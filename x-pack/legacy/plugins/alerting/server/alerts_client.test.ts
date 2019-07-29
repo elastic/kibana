@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { AlertsClient } from './alerts_client';
 import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
@@ -94,12 +94,12 @@ describe('create()', () => {
     taskManager.schedule.mockResolvedValueOnce({
       id: 'task-123',
       taskType: 'alerting:123',
-      sequenceNumber: 1,
-      primaryTerm: 1,
       scheduledAt: new Date(),
       attempts: 1,
       status: 'idle',
       runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
       state: {},
       params: {},
     });
@@ -282,16 +282,15 @@ describe('create()', () => {
       id: '123',
       name: 'Test',
       validate: {
-        params: Joi.object()
-          .keys({
-            param1: Joi.string().required(),
-          })
-          .required(),
+        params: schema.object({
+          param1: schema.string(),
+          threshold: schema.number({ min: 0, max: 1 }),
+        }),
       },
       async executor() {},
     });
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"alertTypeParams invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+      `"alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]"`
     );
   });
 
@@ -438,8 +437,6 @@ describe('enable()', () => {
     });
     taskManager.schedule.mockResolvedValueOnce({
       id: 'task-123',
-      sequenceNumber: 1,
-      primaryTerm: 1,
       scheduledAt: new Date(),
       attempts: 0,
       status: 'idle',
@@ -447,6 +444,8 @@ describe('enable()', () => {
       state: {},
       params: {},
       taskType: '',
+      startedAt: null,
+      retryAt: null,
     });
 
     await alertsClient.enable({ id: '1' });
@@ -738,19 +737,8 @@ describe('delete()', () => {
     savedObjectsClient.delete.mockResolvedValueOnce({
       success: true,
     });
-    taskManager.remove.mockResolvedValueOnce({
-      index: '.task_manager',
-      id: 'task-123',
-      sequenceNumber: 1,
-      primaryTerm: 1,
-      result: '',
-    });
     const result = await alertsClient.delete({ id: '1' });
-    expect(result).toMatchInlineSnapshot(`
-                              Object {
-                                "success": true,
-                              }
-                    `);
+    expect(result).toEqual({ success: true });
     expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
                               Array [
@@ -895,11 +883,9 @@ describe('update()', () => {
       id: '123',
       name: 'Test',
       validate: {
-        params: Joi.object()
-          .keys({
-            param1: Joi.string().required(),
-          })
-          .required(),
+        params: schema.object({
+          param1: schema.string(),
+        }),
       },
       async executor() {},
     });
@@ -934,7 +920,7 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"alertTypeParams invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+      `"alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]"`
     );
   });
 });

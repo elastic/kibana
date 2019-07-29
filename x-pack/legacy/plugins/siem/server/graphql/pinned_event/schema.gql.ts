@@ -12,6 +12,8 @@ export const pinnedEventSchema = gql`
   #########################
 
   type PinnedEvent {
+    code: Float
+    message: String
     pinnedEventId: ID!
     eventId: ID
     timelineId: ID

@@ -33,7 +33,7 @@ describe('Authentication Table Component', () => {
         <ReduxStoreProvider store={store}>
           <AuthenticationTable
             data={mockData.Authentications.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Authentications.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Authentications.pageInfo)}
             id="authentication"
             loading={false}
             loadPage={loadPage}

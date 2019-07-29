@@ -50,7 +50,7 @@ import {
   ChromeRecentlyAccessedHistoryItem,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
-import { HttpServiceBase, HttpSetup, HttpStart, HttpInterceptor, HttpFetchQuery } from './http';
+import { HttpSetup, HttpStart } from './http';
 import { I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
 import {
@@ -88,6 +88,20 @@ export {
   SavedObjectsClient,
   SimpleSavedObject,
 } from './saved_objects';
+
+export {
+  HttpServiceBase,
+  HttpHeadersInit,
+  HttpRequestInit,
+  HttpFetchOptions,
+  HttpFetchQuery,
+  HttpErrorResponse,
+  HttpErrorRequest,
+  HttpInterceptor,
+  HttpResponse,
+  HttpHandler,
+  HttpBody,
+} from './http';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -171,9 +185,6 @@ export {
   ErrorToastOptions,
   FatalErrorInfo,
   FatalErrorsSetup,
-  HttpFetchQuery,
-  HttpInterceptor,
-  HttpServiceBase,
   HttpSetup,
   HttpStart,
   I18nStart,

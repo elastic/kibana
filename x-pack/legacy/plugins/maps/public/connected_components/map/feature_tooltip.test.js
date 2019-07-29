@@ -9,16 +9,13 @@ import { shallow } from 'enzyme';
 import { FeatureTooltip } from './feature_tooltip';
 
 class MockLayer {
-
   constructor(id) {
     this._id = id;
   }
   async getDisplayName() {
     return `display + ${this._id}`;
   }
-
 }
-
 
 const MULTI_FEATURE_MULTI_LAYER = [
   {
@@ -88,7 +85,6 @@ describe('FeatureTooltip (single)', () => {
     expect(component)
       .toMatchSnapshot();
   });
-
 });
 
 describe('FeatureTooltip (multi)', () => {
@@ -145,7 +141,4 @@ describe('FeatureTooltip (multi)', () => {
     expect(component)
       .toMatchSnapshot();
   });
-
-
-
 });

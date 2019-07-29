@@ -37,7 +37,7 @@ export class HeatmapLayer extends VectorLayer {
   }
 
   _getHeatmapLayerId() {
-    return this.getId() + '_heatmap';
+    return this.makeMbLayerId('heatmap');
   }
 
   getMbLayerIds() {

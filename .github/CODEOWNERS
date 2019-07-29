@@ -42,8 +42,11 @@
 /x-pack/legacy/plugins/spaces/  @elastic/kibana-security
 /x-pack/legacy/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /src/legacy/server/csp/ @elastic/kibana-security
+/x-pack/plugins/security/  @elastic/kibana-security
 
 # Kibana Stack Services
+/packages/kbn-analytics/ @elastic/kibana-stack-services
+/src/legacy/core_plugins/ui_metric/ @elastic/kibana-stack-services
 /x-pack/legacy/plugins/telemetry @elastic/kibana-stack-services
 /x-pack/legacy/plugins/alerting @elastic/kibana-stack-services
 /x-pack/legacy/plugins/actions @elastic/kibana-stack-services

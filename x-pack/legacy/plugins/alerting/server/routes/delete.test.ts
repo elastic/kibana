@@ -20,9 +20,8 @@ test('deletes an alert with proper parameters', async () => {
 
   alertsClient.delete.mockResolvedValueOnce({});
   const { payload, statusCode } = await server.inject(request);
-  expect(statusCode).toBe(200);
-  const response = JSON.parse(payload);
-  expect(response).toEqual({});
+  expect(statusCode).toBe(204);
+  expect(payload).toEqual('');
   expect(alertsClient.delete).toHaveBeenCalledTimes(1);
   expect(alertsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
 Array [
