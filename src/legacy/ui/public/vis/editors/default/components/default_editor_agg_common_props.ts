@@ -17,15 +17,26 @@
  * under the License.
  */
 
-import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from '../../../../modules';
-import { AggControlReactWrapper } from './agg_control_react_wrapper';
+import { AggType } from 'ui/agg_types';
+import { AggConfig, VisState, AggParams, VisParams } from '../../../';
+import { AggGroupNames } from '../agg_groups';
 
-uiModules
-  .get('app/visualize')
-  .directive('visAggControlReactWrapper', reactDirective => reactDirective(wrapInI18nContext(AggControlReactWrapper), [
-    ['aggParams', { watchDepth: 'collection' }],
-    ['editorStateParams', { watchDepth: 'collection' }],
-    ['component', { wrapApply: false }],
-    'setValue'
-  ]));
+export type OnAggParamsChange = (
+  params: AggParams | VisParams,
+  paramName: string,
+  value: unknown
+) => void;
+
+export interface DefaultEditorAggCommonProps {
+  formIsTouched: boolean;
+  groupName: AggGroupNames;
+  lastParentPipelineAggTitle?: string;
+  metricAggs: AggConfig[];
+  state: VisState;
+  onAggParamsChange: OnAggParamsChange;
+  onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
+  onToggleEnableAgg: (agg: AggConfig, isEnable: boolean) => void;
+  removeAgg: (agg: AggConfig) => void;
+  setTouched: (isTouched: boolean) => void;
+  setValidity: (isValid: boolean) => void;
+}
