@@ -109,7 +109,15 @@ export function TransactionOverview({
               const type = legacyEncodeURIComponent(event.target.value);
               history.push({
                 ...location,
+<<<<<<< HEAD
                 pathname: `/${urlParams.serviceName}/transactions/${type}`
+=======
+                pathname: `/services/${urlParams.serviceName}/transactions`,
+                search: fromQuery({
+                  ...toQuery(location.search),
+                  transactionType: event.target.value
+                })
+>>>>>>> 7866872417... [APM] Move apm links into apm folder (#42118)
               });
             }}
           />

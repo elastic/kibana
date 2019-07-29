@@ -7,8 +7,14 @@
 import { Location } from 'history';
 import { last } from 'lodash';
 import React from 'react';
+<<<<<<< HEAD
 import chrome from 'ui/chrome';
 import { getAPMHref } from '../../shared/Links/APMLink';
+=======
+import { InternalCoreStart } from 'src/core/public';
+import { useCore } from '../../../hooks/useCore';
+import { getAPMHref } from '../../shared/Links/apm/APMLink';
+>>>>>>> 7866872417... [APM] Move apm links into apm folder (#42118)
 import { Breadcrumb, ProvideBreadcrumbs } from './ProvideBreadcrumbs';
 import { routes } from './route_config';
 

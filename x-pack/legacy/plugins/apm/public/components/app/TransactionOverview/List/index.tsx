@@ -16,7 +16,7 @@ import { ImpactBar } from '../../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-import { TransactionLink } from '../../../shared/Links/TransactionLink';
+import { TransactionLink } from '../../../shared/Links/apm/TransactionLink';
 
 const TransactionNameLink = styled(TransactionLink)`
   ${truncate('100%')};

@@ -17,16 +17,20 @@ import {
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
+<<<<<<< HEAD
 import { APMLink } from '../../../shared/Links/APMLink';
 import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
+=======
+>>>>>>> 7866872417... [APM] Move apm links into apm folder (#42118)
 import { StickyProperties } from '../../../shared/StickyProperties';
+import { TransactionLink } from '../../../shared/Links/apm/TransactionLink';
 
 interface Props {
   error: APMError;
   transaction: Transaction | undefined;
 }
 
-function TransactionLink({
+function TransactionLinkWrapper({
   transaction
 }: {
   transaction: Transaction | undefined;
@@ -47,6 +51,7 @@ function TransactionLink({
   )}/${legacyEncodeURIComponent(transaction.transaction.name)}`;
 
   return (
+<<<<<<< HEAD
     <APMLink
       path={path}
       query={{
@@ -55,8 +60,11 @@ function TransactionLink({
         banana: 'ok'
       }}
     >
+=======
+    <TransactionLink transaction={transaction}>
+>>>>>>> 7866872417... [APM] Move apm links into apm folder (#42118)
       {transaction.transaction.id}
-    </APMLink>
+    </TransactionLink>
   );
 }
 
@@ -106,7 +114,7 @@ export function StickyErrorProperties({ error, transaction }: Props) {
           defaultMessage: 'Transaction sample ID'
         }
       ),
-      val: <TransactionLink transaction={transaction} />,
+      val: <TransactionLinkWrapper transaction={transaction} />,
       width: '25%'
     },
     {

@@ -21,6 +21,7 @@ import {
   truncate,
   unit
 } from '../../../../style/variables';
+<<<<<<< HEAD
 import { APMLink } from '../../../shared/Links/APMLink';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { history } from '../../../../utils/history';
@@ -36,6 +37,11 @@ function paginateItems({
 }) {
   return items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
 }
+=======
+import { APMLink } from '../../../shared/Links/apm/APMLink';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { ManagedTable } from '../../../shared/ManagedTable';
+>>>>>>> 7866872417... [APM] Move apm links into apm folder (#42118)
 
 const GroupIdLink = styled(APMLink)`
   font-family: ${fontFamilyCode};

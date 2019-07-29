@@ -12,8 +12,13 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
+<<<<<<< HEAD
 import { APMLink } from '../../../shared/Links/APMLink';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
+=======
+import { APMLink } from '../../../shared/Links/apm/APMLink';
+import { ManagedTable } from '../../../shared/ManagedTable';
+>>>>>>> 7866872417... [APM] Move apm links into apm folder (#42118)
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 
 interface Props {

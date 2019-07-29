@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { idx } from '@kbn/elastic-idx';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { fontSize } from '../../../../style/variables';
-import { APMLink } from '../../../shared/Links/APMLink';
+import { APMLink } from '../../../shared/Links/apm/APMLink';
 
 const LinkLabel = styled.span`
   font-size: ${fontSize};
