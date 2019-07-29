@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface AppPermissions {
-  hasPermission: boolean;
-  missingClusterPrivileges: string[];
-  missingIndexPrivileges: string[];
-}
+export { AuthorizationProvider, AuthorizationContext, Privileges } from './authorization_provider';
+
+export { WithPrivileges } from './with_privileges';
+
+export { NotAuthorizedSection } from './not_authorized_section';
