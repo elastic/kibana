@@ -26,8 +26,13 @@ release notes>> for a list of bug fixes and other changes.
 [[maps-7.3]]
 === Maps app is now production ready
 
-Many improvements went into the new Maps app, which is production ready for 7.3. 
-To find out more about what’s in Maps and how to use it, go to the <<maps, Maps documentation>>.
+Maps is production ready for 7.3, and includes many improvements, including
+a new GeoJson upload and improved layer styling, aggregations, and tooltips.
+To find out what’s in Maps and how to use it, go to the <<maps, Maps documentation>>.
+
+[role="screenshot"]
+image::release-notes/images/7.3-maps.png[Maps is production ready]
+
 
 [float]
 ==== Upload GeoJSON data (beta)
@@ -50,13 +55,10 @@ The new top hits aggregation enables you to plot the most recent entities from y
 [float]
 ==== Better tooltip content
 
-Maps now helps you create better tooltip content. Your tooltips can now 
+Maps now helps you create more in-depth tooltip content. Your tooltips can
 display information on each feature at the current location.
 To cycle through the features and view their properties, use the tooltip page controls. 
 You can also include custom labels for Grid aggregation and join metrics. 
-
-[role="screenshot"]
-image::release-notes/images/7.3-maps.png[Maps is production ready]
 
 [float]
 [[kerberos-7.3]]
@@ -65,7 +67,7 @@ image::release-notes/images/7.3-maps.png[Maps is production ready]
 {es} provides support for Kerberos starting in 6.6, and in 7.3, 
 {kib} introduces Kerberos authentication provider. You now have single sign-on 
 access and can log into {kib} without repeatedly providing your username and password.  
-For more details, see <<kibana-authentication, SAML single sign-on>>.
+For details, see <<kibana-authentication, SAML single sign-on>>.
 
 [float]
 [[snapshot-7.3]]
@@ -73,10 +75,9 @@ For more details, see <<kibana-authentication, SAML single sign-on>>.
 
 The second phase of the snapshot management UI is out, and includes 
 two notable enhancements: restore and delete. You can recover data and state 
-from a snapshot using the new Restore wizard, and track its progress in the 
-Restore Status view. You can delete snapshots to free up repository storage space. 
-This action is available on the Snapshots view.  For more information about 
-these enhancements, see <<snapshot-repositories, Snapshot and Restore>>.
+from a snapshot using the new *Restore* wizard, and track its progress in the 
+*Restore Status* view. You can delete snapshots, and free up repository storage space,
+in the *Snapshots* view.  For more information, see <<snapshot-repositories, Snapshot and Restore>>.
 
 [role="screenshot"]
 image::release-notes/images/7.3-snapshot-restore.png[Snapshot and restore phase 2]
@@ -103,13 +104,13 @@ Canvas improves the user experience with new templates, experiences, and documen
 ==== Templates
 
 Canvas is all about creating content and telling a story with your data. The 
-content templates, or Canvases for short, help you facilitate this vision. 
-In 7.3, Canvas releases three new templates:
+content templates can help you facilitate this vision, and in 
+7.3, Canvas releases three new templates:
 
 * Pitch is a 14-page template that you can brand and customize for your 
 next board-level presentation.
 
-* The Status template gives you a solid, professional, and clean template 
+* The Status template gives you a professional template 
 for status reports and other updates. 
 
 * The Summary template, shown below, can help you create a report with live representations 
@@ -129,9 +130,9 @@ element by 10 pixels.  To nudge an element by 1 pixel, use Shift + an arrow key.
 [float]
 ==== Documentation
 
-Canvas has more documentation for you to peruse.  Check out the 
+Check out the 
 updated <<canvas-getting-started, Getting started guide>>, the new introduction to <<canvas-workpad, Canvas workpads>>, 
-and the improved <<canvas-function-reference, function reference>>. 
+and the improved <<canvas-function-reference, Canvas function reference>>. 
 
 [float]
 [[KQL-7.3]]
@@ -153,7 +154,6 @@ image::release-notes/images/7.3-kql.png[Canvas summary template]
 
 You can now show values directly inside a bar chart, if space is available.  
 When you create the bar chart, open Panel Settings and select *Show values on chart*.  
-Thanks to Meir Meshi for contributing this feature.
 
 [role="screenshot"]
 image::release-notes/images/7.3-bar-charts.png[Canvas summary template]
@@ -163,15 +163,16 @@ image::release-notes/images/7.3-bar-charts.png[Canvas summary template]
 === Visual Builder: even better under a new name
 
 Time Series Visual Builder is now simply referred to as TSVB. When you open 
-TSVB, you’ll also notice it includes several bug fixes and enhancements. 
+TSVB, you’ll also notice several enhancements
+and bug fixes. 
 
 [float]
 === Give us your feedback
 
-Enjoy all the new features and functionality in {kib} 7.2. 
+Enjoy all the new features and functionality in {kib} 7.3. 
 Play around with them locally or on the https://www.elastic.co/products/elasticsearch/service[{es} Service] 
 and reach out on the 
-https://discuss.elastic.co/c/kibana[{kib}] Discuss forum if you have any questions or feedback.
+https://discuss.elastic.co/c/kibana[{kib} Discuss forum] if you have any questions or feedback.
 
 
 
