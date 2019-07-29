@@ -8,7 +8,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import * as ContextUtils from '../util/context_utils';
+import * as ContextUtils from '../contexts/navigation_menu';
 import { Settings } from './settings';
 
 const navigationMenuMock = ContextUtils.navigationMenuMock;

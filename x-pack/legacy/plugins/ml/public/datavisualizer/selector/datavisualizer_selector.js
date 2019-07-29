@@ -26,7 +26,7 @@ import chrome from 'ui/chrome';
 import { timefilter } from 'ui/timefilter';
 import { timeHistory } from 'ui/timefilter/time_history';
 
-import { NavigationMenuContext } from '../../util/context_utils';
+import { NavigationMenuContext } from '../../contexts/navigation_menu';
 import { NavigationMenu } from '../../components/navigation_menu/navigation_menu';
 
 function startTrialDescription() {

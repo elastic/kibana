@@ -17,7 +17,7 @@ import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { getJobManagementBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
-import { NavigationMenuContext } from '../../util/context_utils';
+import { NavigationMenuContext } from '../../contexts/navigation_menu';
 
 import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';

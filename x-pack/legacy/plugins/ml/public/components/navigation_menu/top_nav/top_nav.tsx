@@ -9,7 +9,7 @@ import { EuiSuperDatePicker } from '@elastic/eui';
 import { TimeHistory, TimeRange } from 'ui/timefilter/time_history';
 
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
-import { NavigationMenuContext } from '../../../util/context_utils';
+import { NavigationMenuContext } from '../../../contexts/navigation_menu';
 
 interface Duration {
   start: string;

@@ -28,7 +28,7 @@ type CreateSearchItems = () => {
   combinedQuery: any;
 };
 
-import { NavigationMenuContext } from '../../../util/context_utils';
+import { NavigationMenuContext } from '../../../contexts/navigation_menu';
 import { KibanaContext } from '../../common';
 import { Page } from './page';
 

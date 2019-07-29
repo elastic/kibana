@@ -23,7 +23,7 @@ import { timefilter } from 'ui/timefilter';
 import { timeHistory } from 'ui/timefilter/time_history';
 import { I18nContext } from 'ui/i18n';
 
-import { NavigationMenuContext } from '../../../util/context_utils';
+import { NavigationMenuContext } from '../../../contexts/navigation_menu';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
