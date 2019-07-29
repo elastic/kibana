@@ -50,7 +50,7 @@ import {
   ChromeRecentlyAccessedHistoryItem,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
-import { HttpServiceBase, HttpSetup, HttpStart, HttpInterceptor } from './http';
+import { HttpSetup, HttpStart } from './http';
 import { I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
 import {
@@ -69,6 +69,19 @@ import { DocLinksStart } from './doc_links';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
+export {
+  HttpServiceBase,
+  HttpHeadersInit,
+  HttpRequestInit,
+  HttpFetchOptions,
+  HttpFetchQuery,
+  HttpErrorResponse,
+  HttpErrorRequest,
+  HttpInterceptor,
+  HttpResponse,
+  HttpHandler,
+  HttpBody,
+} from './http';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -150,8 +163,6 @@ export {
   ErrorToastOptions,
   FatalErrorInfo,
   FatalErrorsSetup,
-  HttpInterceptor,
-  HttpServiceBase,
   HttpSetup,
   HttpStart,
   I18nStart,
