@@ -43,9 +43,10 @@ export function renderTelemetryOptInCard({
     <EuiCard
       image={`${urlBasePath}/plugins/kibana/assets/illo_telemetry.png`}
       textAlign="left"
+      g
       title={
         <FormattedMessage
-          id="kbn.home.telemteryOptInTitle"
+          id="kbn.home.telemtery.optInCardTitle"
           defaultMessage="Help us improve the Elastic Stack"
         />
       }
@@ -59,7 +60,10 @@ export function renderTelemetryOptInCard({
             size="s"
             fill
           >
-            <FormattedMessage id="kbn.home.telemteryOptInConfirmButtonLabel" defaultMessage="Yes" />
+            <FormattedMessage
+              id="kbn.home.telemtery.optInCardConfirmButtonLabel"
+              defaultMessage="Yes"
+            />
           </EuiButton>
           <EuiButton
             className="homWelcome__footerAction"
@@ -69,7 +73,7 @@ export function renderTelemetryOptInCard({
             fill
           >
             <FormattedMessage
-              id="kbn.home.telemteryOptInDeclineButtonLabel"
+              id="kbn.home.telemtery.optInCardDeclineButtonLabel"
               defaultMessage="Skip"
             />
           </EuiButton>

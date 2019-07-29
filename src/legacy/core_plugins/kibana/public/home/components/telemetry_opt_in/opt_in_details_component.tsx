@@ -91,7 +91,7 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
         <EuiCallOut
           title={
             <FormattedMessage
-              id="xpack.telemetry.callout.errorUnprivilegedUserTitle"
+              id="kbn.home.telemetry.callout.errorUnprivilegedUserTitle"
               defaultMessage="Error displaying cluster statistics"
             />
           }
@@ -99,7 +99,7 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
           iconType="cross"
         >
           <FormattedMessage
-            id="xpack.telemetry.callout.errorUnprivilegedUserDescription"
+            id="kbn.home.telemetry.callout.errorUnprivilegedUserDescription"
             defaultMessage="You do not have access to see unencrypted cluster statistics."
           />
         </EuiCallOut>
@@ -111,7 +111,7 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
         <EuiCallOut
           title={
             <FormattedMessage
-              id="xpack.telemetry.callout.errorLoadingClusterStatisticsTitle"
+              id="kbn.home.telemetry.callout.errorLoadingClusterStatisticsTitle"
               defaultMessage="Error loading cluster statistics"
             />
           }
@@ -119,7 +119,7 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
           iconType="cross"
         >
           <FormattedMessage
-            id="xpack.telemetry.callout.errorLoadingClusterStatisticsDescription"
+            id="kbn.home.telemetry.callout.errorLoadingClusterStatisticsDescription"
             defaultMessage="An unexpected error occured while attempting to fetch the cluster statistics.
               This can occur because Elasticsearch failed, Kibana failed, or there is a network error.
               Check Kibana, then reload the page and try again."
@@ -133,29 +133,31 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
 
   render() {
     return (
-      <EuiFlyout ownFocus onClose={this.props.onClose} maxWidth={true}>
-        <EuiFlyoutHeader>
-          <EuiTitle>
-            <h2>
-              <FormattedMessage
-                id="xpack.telemetry.callout.clusterStatisticsTitle"
-                defaultMessage="Cluster statistics"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiTextColor color="subdued">
-            <EuiText>
-              <FormattedMessage
-                id="xpack.telemetry.callout.clusterStatisticsDescription"
-                defaultMessage="This is an example of the basic cluster statistics that we'll collect.
-                It includes the number of indices, shards, and nodes.
-                It also includes high-level usage statistics, such as whether monitoring is turned on."
-              />
-            </EuiText>
-          </EuiTextColor>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>{this.renderBody(this.state)}</EuiFlyoutBody>
-      </EuiFlyout>
+      <EuiPortal>
+        <EuiFlyout ownFocus onClose={this.props.onClose} maxWidth={true}>
+          <EuiFlyoutHeader>
+            <EuiTitle>
+              <h2>
+                <FormattedMessage
+                  id="kbn.home.telemetry.callout.clusterStatisticsTitle"
+                  defaultMessage="Cluster statistics"
+                />
+              </h2>
+            </EuiTitle>
+            <EuiTextColor color="subdued">
+              <EuiText>
+                <FormattedMessage
+                  id="kbn.home.telemetry.callout.clusterStatisticsDescription"
+                  defaultMessage="This is an example of the basic cluster statistics that we'll collect.
+                  It includes the number of indices, shards, and nodes.
+                  It also includes high-level usage statistics, such as whether monitoring is turned on."
+                />
+              </EuiText>
+            </EuiTextColor>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>{this.renderBody(this.state)}</EuiFlyoutBody>
+        </EuiFlyout>
+      </EuiPortal>
     );
   }
 }

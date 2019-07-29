@@ -50,7 +50,7 @@ export class OptInMessage extends React.PureComponent<Props, State> {
       <EuiText size="s">
         <p tab-index="0">
           <FormattedMessage
-            id="telemetry.optInMessageDescription"
+            id="kbn.home.telemetry.optInMessage.detailsDescription"
             defaultMessage="No information about the data you process or store will be sent. This feature
               will periodically send basic feature usage statistics. See an {exampleLink} or read our {telemetryPrivacyStatementLink}.
               You can disable this feature at any time."
@@ -58,7 +58,7 @@ export class OptInMessage extends React.PureComponent<Props, State> {
               exampleLink: (
                 <EuiLink onClick={this.toggleShowExample}>
                   <FormattedMessage
-                    id="telemetry.optInMessage.exampleLinkText"
+                    id="kbn.home.telemetry.optInMessage.detailsExampleLinkText"
                     defaultMessage="example"
                   />
                 </EuiLink>
@@ -69,7 +69,7 @@ export class OptInMessage extends React.PureComponent<Props, State> {
                   target="_blank"
                 >
                   <FormattedMessage
-                    id="telemetry.optInMessage.telemetryPrivacyStatementLinkText"
+                    id="kbn.home.telemetry.optInMessage.detailsTelemetryPrivacyStatementLinkText"
                     defaultMessage="telemetry privacy statement"
                   />
                 </EuiLink>
@@ -89,7 +89,10 @@ export class OptInMessage extends React.PureComponent<Props, State> {
 
     const getReadMore = () => (
       <EuiLink onClick={() => this.setState({ showDetails: true })}>
-        <FormattedMessage id="telemetry.optInMessage.readMoreLinkText" defaultMessage="Read more" />
+        <FormattedMessage
+          id="kbn.home.telemetry.optInMessage.readMoreLinkText"
+          defaultMessage="Read more"
+        />
       </EuiLink>
     );
 
@@ -98,7 +101,7 @@ export class OptInMessage extends React.PureComponent<Props, State> {
         <EuiText>
           <p tab-index="0">
             <FormattedMessage
-              id="telemetry.optInMessage.readMoreLinkText"
+              id="kbn.home.telemetry.optInMessageDescription"
               defaultMessage="Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic."
             />{' '}
             {!showDetails && getReadMore()}
