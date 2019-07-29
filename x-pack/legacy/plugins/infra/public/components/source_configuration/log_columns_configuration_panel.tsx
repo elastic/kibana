@@ -19,7 +19,8 @@ import {
   EuiDroppable,
   EuiIcon,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
 import { DragHandleProps, DropResult } from '../../../../../common/eui_draggable';
 
@@ -158,45 +159,44 @@ const MessageLogColumnConfigurationPanel: React.FunctionComponent<
   />
 );
 
-const FieldLogColumnConfigurationPanel = injectI18n<{
+const FieldLogColumnConfigurationPanel: React.FunctionComponent<{
   logColumnConfigurationProps: FieldLogColumnConfigurationProps;
   dragHandleProps: DragHandleProps;
-}>(
-  ({
-    intl,
-    logColumnConfigurationProps: {
-      logColumnConfiguration: { field },
-      remove,
-    },
-    dragHandleProps,
-  }) => {
-    const fieldLogColumnTitle = intl.formatMessage({
-      id: 'xpack.infra.sourceConfiguration.fieldLogColumnTitle',
+}> = ({
+  logColumnConfigurationProps: {
+    logColumnConfiguration: { field },
+    remove,
+  },
+  dragHandleProps,
+}) => {
+  const fieldLogColumnTitle = i18n.translate(
+    'xpack.infra.sourceConfiguration.fieldLogColumnTitle',
+    {
       defaultMessage: 'Field',
-    });
-    return (
-      <EuiPanel data-test-subj={`logColumnPanel fieldLogColumnPanel fieldLogColumnPanel:${field}`}>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <div data-test-subj="moveLogColumnHandle" {...dragHandleProps}>
-              <EuiIcon type="grab" />
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>{fieldLogColumnTitle}</EuiFlexItem>
-          <EuiFlexItem grow={3}>
-            <code>{field}</code>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <RemoveLogColumnButton
-              onClick={remove}
-              columnDescription={`${fieldLogColumnTitle} - ${field}`}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    );
-  }
-);
+    }
+  );
+  return (
+    <EuiPanel data-test-subj={`logColumnPanel fieldLogColumnPanel fieldLogColumnPanel:${field}`}>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <div data-test-subj="moveLogColumnHandle" {...dragHandleProps}>
+            <EuiIcon type="grab" />
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>{fieldLogColumnTitle}</EuiFlexItem>
+        <EuiFlexItem grow={3}>
+          <code>{field}</code>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <RemoveLogColumnButton
+            onClick={remove}
+            columnDescription={`${fieldLogColumnTitle} - ${field}`}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
 
 const ExplainedLogColumnConfigurationPanel: React.FunctionComponent<{
   fieldName: React.ReactNode;
@@ -226,16 +226,16 @@ const ExplainedLogColumnConfigurationPanel: React.FunctionComponent<{
   </EuiPanel>
 );
 
-const RemoveLogColumnButton = injectI18n<{
+const RemoveLogColumnButton: React.FunctionComponent<{
   onClick?: () => void;
   columnDescription: string;
-}>(({ intl, onClick, columnDescription }) => {
-  const removeColumnLabel = intl.formatMessage(
+}> = ({ onClick, columnDescription }) => {
+  const removeColumnLabel = i18n.translate(
+    'xpack.infra.sourceConfiguration.removeLogColumnButtonLabel',
     {
-      id: 'xpack.infra.sourceConfiguration.removeLogColumnButtonLabel',
       defaultMessage: 'Remove {columnDescription} column',
-    },
-    { columnDescription }
+      values: { columnDescription },
+    }
   );
 
   return (
@@ -247,7 +247,7 @@ const RemoveLogColumnButton = injectI18n<{
       title={removeColumnLabel}
     />
   );
-});
+};
 
 const LogColumnConfigurationEmptyPrompt: React.FunctionComponent = () => (
   <EuiEmptyPrompt
