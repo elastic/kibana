@@ -51,7 +51,7 @@ export function getFailureSummaryDetailsText(failure: ShardFailure): string {
 
 export function ShardFailureDescriptionHeader(props: ShardFailure) {
   const failureDetails = getFailurePropsForSummary(props).map(kv => (
-    <span className="shardFailureModal__keyValueTitle">
+    <span className="shardFailureModal__keyValueTitle" key={kv.key}>
       <EuiCode>{kv.key}</EuiCode> {kv.value}
     </span>
   ));
