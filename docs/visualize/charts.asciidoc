@@ -1,6 +1,6 @@
 [[visualize-chart]]
 == Area, bar, and line charts
-{kib} includes area, bar, and line charts for you to visualize your data. With charts, you can plot your data on an x- and y-axis. 
+Use area, line, and bar charts to plot your data on an x- and y-axis. 
 
 [float]
 [[chart-choose-data]]
@@ -10,7 +10,7 @@ To choose the data that you want to display in the chart, specify the aggregatio
 
 . Choose the aggregation for the y-axis.
 
-.. In the *Metrics* area, expand the *Y-axis* caret.
+.. In the *Metrics* area, expand the *Y-axis* options.
 
 .. From the *Aggregation* dropdown, select the aggregation for the y-axis.
 
@@ -18,7 +18,7 @@ To choose the data that you want to display in the chart, specify the aggregatio
 
 .. In the *Buckets* area, click *Add*, then select *X-axis*.
 
-.. Select the Bucket aggregation for the x-axis.
+.. Select the bucket aggregation for the x-axis.
 
 . To further break down the data, specify sub aggregations.
 
@@ -34,7 +34,7 @@ To choose the data that you want to display in the chart, specify the aggregatio
 [[customize-format-chart]]
 === Customize and format the chart
 
-To make the chart look the way you want, customize and format it using the options.
+To make the chart look the way you want, change the system and panel options.
 
 . Select *Metrics & Axes*.
 
@@ -108,9 +108,9 @@ image:images/visualize-area-chart01.png[Example area chart]
 
 [float]
 [[chart-metricbeat-data-personalize]]
-=== Personalize the area chart
+=== Customize the area chart
 
-To personalize the area chart, change the line style and position the legend. 
+To customize the area chart, change the line style and position the legend. 
 
 . Select *Metrics & Axes*.
 

@@ -1,86 +1,111 @@
 [[pie-chart]]
-== Pie Charts
+== Pie charts
+With pie charts, you can display proportions, or slices, of your data compared to the total. 
 
-The slice size of a pie chart is determined by the _metrics_ aggregation. The following aggregations are available for
-this axis:
+[float]
+[[piechart-choose-data]]
+=== Choose the data you want to display
 
-*Count*:: The {ref}/search-aggregations-metrics-valuecount-aggregation.html[_count_] aggregation returns a raw count of
-the elements in the selected index pattern.
-*Sum*:: The {ref}/search-aggregations-metrics-sum-aggregation.html[_sum_] aggregation returns the total sum of a numeric
-field. Select a field from the drop-down.
-*Unique Count*:: The {ref}/search-aggregations-metrics-cardinality-aggregation.html[_cardinality_] aggregation returns
-the number of unique values in a field. Select a field from the drop-down.
+To choose the data that you want to display in the pie chart, specify the aggregation options. 
 
-Enter a string in the *Custom Label* field to change the display label.
+. In the *Metrics* area, expand the *Slice size* options.
 
-The _buckets_ aggregations determine what information is being retrieved from your data set.
+. From the *Aggregation* dropdown, select the aggregation for the slice size.
 
-Before you choose a buckets aggregation, specify if you are splitting slices within a single chart or splitting into
-multiple charts. A multiple chart split must run before any other aggregations. When you split a chart, you can change
-if the splits are displayed in a row or a column by clicking the *Rows | Columns* selector.
+. Specify the bucket aggregation.
 
-You can specify any of the following bucket aggregations for your pie chart:
+.. In the *Buckets* area, click *Add*, then select *Split series* or *Split chart*.
 
-*Date Histogram*:: A {ref}/search-aggregations-bucket-datehistogram-aggregation.html[_date histogram_] is built from a
-numeric field and organized by date. You can specify a time frame for the intervals in seconds, minutes, hours, days,
-weeks, months, or years. You can also specify a custom interval frame by selecting *Custom* as the interval and
-specifying a number and a time unit in the text field. Custom interval time units are *s* for seconds, *m* for minutes,
-*h* for hours, *d* for days, *w* for weeks, and *y* for years. Different units support different levels of precision,
-down to one second. Intervals are labeled at the start of the interval, using the date-key returned by Elasticsearch. 
-For example, the tooltip for a monthly interval will show the first day of the month.
-*Histogram*:: A standard {ref}/search-aggregations-bucket-histogram-aggregation.html[_histogram_] is built from a
-numeric field. Specify an integer interval for this field. Select the *Show empty buckets* checkbox to include empty
-intervals in the histogram.
-*Range*:: With a {ref}/search-aggregations-bucket-range-aggregation.html[_range_] aggregation, you can specify ranges
-of values for a numeric field. Click *Add Range* to add a set of range endpoints. Click the red *(x)* symbol to remove
-a range.
-*Date Range*:: A {ref}/search-aggregations-bucket-daterange-aggregation.html[_date range_] aggregation reports values
-that are within a range of dates that you specify. You can specify the ranges for the dates using
-{ref}/common-options.html#date-math[_date math_] expressions. Click *Add Range* to add a set of range endpoints.
-Click the red *(/)* symbol to remove a range.
-*IPv4 Range*:: The {ref}/search-aggregations-bucket-iprange-aggregation.html[_IPv4 range_] aggregation enables you to
-specify ranges of IPv4 addresses. Click *Add Range* to add a set of range endpoints. Click the red *(/)* symbol to
-remove a range.
-*Terms*:: A {ref}/search-aggregations-bucket-terms-aggregation.html[_terms_] aggregation enables you to specify the top
-or bottom _n_ elements of a  given field to display, ordered by count or a custom metric.
-*Filters*:: You can specify a set of {ref}/search-aggregations-bucket-filters-aggregation.html[_filters_] for the data.
-You can specify a filter as a query string or in JSON format, just as in the Discover search bar. Click *Add Filter* to
-add another filter. Click the image:images/labelbutton.png[] *label* button to open the label field, where you can type
-in a name to display on the visualization.
-*Significant Terms*:: Displays the results of the experimental
-{ref}/search-aggregations-bucket-significantterms-aggregation.html[_significant terms_] aggregation. The value of the
-*Size* parameter defines the number of entries this aggregation returns.
+.. Select the bucket aggregation.
 
-After defining an initial bucket aggregation, you can define sub-buckets to refine the visualization. Click *+ Add
-sub-buckets* to define a sub-aggregation, then choose *Split Slices* to select a sub-bucket from the list of
-types.
+. To further break down the data, specify sub aggregations.
 
-When multiple aggregations are defined on a chart's axis, you can use the up or down arrows to the right of the
-aggregation's type to change the aggregation's priority.
+.. In the *Buckets* area, click *Add*, then select *Split series* or *Split chart*.
 
-include::color-picker.asciidoc[]
+.. Specify the sub aggregation settings.
 
-Enter a string in the *Custom Label* field to change the display label.
+.. To change the order, drag and drop the aggregations.
 
-You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
+. Click *Apply changes* image:images/apply-changes-button.png[].
 
-*Exclude Pattern*:: Specify a pattern in this field to exclude from the results.
-*Include Pattern*:: Specify a pattern in this field to include in the results.
-*JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation
-definition, as in the following example:
+[float]
+[[customize-format-piechart]]
+=== Format the chart
 
-[source,shell]
-{ "script" : "doc['grade'].value * 1.2" }
+To make the chart look the way you want, change the format options.
 
-NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
-{ref}/modules-scripting.html[dynamic Groovy scripting].
+. Select *Options*.
 
-The availability of these options varies depending on the aggregation you choose.
+. Specify the *Pie Settings* and *Labels Settings*.
 
-Select the *Options* tab to change the following aspects of the table:
+. Click *Apply changes* image:images/apply-changes-button.png[].
 
-*Donut*:: Display the chart as a sliced ring instead of a sliced pie.
-*Show Tooltip*:: Check this box to enable the display of tooltips.
+[float]
+[[piechart-example]]
+== Example: Create a pie chart with Metricbeat data
 
-After changing options, click the *Apply changes* button to update your visualization, or the grey *Discard
-changes* button to keep your visualization in its current state.
+To view the real-time CPU system data collected by Metricbeat, create a pie chart.
+
+[float]
+[[piechart-before-you-begin]]
+=== Before you begin
+
+In this tutorial, you'll use the data from https://www.elastic.co/guide/en/beats/metricbeat/current/index.html[Metricbeat]. To ingest the data locally, link:https://www.elastic.co/downloads/beats/metricbeat[download Metricbeat].
+
+[float]
+[[piechart-metricbeat-data]]
+=== Create the visualization
+
+To create the area chart visualization, use the visualization builder.
+
+. In the side navigation, click *Visualize*.
+
+. Click *Create new visualization*.
+
+. On the *New Visualization* window, click *Pie Chart*.
+
+. On the *New Area/Choose a source* window, select the metricbeat data.
+
+[float]
+[[piechart-metricbeat-data-aggregation]]
+=== Choose the data aggregation
+
+Specify the data you would like to display. 
+
+. In the *Metrics* area, expand the *Slice size* options.
+
+. From the *Aggregation* dropdown, select *Count*.
+
+. In the *Custom label* field, enter a name for the y-axis. For example, `Count`.
+
+[float]
+[[piechart-metricbeat-data-bucket]]
+=== Choose the bucket aggregation
+
+Specify the bucket aggregation options.
+
+. In the *Buckets* area, click *Add*, then select *Split slices*.
+
+. From the *Aggregation* dropdown, select *Terms*.
+
+. From the *Field* dropdown, select *system.cpu.total.pct*.
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
+
+image:images/visualize-pie-chart01.png[Example pie chart]
+
+[float]
+[[piechart-metricbeat-data-format]]
+=== Format the pie chart
+
+To format the area chart, change the chart style and position the legend. 
+
+. Select *Options*.
+
+. From the *Legend Position* dropdown, select *left*.
+
+. Select *Show Labels* and *Show Values*.
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
+
+image:images/visualize-pie-chart02.png[Example pie chart]

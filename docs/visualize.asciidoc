@@ -15,30 +15,55 @@ Create visualizations from a search saved in <<discover, Discover>>, or start wi
 
 {kib} includes many visualizations that you can use to display your data.
 
+[float]
+[[basic-chart-types]]
+=== Basic charts
+
 [horizontal]
-<<xy-chart,Area>>:: Compare different series in X/Y charts.
-<<controls,Controls>>:: Add interactive inputs to Kibana Dashboards.
-<<tilemap,Coordinate Map>>:: Plot latitude and longitude coordinates on a map.
-<<data-table,Data Table>>:: Display the raw data of a composed aggregation.
+<<visualize-chart,Area, bar, and line charts>>:: Compare data series in x- and y-axis charts.
+<<pie-chart,Pie charts>>:: Display source contributions to a total.
+
+[float]
+[[data-visualization-types]]
+=== Data
+
+[horizontal]
+<<data-table,Data table>>:: Display the raw data of a composed aggregation.
 <<goal-chart,Gauge>>:: Display a specified range where your metric falls.
 <<goal-chart,Goal>>:: Display how your metric progresses toward a fixed goal.
-<<heatmap-chart,Heat Map>>:: Shade cells within a matrix.
-<<xy-chart,Horizontal Bar>>::
-<<xy-chart,Line>>::
-<< ,Maps>>:: Create and style maps with multiple layers and indices.
-<<markdown-widget,Markdown>>:: Display free-form information or instructions.
 <<metric-chart,Metric>>:: Display a single number.
-<<pie-chart,Pie>>:: Display source contributions to a total.
-<<regionmap,Region Map>>:: Display metrics on a thematic map where shape color intensity corresponds to metric values.
+
+[float]
+[[maps-visualization-types]]
+=== Maps
+
+[horizontal]
+<<heatmap-chart,Heat map>>:: Shade cells within a matrix.
+<< ,Maps>>:: Create and style maps with multiple layers and indices.
+<<regionmap,Region map>>:: Display metrics on a thematic map where shape color intensity corresponds to metric values.
+<<tilemap,Coordinate map>>:: Plot latitude and longitude coordinates on a map.
+
+[float]
+[[time-series-types]]
+=== Time series
+
+[horizontal]
 <<TSVB,TSVB>>:: Visualize time series data using pipeline aggregations.
-<<tagcloud-chart,Tag Cloud>>:: Display words as a cloud, where the size of the word correspond to its importance.
 <<timelion,Timelion>>:: Compute and combine data from multiple time series data sets.
+
+[float]
+[[other-visualization-types]]
+=== Other
+
+[horizontal]
+<<controls,Controls>>:: Add interactive inputs to Kibana Dashboards.
+<<markdown-widget,Markdown>>:: Display free-form information or instructions.
+<<tagcloud-chart,Tag cloud>>:: Display words as a cloud, where the size of the word correspond to its importance.
 <<vega-graph,Vega>>:: User-defined graphs, external data sources, images, and user-defined interactivity.
-<<xy-chart,Vertical Bar>>:: 
 
 [float]
 [[aggregation-types]]
-== Aggregating your data
+== Data aggregation 
 
 Short description.
 
@@ -144,7 +169,7 @@ Short description.
 
 . Click *Create new visualization*.
 
-. On the *New Visualization* window, choose the type of visualization you want to use.
+. On the *New Visualization* window, select the type of visualization you want to use.
 
 . On the *New Area/Choose a source* window, specify a search query to retrieve the data for your visualization:
 
@@ -162,37 +187,35 @@ visualization. To disable automatic updates, disconnect the visualization
 from the saved search.
 --
 
-include::visualize/area-chart.asciidoc[]
+include::visualize/charts.asciidoc[]
+
+include::visualize/pie.asciidoc[]
+
+include::visualize/datatable.asciidoc[]
+
+include::visualize/goal.asciidoc[]
+
+include::visualize/metric.asciidoc[]
+
+include::visualize/heatmap.asciidoc[]
+
+include::visualize/regionmap.asciidoc[]
+
+include::visualize/tilemap.asciidoc[]
+
+include::visualize/tsvb.asciidoc[]
+
+include::visualize/timelion.asciidoc[]
 
 include::visualize/saving.asciidoc[]
 
 include::visualize/visualize_rollup_data.asciidoc[]
 
-include::visualize/xychart.asciidoc[]
-
 include::visualize/controls.asciidoc[]
-
-include::visualize/datatable.asciidoc[]
 
 include::visualize/markdown.asciidoc[]
 
-include::visualize/metric.asciidoc[]
-
-include::visualize/goal.asciidoc[]
-
-include::visualize/pie.asciidoc[]
-
-include::visualize/tilemap.asciidoc[]
-
-include::visualize/regionmap.asciidoc[]
-
-include::visualize/timelion.asciidoc[]
-
-include::visualize/tsvb.asciidoc[]
-
 include::visualize/tagcloud.asciidoc[]
-
-include::visualize/heatmap.asciidoc[]
 
 include::visualize/vega.asciidoc[]
 
