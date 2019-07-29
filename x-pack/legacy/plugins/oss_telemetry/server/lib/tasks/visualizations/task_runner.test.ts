@@ -43,7 +43,7 @@ describe('visualizationsTaskRunner', () => {
       moment()
         .add(1, 'days')
         .startOf('day')
-        .toISOString();
+        .toDate();
 
     const runner = visualizationsTaskRunner(mockTaskInstance, { server: mockKbnServer });
     const result = await runner();

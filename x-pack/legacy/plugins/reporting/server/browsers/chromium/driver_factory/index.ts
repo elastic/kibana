@@ -102,6 +102,7 @@ export class HeadlessChromiumDriverFactory {
       let page: puppeteer.Page;
       try {
         browser = await puppeteer.launch({
+          pipe: true,
           userDataDir,
           executablePath: this.binaryPath,
           ignoreHTTPSErrors: true,
