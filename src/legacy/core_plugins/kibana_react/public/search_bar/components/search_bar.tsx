@@ -186,7 +186,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           appName={this.props.appName}
           indexPatterns={this.props.indexPatterns}
           store={this.props.store!}
-          prepend={this.props.showFilterBar ? this.getFilterTriggerButton() : ''}
+          prepend={this.props.showFilterBar ? this.getFilterTriggerButton() : undefined}
           showDatePicker={this.props.showDatePicker}
           showQueryInput={this.props.showQueryInput}
           dateRangeFrom={this.props.dateRangeFrom}

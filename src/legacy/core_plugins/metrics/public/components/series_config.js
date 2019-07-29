@@ -163,5 +163,4 @@ SeriesConfig.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   indexPatternForQuery: PropTypes.string,
-  uiSettings: PropTypes.object,
 };
