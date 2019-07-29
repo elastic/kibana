@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Logger } from 'src/core/server/saved_objects/migrations/core/migration_logger';
+import { SavedObjectsMigrationLogger } from 'src/core/server';
 import { DashboardDoc730ToLatest, DashboardDoc700To720 } from './types';
 import { isDashboardDoc } from './is_dashboard_doc';
 import { moveFiltersToQuery } from './move_filters_to_query';
@@ -28,7 +28,7 @@ export function migrations730(
         [key: string]: unknown;
       }
     | DashboardDoc700To720,
-  logger: Logger
+  logger: SavedObjectsMigrationLogger
 ): DashboardDoc730ToLatest | { [key: string]: unknown } {
   if (!isDashboardDoc(doc)) {
     // NOTE: we should probably throw an error here... but for now following suit and in the

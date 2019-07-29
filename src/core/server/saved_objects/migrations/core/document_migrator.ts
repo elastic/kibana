@@ -66,9 +66,12 @@ import cloneDeep from 'lodash.clonedeep';
 import Semver from 'semver';
 import { RawSavedObjectDoc } from '../../serialization';
 import { SavedObjectsMigrationVersion } from '../../types';
-import { LogFn, Logger, MigrationLogger } from './migration_logger';
+import { LogFn, SavedObjectsMigrationLogger, MigrationLogger } from './migration_logger';
 
-export type TransformFn = (doc: RawSavedObjectDoc, log?: Logger) => RawSavedObjectDoc;
+export type TransformFn = (
+  doc: RawSavedObjectDoc,
+  log?: SavedObjectsMigrationLogger
+) => RawSavedObjectDoc;
 
 type ValidateDoc = (doc: RawSavedObjectDoc) => void;
 
@@ -204,7 +207,10 @@ function validateMigrationDefinition(migrations: MigrationDefinition) {
  * From: { type: { version: fn } }
  * To:   { type: { latestVersion: string, transforms: [{ version: string, transform: fn }] } }
  */
-function buildActiveMigrations(migrations: MigrationDefinition, log: Logger): ActiveMigrations {
+function buildActiveMigrations(
+  migrations: MigrationDefinition,
+  log: SavedObjectsMigrationLogger
+): ActiveMigrations {
   return _.mapValues(migrations, (versions, prop) => {
     const transforms = Object.entries(versions)
       .map(([version, transform]) => ({
@@ -293,7 +299,12 @@ function markAsUpToDate(doc: RawSavedObjectDoc, migrations: ActiveMigrations) {
  * If a specific transform function fails, this tacks on a bit of information
  * about the document and transform that caused the failure.
  */
-function wrapWithTry(version: string, prop: string, transform: TransformFn, log: Logger) {
+function wrapWithTry(
+  version: string,
+  prop: string,
+  transform: TransformFn,
+  log: SavedObjectsMigrationLogger
+) {
   return function tryTransformDoc(doc: RawSavedObjectDoc) {
     try {
       const result = transform(doc, log);
