@@ -79,10 +79,6 @@ function dropUnusedLayers(frame: FramePublicAPI, suggestion: unknown, layerId?: 
   });
 }
 
-function willLoseAllLayers(frame: FramePublicAPI, visualization: Visualization) {
-  return !getSuggestion(frame, visualization).layerId;
-}
-
 function getNewVisualizationState(frame: FramePublicAPI, visualization: Visualization) {
   const { suggestion, layerId } = getSuggestion(frame, visualization);
 
@@ -126,7 +122,6 @@ function ConfirmationModal({
   onConfirm: () => void;
 }) {
   const visualization = visualizationMap[selection.visualizationId];
-  const dropAll = willLoseAllLayers(frame, visualization);
   const { label: visualizationLabel } = visualization.visualizationTypes.find(
     v => v.id === selection.subVisualizationId
   )!;
@@ -149,16 +144,10 @@ function ConfirmationModal({
         data-test-subj="lnsConfirmDropLayer"
       >
         <p>
-          {dropAll
-            ? i18n.translate('xpack.lens.configPanel.dropAllLayersDescription', {
-                defaultMessage: 'Switching to {visualizationLabel} will drop all layers.',
-                values: { visualizationLabel },
-              })
-            : i18n.translate('xpack.lens.configPanel.dropAllButLAstLayersDescription', {
-                defaultMessage:
-                  'Switching to {visualizationLabel} will drop all but the last layers.',
-                values: { visualizationLabel },
-              })}
+          {i18n.translate('xpack.lens.configPanel.dropAllButLAstLayersDescription', {
+            defaultMessage: 'Switching to {visualizationLabel} will drop all but the last layers.',
+            values: { visualizationLabel },
+          })}
         </p>
         <p>
           {i18n.translate('xpack.lens.configPanel.dropLayersPrompt', {

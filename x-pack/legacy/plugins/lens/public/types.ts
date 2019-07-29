@@ -201,7 +201,11 @@ export interface Visualization<T = unknown, P = unknown> {
 
   visualizationTypes: VisualizationType[];
 
-  renderDescription: (domElement: Element, state: T) => void;
+  getDescription: (state: T) => {
+    icon?: EuiIconType | string;
+    label: string;
+  };
+
   switchVisualizationType?: (visualizationTypeId: string, state: T) => T;
 
   // For initializing from saved object
