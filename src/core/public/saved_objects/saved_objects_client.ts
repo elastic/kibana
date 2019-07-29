@@ -36,7 +36,7 @@ import {
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchQuery, HttpSetup } from '../http';
 
-type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
+export type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
 
 export {
   SavedObject,
@@ -44,7 +44,6 @@ export {
   SavedObjectAttributes,
   SavedObjectReference,
   SavedObjectsBaseOptions,
-  SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
 } from '../../server/types';
 
@@ -65,6 +64,7 @@ export interface SavedObjectsCreateOptions {
   id?: string;
   /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
   overwrite?: boolean;
+  /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
 }
@@ -91,6 +91,7 @@ export interface SavedObjectsBulkCreateOptions {
 /** @public */
 export interface SavedObjectsUpdateOptions {
   version?: string;
+  /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
 }

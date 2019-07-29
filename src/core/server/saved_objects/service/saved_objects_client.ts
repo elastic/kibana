@@ -39,6 +39,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   id?: string;
   /** Overwrite existing documents (defaults to false) */
   overwrite?: boolean;
+  /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
 }
@@ -52,6 +53,7 @@ export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = 
   type: string;
   attributes: T;
   references?: SavedObjectReference[];
+  /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
 }
 
