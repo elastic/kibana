@@ -18,8 +18,8 @@
  */
 
 import React from 'react';
-import { EuiDualRange } from '@elastic/eui';
+import { EuiRangeProps } from '@elastic/eui';
 
-export class ValidatedDualRange<EuiDualRange> extends React.Component<EuiDualRange> {
+export class ValidatedDualRange<EuiRangeProps> extends React.Component<EuiRangeProps> {
   allowEmptyRange?: boolean;
 }

@@ -31,6 +31,9 @@ function TagCloudOptions({ stateParams, setValue, vis }: VisOptionsProps) {
     setValue('minFontSize', minFontSize);
     setValue('maxFontSize', maxFontSize);
   };
+  const fontSizeRangeLabel = i18n.translate('tagCloud.visParams.fontSizeLabel', {
+    defaultMessage: 'Font size range (pixels)',
+  });
 
   return (
     <EuiPanel paddingSize="s">
@@ -56,21 +59,15 @@ function TagCloudOptions({ stateParams, setValue, vis }: VisOptionsProps) {
 
       <ValidatedDualRange
         allowEmptyRange={false}
-        aria-label={i18n.translate('tagCloud.visParams.fontSizeLabel', {
-          defaultMessage: 'Font size',
-        })}
+        aria-label={fontSizeRangeLabel}
         compressed={true}
         fullWidth={true}
-        label={i18n.translate('tagCloud.visParams.fontSizeLabel', {
-          defaultMessage: 'Font size',
-        })}
+        label={fontSizeRangeLabel}
         max={100}
         min={1}
-        ticks={[{ label: '1px', value: 1 }, { label: '100px', value: 100 }]}
         value={[stateParams.minFontSize, stateParams.maxFontSize]}
         onChange={handleFontSizeChange}
         showInput
-        showTicks
       />
 
       <SwitchOption
