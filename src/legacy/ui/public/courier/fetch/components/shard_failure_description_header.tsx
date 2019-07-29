@@ -38,13 +38,13 @@ export function getFailureSummaryText(failure: ShardFailure, failureDetails?: st
   return i18n.translate('common.ui.courier.fetch.shardsFailedModal.failureHeader', {
     defaultMessage: '{failureName} at {failureDetails}',
     values: { failureName, failureDetails: displayDetails },
-    description: 'Summary of a shard failure',
+    description: 'Summary of shard failures, e.g. "IllegalArgumentException at shard 0 node xyz"',
   });
 }
 
 export function getFailureSummaryDetailsText(failure: ShardFailure): string {
   return getFailurePropsForSummary(failure)
-    .map(kv => `${kv.key}: ${kv.value}`)
+    .map(({ key, value }) => `${key}: ${value}`)
     .join(', ');
 }
 
