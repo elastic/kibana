@@ -112,7 +112,6 @@ exports[`InspectorPanel should render as expected 1`] = `
       "timeZone": null,
     }
   }
-  onClose={[Function]}
   title="Inspector"
   views={
     Array [

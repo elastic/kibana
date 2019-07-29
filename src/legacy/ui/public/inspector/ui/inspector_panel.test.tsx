@@ -20,63 +20,53 @@
 import React from 'react';
 import { InspectorPanel } from './inspector_panel';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { Adapters, InspectorViewDescription } from '../types';
 
 describe('InspectorPanel', () => {
-
-  let adapters;
-  let views;
+  let adapters: Adapters;
+  let views: InspectorViewDescription[];
 
   beforeEach(() => {
     adapters = {
       foodapter: {
-        foo() { return 42; }
+        foo() {
+          return 42;
+        },
       },
-      bardapter: {
-
-      }
+      bardapter: {},
     };
     views = [
       {
         title: 'View 1',
         order: 200,
-        component: () => (<h1>View 1</h1>),
-      }, {
+        component: () => <h1>View 1</h1>,
+      },
+      {
         title: 'Foo View',
         order: 100,
-        component: () => (<h1>Foo view</h1>),
-        shouldShow(adapters) {
-          return adapters.foodapter;
-        }
-      }, {
+        component: () => <h1>Foo view</h1>,
+        shouldShow(adapters2: Adapters) {
+          return adapters2.foodapter;
+        },
+      },
+      {
         title: 'Never',
         order: 200,
         component: () => null,
         shouldShow() {
           return false;
-        }
-      }
+        },
+      },
     ];
   });
 
   it('should render as expected', () => {
-    const component = mountWithIntl(
-      <InspectorPanel
-        adapters={adapters}
-        onClose={() => true}
-        views={views}
-      />
-    );
+    const component = mountWithIntl(<InspectorPanel adapters={adapters} views={views} />);
     expect(component).toMatchSnapshot();
   });
 
   it('should not allow updating adapters', () => {
-    const component = mountWithIntl(
-      <InspectorPanel
-        adapters={adapters}
-        onClose={() => true}
-        views={views}
-      />
-    );
+    const component = mountWithIntl(<InspectorPanel adapters={adapters} views={views} />);
     adapters.notAllowed = {};
     expect(() => component.setProps({ adapters })).toThrow();
   });

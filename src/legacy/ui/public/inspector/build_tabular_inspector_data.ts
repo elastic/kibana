@@ -18,17 +18,33 @@
  */
 
 import { set } from 'lodash';
+// @ts-ignore
 import { createFilter } from '../vis/vis_filters';
 import { FormattedData } from './adapters/data';
+
+interface Column {
+  id: string;
+  name: string;
+  aggConfig: any;
+}
+
+interface Row {
+  [key: string]: any;
+}
+
+interface Table {
+  columns: Column[];
+  rows: Row[];
+}
 
 /**
  * This function builds tabular data from the response and attaches it to the
  * inspector. It will only be called when the data view in the inspector is opened.
  */
-export async function buildTabularInspectorData(table, queryFilter) {
+export async function buildTabularInspectorData(table: Table, queryFilter: any) {
   const aggConfigs = table.columns.map(column => column.aggConfig);
   const rows = table.rows.map(row => {
-    return table.columns.reduce((prev, cur, colIndex) => {
+    return table.columns.reduce<Record<string, FormattedData>>((prev, cur, colIndex) => {
       const value = row[cur.id];
       const fieldFormatter = cur.aggConfig.fieldFormatter('text');
       prev[`col-${colIndex}-${cur.aggConfig.id}`] = new FormattedData(value, fieldFormatter(value));
@@ -38,30 +54,36 @@ export async function buildTabularInspectorData(table, queryFilter) {
 
   const columns = table.columns.map((col, colIndex) => {
     const field = col.aggConfig.getField();
-    const isCellContentFilterable =
-      col.aggConfig.isFilterable()
-      && (!field || field.filterable);
-    return ({
+    const isCellContentFilterable = col.aggConfig.isFilterable() && (!field || field.filterable);
+    return {
       name: col.name,
       field: `col-${colIndex}-${col.aggConfig.id}`,
-      filter: isCellContentFilterable && (value => {
-        const rowIndex = rows.findIndex(row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw);
-        const filter = createFilter(aggConfigs, table, colIndex, rowIndex, value.raw);
-        queryFilter.addFilters(filter);
-      }),
-      filterOut: isCellContentFilterable && (value => {
-        const rowIndex = rows.findIndex(row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw);
-        const filter = createFilter(aggConfigs, table, colIndex, rowIndex, value.raw);
-        const notOther = value.raw !== '__other__';
-        const notMissing = value.raw !== '__missing__';
-        if (Array.isArray(filter)) {
-          filter.forEach(f => set(f, 'meta.negate', (notOther && notMissing)));
-        } else {
-          set(filter, 'meta.negate', (notOther && notMissing));
-        }
-        queryFilter.addFilters(filter);
-      }),
-    });
+      filter:
+        isCellContentFilterable &&
+        ((value: { raw: any }) => {
+          const rowIndex = rows.findIndex(
+            row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
+          );
+          const filter = createFilter(aggConfigs, table, colIndex, rowIndex, value.raw);
+          queryFilter.addFilters(filter);
+        }),
+      filterOut:
+        isCellContentFilterable &&
+        ((value: { raw: any }) => {
+          const rowIndex = rows.findIndex(
+            row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
+          );
+          const filter = createFilter(aggConfigs, table, colIndex, rowIndex, value.raw);
+          const notOther = value.raw !== '__other__';
+          const notMissing = value.raw !== '__missing__';
+          if (Array.isArray(filter)) {
+            filter.forEach(f => set(f, 'meta.negate', notOther && notMissing));
+          } else {
+            set(filter, 'meta.negate', notOther && notMissing);
+          }
+          queryFilter.addFilters(filter);
+        }),
+    };
   });
 
   return { columns, rows };

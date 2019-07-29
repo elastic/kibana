@@ -20,7 +20,6 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -28,26 +27,42 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
+import { InspectorViewDescription } from '../view_registry';
 
-class InspectorViewChooser extends Component {
+interface Props {
+  views: InspectorViewDescription[];
+  onViewSelected: (view: InspectorViewDescription) => void;
+  selectedView: InspectorViewDescription;
+}
 
-  state = {
-    isSelectorOpen: false
+interface State {
+  isSelectorOpen: boolean;
+}
+
+export class InspectorViewChooser extends Component<Props, State> {
+  static propTypes = {
+    views: PropTypes.array.isRequired,
+    onViewSelected: PropTypes.func.isRequired,
+    selectedView: PropTypes.object.isRequired,
+  };
+
+  state: State = {
+    isSelectorOpen: false,
   };
 
   toggleSelector = () => {
-    this.setState((prev) => ({
-      isSelectorOpen: !prev.isSelectorOpen
+    this.setState(prev => ({
+      isSelectorOpen: !prev.isSelectorOpen,
     }));
   };
 
   closeSelector = () => {
     this.setState({
-      isSelectorOpen: false
+      isSelectorOpen: false,
     });
   };
 
-  renderView = (view, index) => {
+  renderView = (view: InspectorViewDescription, index: number) => {
     return (
       <EuiContextMenuItem
         key={index}
@@ -62,7 +77,7 @@ class InspectorViewChooser extends Component {
         {view.title}
       </EuiContextMenuItem>
     );
-  }
+  };
 
   renderViewButton() {
     return (
@@ -84,10 +99,7 @@ class InspectorViewChooser extends Component {
 
   renderSingleView() {
     return (
-      <EuiToolTip
-        position="bottom"
-        content={this.props.selectedView.help}
-      >
+      <EuiToolTip position="bottom" content={this.props.selectedView.help}>
         <FormattedMessage
           id="common.ui.inspector.view"
           defaultMessage="View: {viewName}"
@@ -117,18 +129,8 @@ class InspectorViewChooser extends Component {
         anchorPosition="downRight"
         repositionOnScroll
       >
-        <EuiContextMenuPanel
-          items={views.map(this.renderView)}
-        />
+        <EuiContextMenuPanel items={views.map(this.renderView)} />
       </EuiPopover>
     );
   }
 }
-
-InspectorViewChooser.propTypes = {
-  views: PropTypes.array.isRequired,
-  onViewSelected: PropTypes.func.isRequired,
-  selectedView: PropTypes.object.isRequired,
-};
-
-export { InspectorViewChooser };

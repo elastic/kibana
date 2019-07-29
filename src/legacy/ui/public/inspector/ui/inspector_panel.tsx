@@ -20,52 +20,73 @@
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutHeader,
-  EuiTitle,
-} from '@elastic/eui';
-
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { Adapters, InspectorViewDescription } from '../types';
 import { InspectorViewChooser } from './inspector_view_chooser';
 
-function hasAdaptersChanged(oldAdapters, newAdapters) {
-  return Object.keys(oldAdapters).length !== Object.keys(newAdapters).length
-    || Object.keys(oldAdapters).some(key => oldAdapters[key] !== newAdapters[key]);
+function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {
+  return (
+    Object.keys(oldAdapters).length !== Object.keys(newAdapters).length ||
+    Object.keys(oldAdapters).some(key => oldAdapters[key] !== newAdapters[key])
+  );
 }
 
 const inspectorTitle = i18n.translate('common.ui.inspector.title', {
   defaultMessage: 'Inspector',
 });
 
-class InspectorPanel extends Component {
+interface InspectorPanelProps {
+  adapters: Adapters;
+  title?: string;
+  views: InspectorViewDescription[];
+}
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      selectedView: props.views[0],
-      views: props.views,
-      // Clone adapters array so we can validate that this prop never change
-      adapters: { ...props.adapters },
-    };
-  }
+interface InspectorPanelState {
+  selectedView: InspectorViewDescription;
+  views: InspectorViewDescription[];
+  adapters: Adapters;
+}
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+export class InspectorPanel extends Component<InspectorPanelProps, InspectorPanelState> {
+  static defaultProps = {
+    title: inspectorTitle,
+  };
+
+  static propTypes = {
+    adapters: PropTypes.object.isRequired,
+    views: (props: InspectorPanelProps, propName: string, componentName: string) => {
+      if (!Array.isArray(props.views) || props.views.length < 1) {
+        throw new Error(
+          `${propName} prop must be an array of at least one element in ${componentName}.`
+        );
+      }
+    },
+    title: PropTypes.string,
+  };
+
+  state: InspectorPanelState = {
+    selectedView: this.props.views[0],
+    views: this.props.views,
+    // Clone adapters array so we can validate that this prop never change
+    adapters: { ...this.props.adapters },
+  };
+
+  static getDerivedStateFromProps(nextProps: InspectorPanelProps, prevState: InspectorPanelState) {
     if (hasAdaptersChanged(prevState.adapters, nextProps.adapters)) {
       throw new Error('Adapters are not allowed to be changed on an open InspectorPanel.');
     }
-    const selectedViewMustChange = nextProps.views !== prevState.views
-        && !nextProps.views.includes(prevState.selectedView);
+    const selectedViewMustChange =
+      nextProps.views !== prevState.views && !nextProps.views.includes(prevState.selectedView);
     return {
       views: nextProps.views,
       selectedView: selectedViewMustChange ? nextProps.views[0] : prevState.selectedView,
     };
   }
 
-  onViewSelected = (view) => {
+  onViewSelected = (view: InspectorViewDescription) => {
     if (view !== this.state.selectedView) {
       this.setState({
-        selectedView: view
+        selectedView: view,
       });
     }
   };
@@ -74,7 +95,7 @@ class InspectorPanel extends Component {
     return (
       <this.state.selectedView.component
         adapters={this.props.adapters}
-        title={this.props.title}
+        title={this.props.title || ''}
       />
     );
   }
@@ -86,13 +107,10 @@ class InspectorPanel extends Component {
     return (
       <React.Fragment>
         <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
-            alignItems="center"
-          >
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={true}>
               <EuiTitle size="s">
-                <h1>{ title } 0 lol</h1>
+                <h1>{title}</h1>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -104,26 +122,8 @@ class InspectorPanel extends Component {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
-        { this.renderSelectedPanel() }
+        {this.renderSelectedPanel()}
       </React.Fragment>
     );
   }
 }
-
-InspectorPanel.defaultProps = {
-  title: inspectorTitle,
-};
-
-InspectorPanel.propTypes = {
-  adapters: PropTypes.object.isRequired,
-  views: (props, propName, componentName) => {
-    if (!Array.isArray(props[propName]) || props[propName].length < 1) {
-      throw new Error(
-        `${propName} prop must be an array of at least one element in ${componentName}.`
-      );
-    }
-  },
-  title: PropTypes.string,
-};
-
-export { InspectorPanel };

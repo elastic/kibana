@@ -17,16 +17,23 @@
  * under the License.
  */
 
+import * as React from 'react';
 import { Inspector } from './inspector';
+import { viewRegistry } from './view_registry';
+
 jest.mock('./view_registry', () => ({
   viewRegistry: {
     getVisible: jest.fn(),
   },
 }));
+
 jest.mock('./ui/inspector_panel', () => ({
   InspectorPanel: () => 'InspectorPanel',
 }));
-jest.mock('ui/i18n', () => ({ I18nContext: ({ children }) => children }));
+
+jest.mock('ui/i18n', () => ({
+  I18nContext: ({ children }: { children: React.ReactChild }) => children,
+}));
 
 jest.mock('ui/new_platform', () => ({
   npStart: {
@@ -34,14 +41,12 @@ jest.mock('ui/new_platform', () => ({
       overlay: {
         openFlyout: jest.fn(),
       },
-    }
+    },
   },
 }));
 
-import { viewRegistry } from './view_registry';
-
-function setViews(views) {
-  viewRegistry.getVisible.mockImplementation(() => views);
+function setViews(views: any[]) {
+  ((viewRegistry.getVisible as unknown) as jest.SpyInstance).mockImplementation(() => views);
 }
 
 describe('Inspector', () => {
