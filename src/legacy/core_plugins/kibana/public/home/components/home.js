@@ -225,8 +225,8 @@ export class Home extends Component {
       <Welcome
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
-        optInDescription={this.props.optInDescription}
         showTelemetryOptIn={this.props.showTelemetryOptIn}
+        fetchTelemetry={this.props.fetchTelemetry}
       />
     );
   }
@@ -249,7 +249,6 @@ export class Home extends Component {
 
 Home.propTypes = {
   addBasePath: PropTypes.func.isRequired,
-  optInDescription: PropTypes.element,
   showTelemetryOptIn: PropTypes.bool.isRequired,
   directories: PropTypes.arrayOf(
     PropTypes.shape({

@@ -19,25 +19,25 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   // @ts-ignore
   EuiCard,
   EuiButton,
 } from '@elastic/eui';
+import { OptInMessage } from './opt_in_message';
 
 export interface Props {
-  optInDescription: string | React.Component;
   urlBasePath: string;
   onConfirm: () => void;
   onDecline: () => void;
+  fetchTelemetry: () => Promise<any[]>;
 }
 
 export function renderTelemetryOptInCard({
   urlBasePath,
+  fetchTelemetry,
   onConfirm,
   onDecline,
-  optInDescription,
 }: Props) {
   return (
     <EuiCard
@@ -49,7 +49,7 @@ export function renderTelemetryOptInCard({
           defaultMessage="Help us improve the Elastic Stack"
         />
       }
-      description={optInDescription}
+      description={<OptInMessage fetchTelemetry={fetchTelemetry} />}
       footer={
         <footer>
           <EuiButton

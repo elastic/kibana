@@ -17,33 +17,33 @@
  * under the License.
  */
 
-import React from 'react';
+import moment from 'moment';
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
-
+import chrome from 'ui/chrome';
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
+
 export let indexPatternService;
-export const telemetryService = {
-  showTelemetryOptIn: false,
-  optInDescription: null,
-};
+export let showTelemetryOptIn;
+export let fetchTelemetry;
 
 export const trackUiMetric = createUiStatsReporter('Kibana_home');
 export { METRIC_TYPE };
 
 uiModules.get('kibana').run(($injector) => {
-  indexPatternService = $injector.get('indexPatterns');
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
-
-  if (telemetryEnabled) {
-    // Note: telemetryEnabled is only true with x-pack. This guard will no longer be needed when we move it to OSS.
-    const { TelemetryOptInProvider } = require('../../../../../../x-pack/legacy/plugins/telemetry/public/services/telemetry_opt_in');
-    const { OptInMessage } = require('../../../../../../x-pack/legacy/plugins/telemetry/public/components');
-    const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
-    const Private = $injector.get('Private');
-    const telemetryOptInProvider = Private(TelemetryOptInProvider);
-    const optedIn = telemetryOptInProvider.getOptIn() || false;
-    telemetryService.showTelemetryOptIn = telemetryEnabled && telemetryBanner && !optedIn;
-    telemetryService.optInDescription = <OptInMessage fetchTelemetry={telemetryOptInProvider.fetchExample} />;
-  }
+  const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
+  const telemetryOptedIn = npStart.core.injectedMetadata.getInjectedVar('telemetryOptedIn');
+  showTelemetryOptIn = telemetryEnabled && telemetryBanner && !telemetryOptedIn;
+  indexPatternService = $injector.get('indexPatterns');
+  fetchTelemetry = async () => {
+    const $http = $injector.get('$http');
+    return await $http.post(chrome.addBasePath(`/api/telemetry/v2/clusters/_stats`), {
+      unencrypted: true,
+      timeRange: {
+        min: moment().subtract(20, 'minutes').toISOString(),
+        max: moment().toISOString()
+      }
+    });
+  };
 });

@@ -30,14 +30,13 @@ import {
 } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
-import { telemetryService } from '../kibana_services';
+import { fetchTelemetry, showTelemetryOptIn } from '../kibana_services';
 import chrome from 'ui/chrome';
 
 export function HomeApp({ directories }) {
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
   const apmUiEnabled = chrome.getInjected('apmUiEnabled', true);
   const mlEnabled = chrome.getInjected('mlEnabled', false);
-  const { optInDescription, showTelemetryOptIn } = telemetryService;
   const savedObjectsClient = chrome.getSavedObjectsClient();
 
   const renderTutorialDirectory = (props) => {
@@ -93,8 +92,8 @@ export function HomeApp({ directories }) {
             find={savedObjectsClient.find}
             localStorage={localStorage}
             urlBasePath={chrome.getBasePath()}
-            optInDescription={optInDescription}
             showTelemetryOptIn={showTelemetryOptIn}
+            fetchTelemetry={fetchTelemetry}
           />
         </Route>
       </Switch>
