@@ -20,7 +20,7 @@ import React from 'react';
 // @ts-ignore
 import { npStart } from 'ui/new_platform';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiTextAlign } from '@elastic/eui';
 
 import { ShardFailureModal } from './shard_failure_modal';
 import { ResponseWithShardFailure, Request } from './shard_failure_types';
@@ -46,12 +46,19 @@ export function ShardFailureOpenModalButton({ request, response, title }: Props)
     );
   }
   return (
-    <EuiButton color="warning" size="s" onClick={onClick} data-test-subj="openShardFailureModalBtn">
-      <FormattedMessage
-        id="common.ui.courier.fetch.shardsFailedModal.showDetails"
-        defaultMessage="Show details"
-        description="Open the modal to show details"
-      />
-    </EuiButton>
+    <EuiTextAlign textAlign="right">
+      <EuiButton
+        color="warning"
+        size="s"
+        onClick={onClick}
+        data-test-subj="openShardFailureModalBtn"
+      >
+        <FormattedMessage
+          id="common.ui.courier.fetch.shardsFailedModal.showDetails"
+          defaultMessage="Show details"
+          description="Open the modal to show details"
+        />
+      </EuiButton>
+    </EuiTextAlign>
   );
 }
