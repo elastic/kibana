@@ -18,11 +18,11 @@ export default function deleteActionTests({ getService }: KibanaFunctionalTestDe
     beforeEach(() => esArchiver.load('actions/basic'));
     afterEach(() => esArchiver.unload('actions/basic'));
 
-    it('should return 200 when deleting an action', async () => {
+    it('should return 204 when deleting an action', async () => {
       await supertest
         .delete(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
-        .expect(200, {});
+        .expect(204, '');
     });
 
     it(`should return 404 when action doesn't exist`, async () => {
