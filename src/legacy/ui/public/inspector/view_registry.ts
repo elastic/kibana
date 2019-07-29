@@ -18,7 +18,6 @@
  */
 
 import { npSetup } from 'ui/new_platform';
-
 export { InspectorViewDescription } from './types';
 
 /**

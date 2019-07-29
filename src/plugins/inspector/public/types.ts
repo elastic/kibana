@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { OverlayRef } from '../../../core/public';
+
 /**
  * The interface that the adapters used to open an inspector have to fullfill.
  */
@@ -61,3 +63,14 @@ export interface InspectorViewDescription {
   shouldShow?: (adapters: Adapters) => boolean;
   title: string;
 }
+
+/**
+ * Options that can be specified when opening the inspector.
+ * @property {string} title - An optional title, that will be shown in the header
+ *    of the inspector. Can be used to give more context about what is being inspected.
+ */
+export interface InspectorOptions {
+  title?: string;
+}
+
+export type InspectorSession = OverlayRef;
