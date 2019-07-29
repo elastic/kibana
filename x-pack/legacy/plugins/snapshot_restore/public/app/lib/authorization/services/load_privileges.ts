@@ -7,9 +7,8 @@
 // "useRequest" should also be inside its own shared lib folder ("http" probably)
 import { useRequest } from '../../../services/http/use_request';
 
-export const useLoadPermissions = (permissionEndpoint: string) => {
-  return useRequest({
-    path: permissionEndpoint,
+export const useLoadPrivileges = (endpoint: string) =>
+  useRequest({
+    path: endpoint,
     method: 'get',
   });
-};

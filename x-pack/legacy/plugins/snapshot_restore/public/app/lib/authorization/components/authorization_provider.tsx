@@ -5,7 +5,7 @@
  */
 
 import React, { createContext } from 'react';
-import { useLoadPermissions } from '../services';
+import { useLoadPrivileges } from '../services';
 
 interface Authorization {
   isLoading: boolean;
@@ -38,16 +38,16 @@ const initialValue: Authorization = {
 export const AuthorizationContext = createContext<Authorization>(initialValue);
 
 interface Props {
-  permissionEndpoint: string;
+  privilegesEndpoint: string;
   children: React.ReactNode;
 }
 
-export const AuthorizationProvider = ({ permissionEndpoint, children }: Props) => {
-  const { loading, error, data: permissionsData } = useLoadPermissions(permissionEndpoint);
+export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) => {
+  const { loading, error, data: privilegesData } = useLoadPrivileges(privilegesEndpoint);
 
   const value = {
     isLoading: loading,
-    privileges: loading ? { hasAllPrivileges: true, missingPrivileges: {} } : permissionsData,
+    privileges: loading ? { hasAllPrivileges: true, missingPrivileges: {} } : privilegesData,
     apiError: error ? error : null,
   };
 

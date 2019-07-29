@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './load_permissions';
+export * from './load_privileges';
