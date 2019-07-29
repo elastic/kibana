@@ -13,6 +13,7 @@ import { OptInExampleFlyout } from './opt_in_details_component';
 
 interface Props {
   fetchTelemetry: () => Promise<any[]>;
+  ownFocus?: boolean;
 }
 
 interface State {

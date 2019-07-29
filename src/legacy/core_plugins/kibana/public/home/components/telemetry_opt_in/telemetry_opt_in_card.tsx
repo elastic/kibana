@@ -26,10 +26,9 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import { OptInMessage } from '../../../../../../../../x-pack/legacy/plugins/telemetry/public/components';
 export interface Props {
+  optInDescription: string | React.Component;
   urlBasePath: string;
-  fetchTelemetry: () => Promise<any[]>;
   onConfirm: () => void;
   onDecline: () => void;
 }
@@ -38,7 +37,7 @@ export function renderTelemetryOptInCard({
   urlBasePath,
   onConfirm,
   onDecline,
-  fetchTelemetry,
+  optInDescription,
 }: Props) {
   return (
     <EuiCard
@@ -50,7 +49,7 @@ export function renderTelemetryOptInCard({
           defaultMessage="Help us improve the Elastic Stack"
         />
       }
-      description={<OptInMessage fetchTelemetry={fetchTelemetry} />}
+      description={optInDescription}
       footer={
         <footer>
           <EuiButton

@@ -17,11 +17,16 @@
  * under the License.
  */
 
+import React from 'react';
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
+
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
 export let indexPatternService;
-export const telemetryService = {};
+export const telemetryService = {
+  showTelemetryOptIn: false,
+  optInDescription: null,
+};
 
 export const trackUiMetric = createUiStatsReporter('Kibana_home');
 export { METRIC_TYPE };
@@ -29,14 +34,16 @@ export { METRIC_TYPE };
 uiModules.get('kibana').run(($injector) => {
   indexPatternService = $injector.get('indexPatterns');
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
-  const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
+
   if (telemetryEnabled) {
+    // Note: telemetryEnabled is only true with x-pack. This guard will no longer be needed when we move it to OSS.
     const { TelemetryOptInProvider } = require('../../../../../../x-pack/legacy/plugins/telemetry/public/services/telemetry_opt_in');
+    const { OptInMessage } = require('../../../../../../x-pack/legacy/plugins/telemetry/public/components');
+    const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
     const Private = $injector.get('Private');
     const telemetryOptInProvider = Private(TelemetryOptInProvider);
-    telemetryService.telemetryOptInProvider = telemetryOptInProvider;
+    const optedIn = telemetryOptInProvider.getOptIn() || false;
+    telemetryService.showTelemetryOptIn = telemetryEnabled && telemetryBanner && !optedIn;
+    telemetryService.optInDescription = <OptInMessage fetchTelemetry={telemetryOptInProvider.fetchExample} />;
   }
-  telemetryService.telemetryEnabled = telemetryEnabled || false;
-  telemetryService.telemetryBanner = telemetryBanner || false;
-  telemetryService.telemetryOptInProvider = {};
 });

@@ -45,7 +45,7 @@ import { trackUiMetric, METRIC_TYPE } from '../kibana_services';
 interface Props {
   urlBasePath: string;
   onSkip: () => {};
-  fetchTelemetry: () => Promise<any[]>;
+  optInDescription: any;
   showTelemetryOptIn: boolean;
 }
 interface State {
@@ -117,7 +117,7 @@ export class Welcome extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { urlBasePath, fetchTelemetry, showTelemetryOptIn } = this.props;
+    const { urlBasePath, optInDescription, showTelemetryOptIn } = this.props;
     const { step } = this.state;
 
     return (
@@ -157,7 +157,7 @@ export class Welcome extends React.PureComponent<Props, State> {
                 )}
                 {showTelemetryOptIn && step === 1 && (
                   <TelemetryOptInCard
-                    fetchTelemetry={fetchTelemetry}
+                    optInDescription={optInDescription}
                     urlBasePath={urlBasePath}
                     onConfirm={this.onTelemetryOptInConfirm}
                     onDecline={this.onTelemetryOptInDecline}
