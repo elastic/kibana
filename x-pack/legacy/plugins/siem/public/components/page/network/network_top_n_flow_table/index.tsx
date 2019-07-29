@@ -160,7 +160,6 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadingTitle={i18n.TOP_TALKERS}
         loadPage={newActivePage => loadPage(newActivePage)}
         onChange={this.onChange}
         pageOfItems={data}

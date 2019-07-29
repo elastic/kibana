@@ -20,8 +20,6 @@
 import sinon from 'sinon';
 
 import { FilterStateStore } from '@kbn/es-query';
-
-import { Subscription } from 'rxjs';
 import { FilterStateManager } from './filter_state_manager';
 
 import { StubState } from './test_helpers/stub_state';
@@ -50,7 +48,6 @@ describe('filter_state_manager', () => {
   let appStateStub: StubState;
   let globalStateStub: StubState;
 
-  let subscription: Subscription | undefined;
   let filterManager: FilterManager;
 
   beforeEach(() => {
@@ -58,12 +55,6 @@ describe('filter_state_manager', () => {
     globalStateStub = new StubState();
     const indexPatterns = new StubIndexPatterns();
     filterManager = new FilterManager(indexPatterns);
-  });
-
-  afterEach(() => {
-    if (subscription) {
-      subscription.unsubscribe();
-    }
   });
 
   describe('app_state_undefined', () => {
@@ -162,6 +153,27 @@ describe('filter_state_manager', () => {
 
       sinon.assert.calledOnce(appStateStub.save);
       sinon.assert.calledOnce(globalStateStub.save);
+    });
+  });
+
+  describe('bug fixes', () => {
+    /*
+     ** This test is here to reproduce a bug where a filter manager update
+     ** would cause filter state manager detects those changes
+     ** And triggers *another* filter manager update.
+     */
+    test('should NOT re-trigger filter manager', async done => {
+      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+      filterManager.setFilters([f1]);
+      const setFiltersSpy = sinon.spy(filterManager, 'setFilters');
+
+      f1.meta.negate = true;
+      await filterManager.setFilters([f1]);
+
+      setTimeout(() => {
+        expect(setFiltersSpy.callCount).toEqual(1);
+        done();
+      }, 100);
     });
   });
 });
