@@ -16,6 +16,7 @@ import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useCore } from '../../../hooks/useCore';
+import { useTrackPageview } from '../../../../../infra/public';
 
 const initalData = {
   items: [],
@@ -70,6 +71,9 @@ export function ServiceOverview() {
       });
     }
   }, [data.hasLegacyData]);
+
+  useTrackPageview({ app: 'apm', path: 'services_overview' });
+  useTrackPageview({ app: 'apm', path: 'services_overview', delay: 15000 });
 
   return (
     <EuiPanel>
