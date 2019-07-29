@@ -86,7 +86,7 @@ function HeroImage() {
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiImage
         alt="Illustration of computer"
-        url="/plugins/integrations_manager/assets/illustration-kibana-getting-started@2x.png"
+        url="/plugins/integrations_manager/assets/illustration_kibana_getting_started@2x.png"
         style={{ width: '475px', height: '273px' }}
       />
     </EuiFlexGroup>
