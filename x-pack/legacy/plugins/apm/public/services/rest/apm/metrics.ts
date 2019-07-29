@@ -6,7 +6,6 @@
 
 import { MetricsChartsByAgentAPIResponse } from '../../../../server/lib/metrics/get_metrics_chart_data_by_agent';
 import { callApi } from '../callApi';
-import { getUiFiltersES } from '../../ui_filters/get_ui_filters_es';
 import { UIFilters } from '../../../../typings/ui-filters';
 
 export async function loadMetricsChartData({
@@ -28,7 +27,7 @@ export async function loadMetricsChartData({
       start,
       end,
       agentName,
-      uiFiltersES: await getUiFiltersES(uiFilters)
+      uiFilters: JSON.stringify(uiFilters)
     }
   });
 }
