@@ -6,19 +6,60 @@
 
 import {
   TRANSACTION_DURATION,
-  TRANSACTION_NAME
+  TRANSACTION_NAME,
+  PROCESSOR_EVENT,
+  PARENT_ID,
+  TRANSACTION_SAMPLED,
+  SERVICE_NAME,
+  TRANSACTION_TYPE
 } from '../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType, StringMap } from '../../../typings/common';
+import { PromiseReturnType } from '../../../typings/common';
 import { Setup } from '../helpers/setup_request';
+import { rangeFilter } from '../helpers/range_filter';
+import { BoolQuery } from '../../../typings/elasticsearch';
+
+interface TopTransactionOptions {
+  type: 'top_transactions';
+  serviceName: string;
+  transactionType: string;
+}
+
+interface TopTraceOptions {
+  type: 'top_traces';
+}
+
+export type Options = TopTransactionOptions | TopTraceOptions;
 
 export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
-export function transactionGroupsFetcher(setup: Setup, bodyQuery: StringMap) {
-  const { client, config } = setup;
+export function transactionGroupsFetcher(options: Options, setup: Setup) {
+  const { client, config, start, end, uiFiltersES } = setup;
+
+  const bool: BoolQuery = {
+    must_not: [],
+    // prefer sampled transactions
+    should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
+    filter: [
+      { range: rangeFilter(start, end) },
+      { term: { [PROCESSOR_EVENT]: 'transaction' } },
+      ...uiFiltersES
+    ]
+  };
+
+  if (options.type === 'top_traces') {
+    // A transaction without `parent.id` is considered a "root" transaction, i.e. a trace
+    bool.must_not.push({ exists: { field: PARENT_ID } });
+  } else {
+    bool.filter.push({ term: { [SERVICE_NAME]: options.serviceName } });
+    bool.filter.push({ term: { [TRANSACTION_TYPE]: options.transactionType } });
+  }
+
   const params = {
     index: config.get<string>('apm_oss.transactionIndices'),
     body: {
       size: 0,
-      query: bodyQuery,
+      query: {
+        bool
+      },
       aggs: {
         transactions: {
           terms: {
