@@ -76,7 +76,7 @@ interface State {
 }
 
 class FilterEditorUI extends Component<Props, State> {
-  public constructor(props: Props) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       selectedIndexPattern: this.getIndexPatternFromFilter(),

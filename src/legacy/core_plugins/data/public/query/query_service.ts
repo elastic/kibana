@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { QueryBar, QueryBarInput, fromUser, toUser, getQueryLog } from './query_bar';
+import { fromUser, toUser, getQueryLog } from './query_bar';
 
 /**
  * Query Service

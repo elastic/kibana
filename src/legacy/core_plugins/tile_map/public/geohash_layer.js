@@ -18,7 +18,7 @@
  */
 
 import L from 'leaflet';
-import _ from 'lodash';
+import { min, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
@@ -70,7 +70,7 @@ export class GeohashLayer extends KibanaMapLayer {
 
         let radius = 15;
         if (this._featureCollectionMetaData.geohashGridDimensionsAtEquator) {
-          const minGridLength = _.min(this._featureCollectionMetaData.geohashGridDimensionsAtEquator);
+          const minGridLength = min(this._featureCollectionMetaData.geohashGridDimensionsAtEquator);
           const metersPerPixel = this._kibanaMap.getMetersPerPixel();
           radius = (minGridLength / metersPerPixel) / 2;
         }
@@ -135,7 +135,7 @@ export class GeohashLayer extends KibanaMapLayer {
 
   isReusable(options) {
 
-    if (_.isEqual(this._geohashOptions, options)) {
+    if (isEqual(this._geohashOptions, options)) {
       return true;
     }
 
@@ -144,7 +144,7 @@ export class GeohashLayer extends KibanaMapLayer {
       return false;
     } else if (this._geohashOptions.mapType !== options.mapType) {
       return false;
-    } else if (this._geohashOptions.mapType === 'Heatmap' && !_.isEqual(this._geohashOptions.heatmap, options)) {
+    } else if (this._geohashOptions.mapType === 'Heatmap' && !isEqual(this._geohashOptions.heatmap, options)) {
       return false;
     } else {
       return true;

@@ -114,7 +114,6 @@ class GaugePanelConfigUi extends Component {
           limit={1}
           model={this.props.model}
           name={this.props.name}
-          visData$={this.props.visData$}
           onChange={this.props.onChange}
         />
       );
@@ -350,7 +349,6 @@ GaugePanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  visData$: PropTypes.object,
 };
 
 export const GaugePanelConfig = injectI18n(GaugePanelConfigUi);

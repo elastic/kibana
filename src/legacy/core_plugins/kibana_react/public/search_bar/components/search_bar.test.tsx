@@ -21,7 +21,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { SearchBar } from './search_bar';
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 
 const setupMock = coreMock.createSetup();
 
@@ -95,7 +95,7 @@ describe('SearchBar', () => {
     expect(component.find(QUERY_BAR).length).toBe(1);
   });
 
-  it('Should render empty when timepicker disabled and no options provided', () => {
+  it('Should render empty when timepicker is off and no options provided', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         uiSettings={setupMock.uiSettings}

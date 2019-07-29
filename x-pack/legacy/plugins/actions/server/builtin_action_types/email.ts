@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf, Type } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import nodemailerServices from 'nodemailer/lib/well-known/services.json';
 
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './lib/send_email';
+import { nullableType } from './lib/nullable';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
 const PORT_MAX = 256 * 256 - 1;
-
-function nullableType<V>(type: Type<V>) {
-  return schema.oneOf([type, schema.literal(null)], { defaultValue: () => null });
-}
 
 // config definition
 
@@ -108,6 +105,7 @@ export const actionType: ActionType = {
 // action executor
 
 async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
+  const id = execOptions.id;
   const config = execOptions.config as ActionTypeConfigType;
   const params = execOptions.params as ActionParamsType;
   const services = execOptions.services;
@@ -146,7 +144,7 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   } catch (err) {
     return {
       status: 'error',
-      message: `error sending email: ${err.message}`,
+      message: `error in action ${id} sending email: ${err.message}`,
     };
   }
 

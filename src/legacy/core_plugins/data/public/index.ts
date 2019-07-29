@@ -18,7 +18,6 @@
  */
 
 // /// Define plguin function
-
 import { DataPlugin as Plugin } from './plugin';
 
 export function plugin() {
@@ -34,7 +33,12 @@ export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from '.
 export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
 export { Query, QueryBar, QueryBarInput } from './query';
 export { FilterBar, ApplyFiltersPopover } from './filter';
-export { FilterManager, FilterStateManager, uniqFilters } from './filter/filter_manager';
+export {
+  FilterManager,
+  FilterStateManager,
+  uniqFilters,
+  onlyDisabledFiltersChanged,
+} from './filter/filter_manager';
 
 /** @public static code */
 export { dateHistogramInterval } from '../common/date_histogram_interval';

@@ -330,23 +330,101 @@ export interface FatalErrorsSetup {
 }
 
 // @public (undocumented)
+export type HttpBody = BodyInit | null | any;
+
+// @public (undocumented)
+export interface HttpErrorRequest {
+    // (undocumented)
+    error: Error;
+    // (undocumented)
+    request?: Request;
+}
+
+// @public (undocumented)
+export interface HttpErrorResponse extends HttpResponse {
+    // Warning: (ae-forgotten-export) The symbol "HttpFetchError" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    error: Error | HttpFetchError;
+}
+
+// @public (undocumented)
+export interface HttpFetchOptions extends HttpRequestInit {
+    // (undocumented)
+    headers?: HttpHeadersInit;
+    // (undocumented)
+    prependBasePath?: boolean;
+    // (undocumented)
+    query?: HttpFetchQuery;
+}
+
+// @public (undocumented)
+export interface HttpFetchQuery {
+    // (undocumented)
+    [key: string]: string | number | boolean | undefined;
+}
+
+// @public (undocumented)
+export type HttpHandler = (path: string, options?: HttpFetchOptions) => Promise<HttpBody>;
+
+// @public (undocumented)
+export interface HttpHeadersInit {
+    // (undocumented)
+    [name: string]: any;
+}
+
+// @public (undocumented)
 export interface HttpInterceptor {
     // Warning: (ae-forgotten-export) The symbol "HttpInterceptController" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
     request?(request: Request, controller: HttpInterceptController): Promise<Request> | Request | void;
-    // Warning: (ae-forgotten-export) The symbol "HttpErrorRequest" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     requestError?(httpErrorRequest: HttpErrorRequest, controller: HttpInterceptController): Promise<Request> | Request | void;
-    // Warning: (ae-forgotten-export) The symbol "HttpResponse" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     response?(httpResponse: HttpResponse, controller: HttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
-    // Warning: (ae-forgotten-export) The symbol "HttpErrorResponse" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     responseError?(httpErrorResponse: HttpErrorResponse, controller: HttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
+}
+
+// @public (undocumented)
+export interface HttpRequestInit {
+    // (undocumented)
+    body?: BodyInit | null;
+    // (undocumented)
+    cache?: RequestCache;
+    // (undocumented)
+    credentials?: RequestCredentials;
+    // (undocumented)
+    headers?: HttpHeadersInit;
+    // (undocumented)
+    integrity?: string;
+    // (undocumented)
+    keepalive?: boolean;
+    // (undocumented)
+    method?: string;
+    // (undocumented)
+    mode?: RequestMode;
+    // (undocumented)
+    redirect?: RequestRedirect;
+    // (undocumented)
+    referrer?: string;
+    // (undocumented)
+    referrerPolicy?: ReferrerPolicy;
+    // (undocumented)
+    signal?: AbortSignal | null;
+    // (undocumented)
+    window?: any;
+}
+
+// @public (undocumented)
+export interface HttpResponse {
+    // (undocumented)
+    body?: HttpBody;
+    // (undocumented)
+    request: Request;
+    // (undocumented)
+    response?: Response;
 }
 
 // @public (undocumented)
@@ -361,8 +439,6 @@ export interface HttpServiceBase {
     };
     // (undocumented)
     delete: HttpHandler;
-    // Warning: (ae-forgotten-export) The symbol "HttpHandler" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     fetch: HttpHandler;
     // (undocumented)
@@ -475,7 +551,7 @@ export interface OverlayStart {
 }
 
 // @public
-export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends {} = {}, TPluginsStart extends {} = {}> {
+export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
     setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
     // (undocumented)
@@ -485,7 +561,7 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends {} =
 }
 
 // @public
-export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<string, any> = {}, TPluginsStart extends Record<string, any> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext {

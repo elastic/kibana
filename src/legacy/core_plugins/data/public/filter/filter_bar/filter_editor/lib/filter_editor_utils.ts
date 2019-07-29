@@ -33,8 +33,7 @@ import {
 } from '@kbn/es-query';
 import { omit } from 'lodash';
 import Ipv4Address from 'ui/utils/ipv4_address';
-import { Field, IndexPattern } from '../../../../index_patterns';
-import { utils as indexPatternUtils } from '../../../../index_patterns';
+import { Field, IndexPattern, utils as indexPatternUtils } from '../../../../index_patterns';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
 
 export function getIndexPatternFromFilter(

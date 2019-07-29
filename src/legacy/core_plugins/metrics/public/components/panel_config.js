@@ -31,6 +31,7 @@ import { QueryInputBarContext } from '../contexts/query_input_bar_context';
 import { npSetup } from 'ui/new_platform';
 import { Storage } from 'ui/storage';
 const localStorage = new Storage(window.localStorage);
+import { VisDataContext } from '../contexts/vis_data_context';
 
 const types = {
   timeseries,
@@ -48,10 +49,19 @@ export function PanelConfig(props) {
   const { model } = props;
   const Component = types[model.type];
   const [formValidationResults] = useState({});
+  const [visData, setVisData] = useState({});
 
   useEffect(() => {
     model.isModelInvalid = !checkModelValidity(formValidationResults);
   });
+
+  useEffect(() => {
+    const visDataSubscription = props.visData$.subscribe((visData = {}) => setVisData(visData));
+
+    return function cleanup() {
+      visDataSubscription.unsubscribe();
+    };
+  }, [props.visData$]);
 
   const updateControlValidity = (controlKey, isControlValid) => {
     formValidationResults[controlKey] = isControlValid;
@@ -67,7 +77,9 @@ export function PanelConfig(props) {
     return (
       <QueryInputBarContext.Provider value={queryBarInputContext}>
         <FormValidationContext.Provider value={updateControlValidity}>
-          <Component {...props} />
+          <VisDataContext.Provider value={visData}>
+            <Component {...props} />
+          </VisDataContext.Provider>
         </FormValidationContext.Provider>
       </QueryInputBarContext.Provider>
     );

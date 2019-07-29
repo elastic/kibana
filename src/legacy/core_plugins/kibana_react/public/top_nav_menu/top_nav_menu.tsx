@@ -31,7 +31,6 @@ type Props = Partial<SearchBarProps> & {
   uiSettings: UiSettingsClientContract;
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
-  showSearchBarInline?: boolean;
 };
 
 /*
@@ -46,13 +45,7 @@ type Props = Partial<SearchBarProps> & {
 export function TopNavMenu(props: Props) {
   function renderItems() {
     if (!props.config) return;
-    return props.config.map((menuItem, i) => {
-      if (menuItem.key && !menuItem.id) {
-        // Copy key into id, as it's a reserved react propery.
-        // This is done for 3rd party developer backward compatibility.
-        // In the future, ID should be used, rather than key.
-        menuItem.id = menuItem.key;
-      }
+    return props.config.map((menuItem: TopNavMenuData, i: number) => {
       return (
         <EuiFlexItem grow={false} key={`nav-menu-${i}`}>
           <TopNavMenuItem {...menuItem} />
@@ -91,51 +84,27 @@ export function TopNavMenu(props: Props) {
   }
 
   function renderLayout() {
-    if (props.showSearchBarInline) {
-      return (
-        <div className="topNavMenu__wrapper">
-          <EuiFlexGroup
-            data-test-subj="top-nav"
-            justifyContent="spaceBetween"
-            gutterSize="none"
-            wrap={true}
-            alignItems="center"
-            className="topNavMenu"
-          >
-            <EuiFlexGroup justifyContent="flexStart" gutterSize="none" responsive={false}>
-              {renderItems()}
-            </EuiFlexGroup>
-            <EuiFlexItem grow={false}>{renderSearchBar()}</EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      );
-    } else {
-      return (
-        <span className="topNavMenu__wrapper">
-          <EuiFlexGroup
-            data-test-subj="top-nav"
-            justifyContent="flexStart"
-            gutterSize="none"
-            className="topNavMenu"
-            responsive={false}
-          >
-            {renderItems()}
-          </EuiFlexGroup>
-          {renderSearchBar()}
-        </span>
-      );
-    }
+    return (
+      <span className="kbnTopNavMenu__wrapper">
+        <EuiFlexGroup
+          data-test-subj="top-nav"
+          justifyContent="flexStart"
+          gutterSize="none"
+          className="kbnTopNavMenu"
+          responsive={false}
+        >
+          {renderItems()}
+        </EuiFlexGroup>
+        {renderSearchBar()}
+      </span>
+    );
   }
-
-  // Needed due to Angular loading chrome sync
-  if (!props.uiSettings) return null;
 
   return <I18nProvider>{renderLayout()}</I18nProvider>;
 }
 
 TopNavMenu.defaultProps = {
   showSearchBar: false,
-  showSearchBarInline: false,
   showQueryBar: true,
   showQueryInput: true,
   showDatePicker: true,

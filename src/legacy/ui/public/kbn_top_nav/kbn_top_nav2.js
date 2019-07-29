@@ -24,6 +24,7 @@ import { TopNavMenu } from '../../../core_plugins/kibana_react/public';
 import { Storage } from 'ui/storage';
 import chrome from 'ui/chrome';
 
+
 const module = uiModules.get('kibana');
 
 module.directive('kbnTopNavV2', () => {
@@ -54,10 +55,18 @@ module.directive('kbnTopNavV2', () => {
         $scope.store = localStorage;
         $scope.uiSettings = chrome.getUiSettingsClient();
 
-        // Watch the disableButton functions
+        // Watch config changes
         $scope.$watch(() => {
           const config = $scope.$eval($attr.config);
           return config.map((item) => {
+            // Copy key into id, as it's a reserved react propery.
+            // This is done for Angular directive backward compatibility.
+            // In React only id is recognized.
+            if (item.key && !item.id) {
+              item.id = item.key;
+            }
+
+            // Watch the disableButton functions
             if (typeof item.disableButton === 'function') {
               return item.disableButton();
             }
@@ -102,8 +111,6 @@ module.directive('kbnTopNavV2Helper', (reactDirective) => {
       'showQueryBar',
       'showQueryInput',
       'showDatePicker',
-
-      'showSearchBarInline',
 
       'appName',
       'screenTitle',
