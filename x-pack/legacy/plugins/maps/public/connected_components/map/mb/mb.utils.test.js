@@ -69,6 +69,10 @@ class MockLayer {
     });
   }
 
+  ownsMbSourceId(mbSourceId) {
+    return this._mbSourceIds.some(id => mbSourceId === id);
+  }
+
 }
 
 

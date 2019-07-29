@@ -7,12 +7,17 @@
 import _ from 'lodash';
 
 export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
-  const layerIds = layerList.map((layer) => layer.getId());
+
   const mbStyle = mbMap.getStyle();
   const mbSourcesToRemove = [];
   for (const sourceId in mbStyle.sources) {
-    if (layerIds.indexOf(sourceId) === -1) {
-      mbSourcesToRemove.push(sourceId);
+    if (mbStyle.sources.hasOwnProperty(sourceId)) {
+      const layer = layerList.find(layer => {
+        return layer.ownsMbSourceId(sourceId);
+      });
+      if (!layer) {
+        mbSourcesToRemove.push(sourceId);
+      }
     }
   }
   const mbLayersToRemove = [];

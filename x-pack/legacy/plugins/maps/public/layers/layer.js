@@ -272,6 +272,10 @@ export class AbstractLayer {
     throw new Error('Should implement AbstractLayer#ownsMbLayerId');
   }
 
+  ownsMbSourceId() {
+    throw new Error('Should implement AbstractLayer#ownsMbSourceId');
+  }
+
   canShowTooltip() {
     return false;
   }

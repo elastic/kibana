@@ -710,6 +710,10 @@ export class VectorLayer extends AbstractLayer {
       this._getMbSymbolLayerId() === mbLayerId;
   }
 
+  ownsMbSourceId(mbSourceId) {
+    return this.getId() === mbSourceId;
+  }
+
   _addJoinsToSourceTooltips(tooltipsFromSource) {
     for (let i = 0; i < tooltipsFromSource.length; i++) {
       const tooltipProperty = tooltipsFromSource[i];
