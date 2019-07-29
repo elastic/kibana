@@ -6,8 +6,6 @@
 
 import _ from 'lodash';
 
-import { MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER } from '../../../../common/constants';
-
 export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
   const layerIds = layerList.map((layer) => layer.getId());
   const mbStyle = mbMap.getStyle();
@@ -44,11 +42,17 @@ export function syncLayerOrder(mbMap, layerList) {
   //This assumes that:
   //- a single source-id identifies a single kibana layer
   //- all layer-ids have a pattern that is sourceId_layerName, where sourceId cannot have any underscores
-  const currentLayerOrderLayerIds = _.uniq(
-    mbLayers.map(({ id }) => id.substring(0, id.indexOf(MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER))));
 
-  const newLayerOrderLayerIds = layerList.map(l => l.getId()).filter(layerId => currentLayerOrderLayerIds.includes(layerId));
 
+  const layerIds = mbLayers.map(mbLayer => {
+    const layer = layerList.find(layer => layer.ownsMbLayerId(mbLayer.id));
+    return layer.getId();
+  });
+
+  const currentLayerOrderLayerIds = _.uniq(layerIds);
+
+  const newLayerOrderLayerIdsUnfiltered = layerList.map(l => l.getId());
+  const newLayerOrderLayerIds  = newLayerOrderLayerIdsUnfiltered.filter(layerId =>  currentLayerOrderLayerIds.includes(layerId));
 
   let netPos = 0;
   let netNeg = 0;

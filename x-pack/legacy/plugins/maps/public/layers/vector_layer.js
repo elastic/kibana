@@ -703,6 +703,13 @@ export class VectorLayer extends AbstractLayer {
     return [this._getMbPointLayerId(), this._getMbSymbolLayerId(), this._getMbLineLayerId(), this._getMbPolygonLayerId()];
   }
 
+  ownsMbLayerId(mbLayerId) {
+    return this._getMbPointLayerId() === mbLayerId ||
+      this._getMbLineLayerId() === mbLayerId ||
+      this._getMbPolygonLayerId() === mbLayerId ||
+      this._getMbSymbolLayerId() === mbLayerId;
+  }
+
   _addJoinsToSourceTooltips(tooltipsFromSource) {
     for (let i = 0; i < tooltipsFromSource.length; i++) {
       const tooltipProperty = tooltipsFromSource[i];

@@ -63,6 +63,12 @@ class MockLayer {
     return this._mbLayerIdsToSource;
   }
 
+  ownsMbLayerId(mbLayerId) {
+    return this._mbLayerIdsToSource.some(mbLayerToSource => {
+      return mbLayerToSource.id === mbLayerId;
+    });
+  }
+
 }
 
 
