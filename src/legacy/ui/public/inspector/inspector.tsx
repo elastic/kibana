@@ -30,18 +30,6 @@ const closeButtonLabel = i18n.translate('common.ui.inspector.closeButton', {
 });
 
 /**
- * Checks if a inspector panel could be shown based on the passed adapters.
- *
- * @param {object} adapters - An object of adapters. This should be the same
- *    you would pass into `open`.
- * @returns {boolean} True, if a call to `open` with the same adapters
- *    would have shown the inspector panel, false otherwise.
- */
-function isAvailable(adapters?: Adapters): boolean {
-  return viewRegistry.getVisible(adapters).length > 0;
-}
-
-/**
  * Options that can be specified when opening the inspector.
  * @property {string} title - An optional title, that will be shown in the header
  *    of the inspector. Can be used to give more context about what is being inspected.
@@ -82,9 +70,22 @@ function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSess
   );
 }
 
-const Inspector = {
-  isAvailable,
+/**
+ * @deprecated
+ *
+ * Do not use this, use New Platform `inspector` plugin instead.
+ */
+export const Inspector = {
+  /**
+   * @deprecated
+   *
+   * Do not use this, use New Platform `inspector` plugin instead.
+   */
+  isAvailable: npStart.plugins.inspector.isAvailable,
+  /**
+   * @deprecated
+   *
+   * Do not use this, use New Platform `inspector` plugin instead.
+   */
   open,
 };
-
-export { Inspector };

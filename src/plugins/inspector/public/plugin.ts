@@ -19,6 +19,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { InspectorViewRegistry } from './view_registry';
+import { Adapters } from './types';
 
 export interface Setup {
   registerView: InspectorViewRegistry['register'];
@@ -28,7 +29,17 @@ export interface Setup {
   };
 }
 
-export type Start = void;
+export interface Start {
+  /**
+   * Checks if a inspector panel could be shown based on the passed adapters.
+   *
+   * @param {object} adapters - An object of adapters. This should be the same
+   *    you would pass into `open`.
+   * @returns {boolean} True, if a call to `open` with the same adapters
+   *    would have shown the inspector panel, false otherwise.
+   */
+  isAvailable: (adapters?: Adapters) => boolean;
+}
 
 export class InspectorPublicPlugin implements Plugin<Setup, Start> {
   views: InspectorViewRegistry | undefined;
@@ -47,6 +58,14 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
     };
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart) {
+    const isAvailable: Start['isAvailable'] = adapters =>
+      this.views!.getVisible(adapters).length > 0;
+
+    return {
+      isAvailable,
+    };
+  }
+
   public stop() {}
 }

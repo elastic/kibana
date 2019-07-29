@@ -37,7 +37,9 @@ const createSetupContract = (): Setup => {
 };
 
 const createStartContract = (): Start => {
-  const startContract: Start = undefined;
+  const startContract: Start = {
+    isAvailable: jest.fn(),
+  };
   return startContract;
 };
 

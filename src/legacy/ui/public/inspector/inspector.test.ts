@@ -35,15 +35,7 @@ jest.mock('ui/i18n', () => ({
   I18nContext: ({ children }: { children: React.ReactChild }) => children,
 }));
 
-jest.mock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      overlay: {
-        openFlyout: jest.fn(),
-      },
-    },
-  },
-}));
+jest.mock('ui/new_platform');
 
 function setViews(views: any[]) {
   ((viewRegistry.getVisible as unknown) as jest.SpyInstance).mockImplementation(() => views);
