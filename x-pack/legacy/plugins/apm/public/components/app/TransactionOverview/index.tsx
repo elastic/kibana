@@ -72,12 +72,6 @@ export function TransactionOverview({
 
   const { data: transactionCharts } = useTransactionCharts();
 
-  // TODO: improve urlParams typings.
-  // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
-  if (!serviceName || !transactionType) {
-    return null;
-  }
-
   const {
     data: transactionListData,
     status: transactionListStatus
@@ -86,6 +80,12 @@ export function TransactionOverview({
     () => getHasMLJob({ serviceName, transactionType }),
     [serviceName, transactionType]
   );
+
+  // TODO: improve urlParams typings.
+  // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
+  if (!serviceName || !transactionType) {
+    return null;
+  }
 
   return (
     <React.Fragment>
@@ -139,7 +139,6 @@ export function TransactionOverview({
         <TransactionList
           isLoading={transactionListStatus === 'loading'}
           items={transactionListData}
-          serviceName={serviceName}
         />
       </EuiPanel>
     </React.Fragment>

@@ -25,7 +25,6 @@ const TransactionNameLink = styled(TransactionLink)`
 
 interface Props {
   items: ITransactionGroup[];
-  serviceName: string;
   isLoading: boolean;
 }
 
