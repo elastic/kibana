@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import d3 from 'd3';
 import { i18n } from '@kbn/i18n';
 import 'ace';
@@ -23,13 +24,14 @@ import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
-import { notify, addAppRedirectMessageToUrl, fatalError, toastNotifications } from 'ui/notify';
+import { addAppRedirectMessageToUrl, fatalError, toastNotifications } from 'ui/notify';
+import { formatAngularHttpError } from 'ui/notify/lib';
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { npStart } from 'ui/new_platform';
 
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 import appTemplate from './templates/index.html';
 import { getHomeBreadcrumbs, getWorkspaceBreadcrumbs } from './breadcrumbs';
@@ -56,11 +58,15 @@ import saveTemplate from './templates/save_workspace.html';
 import loadTemplate from './templates/load_workspace.html';
 import settingsTemplate from './templates/settings.html';
 
+import './directives/graph_load';
+import './directives/graph_save';
+import './directives/graph_settings';
+
 const app = uiModules.get('app/graph');
 
-function checkLicense(Private, Promise, kbnBaseUrl) {
-  const xpackInfo = Private(XPackInfoProvider);
-  const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') && xpackInfo.get('features.graph.enableAppLink');
+function checkLicense(Promise, kbnBaseUrl) {
+  const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') &&
+    xpackInfo.get('features.graph.enableAppLink');
   if (!licenseAllowsToShowThisPage) {
     const message = xpackInfo.get('features.graph.message');
     const newUrl = addAppRedirectMessageToUrl(chrome.addBasePath(kbnBaseUrl), message);
@@ -157,20 +163,40 @@ app.controller('graphuiPlugin', function (
   $route,
   $http,
   kbnUrl,
-  Private,
   Promise,
   confirmModal,
-  kbnBaseUrl,
-  config
+  kbnBaseUrl
 ) {
   function handleSuccess(data) {
-    return checkLicense(Private, Promise, kbnBaseUrl)
+    return checkLicense(Promise, kbnBaseUrl)
       .then(() => data);
   }
 
   function handleError(err) {
-    return checkLicense(Private, Promise, kbnBaseUrl)
-      .then(() => notify.error(err));
+    return checkLicense(Promise, kbnBaseUrl)
+      .then(() => {
+        const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
+          defaultMessage: 'Graph Error',
+          description: '"Graph" is a product name and should not be translated.',
+        });
+        if (err instanceof Error) {
+          toastNotifications.addError(err, {
+            title: toastTitle,
+          });
+        } else {
+          toastNotifications.addDanger({
+            title: toastTitle,
+            text: String(err),
+          });
+        }
+      });
+  }
+
+  function handleHttpError(error) {
+    return checkLicense(Promise, kbnBaseUrl)
+      .then(() => {
+        toastNotifications.addDanger(formatAngularHttpError(error));
+      });
   }
 
   $scope.title = 'Graph';
@@ -429,7 +455,7 @@ app.controller('graphuiPlugin', function (
         }
         responseHandler(resp.data.resp);
       })
-      .catch(handleError);
+      .catch(handleHttpError);
   }
 
 
@@ -443,7 +469,7 @@ app.controller('graphuiPlugin', function (
       .then(function (resp) {
         responseHandler(resp.data.resp);
       })
-      .catch(handleError);
+      .catch(handleHttpError);
   };
 
   $scope.submit = function () {
@@ -527,7 +553,7 @@ app.controller('graphuiPlugin', function (
 
   //== Drill-down functionality ==
   const defaultKibanaQuery = ',query:(query_string:(analyze_wildcard:!t,query:\'*\'))';
-  const drillDownRegex = /\{\{gquery\}\}/;
+  const drillDownRegex = /\{\{gquery\}\}/g;
 
   $scope.checkForKibanaUrl = function () {
     $scope.suggestTemplateFix = $scope.newUrlTemplate.url === $scope.lastPastedURL  &&
@@ -837,7 +863,11 @@ app.controller('graphuiPlugin', function (
           defaultMessage: 'Save this workspace',
         }),
         disableButton: function () {return $scope.selectedFields.length === 0;},
-        template: saveTemplate,
+        run: () => {
+          const curState = $scope.menus.showSave;
+          $scope.closeMenus();
+          $scope.menus.showSave = !curState;
+        },
         testId: 'graphSaveButton',
       });
     } else {
@@ -868,7 +898,11 @@ app.controller('graphuiPlugin', function (
     tooltip: i18n.translate('xpack.graph.topNavMenu.loadWorkspaceTooltip', {
       defaultMessage: 'Load a saved workspace',
     }),
-    template: loadTemplate,
+    run: () => {
+      const curState = $scope.menus.showLoad;
+      $scope.closeMenus();
+      $scope.menus.showLoad = !curState;
+    },
     testId: 'graphOpenButton',
   });
   // if deleting is disabled using uiCapabilities, we don't want to render the delete
@@ -920,7 +954,7 @@ app.controller('graphuiPlugin', function (
           );
         }
       });
-    }else {
+    } else {
       $scope.topNavMenu.push({
         key: 'delete',
         disableButton: true,
@@ -946,9 +980,24 @@ app.controller('graphuiPlugin', function (
     description: i18n.translate('xpack.graph.topNavMenu.settingsAriaLabel', {
       defaultMessage: 'Settings',
     }),
-    template: settingsTemplate
+    run: () => {
+      const curState = $scope.menus.showSettings;
+      $scope.closeMenus();
+      $scope.menus.showSettings = !curState;
+    },
   });
 
+  $scope.menus = {
+    showSave: false,
+    showLoad: false,
+    showSettings: false,
+  };
+
+  $scope.closeMenus = () => {
+    _.forOwn($scope.menus, function (value, key) {
+      $scope.menus[key] = false;
+    });
+  };
 
   // Deal with situation of request to open saved workspace
   if ($route.current.locals.savedWorkspace) {

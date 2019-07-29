@@ -6,7 +6,7 @@
 
 import * as Boom from 'boom';
 import { Request } from 'hapi';
-import { LanguageServerDefinition, LanguageServers } from '../lsp/language_servers';
+import { enabledLanguageServers, LanguageServerDefinition } from '../lsp/language_servers';
 import { LspService } from '../lsp/lsp_service';
 import { CodeServerRouter } from '../security';
 
@@ -27,7 +27,7 @@ export function installRoute(server: CodeServerRouter, lspService: LspService) {
   server.route({
     path: '/api/code/install',
     handler() {
-      return LanguageServers.map(status);
+      return enabledLanguageServers(server.server).map(status);
     },
     method: 'GET',
   });
@@ -36,7 +36,7 @@ export function installRoute(server: CodeServerRouter, lspService: LspService) {
     path: '/api/code/install/{name}',
     handler(req: Request) {
       const name = req.params.name;
-      const def = LanguageServers.find(d => d.name === name);
+      const def = enabledLanguageServers(server.server).find(d => d.name === name);
       if (def) {
         return status(def);
       } else {

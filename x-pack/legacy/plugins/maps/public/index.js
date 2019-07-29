@@ -6,6 +6,7 @@
 
 import './kibana_services';
 
+import { wrapInI18nContext } from 'ui/i18n';
 import { i18n } from '@kbn/i18n';
 
 // import the uiExports that we want to "use"
@@ -14,6 +15,7 @@ import 'uiExports/fieldFormats';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
 import 'uiExports/embeddableFactories';
+import 'uiExports/embeddableActions';
 import 'ui/agg_types';
 
 import { capabilities } from 'ui/capabilities';
@@ -30,16 +32,13 @@ import './angular/services/gis_map_saved_object_loader';
 import './angular/map_controller';
 import listingTemplate from './angular/listing_ng_wrapper.html';
 import mapTemplate from './angular/map.html';
-import { MapListing } from './shared/components/map_listing';
+import { MapListing } from './components/map_listing';
 import { recentlyAccessed } from 'ui/persisted_log';
-
-import { data } from 'plugins/data/setup';
-data.query.loadLegacyDirectives();
 
 const app = uiModules.get('app/maps', ['ngRoute', 'react']);
 
 app.directive('mapListing', function (reactDirective) {
-  return reactDirective(MapListing);
+  return reactDirective(wrapInI18nContext(MapListing));
 });
 
 routes.enable();

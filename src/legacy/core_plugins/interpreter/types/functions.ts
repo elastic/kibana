@@ -17,31 +17,4 @@
  * under the License.
  */
 
-import { ArgumentType } from './arguments';
-import { TypeToString, UnwrapPromise } from './common';
-
-/**
- * A generic type which represents an Expression Function definition.
- */
-export interface ExpressionFunction<Name extends string, Context, Arguments, Return> {
-  /** Arguments for the Function */
-  args: { [key in keyof Arguments]: ArgumentType<Arguments[key]> };
-  aliases?: string[];
-  context?: {
-    types: Array<TypeToString<Context>>;
-  };
-  /** Help text displayed in the Expression editor */
-  help: string;
-  /** The name of the Function */
-  name: Name;
-  /** The type of the Function */
-  type?: TypeToString<UnwrapPromise<Return>>;
-  /** The implementation of the Function */
-  fn(context: Context, args: Arguments, handlers: FunctionHandlers): Return;
-}
-
-// TODO: Handlers can be passed to the `fn` property of the Function.  At the moment, these Functions
-// are not strongly defined.
-interface FunctionHandlers {
-  [key: string]: (...args: any) => any;
-}
+export * from '../../../../plugins/data/common/expressions/types/functions';

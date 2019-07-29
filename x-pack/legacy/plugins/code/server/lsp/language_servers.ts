@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Hapi from 'hapi';
+
 import { InstallationType } from '../../common/installation';
 import { LanguageServer } from '../../common/language_server';
 import { CtagsLauncher } from './ctags_launcher';
@@ -11,6 +13,7 @@ import { GoServerLauncher } from './go_launcher';
 import { JavaLauncher } from './java_launcher';
 import { LauncherConstructor } from './language_server_launcher';
 import { TypescriptServerLauncher } from './ts_launcher';
+import { CTAGS_SUPPORT_LANGS } from '../../common/language_server';
 
 export interface LanguageServerDefinition extends LanguageServer {
   builtinWorkspaceFolders: boolean;
@@ -51,57 +54,27 @@ export const GO: LanguageServerDefinition = {
   installationPluginName: 'goLanguageServer',
 };
 export const CTAGS: LanguageServerDefinition = {
-  name: 'ctags',
+  name: 'Ctags',
   builtinWorkspaceFolders: true,
-  languages: [
-    'ant',
-    'asm',
-    'asp',
-    'basic',
-    'beta',
-    'c',
-    'clojure',
-    'c++',
-    'c#',
-    'cobol',
-    'dosbatch',
-    'eiffel',
-    'erlang',
-    'flex',
-    'fortran',
-    'haskell',
-    'kotlin',
-    'lisp',
-    'lua',
-    'make',
-    'matlab',
-    'ocaml',
-    'pascal',
-    'perl',
-    'php',
-    'powershell',
-    'python',
-    'rexx',
-    'ruby',
-    'rust',
-    'scala',
-    'scheme',
-    'sh',
-    'slang',
-    'sml',
-    'sql',
-    'swift',
-    'tcl',
-    'tex',
-    'vera',
-    'verilog',
-    'vhdl',
-    'vim',
-    'yacc',
-  ],
+  languages: CTAGS_SUPPORT_LANGS,
   launcher: CtagsLauncher,
-  installationType: InstallationType.Plugin,
-  installationPluginName: 'ctagsLanguageServer',
+  installationType: InstallationType.Embed,
+  embedPath: require.resolve('@elastic/ctags-langserver/lib/cli.js'),
 };
-export const LanguageServers: LanguageServerDefinition[] = [TYPESCRIPT, JAVA];
-export const LanguageServersDeveloping: LanguageServerDefinition[] = [GO, CTAGS];
+export const LanguageServers: LanguageServerDefinition[] = [TYPESCRIPT, JAVA, CTAGS];
+export const LanguageServersDeveloping: LanguageServerDefinition[] = [GO];
+
+export function enabledLanguageServers(server: Hapi.Server) {
+  const devMode: boolean = server.config().get('env.dev');
+
+  function isEnabled(lang: LanguageServerDefinition, defaultEnabled: boolean) {
+    const name = lang.name;
+    const enabled = server.config().get(`xpack.code.lsp.${name}.enabled`);
+    return enabled === undefined ? defaultEnabled : enabled;
+  }
+  const results = LanguageServers.filter(lang => isEnabled(lang, true));
+  if (devMode) {
+    return results.concat(LanguageServersDeveloping.filter(lang => isEnabled(lang, devMode)));
+  }
+  return results;
+}

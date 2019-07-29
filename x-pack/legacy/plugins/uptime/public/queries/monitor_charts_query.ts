@@ -14,14 +14,12 @@ query MonitorCharts($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId
     dateRangeEnd: $dateRangeEnd
     location: $location
   ) {
-    durationArea {
-      x
-      yMin
-      yMax
-    }
-    durationLine {
-      x
-      y
+    locationDurationLines {
+      name 
+      line {
+        x
+        y
+      }
     }
     status {
       x

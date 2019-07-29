@@ -65,6 +65,7 @@ export {
   VisState,
   // VisualizationController,
   // VisType,
+  VisTypeAlias,
   VisTypesRegistry,
   Status,
 } from './types';

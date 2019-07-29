@@ -38,7 +38,7 @@ export class RawConfigService {
   private readonly config$: Observable<Config>;
 
   constructor(
-    readonly configFiles: ReadonlyArray<string>,
+    readonly configFiles: readonly string[],
     configAdapter: (rawConfig: Record<string, any>) => Config = rawConfig =>
       new ObjectToConfigAdapter(rawConfig)
   ) {

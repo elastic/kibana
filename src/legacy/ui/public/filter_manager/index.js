@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { FilterManagerProvider } from './filter_manager';
+export { getFilterGenerator } from './filter_generator';

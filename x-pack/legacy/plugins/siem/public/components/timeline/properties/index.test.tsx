@@ -30,6 +30,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -56,6 +57,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -83,6 +85,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={true}
           title=""
@@ -112,6 +115,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title={title}
@@ -144,6 +148,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -176,6 +181,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={true}
           isFavorite={false}
           title=""
@@ -207,6 +213,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -241,6 +248,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -277,6 +285,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -311,6 +320,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -345,6 +355,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -377,6 +388,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -406,6 +418,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title={title}
@@ -433,6 +446,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""

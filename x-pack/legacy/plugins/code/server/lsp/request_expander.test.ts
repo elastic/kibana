@@ -13,6 +13,7 @@ import { pathToFileURL } from 'url';
 import { ServerOptions } from '../server_options';
 import { LanguageServerProxy } from './proxy';
 import { InitializingError, RequestExpander, WorkspaceUnloadedError } from './request_expander';
+import { ConsoleLogger } from '../utils/console_logger';
 
 // @ts-ignore
 const options: ServerOptions = {
@@ -63,10 +64,11 @@ function createMockProxy(initDelay: number = 0, requestDelay: number = 0) {
   return proxyStub;
 }
 
+const log = new ConsoleLogger();
 test('requests should be sequential', async () => {
   const clock = sinon.useFakeTimers();
   const proxyStub = createMockProxy(0, 100);
-  const expander = new RequestExpander(proxyStub, false, 1, options);
+  const expander = new RequestExpander(proxyStub, false, 1, options, {}, log);
   const request1 = {
     method: 'request1',
     params: [],
@@ -89,7 +91,7 @@ test('requests should be sequential', async () => {
 test('requests should throw error after lsp init timeout', async () => {
   const clock = sinon.useFakeTimers();
   const proxyStub = createMockProxy(300);
-  const expander = new RequestExpander(proxyStub, false, 1, options);
+  const expander = new RequestExpander(proxyStub, false, 1, options, {}, log);
   const request1 = {
     method: 'request1',
     params: [],
@@ -115,7 +117,7 @@ test('requests should throw error after lsp init timeout', async () => {
 
 test('be able to open multiple workspace', async () => {
   const proxyStub = createMockProxy();
-  const expander = new RequestExpander(proxyStub, true, 2, options);
+  const expander = new RequestExpander(proxyStub, true, 2, options, {}, log);
   const request1 = {
     method: 'request1',
     params: [],
@@ -161,7 +163,7 @@ test('be able to open multiple workspace', async () => {
 
 test('be able to swap workspace', async () => {
   const proxyStub = createMockProxy();
-  const expander = new RequestExpander(proxyStub, true, 1, options);
+  const expander = new RequestExpander(proxyStub, true, 1, options, {}, log);
   const request1 = {
     method: 'request1',
     params: [],
@@ -205,7 +207,7 @@ test('requests should be cancelled if workspace is unloaded', async () => {
   // @ts-ignore
   const clock = sinon.useFakeTimers();
   const proxyStub = createMockProxy(300);
-  const expander = new RequestExpander(proxyStub, true, 1, options);
+  const expander = new RequestExpander(proxyStub, true, 1, options, {}, log);
   const workspace1 = '/tmp/test/workspace/1';
   const request = {
     method: 'request1',

@@ -59,7 +59,7 @@ exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
       aria-label="Monitor duration in milliseconds"
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      1235ms
+      1234ms
     </div>
     <div
       aria-label="Time since last check"

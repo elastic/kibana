@@ -20,11 +20,13 @@ import { mockDataLoaderFetch, timefilter } from './embedded_visualize_handler.te
 
 // @ts-ignore
 import MockState from '../../../../../fixtures/mock_state';
-import { RequestHandlerParams, Vis } from '../../vis';
+import { RequestHandlerParams, Vis, AggConfig } from '../../vis';
 import { VisResponseData } from './types';
 
 import { Inspector } from '../../inspector';
 import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
+
+jest.mock('ui/new_platform');
 
 describe('EmbeddedVisualizeHandler', () => {
   let handler: any;
@@ -47,7 +49,7 @@ describe('EmbeddedVisualizeHandler', () => {
     jest.clearAllMocks();
 
     dataLoaderParams = {
-      aggs: [],
+      aggs: [] as AggConfig[],
       filters: undefined,
       forceFetch: false,
       inspectorAdapters: {},
@@ -66,6 +68,8 @@ describe('EmbeddedVisualizeHandler', () => {
         title: 'My Vis',
         searchSource: undefined,
         destroy: () => ({}),
+        copyOnSave: false,
+        save: () => Promise.resolve('123'),
       },
       {
         autoFetch: true,
@@ -96,6 +100,8 @@ describe('EmbeddedVisualizeHandler', () => {
           title: 'My Vis',
           searchSource: undefined,
           destroy: () => ({}),
+          copyOnSave: false,
+          save: () => Promise.resolve('123'),
         },
         {
           autoFetch: false,

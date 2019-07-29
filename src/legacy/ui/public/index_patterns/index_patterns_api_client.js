@@ -50,7 +50,7 @@ export class IndexPatternsApiClient {
   }
 
   _getUrl(path) {
-    return this.apiBaseUrl + join(path);
+    return this.apiBaseUrl + join(...path);
   }
 
 

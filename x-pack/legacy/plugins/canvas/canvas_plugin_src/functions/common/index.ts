@@ -21,7 +21,6 @@ import { dropdownControl } from './dropdownControl';
 import { eq } from './eq';
 import { exactly } from './exactly';
 import { filterrows } from './filterrows';
-import { font } from './font';
 import { formatdate } from './formatdate';
 import { formatnumber } from './formatnumber';
 import { getCell } from './getCell';
@@ -30,6 +29,7 @@ import { gte } from './gte';
 import { head } from './head';
 import { ifFn } from './if';
 import { image } from './image';
+import { joinRows } from './join_rows';
 import { lt } from './lt';
 import { lte } from './lte';
 import { mapColumn } from './mapColumn';
@@ -77,7 +77,6 @@ export const functions = [
   eq,
   exactly,
   filterrows,
-  font,
   formatdate,
   formatnumber,
   getCell,
@@ -88,6 +87,7 @@ export const functions = [
   image,
   lt,
   lte,
+  joinRows,
   mapColumn,
   math,
   metric,

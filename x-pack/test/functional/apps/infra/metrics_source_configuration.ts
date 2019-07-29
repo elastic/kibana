@@ -7,7 +7,7 @@
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { DATES } from './constants';
 
-const DATE_WITH_DATA = new Date(DATES.metricsAndLogs.hosts.withData);
+const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
@@ -15,7 +15,8 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
   const infraSourceConfigurationFlyout = getService('infraSourceConfigurationFlyout');
   const pageObjects = getPageObjects(['common', 'infraHome']);
 
-  describe('Infrastructure Snapshot Page', () => {
+  describe('Infrastructure Snapshot Page', function() {
+    this.tags('smoke');
     before(async () => {
       await esArchiver.load('empty_kibana');
     });

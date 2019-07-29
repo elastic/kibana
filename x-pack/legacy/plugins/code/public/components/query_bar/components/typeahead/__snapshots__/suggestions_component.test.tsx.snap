@@ -155,9 +155,7 @@ exports[`render full suggestions component 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <EuiToken
-                        displayOptions={Object {}}
                         iconType="tokenSymbol"
-                        size="s"
                       >
                         <div
                           className="euiToken euiToken--tokenTint07 euiToken--rectangle euiToken--small euiToken--fill"
@@ -236,9 +234,7 @@ exports[`render full suggestions component 1`] = `
                       className="codeSearch-suggestion__token"
                     >
                       <EuiToken
-                        displayOptions={Object {}}
                         iconType="tokenClass"
-                        size="s"
                       >
                         <div
                           className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small"
@@ -311,9 +307,7 @@ exports[`render full suggestions component 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <EuiToken
-                        displayOptions={Object {}}
                         iconType="tokenFile"
-                        size="s"
                       >
                         <div
                           className="euiToken euiToken--tokenTint12 euiToken--rectangle euiToken--small euiToken--fill"
@@ -429,9 +423,7 @@ exports[`render full suggestions component 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <EuiToken
-                        displayOptions={Object {}}
                         iconType="tokenRepo"
-                        size="s"
                       >
                         <div
                           className="euiToken euiToken--tokenTint05 euiToken--rectangle euiToken--small euiToken--fill"

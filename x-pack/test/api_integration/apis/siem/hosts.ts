@@ -52,16 +52,19 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
               direction: Direction.asc,
             },
             pagination: {
-              limit: 1,
-              cursor: null,
+              activePage: 0,
+              cursorStart: 0,
+              fakePossibleCount: 3,
+              querySize: 1,
             },
+            inspect: false,
           },
         })
         .then(resp => {
           const hosts = resp.data.source.Hosts;
           expect(hosts.edges.length).to.be(EDGE_LENGTH);
           expect(hosts.totalCount).to.be(TOTAL_COUNT);
-          expect(hosts.pageInfo.endCursor!.value).to.equal('1');
+          expect(hosts.pageInfo.fakeTotalCount).to.equal(3);
         });
     });
 
@@ -82,9 +85,12 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             pagination: {
-              limit: 2,
-              cursor: '1',
+              activePage: 2,
+              cursorStart: 1,
+              fakePossibleCount: 5,
+              querySize: 2,
             },
+            inspect: false,
           },
         })
         .then(resp => {
@@ -143,6 +149,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
               from: FROM,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            inspect: false,
           },
         })
         .then(resp => {

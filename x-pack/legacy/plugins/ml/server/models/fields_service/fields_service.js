@@ -32,10 +32,9 @@ export function fieldsServiceProvider(callWithRequest) {
       })
         .then((fieldCapsResp) => {
           const aggregatableFields = [];
-
           fieldNames.forEach((fieldName) => {
             const fieldInfo = fieldCapsResp.fields[fieldName];
-            const typeKeys = Object.keys(fieldInfo);
+            const typeKeys = (fieldInfo !== undefined ? Object.keys(fieldInfo) : []);
             if (typeKeys.length > 0) {
               const fieldType = typeKeys[0];
               const isFieldAggregatable = fieldInfo[fieldType].aggregatable;

@@ -22,14 +22,15 @@ import { ByteSizeValue } from '@kbn/config-schema';
 
 import { HttpServer } from './http_server';
 import { HttpConfig } from './http_config';
-import { Router } from './router';
+import { Router, KibanaRequest } from './router';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 
+import { httpServerMock } from './http_server.mocks';
 import { createCookieSessionStorageFactory } from './cookie_session_storage';
 
 let server: HttpServer;
 
-const logger = loggingServiceMock.create();
+let logger: ReturnType<typeof loggingServiceMock.create>;
 const config = {
   host: '127.0.0.1',
   maxPayload: new ByteSizeValue(1024),
@@ -37,7 +38,8 @@ const config = {
 } as HttpConfig;
 
 beforeEach(() => {
-  server = new HttpServer(logger.get());
+  logger = loggingServiceMock.create();
+  server = new HttpServer(logger, 'tests');
 });
 
 afterEach(async () => {
@@ -87,7 +89,11 @@ describe('Cookie based SessionStorage', () => {
       const { registerRouter, server: innerServer } = await server.setup(config);
       registerRouter(router);
 
-      const factory = await createCookieSessionStorageFactory(innerServer, cookieOptions);
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        innerServer,
+        cookieOptions
+      );
       await server.start();
 
       const response = await supertest(innerServer.listener)
@@ -107,7 +113,7 @@ describe('Cookie based SessionStorage', () => {
     });
   });
   describe('#get()', () => {
-    it('Should read from session storage', async () => {
+    it('reads from session storage', async () => {
       const router = new Router('');
 
       router.get({ path: '/', validate: false }, async (req, res) => {
@@ -123,7 +129,11 @@ describe('Cookie based SessionStorage', () => {
       const { registerRouter, server: innerServer } = await server.setup(config);
       registerRouter(router);
 
-      const factory = await createCookieSessionStorageFactory(innerServer, cookieOptions);
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        innerServer,
+        cookieOptions
+      );
       await server.start();
 
       const response = await supertest(innerServer.listener)
@@ -141,7 +151,7 @@ describe('Cookie based SessionStorage', () => {
         .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
         .expect(200, { value: userData });
     });
-    it('Should return null for empty session', async () => {
+    it('returns null for empty session', async () => {
       const router = new Router('');
 
       router.get({ path: '/', validate: false }, async (req, res) => {
@@ -153,7 +163,11 @@ describe('Cookie based SessionStorage', () => {
       const { registerRouter, server: innerServer } = await server.setup(config);
       registerRouter(router);
 
-      const factory = await createCookieSessionStorageFactory(innerServer, cookieOptions);
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        innerServer,
+        cookieOptions
+      );
       await server.start();
 
       const response = await supertest(innerServer.listener)
@@ -163,7 +177,8 @@ describe('Cookie based SessionStorage', () => {
       const cookies = response.get('set-cookie');
       expect(cookies).not.toBeDefined();
     });
-    it('Should return null for invalid session & clean cookies', async () => {
+
+    it('returns null for invalid session & clean cookies', async () => {
       const router = new Router('');
 
       let setOnce = false;
@@ -181,7 +196,11 @@ describe('Cookie based SessionStorage', () => {
       const { registerRouter, server: innerServer } = await server.setup(config);
       registerRouter(router);
 
-      const factory = await createCookieSessionStorageFactory(innerServer, cookieOptions);
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        innerServer,
+        cookieOptions
+      );
       await server.start();
 
       const response = await supertest(innerServer.listener)
@@ -204,9 +223,96 @@ describe('Cookie based SessionStorage', () => {
         'sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Path=/',
       ]);
     });
+    // use mocks to simplify test setup
+    it('returns null if multiple session cookies are detected.', async () => {
+      const mockServer = {
+        register: jest.fn(),
+        auth: {
+          strategy: jest.fn(),
+          test: jest.fn(() => ['foo', 'bar']),
+        },
+      };
+
+      const mockRequest = httpServerMock.createRawRequest();
+
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        mockServer as any,
+        cookieOptions
+      );
+
+      expect(mockServer.register).toBeCalledTimes(1);
+      expect(mockServer.auth.strategy).toBeCalledTimes(1);
+
+      const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
+      expect(session).toBe(null);
+
+      expect(mockServer.auth.test).toBeCalledTimes(1);
+      expect(mockServer.auth.test).toHaveBeenCalledWith('security-cookie', mockRequest);
+
+      expect(loggingServiceMock.collect(logger).warn).toEqual([
+        ['Found 2 auth sessions when we were only expecting 1.'],
+      ]);
+    });
+
+    it('returns session if single session cookie is in an array.', async () => {
+      const mockServer = {
+        register: jest.fn(),
+        auth: {
+          strategy: jest.fn(),
+          test: jest.fn(() => ['foo']),
+        },
+      };
+
+      const mockRequest = httpServerMock.createRawRequest();
+
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        mockServer as any,
+        cookieOptions
+      );
+
+      expect(mockServer.register).toBeCalledTimes(1);
+      expect(mockServer.auth.strategy).toBeCalledTimes(1);
+
+      const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
+      expect(session).toBe('foo');
+
+      expect(mockServer.auth.test).toBeCalledTimes(1);
+      expect(mockServer.auth.test).toHaveBeenCalledWith('security-cookie', mockRequest);
+    });
+
+    it('logs the reason of validation function failure.', async () => {
+      const mockServer = {
+        register: jest.fn(),
+        auth: {
+          strategy: jest.fn(),
+          test: () => {
+            throw new Error('Invalid cookie.');
+          },
+        },
+      };
+
+      const mockRequest = httpServerMock.createRawRequest();
+
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        mockServer as any,
+        cookieOptions
+      );
+
+      expect(mockServer.register).toBeCalledTimes(1);
+      expect(mockServer.auth.strategy).toBeCalledTimes(1);
+
+      const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
+      expect(session).toBe(null);
+
+      expect(loggingServiceMock.collect(logger).debug).toEqual([['Error: Invalid cookie.']]);
+    });
   });
+
   describe('#clear()', () => {
-    it('Should clear session storage & remove cookies', async () => {
+    it('clears session storage & remove cookies', async () => {
       const router = new Router('');
 
       router.get({ path: '/', validate: false }, async (req, res) => {
@@ -222,7 +328,11 @@ describe('Cookie based SessionStorage', () => {
       const { registerRouter, server: innerServer } = await server.setup(config);
       registerRouter(router);
 
-      const factory = await createCookieSessionStorageFactory(innerServer, cookieOptions);
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        innerServer,
+        cookieOptions
+      );
       await server.start();
 
       const response = await supertest(innerServer.listener)

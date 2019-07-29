@@ -17,15 +17,17 @@
  * under the License.
  */
 
-import { TimeRange } from 'ui/timefilter/time_history';
 import { Filter } from '@kbn/es-query';
+import { TimeRange } from 'ui/timefilter/time_history';
 import { Query } from 'src/legacy/core_plugins/data/public';
+import { SavedObject } from 'ui/saved_objects/saved_object';
+
 import { SearchSource } from '../../courier';
 import { PersistedState } from '../../persisted_state';
 import { AppState } from '../../state_management/app_state';
 import { Vis } from '../../vis';
 
-export interface VisSavedObject {
+export interface VisSavedObject extends SavedObject {
   vis: Vis;
   description?: string;
   searchSource: SearchSource;

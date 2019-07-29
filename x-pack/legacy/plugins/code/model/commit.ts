@@ -8,8 +8,10 @@ export interface CommitInfo {
   updated: Date;
   message: string;
   committer: string;
+  author: string;
   id: string;
   parents: string[];
+  treeId: string;
 }
 
 export interface ReferenceInfo {
@@ -20,8 +22,8 @@ export interface ReferenceInfo {
 }
 
 export enum ReferenceType {
-  BRANCH,
-  TAG,
-  REMOTE_BRANCH,
-  OTHER,
+  BRANCH = 'BRANCH',
+  TAG = 'TAG',
+  REMOTE_BRANCH = 'REMOTE_BRANCH',
+  OTHER = 'OTHER',
 }

@@ -119,8 +119,10 @@ describe('getAutocompleteSuggestions', () => {
     const expression = 't';
     const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
     const tableIndex = suggestions.findIndex(suggestion => suggestion.text.includes('table'));
-    const fontIndex = suggestions.findIndex(suggestion => suggestion.text.includes('font'));
-    expect(tableIndex).to.be.lessThan(fontIndex);
+    const alterColumnIndex = suggestions.findIndex(suggestion =>
+      suggestion.text.includes('alterColumn')
+    );
+    expect(tableIndex).to.be.lessThan(alterColumnIndex);
   });
 
   it('should prioritize functions that match the previous function type', () => {
@@ -180,7 +182,7 @@ describe('getAutocompleteSuggestions', () => {
   });
 
   it('should not quote booleans', () => {
-    const expression = 'font underline=true';
+    const expression = 'table paginate=true';
     const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
     expect(suggestions[0].text.trim()).to.be('true');
   });

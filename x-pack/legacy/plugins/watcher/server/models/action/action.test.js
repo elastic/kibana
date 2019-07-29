@@ -39,14 +39,14 @@ describe('action', () => {
         delete upstreamJson.id;
         expect(() => {
           Action.fromUpstreamJson(upstreamJson);
-        }).toThrowError(/must contain an id property/i);
+        }).toThrowError('JSON argument must contain an id property');
       });
 
       it(`throws an error if no 'actionJson' property in json`, () => {
         delete upstreamJson.actionJson;
         expect(() => {
           Action.fromUpstreamJson(upstreamJson);
-        }).toThrowError(/must contain an actionJson property/i);
+        }).toThrowError('JSON argument must contain an actionJson property');
       });
 
       it(`throws an error if an Action is invalid`, () => {

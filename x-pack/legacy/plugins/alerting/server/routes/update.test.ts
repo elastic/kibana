@@ -15,7 +15,7 @@ beforeEach(() => jest.resetAllMocks());
 const mockedResponse = {
   id: '1',
   alertTypeId: '1',
-  interval: 12000,
+  interval: '12s',
   alertTypeParams: {
     otherField: false,
   },
@@ -35,7 +35,7 @@ test('calls the update function with proper parameters', async () => {
     method: 'PUT',
     url: '/api/alert/1',
     payload: {
-      interval: 12000,
+      interval: '12s',
       alertTypeParams: {
         otherField: false,
       },
@@ -58,25 +58,25 @@ test('calls the update function with proper parameters', async () => {
   expect(response).toEqual(mockedResponse);
   expect(alertsClient.update).toHaveBeenCalledTimes(1);
   expect(alertsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "data": Object {
-      "actions": Array [
-        Object {
-          "group": "default",
-          "id": "2",
-          "params": Object {
-            "baz": true,
+    Array [
+      Object {
+        "data": Object {
+          "actions": Array [
+            Object {
+              "group": "default",
+              "id": "2",
+              "params": Object {
+                "baz": true,
+              },
+            },
+          ],
+          "alertTypeParams": Object {
+            "otherField": false,
           },
+          "interval": "12s",
         },
-      ],
-      "alertTypeParams": Object {
-        "otherField": false,
+        "id": "1",
       },
-      "interval": 12000,
-    },
-    "id": "1",
-  },
-]
-`);
+    ]
+  `);
 });

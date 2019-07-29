@@ -16,7 +16,7 @@ import { InitializeOptions, RequestExpander } from './request_expander';
 const GO_LANG_DETACH_PORT = 2091;
 
 export class GoServerLauncher extends AbstractLauncher {
-  public constructor(
+  constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
     readonly loggerFactory: LoggerFactory
@@ -36,15 +36,22 @@ export class GoServerLauncher extends AbstractLauncher {
     builtinWorkspace: boolean,
     maxWorkspace: number
   ): RequestExpander {
-    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options, {
-      clientCapabilities: {
-        textDocument: {
-          hover: {
-            contentFormat: [MarkupKind.Markdown, MarkupKind.PlainText],
+    return new RequestExpander(
+      proxy,
+      builtinWorkspace,
+      maxWorkspace,
+      this.options,
+      {
+        clientCapabilities: {
+          textDocument: {
+            hover: {
+              contentFormat: [MarkupKind.Markdown, MarkupKind.PlainText],
+            },
           },
         },
-      },
-    } as InitializeOptions);
+      } as InitializeOptions,
+      this.log
+    );
   }
   // TODO(henrywong): Once go langugage server ready to release, we should support this mode.
   async spawnProcess(installationPath: string, port: number, log: Logger): Promise<ChildProcess> {

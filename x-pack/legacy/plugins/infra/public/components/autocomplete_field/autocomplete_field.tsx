@@ -65,6 +65,7 @@ export class AutocompleteField extends React.Component<
             onKeyDown={this.handleKeyDown}
             onKeyUp={this.handleKeyUp}
             onSearch={this.submit}
+            onBlur={this.submit}
             placeholder={placeholder}
             value={value}
           />
@@ -98,6 +99,10 @@ export class AutocompleteField extends React.Component<
 
     if (hasNewValue) {
       this.updateSuggestions();
+    }
+
+    if (hasNewValue && this.props.value === '') {
+      this.submit();
     }
 
     if (hasNewSuggestions && this.state.isFocused) {

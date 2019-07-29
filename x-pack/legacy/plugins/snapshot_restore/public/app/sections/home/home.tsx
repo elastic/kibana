@@ -26,6 +26,8 @@ import { breadcrumbService } from '../../services/navigation';
 
 import { RepositoryList } from './repository_list';
 import { SnapshotList } from './snapshot_list';
+import { RestoreList } from './restore_list';
+import { PolicyList } from './policy_list';
 import { documentationLinksService } from '../../services/documentation';
 
 interface MatchParams {
@@ -44,9 +46,12 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
     },
   } = useAppDependencies();
 
-  const tabs = [
+  const tabs: Array<{
+    id: Section;
+    name: React.ReactNode;
+  }> = [
     {
-      id: 'snapshots' as Section,
+      id: 'snapshots',
       name: (
         <FormattedMessage
           id="xpack.snapshotRestore.home.snapshotsTabTitle"
@@ -55,11 +60,29 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
       ),
     },
     {
-      id: 'repositories' as Section,
+      id: 'repositories',
       name: (
         <FormattedMessage
           id="xpack.snapshotRestore.home.repositoriesTabTitle"
           defaultMessage="Repositories"
+        />
+      ),
+    },
+    {
+      id: 'policies',
+      name: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.home.policiesTabTitle"
+          defaultMessage="Policies"
+        />
+      ),
+    },
+    {
+      id: 'restore_status',
+      name: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.home.restoreTabTitle"
+          defaultMessage="Restore Status"
         />
       ),
     },
@@ -83,7 +106,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
               <h1 data-test-subj="appTitle">
                 <FormattedMessage
                   id="xpack.snapshotRestore.home.snapshotRestoreTitle"
-                  defaultMessage="Snapshot Repositories"
+                  defaultMessage="Snapshot and Restore"
                 />
               </h1>
             </EuiFlexItem>
@@ -96,7 +119,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
               >
                 <FormattedMessage
                   id="xpack.snapshotRestore.home.snapshotRestoreDocsLinkText"
-                  defaultMessage="Snapshot docs"
+                  defaultMessage="Snapshot and Restore docs"
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -107,7 +130,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.snapshotRestore.home.snapshotRestoreDescription"
-              defaultMessage="Use repositories to store backups of your Elasticsearch indices and clusters."
+              defaultMessage="Use repositories to store and recover backups of your Elasticsearch indices and clusters."
             />
           </EuiText>
         </EuiTitle>
@@ -144,6 +167,8 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
             path={`${BASE_PATH}/snapshots/:repositoryName*/:snapshotId`}
             component={SnapshotList}
           />
+          <Route exact path={`${BASE_PATH}/restore_status`} component={RestoreList} />
+          <Route exact path={`${BASE_PATH}/policies/:policyName*`} component={PolicyList} />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

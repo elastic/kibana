@@ -8,12 +8,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
 
-export const RotationHandle = ({ transformMatrix }) => (
+export const RotationHandle = ({ transformMatrix, zoomScale }) => (
   <div
     className="canvasRotationHandle canvasRotationHandle--connector canvasLayoutAnnotation"
-    style={{ transform: matrixToCSS(transformMatrix) }}
+    style={{
+      transform: matrixToCSS(transformMatrix),
+    }}
   >
-    <div className="canvasRotationHandle--handle" />
+    <div
+      className="canvasRotationHandle--handle"
+      style={{ transform: `scale3d(${1 / zoomScale},${1 / zoomScale},1)` }}
+    />
   </div>
 );
 

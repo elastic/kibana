@@ -46,7 +46,11 @@ async function getSettingsFromFile(log: ToolingLog, path: string, settingOverrid
     );
   }
 
-  const settingsWithDefaults = defaultsDeep({}, settingOverrides, await cache.get(configProvider)!);
+  const settingsWithDefaults: any = defaultsDeep(
+    {},
+    settingOverrides,
+    await cache.get(configProvider)!
+  );
 
   const logDeprecation = (error: string | Error) => log.error(error);
   return transformDeprecations(settingsWithDefaults, logDeprecation);

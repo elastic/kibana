@@ -11,5 +11,6 @@ export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) 
     this.tags('ciGroup3');
 
     loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./pages'));
   });
 }

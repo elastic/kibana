@@ -13,7 +13,7 @@ import { RepositoryForm, SectionError, SectionLoading } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
 import { breadcrumbService } from '../../services/navigation';
-import { editRepository, loadRepository } from '../../services/http';
+import { editRepository, useLoadRepository } from '../../services/http';
 
 interface MatchParams {
   name: string;
@@ -46,19 +46,16 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   // Load repository
   const {
     error: repositoryError,
-    loading: loadingRepository,
+    isLoading: loadingRepository,
     data: repositoryData,
-  } = loadRepository(name);
+  } = useLoadRepository(name);
 
   // Update repository state when data is loaded
-  useEffect(
-    () => {
-      if (repositoryData && repositoryData.repository) {
-        setRepository(repositoryData.repository);
-      }
-    },
-    [repositoryData]
-  );
+  useEffect(() => {
+    if (repositoryData && repositoryData.repository) {
+      setRepository(repositoryData.repository);
+    }
+  }, [repositoryData]);
 
   // Saving repository states
   const [isSaving, setIsSaving] = useState<boolean>(false);

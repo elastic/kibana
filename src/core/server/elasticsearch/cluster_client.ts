@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import Boom from 'boom';
 import { Client } from 'elasticsearch';
 import { get } from 'lodash';
 import { Request } from 'hapi';
 
+import { ElasticsearchErrorHelpers } from './errors';
 import { GetAuthHeaders, isRealRequest } from '../http';
-import { filterHeaders, KibanaRequest, ensureRawRequest } from '../http/router';
+import { filterHeaders, Headers, KibanaRequest, ensureRawRequest } from '../http/router';
 import { Logger } from '../logging';
 import {
   ElasticsearchClientConfig,
@@ -71,7 +70,7 @@ export interface CallAPIOptions {
 async function callAPI(
   client: Client,
   endpoint: string,
-  clientParams: Record<string, unknown> = {},
+  clientParams: Record<string, any> = {},
   options: CallAPIOptions = { wrap401Errors: true }
 ): Promise<any> {
   const clientPath = endpoint.split('.');
@@ -97,13 +96,7 @@ async function callAPI(
       throw err;
     }
 
-    const boomError = Boom.boomify(err, { statusCode: err.statusCode });
-    const wwwAuthHeader: string = get(err, 'body.error.header[WWW-Authenticate]');
-
-    boomError.output.headers['WWW-Authenticate'] =
-      wwwAuthHeader || 'Basic realm="Authorization Required"';
-
-    throw boomError;
+    throw ElasticsearchErrorHelpers.decorateNotAuthorizedError(err);
   }
 }
 
@@ -113,7 +106,7 @@ async function callAPI(
  */
 export interface FakeRequest {
   /** Headers used for authentication against Elasticsearch */
-  headers: Record<string, string>;
+  headers: Headers;
 }
 
 /**
@@ -157,7 +150,7 @@ export class ClusterClient {
    */
   public callAsInternalUser = async (
     endpoint: string,
-    clientParams: Record<string, unknown> = {},
+    clientParams: Record<string, any> = {},
     options?: CallAPIOptions
   ) => {
     this.assertIsNotClosed();
@@ -223,7 +216,7 @@ export class ClusterClient {
    */
   private callAsCurrentUser = async (
     endpoint: string,
-    clientParams: Record<string, unknown> = {},
+    clientParams: Record<string, any> = {},
     options?: CallAPIOptions
   ) => {
     this.assertIsNotClosed();

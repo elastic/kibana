@@ -30,9 +30,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       [InfraNodeType.container]: options.sourceConfiguration.fields.container,
       [InfraNodeType.pod]: options.sourceConfiguration.fields.pod,
     };
-    const indexPattern = `${options.sourceConfiguration.metricAlias},${
-      options.sourceConfiguration.logAlias
-    }`;
+    const indexPattern = `${options.sourceConfiguration.metricAlias},${options.sourceConfiguration.logAlias}`;
     const timeField = options.sourceConfiguration.fields.timestamp;
     const interval = options.timerange.interval;
     const nodeField = fields[options.nodeType];
@@ -58,7 +56,9 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     const requests = options.metrics.map(metricId => {
       const model = metricModels[metricId](timeField, indexPattern, interval);
-      const filters = [{ match: { [nodeField]: options.nodeId } }];
+      const filters = model.map_field_to
+        ? [{ match: { [model.map_field_to]: options.nodeId } }]
+        : [{ match: { [nodeField]: options.nodeId } }];
       return this.framework.makeTSVBRequest(req, model, timerange, filters);
     });
     return Promise.all(requests)

@@ -21,7 +21,7 @@ import React, { useEffect } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
-import { SelectValueProp, SelectParamEditorProps } from '../param_types/select';
+import { OptionedValueProp, OptionedParamEditorProps } from '../param_types/optioned';
 
 function OrderParamEditor({
   aggParam,
@@ -30,30 +30,26 @@ function OrderParamEditor({
   setValue,
   setValidity,
   setTouched,
-  wrappedWithInlineComp,
-}: AggParamEditorProps<SelectValueProp> & SelectParamEditorProps) {
+}: AggParamEditorProps<OptionedValueProp> & OptionedParamEditorProps) {
   const label = i18n.translate('common.ui.aggTypes.orderLabel', {
     defaultMessage: 'Order',
   });
   const isValid = !!value;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
   return (
     <EuiFormRow
       label={label}
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}
-      className={wrappedWithInlineComp ? undefined : 'visEditorSidebar__aggParamFormRow'}
+      compressed
     >
       <EuiSelect
         options={aggParam.options.raw}
-        value={value.value}
+        value={value && value.value}
         onChange={ev => setValue(aggParam.options.byValue[ev.target.value])}
         fullWidth={true}
         isInvalid={showValidation ? !isValid : false}

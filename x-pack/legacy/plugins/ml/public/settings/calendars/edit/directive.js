@@ -17,13 +17,16 @@ import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { getCreateCalendarBreadcrumbs, getEditCalendarBreadcrumbs } from '../../breadcrumbs';
 
+import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
-
+import { timefilter } from 'ui/timefilter';
+import { timeHistory } from 'ui/timefilter/time_history';
 import { I18nContext } from 'ui/i18n';
+
+import { NavigationMenuContext } from '../../../util/context_utils';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
-  <ml-nav-menu name="settings" />
   <ml-new-calendar />
 `;
 
@@ -63,7 +66,9 @@ module.directive('mlNewCalendar', function ($route) {
 
       ReactDOM.render(
         <I18nContext>
-          {React.createElement(NewCalendar, props)}
+          <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
+            <NewCalendar {...props} />
+          </NavigationMenuContext.Provider>
         </I18nContext>,
         element[0]
       );

@@ -8,6 +8,15 @@ exports[`home directories should not render directory entry when showOnHomePage 
     className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -26,13 +35,13 @@ exports[`home directories should not render directory entry when showOnHomePage 
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -52,13 +61,13 @@ exports[`home directories should not render directory entry when showOnHomePage 
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -122,6 +131,15 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
     className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -140,13 +158,13 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -166,13 +184,13 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -249,6 +267,15 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
     className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -267,13 +294,13 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -306,13 +333,13 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -376,6 +403,15 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
     className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -394,13 +430,13 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -420,13 +456,13 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -490,6 +526,15 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
     className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -508,13 +553,13 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -534,13 +579,13 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -604,6 +649,15 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
     className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={true}
@@ -622,13 +676,13 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -648,13 +702,13 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -718,6 +772,15 @@ exports[`home should render home component 1`] = `
     className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -736,13 +799,13 @@ exports[`home should render home component 1`] = `
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -762,13 +825,13 @@ exports[`home should render home component 1`] = `
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -832,6 +895,15 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
     className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -850,13 +922,13 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -876,13 +948,13 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -946,6 +1018,15 @@ exports[`home welcome should show the normal home page if welcome screen is disa
     className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -964,13 +1045,13 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -990,13 +1071,13 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -1067,6 +1148,15 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
     className="eui-displayBlock"
     restrictWidth={false}
   >
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Kibana home"
+          id="kbn.home.welcomeHomePageHeader"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={true}
@@ -1085,13 +1175,13 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Visualize and Explore Data"
                 id="kbn.home.directories.visualize.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"
@@ -1111,13 +1201,13 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           <EuiTitle
             size="s"
           >
-            <h3>
+            <h2>
               <FormattedMessage
                 defaultMessage="Manage and Administer the Elastic Stack"
                 id="kbn.home.directories.manage.nameTitle"
                 values={Object {}}
               />
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer
             size="m"

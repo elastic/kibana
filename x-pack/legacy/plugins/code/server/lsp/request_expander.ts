@@ -28,10 +28,10 @@ interface Job {
   startTime: number;
 }
 
-enum WorkspaceStatus {
-  Uninitialized,
-  Initializing,
-  Initialized,
+export enum WorkspaceStatus {
+  Uninitialized = 'Uninitialized',
+  Initializing = 'Initializing',
+  Initialized = 'Initialized',
 }
 
 interface Workspace {
@@ -63,8 +63,8 @@ export class RequestExpander implements ILanguageServerHandler {
     readonly builtinWorkspace: boolean,
     readonly maxWorkspace: number,
     readonly serverOptions: ServerOptions,
-    readonly initialOptions?: InitializeOptions,
-    readonly log?: Logger
+    readonly initialOptions: InitializeOptions,
+    readonly log: Logger
   ) {
     this.proxy = proxy;
     this.handle = this.handle.bind(this);
@@ -79,6 +79,7 @@ export class RequestExpander implements ILanguageServerHandler {
     return new Promise<ResponseMessage>((resolve, reject) => {
       if (this.exited) {
         reject(new Error('proxy is exited.'));
+        return;
       }
       this.jobQueue.push({
         request,
@@ -86,8 +87,7 @@ export class RequestExpander implements ILanguageServerHandler {
         reject,
         startTime: Date.now(),
       });
-      if (this.log)
-        this.log.debug(`queued  a ${request.method} job for workspace ${request.workspacePath}`);
+      this.log.debug(`queued  a ${request.method} job for workspace ${request.workspacePath}`);
       if (!this.running) {
         this.running = true;
         this.handleNext();
@@ -97,11 +97,13 @@ export class RequestExpander implements ILanguageServerHandler {
 
   public async exit() {
     this.exited = true;
+    this.running = false;
+    this.log.debug(`exiting proxy`);
     return this.proxy.exit();
   }
 
   public async unloadWorkspace(workspacePath: string) {
-    if (this.log) this.log.debug('unload workspace ' + workspacePath);
+    this.log.debug('unload workspace ' + workspacePath);
     if (this.hasWorkspacePath(workspacePath)) {
       const ws = this.getWorkspace(workspacePath);
       if (ws.initPromise) {
@@ -133,8 +135,7 @@ export class RequestExpander implements ILanguageServerHandler {
     this.jobQueue.forEach(job => {
       if (job.request.workspacePath === workspacePath) {
         job.reject(WorkspaceUnloadedError);
-        if (this.log)
-          this.log.debug(`canceled a ${job.request.method} job because of unload workspace`);
+        this.log.debug(`canceled a ${job.request.method} job because of unload workspace`);
       } else {
         newJobQueue.push(job);
       }
@@ -190,6 +191,7 @@ export class RequestExpander implements ILanguageServerHandler {
   private handle() {
     const job = this.jobQueue.shift();
     if (job && !this.exited) {
+      this.log.debug('dequeue a job');
       const { request, resolve, reject } = job;
       this.expand(request, job.startTime).then(
         value => {
@@ -201,6 +203,7 @@ export class RequestExpander implements ILanguageServerHandler {
         },
         err => {
           try {
+            this.log.error(err);
             reject(err);
           } finally {
             this.handleNext();
@@ -297,7 +300,7 @@ export class RequestExpander implements ILanguageServerHandler {
   }
 
   private updateWorkspace(workspacePath: string) {
-    this.getWorkspace(workspacePath).status = Date.now();
+    this.getWorkspace(workspacePath).lastAccess = Date.now();
   }
 
   private hasWorkspacePath(workspacePath: string) {
@@ -324,5 +327,12 @@ export class RequestExpander implements ILanguageServerHandler {
       this.workspaces.set(p, ws);
     }
     return ws;
+  }
+
+  initializeState(workspaceDir: string): WorkspaceStatus {
+    if (this.hasWorkspacePath(workspaceDir)) {
+      return this.getWorkspace(workspaceDir).status;
+    }
+    return WorkspaceStatus.Uninitialized;
   }
 }

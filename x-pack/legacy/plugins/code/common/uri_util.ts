@@ -129,3 +129,11 @@ export function toCanonicalUrl(lspUrl: CompleteParsedUrl) {
   const uri = decodeURIComponent(compiled(data));
   return lspUrl.schema ? `${lspUrl.schema}/${uri}` : uri;
 }
+
+export const decodeRevisionString = (revision: string) => {
+  return revision.replace(/:/g, '/');
+};
+
+export const encodeRevisionString = (revision: string) => {
+  return revision.replace(/\//g, ':');
+};

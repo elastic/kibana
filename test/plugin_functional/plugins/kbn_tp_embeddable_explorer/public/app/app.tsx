@@ -22,6 +22,7 @@ import React, { Component } from 'react';
 import { EmbeddableFactory } from '../../../../../../src/legacy/core_plugins/embeddable_api/public';
 import { ContactCardEmbeddableExample } from './hello_world_embeddable_example';
 import { HelloWorldContainerExample } from './hello_world_container_example';
+import { DashboardContainerExample } from './dashboard_container_example';
 
 export interface AppProps {
   embeddableFactories: Map<string, EmbeddableFactory>;
@@ -39,6 +40,10 @@ export class App extends Component<AppProps, { selectedTabId: string }> {
       {
         id: 'helloWorldEmbeddable',
         name: 'Hello World Embeddable',
+      },
+      {
+        id: 'dashboardContainer',
+        name: 'Dashboard Container',
       },
     ];
 
@@ -84,6 +89,9 @@ export class App extends Component<AppProps, { selectedTabId: string }> {
       }
       case 'helloWorldEmbeddable': {
         return <ContactCardEmbeddableExample />;
+      }
+      case 'dashboardContainer': {
+        return <DashboardContainerExample />;
       }
     }
   }

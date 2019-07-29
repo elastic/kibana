@@ -16,13 +16,7 @@
       "GET"
     ],
     "patterns": [
-      "_cluster/nodes/hotthreads",
-      "_cluster/nodes/hot_threads",
-      "_cluster/nodes/{nodes}/hotthreads",
-      "_cluster/nodes/{nodes}/hot_threads",
-      "_nodes/hotthreads",
       "_nodes/hot_threads",
-      "_nodes/{nodes}/hotthreads",
       "_nodes/{nodes}/hot_threads"
     ],
     "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-hot-threads.html"

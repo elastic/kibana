@@ -75,7 +75,7 @@ export const noteSchema = gql`
   extend type Mutation {
     "Persists a note"
     persistNote(noteId: ID, version: String, note: NoteInput!): ResponseNote!
-    deleteNote(id: [ID!]!, version: String):Boolean
+    deleteNote(id: [ID!]!):Boolean
     deleteNoteByTimelineId(timelineId: ID!, version: String):Boolean
   }
 `;

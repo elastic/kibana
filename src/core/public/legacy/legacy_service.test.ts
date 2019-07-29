@@ -57,6 +57,7 @@ import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { LegacyPlatformService } from './legacy_service';
 import { applicationServiceMock } from '../application/application_service.mock';
+import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 
 const applicationSetup = applicationServiceMock.createSetupContract();
 const fatalErrorsSetup = fatalErrorsServiceMock.createSetupContract();
@@ -84,6 +85,7 @@ const defaultSetupDeps = {
 };
 
 const applicationStart = applicationServiceMock.createStartContract();
+const docLinksStart = docLinksServiceMock.createStartContract();
 const httpStart = httpServiceMock.createStartContract();
 const chromeStart = chromeServiceMock.createStartContract();
 const i18nStart = i18nServiceMock.createStartContract();
@@ -95,6 +97,7 @@ const uiSettingsStart = uiSettingsServiceMock.createStartContract();
 const defaultStartDeps = {
   core: {
     application: applicationStart,
+    docLinks: docLinksStart,
     http: httpStart,
     chrome: chromeStart,
     i18n: i18nStart,

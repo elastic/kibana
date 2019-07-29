@@ -106,8 +106,8 @@ const steps = [
 const toastMessage = (
   <div>
     <p>
-      We’ve made some changes to roles and permissions in Kibana. Read more about what these changes
-      mean for you below.{' '}
+      We’ve made some changes to roles and permissions in Kibana. Read more about how these changes
+      affect your Code implementation below.{' '}
     </p>
     <EuiButton size="s" href={documentationLinks.kibanaRoleManagement}>
       Learn more

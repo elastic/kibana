@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { getChartDateLabel } from './charts';
 export { convertMicrosecondsToMilliseconds } from './convert_measurements';
 export * from './observability_integration';
+export { seriesHasDownValues } from './series_has_down_values';
 export { UptimeUrlParams, getSupportedUrlParams } from './url_params';

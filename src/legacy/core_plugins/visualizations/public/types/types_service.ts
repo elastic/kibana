@@ -26,6 +26,9 @@ import { VisFactoryProvider, visFactory } from 'ui/vis/vis_factory';
 // @ts-ignore
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import * as types from 'ui/vis/vis';
+
+import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 
 /**
  * Vis Types Service
@@ -39,6 +42,7 @@ export class TypesService {
       VisFactoryProvider,
       VisTypesRegistryProvider,
       defaultFeedbackMessage, // make default in base vis type, or move?
+      visTypeAliasRegistry,
     };
   }
 
@@ -53,7 +57,7 @@ export type TypesSetup = ReturnType<TypesService['setup']>;
 export { visFactory, DefaultEditorSize };
 
 /** @public types */
-import * as types from 'ui/vis/vis';
+export type VisTypeAlias = VisTypeAlias;
 export type Vis = types.Vis;
 export type VisParams = types.VisParams;
 export type VisProvider = types.VisProvider;

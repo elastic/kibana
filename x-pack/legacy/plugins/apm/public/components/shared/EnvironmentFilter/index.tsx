@@ -79,18 +79,15 @@ export const EnvironmentFilter: React.FC = () => {
   const { start, end, serviceName } = urlParams;
 
   const { environment } = uiFilters;
-  const { data: environments = [], status = 'loading' } = useFetcher(
-    () => {
-      if (start && end) {
-        return loadEnvironmentsFilter({
-          start,
-          end,
-          serviceName
-        });
-      }
-    },
-    [start, end, serviceName]
-  );
+  const { data: environments = [], status = 'loading' } = useFetcher(() => {
+    if (start && end) {
+      return loadEnvironmentsFilter({
+        start,
+        end,
+        serviceName
+      });
+    }
+  }, [start, end, serviceName]);
 
   return (
     <EuiSelect

@@ -18,7 +18,7 @@ import React from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import { FileTree, FileTreeItemType } from '../../../model';
 import { MainRouteParams, PathTypes } from '../../common/types';
-import { encodeRevisionString } from '../../utils/url';
+import { encodeRevisionString } from '../../../common/uri_util';
 
 interface DirectoryNodesProps {
   title: string;
@@ -51,7 +51,7 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
   ));
   return (
     <EuiFlexItem className="codeContainer__directoryList">
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiTitle size="s">
             <h3>{props.title}</h3>

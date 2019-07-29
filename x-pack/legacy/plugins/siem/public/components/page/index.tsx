@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
+import React from 'react';
+import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
 import styled, { injectGlobal } from 'styled-components';
-import { getOr } from 'lodash/fp';
 
 // SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
 // eslint-disable-next-line no-unused-expressions
@@ -92,17 +92,25 @@ export const Pane1FlexContent = styled.div`
   height: 100%;
 `;
 
-export const CountBadge = styled(EuiBadge)`
-  margin-left: 5px;
-`;
+// Ref: https://github.com/elastic/eui/issues/1655
+// const Badge = styled(EuiBadge)`
+//   margin-left: 5px;
+// `;
+export const CountBadge = (props: EuiBadgeProps) => (
+  <EuiBadge {...props} style={{ marginLeft: '5px' }} />
+);
 
 export const Spacer = styled.span`
   margin-left: 5px;
 `;
 
-export const Badge = styled(EuiBadge)`
-  vertical-align: top;
-`;
+// Ref: https://github.com/elastic/eui/issues/1655
+// export const Badge = styled(EuiBadge)`
+//   vertical-align: top;
+// `;
+export const Badge = (props: EuiBadgeProps) => (
+  <EuiBadge {...props} style={{ verticalAlign: 'top' }} />
+);
 
 export const MoreRowItems = styled(EuiIcon)`
   margin-left: 5px;
@@ -110,15 +118,11 @@ export const MoreRowItems = styled(EuiIcon)`
 
 export const OverviewWrapper = styled(EuiFlexGroup)`
   position: relative;
-`;
 
-export const LoadingOverlay = styled.div`
-  background-color: ${props => getOr('#ffffff', 'theme.eui.euiColorLightShade', props)};
-  margin: -4px 5px;
-  height: 100%;
-  opacity: 0.7;
-  width: calc(100% - 10px);
-  position: absolute;
-  z-index: 3;
-  border-radius: 5px;
+  .euiButtonIcon {
+    position: absolute;
+    right: ${props => props.theme.eui.euiSizeM};
+    top: 6px;
+    z-index: 2;
+  }
 `;

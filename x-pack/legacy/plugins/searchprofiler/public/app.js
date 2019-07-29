@@ -10,12 +10,14 @@ import { uiModules } from 'ui/modules';
 import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import 'ui/capabilities/route_setup';
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
+import { formatAngularHttpError } from 'ui/notify/lib';
 
 // License
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 // Our imports
+import $ from 'jquery';
 import _ from 'lodash';
 import 'ace';
 import 'angular-ui-ace';
@@ -25,6 +27,7 @@ import { Range } from './range';
 import { nsToPretty } from 'plugins/searchprofiler/filters/ns_to_pretty';
 import { msToPretty } from 'plugins/searchprofiler/filters/ms_to_pretty';
 import { checkForParseErrors } from 'plugins/searchprofiler/app_util.js';
+import { initializeEditor } from 'plugins/searchprofiler/editor';
 
 // Styles and templates
 import 'ui/autoload/all';
@@ -60,12 +63,13 @@ uiModules
     return service;
   });
 
-function profileVizController($scope, $http, HighlightService, Private) {
+function profileVizController($scope, $timeout, $http, HighlightService) {
   $scope.title = 'Search Profile';
   $scope.description = 'Search profiling and visualization';
   $scope.profileResponse = [];
   $scope.highlight = HighlightService;
   $scope.index = '_all';
+  $scope.query = '';
 
   // TODO this map controls which tab is active, but due to how
   // the tab directive works, we cannot use a single variable to hold the state.
@@ -75,31 +79,39 @@ function profileVizController($scope, $http, HighlightService, Private) {
     search: true
   };
   $scope.markers = [];
-  $scope.query = defaultQuery;
-  const xpackInfo = Private(XPackInfoProvider);
   $scope.licenseEnabled = xpackInfo.get('features.searchprofiler.enableAppLink');
 
-  $scope.aceLoaded = (_editor) => {
-    $scope.ace = _editor;
-    $scope.ace.$blockScrolling = Infinity;
-    $scope.ace.setReadOnly(!$scope.licenseEnabled);
-    if (!$scope.licenseEnabled) {
-      $scope.ace.container.style.pointerEvents = 'none';
-      $scope.ace.container.style.opacity = 0.5;
-      $scope.ace.renderer.setStyle('disabled', true);
-      $scope.ace.blur();
-    }
-  };
+
+  const editor = initializeEditor({
+    el: $('#SearchProfilerInput')[0],
+    licenseEnabled: $scope.licenseEnabled,
+  });
+
+  editor.on('change', () => {
+    // Do a safe apply/trigger digest
+    $timeout(() => {
+      $scope.query = editor.getValue();
+    });
+  });
+
+  editor.setValue(defaultQuery, 1);
+
+  $scope.hasQuery = () => Boolean($scope.query);
 
   $scope.profile = () => {
+    const  { query } = $scope;
     if (!$scope.licenseEnabled) {
       return;
     }
     // Reset right detail panel
     $scope.resetHighlightPanel();
-    let json = checkForParseErrors($scope.query);
+    let json = checkForParseErrors(query);
     if (json.status === false) {
-      notify.error(json.error);
+      toastNotifications.addError(json.error, {
+        title: i18n.translate('xpack.searchProfiler.errorToastTitle', {
+          defaultMessage: 'JSON parse error',
+        }),
+      });
       return;
     }
     json = json.parsed;
@@ -110,9 +122,7 @@ function profileVizController($scope, $http, HighlightService, Private) {
       $scope.renderProfile(json.profile.shards);
     } else {
       // Otherwise it's (probably) a regular search, execute remotely
-      const requestBody = {
-        query: $scope.query
-      };
+      const requestBody = { query };
       if ($scope.index == null || $scope.index === '') {
         requestBody.index = '_all';
       } else {
@@ -128,7 +138,7 @@ function profileVizController($scope, $http, HighlightService, Private) {
   $scope.executeRemoteQuery = requestBody => {
     $http.post('../api/searchprofiler/profile', requestBody).then(resp => {
       if (!resp.data.ok) {
-        notify.error(resp.data.err.msg);
+        toastNotifications.addDanger(resp.data.err.msg);
 
         try {
           const regex = /line=([0-9]+) col=([0-9]+)/g;
@@ -144,7 +154,7 @@ function profileVizController($scope, $http, HighlightService, Private) {
       }
 
       $scope.renderProfile(resp.data.resp.profile.shards);
-    }).catch(notify.error);
+    }).catch(reason => toastNotifications.addDanger(formatAngularHttpError(reason)));
   };
 
   $scope.renderProfile = data => {

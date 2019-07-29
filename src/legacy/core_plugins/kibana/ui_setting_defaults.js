@@ -405,6 +405,19 @@ export function getUiSettingDefaults() {
       }),
       category: ['search'],
     },
+    'courier:batchSearches': {
+      name: i18n.translate('kbn.advancedSettings.courier.batchSearchesTitle', {
+        defaultMessage: 'Batch concurrent searches',
+      }),
+      value: true,
+      type: 'boolean',
+      description: i18n.translate('kbn.advancedSettings.courier.batchSearchesText', {
+        defaultMessage:
+          'Batch multiple concurrent searches in a single request. This may improve overall load' +
+          'times, but it also means that no single search request will be returned until the last has completed.',
+      }),
+      category: ['search'],
+    },
     'search:includeFrozen': {
       name: 'Search in frozen indices',
       description: `Will include <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/frozen-indices.html"
@@ -556,6 +569,19 @@ export function getUiSettingDefaults() {
           'The opacity of the chart items that are dimmed when highlighting another element of the chart. ' +
           'The lower this number, the more the highlighted element will stand out. ' +
           'This must be a number between 0 and 1.',
+      }),
+      category: ['visualization'],
+    },
+    'visualization:heatmap:maxBuckets': {
+      name: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsTitle', {
+        defaultMessage: 'Heatmap maximum buckets',
+      }),
+      value: 50,
+      type: 'number',
+      description: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsText', {
+        defaultMessage:
+          'The maximum number of buckets a single datasource can return. ' +
+          'A higher number might have negative impact on browser rendering performance'
       }),
       category: ['visualization'],
     },

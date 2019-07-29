@@ -43,13 +43,13 @@ test('Execute update job', async () => {
 
   // Setup CancellationService
   const cancelUpdateJobSpy = sinon.spy();
-  const registerUpdateJobTokenSpy = sinon.spy();
+  const registerCancelableUpdateJobSpy = sinon.spy();
   const cancellationService: any = {
     cancelUpdateJob: emptyAsyncFunc,
-    registerUpdateJobToken: emptyAsyncFunc,
+    registerCancelableUpdateJob: emptyAsyncFunc,
   };
   cancellationService.cancelUpdateJob = cancelUpdateJobSpy;
-  cancellationService.registerUpdateJobToken = registerUpdateJobTokenSpy;
+  cancellationService.registerCancelableUpdateJob = registerCancelableUpdateJobSpy;
 
   const updateWorker = new UpdateWorker(
     esQueue as Esqueue,
@@ -57,7 +57,7 @@ test('Execute update job', async () => {
     esClient as EsClient,
     {
       security: {
-        enableGitCertCheck: false,
+        enableGitCertCheck: true,
       },
     } as ServerOptions,
     {} as GitOperations,
@@ -83,13 +83,13 @@ test('On update job completed because of cancellation ', async () => {
 
   // Setup CancellationService
   const cancelUpdateJobSpy = sinon.spy();
-  const registerUpdateJobTokenSpy = sinon.spy();
+  const registerCancelableUpdateJobSpy = sinon.spy();
   const cancellationService: any = {
     cancelUpdateJob: emptyAsyncFunc,
-    registerUpdateJobToken: emptyAsyncFunc,
+    registerCancelableUpdateJob: emptyAsyncFunc,
   };
   cancellationService.cancelUpdateJob = cancelUpdateJobSpy;
-  cancellationService.registerUpdateJobToken = registerUpdateJobTokenSpy;
+  cancellationService.registerCancelableUpdateJob = registerCancelableUpdateJobSpy;
 
   const updateWorker = new UpdateWorker(
     esQueue as Esqueue,
@@ -97,7 +97,7 @@ test('On update job completed because of cancellation ', async () => {
     esClient as EsClient,
     {
       security: {
-        enableGitCertCheck: false,
+        enableGitCertCheck: true,
       },
     } as ServerOptions,
     {} as GitOperations,

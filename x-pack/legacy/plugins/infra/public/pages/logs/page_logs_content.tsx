@@ -29,6 +29,7 @@ import { Source } from '../../containers/source';
 
 import { LogsToolbar } from './page_toolbar';
 import { SourceConfigurationFlyoutState } from '../../components/source_configuration';
+import { LogHighlightsBridge } from '../../containers/logs/log_highlights';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
   const { derivedIndexPattern, source, sourceId, version } = useContext(Source.Context);
@@ -47,6 +48,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
   return (
     <>
       <ReduxSourceIdBridge sourceId={sourceId} />
+      <LogHighlightsBridge indexPattern={derivedIndexPattern} />
       <WithLogFilterUrlState indexPattern={derivedIndexPattern} />
       <WithLogPositionUrlState />
       <WithLogMinimapUrlState />
@@ -79,6 +81,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
           {({ isAutoReloading, jumpToTargetPosition, reportVisiblePositions, targetPosition }) => (
             <WithStreamItems initializeOnMount={!isAutoReloading}>
               {({
+                currentHighlightKey,
                 hasMoreAfterEnd,
                 hasMoreBeforeStart,
                 isLoadingMore,
@@ -106,6 +109,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                   setFlyoutItem={setFlyoutId}
                   setFlyoutVisibility={setFlyoutVisibility}
                   highlightedItem={surroundingLogsId ? surroundingLogsId : null}
+                  currentHighlightKey={currentHighlightKey}
                 />
               )}
             </WithStreamItems>
