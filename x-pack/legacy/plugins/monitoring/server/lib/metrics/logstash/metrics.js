@@ -77,6 +77,15 @@ export const metrics = {
       defaultMessage: 'Number of events emitted per second by all Logstash nodes at the outputs stage.'
     })
   }),
+  logstash_cluster_queue_depth: new LogstashEventsRateClusterMetric({
+    field: 'logstash_stats.queue.events_count',
+    label: i18n.translate('xpack.monitoring.metrics.logstash.queueDepthLabel', {
+      defaultMessage: 'Queue depth'
+    }),
+    description: i18n.translate('xpack.monitoring.metrics.logstash.queueDepthDescription', {
+      defaultMessage: 'Depth of queue'
+    })
+  }),
   logstash_cluster_events_latency: new LogstashEventsLatencyClusterMetric({
     field: 'logstash_stats.events.out',
     label: i18n.translate('xpack.monitoring.metrics.logstash.eventLatencyLabel', {

@@ -15,7 +15,8 @@ export class Overview extends PureComponent {
     const metricsToShow = [
       metrics.logstash_cluster_events_input_rate,
       metrics.logstash_cluster_events_output_rate,
-      metrics.logstash_cluster_events_latency
+      metrics.logstash_cluster_events_latency,
+      metrics.logstash_cluster_queue_depth
     ];
 
     return (
