@@ -8,7 +8,10 @@ import { ConfigAdapter } from './adapters/configurations/default';
 export class ConfigurationLib {
   constructor(private readonly adapter: ConfigAdapter) {}
 
-  public async rollForward(id: string): Promise<{ id: string; version: number }> {
+  public async rollForward(
+    id: string,
+    toVersion: number
+  ): Promise<{ id: string; version: number }> {
     this.adapter.get(id);
     return {
       id: 'fsdfsdf',
