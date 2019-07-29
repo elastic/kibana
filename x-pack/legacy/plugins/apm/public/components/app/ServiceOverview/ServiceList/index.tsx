@@ -50,7 +50,7 @@ export const SERVICE_COLUMNS = [
     sortable: true,
     render: (serviceName: string) => (
       <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
-        <AppLink path={`/${serviceName}/transactions`}>
+        <AppLink path={`/services/${serviceName}/transactions`}>
           {formatString(serviceName)}
         </AppLink>
       </EuiToolTip>

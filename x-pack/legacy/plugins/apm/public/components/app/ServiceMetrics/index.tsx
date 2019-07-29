@@ -12,7 +12,7 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 
 interface ServiceMetricsProps {
-  agentName?: string;
+  agentName: string;
 }
 
 export function ServiceMetrics({ agentName }: ServiceMetricsProps) {

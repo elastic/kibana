@@ -6,7 +6,7 @@
 import { createOptionalPlugin } from './optional_plugin';
 
 class FooPlugin {
-  get aProp() {
+  public get aProp() {
     return 'a prop';
   }
 
