@@ -16,10 +16,12 @@ interface Authorization {
       message?: string;
     };
   } | null;
-  privileges: {
-    hasAllPrivileges: boolean;
-    missingPrivileges: MissingPrivileges;
-  };
+  privileges: Privileges;
+}
+
+export interface Privileges {
+  hasAllPrivileges: boolean;
+  missingPrivileges: MissingPrivileges;
 }
 
 export interface MissingPrivileges {

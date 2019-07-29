@@ -9,7 +9,9 @@ import {
   APP_REQUIRED_CLUSTER_PRIVILEGES,
   APP_RESTORE_INDEX_PRIVILEGES,
 } from '../../../common/constants';
-import { AppPermissions } from '../../../common/types';
+// NOTE: now we import it from our "public" folder, but when the Authorisation lib
+// will move to the "es_ui_shared" plugin, it will be imported from its "static" folder
+import { Privileges } from '../../../public/app/lib/authorization';
 import { Plugins } from '../../../shim';
 
 let xpackMainPlugin: any;
@@ -34,7 +36,7 @@ const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } =
 export const getPermissionsHandler: RouterRouteHandler = async (
   req,
   callWithRequest
-): Promise<AppPermissions> => {
+): Promise<Privileges> => {
   const xpackInfo = getXpackMainPlugin() && getXpackMainPlugin().info;
   if (!xpackInfo) {
     // xpackInfo is updated via poll, so it may not be available until polling has begun.
@@ -42,7 +44,7 @@ export const getPermissionsHandler: RouterRouteHandler = async (
     throw wrapCustomError(new Error('Security info unavailable'), 503);
   }
 
-  const permissionsResult: AppPermissions = {
+  const permissionsResult: Privileges = {
     hasAllPrivileges: true,
     missingPrivileges: {
       cluster: [],
