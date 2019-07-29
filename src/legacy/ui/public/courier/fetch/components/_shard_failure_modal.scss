@@ -19,12 +19,12 @@
     width: 80% !important;
     margin-top: $euiSizeS;
 }
-.shardFailureModal__keyValueTitle{
+.shardFailureModal__keyValueTitle {
     padding-right: $euiSizeS;
 }
 
 @include euiBreakpoint('xs','s') {
-    .shardFailureModal__keyValueTitle{
+    .shardFailureModal__keyValueTitle { 
         display: block;
         width: 100%;
     }
