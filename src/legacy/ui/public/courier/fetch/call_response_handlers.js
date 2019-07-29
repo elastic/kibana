@@ -18,6 +18,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiText, EuiSpacer } from '@elastic/eui';
 import { toastNotifications } from '../../notify';
 import { RequestFailure } from '../../errors';
 import { RequestStatus } from './req_status';
@@ -45,19 +46,27 @@ export function CallResponseHandlersProvider(Promise) {
       }
 
       if (response._shards && response._shards.failed) {
-        const title = i18n.translate('common.ui.courier.fetch.shardsFailedNotificationMessage', {
+        const title = i18n.translate('common.ui.courier.fetch.shardsFailedNotificationTitle', {
           defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
           values: {
             shardsFailed: response._shards.failed,
             shardsTotal: response._shards.total,
           },
         });
+        const message = i18n.translate('common.ui.courier.fetch.shardsFailedNotificationMessage', {
+          defaultMessage: 'The data you are seeing might be incomplete or wrong.',
+        });
+
         const text = (
-          <ShardFailureOpenModalButton
-            request={searchRequest.fetchParams.body}
-            response={response}
-            title={title}
-          />
+          <div>
+            <EuiText>{message}</EuiText>
+            <EuiSpacer size="s"/>
+            <ShardFailureOpenModalButton
+              request={searchRequest.fetchParams.body}
+              response={response}
+              title={title}
+            />
+          </div>
         );
 
         toastNotifications.addWarning({
