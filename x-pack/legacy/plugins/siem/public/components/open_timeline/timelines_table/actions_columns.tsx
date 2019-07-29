@@ -24,23 +24,10 @@ export const getActionsColumns = ({
   onOpenTimeline: OnOpenTimeline;
   showDeleteAction: boolean;
 }) => {
-  const deleteTimelineColumn = {
-    align: 'center',
-    field: 'savedObjectId',
-    render: (savedObjectId: string, { title }: OpenTimelineResult) => (
-      <DeleteTimelineModalButton
-        deleteTimelines={deleteTimelines}
-        savedObjectId={savedObjectId}
-        title={title}
-      />
-    ),
-    sortable: false,
-    width: ACTION_COLUMN_WIDTH,
-  };
-
   const openAsDuplicateColumn = {
     align: 'center',
     field: 'savedObjectId',
+    name: '',
     render: (savedObjectId: string, timelineResult: OpenTimelineResult) => (
       <EuiToolTip content={i18n.OPEN_AS_DUPLICATE}>
         <EuiButtonIcon
@@ -58,6 +45,21 @@ export const getActionsColumns = ({
           size="s"
         />
       </EuiToolTip>
+    ),
+    sortable: false,
+    width: ACTION_COLUMN_WIDTH,
+  };
+
+  const deleteTimelineColumn = {
+    align: 'center',
+    field: 'savedObjectId',
+    name: '',
+    render: (savedObjectId: string, { title }: OpenTimelineResult) => (
+      <DeleteTimelineModalButton
+        deleteTimelines={deleteTimelines}
+        savedObjectId={savedObjectId}
+        title={title}
+      />
     ),
     sortable: false,
     width: ACTION_COLUMN_WIDTH,
