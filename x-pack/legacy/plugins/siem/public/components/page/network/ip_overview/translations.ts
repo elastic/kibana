@@ -55,6 +55,33 @@ export const REPUTATION = i18n.translate(
   }
 );
 
+export const VIEW_VIRUS_TOTAL = i18n.translate(
+  'xpack.siem.network.ipDetails.ipOverview.viewVirusTotalTitle.',
+  {
+    defaultMessage: 'virustotal.com',
+  }
+);
+
+export const VIEW_TALOS_INTELLIGENCE = i18n.translate(
+  'xpack.siem.network.ipDetails.ipOverview.viewTalosIntelligenceTitle',
+  {
+    defaultMessage: 'talosIntelligence.com',
+  }
+);
+
+export const AS_SOURCE = i18n.translate(
+  'xpack.siem.network.ipDetails.ipOverview.asSourceDropDownOptionLabel',
+  {
+    defaultMessage: 'As Source',
+  }
+);
+export const AS_DESTINATION = i18n.translate(
+  'xpack.siem.network.ipDetails.ipOverview.asDestinationDropDownOptionLabel',
+  {
+    defaultMessage: 'As Destination',
+  }
+);
+
 export const INSPECT_TITLE = i18n.translate(
   'xpack.siem.network.ipDetails.ipOverview.inspectTitle',
   {
