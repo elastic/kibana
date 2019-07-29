@@ -16,13 +16,13 @@ import {
   AreaSeries,
   BarSeries,
   Position,
-  ScaleType,
+  niceTimeFormatter,
 } from '@elastic/charts';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, IconType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LensMultiTable } from '../types';
-import { XYArgs, SeriesType } from './types';
+import { XYArgs, SeriesType, LayerArgs } from './types';
 import { RenderFunction } from '../interpreter_types';
 import { chartTypeIcons } from './xy_config_panel';
 
@@ -100,6 +100,33 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
   return chartTypeIcons.find(chartTypeIcon => chartTypeIcon.id === seriesType)!.iconType;
 }
 
+function getTickFormatter(layers: LayerArgs[], data: LensMultiTable) {
+  const isDateXAxis = Object.values(layers).every(layer => layer.xScaleType === 'time');
+
+  function ofAllXValues(fn: (...args: number[]) => number) {
+    return fn.apply(
+      undefined,
+      Object.values(layers).map(
+        layer =>
+          data.tables &&
+          data.tables[layer.layerId] &&
+          fn.apply(
+            undefined,
+            data.tables[layer.layerId].rows.map(row => row[layer.xAccessor] as number)
+          )
+      )
+    );
+  }
+
+  if (!isDateXAxis) {
+    return (x: string) => x;
+  } else {
+    const minDate = ofAllXValues(Math.min);
+    const maxDate = ofAllXValues(Math.max);
+    return niceTimeFormatter([minDate, maxDate]);
+  }
+}
+
 export function XYChart({ data, args }: XYChartProps) {
   const { legend, layers, isHorizontal } = args;
 
@@ -137,6 +164,7 @@ export function XYChart({ data, args }: XYChartProps) {
         title={args.xTitle}
         showGridLines={false}
         hide={layers[0].hide}
+        tickFormat={getTickFormatter(layers, data)}
       />
 
       <Axis
@@ -148,7 +176,19 @@ export function XYChart({ data, args }: XYChartProps) {
       />
 
       {layers.map(
-        ({ splitAccessor, seriesType, accessors, xAccessor, layerId, columnToLabel }, index) => {
+        (
+          {
+            splitAccessor,
+            seriesType,
+            accessors,
+            xAccessor,
+            layerId,
+            columnToLabel,
+            yScaleType,
+            xScaleType,
+          },
+          index
+        ) => {
           if (!data.tables[layerId] || data.tables[layerId].rows.length === 0) {
             return;
           }
@@ -181,9 +221,8 @@ export function XYChart({ data, args }: XYChartProps) {
             xAccessor,
             yAccessors,
             data: rows,
-            xScaleType:
-              typeof rows[0][xAccessor] === 'number' ? ScaleType.Linear : ScaleType.Ordinal,
-            yScaleType: ScaleType.Linear,
+            xScaleType,
+            yScaleType,
           };
 
           return seriesType === 'line' ? (

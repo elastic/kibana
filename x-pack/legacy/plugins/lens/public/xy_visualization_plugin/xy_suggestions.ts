@@ -11,6 +11,7 @@ import {
   VisualizationSuggestion,
   TableSuggestionColumn,
   TableSuggestion,
+  DataType,
 } from '../types';
 import { State } from './types';
 import { generateId } from '../id_generator';
@@ -117,6 +118,14 @@ function getSuggestion(
     ],
   };
 
+  const dataTypes: Record<string, DataType> = {};
+
+  [xValue, ...yValues, splitBy].forEach(col => {
+    if (col) {
+      dataTypes[col.columnId] = col.operation.dataType;
+    }
+  });
+
   return {
     title,
     score: 1,
@@ -126,13 +135,16 @@ function getSuggestion(
     previewExpression: buildExpression(
       {
         ...state,
-        layers: state.layers.map(layer => ({ ...layer, hide: true })),
+        layers: state.layers
+          .filter(layer => layer.layerId === layerId)
+          .map(layer => ({ ...layer, hide: true })),
         legend: {
           ...state.legend,
           isVisible: false,
         },
       },
-      { xTitle, yTitle }
+      { xTitle, yTitle },
+      { [layerId]: dataTypes }
     ),
   };
 }

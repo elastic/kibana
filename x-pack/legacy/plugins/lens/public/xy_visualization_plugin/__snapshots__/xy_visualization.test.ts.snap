@@ -38,6 +38,12 @@ Object {
                   "xAccessor": Array [
                     "a",
                   ],
+                  "xScaleType": Array [
+                    "linear",
+                  ],
+                  "yScaleType": Array [
+                    "linear",
+                  ],
                 },
                 "function": "lens_xy_layer",
                 "type": "function",

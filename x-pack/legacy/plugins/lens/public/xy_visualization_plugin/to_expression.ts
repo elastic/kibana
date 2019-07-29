@@ -5,8 +5,9 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
+import { ScaleType } from '@elastic/charts';
 import { State, LayerConfig } from './types';
-import { FramePublicAPI } from '../types';
+import { FramePublicAPI, DataType } from '../types';
 
 function xyTitles(layer: LayerConfig, frame: FramePublicAPI) {
   const defaults = {
@@ -55,12 +56,44 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
     }),
   };
 
-  return buildExpression(stateWithValidAccessors, xyTitles(state.layers[0], frame), frame);
+  const dataTypes: Record<string, Record<string, DataType>> = {};
+  state.layers.forEach(layer => {
+    dataTypes[layer.layerId] = {};
+    const datasource = frame.datasourceLayers[layer.layerId];
+    datasource.getTableSpec().forEach(column => {
+      const operation = frame.datasourceLayers[layer.layerId].getOperationForColumnId(
+        column.columnId
+      );
+      if (operation) {
+        dataTypes[layer.layerId][column.columnId] = operation.dataType;
+      }
+    });
+  });
+
+  return buildExpression(
+    stateWithValidAccessors,
+    xyTitles(state.layers[0], frame),
+    dataTypes,
+    frame
+  );
 };
+
+export function getScaleType(dataType: DataType) {
+  switch (dataType) {
+    case 'boolean':
+    case 'string':
+      return ScaleType.Ordinal;
+    case 'date':
+      return ScaleType.Time;
+    default:
+      return ScaleType.Linear;
+  }
+}
 
 export const buildExpression = (
   state: State,
   { xTitle, yTitle }: { xTitle: string; yTitle: string },
+  dataTypes: Record<string, Record<string, DataType>>,
   frame?: FramePublicAPI
 ): Ast => ({
   type: 'expression',
@@ -113,6 +146,8 @@ export const buildExpression = (
                   hide: [Boolean(layer.hide)],
 
                   xAccessor: [layer.xAccessor],
+                  yScaleType: [getScaleType(dataTypes[layer.layerId][layer.accessors[0]])],
+                  xScaleType: [getScaleType(dataTypes[layer.layerId][layer.xAccessor])],
                   splitAccessor: [layer.splitAccessor],
                   seriesType: [layer.seriesType],
                   accessors: layer.accessors,

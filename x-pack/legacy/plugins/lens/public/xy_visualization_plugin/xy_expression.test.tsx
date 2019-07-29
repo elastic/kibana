@@ -9,7 +9,7 @@ import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
-import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerConfig } from './types';
+import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -40,6 +40,8 @@ function sampleArgs() {
         title: 'A and B',
         splitAccessor: 'd',
         columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+        xScaleType: 'linear',
+        yScaleType: 'linear',
       },
     ],
   };
@@ -62,13 +64,15 @@ describe('xy_expression', () => {
     });
 
     test('layerConfig produces the correct arguments', () => {
-      const args: LayerConfig = {
+      const args: LayerArgs = {
         layerId: 'first',
         seriesType: 'line',
         xAccessor: 'c',
         accessors: ['a', 'b'],
         title: 'A and B',
         splitAccessor: 'd',
+        xScaleType: 'linear',
+        yScaleType: 'linear',
       };
 
       expect(layerConfig.fn(null, args, {})).toEqual({
@@ -222,6 +226,8 @@ describe('xy_expression', () => {
           },
         },
       };
+
+      args.layers[0].xScaleType = 'ordinal';
 
       const component = shallow(<XYChart data={data} args={args} />);
       expect(component.find(LineSeries).prop('xScaleType')).toEqual(ScaleType.Ordinal);

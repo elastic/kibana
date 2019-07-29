@@ -93,8 +93,15 @@ describe('xy_visualization', () => {
       frame = createMockFramePublicAPI();
       mockDatasource = createMockDatasource();
 
+      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'd' },
+        { columnId: 'a' },
+        { columnId: 'b' },
+        { columnId: 'c' },
+      ]);
+
       mockDatasource.publicAPIMock.getOperationForColumnId.mockImplementation(col => {
-        return { label: `col_${col}` } as Operation;
+        return { label: `col_${col}`, dataType: 'number' } as Operation;
       });
 
       frame.datasourceLayers = {

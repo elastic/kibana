@@ -129,6 +129,16 @@ export const layerConfig: ExpressionFunction<
       options: ['bar', 'line', 'area', 'bar_stacked', 'area_stacked'],
       help: 'The type of chart to display.',
     },
+    xScaleType: {
+      options: ['ordinal', 'linear', 'time'],
+      help: 'The scale type of the x axis',
+      default: 'ordinal',
+    },
+    yScaleType: {
+      options: ['log', 'sqrt', 'linear', 'time'],
+      help: 'The scale type of the y axes',
+      default: 'linear',
+    },
     splitAccessor: {
       types: ['string'],
       help: 'The column to split by',
@@ -164,6 +174,8 @@ export type LayerConfig = AxisConfig & {
 
 export type LayerArgs = LayerConfig & {
   columnToLabel?: string; // Actually a JSON key-value pair
+  yScaleType: 'time' | 'linear' | 'log' | 'sqrt';
+  xScaleType: 'time' | 'linear' | 'ordinal';
 };
 
 // Arguments to XY chart expression, with computed properties
