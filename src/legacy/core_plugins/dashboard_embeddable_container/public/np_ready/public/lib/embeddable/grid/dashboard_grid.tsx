@@ -43,8 +43,6 @@ import {
 import { DashboardContainer } from '../dashboard_container';
 import { DashboardPanelState, GridData } from '../types';
 
-// @ts-ignore
-
 let lastValidGridSize = 0;
 
 /**
