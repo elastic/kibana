@@ -16,7 +16,7 @@ const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
 
 export function useServiceMetricCharts(
   urlParams: IUrlParams,
-  agentName?: string
+  agentName: string
 ) {
   const { serviceName, start, end } = urlParams;
   const uiFilters = useUiFilters(urlParams);
