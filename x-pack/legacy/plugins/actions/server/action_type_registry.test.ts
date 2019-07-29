@@ -8,13 +8,16 @@ jest.mock('./lib/get_create_task_runner_function', () => ({
   getCreateTaskRunnerFunction: jest.fn(),
 }));
 
+import sinon from 'sinon';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/plugin.mock';
 import { ActionTypeRegistry } from './action_type_registry';
 import { ExecutorType } from './types';
 import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { ExecutorError } from './lib';
 
 const mockTaskManager = taskManagerMock.create();
+let fakeTimer: sinon.SinonFakeTimers;
 
 function getServices() {
   return {
@@ -30,6 +33,12 @@ const actionTypeRegistryParams = {
 };
 
 beforeEach(() => jest.resetAllMocks());
+
+beforeAll(() => {
+  fakeTimer = sinon.useFakeTimers();
+});
+
+afterAll(() => fakeTimer.restore());
 
 const executor: ExecutorType = async options => {
   return { status: 'ok' };
@@ -87,6 +96,27 @@ describe('register()', () => {
     ).toThrowErrorMatchingInlineSnapshot(
       `"Action type \\"my-action-type\\" is already registered."`
     );
+  });
+
+  test('provides a getRetry function that handles ExecutorError', () => {
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      unencryptedAttributes: [],
+      executor,
+    });
+    expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+    const registerTaskDefinitionsCall = mockTaskManager.registerTaskDefinitions.mock.calls[0][0];
+    const getRetry = registerTaskDefinitionsCall['actions:my-action-type'].getRetry!;
+
+    const retryTime = new Date();
+    expect(getRetry(0, new Error())).toEqual(true);
+    expect(getRetry(0, new ExecutorError('my message', {}, true))).toEqual(true);
+    expect(getRetry(0, new ExecutorError('my message', {}, false))).toEqual(false);
+    expect(getRetry(0, new ExecutorError('my message', {}, null))).toEqual(true);
+    expect(getRetry(0, new ExecutorError('my message', {}, undefined))).toEqual(true);
+    expect(getRetry(0, new ExecutorError('my message', {}, retryTime))).toEqual(retryTime);
   });
 });
 
