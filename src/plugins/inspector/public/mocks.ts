@@ -19,6 +19,9 @@
 
 import { Setup as PluginSetup, Start as PluginStart } from '.';
 import { InspectorViewRegistry } from './view_registry';
+import { plugin as pluginInitializer } from '.';
+// eslint-disable-next-line
+import { coreMock } from '../../../core/public/mocks';
 
 export type Setup = jest.Mocked<PluginSetup>;
 export type Start = jest.Mocked<PluginStart>;
@@ -44,7 +47,25 @@ const createStartContract = (): Start => {
   return startContract;
 };
 
+const createPlugin = async () => {
+  const pluginInitializerContext = coreMock.createPluginInitializerContext();
+  const coreSetup = coreMock.createSetup();
+  const coreStart = coreMock.createStart();
+  const plugin = pluginInitializer(pluginInitializerContext);
+  const setup = await plugin.setup(coreSetup);
+
+  return {
+    pluginInitializerContext,
+    coreSetup,
+    coreStart,
+    plugin,
+    setup,
+    doStart: async () => await plugin.start(coreStart),
+  };
+};
+
 export const inspectorPluginMock = {
   createSetupContract,
   createStartContract,
+  createPlugin,
 };
