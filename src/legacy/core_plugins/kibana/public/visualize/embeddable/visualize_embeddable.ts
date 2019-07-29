@@ -30,7 +30,6 @@ import {
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { TimeRange } from 'ui/timefilter/time_history';
-import { Query } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
 import {
   APPLY_FILTER_TRIGGER,
@@ -40,6 +39,7 @@ import {
   Trigger,
   Container,
 } from '../../../../embeddable_api/public';
+import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
@@ -77,6 +77,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private query?: Query;
   private title?: string;
   private filters?: Filter[];
+  private visCustomizations: VisualizeInput['vis'];
   private subscription: Subscription;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
@@ -114,7 +115,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.uiState.on('change', this.uiStateChangeHandler);
 
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
-      this.reload();
       this.handleChanges();
     });
   }
@@ -140,14 +140,17 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     // pass anything from here to the handler.update method
     const visCustomizations = this.input.vis;
     if (visCustomizations) {
-      // Turn this off or the uiStateChangeHandler will fire for every modification.
-      this.uiState.off('change', this.uiStateChangeHandler);
-      this.uiState.clearAllKeys();
-      this.uiState.set('vis', visCustomizations);
-      getKeys(visCustomizations).forEach(key => {
-        this.uiState.set(key, visCustomizations[key]);
-      });
-      this.uiState.on('change', this.uiStateChangeHandler);
+      if (!_.isEqual(visCustomizations, this.visCustomizations)) {
+        this.visCustomizations = visCustomizations;
+        // Turn this off or the uiStateChangeHandler will fire for every modification.
+        this.uiState.off('change', this.uiStateChangeHandler);
+        this.uiState.clearAllKeys();
+        this.uiState.set('vis', visCustomizations);
+        getKeys(visCustomizations).forEach(key => {
+          this.uiState.set(key, visCustomizations[key]);
+        });
+        this.uiState.on('change', this.uiStateChangeHandler);
+      }
     } else {
       this.uiState.clearAllKeys();
     }
@@ -159,19 +162,19 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     const updatedParams: VisualizeUpdateParams = {};
 
     // Check if timerange has changed
-    if (this.input.timeRange !== this.timeRange) {
+    if (!_.isEqual(this.input.timeRange, this.timeRange)) {
       this.timeRange = _.cloneDeep(this.input.timeRange);
       updatedParams.timeRange = this.timeRange;
     }
 
     // Check if filters has changed
-    if (this.input.filters !== this.filters) {
+    if (!onlyDisabledFiltersChanged(this.input.filters, this.filters)) {
       updatedParams.filters = this.input.filters;
       this.filters = this.input.filters;
     }
 
     // Check if query has changed
-    if (this.input.query !== this.query) {
+    if (!_.isEqual(this.input.query, this.query)) {
       updatedParams.query = this.input.query;
       this.query = this.input.query;
     }
@@ -185,6 +188,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     if (this.handler && !_.isEmpty(updatedParams)) {
       this.handler.update(updatedParams);
+      this.handler.reload();
     }
   }
 
@@ -213,8 +217,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       // Append visualization to container instead of replacing its content
       append: true,
       timeRange: _.cloneDeep(this.input.timeRange),
-      query: this.input.query,
-      filters: this.input.filters,
+      query: this.query,
+      filters: this.filters,
       cssClass: `panel-content panel-content--fullWidth`,
       dataAttrs,
     };
