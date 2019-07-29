@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import React, { Fragment } from 'react';
+import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -147,11 +147,11 @@ export const getColumns = (
     {
       name: i18n.translate('xpack.ml.dataframe.progress', { defaultMessage: 'Progress' }),
       sortable: (item: DataFrameTransformListRow) =>
-        get(item, 'stats.checkpointing.next.checkpoint_progress.percent_complete', 0),
+        idx(item, _ => _.stats.checkpointing.next.checkpoint_progress.percent_complete) || 0,
       truncateText: true,
       render(item: DataFrameTransformListRow) {
         const progress = Math.round(
-          get(item, 'stats.checkpointing.next.checkpoint_progress.percent_complete', 0)
+          idx(item, _ => _.stats.checkpointing.next.checkpoint_progress.percent_complete) || 0
         );
 
         const isBatchTransform = typeof item.config.sync === 'undefined';
