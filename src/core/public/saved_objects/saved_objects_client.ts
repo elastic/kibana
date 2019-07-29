@@ -36,7 +36,7 @@ import {
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchQuery, HttpSetup } from '../http';
 
-export type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
+type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
 
 export {
   SavedObject,
@@ -44,6 +44,7 @@ export {
   SavedObjectAttributes,
   SavedObjectReference,
   SavedObjectsBaseOptions,
+  SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
 } from '../../server/types';
 

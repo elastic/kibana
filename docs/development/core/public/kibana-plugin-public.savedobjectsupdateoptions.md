@@ -15,7 +15,7 @@ export interface SavedObjectsUpdateOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [migrationVersion](./kibana-plugin-public.savedobjectsupdateoptions.migrationversion.md) | <code>SavedObjectsMigrationVersion</code> |  |
+|  [migrationVersion](./kibana-plugin-public.savedobjectsupdateoptions.migrationversion.md) | <code>SavedObjectsMigrationVersion</code> | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
 |  [references](./kibana-plugin-public.savedobjectsupdateoptions.references.md) | <code>SavedObjectReference[]</code> |  |
 |  [version](./kibana-plugin-public.savedobjectsupdateoptions.version.md) | <code>string</code> |  |
 

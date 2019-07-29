@@ -458,7 +458,6 @@ export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = 
     attributes: T;
     // (undocumented)
     id?: string;
-    // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
     // (undocumented)
     references?: SavedObjectReference[];
@@ -527,7 +526,6 @@ export interface SavedObjectsClientWrapperOptions<Request = unknown> {
 // @public (undocumented)
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     id?: string;
-    // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
     overwrite?: boolean;
     // (undocumented)

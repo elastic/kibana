@@ -656,7 +656,6 @@ export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
 // @public (undocumented)
 export interface SavedObjectsCreateOptions {
     id?: string;
-    // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
     overwrite?: boolean;
     // (undocumented)
@@ -711,7 +710,6 @@ export interface SavedObjectsStart {
 
 // @public (undocumented)
 export interface SavedObjectsUpdateOptions {
-    // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
     // (undocumented)
     references?: SavedObjectReference[];

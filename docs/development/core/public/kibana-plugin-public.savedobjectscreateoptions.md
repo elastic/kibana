@@ -16,7 +16,7 @@ export interface SavedObjectsCreateOptions
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [id](./kibana-plugin-public.savedobjectscreateoptions.id.md) | <code>string</code> | (Not recommended) Specify an id instead of having the saved objects service generate one for you. |
-|  [migrationVersion](./kibana-plugin-public.savedobjectscreateoptions.migrationversion.md) | <code>SavedObjectsMigrationVersion</code> |  |
+|  [migrationVersion](./kibana-plugin-public.savedobjectscreateoptions.migrationversion.md) | <code>SavedObjectsMigrationVersion</code> | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
 |  [overwrite](./kibana-plugin-public.savedobjectscreateoptions.overwrite.md) | <code>boolean</code> | If a document with the given <code>id</code> already exists, overwrite it's contents (default=false). |
 |  [references](./kibana-plugin-public.savedobjectscreateoptions.references.md) | <code>SavedObjectReference[]</code> |  |
 
