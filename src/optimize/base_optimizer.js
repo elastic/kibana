@@ -472,14 +472,16 @@ export default class BaseOptimizer {
       }
     };
 
-    return webpackMerge(
-      commonConfig,
-      IS_KIBANA_DISTRIBUTABLE
-        ? isDistributableConfig
-        : {},
-      this.uiBundles.isDevMode()
-        ? webpackMerge(watchingConfig, supportEnzymeConfig)
-        : productionConfig
+    return this.uiBundles.getExtendedConfig(
+      webpackMerge(
+        commonConfig,
+        IS_KIBANA_DISTRIBUTABLE
+          ? isDistributableConfig
+          : {},
+        this.uiBundles.isDevMode()
+          ? webpackMerge(watchingConfig, supportEnzymeConfig)
+          : productionConfig
+      )
     );
   }
 

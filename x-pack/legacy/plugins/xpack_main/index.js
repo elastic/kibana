@@ -7,7 +7,6 @@
 import { resolve } from 'path';
 import dedent from 'dedent';
 import {
-  XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING,
   XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS
 } from '../../server/lib/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
@@ -18,7 +17,6 @@ import {
   featuresRoute,
   settingsRoute,
 } from './server/routes/api/v1';
-import { i18n } from '@kbn/i18n';
 
 import { registerOssFeatures } from './server/lib/register_oss_features';
 import { uiCapabilitiesForFeatures } from './server/lib/ui_capabilities_for_features';
@@ -57,20 +55,6 @@ export const xpackMain = (kibana) => {
     },
 
     uiExports: {
-      uiSettingDefaults: {
-        [XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING]: {
-          name: i18n.translate('xpack.main.uiSettings.adminEmailTitle', {
-            defaultMessage: 'Admin email'
-          }),
-          // TODO: change the description when email address is used for more things?
-          description: i18n.translate('xpack.main.uiSettings.adminEmailDescription', {
-            defaultMessage:
-              'Recipient email address for X-Pack admin operations, such as Cluster Alert email notifications from Monitoring.'
-          }),
-          type: 'string', // TODO: Any way of ensuring this is a valid email address?
-          value: null
-        }
-      },
       hacks: [
         'plugins/xpack_main/hacks/check_xpack_info_change',
       ],

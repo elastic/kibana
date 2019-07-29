@@ -36,7 +36,7 @@ export const reporting = (kibana) => {
         'plugins/reporting/share_context_menu/register_csv_reporting',
         'plugins/reporting/share_context_menu/register_reporting',
       ],
-      contextMenuActions: [
+      embeddableActions: [
         'plugins/reporting/panel_actions/get_csv_panel_action',
       ],
       hacks: ['plugins/reporting/hacks/job_completion_notifier'],
@@ -127,6 +127,7 @@ export const reporting = (kibana) => {
           }).default()
         }).default(),
         csv: Joi.object({
+          checkForFormulas: Joi.boolean().default(true),
           enablePanelActionDownload: Joi.boolean().default(false),
           maxSizeBytes: Joi.number().integer().default(1024 * 1024 * 10), // bytes in a kB * kB in a mB * 10
           scroll: Joi.object({

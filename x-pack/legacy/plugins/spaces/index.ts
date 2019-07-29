@@ -181,6 +181,9 @@ export const spaces = (kibana: Record<string, any>) =>
       });
 
       server.expose('getSpaceId', (request: any) => spacesService.getSpaceId(request));
+      server.expose('spaceIdToNamespace', spacesService.spaceIdToNamespace);
+      server.expose('namespaceToSpaceId', spacesService.namespaceToSpaceId);
+      server.expose('getBasePath', spacesService.getBasePath);
       server.expose('getScopedSpacesClient', spacesService.scopedClient);
     },
   });

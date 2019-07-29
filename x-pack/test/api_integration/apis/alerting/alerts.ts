@@ -31,7 +31,7 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
           return supertest
             .delete(`/api/alert/${id}`)
             .set('kbn-xsrf', 'foo')
-            .expect(200);
+            .expect(204, '');
         })
       );
       await esArchiver.unload('actions/basic');
@@ -44,7 +44,7 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            interval: 100,
+            interval: '1s',
             alertTypeId: 'test.always-firing',
             alertTypeParams: {
               index: esTestIndexName,

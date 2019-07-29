@@ -21,21 +21,23 @@ import {
 } from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { FlowDirectionSelect } from '../../../flow_controls/flow_direction_select';
-import { Criteria, ItemsPerRow, LoadMoreTable, SortingBasicTable } from '../../../load_more_table';
+import { Criteria, ItemsPerRow, PaginatedTable, SortingBasicTable } from '../../../paginated_table';
 
 import { getDomainsColumns } from './columns';
 import * as i18n from './translations';
+const tableType = networkModel.IpDetailsTableType.domains;
 
 interface OwnProps {
   data: DomainsEdges[];
   flowTarget: FlowTarget;
-  loading: boolean;
-  hasNextPage: boolean;
+  fakeTotalCount: number;
+  id: string;
   indexPattern: StaticIndexPattern;
   ip: string;
-  nextCursor: string;
+  loading: boolean;
+  loadPage: (newActivePage: number) => void;
+  showMorePagesIndicator: boolean;
   totalCount: number;
-  loadMore: (cursor: string) => void;
   type: networkModel.NetworkType;
 }
 
@@ -58,6 +60,10 @@ interface DomainsTableDispatchProps {
     domainsSort: DomainsSortField;
     networkType: networkModel.NetworkType;
   }>;
+  updateTableActivePage: ActionCreator<{
+    activePage: number;
+    tableType: networkModel.IpDetailsTableType;
+  }>;
 }
 
 type DomainsTableProps = OwnProps & DomainsTableReduxProps & DomainsTableDispatchProps;
@@ -71,14 +77,6 @@ const rowItems: ItemsPerRow[] = [
     text: i18n.ROWS_10,
     numberOfRow: 10,
   },
-  {
-    text: i18n.ROWS_20,
-    numberOfRow: 20,
-  },
-  {
-    text: i18n.ROWS_50,
-    numberOfRow: 50,
-  },
 ];
 
 export const DomainsTableId = 'domains-table';
@@ -88,22 +86,24 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
     const {
       data,
       domainsSortField,
-      hasNextPage,
+      fakeTotalCount,
+      flowDirection,
+      flowTarget,
+      id,
       indexPattern,
       ip,
       limit,
       loading,
-      loadMore,
+      loadPage,
+      showMorePagesIndicator,
       totalCount,
-      nextCursor,
-      updateDomainsLimit,
-      flowDirection,
-      flowTarget,
       type,
+      updateDomainsLimit,
+      updateTableActivePage,
     } = this.props;
 
     return (
-      <LoadMoreTable
+      <PaginatedTable
         columns={getDomainsColumns(
           indexPattern,
           ip,
@@ -112,7 +112,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
           type,
           DomainsTableId
         )}
-        hasNextPage={hasNextPage}
+        showMorePagesIndicator={showMorePagesIndicator}
         headerCount={totalCount}
         headerSupplement={
           <FlowDirectionSelect
@@ -122,17 +122,25 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
         }
         headerTitle={i18n.DOMAINS}
         headerUnit={i18n.UNIT(totalCount)}
+        id={id}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadingTitle={i18n.DOMAINS}
-        loadMore={() => loadMore(nextCursor)}
+        loadPage={newActivePage => loadPage(newActivePage)}
         onChange={this.onChange}
         pageOfItems={data}
         sorting={getSortField(domainsSortField, flowTarget)}
+        totalCount={fakeTotalCount}
+        updateActivePage={newPage =>
+          updateTableActivePage({
+            activePage: newPage,
+            tableType,
+          })
+        }
         updateLimitPagination={newLimit =>
           updateDomainsLimit({ limit: newLimit, networkType: type })
         }
+        updateProps={{ domainsSortField, flowDirection, flowTarget, totalCount }}
       />
     );
   }
@@ -171,6 +179,7 @@ export const DomainsTable = connect(
     updateDomainsLimit: networkActions.updateDomainsLimit,
     updateDomainsDirection: networkActions.updateDomainsFlowDirection,
     updateDomainsSort: networkActions.updateDomainsSort,
+    updateTableActivePage: networkActions.updateIpDetailsTableActivePage,
   }
 )(DomainsTableComponent);
 

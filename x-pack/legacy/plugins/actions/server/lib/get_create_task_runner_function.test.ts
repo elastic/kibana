@@ -19,6 +19,7 @@ const mockedEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
 const actionType = {
   id: '1',
   name: '1',
+  unencryptedAttributes: [],
   executor: jest.fn(),
 };
 

@@ -14,6 +14,7 @@ import React from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import DragSelect from 'dragselect/dist/ds.min.js';
 import { map } from 'rxjs/operators';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiFlexGroup,
@@ -789,7 +790,18 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       if (stateUpdate.influencers !== undefined && !noInfluencersConfigured) {
         for (const influencerName in stateUpdate.influencers) {
           if (stateUpdate.influencers[influencerName][0] && stateUpdate.influencers[influencerName][0].influencerFieldValue) {
-            stateUpdate.filterPlaceHolder = `${influencerName} : ${stateUpdate.influencers[influencerName][0].influencerFieldValue}`;
+            stateUpdate.filterPlaceHolder =
+                  (i18n.translate(
+                    'xpack.ml.explorer.kueryBar.filterPlaceholder',
+                    {
+                      defaultMessage:
+                  'Filter by influencer fields… ({queryExample})',
+                      values: {
+                        queryExample:
+                    `${influencerName} : ${stateUpdate.influencers[influencerName][0].influencerFieldValue}`
+                      }
+                    }
+                  ));
             break;
           }
         }
@@ -968,7 +980,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     }
 
     applyInfluencersFilterQuery = ({
-      influencersFilterQuery,
+      filterQuery: influencersFilterQuery,
       isAndOperator,
       filteredFields,
       queryString,
@@ -1123,7 +1135,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           )}
 
           {noInfluencersConfigured === false && (
-            <div className="column col-xs-2 euiText">
+            <div className="column col-xs-2 euiText" data-test-subj="mlAnomalyExplorerInfluencerList">
               <span className="panel-title">
                 <FormattedMessage
                   id="xpack.ml.explorer.topInfuencersTitle"
@@ -1149,6 +1161,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
               className="ml-explorer-swimlane euiText"
               onMouseEnter={this.onSwimlaneEnterHandler}
               onMouseLeave={this.onSwimlaneLeaveHandler}
+              data-test-subj="mlAnomalyExplorerSwimlaneOverall"
             >
               <ExplorerSwimlane
                 chartWidth={swimlaneWidth}
@@ -1224,6 +1237,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                     className="ml-explorer-swimlane euiText"
                     onMouseEnter={this.onSwimlaneEnterHandler}
                     onMouseLeave={this.onSwimlaneLeaveHandler}
+                    data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
                   >
                     <ExplorerSwimlane
                       chartWidth={swimlaneWidth}

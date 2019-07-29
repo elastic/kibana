@@ -39,9 +39,13 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
             from: FROM,
           },
           pagination: {
-            limit: 1,
+            activePage: 0,
+            cursorStart: 0,
+            fakePossibleCount: 3,
+            querySize: 1,
           },
           defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          inspect: false,
         },
       });
       expect(UncommonProcesses.edges.length).to.be(1);
@@ -62,9 +66,13 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
             from: FROM,
           },
           pagination: {
-            limit: 2,
+            activePage: 0,
+            cursorStart: 0,
+            fakePossibleCount: 3,
+            querySize: 2,
           },
           defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          inspect: false,
         },
       });
       expect(UncommonProcesses.edges.length).to.be(2);
@@ -85,9 +93,13 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
             from: FROM,
           },
           pagination: {
-            limit: 1,
+            activePage: 0,
+            cursorStart: 0,
+            fakePossibleCount: 3,
+            querySize: 1,
           },
           defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          inspect: false,
         },
       });
       expect(UncommonProcesses.totalCount).to.be(TOTAL_COUNT);
@@ -108,9 +120,13 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
             from: FROM,
           },
           pagination: {
-            limit: 1,
+            activePage: 0,
+            cursorStart: 0,
+            fakePossibleCount: 3,
+            querySize: 1,
           },
           defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          inspect: false,
         },
       });
       const expected: GetUncommonProcessesQuery.Node = {

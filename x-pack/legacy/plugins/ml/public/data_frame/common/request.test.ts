@@ -6,14 +6,14 @@
 
 import { PivotGroupByConfig } from '../common';
 
-import { JobDetailsExposedState } from '../components/job_details/job_details_form';
-import { DefinePivotExposedState } from '../components/define_pivot/define_pivot_form';
+import { StepDefineExposedState } from '../pages/data_frame_new_pivot/components/step_define/step_define_form';
+import { StepDetailsExposedState } from '../pages/data_frame_new_pivot/components/step_details/step_details_form';
 
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
 import { PivotAggsConfig, PIVOT_SUPPORTED_AGGS } from './pivot_aggs';
 import {
-  getDataFramePreviewRequest,
-  getDataFrameRequest,
+  getPreviewRequestBody,
+  getCreateRequestBody,
   getPivotQuery,
   isDefaultQuery,
   isSimpleQuery,
@@ -48,7 +48,7 @@ describe('Data Frame: Common', () => {
     });
   });
 
-  test('getDataFramePreviewRequest()', () => {
+  test('getPreviewRequestBody()', () => {
     const query = getPivotQuery('the-query');
     const groupBy: PivotGroupByConfig[] = [
       {
@@ -66,7 +66,7 @@ describe('Data Frame: Common', () => {
         dropDownName: 'the-agg-drop-down-name',
       },
     ];
-    const request = getDataFramePreviewRequest('the-index-pattern-title', query, groupBy, aggs);
+    const request = getPreviewRequestBody('the-index-pattern-title', query, groupBy, aggs);
 
     expect(request).toEqual({
       pivot: {
@@ -74,13 +74,50 @@ describe('Data Frame: Common', () => {
         group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
       },
       source: {
-        index: 'the-index-pattern-title',
+        index: ['the-index-pattern-title'],
         query: { query_string: { default_operator: 'AND', query: 'the-query' } },
       },
     });
   });
 
-  test('getDataFrameRequest()', () => {
+  test('getPreviewRequestBody() with comma-separated index pattern', () => {
+    const query = getPivotQuery('the-query');
+    const groupBy: PivotGroupByConfig[] = [
+      {
+        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
+        field: 'the-group-by-field',
+        aggName: 'the-group-by-agg-name',
+        dropDownName: 'the-group-by-drop-down-name',
+      },
+    ];
+    const aggs: PivotAggsConfig[] = [
+      {
+        agg: PIVOT_SUPPORTED_AGGS.AVG,
+        field: 'the-agg-field',
+        aggName: 'the-agg-agg-name',
+        dropDownName: 'the-agg-drop-down-name',
+      },
+    ];
+    const request = getPreviewRequestBody(
+      'the-index-pattern-title,the-other-title',
+      query,
+      groupBy,
+      aggs
+    );
+
+    expect(request).toEqual({
+      pivot: {
+        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+      },
+      source: {
+        index: ['the-index-pattern-title', 'the-other-title'],
+        query: { query_string: { default_operator: 'AND', query: 'the-query' } },
+      },
+    });
+  });
+
+  test('getCreateRequestBody()', () => {
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
@@ -93,32 +130,42 @@ describe('Data Frame: Common', () => {
       aggName: 'the-agg-agg-name',
       dropDownName: 'the-agg-drop-down-name',
     };
-    const pivotState: DefinePivotExposedState = {
+    const pivotState: StepDefineExposedState = {
       aggList: { 'the-agg-name': agg },
       groupByList: { 'the-group-by-name': groupBy },
       isAdvancedEditorEnabled: false,
-      search: 'the-query',
+      searchString: 'the-query',
+      searchQuery: 'the-search-query',
       valid: true,
     };
-    const jobDetailsState: JobDetailsExposedState = {
+    const transformDetailsState: StepDetailsExposedState = {
+      continuousModeDateField: 'the-continuous-mode-date-field',
+      continuousModeDelay: 'the-continuous-mode-delay',
       createIndexPattern: false,
-      jobId: 'the-job-id',
+      isContinuousModeEnabled: false,
+      transformId: 'the-transform-id',
+      transformDescription: 'the-transform-description',
       destinationIndex: 'the-destination-index',
       touched: true,
       valid: true,
     };
 
-    const request = getDataFrameRequest('the-index-pattern-title', pivotState, jobDetailsState);
+    const request = getCreateRequestBody(
+      'the-index-pattern-title',
+      pivotState,
+      transformDetailsState
+    );
 
     expect(request).toEqual({
+      description: 'the-transform-description',
       dest: { index: 'the-destination-index' },
       pivot: {
         aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
         group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
       },
       source: {
-        index: 'the-index-pattern-title',
-        query: { query_string: { default_operator: 'AND', query: 'the-query' } },
+        index: ['the-index-pattern-title'],
+        query: { query_string: { default_operator: 'AND', query: 'the-search-query' } },
       },
     });
   });

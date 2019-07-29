@@ -52,12 +52,10 @@ export const ErrorCountBadge: React.SFC<Props> = ({
 
   return (
     <APMLink
-      path={`/${idx(transaction, _ => _.service.name)}/errors`}
+      path={`/services/${idx(transaction, _ => _.service.name)}/errors`}
       query={{
         kuery: encodeURIComponent(
-          `trace.id : "${transaction.trace.id}" and transaction.id : "${
-            transaction.transaction.id
-          }"`
+          `trace.id : "${transaction.trace.id}" and transaction.id : "${transaction.transaction.id}"`
         )
       }}
       color="danger"

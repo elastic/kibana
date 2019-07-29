@@ -21,6 +21,13 @@ export const AUTONOMOUS_SYSTEM = i18n.translate(
   }
 );
 
+export const MAX_ANOMALY_SCORE_BY_JOB = i18n.translate(
+  'xpack.siem.network.ipDetails.ipOverview.maxAnomalyScoreByJobTitle',
+  {
+    defaultMessage: 'Max Anomaly Score By Job',
+  }
+);
+
 export const FIRST_SEEN = i18n.translate('xpack.siem.network.ipDetails.ipOverview.firstSeenTitle', {
   defaultMessage: 'First Seen',
 });
@@ -74,5 +81,12 @@ export const AS_DESTINATION = i18n.translate(
   'xpack.siem.network.ipDetails.ipOverview.asDestinationDropDownOptionLabel',
   {
     defaultMessage: 'As Destination',
+  }
+);
+
+export const INSPECT_TITLE = i18n.translate(
+  'xpack.siem.network.ipDetails.ipOverview.inspectTitle',
+  {
+    defaultMessage: 'IP overview',
   }
 );

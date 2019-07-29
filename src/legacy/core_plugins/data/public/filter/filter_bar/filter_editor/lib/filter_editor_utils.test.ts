@@ -18,7 +18,8 @@
  */
 
 import { FilterStateStore, toggleFilterNegated } from '@kbn/es-query';
-import { mockFields, mockIndexPattern } from 'ui/index_patterns/fixtures';
+
+import { fixtures } from '../../../../index_patterns';
 import {
   buildFilter,
   getFieldFromFilter,
@@ -41,6 +42,22 @@ import { existsFilter } from './fixtures/exists_filter';
 import { phraseFilter } from './fixtures/phrase_filter';
 import { phrasesFilter } from './fixtures/phrases_filter';
 import { rangeFilter } from './fixtures/range_filter';
+
+jest.mock('ui/kfetch', () => ({
+  kfetch: () => {},
+}));
+
+jest.mock(
+  'ui/notify',
+  () => ({
+    toastNotifications: {
+      addWarning: () => {},
+    },
+  }),
+  { virtual: true }
+);
+
+const { mockFields, mockIndexPattern } = fixtures;
 
 describe('Filter editor utils', () => {
   describe('getQueryDslFromFilter', () => {
@@ -239,7 +256,11 @@ describe('Filter editor utils', () => {
       const filter = buildFilter(mockIndexPattern, mockFields[0], isOperator, params, alias, state);
       expect(filter.meta.negate).toBe(isOperator.negate);
       expect(filter.meta.alias).toBe(alias);
-      expect(filter.$state.store).toBe(state);
+
+      expect(filter.$state).toBeDefined();
+      if (filter.$state) {
+        expect(filter.$state.store).toBe(state);
+      }
     });
 
     it('should build phrases filters', () => {
@@ -257,7 +278,10 @@ describe('Filter editor utils', () => {
       expect(filter.meta.type).toBe(isOneOfOperator.type);
       expect(filter.meta.negate).toBe(isOneOfOperator.negate);
       expect(filter.meta.alias).toBe(alias);
-      expect(filter.$state.store).toBe(state);
+      expect(filter.$state).toBeDefined();
+      if (filter.$state) {
+        expect(filter.$state.store).toBe(state);
+      }
     });
 
     it('should build range filters', () => {
@@ -274,7 +298,10 @@ describe('Filter editor utils', () => {
       );
       expect(filter.meta.negate).toBe(isBetweenOperator.negate);
       expect(filter.meta.alias).toBe(alias);
-      expect(filter.$state.store).toBe(state);
+      expect(filter.$state).toBeDefined();
+      if (filter.$state) {
+        expect(filter.$state.store).toBe(state);
+      }
     });
 
     it('should build exists filters', () => {
@@ -291,7 +318,10 @@ describe('Filter editor utils', () => {
       );
       expect(filter.meta.negate).toBe(existsOperator.negate);
       expect(filter.meta.alias).toBe(alias);
-      expect(filter.$state.store).toBe(state);
+      expect(filter.$state).toBeDefined();
+      if (filter.$state) {
+        expect(filter.$state.store).toBe(state);
+      }
     });
 
     it('should negate based on operator', () => {
@@ -308,7 +338,10 @@ describe('Filter editor utils', () => {
       );
       expect(filter.meta.negate).toBe(doesNotExistOperator.negate);
       expect(filter.meta.alias).toBe(alias);
-      expect(filter.$state.store).toBe(state);
+      expect(filter.$state).toBeDefined();
+      if (filter.$state) {
+        expect(filter.$state.store).toBe(state);
+      }
     });
   });
 });

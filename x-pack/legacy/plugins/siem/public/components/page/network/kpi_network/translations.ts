@@ -25,21 +25,24 @@ export const UNIQUE_PRIVATE_IPS = i18n.translate(
   }
 );
 
-export const SRC = i18n.translate('xpack.siem.kpiNetwork.source.srcTitle', {
-  defaultMessage: 'Src.',
-});
-
 export const SOURCE = i18n.translate('xpack.siem.kpiNetwork.source.sourceTitle', {
   defaultMessage: 'Source',
+});
+
+export const SOURCE_NAME = i18n.translate('xpack.siem.kpiNetwork.source.name.sourceTitle', {
+  defaultMessage: 'Src.',
 });
 
 export const DESTINATION = i18n.translate('xpack.siem.kpiNetwork.source.destinationTitle', {
   defaultMessage: 'Destination',
 });
 
-export const DIST = i18n.translate('xpack.siem.kpiNetwork.source.distTitle', {
-  defaultMessage: 'Dist.',
-});
+export const DESTINATION_NAME = i18n.translate(
+  'xpack.siem.kpiNetwork.source.name.destinationTitle',
+  {
+    defaultMessage: 'Dest.',
+  }
+);
 
 export const LOADING = i18n.translate('xpack.siem.kpiNetwork.source.loadingDescription', {
   defaultMessage: 'Loading',

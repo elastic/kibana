@@ -39,8 +39,8 @@ it('fires an action with proper parameters', async () => {
   execute.mockResolvedValueOnce({ success: true });
 
   const { payload, statusCode } = await server.inject(request);
-  expect(statusCode).toBe(204);
-  expect(payload).toBe('');
+  expect(statusCode).toBe(200);
+  expect(payload).toBe('{"success":true}');
 
   expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
   expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`

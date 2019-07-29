@@ -15,10 +15,12 @@
 
   .expressionInput {
     flex-grow: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   .expressionInput--inner {
-    height: 100%;
+    flex-grow: 1;
   }
 
   .canvasExpression--settings {
@@ -26,15 +28,19 @@
   }
 
   .canvasTextArea--code {
-    height: 100%;
+    flex-grow: 1;
     padding-right: $euiSizeXXL;
   }
 
   .autocomplete {
     flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 
     .canvasAutocomplete--inner {
-      height: 100%;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
     }
   }
 

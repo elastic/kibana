@@ -1,0 +1,10 @@
+{
+  "ml.put_data_frame_analytics": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_ml/data_frame/analytics/{id}"
+    ]
+  }
+}

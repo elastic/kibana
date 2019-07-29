@@ -12,9 +12,14 @@ import { rgba } from 'polished';
 import { TimeSeriesAPIResponse } from '../../server/lib/transactions/charts';
 import { ApmTimeSeriesResponse } from '../../server/lib/transactions/charts/get_timeseries_data/transform';
 import { StringMap } from '../../typings/common';
-import { Coordinate, RectCoordinate } from '../../typings/timeseries';
+import {
+  Coordinate,
+  RectCoordinate,
+  TimeSeries
+} from '../../typings/timeseries';
 import { asDecimal, asMillis, tpmUnit } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
+import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
 
 export interface ITpmBucket {
   title: string;
@@ -25,14 +30,12 @@ export interface ITpmBucket {
 }
 
 export interface ITransactionChartData {
-  noHits: boolean;
   tpmSeries: ITpmBucket[];
-  responseTimeSeries: TimeSerie[];
+  responseTimeSeries: TimeSeries[];
 }
 
 const INITIAL_DATA = {
   apmTimeseries: {
-    totalHits: 0,
     responseTimes: {
       avg: [],
       p95: [],
@@ -48,7 +51,6 @@ export function getTransactionCharts(
   { transactionType }: IUrlParams,
   { apmTimeseries, anomalyTimeseries }: TimeSeriesAPIResponse = INITIAL_DATA
 ): ITransactionChartData {
-  const noHits = apmTimeseries.totalHits === 0;
   const tpmSeries = getTpmSeries(apmTimeseries, transactionType);
 
   const responseTimeSeries = getResponseTimeSeries({
@@ -57,22 +59,9 @@ export function getTransactionCharts(
   });
 
   return {
-    noHits,
     tpmSeries,
     responseTimeSeries
   };
-}
-
-interface TimeSerie {
-  title: string;
-  titleShort?: string;
-  hideLegend?: boolean;
-  hideTooltipValue?: boolean;
-  data: Array<Coordinate | RectCoordinate>;
-  legendValue?: string;
-  type: string;
-  color: string;
-  areaColor?: string;
 }
 
 export function getResponseTimeSeries({
@@ -82,7 +71,7 @@ export function getResponseTimeSeries({
   const { overallAvgDuration } = apmTimeseries;
   const { avg, p95, p99 } = apmTimeseries.responseTimes;
 
-  const series: TimeSerie[] = [
+  const series: TimeSeries[] = [
     {
       title: i18n.translate('xpack.apm.transactions.chart.averageLabel', {
         defaultMessage: 'Avg.'
@@ -170,12 +159,20 @@ export function getTpmSeries(
   const bucketKeys = tpmBuckets.map(({ key }) => key);
   const getColor = getColorByKey(bucketKeys);
 
+  const { avg } = apmTimeseries.responseTimes;
+
+  if (!tpmBuckets.length && avg.length) {
+    const start = avg[0].x;
+    const end = avg[avg.length - 1].x;
+    return getEmptySeries(start, end);
+  }
+
   return tpmBuckets.map(bucket => {
-    const avg = mean(bucket.dataPoints.map(p => p.y));
+    const average = mean(bucket.dataPoints.map(p => p.y));
     return {
       title: bucket.key,
       data: bucket.dataPoints,
-      legendValue: `${asDecimal(avg)} ${tpmUnit(transactionType || '')}`,
+      legendValue: `${asDecimal(average)} ${tpmUnit(transactionType || '')}`,
       type: 'linemark',
       color: getColor(bucket.key)
     };

@@ -1,17 +1,21 @@
 # Kibana actions
 
-The Kibana actions plugin provides a common place to execute actions. You can:
+The Kibana actions plugin provides a framework to create executable actions. You can:
 
-- Register an action type
-- View a list of registered types
-- Fire an action either manually or by using an alert
-- Perform CRUD on actions with encrypted configurations
+- Register an action type and associate a JavaScript function to run when actions
+  are executed.
+- Get a list of registered action types
+- Create an action from an action type and encrypted configuration object.
+- Get a list of actions that have been created.
+- Execute an action, passing it a parameter object.
+- Perform CRUD operations on actions.
 
 ## Terminology
 
-**Action Type**: A programatically defined integration with another service, with an expected set of configuration and parameters.
+**Action Type**: A programatically defined integration with another service, with an expected set of configuration and parameters properties, typically defined with a schema.  Plugins can add new
+action types.
 
-**Action**: A user-defined configuration that satisfies an action type's expected configuration.
+**Action**: A configuration object associated with an action type, that is ready to be executed.  The configuration is persisted via Saved Objects, and some/none/all of the configuration properties can be stored encrypted.
 
 ## Usage
 
@@ -32,9 +36,11 @@ The following table describes the properties of the `options` object.
 |id|Unique identifier for the action type. For convention, ids starting with `.` are reserved for built in action types. We recommend using a convention like `<plugin_id>.mySpecialAction` for your action types.|string|
 |name|A user-friendly name for the action type. These will be displayed in dropdowns when chosing action types.|string|
 |unencryptedAttributes|A list of opt-out attributes that don't need to be encrypted. These attributes won't need to be re-entered on import / export when the feature becomes available. These attributes will also be readable / displayed when it comes to a table / edit screen.|array of strings|
-|validate.params|When developing an action type, it needs to accept parameters to know what to do with the action. (Example to, from, subject, body of an email). Use joi object validation if you would like `params` to be validated before being passed to the executor.|Joi schema|
-|validate.config|Similar to params, a config is required when creating an action (for example host, port, username, and password of an email server). Use the joi object validation if you would like the config to be validated before being passed to the executor.|Joi schema|
+|validate.params|When developing an action type, it needs to accept parameters to know what to do with the action. (Example to, from, subject, body of an email). See the current built-in email action type for an example of the state-of-the-art validation. <p>Technically, the value of this property should have a property named `validate()` which is a function that takes a params object to validate and returns a sanitized version of that object to pass to the execution function.  Validation errors should be thrown from the `validate()` function and will be available as an error message|schema / validation function|
+|validate.config|Similar to params, a config is required when creating an action (for example host, port, username, and password of an email server). |schema / validation function|
 |executor|This is where the code of an action type lives. This is a function gets called for executing an action from either alerting or manually by using the exposed function (see firing actions). For full details, see executor section below.|Function|
+
+**Important**  - The config object is persisted in ElasticSearch and updated via the ElasticSearch update document API.  This API allows "partial updates" - and this can cause issues with the encryption used on specified properties.  So, a `validate()` function should return values for all configuration properties, so that partial updates do not occur.  Setting property values to `null` rather than `undefined`, or not including a property in the config object, is all you need to do to ensure partial updates won't occur.
 
 ### Executor
 
@@ -52,37 +58,9 @@ This is the primary function for an action type. Whenever the action needs to ex
 
 ### Example
 
-Below is an example email action type. The attributes `host` and `port` are configured to be unencrypted by using the `unencryptedAttributes` attribute.
+The built-in email action type provides a good example of creating an action type with non-trivial configuration and params: 
+[x-pack/legacy/plugins/actions/server/builtin_action_types/email.ts](server/builtin_action_types/email.ts)
 
-```
-server.plugins.actions.registerType({
-  id: 'smtp',
-  name: 'Email',
-  unencryptedAttributes: ['host', 'port'],
-  validate: {
-    params: Joi.object()
-      .keys({
-        to: Joi.array().items(Joi.string()).required(),
-        from: Joi.string().required(),
-        subject: Joi.string().required(),
-        body: Joi.string().required(),
-      })
-      .required(),
-    config: Joi.object()
-      .keys({
-        host: Joi.string().required(),
-        port: Joi.number().default(465),
-        username: Joi.string().required(),
-        password: Joi.string().required(),
-      })
-      .required(),
-  },
-  async executor({ config, params, services }) {
-    const transporter = nodemailer. createTransport(config);
-    await transporter.sendMail(params);
-  },
-});
-```
 
 ## RESTful API
 
@@ -112,7 +90,7 @@ Params:
 
 Params:
 
-See the saved objects API documentation for find. All the properties are the same except that you cannot pass in `type`.
+See the [saved objects API documentation for find](https://www.elastic.co/guide/en/kibana/master/saved-objects-api-find.html). All the properties are the same except that you cannot pass in `type`.
 
 #### `GET /api/action/{id}`: Get action
 
@@ -188,4 +166,125 @@ server.plugins.actions.fire({
   namespace: undefined, // The namespace the action exists within
   basePath: undefined, // Usually `request.getBasePath();` or `undefined`
 });
+```
+
+# Built-in Action Types
+
+Kibana ships with a set of built-in action types:
+
+- server log: logs messages to the Kibana log using `server.log()`
+- email: send an email
+- slack: post a message to a slack channel
+- index: index document(s) into elasticsearch
+
+## server log, action id: `.log`
+
+The params properties are modelled after the arguments to the [Hapi.server.log()](https://hapijs.com/api#-serverlogtags-data-timestamp) function.
+
+#### config properties
+
+|Property|Description|Type|
+|---|---|---|
+|-|This action has no config properties.|-|
+
+#### params properties
+
+|Property|Description|Type|
+|---|---|---|
+|message|The message to log.|string|
+|tags|Tags associated with the message to log.|string[] _(optional)_|
+
+## email, action id: `.email`
+
+This action type uses [nodemailer](https://nodemailer.com/about/) to send emails.
+
+#### config properties
+
+Either the property `service` must be provided, or the `host` and `port` properties must be provided.  If `service` is provided, `host`, `port` and `secure` are ignored.  For more information on the `gmail` service value specifically, see the [nodemailer gmail documentation](https://nodemailer.com/usage/using-gmail/).
+
+The `secure` property defaults to `false`.  See the [nodemailer TLS documentation](https://nodemailer.com/smtp/#tls-options) for more information.
+
+The `from` field can be specified as in typical `"user@host-name"` format, or as `"human name <user@host-name>"` format.  See the [nodemailer address documentation](https://nodemailer.com/message/addresses/) for more information.
+
+|Property|Description|Type|
+|---|---|---|
+|service|the name of a [well-known email service provider](https://nodemailer.com/smtp/well-known/)|string _(optional)_|
+|host|host name of the service provider|string _(optional)_|
+|port|port number of the service provider|number _(optional)_|
+|secure|whether to use TLS with the service provider|boolean _(optional)_|
+|user|userid to use with the service provider|string|
+|password|password to use with the service provider|string|
+|from|the from address for all emails sent with this action type|string|
+
+#### params properties
+
+There must be at least one entry in the `to`, `cc` and `bcc` arrays.
+
+The message text will be sent as both plain text and html text.  Additional function may be provided later.
+
+The `to`, `cc`, and `bcc` array entries can be in the same format as the `from` property described in the config object above.
+
+|Property|Description|Type|
+|---|---|---|
+|to|list of to addressees|string[] _(optional)_|
+|cc|list of cc addressees|string[] _(optional)_|
+|bcc|list of bcc addressees|string[] _(optional)_|
+|subject|the subject line of the email|string|
+|message|the message text|string|
+
+## slack, action id: `.slack`
+
+This action type interfaces with the [Slack Incoming Webhooks feature](https://api.slack.com/incoming-webhooks).  Currently the params property `message` will be used as the `text` property of the Slack incoming message.  Additional function may be provided later.
+
+#### config properties
+
+|Property|Description|Type|
+|---|---|---|
+|webhookUrl|the url of the Slack incoming webhook|string|
+
+#### params properties
+
+|Property|Description|Type|
+|---|---|---|
+|message|the message text|string|
+
+
+## index, action id: `.index`
+
+The config and params properties are modelled after the [Watcher Index Action](https://www.elastic.co/guide/en/elastic-stack-overview/master/actions-index.html).  The index can be set in the config or params, and if set in config, then the index set in the params will be ignored.
+
+#### config properties
+
+|Property|Description|Type|
+|---|---|---|
+|index|The Elasticsearch index to index into.|string _(optional)_|
+
+#### params properties
+
+|Property|Description|Type|
+|---|---|---|
+|index|The Elasticsearch index to index into.|string _(optional)_|
+|doc_id|The optional _id of the document.|string _(optional)_|
+|execution_time_field|The field that will store/index the action execution time.|string _(optional)_|
+|refresh|Setting of the refresh policy for the write request|boolean _(optional)_|
+|body|The documument body/bodies to index.|object or object[]|
+
+# Command Line Utility
+
+The [`kbn-action`](https://github.com/pmuellr/kbn-action) tool can be used to send HTTP requests to the Actions plugin.  For instance, to create a Slack action from the `.slack` Action Type, use the following command:
+
+```console
+$ kbn-action create .slack "post to slack" '{"webhookUrl": "https://hooks.slack.com/services/T0000/B0000/XXXX"}'
+{
+    "type": "action",
+    "id": "d6f1e228-1806-4a72-83ac-e06f3d5c2fbe",
+    "attributes": {
+        "actionTypeId": ".slack",
+        "description": "post to slack",
+        "actionTypeConfig": {}
+    },
+    "references": [],
+    "updated_at": "2019-06-26T17:55:42.728Z",
+    "version": "WzMsMV0="
+}
 ```

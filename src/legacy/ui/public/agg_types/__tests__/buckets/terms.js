@@ -26,7 +26,7 @@ describe('Terms Agg', function () {
 
     let $rootScope;
 
-    function init({ responseValueAggs = [], aggParams = {} }) {
+    function init({ metricAggs = [], aggParams = {} }) {
       ngMock.module('kibana');
       ngMock.inject(function ($controller, _$rootScope_) {
         const terms = aggTypes.byName.terms;
@@ -41,7 +41,7 @@ describe('Terms Agg', function () {
             aggs: []
           }
         };
-        $rootScope.responseValueAggs = responseValueAggs;
+        $rootScope.metricAggs = metricAggs;
         $controller(orderAggController, { $scope: $rootScope });
         $rootScope.$digest();
       });
@@ -50,7 +50,7 @@ describe('Terms Agg', function () {
     // should be rewritten after EUIficate order_agg.html
     it.skip('selects _key if the selected metric becomes incompatible', function () {
       init({
-        responseValueAggs: [
+        metricAggs: [
           {
             id: 'agg1',
             type: {
@@ -60,7 +60,7 @@ describe('Terms Agg', function () {
         ]
       });
       expect($rootScope.agg.params.orderBy).to.be('agg1');
-      $rootScope.responseValueAggs = [
+      $rootScope.metricAggs = [
         {
           id: 'agg1',
           type: {
@@ -75,7 +75,7 @@ describe('Terms Agg', function () {
     // should be rewritten after EUIficate order_agg.html
     it.skip('selects _key if the selected metric is removed', function () {
       init({
-        responseValueAggs: [
+        metricAggs: [
           {
             id: 'agg1',
             type: {
@@ -85,15 +85,15 @@ describe('Terms Agg', function () {
         ]
       });
       expect($rootScope.agg.params.orderBy).to.be('agg1');
-      $rootScope.responseValueAggs = [];
+      $rootScope.metricAggs = [];
       $rootScope.$digest();
       expect($rootScope.agg.params.orderBy).to.be('_key');
     });
 
-    describe('custom field formatter', () => {
+    describe.skip('custom field formatter', () => {
       beforeEach(() => {
         init({
-          responseValueAggs: [
+          metricAggs: [
             {
               id: 'agg1',
               type: {
@@ -127,7 +127,7 @@ describe('Terms Agg', function () {
     it('saves the "custom metric" to state and refreshes from it');
     it('invalidates the form if the metric agg form is not complete');
 
-    describe('convert include/exclude from old format', function () {
+    describe.skip('convert include/exclude from old format', function () {
 
       it('it doesnt do anything with string type', function () {
         init({

@@ -38,14 +38,14 @@ The following table describes the properties of the `options` object.
 |---|---|---|
 |id|Unique identifier for the alert type. For convention purposes, ids starting with `.` are reserved for built in alert types. We recommend using a convention like `<plugin_id>.mySpecialAlert` for your alert types to avoid conflicting with another plugin.|string|
 |name|A user-friendly name for the alert type. These will be displayed in dropdowns when choosing alert types.|string|
-|validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `execute` function or created as an alert saved object. In order to do this, provide a joi schema that we will use to validate the `params` attribute.|Joi schema|
-|execute|This is where the code of the alert type lives. This is a function to be called when executing an alert on an interval basis. For full details, see executor section below.|Function|
+|validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `executor` function or created as an alert saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.|@kbn/config-schema|
+|executor|This is where the code of the alert type lives. This is a function to be called when executing an alert on an interval basis. For full details, see executor section below.|Function|
 
 ### Executor
 
 This is the primary function for an alert type. Whenever the alert needs to execute, this function will perform the execution. It receives a variety of parameters. The following table describes the properties the executor receives.
 
-**execute(options)**
+**executor(options)**
 
 |Property|Description|
 |---|---|
@@ -62,24 +62,24 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 This example receives server and threshold as parameters. It will read the CPU usage of the server and fire actions if the reading is greater than the threshold.
 
 ```
+import { schema } from '@kbn/config-schema';
+...
 server.plugins.alerting.registerType({
 	id: 'my-alert-type',
 	name: 'My alert type',
 	validate: {
-		params: Joi.object()
-			.keys({
-				server: Joi.string().required(),
-				threshold: Joi.number().min(0).max(1).required(),
-			})
-			.required(),
+		params: schema.object({
+			server: schema.string(),
+			threshold: schema.number({ min: 0, max: 1 }),
+		}),
 	},
-	async execute({
+	async executor({
 		scheduledRunAt,
 		previousScheduledRunAt,
 		services,
 		params,
 		state,
-	}: AlertExecuteOptions) {
+	}: AlertExecutorOptions) {
 		const { server, threshold } = params; // Let's assume params is { server: 'server_1', threshold: 0.8 }
 
 		// Call a function to get the server's current CPU usage
@@ -126,19 +126,17 @@ server.plugins.alerting.registerType({
 	id: 'my-alert-type',
 	name: 'My alert type',
 	validate: {
-		params: Joi.object()
-			.keys({
-				threshold: Joi.number().min(0).max(1).required(),
-			})
-			.required(),
+		params: schema.object({
+			threshold: schema.number({ min: 0, max: 1 }),
+		}),
 	},
-	async execute({
+	async executor({
 		scheduledRunAt,
 		previousScheduledRunAt,
 		services,
 		params,
 		state,
-	}: AlertExecuteOptions) {
+	}: AlertExecutorOptions) {
 		const { threshold } = params; // Let's assume params is { threshold: 0.8 }
 
 		// Call a function to get the CPU readings on all the servers. The result will be
@@ -189,8 +187,9 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
+|enabled|Indicate if you want the alert to start executing on an interval basis after it has been created.|boolean| 
 |alertTypeId|The id value of the alert type you want to call when the alert is scheduled to execute.|string|
-|interval|The interval in milliseconds the alert should execute.|number|
+|interval|The interval in seconds, minutes, hours or days the alert should execute. Example: `10s`, `5m`, `1h`, `1d`.|string|
 |alertTypeParams|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
 |actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to fire.<br>- `params` (object): The map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
 
@@ -232,9 +231,26 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|interval|The interval in milliseconds the alert should execute.|number|
+|interval|The interval in seconds, minutes, hours or days the alert should execute. Example: `10s`, `5m`, `1h`, `1d`.|string|
 |alertTypeParams|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
 |actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to fire.<br>- `params` (object): There map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
+
+#### `POST /api/alert/{id}/_enable`: Enable an alert
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to enable.|string|
+
+#### `POST /api/alert/{id}/_disable`: Disable an alert
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to disable.|string|
+
 
 ## Alert instance factory
 

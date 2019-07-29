@@ -85,6 +85,7 @@ export const ml = (kibana: any) => {
         elasticsearch: server.plugins.elasticsearch,
         security: server.plugins.security,
         xpackMain: server.plugins.xpack_main,
+        spaces: server.plugins.spaces,
         ml: this,
       };
 

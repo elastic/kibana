@@ -17,9 +17,10 @@
  * under the License.
  */
 
-// aggParams and editorStateParams should be described while EUIficate agg_params.js
+import { VisParams, AggParams } from 'ui/vis';
+
 export interface AggControlProps<T> {
-  aggParams: any;
-  editorStateParams: any;
-  setValue(params: any, paramName: string, value: T): void;
+  aggParams: AggParams;
+  editorStateParams: VisParams;
+  setValue(params: AggParams, paramName: string, value: T): void;
 }

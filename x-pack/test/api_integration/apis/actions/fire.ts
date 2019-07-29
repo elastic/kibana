@@ -64,9 +64,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             message: 'Testing 123',
           },
         })
-        .expect(204)
+        .expect(200)
         .then((resp: any) => {
-          expect(resp.body).to.eql({});
+          expect(resp.body).to.be.an('object');
         });
       const indexedRecord = await retry.tryForTime(5000, async () => {
         const searchResult = await es.search({
@@ -124,17 +124,6 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         .expect(200);
       expect(updatedAction).to.eql({
         id: ES_ARCHIVER_ACTION_ID,
-        type: 'action',
-        updated_at: updatedAction.updated_at,
-        version: updatedAction.version,
-        references: [],
-        attributes: {
-          description: 'My action updated',
-          actionTypeId: 'test.index-record',
-          actionTypeConfig: {
-            unencrypted: `This value shouldn't get encrypted`,
-          },
-        },
       });
       await supertest
         .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_fire`)
@@ -146,9 +135,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             message: 'Testing 123',
           },
         })
-        .expect(204)
+        .expect(200)
         .then((resp: any) => {
-          expect(resp.body).to.eql({});
+          expect(resp.body).to.be.an('object');
         });
       const indexedRecord = await retry.tryForTime(5000, async () => {
         const searchResult = await es.search({

@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { OrderAggParamEditor } from './order_agg';
+import { OrderByParamEditor } from './order_by';
 
 describe('OrderAggParamEditor component', () => {
   let setValue: jest.Mock;
@@ -48,7 +48,7 @@ describe('OrderAggParamEditor component', () => {
   });
 
   it('defaults to the first metric agg after init', () => {
-    const responseValueAggs = [
+    const metricAggs = [
       {
         id: 'agg1',
         type: {
@@ -62,15 +62,15 @@ describe('OrderAggParamEditor component', () => {
         },
       },
     ];
-    const props = { ...defaultProps, responseValueAggs };
+    const props = { ...defaultProps, metricAggs };
 
-    mount(<OrderAggParamEditor {...props} />);
+    mount(<OrderByParamEditor {...props} />);
 
     expect(setValue).toHaveBeenCalledWith('agg1');
   });
 
   it('defaults to the first metric agg that is compatible with the terms bucket', () => {
-    const responseValueAggs = [
+    const metricAggs = [
       {
         id: 'agg1',
         type: {
@@ -102,15 +102,15 @@ describe('OrderAggParamEditor component', () => {
         },
       },
     ];
-    const props = { ...defaultProps, responseValueAggs };
+    const props = { ...defaultProps, metricAggs };
 
-    mount(<OrderAggParamEditor {...props} />);
+    mount(<OrderByParamEditor {...props} />);
 
     expect(setValue).toHaveBeenCalledWith('agg5');
   });
 
   it('defaults to the _key metric if no agg is compatible', () => {
-    const responseValueAggs = [
+    const metricAggs = [
       {
         id: 'agg1',
         type: {
@@ -118,15 +118,15 @@ describe('OrderAggParamEditor component', () => {
         },
       },
     ];
-    const props = { ...defaultProps, responseValueAggs };
+    const props = { ...defaultProps, metricAggs };
 
-    mount(<OrderAggParamEditor {...props} />);
+    mount(<OrderByParamEditor {...props} />);
 
     expect(setValue).toHaveBeenCalledWith('_key');
   });
 
   it('selects first metric if it is avg', () => {
-    const responseValueAggs = [
+    const metricAggs = [
       {
         id: 'agg1',
         type: {
@@ -135,15 +135,15 @@ describe('OrderAggParamEditor component', () => {
         },
       },
     ];
-    const props = { ...defaultProps, responseValueAggs };
+    const props = { ...defaultProps, metricAggs };
 
-    mount(<OrderAggParamEditor {...props} />);
+    mount(<OrderByParamEditor {...props} />);
 
     expect(setValue).toHaveBeenCalledWith('agg1');
   });
 
   it('selects _key if the first metric is avg_bucket', () => {
-    const responseValueAggs = [
+    const metricAggs = [
       {
         id: 'agg1',
         type: {
@@ -152,15 +152,15 @@ describe('OrderAggParamEditor component', () => {
         },
       },
     ];
-    const props = { ...defaultProps, responseValueAggs };
+    const props = { ...defaultProps, metricAggs };
 
-    mount(<OrderAggParamEditor {...props} />);
+    mount(<OrderByParamEditor {...props} />);
 
     expect(setValue).toHaveBeenCalledWith('_key');
   });
 
   it('selects _key if there are no metric aggs', () => {
-    mount(<OrderAggParamEditor {...defaultProps} />);
+    mount(<OrderByParamEditor {...defaultProps} />);
 
     expect(setValue).toHaveBeenCalledWith('_key');
   });

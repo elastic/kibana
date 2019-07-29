@@ -20,14 +20,23 @@
 import { once } from 'lodash';
 import { FilterBar, setupDirective as setupFilterBarDirective } from './filter_bar';
 import { ApplyFiltersPopover, setupDirective as setupApplyFiltersDirective } from './apply_filters';
-
+import { IndexPatterns } from '../index_patterns';
+import { FilterManager } from './filter_manager';
 /**
  * FilterSearch Service
  * @internal
  */
+
+export interface FilterServiceDependencies {
+  indexPatterns: IndexPatterns;
+}
+
 export class FilterService {
-  public setup() {
+  public setup({ indexPatterns }: FilterServiceDependencies) {
+    const filterManager = new FilterManager(indexPatterns);
+
     return {
+      filterManager,
       ui: {
         ApplyFiltersPopover,
         FilterBar,

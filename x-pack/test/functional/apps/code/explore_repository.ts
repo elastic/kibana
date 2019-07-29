@@ -23,7 +23,8 @@ export default function exploreRepositoryFunctionalTests({
 
   const FIND_TIME = config.get('timeouts.find');
 
-  describe('Explore Repository', () => {
+  describe('Explore Repository', function() {
+    this.tags('smoke');
     describe('Explore a repository', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
@@ -172,9 +173,7 @@ export default function exploreRepositoryFunctionalTests({
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-open')).ok();
         });
 
-        // click src again to focus on this folder
-        await testSubjects.click('codeFileTreeNode-Directory-src');
-        // then click again to close this folder.
+        // click src again to focus on this folder and close this folder.
         await testSubjects.click('codeFileTreeNode-Directory-src');
 
         await retry.tryForTime(5000, async () => {

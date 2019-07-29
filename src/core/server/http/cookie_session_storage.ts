@@ -20,9 +20,9 @@
 import { Request, Server } from 'hapi';
 import hapiAuthCookie from 'hapi-auth-cookie';
 
-import { Logger } from '..';
 import { KibanaRequest, ensureRawRequest } from './router';
 import { SessionStorageFactory, SessionStorage } from './session_storage';
+import { Logger } from '..';
 
 export interface SessionStorageCookieOptions<T> {
   name: string;

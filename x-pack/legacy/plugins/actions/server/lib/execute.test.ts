@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { execute } from './execute';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
@@ -39,6 +39,7 @@ test('successfully executes', async () => {
   const actionType = {
     id: 'test',
     name: 'Test',
+    unencryptedAttributes: [],
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -69,6 +70,7 @@ test('successfully executes', async () => {
   expect(actionTypeRegistry.get).toHaveBeenCalledWith('test');
 
   expect(actionType.executor).toHaveBeenCalledWith({
+    id: '1',
     services: expect.anything(),
     config: {
       bar: true,
@@ -82,6 +84,7 @@ test('provides empty config when actionTypeConfig and / or actionTypeConfigSecre
   const actionType = {
     id: 'test',
     name: 'Test',
+    unencryptedAttributes: [],
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -106,12 +109,11 @@ test('throws an error when config is invalid', async () => {
   const actionType = {
     id: 'test',
     name: 'Test',
+    unencryptedAttributes: [],
     validate: {
-      config: Joi.object()
-        .keys({
-          param1: Joi.string().required(),
-        })
-        .required(),
+      config: schema.object({
+        param1: schema.string(),
+      }),
     },
     executor: jest.fn(),
   };
@@ -127,21 +129,22 @@ test('throws an error when config is invalid', async () => {
   encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
-  await expect(execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"The following actionTypeConfig attributes are invalid: param1 [any.required]"`
-  );
+  const result = await execute(executeParams);
+  expect(result).toEqual({
+    status: 'error',
+    message: `The actionTypeConfig is invalid: [param1]: expected value of type [string] but got [undefined]`,
+  });
 });
 
 test('throws an error when params is invalid', async () => {
   const actionType = {
     id: 'test',
     name: 'Test',
+    unencryptedAttributes: [],
     validate: {
-      params: Joi.object()
-        .keys({
-          param1: Joi.string().required(),
-        })
-        .required(),
+      params: schema.object({
+        param1: schema.string(),
+      }),
     },
     executor: jest.fn(),
   };
@@ -157,7 +160,9 @@ test('throws an error when params is invalid', async () => {
   encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
-  await expect(execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"params invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
-  );
+  const result = await execute(executeParams);
+  expect(result).toEqual({
+    status: 'error',
+    message: `The actionParams is invalid: [param1]: expected value of type [string] but got [undefined]`,
+  });
 });

@@ -24,7 +24,7 @@ import { DomainsTable } from '.';
 import { mockDomainsData } from './mock';
 
 describe('Domains Table Component', () => {
-  const loadMore = jest.fn();
+  const loadPage = jest.fn();
   const ip = '10.10.10.10';
   const state: State = mockGlobalState;
 
@@ -39,15 +39,20 @@ describe('Domains Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <DomainsTable
+            data={mockDomainsData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockDomainsData.pageInfo)}
+            flowTarget={FlowTarget.source}
+            id="domains"
             indexPattern={mockIndexPattern}
             ip={ip}
-            totalCount={1}
             loading={false}
-            loadMore={loadMore}
-            data={mockDomainsData.edges}
-            flowTarget={FlowTarget.source}
-            hasNextPage={getOr(false, 'hasNextPage', mockDomainsData.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockDomainsData.pageInfo)}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockDomainsData.pageInfo
+            )}
+            totalCount={1}
             type={networkModel.NetworkType.details}
           />
         </ReduxStoreProvider>
@@ -63,15 +68,20 @@ describe('Domains Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <DomainsTable
+              data={mockDomainsData.edges}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockDomainsData.pageInfo)}
+              flowTarget={FlowTarget.source}
+              id="domains"
               indexPattern={mockIndexPattern}
               ip={ip}
-              totalCount={1}
               loading={false}
-              loadMore={loadMore}
-              data={mockDomainsData.edges}
-              flowTarget={FlowTarget.source}
-              hasNextPage={getOr(false, 'hasNextPage', mockDomainsData.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockDomainsData.pageInfo)}
+              loadPage={loadPage}
+              showMorePagesIndicator={getOr(
+                false,
+                'showMorePagesIndicator',
+                mockDomainsData.pageInfo
+              )}
+              totalCount={1}
               type={networkModel.NetworkType.details}
             />
           </TestProviders>

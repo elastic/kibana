@@ -138,7 +138,7 @@ export const CommitHistoryComponent = (props: {
 const mapStateToProps = (state: RootState) => ({
   file: state.file.file,
   commits: treeCommitsSelector(state) || [],
-  loadingCommits: state.file.loadingCommits,
+  loadingCommits: state.revision.loadingCommits,
   hasMoreCommit: hasMoreCommitsSelector(state),
 });
 

@@ -20,16 +20,17 @@ import {
   SearchOptions,
   SearchScope,
   WorkerReservedProgress,
+  Repository,
 } from '../../../model';
 import { CommitInfo, ReferenceInfo } from '../../../model/commit';
-import { changeSearchScope, FetchFileResponse } from '../../actions';
+import { changeSearchScope, FetchFileResponse, RepoState, RepoStatus } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
-import { RepoState, RepoStatus, RootState } from '../../reducers';
+import { RootState } from '../../reducers';
 import {
   currentTreeSelector,
   hasMoreCommitsSelector,
   repoUriSelector,
-  statusSelector,
+  repoStatusSelector,
 } from '../../selectors';
 import { encodeRevisionString } from '../../../common/uri_util';
 import { history } from '../../utils/url';
@@ -46,7 +47,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   repoStatus?: RepoStatus;
   tree: FileTree;
   file: FetchFileResponse | undefined;
-  currentTree: FileTree | undefined;
+  currentTree: FileTree | null;
   commits: CommitInfo[];
   branches: ReferenceInfo[];
   hasMoreCommits: boolean;
@@ -57,6 +58,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   fileTreeLoadingPaths: string[];
   searchOptions: SearchOptions;
   query: string;
+  currentRepository: Repository;
 }
 const LANG_MD = 'markdown';
 
@@ -197,6 +199,8 @@ class CodeContent extends React.PureComponent<Props> {
           />
         </EuiFlexGroup>
       );
+    } else if (this.shouldRenderCloneProgress()) {
+      return null;
     } else {
       return (
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
@@ -232,6 +236,7 @@ class CodeContent extends React.PureComponent<Props> {
           searchOptions={this.props.searchOptions}
           branches={this.props.branches}
           query={this.props.query}
+          currentRepository={this.props.currentRepository}
         />
         {this.renderContent()}
       </div>
@@ -261,7 +266,7 @@ class CodeContent extends React.PureComponent<Props> {
       <CloneStatus
         repoName={`${org}/${repo}`}
         progress={progress ? progress : 0}
-        cloneProgress={cloneProgress}
+        cloneProgress={cloneProgress!}
       />
     );
   }
@@ -391,17 +396,18 @@ class CodeContent extends React.PureComponent<Props> {
 
 const mapStateToProps = (state: RootState) => ({
   isNotFound: state.file.isNotFound,
-  notFoundDirs: state.file.notFoundDirs,
+  notFoundDirs: state.fileTree.notFoundDirs,
   file: state.file.file,
-  tree: state.file.tree,
-  fileTreeLoadingPaths: state.file.fileTreeLoadingPaths,
+  tree: state.fileTree.tree,
+  fileTreeLoadingPaths: state.fileTree.fileTreeLoadingPaths,
   currentTree: currentTreeSelector(state),
-  branches: state.file.branches,
+  branches: state.revision.branches,
   hasMoreCommits: hasMoreCommitsSelector(state),
-  loadingCommits: state.file.loadingCommits,
-  repoStatus: statusSelector(state, repoUriSelector(state)),
+  loadingCommits: state.revision.loadingCommits,
+  repoStatus: repoStatusSelector(state, repoUriSelector(state)),
   searchOptions: state.search.searchOptions,
   query: state.search.query,
+  currentRepository: state.repository.repository,
 });
 
 const mapDispatchToProps = {

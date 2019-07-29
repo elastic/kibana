@@ -58,7 +58,10 @@ describe('http service', () => {
 
       it('runs auth for legacy routes and proxy request to legacy server route handlers', async () => {
         const { http } = await root.setup();
-        const { sessionStorageFactory } = await http.registerAuth<StorageData>((req, t) => {
+        const sessionStorageFactory = await http.createCookieSessionStorageFactory<StorageData>(
+          cookieOptions
+        );
+        http.registerAuth((req, t) => {
           if (req.headers.authorization) {
             const user = { id: '42' };
             const sessionStorage = sessionStorageFactory.asScoped(req);
@@ -67,7 +70,7 @@ describe('http service', () => {
           } else {
             return t.rejected(Boom.unauthorized());
           }
-        }, cookieOptions);
+        });
         await root.start();
 
         const legacyUrl = '/legacy';
@@ -88,21 +91,24 @@ describe('http service', () => {
       it('passes authHeaders as request headers to the legacy platform', async () => {
         const token = 'Basic: name:password';
         const { http } = await root.setup();
-        const { sessionStorageFactory } = await http.registerAuth<StorageData>((req, t) => {
+        const sessionStorageFactory = await http.createCookieSessionStorageFactory<StorageData>(
+          cookieOptions
+        );
+        http.registerAuth((req, t) => {
           if (req.headers.authorization) {
             const user = { id: '42' };
             const sessionStorage = sessionStorageFactory.asScoped(req);
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
             return t.authenticated({
               state: user,
-              headers: {
+              requestHeaders: {
                 authorization: token,
               },
             });
           } else {
             return t.rejected(Boom.unauthorized());
           }
-        }, cookieOptions);
+        });
         await root.start();
 
         const legacyUrl = '/legacy';
@@ -126,7 +132,10 @@ describe('http service', () => {
         const user = { id: '42' };
 
         const { http } = await root.setup();
-        const { sessionStorageFactory } = await http.registerAuth<StorageData>((req, t) => {
+        const sessionStorageFactory = await http.createCookieSessionStorageFactory<StorageData>(
+          cookieOptions
+        );
+        http.registerAuth((req, t) => {
           if (req.headers.authorization) {
             const sessionStorage = sessionStorageFactory.asScoped(req);
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
@@ -134,7 +143,7 @@ describe('http service', () => {
           } else {
             return t.rejected(Boom.unauthorized());
           }
-        }, cookieOptions);
+        });
         await root.start();
 
         const legacyUrl = '/legacy';
@@ -158,8 +167,8 @@ describe('http service', () => {
         const { registerAuth, registerRouter } = http;
 
         await registerAuth((req, t) => {
-          return t.authenticated({ headers: authHeaders });
-        }, cookieOptions);
+          return t.authenticated({ requestHeaders: authHeaders });
+        });
 
         const router = new Router('/new-platform');
         router.get({ path: '/', validate: false }, async (req, res) => {
@@ -178,7 +187,7 @@ describe('http service', () => {
         expect(headers).toEqual(authHeaders);
       });
 
-      it('pass request authorization header to Elasticsearch if registerAuth was not set', async () => {
+      it('passes request authorization header to Elasticsearch if registerAuth was not set', async () => {
         const authorizationHeader = 'Basic: username:password';
         const { http, elasticsearch } = await root.setup();
         const { registerRouter } = http;
@@ -204,6 +213,56 @@ describe('http service', () => {
         expect(headers).toEqual({
           authorization: authorizationHeader,
         });
+      });
+
+      it('attach security header to a successful response handled by Legacy platform', async () => {
+        const authResponseHeader = {
+          'www-authenticate': 'Negotiate ade0234568a4209af8bc0280289eca',
+        };
+        const { http } = await root.setup();
+        const { registerAuth } = http;
+
+        await registerAuth((req, t) => {
+          return t.authenticated({ responseHeaders: authResponseHeader });
+        });
+
+        await root.start();
+
+        const kbnServer = kbnTestServer.getKbnServer(root);
+        kbnServer.server.route({
+          method: 'GET',
+          path: '/legacy',
+          handler: () => 'ok',
+        });
+
+        const response = await kbnTestServer.request.get(root, '/legacy').expect(200);
+        expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
+      });
+
+      it('attach security header to an error response handled by Legacy platform', async () => {
+        const authResponseHeader = {
+          'www-authenticate': 'Negotiate ade0234568a4209af8bc0280289eca',
+        };
+        const { http } = await root.setup();
+        const { registerAuth } = http;
+
+        await registerAuth((req, t) => {
+          return t.authenticated({ responseHeaders: authResponseHeader });
+        });
+
+        await root.start();
+
+        const kbnServer = kbnTestServer.getKbnServer(root);
+        kbnServer.server.route({
+          method: 'GET',
+          path: '/legacy',
+          handler: () => {
+            throw Boom.badRequest();
+          },
+        });
+
+        const response = await kbnTestServer.request.get(root, '/legacy').expect(400);
+        expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
       });
     });
 

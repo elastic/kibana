@@ -13,17 +13,16 @@ import chrome from 'ui/chrome';
 import 'plugins/security/services/shield_user';
 import '../account/account';
 import { Path } from 'plugins/xpack_main/services/path';
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 import { chromeHeaderNavControlsRegistry, NavControlSide } from 'ui/registry/chrome_header_nav_controls';
 import { SecurityNavControl } from './nav_control_component';
 
-chromeHeaderNavControlsRegistry.register((ShieldUser, kbnBaseUrl, Private) => ({
+chromeHeaderNavControlsRegistry.register((ShieldUser, kbnBaseUrl) => ({
   name: 'security',
   order: 1000,
   side: NavControlSide.Right,
   render(el) {
-    const xpackInfo = Private(XPackInfoProvider);
     const showSecurityLinks = xpackInfo.get('features.security.showLinks');
     if (Path.isUnauthenticated() || !showSecurityLinks) return null;
 

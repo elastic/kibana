@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import '../../../../np_core.test.mocks';
+import '../../../../ui_capabilities.test.mocks';
 
 import React from 'react';
 import {
@@ -35,6 +35,8 @@ import { CustomizePanelModal } from './customize_panel_modal';
 import { Container, isErrorEmbeddable } from '../../../..';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { EmbeddableFactory } from '../../../../embeddables';
+
+jest.mock('ui/new_platform');
 
 let container: Container;
 let embeddable: ContactCardEmbeddable;

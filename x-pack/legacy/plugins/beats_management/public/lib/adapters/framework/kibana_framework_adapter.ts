@@ -44,7 +44,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     private readonly routes: UIRoutes,
     private readonly getBasePath: () => string,
     private readonly onKibanaReady: () => Promise<IInjector>,
-    private readonly XPackInfoProvider: unknown,
+    private readonly xpackInfoService: any | null,
     public readonly version: string
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
@@ -58,16 +58,9 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
 
   public async waitUntilFrameworkReady(): Promise<void> {
     const $injector = await this.onKibanaReady();
-    const Private: any = $injector.get('Private');
-
-    let xpackInfo: any;
-    try {
-      xpackInfo = Private(this.XPackInfoProvider);
-    } catch (e) {
-      xpackInfo = false;
-    }
-
+    const xpackInfo: any = this.xpackInfoService;
     let xpackInfoUnpacked: FrameworkInfo;
+
     try {
       xpackInfoUnpacked = {
         basePath: this.getBasePath(),
@@ -90,7 +83,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
         settings: xpackInfo ? xpackInfo.get(`features.${this.PLUGIN_ID}.settings`) : {},
       };
     } catch (e) {
-      throw new Error(`Unexpected data structure from XPackInfoProvider, ${JSON.stringify(e)}`);
+      throw new Error(`Unexpected data structure from xpackInfoService, ${JSON.stringify(e)}`);
     }
 
     const assertData = RuntimeFrameworkInfo.decode(xpackInfoUnpacked);

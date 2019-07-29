@@ -97,6 +97,11 @@ function MetricVisProvider(Private) {
           aggFilter: [
             '!std_dev', '!geo_centroid',
             '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum', '!geo_bounds'],
+          aggSettings: {
+            top_hits: {
+              allowStrings: true
+            },
+          },
           defaults: [
             { type: 'count', schema: 'metric' }
           ]

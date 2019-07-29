@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Services, ActionTypeRegistryContract } from '../types';
+import { Services, ActionTypeRegistryContract, ActionTypeExecutorResult } from '../types';
 import { validateActionTypeConfig } from './validate_action_type_config';
 import { validateActionTypeParams } from './validate_action_type_params';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
@@ -25,7 +25,7 @@ export async function execute({
   services,
   params,
   encryptedSavedObjectsPlugin,
-}: ExecuteOptions) {
+}: ExecuteOptions): Promise<ActionTypeExecutorResult> {
   // TODO: Ensure user can read the action before processing
   const action = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser('action', actionId, {
     namespace,
@@ -35,11 +35,41 @@ export async function execute({
     ...(action.attributes.actionTypeConfig || {}),
     ...(action.attributes.actionTypeConfigSecrets || {}),
   };
-  const validatedConfig = validateActionTypeConfig(actionType, mergedActionTypeConfig);
-  const validatedParams = validateActionTypeParams(actionType, params);
-  await actionType.executor({
-    services,
-    config: validatedConfig,
-    params: validatedParams,
-  });
+
+  let validatedConfig;
+  let validatedParams;
+
+  try {
+    validatedConfig = validateActionTypeConfig(actionType, mergedActionTypeConfig);
+    validatedParams = validateActionTypeParams(actionType, params);
+  } catch (err) {
+    return { status: 'error', message: err.message };
+  }
+
+  let result: ActionTypeExecutorResult | null = null;
+
+  const { actionTypeId, description } = action.attributes;
+  const actionLabel = `${actionId} - ${actionTypeId} - ${description}`;
+
+  try {
+    result = await actionType.executor({
+      id: actionId,
+      services,
+      config: validatedConfig,
+      params: validatedParams,
+    });
+  } catch (err) {
+    services.log(
+      ['warning', 'x-pack', 'actions'],
+      `action executed unsuccessfully: ${actionLabel} - ${err.message}`
+    );
+    throw err;
+  }
+
+  services.log(['debug', 'x-pack', 'actions'], `action executed successfully: ${actionLabel}`);
+
+  // return basic response if none provided
+  if (result == null) return { status: 'ok' };
+
+  return result;
 }

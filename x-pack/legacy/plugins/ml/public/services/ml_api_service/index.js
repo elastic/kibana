@@ -221,7 +221,7 @@ export const ml = {
 
   checkMlPrivileges() {
     return http({
-      url: `${basePath}/ml_privileges`,
+      url: `${basePath}/ml_capabilities`,
       method: 'GET',
     });
   },
