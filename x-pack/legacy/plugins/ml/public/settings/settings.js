@@ -22,7 +22,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useNavigationMenuContext } from '../contexts/navigation_menu';
+import { useNavigationMenuContext } from '../contexts/navigation_menu/use_navigation_menu_context';
 import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
 
 export function Settings({

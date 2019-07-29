@@ -5,27 +5,15 @@
  */
 
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import PropTypes from 'prop-types';
 import React from 'react';
 
-import * as ContextUtils from '../contexts/navigation_menu';
 import { Settings } from './settings';
 
-const navigationMenuMock = ContextUtils.navigationMenuMock;
-const mountOptions = {
-  context: { NavigationMenuContext: navigationMenuMock },
-  childContextTypes: { NavigationMenuContext: PropTypes.object }
-};
-
-jest.mock('../components/navigation_menu/navigation_menu', () => ({
-  NavigationMenu: () => <div id="mockNavigationMenu" />
-}));
-jest.spyOn(ContextUtils, 'useNavigationMenuContext').mockImplementation(() => navigationMenuMock);
-
+jest.mock('../contexts/navigation_menu/use_navigation_menu_context');
 
 describe('Settings', () => {
   test('Renders settings page with all buttons enabled.', () => {
-    const wrapper = mountWithIntl(<Settings canGetFilters={true} canGetCalendars={true} />, mountOptions);
+    const wrapper = mountWithIntl(<Settings canGetFilters={true} canGetCalendars={true} />);
 
     const filterButton = wrapper
       .find('[data-test-subj="ml_filter_lists_button"]')
@@ -39,7 +27,7 @@ describe('Settings', () => {
   });
 
   test('Filter Lists button disabled if canGetFilters is false', () => {
-    const wrapper = mountWithIntl(<Settings canGetFilters={false} canGetCalendars={true} />, mountOptions);
+    const wrapper = mountWithIntl(<Settings canGetFilters={false} canGetCalendars={true} />);
 
     const filterButton = wrapper
       .find('[data-test-subj="ml_filter_lists_button"]')
@@ -53,7 +41,7 @@ describe('Settings', () => {
   });
 
   test('Calendar management button disabled if canGetCalendars is false', () => {
-    const wrapper = mountWithIntl(<Settings canGetFilters={true} canGetCalendars={false} />, mountOptions);
+    const wrapper = mountWithIntl(<Settings canGetFilters={true} canGetCalendars={false} />);
 
     const filterButton = wrapper
       .find('[data-test-subj="ml_filter_lists_button"]')

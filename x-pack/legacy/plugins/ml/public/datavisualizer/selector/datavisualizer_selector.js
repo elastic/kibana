@@ -22,11 +22,8 @@ import {
 
 import { isFullLicense } from '../../license/check_license';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
 import { timefilter } from 'ui/timefilter';
-import { timeHistory } from 'ui/timefilter/time_history';
 
-import { NavigationMenuContext } from '../../contexts/navigation_menu';
 import { NavigationMenu } from '../../components/navigation_menu/navigation_menu';
 
 function startTrialDescription() {
@@ -57,7 +54,7 @@ export const DatavisualizerSelector = injectI18n(function (props) {
   const startTrialVisible = isFullLicense() === false;
 
   return (
-    <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
+    <Fragment>
       <NavigationMenu tabId="datavisualizer" />
       <EuiPage restrictWidth={1000}>
         <EuiPageBody>
@@ -182,6 +179,6 @@ export const DatavisualizerSelector = injectI18n(function (props) {
           )}
         </EuiPageBody>
       </EuiPage>
-    </NavigationMenuContext.Provider>
+    </Fragment>
   );
 });

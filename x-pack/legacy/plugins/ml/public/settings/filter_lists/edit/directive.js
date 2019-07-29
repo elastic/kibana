@@ -18,13 +18,8 @@ import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/che
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { EditFilterList } from './edit_filter_list';
 
-import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
-import { timefilter } from 'ui/timefilter';
-import { timeHistory } from 'ui/timefilter/time_history';
 import { I18nContext } from 'ui/i18n';
-
-import { NavigationMenuContext } from '../../../contexts/navigation_menu';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
@@ -65,9 +60,7 @@ module.directive('mlEditFilterList', function ($route) {
 
       ReactDOM.render(
         <I18nContext>
-          <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-            <EditFilterList {...props} />
-          </NavigationMenuContext.Provider>
+          <EditFilterList {...props} />
         </I18nContext>,
         element[0]
       );

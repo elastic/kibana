@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useContext, useState, useEffect } from 'react';
+import React, { FC, Fragment, useState, useEffect } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { TimeHistory, TimeRange } from 'ui/timefilter/time_history';
 
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
-import { NavigationMenuContext } from '../../../contexts/navigation_menu';
+import { useNavigationMenuContext } from '../../../contexts/navigation_menu/use_navigation_menu_context';
 
 interface Duration {
   start: string;
@@ -28,7 +28,7 @@ function getRecentlyUsedRangesFactory(timeHistory: TimeHistory) {
 }
 
 export const TopNav: FC = () => {
-  const navigationMenuContext = useContext(NavigationMenuContext);
+  const navigationMenuContext = useNavigationMenuContext();
   const timefilter = navigationMenuContext.timefilter;
   const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(navigationMenuContext.timeHistory);
 

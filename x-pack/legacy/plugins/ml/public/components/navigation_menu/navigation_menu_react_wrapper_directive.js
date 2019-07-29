@@ -12,11 +12,6 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 import 'ui/directives/kbn_href';
-import chrome from 'ui/chrome';
-import { timefilter } from 'ui/timefilter';
-import { timeHistory } from 'ui/timefilter/time_history';
-
-import { NavigationMenuContext } from '../../contexts/navigation_menu';
 
 import { NavigationMenu } from './navigation_menu';
 
@@ -25,12 +20,7 @@ module.directive('mlNavMenu', function () {
     restrict: 'E',
     transclude: true,
     link: function (scope, element, attrs) {
-      ReactDOM.render(
-        <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-          <NavigationMenu tabId={attrs.name} />
-        </NavigationMenuContext.Provider>,
-        element[0]
-      );
+      ReactDOM.render(<NavigationMenu tabId={attrs.name} />, element[0]);
 
       element.on('$destroy', () => {
         ReactDOM.unmountComponentAtNode(element[0]);

@@ -4,25 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FileDataVisualizerView } from './components/file_datavisualizer_view';
+import React, { Fragment } from 'react';
 
-import React from 'react';
-
-import chrome from 'ui/chrome';
 import { timefilter } from 'ui/timefilter';
-import { timeHistory } from 'ui/timefilter/time_history';
 
-import { NavigationMenuContext } from '../contexts/navigation_menu';
 import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
+
+import { FileDataVisualizerView } from './components/file_datavisualizer_view';
 
 export function FileDataVisualizerPage({ indexPatterns, kibanaConfig }) {
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
 
   return (
-    <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
+    <Fragment>
       <NavigationMenu tabId="datavisualizer" />
       <FileDataVisualizerView indexPatterns={indexPatterns} kibanaConfig={kibanaConfig} />
-    </NavigationMenuContext.Provider>
+    </Fragment>
   );
 }

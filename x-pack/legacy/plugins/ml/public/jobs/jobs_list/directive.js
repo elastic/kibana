@@ -17,12 +17,8 @@ import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { getJobManagementBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
-import { NavigationMenuContext } from '../../contexts/navigation_menu';
 
-import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
-import { timefilter } from 'ui/timefilter';
-import { timeHistory } from 'ui/timefilter/time_history';
 
 const template = `<jobs-page data-test-subj="mlPageJobManagement" />`;
 
@@ -49,9 +45,7 @@ module.directive('jobsPage', function () {
     link: (scope, element) => {
       ReactDOM.render(
         <I18nContext>
-          <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-            <JobsPage angularWrapperScope={scope} />
-          </NavigationMenuContext.Provider>
+          <JobsPage angularWrapperScope={scope} />
         </I18nContext>,
         element[0]
       );
