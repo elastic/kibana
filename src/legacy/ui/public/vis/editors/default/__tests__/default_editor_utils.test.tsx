@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { groupAggregationsBy } from '../default_editor_utils';
+import { groupAndSortBy } from '../default_editor_utils';
 import { AggGroupNames } from '../agg_groups';
 
 const aggs = [
@@ -54,7 +54,7 @@ const aggs = [
 ];
 
 describe('Default Editor groupAggregationsBy', () => {
-  it('should return aggs grouped by default type field', () => {
+  it('should return aggs grouped by type field', () => {
     const groupedAggs = [
       {
         label: AggGroupNames.Metrics,
@@ -116,7 +116,7 @@ describe('Default Editor groupAggregationsBy', () => {
         ],
       },
     ];
-    expect(groupAggregationsBy(aggs)).toEqual(groupedAggs);
+    expect(groupAndSortBy(aggs, 'type')).toEqual(groupedAggs);
   });
   it('should return aggs grouped by subtype field', () => {
     const groupedAggs = [
@@ -190,6 +190,6 @@ describe('Default Editor groupAggregationsBy', () => {
         ],
       },
     ];
-    expect(groupAggregationsBy(aggs, 'subtype')).toEqual(groupedAggs);
+    expect(groupAndSortBy(aggs, 'subtype')).toEqual(groupedAggs);
   });
 });

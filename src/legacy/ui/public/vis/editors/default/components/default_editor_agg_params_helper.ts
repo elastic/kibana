@@ -21,10 +21,10 @@ import { get, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AggConfig, VisState } from 'ui/vis';
 import { aggTypeFilters } from 'ui/agg_types/filter';
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern, Field } from 'ui/index_patterns';
 import { aggTypes, AggParam, FieldParamType, AggType } from 'ui/agg_types';
 import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
-import { groupAggregationsBy } from '../default_editor_utils';
+import { groupAndSortBy, ComboBoxGroupedOption } from '../default_editor_utils';
 import { EditorConfig } from '../../config/types';
 import { AggTypeState, AggParamsState } from './default_editor_agg_params_state';
 import { AggParamEditorProps } from './default_editor_agg_param_props';
@@ -38,7 +38,7 @@ interface ParamInstanceBase {
 
 export interface ParamInstance extends ParamInstanceBase {
   aggParam: AggParam;
-  indexedFields: FieldParamType[];
+  indexedFields: Array<ComboBoxGroupedOption<Field>>;
   paramEditor: React.ComponentType<AggParamEditorProps<unknown>>;
   value: unknown;
 }
@@ -58,7 +58,7 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
 
   // build collection of agg params components
   paramsToRender.forEach((param: AggParam, index: number) => {
-    let indexedFields: FieldParamType[] = [];
+    let indexedFields: Array<ComboBoxGroupedOption<Field>> = [];
     let fields;
 
     if (agg.schema.hideCustomLabel && param.name === 'customLabel') {
@@ -70,7 +70,7 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
         agg.getIndexPattern().fields
       );
       fields = aggTypeFieldFilters.filter(availableFields, param.type, agg);
-      indexedFields = groupAggregationsBy(fields, 'type', 'displayName');
+      indexedFields = groupAndSortBy(fields, 'type', 'displayName');
     }
 
     if (fields && !indexedFields.length && index > 0) {
@@ -122,9 +122,13 @@ function getError(agg: AggConfig, aggIsTooLow: boolean) {
   return errors;
 }
 
-function getAggTypeOptions(agg: AggConfig, indexPattern: IndexPattern, groupName: string) {
+function getAggTypeOptions(
+  agg: AggConfig,
+  indexPattern: IndexPattern,
+  groupName: string
+): Array<ComboBoxGroupedOption<AggType>> {
   const aggTypeOptions = aggTypeFilters.filter(aggTypes.byType[groupName], indexPattern, agg);
-  return groupAggregationsBy(aggTypeOptions, 'subtype');
+  return groupAndSortBy(aggTypeOptions, 'subtype');
 }
 
 /**

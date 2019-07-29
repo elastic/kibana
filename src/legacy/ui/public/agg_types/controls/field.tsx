@@ -47,12 +47,12 @@ function FieldParamEditor({
   setValidity,
   setValue,
 }: FieldParamEditorProps) {
-  const selectedOptions: ComboBoxGroupedOption[] = value
-    ? [{ label: value.displayName, value }]
+  const selectedOptions: Array<ComboBoxGroupedOption<Field>> = value
+    ? [{ label: value.displayName || '', target: value }]
     : [];
 
   const onChange = (options: EuiComboBoxOptionProps[]) => {
-    const selectedOption = get(options, '0.value');
+    const selectedOption: Field = get(options, '0.target');
     if (!(aggParam.required && !selectedOption)) {
       setValue(selectedOption);
     }
@@ -95,9 +95,9 @@ function FieldParamEditor({
     const options = indexedFields[0].options;
 
     if (!options) {
-      setValue(indexedFields[0].value);
+      setValue(indexedFields[0].target);
     } else if (options.length === 1) {
-      setValue(options[0].value);
+      setValue(options[0].target);
     }
   }, []);
 

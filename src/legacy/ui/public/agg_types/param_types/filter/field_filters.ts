@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Field } from 'ui/index_patterns';
 import { FieldParamType } from '../';
 import { AggConfig } from '../../../vis';
 
@@ -51,7 +52,7 @@ class AggTypeFieldFilters {
    * @param aggConfig The aggConfig for which the returning list will be used.
    * @return A filtered list of the passed fields.
    */
-  public filter(fields: any[], fieldParamType: FieldParamType, aggConfig: AggConfig) {
+  public filter(fields: Field[], fieldParamType: FieldParamType, aggConfig: AggConfig) {
     const allFilters = Array.from(this.filters);
     const allowedAggTypeFields = fields.filter(field => {
       const isAggTypeFieldAllowed = allFilters.every(filter =>

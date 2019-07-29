@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import { Field } from 'ui/index_patterns';
 import { AggParam } from '../../../../agg_types';
 import { AggConfig } from '../../../agg_config';
-import { FieldParamType } from '../../../../agg_types/param_types';
+import { ComboBoxGroupedOption } from '../default_editor_utils';
 import { EditorConfig } from '../../config/types';
 import { VisState } from '../../../vis';
 import { SubAggParamsProp } from './default_editor_agg_params';
@@ -34,7 +35,7 @@ export interface AggParamCommonProps<T> {
   aggParam: AggParam;
   disabled?: boolean;
   editorConfig: EditorConfig;
-  indexedFields?: FieldParamType[];
+  indexedFields?: Array<ComboBoxGroupedOption<Field>>;
   showValidation: boolean;
   state: VisState;
   value?: T;

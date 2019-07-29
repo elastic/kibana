@@ -29,7 +29,7 @@ import { ComboBoxGroupedOption } from '../default_editor_utils';
 
 interface DefaultEditorAggSelectProps {
   aggError?: string | null;
-  aggTypeOptions: AggType[];
+  aggTypeOptions: Array<ComboBoxGroupedOption<AggType>>;
   id: string;
   indexPattern: IndexPattern;
   showValidation: boolean;
@@ -52,7 +52,9 @@ function DefaultEditorAggSelect({
   setTouched,
   setValidity,
 }: DefaultEditorAggSelectProps) {
-  const selectedOptions: ComboBoxGroupedOption[] = value ? [{ label: value.title, value }] : [];
+  const selectedOptions: Array<ComboBoxGroupedOption<AggType>> = value
+    ? [{ label: value.title, target: value }]
+    : [];
 
   const label = isSubAggregation ? (
     <FormattedMessage
@@ -113,7 +115,7 @@ function DefaultEditorAggSelect({
   }, [errors.length]);
 
   const onChange = (options: EuiComboBoxOptionProps[]) => {
-    const selectedOption = get(options, '0.value');
+    const selectedOption = get(options, '0.target');
     if (selectedOption) {
       setValue(selectedOption);
     }

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Field } from 'ui/index_patterns';
 import { AggTypeFieldFilters } from './field_filters';
 
 describe('AggTypeFieldFilters', () => {
@@ -29,13 +30,13 @@ describe('AggTypeFieldFilters', () => {
   });
 
   it('should filter nothing without registered filters', async () => {
-    const fields = [{ name: 'foo' }, { name: 'bar' }];
+    const fields = [{ name: 'foo' }, { name: 'bar' }] as Field[];
     const filtered = registry.filter(fields, fieldParamType, aggConfig);
     expect(filtered).toEqual(fields);
   });
 
   it('should pass all fields to the registered filter', async () => {
-    const fields = [{ name: 'foo' }, { name: 'bar' }];
+    const fields = [{ name: 'foo' }, { name: 'bar' }] as Field[];
     const filter = jest.fn();
     registry.addFilter(filter);
     registry.filter(fields, fieldParamType, aggConfig);
@@ -44,7 +45,7 @@ describe('AggTypeFieldFilters', () => {
   });
 
   it('should allow registered filters to filter out fields', async () => {
-    const fields = [{ name: 'foo' }, { name: 'bar' }];
+    const fields = [{ name: 'foo' }, { name: 'bar' }] as Field[];
     let filtered = registry.filter(fields, fieldParamType, aggConfig);
     expect(filtered).toEqual(fields);
 
