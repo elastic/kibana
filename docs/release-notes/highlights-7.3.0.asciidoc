@@ -22,13 +22,15 @@ release notes>> for a list of bug fixes and other changes.
 * <<bar-charts-7.3, Values inside bar charts>>
 * <<visual-builder-7.3, Visual Builder: even better under a new name>>
 
+// tag::notable-highlights[]
+
 [float]
 [[maps-7.3]]
 === Maps app is now production ready
 
 Maps is production ready for 7.3, and includes many improvements, including
 a new GeoJson upload and improved layer styling, aggregations, and tooltips.
-To find out what’s in Maps and how to use it, go to the <<maps, Maps documentation>>.
+To find out what’s in Maps and how to use it, go to the {kibana-ref}/maps.html[Maps documentation].
 
 [role="screenshot"]
 image::release-notes/images/7.3-maps.png[Maps is production ready]
@@ -67,7 +69,7 @@ You can also include custom labels for Grid aggregation and join metrics.
 {es} provides support for Kerberos starting in 6.6, and in 7.3, 
 {kib} introduces Kerberos authentication provider. You now have single sign-on 
 access and can log into {kib} without repeatedly providing your username and password.  
-For details, see <<kibana-authentication, SAML single sign-on>>.
+For details, see {kibana-ref}/kibana-authentication.html[SAML single sign-on].
 
 [float]
 [[snapshot-7.3]]
@@ -77,7 +79,7 @@ The second phase of the snapshot management UI is out, and includes
 two notable enhancements: restore and delete. You can recover data and state 
 from a snapshot using the new *Restore* wizard, and track its progress in the 
 *Restore Status* view. You can delete snapshots, and free up repository storage space,
-in the *Snapshots* view.  For more information, see <<snapshot-repositories, Snapshot and Restore>>.
+in the *Snapshots* view.  For more information, see {kibana-ref}/snapshot-repositories.html[Snapshot and Restore].
 
 [role="screenshot"]
 image::release-notes/images/7.3-snapshot-restore.png[Snapshot and restore phase 2]
@@ -131,8 +133,11 @@ element by 10 pixels.  To nudge an element by 1 pixel, use Shift + an arrow key.
 ==== Documentation
 
 Check out the 
-updated <<canvas-getting-started, Getting started guide>>, the new introduction to <<canvas-workpad, Canvas workpads>>, 
-and the improved <<canvas-function-reference, Canvas function reference>>. 
+updated {kibana-ref}/canvas-getting-started.html[Getting started guide], the new introduction to {kibana-ref}/canvas-workpad.html[Canvas workpads], 
+and the improved {kibana-ref}/canvas-function-reference.html[Canvas function reference]. 
+
+// end::notable-highlights[]
+
 
 [float]
 [[KQL-7.3]]
@@ -178,5 +183,3 @@ https://discuss.elastic.co/c/kibana[{kib} Discuss forum] if you have any questio
 
 
 
-// tag::notable-highlights[]
-// end::notable-highlights[]
