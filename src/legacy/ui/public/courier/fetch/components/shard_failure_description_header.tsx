@@ -17,10 +17,9 @@
  * under the License.
  */
 import React from 'react';
-import { EuiCode } from '@elastic/eui';
+import { EuiCode, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ShardFailure } from './shard_failure_types';
-import { formatKey } from './shard_failure_description';
 
 export function getFailurePropsForSummary(
   failure: ShardFailure
@@ -32,7 +31,7 @@ export function getFailurePropsForSummary(
 }
 
 export function getFailureSummaryText(failure: ShardFailure, failureDetails?: string): string {
-  const failureName = formatKey(failure.reason.type);
+  const failureName = failure.reason.type;
   const displayDetails =
     typeof failureDetails === 'string' ? failureDetails : getFailureSummaryDetailsText(failure);
 
@@ -56,9 +55,11 @@ export function ShardFailureDescriptionHeader(props: ShardFailure) {
     </span>
   ));
   return (
-    <h2>
-      {getFailureSummaryText(props, '')}
-      {failureDetails}
-    </h2>
+    <EuiTitle size="xs">
+      <h2>
+        {getFailureSummaryText(props, '')}
+        {failureDetails}
+      </h2>
+    </EuiTitle>
   );
 }
