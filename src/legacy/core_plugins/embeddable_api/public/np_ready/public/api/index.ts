@@ -22,7 +22,6 @@ import {
   EmbeddableDependencies,
   EmbeddableApi,
   EmbeddableDependenciesInternal,
-  Embeddables,
 } from './types';
 import { attachAction } from './attach_action';
 import { detachAction } from './detach_action';
@@ -63,15 +62,4 @@ export const createApi = (deps: EmbeddableDependencies) => {
   const api = partialApi as EmbeddableApi;
   bootstrap(api);
   return { api, depsInternal };
-};
-
-export const createEmbeddables = (deps: EmbeddableDependencies): Embeddables => {
-  const { api, depsInternal } = createApi(deps);
-  const addDependencies: Embeddables['addDependencies'] = dependencies => {
-    Object.assign(depsInternal, dependencies);
-  };
-  return {
-    api,
-    addDependencies,
-  };
 };

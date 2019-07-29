@@ -24,29 +24,24 @@ import {
   Plugin,
 } from '../../../../../../core/public';
 import { TriggerRegistry, ActionRegistry, EmbeddableFactoryRegistry } from './types';
-import { createEmbeddables, Embeddables } from './api';
+import { createApi, EmbeddableApi } from './api';
 
 export class EmbeddablePublicPlugin implements Plugin<any, any> {
   private readonly triggers: TriggerRegistry = new Map();
   private readonly actions: ActionRegistry = new Map();
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  private embeddables!: Embeddables;
+  private api!: EmbeddableApi;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
-    this.embeddables = createEmbeddables({
+    ({ api: this.api } = createApi({
       actions: this.actions,
       embeddableFactories: this.embeddableFactories,
       triggers: this.triggers,
-    });
+    }));
 
-    const {
-      registerTrigger,
-      registerAction,
-      registerEmbeddableFactory,
-      attachAction,
-    } = this.embeddables.api;
+    const { registerTrigger, registerAction, registerEmbeddableFactory, attachAction } = this.api;
 
     return {
       registerTrigger,
@@ -57,7 +52,7 @@ export class EmbeddablePublicPlugin implements Plugin<any, any> {
   }
 
   public start(core: CoreStart) {
-    return this.embeddables.api;
+    return this.api;
   }
 
   public stop() {}

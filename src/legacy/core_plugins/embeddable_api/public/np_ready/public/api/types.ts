@@ -49,21 +49,9 @@ export interface EmbeddableDependencies {
 }
 
 export interface EmbeddableDependenciesInternal extends EmbeddableDependencies {
-  api: Partial<EmbeddableApi>;
+  api: Readonly<Partial<EmbeddableApi>>;
 }
 
 export type EmbeddableApiPure = {
   [K in keyof EmbeddableApi]: (deps: EmbeddableDependenciesInternal) => EmbeddableApi[K];
 };
-
-type OptionalPropertyOf<T extends object> = Exclude<
-  {
-    [K in keyof T]: T extends Record<K, T[K]> ? never : K;
-  }[keyof T],
-  undefined
->;
-
-export interface Embeddables {
-  api: Readonly<EmbeddableApi>;
-  addDependencies: (deps: OptionalPropertyOf<EmbeddableDependencies>) => void;
-}
