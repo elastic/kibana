@@ -460,9 +460,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.gotoDashboardLandingPage();
 
       await this.searchForDashboardWithName(dashName);
-      await this.selectDashboard(dashName);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
+      await retry.try(async () => {
+        await this.selectDashboard(dashName);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // check Dashboard landing page is not present
+        await testSubjects.missingOrFail('newItemButton');
+      });
     }
 
     async getPanelTitles() {
