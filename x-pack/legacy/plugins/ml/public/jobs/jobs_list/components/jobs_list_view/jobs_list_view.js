@@ -127,7 +127,8 @@ export class JobsListView extends Component {
     } else {
       this.setRefreshInterval(value);
     }
-    this.refreshJobSummaryList();
+    // force load the jobs list when the refresh interval changes
+    this.refreshJobSummaryList(true);
   }
 
   setRefreshInterval(interval) {
