@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { pure } from 'recompose';
 
@@ -15,7 +14,7 @@ import { NetworkComponentProps } from '../../components/link_to/redirect_to_netw
 
 import { IPDetails } from './ip_details';
 import { Network } from './network';
-import { PageRoute } from '../../components/page_router/page';
+import { PageRoute } from '../../components/page_router/pageroute';
 
 export const NetworkContainer = pure<NetworkComponentProps>(({ match }) => (
   <>
