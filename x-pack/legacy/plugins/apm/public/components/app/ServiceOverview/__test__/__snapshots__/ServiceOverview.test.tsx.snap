@@ -165,7 +165,7 @@ NodeList [
           <a
             aria-describedby="service-name-tooltip"
             class="euiLink euiLink--primary sc-bdVaJa eQDnXY"
-            href="#/My Go Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+            href="#/services/My Go Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
             rel="noreferrer"
           >
             My Go Service
@@ -264,7 +264,7 @@ NodeList [
           <a
             aria-describedby="service-name-tooltip"
             class="euiLink euiLink--primary sc-bdVaJa eQDnXY"
-            href="#/My Python Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+            href="#/services/My Python Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
             rel="noreferrer"
           >
             My Python Service
