@@ -16,17 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { Setup as PluginSetup, Start as PluginStart } from '.';
+import { InspectorViewRegistry } from './view_registry';
 
 export type Setup = jest.Mocked<PluginSetup>;
 export type Start = jest.Mocked<PluginStart>;
 
 const createSetupContract = (): Setup => {
-  const setupContract: Setup = {
-    registerView: jest.fn(),
+  const views = new InspectorViewRegistry();
 
-    // Do not use this for testing, hence NaN.
-    __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: NaN as any,
+  const setupContract: Setup = {
+    registerView: jest.fn(views.register.bind(views)),
+
+    __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+      views,
+    },
   };
   return setupContract;
 };
@@ -36,7 +41,7 @@ const createStartContract = (): Start => {
   return startContract;
 };
 
-export const dataPluginMock = {
+export const inspectorPluginMock = {
   createSetupContract,
   createStartContract,
 };

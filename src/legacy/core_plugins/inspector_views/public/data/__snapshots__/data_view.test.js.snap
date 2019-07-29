@@ -123,10 +123,19 @@ exports[`Inspector Data View component should render empty state 1`] = `
     useFlex={true}
   >
     <EuiFlyoutBody
-      className="kbnInspectorView--flex"
+      style={
+        Object {
+          "display": "flex",
+        }
+      }
     >
       <div
-        className="euiFlyoutBody kbnInspectorView--flex"
+        className="euiFlyoutBody"
+        style={
+          Object {
+            "display": "flex",
+          }
+        }
       >
         <div
           className="euiFlyoutBody__overflow"
@@ -332,10 +341,19 @@ exports[`Inspector Data View component should render loading state 1`] = `
     useFlex={true}
   >
     <EuiFlyoutBody
-      className="kbnInspectorView--flex"
+      style={
+        Object {
+          "display": "flex",
+        }
+      }
     >
       <div
-        className="euiFlyoutBody kbnInspectorView--flex"
+        className="euiFlyoutBody"
+        style={
+          Object {
+            "display": "flex",
+          }
+        }
       >
         <div
           className="euiFlyoutBody__overflow"

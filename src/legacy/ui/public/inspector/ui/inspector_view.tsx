@@ -21,9 +21,9 @@ import React from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 
 /**
- * The InspectorView component should be the top most element in every implemented
- * inspector view. It makes sure, that the appropriate stylings are applied to the
- * view.
+ * Do not use this, use {@link EuiFlyoutBody} EUI component directly.
+ *
+ * @deprecated
  */
 export const InspectorView: React.FC<{ useFlex?: boolean }> = ({ useFlex, children }) => {
   const style: React.CSSProperties = {};

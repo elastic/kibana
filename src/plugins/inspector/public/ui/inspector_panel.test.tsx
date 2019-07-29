@@ -18,8 +18,8 @@
  */
 
 import React from 'react';
-import { InspectorPanel } from './inspector_panel';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { InspectorPanel } from './inspector_panel';
 import { Adapters, InspectorViewDescription } from '../types';
 
 describe('InspectorPanel', () => {
