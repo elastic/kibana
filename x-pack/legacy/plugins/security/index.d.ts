@@ -7,6 +7,7 @@
 import { Legacy } from 'kibana';
 import { AuthenticatedUser } from './common/model';
 import { AuthorizationService } from './server/lib/authorization/service';
+import { CreateApiKeyParams, CreateApiKeyResult } from './server/lib/create_api_key';
 
 /**
  * Public interface of the security plugin.
@@ -14,4 +15,8 @@ import { AuthorizationService } from './server/lib/authorization/service';
 export interface SecurityPlugin {
   authorization: Readonly<AuthorizationService>;
   getUser: (request: Legacy.Request) => Promise<AuthenticatedUser>;
+  createApiKey: (
+    request: Legacy.Request,
+    params: CreateApiKeyParams
+  ) => Promise<CreateApiKeyResult>;
 }

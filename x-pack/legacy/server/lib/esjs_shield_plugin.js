@@ -497,5 +497,16 @@
         }
       ]
     });
+
+    /**
+     * Perform a [shield.createApiKey](Creates an API Key for the current user) request
+    */
+    shield.createApiKey = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_security/api_key',
+      },
+    });
   };
 }));
