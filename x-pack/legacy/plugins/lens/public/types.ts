@@ -130,7 +130,7 @@ export interface DatasourceDimensionPanelProps {
   dragDropContext: DragContextState;
 
   // Visualizations can restrict operations based on their own rules
-  filterOperations: (operation: Operation) => boolean;
+  filterOperations: (operation: OperationMetadata) => boolean;
 
   // Visualizations can hint at the role this dimension would play, which
   // affects the default ordering of the query
@@ -148,11 +148,12 @@ export type DataType = 'string' | 'number' | 'date' | 'boolean';
 // about how the column was created such as whether it is a sum or average.
 // Visualizations are able to filter based on the output, not based on the
 // underlying data
-export interface Operation {
-  // Operation ID is a reference to the operation
-  id: string;
+export interface Operation extends OperationMetadata {
   // User-facing label for the operation
   label: string;
+}
+
+export interface OperationMetadata {
   // The output of this operation will have this data type
   dataType: DataType;
   // A bucketed operation is grouped by duplicate values, otherwise each row is

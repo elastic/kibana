@@ -46,6 +46,8 @@ function updateColumns(
   return { ...state, layers };
 }
 
+const allOperations = () => true;
+
 export function DataTableLayer({
   layer,
   frame,
@@ -68,7 +70,7 @@ export function DataTableLayer({
             accessors={layer.columns}
             datasource={datasource}
             dragDropContext={dragDropContext}
-            filterOperations={() => true}
+            filterOperations={allOperations}
             layerId={layer.layerId}
             onAdd={() =>
               setState(updateColumns(state, layer, columns => [...columns, generateId()]))

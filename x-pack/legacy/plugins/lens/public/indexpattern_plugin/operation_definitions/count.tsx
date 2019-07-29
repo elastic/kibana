@@ -13,11 +13,17 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
     defaultMessage: 'Count',
   }),
-  isApplicableWithoutField: true,
-  isApplicableForField: () => false,
-  buildColumn({ operationId, suggestedPriority, indexPatternId }) {
+  getPossibleOperationsForField: () => [],
+  getPossibleOperationsForDocument: () => {
+    return [
+      {
+        dataType: 'number',
+        isBucketed: false,
+      },
+    ];
+  },
+  buildColumn({ suggestedPriority, indexPatternId }) {
     return {
-      operationId,
       label: i18n.translate('xpack.lens.indexPattern.countOf', {
         defaultMessage: 'Count of documents',
       }),

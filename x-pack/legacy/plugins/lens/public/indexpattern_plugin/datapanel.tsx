@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import {
   EuiComboBox,
   EuiFieldSearch,
@@ -26,8 +26,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DatasourceDataPanelProps, DataType } from '../types';
-import { IndexPatternPrivateState, IndexPatternField } from './indexpattern';
-import { ChildDragDropProvider } from '../drag_drop';
+import { IndexPatternPrivateState, IndexPatternField, IndexPattern } from './indexpattern';
+import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
 import { FieldIcon } from './field_icon';
 
@@ -50,11 +50,55 @@ const fieldTypeNames: Record<DataType, string> = {
   date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
 };
 
-export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatternPrivateState>) {
+export function IndexPatternDataPanel({
+  setState,
+  state,
+  dragDropContext,
+}: DatasourceDataPanelProps<IndexPatternPrivateState>) {
+  const { indexPatterns, currentIndexPatternId } = state;
+  const [showIndexPatternSwitcher, setShowIndexPatternSwitcher] = useState(false);
+
+  const onChangeIndexPattern = useCallback(
+    (newIndexPattern: string) => {
+      setState({
+        ...state,
+        currentIndexPatternId: newIndexPattern,
+      });
+    },
+    [state, setState]
+  );
+
+  return (
+    <MemoizedDataPanel
+      showIndexPatternSwitcher={showIndexPatternSwitcher}
+      setShowIndexPatternSwitcher={setShowIndexPatternSwitcher}
+      currentIndexPatternId={currentIndexPatternId}
+      indexPatterns={indexPatterns}
+      dragDropContext={dragDropContext}
+      // only pass in the state change callback if it's actually needed to avoid re-renders
+      onChangeIndexPattern={showIndexPatternSwitcher ? onChangeIndexPattern : undefined}
+    />
+  );
+}
+
+export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
+  currentIndexPatternId,
+  indexPatterns,
+  dragDropContext,
+  showIndexPatternSwitcher,
+  setShowIndexPatternSwitcher,
+  onChangeIndexPattern,
+}: {
+  currentIndexPatternId: string;
+  indexPatterns: Record<string, IndexPattern>;
+  dragDropContext: DragContextState;
+  showIndexPatternSwitcher: boolean;
+  setShowIndexPatternSwitcher: (show: boolean) => void;
+  onChangeIndexPattern?: (newId: string) => void;
+}) {
   const [state, setState] = useState({
     nameFilter: '',
     typeFilter: [] as DataType[],
-    showIndexPatternSwitcher: false,
     isTypeFilterOpen: false,
   });
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
@@ -76,9 +120,9 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
       setPageSize(PAGINATION_SIZE);
       lazyScroll();
     }
-  }, [state.nameFilter, state.typeFilter, props.state.currentIndexPatternId]);
+  }, [state.nameFilter, state.typeFilter, currentIndexPatternId]);
 
-  if (Object.keys(props.state.indexPatterns).length === 0) {
+  if (Object.keys(indexPatterns).length === 0) {
     return (
       <EuiFlexGroup gutterSize="s" className="lnsIndexPatternDataPanel" direction="column">
         <EuiFlexItem grow={null}>
@@ -102,7 +146,7 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
     );
   }
 
-  const allFields = props.state.indexPatterns[props.state.currentIndexPatternId].fields;
+  const allFields = indexPatterns[currentIndexPatternId].fields;
   const filteredFields = allFields
     .filter(
       (field: IndexPatternField) =>
@@ -117,24 +161,24 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
   );
 
   return (
-    <ChildDragDropProvider {...props.dragDropContext}>
+    <ChildDragDropProvider {...dragDropContext}>
       <EuiFlexGroup gutterSize="s" className="lnsIndexPatternDataPanel" direction="column">
         <EuiFlexItem grow={null}>
           <div className="lnsIndexPatternDataPanel__header">
-            {!state.showIndexPatternSwitcher ? (
+            {!showIndexPatternSwitcher ? (
               <>
                 <EuiTitle size="xxs">
                   <h4
                     className="lnsIndexPatternDataPanel__header"
-                    title={props.state.indexPatterns[props.state.currentIndexPatternId].title}
+                    title={indexPatterns[currentIndexPatternId].title}
                   >
-                    {props.state.indexPatterns[props.state.currentIndexPatternId].title}{' '}
+                    {indexPatterns[currentIndexPatternId].title}{' '}
                   </h4>
                 </EuiTitle>
                 <EuiButtonEmpty
                   data-test-subj="indexPattern-switch-link"
                   className="lnsIndexPatternDataPanel__changeLink"
-                  onClick={() => setState({ ...state, showIndexPatternSwitcher: true })}
+                  onClick={() => setShowIndexPatternSwitcher(true)}
                   size="xs"
                 >
                   (
@@ -148,7 +192,7 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
             ) : (
               <EuiComboBox
                 data-test-subj="indexPattern-switcher"
-                options={Object.values(props.state.indexPatterns).map(({ title, id }) => ({
+                options={Object.values(indexPatterns).map(({ title, id }) => ({
                   label: title,
                   value: id,
                 }))}
@@ -158,11 +202,11 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
                   }
                 }}
                 selectedOptions={
-                  props.state.currentIndexPatternId
+                  currentIndexPatternId
                     ? [
                         {
-                          label: props.state.indexPatterns[props.state.currentIndexPatternId].title,
-                          value: props.state.indexPatterns[props.state.currentIndexPatternId].id,
+                          label: indexPatterns[currentIndexPatternId].title,
+                          value: indexPatterns[currentIndexPatternId].id,
                         },
                       ]
                     : undefined
@@ -170,20 +214,18 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
                 singleSelection={{ asPlainText: true }}
                 isClearable={false}
                 onBlur={() => {
-                  setState({ ...state, showIndexPatternSwitcher: false });
+                  setShowIndexPatternSwitcher(false);
                 }}
                 onChange={choices => {
-                  props.setState({
-                    ...props.state,
-                    currentIndexPatternId: choices[0].value as string,
-                  });
+                  onChangeIndexPattern!(choices[0].value as string);
 
                   setState({
                     ...state,
-                    showIndexPatternSwitcher: false,
                     nameFilter: '',
                     typeFilter: [],
                   });
+
+                  setShowIndexPatternSwitcher(false);
                 }}
               />
             )}
@@ -288,4 +330,6 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
       </EuiFlexGroup>
     </ChildDragDropProvider>
   );
-}
+};
+
+const MemoizedDataPanel = memo(InnerIndexPatternDataPanel);
