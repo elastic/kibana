@@ -42,9 +42,7 @@ class AggTypeFieldFilters {
   /**
    * Returns the {@link any|fields} filtered by all registered filters.
    *
-   * @param fields A list of fields that will be filtered down by this registry.
-   * @param fieldParamType The fieldParamType for which the returning list will be used.
-   * @param indexPattern The indexPattern for which the returning list will be used.
+   * @param fields An IndexedArray of fields that will be filtered down by this registry.
    * @param aggConfig The aggConfig for which the returning list will be used.
    * @return A filtered list of the passed fields.
    */

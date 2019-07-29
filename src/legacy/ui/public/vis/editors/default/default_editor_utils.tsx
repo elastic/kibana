@@ -43,7 +43,7 @@ export interface ComboBoxGroupedOption<T> {
  */
 function groupAndSortBy<T>(
   objects: T[],
-  groupBy: string = 'type',
+  groupBy = 'type',
   labelName = 'title'
 ): Array<ComboBoxGroupedOption<T>> | [] {
   const groupedOptions: Array<ComboBoxGroupedOption<T>> = objects.reduce(

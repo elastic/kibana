@@ -48,7 +48,7 @@ function FieldParamEditor({
   setValue,
 }: FieldParamEditorProps) {
   const selectedOptions: Array<ComboBoxGroupedOption<Field>> = value
-    ? [{ label: value.displayName || '', target: value }]
+    ? [{ label: value.displayName || value.name, target: value }]
     : [];
 
   const onChange = (options: EuiComboBoxOptionProps[]) => {

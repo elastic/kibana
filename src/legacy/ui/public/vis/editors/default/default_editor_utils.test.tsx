@@ -54,7 +54,7 @@ const aggs = [
 ];
 
 describe('Default Editor groupAggregationsBy', () => {
-  it('should return aggs grouped by type field', () => {
+  it('should return aggs grouped by default type field', () => {
     const groupedAggs = [
       {
         label: AggGroupNames.Metrics,
@@ -116,7 +116,7 @@ describe('Default Editor groupAggregationsBy', () => {
         ],
       },
     ];
-    expect(groupAndSortBy(aggs, 'type')).toEqual(groupedAggs);
+    expect(groupAndSortBy(aggs)).toEqual(groupedAggs);
   });
   it('should return aggs grouped by subtype field', () => {
     const groupedAggs = [
