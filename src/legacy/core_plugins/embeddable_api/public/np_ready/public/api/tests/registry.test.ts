@@ -164,3 +164,20 @@ test('cannot register another trigger with the same ID', async () => {
     `"Trigger [trigger.id = MY-TRIGGER] already registered in Embeddables API."`
   );
 });
+
+test('cannot register embeddable factory with the same ID', async () => {
+  const deps = createDeps();
+  const { api } = createApi(deps);
+  const embeddableFactoryId = 'ID';
+  const embeddableFactory = {} as any;
+
+  api.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory);
+  const error = expectError(() =>
+    api.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory)
+  );
+
+  expect(error).toBeInstanceOf(Error);
+  expect(error.message).toMatchInlineSnapshot(
+    `"Embeddable factory [embeddableFactoryId = ID] already registered in Embeddables API."`
+  );
+});

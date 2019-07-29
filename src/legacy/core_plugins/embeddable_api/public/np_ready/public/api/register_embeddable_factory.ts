@@ -21,6 +21,12 @@ import { EmbeddableApiPure } from './types';
 
 export const registerEmbeddableFactory: EmbeddableApiPure['registerEmbeddableFactory'] = ({
   embeddableFactories,
-}) => (id, factory) => {
-  embeddableFactories.set(id, factory);
+}) => (embeddableFactoryId, factory) => {
+  if (embeddableFactories.has(embeddableFactoryId)) {
+    throw new Error(
+      `Embeddable factory [embeddableFactoryId = ${embeddableFactoryId}] already registered in Embeddables API.`
+    );
+  }
+
+  embeddableFactories.set(embeddableFactoryId, factory);
 };
