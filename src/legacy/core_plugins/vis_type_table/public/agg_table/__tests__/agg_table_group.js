@@ -52,7 +52,7 @@ describe('Table Vis - AggTableGroup Directive', function () {
         { type: 'terms', schema: 'segment', params: { field: 'machine.os' } }
       ]
     });
-    vis2.aggs.forEach(function (agg, i) {
+    vis2.aggs.aggs.forEach(function (agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
     tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, fixtures.threeTermBuckets);

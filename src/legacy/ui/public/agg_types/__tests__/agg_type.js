@@ -21,7 +21,6 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import '../../private';
-import { AggParams } from '../agg_params';
 import { VisProvider } from '../../vis';
 import { fieldFormats } from '../../registry/field_formats';
 import { AggType } from '../agg_type';
@@ -100,8 +99,7 @@ describe('AggType Class', function () {
               }
             ]
           });
-
-          let aggConfig = vis.aggs.byTypeName.date_histogram[0];
+          let aggConfig = vis.aggs.getByName('date_histogram')[0];
 
           expect(aggType.getFormat(aggConfig)).to.be(fieldFormats.getDefaultInstance('date'));
 
@@ -113,7 +111,7 @@ describe('AggType Class', function () {
               }
             ]
           });
-          aggConfig = vis.aggs.byTypeName.count[0];
+          aggConfig = vis.aggs.getByName('count')[0];
 
           expect(aggType.getFormat(aggConfig)).to.be(fieldFormats.getDefaultInstance('string'));
         });
@@ -136,7 +134,7 @@ describe('AggType Class', function () {
             name: 'smart agg'
           });
 
-          expect(aggType.params).to.be.an(AggParams);
+          expect(aggType.params).to.be.an(Array);
           expect(aggType.params.length).to.be(2);
           expect(aggType.params[0].name).to.be('json');
           expect(aggType.params[1].name).to.be('customLabel');
@@ -164,7 +162,7 @@ describe('AggType Class', function () {
             params: params
           });
 
-          expect(aggType.params).to.be.an(AggParams);
+          expect(aggType.params).to.be.an(Array);
           expect(aggType.params.length).to.be(paramLength);
         });
       });

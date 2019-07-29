@@ -49,7 +49,7 @@ function SubMetricParamEditor({
   const aggGroup = type === 'customMetric' ? AggGroupNames.Metrics : AggGroupNames.Buckets;
 
   useEffect(() => {
-    setValue(agg.params[type] || agg.type.params.byName[type].makeAgg(agg));
+    setValue(agg.params[type] || agg.type.params.find((a: any) => a.name === type).makeAgg(agg));
   }, []);
 
   const [innerState, setInnerState] = useState(true);

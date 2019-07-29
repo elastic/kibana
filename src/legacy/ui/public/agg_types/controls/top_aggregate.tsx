@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { AggConfig } from 'ui/vis';
-import { AggParam } from '../agg_param';
+import { AggParam } from '../agg_params';
 import { OptionedValueProp, OptionedParamEditorProps } from '../param_types/optioned';
 
 export interface AggregateValueProp extends OptionedValueProp {
@@ -33,12 +33,12 @@ export interface AggregateValueProp extends OptionedValueProp {
 export type TopAggregateParamEditorProps = AggParamEditorProps<AggregateValueProp> &
   OptionedParamEditorProps<AggregateValueProp>;
 
-function getCompatibleAggs(agg: AggConfig): AggregateValueProp[] {
+export function getCompatibleAggs(agg: AggConfig): AggregateValueProp[] {
   const { options = [] } = agg.getAggParams().find(({ name }: AggParam) => name === 'aggregate');
   return options.filter((option: AggregateValueProp) => option.isCompatible(agg));
 }
 
-function TopAggregateParamEditor({
+export function TopAggregateParamEditor({
   agg,
   aggParam,
   value,
@@ -85,7 +85,7 @@ function TopAggregateParamEditor({
     }
 
     if (value) {
-      if (aggParam.options.byValue[value.value]) {
+      if (aggParam.options.find(opt => opt.value === value.value)) {
         return;
       }
 
@@ -93,7 +93,7 @@ function TopAggregateParamEditor({
     }
 
     if (filteredOptions.length === 1) {
-      setValue(aggParam.options.byValue[filteredOptions[0].value]);
+      setValue(aggParam.options.find(opt => opt.value === filteredOptions[0].value));
     }
   }, [fieldType]);
 
@@ -101,7 +101,7 @@ function TopAggregateParamEditor({
     if (event.target.value === emptyValue.value) {
       setValue();
     } else {
-      setValue(aggParam.options.byValue[event.target.value]);
+      setValue(aggParam.options.find(opt => opt.value === event.target.value));
     }
   };
 
@@ -125,5 +125,3 @@ function TopAggregateParamEditor({
     </EuiFormRow>
   );
 }
-
-export { TopAggregateParamEditor, getCompatibleAggs };

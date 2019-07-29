@@ -32,4 +32,5 @@ export interface FieldDescriptor {
   esTypes: string[];
   parent?: string;
   subType?: string;
+  scripted?: boolean;
 }

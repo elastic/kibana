@@ -30,8 +30,8 @@ import { aggTypes } from '..';
 import { BucketAggType } from '../buckets/_bucket_agg_type';
 import { MetricAggType } from '../metrics/metric_agg_type';
 
-const bucketAggs = aggTypes.byType.buckets;
-const metricAggs = aggTypes.byType.metrics;
+const bucketAggs = aggTypes.buckets;
+const metricAggs = aggTypes.metrics;
 
 describe('AggTypesComponent', function () {
 

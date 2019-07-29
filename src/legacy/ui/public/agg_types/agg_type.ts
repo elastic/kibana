@@ -18,45 +18,66 @@
  */
 
 import _ from 'lodash';
-import { AggParams } from './agg_params';
-import { fieldFormats } from '../registry/field_formats';
 import { i18n } from '@kbn/i18n';
+import { BaseParamType } from 'ui/agg_types/param_types';
+import { AggParam, initParams } from './agg_params';
+// @ts-ignore
+import { FieldFormat, fieldFormats } from '../registry/field_formats';
+import { AggConfig } from '../vis';
+import { AggConfigs } from '../vis/agg_configs';
+import { SearchSource } from '../courier';
+import { Adapters } from '../inspector';
 
-/**
- * Generic AggType Constructor
- *
- * Used to create the values exposed by the agg_types module.
- *
- * @class AggType
- * @private
- * @param {object} config - used to set the properties of the AggType
- */
-function AggType(config) {
+export interface AggTypeConfig {
+  name: string;
+  title: string;
+  dslName?: string;
+  makeLabel?: () => string;
+  ordered?: any;
+  hasNoDsl?: boolean;
+  createFilter: (aggConfig: AggConfig, key: any) => any;
+  params?: AggParam[];
+  getRequestAggs?: () => AggConfig[];
+  getResponseAggs?: () => AggConfig[];
+  customLabels?: boolean;
+  decorateAggConfig?: () => Record<string, any>;
+  postFlightRequest?: (
+    resp: any,
+    aggConfigs: AggConfigs,
+    aggConfig: AggConfig,
+    searchSource: SearchSource,
+    inspectorAdapters: Adapters
+  ) => Promise<any>;
+  getFormat?: (agg: AggConfig) => FieldFormat;
+}
 
+const getFormat = (agg: AggConfig) => {
+  const field = agg.getField();
+  return field ? field.format : fieldFormats.getDefaultInstance('string');
+};
+
+export class AggType {
   /**
    * the unique, unchanging, name that we have assigned this aggType
    *
    * @property name
    * @type {string}
    */
-  this.name = config.name;
-
+  name: string;
   /**
    * the name of the elasticsearch aggregation that this aggType represents. Usually just this.name
    *
    * @property name
    * @type {string}
    */
-  this.dslName = config.dslName || config.name;
-
+  dslName: string;
   /**
    * the user friendly name that will be shown in the ui for this aggType
    *
    * @property title
    * @type {string}
    */
-  this.title = config.title;
-
+  title: string;
   /**
    * a function that will be called when this aggType is assigned to
    * an aggConfig, and that aggConfig is being rendered (in a form, chart, etc.).
@@ -65,8 +86,7 @@ function AggType(config) {
    * @param {AggConfig} aggConfig - an agg config of this type
    * @returns {string} - label that can be used in the ui to describe the aggConfig
    */
-  this.makeLabel = config.makeLabel || _.constant(this.name);
-
+  makeLabel: () => string;
   /**
    * Describes if this aggType creates data that is ordered, and if that ordered data
    * is some sort of time series.
@@ -81,8 +101,7 @@ function AggType(config) {
    * @property ordered
    * @type {object|undefined}
    */
-  this.ordered = config.ordered;
-
+  ordered: any;
   /**
    * Flag that prevents this aggregation from being included in the dsl. This is only
    * used by the count aggregation (currently) since it doesn't really exist and it's output
@@ -90,55 +109,31 @@ function AggType(config) {
    *
    * @type {Boolean}
    */
-  this.hasNoDsl = !!config.hasNoDsl;
-
+  hasNoDsl: boolean;
   /**
    * The method to create a filter representation of the bucket
    * @param {object} aggConfig The instance of the aggConfig
    * @param {mixed} key The key for the bucket
    * @returns {object} The filter
    */
-  this.createFilter = config.createFilter;
-
+  createFilter: (aggConfig: AggConfig, key: any) => any;
   /**
    * An instance of {{#crossLink "AggParams"}}{{/crossLink}}.
    *
    * @property params
    * @type {AggParams}
    */
-  this.params = config.params || [];
-  if (!(this.params instanceof AggParams)) {
-    // always append the raw JSON param
-    this.params.push({
-      name: 'json',
-      type: 'json',
-      advanced: true
-    });
-    // always append custom label
-
-    if (config.customLabels !== false) {
-      this.params.push({
-        name: 'customLabel',
-        displayName: i18n.translate('common.ui.aggTypes.string.customLabel', { defaultMessage: 'Custom label' }),
-        type: 'string',
-        write: _.noop
-      });
-    }
-
-    this.params = new AggParams(this.params);
-  }
-
+  params: AggParam[];
   /**
    * Designed for multi-value metric aggs, this method can return a
    * set of AggConfigs that should replace this aggConfig in requests
    *
    * @method getRequestAggs
-   * @returns {array[AggConfig]|undefined} - an array of aggConfig objects
+   * @returns {array[AggConfig]} - an array of aggConfig objects
    *                                         that should replace this one,
    *                                         or undefined
    */
-  this.getRequestAggs = config.getRequestAggs || _.noop;
-
+  getRequestAggs: (() => AggConfig[]) | (() => void);
   /**
    * Designed for multi-value metric aggs, this method can return a
    * set of AggConfigs that should replace this aggConfig in result sets
@@ -149,14 +144,12 @@ function AggType(config) {
    *                                         that should replace this one,
    *                                         or undefined
    */
-  this.getResponseAggs = config.getResponseAggs || _.noop;
-
+  getResponseAggs: (() => AggConfig[]) | (() => void);
   /**
    * A function that will be called each time an aggConfig of this type
    * is created, giving the agg type a chance to modify the agg config
    */
-  this.decorateAggConfig = config.decorateAggConfig || null;
-
+  decorateAggConfig: () => Record<string, any>;
   /**
    * A function that needs to be called after the main request has been made
    * and should return an updated response
@@ -167,24 +160,71 @@ function AggType(config) {
    * @param nestedSearchSource - the new SearchSource that will be used to make post flight request
    * @return {Promise}
    */
-  this.postFlightRequest = config.postFlightRequest || _.identity;
+  postFlightRequest: (
+    resp: any,
+    aggConfigs: AggConfigs,
+    aggConfig: AggConfig,
+    searchSource: SearchSource,
+    inspectorAdapters: Adapters
+  ) => Promise<any>;
+  /**
+   * Pick a format for the values produced by this agg type,
+   * overridden by several metrics that always output a simple
+   * number
+   *
+   * @param  {agg} agg - the agg to pick a format for
+   * @return {FieldFormat}
+   */
+  getFormat: (agg: AggConfig) => FieldFormat;
 
-  if (config.getFormat) {
-    this.getFormat = config.getFormat;
+  /**
+   * Generic AggType Constructor
+   *
+   * Used to create the values exposed by the agg_types module.
+   *
+   * @class AggType
+   * @private
+   * @param {object} config - used to set the properties of the AggType
+   */
+  constructor(config: AggTypeConfig) {
+    this.name = config.name;
+    this.dslName = config.dslName || config.name;
+    this.title = config.title;
+    this.makeLabel = config.makeLabel || _.constant(this.name);
+    this.ordered = config.ordered;
+    this.hasNoDsl = !!config.hasNoDsl;
+    this.createFilter = config.createFilter;
+
+    if (config.params && config.params.length && config.params[0] instanceof BaseParamType) {
+      this.params = config.params;
+    } else {
+      // always append the raw JSON param
+      const params: any[] = config.params ? [...config.params] : [];
+      params.push({
+        name: 'json',
+        type: 'json',
+        advanced: true,
+      });
+      // always append custom label
+
+      if (config.customLabels !== false) {
+        params.push({
+          name: 'customLabel',
+          displayName: i18n.translate('common.ui.aggTypes.string.customLabel', {
+            defaultMessage: 'Custom label',
+          }),
+          type: 'string',
+          write: _.noop,
+        });
+      }
+
+      this.params = initParams(params as any);
+    }
+
+    this.getRequestAggs = config.getRequestAggs || _.noop;
+    this.getResponseAggs = config.getResponseAggs || _.noop;
+    this.decorateAggConfig = config.decorateAggConfig || (() => ({}));
+    this.postFlightRequest = config.postFlightRequest || _.identity;
+    this.getFormat = config.getFormat || getFormat;
   }
 }
-
-/**
- * Pick a format for the values produced by this agg type,
- * overridden by several metrics that always output a simple
- * number
- *
- * @param  {agg} agg - the agg to pick a format for
- * @return {FieldFormat}
- */
-AggType.prototype.getFormat = function (agg) {
-  const field = agg.getField();
-  return field ? field.format : fieldFormats.getDefaultInstance('string');
-};
-
-export { AggType };

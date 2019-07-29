@@ -29,4 +29,5 @@ export interface Schema {
   name: string;
   params: AggParam[];
   title: string;
+  defaults: unknown;
 }

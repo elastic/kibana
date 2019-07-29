@@ -24,6 +24,7 @@ import { AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg, DefaultEditorAggProps } from './agg';
 import { act } from 'react-dom/test-utils';
 import { DefaultEditorAggParams } from './agg_params';
+import { IndexPattern } from 'ui/index_patterns';
 
 jest.mock('./agg_params', () => ({
   DefaultEditorAggParams: () => null,
@@ -46,13 +47,13 @@ describe('DefaultEditorAgg component', () => {
 
     defaultProps = {
       agg: {
-        id: 1,
+        id: '1',
         brandNew: true,
-        getIndexPattern: () => ({}),
+        getIndexPattern: () => ({} as IndexPattern),
         schema: { title: 'Schema name' },
         title: 'Metrics',
         params: {},
-      },
+      } as any,
       aggIndex: 0,
       aggIsTooLow: false,
       dragHandleProps: null,
@@ -85,7 +86,7 @@ describe('DefaultEditorAgg component', () => {
   });
 
   it('should not show description when agg is invalid', () => {
-    defaultProps.agg.brandNew = false;
+    (defaultProps.agg as any).brandNew = false;
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
     act(() => {
@@ -103,7 +104,7 @@ describe('DefaultEditorAgg component', () => {
   });
 
   it('should show description when agg is valid', () => {
-    defaultProps.agg.brandNew = false;
+    (defaultProps.agg as any).brandNew = false;
     defaultProps.agg.type = {
       makeLabel: () => 'Agg description',
     };

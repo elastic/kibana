@@ -17,7 +17,6 @@
  * under the License.
  */
 import { Field } from 'ui/index_patterns';
-import { IndexedArray } from 'ui/indexed_array';
 import { AggConfig } from '../../../vis';
 
 type AggTypeFieldFilter = (field: Field, aggConfig: AggConfig) => boolean;
@@ -46,7 +45,7 @@ class AggTypeFieldFilters {
    * @param aggConfig The aggConfig for which the returning list will be used.
    * @return A filtered list of the passed fields.
    */
-  public filter(fields: IndexedArray<Field>, aggConfig: AggConfig) {
+  public filter(fields: Field[], aggConfig: AggConfig) {
     const allFilters = Array.from(this.filters);
     const allowedAggTypeFields = fields.filter(field => {
       const isAggTypeFieldAllowed = allFilters.every(filter => filter(field, aggConfig));

@@ -24,7 +24,7 @@ import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionProps } from '@el
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggParamEditorProps } from '../../vis/editors/default';
-import { AggParamOption } from '../agg_param';
+import { AggParamOption } from '../agg_params';
 import { isValidInterval } from '../utils';
 
 interface ComboBoxOption extends EuiComboBoxOptionProps {
@@ -44,7 +44,7 @@ function TimeIntervalParamEditor({
   const timeBase: string = get(editorConfig, 'interval.timeBase');
   const options = timeBase
     ? []
-    : (aggParam.options || []).reduce(
+    : ((aggParam as any).options || []).reduce(
         (filtered: ComboBoxOption[], option: AggParamOption) => {
           if (option.enabled ? option.enabled(agg) : true) {
             filtered.push({ label: option.display, key: option.val });
@@ -63,7 +63,7 @@ function TimeIntervalParamEditor({
     isValid = !!(definedOption || isValidInterval(value, timeBase));
   }
 
-  const interval = get(agg, 'buckets.getInterval') && agg.buckets.getInterval();
+  const interval = get(agg, 'buckets.getInterval') && (agg as any).buckets.getInterval();
   const scaledHelpText =
     interval && interval.scaled && isValid ? (
       <strong className="eui-displayBlock">

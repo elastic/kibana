@@ -34,9 +34,9 @@ function SubAggParamEditor({
   useEffect(() => {
     // we aren't creating a custom aggConfig
     if (agg.params.metricAgg !== 'custom') {
-      setValue(null);
+      setValue(undefined);
     } else if (!agg.params.customMetric) {
-      setValue(agg.type.params.byName.customMetric.makeAgg(agg));
+      setValue(agg.type.params.find((a: any) => a.name === 'customMetric').makeAgg(agg));
     }
   }, [value, metricAggs]);
 

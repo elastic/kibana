@@ -26,6 +26,7 @@ import { AggConfig } from 'ui/vis';
 import { Field } from 'ui/index_patterns';
 import { AggParamEditorProps, ComboBoxGroupedOptions } from 'ui/vis/editors/default';
 import { formatListAsProse, parseCommaSeparatedList } from '../../../../utils';
+import { AggParam, FieldParamType } from '..';
 
 const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
 
@@ -128,10 +129,9 @@ function FieldParamEditor({
 }
 
 function getFieldTypesString(agg: AggConfig) {
-  return formatListAsProse(
-    parseCommaSeparatedList(get(agg, 'type.params.byName.field.filterFieldTypes')),
-    { inclusive: false }
-  );
+  const param =
+    get(agg, 'type.params', []).find((p: AggParam) => p.name === 'field') || ({} as FieldParamType);
+  return formatListAsProse(parseCommaSeparatedList(param.filterFieldTypes), { inclusive: false });
 }
 
 export { FieldParamEditor };

@@ -57,7 +57,7 @@ const getAggResultBuckets = (aggConfigs, response, aggWithOtherBucket, key) => {
       for (let aggId = 0; aggId < responseAggs.length; aggId++) {
         const agg = responseAggs[aggId];
         const aggKey = _.keys(responseAgg)[aggId];
-        const aggConfig = _.find(aggConfigs, agg => agg.id === aggKey);
+        const aggConfig = _.find(aggConfigs.aggs, agg => agg.id === aggKey);
         const bucket = _.find(agg.buckets, (bucket, bucketObjKey) => {
           const bucketKey = aggConfig.getKey(bucket, Number.isInteger(bucketObjKey) ? null : bucketObjKey).toString();
           return bucketKey === keyParts[i];
@@ -118,7 +118,7 @@ const getOtherAggTerms = (requestAgg, key, otherAgg) => {
 
 
 export const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
-  const bucketAggs = aggConfigs.filter(agg => agg.type.type === AggGroupNames.Buckets);
+  const bucketAggs = aggConfigs.aggs.filter(agg => agg.type.type === AggGroupNames.Buckets);
   const index = bucketAggs.findIndex(agg => agg.id === aggWithOtherBucket.id);
   const aggs = aggConfigs.toDsl();
   const indexPattern = aggWithOtherBucket.params.field.indexPattern;

@@ -98,7 +98,7 @@ describe('Table Vis - Controller', async function () {
 
   // basically a parameterized beforeEach
   function initController(vis) {
-    vis.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
+    vis.aggs.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
 
     tabifiedResponse = tabifyAggResponse(vis.aggs, fixtures.oneRangeBucket);
     $rootScope.vis = vis;

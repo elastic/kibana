@@ -40,6 +40,7 @@ function OrderParamEditor({
     setValidity(isValid);
   }, [isValid]);
 
+  // @ts-ignore
   return (
     <EuiFormRow
       label={label}
@@ -48,9 +49,11 @@ function OrderParamEditor({
       compressed
     >
       <EuiSelect
-        options={aggParam.options.raw}
+        options={aggParam.options}
         value={value && value.value}
-        onChange={ev => setValue(aggParam.options.byValue[ev.target.value])}
+        onChange={ev =>
+          setValue(aggParam.options.find((opt: OptionedValueProp) => opt.value === ev.target.value))
+        }
         fullWidth={true}
         isInvalid={showValidation ? !isValid : false}
         onBlur={setTouched}

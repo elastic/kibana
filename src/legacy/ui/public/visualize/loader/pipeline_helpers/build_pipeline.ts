@@ -88,7 +88,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
       date_histogram: () => ({
         id: 'date',
         params: {
-          pattern: agg.buckets.getScaledDateFormat(),
+          pattern: (agg as any).buckets.getScaledDateFormat(),
         },
       }),
       terms: () => ({
@@ -127,7 +127,9 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
     ].includes(agg.type.name);
 
     const format = createFormat(
-      hasSubAgg ? agg.params.customMetric || agg.aggConfigs.byId[agg.params.metricAgg] : agg
+      hasSubAgg
+        ? agg.params.customMetric || agg.aggConfigs.getRequestAggById(agg.params.metricAgg)
+        : agg
     );
 
     const params: SchemaConfigParams = {};
@@ -471,7 +473,7 @@ export const buildVislibDimensions = async (
       dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
       dimensions.x.params.bounds = xAgg.buckets.getBounds();
     } else if (xAgg.type.name === 'histogram') {
-      const intervalParam = xAgg.type.params.byName.interval;
+      const intervalParam = xAgg.type.params.find((agg: any) => agg.name === 'interval');
       const output = { params: {} as any };
       await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, params.searchSource);
       intervalParam.write(xAgg, output);

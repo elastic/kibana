@@ -63,7 +63,7 @@ describe('Top hit metric', function () {
       });
 
       // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
-      aggConfig = vis.aggs[0];
+      aggConfig = vis.aggs.aggs[0];
       aggDsl = aggConfig.toDsl();
     });
   }

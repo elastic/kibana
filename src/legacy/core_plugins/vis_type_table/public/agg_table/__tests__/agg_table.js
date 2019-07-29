@@ -60,7 +60,7 @@ describe('Table Vis - AggTable Directive', function () {
         { type: 'terms', schema: 'bucket', params: { field: 'machine.os' } }
       ]
     });
-    vis2.aggs.forEach(function (agg, i) {
+    vis2.aggs.aggs.forEach(function (agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
     tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, fixtures.threeTermBuckets, { metricsAtAllLevels: true });
@@ -77,7 +77,7 @@ describe('Table Vis - AggTable Directive', function () {
         { type: 'top_hits', schema: 'metric', params: { field: 'bytes', aggregate: { val: 'min' }, size: 1 } }
       ]
     });
-    vis3.aggs.forEach(function (agg, i) {
+    vis3.aggs.aggs.forEach(function (agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
 

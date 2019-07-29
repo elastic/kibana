@@ -64,7 +64,7 @@ describe.skip('editor', function () {
         '</vis-editor-agg-params>');
       const $parentScope = $injector.get('$rootScope').$new();
 
-      agg = $parentScope.agg = vis.aggs.bySchemaName.segment[0];
+      agg = $parentScope.agg = vis.aggs.bySchemaName('segment')[0];
       $parentScope.groupName = 'buckets';
       $parentScope.vis = vis;
 

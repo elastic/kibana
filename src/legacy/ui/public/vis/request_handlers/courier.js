@@ -126,7 +126,7 @@ const CourierRequestHandlerProvider = function () {
       // must take care not to mutate it, or it could have unintended side effects, e.g. displaying
       // response data incorrectly in the inspector.
       let resp = searchSource.rawResponse;
-      for (const agg of aggs) {
+      for (const agg of aggs.aggs) {
         if (has(agg, 'type.postFlightRequest')) {
           resp = await agg.type.postFlightRequest(
             resp,

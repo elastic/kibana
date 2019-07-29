@@ -54,7 +54,7 @@ describe('Vis Class', function () {
 
   const verifyVis = function (vis) {
     expect(vis).to.have.property('aggs');
-    expect(vis.aggs).to.have.length(3);
+    expect(vis.aggs.aggs).to.have.length(3);
 
     expect(vis).to.have.property('type');
     expect(vis.type).to.eql(visTypes.byName.pie);
@@ -89,7 +89,7 @@ describe('Vis Class', function () {
       expect(vis).to.have.property('type');
       expect(vis.type).to.eql(visTypes.byName.histogram);
       expect(vis).to.have.property('aggs');
-      expect(vis.aggs).to.have.length(1);
+      expect(vis.aggs.aggs).to.have.length(1);
       expect(vis).to.have.property('params');
       expect(vis.params).to.have.property('addLegend', true);
       expect(vis.params).to.have.property('addTooltip', true);

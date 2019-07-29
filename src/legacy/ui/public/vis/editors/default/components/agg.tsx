@@ -62,7 +62,7 @@ function DefaultEditorAgg({
   setTouched,
   setValidity,
 }: DefaultEditorAggProps) {
-  const [isEditorOpen, setIsEditorOpen] = useState(agg.brandNew);
+  const [isEditorOpen, setIsEditorOpen] = useState((agg as any).brandNew);
   const [validState, setValidState] = useState(true);
   const showDescription = !isEditorOpen && validState;
   const showError = !isEditorOpen && !validState;
