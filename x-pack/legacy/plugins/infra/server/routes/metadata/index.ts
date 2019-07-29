@@ -16,6 +16,7 @@ import {
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { getMetricMetadata } from './lib/get_metric_metadata';
 import { pickFeatureName } from './lib/pick_feature_name';
+// import { hasAPMData } from './lib/has_apm_data';
 import { getCloudMetricsMetadata } from './lib/get_cloud_metric_metadata';
 import { getNodeInfo } from './lib/get_node_info';
 import { throwErrors } from '../../../common/runtime_types';
@@ -53,6 +54,15 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
         const cloudMetricsFeatures = pickFeatureName(cloudMetricsMetadata.buckets).map(
           nameToFeature('metrics')
         );
+
+        // const hasAPMData = await hasAPMData(
+        //   framework,
+        //   req,
+        //   configuration,
+        //   nodeId,
+        //   nodeType
+        // );
+        // const apmMetricData = hasAPMData ? [{ name: 'apm.transaction', source: 'apm' }] : [];
 
         const id = metricsMetadata.id;
         const name = metricsMetadata.name || id;
