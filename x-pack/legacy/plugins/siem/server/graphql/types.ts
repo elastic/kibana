@@ -2121,9 +2121,11 @@ export enum FlowDirection {
 }
 
 export enum FlowTarget {
-  unified = 'unified',
+  client = 'client',
   destination = 'destination',
+  server = 'server',
   source = 'source',
+  unified = 'unified',
 }
 
 export enum NetworkDirectionEcs {

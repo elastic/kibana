@@ -177,8 +177,8 @@ const formatTopNFlowEdgesUnified = (
                   autonomous_system: getAs(bucket),
                 },
                 network: {
-                  bytes_in: getOrNumber('bytes_in.value', bucket),
-                  bytes_out: getOrNumber('bytes_out.value', bucket),
+                  bytes_in: getOr(0, 'bytes_in.value', bucket),
+                  bytes_out: getOr(0, 'bytes_out.value', bucket),
                 },
               },
               cursor: {
@@ -207,11 +207,11 @@ const formatTopNFlowEdgesUnified = (
               },
               network: {
                 bytes_in:
-                  getOrNumber('bytes_in.value', bucket) +
-                  getOrNumber('node.unified.bytes_in', acc[bucket.key]),
+                  getOr(0, 'bytes_in.value', bucket) +
+                  getOr(0, 'node.network.bytes_in', acc[bucket.key]),
                 bytes_out:
-                  getOrNumber('bytes_out.value', bucket) +
-                  getOrNumber('node.unified.bytes_out', acc[bucket.key]),
+                  getOr(0, 'bytes_out.value', bucket) +
+                  getOr(0, 'node.network.bytes_out', acc[bucket.key]),
               },
             },
             cursor: {

@@ -6230,19 +6230,16 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
-          {
-            "name": "unified",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
+          { "name": "client", "description": "", "isDeprecated": false, "deprecationReason": null },
           {
             "name": "destination",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
           },
-          { "name": "source", "description": "", "isDeprecated": false, "deprecationReason": null }
+          { "name": "server", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "source", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "unified", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
       },
