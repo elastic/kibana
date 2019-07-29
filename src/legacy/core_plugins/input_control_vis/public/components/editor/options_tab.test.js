@@ -42,7 +42,7 @@ describe('OptionsTab', () => {
   it('should renders OptionsTab', () => {
     const component = shallow(<OptionsTab {...props} />);
 
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   it('should update updateFiltersOnChange', () => {
