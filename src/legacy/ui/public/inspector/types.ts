@@ -21,7 +21,7 @@
  * Do not import these types from here, instead import them from `inspector` plugin.
  *
  * ```ts
- * import 'src/plugins/inspector/public';
+ * import { InspectorViewDescription } from 'src/plugins/inspector/public';
  * ```
  *
  * @deprecated

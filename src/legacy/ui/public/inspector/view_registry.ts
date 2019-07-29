@@ -22,7 +22,7 @@ import { npSetup } from 'ui/new_platform';
 export { InspectorViewDescription } from './types';
 
 /**
- * Do not use this, instead use `inpector` plugin directly.
+ * Do not use this, instead use `inspector` plugin directly.
  *
  * ```ts
  * import { npSetup } from 'ui/new_platform';
