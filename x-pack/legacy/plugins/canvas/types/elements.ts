@@ -59,7 +59,7 @@ export interface AST {
   }>;
 }
 
-interface Position {
+export interface ElementPosition {
   /**
    * distance from the left edge of the page
    */
@@ -94,7 +94,7 @@ export interface PositionedElement {
   /**
    * layout engine settings
    */
-  position: Position;
+  position: ElementPosition;
   /**
    * Canvas expression used to generate the element
    */

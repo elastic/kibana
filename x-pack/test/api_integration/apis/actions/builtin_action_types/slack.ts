@@ -131,7 +131,7 @@ export default function slackTest({ getService }: KibanaFunctionalTestDefaultPro
         })
         .expect(200);
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/an error occurred posting a slack message/);
+      expect(result.message).to.match(/an error occurred in action .+ posting a slack message/);
     });
 
     it('should handle a 429 slack error', async () => {
@@ -147,7 +147,7 @@ export default function slackTest({ getService }: KibanaFunctionalTestDefaultPro
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/an error occurred posting a slack message/);
+      expect(result.message).to.match(/an error occurred in action .+ posting a slack message/);
       expect(result.message).to.match(/retry at/);
 
       const dateRetry = new Date(result.retry).getTime();
@@ -166,7 +166,7 @@ export default function slackTest({ getService }: KibanaFunctionalTestDefaultPro
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/an error occurred posting a slack message/);
+      expect(result.message).to.match(/an error occurred in action .+ posting a slack message/);
       expect(result.retry).to.equal(true);
     });
   });
