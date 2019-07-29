@@ -38,6 +38,10 @@ export const AnomalyChart: FC<Props> = ({
   width,
 }) => {
   const data = chartType === CHART_TYPE.SCATTER ? flattenData(chartData) : chartData;
+  if (data.length === 0) {
+    return null;
+  }
+
   const xDomain = getXRange(data);
   return (
     <div style={{ width, height }}>
