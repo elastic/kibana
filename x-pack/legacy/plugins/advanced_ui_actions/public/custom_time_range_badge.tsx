@@ -80,7 +80,8 @@ export class CustomTimeRangeBadge extends Action {
 
   public async isCompatible({ embeddable }: ActionContext) {
     const isInputControl =
-      isVisualizeEmbeddable(embeddable) && embeddable.getOutput().visTypeName === 'inputControl';
+      isVisualizeEmbeddable(embeddable) &&
+      embeddable.getOutput().visTypeName === 'input_control_vis';
 
     return Boolean(
       embeddable &&
