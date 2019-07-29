@@ -20,7 +20,7 @@ import { mockDataLoaderFetch, timefilter } from './embedded_visualize_handler.te
 
 // @ts-ignore
 import MockState from '../../../../../fixtures/mock_state';
-import { RequestHandlerParams, Vis } from '../../vis';
+import { RequestHandlerParams, Vis, AggConfig } from '../../vis';
 import { VisResponseData } from './types';
 
 import { Inspector } from '../../inspector';
@@ -49,7 +49,7 @@ describe('EmbeddedVisualizeHandler', () => {
     jest.clearAllMocks();
 
     dataLoaderParams = {
-      aggs: [],
+      aggs: [] as AggConfig[],
       filters: undefined,
       forceFetch: false,
       inspectorAdapters: {},

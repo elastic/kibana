@@ -62,7 +62,7 @@ const ErrorGroupList: React.FC<Props> = props => {
         width: px(unit * 6),
         render: (groupId: string) => {
           return (
-            <GroupIdLink path={`/${serviceName}/errors/${groupId}`}>
+            <GroupIdLink path={`/services/${serviceName}/errors/${groupId}`}>
               {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
           );
@@ -85,7 +85,9 @@ const ErrorGroupList: React.FC<Props> = props => {
                 id="error-message-tooltip"
                 content={message || NOT_AVAILABLE_LABEL}
               >
-                <MessageLink path={`/${serviceName}/errors/${item.groupId}`}>
+                <MessageLink
+                  path={`/services/${serviceName}/errors/${item.groupId}`}
+                >
                   {message || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </EuiToolTip>

@@ -10,17 +10,17 @@ import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+import {
+  AutocompleteSuggestion,
+  getAutocompleteProvider
+} from 'ui/autocomplete_providers';
 import { StaticIndexPattern } from 'ui/index_patterns';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { KibanaLink } from '../Links/KibanaLink';
 // @ts-ignore
 import { Typeahead } from './Typeahead';
-import {
-  convertKueryToEsQuery,
-  getSuggestions,
-  getAPMIndexPatternForKuery
-} from '../../../services/kuery';
 // @ts-ignore
 import { getBoolFilter } from './get_bool_filter';
 import { useLocation } from '../../../hooks/useLocation';
@@ -29,6 +29,7 @@ import { history } from '../../../utils/history';
 import { useMatchedRoutes } from '../../../hooks/useMatchedRoutes';
 import { RouteName } from '../../app/Main/route_config/route_names';
 import { useCore } from '../../../hooks/useCore';
+import { getAPMIndexPattern } from '../../../services/rest/savedObjects';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -39,6 +40,50 @@ interface State {
   suggestions: AutocompleteSuggestion[];
   isLoadingIndexPattern: boolean;
   isLoadingSuggestions: boolean;
+}
+
+function convertKueryToEsQuery(
+  kuery: string,
+  indexPattern: StaticIndexPattern
+) {
+  const ast = fromKueryExpression(kuery);
+  return toElasticsearchQuery(ast, indexPattern);
+}
+
+async function getAPMIndexPatternForKuery(): Promise<
+  StaticIndexPattern | undefined
+> {
+  const apmIndexPattern = await getAPMIndexPattern();
+  if (!apmIndexPattern) {
+    return;
+  }
+  return getFromSavedObject(apmIndexPattern);
+}
+
+function getSuggestions(
+  query: string,
+  selectionStart: number,
+  apmIndexPattern: StaticIndexPattern,
+  boolFilter: unknown
+) {
+  const autocompleteProvider = getAutocompleteProvider('kuery');
+  if (!autocompleteProvider) {
+    return [];
+  }
+  const config = {
+    get: () => true
+  };
+
+  const getAutocompleteSuggestions = autocompleteProvider({
+    config,
+    indexPatterns: [apmIndexPattern],
+    boolFilter
+  });
+  return getAutocompleteSuggestions({
+    query,
+    selectionStart,
+    selectionEnd: selectionStart
+  });
 }
 
 export function KueryBar() {
