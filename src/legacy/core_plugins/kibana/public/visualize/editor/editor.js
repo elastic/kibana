@@ -402,20 +402,6 @@ function VisEditor(
     $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateTimeRange);
     $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateRefreshInterval);
 
-    // update the searchSource when filters update
-    const filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
-      next: () => {
-        const filters = queryFilter.getFilters();
-        const isFetchRequired = !_.isEqual(
-          (filters || []).filter(filter => !filter.meta.disabled),
-          ($scope.filters || []).filter(filter => !filter.meta.disabled),
-        );
-        $scope.filters = filters;
-        $scope.globalFilters = queryFilter.getGlobalFilters();
-        if (isFetchRequired) $scope.fetch();
-      }
-    });
-
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
@@ -424,6 +410,17 @@ function VisEditor(
       $scope.vis.forceReload();
     };
 
+    // update the searchSource when filters update
+    const filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+      next: () => {
+        $scope.filters = queryFilter.getFilters();
+        $scope.globalFilters = queryFilter.getGlobalFilters();
+      }
+    });
+    const filterFetchSubscription = subscribeWithScope($scope, queryFilter.getFetches$(), {
+      next: $scope.fetch
+    });
+
     $scope.$on('$destroy', function () {
       if ($scope._handler) {
         $scope._handler.destroy();
@@ -431,6 +428,7 @@ function VisEditor(
       savedVis.destroy();
       stateMonitor.destroy();
       filterUpdateSubscription.unsubscribe();
+      filterFetchSubscription.unsubscribe();
     });
 
     if (!$scope.chrome.getVisible()) {
