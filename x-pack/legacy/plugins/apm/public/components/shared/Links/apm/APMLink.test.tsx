@@ -6,7 +6,7 @@
 
 import { Location } from 'history';
 import React from 'react';
-import { getRenderedHref } from '../../../utils/testHelpers';
+import { getRenderedHref } from '../../../../utils/testHelpers';
 import { APMLink } from './APMLink';
 
 test('APMLink should produce the correct URL', async () => {

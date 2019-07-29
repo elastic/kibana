@@ -79,26 +79,14 @@ export async function getTransactionBreakdown({
   };
 
   const filters = [
-    {
-      term: {
-        [SERVICE_NAME]: {
-          value: serviceName
-        }
-      }
-    },
-    {
-      term: {
-        [TRANSACTION_TYPE]: {
-          value: transactionType
-        }
-      }
-    },
+    { term: { [SERVICE_NAME]: serviceName } },
+    { term: { [TRANSACTION_TYPE]: transactionType } },
     { range: rangeFilter(start, end) },
     ...uiFiltersES
   ];
 
   if (transactionName) {
-    filters.push({ term: { [TRANSACTION_NAME]: { value: transactionName } } });
+    filters.push({ term: { [TRANSACTION_NAME]: transactionName } });
   }
 
   const params = {
@@ -107,7 +95,7 @@ export async function getTransactionBreakdown({
       size: 0,
       query: {
         bool: {
-          must: filters
+          filter: filters
         }
       },
       aggs: {
