@@ -102,6 +102,15 @@ export const code = (kibana: any) =>
             .default(['https', 'git', 'ssh']),
           enableGitCertCheck: Joi.boolean().default(true),
         }).default(),
+        disk: Joi.object({
+          threshold_enabled: Joi.bool().default(true),
+          watermark: Joi.object({
+            low: Joi.string().default('85%'),
+            high: Joi.string().default('90%'),
+            floodStage: Joi.string().default('95%'),
+          }).default(),
+          updateIntervalMs: Joi.number().default(moment.duration(30, 'second').asMilliseconds()),
+        }).default(),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now
         codeNodeUrl: Joi.string(),
