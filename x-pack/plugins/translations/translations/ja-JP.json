@@ -2059,7 +2059,6 @@
     "kbn.server.tutorials.apm.dotNetClient.configureApplication.textPost": "「IConfiguration」インスタンスを渡すのはオプションで、これにより、エージェントはこの「IConfiguration」インスタンス (例: 「appsettings.json」ファイル) から構成を読み込みます。",
     "kbn.server.tutorials.apm.dotNetClient.configureApplication.textPre": "ASP.NET Core の場合、「Startup.cs」ファイル内の「Configure」メソドの「UseElasticApm」メソドを呼び出します。",
     "kbn.server.tutorials.apm.dotNetClient.configureApplication.title": "エージェントをアプリケーションに追加",
-    "kbn.server.tutorials.apm.dotNetClient.download.textPre": "**警告:.NET エージェントは現在ベータで、本番向けではありません。** \n\n       [NuGet]({allNuGetPacakgesLink}) から .NET アプリケーションにエージェントパッケージを追加してください。用途の異なる複数の NuGet パッケージがあります。\n\n  Entity Framework Core の ASP.NET Core アプリケーションの場合は、[Elastic.Apm.All]({allApmPackageLink}) パッケージをダウンロードしてください。このパッケージは、自動的にすべてのエージェントコンポーネントをアプリケーションに追加します。\n\n 依存性を最低限に抑えたい場合、ASP.NET Core の監視のみに [Elastic.Apm.AspNetCore]({aspNetCorePackageLink}) パッケージ、または Entity Framework Core の監視のみに [Elastic.Apm.EfCore]({efCorePackageLink}) パッケージを使用することができます。\n\n       手動インストルメンテーションのみにパブリック Agent API を使用する場合は、[Elastic.Apm]({elasticApmPackageLink}) パッケージを使用してください。",
     "kbn.server.tutorials.apm.dotNetClient.download.title": "APM エージェントのダウンロード",
     "kbn.server.tutorials.apm.downloadServer.title": "APM Server をダウンロードして展開します",
     "kbn.server.tutorials.apm.downloadServerRpm": "32 ビットパッケージをお探しですか？[ダウンロードページ]({downloadPageLink}) をご覧ください。",
