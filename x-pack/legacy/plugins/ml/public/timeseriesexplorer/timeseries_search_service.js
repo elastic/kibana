@@ -8,10 +8,10 @@
 
 import _ from 'lodash';
 
-import { ml } from 'plugins/ml/services/ml_api_service';
-import { isModelPlotEnabled } from 'plugins/ml/../common/util/job_utils';
-import { buildConfigFromDetector } from 'plugins/ml/util/chart_config_builder';
-import { mlResultsService } from 'plugins/ml/services/results_service';
+import { ml } from '../services/ml_api_service';
+import { isModelPlotEnabled } from '../../common/util/job_utils';
+import { buildConfigFromDetector } from '../util/chart_config_builder';
+import { mlResultsService } from '../services/results_service';
 
 function getMetricData(job, detectorIndex, entityFields, earliestMs, latestMs, interval) {
   if (isModelPlotEnabled(job, detectorIndex, entityFields)) {

@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
+import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
@@ -191,7 +192,12 @@ export const StepCreateForm: SFC<Props> = React.memo(
           try {
             const stats = await ml.dataFrame.getDataFrameTransformsStats(transformId);
             if (stats && Array.isArray(stats.transforms) && stats.transforms.length > 0) {
-              const percent = Math.round(stats.transforms[0].state.progress.percent_complete);
+              const percent = Math.round(
+                idx(
+                  stats,
+                  _ => _.transforms[0].checkpointing.next.checkpoint_progress.percent_complete
+                ) || 0
+              );
               setProgressPercentComplete(percent);
               if (percent >= 100) {
                 clearInterval(interval);
