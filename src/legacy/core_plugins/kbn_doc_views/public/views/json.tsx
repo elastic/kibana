@@ -18,26 +18,23 @@
  */
 // @ts-ignore
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
+import React from 'react';
+import ReactDom from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { JsonCodeEditor } from './json_code_editor';
 
 /*
  * Registration of the the doc view: json
  * - used to display an ES hit as pretty printed JSON at Discover
- * - registered as angular directive to stay compatible with community plugins
  */
-DocViewsRegistryProvider.register(function(reactDirective: any) {
-  const reactDir = reactDirective(JsonCodeEditor, ['hit']);
-  // setting of reactDir.scope is required to assign $scope props
-  // to the react component via render-directive in doc_viewer.js
-  reactDir.scope = {
-    hit: '=',
-  };
+DocViewsRegistryProvider.register(function() {
   return {
     title: i18n.translate('kbnDocViews.json.jsonTitle', {
       defaultMessage: 'JSON',
     }),
     order: 20,
-    directive: reactDir,
+    render: (domNode: any, props: any) => {
+      ReactDom.render(<JsonCodeEditor hit={props.hit} />, domNode);
+    },
   };
 });
