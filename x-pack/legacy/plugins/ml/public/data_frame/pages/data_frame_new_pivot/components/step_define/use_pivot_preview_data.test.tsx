@@ -15,6 +15,8 @@ import {
   UsePivotPreviewDataReturnType,
 } from './use_pivot_preview_data';
 
+import { IndexPattern } from 'ui/index_patterns';
+
 jest.mock('../../../../../services/ml_api_service');
 
 type Callback = () => void;
@@ -46,7 +48,7 @@ describe('usePivotPreviewData', () => {
   test('indexPattern not defined', () => {
     testHook(() => {
       pivotPreviewObj = usePivotPreviewData(
-        { id: 'the-id', title: 'the-title', fields: [] } as any,
+        ({ id: 'the-id', title: 'the-title', fields: [] } as unknown) as IndexPattern,
         query,
         {},
         {}
@@ -62,7 +64,7 @@ describe('usePivotPreviewData', () => {
   test('indexPattern set triggers loading', () => {
     testHook(() => {
       pivotPreviewObj = usePivotPreviewData(
-        { id: 'the-id', title: 'the-title', fields: [] } as any,
+        ({ id: 'the-id', title: 'the-title', fields: [] } as unknown) as IndexPattern,
         query,
         {},
         {}

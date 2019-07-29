@@ -32,7 +32,7 @@ describe('Data Frame: <StepCreateForm />', () => {
       id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
       fields: [],
-    } as any) as IndexPattern;
+    } as unknown) as IndexPattern;
 
     // Using a wrapping <div> element because shallow() would fail
     // with the Provider being the outer most component.
