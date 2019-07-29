@@ -1098,6 +1098,7 @@ export class TimeSeriesExplorer extends React.Component {
                           fieldName: countData.fieldName
                         }
                       })}
+                      {(i !== (chartDetails.entityData.entities.length - 1)) ? ', ' : ''}
                     </Fragment>
                   );
                 })}
