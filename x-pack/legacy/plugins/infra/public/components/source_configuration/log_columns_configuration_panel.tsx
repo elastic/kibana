@@ -230,10 +230,13 @@ const RemoveLogColumnButton = injectI18n<{
   onClick?: () => void;
   columnDescription: string;
 }>(({ intl, onClick, columnDescription }) => {
-  const removeColumnLabel = intl.formatMessage({
-    id: 'xpack.infra.sourceConfiguration.removeLogColumnButtonLabel',
-    defaultMessage: 'Remove this column',
-  });
+  const removeColumnLabel = intl.formatMessage(
+    {
+      id: 'xpack.infra.sourceConfiguration.removeLogColumnButtonLabel',
+      defaultMessage: 'Remove {columnDescription} column',
+    },
+    { columnDescription }
+  );
 
   return (
     <EuiButtonIcon
@@ -241,7 +244,7 @@ const RemoveLogColumnButton = injectI18n<{
       data-test-subj="removeLogColumnButton"
       iconType="trash"
       onClick={onClick}
-      title={`${removeColumnLabel}: ${columnDescription}`}
+      title={removeColumnLabel}
     />
   );
 });
