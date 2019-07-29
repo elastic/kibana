@@ -7,7 +7,7 @@
 import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
-export function InfraSourceConfigurationFlyoutProvider({
+export function InfraSourceConfigurationFormProvider({
   getService,
 }: KibanaFunctionalTestDefaultProviders) {
   const find = getService('find');
@@ -17,41 +17,23 @@ export function InfraSourceConfigurationFlyoutProvider({
 
   return {
     /**
-     * Tab navigation
-     */
-    async switchToIndicesAndFieldsTab() {
-      await (await find.descendantDisplayedByCssSelector(
-        '#indicesAndFieldsTab',
-        await this.getFlyout()
-      )).click();
-      await testSubjects.find('sourceConfigurationNameSectionTitle');
-    },
-    async switchToLogsTab() {
-      await (await find.descendantDisplayedByCssSelector(
-        '#logsTab',
-        await this.getFlyout()
-      )).click();
-      await testSubjects.find('sourceConfigurationLogColumnsSectionTitle');
-    },
-
-    /**
      * Indices and fields
      */
     async getNameInput(): Promise<WebElementWrapper> {
-      return await testSubjects.findDescendant('nameInput', await this.getFlyout());
+      return await testSubjects.findDescendant('nameInput', await this.getForm());
     },
     async getLogIndicesInput(): Promise<WebElementWrapper> {
-      return await testSubjects.findDescendant('logIndicesInput', await this.getFlyout());
+      return await testSubjects.findDescendant('logIndicesInput', await this.getForm());
     },
     async getMetricIndicesInput(): Promise<WebElementWrapper> {
-      return await testSubjects.findDescendant('metricIndicesInput', await this.getFlyout());
+      return await testSubjects.findDescendant('metricIndicesInput', await this.getForm());
     },
 
     /**
      * Logs
      */
     async getAddLogColumnButton(): Promise<WebElementWrapper> {
-      return await testSubjects.findDescendant('addLogColumnButton', await this.getFlyout());
+      return await testSubjects.findDescendant('addLogColumnButton', await this.getForm());
     },
     async getAddLogColumnPopover(): Promise<WebElementWrapper> {
       return await testSubjects.find('addLogColumnPopover');
@@ -70,7 +52,7 @@ export function InfraSourceConfigurationFlyoutProvider({
       await (await testSubjects.findDescendant(`addFieldLogColumn:${fieldName}`, popover)).click();
     },
     async getLogColumnPanels(): Promise<WebElementWrapper[]> {
-      return await testSubjects.findAllDescendant('logColumnPanel', await this.getFlyout());
+      return await testSubjects.findAllDescendant('logColumnPanel', await this.getForm());
     },
     async removeLogColumn(columnIndex: number) {
       const logColumnPanel = (await this.getLogColumnPanels())[columnIndex];
@@ -106,29 +88,24 @@ export function InfraSourceConfigurationFlyoutProvider({
     },
 
     /**
-     * Form and flyout
+     * Form
      */
-    async getFlyout(): Promise<WebElementWrapper> {
-      return await testSubjects.find('sourceConfigurationFlyout');
+    async getForm(): Promise<WebElementWrapper> {
+      return await testSubjects.find('sourceConfigurationContent');
     },
     async saveConfiguration() {
       await (await testSubjects.findDescendant(
-        'updateSourceConfigurationButton',
-        await this.getFlyout()
+        'applySettingsButton',
+        await this.getForm()
       )).click();
 
       await retry.try(async () => {
         const element = await testSubjects.findDescendant(
-          'updateSourceConfigurationButton',
-          await this.getFlyout()
+          'applySettingsButton',
+          await this.getForm()
         );
         return !(await element.isEnabled());
       });
-    },
-    async closeFlyout() {
-      const flyout = await this.getFlyout();
-      await (await testSubjects.findDescendant('closeFlyoutButton', flyout)).click();
-      await testSubjects.waitForDeleted(flyout);
     },
   };
 }

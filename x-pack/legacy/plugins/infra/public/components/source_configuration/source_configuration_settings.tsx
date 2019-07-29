@@ -88,7 +88,11 @@ export const SourceConfigurationSettings = injectI18n(
       <>
         <EuiPage>
           <EuiPageBody>
-            <EuiPageContent verticalPosition="center" horizontalPosition="center">
+            <EuiPageContent
+              verticalPosition="center"
+              horizontalPosition="center"
+              data-test-subj="sourceConfigurationContent"
+            >
               <EuiPageContentBody>
                 <EuiPanel paddingSize="l">
                   <NameConfigurationPanel

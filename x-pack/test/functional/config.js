@@ -64,7 +64,7 @@ import {
   GrokDebuggerProvider,
   UserMenuProvider,
   UptimeProvider,
-  InfraSourceConfigurationFlyoutProvider,
+  InfraSourceConfigurationFormProvider,
   InfraLogStreamProvider,
   MachineLearningProvider,
 } from './services';
@@ -161,7 +161,7 @@ export default async function ({ readConfigFile }) {
       userMenu: UserMenuProvider,
       uptime: UptimeProvider,
       rollup: RollupPageProvider,
-      infraSourceConfigurationFlyout: InfraSourceConfigurationFlyoutProvider,
+      infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
       infraLogStream: InfraLogStreamProvider,
       ml: MachineLearningProvider,
     },

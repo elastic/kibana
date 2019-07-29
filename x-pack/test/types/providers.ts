@@ -6,7 +6,7 @@
 
 import { EsArchiver } from '../../../src/es_archiver';
 import { InfraLogStreamProvider } from '../functional/services/infra_log_stream';
-import { InfraSourceConfigurationFlyoutProvider } from '../functional/services/infra_source_configuration_flyout';
+import { InfraSourceConfigurationFormProvider } from '../functional/services/infra_source_configuration_form';
 import { UptimeProvider } from '../functional/services/uptime';
 
 export interface KibanaFunctionalTestDefaultProviders {
@@ -14,7 +14,7 @@ export interface KibanaFunctionalTestDefaultProviders {
   getService(serviceName: 'infraLogStream'): ReturnType<typeof InfraLogStreamProvider>;
   getService(
     serviceName: 'infraSourceConfigurationFlyout'
-  ): ReturnType<typeof InfraSourceConfigurationFlyoutProvider>;
+  ): ReturnType<typeof InfraSourceConfigurationFormProvider>;
   getService(serviceName: 'uptime'): ReturnType<typeof UptimeProvider>;
   getService(serviceName: string): any;
   getPageObjects(pageObjectNames: string[]): any;

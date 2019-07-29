@@ -18,6 +18,10 @@ export function InfraLogStreamProvider({ getService }: KibanaFunctionalTestDefau
       return await Promise.all(columnHeaderElements.map(element => element.getVisibleText()));
     },
 
+    async getStream(): Promise<WebElementWrapper[]> {
+      return await testSubjects.find('logStream');
+    },
+
     async getStreamEntries(): Promise<WebElementWrapper[]> {
       return await testSubjects.findAll('streamEntry');
     },
