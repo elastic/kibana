@@ -33,7 +33,7 @@ export interface SendRequestResponse {
 export interface UseRequestConfig extends SendRequestConfig {
   pollIntervalMs?: number;
   initialData?: any;
-  deserializer?: any;
+  deserializer?: (data: unknown) => unknown;
 }
 
 export const sendRequest = async (
