@@ -60,7 +60,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [Plugin](./kibana-plugin-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
 |  [SavedObject](./kibana-plugin-public.savedobject.md) |  |
-|  [SavedObjectAttributes](./kibana-plugin-public.savedobjectattributes.md) |  |
+|  [SavedObjectAttributes](./kibana-plugin-public.savedobjectattributes.md) | The data for a Saved Object is stored in the <code>attributes</code> key as either an object or an array of objects. |
 |  [SavedObjectReference](./kibana-plugin-public.savedobjectreference.md) | A reference to another saved object. |
 |  [SavedObjectsBaseOptions](./kibana-plugin-public.savedobjectsbaseoptions.md) |  |
 |  [SavedObjectsBatchResponse](./kibana-plugin-public.savedobjectsbatchresponse.md) |  |

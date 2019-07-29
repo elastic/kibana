@@ -414,31 +414,24 @@ export class Router {
 
 // @public (undocumented)
 export interface SavedObject<T extends SavedObjectAttributes = any> {
-    // (undocumented)
     attributes: T;
     // (undocumented)
     error?: {
         message: string;
         statusCode: number;
     };
-    // (undocumented)
     id: string;
-    // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
-    // (undocumented)
     references: SavedObjectReference[];
-    // (undocumented)
     type: string;
-    // (undocumented)
     updated_at?: string;
-    // (undocumented)
     version?: string;
 }
 
 // @public (undocumented)
 export type SavedObjectAttribute = string | number | boolean | null | undefined | SavedObjectAttributes | SavedObjectAttributes[];
 
-// @public (undocumented)
+// @public
 export interface SavedObjectAttributes {
     // (undocumented)
     [key: string]: SavedObjectAttribute | SavedObjectAttribute[];
@@ -595,7 +588,6 @@ export class SavedObjectsErrorHelpers {
 export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
-    // (undocumented)
     fields?: string[];
     // (undocumented)
     hasReference?: {
@@ -606,7 +598,6 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     page?: number;
     // (undocumented)
     perPage?: number;
-    // (undocumented)
     search?: string;
     searchFields?: string[];
     // (undocumented)

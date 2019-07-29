@@ -51,7 +51,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginsServiceStart](./kibana-plugin-server.pluginsservicestart.md) |  |
 |  [RouteConfigOptions](./kibana-plugin-server.routeconfigoptions.md) | Route specific configuration. |
 |  [SavedObject](./kibana-plugin-server.savedobject.md) |  |
-|  [SavedObjectAttributes](./kibana-plugin-server.savedobjectattributes.md) |  |
+|  [SavedObjectAttributes](./kibana-plugin-server.savedobjectattributes.md) | The data for a Saved Object is stored in the <code>attributes</code> key as either an object or an array of objects. |
 |  [SavedObjectReference](./kibana-plugin-server.savedobjectreference.md) | A reference to another saved object. |
 |  [SavedObjectsBaseOptions](./kibana-plugin-server.savedobjectsbaseoptions.md) |  |
 |  [SavedObjectsBulkCreateObject](./kibana-plugin-server.savedobjectsbulkcreateobject.md) |  |

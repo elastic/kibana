@@ -4,7 +4,7 @@
 
 ## SavedObjectsFindOptions.searchFields property
 
-see Elasticsearch Simple Query String Query field argument for more information
+The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information
 
 <b>Signature:</b>
 

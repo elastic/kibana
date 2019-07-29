@@ -14,12 +14,5 @@ export interface SavedObjectsMigrationVersion
 
 ## Example
 
-
-```
-migrationVersion: {
-  dashboard: '7.1.1',
-  space: '6.6.6',
-}
-
-```
+migrationVersion: { dashboard: '7.1.1', space: '6.6.6', }
 

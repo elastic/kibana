@@ -27,12 +27,10 @@ import { SavedObjectsClient } from './service/saved_objects_client';
  * value.
  *
  * @example
- * ```
  * migrationVersion: {
  *   dashboard: '7.1.1',
  *   space: '6.6.6',
  * }
- * ```
  *
  * @public
  */
@@ -54,6 +52,8 @@ export type SavedObjectAttribute =
   | SavedObjectAttributes[];
 
 /**
+ * The data for a Saved Object is stored in the `attributes` key as either an
+ * object or an array of objects.
  *
  * @public
  */
@@ -66,16 +66,23 @@ export interface SavedObjectAttributes {
  * @public
  */
 export interface SavedObject<T extends SavedObjectAttributes = any> {
+  /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
+  /**  The type of Saved Object. Each plugin can define it's own custom Saved Object types. */
   type: string;
+  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
+  /** Timestamp of the last time this document had been updated.  */
   updated_at?: string;
   error?: {
     message: string;
     statusCode: number;
   };
+  /** {@inheritdoc SavedObjectAttributes} */
   attributes: T;
+  /** {@inheritdoc SavedObjectReference} */
   references: SavedObjectReference[];
+  /** {@inheritdoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
 }
 
@@ -100,9 +107,15 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
   perPage?: number;
   sortField?: string;
   sortOrder?: string;
+  /**
+   * An array of fields to include in the results
+   * @example
+   * SavedObjects.find({type: 'dashboard', fields: ['attributes.name', 'attributes.location']})
+   */
   fields?: string[];
+  /** Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String `query` argument for more information */
   search?: string;
-  /** see Elasticsearch Simple Query String Query field argument for more information */
+  /** The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information */
   searchFields?: string[];
   hasReference?: { type: string; id: string };
   defaultSearchOperator?: 'AND' | 'OR';

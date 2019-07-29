@@ -4,6 +4,8 @@
 
 ## SavedObject.id property
 
+The ID of this Saved Object, guaranteed to be unique for all objects of the same `type`
+
 <b>Signature:</b>
 
 ```typescript
