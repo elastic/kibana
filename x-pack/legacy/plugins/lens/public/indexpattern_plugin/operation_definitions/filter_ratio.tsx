@@ -69,7 +69,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
         >
           <QueryBarInput
             appName={'lens'}
-            indexPatterns={[state.currentIndexPatternId]}
+            indexPatterns={[state.indexPatterns[state.layers[layerId].indexPatternId].title]}
             query={
               (state.layers[layerId].columns[currentColumnId] as FilterRatioIndexPatternColumn)
                 .params.numerator
@@ -98,7 +98,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
           {hasDenominator ? (
             <QueryBarInput
               appName={'lens'}
-              indexPatterns={[state.currentIndexPatternId]}
+              indexPatterns={[state.indexPatterns[state.layers[layerId].indexPatternId].title]}
               query={
                 (state.layers[layerId].columns[currentColumnId] as FilterRatioIndexPatternColumn)
                   .params.denominator

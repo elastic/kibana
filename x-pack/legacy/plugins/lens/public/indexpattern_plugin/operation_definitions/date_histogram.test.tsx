@@ -31,6 +31,19 @@ describe('date_histogram', () => {
             },
           ],
         },
+        2: {
+          id: '2',
+          title: 'Mock Indexpattern 2',
+          fields: [
+            {
+              name: 'other_timestamp',
+              type: 'date',
+              esTypes: ['date'],
+              aggregatable: true,
+              searchable: true,
+            },
+          ],
+        },
       },
       layers: {
         first: {
@@ -50,6 +63,26 @@ describe('date_histogram', () => {
               },
               sourceField: 'timestamp',
               indexPatternId: '1',
+            },
+          },
+        },
+        second: {
+          indexPatternId: '2',
+          columnOrder: ['col2'],
+          columns: {
+            col2: {
+              operationId: 'op2',
+              label: 'Value of timestamp',
+              dataType: 'date',
+              isBucketed: true,
+
+              // Private
+              operationType: 'date_histogram',
+              params: {
+                interval: 'd',
+              },
+              sourceField: 'other_timestamp',
+              indexPatternId: '2',
             },
           },
         },
@@ -128,6 +161,15 @@ describe('date_histogram', () => {
       );
 
       expect(instance.find(EuiRange).prop('value')).toEqual(1);
+    });
+
+    it('should render current value for other index pattern', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions state={state} setState={setStateSpy} columnId="col2" layerId="second" />
+      );
+
+      expect(instance.find(EuiRange).prop('value')).toEqual(2);
     });
 
     it('should update state with the interval value', () => {

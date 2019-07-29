@@ -136,7 +136,7 @@ describe('filter_ratio', () => {
       );
 
       expect(wrapper.find(MockQueryBarInput)).toHaveLength(1);
-      expect(wrapper.find(MockQueryBarInput).prop('indexPatterns')).toEqual(['1']);
+      expect(wrapper.find(MockQueryBarInput).prop('indexPatterns')).toEqual(['Mock Indexpattern']);
     });
 
     it('should update the state when typing into the query bar', () => {
