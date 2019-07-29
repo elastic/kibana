@@ -114,7 +114,7 @@ describe('normalizeQuery', () => {
     expect(modifiedDoc.aggs.pivot.aggs[seriesId].aggs[seriesId]).toBeUndefined();
   });
 
-  test('should not remove the top level aggregation for pipeline queries', () => {
+  test('should not remove the top level aggregation for Sibling Pipeline queries', () => {
     const doc = getMockedDoc();
     const pipelineId = 'd4167fe0-afb0-11e9-b141-7b94c69f37eb';
 
