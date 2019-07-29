@@ -42,13 +42,11 @@ export const xyVisualization: Visualization<State, PersistableState> = {
 
   getPersistableState: state => state,
 
-  renderConfigPanel: (domElement, props) =>
-    render(
-      <I18nProvider>
-        <XYConfigPanel {...props} />
-      </I18nProvider>,
-      domElement
-    ),
+  ConfigPanel: props => (
+    <I18nProvider>
+      <XYConfigPanel {...props} />
+    </I18nProvider>
+  ),
 
   toExpression,
 };

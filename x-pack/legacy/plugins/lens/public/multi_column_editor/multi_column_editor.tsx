@@ -5,7 +5,6 @@
  */
 
 import React, { useEffect } from 'react';
-import { NativeRenderer } from '../native_renderer';
 import { DatasourcePublicAPI, OperationMetadata } from '../types';
 import { DragContextState } from '../drag_drop';
 
@@ -44,18 +43,14 @@ export function MultiColumnEditor({
     <>
       {accessors.map(accessor => (
         <div key={accessor}>
-          <NativeRenderer
-            data-test-subj={`lnsXY_${testSubj}_${accessor}`}
-            render={datasource.renderDimensionPanel}
-            nativeProps={{
-              columnId: accessor,
-              dragDropContext,
-              filterOperations,
-              suggestedPriority,
-              layerId,
-              onRemove,
-            }}
-          />
+          {datasource.renderDimensionPanel({
+            columnId: accessor,
+            dragDropContext,
+            filterOperations,
+            suggestedPriority,
+            layerId,
+            onRemove,
+          })}
         </div>
       ))}
     </>

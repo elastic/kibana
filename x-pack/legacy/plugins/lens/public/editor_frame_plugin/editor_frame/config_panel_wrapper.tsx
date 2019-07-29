@@ -6,9 +6,13 @@
 
 import React, { useMemo, useContext, memo } from 'react';
 import { EuiSelect } from '@elastic/eui';
-import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
-import { Visualization, FramePublicAPI, VisualizationSuggestion } from '../../types';
+import {
+  Visualization,
+  FramePublicAPI,
+  VisualizationSuggestion,
+  VisualizationProps,
+} from '../../types';
 import { DragContext } from '../../drag_drop';
 
 interface ConfigPanelWrapperProps {
@@ -61,6 +65,11 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
     [props.dispatch]
   );
 
+  const ConfigPanel = (props.activeVisualizationId &&
+    props.visualizationMap[props.activeVisualizationId].ConfigPanel) as React.ComponentType<
+    VisualizationProps<unknown>
+  >;
+
   return (
     <>
       <EuiSelect
@@ -84,14 +93,11 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
       />
       {props.activeVisualizationId && props.visualizationState !== null && (
         <div className="lnsConfigPanelWrapper">
-          <NativeRenderer
-            render={props.visualizationMap[props.activeVisualizationId].renderConfigPanel}
-            nativeProps={{
-              dragDropContext: context,
-              state: props.visualizationState,
-              setState: setVisualizationState,
-              frame: props.framePublicAPI,
-            }}
+          <ConfigPanel
+            dragDropContext={context}
+            state={props.visualizationState}
+            setState={setVisualizationState}
+            frame={props.framePublicAPI}
           />
         </div>
       )}

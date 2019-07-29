@@ -6,7 +6,6 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
 import {
@@ -290,15 +289,11 @@ export function getIndexPatternDatasource({
       };
     },
 
-    renderDataPanel(
-      domElement: Element,
-      props: DatasourceDataPanelProps<IndexPatternPrivateState>
-    ) {
-      render(
+    DataPanel(props: DatasourceDataPanelProps<IndexPatternPrivateState>) {
+      return (
         <I18nProvider>
           <IndexPatternDataPanel {...props} />
-        </I18nProvider>,
-        domElement
+        </I18nProvider>
       );
     },
 
@@ -317,8 +312,8 @@ export function getIndexPatternDatasource({
           }
           return null;
         },
-        renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
-          render(
+        renderDimensionPanel: (props: DatasourceDimensionPanelProps) => {
+          return (
             <I18nProvider>
               <IndexPatternDimensionPanel
                 state={state}
@@ -328,19 +323,17 @@ export function getIndexPatternDatasource({
                 layerId={props.layerId}
                 {...props}
               />
-            </I18nProvider>,
-            domElement
+            </I18nProvider>
           );
         },
 
-        renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => {
-          render(
+        renderLayerPanel: (props: DatasourceLayerPanelProps) => {
+          return (
             <I18nProvider>
               <EuiText size="s">
                 {state.indexPatterns[state.layers[props.layerId].indexPatternId].title}
               </EuiText>
-            </I18nProvider>,
-            domElement
+            </I18nProvider>
           );
         },
 

@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { State, SeriesType, LayerConfig } from './types';
 import { VisualizationProps, OperationMetadata } from '../types';
-import { NativeRenderer } from '../native_renderer';
 import { MultiColumnEditor } from '../multi_column_editor';
 import { generateId } from '../id_generator';
 
@@ -153,170 +152,166 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
         </EuiPopover>
       </EuiFormRow>
 
-      {state.layers.map((layer, index) => (
-        <EuiFormRow key={layer.layerId} data-test-subj={`lnsXY_layer_${layer.layerId}`}>
-          <EuiPanel>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiPopover
-                  id="lnsXY_layer"
-                  isOpen={localState.openLayerId === layer.layerId}
-                  closePopover={() => {
-                    setLocalState({ ...localState, openLayerId: null });
-                  }}
-                  button={
-                    <EuiButtonIcon
-                      iconType="gear"
-                      data-test-subj="lnsXY_layer_advanced"
-                      aria-label={i18n.translate('xpack.lens.xyChart.layerSettings', {
-                        defaultMessage: 'Edit layer settings',
-                      })}
-                      onClick={() => {
-                        setLocalState({ ...localState, openLayerId: layer.layerId });
-                      }}
-                    />
-                  }
-                >
-                  <>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.lens.xyChart.chartTypeLabel', {
-                        defaultMessage: 'Chart type',
-                      })}
-                    >
-                      <EuiButtonGroup
-                        legend={i18n.translate('xpack.lens.xyChart.chartTypeLegend', {
+      {state.layers.map((layer, index) => {
+        const renderLayerPanel = props.frame.datasourceLayers[layer.layerId].renderLayerPanel;
+        const renderDimensionPanel =
+          props.frame.datasourceLayers[layer.layerId].renderDimensionPanel;
+
+        return (
+          <EuiFormRow key={layer.layerId} data-test-subj={`lnsXY_layer_${layer.layerId}`}>
+            <EuiPanel>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiPopover
+                    id="lnsXY_layer"
+                    isOpen={localState.openLayerId === layer.layerId}
+                    closePopover={() => {
+                      setLocalState({ ...localState, openLayerId: null });
+                    }}
+                    button={
+                      <EuiButtonIcon
+                        iconType="gear"
+                        data-test-subj="lnsXY_layer_advanced"
+                        aria-label={i18n.translate('xpack.lens.xyChart.layerSettings', {
+                          defaultMessage: 'Edit layer settings',
+                        })}
+                        onClick={() => {
+                          setLocalState({ ...localState, openLayerId: layer.layerId });
+                        }}
+                      />
+                    }
+                  >
+                    <>
+                      <EuiFormRow
+                        label={i18n.translate('xpack.lens.xyChart.chartTypeLabel', {
                           defaultMessage: 'Chart type',
                         })}
-                        name="chartType"
-                        className="eui-displayInlineBlock"
-                        data-test-subj="lnsXY_seriesType"
-                        options={chartTypeIcons}
-                        idSelected={layer.seriesType}
-                        onChange={seriesType => {
-                          setState(
-                            updateLayer(
-                              state,
-                              { ...layer, seriesType: seriesType as SeriesType },
-                              index
-                            )
-                          );
+                      >
+                        <EuiButtonGroup
+                          legend={i18n.translate('xpack.lens.xyChart.chartTypeLegend', {
+                            defaultMessage: 'Chart type',
+                          })}
+                          name="chartType"
+                          className="eui-displayInlineBlock"
+                          data-test-subj="lnsXY_seriesType"
+                          options={chartTypeIcons}
+                          idSelected={layer.seriesType}
+                          onChange={seriesType => {
+                            setState(
+                              updateLayer(
+                                state,
+                                { ...layer, seriesType: seriesType as SeriesType },
+                                index
+                              )
+                            );
+                          }}
+                          isIconOnly
+                        />
+                      </EuiFormRow>
+
+                      <EuiButton
+                        iconType="trash"
+                        color="danger"
+                        size="s"
+                        data-test-subj="lnsXY_layer_remove"
+                        onClick={() => {
+                          frame.removeLayer(layer.layerId);
+                          setState({ ...state, layers: state.layers.filter(l => l !== layer) });
                         }}
-                        isIconOnly
-                      />
-                    </EuiFormRow>
+                      >
+                        <FormattedMessage
+                          id="xpack.lens.xyChart.removeLayer"
+                          defaultMessage="Remove Layer"
+                        />
+                      </EuiButton>
+                    </>
+                  </EuiPopover>
+                </EuiFlexItem>
 
-                    <EuiButton
-                      iconType="trash"
-                      color="danger"
-                      size="s"
-                      data-test-subj="lnsXY_layer_remove"
-                      onClick={() => {
-                        frame.removeLayer(layer.layerId);
-                        setState({ ...state, layers: state.layers.filter(l => l !== layer) });
-                      }}
-                    >
-                      <FormattedMessage
-                        id="xpack.lens.xyChart.removeLayer"
-                        defaultMessage="Remove Layer"
-                      />
-                    </EuiButton>
-                  </>
-                </EuiPopover>
-              </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiIcon
+                    type={chartTypeIcons.find(icon => icon.id === layer.seriesType)!.iconType}
+                  />
+                </EuiFlexItem>
 
-              <EuiFlexItem>
-                <EuiIcon
-                  type={chartTypeIcons.find(icon => icon.id === layer.seriesType)!.iconType}
-                />
-              </EuiFlexItem>
+                <EuiFlexItem>
+                  {renderLayerPanel({
+                    layerId: layer.layerId,
+                  })}
+                </EuiFlexItem>
+              </EuiFlexGroup>
 
-              <EuiFlexItem>
-                <NativeRenderer
-                  data-test-subj="lnsXY_layerHeader"
-                  render={props.frame.datasourceLayers[layer.layerId].renderLayerPanel}
-                  nativeProps={{ layerId: layer.layerId }}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiFormRow
-              label={i18n.translate('xpack.lens.xyChart.xAxisLabel', {
-                defaultMessage: 'X Axis',
-              })}
-            >
-              <NativeRenderer
-                data-test-subj="lnsXY_xDimensionPanel"
-                render={props.frame.datasourceLayers[layer.layerId].renderDimensionPanel}
-                nativeProps={{
+              <EuiFormRow
+                label={i18n.translate('xpack.lens.xyChart.xAxisLabel', {
+                  defaultMessage: 'X Axis',
+                })}
+              >
+                {renderDimensionPanel({
                   columnId: layer.xAccessor,
                   dragDropContext: props.dragDropContext,
                   filterOperations: isBucketed,
                   suggestedPriority: 1,
                   layerId: layer.layerId,
-                }}
-              />
-            </EuiFormRow>
+                })}
+              </EuiFormRow>
 
-            <EuiFormRow
-              label={i18n.translate('xpack.lens.xyChart.splitSeries', {
-                defaultMessage: 'Split series',
-              })}
-            >
-              <NativeRenderer
-                data-test-subj="lnsXY_splitDimensionPanel"
-                render={props.frame.datasourceLayers[layer.layerId].renderDimensionPanel}
-                nativeProps={{
+              <EuiFormRow
+                label={i18n.translate('xpack.lens.xyChart.splitSeries', {
+                  defaultMessage: 'Split series',
+                })}
+              >
+                {renderDimensionPanel({
                   columnId: layer.splitAccessor,
                   dragDropContext: props.dragDropContext,
                   filterOperations: isBucketed,
                   suggestedPriority: 0,
                   layerId: layer.layerId,
-                }}
-              />
-            </EuiFormRow>
+                })}
+              </EuiFormRow>
 
-            <EuiFormRow
-              label={i18n.translate('xpack.lens.xyChart.yAxisLabel', {
-                defaultMessage: 'Y Axis',
-              })}
-            >
-              <MultiColumnEditor
-                accessors={layer.accessors}
-                datasource={frame.datasourceLayers[layer.layerId]}
-                dragDropContext={props.dragDropContext}
-                onAdd={() =>
-                  setState(
-                    updateLayer(
-                      state,
-                      {
-                        ...layer,
-                        accessors: [...layer.accessors, generateId()],
-                      },
-                      index
+              <EuiFormRow
+                label={i18n.translate('xpack.lens.xyChart.yAxisLabel', {
+                  defaultMessage: 'Y Axis',
+                })}
+              >
+                <MultiColumnEditor
+                  accessors={layer.accessors}
+                  datasource={frame.datasourceLayers[layer.layerId]}
+                  dragDropContext={props.dragDropContext}
+                  onAdd={() =>
+                    setState(
+                      updateLayer(
+                        state,
+                        {
+                          ...layer,
+                          accessors: [...layer.accessors, generateId()],
+                        },
+                        index
+                      )
                     )
-                  )
-                }
-                onRemove={accessor =>
-                  setState(
-                    updateLayer(
-                      state,
-                      {
-                        ...layer,
-                        accessors: layer.accessors.filter(col => col !== accessor),
-                      },
-                      index
+                  }
+                  onRemove={accessor =>
+                    setState(
+                      updateLayer(
+                        state,
+                        {
+                          ...layer,
+                          accessors: layer.accessors.filter(col => col !== accessor),
+                        },
+                        index
+                      )
                     )
-                  )
-                }
-                filterOperations={isNumericMetric}
-                data-test-subj="lensXY_yDimensionPanel"
-                testSubj="lensXY_yDimensionPanel"
-                layerId={layer.layerId}
-              />
-            </EuiFormRow>
-          </EuiPanel>
-        </EuiFormRow>
-      ))}
+                  }
+                  filterOperations={isNumericMetric}
+                  data-test-subj="lensXY_yDimensionPanel"
+                  testSubj="lensXY_yDimensionPanel"
+                  layerId={layer.layerId}
+                />
+              </EuiFormRow>
+            </EuiPanel>
+          </EuiFormRow>
+        );
+      })}
 
       <EuiFormRow>
         <EuiButton

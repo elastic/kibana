@@ -6,6 +6,7 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { DragContextState } from './drag_drop';
+import { ReactElement } from 'react';
 
 // eslint-disable-next-line
 export interface EditorFrameOptions {}
@@ -64,7 +65,7 @@ export interface Datasource<T = unknown, P = unknown> {
   removeLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
 
-  renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
+  DataPanel: React.ComponentType<DatasourceDataPanelProps<T>>;
 
   toExpression: (state: T, layerId: string) => Ast | string | null;
 
@@ -84,8 +85,8 @@ export interface DatasourcePublicAPI {
   getOperationForColumnId: (columnId: string) => Operation | null;
 
   // Render can be called many times
-  renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => void;
-  renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => void;
+  renderDimensionPanel: (props: DatasourceDimensionPanelProps) => ReactElement;
+  renderLayerPanel: (props: DatasourceLayerPanelProps) => ReactElement;
 
   removeColumnInTableSpec: (columnId: string) => void;
   moveColumnTo: (columnId: string, targetIndex: number) => void;
@@ -195,7 +196,7 @@ export interface Visualization<T = unknown, P = unknown> {
 
   getPersistableState: (state: T) => P;
 
-  renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;
+  ConfigPanel: React.ComponentType<VisualizationProps<T>>;
 
   toExpression: (state: T, frame: FramePublicAPI) => Ast | string | null;
 

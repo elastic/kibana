@@ -8,7 +8,6 @@ import React, { useMemo, memo, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { DatasourceDataPanelProps, Datasource } from '../../../public';
-import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
 import { DragContext } from '../../drag_drop';
 
@@ -39,6 +38,12 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   };
 
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);
+
+  const DataPanel = (props.activeDatasource &&
+    !props.datasourceIsLoading &&
+    props.datasourceMap[props.activeDatasource].DataPanel) as React.ComponentType<
+    DatasourceDataPanelProps<unknown>
+  >;
 
   return (
     <>
@@ -88,11 +93,9 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
         </EuiPopover>
       )}
       {props.activeDatasource && !props.datasourceIsLoading && (
-        <NativeRenderer
-          className="lnsSidebarContainer"
-          render={props.datasourceMap[props.activeDatasource].renderDataPanel}
-          nativeProps={datasourceProps}
-        />
+        <div className="lnsSidebarContainer">
+          <DataPanel {...datasourceProps} />
+        </div>
       )}
     </>
   );
