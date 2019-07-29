@@ -10,6 +10,7 @@ export const RuntimeDatasourceInput = t.interface(
   {
     id: t.string,
     meta: t.union([t.undefined, t.string]),
+    config_id: t.string,
     config: t.string,
   },
   'DatasourceInput'
