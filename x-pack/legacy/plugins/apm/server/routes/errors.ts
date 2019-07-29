@@ -33,8 +33,8 @@ export function initErrorsApi(core: InternalCoreSetup) {
       },
       tags: ['access:apm']
     },
-    handler: req => {
-      const setup = setupRequest(req);
+    handler: async req => {
+      const setup = await setupRequest(req);
       const { serviceName } = req.params;
       const { sortField, sortDirection } = req.query as {
         sortField: string;
@@ -59,8 +59,8 @@ export function initErrorsApi(core: InternalCoreSetup) {
       },
       tags: ['access:apm']
     },
-    handler: req => {
-      const setup = setupRequest(req);
+    handler: async req => {
+      const setup = await setupRequest(req);
       const { serviceName, groupId } = req.params;
       return getErrorGroup({ serviceName, groupId, setup }).catch(
         defaultErrorHandler
@@ -79,8 +79,8 @@ export function initErrorsApi(core: InternalCoreSetup) {
       },
       tags: ['access:apm']
     },
-    handler: req => {
-      const setup = setupRequest(req);
+    handler: async req => {
+      const setup = await setupRequest(req);
       const { serviceName } = req.params;
       const { groupId } = req.query as { groupId?: string };
       return getErrorDistribution({ serviceName, groupId, setup }).catch(
