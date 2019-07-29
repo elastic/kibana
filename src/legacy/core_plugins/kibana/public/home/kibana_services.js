@@ -19,7 +19,6 @@
 
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
-import { TelemetryOptInProvider } from '../../../../../../x-pack/legacy/plugins/telemetry/public/services/telemetry_opt_in';
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
 export let indexPatternService;
 export const telemetryService = {};
@@ -29,11 +28,15 @@ export { METRIC_TYPE };
 
 uiModules.get('kibana').run(($injector) => {
   indexPatternService = $injector.get('indexPatterns');
-  const Private = $injector.get('Private');
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
   const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
-  const telemetryOptInProvider = telemetryEnabled ? Private(TelemetryOptInProvider) : {};
-  telemetryService.telemetryEnabled = telemetryEnabled;
-  telemetryService.telemetryBanner = telemetryBanner;
-  telemetryService.telemetryOptInProvider = telemetryOptInProvider;
+  if (telemetryEnabled) {
+    const { TelemetryOptInProvider } = require('../../../../../../x-pack/legacy/plugins/telemetry/public/services/telemetry_opt_in');
+    const Private = $injector.get('Private');
+    const telemetryOptInProvider = Private(TelemetryOptInProvider);
+    telemetryService.telemetryOptInProvider = telemetryOptInProvider;
+  }
+  telemetryService.telemetryEnabled = telemetryEnabled || false;
+  telemetryService.telemetryBanner = telemetryBanner || false;
+  telemetryService.telemetryOptInProvider = {};
 });
