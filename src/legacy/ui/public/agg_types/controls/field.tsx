@@ -23,14 +23,14 @@ import React, { useEffect } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from 'ui/vis';
+import { Field } from 'ui/index_patterns';
 import { formatListAsProse, parseCommaSeparatedList } from '../../../../utils';
 import { AggParamEditorProps } from '../../vis/editors/default';
 import { ComboBoxGroupedOption } from '../../vis/editors/default/default_editor_utils';
-import { FieldParamType } from '../param_types';
 
 const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
 
-interface FieldParamEditorProps extends AggParamEditorProps<FieldParamType> {
+interface FieldParamEditorProps extends AggParamEditorProps<Field> {
   customError?: string;
   customLabel?: string;
 }

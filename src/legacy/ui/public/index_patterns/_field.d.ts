@@ -28,4 +28,5 @@ export interface Field {
   searchable: boolean;
   parent?: string;
   subType?: string;
+  displayName?: string;
 }

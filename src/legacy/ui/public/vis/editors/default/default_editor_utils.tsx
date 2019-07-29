@@ -24,11 +24,14 @@ import { AggType } from 'ui/agg_types';
 // as there is currently a bug on babel typescript transform plugin for it
 // https://github.com/babel/babel/issues/7641
 //
-export type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
-  label?: string;
-  value?: AggType;
-  options?: ComboBoxGroupedOption[];
-};
+export type ComboBoxGroupedOption<T> =
+  | EuiComboBoxOptionProps & {
+      value: T;
+    }
+  | EuiComboBoxOptionProps & {
+      label: string;
+      options?: Array<ComboBoxGroupedOption<T>>;
+    };
 
 /**
  * Groups and sorts alphabetically aggregation objects and returns an array of options that are compatible with EuiComboBox options.
@@ -39,34 +42,39 @@ export type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
  *
  * @returns An array of grouped and sorted alphabetically `aggs` that are compatible with EuiComboBox options. If `aggs` is not an array, the function returns an empty array.
  */
-function groupAggregationsBy(
-  aggs: AggType[],
-  groupBy: string = 'type',
+function groupAggregationsBy<T>(
+  aggs: T[],
+  groupBy: string,
   labelName = 'title'
-): ComboBoxGroupedOption[] | [] {
+): Array<ComboBoxGroupedOption<T>> | [] {
   if (!Array.isArray(aggs)) {
     return [];
   }
 
-  const groupedOptions: ComboBoxGroupedOption[] = aggs.reduce((array: AggType[], type: AggType) => {
-    const group = array.find(element => element.label === type[groupBy]);
-    const option = {
-      label: type[labelName],
-      value: type,
-    };
+  const groupedOptions: Array<ComboBoxGroupedOption<T>> = aggs.reduce(
+    (array: Array<ComboBoxGroupedOption<T>>, type: T) => {
+      const group = array.find(
+        element => element.label === (type as { [key: string]: any })[groupBy]
+      );
+      const option: ComboBoxGroupedOption<T> = {
+        label: (type as { [key: string]: any })[labelName],
+        value: type,
+      };
 
-    if (group) {
-      group.options.push(option);
-    } else {
-      array.push({ label: type[groupBy], options: [option] });
-    }
+      if (group && group.options) {
+        group.options.push(option);
+      } else {
+        array.push({ label: type[groupBy], options: [option] });
+      }
 
-    return array;
-  }, []);
+      return array;
+    },
+    []
+  );
 
   groupedOptions.sort(sortByLabel);
 
-  groupedOptions.forEach((group: ComboBoxGroupedOption) => {
+  groupedOptions.forEach((group: ComboBoxGroupedOption<T>) => {
     if (Array.isArray(group.options)) {
       group.options.sort(sortByLabel);
     }
@@ -79,7 +87,7 @@ function groupAggregationsBy(
   return groupedOptions;
 }
 
-function sortByLabel(a: ComboBoxGroupedOption, b: ComboBoxGroupedOption) {
+function sortByLabel<T>(a: ComboBoxGroupedOption<T>, b: ComboBoxGroupedOption<T>) {
   return (a.label || '').toLowerCase().localeCompare((b.label || '').toLowerCase());
 }
 
