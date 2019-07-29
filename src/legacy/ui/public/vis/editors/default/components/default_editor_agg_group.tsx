@@ -69,12 +69,10 @@ function DefaultEditorAggGroup({
   const stats = {
     max: 0,
     count: group.length,
-    deprecate: false,
   };
 
   schemas.forEach((schema: Schema) => {
     stats.max += schema.max;
-    stats.deprecate = schema.deprecate;
   });
 
   const [aggsState, setAggsState] = useReducer(aggGroupReducer, group, initAggsState);

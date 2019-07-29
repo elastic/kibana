@@ -40,7 +40,6 @@ interface DefaultEditorAggAddProps {
   stats: {
     max: number;
     count: number;
-    deprecate: boolean;
   };
   addSchema(schema: Schema): void;
 }
@@ -91,14 +90,14 @@ function DefaultEditorAggAdd({
           closePopover={() => setIsPopoverOpen(false)}
         >
           <EuiPopoverTitle>
-            {(groupName !== AggGroupNames.Buckets || (!stats.count && !stats.deprecate)) && (
+            {(groupName !== AggGroupNames.Buckets || !stats.count) && (
               <FormattedMessage
                 id="common.ui.vis.editors.aggAdd.addGroupButtonLabel"
                 defaultMessage="Add {groupNameLabel}"
                 values={{ groupNameLabel }}
               />
             )}
-            {groupName === AggGroupNames.Buckets && stats.count > 0 && !stats.deprecate && (
+            {groupName === AggGroupNames.Buckets && stats.count > 0 && (
               <FormattedMessage
                 id="common.ui.vis.editors.aggAdd.addSubGroupButtonLabel"
                 defaultMessage="Add sub-{groupNameLabel}"
@@ -107,19 +106,16 @@ function DefaultEditorAggAdd({
             )}
           </EuiPopoverTitle>
           <EuiContextMenuPanel
-            items={schemas.map(
-              schema =>
-                !schema.deprecate && (
-                  <EuiContextMenuItem
-                    key={`${schema.name}_${schema.title}`}
-                    data-test-subj={`visEditorAdd_${groupName}_${schema.title}`}
-                    disabled={isPopoverOpen && isSchemaDisabled(schema)}
-                    onClick={() => onSelectSchema(schema)}
-                  >
-                    {schema.title}
-                  </EuiContextMenuItem>
-                )
-            )}
+            items={schemas.map(schema => (
+              <EuiContextMenuItem
+                key={`${schema.name}_${schema.title}`}
+                data-test-subj={`visEditorAdd_${groupName}_${schema.title}`}
+                disabled={isPopoverOpen && isSchemaDisabled(schema)}
+                onClick={() => onSelectSchema(schema)}
+              >
+                {schema.title}
+              </EuiContextMenuItem>
+            ))}
           />
         </EuiPopover>
       </EuiFlexItem>
