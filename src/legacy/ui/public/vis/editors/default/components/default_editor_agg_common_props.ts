@@ -17,19 +17,26 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { compareFilters } from './compare_filters';
-const compareOptions = { disabled: true, negate: true };
+import { AggType } from 'ui/agg_types';
+import { AggConfig, VisState, AggParams, VisParams } from '../../../';
+import { AggGroupNames } from '../agg_groups';
 
-/**
- * Checks to see if only disabled filters have been changed
- * @returns {bool} Only disabled filters
- */
-export function onlyStateChanged(newFilters, oldFilters) {
-  return _.every(newFilters, function (newFilter) {
-    const match = _.find(oldFilters, function (oldFilter) {
-      return compareFilters(newFilter, oldFilter, compareOptions);
-    });
-    return !!match;
-  });
+export type OnAggParamsChange = (
+  params: AggParams | VisParams,
+  paramName: string,
+  value: unknown
+) => void;
+
+export interface DefaultEditorAggCommonProps {
+  formIsTouched: boolean;
+  groupName: AggGroupNames;
+  lastParentPipelineAggTitle?: string;
+  metricAggs: AggConfig[];
+  state: VisState;
+  onAggParamsChange: OnAggParamsChange;
+  onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
+  onToggleEnableAgg: (agg: AggConfig, isEnable: boolean) => void;
+  removeAgg: (agg: AggConfig) => void;
+  setTouched: (isTouched: boolean) => void;
+  setValidity: (isValid: boolean) => void;
 }

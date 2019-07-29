@@ -17,18 +17,29 @@
  * under the License.
  */
 
-import { uiModules } from '../../../modules';
-import { DefaultEditorAggAdd } from './components/default_editor_agg_add';
-import { wrapInI18nContext } from 'ui/i18n';
+import React from 'react';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { VisOptionsSetValue } from 'ui/vis/editors/default';
 
-uiModules
-  .get('kibana')
-  .directive('visEditorAggAdd', reactDirective =>
-    reactDirective(wrapInI18nContext(DefaultEditorAggAdd), [
-      ['group', { watchDepth: 'collection' }],
-      ['schemas', { watchDepth: 'collection' }],
-      ['stats', { watchDepth: 'reference' }],
-      'groupName',
-      'addSchema'
-    ])
+interface SelectOptionProps {
+  label: string;
+  options: Array<{ value: string; text: string }>;
+  paramName: string;
+  value: string;
+  setValue: VisOptionsSetValue;
+}
+
+function SelectOption({ label, options, paramName, value, setValue }: SelectOptionProps) {
+  return (
+    <EuiFormRow label={label} fullWidth={true} compressed>
+      <EuiSelect
+        options={options}
+        value={value}
+        onChange={ev => setValue(paramName, ev.target.value)}
+        fullWidth={true}
+      />
+    </EuiFormRow>
   );
+}
+
+export { SelectOption };

@@ -17,15 +17,20 @@
  * under the License.
  */
 
-import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from '../../../../modules';
-import { AggControlReactWrapper } from './agg_control_react_wrapper';
+import _ from 'lodash';
+import { Filter } from '@kbn/es-query';
 
-uiModules
-  .get('app/visualize')
-  .directive('visAggControlReactWrapper', reactDirective => reactDirective(wrapInI18nContext(AggControlReactWrapper), [
-    ['aggParams', { watchDepth: 'collection' }],
-    ['editorStateParams', { watchDepth: 'collection' }],
-    ['component', { wrapApply: false }],
-    'setValue'
-  ]));
+const isEnabled = function(filter: Filter) {
+  return filter && filter.meta && !filter.meta.disabled;
+};
+/**
+ * Checks to see if only disabled filters have been changed
+ * @returns {bool} Only disabled filters
+ */
+export function onlyDisabledFiltersChanged(newFilters: Filter[], oldFilters: Filter[]) {
+  // If it's the same - compare only enabled filters
+  const newEnabledFilters = _.filter(newFilters, isEnabled);
+  const oldEnabledFilters = _.filter(oldFilters, isEnabled);
+
+  return _.isEqual(oldEnabledFilters, newEnabledFilters);
+}

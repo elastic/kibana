@@ -30,8 +30,8 @@ export function initUIFiltersApi(core: InternalCoreSetup) {
       },
       tags: ['access:apm']
     },
-    handler: req => {
-      const setup = setupRequest(req);
+    handler: async req => {
+      const setup = await setupRequest(req);
       const { serviceName } = req.query as {
         serviceName?: string;
       };
