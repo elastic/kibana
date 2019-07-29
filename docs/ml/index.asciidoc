@@ -1,6 +1,6 @@
 [role="xpack"]
 [[xpack-ml]]
-= Machine Learning
+= {ml-cap}
 
 [partintro]
 --
