@@ -27,7 +27,7 @@ export const attachAction: EmbeddableApiPure['attachAction'] = ({ triggers }) =>
 
   if (!trigger) {
     throw new Error(
-      `No trigger [triggerId = ${triggerId}] exists, for detaching action [actionId = ${actionId}].`
+      `No trigger [triggerId = ${triggerId}] exists, for attaching action [actionId = ${actionId}].`
     );
   }
 

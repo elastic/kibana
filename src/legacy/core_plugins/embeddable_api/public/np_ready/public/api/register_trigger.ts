@@ -20,5 +20,9 @@
 import { EmbeddableApiPure } from './types';
 
 export const registerTrigger: EmbeddableApiPure['registerTrigger'] = ({ triggers }) => trigger => {
+  if (triggers.has(trigger.id)) {
+    throw new Error(`Trigger [trigger.id = ${trigger.id}] already registered in Embeddables API.`);
+  }
+
   triggers.set(trigger.id, trigger);
 };

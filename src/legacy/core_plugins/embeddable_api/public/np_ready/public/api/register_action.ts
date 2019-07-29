@@ -20,5 +20,9 @@
 import { EmbeddableApiPure } from './types';
 
 export const registerAction: EmbeddableApiPure['registerAction'] = ({ actions }) => action => {
+  if (actions.has(action.id)) {
+    throw new Error(`Action [action.id = ${action.id}] already registered in Embeddables API.`);
+  }
+
   actions.set(action.id, action);
 };

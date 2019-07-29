@@ -130,6 +130,37 @@ test('attaching an invalid action to a trigger throws an error', async () => {
 
   expect(error).toBeInstanceOf(Error);
   expect(error.message).toMatchInlineSnapshot(
-    `"No trigger [triggerId = i do not exist] exists, for detaching action [actionId = HELLO_WORLD_ACTION_ID]."`
+    `"No trigger [triggerId = i do not exist] exists, for attaching action [actionId = HELLO_WORLD_ACTION_ID]."`
+  );
+});
+
+test('cannot register another action with the same ID', async () => {
+  const deps = createDeps();
+  const { api } = createApi(deps);
+  const action = {
+    id: HELLO_WORLD_ACTION_ID,
+    order: 25,
+  } as any;
+
+  api.registerAction(action);
+  const error = expectError(() => api.registerAction(action));
+
+  expect(error).toBeInstanceOf(Error);
+  expect(error.message).toMatchInlineSnapshot(
+    `"Action [action.id = HELLO_WORLD_ACTION_ID] already registered in Embeddables API."`
+  );
+});
+
+test('cannot register another trigger with the same ID', async () => {
+  const deps = createDeps();
+  const { api } = createApi(deps);
+  const trigger = { id: 'MY-TRIGGER' } as any;
+
+  api.registerTrigger(trigger);
+  const error = expectError(() => api.registerTrigger(trigger));
+
+  expect(error).toBeInstanceOf(Error);
+  expect(error.message).toMatchInlineSnapshot(
+    `"Trigger [trigger.id = MY-TRIGGER] already registered in Embeddables API."`
   );
 });
