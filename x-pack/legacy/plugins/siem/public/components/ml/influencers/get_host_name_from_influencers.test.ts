@@ -26,6 +26,11 @@ describe('get_host_name_from_influencers', () => {
     expect(hostName).toEqual(null);
   });
 
+  test('returns null if is given undefined influencers', () => {
+    const hostName = getHostNameFromInfluencers();
+    expect(hostName).toEqual(null);
+  });
+
   test('returns null if there influencers is an empty object', () => {
     anomalies.anomalies[0].influencers = [{}];
     const hostName = getHostNameFromInfluencers(anomalies.anomalies[0].influencers);
