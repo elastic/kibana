@@ -17,11 +17,29 @@
  * under the License.
  */
 
-import { Vis, VisParams } from 'ui/vis';
+import React from 'react';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { VisOptionsSetValue } from 'ui/vis/editors/default';
 
-export type VisOptionsSetValue = (paramName: string, value: unknown) => void;
-export interface VisOptionsProps {
-  stateParams: VisParams;
-  vis: Vis;
+interface SelectOptionProps {
+  label: string;
+  options: Array<{ value: string; text: string }>;
+  paramName: string;
+  value: string;
   setValue: VisOptionsSetValue;
 }
+
+function SelectOption({ label, options, paramName, value, setValue }: SelectOptionProps) {
+  return (
+    <EuiFormRow label={label} fullWidth={true} compressed>
+      <EuiSelect
+        options={options}
+        value={value}
+        onChange={ev => setValue(paramName, ev.target.value)}
+        fullWidth={true}
+      />
+    </EuiFormRow>
+  );
+}
+
+export { SelectOption };
