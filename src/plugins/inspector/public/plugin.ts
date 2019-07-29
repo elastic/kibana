@@ -18,11 +18,35 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { InspectorViewRegistry } from './view_registry';
 
-export class InspectorPublicPlugin implements Plugin<void, void> {
+export interface Setup {
+  registerView: InspectorViewRegistry['register'];
+
+  __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+    views: InspectorViewRegistry;
+  };
+}
+
+export type Start = void;
+
+export class InspectorPublicPlugin implements Plugin<Setup, Start> {
+  views: InspectorViewRegistry | undefined;
+
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup) {}
+  public async setup(core: CoreSetup) {
+    this.views = new InspectorViewRegistry();
+
+    return {
+      registerView: this.views!.register.bind(this.views),
+
+      __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+        views: this.views,
+      },
+    };
+  }
+
   public start(core: CoreStart) {}
   public stop() {}
 }

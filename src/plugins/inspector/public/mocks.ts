@@ -16,13 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Plugin } from '.';
+import { Setup as PluginSetup, Start as PluginStart } from '.';
 
-export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
-export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
+export type Setup = jest.Mocked<PluginSetup>;
+export type Start = jest.Mocked<PluginStart>;
 
 const createSetupContract = (): Setup => {
-  const setupContract: Setup = undefined;
+  const setupContract: Setup = {
+    registerView: jest.fn(),
+
+    // Do not use this for testing, hence NaN.
+    __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: NaN as any,
+  };
   return setupContract;
 };
 
