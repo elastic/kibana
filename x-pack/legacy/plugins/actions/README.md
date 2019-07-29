@@ -147,7 +147,6 @@ The following table describes the properties of the `options` object.
 |---|---|---|
 |id|The id of the action you want to fire.|string|
 |params|The `params` value to give the action type executor.|object|
-|namespace|The saved object namespace the action exists within.|string|
 |spaceId|The space id the action is within.|string|
 
 ### Example
