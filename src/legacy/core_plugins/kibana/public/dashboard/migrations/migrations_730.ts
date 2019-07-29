@@ -42,7 +42,9 @@ export function migrations730(
       moveFiltersToQuery(searchSource)
     );
   } catch (e) {
-    logger.warning(`Exception @ migrations730 while trying to migrate query filters! ${e}`);
+    logger.warning(
+      `Exception @ migrations730 while trying to migrate query filters!\nError:${e}\nSearchSource JSON:\n${doc.attributes.kibanaSavedObjectMeta.searchSourceJSON}`
+    );
     return doc;
   }
 
@@ -55,7 +57,12 @@ export function migrations730(
   try {
     const panels = JSON.parse(doc.attributes.panelsJSON);
     doc.attributes.panelsJSON = JSON.stringify(
-      migratePanelsTo730(panels, '7.3.0', doc.attributes.useMargins, uiState)
+      migratePanelsTo730(
+        panels,
+        '7.3.0',
+        doc.attributes.useMargins === undefined ? true : doc.attributes.useMargins,
+        uiState
+      )
     );
 
     delete doc.attributes.uiStateJSON;

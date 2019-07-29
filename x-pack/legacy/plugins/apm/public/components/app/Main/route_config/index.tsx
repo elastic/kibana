@@ -7,14 +7,14 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
-import { legacyDecodeURIComponent } from '../../../shared/Links/url_helpers';
 import { ErrorGroupDetails } from '../../ErrorGroupDetails';
 import { ServiceDetails } from '../../ServiceDetails';
 import { TransactionDetails } from '../../TransactionDetails';
-import { Home } from '../Home';
+import { Home } from '../../Home';
 import { BreadcrumbRoute } from '../ProvideBreadcrumbs';
 import { RouteName } from './route_names';
 import { SettingsList } from '../../Settings/SettingsList';
+import { toQuery } from '../../../shared/Links/url_helpers';
 
 interface RouteParams {
   serviceName: string;
@@ -50,15 +50,6 @@ export const routes: BreadcrumbRoute[] = [
   },
   {
     exact: true,
-    path: '/settings',
-    component: SettingsList,
-    breadcrumb: i18n.translate('xpack.apm.breadcrumb.listSettingsTitle', {
-      defaultMessage: 'Settings'
-    }),
-    name: RouteName.SETTINGS
-  },
-  {
-    exact: true,
     path: '/traces',
     component: Home,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
@@ -68,63 +59,71 @@ export const routes: BreadcrumbRoute[] = [
   },
   {
     exact: true,
-    path: '/:serviceName',
-    breadcrumb: ({ match }) => match.params.serviceName,
-    render: (props: RouteComponentProps<RouteParams>) =>
-      renderAsRedirectTo(`/${props.match.params.serviceName}/transactions`)(
-        props
-      ),
-    name: RouteName.SERVICE
+    path: '/settings',
+    component: SettingsList,
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.listSettingsTitle', {
+      defaultMessage: 'Settings'
+    }),
+    name: RouteName.SETTINGS
   },
   {
     exact: true,
-    path: '/:serviceName/errors/:groupId',
+    path: '/services/:serviceName',
+    breadcrumb: ({ match }) => match.params.serviceName,
+    render: (props: RouteComponentProps<RouteParams>) =>
+      renderAsRedirectTo(
+        `/services/${props.match.params.serviceName}/transactions`
+      )(props),
+    name: RouteName.SERVICE
+  },
+
+  // errors
+  {
+    exact: true,
+    path: '/services/:serviceName/errors/:groupId',
     component: ErrorGroupDetails,
     breadcrumb: ({ match }) => match.params.groupId,
     name: RouteName.ERROR
   },
   {
     exact: true,
-    path: '/:serviceName/errors',
+    path: '/services/:serviceName/errors',
     component: ServiceDetails,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.errorsTitle', {
       defaultMessage: 'Errors'
     }),
     name: RouteName.ERRORS
   },
+
+  // transactions
   {
     exact: true,
-    path: '/:serviceName/transactions',
+    path: '/services/:serviceName/transactions',
     component: ServiceDetails,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.transactionsTitle', {
       defaultMessage: 'Transactions'
     }),
     name: RouteName.TRANSACTIONS
   },
-  // Have to split this out as its own route to prevent duplicate breadcrumbs from both matching
-  // if we use :transactionType? as a single route here
   {
     exact: true,
-    path: '/:serviceName/transactions/:transactionType',
-    component: ServiceDetails,
-    breadcrumb: null,
-    name: RouteName.TRANSACTION_TYPE
+    path: '/services/:serviceName/transactions/view',
+    component: TransactionDetails,
+    breadcrumb: ({ location }) => {
+      const query = toQuery(location.search);
+      return query.transactionName as string;
+    },
+    name: RouteName.TRANSACTION_NAME
   },
+
+  // metrics
   {
     exact: true,
-    path: '/:serviceName/metrics',
+    path: '/services/:serviceName/metrics',
     component: ServiceDetails,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
       defaultMessage: 'Metrics'
     }),
     name: RouteName.METRICS
-  },
-  {
-    exact: true,
-    path: '/:serviceName/transactions/:transactionType/:transactionName',
-    component: TransactionDetails,
-    breadcrumb: ({ match }) =>
-      legacyDecodeURIComponent(match.params.transactionName) || '',
-    name: RouteName.TRANSACTION_NAME
   }
 ];

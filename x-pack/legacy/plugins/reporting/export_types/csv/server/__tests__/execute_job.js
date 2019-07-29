@@ -296,7 +296,7 @@ describe('CSV Execute Job', function () {
     });
   });
 
-  describe('Cells with formula values', async () => {
+  describe('Cells with formula values', () => {
     it('returns `csv_contains_formulas` when cells contain formulas', async function () {
       mockServer.config().get.withArgs('xpack.reporting.csv.checkForFormulas').returns(true);
       callWithRequestStub.onFirstCall().returns({

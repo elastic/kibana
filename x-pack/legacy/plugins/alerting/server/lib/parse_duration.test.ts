@@ -37,3 +37,18 @@ test('throws error when suffix is missing', () => {
     `"Invalid duration \\"1000\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
   );
 });
+
+test('throws error when 0 based', () => {
+  expect(() => parseDuration('0s')).toThrowErrorMatchingInlineSnapshot(
+    `"Invalid duration \\"0s\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+  );
+  expect(() => parseDuration('0m')).toThrowErrorMatchingInlineSnapshot(
+    `"Invalid duration \\"0m\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+  );
+  expect(() => parseDuration('0h')).toThrowErrorMatchingInlineSnapshot(
+    `"Invalid duration \\"0h\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+  );
+  expect(() => parseDuration('0d')).toThrowErrorMatchingInlineSnapshot(
+    `"Invalid duration \\"0d\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+  );
+});

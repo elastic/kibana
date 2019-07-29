@@ -5,12 +5,11 @@
  */
 
 import Boom from 'boom';
-
 import { InternalCoreSetup } from 'src/core/server';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getTopTraces } from '../lib/traces/get_top_traces';
 import { getTrace } from '../lib/traces/get_trace';
+import { getTransactionGroupList } from '../lib/transaction_groups';
 
 const ROOT = '/api/apm/traces';
 const defaultErrorHandler = (err: Error) => {
@@ -32,10 +31,11 @@ export function initTracesApi(core: InternalCoreSetup) {
       },
       tags: ['access:apm']
     },
-    handler: req => {
-      const setup = setupRequest(req);
-
-      return getTopTraces(setup).catch(defaultErrorHandler);
+    handler: async req => {
+      const setup = await setupRequest(req);
+      return getTransactionGroupList({ type: 'top_traces' }, setup).catch(
+        defaultErrorHandler
+      );
     }
   });
 
@@ -49,9 +49,9 @@ export function initTracesApi(core: InternalCoreSetup) {
       },
       tags: ['access:apm']
     },
-    handler: req => {
+    handler: async req => {
       const { traceId } = req.params;
-      const setup = setupRequest(req);
+      const setup = await setupRequest(req);
       return getTrace(traceId, setup).catch(defaultErrorHandler);
     }
   });

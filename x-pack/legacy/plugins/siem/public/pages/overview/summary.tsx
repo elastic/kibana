@@ -31,7 +31,7 @@ export const Summary = pure(() => (
               </EuiLink>
             ),
             data: (
-              <EuiLink href="kibana#home/tutorial_directory/security">
+              <EuiLink href="kibana#home/tutorial_directory/siem">
                 <FormattedMessage
                   id="xpack.siem.overview.startedText.dataLinkText"
                   defaultMessage="ingesting data"

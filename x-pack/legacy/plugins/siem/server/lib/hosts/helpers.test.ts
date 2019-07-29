@@ -10,7 +10,7 @@ import { buildFieldsTermAggregation } from './helpers';
 
 describe('#buildFieldsTermAggregation', () => {
   test('it convert fields to aggregation terms', () => {
-    const fields: ReadonlyArray<string> = [
+    const fields: readonly string[] = [
       'host.architecture',
       'host.id',
       'host.name',

@@ -32,7 +32,7 @@ export default function createFindTests({ getService }: KibanaFunctionalTestDefa
       await supertest
         .delete(`/api/alert/${alertId}`)
         .set('kbn-xsrf', 'foo')
-        .expect(200);
+        .expect(204, '');
       await esArchiver.unload('actions/basic');
     });
 
@@ -46,6 +46,7 @@ export default function createFindTests({ getService }: KibanaFunctionalTestDefa
             id: alertId,
             alertTypeId: 'test.noop',
             interval: '10s',
+            enabled: true,
             actions: [
               {
                 group: 'default',

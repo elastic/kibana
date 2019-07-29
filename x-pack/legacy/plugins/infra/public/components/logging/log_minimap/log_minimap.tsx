@@ -42,6 +42,7 @@ interface LogMinimapState {
   target: number | null;
   drag: DragRecord | null;
   svgPosition: ClientRect;
+  timeCursorY: number;
 }
 
 function calculateYScale(target: number | null, height: number, intervalSize: number) {
@@ -56,6 +57,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
   constructor(props: LogMinimapProps) {
     super(props);
     this.state = {
+      timeCursorY: 0,
       target: props.target,
       drag: null,
       svgPosition: {
@@ -147,6 +149,13 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
     return ((time - minTime) * height) / intervalSize; //
   };
 
+  private updateTimeCursor: React.MouseEventHandler<SVGSVGElement> = event => {
+    const svgPosition = event.currentTarget.getBoundingClientRect();
+    const timeCursorY = event.clientY - svgPosition.top;
+
+    this.setState({ timeCursorY });
+  };
+
   public render() {
     const {
       className,
@@ -158,7 +167,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
       width,
       intervalSize,
     } = this.props;
-    const { drag, target } = this.state;
+    const { timeCursorY, drag, target } = this.state;
     const [minTime, maxTime] = this.getYScale().domain();
     const minimapTransform = !drag || !drag.currentY ? null : drag.currentY - drag.startY;
     const overscanHeight = Math.round(window.screen.availHeight * 2.5) || height * 3;
@@ -169,15 +178,15 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
     ).domain();
     const tickCount = height ? Math.round((overscanHeight / height) * 12) : 12;
     const overscanTranslate = height ? -(overscanHeight - height) / 2 : 0;
-    console.log(overscanTranslate);
     return (
-      <svg
+      <MinimapWrapper
         className={className}
         height={height}
         preserveAspectRatio="none"
         viewBox={`0 0 ${width} ${height}`}
         width={width}
         onMouseDown={this.handleMouseDown}
+        onMouseMove={this.updateTimeCursor}
       >
         <g transform={minimapTransform ? `translate(0, ${minimapTransform})` : undefined}>
           <MinimapBackground x={width / 2} y="0" width={width / 2} height={height} />
@@ -200,6 +209,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
             width={width}
           />
         ) : null}
+        <TimeCursor x1={0} x2={width} y1={timeCursorY} y2={timeCursorY} />
         {/* <g transform={`translate(${width * 0.5}, 0)`}>
           <SearchMarkers
             buckets={searchSummaryBuckets || []}
@@ -210,7 +220,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
             jumpToTarget={jumpToTarget}
           />
         </g> */}
-      </svg>
+      </MinimapWrapper>
     );
   }
 }
@@ -222,4 +232,21 @@ const MinimapBackground = euiStyled.rect`
 const MinimapBorder = euiStyled.line`
   stroke: ${props => props.theme.eui.euiColorMediumShade};
   stroke-width: 1px;
+`;
+
+const TimeCursor = euiStyled.line`
+  stroke-width: 1px;
+  stroke: ${props =>
+    props.theme.darkMode
+      ? props.theme.eui.euiColorDarkestShade
+      : props.theme.eui.euiColorDarkShade};
+`;
+
+const MinimapWrapper = euiStyled.svg`
+  & ${TimeCursor} {
+    visibility: hidden;
+  }
+  &:hover ${TimeCursor} {
+    visibility: visible;
+  }
 `;

@@ -199,8 +199,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       // wait until the count of dashboard panels equals the count of toggle menu icons
       await retry.waitFor('in edit mode', async () => {
         const [panels, menuIcons] = await Promise.all([
-          testSubjects.findAll('dashboardPanel'),
-          testSubjects.findAll('dashboardPanelToggleMenuIcon'),
+          testSubjects.findAll('embeddablePanel'),
+          testSubjects.findAll('embeddablePanelToggleMenuIcon'),
         ]);
         return panels.length === menuIcons.length;
       });
@@ -217,15 +217,20 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickNewDashboard() {
-      // newItemButton button is only visible when dashboard listing table is displayed
-      // (at least one dashboard).
-      const exists = await testSubjects.exists('newItemButton');
-      if (exists) {
-        return await testSubjects.click('newItemButton');
-      }
+      // One or the other will eventually show up on the landing page, depending on whether there are
+      // dashboards.
+      await retry.try(async () => {
+        const createNewItemButtonExists = await testSubjects.exists('newItemButton');
+        if (createNewItemButtonExists) {
+          return await testSubjects.click('newItemButton');
+        }
+        const createNewItemPromptExists = await this.getCreateDashboardPromptExists();
+        if (createNewItemPromptExists) {
+          return await this.clickCreateDashboardPrompt();
+        }
 
-      // If no dashboards exist, then newItemButton to create a new dashboard.
-      return await this.clickCreateDashboardPrompt();
+        throw new Error('Page is still loading... waiting for create new prompt or button to appear');
+      });
     }
 
     async clickCreateDashboardPrompt() {
@@ -455,9 +460,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.gotoDashboardLandingPage();
 
       await this.searchForDashboardWithName(dashName);
-      await this.selectDashboard(dashName);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
+      await retry.try(async () => {
+        await this.selectDashboard(dashName);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // check Dashboard landing page is not present
+        await testSubjects.missingOrFail('newItemButton');
+      });
     }
 
     async getPanelTitles() {
@@ -482,7 +490,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getPanelCount() {
       log.debug('getPanelCount');
-      const panels = await testSubjects.findAll('dashboardPanel');
+      const panels = await testSubjects.findAll('embeddablePanel');
       return panels.length;
     }
 
@@ -507,7 +515,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getDashboardPanels() {
-      return await testSubjects.findAll('dashboardPanel');
+      return await testSubjects.findAll('embeddablePanel');
     }
 
     async addVisualizations(visualizations) {
@@ -611,7 +619,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const checkList = [];
       for (const name of vizList) {
         const isPresent = await testSubjects.exists(
-          `dashboardPanelHeading-${name.replace(/\s+/g, '')}`,
+          `embeddablePanelHeading-${name.replace(/\s+/g, '')}`,
           { timeout: 10000 }
         );
         checkList.push({ name, isPresent });

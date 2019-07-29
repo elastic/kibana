@@ -6,17 +6,6 @@ All communication from the Kibana UI to the server needs to respect the
 based on the context:
 
 [float]
-==== `<img>` and `<a>` elements
-
-Write the `src` or `href` urls as you would without the base path, but then
-replace `src` or `href` with `kbn-src` or `kbn-href`.
-
-["source","shell"]
------------
-<img kbn-src="plugins/kibana/images/logo.png">
------------
-
-[float]
 ==== Getting a static asset url
 
 Use webpack to import the asset into the build. This will give you a URL in

@@ -71,9 +71,6 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
 
-import { data } from 'plugins/data/setup';
-data.search.loadLegacyDirectives();
-
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
   LOADING: 'loading',
@@ -81,7 +78,6 @@ const fetchStatuses = {
 };
 
 const app = uiModules.get('apps/discover', [
-  'kibana/notify',
   'kibana/courier',
   'kibana/url',
   'kibana/index_patterns'
@@ -239,7 +235,7 @@ function discoverController(
 
   const getTopNavLinks = () => {
     const newSearch = {
-      key: 'new',
+      id: 'new',
       label: i18n.translate('kbn.discover.localMenu.localMenu.newSearchTitle', {
         defaultMessage: 'New',
       }),
@@ -251,7 +247,7 @@ function discoverController(
     };
 
     const saveSearch = {
-      key: 'save',
+      id: 'save',
       label: i18n.translate('kbn.discover.localMenu.saveTitle', {
         defaultMessage: 'Save',
       }),
@@ -291,7 +287,7 @@ function discoverController(
     };
 
     const openSearch = {
-      key: 'open',
+      id: 'open',
       label: i18n.translate('kbn.discover.localMenu.openTitle', {
         defaultMessage: 'Open',
       }),
@@ -309,7 +305,7 @@ function discoverController(
     };
 
     const shareSearch = {
-      key: 'share',
+      id: 'share',
       label: i18n.translate('kbn.discover.localMenu.shareTitle', {
         defaultMessage: 'Share',
       }),
@@ -317,7 +313,7 @@ function discoverController(
         defaultMessage: 'Share Search',
       }),
       testId: 'shareTopNavButton',
-      run: async (menuItem, navController, anchorElement) => { // eslint-disable-line no-unused-vars
+      run: async (anchorElement) => {
         const sharingData = await this.getSharingData();
         showShareContextMenu({
           anchorElement,
@@ -337,7 +333,7 @@ function discoverController(
     };
 
     const inspectSearch = {
-      key: 'inspect',
+      id: 'inspect',
       label: i18n.translate('kbn.discover.localMenu.inspectTitle', {
         defaultMessage: 'Inspect',
       }),
@@ -543,15 +539,9 @@ function discoverController(
 
     $scope.updateDataSource()
       .then(function () {
-        $scope.$listen(timefilter, 'fetch', function () {
-          $scope.fetch();
-        });
-        $scope.$listen(timefilter, 'refreshIntervalUpdate', () => {
-          $scope.updateRefreshInterval();
-        });
-        $scope.$listen(timefilter, 'timeUpdate', () => {
-          $scope.updateTime();
-        });
+        $scope.$listen(timefilter, 'autoRefreshFetch', $scope.fetch);
+        $scope.$listen(timefilter, 'refreshIntervalUpdate', $scope.updateRefreshInterval);
+        $scope.$listen(timefilter, 'timeUpdate', $scope.updateTime);
 
         $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;
@@ -710,20 +700,30 @@ function discoverController(
 
     $scope.updateTime();
 
+    // Abort any in-progress requests before fetching again
+    $scope.searchSource.cancelQueued();
+
     $scope.updateDataSource()
       .then(setupVisualization)
       .then(function () {
         $state.save();
         $scope.fetchStatus = fetchStatuses.LOADING;
         logInspectorRequest();
-        return courier.fetch();
+        return $scope.searchSource.fetch();
       })
+      .then(onResults)
       .catch((error) => {
-        toastNotifications.addError(error, {
-          title: i18n.translate('kbn.discover.discoverError', {
-            defaultMessage: 'Discover error',
-          }),
-        });
+        const fetchError = getPainlessError(error);
+
+        if (fetchError) {
+          $scope.fetchError = fetchError;
+        } else {
+          toastNotifications.addError(error, {
+            title: i18n.translate('kbn.discover.errorLoadingData', {
+              defaultMessage: 'Error loading data',
+            }),
+          });
+        }
       });
   };
 
@@ -769,8 +769,6 @@ function discoverController(
     });
 
     $scope.fetchStatus = fetchStatuses.COMPLETE;
-
-    return $scope.searchSource.onResults().then(onResults);
   }
 
   let inspectorRequest;
@@ -795,29 +793,6 @@ function discoverController(
       .stats(getResponseInspectorStats($scope.searchSource, resp))
       .ok({ json: resp });
   }
-
-  function startSearching() {
-    return $scope.searchSource.onResults()
-      .then(onResults)
-      .catch((error) => {
-        const fetchError = getPainlessError(error);
-
-        if (fetchError) {
-          $scope.fetchError = fetchError;
-        } else {
-          toastNotifications.addError(error, {
-            title: i18n.translate('kbn.discover.errorLoadingData', {
-              defaultMessage: 'Error loading data',
-            }),
-          });
-        }
-
-        // Restart. This enables auto-refresh functionality.
-        startSearching();
-      });
-  }
-
-  startSearching();
 
   $scope.updateTime = function () {
     $scope.timeRange = {

@@ -1,0 +1,154 @@
+{
+  "monitorStates": {
+    "totalSummaryCount": {
+      "count": 9234
+    },
+    "summaries": [
+      {
+        "monitor_id": "auto-http-0XDD2D4E60FD4A61C3",
+        "histogram": {
+          "count": 975,
+          "points": [
+            {
+              "timestamp": 1548697571840,
+              "up": 37,
+              "down": 0
+            },
+            {
+              "timestamp": 1548697764160,
+              "up": 52,
+              "down": 0
+            },
+            {
+              "timestamp": 1548697956480,
+              "up": 51,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698148800,
+              "up": 52,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698341120,
+              "up": 58,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698533440,
+              "up": 58,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698725760,
+              "up": 51,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698918080,
+              "up": 52,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699110400,
+              "up": 61,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699302720,
+              "up": 60,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699495040,
+              "up": 61,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699687360,
+              "up": 63,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699879680,
+              "up": 62,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700072000,
+              "up": 62,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700264320,
+              "up": 52,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700456640,
+              "up": 51,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700648960,
+              "up": 51,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700841280,
+              "up": 41,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "151.101.250.217",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": null,
+                  "location": null
+                }
+              },
+              "timestamp": "1548700993074"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "https://www.elastic.co",
+            "domain": "www.elastic.co"
+          },
+          "timestamp": 1548700993074
+        }
+      }
+    ]
+  }
+}

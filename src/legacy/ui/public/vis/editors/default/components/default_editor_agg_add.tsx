@@ -31,10 +31,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from 'ui/vis';
 import { Schema } from '../schemas';
-
-const GROUP_NAMES = {
-  BUCKETS: 'buckets',
-};
+import { AggGroupNames } from '../agg_groups';
 
 interface DefaultEditorAggAddProps {
   group?: AggConfig[];
@@ -42,9 +39,7 @@ interface DefaultEditorAggAddProps {
   schemas: Schema[];
   stats: {
     max: number;
-    min: number;
     count: number;
-    deprecate: boolean;
   };
   addSchema(schema: Schema): void;
 }
@@ -74,7 +69,7 @@ function DefaultEditorAggAdd({
   );
 
   const groupNameLabel =
-    groupName === GROUP_NAMES.BUCKETS
+    groupName === AggGroupNames.Buckets
       ? i18n.translate('common.ui.vis.editors.aggAdd.bucketLabel', { defaultMessage: 'bucket' })
       : i18n.translate('common.ui.vis.editors.aggAdd.metricLabel', { defaultMessage: 'metric' });
 
@@ -83,8 +78,8 @@ function DefaultEditorAggAdd({
     return count >= schema.max;
   };
 
-  return stats.max > stats.count ? (
-    <EuiFlexGroup justifyContent="center">
+  return (
+    <EuiFlexGroup justifyContent="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiPopover
           id={`addGroupButtonPopover_${groupName}`}
@@ -95,14 +90,14 @@ function DefaultEditorAggAdd({
           closePopover={() => setIsPopoverOpen(false)}
         >
           <EuiPopoverTitle>
-            {(groupName !== GROUP_NAMES.BUCKETS || (!stats.count && !stats.deprecate)) && (
+            {(groupName !== AggGroupNames.Buckets || !stats.count) && (
               <FormattedMessage
                 id="common.ui.vis.editors.aggAdd.addGroupButtonLabel"
                 defaultMessage="Add {groupNameLabel}"
                 values={{ groupNameLabel }}
               />
             )}
-            {groupName === GROUP_NAMES.BUCKETS && stats.count > 0 && !stats.deprecate && (
+            {groupName === AggGroupNames.Buckets && stats.count > 0 && (
               <FormattedMessage
                 id="common.ui.vis.editors.aggAdd.addSubGroupButtonLabel"
                 defaultMessage="Add sub-{groupNameLabel}"
@@ -111,24 +106,21 @@ function DefaultEditorAggAdd({
             )}
           </EuiPopoverTitle>
           <EuiContextMenuPanel
-            items={schemas.map(
-              schema =>
-                !schema.deprecate && (
-                  <EuiContextMenuItem
-                    key={`${schema.name}_${schema.title}`}
-                    data-test-subj={`visEditorAdd_${groupName}_${schema.title}`}
-                    disabled={isPopoverOpen && isSchemaDisabled(schema)}
-                    onClick={() => onSelectSchema(schema)}
-                  >
-                    {schema.title}
-                  </EuiContextMenuItem>
-                )
-            )}
+            items={schemas.map(schema => (
+              <EuiContextMenuItem
+                key={`${schema.name}_${schema.title}`}
+                data-test-subj={`visEditorAdd_${groupName}_${schema.title}`}
+                disabled={isPopoverOpen && isSchemaDisabled(schema)}
+                onClick={() => onSelectSchema(schema)}
+              >
+                {schema.title}
+              </EuiContextMenuItem>
+            ))}
           />
         </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
-  ) : null;
+  );
 }
 
 export { DefaultEditorAggAdd };

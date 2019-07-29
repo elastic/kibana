@@ -7,7 +7,15 @@
 import React, { useCallback, useMemo } from 'react';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Axis, Chart, getAxisId, niceTimeFormatter, Position, Settings } from '@elastic/charts';
+import {
+  Axis,
+  Chart,
+  getAxisId,
+  niceTimeFormatter,
+  Position,
+  Settings,
+  TooltipValue,
+} from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import { UICapabilities } from 'ui/capabilities';
@@ -16,15 +24,19 @@ import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/t
 import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
+  MetricsExplorerYAxisMode,
+  MetricsExplorerChartOptions,
 } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import euiStyled from '../../../../../common/eui_styled_components';
 import { createFormatterForMetric } from './helpers/create_formatter_for_metric';
-import { MetricLineSeries } from './line_series';
+import { MetricExplorerSeriesChart } from './series_chart';
 import { MetricsExplorerChartContextMenu } from './chart_context_menu';
 import { SourceQuery } from '../../graphql/types';
 import { MetricsExplorerEmptyChart } from './empty_chart';
 import { MetricsExplorerNoMetrics } from './no_metrics';
 import { getChartTheme } from './helpers/get_chart_theme';
+import { useKibanaUiSetting } from '../../utils/use_kibana_ui_setting';
+import { calculateDomain } from './helpers/calculate_domain';
 
 interface Props {
   intl: InjectedIntl;
@@ -33,6 +45,7 @@ interface Props {
   width?: number | string;
   height?: number | string;
   options: MetricsExplorerOptions;
+  chartOptions: MetricsExplorerChartOptions;
   series: MetricsExplorerSeries;
   source: SourceQuery.Query['source']['configuration'] | undefined;
   timeRange: MetricsExplorerTimeOptions;
@@ -45,6 +58,7 @@ export const MetricsExplorerChart = injectUICapabilities(
     ({
       source,
       options,
+      chartOptions,
       series,
       title,
       onFilter,
@@ -55,6 +69,7 @@ export const MetricsExplorerChart = injectUICapabilities(
       uiCapabilities,
     }: Props) => {
       const { metrics } = options;
+      const [dateFormat] = useKibanaUiSetting('dateFormat');
       const handleTimeChange = (from: number, to: number) => {
         onTimeChange(moment(from).toISOString(), moment(to).toISOString());
       };
@@ -65,9 +80,20 @@ export const MetricsExplorerChart = injectUICapabilities(
             : (value: number) => `${value}`,
         [series.rows]
       );
+      const tooltipProps = {
+        headerFormatter: useCallback(
+          (data: TooltipValue) => moment(data.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
+          [dateFormat]
+        ),
+      };
       const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
+      const dataDomain = calculateDomain(series, metrics, chartOptions.stack);
+      const domain =
+        chartOptions.yAxisMode === MetricsExplorerYAxisMode.fromZero
+          ? { ...dataDomain, min: 0 }
+          : dataDomain;
       return (
-        <React.Fragment>
+        <div style={{ padding: 24 }}>
           {options.groupBy ? (
             <EuiTitle size="xs">
               <EuiFlexGroup alignItems="center">
@@ -80,6 +106,7 @@ export const MetricsExplorerChart = injectUICapabilities(
                   <MetricsExplorerChartContextMenu
                     timeRange={timeRange}
                     options={options}
+                    chartOptions={chartOptions}
                     series={series}
                     onFilter={onFilter}
                     source={source}
@@ -93,6 +120,7 @@ export const MetricsExplorerChart = injectUICapabilities(
               <EuiFlexItem grow={false}>
                 <MetricsExplorerChartContextMenu
                   options={options}
+                  chartOptions={chartOptions}
                   series={series}
                   source={source}
                   timeRange={timeRange}
@@ -105,7 +133,14 @@ export const MetricsExplorerChart = injectUICapabilities(
             {series.rows.length > 0 ? (
               <Chart>
                 {metrics.map((metric, id) => (
-                  <MetricLineSeries key={id} metric={metric} id={id} series={series} />
+                  <MetricExplorerSeriesChart
+                    type={chartOptions.type}
+                    key={id}
+                    metric={metric}
+                    id={id}
+                    series={series}
+                    stack={chartOptions.stack}
+                  />
                 ))}
                 <Axis
                   id={getAxisId('timestamp')}
@@ -117,8 +152,13 @@ export const MetricsExplorerChart = injectUICapabilities(
                   id={getAxisId('values')}
                   position={Position.Left}
                   tickFormat={yAxisFormater}
+                  domain={domain}
                 />
-                <Settings onBrushEnd={handleTimeChange} theme={getChartTheme()} />
+                <Settings
+                  tooltip={tooltipProps}
+                  onBrushEnd={handleTimeChange}
+                  theme={getChartTheme()}
+                />
               </Chart>
             ) : options.metrics.length > 0 ? (
               <MetricsExplorerEmptyChart />
@@ -126,7 +166,7 @@ export const MetricsExplorerChart = injectUICapabilities(
               <MetricsExplorerNoMetrics />
             )}
           </div>
-        </React.Fragment>
+        </div>
       );
     }
   )

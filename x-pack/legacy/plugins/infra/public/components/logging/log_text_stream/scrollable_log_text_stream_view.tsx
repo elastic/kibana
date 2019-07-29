@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TextScale } from '../../../../common/log_text_scale';
-import { TimeKey } from '../../../../common/time';
+import { TimeKey, UniqueTimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
 import { LogColumnConfiguration } from '../../../utils/source_configuration';
 import { AutoSizer } from '../../auto_sizer';
@@ -52,6 +52,7 @@ interface ScrollableLogTextStreamViewProps {
   showColumnConfiguration: () => void;
   intl: InjectedIntl;
   highlightedItem: string | null;
+  currentHighlightKey: UniqueTimeKey | null;
 }
 
 interface ScrollableLogTextStreamViewState {
@@ -98,6 +99,7 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
   public render() {
     const {
       columnConfigurations,
+      currentHighlightKey,
       hasMoreAfterEnd,
       hasMoreBeforeStart,
       highlightedItem,
@@ -188,6 +190,10 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
                                     boundingBoxRef={itemMeasureRef}
                                     logEntry={item.logEntry}
                                     highlights={item.highlights}
+                                    isActiveHighlight={
+                                      !!currentHighlightKey &&
+                                      currentHighlightKey.gid === item.logEntry.gid
+                                    }
                                     scale={scale}
                                     wrap={wrap}
                                     isHighlighted={

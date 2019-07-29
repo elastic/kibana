@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const SECONDS_REGEX = /^[0-9]+s$/;
-export const MINUTES_REGEX = /^[0-9]+m$/;
-export const HOURS_REGEX = /^[0-9]+h$/;
-export const DAYS_REGEX = /^[0-9]+d$/;
+export const SECONDS_REGEX = /^[1-9][0-9]*s$/;
+export const MINUTES_REGEX = /^[1-9][0-9]*m$/;
+export const HOURS_REGEX = /^[1-9][0-9]*h$/;
+export const DAYS_REGEX = /^[1-9][0-9]*d$/;
 
 export function parseDuration(duration: string): number {
   const parsed = parseInt(duration, 10);

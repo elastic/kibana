@@ -36,7 +36,11 @@
  */
 
 import { Observable } from 'rxjs';
-import { ClusterClient, ElasticsearchServiceSetup } from './elasticsearch';
+import {
+  ClusterClient,
+  ElasticsearchClientConfig,
+  ElasticsearchServiceSetup,
+} from './elasticsearch';
 import { HttpServiceSetup, HttpServiceStart } from './http';
 import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
@@ -57,7 +61,7 @@ export {
 export {
   AuthenticationHandler,
   AuthHeaders,
-  AuthResultData,
+  AuthResultParams,
   AuthToolkit,
   GetAuthHeaders,
   KibanaRequest,
@@ -99,6 +103,9 @@ export {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
   SavedObjectsMigrationVersion,
+  SavedObjectsRawDoc,
+  SavedObjectsSchema,
+  SavedObjectsSerializer,
   SavedObjectsService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
@@ -115,13 +122,19 @@ export interface CoreSetup {
   elasticsearch: {
     adminClient$: Observable<ClusterClient>;
     dataClient$: Observable<ClusterClient>;
+    createClient: (
+      type: string,
+      clientConfig?: Partial<ElasticsearchClientConfig>
+    ) => ClusterClient;
   };
   http: {
+    createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
     registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
     registerAuth: HttpServiceSetup['registerAuth'];
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
     basePath: HttpServiceSetup['basePath'];
     createNewServer: HttpServiceSetup['createNewServer'];
+    isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
   };
 }
 
