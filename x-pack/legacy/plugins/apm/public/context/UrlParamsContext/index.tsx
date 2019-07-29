@@ -23,8 +23,16 @@ interface TimeRange {
   rangeTo: string;
 }
 
-function useUiFilters({ kuery, environment }: IUrlParams): UIFilters {
-  return useMemo(() => ({ kuery, environment }), [kuery, environment]);
+function useUiFilters({
+  kuery,
+  environment,
+  transactionType
+}: IUrlParams): UIFilters {
+  return useMemo(() => ({ kuery, environment, transactionType }), [
+    kuery,
+    environment,
+    transactionType
+  ]);
 }
 
 const defaultRefresh = (time: TimeRange) => {};
@@ -39,17 +47,19 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
   ({ location, children }) => {
     const refUrlParams = useRef(resolveUrlParams(location, {}));
 
+    const { start, end, rangeFrom, rangeTo } = refUrlParams.current;
+
     const [, forceUpdate] = useState('');
 
     const urlParams = useMemo(
       () =>
         resolveUrlParams(location, {
-          start: refUrlParams.current.start,
-          end: refUrlParams.current.end,
-          rangeFrom: refUrlParams.current.rangeFrom,
-          rangeTo: refUrlParams.current.rangeTo
+          start,
+          end,
+          rangeFrom,
+          rangeTo
         }),
-      [location, refUrlParams.current]
+      [location, start, end, rangeFrom, rangeTo]
     );
 
     refUrlParams.current = urlParams;

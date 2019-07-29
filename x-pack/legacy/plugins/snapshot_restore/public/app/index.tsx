@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { render } from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 
+import { API_BASE_PATH } from '../../common/constants';
 import { App } from './app';
-import { AppStateProvider, initialState, reducer } from './services/state';
+import { httpService } from './services/http';
+import { AuthorizationProvider } from './lib/authorization';
 import { AppCore, AppDependencies, AppPlugins } from './types';
 
 export { BASE_PATH as CLIENT_BASE_PATH } from './constants';
@@ -41,13 +43,15 @@ const getAppProviders = (deps: AppDependencies) => {
   const AppDependenciesProvider = setAppDependencies(deps);
 
   return ({ children }: { children: ReactNode }) => (
-    <I18nContext>
-      <HashRouter>
-        <AppDependenciesProvider value={deps}>
-          <AppStateProvider value={useReducer(reducer, initialState)}>{children}</AppStateProvider>
-        </AppDependenciesProvider>
-      </HashRouter>
-    </I18nContext>
+    <AuthorizationProvider
+      privilegesEndpoint={httpService.addBasePath(`${API_BASE_PATH}privileges`)}
+    >
+      <I18nContext>
+        <HashRouter>
+          <AppDependenciesProvider value={deps}>{children}</AppDependenciesProvider>
+        </HashRouter>
+      </I18nContext>
+    </AuthorizationProvider>
   );
 };
 

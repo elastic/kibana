@@ -74,14 +74,22 @@ export function useFetcher<Response>(
       dispatchStatus({ id, isLoading: false });
       didCancel = true;
     };
-  }, [...effectKey, counter]);
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [
+    counter,
+    id,
+    preservePreviousResponse,
+    dispatchStatus,
+    ...effectKey
+    /* eslint-enable react-hooks/exhaustive-deps */
+  ]);
 
   return useMemo(
     () => ({
       ...result,
       refresh: () => {
         // this will invalidate the effectKey and will result in a new request
-        setCounter(counter + 1);
+        setCounter(count => count + 1);
       }
     }),
     [result]
