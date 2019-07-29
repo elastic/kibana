@@ -40,12 +40,12 @@ export function HomeApp({ directories }) {
   const {
     telemetryBanner,
     telemetryEnabled,
-    telemetryOptInProvide,
+    telemetryOptInProvider,
   } = telemetryService;
 
-  const showTelemetryOptIn = telemetryEnabled && telemetryBanner && telemetryOptInProvide.getOptIn() !== true;
+  const showTelemetryOptIn = telemetryEnabled && telemetryBanner && telemetryOptInProvider.getOptIn() !== true;
   const savedObjectsClient = chrome.getSavedObjectsClient();
-  const fetchTelemetry = telemetryOptInProvide.fetchExample;
+  const fetchTelemetry = telemetryOptInProvider.fetchExample;
 
   const renderTutorialDirectory = (props) => {
     return (

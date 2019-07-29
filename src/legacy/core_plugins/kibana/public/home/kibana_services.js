@@ -30,9 +30,9 @@ export { METRIC_TYPE };
 uiModules.get('kibana').run(($injector) => {
   indexPatternService = $injector.get('indexPatterns');
   const Private = $injector.get('Private');
-  const telemetryOptInProvider = Private(TelemetryOptInProvider);
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
   const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
+  const telemetryOptInProvider = telemetryEnabled ? Private(TelemetryOptInProvider) : {};
   telemetryService.telemetryEnabled = telemetryEnabled;
   telemetryService.telemetryBanner = telemetryBanner;
   telemetryService.telemetryOptInProvider = telemetryOptInProvider;

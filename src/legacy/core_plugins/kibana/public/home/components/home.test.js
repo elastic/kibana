@@ -17,29 +17,13 @@
  * under the License.
  */
 
+import './home.test.mocks';
+
 import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
 import { Home } from './home';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
-
-jest.mock(
-  'ui/chrome',
-  () => ({
-    getBasePath: jest.fn(() => 'path'),
-    getInjected: jest.fn(() => ''),
-  }),
-  { virtual: true }
-);
-
-jest.mock(
-  'ui/capabilities',
-  () => ({
-    catalogue: {},
-    management: {},
-    navLinks: {}
-  })
-);
 
 describe('home', () => {
   let defaultProps;

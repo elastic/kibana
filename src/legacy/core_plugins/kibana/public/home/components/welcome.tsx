@@ -105,6 +105,10 @@ export class Welcome extends React.PureComponent<Props, State> {
   };
 
   componentDidMount() {
+    trackUiMetric(METRIC_TYPE.LOADED, 'welcomeScreenMount');
+    if (this.props.showTelemetryOptIn) {
+      trackUiMetric(METRIC_TYPE.COUNT, 'welcomeScreenWithTelemetryOptIn');
+    }
     document.addEventListener('keydown', this.hideOnEsc);
   }
 
