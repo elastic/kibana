@@ -44,7 +44,7 @@ const getAppProviders = (deps: AppDependencies) => {
 
   return ({ children }: { children: ReactNode }) => (
     <AuthorizationProvider
-      permissionEndpoint={httpService.addBasePath(`${API_BASE_PATH}permissions`)}
+      privilegesEndpoint={httpService.addBasePath(`${API_BASE_PATH}privileges`)}
     >
       <I18nContext>
         <HashRouter>

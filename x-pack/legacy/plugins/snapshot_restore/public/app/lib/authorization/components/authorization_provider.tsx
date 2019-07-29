@@ -5,7 +5,7 @@
  */
 
 import React, { createContext } from 'react';
-import { useLoadPrivileges } from '../services';
+import { useRequest } from '../../../services/http/use_request';
 
 interface Authorization {
   isLoading: boolean;
@@ -45,7 +45,10 @@ interface Props {
 }
 
 export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) => {
-  const { loading, error, data: privilegesData } = useLoadPrivileges(privilegesEndpoint);
+  const { loading, error, data: privilegesData } = useRequest({
+    path: privilegesEndpoint,
+    method: 'get',
+  });
 
   const value = {
     isLoading: loading,

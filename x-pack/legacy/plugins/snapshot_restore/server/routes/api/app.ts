@@ -18,7 +18,7 @@ let xpackMainPlugin: any;
 
 export function registerAppRoutes(router: Router, plugins: Plugins) {
   xpackMainPlugin = plugins.xpack_main;
-  router.get('permissions', getPermissionsHandler);
+  router.get('privileges', getPrivilegesHandler);
 }
 
 export function getXpackMainPlugin() {
@@ -33,7 +33,7 @@ const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } =
     return privileges;
   }, []);
 
-export const getPermissionsHandler: RouterRouteHandler = async (
+export const getPrivilegesHandler: RouterRouteHandler = async (
   req,
   callWithRequest
 ): Promise<Privileges> => {
@@ -44,7 +44,7 @@ export const getPermissionsHandler: RouterRouteHandler = async (
     throw wrapCustomError(new Error('Security info unavailable'), 503);
   }
 
-  const permissionsResult: Privileges = {
+  const privilegesResult: Privileges = {
     hasAllPrivileges: true,
     missingPrivileges: {
       cluster: [],
@@ -55,7 +55,7 @@ export const getPermissionsHandler: RouterRouteHandler = async (
   const securityInfo = xpackInfo && xpackInfo.isAvailable() && xpackInfo.feature('security');
   if (!securityInfo || !securityInfo.isAvailable() || !securityInfo.isEnabled()) {
     // If security isn't enabled, let the user use app.
-    return permissionsResult;
+    return privilegesResult;
   }
 
   // Get cluster priviliges
@@ -68,8 +68,8 @@ export const getPermissionsHandler: RouterRouteHandler = async (
   });
 
   // Find missing cluster privileges and set overall app permissions
-  permissionsResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);
-  permissionsResult.hasAllPrivileges = hasPermission;
+  privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);
+  privilegesResult.hasAllPrivileges = hasPermission;
 
   // Get all index privileges the user has
   const { indices } = await callWithRequest('transport.request', {
@@ -92,8 +92,8 @@ export const getPermissionsHandler: RouterRouteHandler = async (
 
   // If they don't, return list of required index privileges
   if (!oneIndexWithAllPrivileges) {
-    permissionsResult.missingPrivileges.index = [...APP_RESTORE_INDEX_PRIVILEGES];
+    privilegesResult.missingPrivileges.index = [...APP_RESTORE_INDEX_PRIVILEGES];
   }
 
-  return permissionsResult;
+  return privilegesResult;
 };
