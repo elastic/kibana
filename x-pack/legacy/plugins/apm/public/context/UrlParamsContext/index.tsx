@@ -23,8 +23,16 @@ interface TimeRange {
   rangeTo: string;
 }
 
-function useUiFilters({ kuery, environment }: IUrlParams): UIFilters {
-  return useMemo(() => ({ kuery, environment }), [kuery, environment]);
+function useUiFilters({
+  kuery,
+  environment,
+  transactionType
+}: IUrlParams): UIFilters {
+  return useMemo(() => ({ kuery, environment, transactionType }), [
+    kuery,
+    environment,
+    transactionType
+  ]);
 }
 
 const defaultRefresh = (time: TimeRange) => {};
