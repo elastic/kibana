@@ -170,7 +170,7 @@ export class TimeSeriesExplorer extends React.Component {
   detectorIndexChangeHandler = (e) => {
     const id = e.target.value;
     if (id !== undefined) {
-      this.setState({ detectorrId: id });
+      this.setState({ detectorId: id });
     }
     this.updateControlsForDetector();
     this.loadEntityValues();
