@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { APMLink } from './APMLink';
 
 interface TransactionLinkProps {
-  transaction?: Transaction;
+  transaction: Transaction | undefined;
 }
 
 export const TransactionLink: React.SFC<TransactionLinkProps> = ({
