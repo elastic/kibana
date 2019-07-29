@@ -17,79 +17,80 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import './agg';
-import './agg_add';
-
+import 'ngreact';
+import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
-import aggGroupTemplate from './agg_group.html';
-import { move } from '../../../utils/collection';
-import { aggGroupNameMaps } from './agg_group_names';
-import { AggConfig } from '../../agg_config';
-
-import '../../draggable/draggable_container';
-import '../../draggable/draggable_item';
-import '../../draggable/draggable_handle';
+import { DefaultEditorAggGroup } from './components/default_editor_agg_group';
 
 uiModules
   .get('app/visualize')
+  .directive('visEditorAggGroupWrapper', reactDirective =>
+    reactDirective(wrapInI18nContext(DefaultEditorAggGroup), [
+      ['metricAggs', { watchDepth: 'reference' }], // we watch reference to identify each aggs change in useEffects
+      ['schemas', { watchDepth: 'collection' }],
+      ['state', { watchDepth: 'reference' }],
+      ['addSchema', { watchDepth: 'reference' }],
+      ['onAggParamsChange', { watchDepth: 'reference' }],
+      ['onAggTypeChange', { watchDepth: 'reference' }],
+      ['onToggleEnableAgg', { watchDepth: 'reference' }],
+      ['removeAgg', { watchDepth: 'reference' }],
+      ['reorderAggs', { watchDepth: 'reference' }],
+      ['setTouched', { watchDepth: 'reference' }],
+      ['setValidity', { watchDepth: 'reference' }],
+      'groupName',
+      'formIsTouched',
+      'lastParentPipelineAggTitle',
+    ])
+  )
   .directive('visEditorAggGroup', function () {
-
     return {
       restrict: 'E',
-      template: aggGroupTemplate,
       scope: true,
-      link: function ($scope, $el, attr) {
+      require: '?^ngModel',
+      template: function () {
+        return `<vis-editor-agg-group-wrapper	
+            ng-if="setValidity"	
+            form-is-touched="formIsTouched"
+            group-name="groupName"
+            last-parent-pipeline-agg-title="lastParentPipelineAggTitle"
+            metric-aggs="metricAggs"
+            state="state"
+            schemas="schemas"	
+            add-schema="addSchema"	
+            on-agg-params-change="onAggParamsChange"
+            on-agg-type-change="onAggTypeChange"
+            on-toggle-enable-agg="onToggleEnableAgg"
+            remove-agg="removeAgg"
+            reorder-aggs="reorderAggs"
+            set-validity="setValidity"	
+            set-touched="setTouched"	
+          ></vis-editor-agg-group-wrapper>`;
+      },
+      link: function ($scope, $el, attr, ngModelCtrl) {
         $scope.groupName = attr.groupName;
-        $scope.groupNameLabel = aggGroupNameMaps()[$scope.groupName];
-        $scope.$bind('group', 'state.aggs.bySchemaGroup["' + $scope.groupName + '"]');
-        $scope.$bind('schemas', 'vis.type.schemas["' + $scope.groupName + '"]');
+        $scope.$bind('schemas', attr.schemas);
+        // The model can become touched either onBlur event or when the form is submitted.
+        // We also watch $touched to identify when the form is submitted.
+        $scope.$watch(
+          () => {
+            return ngModelCtrl.$touched;
+          },
+          value => {
+            $scope.formIsTouched = value;
+          }
+        );
 
-        $scope.$watchMulti([
-          'schemas',
-          '[]group'
-        ], function () {
-          const stats = $scope.stats = {
-            min: 0,
-            max: 0,
-            count: $scope.group ? $scope.group.length : 0
-          };
-
-          if (!$scope.schemas) return;
-
-          $scope.schemas.forEach(function (schema) {
-            stats.min += schema.min;
-            stats.max += schema.max;
-            stats.deprecate = schema.deprecate;
-          });
-        });
-
-        function reorderFinished() {
-        //the aggs have been reordered in [group] and we need
-        //to apply that ordering to [vis.aggs]
-          const indexOffset = $scope.state.aggs.indexOf($scope.group[0]);
-          _.forEach($scope.group, (agg, index) => {
-            move($scope.state.aggs, agg, indexOffset + index);
-          });
-        }
-
-        $scope.$on('agg-reorder', reorderFinished);
-        $scope.$on('agg-drag-start', () => $scope.dragging = true);
-        $scope.$on('agg-drag-end', () => {
-          $scope.dragging = false;
-          reorderFinished();
-        });
-
-        $scope.addSchema = function (schema) {
-          const aggConfig = new AggConfig($scope.state.aggs, {
-            schema,
-            id: AggConfig.nextId($scope.state.aggs),
-          });
-          aggConfig.brandNew = true;
-
-          $scope.state.aggs.push(aggConfig);
+        $scope.setValidity = isValid => {
+          ngModelCtrl.$setValidity(`aggGroup${$scope.groupName}`, isValid);
         };
-      }
-    };
 
+        $scope.setTouched = isTouched => {
+          if (isTouched) {
+            ngModelCtrl.$setTouched();
+          } else {
+            ngModelCtrl.$setUntouched();
+          }
+        };
+      },
+    };
   });
