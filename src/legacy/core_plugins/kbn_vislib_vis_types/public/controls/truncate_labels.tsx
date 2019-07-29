@@ -17,18 +17,31 @@
  * under the License.
  */
 
+import React, { ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import { VisOptionsSetValue } from 'ui/vis/editors/default';
 
-export enum AggGroupNames {
-  Buckets = 'buckets',
-  Metrics = 'metrics',
+interface TruncateLabelsOptionProps {
+  value: number | null;
+  setValue: VisOptionsSetValue;
 }
 
-export const aggGroupNamesMap = () => ({
-  [AggGroupNames.Metrics]: i18n.translate('common.ui.vis.editors.aggGroups.metricsText', {
-    defaultMessage: 'Metrics',
-  }),
-  [AggGroupNames.Buckets]: i18n.translate('common.ui.vis.editors.aggGroups.bucketsText', {
-    defaultMessage: 'Buckets',
-  }),
-});
+function TruncateLabelsOption({ value, setValue }: TruncateLabelsOptionProps) {
+  const onChange = (ev: ChangeEvent<HTMLInputElement>) =>
+    setValue('truncate', ev.target.value === '' ? null : parseFloat(ev.target.value));
+
+  return (
+    <EuiFormRow
+      label={i18n.translate('kbnVislibVisTypes.controls.truncateLabel', {
+        defaultMessage: 'Truncate',
+      })}
+      fullWidth={true}
+      compressed
+    >
+      <EuiFieldNumber value={value === null ? '' : value} onChange={onChange} fullWidth={true} />
+    </EuiFormRow>
+  );
+}
+
+export { TruncateLabelsOption };

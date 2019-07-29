@@ -25,13 +25,6 @@
   }
 }
 
-/**
-  * 1. Hack to split child elements evenly.
-  */
-.visEditorAgg__formRow--split {
-  flex: 1 1 0 !important; /* 1 */
-}
-
 .visEditorAgg__sliderValue {
   @include euiFontSize;
   align-self: center;
