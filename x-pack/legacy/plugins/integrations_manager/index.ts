@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { LegacyPluginInitializer, LegacyPluginOptions } from 'src/legacy/types';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
@@ -15,11 +14,10 @@ import { CoreSetup, Plugin as ServerPlugin, PluginInitializerContext } from './s
 import { mappings, savedObjectSchemas } from './server/saved_objects';
 
 const ROOT = `plugins/${PLUGIN.ID}`;
-const pluginTitle = PLUGIN.getI18nName(i18n);
 
 const feature: Feature = {
   id: PLUGIN.ID,
-  name: pluginTitle,
+  name: PLUGIN.TITLE,
   icon: PLUGIN.ICON,
   navLinkId: PLUGIN.ID,
   app: [PLUGIN.ID, 'kibana'],
@@ -53,8 +51,8 @@ const pluginOptions: LegacyPluginOptions = {
   kibanaVersion: manifest.kibanaVersion,
   uiExports: {
     app: {
-      title: pluginTitle,
-      description: pluginTitle,
+      title: PLUGIN.TITLE,
+      description: PLUGIN.TITLE,
       main: `${ROOT}/index`,
       euiIconType: PLUGIN.ICON,
       order: 8100,
