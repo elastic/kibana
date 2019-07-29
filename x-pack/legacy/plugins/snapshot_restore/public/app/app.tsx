@@ -22,7 +22,7 @@ export const App: React.FunctionComponent = () => {
   } = useAppDependencies();
   const { apiError } = useContext(AuthorizationContext);
 
-  const sections: Section[] = ['repositories', 'snapshots', 'restore_status'];
+  const sections: Section[] = ['repositories', 'snapshots', 'restore_status', 'policies'];
   const sectionsRegex = sections.join('|');
 
   return apiError ? (
