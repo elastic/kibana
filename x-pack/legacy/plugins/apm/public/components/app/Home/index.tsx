@@ -17,7 +17,7 @@ import { HistoryTabs, IHistoryTab } from '../../shared/HistoryTabs';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
-import { APMLink } from '../../shared/Links/APMLink';
+import { APMLink } from '../../shared/Links/apm/APMLink';
 
 const homeTabs: IHistoryTab[] = [
   {
