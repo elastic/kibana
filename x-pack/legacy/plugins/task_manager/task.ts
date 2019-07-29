@@ -108,10 +108,13 @@ export interface TaskDefinition {
   maxAttempts?: number;
 
   /**
-   * Function that returns the delay in seconds to wait before attempting the
-   * failed task again.
+   * Function that customizes how the task should behave when the task fails. This
+   * function can return `true`, `false` or a Date. True will tell task manager
+   * to retry using default delay logic. False will tell task manager to stop retrying
+   * this task. Date will suggest when to the task manager the task should retry.
+   * This function isn't used for interval type tasks, those retry at the next interval.
    */
-  getRetryDelay?: (attempts: number, error: object) => number;
+  getRetry?: (attempts: number, error: object) => boolean | Date;
 
   /**
    * The numer of workers / slots a running instance of this task occupies.
@@ -145,7 +148,7 @@ export const validateTaskDefinition = Joi.object({
     .min(1)
     .default(1),
   createTaskRunner: Joi.func().required(),
-  getRetryDelay: Joi.func().optional(),
+  getRetry: Joi.func().optional(),
 }).default();
 
 /**
