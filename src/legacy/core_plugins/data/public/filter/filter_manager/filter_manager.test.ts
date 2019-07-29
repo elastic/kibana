@@ -217,6 +217,30 @@ describe('filter_manager', () => {
       expect(updateListener.called).toBeTruthy();
       expect(updateListener.callCount).toBe(2);
     });
+
+    test('changing a disabled filter should fire only update event', async function() {
+      const updateStub = jest.fn();
+      const fetchStub = jest.fn();
+      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, true, false, 'age', 34);
+
+      await filterManager.setFilters([f1]);
+
+      filterManager.getUpdates$().subscribe({
+        next: updateStub,
+      });
+
+      filterManager.getFetches$().subscribe({
+        next: fetchStub,
+      });
+
+      const f2 = _.cloneDeep(f1);
+      f2.meta.negate = true;
+      await filterManager.setFilters([f2]);
+
+      // this time, events should be emitted
+      expect(fetchStub).toBeCalledTimes(0);
+      expect(updateStub).toBeCalledTimes(1);
+    });
   });
 
   describe('add filters', () => {
