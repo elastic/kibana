@@ -18,8 +18,9 @@
  */
 
 import { AggConfig, VisState } from 'ui/vis';
-import { FieldParamType, AggType } from 'ui/agg_types';
-import { IndexPattern } from 'ui/index_patterns';
+import { AggType } from 'ui/agg_types';
+import { IndexPattern, Field } from 'ui/index_patterns';
+import { IndexedArray } from 'ui/indexed_array';
 import {
   getAggParamsToRender,
   getError,
@@ -109,7 +110,7 @@ describe('DefaultEditorAggParams helpers', () => {
               name: 'field',
               type: 'field',
               filterFieldTypes,
-              getAvailableFields: jest.fn((fields: FieldParamType[]) =>
+              getAvailableFields: jest.fn((fields: IndexedArray<Field>) =>
                 fields.filter(({ type }) => filterFieldTypes.includes(type))
               ),
               editorComponent: jest.fn(),

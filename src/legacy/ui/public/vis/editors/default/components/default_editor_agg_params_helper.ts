@@ -69,7 +69,7 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
       const availableFields = (param as FieldParamType).getAvailableFields(
         agg.getIndexPattern().fields
       );
-      fields = aggTypeFieldFilters.filter(availableFields, param.type, agg);
+      fields = aggTypeFieldFilters.filter(availableFields, agg);
       indexedFields = groupAndSortBy(fields, 'type', 'displayName');
     }
 

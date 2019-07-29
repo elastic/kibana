@@ -17,14 +17,10 @@
  * under the License.
  */
 import { Field } from 'ui/index_patterns';
-import { FieldParamType } from '../';
+import { IndexedArray } from 'ui/indexed_array';
 import { AggConfig } from '../../../vis';
 
-type AggTypeFieldFilter = (
-  field: any,
-  fieldParamType: FieldParamType,
-  aggConfig: AggConfig
-) => boolean;
+type AggTypeFieldFilter = (field: Field, aggConfig: AggConfig) => boolean;
 
 /**
  * A registry to store {@link AggTypeFieldFilter} which are used to filter down
@@ -52,12 +48,10 @@ class AggTypeFieldFilters {
    * @param aggConfig The aggConfig for which the returning list will be used.
    * @return A filtered list of the passed fields.
    */
-  public filter(fields: Field[], fieldParamType: FieldParamType, aggConfig: AggConfig) {
+  public filter(fields: IndexedArray<Field>, aggConfig: AggConfig) {
     const allFilters = Array.from(this.filters);
     const allowedAggTypeFields = fields.filter(field => {
-      const isAggTypeFieldAllowed = allFilters.every(filter =>
-        filter(field, fieldParamType, aggConfig)
-      );
+      const isAggTypeFieldAllowed = allFilters.every(filter => filter(field, aggConfig));
       return isAggTypeFieldAllowed;
     });
     return allowedAggTypeFields;
