@@ -20,8 +20,6 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { State, SeriesType, LayerConfig, visualizationTypes } from './types';
-import { VisualizationProps } from '../types';
-import { State, SeriesType, LayerConfig } from './types';
 import { VisualizationProps, OperationMetadata } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { MultiColumnEditor } from '../multi_column_editor';
