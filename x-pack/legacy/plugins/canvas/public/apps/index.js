@@ -10,4 +10,4 @@ import * as exp from './export';
 
 export const routes = [].concat(workpad.routes, home.routes, exp.routes);
 
-export const apps = [workpad.WorkpadApp, home.HomeApp, exp.ExportApp];
+export const apps = [workpad.WorkpadApp, home.HomeApp, exp.ExportApp, exp.ExternalEmbed];
