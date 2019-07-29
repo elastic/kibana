@@ -5,7 +5,11 @@
  */
 
 import _ from 'lodash';
-import { BaseIndexPatternColumn, FieldBasedIndexPatternColumn } from './indexpattern';
+import {
+  BaseIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+  IndexPatternField,
+} from './indexpattern';
 
 export function hasField(column: BaseIndexPatternColumn): column is FieldBasedIndexPatternColumn {
   return 'sourceField' in column;
@@ -18,4 +22,13 @@ export function sortByField<C extends BaseIndexPatternColumn>(columns: C[]) {
     }
     return column1.operationType.localeCompare(column2.operationType);
   });
+}
+
+export function isIndexPatternField(fieldCandidate: unknown): fieldCandidate is IndexPatternField {
+  return (
+    typeof fieldCandidate === 'object' &&
+    fieldCandidate !== null &&
+    'type' in fieldCandidate &&
+    'name' in fieldCandidate
+  );
 }

@@ -126,6 +126,27 @@ describe('xy_suggestions', () => {
             `);
   });
 
+  test('does not suggest multiple splits', () => {
+    const suggestions = getSuggestions({
+      tables: [
+        {
+          datasourceSuggestionId: 1,
+          isMultiRow: true,
+          columns: [
+            numCol('price'),
+            numCol('quantity'),
+            dateCol('date'),
+            strCol('product'),
+            strCol('city'),
+          ],
+          layerId: 'first',
+        },
+      ],
+    });
+
+    expect(suggestions).toHaveLength(0);
+  });
+
   test('suggests a split x y chart with date on x', () => {
     const [suggestion, ...rest] = getSuggestions({
       tables: [

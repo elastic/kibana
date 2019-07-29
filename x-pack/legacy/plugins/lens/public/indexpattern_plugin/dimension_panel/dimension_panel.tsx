@@ -22,7 +22,7 @@ import { getPotentialColumns } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
-import { hasField } from '../utils';
+import { hasField, isIndexPatternField } from '../utils';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
@@ -62,9 +62,8 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
 
   function canHandleDrop() {
     const { dragging } = props.dragDropContext;
-    const field = dragging as IndexPatternField;
 
-    return !!field && !!field.type && !!findColumnByField(field as IndexPatternField);
+    return isIndexPatternField(dragging) && Boolean(findColumnByField(dragging));
   }
 
   return (
@@ -74,7 +73,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
         data-test-subj="indexPattern-dropTarget"
         droppable={canHandleDrop()}
         onDrop={field => {
-          const column = findColumnByField(field as IndexPatternField);
+          const column = isIndexPatternField(field) && findColumnByField(field);
 
           if (!column) {
             // TODO: What do we do if we couldn't find a column?
