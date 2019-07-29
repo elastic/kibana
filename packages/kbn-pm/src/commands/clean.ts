@@ -27,7 +27,7 @@ import { log } from '../utils/log';
 import { ICommand } from './';
 
 export const CleanCommand: ICommand = {
-  description: 'Remove the node_modules and target directories from all projects.',
+  description: 'Remove the node_modules from all projects.',
   name: 'clean',
 
   async run(projects) {
@@ -37,13 +37,6 @@ export const CleanCommand: ICommand = {
         toDelete.push({
           cwd: project.path,
           pattern: relative(project.path, project.nodeModulesLocation),
-        });
-      }
-
-      if (await isDirectory(project.targetLocation)) {
-        toDelete.push({
-          cwd: project.path,
-          pattern: relative(project.path, project.targetLocation),
         });
       }
 

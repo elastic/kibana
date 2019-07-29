@@ -5,8 +5,7 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "babel src --out-dir target --delete-dir-on-start --extensions .ts,.js,.tsx",
-    "kbn:bootstrap": "yarn build",
+    "kbn:build": "babel src --out-dir target --delete-dir-on-start --extensions .ts,.js,.tsx",
     "kbn:watch": "yarn build --watch"
   },
   "devDependencies": {

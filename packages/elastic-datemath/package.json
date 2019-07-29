@@ -6,8 +6,7 @@
   "main": "target/index.js",
   "typings": "target/index.d.ts",
   "scripts": {
-    "build": "babel src --out-dir target --copy-files",
-    "kbn:bootstrap": "yarn build --quiet",
+    "kbn:build": "babel src --out-dir target --copy-files",
     "kbn:watch": "yarn build --watch"
   },
   "devDependencies": {

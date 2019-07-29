@@ -11,8 +11,7 @@
     "url": "https://github.com/elastic/kibana/tree/master/packages/kbn-elastic-idx"
   },
   "scripts": {
-    "build": "tsc",
-    "kbn:bootstrap": "yarn build",
+    "kbn:build": "tsc",
     "kbn:watch": "yarn build --watch",
     "test": "jest"
   },

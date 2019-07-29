@@ -6,8 +6,7 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "node scripts/build",
-    "kbn:bootstrap": "node scripts/build --source-maps",
+    "kbn:build": "node scripts/build  --source-maps",
     "kbn:watch": "node scripts/build --source-maps --watch"
   },
   "dependencies": {

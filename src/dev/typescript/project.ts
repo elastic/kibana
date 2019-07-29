@@ -48,6 +48,12 @@ function testMatchers(matchers: IMinimatch[], path: string) {
   return matchers.some(matcher => matcher.match(path));
 }
 
+interface CompilerOptions {
+  declaration?: boolean;
+  declarationDir?: string;
+  outDir?: string;
+}
+
 export class Project {
   public directory: string;
   public name: string;
@@ -55,29 +61,40 @@ export class Project {
 
   private readonly include: IMinimatch[];
   private readonly exclude: IMinimatch[];
+  private readonly declaration: boolean;
+  private readonly declarationDir: string;
 
   constructor(public tsConfigPath: string, name?: string) {
     this.config = parseTsConfig(tsConfigPath);
 
-    const { files, include, exclude = [] } = this.config as {
+    const { files, compilerOptions = {}, include, exclude = [] } = this.config as {
+      compilerOptions?: CompilerOptions;
       files?: string[];
       include?: string[];
       exclude?: string[];
     };
 
     if (files || !include) {
-      throw new Error(
-        'tsconfig.json files in the Kibana repo must use "include" keys and not "files"'
-      );
+      throw new Error(`${tsConfigPath} must use "include" keys and not "files"`);
     }
 
     this.directory = dirname(this.tsConfigPath);
     this.name = name || relative(REPO_ROOT, this.directory) || basename(this.directory);
     this.include = makeMatchers(this.directory, include);
     this.exclude = makeMatchers(this.directory, exclude);
+    this.declaration = compilerOptions.declaration || false;
+    this.declarationDir = resolve(
+      this.directory,
+      compilerOptions.declarationDir || compilerOptions.outDir || './target'
+    );
   }
 
   public isAbsolutePathSelected(path: string) {
-    return testMatchers(this.exclude, path) ? false : testMatchers(this.include, path);
+    // it's assumed any declarations are part of the project
+    if (this.declaration && path.startsWith(this.declarationDir)) {
+      return true;
+    }
+
+    return testMatchers([...this.exclude], path) ? false : testMatchers(this.include, path);
   }
 }

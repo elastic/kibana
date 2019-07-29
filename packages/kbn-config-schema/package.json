@@ -6,8 +6,7 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "tsc",
-    "kbn:bootstrap": "yarn build"
+    "kbn:build": "tsc"
   },
   "devDependencies": {
     "typescript": "3.5.3"

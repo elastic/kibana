@@ -8,7 +8,7 @@
     "kbn": "node ../scripts/kbn",
     "kbn:bootstrap": "node legacy/plugins/canvas/scripts/clean_storybook_dll",
     "start": "gulp dev",
-    "build": "gulp build",
+    "build:production": "gulp build",
     "testonly": "gulp testonly",
     "test": "gulp test",
     "test:browser:dev": "gulp testbrowser-dev",

@@ -10,7 +10,7 @@ node_modules
 trash
 /optimize
 /built_assets
-target
+/target
 /build
 .jruby
 .idea

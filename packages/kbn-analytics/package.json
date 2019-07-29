@@ -8,8 +8,7 @@
   "author": "Ahmad Bamieh <ahmadbamieh@gmail.com>",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "tsc",
-    "kbn:bootstrap": "yarn build",
+    "kbn:build": "tsc",
     "kbn:watch": "yarn build --watch"
   },
   "devDependencies": {
