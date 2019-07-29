@@ -491,8 +491,11 @@ describe('Response factory', () => {
       const router = new Router('/');
 
       router.get({ path: '/', validate: false }, (req, res) => {
-        return res.redirected('/new-url', {
-          headers: { 'x-kibana': 'tag' },
+        return res.redirected('The document has moved', {
+          headers: {
+            location: '/new-url',
+            'x-kibana': 'tag',
+          },
         });
       });
 
@@ -504,6 +507,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(302);
 
+      expect(result.text).toBe('The document has moved');
       expect(result.header.location).toBe('/new-url');
       expect(result.header['x-kibana']).toBe('tag');
     });
@@ -512,7 +516,11 @@ describe('Response factory', () => {
       const router = new Router('/');
 
       router.get({ path: '/', validate: false }, (req, res) => {
-        return res.redirected(undefined as any); // url string is required parameter
+        return res.redirected(undefined, {
+          headers: {
+            'x-kibana': 'tag',
+          },
+        } as any); // location headers is required
       });
 
       const { registerRouter, server: innerServer } = await server.setup(config);
@@ -527,7 +535,7 @@ describe('Response factory', () => {
       expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: expected redirection url, but given undefined],
+            [Error: expected 'location' header to be set],
           ],
         ]
       `);
@@ -688,7 +696,10 @@ describe('Response factory', () => {
       const router = new Router('/');
 
       router.get({ path: '/', validate: false }, (req, res) => {
-        return res.custom('/new-url', {
+        return res.custom('The document has moved', {
+          headers: {
+            location: '/new-url',
+          },
           statusCode: 301,
         });
       });
@@ -702,6 +713,33 @@ describe('Response factory', () => {
         .expect(301);
 
       expect(result.header.location).toBe('/new-url');
+    });
+
+    it('throws if redirects without location header to be set', async () => {
+      const router = new Router('/');
+
+      router.get({ path: '/', validate: false }, (req, res) => {
+        return res.custom('The document has moved', {
+          headers: {},
+          statusCode: 301,
+        });
+      });
+
+      const { registerRouter, server: innerServer } = await server.setup(config);
+      registerRouter(router);
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .get('/')
+        .expect(500);
+
+      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            [Error: expected 'location' header to be set],
+          ],
+        ]
+      `);
     });
 
     it('creates error response', async () => {

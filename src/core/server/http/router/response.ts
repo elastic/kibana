@@ -29,6 +29,18 @@ export class KibanaResponse<T extends HttpResponsePayload | ResponseError> {
   ) {}
 }
 
+/**
+ * Creates a Union type of all known keys of a given interface.
+ * @example
+ * ```ts
+ * interface Person {
+ *   name: string;
+ *   age: number;
+ *   [attributes: string]: string | number;
+ * }
+ * type PersonKnownKeys = KnownKeys<Person>; // "age" | "name"
+ * ```
+ */
 type KnownKeys<T> = {
   [K in keyof T]: string extends K ? never : number extends K ? never : K;
 } extends { [_ in keyof T]: infer U }
@@ -59,6 +71,16 @@ export type HttpResponsePayload = undefined | string | Record<string, any> | Buf
 export interface CustomResponseOptions extends HttpResponseOptions {
   statusCode: number;
 }
+
+/**
+ * HTTP response parameters
+ * @public
+ */
+export type RedirectResponseOptions = HttpResponseOptions & {
+  headers: {
+    location: string;
+  };
+};
 
 export const responseFactory = {
   // Success
@@ -107,11 +129,12 @@ export const responseFactory = {
   /**
    * Redirect to a different URI.
    * Status code: `302`.
-   * @param url - an absolute or relative URI used to redirect the client to another resource.
-   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   * @param payload - payload to send to the client
+   * @param options - {@link RedirectResponseOptions} configures HTTP response parameters.
+   * Expects `location` header to be set.
    */
-  redirected: (url: string, options: HttpResponseOptions = {}) =>
-    new KibanaResponse(302, url, options),
+  redirected: <T extends HttpResponsePayload>(payload: T, options: RedirectResponseOptions) =>
+    new KibanaResponse(302, payload, options),
 
   // Client error
   /**

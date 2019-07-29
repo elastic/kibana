@@ -34,6 +34,8 @@ export interface ResponseErrorMeta {
 export class ResponseError extends Error {
   constructor(error: Error | string, public readonly meta?: ResponseErrorMeta) {
     super(typeof error === 'string' ? error : error.message);
+    // Set the prototype explicitly, see:
+    // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
     Object.setPrototypeOf(this, ResponseError.prototype);
   }
 }

@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ResponseObject, ResponseToolkit } from 'hapi';
+import { ResponseObject as HapiResponseObject, ResponseToolkit as HapiResponseToolkit } from 'hapi';
 import typeDetect from 'type-detect';
 
 import { HttpResponsePayload, KibanaResponse } from './response';
 import { ResponseError } from './response_error';
 
-function setHeaders(response: ResponseObject, headers: Record<string, string | string[]> = {}) {
+function setHeaders(response: HapiResponseObject, headers: Record<string, string | string[]> = {}) {
   Object.entries(headers).forEach(([header, value]) => {
     if (value !== undefined) {
       // Hapi typings for header accept only string, although string[] is a valid value
@@ -39,7 +39,7 @@ const statusHelpers = {
 };
 
 export class HapiResponseAdapter {
-  constructor(private readonly responseToolkit: ResponseToolkit) {}
+  constructor(private readonly responseToolkit: HapiResponseToolkit) {}
   public toBadRequest(message: string) {
     return this.responseToolkit.response({ error: message }).code(400);
   }
@@ -81,12 +81,16 @@ export class HapiResponseAdapter {
     return this.responseToolkit.response(kibanaResponse.payload).code(kibanaResponse.status);
   }
 
-  private toRedirect(kibanaResponse: KibanaResponse<string>) {
-    const url = kibanaResponse.payload;
-    if (typeof url !== 'string') {
-      throw new Error(`expected redirection url, but given ${typeDetect(url)}`);
+  private toRedirect(kibanaResponse: KibanaResponse<HttpResponsePayload>) {
+    const { headers } = kibanaResponse.options;
+    if (!headers || typeof headers.location !== 'string') {
+      throw new Error("expected 'location' header to be set");
     }
-    return this.responseToolkit.redirect(url).code(kibanaResponse.status);
+
+    return this.responseToolkit
+      .response(kibanaResponse.payload)
+      .redirect(headers.location)
+      .code(kibanaResponse.status);
   }
 
   private toError(kibanaResponse: KibanaResponse<ResponseError>) {
