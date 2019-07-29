@@ -152,7 +152,6 @@ export function TransactionOverview({ urlParams }: Props) {
         <TransactionList
           isLoading={transactionListStatus === 'loading'}
           items={transactionListData}
-          serviceName={serviceName}
         />
       </EuiPanel>
     </React.Fragment>
