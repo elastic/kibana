@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import 'monaco-editor/esm/vs/base/common/worker/simpleWorker';
-import 'monaco-editor/esm/vs/base/worker/defaultWorkerFactory';
-import 'monaco-editor/esm/vs/editor/editor.api';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
-import 'monaco-editor/esm/vs/editor/browser/controller/coreCommands.js';
-import 'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js';
-import 'monaco-editor/esm/vs/editor/browser/widget/diffEditorWidget.js';
-import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/bracketMatching.js';
-import 'monaco-editor/esm/vs/editor/contrib/clipboard/clipboard.js';
-import 'monaco-editor/esm/vs/editor/contrib/suggest/suggestController.js';
+type LanguageConfiguration = monaco.languages.LanguageConfiguration;
+type LanguageDefinition = monaco.languages.IMonarchLanguage & { keywords: string[] };
 
-// import 'monaco-editor/esm/vs/editor/editor.all';
+export interface Language {
+  id: string;
+  conf: LanguageConfiguration;
+  def: LanguageDefinition;
+}

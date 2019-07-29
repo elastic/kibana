@@ -17,53 +17,7 @@
  * under the License.
  */
 
-/**
- * This class is responsible for acting as an abstraction layer between consumers
- * and whatever editor implementation we are using. It should consist only of the methods
- * we find useful for an editor to have, like:
- *
- * - Registering a lang
- * - Registering autocompletion
- * - Getting the current content of the editor
- *
- * The fact that we use Monaco should, in as far as possible, be an implementation detail.
- */
+export * from './language';
+export * from './containers/editor';
 
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-
-import './monaco/components';
-
-import * as consoleEditor from './monaco/lifecycle';
-import { Theme } from '../../types';
-
-export class Editor {
-  private editor: monaco.editor.IStandaloneCodeEditor | null = null;
-
-  constructor(private readonly mountElement: HTMLElement, readonly themeName: Theme) {}
-
-  async setup() {
-    this.editor = consoleEditor.setup({ element: this.mountElement, theme: this.themeName });
-  }
-
-  teardown() {
-    consoleEditor.teardown();
-  }
-
-  recalculateLayout() {
-    if (this.editor) {
-      this.editor.layout();
-    }
-  }
-
-  async startWorker() {}
-}
-
-export const createEditor = ({
-  mountElement,
-  themeName,
-}: {
-  mountElement: HTMLElement;
-  themeName: Theme;
-}) => {
-  return new Editor(mountElement, themeName);
-};
+export { registerLanguage, registerWorker, teardown, setup, getThemeConfig } from './monaco';

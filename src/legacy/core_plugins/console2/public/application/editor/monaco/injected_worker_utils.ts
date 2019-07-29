@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import 'monaco-editor/esm/vs/base/common/worker/simpleWorker';
-import 'monaco-editor/esm/vs/base/worker/defaultWorkerFactory';
-import 'monaco-editor/esm/vs/editor/editor.api';
+// @ts-ignore
+import txt1 from '!!raw-loader!monaco-editor/min/vs/base/worker/workerMain';
+// @ts-ignore
+import txt2 from '!!raw-loader!monaco-editor/min/vs/loader';
 
-import 'monaco-editor/esm/vs/editor/browser/controller/coreCommands.js';
-import 'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js';
-import 'monaco-editor/esm/vs/editor/browser/widget/diffEditorWidget.js';
-import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/bracketMatching.js';
-import 'monaco-editor/esm/vs/editor/contrib/clipboard/clipboard.js';
-import 'monaco-editor/esm/vs/editor/contrib/suggest/suggestController.js';
-
-// import 'monaco-editor/esm/vs/editor/editor.all';
+export const injectJS = {
+  code: `
+  ${txt1}
+ 
+  ${txt2} 
+  `,
+};

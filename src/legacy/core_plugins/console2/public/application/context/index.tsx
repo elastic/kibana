@@ -19,17 +19,14 @@
 
 import React, { Dispatch } from 'react';
 import { createContext, useContext, useState } from 'react';
-import { Theme } from '../../types';
-import { Editor } from '../editor';
+import { ThemeMode } from '../../types';
 
 interface AppContext {
-  themeName: Theme;
-  editor: Editor | null;
+  themeMode: ThemeMode;
 }
 
 let initialState: AppContext = {
-  themeName: 'light',
-  editor: null,
+  themeMode: 'light',
 };
 
 export const setInitialState = (overrides: Partial<AppContext>) => {

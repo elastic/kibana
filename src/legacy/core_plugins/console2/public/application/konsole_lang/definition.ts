@@ -17,15 +17,20 @@
  * under the License.
  */
 
-import 'monaco-editor/esm/vs/base/common/worker/simpleWorker';
-import 'monaco-editor/esm/vs/base/worker/defaultWorkerFactory';
-import 'monaco-editor/esm/vs/editor/editor.api';
+import { Language } from '../editor';
 
-import 'monaco-editor/esm/vs/editor/browser/controller/coreCommands.js';
-import 'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js';
-import 'monaco-editor/esm/vs/editor/browser/widget/diffEditorWidget.js';
-import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/bracketMatching.js';
-import 'monaco-editor/esm/vs/editor/contrib/clipboard/clipboard.js';
-import 'monaco-editor/esm/vs/editor/contrib/suggest/suggestController.js';
+export const konsole: Language = {
+  id: 'konsole',
+  conf: {
+    autoClosingPairs: [{ open: '{', close: '}' }, { open: '"', close: '"' }],
+    comments: { lineComment: '#' },
+  },
+  def: {
+    defaultToken: '',
+    keywords: ['GET', 'PUT', 'POST', 'DELETE'],
 
-// import 'monaco-editor/esm/vs/editor/editor.all';
+    tokenizer: {
+      method: [[/[A-Z]+/, { cases: { '@keywords': 'keyword' } }]],
+    },
+  },
+};

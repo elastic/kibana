@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export type Theme = 'light' | 'dark';
+export type ThemeMode = 'light' | 'dark';

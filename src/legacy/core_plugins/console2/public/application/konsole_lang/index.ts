@@ -16,42 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { Ref } from 'react';
 
-interface Props {
-  forwardedRef: Ref<HTMLDivElement>;
-}
-
-function _Editor(props: Props) {
-  const { forwardedRef } = props;
-
-  return (
-    <div style={{ height: '100%' }}>
-      <style>
-        {`
-  /*
-    This is a hack for now to get around the style set up by the code x-pack plugin :c
-  */
-  .monaco-editor .cursors-layer > .cursor {
-    display: inherit !important;
-  }
-
-  textarea.inputarea {
-    display: inherit !important;
-  }
-
-
-  .code-line-decoration + .cldr.folding {
-    left: inherit !important;
-  }
-
-        `}
-      </style>
-      <div style={{ height: '100%' }} ref={forwardedRef} />
-    </div>
-  );
-}
-
-export const Editor = React.forwardRef<HTMLDivElement>((props, ref) => {
-  return <_Editor {...props} forwardedRef={ref} />;
-});
+export * from './definition';
+export * from './worker';

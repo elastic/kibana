@@ -17,33 +17,32 @@
  * under the License.
  */
 
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 
-import { createEditor } from './editor';
+import { Editor } from './editor';
 import { useAppContext } from './context';
-import { Editor } from './containers/editor';
+import { konsole } from './konsole_lang';
 
 export const App = () => {
-  const editorElementRef = useRef<HTMLDivElement>(null);
-  const [ctx, setContext] = useAppContext();
-  const { themeName } = ctx;
+  const [ctx] = useAppContext();
+  const { themeMode } = ctx;
 
-  useEffect(() => {
-    (async () => {
-      const editor = createEditor({
-        mountElement: editorElementRef.current as HTMLDivElement,
-        themeName,
-      });
-      await editor.setup();
-
-      setContext({
-        ...ctx,
-        editor,
-      });
-    })();
-
-    return () => (ctx.editor ? ctx.editor.teardown() : undefined);
-  }, []);
-
-  return <Editor ref={editorElementRef} />;
+  return (
+    <Editor
+      value={`POST /_rollup/job/t/_start`}
+      language={konsole}
+      themeMode={themeMode}
+      options={{
+        hover: { enabled: true },
+        tabCompletion: true,
+        readOnly: false,
+        minimap: { enabled: false },
+        quickSuggestions: true,
+        scrollbar: {
+          vertical: 'auto',
+          horizontal: 'hidden',
+        },
+      }}
+    />
+  );
 };

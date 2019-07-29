@@ -17,15 +17,10 @@
  * under the License.
  */
 
-import 'monaco-editor/esm/vs/base/common/worker/simpleWorker';
-import 'monaco-editor/esm/vs/base/worker/defaultWorkerFactory';
-import 'monaco-editor/esm/vs/editor/editor.api';
+function MyWorker() {}
+// MyWorker.prototype.sayHello = () => console.log('hello');
 
-import 'monaco-editor/esm/vs/editor/browser/controller/coreCommands.js';
-import 'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js';
-import 'monaco-editor/esm/vs/editor/browser/widget/diffEditorWidget.js';
-import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/bracketMatching.js';
-import 'monaco-editor/esm/vs/editor/contrib/clipboard/clipboard.js';
-import 'monaco-editor/esm/vs/editor/contrib/suggest/suggestController.js';
-
-// import 'monaco-editor/esm/vs/editor/editor.all';
+self.onmessage = (a: any) => {
+  // console.log(self);
+  // self.postMessage({ success: true });
+};

@@ -20,11 +20,14 @@ import { unmountComponentAtNode } from 'react-dom';
 
 import { Plugin, PluginInitializerContext, CoreStart } from '../../../../core/public';
 
-import { Theme } from './types';
+import { ThemeMode } from './types';
 import { XCoreSetup } from './shim';
 import * as context from './application/context';
 import indexHtml from './index.html';
 import { renderApp } from './index';
+
+import { konsole, worker } from './application/konsole_lang';
+import * as editor from './application/editor';
 
 const CONSOLE_EL_ROOT_ID = 'console2Root';
 
@@ -34,8 +37,15 @@ export class ConsolePlugin implements Plugin {
 
   setup(core: XCoreSetup) {
     const { chrome, routes } = core;
-    const themeName: Theme = chrome.getUiSettingsClient().get('theme:darkMode') ? 'dark' : 'light';
-    context.setInitialState({ themeName });
+
+    const themeMode: ThemeMode = chrome.getUiSettingsClient().get('theme:darkMode')
+      ? 'dark'
+      : 'light';
+    context.setInitialState({ themeMode });
+
+    editor.setup();
+    editor.registerLanguage(konsole, worker.src);
+
     routes.registerNgRoutes.when('/dev_tools/console2', {
       controller: ($scope: any) => {
         const targetElement = document.querySelector(`#${CONSOLE_EL_ROOT_ID}`) as HTMLElement;
