@@ -6,7 +6,7 @@
 
 
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { PropTypes } from 'prop-types';
 
 import {
@@ -20,67 +20,73 @@ import {
   EuiTitle
 } from '@elastic/eui';
 
-import chrome from 'ui/chrome';
-
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { useNavigationMenuContext } from '../util/context_utils';
+import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
 
 export function Settings({
   canGetFilters,
   canGetCalendars
 }) {
+  const basePath = useNavigationMenuContext().chrome.getBasePath();
+
   return (
-    <EuiPage className="mlSettingsPage" data-test-subj="mlPageSettings">
-      <EuiPageBody className="mlSettingsPage__body">
-        <EuiPageContent
-          className="mlSettingsPage__content"
-          horizontalPosition="center"
-        >
-          <EuiPageContentHeader>
-            <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="xpack.ml.settings.jobManagementTitle"
-                  defaultMessage="Job Management"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiPageContentHeader>
+    <Fragment>
+      <NavigationMenu tabId="settings" />
+      <EuiPage className="mlSettingsPage" data-test-subj="mlPageSettings">
+        <EuiPageBody className="mlSettingsPage__body">
+          <EuiPageContent
+            className="mlSettingsPage__content"
+            horizontalPosition="center"
+          >
+            <EuiPageContentHeader>
+              <EuiTitle>
+                <h2>
+                  <FormattedMessage
+                    id="xpack.ml.settings.jobManagementTitle"
+                    defaultMessage="Job Management"
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiPageContentHeader>
 
-          <EuiFlexGroup gutterSize="xl">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="ml_calendar_mng_button"
-                size="l"
-                color="primary"
-                href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list`}
-                isDisabled={canGetCalendars === false}
-              >
-                <FormattedMessage
-                  id="xpack.ml.settings.calendarManagementButtonLabel"
-                  defaultMessage="Calendar management"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            <EuiFlexGroup gutterSize="xl">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="ml_calendar_mng_button"
+                  size="l"
+                  color="primary"
+                  href={`${basePath}/app/ml#/settings/calendars_list`}
+                  isDisabled={canGetCalendars === false}
+                >
+                  <FormattedMessage
+                    id="xpack.ml.settings.calendarManagementButtonLabel"
+                    defaultMessage="Calendar management"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="ml_filter_lists_button"
-                size="l"
-                color="primary"
-                href={`${chrome.getBasePath()}/app/ml#/settings/filter_lists`}
-                isDisabled={canGetFilters === false}
-              >
-                <FormattedMessage
-                  id="xpack.ml.settings.filterListsButtonLabel"
-                  defaultMessage="Filter Lists"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="ml_filter_lists_button"
+                  size="l"
+                  color="primary"
+                  href={`${basePath}/app/ml#/settings/filter_lists`}
+                  isDisabled={canGetFilters === false}
+                >
+                  <FormattedMessage
+                    id="xpack.ml.settings.filterListsButtonLabel"
+                    defaultMessage="Filter Lists"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    </Fragment>
   );
 }
 

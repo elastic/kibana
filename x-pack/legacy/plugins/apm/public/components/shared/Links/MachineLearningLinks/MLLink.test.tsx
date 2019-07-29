@@ -8,14 +8,21 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../../utils/testHelpers';
 import { MLLink } from './MLLink';
-import chrome from 'ui/chrome';
 import * as savedObjects from '../../../../services/rest/savedObjects';
+import * as hooks from '../../../../hooks/useCore';
+import { InternalCoreStart } from 'src/core/public';
 
 jest.mock('ui/kfetch');
 
-jest
-  .spyOn(chrome, 'addBasePath')
-  .mockImplementation(path => `/basepath${path}`);
+const coreMock = ({
+  http: {
+    basePath: {
+      prepend: (path: string) => `/basepath${path}`
+    }
+  }
+} as unknown) as InternalCoreStart;
+
+jest.spyOn(hooks, 'useCore').mockReturnValue(coreMock);
 
 jest
   .spyOn(savedObjects, 'getAPMIndexPattern')

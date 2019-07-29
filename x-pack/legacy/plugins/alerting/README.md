@@ -38,7 +38,7 @@ The following table describes the properties of the `options` object.
 |---|---|---|
 |id|Unique identifier for the alert type. For convention purposes, ids starting with `.` are reserved for built in alert types. We recommend using a convention like `<plugin_id>.mySpecialAlert` for your alert types to avoid conflicting with another plugin.|string|
 |name|A user-friendly name for the alert type. These will be displayed in dropdowns when choosing alert types.|string|
-|validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `executor` function or created as an alert saved object. In order to do this, provide a joi schema that we will use to validate the `params` attribute.|Joi schema|
+|validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `executor` function or created as an alert saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.|@kbn/config-schema|
 |executor|This is where the code of the alert type lives. This is a function to be called when executing an alert on an interval basis. For full details, see executor section below.|Function|
 
 ### Executor
@@ -62,16 +62,16 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 This example receives server and threshold as parameters. It will read the CPU usage of the server and fire actions if the reading is greater than the threshold.
 
 ```
+import { schema } from '@kbn/config-schema';
+...
 server.plugins.alerting.registerType({
 	id: 'my-alert-type',
 	name: 'My alert type',
 	validate: {
-		params: Joi.object()
-			.keys({
-				server: Joi.string().required(),
-				threshold: Joi.number().min(0).max(1).required(),
-			})
-			.required(),
+		params: schema.object({
+			server: schema.string(),
+			threshold: schema.number({ min: 0, max: 1 }),
+		}),
 	},
 	async executor({
 		scheduledRunAt,
@@ -126,11 +126,9 @@ server.plugins.alerting.registerType({
 	id: 'my-alert-type',
 	name: 'My alert type',
 	validate: {
-		params: Joi.object()
-			.keys({
-				threshold: Joi.number().min(0).max(1).required(),
-			})
-			.required(),
+		params: schema.object({
+			threshold: schema.number({ min: 0, max: 1 }),
+		}),
 	},
 	async executor({
 		scheduledRunAt,

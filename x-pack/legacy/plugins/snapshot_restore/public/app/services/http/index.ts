@@ -7,3 +7,4 @@ export { httpService } from './http';
 export * from './repository_requests';
 export * from './snapshot_requests';
 export * from './restore_requests';
+export * from './policy_requests';

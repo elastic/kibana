@@ -18,10 +18,11 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { SectionError, SectionLoading } from '../../../components';
-import { UIM_RESTORE_LIST_LOAD, BASE_PATH } from '../../../constants';
+import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadRestores } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
+import { linkToSnapshots } from '../../../services/navigation';
 import { RestoreTable } from './restore_table';
 import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
 
@@ -102,7 +103,7 @@ export const RestoreList: React.FunctionComponent = () => {
                 defaultMessage="Go to {snapshotsLink} to start a restore."
                 values={{
                   snapshotsLink: (
-                    <EuiLink href={`#${BASE_PATH}/snapshots`}>
+                    <EuiLink href={linkToSnapshots()}>
                       <FormattedMessage
                         id="xpack.snapshotRestore.restoreList.emptyPromptDescriptionLink"
                         defaultMessage="Snapshots"
