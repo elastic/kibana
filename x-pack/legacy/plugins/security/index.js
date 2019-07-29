@@ -5,7 +5,6 @@
  */
 
 import { resolve } from 'path';
-import { createApiKeyProvider } from './server/lib/create_api_key';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
 import { initExternalRolesApi } from './server/routes/api/external/roles';
@@ -146,7 +145,10 @@ export const security = (kibana) => new kibana.Plugin({
     // to re-compute the license check results for this plugin
     xpackInfoFeature.registerLicenseCheckResultsGenerator(checkLicense);
 
-    server.expose({ getUser: request => securityPlugin.authc.getCurrentUser(KibanaRequest.from(request)) });
+    server.expose({
+      getUser: request => securityPlugin.authc.getCurrentUser(KibanaRequest.from(request)),
+      createApiKey: (...args) => securityPlugin.authc.createApiKey(...args),
+    });
 
     const { savedObjects } = server;
 
@@ -190,7 +192,6 @@ export const security = (kibana) => new kibana.Plugin({
       return client;
     });
 
-    createApiKeyProvider(server);
     initAuthenticateApi(securityPlugin, server);
     initAPIAuthorization(server, authorization);
     initAppAuthorization(server, xpackMainPlugin, authorization);
