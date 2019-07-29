@@ -8,7 +8,6 @@ jest.mock('./lib/get_create_task_runner_function', () => ({
   getCreateTaskRunnerFunction: jest.fn(),
 }));
 
-import sinon from 'sinon';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/plugin.mock';
 import { ActionTypeRegistry } from './action_type_registry';
@@ -17,7 +16,6 @@ import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { ExecutorError } from './lib';
 
 const mockTaskManager = taskManagerMock.create();
-let fakeTimer: sinon.SinonFakeTimers;
 
 function getServices() {
   return {
@@ -33,12 +31,6 @@ const actionTypeRegistryParams = {
 };
 
 beforeEach(() => jest.resetAllMocks());
-
-beforeAll(() => {
-  fakeTimer = sinon.useFakeTimers();
-});
-
-afterAll(() => fakeTimer.restore());
 
 const executor: ExecutorType = async options => {
   return { status: 'ok' };
