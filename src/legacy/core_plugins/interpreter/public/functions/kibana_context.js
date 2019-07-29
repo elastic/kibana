@@ -76,6 +76,8 @@ export const kibanaContext = () => ({
 
     const timeRange = args.timeRange ? JSON.parse(args.timeRange) : context.timeRange;
 
+    console.log(queries, filters, timeRange);
+
     return {
       type: 'kibana_context',
       query: queries,

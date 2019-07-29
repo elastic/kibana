@@ -6,11 +6,13 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Registry } from '@kbn/interpreter/target/common';
 import { I18nProvider } from '@kbn/i18n/react';
+import { Registry } from '@kbn/interpreter/target/common';
+// import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup } from 'src/core/public';
-import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
+// import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
 import chrome, { Chrome } from 'ui/chrome';
+// import { I18nContext } from 'ui/i18n';
 import {
   EmbeddablePlugin,
   embeddablePlugin,
@@ -27,11 +29,12 @@ import {
   Visualization,
   EditorFrameSetup,
   EditorFrameInstance,
-  ErrorCallback,
+  // ErrorCallback,
 } from '../types';
 import { EditorFrame } from './editor_frame';
-import { SavedObjectIndexStore, SavedObjectStore, Document } from '../persistence';
-import { InitializableComponent } from './initializable_component';
+// import { SavedObjectIndexStore, SavedObjectStore, Document } from '../persistence';
+// import { SavedObjectStore, Document } from '../persistence';
+// import { InitializableComponent } from './initializable_component';
 import { mergeTables } from './merge_tables';
 import { EmbeddableFactory } from './embeddable/embeddable_factory';
 
@@ -49,86 +52,48 @@ export interface InterpreterSetup {
   >;
 }
 
-interface InitializationResult {
-  doc?: Document;
-  error?: { message: string };
-}
-
-interface InitializationProps {
-  persistedId?: string;
-  store: SavedObjectStore;
-  onError: ErrorCallback;
-}
-
-interface RenderProps extends InitializationResult {
-  routeProps: { history: { push: (path: string) => void } };
-  store: SavedObjectStore;
-  onError: ErrorCallback;
-  datasources: Record<string, Datasource>;
-  visualizations: Record<string, Visualization>;
-  expressionRenderer: ExpressionRenderer;
-}
-
 export class EditorFramePlugin {
   constructor() {}
 
   private ExpressionRenderer: ExpressionRenderer | null = null;
-  private chrome: Chrome | null = null;
+  // private chrome: Chrome | null = null;
   private readonly datasources: Record<string, Datasource> = {};
   private readonly visualizations: Record<string, Visualization> = {};
 
   private createInstance(): EditorFrameInstance {
     let domElement: Element;
-
-    const store = new SavedObjectIndexStore(this.chrome!.getSavedObjectsClient());
-
-    function unmount() {
-      if (domElement) {
-        unmountComponentAtNode(domElement);
-      }
-    }
-
     return {
-      mount: (element, { onError }) => {
+      mount: (element, { doc, onError, dateRange, query, onIndexPatternChange, onStateChange }) => {
         domElement = element;
-
-        const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
-          const persistedId = routeProps.match.params.id;
-
-          return (
-            <InitializableComponent
-              watch={[persistedId]}
-              init={async () => init({ persistedId, store, onError })}
-              render={({ doc, error }) => (
-                <InitializedEditor
-                  doc={doc}
-                  error={error}
-                  routeProps={routeProps}
-                  onError={onError}
-                  store={store}
-                  datasources={this.datasources}
-                  visualizations={this.visualizations}
-                  expressionRenderer={this.ExpressionRenderer!}
-                />
-              )}
-            />
-          );
-        };
-
+        const firstDatasourceId = Object.keys(this.datasources)[0];
+        const firstVisualizationId = Object.keys(this.visualizations)[0];
         render(
           <I18nProvider>
-            <HashRouter>
-              <Switch>
-                <Route exact path="/edit/:id" render={renderEditor} />
-                <Route exact path="/" render={renderEditor} />
-                <Route component={NotFound} />
-              </Switch>
-            </HashRouter>
+            <EditorFrame
+              data-test-subj="lnsEditorFrame"
+              onError={onError}
+              datasourceMap={this.datasources}
+              visualizationMap={this.visualizations}
+              initialDatasourceId={(doc && doc.activeDatasourceId) || firstDatasourceId || null}
+              initialVisualizationId={
+                (doc && doc.visualizationType) || firstVisualizationId || null
+              }
+              ExpressionRenderer={this.ExpressionRenderer!}
+              doc={doc}
+              dateRange={dateRange}
+              query={query}
+              onIndexPatternChange={onIndexPatternChange}
+              onStateChange={onStateChange}
+            />
           </I18nProvider>,
           domElement
         );
       },
-      unmount,
+      unmount() {
+        if (domElement) {
+          unmountComponentAtNode(domElement);
+        }
+      },
     };
   }
 
@@ -136,7 +101,7 @@ export class EditorFramePlugin {
     plugins.interpreter.functionsRegistry.register(() => mergeTables);
 
     this.ExpressionRenderer = plugins.data.expressions.ExpressionRenderer;
-    this.chrome = plugins.chrome;
+    // this.chrome = plugins.chrome;
     plugins.embeddables.addEmbeddableFactory(
       new EmbeddableFactory(plugins.chrome, this.ExpressionRenderer, plugins.data.indexPatterns)
     );
@@ -170,64 +135,3 @@ export const editorFrameSetup = () =>
   });
 
 export const editorFrameStop = () => editorFrame.stop();
-
-function NotFound() {
-  return <h1>TODO: 404 Page</h1>;
-}
-
-function is404(error?: unknown) {
-  return error && (error as { statusCode: number }).statusCode === 404;
-}
-
-export async function init({
-  persistedId,
-  store,
-  onError,
-}: InitializationProps): Promise<InitializationResult> {
-  if (!persistedId) {
-    return {};
-  } else {
-    return store
-      .load(persistedId)
-      .then(doc => ({ doc }))
-      .catch((error: Error) => {
-        if (!is404(error)) {
-          onError(error);
-        }
-        return { error };
-      });
-  }
-}
-
-export function InitializedEditor({
-  doc,
-  error,
-  routeProps,
-  onError,
-  store,
-  datasources,
-  visualizations,
-  expressionRenderer,
-}: RenderProps) {
-  const firstDatasourceId = Object.keys(datasources)[0];
-  const firstVisualizationId = Object.keys(visualizations)[0];
-
-  if (is404(error)) {
-    return <NotFound />;
-  }
-
-  return (
-    <EditorFrame
-      data-test-subj="lnsEditorFrame"
-      onError={onError}
-      store={store}
-      datasourceMap={datasources}
-      visualizationMap={visualizations}
-      initialDatasourceId={(doc && doc.activeDatasourceId) || firstDatasourceId || null}
-      initialVisualizationId={(doc && doc.visualizationType) || firstVisualizationId || null}
-      ExpressionRenderer={expressionRenderer}
-      redirectTo={path => routeProps.history.push(path)}
-      doc={doc}
-    />
-  );
-}

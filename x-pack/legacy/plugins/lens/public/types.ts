@@ -5,19 +5,35 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
+import { Query } from 'src/plugins/data/common';
 import { DragContextState } from './drag_drop';
+import { Document } from './persistence';
 
 // eslint-disable-next-line
 export interface EditorFrameOptions {}
 
 export type ErrorCallback = (e: { message: string }) => void;
 
+export interface EditorFrameProps {
+  onError: ErrorCallback;
+  doc?: Document;
+  dateRange: {
+    fromDate: string;
+    toDate: string;
+  };
+  query: Query;
+
+  // These callback are provided by the frame loader (app or embeddable) and are called by the frame
+  onIndexPatternChange: (newIndexPatterns: string[]) => void;
+  onStateChange: (newDoc: Document) => void;
+}
 export interface EditorFrameInstance {
-  mount: (element: Element, props: { onError: ErrorCallback }) => void;
+  mount: (element: Element, props: EditorFrameProps) => void;
   unmount: () => void;
 }
 
 export interface EditorFrameSetup {
+  // render: () => EditorFrameInstance;
   createInstance: (options: EditorFrameOptions) => EditorFrameInstance;
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
   registerDatasource: <T, P>(name: string, datasource: Datasource<T, P>) => void;
@@ -183,6 +199,12 @@ export interface VisualizationSuggestion<T = unknown> {
 
 export interface FramePublicAPI {
   datasourceLayers: Record<string, DatasourcePublicAPI>;
+  dateRange: {
+    fromDate: string;
+    toDate: string;
+  };
+  query: Query;
+
   // Adds a new layer. This has a side effect of updating the datasource state
   addNewLayer: () => string;
   removeLayer: (layerId: string) => void;

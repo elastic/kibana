@@ -121,6 +121,12 @@ export function buildExpression({
 
   return prependKibanaContext(
     prependDatasourceExpression(visualizationExpression, datasourceMap, datasourceStates),
-    {}
+    {
+      timeRange: {
+        from: framePublicAPI.dateRange.fromDate,
+        to: framePublicAPI.dateRange.toDate,
+      },
+      query: framePublicAPI.query,
+    }
   );
 }

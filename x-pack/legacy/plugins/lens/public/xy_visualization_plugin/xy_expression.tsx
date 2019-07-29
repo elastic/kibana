@@ -18,6 +18,7 @@ import {
   Position,
   ScaleType,
 } from '@elastic/charts';
+import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, IconType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -92,7 +93,12 @@ export const xyChartRenderer: RenderFunction<XYChartProps> = {
   validate: () => {},
   reuseDomNode: true,
   render: async (domNode: Element, config: XYChartProps, _handlers: unknown) => {
-    ReactDOM.render(<XYChart {...config} />, domNode);
+    ReactDOM.render(
+      <I18nProvider>
+        <XYChart {...config} />
+      </I18nProvider>,
+      domNode
+    );
   },
 };
 

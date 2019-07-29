@@ -5,9 +5,12 @@
  */
 
 import React, { useEffect, useReducer } from 'react';
-import { EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
+// import { EuiLink } from '@elastic/eui';
+// import { i18n } from '@kbn/i18n';
+import {
+  ExpressionRenderer,
+  Query,
+} from '../../../../../../../src/legacy/core_plugins/data/public';
 import { Datasource, DatasourcePublicAPI, FramePublicAPI, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
@@ -16,20 +19,29 @@ import { FrameLayout } from './frame_layout';
 import { SuggestionPanel } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
 import { SavedObjectStore, Document } from '../../persistence/saved_object_store';
-import { save } from './save';
+// import { save } from './save';
+import { getSavedObjectFormat } from './save';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { generateId } from '../../id_generator';
 
 export interface EditorFrameProps {
   doc?: Document;
-  store: SavedObjectStore;
+  // store: SavedObjectStore;
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
-  redirectTo: (path: string) => void;
+  // redirectTo: (path: string) => void;
   initialDatasourceId: string | null;
   initialVisualizationId: string | null;
   ExpressionRenderer: ExpressionRenderer;
   onError: (e: { message: string }) => void;
+
+  dateRange: {
+    fromDate: string;
+    toDate: string;
+  };
+  query: Query;
+  onIndexPatternChange: (indexPatterns: string[]) => void;
+  onStateChange: (newDoc: Document) => void;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -90,6 +102,9 @@ export function EditorFrame(props: EditorFrameProps) {
 
   const framePublicAPI: FramePublicAPI = {
     datasourceLayers,
+    dateRange: props.dateRange,
+    query: props.query,
+
     addNewLayer: () => {
       const newLayerId = generateId();
 
@@ -144,51 +159,103 @@ export function EditorFrame(props: EditorFrameProps) {
         type: 'UPDATE_VISUALIZATION_STATE',
         newState: initialVisualizationState,
       });
+
+      const activeDatasource =
+        state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
+          ? props.datasourceMap[state.activeDatasourceId]
+          : undefined;
+
+      const visualization = state.visualization.activeId
+        ? props.visualizationMap[state.visualization.activeId]
+        : undefined;
+
+      if (!activeDatasource || !visualization) {
+        return;
+      }
+
+      getSavedObjectFormat({
+        activeDatasources: Object.keys(state.datasourceStates).reduce(
+          (datasourceMap, datasourceId) => ({
+            ...datasourceMap,
+            [datasourceId]: props.datasourceMap[datasourceId],
+          }),
+          {}
+        ),
+        // dispatch,
+        visualization,
+        state,
+        // redirectTo: props.redirectTo,
+        // store: props.store,
+        activeDatasourceId: state.activeDatasourceId!,
+        framePublicAPI,
+      }).then(doc => {
+        props.onStateChange(doc);
+      });
     }
   }, [allLoaded, state.visualization.activeId, state.visualization.state]);
 
-  const activeDatasource =
-    state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
-      ? props.datasourceMap[state.activeDatasourceId]
-      : undefined;
+  useEffect(() => {
+    const filterableIndexPatterns: string[] = [];
+    Object.entries(props.datasourceMap)
+      .filter(([id, datasource]) => {
+        const stateWrapper = state.datasourceStates[id];
+        return (
+          stateWrapper &&
+          !stateWrapper.isLoading &&
+          datasource.getLayers(stateWrapper.state).length > 0
+        );
+      })
+      .forEach(([id, datasource]) => {
+        filterableIndexPatterns.push(
+          ...datasource.getMetaData(state.datasourceStates[id].state).filterableIndexPatterns
+        );
+      });
 
-  const visualization = state.visualization.activeId
-    ? props.visualizationMap[state.visualization.activeId]
-    : undefined;
+    props.onIndexPatternChange(filterableIndexPatterns);
+  }, [state.datasourceStates]);
+
+  // const activeDatasource =
+  //   state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
+  //     ? props.datasourceMap[state.activeDatasourceId]
+  //     : undefined;
+
+  // const visualization = state.visualization.activeId
+  //   ? props.visualizationMap[state.visualization.activeId]
+  //   : undefined;
 
   return (
     <FrameLayout
-      navPanel={
-        <nav>
-          <EuiLink
-            onClick={() => {
-              if (state.activeDatasourceId && activeDatasource && visualization) {
-                save({
-                  activeDatasources: Object.keys(state.datasourceStates).reduce(
-                    (datasourceMap, datasourceId) => ({
-                      ...datasourceMap,
-                      [datasourceId]: props.datasourceMap[datasourceId],
-                    }),
-                    {}
-                  ),
-                  dispatch,
-                  visualization,
-                  state,
-                  redirectTo: props.redirectTo,
-                  store: props.store,
-                  activeDatasourceId: state.activeDatasourceId,
-                  framePublicAPI,
-                }).catch(onError);
-              }
-            }}
-            disabled={state.saving || !state.activeDatasourceId || !state.visualization.activeId}
-          >
-            {i18n.translate('xpack.lens.editorFrame.Save', {
-              defaultMessage: 'Save',
-            })}
-          </EuiLink>
-        </nav>
-      }
+      // navPanel={
+      // <nav>
+      //   <EuiLink
+      //     onClick={() => {
+      //       if (state.activeDatasourceId && activeDatasource && visualization) {
+      //         save({
+      //           activeDatasources: Object.keys(state.datasourceStates).reduce(
+      //             (datasourceMap, datasourceId) => ({
+      //               ...datasourceMap,
+      //               [datasourceId]: props.datasourceMap[datasourceId],
+      //             }),
+      //             {}
+      //           ),
+      //           dispatch,
+      //           visualization,
+      //           state,
+      //           redirectTo: props.redirectTo,
+      //           store: props.store,
+      //           activeDatasourceId: state.activeDatasourceId,
+      //           framePublicAPI,
+      //         }).catch(onError);
+      //       }
+      //     }}
+      //     disabled={state.saving || !state.activeDatasourceId || !state.visualization.activeId}
+      //   >
+      //     {i18n.translate('xpack.lens.editorFrame.Save', {
+      //       defaultMessage: 'Save',
+      //     })}
+      //   </EuiLink>
+      // </nav>
+      // }
       dataPanel={
         <DataPanelWrapper
           datasourceMap={props.datasourceMap}

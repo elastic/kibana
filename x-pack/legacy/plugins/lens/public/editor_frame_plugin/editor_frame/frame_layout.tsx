@@ -13,15 +13,15 @@ export interface FrameLayoutProps {
   configPanel?: React.ReactNode;
   suggestionsPanel?: React.ReactNode;
   workspacePanel?: React.ReactNode;
-  navPanel?: React.ReactNode;
+  // navPanel?: React.ReactNode;
 }
 
 export function FrameLayout(props: FrameLayoutProps) {
   return (
     <RootDragDropProvider>
       <EuiPage className="lnsPage">
-        <header className="lnsHeader">{props.navPanel}</header>
-        <EuiHorizontalRule margin="s" />
+        {/* <header className="lnsHeader">{props.navPanel}</header>
+        <EuiHorizontalRule margin="s" /> */}
         <div className="lnsPageMainContent">
           <EuiPageSideBar className="lnsSidebar">{props.dataPanel}</EuiPageSideBar>
           <EuiPageBody className="lnsPageBody" restrictWidth={false}>

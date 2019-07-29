@@ -87,10 +87,10 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     params: {
       field: column.sourceField,
       // TODO: This range should be passed in from somewhere else
-      timeRange: {
-        from: 'now-1d',
-        to: 'now',
-      },
+      // timeRange: {
+      //   from: 'now-1d',
+      //   to: 'now',
+      // },
       time_zone: column.params.timeZone,
       useNormalizedEsInterval: true,
       interval: column.params.interval,

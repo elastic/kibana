@@ -289,6 +289,7 @@ export function getIndexPatternDatasource({
       return {
         filterableIndexPatterns: _.uniq(
           Object.values(state.layers).map(layer => layer.indexPatternId)
+          // .map(indexPatternId => state.indexPatterns[indexPatternId].title)
         ),
       };
     },
