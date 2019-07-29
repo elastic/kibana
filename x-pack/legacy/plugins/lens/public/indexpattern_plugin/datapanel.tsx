@@ -54,8 +54,8 @@ export function IndexPatternDataPanel({
   setState,
   state,
   dragDropContext,
-  state: { indexPatterns, currentIndexPatternId },
 }: DatasourceDataPanelProps<IndexPatternPrivateState>) {
+  const { indexPatterns, currentIndexPatternId } = state;
   const [showIndexPatternSwitcher, setShowIndexPatternSwitcher] = useState(false);
 
   const onChangeIndexPattern = useCallback(
