@@ -19,8 +19,8 @@
 
 import { uniq, map, size, flow } from 'lodash';
 
-export const areChartTypesDifferent = series =>
+export const areFieldsDifferent = name => series =>
   flow(
     uniq,
     size
-  )(map(series, 'chart_type')) > 1;
+  )(map(series, name)) > 1;

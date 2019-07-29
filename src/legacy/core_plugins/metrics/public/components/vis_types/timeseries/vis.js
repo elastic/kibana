@@ -30,7 +30,7 @@ import { TimeSeries } from '../../../visualizations/views/timeseries';
 import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
-import { areChartTypesDifferent } from '../../lib/charts';
+import { areFieldsDifferent } from '../../lib/charts';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 import { isBackgroundDark } from '../../../../common/set_is_reversed';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
@@ -106,7 +106,7 @@ export class TimeseriesVisualization extends Component {
     });
 
     const seriesModel = model.series.map(s => cloneDeep(s)).filter(s => !s.hidden);
-    const enableHistogramMode = areChartTypesDifferent(seriesModel);
+    const enableHistogramMode = areFieldsDifferent('chart_type')(seriesModel);
     const firstSeries = seriesModel.find(s => s.formatter && !s.separate_axis);
     const tickFormatter = createTickFormatter(
       get(firstSeries, 'formatter'),
@@ -156,7 +156,7 @@ export class TimeseriesVisualization extends Component {
 
       if (seriesGroup.separate_axis) {
         const yaxis = {
-          id: yAxisIdGenerator(),
+          id: yAxisIdGenerator(seriesGroup.id),
           groupId: seriesGroupId,
           position: seriesGroup.axis_position,
           tickFormatter:
