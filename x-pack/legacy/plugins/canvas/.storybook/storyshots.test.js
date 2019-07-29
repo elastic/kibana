@@ -35,10 +35,10 @@ jest.mock('../canvas_plugin_src/renderers/shape/shapes', () => ({
 jest.mock('@elastic/datemath', () => {
   return {
     parse: (d, opts) => {
-      const dateMath = jest.requireActual('@elastic/datemath'); 
-      return dateMath.parse(d, {...opts, forceNow: new Date(Date.UTC(2019, 5, 1))}); // June 1 2019
-    }
-  }
+      const dateMath = jest.requireActual('@elastic/datemath');
+      return dateMath.parse(d, { ...opts, forceNow: new Date(Date.UTC(2019, 5, 1)) }); // June 1 2019
+    },
+  };
 });
 
 // Mock react-datepicker dep used by eui to avoid rendering the entire large component
@@ -46,7 +46,7 @@ jest.mock('@elastic/eui/packages/react-datepicker', () => {
   return {
     __esModule: true,
     default: 'ReactDatePicker',
-  }
+  };
 });
 
 addSerializer(styleSheetSerializer);
