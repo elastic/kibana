@@ -12,22 +12,20 @@ import { CheckPrivilegesAtResourceResponse, CheckPrivilegesWithRequest } from '.
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesPlugin } from '../../../../spaces/types';
+import { SpacesPlugin } from '../../../../spaces';
 import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 
 export type CheckPrivilegesDynamically = (
   privilegeOrPrivileges: string | string[]
 ) => Promise<CheckPrivilegesAtResourceResponse>;
 
-export type CheckPrivilegesDynamicallyWithRequest = (
-  request: Record<string, any>
-) => CheckPrivilegesDynamically;
+export type CheckPrivilegesDynamicallyWithRequest = (request: any) => CheckPrivilegesDynamically;
 
 export function checkPrivilegesDynamicallyWithRequestFactory(
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest,
   spaces: OptionalPlugin<SpacesPlugin>
 ): CheckPrivilegesDynamicallyWithRequest {
-  return function checkPrivilegesDynamicallyWithRequest(request: Record<string, any>) {
+  return function checkPrivilegesDynamicallyWithRequest(request: any) {
     const checkPrivileges = checkPrivilegesWithRequest(request);
     return async function checkPrivilegesDynamically(privilegeOrPrivileges: string | string[]) {
       if (spaces.isEnabled) {
