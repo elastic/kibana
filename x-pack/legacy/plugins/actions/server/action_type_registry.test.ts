@@ -103,7 +103,7 @@ describe('register()', () => {
     const getRetry = registerTaskDefinitionsCall['actions:my-action-type'].getRetry!;
 
     const retryTime = new Date();
-    expect(getRetry(0, new Error())).toEqual(true);
+    expect(getRetry(0, new Error())).toEqual(false);
     expect(getRetry(0, new ExecutorError('my message', {}, true))).toEqual(true);
     expect(getRetry(0, new ExecutorError('my message', {}, false))).toEqual(false);
     expect(getRetry(0, new ExecutorError('my message', {}, null))).toEqual(true);

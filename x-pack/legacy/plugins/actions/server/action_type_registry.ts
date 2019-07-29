@@ -66,8 +66,8 @@ export class ActionTypeRegistry {
           if (error instanceof ExecutorError) {
             return error.retry == null ? true : error.retry;
           }
-          // Retry other kinds of errors
-          return true;
+          // Don't retry other kinds of errors
+          return false;
         },
         createTaskRunner: this.taskRunCreatorFunction,
       },
