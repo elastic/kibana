@@ -37,7 +37,7 @@ jest.mock('ui/agg_types', () => ({
   },
 }));
 jest.mock('../default_editor_utils', () => ({
-  groupAggregationsBy: jest.fn(() => ['indexedFields']),
+  groupAndSortBy: jest.fn(() => ['indexedFields']),
 }));
 
 describe('DefaultEditorAggParams helpers', () => {

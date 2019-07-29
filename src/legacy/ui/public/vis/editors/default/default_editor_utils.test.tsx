@@ -61,7 +61,7 @@ describe('Default Editor groupAggregationsBy', () => {
         options: [
           {
             label: 'Average',
-            value: {
+            target: {
               title: 'Average',
               type: AggGroupNames.Metrics,
               subtype: 'Metric Aggregations',
@@ -69,7 +69,7 @@ describe('Default Editor groupAggregationsBy', () => {
           },
           {
             label: 'Count',
-            value: {
+            target: {
               title: 'Count',
               type: AggGroupNames.Metrics,
               subtype: 'Metric Aggregations',
@@ -77,7 +77,7 @@ describe('Default Editor groupAggregationsBy', () => {
           },
           {
             label: 'Cumulative Sum',
-            value: {
+            target: {
               title: 'Cumulative Sum',
               type: AggGroupNames.Metrics,
               subtype: 'Parent Pipeline Aggregations',
@@ -86,7 +86,7 @@ describe('Default Editor groupAggregationsBy', () => {
 
           {
             label: 'Min Bucket',
-            value: {
+            target: {
               title: 'Min Bucket',
               type: AggGroupNames.Metrics,
               subtype: 'Parent Pipeline Aggregations',
@@ -99,7 +99,7 @@ describe('Default Editor groupAggregationsBy', () => {
         options: [
           {
             label: 'String agg',
-            value: {
+            target: {
               title: 'String agg',
               type: 'string',
               subtype: 'String aggregations',
@@ -107,7 +107,7 @@ describe('Default Editor groupAggregationsBy', () => {
           },
           {
             label: 'Sub string agg',
-            value: {
+            target: {
               title: 'Sub string agg',
               type: 'string',
               subtype: 'Sub-String aggregations',
@@ -125,7 +125,7 @@ describe('Default Editor groupAggregationsBy', () => {
         options: [
           {
             label: 'Average',
-            value: {
+            target: {
               title: 'Average',
               type: AggGroupNames.Metrics,
               subtype: 'Metric Aggregations',
@@ -133,7 +133,7 @@ describe('Default Editor groupAggregationsBy', () => {
           },
           {
             label: 'Count',
-            value: {
+            target: {
               title: 'Count',
               type: AggGroupNames.Metrics,
               subtype: 'Metric Aggregations',
@@ -146,7 +146,7 @@ describe('Default Editor groupAggregationsBy', () => {
         options: [
           {
             label: 'Cumulative Sum',
-            value: {
+            target: {
               title: 'Cumulative Sum',
               type: AggGroupNames.Metrics,
               subtype: 'Parent Pipeline Aggregations',
@@ -155,7 +155,7 @@ describe('Default Editor groupAggregationsBy', () => {
 
           {
             label: 'Min Bucket',
-            value: {
+            target: {
               title: 'Min Bucket',
               type: AggGroupNames.Metrics,
               subtype: 'Parent Pipeline Aggregations',
@@ -168,7 +168,7 @@ describe('Default Editor groupAggregationsBy', () => {
         options: [
           {
             label: 'String agg',
-            value: {
+            target: {
               title: 'String agg',
               type: 'string',
               subtype: 'String aggregations',
@@ -181,7 +181,7 @@ describe('Default Editor groupAggregationsBy', () => {
         options: [
           {
             label: 'Sub string agg',
-            value: {
+            target: {
               title: 'Sub string agg',
               type: 'string',
               subtype: 'Sub-String aggregations',
