@@ -22,11 +22,11 @@ import Boom from 'boom';
 import supertest from 'supertest';
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 
-import { HttpConfig, Router } from '..';
-import { createResponseError } from './response_error';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
-import { LoggerFactory } from '../../logging/';
+import { createResponseError, HttpConfig, Router } from '..';
 import { HttpServer } from '../http_server';
+
+import { LoggerFactory } from '../../logging';
+import { loggingServiceMock } from '../../logging/logging_service.mock';
 
 let server: HttpServer;
 let logger: LoggerFactory;
