@@ -21,9 +21,14 @@ import {
 } from '@elastic/eui';
 import { State, SeriesType, LayerConfig, visualizationTypes } from './types';
 import { VisualizationProps } from '../types';
+import { State, SeriesType, LayerConfig } from './types';
+import { VisualizationProps, OperationMetadata } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { MultiColumnEditor } from '../multi_column_editor';
 import { generateId } from '../id_generator';
+
+const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
+const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -202,7 +207,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 nativeProps={{
                   columnId: layer.xAccessor,
                   dragDropContext: props.dragDropContext,
-                  filterOperations: operation => operation.isBucketed,
+                  filterOperations: isBucketed,
                   suggestedPriority: 1,
                   layerId: layer.layerId,
                 }}
@@ -219,7 +224,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 nativeProps={{
                   columnId: layer.splitAccessor,
                   dragDropContext: props.dragDropContext,
-                  filterOperations: operation => operation.isBucketed,
+                  filterOperations: isBucketed,
                   suggestedPriority: 0,
                   layerId: layer.layerId,
                 }}
@@ -258,7 +263,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                     )
                   )
                 }
-                filterOperations={op => !op.isBucketed && op.dataType === 'number'}
+                filterOperations={isNumericMetric}
                 data-test-subj="lensXY_yDimensionPanel"
                 testSubj="lensXY_yDimensionPanel"
                 layerId={layer.layerId}

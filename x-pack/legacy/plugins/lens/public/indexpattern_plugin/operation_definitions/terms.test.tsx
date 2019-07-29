@@ -24,7 +24,6 @@ describe('terms', () => {
           columnOrder: ['col1', 'col2'],
           columns: {
             col1: {
-              operationId: 'op1',
               label: 'Top value of category',
               dataType: 'string',
               isBucketed: true,
@@ -40,7 +39,6 @@ describe('terms', () => {
               indexPatternId: '1',
             },
             col2: {
-              operationId: 'op1',
               label: 'Count',
               dataType: 'number',
               isBucketed: false,
@@ -76,13 +74,11 @@ describe('terms', () => {
   describe('buildColumn', () => {
     it('should use existing metric column as order column', () => {
       const termsColumn = termsOperation.buildColumn({
-        operationId: 'abc',
         layerId: 'first',
         indexPatternId: '1',
         suggestedPriority: undefined,
         columns: {
           col1: {
-            operationId: 'op1',
             label: 'Count',
             dataType: 'number',
             isBucketed: false,
@@ -104,7 +100,6 @@ describe('terms', () => {
   describe('onOtherColumnChanged', () => {
     it('should keep the column if order by column still exists and is metric', () => {
       const initialColumn: TermsIndexPatternColumn = {
-        operationId: 'op1',
         label: 'Top value of category',
         dataType: 'string',
         isBucketed: true,
@@ -121,7 +116,6 @@ describe('terms', () => {
       };
       const updatedColumn = termsOperation.onOtherColumnChanged!(initialColumn, {
         col1: {
-          operationId: 'op1',
           label: 'Count',
           dataType: 'number',
           isBucketed: false,
@@ -137,7 +131,6 @@ describe('terms', () => {
     it('should switch to alphabetical ordering if the order column is removed', () => {
       const termsColumn = termsOperation.onOtherColumnChanged!(
         {
-          operationId: 'op1',
           label: 'Top value of category',
           dataType: 'string',
           isBucketed: true,
@@ -164,7 +157,6 @@ describe('terms', () => {
     it('should switch to alphabetical ordering if the order column is not a metric anymore', () => {
       const termsColumn = termsOperation.onOtherColumnChanged!(
         {
-          operationId: 'op1',
           label: 'Top value of category',
           dataType: 'string',
           isBucketed: true,
@@ -181,7 +173,6 @@ describe('terms', () => {
         },
         {
           col1: {
-            operationId: 'op1',
             label: 'Value of timestamp',
             dataType: 'date',
             isBucketed: true,
@@ -233,7 +224,6 @@ describe('terms', () => {
                 columns: {
                   ...state.layers.first.columns,
                   col2: {
-                    operationId: 'op1',
                     label: 'Count',
                     dataType: 'number',
                     isBucketed: false,

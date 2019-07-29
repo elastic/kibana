@@ -147,7 +147,6 @@ describe('XYConfigPanel', () => {
     const { columnId, filterOperations } = nativeProps;
     const exampleOperation: Operation = {
       dataType: 'number',
-      id: 'foo',
       isBucketed: false,
       label: 'bar',
     };
@@ -186,7 +185,6 @@ describe('XYConfigPanel', () => {
 
     const exampleOperation: Operation = {
       dataType: 'number',
-      id: 'foo',
       isBucketed: false,
       label: 'bar',
     };

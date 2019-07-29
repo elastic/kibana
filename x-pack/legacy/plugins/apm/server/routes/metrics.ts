@@ -32,7 +32,7 @@ export function initMetricsApi(core: InternalCoreSetup) {
       tags: ['access:apm']
     },
     handler: async req => {
-      const setup = setupRequest(req);
+      const setup = await setupRequest(req);
       const { serviceName } = req.params;
       // casting approach recommended here: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/25605
       const { agentName } = req.query as { agentName: string };
