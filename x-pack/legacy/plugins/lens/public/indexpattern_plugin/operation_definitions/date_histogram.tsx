@@ -37,19 +37,23 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
   displayName: i18n.translate('xpack.lens.indexPattern.dateHistogram', {
     defaultMessage: 'Date Histogram',
   }),
-  isApplicableWithoutField: false,
-  isApplicableForField: ({ aggregationRestrictions, type }) => {
-    return Boolean(
-      type === 'date' && (!aggregationRestrictions || aggregationRestrictions.date_histogram)
-    );
+  getPossibleOperationsForDocument: () => [],
+  getPossibleOperationsForField: ({ aggregationRestrictions, type }) => {
+    if (type === 'date' && (!aggregationRestrictions || aggregationRestrictions.date_histogram)) {
+      return [
+        {
+          dataType: 'date',
+          isBucketed: true,
+        },
+      ];
+    }
+    return [];
   },
   buildColumn({
-    operationId,
     suggestedPriority,
     indexPatternId,
     field,
   }: {
-    operationId: string;
     suggestedPriority: DimensionPriority | undefined;
     indexPatternId: string;
     field?: IndexPatternField;
@@ -65,7 +69,6 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       timeZone = field.aggregationRestrictions.date_histogram.time_zone;
     }
     return {
-      operationId,
       indexPatternId,
       label: ofName(field.name),
       dataType: 'date',

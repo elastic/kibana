@@ -6,7 +6,7 @@
 
 import React, { useEffect } from 'react';
 import { NativeRenderer } from '../native_renderer';
-import { DatasourcePublicAPI, Operation } from '../types';
+import { DatasourcePublicAPI, OperationMetadata } from '../types';
 import { DragContextState } from '../drag_drop';
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
   dragDropContext: DragContextState;
   onRemove: (accessor: string) => void;
   onAdd: () => void;
-  filterOperations: (op: Operation) => boolean;
+  filterOperations: (op: OperationMetadata) => boolean;
   suggestedPriority?: 0 | 1 | 2 | undefined;
   testSubj: string;
   layerId: string;

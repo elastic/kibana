@@ -39,19 +39,24 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   displayName: i18n.translate('xpack.lens.indexPattern.terms', {
     defaultMessage: 'Top Values',
   }),
-  isApplicableWithoutField: false,
-  isApplicableForField: ({ aggregationRestrictions, type }) => {
-    return Boolean(
-      type === 'string' && (!aggregationRestrictions || aggregationRestrictions.terms)
-    );
+  getPossibleOperationsForDocument: () => [],
+  getPossibleOperationsForField: ({ aggregationRestrictions, type }) => {
+    if (type === 'string' && (!aggregationRestrictions || aggregationRestrictions.terms)) {
+      return [
+        {
+          dataType: 'string',
+          isBucketed: true,
+        },
+      ];
+    }
+    return [];
   },
-  buildColumn({ operationId, suggestedPriority, columns, field, indexPatternId }) {
+  buildColumn({ suggestedPriority, columns, field, indexPatternId }) {
     const existingMetricColumn = Object.entries(columns)
       .filter(([_columnId, column]) => column && isSortableByColumn(column))
       .map(([id]) => id)[0];
 
     return {
-      operationId,
       label: ofName(field ? field.name : ''),
       dataType: 'string',
       operationType: 'terms',

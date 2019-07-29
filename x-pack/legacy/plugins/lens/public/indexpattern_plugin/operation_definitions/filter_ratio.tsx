@@ -18,11 +18,17 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
   displayName: i18n.translate('xpack.lens.indexPattern.filterRatio', {
     defaultMessage: 'Filter Ratio',
   }),
-  isApplicableWithoutField: true,
-  isApplicableForField: () => false,
-  buildColumn({ operationId, suggestedPriority, indexPatternId }) {
+  getPossibleOperationsForField: () => [],
+  getPossibleOperationsForDocument: () => {
+    return [
+      {
+        dataType: 'number',
+        isBucketed: false,
+      },
+    ];
+  },
+  buildColumn({ suggestedPriority, indexPatternId }) {
     return {
-      operationId,
       label: i18n.translate('xpack.lens.indexPattern.filterRatio', {
         defaultMessage: 'Filter Ratio',
       }),
