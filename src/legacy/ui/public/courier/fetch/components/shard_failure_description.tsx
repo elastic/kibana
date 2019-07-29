@@ -17,10 +17,7 @@
  * under the License.
  */
 import React from 'react';
-// @ts-ignore
 import { EuiCodeBlock, EuiDescriptionList, EuiTitle, EuiSpacer } from '@elastic/eui';
-// @ts-ignore
-import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { ShardFailure } from './shard_failure_types';
 import { getFlattenedObject } from '../../../../../../legacy/utils/get_flattened_object';
 import { ShardFailureDescriptionHeader } from './shard_failure_description_header';
@@ -40,7 +37,7 @@ export function formatKey(key: string): string {
  * @param value
  * @param key
  */
-export function formatValueByKey(value: any, key: string): string | any {
+export function formatValueByKey(value: unknown, key: string): string | JSX.Element {
   if (key === 'script' || key === 'script_stack') {
     const valueScript = Array.isArray(value) ? value.join('\n') : String(value);
     return (
