@@ -45,21 +45,9 @@ export interface Props {
 export function ShardFailureModal({ request, response, title, onClose }: Props) {
   if (!response || !response._shards || !Array.isArray(response._shards.failures) || !request) {
     // this should never ever happen, but just in case
-    const errorTitle = i18n.translate(
-      'common.ui.courier.fetch.shardsFailedModal.componentErrorTitle',
-      {
-        defaultMessage: 'Sorry, there was an error',
-      }
-    );
-    const errorDesc = i18n.translate(
-      'common.ui.courier.fetch.shardsFailedModal.componentErrorDesc',
-      {
-        defaultMessage: 'The ShardFailureModal component received invalid properties',
-      }
-    );
     return (
-      <EuiCallOut title={errorTitle} color="danger" iconType="alert">
-        {errorDesc}
+      <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
+        The ShardFailureModal component received invalid properties
       </EuiCallOut>
     );
   }
@@ -84,7 +72,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
         description: 'Name of the tab displaying the JSON request',
       }),
       content: (
-        <EuiCodeBlock language="json" isCopyable className="shardFailureModal__codeblock">
+        <EuiCodeBlock language="json" isCopyable>
           {requestJSON}
         </EuiCodeBlock>
       ),
@@ -96,7 +84,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
         description: 'Name of the tab displaying the JSON response',
       }),
       content: (
-        <EuiCodeBlock language="json" isCopyable className="shardFailureModal__codeblock">
+        <EuiCodeBlock language="json" isCopyable>
           {responseJSON}
         </EuiCodeBlock>
       ),
@@ -106,7 +94,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
   return (
     <React.Fragment>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{String(title)}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
@@ -118,7 +106,6 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
               <FormattedMessage
                 id="common.ui.courier.fetch.shardsFailedModal.copyToClipboard"
                 defaultMessage="Copy response to clipboard"
-                description="Copy the response JSON  to clipboard"
               />
             </EuiButtonEmpty>
           )}
