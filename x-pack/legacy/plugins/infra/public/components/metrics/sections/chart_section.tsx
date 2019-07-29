@@ -4,9 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useCallback } from 'react';
+import moment from 'moment';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
-import { Axis, Chart, getAxisId, niceTimeFormatter, Position, Settings } from '@elastic/charts';
+import {
+  Axis,
+  Chart,
+  getAxisId,
+  niceTimeFormatter,
+  Position,
+  Settings,
+  TooltipValue,
+} from '@elastic/charts';
 import { EuiPageContentBody, EuiTitle } from '@elastic/eui';
 import { InfraMetricLayoutSection } from '../../../pages/metrics/layouts/types';
 import { InfraMetricData, InfraTimerangeInput } from '../../../graphql/types';
@@ -22,6 +31,7 @@ import {
   seriesHasLessThen2DataPoints,
 } from './helpers';
 import { ErrorMessage } from './error_message';
+import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 
 interface Props {
   section: InfraMetricLayoutSection;
@@ -35,6 +45,7 @@ interface Props {
 export const ChartSection = injectI18n(
   ({ onChangeRangeTime, section, metric, intl, stopLiveStreaming, isLiveStreaming }: Props) => {
     const { visConfig } = section;
+    const [dateFormat] = useKibanaUiSetting('dateFormat');
     const formatter = get(visConfig, 'formatter', InfraFormatterType.number);
     const formatterTemplate = get(visConfig, 'formatterTemplate', '{{value}}');
     const valueFormatter = useCallback(getFormatter(formatter, formatterTemplate), [
@@ -57,6 +68,12 @@ export const ChartSection = injectI18n(
       },
       [onChangeRangeTime, isLiveStreaming, stopLiveStreaming]
     );
+    const tooltipProps = {
+      headerFormatter: useCallback(
+        (data: TooltipValue) => moment(data.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
+        [dateFormat]
+      ),
+    };
 
     if (!metric) {
       return (
@@ -115,7 +132,11 @@ export const ChartSection = injectI18n(
                   stack={visConfig.stacked}
                 />
               ))}
-            <Settings onBrushEnd={handleTimeChange} theme={getChartTheme()} />
+            <Settings
+              tooltip={tooltipProps}
+              onBrushEnd={handleTimeChange}
+              theme={getChartTheme()}
+            />
           </Chart>
         </div>
       </EuiPageContentBody>

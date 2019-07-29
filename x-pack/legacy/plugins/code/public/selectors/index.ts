@@ -35,6 +35,7 @@ export const repoUriSelector = (state: RootState) => {
   const { resource, org, repo } = state.route.match.params;
   return `${resource}/${org}/${repo}`;
 };
+export const revisionSelector = (state: RootState) => state.route.match.params.revision;
 
 export const routeSelector = (state: RootState) => state.route.match;
 

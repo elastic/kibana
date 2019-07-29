@@ -12,8 +12,7 @@ import { useUiFilters } from '../context/UrlParamsContext';
 const INITIAL_DATA = {
   buckets: [],
   totalHits: 0,
-  bucketSize: 0,
-  defaultSample: undefined
+  bucketSize: 0
 };
 
 export function useTransactionDistribution(urlParams: IUrlParams) {

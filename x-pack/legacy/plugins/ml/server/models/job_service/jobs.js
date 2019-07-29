@@ -200,6 +200,7 @@ export function jobsProvider(callWithRequest) {
           const datafeedStats = results[DATAFEED_STATS].datafeeds.find(ds => (ds.datafeed_id === datafeed.datafeed_id));
           if (datafeedStats) {
             datafeed.state = datafeedStats.state;
+            datafeed.timing_stats = datafeedStats.timing_stats;
           }
         }
         datafeeds[datafeed.job_id] = datafeed;
