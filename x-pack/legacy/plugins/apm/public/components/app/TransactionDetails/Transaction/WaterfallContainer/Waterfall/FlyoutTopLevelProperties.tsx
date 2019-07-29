@@ -31,7 +31,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       }),
       fieldName: SERVICE_NAME,
       val: (
-        <APMLink path={`/${transaction.service.name}`}>
+        <APMLink path={`/services/${transaction.service.name}`}>
           {transaction.service.name}
         </APMLink>
       ),
