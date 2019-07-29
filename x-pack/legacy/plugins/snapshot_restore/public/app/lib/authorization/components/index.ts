@@ -6,6 +6,6 @@
 
 export { AuthorizationProvider, AuthorizationContext } from './authorization_provider';
 
-export { AuthPrivileges } from './auth_privileges';
+export { WithPrivileges } from './with_privileges';
 
 export { NotAuthorizedSection } from './not_authorized_section';

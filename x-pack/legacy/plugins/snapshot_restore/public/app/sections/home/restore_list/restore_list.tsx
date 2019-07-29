@@ -23,7 +23,7 @@ import { useAppDependencies } from '../../../index';
 import { useLoadRestores } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
 import { RestoreTable } from './restore_table';
-import { AuthPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
+import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
 
 const ONE_SECOND_MS = 1000;
 const TEN_SECONDS_MS = 10 * 1000;
@@ -197,8 +197,8 @@ export const RestoreList: React.FunctionComponent = () => {
   }
 
   return (
-    <AuthPrivileges requiredPrivileges="index.*">
-      {({ hasPrivileges, requiredPrivilegesMissing }) =>
+    <WithPrivileges privileges="index.*">
+      {({ hasPrivileges, privilegesMissing }) =>
         hasPrivileges ? (
           <section data-test-subj="restoreList">{content}</section>
         ) : (
@@ -215,14 +215,14 @@ export const RestoreList: React.FunctionComponent = () => {
                 defaultMessage="To view snapshot restore status, you must have {privilegesCount,
                   plural, one {this index privilege} other {these index privileges}} for one or more indices: {missingPrivileges}."
                 values={{
-                  missingPrivileges: requiredPrivilegesMissing.index!.join(', '),
-                  privilegesCount: requiredPrivilegesMissing.index!.length,
+                  missingPrivileges: privilegesMissing.index!.join(', '),
+                  privilegesCount: privilegesMissing.index!.length,
                 }}
               />
             }
           />
         )
       }
-    </AuthPrivileges>
+    </WithPrivileges>
   );
 };

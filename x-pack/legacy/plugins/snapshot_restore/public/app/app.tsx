@@ -12,7 +12,7 @@ import { SectionLoading, SectionError } from './components';
 import { BASE_PATH, DEFAULT_SECTION, Section } from './constants';
 import { RepositoryAdd, RepositoryEdit, RestoreSnapshot, SnapshotRestoreHome } from './sections';
 import { useAppDependencies } from './index';
-import { AuthorizationContext, AuthPrivileges, NotAuthorizedSection } from './lib/authorization';
+import { AuthorizationContext, WithPrivileges, NotAuthorizedSection } from './lib/authorization';
 
 export const App: React.FunctionComponent = () => {
   const {
@@ -36,8 +36,8 @@ export const App: React.FunctionComponent = () => {
       error={apiError}
     />
   ) : (
-    <AuthPrivileges requiredPrivileges="cluster.*">
-      {({ isLoading, hasPrivileges, requiredPrivilegesMissing }) =>
+    <WithPrivileges privileges="cluster.*">
+      {({ isLoading, hasPrivileges, privilegesMissing }) =>
         isLoading ? (
           <SectionLoading>
             <FormattedMessage
@@ -87,8 +87,8 @@ export const App: React.FunctionComponent = () => {
                   defaultMessage="To use Snapshot and Restore, you must have {privilegesCount,
                     plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
                   values={{
-                    missingPrivileges: requiredPrivilegesMissing.cluster!.join(', '),
-                    privilegesCount: requiredPrivilegesMissing.cluster!.length,
+                    missingPrivileges: privilegesMissing.cluster!.join(', '),
+                    privilegesCount: privilegesMissing.cluster!.length,
                   }}
                 />
               }
@@ -96,6 +96,6 @@ export const App: React.FunctionComponent = () => {
           </EuiPageContent>
         )
       }
-    </AuthPrivileges>
+    </WithPrivileges>
   );
 };
