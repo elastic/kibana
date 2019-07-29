@@ -42,7 +42,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
     handler: async req => {
       await createApmAgentConfigurationIndex(server);
 
-      const setup = setupRequest(req);
+      const setup = await setupRequest(req);
       return await listConfigurations({
         setup
       }).catch(defaultErrorHandler);
@@ -62,7 +62,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
       tags: ['access:apm']
     },
     handler: async req => {
-      const setup = setupRequest(req);
+      const setup = await setupRequest(req);
       const { configurationId } = req.params;
       return await deleteConfiguration({
         configurationId,
@@ -84,7 +84,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
       tags: ['access:apm']
     },
     handler: async req => {
-      const setup = setupRequest(req);
+      const setup = await setupRequest(req);
       return await getServiceNames({
         setup
       }).catch(defaultErrorHandler);
@@ -104,7 +104,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
       tags: ['access:apm']
     },
     handler: async req => {
-      const setup = setupRequest(req);
+      const setup = await setupRequest(req);
       const { serviceName } = req.params;
       return await getEnvironments({
         serviceName,
@@ -142,7 +142,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
       tags: ['access:apm']
     },
     handler: async req => {
-      const setup = setupRequest(req);
+      const setup = await setupRequest(req);
       const configuration = req.payload as AgentConfigurationIntake;
       return await createConfiguration({
         configuration,
@@ -165,7 +165,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
       tags: ['access:apm']
     },
     handler: async req => {
-      const setup = setupRequest(req);
+      const setup = await setupRequest(req);
       const { configurationId } = req.params;
       const configuration = req.payload as AgentConfigurationIntake;
       return await updateConfiguration({
@@ -202,7 +202,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
 
         await createApmAgentConfigurationIndex(server);
 
-        const setup = setupRequest(req);
+        const setup = await setupRequest(req);
         const payload = req.payload as Payload;
         const serviceName = payload.service.name;
         const environment = payload.service.environment;
