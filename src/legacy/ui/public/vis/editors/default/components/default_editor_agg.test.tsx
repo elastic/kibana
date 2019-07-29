@@ -1,0 +1,243 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import React from 'react';
+import { mount, shallow } from 'enzyme';
+import { VisState } from 'ui/vis';
+import { AggGroupNames } from '../agg_groups';
+import { DefaultEditorAgg, DefaultEditorAggProps } from './default_editor_agg';
+
+jest.mock('./default_editor_agg_params', () => ({
+  DefaultEditorAggParams: () => null,
+}));
+
+describe('DefaultEditorAgg component', () => {
+  let defaultProps: DefaultEditorAggProps;
+  let onAggParamsChange: jest.Mock;
+  let setTouched: jest.Mock;
+  let onToggleEnableAgg: jest.Mock;
+  let removeAgg: jest.Mock;
+
+  beforeEach(() => {
+    onAggParamsChange = jest.fn();
+    setTouched = jest.fn();
+    onToggleEnableAgg = jest.fn();
+    removeAgg = jest.fn();
+
+    defaultProps = {
+      agg: {
+        id: 1,
+        brandNew: true,
+        getIndexPattern: () => ({}),
+        schema: {},
+        title: 'Metrics',
+        params: {},
+      },
+      aggIndex: 0,
+      aggIsTooLow: false,
+      dragHandleProps: null,
+      formIsTouched: false,
+      groupName: AggGroupNames.Metrics,
+      isDraggable: false,
+      isLastBucket: false,
+      isRemovable: false,
+      metricAggs: [],
+      state: {} as VisState,
+      onAggParamsChange,
+      onAggTypeChange: () => {},
+      setValidity: () => {},
+      setTouched,
+      onToggleEnableAgg,
+      removeAgg,
+    };
+  });
+
+  it('should init with the default set of props', () => {
+    const comp = shallow(<DefaultEditorAgg {...defaultProps} />);
+
+    expect(comp).toMatchSnapshot();
+  });
+
+  it('should open accordion initially', () => {
+    const comp = shallow(<DefaultEditorAgg {...defaultProps} />);
+
+    expect(comp.props()).toHaveProperty('initialIsOpen', true);
+  });
+
+  it('should not show description when no type', () => {
+    const comp = mount(<DefaultEditorAgg {...defaultProps} />);
+
+    expect(
+      comp.find('.visEditorSidebar__aggGroupAccordionButtonContent span').exists()
+    ).toBeFalsy();
+  });
+
+  it('should show description when type selected', () => {
+    defaultProps.agg.brandNew = false;
+    defaultProps.agg.type = {
+      makeLabel: () => 'Agg description',
+    };
+    const comp = mount(<DefaultEditorAgg {...defaultProps} />);
+
+    expect(comp.find('.visEditorSidebar__aggGroupAccordionButtonContent span').text()).toBe(
+      'Agg description'
+    );
+  });
+
+  it('should call setTouched when invalid agg closed', () => {
+    const comp = mount(<DefaultEditorAgg {...defaultProps} />);
+    expect(defaultProps.setTouched).toBeCalledTimes(0);
+    comp.find('.euiAccordion__button').simulate('click');
+
+    expect(defaultProps.setTouched).toBeCalledWith(true);
+  });
+
+  it('should add schema component', () => {
+    defaultProps.agg.schema = {
+      editorComponent: () => <div className="schemaComponent"></div>,
+    };
+    const comp = mount(<DefaultEditorAgg {...defaultProps} />);
+
+    expect(comp.find('.schemaComponent').exists()).toBeTruthy();
+  });
+
+  describe('agg actions', () => {
+    beforeEach(() => {
+      defaultProps.agg.enabled = true;
+    });
+
+    it('should not have actions', () => {
+      const comp = shallow(<DefaultEditorAgg {...defaultProps} />);
+      const actions = shallow(comp.prop('extraAction'));
+
+      expect(actions.children().exists()).toBeFalsy();
+    });
+
+    it('should have disable and remove actions', () => {
+      defaultProps.isRemovable = true;
+      const comp = shallow(<DefaultEditorAgg {...defaultProps} />);
+      const actions = shallow(comp.prop('extraAction'));
+
+      expect(actions.children().length).toBe(2);
+      expect(actions.childAt(0).props()).toHaveProperty('content', 'Disable aggregation');
+      expect(actions.childAt(1).props()).toHaveProperty('content', 'Remove dimension');
+    });
+
+    it('should have draggable action', () => {
+      defaultProps.isDraggable = true;
+      const comp = shallow(<DefaultEditorAgg {...defaultProps} />);
+      const actions = shallow(comp.prop('extraAction'));
+
+      expect(actions.children().length).toBe(1);
+      expect(actions.childAt(0).props()).toHaveProperty('content', 'Modify priority by dragging');
+      expect(actions.childAt(0).props()).toHaveProperty('type', 'grab');
+    });
+
+    it('should disable agg', () => {
+      defaultProps.isRemovable = true;
+      const comp = mount(<DefaultEditorAgg {...defaultProps} />);
+      comp.find('[iconType="eye"]').simulate('click');
+
+      expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg, false);
+    });
+
+    it('should enable agg', () => {
+      defaultProps.agg.enabled = false;
+      const comp = mount(<DefaultEditorAgg {...defaultProps} />);
+      comp.find('[iconType="eyeClosed"]').simulate('click');
+
+      expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg, true);
+    });
+
+    it('should call removeAgg', () => {
+      defaultProps.isRemovable = true;
+      const comp = mount(<DefaultEditorAgg {...defaultProps} />);
+      comp.find('[iconType="cross"]').simulate('click');
+
+      expect(defaultProps.removeAgg).toBeCalledWith(defaultProps.agg);
+    });
+  });
+
+  describe('last bucket', () => {
+    beforeEach(() => {
+      defaultProps.isLastBucket = true;
+      defaultProps.lastParentPipelineAggTitle = 'ParentPipelineAgg';
+    });
+
+    it('should disable min_doc_count when agg is histogram or date_histogram', () => {
+      defaultProps.agg.type = {
+        name: 'histogram',
+      };
+      const compHistogram = shallow(<DefaultEditorAgg {...defaultProps} />);
+      defaultProps.agg.type = {
+        name: 'date_histogram',
+      };
+      const compDateHistogram = shallow(<DefaultEditorAgg {...defaultProps} />);
+
+      expect(compHistogram.find('DefaultEditorAggParams').props()).toHaveProperty(
+        'disabledParams',
+        ['min_doc_count']
+      );
+      expect(compDateHistogram.find('DefaultEditorAggParams').props()).toHaveProperty(
+        'disabledParams',
+        ['min_doc_count']
+      );
+    });
+
+    it('should set error when agg is not histogram or date_histogram', () => {
+      defaultProps.agg.type = {
+        name: 'aggType',
+      };
+      const comp = shallow(<DefaultEditorAgg {...defaultProps} />);
+
+      expect(comp.find('DefaultEditorAggParams').props()).toHaveProperty(
+        'aggError',
+        'Last bucket aggregation must be "Date Histogram" or "Histogram" when using "ParentPipelineAgg" metric aggregation.'
+      );
+    });
+
+    it('should set min_doc_count to true when agg type was changed to histogram', () => {
+      defaultProps.agg.type = {
+        name: 'aggType',
+      };
+      const comp = mount(<DefaultEditorAgg {...defaultProps} />);
+      comp.setProps({ agg: { ...defaultProps.agg, type: { name: 'histogram' } } });
+
+      expect(defaultProps.onAggParamsChange).toHaveBeenCalledWith(
+        defaultProps.agg.params,
+        'min_doc_count',
+        true
+      );
+    });
+
+    it('should set min_doc_count to 0 when agg type was changed to date_histogram', () => {
+      defaultProps.agg.type = {
+        name: 'aggType',
+      };
+      const comp = mount(<DefaultEditorAgg {...defaultProps} />);
+      comp.setProps({ agg: { ...defaultProps.agg, type: { name: 'date_histogram' } } });
+
+      expect(defaultProps.onAggParamsChange).toHaveBeenCalledWith(
+        defaultProps.agg.params,
+        'min_doc_count',
+        0
+      );
+    });
+  });
+});

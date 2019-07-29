@@ -32,7 +32,7 @@ import { AggConfig } from '../../../';
 import { DefaultEditorAggParams } from './default_editor_agg_params';
 import { DefaultEditorAggCommonProps } from './default_editor_agg_common_props';
 
-interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
+export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   agg: AggConfig;
   aggIndex: number;
   aggIsTooLow: boolean;
