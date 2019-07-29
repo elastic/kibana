@@ -425,12 +425,12 @@
             "description": "",
             "args": [
               {
-                "name": "nodeId",
+                "name": "nodeIds",
                 "description": "",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "InfraNodeIdsInput", "ofType": null }
                 },
                 "defaultValue": null
               },
@@ -2231,6 +2231,33 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "InfraNodeIdsInput",
+        "description": "",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "nodeId",
+            "description": "",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "cloudId",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "ID", "ofType": null },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },

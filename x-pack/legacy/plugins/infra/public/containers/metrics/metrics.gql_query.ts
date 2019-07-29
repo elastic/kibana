@@ -12,11 +12,17 @@ export const metricsQuery = gql`
     $timerange: InfraTimerangeInput!
     $metrics: [InfraMetric!]!
     $nodeId: ID!
+    $cloudId: ID
     $nodeType: InfraNodeType!
   ) {
     source(id: $sourceId) {
       id
-      metrics(nodeId: $nodeId, timerange: $timerange, metrics: $metrics, nodeType: $nodeType) {
+      metrics(
+        nodeIds: { nodeId: $nodeId, cloudId: $cloudId }
+        timerange: $timerange
+        metrics: $metrics
+        nodeType: $nodeType
+      ) {
         id
         series {
           id
