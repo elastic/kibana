@@ -141,6 +141,6 @@ node ../scripts/functional_test_runner
 
 For both of the above commands, it's crucial that you pass in `--config` to specify the same config file to both commands. This makes sure that the right tests will run against the right servers. Typically a set of tests and server configuration go together.
 
-Read more about how the scripts work [here](scripts/README.md).
+Read more about how the scripts work [here](../scripts/README.md).
 
-For a deeper dive, read more about the way functional tests and servers work [here](packages/kbn-test/README.md).
+For a deeper dive, read more about the way functional tests and servers work [here](../packages/kbn-test/README.md).
