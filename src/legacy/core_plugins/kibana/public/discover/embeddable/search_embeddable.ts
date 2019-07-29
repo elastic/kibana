@@ -29,8 +29,8 @@ import { getTime } from 'ui/timefilter/get_time';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { Filter, FilterStateStore } from '@kbn/es-query';
-import { Query } from 'src/legacy/core_plugins/data/public';
 import { TimeRange } from 'ui/timefilter/time_history';
+import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Embeddable,
@@ -80,10 +80,6 @@ interface SearchEmbeddableConfig {
 }
 
 export const SEARCH_EMBEDDABLE_TYPE = 'search';
-
-function getEnabledFilters(filters?: Filter[]) {
-  return filters ? filters.filter(filter => !filter.meta.disabled) : undefined;
-}
 
 export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   implements ISearchEmbeddable {
@@ -269,19 +265,18 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     searchScope.sort = this.input.sort || this.savedSearch.sort;
     searchScope.sharedItemTitle = this.panelTitle;
 
-    const enabledFilters = getEnabledFilters(this.input.filters);
     if (
-      !_.isEqual(this.prevFilters, enabledFilters) ||
+      !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !_.isEqual(this.prevQuery, this.input.query) ||
       !_.isEqual(this.prevTimeRange, this.input.timeRange)
     ) {
-      this.filtersSearchSource.setField('filter', enabledFilters);
+      this.filtersSearchSource.setField('filter', this.input.filters);
       this.filtersSearchSource.setField('query', this.input.query);
 
       // Sadly this is neccessary to tell the angular component to refetch the data.
       this.courier.fetch();
 
-      this.prevFilters = enabledFilters;
+      this.prevFilters = this.input.filters;
       this.prevQuery = this.input.query;
       this.prevTimeRange = this.input.timeRange;
     }

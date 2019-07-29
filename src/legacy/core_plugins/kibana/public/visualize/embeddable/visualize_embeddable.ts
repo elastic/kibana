@@ -38,8 +38,8 @@ import {
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { TimeRange } from 'ui/timefilter/time_history';
-import { Query } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
+import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
@@ -65,10 +65,6 @@ export interface VisualizeOutput extends EmbeddableOutput {
   editUrl: string;
   indexPatterns?: StaticIndexPattern[];
   savedObjectId: string;
-}
-
-function getEnabledFilters(filters?: Filter[]) {
-  return filters ? filters.filter(filter => !filter.meta.disabled) : undefined;
 }
 
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
@@ -170,10 +166,9 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     }
 
     // Check if filters has changed
-    const enabledFilters = getEnabledFilters(this.input.filters);
-    if (!_.isEqual(enabledFilters, this.filters)) {
-      updatedParams.filters = enabledFilters;
-      this.filters = enabledFilters;
+    if (!onlyDisabledFiltersChanged(this.input.filters, this.filters)) {
+      updatedParams.filters = this.input.filters;
+      this.filters = this.input.filters;
     }
 
     // Check if query has changed
@@ -203,7 +198,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   public render(domNode: HTMLElement) {
     this.timeRange = _.cloneDeep(this.input.timeRange);
     this.query = this.input.query;
-    this.filters = getEnabledFilters(this.input.filters);
+    this.filters = this.input.filters;
 
     this.transferCustomizationsToUiState();
 
