@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { assign, get } from 'lodash';
+import { assign } from 'lodash';
 
 import { TimeseriesSeries as timeseries } from './vis_types/timeseries/series';
 import { MetricSeries as metric } from './vis_types/metric/series';
@@ -28,6 +28,7 @@ import { TableSeries as table } from './vis_types/table/series';
 import { GaugeSeries as gauge } from './vis_types/gauge/series';
 import { MarkdownSeries as markdown } from './vis_types/markdown/series';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { VisDataContext } from '../contexts/vis_data_context';
 
 const lookup = {
   top_n: topN,
@@ -39,17 +40,10 @@ const lookup = {
 };
 
 export class Series extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      visible: true,
-      selectedTab: 'metrics',
-      uiRestrictions: undefined,
-    };
-
-    this.visDataSubscription = null;
-  }
+  state = {
+    visible: true,
+    selectedTab: 'metrics',
+  };
 
   switchTab = selectedTab => {
     this.setState({ selectedTab });
@@ -79,44 +73,37 @@ export class Series extends Component {
     });
   };
 
-  componentDidMount() {
-    if (this.props.visData$) {
-      this.visDataSubscription = this.props.visData$.subscribe(visData =>
-        this.setState({
-          uiRestrictions: get(visData, 'uiRestrictions'),
-        })
-      );
-    }
-  }
-
   render() {
     const { panel } = this.props;
     const Component = lookup[panel.type];
 
-    const params = {
-      className: this.props.className,
-      disableAdd: this.props.disableAdd,
-      disableDelete: this.props.disableDelete,
-      fields: this.props.fields,
-      name: this.props.name,
-      onAdd: this.props.onAdd,
-      onChange: this.handleChange,
-      onClone: this.props.onClone,
-      onDelete: this.props.onDelete,
-      model: this.props.model,
-      panel: this.props.panel,
-      selectedTab: this.state.selectedTab,
-      style: this.props.style,
-      uiRestrictions: this.state.uiRestrictions,
-      switchTab: this.switchTab,
-      toggleVisible: this.toggleVisible,
-      togglePanelActivation: this.togglePanelActivation,
-      visible: this.state.visible,
-      dragHandleProps: this.props.dragHandleProps,
-      indexPatternForQuery: panel.index_pattern || panel.default_index_pattern,
-    };
     return Boolean(Component) ? (
-      <Component {...params} />
+      <VisDataContext.Consumer>
+        {visData => (
+          <Component
+            className={this.props.className}
+            disableAdd={this.props.disableAdd}
+            uiRestrictions={visData.uiRestrictions}
+            disableDelete={this.props.disableDelete}
+            fields={this.props.fields}
+            name={this.props.name}
+            onAdd={this.props.onAdd}
+            onChange={this.handleChange}
+            onClone={this.props.onClone}
+            onDelete={this.props.onDelete}
+            model={this.props.model}
+            panel={this.props.panel}
+            selectedTab={this.state.selectedTab}
+            style={this.props.style}
+            switchTab={this.switchTab}
+            toggleVisible={this.toggleVisible}
+            togglePanelActivation={this.togglePanelActivation}
+            visible={this.state.visible}
+            dragHandleProps={this.props.dragHandleProps}
+            indexPatternForQuery={panel.index_pattern || panel.default_index_pattern}
+          />
+        )}
+      </VisDataContext.Consumer>
     ) : (
       <FormattedMessage
         id="tsvb.seriesConfig.missingSeriesComponentDescription"
@@ -124,12 +111,6 @@ export class Series extends Component {
         values={{ panelType: panel.type }}
       />
     );
-  }
-
-  componentWillUnmount() {
-    if (this.visDataSubscription) {
-      this.visDataSubscription.unsubscribe();
-    }
   }
 }
 
@@ -149,6 +130,5 @@ Series.propTypes = {
   onDelete: PropTypes.func,
   model: PropTypes.object,
   panel: PropTypes.object,
-  visData$: PropTypes.object,
   dragHandleProps: PropTypes.object,
 };

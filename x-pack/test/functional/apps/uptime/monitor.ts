@@ -12,7 +12,7 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
   const pageObjects = getPageObjects(['uptime']);
   const archive = 'uptime/full_heartbeat';
 
-  describe('monitor page', async function() {
+  describe('monitor page', function() {
     this.tags(['skipFirefox']);
     before(async () => {
       await esArchiver.load(archive);
