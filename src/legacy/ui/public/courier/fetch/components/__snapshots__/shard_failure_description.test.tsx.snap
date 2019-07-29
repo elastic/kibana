@@ -2,133 +2,129 @@
 
 exports[`ShardFailureDescription renders matching snapshot given valid properties 1`] = `
 <div>
-  <EuiTitle
-    size="xs"
-  >
-    <ShardFailureDescriptionHeader
-      index="repro2"
-      intl={
-        Object {
-          "defaultFormats": Object {},
-          "defaultLocale": "en",
-          "formatDate": [Function],
-          "formatHTMLMessage": [Function],
-          "formatMessage": [Function],
-          "formatNumber": [Function],
-          "formatPlural": [Function],
-          "formatRelative": [Function],
-          "formatTime": [Function],
-          "formats": Object {
-            "date": Object {
-              "full": Object {
-                "day": "numeric",
-                "month": "long",
-                "weekday": "long",
-                "year": "numeric",
-              },
-              "long": Object {
-                "day": "numeric",
-                "month": "long",
-                "year": "numeric",
-              },
-              "medium": Object {
-                "day": "numeric",
-                "month": "short",
-                "year": "numeric",
-              },
-              "short": Object {
-                "day": "numeric",
-                "month": "numeric",
-                "year": "2-digit",
-              },
+  <ShardFailureDescriptionHeader
+    index="repro2"
+    intl={
+      Object {
+        "defaultFormats": Object {},
+        "defaultLocale": "en",
+        "formatDate": [Function],
+        "formatHTMLMessage": [Function],
+        "formatMessage": [Function],
+        "formatNumber": [Function],
+        "formatPlural": [Function],
+        "formatRelative": [Function],
+        "formatTime": [Function],
+        "formats": Object {
+          "date": Object {
+            "full": Object {
+              "day": "numeric",
+              "month": "long",
+              "weekday": "long",
+              "year": "numeric",
             },
-            "number": Object {
-              "currency": Object {
-                "style": "currency",
-              },
-              "percent": Object {
-                "style": "percent",
-              },
+            "long": Object {
+              "day": "numeric",
+              "month": "long",
+              "year": "numeric",
             },
-            "relative": Object {
-              "days": Object {
-                "units": "day",
-              },
-              "hours": Object {
-                "units": "hour",
-              },
-              "minutes": Object {
-                "units": "minute",
-              },
-              "months": Object {
-                "units": "month",
-              },
-              "seconds": Object {
-                "units": "second",
-              },
-              "years": Object {
-                "units": "year",
-              },
+            "medium": Object {
+              "day": "numeric",
+              "month": "short",
+              "year": "numeric",
             },
-            "time": Object {
-              "full": Object {
-                "hour": "numeric",
-                "minute": "numeric",
-                "second": "numeric",
-                "timeZoneName": "short",
-              },
-              "long": Object {
-                "hour": "numeric",
-                "minute": "numeric",
-                "second": "numeric",
-                "timeZoneName": "short",
-              },
-              "medium": Object {
-                "hour": "numeric",
-                "minute": "numeric",
-                "second": "numeric",
-              },
-              "short": Object {
-                "hour": "numeric",
-                "minute": "numeric",
-              },
+            "short": Object {
+              "day": "numeric",
+              "month": "numeric",
+              "year": "2-digit",
             },
           },
-          "formatters": Object {
-            "getDateTimeFormat": [Function],
-            "getMessageFormat": [Function],
-            "getNumberFormat": [Function],
-            "getPluralFormat": [Function],
-            "getRelativeFormat": [Function],
+          "number": Object {
+            "currency": Object {
+              "style": "currency",
+            },
+            "percent": Object {
+              "style": "percent",
+            },
           },
-          "locale": "en",
-          "messages": Object {},
-          "now": [Function],
-          "onError": [Function],
-          "textComponent": Symbol(react.fragment),
-          "timeZone": null,
-        }
+          "relative": Object {
+            "days": Object {
+              "units": "day",
+            },
+            "hours": Object {
+              "units": "hour",
+            },
+            "minutes": Object {
+              "units": "minute",
+            },
+            "months": Object {
+              "units": "month",
+            },
+            "seconds": Object {
+              "units": "second",
+            },
+            "years": Object {
+              "units": "year",
+            },
+          },
+          "time": Object {
+            "full": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "long": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "medium": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+            },
+            "short": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+            },
+          },
+        },
+        "formatters": Object {
+          "getDateTimeFormat": [Function],
+          "getMessageFormat": [Function],
+          "getNumberFormat": [Function],
+          "getPluralFormat": [Function],
+          "getRelativeFormat": [Function],
+        },
+        "locale": "en",
+        "messages": Object {},
+        "now": [Function],
+        "onError": [Function],
+        "textComponent": Symbol(react.fragment),
+        "timeZone": null,
       }
-      node="itsmeyournode"
-      reason={
-        Object {
-          "caused_by": Object {
-            "reason": "Gimme reason",
-            "type": "illegal_argument_exception",
-          },
-          "lang": "painless",
-          "reason": "runtime error",
-          "script": "return doc['targetfield'].value;",
-          "script_stack": Array [
-            "return doc['targetfield'].value;",
-            "           ^---- HERE",
-          ],
-          "type": "script_exception",
-        }
+    }
+    node="itsmeyournode"
+    reason={
+      Object {
+        "caused_by": Object {
+          "reason": "Gimme reason",
+          "type": "illegal_argument_exception",
+        },
+        "lang": "painless",
+        "reason": "runtime error",
+        "script": "return doc['targetfield'].value;",
+        "script_stack": Array [
+          "return doc['targetfield'].value;",
+          "           ^---- HERE",
+        ],
+        "type": "script_exception",
       }
-      shard={0}
-    />
-  </EuiTitle>
+    }
+    shard={0}
+  />
   <EuiSpacer
     size="m"
   />
