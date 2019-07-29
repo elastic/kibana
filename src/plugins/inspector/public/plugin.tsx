@@ -78,7 +78,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
     const isAvailable: Start['isAvailable'] = adapters =>
       this.views!.getVisible(adapters).length > 0;
 
-    const closeButtonLabel = i18n.translate('common.ui.inspector.closeButton', {
+    const closeButtonLabel = i18n.translate('plugins.inspector.closeButton', {
       defaultMessage: 'Close Inspector',
     });
 
