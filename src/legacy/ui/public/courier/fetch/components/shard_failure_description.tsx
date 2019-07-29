@@ -60,9 +60,7 @@ export function ShardFailureDescription(props: ShardFailure) {
 
   return (
     <div>
-      <EuiTitle size="xs">
-        <ShardFailureDescriptionHeader {...props} />
-      </EuiTitle>
+      <ShardFailureDescriptionHeader {...props} />
       <EuiSpacer size="m" />
       <EuiDescriptionList
         listItems={listItems}
