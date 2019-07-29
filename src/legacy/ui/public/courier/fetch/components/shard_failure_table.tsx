@@ -81,26 +81,34 @@ export function ShardFailureTable({ failures }: { failures: ShardFailure[] }) {
     },
     {
       field: 'shard',
-      name: 'Shard',
+      name: i18n.translate('common.ui.courier.fetch.shardsFailedModal.tableColShard', {
+        defaultMessage: 'Shard',
+      }),
       sortable: true,
       truncateText: true,
       width: '80px',
     },
     {
       field: 'index',
-      name: 'Index',
+      name: i18n.translate('common.ui.courier.fetch.shardsFailedModal.tableColIndex', {
+        defaultMessage: 'Index',
+      }),
       sortable: true,
       truncateText: true,
     },
     {
       field: 'node',
-      name: 'Node',
+      name: i18n.translate('common.ui.courier.fetch.shardsFailedModal.tableColNode', {
+        defaultMessage: 'Node',
+      }),
       sortable: true,
       truncateText: true,
     },
     {
       field: 'reason.type',
-      name: 'Reason',
+      name: i18n.translate('common.ui.courier.fetch.shardsFailedModal.tableColReason', {
+        defaultMessage: 'Reason',
+      }),
       truncateText: true,
     },
   ];
