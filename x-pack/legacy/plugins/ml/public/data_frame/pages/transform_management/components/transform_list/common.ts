@@ -8,6 +8,12 @@ import { Dictionary } from '../../../../../../common/types/common';
 
 import { DataFrameTransformId, DataFrameTransformPivotConfig } from '../../../../common';
 
+export enum DATA_FRAME_INDEXER_STATE {
+  FAILED = 'failed',
+  STARTED = 'started',
+  STOPPED = 'stopped',
+}
+
 export enum DATA_FRAME_TASK_STATE {
   FAILED = 'failed',
   STARTED = 'started',
@@ -33,16 +39,37 @@ export interface Query {
   syntax: any;
 }
 
-export interface DataFrameTransformState {
-  checkpoint: number;
-  current_position: Dictionary<any>;
-  // indexer_state is a backend internal attribute
-  // and should not be considered in the UI.
-  indexer_state: DATA_FRAME_TASK_STATE;
-  progress?: {
-    docs_remaining: number;
-    percent_complete: number;
-    total_docs: number;
+export interface DataFrameTransformStats {
+  id: DataFrameTransformId;
+  checkpointing: {
+    last: {
+      checkpoint: number;
+      timestamp_millis?: number;
+    };
+    next?: {
+      checkpoint: number;
+      // indexer_state is a backend internal attribute
+      // and should not be considered in the UI.
+      indexer_state: DATA_FRAME_INDEXER_STATE;
+      checkpoint_progress?: {
+        total_docs: number;
+        docs_remaining: number;
+        percent_complete: number;
+      };
+    };
+    operations_behind: number;
+  };
+  stats: {
+    documents_indexed: number;
+    documents_processed: number;
+    index_failures: number;
+    index_time_in_ms: number;
+    index_total: number;
+    pages_processed: number;
+    search_failures: number;
+    search_time_in_ms: number;
+    search_total: number;
+    trigger_count: number;
   };
   reason?: string;
   // task_state is the attribute to check against if a transform
@@ -50,23 +77,18 @@ export interface DataFrameTransformState {
   task_state: DATA_FRAME_TASK_STATE;
 }
 
-export interface DataFrameTransformStats {
-  documents_indexed: number;
-  documents_processed: number;
-  index_failures: number;
-  index_time_in_ms: number;
-  index_total: number;
-  pages_processed: number;
-  search_failures: number;
-  search_time_in_ms: number;
-  search_total: number;
-  trigger_count: number;
+export function isDataFrameTransformStats(arg: any): arg is DataFrameTransformStats {
+  return (
+    typeof arg === 'object' &&
+    arg !== null &&
+    {}.hasOwnProperty.call(arg, 'task_state') &&
+    Object.values(DATA_FRAME_TASK_STATE).includes(arg.task_state)
+  );
 }
 
 export interface DataFrameTransformListRow {
   id: DataFrameTransformId;
   checkpointing: object;
-  state: DataFrameTransformState;
   stats: DataFrameTransformStats;
   config: DataFrameTransformPivotConfig;
 }
@@ -85,8 +107,8 @@ export function isCompletedBatchTransform(item: DataFrameTransformListRow) {
   // If `checkpoint=1`, `sync` is missing from the config and state is stopped,
   // then this is a completed batch data frame transform.
   return (
-    item.state.checkpoint === 1 &&
+    item.stats.checkpointing.last.checkpoint === 1 &&
     item.config.sync === undefined &&
-    item.state.task_state === DATA_FRAME_TASK_STATE.STOPPED
+    item.stats.task_state === DATA_FRAME_TASK_STATE.STOPPED
   );
 }

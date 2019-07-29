@@ -35,6 +35,8 @@ import { extractTimeFilter } from './lib/extract_time_filter';
 // @ts-ignore
 import { changeTimeFilter } from './lib/change_time_filter';
 
+import { onlyDisabledFiltersChanged } from './lib/only_disabled';
+
 import { PartitionedFilters } from './partitioned_filters';
 
 import { IndexPatterns } from '../../index_patterns';
@@ -92,13 +94,14 @@ export class FilterManager {
     });
 
     const filtersUpdated = !_.isEqual(this.filters, newFilters);
+    const updatedOnlyDisabledFilters = onlyDisabledFiltersChanged(newFilters, this.filters);
 
     this.filters = newFilters;
     if (filtersUpdated) {
       this.updated$.next();
-      // Fired together with updated$, because historically (~4 years ago) there was a fetch optimization, that didn't call fetch for very specific cases.
-      // This optimization seems irrelevant at the moment, but I didn't want to change the logic of all consumers.
-      this.fetch$.next();
+      if (!updatedOnlyDisabledFilters) {
+        this.fetch$.next();
+      }
     }
   }
 
