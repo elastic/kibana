@@ -18,9 +18,9 @@
  */
 
 import { flatten } from 'lodash';
-import { PluginName } from '../../server';
 import { pick } from '../../utils';
 import { CoreId } from '../core_system';
+import { PluginOpaqueId } from '../plugins';
 
 /**
  * A function that returns a context value for a specific key of given context type.
@@ -74,46 +74,51 @@ type Promisify<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;
  * In order to configure a handler with context, you must call the {@link IContextContainer.createHandler} function and
  * use the returned handler which will automatically build a context object when called.
  *
- * When registering context or creating handlers, the _calling plugin's id_ must be provided. Note this should NOT be
- * the context service owner, but the plugin that is actually registering the context or handler.
+ * When registering context or creating handlers, the _calling plugin's opaque id_ must be provided. This id is passed
+ * in via the plugin's initializer and can be accessed from the {@link PluginInitializerContext.opaqueId} Note this
+ * should NOT be the context service owner's id, but the plugin that is actually registering the context or handler.
  *
  * ```ts
- * // GOOD
+ * // Correct
  * class MyPlugin {
  *   private readonly handlers = new Map();
  *
  *   setup(core) {
  *     this.contextContainer = core.context.createContextContainer();
  *     return {
- *       registerContext(pluginId, contextName, provider) {
- *         this.contextContainer.registerContext(pluginId, contextName, provider);
+ *       registerContext(pluginOpaqueId, contextName, provider) {
+ *         this.contextContainer.registerContext(pluginOpaqueId, contextName, provider);
  *       },
- *       registerRoute(pluginId, path, handler) {
+ *       registerRoute(pluginOpaqueId, path, handler) {
  *         this.handlers.set(
  *           path,
- *           this.contextContainer.createHandler(pluginId, handler)
+ *           this.contextContainer.createHandler(pluginOpaqueId, handler)
  *         );
  *       }
  *     }
  *   }
  * }
  *
- * // BAD
+ * // Incorrect
  * class MyPlugin {
  *   private readonly handlers = new Map();
+ *
+ *   constructor(private readonly initContext: PluginInitializerContext) {}
  *
  *   setup(core) {
  *     this.contextContainer = core.context.createContextContainer();
  *     return {
- *       registerContext(pluginId, contextName, provider) {
+ *       registerContext(contextName, provider) {
+ *         // BUG!
  *         // This would leak this context to all handlers rather that only plugins that depend on the calling plugin.
- *         this.contextContainer.registerContext('my_plugin', contextName, provider);
+ *         this.contextContainer.registerContext(this.initContext.opaqueId, contextName, provider);
  *       },
- *       registerRoute(pluginId, path, handler) {
+ *       registerRoute(path, handler) {
  *         this.handlers.set(
  *           path,
+ *           // BUG!
  *           // This handler will not receive any contexts provided by other dependencies of the calling plugin.
- *           this.contextContainer.createHandler('my_plugin', handler)
+ *           this.contextContainer.createHandler(this.initContext.opaqueId, handler)
  *         );
  *       }
  *     }
@@ -137,13 +142,13 @@ export interface IContextContainer<
    *
    * Throws an exception if more than one provider is registered for the same `contextName`.
    *
-   * @param pluginId - The plugin ID for the plugin that registers this context.
+   * @param pluginOpaqueId - The plugin opaque ID for the plugin that registers this context.
    * @param contextName - The key of the `TContext` object this provider supplies the value for.
    * @param provider - A {@link IContextProvider} to be called each time a new context is created.
    * @returns The {@link IContextContainer} for method chaining.
    */
   registerContext<TContextName extends keyof TContext>(
-    pluginId: string,
+    pluginOpaqueId: PluginOpaqueId,
     contextName: TContextName,
     provider: IContextProvider<TContext, TContextName, THandlerParameters>
   ): this;
@@ -151,18 +156,16 @@ export interface IContextContainer<
   /**
    * Create a new handler function pre-wired to context for the plugin.
    *
-   * @param pluginId - The plugin ID for the plugin that registers this handler.
+   * @param pluginOpaqueId - The plugin opaque ID for the plugin that registers this handler.
    * @param handler - Handler function to pass context object to.
    * @returns A function that takes `THandlerParameters`, calls `handler` with a new context, and returns a Promise of
    * the `handler` return value.
    */
   createHandler(
-    pluginId: string,
+    pluginOpaqueId: PluginOpaqueId,
     handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>
   ): (...rest: THandlerParameters) => Promisify<THandlerReturn>;
 }
-
-type ContextSource = PluginName | CoreId;
 
 /** @internal */
 export class ContextContainer<
@@ -178,33 +181,32 @@ export class ContextContainer<
     keyof TContext,
     {
       provider: IContextProvider<TContext, keyof TContext, THandlerParameters>;
-      source: ContextSource;
+      source: symbol;
     }
   >();
   /** Used to keep track of which plugins registered which contexts for dependency resolution. */
-  private readonly contextNamesBySource: Map<ContextSource, Array<keyof TContext>>;
+  private readonly contextNamesBySource: Map<symbol, Array<keyof TContext>>;
 
   /**
    * @param pluginDependencies - A map of plugins to an array of their dependencies.
    */
   constructor(
-    private readonly pluginDependencies: ReadonlyMap<PluginName, PluginName[]>,
+    private readonly pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>,
     private readonly coreId: CoreId
   ) {
-    this.contextNamesBySource = new Map<ContextSource, Array<keyof TContext>>([[coreId, []]]);
+    this.contextNamesBySource = new Map<symbol, Array<keyof TContext>>([[coreId, []]]);
   }
 
   public registerContext = <TContextName extends keyof TContext>(
-    source: ContextSource,
+    source: symbol,
     contextName: TContextName,
     provider: IContextProvider<TContext, TContextName, THandlerParameters>
   ): this => {
     if (this.contextProviders.has(contextName)) {
       throw new Error(`Context provider for ${contextName} has already been registered.`);
     }
-
-    if (typeof source === 'symbol' && source !== this.coreId) {
-      throw new Error(`Symbol only allowed for core services`);
+    if (source !== this.coreId && !this.pluginDependencies.has(source)) {
+      throw new Error(`Cannot register context for unknown plugin: ${source.toString()}`);
     }
 
     this.contextProviders.set(contextName, { provider, source });
@@ -217,13 +219,11 @@ export class ContextContainer<
   };
 
   public createHandler = (
-    source: ContextSource,
+    source: symbol,
     handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>
   ) => {
-    if (typeof source === 'symbol' && source !== this.coreId) {
-      throw new Error(`Symbol only allowed for core services`);
-    } else if (typeof source === 'string' && !this.pluginDependencies.has(source)) {
-      throw new Error(`Cannot create handler for unknown plugin: ${source}`);
+    if (source !== this.coreId && !this.pluginDependencies.has(source)) {
+      throw new Error(`Cannot create handler for unknown plugin: ${source.toString()}`);
     }
 
     return (async (...args: THandlerParameters) => {
@@ -233,7 +233,7 @@ export class ContextContainer<
   };
 
   private async buildContext(
-    source: ContextSource,
+    source: symbol,
     ...contextArgs: THandlerParameters
   ): Promise<TContext> {
     const contextsToBuild: ReadonlySet<keyof TContext> = new Set(
@@ -246,7 +246,8 @@ export class ContextContainer<
         async (contextPromise, [contextName, { provider, source: providerSource }]) => {
           const resolvedContext = await contextPromise;
 
-          // For the next provider, only expose the context available based on the dependencies.
+          // For the next provider, only expose the context available based on the dependencies of the plugin that
+          // registered that provider.
           const exposedContext = pick(resolvedContext, [
             ...this.getContextNamesForSource(providerSource),
           ]);
@@ -260,14 +261,8 @@ export class ContextContainer<
       );
   }
 
-  private getContextNamesForSource(source: ContextSource): ReadonlySet<keyof TContext> {
-    // If the source is core...
-    if (typeof source === 'symbol') {
-      if (source !== this.coreId) {
-        // This case should never be hit.
-        throw new Error(`Cannot build context for symbol`);
-      }
-
+  private getContextNamesForSource(source: symbol): ReadonlySet<keyof TContext> {
+    if (source === this.coreId) {
       return this.getContextNamesForCore();
     } else {
       return this.getContextNamesForPluginId(source);
@@ -278,12 +273,12 @@ export class ContextContainer<
     return new Set(this.contextNamesBySource.get(this.coreId)!);
   }
 
-  private getContextNamesForPluginId(pluginId: string) {
+  private getContextNamesForPluginId(pluginId: symbol) {
     // If the source is a plugin...
     const pluginDeps = this.pluginDependencies.get(pluginId);
     if (!pluginDeps) {
-      // This case should never be hit.
-      throw new Error(`Cannot create context for unknown plugin: ${pluginId}`);
+      // This case should never be hit, but let's be safe.
+      throw new Error(`Cannot create context for unknown plugin: ${pluginId.toString()}`);
     }
 
     return new Set([

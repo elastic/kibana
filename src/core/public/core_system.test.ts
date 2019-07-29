@@ -52,6 +52,7 @@ const defaultCoreSystemParams = {
   rootDomElement: document.createElement('div'),
   browserSupportsCsp: true,
   injectedMetadata: {
+    uiPlugins: [],
     csp: {
       warnLegacyBrowsers: true,
     },

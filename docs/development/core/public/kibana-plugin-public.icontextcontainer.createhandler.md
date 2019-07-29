@@ -9,14 +9,14 @@ Create a new handler function pre-wired to context for the plugin.
 <b>Signature:</b>
 
 ```typescript
-createHandler(pluginId: string, handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => Promisify<THandlerReturn>;
+createHandler(pluginOpaqueId: PluginOpaqueId, handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => Promisify<THandlerReturn>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  pluginId | <code>string</code> | The plugin ID for the plugin that registers this handler. |
+|  pluginOpaqueId | <code>PluginOpaqueId</code> | The plugin opaque ID for the plugin that registers this handler. |
 |  handler | <code>IContextHandler&lt;TContext, THandlerReturn, THandlerParameters&gt;</code> | Handler function to pass context object to. |
 
 <b>Returns:</b>

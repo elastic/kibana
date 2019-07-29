@@ -20,7 +20,7 @@
 import { DiscoveredPlugin, PluginName } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_system';
-import { PluginWrapper } from './plugin';
+import { PluginWrapper, PluginOpaqueId } from './plugin';
 import {
   createPluginInitializerContext,
   createPluginSetupContext,
@@ -55,33 +55,44 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
   private readonly satupPlugins: PluginName[] = [];
 
-  constructor(private readonly coreContext: CoreContext) {}
+  constructor(
+    private readonly coreContext: CoreContext,
+    plugins: Array<{ id: PluginName; plugin: DiscoveredPlugin }>
+  ) {
+    // Generate opaque ids
+    const opaqueIds = new Map<PluginName, PluginOpaqueId>(plugins.map(p => [p.id, Symbol(p.id)]));
 
-  public setPluginDependencies(plugins: Array<{ id: PluginName; plugin: DiscoveredPlugin }>) {
-    // Setup map of dependencies
-    const allPluginNames = new Set<PluginName>(plugins.map(p => p.id));
-    plugins.forEach(({ id, plugin }) =>
+    // Setup dependency map and plugin wrappers
+    plugins.forEach(({ id, plugin }) => {
+      // Setup map of dependencies
       this.pluginDependencies.set(id, [
         ...plugin.requiredPlugins,
-        ...plugin.optionalPlugins.filter(optPlugin => allPluginNames.has(optPlugin)),
+        ...plugin.optionalPlugins.filter(optPlugin => opaqueIds.has(optPlugin)),
+      ]);
+
+      // Construct plugin wrappers, depending on the topological order set by the server.
+      this.plugins.set(
+        id,
+        new PluginWrapper(
+          plugin,
+          opaqueIds.get(id)!,
+          createPluginInitializerContext(this.coreContext, opaqueIds.get(id)!, plugin)
+        )
+      );
+    });
+  }
+
+  public getOpaqueIds(): ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]> {
+    // Return dependency map of opaque ids
+    return new Map(
+      [...this.pluginDependencies].map(([id, deps]) => [
+        this.plugins.get(id)!.opaqueId,
+        deps.map(depId => this.plugins.get(depId)!.opaqueId),
       ])
     );
-
-    return this.pluginDependencies;
   }
 
   public async setup(deps: PluginsServiceSetupDeps): Promise<PluginsServiceSetup> {
-    this.setPluginDependencies(deps.injectedMetadata.getPlugins());
-    // Construct plugin wrappers, depending on the topological order set by the server.
-    deps.injectedMetadata
-      .getPlugins()
-      .forEach(({ id, plugin }) =>
-        this.plugins.set(
-          id,
-          new PluginWrapper(plugin, createPluginInitializerContext(this.coreContext, plugin))
-        )
-      );
-
     // Load plugin bundles
     await this.loadPluginBundles(deps.http.basePath.prepend);
 

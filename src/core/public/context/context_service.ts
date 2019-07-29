@@ -19,9 +19,10 @@
 
 import { IContextContainer, ContextContainer } from './context';
 import { CoreContext } from '../core_system';
+import { PluginOpaqueId } from '../plugins';
 
 interface StartDeps {
-  pluginDependencies: ReadonlyMap<string, string[]>;
+  pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;
 }
 
 /** @internal */
@@ -72,7 +73,7 @@ export class ContextService {
  *
  *     return {
  *       registerContext: this.contextContainer.registerContext,
- *       registerVizRenderer: (plugin: string, renderMethod: string, renderer: VizTypeRenderer) =>
+ *       registerVizRenderer: (plugin: PluginOpaqueId, renderMethod: string, renderer: VizTypeRenderer) =>
  *         this.vizRenderers.set(renderMethod, this.contextContainer.createHandler(plugin, renderer)),
  *     };
  *   }

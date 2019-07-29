@@ -112,7 +112,7 @@ export class CoreSystem {
 
     const core: CoreContext = { coreId: Symbol('core') };
     this.context = new ContextService(core);
-    this.plugins = new PluginsService(core);
+    this.plugins = new PluginsService(core, injectedMetadata.uiPlugins);
 
     this.legacyPlatform = new LegacyPlatformService({
       requireLegacyFiles,
@@ -134,7 +134,7 @@ export class CoreSystem {
       const notifications = this.notifications.setup({ uiSettings });
       const application = this.application.setup();
 
-      const pluginDependencies = this.plugins.setPluginDependencies(injectedMetadata.getPlugins());
+      const pluginDependencies = this.plugins.getOpaqueIds();
       const context = this.context.setup({ pluginDependencies });
 
       const core: InternalCoreSetup = {

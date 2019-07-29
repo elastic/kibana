@@ -17,14 +17,18 @@
  * under the License.
  */
 
-import { PluginName } from '../../server';
 import { ContextContainer } from './context';
+import { PluginOpaqueId } from '../plugins';
 
-const plugins: ReadonlyMap<PluginName, PluginName[]> = new Map([
-  ['pluginA', []],
-  ['pluginB', ['pluginA']],
-  ['pluginC', ['pluginA', 'pluginB']],
-  ['pluginD', []],
+const pluginA = Symbol('pluginA');
+const pluginB = Symbol('pluginB');
+const pluginC = Symbol('pluginC');
+const pluginD = Symbol('pluginD');
+const plugins: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]> = new Map([
+  [pluginA, []],
+  [pluginB, [pluginA]],
+  [pluginC, [pluginA, pluginB]],
+  [pluginD, []],
 ]);
 
 interface MyContext {
@@ -34,7 +38,6 @@ interface MyContext {
   ctxFromB: number;
   ctxFromC: boolean;
   ctxFromD: object;
-  baseCtx: number;
 }
 
 const coreId = Symbol();
@@ -51,6 +54,17 @@ describe('ContextContainer', () => {
     );
   });
 
+  describe('registerContext', () => {
+    it('throws error if called with an unknown symbol', async () => {
+      const contextContainer = new ContextContainer<MyContext, string>(plugins, coreId);
+      await expect(() =>
+        contextContainer.registerContext(Symbol('unknown'), 'ctxFromA', jest.fn())
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Cannot register context for unknown plugin: Symbol(unknown)"`
+      );
+    });
+  });
+
   describe('context building', () => {
     it('resolves dependencies', async () => {
       const contextContainer = new ContextContainer<MyContext, string>(plugins, coreId);
@@ -60,28 +74,28 @@ describe('ContextContainer', () => {
         return 'core';
       });
 
-      contextContainer.registerContext('pluginA', 'ctxFromA', context => {
+      contextContainer.registerContext(pluginA, 'ctxFromA', context => {
         expect(context).toEqual({ core1: 'core' });
         return 'aString';
       });
-      contextContainer.registerContext('pluginB', 'ctxFromB', context => {
+      contextContainer.registerContext(pluginB, 'ctxFromB', context => {
         expect(context).toEqual({ core1: 'core', ctxFromA: 'aString' });
         return 299;
       });
-      contextContainer.registerContext('pluginC', 'ctxFromC', context => {
+      contextContainer.registerContext(pluginC, 'ctxFromC', context => {
         expect(context).toEqual({ core1: 'core', ctxFromA: 'aString', ctxFromB: 299 });
         return false;
       });
-      contextContainer.registerContext('pluginD', 'ctxFromD', context => {
+      contextContainer.registerContext(pluginD, 'ctxFromD', context => {
         expect(context).toEqual({ core1: 'core' });
         return {};
       });
 
       const rawHandler1 = jest.fn<string, []>(() => 'handler1');
-      const handler1 = contextContainer.createHandler('pluginC', rawHandler1);
+      const handler1 = contextContainer.createHandler(pluginC, rawHandler1);
 
       const rawHandler2 = jest.fn<string, []>(() => 'handler2');
-      const handler2 = contextContainer.createHandler('pluginD', rawHandler2);
+      const handler2 = contextContainer.createHandler(pluginD, rawHandler2);
 
       await handler1();
       await handler2();
@@ -116,7 +130,7 @@ describe('ContextContainer', () => {
         });
 
       const rawHandler1 = jest.fn<string, []>(() => 'handler1');
-      const handler1 = contextContainer.createHandler('pluginA', rawHandler1);
+      const handler1 = contextContainer.createHandler(pluginA, rawHandler1);
 
       expect(await handler1()).toEqual('handler1');
 
@@ -132,7 +146,7 @@ describe('ContextContainer', () => {
 
       contextContainer
         .registerContext(coreId, 'core1', context => 'core')
-        .registerContext('pluginA', 'ctxFromA', context => 'aString');
+        .registerContext(pluginA, 'ctxFromA', context => 'aString');
 
       const rawHandler1 = jest.fn<string, []>(() => 'handler1');
       const handler1 = contextContainer.createHandler(coreId, rawHandler1);
@@ -157,7 +171,7 @@ describe('ContextContainer', () => {
         return `core ${str}`;
       });
 
-      contextContainer.registerContext('pluginD', 'ctxFromD', (context, str, num) => {
+      contextContainer.registerContext(pluginD, 'ctxFromD', (context, str, num) => {
         expect(str).toEqual('passed string');
         expect(num).toEqual(77);
         return {
@@ -166,7 +180,7 @@ describe('ContextContainer', () => {
       });
 
       const rawHandler1 = jest.fn<string, [MyContext, string, number]>(() => 'handler1');
-      const handler1 = contextContainer.createHandler('pluginD', rawHandler1);
+      const handler1 = contextContainer.createHandler(pluginD, rawHandler1);
 
       expect(await handler1('passed string', 77)).toEqual('handler1');
 
@@ -184,18 +198,20 @@ describe('ContextContainer', () => {
   });
 
   describe('createHandler', () => {
-    it('throws error if called with a different symbol', async () => {
+    it('throws error if called with an unknown symbol', async () => {
       const contextContainer = new ContextContainer<MyContext, string>(plugins, coreId);
       await expect(() =>
-        contextContainer.createHandler(Symbol(), jest.fn())
-      ).toThrowErrorMatchingInlineSnapshot(`"Symbol only allowed for core services"`);
+        contextContainer.createHandler(Symbol('unknown'), jest.fn())
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Cannot create handler for unknown plugin: Symbol(unknown)"`
+      );
     });
 
     it('returns value from original handler', async () => {
       const contextContainer = new ContextContainer<MyContext, string>(plugins, coreId);
 
       const rawHandler1 = jest.fn(() => 'handler1');
-      const handler1 = contextContainer.createHandler('pluginA', rawHandler1);
+      const handler1 = contextContainer.createHandler(pluginA, rawHandler1);
 
       expect(await handler1()).toEqual('handler1');
     });
@@ -207,7 +223,7 @@ describe('ContextContainer', () => {
       );
 
       const rawHandler1 = jest.fn<string, [MyContext, string, number]>(() => 'handler1');
-      const handler1 = contextContainer.createHandler('pluginA', rawHandler1);
+      const handler1 = contextContainer.createHandler(pluginA, rawHandler1);
 
       await handler1('passed string', 77);
       expect(rawHandler1).toHaveBeenCalledWith({}, 'passed string', 77);

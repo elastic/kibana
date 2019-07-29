@@ -491,8 +491,9 @@ export interface I18nStart {
 // @public
 export interface IContextContainer<TContext extends {}, THandlerReturn, THandlerParameters extends any[] = []> {
     // Warning: (ae-forgotten-export) The symbol "Promisify" needs to be exported by the entry point index.d.ts
-    createHandler(pluginId: string, handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => Promisify<THandlerReturn>;
-    registerContext<TContextName extends keyof TContext>(pluginId: string, contextName: TContextName, provider: IContextProvider<TContext, TContextName, THandlerParameters>): this;
+    createHandler(pluginOpaqueId: PluginOpaqueId, handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => Promisify<THandlerReturn>;
+    // Warning: (ae-forgotten-export) The symbol "PluginOpaqueId" needs to be exported by the entry point index.d.ts
+    registerContext<TContextName extends keyof TContext>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<TContext, TContextName, THandlerParameters>): this;
 }
 
 // @public
@@ -591,6 +592,7 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = obj
 
 // @public
 export interface PluginInitializerContext {
+    readonly opaqueId: PluginOpaqueId;
 }
 
 // Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts

@@ -19,12 +19,9 @@
 
 import { MockContextConstructor } from './context_service.test.mocks';
 import { ContextService } from './context_service';
+import { PluginOpaqueId } from '../plugins';
 
-const pluginDependencies = new Map<string, string[]>([
-  ['pluginA', []],
-  ['pluginB', ['pluginA']],
-  ['pluginC', ['pluginB']],
-]);
+const pluginDependencies = new Map<PluginOpaqueId, PluginOpaqueId[]>();
 
 describe('ContextService', () => {
   describe('#setup()', () => {
