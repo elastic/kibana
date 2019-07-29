@@ -279,13 +279,9 @@ export class JobCreator {
 
   // create a jobRunner instance, start it and return it
   public async startDatafeed(): Promise<JobRunner> {
-    try {
-      const jobRunner = new JobRunner(this);
-      await jobRunner.startDatafeed();
-      return jobRunner;
-    } catch (error) {
-      throw error;
-    }
+    const jobRunner = new JobRunner(this);
+    await jobRunner.startDatafeed();
+    return jobRunner;
   }
 
   public subscribeToProgress(func: ProgressSubscriber) {
