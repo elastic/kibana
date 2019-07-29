@@ -17,4 +17,9 @@
  * under the License.
  */
 
+/**
+ * Do not use this, use NP `inspector` plugin instead.
+ *
+ * @deprecated
+ */
 export { InspectorView } from './inspector_view';

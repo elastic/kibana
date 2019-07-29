@@ -17,11 +17,5 @@
  * under the License.
  */
 
-/* eslint-disable */
-
-/**
- * Do not use this, use NP `inspector` plugin instead.
- * 
- * @deprecated
- */
-export * from '../../../../../plugins/inspector/public/adapters/index';
+export { DataAdapter, FormattedData } from './data';
+export { RequestAdapter, RequestStatus } from './request';

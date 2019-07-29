@@ -20,7 +20,7 @@
 import { set } from 'lodash';
 // @ts-ignore
 import { createFilter } from '../vis/vis_filters';
-import { FormattedData } from './adapters/data';
+import { FormattedData } from './adapters';
 
 interface Column {
   id: string;
@@ -38,6 +38,16 @@ interface Table {
 }
 
 /**
+ * @deprecated
+ *
+ * Do not use this function.
+ *
+ * @todo This function is used only by Courier. Courier will
+ *   soon be removed, and this function will be deleted, too. If Courier is no removed,
+ *   move this function inside Courier.
+ *
+ * ---
+ *
  * This function builds tabular data from the response and attaches it to the
  * inspector. It will only be called when the data view in the inspector is opened.
  */
