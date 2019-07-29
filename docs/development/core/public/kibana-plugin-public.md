@@ -23,8 +23,12 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Interface | Description |
 |  --- | --- |
+|  [App](./kibana-plugin-public.app.md) | Extension of [common app properties](./kibana-plugin-public.appbase.md) with the mount function. |
+|  [AppBase](./kibana-plugin-public.appbase.md) |  |
 |  [ApplicationSetup](./kibana-plugin-public.applicationsetup.md) |  |
 |  [ApplicationStart](./kibana-plugin-public.applicationstart.md) |  |
+|  [AppMountContext](./kibana-plugin-public.appmountcontext.md) | The context object received when applications are mounted to the DOM. |
+|  [AppMountParameters](./kibana-plugin-public.appmountparameters.md) |  |
 |  [Capabilities](./kibana-plugin-public.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
 |  [ChromeBadge](./kibana-plugin-public.chromebadge.md) |  |
 |  [ChromeBrand](./kibana-plugin-public.chromebrand.md) |  |
@@ -80,6 +84,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AppUnmount](./kibana-plugin-public.appunmount.md) | A function called when an application should be unmounted from the page. This function should be synchronous. |
 |  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
 |  [ChromeNavLinkUpdateableFields](./kibana-plugin-public.chromenavlinkupdateablefields.md) |  |
 |  [HttpBody](./kibana-plugin-public.httpbody.md) |  |

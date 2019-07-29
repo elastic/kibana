@@ -21,14 +21,20 @@ import React from 'react';
 
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { RenderingService } from './rendering_service';
+import { InternalApplicationStart } from '../application';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 
 describe('RenderingService#start', () => {
   const getService = () => {
     const rendering = new RenderingService();
+    const application = {
+      getComponent: () => <div>Hello application!</div>,
+    } as InternalApplicationStart;
     const chrome = chromeServiceMock.createStartContract();
     chrome.getComponent.mockReturnValue(<div>Hello chrome!</div>);
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
     const targetDomElement = document.createElement('div');
-    const start = rendering.start({ chrome, targetDomElement });
+    const start = rendering.start({ application, chrome, injectedMetadata, targetDomElement });
     return { start, targetDomElement };
   };
 
@@ -54,7 +60,7 @@ describe('RenderingService#start', () => {
       start: { legacyTargetDomElement },
       targetDomElement,
     } = getService();
-    legacyTargetDomElement.innerHTML = '<span id="legacy">Hello legacy!</span>';
+    legacyTargetDomElement!.innerHTML = '<span id="legacy">Hello legacy!</span>';
     expect(targetDomElement.querySelector('#legacy')).toMatchInlineSnapshot(`
 <span
   id="legacy"

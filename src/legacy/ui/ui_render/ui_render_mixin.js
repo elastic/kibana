@@ -164,7 +164,7 @@ export function uiRenderMixin(kbnServer, server, config) {
   });
 
   server.route({
-    path: '/app/{id}',
+    path: '/app/{id}/{path?}',
     method: 'GET',
     async handler(req, h) {
       const id = req.params.id;
@@ -239,6 +239,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         buildNumber: config.get('pkg.buildNum'),
         branch: config.get('pkg.branch'),
         basePath,
+        legacyMode: app.getId() !== 'core',
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
         },

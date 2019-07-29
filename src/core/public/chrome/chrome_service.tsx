@@ -27,7 +27,7 @@ import { IconType } from '@elastic/eui';
 
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
-import { ApplicationStart } from '../application';
+import { InternalApplicationStart } from '../application';
 import { HttpStart } from '../http';
 
 import { ChromeNavLinks, NavLinksService } from './nav_links';
@@ -73,7 +73,7 @@ interface ConstructorParams {
 }
 
 interface StartDeps {
-  application: ApplicationStart;
+  application: InternalApplicationStart;
   docLinks: DocLinksStart;
   http: HttpStart;
   injectedMetadata: InjectedMetadataStart;
@@ -83,14 +83,11 @@ interface StartDeps {
 /** @internal */
 export class ChromeService {
   private readonly stop$ = new ReplaySubject(1);
-  private readonly browserSupportsCsp: boolean;
   private readonly navControls = new NavControlsService();
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
 
-  constructor({ browserSupportsCsp }: ConstructorParams) {
-    this.browserSupportsCsp = browserSupportsCsp;
-  }
+  constructor(private readonly params: ConstructorParams) {}
 
   public async start({
     application,
@@ -114,7 +111,7 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
 
-    if (!this.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
+    if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
         i18n.translate('core.chrome.legacyBrowserWarning', {
           defaultMessage: 'Your browser does not meet the security requirements for Kibana.',
@@ -137,6 +134,7 @@ export class ChromeService {
               badge$={badge$.pipe(takeUntil(this.stop$))}
               basePath={http.basePath}
               breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
+              currentAppId$={application.currentAppId$}
               kibanaDocLink={docLinks.links.kibana}
               forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
               helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
@@ -146,7 +144,9 @@ export class ChromeService {
                 takeUntil(this.stop$)
               )}
               kibanaVersion={injectedMetadata.getKibanaVersion()}
+              legacyMode={injectedMetadata.getLegacyMode()}
               navLinks$={navLinks.getNavLinks$()}
+              navigateToApp={application.navigateToApp}
               recentlyAccessed$={recentlyAccessed.get$()}
               navControlsLeft$={navControls.getLeft$()}
               navControlsRight$={navControls.getRight$()}

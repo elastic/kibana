@@ -9,5 +9,5 @@ An ordinal used to sort nav links relative to one another for display.
 <b>Signature:</b>
 
 ```typescript
-readonly order: number;
+readonly order?: number;
 ```

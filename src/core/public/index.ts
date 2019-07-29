@@ -68,9 +68,12 @@ import { ApplicationSetup, Capabilities, ApplicationStart } from './application'
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
+import { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
+
+export { App, AppBase, AppUnmount, AppMountContext, AppMountParameters } from './application';
 export {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
@@ -114,6 +117,8 @@ export {
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
+  /** {@link ApplicationSetup} */
+  application: ApplicationSetup;
   /** {@link ContextSetup} */
   context: ContextSetup;
   /** {@link FatalErrorsSetup} */
@@ -137,7 +142,7 @@ export interface CoreSetup {
  */
 export interface CoreStart {
   /** {@link ApplicationStart} */
-  application: Pick<ApplicationStart, 'capabilities'>;
+  application: Pick<ApplicationStart, 'capabilities' | 'navigateToApp' | 'registerMountContext'>;
   /** {@link ChromeStart} */
   chrome: ChromeStart;
   /** {@link DocLinksStart} */
@@ -157,14 +162,14 @@ export interface CoreStart {
 }
 
 /** @internal */
-export interface InternalCoreSetup extends CoreSetup {
-  application: ApplicationSetup;
+export interface InternalCoreSetup extends Omit<CoreSetup, 'application'> {
+  application: InternalApplicationSetup;
   injectedMetadata: InjectedMetadataSetup;
 }
 
 /** @internal */
-export interface InternalCoreStart extends CoreStart {
-  application: ApplicationStart;
+export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
+  application: InternalApplicationStart;
   injectedMetadata: InjectedMetadataStart;
 }
 

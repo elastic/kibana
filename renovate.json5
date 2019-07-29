@@ -241,6 +241,14 @@
         ],
       },
       {
+        groupSlug: 'history',
+        groupName: 'history related packages',
+        packageNames: [
+          'history',
+          '@types/history',
+        ],
+      },
+      {
         groupSlug: 'json-stable-stringify',
         groupName: 'json-stable-stringify related packages',
         packageNames: [
@@ -614,14 +622,6 @@
         packageNames: [
           'git-url-parse',
           '@types/git-url-parse',
-        ],
-      },
-      {
-        groupSlug: 'history',
-        groupName: 'history related packages',
-        packageNames: [
-          'history',
-          '@types/history',
         ],
       },
       {

@@ -34,7 +34,8 @@ interface SetupDeps {
 interface StartDeps {
   core: InternalCoreStart;
   plugins: Record<string, unknown>;
-  targetDomElement: HTMLElement;
+  lastSubUrlStorage?: Storage;
+  targetDomElement?: HTMLElement;
 }
 
 interface BootstrapModule {
@@ -55,10 +56,7 @@ export class LegacyPlatformService {
   constructor(private readonly params: LegacyPlatformParams) {}
 
   public setup({ core, plugins }: SetupDeps) {
-    // Inject parts of the new platform into parts of the legacy platform
-    // so that legacy APIs/modules can mimic their new platform counterparts
-    require('ui/new_platform').__setup__(core, plugins);
-
+    // Always register legacy apps, even if not in legacy mode.
     core.injectedMetadata.getLegacyMetadata().nav.forEach((navLink: any) =>
       core.application.registerLegacyApp({
         id: navLink.id,
@@ -71,9 +69,36 @@ export class LegacyPlatformService {
         linkToLastSubUrl: navLink.linkToLastSubUrl,
       })
     );
+
+    // Inject parts of the new platform into parts of the legacy platform
+    // so that legacy APIs/modules can mimic their new platform counterparts
+    if (core.injectedMetadata.getLegacyMode()) {
+      require('ui/new_platform').__setup__(core, plugins);
+    }
   }
 
-  public start({ core, targetDomElement, plugins }: StartDeps) {
+  public start({
+    core,
+    targetDomElement,
+    plugins,
+    lastSubUrlStorage = window.sessionStorage,
+  }: StartDeps) {
+    // Initialize legacy sub urls
+    core.chrome.navLinks
+      .getAll()
+      .filter(link => link.legacy)
+      .forEach(navLink => {
+        const lastSubUrl = lastSubUrlStorage.getItem(`lastSubUrl:${navLink.baseUrl}`);
+        core.chrome.navLinks.update(navLink.id, {
+          url: lastSubUrl || navLink.url || navLink.baseUrl,
+        });
+      });
+
+    // Only import and bootstrap legacy platform if we're in legacy mode.
+    if (!core.injectedMetadata.getLegacyMode()) {
+      return;
+    }
+
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
     require('ui/new_platform').__start__(core, plugins);
@@ -91,7 +116,8 @@ export class LegacyPlatformService {
 
     this.targetDomElement = targetDomElement;
 
-    this.bootstrapModule.bootstrap(this.targetDomElement);
+    // `targetDomElement` is always defined when in legacy mode
+    this.bootstrapModule.bootstrap(this.targetDomElement!);
   }
 
   public stop() {

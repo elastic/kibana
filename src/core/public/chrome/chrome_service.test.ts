@@ -38,7 +38,7 @@ const store = new Map();
 
 function defaultStartDeps() {
   return {
-    application: applicationServiceMock.createStartContract(),
+    application: applicationServiceMock.createInternalStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),

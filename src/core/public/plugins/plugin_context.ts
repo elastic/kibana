@@ -76,6 +76,11 @@ export function createPluginSetupContext<
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): CoreSetup {
   return {
+    application: {
+      register: app => deps.application.register(plugin.opaqueId, app),
+      registerMountContext: (contextName, provider) =>
+        deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
+    },
     context: omit(deps.context, 'setCurrentPlugin'),
     fatalErrors: deps.fatalErrors,
     http: deps.http,
@@ -107,6 +112,9 @@ export function createPluginStartContext<
   return {
     application: {
       capabilities: deps.application.capabilities,
+      navigateToApp: deps.application.navigateToApp,
+      registerMountContext: (contextName, provider) =>
+        deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
     },
     docLinks: deps.docLinks,
     http: deps.http,

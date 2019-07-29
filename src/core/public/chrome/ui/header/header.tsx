@@ -152,6 +152,7 @@ interface Props {
   appTitle$: Rx.Observable<string>;
   badge$: Rx.Observable<ChromeBadge | undefined>;
   breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
+  currentAppId$: Rx.Observable<string | undefined>;
   homeHref: string;
   isVisible$: Rx.Observable<boolean>;
   kibanaDocLink: string;
@@ -159,14 +160,17 @@ interface Props {
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Rx.Observable<boolean>;
   helpExtension$: Rx.Observable<ChromeHelpExtension>;
+  legacyMode: boolean;
   navControlsLeft$: Rx.Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
+  navigateToApp: (appId: string) => void;
   intl: InjectedIntl;
   basePath: HttpStart['basePath'];
 }
 
 interface State {
   appTitle: string;
+  currentAppId?: string;
   isVisible: boolean;
   navLinks: ReadonlyArray<ReturnType<typeof extendNavLink>>;
   recentlyAccessed: ReadonlyArray<ReturnType<typeof extendRecentlyAccessedHistoryItem>>;
@@ -201,7 +205,11 @@ class HeaderUI extends Component<Props, State> {
       this.props.navLinks$,
       this.props.recentlyAccessed$,
       // Types for combineLatest only handle up to 6 inferred types so we combine these two separately.
-      Rx.combineLatest(this.props.navControlsLeft$, this.props.navControlsRight$)
+      Rx.combineLatest(
+        this.props.navControlsLeft$,
+        this.props.navControlsRight$,
+        this.props.currentAppId$
+      )
     ).subscribe({
       next: ([
         appTitle,
@@ -209,7 +217,7 @@ class HeaderUI extends Component<Props, State> {
         forceNavigation,
         navLinks,
         recentlyAccessed,
-        [navControlsLeft, navControlsRight],
+        [navControlsLeft, navControlsRight, currentAppId],
       ]) => {
         this.setState({
           appTitle,
@@ -221,6 +229,7 @@ class HeaderUI extends Component<Props, State> {
           ),
           navControlsLeft,
           navControlsRight,
+          currentAppId,
         });
       },
     });
@@ -268,9 +277,12 @@ class HeaderUI extends Component<Props, State> {
       intl,
       kibanaDocLink,
       kibanaVersion,
+      legacyMode,
+      navigateToApp,
     } = this.props;
     const {
       appTitle,
+      currentAppId,
       isVisible,
       navControlsLeft,
       navControlsRight,
@@ -287,9 +299,18 @@ class HeaderUI extends Component<Props, State> {
       .map(navLink => ({
         key: navLink.id,
         label: navLink.title,
-        href: navLink.href,
+
+        // Legacy apps use href, NP apps use onClick
+        // This needs to work with both href and onClick to support "open in new tab" correctly, however EUI
+        // does not current support this.
+        // https://github.com/elastic/eui/pull/1933
+        href: legacyMode || navLink.legacy ? navLink.href : undefined,
+        onClick: !legacyMode && !navLink.legacy ? () => navigateToApp(navLink.id) : undefined,
+
+        // Legacy apps use `active` property, NP apps should match the current app
+        isActive: navLink.active || currentAppId === navLink.id,
         isDisabled: navLink.disabled,
-        isActive: navLink.active,
+
         iconType: navLink.euiIconType,
         icon:
           !navLink.euiIconType && navLink.icon ? (

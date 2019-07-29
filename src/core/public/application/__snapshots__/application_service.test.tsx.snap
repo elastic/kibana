@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#start() returns renderable JSX tree 1`] = `
+<AppRouter
+  apps={Map {}}
+  basePath={
+    Object {
+      "get": [MockFunction] {
+        "calls": Array [
+          Array [],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": "",
+          },
+        ],
+      },
+      "prepend": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+  currentAppId$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": undefined,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
+  history={
+    Object {
+      "push": [MockFunction],
+    }
+  }
+  legacyApps={Map {}}
+  redirectTo={[Function]}
+/>
+`;
