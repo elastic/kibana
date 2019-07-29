@@ -1,0 +1,40 @@
+/**
+ * 1. Match height of logo in side bar, but allow it to expand to accommodate
+ *    dropdown.
+ */
+.kuiLocalNav {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 69px; /* 1 */
+  color: $localNavTextColor;
+  background-color: $localNavBackgroundColor;
+  line-height: $kuiLineHeight;
+  border-bottom: solid 1px $kuiColorLightGray;
+}
+
+/**
+ * 1. Allow row to expand if the content is so long that it wraps.
+ */
+.kuiLocalNavRow {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+.kuiLocalNavRow__section {
+  display: flex;
+  align-items: stretch;
+}
+
+/**
+ * 1. We make this row flex-start because it usually contains a search input, which may expand
+ *    beyond the height of this container. We can't use `align-items: center`, because this would
+ *    cause the search input to overflow both on the top and bottom; `align-items: flex-start`
+ *    makes it only overflow on the bottom. But this means we need to manually center the content
+ *    of this container using padding.
+ */
+.kuiLocalNavRow--secondary {
+  padding: 0 $localNavSideSpacing; /* 1 */
+  align-items: flex-start; /* 1 */
+}

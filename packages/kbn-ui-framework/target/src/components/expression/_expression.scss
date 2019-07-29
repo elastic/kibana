@@ -1,0 +1,27 @@
+.kuiExpression {
+  padding: 20px;
+  white-space: nowrap;
+}
+
+.kuiExpressionButton {
+  background-color: transparent;
+  padding: 5px 0px;
+  border: none;
+  border-bottom: dotted 2px $kuiBorderColor;
+  font-size: $kuiFontSize;
+  cursor: pointer;
+}
+
+.kuiExpressionButton__description {
+  color: $expressionColorHighlight;
+  text-transform: uppercase;
+}
+
+.kuiExpressionButton__value {
+  color: $kuiTextColor;
+  text-transform: lowercase;
+}
+
+.kuiExpressionButton-isActive {
+  border-bottom: solid 2px $expressionColorHighlight;
+}

@@ -1,0 +1,17 @@
+/**
+ * 1. Set inline-block so this wrapper shrinks to fit the input.
+ */
+.kuiAssistedInput {
+  display: inline-block; /* 1 */
+  position: relative;
+}
+
+  /**
+   * 1. Vertically center the assistance, regardless of its height.
+   */
+  .kuiAssistedInput__assistance {
+    position: absolute;
+    right: $kuiFormControlHorizontalPadding;
+    top: 50%; /* 1 */
+    transform: translateY(-50%); /* 1 */
+  }

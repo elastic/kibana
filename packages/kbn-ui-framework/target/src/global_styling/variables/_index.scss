@@ -1,0 +1,17 @@
+// --------------------------------------------------------------------------------------
+// KUI global variables
+// --------------------------------------------------------------------------------------
+// This module contains all global variables available within kui. Every variable in this
+// document should be prefixed with $kui. This lets us know where the variable is
+// coming from when looking inside the individual component files. Any component local
+// variables should be declared at the top of those documents prefixed with $componentName.
+
+@import 'size';
+@import 'colors';
+@import 'font';
+@import 'timing';
+@import 'borders';
+@import 'z_index';
+@import 'animations';
+@import 'form';
+@import 'tool_bar';

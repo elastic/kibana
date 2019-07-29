@@ -1,0 +1,51 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.castProvider = castProvider;
+
+var _get_type = require("../lib/get_type");
+
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+function castProvider(types) {
+  return function cast(node, toTypeNames) {
+    // If you don't give us anything to cast to, you'll get your input back
+    if (!toTypeNames || toTypeNames.length === 0) return node; // No need to cast if node is already one of the valid types
+
+    var fromTypeName = (0, _get_type.getType)(node);
+    if (toTypeNames.includes(fromTypeName)) return node;
+    var fromTypeDef = types[fromTypeName];
+
+    for (var i = 0; i < toTypeNames.length; i++) {
+      // First check if the current type can cast to this type
+      if (fromTypeDef && fromTypeDef.castsTo(toTypeNames[i])) {
+        return fromTypeDef.to(node, toTypeNames[i], types);
+      } // If that isn't possible, check if this type can cast from the current type
+
+
+      var toTypeDef = types[toTypeNames[i]];
+      if (toTypeDef && toTypeDef.castsFrom(fromTypeName)) return toTypeDef.from(node, types);
+    }
+
+    throw new Error("Can not cast '".concat(fromTypeName, "' to any of '").concat(toTypeNames.join(', '), "'"));
+  };
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21tb24vbGliL2Nhc3QuanMiXSwibmFtZXMiOlsiY2FzdFByb3ZpZGVyIiwidHlwZXMiLCJjYXN0Iiwibm9kZSIsInRvVHlwZU5hbWVzIiwibGVuZ3RoIiwiZnJvbVR5cGVOYW1lIiwiaW5jbHVkZXMiLCJmcm9tVHlwZURlZiIsImkiLCJjYXN0c1RvIiwidG8iLCJ0b1R5cGVEZWYiLCJjYXN0c0Zyb20iLCJmcm9tIiwiRXJyb3IiLCJqb2luIl0sIm1hcHBpbmdzIjoiOzs7Ozs7O0FBbUJBOztBQW5CQTs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBcUJPLFNBQVNBLFlBQVQsQ0FBc0JDLEtBQXRCLEVBQTZCO0FBQ2xDLFNBQU8sU0FBU0MsSUFBVCxDQUFjQyxJQUFkLEVBQW9CQyxXQUFwQixFQUFpQztBQUN0QztBQUNBLFFBQUksQ0FBQ0EsV0FBRCxJQUFnQkEsV0FBVyxDQUFDQyxNQUFaLEtBQXVCLENBQTNDLEVBQThDLE9BQU9GLElBQVAsQ0FGUixDQUl0Qzs7QUFDQSxRQUFNRyxZQUFZLEdBQUcsdUJBQVFILElBQVIsQ0FBckI7QUFDQSxRQUFJQyxXQUFXLENBQUNHLFFBQVosQ0FBcUJELFlBQXJCLENBQUosRUFBd0MsT0FBT0gsSUFBUDtBQUV4QyxRQUFNSyxXQUFXLEdBQUdQLEtBQUssQ0FBQ0ssWUFBRCxDQUF6Qjs7QUFFQSxTQUFLLElBQUlHLENBQUMsR0FBRyxDQUFiLEVBQWdCQSxDQUFDLEdBQUdMLFdBQVcsQ0FBQ0MsTUFBaEMsRUFBd0NJLENBQUMsRUFBekMsRUFBNkM7QUFDM0M7QUFDQSxVQUFJRCxXQUFXLElBQUlBLFdBQVcsQ0FBQ0UsT0FBWixDQUFvQk4sV0FBVyxDQUFDSyxDQUFELENBQS9CLENBQW5CLEVBQXdEO0FBQ3RELGVBQU9ELFdBQVcsQ0FBQ0csRUFBWixDQUFlUixJQUFmLEVBQXFCQyxXQUFXLENBQUNLLENBQUQsQ0FBaEMsRUFBcUNSLEtBQXJDLENBQVA7QUFDRCxPQUowQyxDQU0zQzs7O0FBQ0EsVUFBTVcsU0FBUyxHQUFHWCxLQUFLLENBQUNHLFdBQVcsQ0FBQ0ssQ0FBRCxDQUFaLENBQXZCO0FBQ0EsVUFBSUcsU0FBUyxJQUFJQSxTQUFTLENBQUNDLFNBQVYsQ0FBb0JQLFlBQXBCLENBQWpCLEVBQW9ELE9BQU9NLFNBQVMsQ0FBQ0UsSUFBVixDQUFlWCxJQUFmLEVBQXFCRixLQUFyQixDQUFQO0FBQ3JEOztBQUVELFVBQU0sSUFBSWMsS0FBSix5QkFBMkJULFlBQTNCLDBCQUF1REYsV0FBVyxDQUFDWSxJQUFaLENBQWlCLElBQWpCLENBQXZELE9BQU47QUFDRCxHQXRCRDtBQXVCRCIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBMaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lIG9yIG1vcmUgY29udHJpYnV0b3JcbiAqIGxpY2Vuc2UgYWdyZWVtZW50cy4gU2VlIHRoZSBOT1RJQ0UgZmlsZSBkaXN0cmlidXRlZCB3aXRoXG4gKiB0aGlzIHdvcmsgZm9yIGFkZGl0aW9uYWwgaW5mb3JtYXRpb24gcmVnYXJkaW5nIGNvcHlyaWdodFxuICogb3duZXJzaGlwLiBFbGFzdGljc2VhcmNoIEIuVi4gbGljZW5zZXMgdGhpcyBmaWxlIHRvIHlvdSB1bmRlclxuICogdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTsgeW91IG1heVxuICogbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZyxcbiAqIHNvZnR3YXJlIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuXG4gKiBcIkFTIElTXCIgQkFTSVMsIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWVxuICogS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC4gIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlXG4gKiBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kIGxpbWl0YXRpb25zXG4gKiB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG5pbXBvcnQgeyBnZXRUeXBlIH0gZnJvbSAnLi4vbGliL2dldF90eXBlJztcblxuZXhwb3J0IGZ1bmN0aW9uIGNhc3RQcm92aWRlcih0eXBlcykge1xuICByZXR1cm4gZnVuY3Rpb24gY2FzdChub2RlLCB0b1R5cGVOYW1lcykge1xuICAgIC8vIElmIHlvdSBkb24ndCBnaXZlIHVzIGFueXRoaW5nIHRvIGNhc3QgdG8sIHlvdSdsbCBnZXQgeW91ciBpbnB1dCBiYWNrXG4gICAgaWYgKCF0b1R5cGVOYW1lcyB8fCB0b1R5cGVOYW1lcy5sZW5ndGggPT09IDApIHJldHVybiBub2RlO1xuXG4gICAgLy8gTm8gbmVlZCB0byBjYXN0IGlmIG5vZGUgaXMgYWxyZWFkeSBvbmUgb2YgdGhlIHZhbGlkIHR5cGVzXG4gICAgY29uc3QgZnJvbVR5cGVOYW1lID0gZ2V0VHlwZShub2RlKTtcbiAgICBpZiAodG9UeXBlTmFtZXMuaW5jbHVkZXMoZnJvbVR5cGVOYW1lKSkgcmV0dXJuIG5vZGU7XG5cbiAgICBjb25zdCBmcm9tVHlwZURlZiA9IHR5cGVzW2Zyb21UeXBlTmFtZV07XG5cbiAgICBmb3IgKGxldCBpID0gMDsgaSA8IHRvVHlwZU5hbWVzLmxlbmd0aDsgaSsrKSB7XG4gICAgICAvLyBGaXJzdCBjaGVjayBpZiB0aGUgY3VycmVudCB0eXBlIGNhbiBjYXN0IHRvIHRoaXMgdHlwZVxuICAgICAgaWYgKGZyb21UeXBlRGVmICYmIGZyb21UeXBlRGVmLmNhc3RzVG8odG9UeXBlTmFtZXNbaV0pKSB7XG4gICAgICAgIHJldHVybiBmcm9tVHlwZURlZi50byhub2RlLCB0b1R5cGVOYW1lc1tpXSwgdHlwZXMpO1xuICAgICAgfVxuXG4gICAgICAvLyBJZiB0aGF0IGlzbid0IHBvc3NpYmxlLCBjaGVjayBpZiB0aGlzIHR5cGUgY2FuIGNhc3QgZnJvbSB0aGUgY3VycmVudCB0eXBlXG4gICAgICBjb25zdCB0b1R5cGVEZWYgPSB0eXBlc1t0b1R5cGVOYW1lc1tpXV07XG4gICAgICBpZiAodG9UeXBlRGVmICYmIHRvVHlwZURlZi5jYXN0c0Zyb20oZnJvbVR5cGVOYW1lKSkgcmV0dXJuIHRvVHlwZURlZi5mcm9tKG5vZGUsIHR5cGVzKTtcbiAgICB9XG5cbiAgICB0aHJvdyBuZXcgRXJyb3IoYENhbiBub3QgY2FzdCAnJHtmcm9tVHlwZU5hbWV9JyB0byBhbnkgb2YgJyR7dG9UeXBlTmFtZXMuam9pbignLCAnKX0nYCk7XG4gIH07XG59XG4iXX0=

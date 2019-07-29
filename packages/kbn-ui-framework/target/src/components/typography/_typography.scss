@@ -1,0 +1,48 @@
+/**
+ * 1. Override h1.
+ */
+.kuiTitle {
+  margin: 0; /* 1 */
+  font-weight: $kuiFontWeightRegular; /* 1 */
+  font-size: $typographyTitleFontSize;
+}
+
+/**
+ * 1. Override h2, h3, etc.
+ */
+.kuiSubTitle {
+  margin: 0; /* 1 */
+  font-weight: $kuiFontWeightRegular; /* 1 */
+  font-size: $kuiTitleFontSize;
+}
+
+/**
+ * 1. Override p.
+ */
+.kuiTextTitle {
+  margin: 0; /* 1 */
+  font-weight: $kuiFontWeightBold; /* 1 */
+  line-height: $kuiLineHeight;
+  font-size: $kuiFontSize;
+}
+
+/**
+ * 1. Override p.
+ */
+.kuiText {
+  margin: 0; /* 1 */
+  font-weight: $kuiFontWeightRegular; /* 1 */
+  line-height: $kuiLineHeight;
+  font-size: $kuiFontSize;
+}
+
+.kuiSubText {
+  margin: 0; /* 1 */
+  font-weight: $kuiFontWeightRegular; /* 1 */
+  line-height: $kuiLineHeight;
+  font-size: $kuiSubTextFontSize;
+}
+
+.kuiSubduedText {
+  color: $kuiSubduedTextColor !important;
+}

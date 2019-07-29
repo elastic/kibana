@@ -1,0 +1,122 @@
+.kuiLocalDropdown {
+  position: relative;
+  padding: 10px $localNavSideSpacing 14px;
+  background-color: $localDropdownBackgroundColor;
+  margin-bottom: 10px;
+  line-height: 20px;
+}
+
+.kuiLocalDropdownCloseButton {
+  @include collapseButton;
+
+  position: absolute;
+  top: 1px;
+  right: 5px;
+}
+
+.kuiLocalDropdownPanels {
+  display: flex;
+}
+
+.kuiLocalDropdownPanel {
+  flex: 1 1 0%;
+}
+
+.kuiLocalDropdownPanel--left {
+  margin-right: 30px;
+}
+
+.kuiLocalDropdownPanel--right {
+  margin-left: 30px;
+}
+
+/**
+ * 1. Override inherited styles.
+ */
+.kuiLocalDropdownTitle {
+  margin-top: 0; /* 1 */
+  margin-bottom: 12px;
+  font-size: 18px;
+  color: $localNavTextColor;
+}
+
+.kuiLocalDropdownSection {
+  margin-bottom: 16px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.kuiLocalDropdownHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+  /**
+   * 1. Override inherited styles.
+   */
+  .kuiLocalDropdownHeader__label {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 0; /* 1 */
+    color: $localNavTextColor;
+  }
+
+  .kuiLocalDropdownHeader__actions {
+    display: flex;
+  }
+
+  .kuiLocalDropdownHeader__action {
+    color: $kuiLinkColor;
+    font-size: 12px;
+    text-decoration: none;
+    cursor: pointer;
+
+    & + & {
+      margin-left: 10px;
+    }
+
+    &:hover,
+    &:active {
+      color: $kuiLinkColor-isHover;
+    }
+  }
+
+.kuiLocalDropdownInput {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 5px 15px;
+  font-size: 14px;
+  color: $kuiInputTextColor;
+  background-color: $kuiInputBackgroundColor;
+  border: 1px solid $kuiInputBorderColor;
+  border-radius: 4px;
+
+  &:focus {
+    border-color: $kuiFocusColor;
+  }
+}
+
+.kuiLocalDropdownFormNote {
+  font-size: 14px;
+  color: $localDropdownFormNoteTextColor;
+}
+
+.kuiLocalDropdownWarning {
+  margin-bottom: 16px;
+  padding: 6px 10px;
+  font-size: 14px;
+  color: $kuiTextColor;
+  background-color: $localNavBackgroundColor;
+  border-left: solid 2px $euiColorDanger;
+}
+
+.kuiLocalDropdownHelpText {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: $euiColorDarkShade;
+}

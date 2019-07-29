@@ -1,0 +1,117 @@
+.kuiDatePicker {
+  background-color: transparent;
+  border-collapse: collapse;
+  border-spacing: 0;
+  line-height: $kuiLineHeight;
+}
+
+.kuiDatePickerNavigationCell {
+  padding: 0;
+}
+
+.kuiDatePickerNavigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $localDatePickerBottomSpacing;
+}
+
+/**
+ * 1. Override inherited styles.
+ */
+.kuiDatePickerNavigationButton {
+  appearance: none;
+  background-color: transparent;
+  border: none;
+  font-size: $kuiSubTextFontSize;
+  color: $localNavButtonTextColor;
+  padding: $localDatePickerButtonPadding;
+  border-radius: $kuiBorderRadius;
+
+  &:hover,
+  &:active {
+    cursor: pointer;
+    color: $localNavButtonTextColor-isHover;
+    background-color: $localDatePickerButtonHoverBackgroundColor;
+  }
+
+  &:focus {
+    @include focus($kuiFocusColor, $localDropdownBackgroundColor);
+
+    color: $localNavButtonTextColor; /* 1 */
+  }
+}
+
+.kuiDatePickerHeaderCell {
+  padding: $localDatePickerHeaderCellPadding;
+  color: $localNavTextColor;
+  font-size: $kuiSubTextFontSize;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.kuiDatePickerRowCell {
+  padding: 0;
+  text-align: center;
+
+  /**
+   * This state class exists to support weird angular-bootstrap datepicker functionality,
+   * in which you can't select a day on the "From" calendar if it falls after the selected day in
+   * the "To" calendar (and vice versa, you can't select a "To" day if it is before the "From" day).
+   */
+  &.kuiDatePickerRowCell-isBlocked {
+    cursor: not-allowed;
+
+    .kuiDatePickerRowCellContent {
+      pointer-events: none;
+    }
+  }
+}
+
+/**
+ * 1. Override inherited styles.
+ */
+.kuiDatePickerRowCellContent {
+  appearance: none;
+  background-color: transparent;
+  width: 100%;
+  border: 1px solid transparent;
+  color: $localNavTextColor;
+  font-size: $kuiSubTextFontSize;
+  padding: $localDatePickerCellPadding;
+  border-radius: $kuiBorderRadius;
+  line-height: $localDatePickerCellLineHeight;
+
+  &:focus {
+    @include focus($kuiFocusColor, $localDropdownBackgroundColor);
+
+    color: $localNavTextColor; /* 1 */
+  }
+
+  &:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  &.kuiDatePickerRowCellContent-isOtherMonth {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  &.kuiDatePickerRowCellContent-isCurrent {
+    color: $kuiLinkColor;
+  }
+
+  &.kuiDatePickerRowCellContent-isSelected {
+    background-color: $localDatePickerCellSelectedBackgroundColor;
+    color: $localDatePickerCellSelectedTextColor;
+  }
+
+  &:hover,
+  &:active {
+    cursor: pointer;
+    color: $localNavButtonTextColor-isHover;
+    background-color: $localDatePickerButtonHoverBackgroundColor;
+  }
+}

@@ -1,0 +1,175 @@
+/**
+ * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.
+ */
+@mixin tableCell {
+  font-size: $kuiFontSize;
+  font-weight: $tableCellFontWeight;
+  text-align: left;
+  max-width: 20px; /* 1 */
+}
+
+/**
+ * NOTE: table-layout: fixed causes a bug in IE11 and Edge (see #9929). It also prevents us from
+ * specifying a column width, e.g. the checkbox column.
+ */
+.kuiTable {
+  width: 100%;
+  border: $kuiBorderThin;
+  border-collapse: collapse;
+  background-color: $tableBackgroundColor;
+}
+
+/**
+ * 1. Allow contents of cells to determine table's width.
+ */
+.kuiTable--fluid {
+  width: auto; /* 1 */
+
+  .kuiTableHeaderCell,
+  .kuiTableRowCell {
+    max-width: none; /* 1 */
+  }
+}
+
+.kuiTableHeaderCell {
+  @include tableCell;
+  line-height: $kuiLineHeight;
+  color: $tableHeaderTextColor;
+}
+
+.kuiTableHeaderCell__liner {
+  display: inline-block;
+  padding: $tableCellPadding;
+}
+
+/**
+ * 1. Prevent rapid clicking from selecting text.
+ * 2. Remove native button element styles.
+ * 3. Make buttons look and behave like table header cells.
+ */
+.kuiTableHeaderCellButton {
+  user-select: none; /* 1 */
+  cursor: pointer;
+  width: 100%;
+  appearance: none; /* 2 */
+  background-color: transparent; /* 2 */
+  border: 0; /* 2 */
+  padding: 0; /* 2 */
+  color: inherit; /* 3 */
+  line-height: inherit; /* 3 */
+  font-size: inherit; /* 3 */
+  text-align: inherit; /* 3 */
+
+  &:hover {
+    .kuiTableSortIcon {
+      display: block;
+      opacity: 1;
+    }
+  }
+
+  .kuiTableHeaderCell__liner {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.kuiTableHeaderCell--alignRight {
+  text-align: right;
+}
+
+.kuiTableSortIcon {
+  display: none;
+  pointer-events: none;
+  margin-left: 4px;
+
+  .kuiTableHeaderCellButton-isSorted & {
+    display: block;
+    opacity: 0.4;
+  }
+}
+
+.kuiTableRow {
+  &:hover {
+    .kuiTableRowHoverReveal {
+      display: inline-block;
+    }
+  }
+}
+
+.kuiTableRowHoverReveal {
+  display: none;
+}
+
+.kuiTableRowCell {
+  @include tableCell;
+  color: $kuiFontColor;
+  border-top: $kuiBorderThin;
+  vertical-align: middle;
+}
+
+  /**
+   * 1. Vertically align all children.
+   * 2. The padding on this div allows the ellipsis to show if the content is truncated. If
+   *    the padding was on the cell, the ellipsis would be cropped.
+   * 3. Truncate content with an ellipsis.
+   */
+  .kuiTableRowCell__liner {
+    padding: $tableCellPadding; /* 2 */
+    line-height: $kuiLineHeight; /* 1 */
+    overflow: hidden; /* 3 */
+    text-overflow: ellipsis; /* 3 */
+    white-space: nowrap; /* 3 */
+
+    & > * {
+      vertical-align: middle; /* 1 */
+    }
+  }
+
+.kuiTableRowCell--wrap {
+  .kuiTableRowCell__liner {
+    white-space: normal;
+  }
+}
+
+.kuiTableRowCell--overflowingContent {
+  .kuiTableRowCell__liner {
+    overflow: visible;
+    white-space: normal;
+  }
+}
+
+/**
+ * 1. We don't want to create too strong a disconnect between the original row and the row
+ *    that contains its expanded details.
+ */
+.kuiTableRowCell--expanded {
+  border-top-color: $tableCellExpandedBorderColor; /* 1 */
+}
+
+.kuiTableRowCell--alignRight {
+  text-align: right;
+
+  .kuiTableRowCell__liner {
+    text-align: right;
+  }
+}
+
+/**
+ * 1. Rendered width of cell with checkbox inside of it.
+ * 2. Align checkbox with text in other cells.
+ * 3. Show the checkbox in Edge; otherwise it gets cropped.
+ */
+.kuiTableHeaderCell--checkBox,
+.kuiTableRowCell--checkBox {
+  width: 28px; /* 1 */
+  line-height: 1; /* 2 */
+
+  .kuiTableRowCell__liner {
+    overflow: visible; /* 3 */
+  }
+
+  .kuiTableHeaderCell__liner,
+  .kuiTableRowCell__liner {
+    padding-right: 0;
+  }
+}

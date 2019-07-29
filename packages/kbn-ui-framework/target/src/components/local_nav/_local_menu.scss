@@ -1,0 +1,49 @@
+.kuiLocalMenu {
+  display: flex;
+  align-items: stretch;
+  padding-top: $euiSizeS;
+  padding-bottom: $euiSizeS;
+}
+
+.kuiLocalMenuItem {
+  display: flex;
+  align-items: center;
+  padding: ($localNavSideSpacing * .25) $localNavSideSpacing;
+  font-size: $kuiFontSize;
+  background-color: $localNavButtonBackgroundColor;
+  color: $localNavButtonTextColor;
+  border: 0;
+  cursor: pointer;
+  border-bottom: solid 2px transparent;
+
+  &:hover, &:focus {
+    background-color: rgba($localNavButtonBackgroundColor-isHover, .15);
+    text-decoration: underline;
+  }
+
+  &.kuiLocalMenuItem-isSelected {
+    color: $kuiColorBlue;
+    background-color: $localNavButtonBackgroundColor-isSelected;
+    border-color: $euiColorPrimary;
+    z-index: 2;
+
+    &:hover, &:focus {
+      text-decoration: none;
+    }
+  }
+
+  &.kuiLocalMenuItem-isDisabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+
+    &:hover {
+      background-color: transparent;
+      text-decoration: none;
+    }
+  }
+}
+
+    .kuiLocalMenuItem__icon {
+      margin-right: 5px;
+      margin-bottom: -1px;
+    }

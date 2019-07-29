@@ -1,0 +1,23 @@
+.kuiToolBar {
+  @include bar;
+  @include buttonOnStandoutBackground;
+  @include selectOnStandoutBackground;
+
+  padding: $toolBarPadding;
+  height: $toolBarHeight;
+  background-color: transparent;
+  border: solid 1px $kuiColorLightGray;
+}
+
+.kuiToolBarSection {
+  @include barSection;
+}
+
+/**
+ * 1. Override Bar styles and put Search on the left side.
+ */
+.kuiToolBar--searchOnly {
+  .kuiToolBarSearch {
+    margin-left: 0 !important; /* 1 */
+  }
+}

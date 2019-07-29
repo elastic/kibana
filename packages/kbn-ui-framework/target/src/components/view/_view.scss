@@ -1,0 +1,22 @@
+.kuiView {
+  background-color: $viewBackground;
+  flex: 1 1 auto;
+}
+
+.kuiViewContent {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  width: 100%;
+}
+
+.kuiViewContent--constrainedWidth {
+  width: 100%;
+  max-width: $viewContentMaxWidth;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.kuiViewContentItem {
+  padding-left: 20px;
+  padding-right: 20px;
+}

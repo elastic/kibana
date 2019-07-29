@@ -1,0 +1,1 @@
+{"version":3,"file":"boolean_type.d.ts","sourceRoot":"","sources":["../../../src/types/boolean_type.ts"],"names":[],"mappings":"AAqBA,OAAO,EAAE,IAAI,EAAE,WAAW,EAAE,MAAM,QAAQ,CAAC;AAE3C,qBAAa,WAAY,SAAQ,IAAI,CAAC,OAAO,CAAC;gBAChC,OAAO,CAAC,EAAE,WAAW,CAAC,OAAO,CAAC;IAI1C,SAAS,CAAC,WAAW,CAAC,IAAI,EAAE,MAAM,EAAE,EAAE,KAAK,EAAE,EAAE,MAAM,CAAC,MAAM,EAAE,GAAG,CAAC;CAKnE"}

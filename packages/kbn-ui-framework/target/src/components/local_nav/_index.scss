@@ -1,0 +1,44 @@
+// Normal colors
+$localNavTextColor: $kuiTextColor;
+$localNavBackgroundColor: $euiColorEmptyShade;
+$localNavButtonTextColor: $kuiTextColor;
+$localNavButtonTextColor-isHover: $kuiColorLightestGray;
+$localNavButtonBackgroundColor: transparent;
+$localNavButtonBackgroundColor-isHover: $kuiColorBlue;
+$localNavButtonBackgroundColor-isSelected: transparent;
+$localNavBreadcrumbDelimiterColor: $euiBorderColor;
+$localSearchBackgroundColor: $euiColorGhost;
+$localSearchBorderColor-isInvalid: $euiColorDanger;
+$localDropdownBackgroundColor: $localNavButtonBackgroundColor-isSelected;
+$localDropdownFormNoteTextColor: $euiColorDarkShade;
+$localTabTextColor: $kuiColorDarkestGray;
+$localTabTextColor-isHover: $kuiColorBlue;
+$localTabTextColor-isSelected: $kuiColorBlue;
+$localBreadcrumbLinkColor: $kuiColorBlue;
+$localSearchButtonBackgroundColor: $euiColorPrimary;
+$localSearchButtonTextColor: $euiColorGhost;
+$localDatePickerButtonHoverBackgroundColor: $localNavButtonBackgroundColor-isHover;
+$localDatePickerCellSelectedBackgroundColor: $euiColorDarkShade;
+$localDatePickerCellSelectedTextColor: $euiTextColor;
+
+// Spacing
+$localNavSideSpacing: $euiSizeS;
+$localSearchHeight: 32px;
+$localDatePickerBottomSpacing: 4px;
+$localDatePickerButtonPadding: 3px 6px;
+$localDatePickerCellPadding: 8px;
+// Match the height of body cells, but leave out side padding so content can expand without
+// affecting the cell's width.
+$localDatePickerHeaderCellPadding: #{$localDatePickerCellPadding + 1px} 0;
+$localDatePickerCellLineHeight: 1.2;
+
+// Fonts
+
+@import "local_breadcrumbs";
+@import "local_date_picker";
+@import "local_dropdown";
+@import "local_menu";
+@import "local_nav";
+@import "local_search";
+@import "local_tabs";
+@import "local_title";
