@@ -26,7 +26,7 @@ describe('get_host_name_from_influencers', () => {
     expect(hostName).toEqual(null);
   });
 
-  test('returns null if is given undefined influencers', () => {
+  test('returns null if it is given undefined influencers', () => {
     const hostName = getHostNameFromInfluencers();
     expect(hostName).toEqual(null);
   });
