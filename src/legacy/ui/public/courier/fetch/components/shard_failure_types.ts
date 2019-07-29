@@ -18,10 +18,10 @@
  */
 export interface Request {
   docvalue_fields: string[];
-  _source: any;
-  query: any;
-  script_fields: any;
-  sort: any;
+  _source: unknown;
+  query: unknown;
+  script_fields: unknown;
+  sort: unknown;
   stored_fields: string[];
 }
 export interface ResponseWithShardFailure {
