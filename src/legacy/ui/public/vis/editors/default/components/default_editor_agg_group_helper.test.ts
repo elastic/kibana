@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { AggConfig } from '../../../agg_config';
 import {
   isAggRemovable,
