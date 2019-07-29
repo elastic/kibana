@@ -29,8 +29,8 @@ export const App: React.FunctionComponent = () => {
     <SectionError
       title={
         <FormattedMessage
-          id="xpack.snapshotRestore.app.checkingPermissionsErrorMessage"
-          defaultMessage="Error fetching user permissions from the server."
+          id="xpack.snapshotRestore.app.checkingPrivilegesErrorMessage"
+          defaultMessage="Error fetching user privileges from the server."
         />
       }
       error={apiError}
@@ -41,8 +41,8 @@ export const App: React.FunctionComponent = () => {
         isLoading ? (
           <SectionLoading>
             <FormattedMessage
-              id="xpack.snapshotRestore.app.checkingPermissionsDescription"
-              defaultMessage="Checking permissions…"
+              id="xpack.snapshotRestore.app.checkingPrivilegesDescription"
+              defaultMessage="Checking privileges…"
             />
           </SectionLoading>
         ) : hasPrivileges ? (
@@ -77,13 +77,13 @@ export const App: React.FunctionComponent = () => {
             <NotAuthorizedSection
               title={
                 <FormattedMessage
-                  id="xpack.snapshotRestore.app.deniedPermissionTitle"
+                  id="xpack.snapshotRestore.app.deniedPrivilegeTitle"
                   defaultMessage="You're missing cluster privileges"
                 />
               }
               message={
                 <FormattedMessage
-                  id="xpack.snapshotRestore.app.deniedPermissionDescription"
+                  id="xpack.snapshotRestore.app.deniedPrivilegeDescription"
                   defaultMessage="To use Snapshot and Restore, you must have {privilegesCount,
                     plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
                   values={{

@@ -206,13 +206,13 @@ export const RestoreList: React.FunctionComponent = () => {
           <NotAuthorizedSection
             title={
               <FormattedMessage
-                id="xpack.snapshotRestore.restoreList.deniedPermissionTitle"
+                id="xpack.snapshotRestore.restoreList.deniedPrivilegeTitle"
                 defaultMessage="You're missing index privileges"
               />
             }
             message={
               <FormattedMessage
-                id="xpack.snapshotRestore.restoreList.deniedPermissionDescription"
+                id="xpack.snapshotRestore.restoreList.deniedPrivilegeDescription"
                 defaultMessage="To view snapshot restore status, you must have {privilegesCount,
                   plural, one {this index privilege} other {these index privileges}} for one or more indices: {missingPrivileges}."
                 values={{

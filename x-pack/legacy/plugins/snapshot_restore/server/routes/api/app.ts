@@ -59,17 +59,20 @@ export const getPrivilegesHandler: RouterRouteHandler = async (
   }
 
   // Get cluster priviliges
-  const { has_all_requested: hasPermission, cluster } = await callWithRequest('transport.request', {
-    path: '/_security/user/_has_privileges',
-    method: 'POST',
-    body: {
-      cluster: APP_REQUIRED_CLUSTER_PRIVILEGES,
-    },
-  });
+  const { has_all_requested: hasAllPrivileges, cluster } = await callWithRequest(
+    'transport.request',
+    {
+      path: '/_security/user/_has_privileges',
+      method: 'POST',
+      body: {
+        cluster: APP_REQUIRED_CLUSTER_PRIVILEGES,
+      },
+    }
+  );
 
-  // Find missing cluster privileges and set overall app permissions
+  // Find missing cluster privileges and set overall app privileges
   privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);
-  privilegesResult.hasAllPrivileges = hasPermission;
+  privilegesResult.hasAllPrivileges = hasAllPrivileges;
 
   // Get all index privileges the user has
   const { indices } = await callWithRequest('transport.request', {
