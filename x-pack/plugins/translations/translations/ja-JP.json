@@ -815,7 +815,6 @@
     "data.query.queryBar.syntaxOptionsTitle": "構文オプション",
     "kibana_react.search.searchBar.filtersButtonClickToHideTitle": "選択して表示",
     "kibana_react.search.searchBar.filtersButtonClickToShowTitle": "選択して非表示",
-    "kibana_react.search.searchBar.filtersButtonFiltersAppliedTitle": "フィルターが適用されました。",
     "embeddableApi.actionPanel.title": "オプション",
     "embeddableApi.actions.applyFilterActionTitle": "現在のビューにフィルターを適用",
     "embeddableApi.addPanel.createNew": "新規 {factoryName} を作成",
