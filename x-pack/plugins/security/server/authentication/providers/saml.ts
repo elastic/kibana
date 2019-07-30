@@ -271,7 +271,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Login has been performed with SAML response.');
       return AuthenticationResult.redirectTo(
         stateRedirectURL || `${this.options.basePath.get(request)}/`,
-        { accessToken, refreshToken }
+        { state: { accessToken, refreshToken } }
       );
     } catch (err) {
       this.logger.debug(`Failed to log in with SAML response: ${err.message}`);
@@ -350,7 +350,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       );
       return AuthenticationResult.redirectTo(
         `${this.options.basePath.get(request)}/overwritten_session`,
-        newState
+        { state: newState }
       );
     }
 
@@ -466,7 +466,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.redirectTo(
         redirect,
         // Store request id in the state so that we can reuse it once we receive `SAMLResponse`.
-        { requestId, nextURL: `${this.options.basePath.get(request)}${request.url.path}` }
+        {
+          state: { requestId, nextURL: `${this.options.basePath.get(request)}${request.url.path}` },
+        }
       );
     } catch (err) {
       this.logger.debug(`Failed to initiate SAML handshake: ${err.message}`);

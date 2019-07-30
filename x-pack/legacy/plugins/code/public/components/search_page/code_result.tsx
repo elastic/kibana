@@ -5,6 +5,7 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { IPosition } from 'monaco-editor';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -63,7 +64,10 @@ export class CodeResult extends React.PureComponent<Props> {
               <EuiBadge color="default">{hits}</EuiBadge>
             </EuiFlexItem>
             <EuiText size="s">
-              &nbsp;hits from&nbsp;
+              <FormattedMessage
+                id="xpack.code.searchPage.hitsCountText"
+                defaultMessage=" hits from "
+              />
               <Link to={fileLinkUrl} data-test-subj="codeSearchResultFileItem">
                 {filePath}
               </Link>

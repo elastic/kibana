@@ -84,6 +84,30 @@ describe('KibanaMigrator', () => {
       const migrationResults = await new KibanaMigrator({ kbnServer }).awaitMigration();
       expect(migrationResults.length).toEqual(2);
     });
+
+    it('only handles and deletes index templates once', async () => {
+      const { kbnServer } = mockKbnServer();
+      const clusterStub = jest.fn<any, any>(() => ({ status: 404 }));
+      const waitUntilReady = jest.fn(async () => undefined);
+
+      kbnServer.server.plugins.elasticsearch = {
+        waitUntilReady,
+        getCluster() {
+          return {
+            callWithInternalUser: clusterStub,
+          };
+        },
+      };
+
+      await new KibanaMigrator({ kbnServer }).awaitMigration();
+
+      // callCluster with "cat.templates" is called by "deleteIndexTemplates" function
+      // and should only be done once
+      const callClusterCommands = clusterStub.mock.calls
+        .map(([callClusterPath]) => callClusterPath)
+        .filter(callClusterPath => callClusterPath === 'cat.templates');
+      expect(callClusterCommands.length).toBe(1);
+    });
   });
 });
 
