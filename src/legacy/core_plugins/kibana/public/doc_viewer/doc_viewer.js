@@ -21,24 +21,16 @@ import { EuiTabbedContent } from '@elastic/eui';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerAngularTab } from './doc_viewer_angular_tab';
 
-
 export function DocViewer({ docViews, renderProps }) {
-  const tabs = docViews.map(({ title, render, directive }) => {
+  const tabs = docViews.map(({ title, render, directive, component }) => {
     let content;
-
-    if (render) {
+    if (component) {
+      const Component = component;
+      content = <Component {...renderProps} />;
+    } else if (render) {
       content = <DocViewRenderTab render={render} renderProps={renderProps} />;
     } else {
-      try {
-        content = (
-          <DocViewerAngularTab
-            renderProps={renderProps}
-            directive={directive}
-          />
-        );
-      } catch (e) {
-        content = <span>Exception at rendering DocViewerAngularTab</span>;
-      }
+      content = <DocViewerAngularTab renderProps={renderProps} directive={directive} />;
     }
 
     return {
