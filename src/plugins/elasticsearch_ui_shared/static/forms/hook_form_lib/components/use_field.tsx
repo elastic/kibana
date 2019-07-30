@@ -36,7 +36,7 @@ export const UseField = ({
   path,
   config,
   form,
-  defaultValue,
+  defaultValue = form.__getFieldDefaultValue(path),
   component = 'input',
   componentProps = {},
   children,
@@ -45,15 +45,9 @@ export const UseField = ({
     config = form.__readFieldConfigFromSchema(path);
   }
 
-  // Default value on props takes over any possible default value
-  // provided when initiating the form.
-  const _defaultValue = defaultValue || form.__getFieldDefaultValue(path);
-
   // Don't modify the config object
   const configCopy =
-    typeof _defaultValue !== 'undefined'
-      ? { ...config, defaultValue: _defaultValue }
-      : { ...config };
+    typeof defaultValue !== 'undefined' ? { ...config, defaultValue } : { ...config };
 
   if (!configCopy.path) {
     configCopy.path = path;
@@ -67,13 +61,12 @@ export const UseField = ({
 
   const field = useField(form, path, configCopy);
 
-  // Remove field from form when it is unmounted
-  useEffect(
-    () => () => {
+  // Remove field from form when it is unmounted or if its path changes
+  useEffect(() => {
+    return () => {
       form.__removeField(path);
-    },
-    []
-  );
+    };
+  }, [path]);
 
   // Children prevails over anything else provided.
   if (children) {

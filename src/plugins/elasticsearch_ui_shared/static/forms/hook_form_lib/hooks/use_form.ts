@@ -109,7 +109,7 @@ export const useForm = <T = FormData>(
   const addField: Form<T>['__addField'] = field => {
     fieldsRefs.current[field.path] = field;
 
-    // Only update the formData if the path does not exist (= it is the _first_ time
+    // Only update the formData if the path does not exist (it is the _first_ time
     // the field is added), to avoid entering an infinite loop when the form is re-rendered.
     if (!{}.hasOwnProperty.call(formData$.current.value, field.path)) {
       updateFormDataAt(field.path, field.__getOutputValue());
@@ -124,35 +124,10 @@ export const useForm = <T = FormData>(
       delete fieldsRefs.current[name];
       delete currentFormData[name];
     });
+
     formData$.current.next(currentFormData as T);
-
-    // Wait next tick to make sure all the fields have their
-    // values updated after the DOM has been updated
-    setTimeout(() => {
-      validateFields();
-    });
   };
 
-  /**
-   * Remove all fields whose path starts with the pattern provided.
-   * Usefull for removing all the elements of an Array
-   * for example (e.g pattern = "colors." => "colors.0, colors.1" would be removed.)
-   *
-   * @param pattern The path pattern to match
-   */
-  const removeFieldsStartingWith: Form<T>['__removeFieldsStartingWith'] = pattern => {
-    Object.keys(fieldsRefs.current).forEach(key => {
-      if (key.startsWith(pattern)) {
-        delete fieldsRefs.current[key];
-      }
-    });
-
-    // As removing a field implies that it is also removed from the DOM
-    // we need to first wait for the the DOM to be updated _before_ validating the form fields.
-    setTimeout(() => {
-      validateFields();
-    });
-  };
   const setFieldValue: Form<T>['setFieldValue'] = (fieldName, value) => {
     fieldsRefs.current[fieldName].setValue(value);
   };
@@ -205,7 +180,6 @@ export const useForm = <T = FormData>(
     __addField: addField,
     __removeField: removeField,
     __validateFields: validateFields,
-    __removeFieldsStartingWith: removeFieldsStartingWith,
     __getFieldDefaultValue: getFieldDefaultValue,
   };
 

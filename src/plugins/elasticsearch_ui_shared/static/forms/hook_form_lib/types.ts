@@ -33,7 +33,6 @@ export interface Form<T = FormData> {
   __removeField: (fieldNames: string | string[]) => void;
   __validateFields: (fieldNames?: string[]) => Promise<boolean>;
   __getFormData: (options?: { unflatten?: boolean }) => T;
-  __removeFieldsStartingWith: (pattern: string) => void;
   __updateFormDataAt: (field: string, value: unknown) => T;
   __getFieldDefaultValue: (fieldName: string) => unknown;
   __readFieldConfigFromSchema: (fieldName: string) => FieldConfig;
@@ -110,8 +109,8 @@ export interface FieldsMap {
 export type FormSubmitHandler<T> = (formData: T, isValid: boolean) => Promise<void>;
 
 export interface ValidationError {
-  code: string;
   message: string | ((error: ValidationError) => string);
+  code?: string;
   validationType?: string;
   [key: string]: any;
 }
