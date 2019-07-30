@@ -8,7 +8,14 @@ import React, { Fragment, SFC, useContext } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow, EuiText } from '@elastic/eui';
+import {
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiText,
+} from '@elastic/eui';
 
 import { AggListSummary } from '../aggregation_list';
 import { GroupByListSummary } from '../group_by_list';
@@ -21,7 +28,8 @@ const defaultSearch = '*';
 const emptySearch = '';
 
 export const StepDefineSummary: SFC<StepDefineExposedState> = ({
-  search,
+  searchString,
+  searchQuery,
   groupByList,
   aggList,
 }) => {
@@ -31,15 +39,24 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
     return null;
   }
 
-  const pivotQuery = getPivotQuery(search);
-
-  const displaySearch = search === defaultSearch ? emptySearch : search;
+  const pivotQuery = getPivotQuery(searchQuery);
+  let useCodeBlock = false;
+  let displaySearch;
+  // searchString set to empty once source config editor used - display query instead
+  if (searchString === emptySearch) {
+    displaySearch = JSON.stringify(searchQuery, null, 2);
+    useCodeBlock = true;
+  } else if (searchString === defaultSearch) {
+    displaySearch = emptySearch;
+  } else {
+    displaySearch = searchString;
+  }
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <EuiForm>
-          {kibanaContext.currentSavedSearch.id === undefined && typeof search === 'string' && (
+          {kibanaContext.currentSavedSearch.id === undefined && typeof searchString === 'string' && (
             <Fragment>
               <EuiFormRow
                 label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.indexPatternLabel', {
@@ -48,13 +65,34 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
               >
                 <span>{kibanaContext.currentIndexPattern.title}</span>
               </EuiFormRow>
-              {displaySearch !== emptySearch && (
+              {useCodeBlock === false && displaySearch !== emptySearch && (
                 <EuiFormRow
                   label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.queryLabel', {
                     defaultMessage: 'Query',
                   })}
                 >
                   <span>{displaySearch}</span>
+                </EuiFormRow>
+              )}
+              {useCodeBlock === true && displaySearch !== emptySearch && (
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.ml.dataframe.stepDefineSummary.queryCodeBlockLabel',
+                    {
+                      defaultMessage: 'Query',
+                    }
+                  )}
+                >
+                  <EuiCodeBlock
+                    language="js"
+                    fontSize="s"
+                    paddingSize="s"
+                    color="light"
+                    overflowHeight={300}
+                    isCopyable
+                  >
+                    {displaySearch}
+                  </EuiCodeBlock>
                 </EuiFormRow>
               )}
             </Fragment>

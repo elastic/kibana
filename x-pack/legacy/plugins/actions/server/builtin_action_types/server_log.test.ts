@@ -114,7 +114,9 @@ describe('execute()', () => {
 
     services.log = mockLog;
     const actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+    const id = 'some-id';
     await actionType.executor({
+      id,
       services: {
         log: mockLog,
         callCluster: async (path: string, opts: any) => {},

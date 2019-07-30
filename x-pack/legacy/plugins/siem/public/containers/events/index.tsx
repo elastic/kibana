@@ -116,7 +116,7 @@ class EventsComponentQuery extends QueryTemplatePaginated<
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Events.pageInfo', data),
             refetch,
-            totalCount: getOr(0, 'source.Events.totalCount', data),
+            totalCount: getOr(-1, 'source.Events.totalCount', data),
           });
         }}
       </Query>
