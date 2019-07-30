@@ -32,6 +32,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { FieldFilter, Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
@@ -293,7 +294,11 @@ class FilterEditorUI extends Component<Props, State> {
 
   private renderCustomEditor() {
     return (
-      <EuiFormRow label="Value">
+      <EuiFormRow
+        label={i18n.translate('data.filter.filterEditor.queryDslLabel', {
+          defaultMessage: 'Elasticsearch Query DSL',
+        })}
+      >
         <EuiCodeEditor
           value={this.state.queryDsl}
           onChange={this.onQueryDslChange}
