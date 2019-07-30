@@ -19,6 +19,7 @@ export default function({ getService }: TestInvoker) {
       expectSpaceAwareResults,
       createExpectDoesntExistNotFound,
       expectNotSpaceAwareResults,
+      expectSpaceNotFound,
       updateTest,
     } = updateTestSuiteFactory(esArchiver, supertest);
 
@@ -32,6 +33,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
+        },
+        hiddenType: {
+          statusCode: 404,
+          response: expectSpaceNotFound,
         },
         doesntExist: {
           statusCode: 404,
@@ -51,6 +56,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
         },
+        hiddenType: {
+          statusCode: 404,
+          response: expectSpaceNotFound,
+        },
         doesntExist: {
           statusCode: 404,
           response: createExpectDoesntExistNotFound(SPACES.SPACE_1.spaceId),
@@ -69,6 +78,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
+        },
+        hiddenType: {
+          statusCode: 404,
+          response: expectSpaceNotFound,
         },
         doesntExist: {
           statusCode: 404,

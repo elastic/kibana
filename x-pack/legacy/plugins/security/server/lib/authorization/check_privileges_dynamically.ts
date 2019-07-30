@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import { CheckPrivilegesAtResourceResponse, CheckPrivilegesWithRequest } from './check_privileges';
 
 /*
@@ -12,7 +13,7 @@ import { CheckPrivilegesAtResourceResponse, CheckPrivilegesWithRequest } from '.
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesPlugin } from '../../../../spaces/types';
+import { SpacesPlugin } from '../../../../spaces';
 import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 
 export type CheckPrivilegesDynamically = (
@@ -20,14 +21,14 @@ export type CheckPrivilegesDynamically = (
 ) => Promise<CheckPrivilegesAtResourceResponse>;
 
 export type CheckPrivilegesDynamicallyWithRequest = (
-  request: Record<string, any>
+  request: Legacy.Request
 ) => CheckPrivilegesDynamically;
 
 export function checkPrivilegesDynamicallyWithRequestFactory(
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest,
   spaces: OptionalPlugin<SpacesPlugin>
 ): CheckPrivilegesDynamicallyWithRequest {
-  return function checkPrivilegesDynamicallyWithRequest(request: Record<string, any>) {
+  return function checkPrivilegesDynamicallyWithRequest(request: Legacy.Request) {
     const checkPrivileges = checkPrivilegesWithRequest(request);
     return async function checkPrivilegesDynamically(
       privilegeOrPrivileges: string | string[],
