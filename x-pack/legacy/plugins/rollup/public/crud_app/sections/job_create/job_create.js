@@ -93,20 +93,20 @@ export class JobCreateUi extends Component {
     super(props);
 
     chrome.breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb, createBreadcrumb]);
-    const { jobToClone: overrides } = props;
+    const { jobToClone: stepDefaultOverrides } = props;
     const stepsFields = mapValues(stepIdToStepConfigMap, step =>
-      cloneDeep(step.getDefaultFields(overrides))
+      cloneDeep(step.getDefaultFields(stepDefaultOverrides))
     );
 
     this.state = {
-      jobToClone: { ...overrides },
+      jobToClone: { ...stepDefaultOverrides },
       checkpointStepId: stepIds[0],
       currentStepId: stepIds[0],
       nextStepId: stepIds[1],
       previousStepId: undefined,
       stepsFieldErrors: this.getStepsFieldsErrors(stepsFields),
       // Show step errors immediately if we are cloning a job.
-      areStepErrorsVisible: !!overrides,
+      areStepErrorsVisible: !!stepDefaultOverrides,
       stepsFields,
       isValidatingIndexPattern: false,
       indexPatternAsyncErrors: undefined,
