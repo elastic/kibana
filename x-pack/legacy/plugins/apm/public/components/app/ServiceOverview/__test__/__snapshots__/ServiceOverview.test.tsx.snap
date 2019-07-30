@@ -163,7 +163,6 @@ NodeList [
           class="euiToolTipAnchor"
         >
           <a
-            aria-describedby="service-name-tooltip"
             class="euiLink euiLink--primary sc-bdVaJa eQDnXY"
             href="#/services/My Go Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
             rel="noreferrer"
@@ -262,7 +261,6 @@ NodeList [
           class="euiToolTipAnchor"
         >
           <a
-            aria-describedby="service-name-tooltip"
             class="euiLink euiLink--primary sc-bdVaJa eQDnXY"
             href="#/services/My Python Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
             rel="noreferrer"
