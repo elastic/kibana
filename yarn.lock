@@ -10681,10 +10681,10 @@ download@^5.0.3:
     mkdirp "^0.5.1"
     pify "^2.3.0"
 
-dragselect@1.8.1:
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/dragselect/-/dragselect-1.8.1.tgz#63f71a6f980f710c87e28b328e175b7afc9e162b"
-  integrity sha512-4YbJCcS6zwK8vMX2GiIX3tUrXFSo9a6xmV2z66EIJ8nj+iMHP1o4j0PeFdf5zjfhqVZJi+6zuVKPZInnrTLMbw==
+dragselect@1.13.1:
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/dragselect/-/dragselect-1.13.1.tgz#aa4166e1164b51ed5ee0cd89e0c5310a9c35be6a"
+  integrity sha512-spfUz6/sNnlY4fF/OxPBwaKLa5hVz6V+fq5XhVuD+h47RAkA75TMkfvr4AoWUh5Ufq3V1oIAbfu+sjc9QbewoA==
 
 duplexer2@0.0.2, duplexer2@~0.0.2:
   version "0.0.2"
