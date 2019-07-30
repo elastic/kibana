@@ -17,6 +17,18 @@
  * under the License.
  */
 
-export * from './plugins_service';
-export { Plugin, PluginInitializer, PluginOpaqueId } from './plugin';
-export { PluginInitializerContext } from './plugin_context';
+import { IContextContainer } from './context';
+
+export type ContextContainerMock = jest.Mocked<IContextContainer<any, any, any>>;
+
+const createContextMock = () => {
+  const contextMock: ContextContainerMock = {
+    registerContext: jest.fn(),
+    createHandler: jest.fn(),
+  };
+  return contextMock;
+};
+
+export const contextMock = {
+  create: createContextMock,
+};
