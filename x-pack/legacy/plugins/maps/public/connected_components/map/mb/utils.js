@@ -5,57 +5,19 @@
  */
 
 import _ from 'lodash';
-import mapboxgl from 'mapbox-gl';
-import chrome from 'ui/chrome';
-import { MAKI_SPRITE_PATH } from '../../../../common/constants';
-
-function relativeToAbsolute(url) {
-  const a = document.createElement('a');
-  a.setAttribute('href', url);
-  return a.href;
-}
-
-export async function createMbMapInstance({ node, initialView, scrollZoom }) {
-  const makiUrl = relativeToAbsolute(chrome.addBasePath(MAKI_SPRITE_PATH));
-  return new Promise((resolve) => {
-    const options = {
-      attributionControl: false,
-      container: node,
-      style: {
-        version: 8,
-        sources: {},
-        layers: [],
-        sprite: makiUrl
-      },
-      scrollZoom,
-      preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false)
-    };
-    if (initialView) {
-      options.zoom = initialView.zoom;
-      options.center = {
-        lng: initialView.lon,
-        lat: initialView.lat
-      };
-    }
-    const mbMap = new mapboxgl.Map(options);
-    mbMap.dragRotate.disable();
-    mbMap.touchZoomRotate.disableRotation();
-    mbMap.addControl(
-      new mapboxgl.NavigationControl({ showCompass: false }), 'top-left'
-    );
-    mbMap.on('load', () => {
-      resolve(mbMap);
-    });
-  });
-}
 
 export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
-  const layerIds = layerList.map((layer) => layer.getId());
+
   const mbStyle = mbMap.getStyle();
   const mbSourcesToRemove = [];
   for (const sourceId in mbStyle.sources) {
-    if (layerIds.indexOf(sourceId) === -1) {
-      mbSourcesToRemove.push(sourceId);
+    if (mbStyle.sources.hasOwnProperty(sourceId)) {
+      const layer = layerList.find(layer => {
+        return layer.ownsMbSourceId(sourceId);
+      });
+      if (!layer) {
+        mbSourcesToRemove.push(sourceId);
+      }
     }
   }
   const mbLayersToRemove = [];
@@ -73,32 +35,62 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
 
 }
 
-export function syncLayerOrder(mbMap, layerList) {
-  if (layerList && layerList.length) {
-    const mbLayers = mbMap.getStyle().layers.slice();
-    const currentLayerOrder = _.uniq( // Consolidate layers and remove suffix
-      mbLayers.map(({ id }) => id.substring(0, id.lastIndexOf('_'))));
-    const newLayerOrder = layerList.map(l => l.getId())
-      .filter(layerId => currentLayerOrder.includes(layerId));
-    let netPos = 0;
-    let netNeg = 0;
-    const movementArr = currentLayerOrder.reduce((accu, id, idx) => {
-      const movement = newLayerOrder.findIndex(newOId => newOId === id) - idx;
-      movement > 0 ? netPos++ : movement < 0 && netNeg++;
-      accu.push({ id, movement });
-      return accu;
-    }, []);
-    if (netPos === 0 && netNeg === 0) { return; }
-    const movedLayer = (netPos >= netNeg) && movementArr.find(l => l.movement < 0).id ||
-      (netPos < netNeg) && movementArr.find(l => l.movement > 0).id;
-    const nextLayerIdx = newLayerOrder.findIndex(layerId => layerId === movedLayer) + 1;
-    const nextLayerId = nextLayerIdx === newLayerOrder.length ? null :
-      mbLayers.find(({ id }) => id.startsWith(newLayerOrder[nextLayerIdx])).id;
+/**
+ * This is function assumes only a single layer moved in the layerList, compared to mbMap
+ * It is optimized to minimize the amount of mbMap.moveLayer calls.
+ * @param mbMap
+ * @param layerList
+ */
+export function syncLayerOrderForSingleLayer(mbMap, layerList) {
 
-    mbLayers.forEach(({ id }) => {
-      if (id.startsWith(movedLayer)) {
-        mbMap.moveLayer(id, nextLayerId);
-      }
-    });
+  if (!layerList || layerList.length === 0) {
+    return;
   }
+
+
+  const mbLayers = mbMap.getStyle().layers.slice();
+  const layerIds = mbLayers.map(mbLayer => {
+    const layer = layerList.find(layer => layer.ownsMbLayerId(mbLayer.id));
+    return layer.getId();
+  });
+
+  const currentLayerOrderLayerIds = _.uniq(layerIds);
+
+  const newLayerOrderLayerIdsUnfiltered = layerList.map(l => l.getId());
+  const newLayerOrderLayerIds  = newLayerOrderLayerIdsUnfiltered.filter(layerId =>  currentLayerOrderLayerIds.includes(layerId));
+
+  let netPos = 0;
+  let netNeg = 0;
+  const movementArr = currentLayerOrderLayerIds.reduce((accu, id, idx) => {
+    const movement = newLayerOrderLayerIds.findIndex(newOId => newOId === id) - idx;
+    movement > 0 ? netPos++ : movement < 0 && netNeg++;
+    accu.push({ id, movement });
+    return accu;
+  }, []);
+  if (netPos === 0 && netNeg === 0) {
+    return;
+  }
+  const movedLayerId = (netPos >= netNeg) && movementArr.find(l => l.movement < 0).id ||
+      (netPos < netNeg) && movementArr.find(l => l.movement > 0).id;
+  const nextLayerIdx = newLayerOrderLayerIds.findIndex(layerId => layerId === movedLayerId) + 1;
+
+  let nextMbLayerId;
+  if (nextLayerIdx === newLayerOrderLayerIds.length) {
+    nextMbLayerId = null;
+  } else {
+    const foundLayer = mbLayers.find(({ id: mbLayerId }) => {
+      const layerId = newLayerOrderLayerIds[nextLayerIdx];
+      const layer = layerList.find(layer => layer.getId() === layerId);
+      return layer.ownsMbLayerId(mbLayerId);
+    });
+    nextMbLayerId = foundLayer.id;
+  }
+
+  const movedLayer = layerList.find(layer => layer.getId() === movedLayerId);
+  mbLayers.forEach(({ id: mbLayerId }) => {
+    if (movedLayer.ownsMbLayerId(mbLayerId)) {
+      mbMap.moveLayer(mbLayerId, nextMbLayerId);
+    }
+  });
+
 }

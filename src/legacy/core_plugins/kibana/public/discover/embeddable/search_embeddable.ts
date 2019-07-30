@@ -29,6 +29,8 @@ import { getTime } from 'ui/timefilter/get_time';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { Filter, FilterStateStore } from '@kbn/es-query';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Embeddable,
@@ -93,6 +95,10 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private subscription?: Subscription;
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private filterGen: FilterManager;
+
+  private prevTimeRange?: TimeRange;
+  private prevFilters?: Filter[];
+  private prevQuery?: Query;
 
   constructor(
     {
@@ -259,10 +265,20 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     searchScope.sort = this.input.sort || this.savedSearch.sort;
     searchScope.sharedItemTitle = this.panelTitle;
 
-    this.filtersSearchSource.setField('filter', this.input.filters);
-    this.filtersSearchSource.setField('query', this.input.query);
+    if (
+      !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
+      !_.isEqual(this.prevQuery, this.input.query) ||
+      !_.isEqual(this.prevTimeRange, this.input.timeRange)
+    ) {
+      this.filtersSearchSource.setField('filter', this.input.filters);
+      this.filtersSearchSource.setField('query', this.input.query);
 
-    // Sadly this is neccessary to tell the angular component to refetch the data.
-    this.courier.fetch();
+      // Sadly this is neccessary to tell the angular component to refetch the data.
+      this.courier.fetch();
+
+      this.prevFilters = this.input.filters;
+      this.prevQuery = this.input.query;
+      this.prevTimeRange = this.input.timeRange;
+    }
   }
 }

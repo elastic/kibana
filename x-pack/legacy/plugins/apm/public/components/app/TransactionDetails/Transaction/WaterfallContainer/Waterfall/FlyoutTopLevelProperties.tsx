@@ -11,8 +11,8 @@ import {
   TRANSACTION_NAME
 } from '../../../../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/Transaction';
-import { APMLink } from '../../../../../shared/Links/APMLink';
-import { TransactionLink } from '../../../../../shared/Links/TransactionLink';
+import { APMLink } from '../../../../../shared/Links/apm/APMLink';
+import { TransactionLink } from '../../../../../shared/Links/apm/TransactionLink';
 import { StickyProperties } from '../../../../../shared/StickyProperties';
 
 interface Props {
@@ -31,7 +31,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       }),
       fieldName: SERVICE_NAME,
       val: (
-        <APMLink path={`/${transaction.service.name}`}>
+        <APMLink path={`/services/${transaction.service.name}`}>
           {transaction.service.name}
         </APMLink>
       ),

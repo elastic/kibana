@@ -36,12 +36,12 @@ export const getSavedObjectsClient = () => {
 
 const basePath = chrome.addBasePath(ROUTES.API_ROOT);
 
-export const loadWatches = (interval: number) => {
+export const loadWatches = (pollIntervalMs: number) => {
   return useRequest({
     path: `${basePath}/watches`,
     method: 'get',
-    interval,
-    processData: ({ watches = [] }: { watches: any[] }) => {
+    pollIntervalMs,
+    deserializer: ({ watches = [] }: { watches: any[] }) => {
       return watches.map((watch: any) => Watch.fromUpstreamJson(watch));
     },
   });
@@ -51,7 +51,7 @@ export const loadWatchDetail = (id: string) => {
   return useRequest({
     path: `${basePath}/watch/${id}`,
     method: 'get',
-    processData: ({ watch = {} }: { watch: any }) => Watch.fromUpstreamJson(watch),
+    deserializer: ({ watch = {} }: { watch: any }) => Watch.fromUpstreamJson(watch),
   });
 };
 
@@ -65,7 +65,7 @@ export const loadWatchHistory = (id: string, startTime: string) => {
   return useRequest({
     path,
     method: 'get',
-    processData: ({ watchHistoryItems = [] }: { watchHistoryItems: any }) => {
+    deserializer: ({ watchHistoryItems = [] }: { watchHistoryItems: any }) => {
       return watchHistoryItems.map((historyItem: any) =>
         WatchHistoryItem.fromUpstreamJson(historyItem)
       );
@@ -75,9 +75,9 @@ export const loadWatchHistory = (id: string, startTime: string) => {
 
 export const loadWatchHistoryDetail = (id: string | undefined) => {
   return useRequest({
-    path: !id ? undefined : `${basePath}/history/${id}`,
+    path: !id ? '' : `${basePath}/history/${id}`,
     method: 'get',
-    processData: ({ watchHistoryItem }: { watchHistoryItem: any }) =>
+    deserializer: ({ watchHistoryItem }: { watchHistoryItem: any }) =>
       WatchHistoryItem.fromUpstreamJson(watchHistoryItem),
   });
 };
@@ -164,7 +164,7 @@ export const getWatchVisualizationData = (watchModel: BaseWatch, visualizeOption
       watch: watchModel.upstreamJson,
       options: visualizeOptions.upstreamJson,
     },
-    processData: ({ visualizeData }: { visualizeData: any }) => visualizeData,
+    deserializer: ({ visualizeData }: { visualizeData: any }) => visualizeData,
   });
 };
 
@@ -172,7 +172,7 @@ export const loadSettings = () => {
   return useRequest({
     path: `${basePath}/settings`,
     method: 'get',
-    processData: (data: {
+    deserializer: (data: {
       action_types: {
         [key: string]: {
           enabled: boolean;

@@ -12,6 +12,7 @@ import {
   UIM_REPOSITORY_DELETE_MANY,
   UIM_REPOSITORY_DETAIL_PANEL_VERIFY,
 } from '../../constants';
+import { uiMetricService } from '../ui_metric';
 import { httpService } from './http';
 import { sendRequest, useRequest } from './use_request';
 
@@ -30,14 +31,17 @@ export const useLoadRepository = (name: Repository['name']) => {
   });
 };
 
-export const verifyRepository = (name: Repository['name']) => {
-  return sendRequest({
+export const verifyRepository = async (name: Repository['name']) => {
+  const result = await sendRequest({
     path: httpService.addBasePath(
       `${API_BASE_PATH}repositories/${encodeURIComponent(name)}/verify`
     ),
     method: 'get',
-    uimActionType: UIM_REPOSITORY_DETAIL_PANEL_VERIFY,
   });
+
+  const { trackUiMetric } = uiMetricService;
+  trackUiMetric(UIM_REPOSITORY_DETAIL_PANEL_VERIFY);
+  return result;
 };
 
 export const useLoadRepositoryTypes = () => {
@@ -49,31 +53,40 @@ export const useLoadRepositoryTypes = () => {
 };
 
 export const addRepository = async (newRepository: Repository | EmptyRepository) => {
-  return sendRequest({
+  const result = await sendRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}repositories`),
     method: 'put',
     body: newRepository,
-    uimActionType: UIM_REPOSITORY_CREATE,
   });
+
+  const { trackUiMetric } = uiMetricService;
+  trackUiMetric(UIM_REPOSITORY_CREATE);
+  return result;
 };
 
 export const editRepository = async (editedRepository: Repository | EmptyRepository) => {
-  return sendRequest({
+  const result = await sendRequest({
     path: httpService.addBasePath(
       `${API_BASE_PATH}repositories/${encodeURIComponent(editedRepository.name)}`
     ),
     method: 'put',
     body: editedRepository,
-    uimActionType: UIM_REPOSITORY_UPDATE,
   });
+
+  const { trackUiMetric } = uiMetricService;
+  trackUiMetric(UIM_REPOSITORY_UPDATE);
+  return result;
 };
 
 export const deleteRepositories = async (names: Array<Repository['name']>) => {
-  return sendRequest({
+  const result = await sendRequest({
     path: httpService.addBasePath(
       `${API_BASE_PATH}repositories/${names.map(name => encodeURIComponent(name)).join(',')}`
     ),
     method: 'delete',
-    uimActionType: names.length > 1 ? UIM_REPOSITORY_DELETE_MANY : UIM_REPOSITORY_DELETE,
   });
+
+  const { trackUiMetric } = uiMetricService;
+  trackUiMetric(names.length > 1 ? UIM_REPOSITORY_DELETE_MANY : UIM_REPOSITORY_DELETE);
+  return result;
 };
