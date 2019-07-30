@@ -18,7 +18,6 @@
  */
 
 import React from 'react';
-
 // @ts-ignore
 import { MetricSeries } from './series';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
