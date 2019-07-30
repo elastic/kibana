@@ -51,19 +51,19 @@ VisTypesRegistryProvider.register(function (Private) {
       collections: {
         scales: [
           {
-            text: i18n.translate('tagCloud.vis.editorConfig.collections.scales.linear', {
+            text: i18n.translate('tagCloud.vis.editorConfig.scales.linearText', {
               defaultMessage: 'Linear'
             }),
             value: 'linear'
           },
           {
-            text: i18n.translate('tagCloud.vis.editorConfig.collections.scales.log', {
+            text: i18n.translate('tagCloud.vis.editorConfig.scales.logText', {
               defaultMessage: 'Log'
             }),
             value: 'log'
           },
           {
-            text: i18n.translate('tagCloud.vis.editorConfig.collections.scales.squareRoot', {
+            text: i18n.translate('tagCloud.vis.editorConfig.scales.squareRootText', {
               defaultMessage: 'Square root'
             }),
             value: 'square root'
@@ -71,19 +71,19 @@ VisTypesRegistryProvider.register(function (Private) {
         ],
         orientations: [
           {
-            text: i18n.translate('tagCloud.vis.editorConfig.collections.orientations.single', {
+            text: i18n.translate('tagCloud.vis.editorConfig.orientations.singleText', {
               defaultMessage: 'Single'
             }),
             value: 'single'
           },
           {
-            text: i18n.translate('tagCloud.vis.editorConfig.collections.orientations.rightAngled', {
+            text: i18n.translate('tagCloud.vis.editorConfig.orientations.rightAngledText', {
               defaultMessage: 'Right angled'
             }),
             value: 'right angled'
           },
           {
-            text: i18n.translate('tagCloud.vis.editorConfig.collections.orientations.multiple', {
+            text: i18n.translate('tagCloud.vis.editorConfig.orientations.multipleText', {
               defaultMessage: 'Multiple'
             }),
             value: 'multiple'

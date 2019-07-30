@@ -52,25 +52,25 @@ export default function HistogramVisType(Private) {
       collections: {
         legendPositions: [
           {
-            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.collections.legendPositions.left', {
+            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.leftText', {
               defaultMessage: 'Left'
             }),
             value: 'left'
           },
           {
-            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.collections.legendPositions.right', {
+            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.rightText', {
               defaultMessage: 'Right'
             }),
             value: 'right'
           },
           {
-            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.collections.legendPositions.top', {
+            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.topText', {
               defaultMessage: 'Top'
             }),
             value: 'top'
           },
           {
-            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.collections.legendPositions.bottom', {
+            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.bottomText', {
               defaultMessage: 'Bottom'
             }),
             value: 'bottom'

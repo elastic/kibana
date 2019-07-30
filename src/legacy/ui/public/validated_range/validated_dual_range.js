@@ -100,6 +100,7 @@ ValidatedDualRange.propTypes = {
   allowEmptyRange: PropTypes.bool,
   fullWidth: PropTypes.bool,
   compressed: PropTypes.bool,
+  label: PropTypes.node,
 };
 
 ValidatedDualRange.defaultProps = {
