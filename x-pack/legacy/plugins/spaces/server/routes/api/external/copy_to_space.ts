@@ -29,7 +29,6 @@ interface ResolveConflictsPayload {
       type: string;
       id: string;
       overwrite: boolean;
-      replaceReferences: Array<{ type: string; from: string; to: string }>;
     }>;
   }>;
 }
@@ -138,15 +137,6 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
                     type: Joi.string().required(),
                     id: Joi.string().required(),
                     overwrite: Joi.boolean().default(false),
-                    replaceReferences: Joi.array()
-                      .items(
-                        Joi.object({
-                          to: Joi.string().required(),
-                          from: Joi.string().required(),
-                          type: Joi.string().required(),
-                        })
-                      )
-                      .default([]),
                   })
                 ),
               })

@@ -25,6 +25,7 @@ export function createJestConfig({
       '^ui/(.*)': `${kibanaDirectory}/src/legacy/ui/public/$1`,
       'uiExports/(.*)': `${kibanaDirectory}/src/dev/jest/mocks/file_mock.js`,
       '^src/core/(.*)': `${kibanaDirectory}/src/core/$1`,
+      '^src/legacy/(.*)': `${kibanaDirectory}/src/legacy/$1`,
       '^plugins/watcher/models/(.*)': `${xPackKibanaDirectory}/legacy/plugins/watcher/public/models/$1`,
       '^plugins/([^\/.]*)(.*)': `${kibanaDirectory}/src/legacy/core_plugins/$1/public$2`,
       '^legacy/plugins/xpack_main/(.*);': `${xPackKibanaDirectory}/legacy/plugins/xpack_main/public/$1`,
