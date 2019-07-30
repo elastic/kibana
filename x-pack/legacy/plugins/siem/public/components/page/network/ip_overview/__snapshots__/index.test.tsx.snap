@@ -157,7 +157,6 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
     narrowDateRange={[MockFunction]}
     startDate={1560578400000}
     type="details"
-    updateFlowTargetAction={[MockFunction]}
   />
 </Component>
 `;

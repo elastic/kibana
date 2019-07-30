@@ -35,7 +35,7 @@ export type NetworkTopNFlowColumns = [
   Columns<NetworkTopNFlowEdges>,
   Columns<TopNFlowNetworkEcsField['bytes_in']>,
   Columns<TopNFlowNetworkEcsField['bytes_out']>,
-  Columns<TopNFlowItem['location']>,
+  Columns<TopNFlowItem['location'], NetworkTopNFlowEdges>,
   Columns<TopNFlowItem['autonomous_system']>
 ];
 
@@ -140,7 +140,7 @@ export const getNetworkTopNFlowColumns = (
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: location => {
+    render: (location, { cursor: { value: ipAddress } }) => {
       const makeGeoFields = ({ geo, flowTarget: flowTargetTarget }: GeoItem) =>
         geo
           ? {
@@ -154,12 +154,15 @@ export const getNetworkTopNFlowColumns = (
         (location.flowTarget === FlowTarget.source ||
           location.flowTarget === FlowTarget.destination)
       ) {
+        const id = escapeDataProviderId(
+          `${tableId}-table-${flowTarget}-${flowDirection}-ip-${ipAddress}`
+        );
         return (
           <GeoFields
             type={location.flowTarget}
             {...makeGeoFields(location)}
-            contextId="ha"
-            eventId="blah"
+            contextId={tableId}
+            eventId={id}
           />
         );
       } else {

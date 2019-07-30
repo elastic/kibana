@@ -15,12 +15,32 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
             "bytes_out": 1083495734,
           },
           "source": Object {
-            "autonomous_system": "Google, Inc",
+            "autonomous_system": "Google, Inc / 15169",
             "domain": Array [
               "test.domain.com",
             ],
             "ip": "8.8.8.8",
-            "location": "US",
+            "location": Object {
+              "flowTarget": "source",
+              "geo": Object {
+                "city_name": Array [
+                  "Mountain View",
+                ],
+                "continent_name": Array [
+                  "North America",
+                ],
+                "country_iso_code": Array [
+                  "US",
+                ],
+                "country_name": null,
+                "region_iso_code": Array [
+                  "US-CA",
+                ],
+                "region_name": Array [
+                  "California",
+                ],
+              },
+            },
           },
         },
       },
@@ -35,13 +55,33 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
             "bytes_out": 1083495734,
           },
           "source": Object {
-            "autonomous_system": "Google, Inc",
+            "autonomous_system": "TM Net, Internet Service Provider / 4788",
             "domain": Array [
               "test.domain.net",
               "test.old.domain.net",
             ],
             "ip": "9.9.9.9",
-            "location": "DE",
+            "location": Object {
+              "flowTarget": "source",
+              "geo": Object {
+                "city_name": Array [
+                  "Petaling Jaya",
+                ],
+                "continent_name": Array [
+                  "Asia",
+                ],
+                "country_iso_code": Array [
+                  "MY",
+                ],
+                "country_name": null,
+                "region_iso_code": Array [
+                  "MY-10",
+                ],
+                "region_name": Array [
+                  "Selangor",
+                ],
+              },
+            },
           },
         },
       },

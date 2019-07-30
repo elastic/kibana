@@ -16,7 +16,7 @@ Object {
             "appletv-livingroom.iot.sr.local.crowbird.com",
           ],
           "ip": "10.100.7.197",
-          "location": "",
+          "location": Object {},
         },
         "network": Object {
           "bytes_in": 372031697,
@@ -32,14 +32,25 @@ Object {
       "node": Object {
         "_id": "63.88.73.76",
         "destination": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "76.73.88.63.ashburn.google-ggc.verizon.com",
             "r1---sn-8xgp1vo-p5ql.googlevideo.com",
             "r1.sn-8xgp1vo-p5ql.googlevideo.com",
           ],
           "ip": "63.88.73.76",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
         "network": Object {
           "bytes_in": 61391425,
@@ -55,13 +66,24 @@ Object {
       "node": Object {
         "_id": "63.88.73.17",
         "destination": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "17.73.88.63.ashburn.google-ggc.verizon.com",
             "r6---sn-8xgp1vo-p5qe.googlevideo.com",
           ],
           "ip": "63.88.73.17",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
         "network": Object {
           "bytes_in": 54057925,
@@ -77,13 +99,24 @@ Object {
       "node": Object {
         "_id": "45.57.63.168",
         "destination": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "ipv4_1.mce0.c102.was001.ix.nflxvideo.net",
             "ipv4-c102-was001-ix.1.oca.nflxvideo.net",
           ],
           "ip": "45.57.63.168",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
         "network": Object {
           "bytes_in": 39482002,
@@ -99,13 +132,24 @@ Object {
       "node": Object {
         "_id": "45.57.62.188",
         "destination": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "ipv4_1.mce0.c086.was001.ix.nflxvideo.net",
             "ipv4-c086-was001-ix.1.oca.nflxvideo.net",
           ],
           "ip": "45.57.62.188",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
         "network": Object {
           "bytes_in": 37344825,
@@ -121,14 +165,25 @@ Object {
       "node": Object {
         "_id": "63.88.73.13",
         "destination": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "13.73.88.63.ashburn.google-ggc.verizon.com",
             "r2.sn-8xgp1vo-p5qe.googlevideo.com",
             "r2---sn-8xgp1vo-p5qe.googlevideo.com",
           ],
           "ip": "63.88.73.13",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
         "network": Object {
           "bytes_in": 33714266,
@@ -144,13 +199,24 @@ Object {
       "node": Object {
         "_id": "45.57.63.172",
         "destination": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "ipv4_1.mce0.c106.was001.ix.nflxvideo.net",
             "ipv4-c106-was001-ix.1.oca.nflxvideo.net",
           ],
           "ip": "45.57.63.172",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
         "network": Object {
           "bytes_in": 30971586,
@@ -166,14 +232,25 @@ Object {
       "node": Object {
         "_id": "63.88.73.140",
         "destination": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "140.73.88.63.ashburn.google-ggc.verizon.com",
             "r1.sn-8xgp1vo-p5qs.googlevideo.com",
             "r1---sn-8xgp1vo-p5qs.googlevideo.com",
           ],
           "ip": "63.88.73.140",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
         "network": Object {
           "bytes_in": 29750376,
@@ -189,13 +266,24 @@ Object {
       "node": Object {
         "_id": "45.57.63.187",
         "destination": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "ipv4_1.mce0.c121.was001.ix.nflxvideo.net",
             "ipv4-c121-was001-ix.1.oca.nflxvideo.net",
           ],
           "ip": "45.57.63.187",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
         "network": Object {
           "bytes_in": 15244446,
@@ -211,13 +299,24 @@ Object {
       "node": Object {
         "_id": "63.88.73.19",
         "destination": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "19.73.88.63.ashburn.google-ggc.verizon.com",
             "r8---sn-8xgp1vo-p5qe.googlevideo.com",
           ],
           "ip": "63.88.73.19",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
         "network": Object {
           "bytes_in": 11528129,
@@ -1196,7 +1295,7 @@ Object {
             "simianhacker-demo",
           ],
           "ip": "10.142.0.9",
-          "location": "",
+          "location": Object {},
         },
         "network": Object {
           "bytes_in": 36321426479,
@@ -1212,10 +1311,22 @@ Object {
       "node": Object {
         "_id": "104.198.38.169",
         "destination": Object {
-          "autonomous_system": "Google LLC",
+          "autonomous_system": "Google LLC / 15169",
           "domain": Array [],
           "ip": "104.198.38.169",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 38.6582,
+                "lon": -77.2497,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
         "network": Object {
           "bytes_in": 29402384765,
@@ -1236,7 +1347,7 @@ Object {
             "siem-es",
           ],
           "ip": "10.142.0.10",
-          "location": "",
+          "location": Object {},
         },
         "network": Object {
           "bytes_in": 7034783187,
@@ -1257,7 +1368,7 @@ Object {
             "siem-kibana",
           ],
           "ip": "10.142.0.7",
-          "location": "",
+          "location": Object {},
         },
         "network": Object {
           "bytes_in": 2361869470,
@@ -1273,12 +1384,24 @@ Object {
       "node": Object {
         "_id": "35.196.73.82",
         "destination": Object {
-          "autonomous_system": "Google LLC",
+          "autonomous_system": "Google LLC / 15169",
           "domain": Array [
             "siem-kibana",
           ],
           "ip": "35.196.73.82",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 38.6582,
+                "lon": -77.2497,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
         "network": Object {
           "bytes_in": 1231689482,
@@ -1294,12 +1417,24 @@ Object {
       "node": Object {
         "_id": "35.227.125.33",
         "destination": Object {
-          "autonomous_system": "Google LLC",
+          "autonomous_system": "Google LLC / 15169",
           "domain": Array [
             "siem-es",
           ],
           "ip": "35.227.125.33",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 38.6582,
+                "lon": -77.2497,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
         "network": Object {
           "bytes_in": 802811843,
@@ -1315,10 +1450,23 @@ Object {
       "node": Object {
         "_id": "34.213.68.235",
         "destination": Object {
-          "autonomous_system": "Amazon.com, Inc.",
+          "autonomous_system": "Amazon.com, Inc. / 16509",
           "domain": Array [],
           "ip": "34.213.68.235",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "Boardman",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 45.8696,
+                "lon": -119.688,
+              },
+              "region_iso_code": "US-OR",
+              "region_name": "Oregon",
+            },
+          },
         },
         "network": Object {
           "bytes_in": 311637700,
@@ -1334,10 +1482,23 @@ Object {
       "node": Object {
         "_id": "67.173.227.94",
         "destination": Object {
-          "autonomous_system": "Comcast Cable Communications, LLC",
+          "autonomous_system": "Comcast Cable Communications, LLC / 7922",
           "domain": Array [],
           "ip": "67.173.227.94",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "Lafayette",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 40.0153,
+                "lon": -105.1076,
+              },
+              "region_iso_code": "US-CO",
+              "region_name": "Colorado",
+            },
+          },
         },
         "network": Object {
           "bytes_in": 210521475,
@@ -1353,10 +1514,22 @@ Object {
       "node": Object {
         "_id": "104.197.128.48",
         "destination": Object {
-          "autonomous_system": "Google LLC",
+          "autonomous_system": "Google LLC / 15169",
           "domain": Array [],
           "ip": "104.197.128.48",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 38.6582,
+                "lon": -77.2497,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
         "network": Object {
           "bytes_in": 121938054,
@@ -1372,10 +1545,23 @@ Object {
       "node": Object {
         "_id": "72.86.47.26",
         "destination": Object {
-          "autonomous_system": "MCI Communications Services, Inc. d/b/a Verizon Business",
+          "autonomous_system": "MCI Communications Services, Inc. d/b/a Verizon Business / 701",
           "domain": Array [],
           "ip": "72.86.47.26",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "Leesburg",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 39.1748,
+                "lon": -77.5326,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
         "network": Object {
           "bytes_in": 121213928,
@@ -2167,7 +2353,7 @@ Object {
             "simianhacker-demo",
           ],
           "ip": "10.142.0.9",
-          "location": "",
+          "location": Object {},
         },
         "network": Object {
           "bytes_in": 36321426479,
@@ -2183,10 +2369,22 @@ Object {
       "node": Object {
         "_id": "104.198.38.169",
         "destination": Object {
-          "autonomous_system": "Google LLC",
+          "autonomous_system": "Google LLC / 15169",
           "domain": Array [],
           "ip": "104.198.38.169",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 38.6582,
+                "lon": -77.2497,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
         "network": Object {
           "bytes_in": 29402384765,
@@ -2207,7 +2405,7 @@ Object {
             "siem-es",
           ],
           "ip": "10.142.0.10",
-          "location": "",
+          "location": Object {},
         },
         "network": Object {
           "bytes_in": 7034783187,
@@ -2228,7 +2426,7 @@ Object {
             "siem-kibana",
           ],
           "ip": "10.142.0.7",
-          "location": "",
+          "location": Object {},
         },
         "network": Object {
           "bytes_in": 2361869470,
@@ -2244,12 +2442,24 @@ Object {
       "node": Object {
         "_id": "35.196.73.82",
         "destination": Object {
-          "autonomous_system": "Google LLC",
+          "autonomous_system": "Google LLC / 15169",
           "domain": Array [
             "siem-kibana",
           ],
           "ip": "35.196.73.82",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 38.6582,
+                "lon": -77.2497,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
         "network": Object {
           "bytes_in": 1231689482,
@@ -2265,12 +2475,24 @@ Object {
       "node": Object {
         "_id": "35.227.125.33",
         "destination": Object {
-          "autonomous_system": "Google LLC",
+          "autonomous_system": "Google LLC / 15169",
           "domain": Array [
             "siem-es",
           ],
           "ip": "35.227.125.33",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 38.6582,
+                "lon": -77.2497,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
         "network": Object {
           "bytes_in": 802811843,
@@ -2296,7 +2518,7 @@ Object {
             "isrg.trustid.ocsp.identrust.com",
           ],
           "ip": "10.100.7.197",
-          "location": "",
+          "location": Object {},
         },
         "network": Object {
           "bytes_in": 372032297,
@@ -2312,10 +2534,23 @@ Object {
       "node": Object {
         "_id": "34.213.68.235",
         "destination": Object {
-          "autonomous_system": "Amazon.com, Inc.",
+          "autonomous_system": "Amazon.com, Inc. / 16509",
           "domain": Array [],
           "ip": "34.213.68.235",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "Boardman",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 45.8696,
+                "lon": -119.688,
+              },
+              "region_iso_code": "US-OR",
+              "region_name": "Oregon",
+            },
+          },
         },
         "network": Object {
           "bytes_in": 311637700,
@@ -2331,10 +2566,23 @@ Object {
       "node": Object {
         "_id": "67.173.227.94",
         "destination": Object {
-          "autonomous_system": "Comcast Cable Communications, LLC",
+          "autonomous_system": "Comcast Cable Communications, LLC / 7922",
           "domain": Array [],
           "ip": "67.173.227.94",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "Lafayette",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 40.0153,
+                "lon": -105.1076,
+              },
+              "region_iso_code": "US-CO",
+              "region_name": "Colorado",
+            },
+          },
         },
         "network": Object {
           "bytes_in": 210521475,
@@ -2350,10 +2598,22 @@ Object {
       "node": Object {
         "_id": "104.197.128.48",
         "destination": Object {
-          "autonomous_system": "Google LLC",
+          "autonomous_system": "Google LLC / 15169",
           "domain": Array [],
           "ip": "104.197.128.48",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 38.6582,
+                "lon": -77.2497,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
         "network": Object {
           "bytes_in": 121938054,
@@ -3159,7 +3419,7 @@ Object {
             "samsungtv-kitchen.iot.sr.local.crowbird.com",
           ],
           "ip": "10.100.7.196",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -3180,7 +3440,7 @@ Object {
             "appletv-livingroom.iot.sr.local.crowbird.com",
           ],
           "ip": "10.100.7.197",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -3199,7 +3459,7 @@ Object {
           "autonomous_system": "",
           "domain": Array [],
           "ip": "10.0.2.15",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -3220,7 +3480,7 @@ Object {
             "samsungtv-livingroom.iot.sr.local.crowbird.com",
           ],
           "ip": "10.100.7.195",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -3236,12 +3496,23 @@ Object {
           "bytes_out": 371918013,
         },
         "source": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "13.73.88.63.ashburn.google-ggc.verizon.com",
           ],
           "ip": "63.88.73.13",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
       },
     },
@@ -3262,7 +3533,7 @@ Object {
             "smartthings-hub.iot.sr.local.crowbird.com",
           ],
           "ip": "10.100.7.199",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -3278,13 +3549,24 @@ Object {
           "bytes_out": 3779257,
         },
         "source": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "76.73.88.63.ashburn.google-ggc.verizon.com",
             "r1---sn-8xgp1vo-p5ql.googlevideo.com",
           ],
           "ip": "63.88.73.76",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
       },
     },
@@ -3303,7 +3585,7 @@ Object {
           "autonomous_system": "",
           "domain": Array [],
           "ip": "10.100.7.254",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -3324,7 +3606,7 @@ Object {
             "nest-frontdoor.iot.sr.local.crowbird.com",
           ],
           "ip": "10.100.7.198",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -3340,10 +3622,21 @@ Object {
           "bytes_out": 11806,
         },
         "source": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [],
           "ip": "17.249.108.26",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
       },
     },
@@ -3992,10 +4285,20 @@ Object {
           "bytes_out": 139182,
         },
         "source": Object {
-          "autonomous_system": "TOT Public Company Limited",
+          "autonomous_system": "TOT Public Company Limited / 131293",
           "domain": Array [],
           "ip": "1.179.154.108",
-          "location": "TH",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "continent_name": "Asia",
+              "country_iso_code": "TH",
+              "location": Object {
+                "lat": 13.75,
+                "lon": 100.4667,
+              },
+            },
+          },
         },
       },
     },
@@ -4011,10 +4314,20 @@ Object {
           "bytes_out": 2164,
         },
         "source": Object {
-          "autonomous_system": "JSC Kazakhtelecom",
+          "autonomous_system": "JSC Kazakhtelecom / 9198",
           "domain": Array [],
           "ip": "2.135.221.237",
-          "location": "KZ",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "continent_name": "Asia",
+              "country_iso_code": "KZ",
+              "location": Object {
+                "lat": 48,
+                "lon": 68,
+              },
+            },
+          },
         },
       },
     },
@@ -4030,10 +4343,20 @@ Object {
           "bytes_out": 0,
         },
         "source": Object {
-          "autonomous_system": "Iran Telecommunication Company PJS",
+          "autonomous_system": "Iran Telecommunication Company PJS / 58224",
           "domain": Array [],
           "ip": "2.180.34.2",
-          "location": "IR",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "continent_name": "Asia",
+              "country_iso_code": "IR",
+              "location": Object {
+                "lat": 35.6961,
+                "lon": 51.4231,
+              },
+            },
+          },
         },
       },
     },
@@ -4049,10 +4372,23 @@ Object {
           "bytes_out": 5910,
         },
         "source": Object {
-          "autonomous_system": "",
+          "autonomous_system": "16509",
           "domain": Array [],
           "ip": "3.105.198.132",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "Seattle",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 47.6344,
+                "lon": -122.3422,
+              },
+              "region_iso_code": "US-WA",
+              "region_name": "Washington",
+            },
+          },
         },
       },
     },
@@ -4068,10 +4404,20 @@ Object {
           "bytes_out": 82233,
         },
         "source": Object {
-          "autonomous_system": "",
+          "autonomous_system": "14618",
           "domain": Array [],
           "ip": "3.208.42.117",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
       },
     },
@@ -4087,10 +4433,23 @@ Object {
           "bytes_out": 14868,
         },
         "source": Object {
-          "autonomous_system": "Level 3 Parent, LLC",
+          "autonomous_system": "Level 3 Parent, LLC / 3356",
           "domain": Array [],
           "ip": "4.34.195.30",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "Philadelphia",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 39.9359,
+                "lon": -75.1534,
+              },
+              "region_iso_code": "US-PA",
+              "region_name": "Pennsylvania",
+            },
+          },
         },
       },
     },
@@ -4106,10 +4465,20 @@ Object {
           "bytes_out": 2670,
         },
         "source": Object {
-          "autonomous_system": "OVH SAS",
+          "autonomous_system": "OVH SAS / 16276",
           "domain": Array [],
           "ip": "5.196.72.58",
-          "location": "FR",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "continent_name": "Europe",
+              "country_iso_code": "FR",
+              "location": Object {
+                "lat": 48.8582,
+                "lon": 2.3387000000000002,
+              },
+            },
+          },
         },
       },
     },
@@ -4125,10 +4494,23 @@ Object {
           "bytes_out": 35846810,
         },
         "source": Object {
-          "autonomous_system": "Longmont Power & Communications",
+          "autonomous_system": "Longmont Power & Communications / 393552",
           "domain": Array [],
           "ip": "8.42.77.171",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "Longmont",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 40.1791,
+                "lon": -105.1986,
+              },
+              "region_iso_code": "US-CO",
+              "region_name": "Colorado",
+            },
+          },
         },
       },
     },
@@ -4144,10 +4526,20 @@ Object {
           "bytes_out": 384580,
         },
         "source": Object {
-          "autonomous_system": "Level 3 Parent, LLC",
+          "autonomous_system": "Level 3 Parent, LLC / 3356",
           "domain": Array [],
           "ip": "8.249.225.254",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
       },
     },
@@ -4163,10 +4555,20 @@ Object {
           "bytes_out": 600,
         },
         "source": Object {
-          "autonomous_system": "Level 3 Parent, LLC",
+          "autonomous_system": "Level 3 Parent, LLC / 3356",
           "domain": Array [],
           "ip": "8.249.227.254",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
       },
     },
@@ -5007,7 +5409,7 @@ Object {
             "samsungtv-kitchen.iot.sr.local.crowbird.com",
           ],
           "ip": "10.100.7.196",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -5028,7 +5430,7 @@ Object {
             "appletv-livingroom.iot.sr.local.crowbird.com",
           ],
           "ip": "10.100.7.197",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -5047,7 +5449,7 @@ Object {
           "autonomous_system": "",
           "domain": Array [],
           "ip": "10.0.2.15",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -5068,7 +5470,7 @@ Object {
             "samsungtv-livingroom.iot.sr.local.crowbird.com",
           ],
           "ip": "10.100.7.195",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -5084,14 +5486,25 @@ Object {
           "bytes_out": 371918013,
         },
         "source": Object {
-          "autonomous_system": "MCI Communications Services, Inc. d/b/a Verizon Business",
+          "autonomous_system": "MCI Communications Services, Inc. d/b/a Verizon Business / 701",
           "domain": Array [
             "13.73.88.63.ashburn.google-ggc.verizon.com",
             "r2---sn-8xgp1vo-p5qe.googlevideo.com",
             "r2.sn-8xgp1vo-p5qe.googlevideo.com",
           ],
           "ip": "63.88.73.13",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
       },
     },
@@ -5112,7 +5525,7 @@ Object {
             "smartthings-hub.iot.sr.local.crowbird.com",
           ],
           "ip": "10.100.7.199",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -5128,14 +5541,25 @@ Object {
           "bytes_out": 3779257,
         },
         "source": Object {
-          "autonomous_system": "MCI Communications Services, Inc. d/b/a Verizon Business",
+          "autonomous_system": "MCI Communications Services, Inc. d/b/a Verizon Business / 701",
           "domain": Array [
             "76.73.88.63.ashburn.google-ggc.verizon.com",
             "r1---sn-8xgp1vo-p5ql.googlevideo.com",
             "r1.sn-8xgp1vo-p5ql.googlevideo.com",
           ],
           "ip": "63.88.73.76",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
       },
     },
@@ -5154,7 +5578,7 @@ Object {
           "autonomous_system": "",
           "domain": Array [],
           "ip": "10.100.7.254",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -5175,7 +5599,7 @@ Object {
             "nest-frontdoor.iot.sr.local.crowbird.com",
           ],
           "ip": "10.100.7.198",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -5191,13 +5615,25 @@ Object {
           "bytes_out": 0,
         },
         "source": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "appboot.netflix.com",
             "ec2-52-44-137-93.compute-1.amazonaws.com",
           ],
           "ip": "52.44.137.93",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "Ashburn",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 39.0481,
+                "lon": -77.4728,
+              },
+              "region_name": "Virginia",
+            },
+          },
         },
       },
     },
@@ -5897,7 +6333,7 @@ Object {
             "samsungtv-kitchen.iot.sr.local.crowbird.com",
           ],
           "ip": "10.100.7.196",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -5918,7 +6354,7 @@ Object {
             "appletv-livingroom.iot.sr.local.crowbird.com",
           ],
           "ip": "10.100.7.197",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -5937,7 +6373,7 @@ Object {
           "autonomous_system": "",
           "domain": Array [],
           "ip": "10.0.2.15",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -5953,14 +6389,25 @@ Object {
           "bytes_out": 1845143680,
         },
         "unified": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "76.73.88.63.ashburn.google-ggc.verizon.com",
             "r1---sn-8xgp1vo-p5ql.googlevideo.com",
             "r1.sn-8xgp1vo-p5ql.googlevideo.com",
           ],
           "ip": "63.88.73.76",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
       },
     },
@@ -5976,13 +6423,24 @@ Object {
           "bytes_out": 1881475715,
         },
         "unified": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "17.73.88.63.ashburn.google-ggc.verizon.com",
             "r6---sn-8xgp1vo-p5qe.googlevideo.com",
           ],
           "ip": "63.88.73.17",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
       },
     },
@@ -5998,14 +6456,25 @@ Object {
           "bytes_out": 1507866063,
         },
         "unified": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "13.73.88.63.ashburn.google-ggc.verizon.com",
             "r2.sn-8xgp1vo-p5qe.googlevideo.com",
             "r2---sn-8xgp1vo-p5qe.googlevideo.com",
           ],
           "ip": "63.88.73.13",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
       },
     },
@@ -6021,13 +6490,24 @@ Object {
           "bytes_out": 2495262552,
         },
         "unified": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "ipv4_1.mce0.c102.was001.ix.nflxvideo.net",
             "ipv4-c102-was001-ix.1.oca.nflxvideo.net",
           ],
           "ip": "45.57.63.168",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
       },
     },
@@ -6043,13 +6523,24 @@ Object {
           "bytes_out": 2617096335,
         },
         "unified": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "ipv4_1.mce0.c086.was001.ix.nflxvideo.net",
             "ipv4-c086-was001-ix.1.oca.nflxvideo.net",
           ],
           "ip": "45.57.62.188",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
       },
     },
@@ -6065,13 +6556,24 @@ Object {
           "bytes_out": 2185412187,
         },
         "unified": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "ipv4_1.mce0.c106.was001.ix.nflxvideo.net",
             "ipv4-c106-was001-ix.1.oca.nflxvideo.net",
           ],
           "ip": "45.57.63.172",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
       },
     },
@@ -6087,14 +6589,25 @@ Object {
           "bytes_out": 692489502,
         },
         "unified": Object {
-          "autonomous_system": "",
+          "autonomous_system": "0",
           "domain": Array [
             "140.73.88.63.ashburn.google-ggc.verizon.com",
             "r1.sn-8xgp1vo-p5qs.googlevideo.com",
             "r1---sn-8xgp1vo-p5qs.googlevideo.com",
           ],
           "ip": "63.88.73.140",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 37.751,
+                "lon": -97.822,
+              },
+            },
+          },
         },
       },
     },
@@ -10212,7 +10725,7 @@ Object {
             "simianhacker-demo",
           ],
           "ip": "10.142.0.9",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -10228,10 +10741,22 @@ Object {
           "bytes_out": 0,
         },
         "unified": Object {
-          "autonomous_system": "Google LLC",
+          "autonomous_system": "Google LLC / 15169",
           "domain": Array [],
           "ip": "104.198.38.169",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 38.6582,
+                "lon": -77.2497,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
       },
     },
@@ -10252,7 +10777,7 @@ Object {
             "siem-es",
           ],
           "ip": "10.142.0.10",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -10273,7 +10798,7 @@ Object {
             "siem-kibana",
           ],
           "ip": "10.142.0.7",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -10289,12 +10814,24 @@ Object {
           "bytes_out": 0,
         },
         "unified": Object {
-          "autonomous_system": "Google LLC",
+          "autonomous_system": "Google LLC / 15169",
           "domain": Array [
             "siem-kibana",
           ],
           "ip": "35.196.73.82",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 38.6582,
+                "lon": -77.2497,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
       },
     },
@@ -10310,12 +10847,24 @@ Object {
           "bytes_out": 0,
         },
         "unified": Object {
-          "autonomous_system": "Google LLC",
+          "autonomous_system": "Google LLC / 15169",
           "domain": Array [
             "siem-es",
           ],
           "ip": "35.227.125.33",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 38.6582,
+                "lon": -77.2497,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
       },
     },
@@ -10331,10 +10880,23 @@ Object {
           "bytes_out": 0,
         },
         "unified": Object {
-          "autonomous_system": "Amazon.com, Inc.",
+          "autonomous_system": "Amazon.com, Inc. / 16509",
           "domain": Array [],
           "ip": "34.213.68.235",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "Boardman",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 45.8696,
+                "lon": -119.688,
+              },
+              "region_iso_code": "US-OR",
+              "region_name": "Oregon",
+            },
+          },
         },
       },
     },
@@ -10350,10 +10912,23 @@ Object {
           "bytes_out": 0,
         },
         "unified": Object {
-          "autonomous_system": "Comcast Cable Communications, LLC",
+          "autonomous_system": "Comcast Cable Communications, LLC / 7922",
           "domain": Array [],
           "ip": "67.173.227.94",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "Lafayette",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 40.0153,
+                "lon": -105.1076,
+              },
+              "region_iso_code": "US-CO",
+              "region_name": "Colorado",
+            },
+          },
         },
       },
     },
@@ -10369,10 +10944,22 @@ Object {
           "bytes_out": 0,
         },
         "unified": Object {
-          "autonomous_system": "Google LLC",
+          "autonomous_system": "Google LLC / 15169",
           "domain": Array [],
           "ip": "104.197.128.48",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 38.6582,
+                "lon": -77.2497,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
       },
     },
@@ -10388,10 +10975,23 @@ Object {
           "bytes_out": 0,
         },
         "unified": Object {
-          "autonomous_system": "MCI Communications Services, Inc. d/b/a Verizon Business",
+          "autonomous_system": "MCI Communications Services, Inc. d/b/a Verizon Business / 701",
           "domain": Array [],
           "ip": "72.86.47.26",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "Leesburg",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 39.1748,
+                "lon": -77.5326,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
       },
     },
@@ -13956,7 +14556,7 @@ Object {
             "simianhacker-demo",
           ],
           "ip": "10.142.0.9",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -13972,10 +14572,22 @@ Object {
           "bytes_out": 0,
         },
         "unified": Object {
-          "autonomous_system": "Google LLC",
+          "autonomous_system": "Google LLC / 15169",
           "domain": Array [],
           "ip": "104.198.38.169",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 38.6582,
+                "lon": -77.2497,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
       },
     },
@@ -13996,7 +14608,7 @@ Object {
             "samsungtv-kitchen.iot.sr.local.crowbird.com",
           ],
           "ip": "10.100.7.196",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -14017,7 +14629,7 @@ Object {
             "siem-es",
           ],
           "ip": "10.142.0.10",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -14043,7 +14655,7 @@ Object {
             "isrg.trustid.ocsp.identrust.com",
           ],
           "ip": "10.100.7.197",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -14064,7 +14676,7 @@ Object {
             "siem-kibana",
           ],
           "ip": "10.142.0.7",
-          "location": "",
+          "location": Object {},
         },
       },
     },
@@ -14080,12 +14692,24 @@ Object {
           "bytes_out": 0,
         },
         "unified": Object {
-          "autonomous_system": "Google LLC",
+          "autonomous_system": "Google LLC / 15169",
           "domain": Array [
             "siem-kibana",
           ],
           "ip": "35.196.73.82",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 38.6582,
+                "lon": -77.2497,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
       },
     },
@@ -14101,12 +14725,24 @@ Object {
           "bytes_out": 0,
         },
         "unified": Object {
-          "autonomous_system": "Google LLC",
+          "autonomous_system": "Google LLC / 15169",
           "domain": Array [
             "siem-es",
           ],
           "ip": "35.227.125.33",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 38.6582,
+                "lon": -77.2497,
+              },
+              "region_iso_code": "US-VA",
+              "region_name": "Virginia",
+            },
+          },
         },
       },
     },
@@ -14122,10 +14758,23 @@ Object {
           "bytes_out": 0,
         },
         "unified": Object {
-          "autonomous_system": "Amazon.com, Inc.",
+          "autonomous_system": "Amazon.com, Inc. / 16509",
           "domain": Array [],
           "ip": "34.213.68.235",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "Boardman",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 45.8696,
+                "lon": -119.688,
+              },
+              "region_iso_code": "US-OR",
+              "region_name": "Oregon",
+            },
+          },
         },
       },
     },
@@ -14141,10 +14790,23 @@ Object {
           "bytes_out": 0,
         },
         "unified": Object {
-          "autonomous_system": "Comcast Cable Communications, LLC",
+          "autonomous_system": "Comcast Cable Communications, LLC / 7922",
           "domain": Array [],
           "ip": "67.173.227.94",
-          "location": "US",
+          "location": Object {
+            "flowTarget": "destination",
+            "geo": Object {
+              "city_name": "Lafayette",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 40.0153,
+                "lon": -105.1076,
+              },
+              "region_iso_code": "US-CO",
+              "region_name": "Colorado",
+            },
+          },
         },
       },
     },
