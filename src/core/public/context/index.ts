@@ -17,6 +17,5 @@
  * under the License.
  */
 
-export * from './plugins_service';
-export { Plugin, PluginInitializer, PluginOpaqueId } from './plugin';
-export { PluginInitializerContext } from './plugin_context';
+export { ContextService, ContextSetup } from './context_service';
+export { IContextContainer, IContextProvider, IContextHandler } from './context';
