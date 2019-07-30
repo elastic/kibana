@@ -2,11 +2,13 @@
 [[xpack-metrics-getting-started]]
 == Getting started with infrastructure monitoring
 
-// **** to do
+// +++ to do. this is the text from Logging, suitable updated. It's not really much help as the referenced document leaves you on your own.
+// +++ decide whether to mention all the things you can monitor here (metrics, logs, APM, Uptime) and how to set the up, or just metrics.
+// +++ The problem is that the phrase "monitoring infrastructure" implies all of the above, whereas the UI in its intended form only covers metrics. So straight away we have the title taling about "infrastructure" and the body talking about "metrics" which will be confusing to many eraders.
 
-Kibana provides step-by-step instructions to help you add log data. The
+Kibana provides step-by-step instructions to help you add metrics data. The
 {infra-guide}[Infrastructure Monitoring Guide] is a good source for more
 detailed information and instructions.
 
 [role="screenshot"]
-image::logs/images/logs-add-data.png[Included data ingestion tutorials in Kibana]
+image::infrastructure/images/metrics-add-data.png[Screenshot showing Add metric data to Kibana UI]

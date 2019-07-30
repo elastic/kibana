@@ -1,12 +1,12 @@
 [role="xpack"]
 [[xpack-observability]]
-//= Observability
+// +++ = Observability
 == About Observability
 
-// I'd like to make this a separate section in the Kibana docs?
-// At present, I've removed the level 1 heading and tagged this at the end of Infrastructure.
-// Should this be a container for the other observability functions, or separate at the same level? I think the latter.
-// When I separate this out, reinstate the book title (the + line above)
+// +++ I'd like to make this a separate section in the Kibana docs?
+// +++ At present, I've removed the level 1 heading and tagged this at the end of Infrastructure.
+// +++ Should this be a container for the other observability functions, or separate at the same level? I think the latter.
+// +++ When I separate this out, reinstate the book title (the + line above)
 
 
 Observability is a system attribute. An _observable_ system allows the operators responsible for it to:
@@ -29,27 +29,27 @@ You can also use the *Logs*, *APM* or *Uptime* tabs to view logs, application tr
 
 If you have specific graphs and charts that you want to refer to regularly, you can add them to a Kibana dashboard, so you can view interesting information about your system in one place.
 
-// XXXXXX Either a single graphic, or an example, as below, with several graphics
+// +++ Either a single graphic, or an example, as below, with several graphics
 
-// Example
+// +++ Example
 Before you start setting up Observability for your data, take a look at this simple example showing Observability in action to pin down a system performance problem. <link to example>
 
-// XXXX This may be better as a "getting started with observability" topic.
+// +++ This may be better as a "getting started with observability" topic.
 [float]
 == More about Observability
 
 To use the Observability features in Kibana, firstly you need to `<install Elasticsearch and Kibana>` if you have not already done so. Then you need to add some data from your system to observe.
 
-// **** Check what the standard wording is for this, and find some good places to link to.
-// Do we recommend that you don't install ELK on the system you are monitoring, or doesn't it matter?
-// This section is becoming a bit to detailed to use as intro signposting. Needs work.
+// +++ Check what the standard wording is for this, and find some good places to link to.
+// +++ Do we recommend that you don't install ELK on the system you are monitoring, or doesn't it matter?
+// +++ This section is becoming a bit to detailed to use as intro signposting. Needs work.
 
-// Something like
+// +++ Something like
 
-// To collect system metrics, you need to <install and configure> Metricbeat. To collect logs, you need to . . .
+// +++ To collect system metrics, you need to <install and configure> Metricbeat. To collect logs, you need to . . .
 
 Metrics, logs or uptime information are collected using the appropriate Elastic Beats (lightweight data shippers, link etc xxxx). Use <Metricbeat to collect metrics>, <Filebeat to collect logs> and <Heartbeat to collect uptime information>.
-// ??? could make links a bit more specific, to make sure these are installs for observability, not general installation.
+// +++ could make links a bit more specific, to make sure these are installs for observability, not general installation.
 
 To collect application traces, you need to <install and configure Elastic APM>.
 

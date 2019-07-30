@@ -2,9 +2,9 @@
 [[xpack-view-metrics]]
 == Viewing metrics
 
-// ***** To do
+// +++ To do
 
-here's some dummy content for now. this describes the detailed metrics screen.
+here's some dummy content for now. this describes the detailed metrics screen, selected from View metrics.
 
 We will have a quick screenshot, a description of the (kind of) things you can see/click, what happens when you do, and, non-intuitively, how to get back to the infrastructure screen.
 

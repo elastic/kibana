@@ -6,29 +6,31 @@
 --
 The Infrastructure UI enables you to monitor your infrastructure and identify problems in real time.
 You start with a visual summary of your infrastructure where you can view basic metrics for common servers, containers, and services.
-Then you can drill down to view more detailed metrics.
-Alternatively, you can select a single component, then view the metrics for that component, or seamlessly switch to view the corresponding logs, application traces or uptime information for that component.
+Then you can drill down to view more detailed metrics for your infrastructure.
+Alternatively, you can select a single component and view the metrics for that component, or seamlessly switch to view the corresponding logs, application traces or uptime information for that component.
 
-// Update this when i have a better idea of what these all do. At present, there is some duplication above and below. I'd like some links to the topics.
+// +++ Update this when i have a better idea of what these all do. At present, there is some duplication above and below. I'd like some links to the lower level topics, and also a mention that things need to be updated
 
 You can:
 
-* View your infrastructure by hosts, Kubernetes pod or Docker containers.
-The UI helps you group, filter, and view data to help you find what you seek.
+* View an inventory of your infrastructure by hosts, Kubernetes pod or Docker containers.
+You can group and filter the data in various ways to help you identify the items that interest you.
 
-* View common predefined metrics such as CPU usage, memory usage, load, and inbound or outbound traffic.
+* View current and historic values for metrics such as CPU usage, memory usage, and network traffic for each component. The available metrics depend on the kind of component being inspected.
 
-* Use *Metrics Explorer* to group and visualise multiple customisable metrics in a graphical format.
+* Use *Metrics Explorer* to group and visualise multiple customisable metrics for one or more components in a graphical format.
+You can optionally save these views and add them to {kibana-ref}dashboard.html[dashboards].
 
-* Seamlessly switch to view the corresponding logs, application traces or uptime information for a component
+* Seamlessly switch to view the corresponding logs, application traces or uptime information for a component.
 
-// Image to update
 [role="screenshot"]
-image::infrastructure/images/infra-sysmon.jpg[Infrastructure Overview in Kibana]
+image::infrastructure/images/infra-sysmon.png[Infrastructure Overview in Kibana]
 
-// *** Still to decide *** Where do I do include the info about the data you need to add and the configuration you need to do in order to use to use the various features? Some is below, but some is in the separate guides, and some may even be in the Beats documentation.
+// +++ Add links for where to go next
 
-// *** Still to decide *** Can I include a tutorial (using the Maps section as an example)? In order to do that, I'd need some data. I wonder if the Metrics Explorer data is more widely applicable?
+// +++ *** Still to decide *** Where do I do include the info about the data you need to add and the configuration you need to do in order to use to use the various features? Some is below, but some is in the separate guides, and some may even be in the Beats documentation.
+
+// +++ *** Still to decide *** Can I include a tutorial (using the Maps section as an example)? In order to do that, I'd need some data. I wonder if the Metrics Explorer data is more widely applicable?
 
 --
 

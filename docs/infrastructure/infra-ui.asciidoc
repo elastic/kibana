@@ -2,64 +2,70 @@
 [[infra-ui]]
 == Using the Infrastructure UI
 
-// Gail provides this as an example of a good document. Leave it as is!
+// +++ Gail provides this as an example of a good document. Leave it as is!
 
 Use the Infrastructure UI in {kib} to monitor your infrastructure and identify
-problems in real time.
+problems in real time. You can explore metrics for hosts, containers and services. You can also drill down to view more detailed metrics, or seamlessly switch to view the corresponding logs, application traces and uptime information for a component.
 
-You start with an overview of your infrastructure.
-Then you can use the interactive UI to drill down into areas of interest.
+Initially, the *Inventory* tab shows an overview the hosts in of your infrastructure and the current CPU usage for each host.
+From here, you can drill down into areas of interest.
 
 [role="screenshot"]
-image::infrastructure/images/infra-sysmon.jpg[Infrastructure Overview in Kibana]
-
-TIP: Right-click an element to jump to related logs or metrics.
+image::infrastructure/images/infra-sysmon.png[Infrastructure Overview in Kibana]
 
 [float]
 [[infra-cat]]
-=== View your infrastructure by hosts or container
+=== Choose the high-level view of your infrastructure
 
-Select the high-level view: *Hosts*, *Kubernetes*, or *Docker*.
-When you change views, you can see the same data through the perspective of a
-different category.
+Select the high-level view from *Hosts*, *Kubernetes*, or *Docker*.
+When you change views, you see the same data through the perspective of a different category.
 
 [float]
 [[infra-search]]
 === Use the power of Search
 
-The Search bar is always available. You can use it to perform adhoc or structured searches.
-The Search feature can surface the information you're looking for, even if the
+Use the Search bar to perform ad hoc or structured searches using {kibana-ref}/kuery-query.html[Kibana Query Language] which features autocomplete and a simple, easy to use syntax.
+For example, enter `host.hostname : "xxxxxxx"`
+It can help you find the information you're looking for, even if the
 other options you have selected would normally filter it out.
+// +++ What does this last sentence mean?
+// +++ Can you enter anything else other than KQL?
+// +++ and what's a good example (complete above)? each thing I try doesn't return the results I expect?
+
 
 [float]
 [[infra-metric]]
-=== Start at a high-level by selecting the metric
+=== Select the metric to view
 
-This filter helps you start focusing on potential problem areas that may need
-further investigation. You'll see metrics that are most relevant for hosts or
-the container you selected.
+Select the metric to view from the *Metric* dropdown list.
+The available metrics are those that are most relevant for the high level view you selected.
 
 [float]
 [[infra-group]]
 === Group components
 
-The *Group By* selector offers grouping options that are native and specific for
-your physical, virtual, and container-based infrastructure.
-Examples include Availability Zone, Machine Type, Project ID, and Cloud Provider
-for Hosts, and Namespace and Node for Kubernetes.
+Select the way you want to group the infrastructure components from the *Group By* dropdown list.
+The available options are specific to your physical, virtual, or container-based infrastructure.
+Examples of grouping options include Availability Zone, Machine Type, Project ID, and Cloud Provider for Hosts, and Namespace and Node for Kubernetes.
 
 [float]
 [[infra-date]]
-=== Specify the date range
+=== Specify the time and date range
 
 Use the time selector to focus on a specific timeframe.
+If you want the metrics to be continuously updated, click *Auto-refresh*.
+
+// +++ how can you specify anything other than the last minute.
+
+// +++ what if you don't auto-refresh (or is that the default?) Is this a separate section (as below) or related to the time and date picker functionality?
+
+// +++ and how does auto-refresh work if you've selected a historic period.
 
 [float]
 [[infra-refresh]]
 === Auto-refresh or pause
 
-Set auto-refresh to keep up-to-date information coming in, or stop
-refreshing to focus on historical data without new distractions.
+Select *Auto-refresh* to keep up-to-date information coming in, or *Stop refreshing* to focus on historical data without new distractions.
 
 [float]
 [[infra-configure-source]]
@@ -68,3 +74,29 @@ refreshing to focus on historical data without new distractions.
 Using a custom index pattern to store the metrics, or want to limit the entries
 presented in a space? Use configure source to change the index pattern and
 other settings.
+// +++ more investigation needed here. Include info (currently in dumping ground topic) or add a link.  and what about the related logging features? Are the two configs identical or not?
+
+[float]
+[[infra-drill-down]]
+=== Drill down for related information
+
+Hover over a component to see more information about that component.
+
+Click a component to see the other actions for that component that you can carry out from the Infrastructure tab.
+You can select:
+
+* *View Metrics* to {kibana-ref}xpack-view-metrics.html[view detailed metrics for the selected component].
+// +++ Add link
+
+* *View Logs* to view the {kibana-ref}xpack-logs-using.html[corresponding logs for the selected component] in the *Logs* tab.
+// +++ There may be a better link than this, or I may need to explain here that the tab opens with the appropriate component etc pre-selected.
+
+Depending on the xxx you have installed and configured, you may also be able to select:
+// +++ depending on what?
+
+* *View APM* to {kibana-ref}xpack-apm.html[view APM traces for the selected component] in the *APM* tab.
+// +++ Comment as for Logs link
+
+* *View Uptime* to {kibana-ref}xpack-uptime.html[view uptime information for the selected component] in the *Uptime* tab.
+// +++ Comment as for logs link
+

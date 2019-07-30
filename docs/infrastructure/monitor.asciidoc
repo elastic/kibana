@@ -2,7 +2,7 @@
 [[monitor-infra]]
 == Monitor your infrastructure
 
-// Delete this topic, it's been included in the top level topic.
+// +++ Delete this topic, it's been included in the top level topic.
 
 You start with a visual summary of your infrastructure.
 Then you can drill down into areas of interest.
