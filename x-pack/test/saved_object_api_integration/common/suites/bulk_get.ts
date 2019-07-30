@@ -17,7 +17,7 @@ interface BulkGetTest {
 
 interface BulkGetTests {
   default: BulkGetTest;
-  includingSpace: BulkGetTest;
+  includingHiddenType: BulkGetTest;
 }
 
 interface BulkGetTestDefinition {
@@ -76,15 +76,15 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     });
   };
 
-  const expectBadRequestForSpace = (resp: { [key: string]: any }) => {
+  const expectBadRequestForHiddenType = (resp: { [key: string]: any }) => {
     const spaceEntry = resp.body.saved_objects.find(
-      (entry: any) => entry.id === 'my-space' && entry.type === 'space'
+      (entry: any) => entry.id === 'my-hiddentype' && entry.type === 'hiddentype'
     );
     expect(spaceEntry).to.eql({
-      id: 'my-space',
-      type: 'space',
+      id: 'my-hiddentype',
+      type: 'hiddentype',
       error: {
-        message: "Unsupported saved object type: 'space': Bad Request",
+        message: "Unsupported saved object type: 'hiddentype': Bad Request",
         statusCode: 400,
         error: 'Bad Request',
       },
@@ -92,7 +92,12 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
   };
 
   const expectedForbiddenTypes = ['dashboard', 'globaltype', 'visualization'];
-  const expectedForbiddenTypesWithSpace = ['dashboard', 'globaltype', 'space', 'visualization'];
+  const expectedForbiddenTypesWithHiddenType = [
+    'dashboard',
+    'globaltype',
+    'hiddentype',
+    'visualization',
+  ];
   const createExpectRbacForbidden = (types: string[] = expectedForbiddenTypes) => (resp: {
     [key: string]: any;
   }) => {
@@ -170,20 +175,20 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
           .then(tests.default.response);
       });
 
-      it(`with a space saved object included should return ${tests.includingSpace.statusCode}`, async () => {
+      it(`with a hiddentype saved object included should return ${tests.includingHiddenType.statusCode}`, async () => {
         await supertest
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_get`)
           .auth(user.username, user.password)
           .send(
             createBulkRequests(otherSpaceId || spaceId).concat([
               {
-                type: 'space',
-                id: `my-space`,
+                type: 'hiddentype',
+                id: `my-hiddentype`,
               },
             ])
           )
-          .expect(tests.includingSpace.statusCode)
-          .then(tests.includingSpace.response);
+          .expect(tests.includingHiddenType.statusCode)
+          .then(tests.includingHiddenType.response);
       });
     });
   };
@@ -197,7 +202,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     createExpectNotFoundResults,
     createExpectResults,
     createExpectRbacForbidden,
-    expectBadRequestForSpace,
-    expectedForbiddenTypesWithSpace,
+    expectBadRequestForHiddenType,
+    expectedForbiddenTypesWithHiddenType,
   };
 }

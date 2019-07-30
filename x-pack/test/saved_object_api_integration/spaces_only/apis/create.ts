@@ -31,7 +31,7 @@ export default function({ getService }: TestInvoker) {
     createTest,
     createExpectSpaceAwareResults,
     expectNotSpaceAwareResults,
-    expectBadRequestForSpace,
+    expectBadRequestForHiddenType,
   } = createTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
   describe('create', () => {
@@ -46,9 +46,9 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
         },
-        spaceType: {
+        hiddenType: {
           statusCode: 400,
-          response: expectBadRequestForSpace,
+          response: expectBadRequestForHiddenType,
         },
         custom: {
           description: 'when a namespace is specified on the saved object',
@@ -76,9 +76,9 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
         },
-        spaceType: {
+        hiddenType: {
           statusCode: 400,
-          response: expectBadRequestForSpace,
+          response: expectBadRequestForHiddenType,
         },
         custom: {
           description: 'when a namespace is specified on the saved object',

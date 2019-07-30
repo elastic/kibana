@@ -17,7 +17,7 @@ interface ExportTest {
 
 interface ExportTests {
   spaceAwareType: ExportTest;
-  spaceType: ExportTest;
+  hiddenType: ExportTest;
   noTypeOrObjects: ExportTest;
 }
 
@@ -126,21 +126,21 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .then(tests.spaceAwareType.response);
       });
 
-      describe('space type', () => {
-        it(`should return ${tests.spaceType.statusCode} with ${tests.spaceType.description}`, async () => {
+      describe('hidden type', () => {
+        it(`should return ${tests.hiddenType.statusCode} with ${tests.hiddenType.description}`, async () => {
           await supertest
             .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
             .send({
               objects: [
                 {
-                  type: 'space',
-                  id: `space_1`,
+                  type: 'hiddentype',
+                  id: `hiddentype_1`,
                 },
               ],
             })
             .auth(user.username, user.password)
-            .expect(tests.spaceType.statusCode)
-            .then(tests.spaceType.response);
+            .expect(tests.hiddenType.statusCode)
+            .then(tests.hiddenType.response);
         });
       });
 

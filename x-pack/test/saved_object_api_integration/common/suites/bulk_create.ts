@@ -133,15 +133,15 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
     }
   };
 
-  const expectBadRequestForSpace = (resp: { [key: string]: any }) => {
+  const expectBadRequestForHiddenType = (resp: { [key: string]: any }) => {
     const spaceEntry = resp.body.saved_objects.find(
-      (entry: any) => entry.id === 'my-space' && entry.type === 'space'
+      (entry: any) => entry.id === 'my-hiddentype' && entry.type === 'hiddentype'
     );
     expect(spaceEntry).to.eql({
-      id: 'my-space',
-      type: 'space',
+      id: 'my-hiddentype',
+      type: 'hiddentype',
       error: {
-        message: "Unsupported saved object type: 'space': Bad Request",
+        message: "Unsupported saved object type: 'hiddentype': Bad Request",
         statusCode: 400,
         error: 'Bad Request',
       },
@@ -149,7 +149,12 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
   };
 
   const expectedForbiddenTypes = ['dashboard', 'globaltype', 'visualization'];
-  const expectedForbiddenTypesWithSpace = ['dashboard', 'globaltype', 'space', 'visualization'];
+  const expectedForbiddenTypesWithHiddenType = [
+    'dashboard',
+    'globaltype',
+    'hiddentype',
+    'visualization',
+  ];
   const createExpectRbacForbidden = (types: string[] = expectedForbiddenTypes) => (resp: {
     [key: string]: any;
   }) => {
@@ -179,17 +184,17 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
           .then(tests.default.response);
       });
 
-      it(`including a space saved object should return ${tests.includingSpace.statusCode}`, async () => {
+      it(`including a hiddentype saved object should return ${tests.includingSpace.statusCode}`, async () => {
         await supertest
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_create`)
           .auth(user.username, user.password)
           .send(
             createBulkRequests(spaceId).concat([
               {
-                type: 'space',
-                id: `my-space`,
+                type: 'hiddentype',
+                id: `my-hiddentype`,
                 attributes: {
-                  name: 'My awesome space',
+                  name: 'My awesome hiddentype',
                 },
               },
             ])
@@ -219,7 +224,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
     bulkCreateTest,
     createExpectResults,
     createExpectRbacForbidden,
-    expectBadRequestForSpace,
-    expectedForbiddenTypesWithSpace,
+    expectBadRequestForHiddenType,
+    expectedForbiddenTypesWithHiddenType,
   };
 }

@@ -18,8 +18,8 @@ export default function({ getService }: TestInvoker) {
     importTest,
     createExpectResults,
     expectRbacForbidden,
-    expectUnknownType,
-    expectResultsWithUnsupportedSpaceType,
+    expectUnknownTypeUnsupported,
+    expectResultsWithUnsupportedHiddenType,
   } = importTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_import', () => {
@@ -30,7 +30,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
-        spaceType: {
+        hiddenType: {
           statusCode: 403,
           response: expectRbacForbidden,
         },
@@ -48,14 +48,14 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(),
         },
-        spaceType: {
+        hiddenType: {
           // import filters out the space type, so the remaining objects will import successfully
           statusCode: 200,
-          response: expectResultsWithUnsupportedSpaceType,
+          response: expectResultsWithUnsupportedHiddenType,
         },
         unknownType: {
           statusCode: 200,
-          response: expectUnknownType,
+          response: expectUnknownTypeUnsupported,
         },
       },
     });
@@ -67,7 +67,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
-        spaceType: {
+        hiddenType: {
           statusCode: 403,
           response: expectRbacForbidden,
         },
@@ -85,14 +85,14 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(),
         },
-        spaceType: {
+        hiddenType: {
           // import filters out the space type, so the remaining objects will import successfully
           statusCode: 200,
-          response: expectResultsWithUnsupportedSpaceType,
+          response: expectResultsWithUnsupportedHiddenType,
         },
         unknownType: {
           statusCode: 200,
-          response: expectUnknownType,
+          response: expectUnknownTypeUnsupported,
         },
       },
     });
@@ -104,7 +104,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
-        spaceType: {
+        hiddenType: {
           statusCode: 403,
           response: expectRbacForbidden,
         },
@@ -122,14 +122,14 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(),
         },
-        spaceType: {
+        hiddenType: {
           // import filters out the space type, so the remaining objects will import successfully
           statusCode: 200,
-          response: expectResultsWithUnsupportedSpaceType,
+          response: expectResultsWithUnsupportedHiddenType,
         },
         unknownType: {
           statusCode: 200,
-          response: expectUnknownType,
+          response: expectUnknownTypeUnsupported,
         },
       },
     });
@@ -141,7 +141,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
-        spaceType: {
+        hiddenType: {
           statusCode: 403,
           response: expectRbacForbidden,
         },
@@ -159,7 +159,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
-        spaceType: {
+        hiddenType: {
           statusCode: 403,
           response: expectRbacForbidden,
         },
@@ -177,7 +177,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
-        spaceType: {
+        hiddenType: {
           statusCode: 403,
           response: expectRbacForbidden,
         },
@@ -195,7 +195,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
-        spaceType: {
+        hiddenType: {
           statusCode: 403,
           response: expectRbacForbidden,
         },
@@ -213,7 +213,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
-        spaceType: {
+        hiddenType: {
           statusCode: 403,
           response: expectRbacForbidden,
         },

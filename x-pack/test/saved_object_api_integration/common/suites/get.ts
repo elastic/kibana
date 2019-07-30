@@ -17,7 +17,7 @@ interface GetTest {
 interface GetTests {
   spaceAware: GetTest;
   notSpaceAware: GetTest;
-  spaceType: GetTest;
+  hiddenType: GetTest;
   doesntExist: GetTest;
 }
 
@@ -47,7 +47,11 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     });
   };
 
-  const expectSpaceNotFound = createExpectNotFound('space', 'space_1', DEFAULT_SPACE_ID);
+  const expectHiddenTypeNotFound = createExpectNotFound(
+    'hiddentype',
+    'hiddentype_1',
+    DEFAULT_SPACE_ID
+  );
 
   const createExpectNotSpaceAwareRbacForbidden = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
@@ -86,7 +90,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
 
   const expectSpaceAwareRbacForbidden = createExpectRbacForbidden('visualization');
   const expectNotSpaceAwareRbacForbidden = createExpectRbacForbidden('globaltype');
-  const expectSpaceTypeRbacForbidden = createExpectRbacForbidden('space');
+  const expectHiddenTypeRbacForbidden = createExpectRbacForbidden('hiddentype');
   const expectDoesntExistRbacForbidden = createExpectRbacForbidden('visualization');
 
   const createExpectSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => (resp: {
@@ -147,12 +151,12 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
           .then(tests.notSpaceAware.response);
       });
 
-      it(`should return ${tests.spaceType.statusCode} when getting a space doc`, async () => {
+      it(`should return ${tests.hiddenType.statusCode} when getting a hiddentype doc`, async () => {
         await supertest
-          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/space/space_1`)
+          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/hiddentype/hiddentype_1`)
           .auth(user.username, user.password)
-          .expect(tests.spaceType.statusCode)
-          .then(tests.spaceType.response);
+          .expect(tests.hiddenType.statusCode)
+          .then(tests.hiddenType.response);
       });
 
       describe('document does not exist', () => {
@@ -181,11 +185,11 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     createExpectNotSpaceAwareResults,
     createExpectSpaceAwareNotFound,
     createExpectSpaceAwareResults,
-    expectSpaceNotFound,
+    expectHiddenTypeNotFound,
     expectSpaceAwareRbacForbidden,
     expectNotSpaceAwareRbacForbidden,
     expectDoesntExistRbacForbidden,
-    expectSpaceTypeRbacForbidden,
+    expectHiddenTypeRbacForbidden,
     getTest,
   };
 }

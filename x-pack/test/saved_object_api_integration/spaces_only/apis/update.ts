@@ -34,7 +34,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
         },
-        spaceType: {
+        hiddenType: {
           statusCode: 404,
           response: expectSpaceNotFound,
         },
@@ -56,7 +56,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
         },
-        spaceType: {
+        hiddenType: {
           statusCode: 404,
           response: expectSpaceNotFound,
         },
@@ -79,7 +79,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
         },
-        spaceType: {
+        hiddenType: {
           statusCode: 404,
           response: expectSpaceNotFound,
         },
