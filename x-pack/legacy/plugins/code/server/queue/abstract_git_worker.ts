@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import {
   CloneProgress,
   CloneWorkerProgress,
@@ -44,7 +46,12 @@ export abstract class AbstractGitWorker extends AbstractWorker {
       );
       const isLowWatermark = await watermarkService.isLowWatermark();
       if (isLowWatermark) {
-        const msg = `Disk watermark level lower than ${watermarkLowMb} MB.`;
+        const msg = i18n.translate('xpack.code.git.diskWatermarkLow', {
+          defaultMessage: `Disk watermark level lower than {watermarkLowMb} MB`,
+          values: {
+            watermarkLowMb,
+          },
+        });
         this.log.error(msg);
         throw new Error(msg);
       }
