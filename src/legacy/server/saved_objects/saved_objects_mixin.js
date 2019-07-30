@@ -148,6 +148,7 @@ export function savedObjectsMixin(kbnServer, server) {
     addScopedSavedObjectsClientWrapperFactory: (...args) =>
       provider.addClientWrapperFactory(...args),
     importExport: {
+      objectLimit: server.config().get('savedObjects.maxImportExportSize'),
       importSavedObjects,
       resolveImportErrors,
       getSortedObjectsForExport,

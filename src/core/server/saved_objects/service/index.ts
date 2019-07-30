@@ -39,6 +39,7 @@ export interface SavedObjectsService<Request = any> {
   schema: SavedObjectsSchema;
   getSavedObjectsRepository(...rest: any[]): any;
   importExport: {
+    objectLimit: number;
     importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
     resolveImportErrors(
       options: SavedObjectsResolveImportErrorsOptions

@@ -839,6 +839,7 @@ export interface SavedObjectsService<Request = any> {
     getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
     // (undocumented)
     importExport: {
+        objectLimit: number;
         importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
         resolveImportErrors(options: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
         getSortedObjectsForExport(options: ExportObjectsOptions): Promise<Readable>;
