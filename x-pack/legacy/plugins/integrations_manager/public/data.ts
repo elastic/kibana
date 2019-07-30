@@ -5,7 +5,7 @@
  */
 
 import { npStart } from 'ui/new_platform';
-import { HttpHandler } from 'src/core/public/http';
+import { HttpHandler } from 'src/core/public';
 import { STATUS_INSTALLED, STATUS_NOT_INSTALLED } from '../common/constants';
 import { getInstallPath, getInfoPath, getListPath, getRemovePath } from '../common/routes';
 import { IntegrationInfo, IntegrationList, IntegrationsGroupedByStatus } from '../common/types';

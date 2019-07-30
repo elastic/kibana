@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ChromeBreadcrumb } from 'src/core/public/chrome';
+import { ChromeBreadcrumb } from 'src/core/public';
 import { useCore } from '../hooks';
 
 export function useBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]) {
