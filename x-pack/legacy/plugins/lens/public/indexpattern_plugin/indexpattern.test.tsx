@@ -152,7 +152,6 @@ describe('IndexPattern Data Source', () => {
           columnOrder: ['col1'],
           columns: {
             col1: {
-              operationId: 'op1',
               label: 'My Op',
               dataType: 'string',
               isBucketed: true,
@@ -215,7 +214,6 @@ describe('IndexPattern Data Source', () => {
             columnOrder: ['col1', 'col2'],
             columns: {
               col1: {
-                operationId: 'op1',
                 label: 'Count of Documents',
                 dataType: 'number',
                 isBucketed: false,
@@ -225,7 +223,6 @@ describe('IndexPattern Data Source', () => {
                 indexPatternId: '1',
               },
               col2: {
-                operationId: 'op2',
                 label: 'Date',
                 dataType: 'date',
                 isBucketed: true,
@@ -627,7 +624,6 @@ describe('IndexPattern Data Source', () => {
               indexPatternId: '1',
               columns: {
                 col1: {
-                  operationId: 'op1',
                   dataType: 'string',
                   indexPatternId: '1',
                   isBucketed: true,
@@ -641,7 +637,6 @@ describe('IndexPattern Data Source', () => {
                   },
                 },
                 col2: {
-                  operationId: 'op2',
                   dataType: 'number',
                   indexPatternId: '1',
                   isBucketed: false,
@@ -666,7 +661,6 @@ describe('IndexPattern Data Source', () => {
                 ...initialState.layers.currentLayer,
                 columns: {
                   col1: {
-                    operationId: 'op1',
                     dataType: 'date',
                     indexPatternId: '1',
                     isBucketed: true,
@@ -678,7 +672,6 @@ describe('IndexPattern Data Source', () => {
                     },
                   },
                   col2: {
-                    operationId: 'op2',
                     dataType: 'number',
                     indexPatternId: '1',
                     isBucketed: false,
@@ -964,7 +957,6 @@ describe('IndexPattern Data Source', () => {
               {
                 columnId: 'col1',
                 operation: {
-                  id: 'op1',
                   label: 'My Op',
                   dataType: 'string',
                   isBucketed: true,
@@ -1090,7 +1082,6 @@ describe('IndexPattern Data Source', () => {
           dataType: 'number',
           isBucketed: false,
           label: 'foo',
-          operationId: 'bar',
           operationType: 'max',
           sourceField: 'baz',
           suggestedPriority: 0,
@@ -1138,7 +1129,6 @@ describe('IndexPattern Data Source', () => {
     describe('getOperationForColumnId', () => {
       it('should get an operation for col1', () => {
         expect(publicAPI.getOperationForColumnId('col1')).toEqual({
-          id: 'op1',
           label: 'My Op',
           dataType: 'string',
           isBucketed: true,

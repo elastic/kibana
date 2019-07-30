@@ -19,7 +19,6 @@ describe('state_helpers', () => {
   describe('deleteColumn', () => {
     it('should remove column', () => {
       const termsColumn: TermsIndexPatternColumn = {
-        operationId: 'op2',
         label: 'Top values of source',
         dataType: 'string',
         isBucketed: true,
@@ -45,7 +44,6 @@ describe('state_helpers', () => {
             columns: {
               col1: termsColumn,
               col2: {
-                operationId: 'op1',
                 label: 'Count',
                 dataType: 'number',
                 isBucketed: false,
@@ -68,7 +66,6 @@ describe('state_helpers', () => {
 
     it('should execute adjustments for other columns', () => {
       const termsColumn: TermsIndexPatternColumn = {
-        operationId: 'op2',
         label: 'Top values of source',
         dataType: 'string',
         isBucketed: true,
@@ -94,7 +91,6 @@ describe('state_helpers', () => {
             columns: {
               col1: termsColumn,
               col2: {
-                operationId: 'op1',
                 label: 'Count',
                 dataType: 'number',
                 isBucketed: false,
@@ -123,7 +119,6 @@ describe('state_helpers', () => {
   describe('updateColumnParam', () => {
     it('should set the param for the given column', () => {
       const currentColumn: DateHistogramIndexPatternColumn = {
-        operationId: 'op1',
         label: 'Value of timestamp',
         dataType: 'date',
         isBucketed: true,
@@ -171,7 +166,6 @@ describe('state_helpers', () => {
             columnOrder: ['col1', 'col2'],
             columns: {
               col1: {
-                operationId: 'op1',
                 label: 'Average of bytes',
                 dataType: 'number',
                 isBucketed: false,
@@ -182,7 +176,6 @@ describe('state_helpers', () => {
                 indexPatternId: '1',
               },
               col2: {
-                operationId: 'op1',
                 label: 'Max of bytes',
                 dataType: 'number',
                 isBucketed: false,
@@ -202,7 +195,6 @@ describe('state_helpers', () => {
           columnId: 'col2',
           layerId: 'first',
           newColumn: {
-            operationId: 'op1',
             label: 'Date histogram of timestamp',
             dataType: 'date',
             isBucketed: true,
@@ -236,7 +228,6 @@ describe('state_helpers', () => {
             columnOrder: ['col1'],
             columns: {
               col1: {
-                operationId: 'op1',
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
                 isBucketed: true,
@@ -259,7 +250,6 @@ describe('state_helpers', () => {
           layerId: 'first',
           columnId: 'col2',
           newColumn: {
-            operationId: 'op2',
             label: 'Date histogram of order_date',
             dataType: 'date',
             isBucketed: true,
@@ -282,7 +272,6 @@ describe('state_helpers', () => {
 
     it('should execute adjustments for other columns', () => {
       const termsColumn: TermsIndexPatternColumn = {
-        operationId: 'op2',
         label: 'Top values of source',
         dataType: 'string',
         isBucketed: true,
@@ -299,7 +288,6 @@ describe('state_helpers', () => {
       };
 
       const newColumn: AvgIndexPatternColumn = {
-        operationId: 'op1',
         label: 'Average of bytes',
         dataType: 'number',
         isBucketed: false,
@@ -320,7 +308,6 @@ describe('state_helpers', () => {
             columns: {
               col1: termsColumn,
               col2: {
-                operationId: 'op1',
                 label: 'Count',
                 dataType: 'number',
                 isBucketed: false,
@@ -357,7 +344,6 @@ describe('state_helpers', () => {
       expect(
         getColumnOrder({
           col1: {
-            operationId: 'op1',
             label: 'Value of timestamp',
             dataType: 'string',
             isBucketed: false,
@@ -378,7 +364,6 @@ describe('state_helpers', () => {
       expect(
         getColumnOrder({
           col1: {
-            operationId: 'op1',
             label: 'Top Values of category',
             dataType: 'string',
             isBucketed: true,
@@ -396,7 +381,6 @@ describe('state_helpers', () => {
             indexPatternId: '1',
           },
           col2: {
-            operationId: 'op2',
             label: 'Average of bytes',
             dataType: 'number',
             isBucketed: false,
@@ -407,7 +391,6 @@ describe('state_helpers', () => {
             indexPatternId: '1',
           },
           col3: {
-            operationId: 'op3',
             label: 'Date Histogram of timestamp',
             dataType: 'date',
             isBucketed: true,
@@ -428,7 +411,6 @@ describe('state_helpers', () => {
       expect(
         getColumnOrder({
           col1: {
-            operationId: 'op1',
             label: 'Top Values of category',
             dataType: 'string',
             isBucketed: true,
@@ -447,7 +429,6 @@ describe('state_helpers', () => {
             indexPatternId: '1',
           },
           col2: {
-            operationId: 'op2',
             label: 'Average of bytes',
             dataType: 'number',
             isBucketed: false,
@@ -459,7 +440,6 @@ describe('state_helpers', () => {
             indexPatternId: '1',
           },
           col3: {
-            operationId: 'op3',
             label: 'Date Histogram of timestamp',
             dataType: 'date',
             isBucketed: true,

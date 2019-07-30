@@ -12,7 +12,6 @@ import { data } from '../../../../../../../src/legacy/core_plugins/data/public/s
 import { localStorage } from 'ui/storage/storage_service';
 import { IndexPatternPrivateState } from '../indexpattern';
 import { changeColumn } from '../state_helpers';
-import { getPotentialColumns } from '../operations';
 import { IndexPatternDimensionPanel, IndexPatternDimensionPanelProps } from './dimension_panel';
 import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
@@ -87,7 +86,6 @@ describe('IndexPatternDimensionPanel', () => {
           columnOrder: ['col1'],
           columns: {
             col1: {
-              operationId: 'op1',
               label: 'Date Histogram of timestamp',
               dataType: 'date',
               isBucketed: true,
@@ -137,17 +135,6 @@ describe('IndexPatternDimensionPanel', () => {
         .first()
         .prop('iconType')
     ).toEqual('plusInCircle');
-  });
-
-  it('should pass the right arguments to getPotentialColumns', async () => {
-    wrapper = shallow(<IndexPatternDimensionPanel {...defaultProps} suggestedPriority={1} />);
-
-    expect(getPotentialColumns).toHaveBeenCalledWith({
-      fields: state.indexPatterns[state.currentIndexPatternId].fields,
-      suggestedPriority: 1,
-      layerId: 'first',
-      layer: state.layers.first,
-    });
   });
 
   it('should call the filterOperations function', () => {
@@ -213,7 +200,6 @@ describe('IndexPatternDimensionPanel', () => {
               columns: {
                 ...state.layers.first.columns,
                 col1: {
-                  operationId: 'op1',
                   label: 'Max of bytes',
                   dataType: 'number',
                   isBucketed: false,
@@ -256,7 +242,6 @@ describe('IndexPatternDimensionPanel', () => {
               columns: {
                 ...state.layers.first.columns,
                 col1: {
-                  operationId: 'op1',
                   label: 'Max of bytes',
                   dataType: 'number',
                   isBucketed: false,
@@ -296,7 +281,6 @@ describe('IndexPatternDimensionPanel', () => {
           columns: {
             ...state.layers.first.columns,
             col1: {
-              operationId: 'op1',
               label: 'Max of bytes',
               dataType: 'number',
               isBucketed: false,
@@ -382,7 +366,6 @@ describe('IndexPatternDimensionPanel', () => {
               columns: {
                 ...state.layers.first.columns,
                 col1: {
-                  operationId: 'op1',
                   label: 'Max of bytes',
                   dataType: 'number',
                   isBucketed: false,
@@ -681,7 +664,7 @@ describe('IndexPatternDimensionPanel', () => {
         .find(EuiSideNav)
         .prop('items')[0]
         .items.map(({ name }) => name)
-    ).toEqual(['Maximum', 'Average', 'Sum', 'Minimum', 'Count', 'Filter Ratio']);
+    ).toEqual(['Average', 'Count', 'Filter Ratio', 'Maximum', 'Minimum', 'Sum']);
   });
 
   it('should add a column on selection of a field', () => {
@@ -723,7 +706,6 @@ describe('IndexPatternDimensionPanel', () => {
           columns: {
             ...state.layers.first.columns,
             col1: {
-              operationId: 'op1',
               label: 'Max of bytes',
               dataType: 'number',
               isBucketed: false,
@@ -827,7 +809,6 @@ describe('IndexPatternDimensionPanel', () => {
             columnOrder: ['col1'],
             columns: {
               col1: {
-                operationId: 'op1',
                 label: 'Date Histogram of timestamp',
                 dataType: 'date',
                 isBucketed: true,

@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { DatasourceSuggestion } from '../types';
-import { buildColumnForOperationType, getOperationTypesForField } from './operations';
+import { buildColumn, getOperationTypesForField } from './operations';
 import { generateId } from '../id_generator';
 import { hasField } from './utils';
 import {
@@ -99,17 +99,17 @@ export function getDatasourceSuggestionsForField(
     };
   } else {
     layer = state.layers[layerId];
+    const indexPattern = state.indexPatterns[layer.indexPatternId];
     if (layer.columnOrder.length) {
       const fieldInUse = Object.values(layer.columns).some(
         column => hasField(column) && column.sourceField === field.name
       );
       if (hasBucket && !fieldInUse) {
-        const newColumn = buildColumnForOperationType({
-          index: 1,
+        const newColumn = buildColumn({
           op: hasBucket,
           columns: layer.columns,
           layerId,
-          indexPatternId: state.currentIndexPatternId,
+          indexPattern,
           suggestedPriority: undefined,
           field,
         });
@@ -174,12 +174,11 @@ export function getDatasourceSuggestionsForField(
         }
 
         // add metric aggregation to the end of the table
-        const newColumn = buildColumnForOperationType({
-          index: 1,
+        const newColumn = buildColumn({
           op: operationCandidate,
           columns: layer.columns,
           layerId,
-          indexPatternId: state.currentIndexPatternId,
+          indexPattern,
           suggestedPriority: undefined,
           field,
         });
@@ -212,21 +211,19 @@ export function getDatasourceSuggestionsForField(
   }
 
   if (hasBucket) {
-    const countColumn = buildColumnForOperationType({
-      index: 1,
+    const countColumn = buildColumn({
       op: 'count',
       columns: layer.columns,
-      indexPatternId: state.currentIndexPatternId,
+      indexPattern: state.indexPatterns[state.currentIndexPatternId],
       layerId,
       suggestedPriority: undefined,
     });
 
     // let column know about count column
-    const column = buildColumnForOperationType({
-      index: 0,
+    const column = buildColumn({
       layerId,
       op: hasBucket,
-      indexPatternId: state.currentIndexPatternId,
+      indexPattern: state.indexPatterns[state.currentIndexPatternId],
       columns: {
         col2: countColumn,
       },
@@ -259,23 +256,21 @@ export function getDatasourceSuggestionsForField(
       f => f.name === currentIndexPattern.timeFieldName
     )!;
 
-    const column = buildColumnForOperationType({
-      index: 0,
+    const column = buildColumn({
       op: operations[0],
       columns: layer.columns,
       suggestedPriority: undefined,
       field,
-      indexPatternId: state.currentIndexPatternId,
+      indexPattern: state.indexPatterns[state.currentIndexPatternId],
       layerId,
     });
 
-    const dateColumn = buildColumnForOperationType({
-      index: 1,
+    const dateColumn = buildColumn({
       op: 'date_histogram',
       columns: layer.columns,
       suggestedPriority: undefined,
       field: dateField,
-      indexPatternId: state.currentIndexPatternId,
+      indexPattern: state.indexPatterns[state.currentIndexPatternId],
       layerId,
     });
 

@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { Storage } from 'ui/storage';
 import { DataSetup } from '../../../../../../src/legacy/core_plugins/data/public';
-import { DimensionPriority } from '../types';
+import { DimensionPriority, OperationMetadata } from '../types';
 import {
   IndexPatternColumn,
   IndexPatternField,
   IndexPatternPrivateState,
-  IndexPatternLayer,
   OperationType,
   BaseIndexPatternColumn,
+  IndexPattern,
 } from './indexpattern';
 import { termsOperation } from './operation_definitions/terms';
 import {
@@ -25,15 +26,14 @@ import {
 import { dateHistogramOperation } from './operation_definitions/date_histogram';
 import { countOperation } from './operation_definitions/count';
 import { filterRatioOperation } from './operation_definitions/filter_ratio';
-import { sortByField } from './utils';
 
-type PossibleOperationDefinitions<
+type PossibleOperationDefinition<
   U extends IndexPatternColumn = IndexPatternColumn
 > = U extends IndexPatternColumn ? OperationDefinition<U> : never;
 
 type PossibleOperationDefinitionMapEntyries<
-  U extends PossibleOperationDefinitions = PossibleOperationDefinitions
-> = U extends PossibleOperationDefinitions ? { [K in U['type']]: U } : never;
+  U extends PossibleOperationDefinition = PossibleOperationDefinition
+> = U extends PossibleOperationDefinition ? { [K in U['type']]: U } : never;
 
 type UnionToIntersection<U> = (U extends U ? (k: U) => void : never) extends ((k: infer I) => void)
   ? I
@@ -52,7 +52,7 @@ export const operationDefinitionMap: AllOperationDefinitions = {
   count: countOperation,
   filter_ratio: filterRatioOperation,
 };
-const operationDefinitions: PossibleOperationDefinitions[] = Object.values(operationDefinitionMap);
+const operationDefinitions: PossibleOperationDefinition[] = Object.values(operationDefinitionMap);
 
 export function getOperations(): OperationType[] {
   return Object.keys(operationDefinitionMap) as OperationType[];
@@ -70,11 +70,9 @@ export interface ParamEditorProps {
 export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   type: C['operationType'];
   displayName: string;
-  // TODO make this a function dependend on the indexpattern with typeMeta information
-  isApplicableWithoutField: boolean;
-  isApplicableForField: (field: IndexPatternField) => boolean;
+  getPossibleOperationsForDocument: (indexPattern: IndexPattern) => OperationMetadata[];
+  getPossibleOperationsForField: (field: IndexPatternField) => OperationMetadata[];
   buildColumn: (arg: {
-    operationId: string;
     suggestedPriority: DimensionPriority | undefined;
     layerId: string;
     indexPatternId: string;
@@ -106,81 +104,91 @@ export function getOperationDisplay() {
   return display;
 }
 
-export function getOperationTypesForField(field: IndexPatternField): OperationType[] {
+export function getOperationTypesForField(field: IndexPatternField) {
   return operationDefinitions
-    .filter(definition => definition.isApplicableForField(field))
+    .filter(
+      operationDefinition => operationDefinition.getPossibleOperationsForField(field).length > 0
+    )
     .map(({ type }) => type);
 }
 
-export function buildColumnForOperationType<T extends OperationType>({
-  index,
+type OperationFieldTuple =
+  | { type: 'field'; operationType: OperationType; field: string }
+  | { operationType: OperationType; type: 'document' };
+
+export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
+  const operationByMetadata: Record<
+    string,
+    { operationMetaData: OperationMetadata; operations: OperationFieldTuple[] }
+  > = {};
+
+  const addToMap = (operation: OperationFieldTuple) => (operationMetadata: OperationMetadata) => {
+    const key = `${operationMetadata.dataType}-${operationMetadata.isBucketed ? 'true' : ''}`;
+
+    if (operationByMetadata[key]) {
+      operationByMetadata[key].operations.push(operation);
+    } else {
+      operationByMetadata[key] = {
+        operationMetaData: operationMetadata,
+        operations: [operation],
+      };
+    }
+  };
+
+  operationDefinitions.forEach(operationDefinition => {
+    operationDefinition
+      .getPossibleOperationsForDocument(indexPattern)
+      .forEach(addToMap({ type: 'document', operationType: operationDefinition.type }));
+
+    indexPattern.fields.forEach(field => {
+      operationDefinition.getPossibleOperationsForField(field).forEach(
+        addToMap({
+          type: 'field',
+          operationType: operationDefinition.type,
+          field: field.name,
+        })
+      );
+    });
+  });
+
+  return Object.values(operationByMetadata);
+}
+
+export function buildColumn({
   op,
   columns,
   field,
   layerId,
-  indexPatternId,
+  indexPattern,
   suggestedPriority,
+  asDocumentOperation,
 }: {
-  index: number;
-  op: T;
+  op?: OperationType;
   columns: Partial<Record<string, IndexPatternColumn>>;
   suggestedPriority: DimensionPriority | undefined;
   layerId: string;
-  indexPatternId: string;
+  indexPattern: IndexPattern;
   field?: IndexPatternField;
+  asDocumentOperation?: boolean;
 }): IndexPatternColumn {
-  return operationDefinitionMap[op].buildColumn({
-    operationId: `${index}${op}`,
+  let operationDefinition: PossibleOperationDefinition;
+
+  if (op) {
+    operationDefinition = operationDefinitionMap[op];
+  } else if (asDocumentOperation) {
+    operationDefinition = operationDefinitions.find(
+      definition => definition.getPossibleOperationsForDocument(indexPattern).length !== 0
+    )!;
+  } else if (field) {
+    operationDefinition = operationDefinitions.find(
+      definition => definition.getPossibleOperationsForField(field).length !== 0
+    )!;
+  }
+  return operationDefinition!.buildColumn({
     columns,
     suggestedPriority,
     field,
     layerId,
-    indexPatternId,
+    indexPatternId: indexPattern.id,
   });
-}
-
-export function getPotentialColumns({
-  fields,
-  suggestedPriority,
-  layerId,
-  layer,
-}: {
-  fields: IndexPatternField[];
-  suggestedPriority?: DimensionPriority;
-  layerId: string;
-  layer: IndexPatternLayer;
-}): IndexPatternColumn[] {
-  const result: IndexPatternColumn[] = fields
-    .map((field, index) => {
-      const validOperations = getOperationTypesForField(field);
-
-      return validOperations.map(op =>
-        buildColumnForOperationType({
-          index,
-          op,
-          columns: layer.columns,
-          suggestedPriority,
-          field,
-          indexPatternId: layer.indexPatternId,
-          layerId,
-        })
-      );
-    })
-    .reduce((prev, current) => prev.concat(current));
-
-  operationDefinitions.forEach(operation => {
-    if (operation.isApplicableWithoutField) {
-      result.push(
-        operation.buildColumn({
-          operationId: operation.type,
-          suggestedPriority,
-          layerId,
-          columns: layer.columns,
-          indexPatternId: layer.indexPatternId,
-        })
-      );
-    }
-  });
-
-  return sortByField(result);
 }

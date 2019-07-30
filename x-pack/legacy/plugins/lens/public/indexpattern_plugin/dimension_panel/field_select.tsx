@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiComboBoxOptionProps } from '@elastic/eui';
 import classNames from 'classnames';
@@ -13,99 +13,114 @@ import {
   // @ts-ignore
   EuiHighlight,
 } from '@elastic/eui';
-import {
-  IndexPatternColumn,
-  FieldBasedIndexPatternColumn,
-  OperationType,
-  BaseIndexPatternColumn,
-} from '../indexpattern';
+import { OperationType, IndexPattern, IndexPatternField } from '../indexpattern';
 import { FieldIcon } from '../field_icon';
 import { DataType } from '../../types';
-import { hasField, sortByField } from '../utils';
+import { OperationFieldSupportMatrix } from './dimension_panel';
+
+export type FieldChoice =
+  | { type: 'field'; field: string; operationType?: OperationType }
+  | { type: 'document' };
 
 export interface FieldSelectProps {
+  currentIndexPattern: IndexPattern;
+  fieldMap: Record<string, IndexPatternField>;
   incompatibleSelectedOperationType: OperationType | null;
-  selectedColumn?: IndexPatternColumn;
-  filteredColumns: IndexPatternColumn[];
-  onChangeColumn: (newColumn: IndexPatternColumn) => void;
+  selectedColumnOperationType?: OperationType;
+  selectedColumnSourceField?: string;
+  operationFieldSupportMatrix: OperationFieldSupportMatrix;
+  onChoose: (choice: FieldChoice) => void;
   onDeleteColumn: () => void;
 }
 
 export function FieldSelect({
   incompatibleSelectedOperationType,
-  selectedColumn,
-  filteredColumns,
-  onChangeColumn,
+  selectedColumnOperationType,
+  selectedColumnSourceField,
+  operationFieldSupportMatrix,
+  currentIndexPattern,
+  fieldMap,
+  onChoose,
   onDeleteColumn,
 }: FieldSelectProps) {
-  const fieldColumns = filteredColumns.filter(hasField) as FieldBasedIndexPatternColumn[];
+  const { operationByDocument, operationByField } = operationFieldSupportMatrix;
+  const memoizedFieldOptions = useMemo(() => {
+    const fields = Object.keys(operationByField).sort();
 
-  const uniqueColumnsByField = sortByField(
-    _.uniq(
-      fieldColumns
-        .filter(col =>
-          incompatibleSelectedOperationType
-            ? col.operationType === incompatibleSelectedOperationType
-            : selectedColumn && col.operationType === selectedColumn.operationType
-        )
-        .concat(fieldColumns),
-      col => col.sourceField
-    )
-  );
-
-  function isCompatibleWithCurrentOperation(col: BaseIndexPatternColumn) {
-    if (incompatibleSelectedOperationType) {
-      return col.operationType === incompatibleSelectedOperationType;
+    function isCompatibleWithCurrentOperation(fieldName: string) {
+      if (incompatibleSelectedOperationType) {
+        return operationByField[fieldName]!.includes(incompatibleSelectedOperationType);
+      }
+      return (
+        !selectedColumnOperationType ||
+        operationByField[fieldName]!.includes(selectedColumnOperationType)
+      );
     }
-    return !selectedColumn || col.operationType === selectedColumn.operationType;
-  }
 
-  const fieldOptions = [];
-  const fieldlessColumn =
-    filteredColumns.find(column => !hasField(column) && isCompatibleWithCurrentOperation(column)) ||
-    filteredColumns.find(column => !hasField(column));
+    const isCurrentOperationApplicableWithoutField =
+      (!selectedColumnOperationType && !incompatibleSelectedOperationType) ||
+      operationByDocument.includes(
+        incompatibleSelectedOperationType || selectedColumnOperationType!
+      );
 
-  if (fieldlessColumn) {
-    fieldOptions.push({
-      label: i18n.translate('xpack.lens.indexPattern.documentField', {
-        defaultMessage: 'Document',
-      }),
-      value: { operationId: fieldlessColumn.operationId },
-      className: classNames({
-        'lnsConfigPanel__fieldOption--incompatible': !isCompatibleWithCurrentOperation(
-          fieldlessColumn
-        ),
-      }),
-    });
-  }
+    const fieldOptions = [];
 
-  if (uniqueColumnsByField.length > 0) {
-    fieldOptions.push({
-      label: i18n.translate('xpack.lens.indexPattern.individualFieldsLabel', {
-        defaultMessage: 'Individual fields',
-      }),
-      options: uniqueColumnsByField
-        .map(col => ({
-          label: col.sourceField,
-          value: { operationId: col.operationId, dataType: col.dataType },
-          compatible: isCompatibleWithCurrentOperation(col),
-        }))
-        .sort(({ compatible: a }, { compatible: b }) => {
-          if (a && !b) {
-            return -1;
-          }
-          if (!a && b) {
-            return 1;
-          }
-          return 0;
-        })
-        .map(({ label, value, compatible }) => ({
-          label,
-          value,
-          className: classNames({ 'lnsConfigPanel__fieldOption--incompatible': !compatible }),
-        })),
-    });
-  }
+    if (operationByDocument.length > 0) {
+      fieldOptions.push({
+        label: i18n.translate('xpack.lens.indexPattern.documentField', {
+          defaultMessage: 'Document',
+        }),
+        value: { type: 'document' },
+        className: classNames({
+          'lnsConfigPanel__fieldOption--incompatible': !isCurrentOperationApplicableWithoutField,
+        }),
+      });
+    }
+
+    if (fields.length > 0) {
+      fieldOptions.push({
+        label: i18n.translate('xpack.lens.indexPattern.individualFieldsLabel', {
+          defaultMessage: 'Individual fields',
+        }),
+        options: fields
+          .map(field => ({
+            label: field,
+            value: {
+              type: 'field',
+              field,
+              dataType: fieldMap[field].type,
+              operationType:
+                selectedColumnOperationType && isCompatibleWithCurrentOperation(field)
+                  ? selectedColumnOperationType
+                  : undefined,
+            },
+            compatible: isCompatibleWithCurrentOperation(field),
+          }))
+          .sort(({ compatible: a }, { compatible: b }) => {
+            if (a && !b) {
+              return -1;
+            }
+            if (!a && b) {
+              return 1;
+            }
+            return 0;
+          })
+          .map(({ label, value, compatible }) => ({
+            label,
+            value,
+            className: classNames({ 'lnsConfigPanel__fieldOption--incompatible': !compatible }),
+          })),
+      });
+    }
+    return fieldOptions;
+  }, [
+    incompatibleSelectedOperationType,
+    selectedColumnOperationType,
+    selectedColumnSourceField,
+    operationFieldSupportMatrix,
+    currentIndexPattern,
+    fieldMap,
+  ]);
 
   return (
     <EuiComboBox
@@ -114,18 +129,18 @@ export function FieldSelect({
       placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
         defaultMessage: 'Field',
       })}
-      options={(fieldOptions as unknown) as EuiComboBoxOptionProps[]}
-      isInvalid={Boolean(incompatibleSelectedOperationType && selectedColumn)}
+      options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionProps[]}
+      isInvalid={Boolean(incompatibleSelectedOperationType && selectedColumnOperationType)}
       selectedOptions={
-        selectedColumn
-          ? hasField(selectedColumn)
+        selectedColumnOperationType
+          ? selectedColumnSourceField
             ? [
                 {
-                  label: selectedColumn.sourceField,
-                  value: selectedColumn.operationId,
+                  label: selectedColumnSourceField,
+                  value: { type: 'field', field: selectedColumnSourceField },
                 },
               ]
-            : [fieldOptions[0]]
+            : [memoizedFieldOptions[0]]
           : []
       }
       singleSelection={{ asPlainText: true }}
@@ -135,12 +150,7 @@ export function FieldSelect({
           return;
         }
 
-        const column: IndexPatternColumn = filteredColumns.find(
-          ({ operationId }) =>
-            operationId === ((choices[0].value as unknown) as { operationId: string }).operationId
-        )!;
-
-        onChangeColumn(column);
+        onChoose((choices[0].value as unknown) as FieldChoice);
       }}
       renderOption={(option, searchValue) => {
         return (

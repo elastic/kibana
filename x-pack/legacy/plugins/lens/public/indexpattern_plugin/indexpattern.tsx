@@ -43,8 +43,6 @@ export type IndexPatternColumn =
   | FilterRatioIndexPatternColumn;
 
 export interface BaseIndexPatternColumn {
-  // Public
-  operationId: string;
   label: string;
   dataType: DataType;
   isBucketed: boolean;
@@ -144,9 +142,8 @@ export type IndexPatternPrivateState = IndexPatternPersistedState & {
 };
 
 export function columnToOperation(column: IndexPatternColumn): Operation {
-  const { dataType, label, isBucketed, operationId } = column;
+  const { dataType, label, isBucketed } = column;
   return {
-    id: operationId,
     label,
     dataType,
     isBucketed,

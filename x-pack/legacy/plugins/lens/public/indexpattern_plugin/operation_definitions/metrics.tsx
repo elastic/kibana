@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  IndexPatternField,
   FieldBasedIndexPatternColumn,
   MinIndexPatternColumn,
   SumIndexPatternColumn,
@@ -23,18 +22,23 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
   const operationDefinition: OperationDefinition<T> = {
     type,
     displayName,
-    isApplicableWithoutField: false,
-    isApplicableForField: ({ aggregationRestrictions, type: fieldType }: IndexPatternField) => {
-      return Boolean(
-        fieldType === 'number' && (!aggregationRestrictions || aggregationRestrictions[type])
-      );
+    getPossibleOperationsForDocument: () => [],
+    getPossibleOperationsForField: ({ aggregationRestrictions, type: fieldType }) => {
+      if (fieldType === 'number' && (!aggregationRestrictions || aggregationRestrictions[type])) {
+        return [
+          {
+            dataType: 'number',
+            isBucketed: false,
+          },
+        ];
+      }
+      return [];
     },
-    buildColumn({ operationId, suggestedPriority, field, indexPatternId }): T {
+    buildColumn({ suggestedPriority, field, indexPatternId }): T {
       if (!field) {
         throw new Error(`Invariant: A ${type} operation can only be built with a field`);
       }
       return {
-        operationId,
         label: ofName(field ? field.name : ''),
         dataType: 'number',
         operationType: type,
