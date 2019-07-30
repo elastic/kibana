@@ -8,7 +8,14 @@ import React, { Fragment, SFC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow, EuiText } from '@elastic/eui';
+import {
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiText,
+} from '@elastic/eui';
 
 import { useAngularContext } from '../../../../../contexts/angular';
 
@@ -31,8 +38,17 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
   const angularContext = useAngularContext();
 
   const pivotQuery = getPivotQuery(searchQuery);
-
-  const displaySearch = searchString === defaultSearch ? emptySearch : searchString;
+  let useCodeBlock = false;
+  let displaySearch;
+  // searchString set to empty once source config editor used - display query instead
+  if (searchString === emptySearch) {
+    displaySearch = JSON.stringify(searchQuery, null, 2);
+    useCodeBlock = true;
+  } else if (searchString === defaultSearch) {
+    displaySearch = emptySearch;
+  } else {
+    displaySearch = searchString;
+  }
 
   return (
     <EuiFlexGroup>
@@ -47,13 +63,34 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
               >
                 <span>{angularContext.currentIndexPattern.title}</span>
               </EuiFormRow>
-              {displaySearch !== emptySearch && (
+              {useCodeBlock === false && displaySearch !== emptySearch && (
                 <EuiFormRow
                   label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.queryLabel', {
                     defaultMessage: 'Query',
                   })}
                 >
                   <span>{displaySearch}</span>
+                </EuiFormRow>
+              )}
+              {useCodeBlock === true && displaySearch !== emptySearch && (
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.ml.dataframe.stepDefineSummary.queryCodeBlockLabel',
+                    {
+                      defaultMessage: 'Query',
+                    }
+                  )}
+                >
+                  <EuiCodeBlock
+                    language="js"
+                    fontSize="s"
+                    paddingSize="s"
+                    color="light"
+                    overflowHeight={300}
+                    isCopyable
+                  >
+                    {displaySearch}
+                  </EuiCodeBlock>
                 </EuiFormRow>
               )}
             </Fragment>
