@@ -230,9 +230,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   const updateScheduler = new UpdateScheduler(updateWorker, serverOptions, esClient, log);
   const indexScheduler = new IndexScheduler(indexWorker, serverOptions, esClient, log);
   updateScheduler.start();
-  if (!serverOptions.disableIndexScheduler) {
-    indexScheduler.start();
-  }
+  indexScheduler.start();
   // Check if the repository is local on the file system.
   // This should be executed once at the startup time of Kibana.
   cloneScheduler.schedule();
@@ -261,9 +259,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
 
   server.events.on('stop', () => {
     gitOps.cleanAllRepo();
-    if (!serverOptions.disableIndexScheduler) {
-      indexScheduler.stop();
-    }
+    indexScheduler.stop();
     updateScheduler.stop();
     queue.destroy();
   });
