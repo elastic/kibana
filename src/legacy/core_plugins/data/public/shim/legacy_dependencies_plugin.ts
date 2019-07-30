@@ -17,15 +17,25 @@
  * under the License.
  */
 
-import 'ngreact';
-import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from 'ui/modules';
-import { FilterBar } from './filter_bar';
+import chrome from 'ui/chrome';
+import { CoreStart, Plugin } from 'kibana/public';
+import { initLegacyModule } from './legacy_module';
 
-const app = uiModules.get('app/kibana', ['react']);
+/** @internal */
+export interface LegacyDependenciesPluginSetup {
+  savedObjectsClient: any;
+}
 
-export function setupDirective() {
-  app.directive('filterBar', reactDirective => {
-    return reactDirective(wrapInI18nContext(FilterBar));
-  });
+export class LegacyDependenciesPlugin implements Plugin<any, any> {
+  public setup() {
+    initLegacyModule();
+
+    return {
+      savedObjectsClient: chrome.getSavedObjectsClient(),
+    } as LegacyDependenciesPluginSetup;
+  }
+
+  public start(core: CoreStart) {
+    // nothing to do here yet
+  }
 }
