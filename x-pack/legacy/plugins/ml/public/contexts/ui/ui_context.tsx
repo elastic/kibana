@@ -10,6 +10,16 @@ import chrome from 'ui/chrome';
 import { timefilter } from 'ui/timefilter';
 import { timeHistory } from 'ui/timefilter/time_history';
 
+// This provides ui/* based imports via React Context.
+// Because these dependencies can use regular imports,
+// they are just passed on as the default value
+// of the Context which means it's not necessary
+// to add <UiContext.Provider value="..." />... to the
+// wrapping angular directive, reducing a lot of boilerplate.
+// The custom hooks like useUiContext() need to be mocked in
+// tests because we rely on the properly set up default value.
+// Different custom hooks can be created to access parts only
+// from the full context value, see useUiChromeContext() as an example.
 export const UiContext = React.createContext({
   chrome,
   timefilter,
