@@ -45,7 +45,7 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
       defaultValue: '',
       validations: [
         {
-          validator: emptyField('Please give a name to the property'),
+          validator: emptyField('Give a name to the field.'),
         },
         {
           validator: containsCharsField({
