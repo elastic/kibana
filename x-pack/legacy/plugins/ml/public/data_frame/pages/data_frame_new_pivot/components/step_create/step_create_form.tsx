@@ -71,6 +71,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
     );
 
     const angularContext = useAngularContext();
+    const baseUrl = useUiChromeContext().addBasePath(angularContext.kbnBaseUrl);
 
     useEffect(() => {
       onChange({ created, started, indexPatternId });

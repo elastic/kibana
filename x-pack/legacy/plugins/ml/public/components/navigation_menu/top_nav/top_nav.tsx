@@ -28,7 +28,7 @@ function getRecentlyUsedRangesFactory(timeHistory: TimeHistory) {
 }
 
 export const TopNav: FC = () => {
-  const { timefilter, timeHistory } = useUiContext();
+  const { chrome, timefilter, timeHistory } = useUiContext();
   const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(timeHistory);
 
   const [refreshInterval, setRefreshInterval] = useState(timefilter.getRefreshInterval());
@@ -41,7 +41,7 @@ export const TopNav: FC = () => {
     timefilter.isTimeRangeSelectorEnabled
   );
 
-  const dateFormat = ui.chrome.getUiSettingsClient().get('dateFormat');
+  const dateFormat = chrome.getUiSettingsClient().get('dateFormat');
 
   useEffect(() => {
     timefilter.on('refreshIntervalUpdate', timefilterUpdateListener);
