@@ -103,7 +103,7 @@ For each parent pipeline aggregation, you define the metric for the calculated a
 
 Derivative:: Calculates the derivative of the specified metrics.
 
-Culumlative Sum:: Calculates the cumulative sum of the specified metric in a parent histogram.
+Cumulative Sum:: Calculates the cumulative sum of the specified metric in a parent histogram.
 
 Moving Average:: Slides a window across the data and displays the average value of the window.
 
@@ -139,13 +139,21 @@ Date Histogram:: Builds from a numeric field and organized by date.
 
 Histogram:: Builds from a numeric field.
 
+Range:: Specifies a range of values for a numeric field.
+
+Date Range:: Returns values that are within a range of specified dates.
+
 IPv4 Range:: Specifies a range of IPv4 ranges.
 
 Terms:: Specifies the top or bottom _n_ elements of a field to display.
 
+Significant Terms:: Displays the results of the experimental _significant terms_ aggregation.
+
 Filters:: Specifies a set of filters that you can apply to the data.
 
 Significant filters:: Displays the results of the experimental _significant terms_ aggregation.
+
+Geohash:: Displays points based on the geohash coordinates.
 
 For more information about Elasticsearch bucket aggregations, refer to * {ref}/search-aggregations-bucket.html[Bucket aggregation].
 

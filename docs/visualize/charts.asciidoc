@@ -3,30 +3,59 @@
 Use area, line, and bar charts to plot your data on an x- and y-axis. 
 
 [float]
-[[chart-choose-data]]
-=== Choose the data you want to display
+[[chart-choose-y-axis]]
+=== Choose the aggregation for the y-axis
 
-To choose the data that you want to display in the chart, specify the aggregations. 
+To choose the data that you want to display along the y-axis, specify the aggregation. 
 
-. Choose the aggregation for the y-axis.
+. In the *Metrics* area, expand the *Y-axis* options.
 
-.. In the *Metrics* area, expand the *Y-axis* options.
+. From the *Aggregation* dropdown, select the aggregation for the y-axis.
 
-.. From the *Aggregation* dropdown, select the aggregation for the y-axis.
+. Click *Apply changes* image:images/apply-changes-button.png[].
 
-. Choose a bucket aggregation for the x-axis.
+[float]
+[[chart-choose-x-axis]]
+=== Choose a bucket aggregation for the x-axis
 
-.. In the *Buckets* area, click *Add*, then select *X-axis*.
+To choose the data that you want to display along the x-axis, specify the bucket aggregation.
 
-.. Select the bucket aggregation for the x-axis.
+. In the *Buckets* area, click *Add*, then select *X-axis*.
 
-. To further break down the data, specify sub aggregations.
+. Select the bucket aggregation for the x-axis.
 
-.. In the *Buckets* area, click *Add*, then select *Split series* or *Split chart*.
+. Click *Apply changes* image:images/apply-changes-button.png[].
 
-.. Specify the sub aggregation settings.
+[float]
+[[chart-choose-sub-aggregation]]
+=== Choose sub aggregations
 
-.. To change the order, drag and drop the aggregations.
+To further break down the data, specify sub aggregations.
+
+. In the *Buckets* area, click *Add*, then select *Split series* or *Split chart*.
+
+. Specify the sub aggregation settings.
+
+. To change the order, drag and drop the aggregations.
+
+NOTE: Multiple chart splits must run before any other aggregation.
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
+
+[float]
+[[chart-choose-customize-aggregation]]
+=== Customize your metrics or bucket aggregation
+
+To customize your metrics or bucket aggregation, add specific JSON-formatted properties to merge with the aggregation definitions. The availability of the options depends on the aggregation you choose.
+
+. Click *Advanced*.
+
+. In the *JSON Input* field, add the JSON-formatted properties. For example:
+
+[source,shell]
+{ "script" : "doc['grade'].value * 1.2" }
+
+NOTE: In Elasticsearch 1.4.3 and later, you must enable {ref}/modules-scripting.html[dynamic Groovy scripting] to add JSON-formatted properties.
 
 . Click *Apply changes* image:images/apply-changes-button.png[].
 
@@ -38,7 +67,7 @@ To make the chart look the way you want, change the system and panel options.
 
 . Select *Metrics & Axes*.
 
-.. Expand the *System* options, then choose how you want your data to appear in the visualization.
+.. Expand the *System* options, then choose how you want your data to appear.
 
 .. Expand the y-axis and x-axis options, then choose how you want to display the y- and x-axis.
 
@@ -46,7 +75,7 @@ To make the chart look the way you want, change the system and panel options.
 
 . Select *Panel Settings*.
 
-. Specify the settings, then click *Apply changes* image:images/apply-changes-button.png[].
+.. Specify the settings, then click *Apply changes* image:images/apply-changes-button.png[].
 
 [float]
 [[chart-example]]

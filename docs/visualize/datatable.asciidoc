@@ -3,65 +3,96 @@
 Display your raw data values in a table format. 
 
 [float]
-[[chart-choose-data]]
-=== Choose the data you want to display
+[[data-table-choose-metric-aggregation]]
+=== Select the metric aggregation
 
-To choose the data that you want to display in the chart, specify the aggregations. 
+To choose the data that you want to display in the table, specify the metric aggregation. 
 
-. Choose the aggregation for the y-axis.
+. In the *Metrics* area, expand the *Metric* options.
 
-.. In the *Metrics* area, expand the *Y-axis* options.
+. From the *Aggregation* dropdown, select the aggregation.
 
-.. From the *Aggregation* dropdown, select the aggregation for the y-axis.
+. From the *Field* dropdown, select the data type.
 
-. Choose a bucket aggregation for the x-axis.
-
-.. In the *Buckets* area, click *Add*, then select *X-axis*.
-
-.. Select the bucket aggregation for the x-axis.
-
-. To further break down the data, specify sub aggregations.
-
-.. In the *Buckets* area, click *Add*, then select *Split series* or *Split chart*.
-
-.. Specify the sub aggregation settings.
-
-.. To change the order, drag and drop the aggregations.
+. In the *Custom label* field, enter a name for the data.
 
 . Click *Apply changes* image:images/apply-changes-button.png[].
 
 [float]
-[[customize-format-chart]]
-=== Customize and format the chart
+[[data-table-bucket-aggregation]]
+=== Select a bucket aggregation
 
-To make the chart look the way you want, change the system and panel options.
+Short description.
 
-. Select *Metrics & Axes*.
+. In the *Buckets* area, click *Add*.
 
-.. Expand the *System* options, then choose how you want your data to appear in the visualization.
+. Select *Split series* or *Split chart*.
 
-.. Expand the y-axis and x-axis options, then choose how you want to display the y- and x-axis.
+. Select the bucket aggregation.
 
-.. To change the colors of the y- and x-axis, click the data set in the legend, then choose a color from the color picker. 
-
-. Select *Panel Settings*.
-
-. Specify the settings, then click *Apply changes* image:images/apply-changes-button.png[].
+. Click *Apply changes* image:images/apply-changes-button.png[].
 
 [float]
-[[chart-example]]
-== Example: Create an area chart with Metricbeat data
+[[data-table-choose-sub-aggregation]]
+=== Select sub aggregations
 
-To view the real-time CPU system data collected by Metricbeat, create an area chart.
+To further break down the data, specify sub aggregations.
+
+. In the *Buckets* area, click *Add*, then select *Split series* or *Split chart*.
+
+. Specify the sub aggregation settings.
+
+. To change the order, drag and drop the aggregations.
+
+NOTE: Multiple chart splits must run before any other aggregation.
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
 
 [float]
-[[chart-before-you-begin]]
+[[data-table-choose-customize-aggregation]]
+=== Customize your metrics or bucket aggregation
+
+To customize your metrics or bucket aggregation, add specific JSON-formatted properties to merge with the aggregation definitions. The availability of the options depends on the aggregation you choose.
+
+. Click *Advanced*.
+
+. In the *JSON Input* field, add the JSON-formatted properties. For example:
+
+[source,shell]
+{ "script" : "doc['grade'].value * 1.2" }
+
+NOTE: In Elasticsearch 1.4.3 and later, you must enable {ref}/modules-scripting.html[dynamic Groovy scripting] to add JSON-formatted properties.
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
+
+[float]
+[[customize-format-data-table]]
+=== Format the table
+
+To make the table look the way you want, change the format options.
+
+. Select *Options*.
+
+. Specify or change the options.
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
+
+[float]
+[[data-table-example]]
+== Example: Create a data table
+
+Create a data table that shows the average flight distance, in kilometers, every 30 seconds.
+
+[float]
+[[data-table-before-you-begin]]
 === Before you begin
 
-In this tutorial, you'll use the data from https://www.elastic.co/guide/en/beats/metricbeat/current/index.html[Metricbeat]. To ingest the data locally, link:https://www.elastic.co/downloads/beats/metricbeat[download Metricbeat].
+. For this example, you'll need to add the {kibana-ref}/add-sample-data.html[Sample flight data].
+
+. Make sure that you change the time filter to *Today*.
 
 [float]
-[[chart-metricbeat-data]]
+[[data-table-create-visualization]]
 === Create the visualization
 
 To create the area chart visualization, use the visualization builder.
@@ -70,60 +101,54 @@ To create the area chart visualization, use the visualization builder.
 
 . Click *Create new visualization*.
 
-. On the *New Visualization* window, click *Area*.
+. On the *New Visualization* window, click *Data Table*.
 
-. On the *New Area/Choose a source* window, select the metricbeat data.
+. On the *New Area/Choose a source* window, select *kibana_sample_data_flights*.
 
 [float]
-[[chart-metricbeat-data-yaxis]]
-=== Choose the aggregation for the y-axis
+[[data-table-metric-aggregation]]
+=== Choose the metric aggregation
 
-Specify the options for the y-axis. 
-
-. In the *Metrics* area, expand the *Y-axis* options.
+. Expand the *Metric* options.
 
 . From the *Aggregation* dropdown, select *Average*.
 
-. From the *Field* dropdown, select *system.process.cpu.total.pct*.
+. From the *Field* dropdown, select *DistanceKilometers*.
 
-. In the *Custom label* field, enter a name for the y-axis. For example, `Average`.
+. In the *Custom Label* field, enter a name for the data. For example, `Average distance (in kilometers)`.
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
+
+image:images/visualize-data-table01.png[Example data table]
 
 [float]
-[[chart-metricbeat-data-xaxis]]
-=== Choose the bucket aggregation for the x-axis
+[[example-data-table-bucket-aggregation]]
+=== Choose the bucket aggregation
 
-Specify the options for the x-axis.
-
-. In the *Buckets* area, click *Add*, then select *X-axis*.
+. In the *Buckets* area, click *Add*, then select *Split rows*.
 
 . From the *Aggregation* dropdown, select *Date Histogram*.
 
-. From the *Field* dropdown, select *@timestamp*.
+. From the *Field* dropdown, select *timestamp*.
 
-. In the *Custom label* field, enter a name for the x-axis. For example, `CPU`.
+. In the *Custom Label* field, enter a name for the data. For example, `Time`.
 
 . Click *Apply changes* image:images/apply-changes-button.png[].
 
-image:images/visualize-area-chart01.png[Example area chart]
+image:images/visualize-data-table02.png[Example data table]
 
 [float]
-[[chart-metricbeat-data-personalize]]
-=== Customize the area chart
+[[data-table-format]]
+=== Customize the data table
 
-To customize the area chart, change the line style and position the legend. 
+. Select *Options*.
 
-. Select *Metrics & Axes*.
+. To show fewer or more rows, click the arrows in the *Per Page* field. For this example, click the down arrow until `5` appears.
 
-.. To soften the area chart lines, select *smoothed* from the *Line Mode* dropdown.
+. To show the average of the `Average distance (in kilometers)` column, select *Show total*, then make sure that *sum* is selected from the *Total function* dropdown.
 
-.. Use the default settings for the remaining options. 
-
-. Select *Panel Settings*.
-
-.. To move the legend to the bottom of the area chart, select *bottom* from the *Legend Position* dropdown.
-
-.. To make the area chart easier to read, select *X-Axis Lines*, then select *LeftAxis-1* from the *Y-Axis Lines* dropdown.
+. To show the percentage of each value in the `Average distance (in kilometers)` column, select *Average distance (in kilometers)* from the *Percentage column*.
 
 . Click *Apply changes* image:images/apply-changes-button.png[].
 
-image:images/visualize-area-chart02.png[Example area chart]
+image:images/visualize-data-table03.png[Example data table]
