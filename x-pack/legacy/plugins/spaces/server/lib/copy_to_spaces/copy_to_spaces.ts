@@ -10,7 +10,7 @@ import {
   SavedObjectsImportError,
 } from 'src/core/server';
 import { Readable } from 'stream';
-import { SavedObjectsClientProviderOptions } from 'src/core/server/saved_objects/service/lib/scoped_client_provider';
+import { SavedObjectsClientProviderOptions } from 'src/core/server';
 import { SpacesClient } from '../spaces_client';
 import { Rereadable } from './lib/rereadable_stream';
 import { spaceIdToNamespace } from '../utils/namespace';

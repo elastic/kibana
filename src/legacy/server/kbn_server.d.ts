@@ -19,7 +19,7 @@
 
 import { ResponseObject, Server } from 'hapi';
 
-import { SavedObjectsClientProviderOptions } from 'src/core/server/saved_objects/service/lib/scoped_client_provider';
+import { SavedObjectsClientProviderOptions } from 'src/core/server';
 import {
   ConfigService,
   ElasticsearchServiceSetup,
