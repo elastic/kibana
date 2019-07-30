@@ -190,23 +190,21 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 gutterSize="none"
                 responsive={false}
               >
-                <React.Fragment>
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    host.name: "zeek-iowa"
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    process.name: "du"
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    user.name: "root"
-                  </EuiFlexItem>
-                </React.Fragment>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  host.name: "zeek-iowa"
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  process.name: "du"
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  user.name: "root"
+                </EuiFlexItem>
               </EuiFlexGroup>,
               "title": "Influenced By",
             },
