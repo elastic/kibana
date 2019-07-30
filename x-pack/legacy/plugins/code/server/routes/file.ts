@@ -18,7 +18,7 @@ import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { TEXT_FILE_LIMIT } from '../../common/file';
 import { decodeRevisionString } from '../../common/uri_util';
 
-export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
+export function fileRoute(router: CodeServerRouter, gitOps: GitOperations) {
   async function getRepoUriFromMeta(
     req: RequestFacade,
     repoUri: string
