@@ -32,6 +32,7 @@ import {
 
 import { ml } from '../../../../../services/ml_api_service';
 import { useAngularContext } from '../../../../../contexts/angular';
+import { useUiChromeContext } from '../../../../../contexts/ui';
 import { PROGRESS_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 
 import { moveToDataFrameTransformList, moveToDiscover } from '../../../../common';
@@ -383,7 +384,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
                         defaultMessage: 'Use Discover to explore the data frame pivot.',
                       }
                     )}
-                    onClick={() => moveToDiscover(indexPatternId, angularContext.kbnBaseUrl)}
+                    onClick={() => moveToDiscover(indexPatternId, baseUrl)}
                   />
                 </EuiFlexItem>
               )}
