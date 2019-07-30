@@ -59,11 +59,10 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
 
     public async missingOrFail(
       selector: string,
-      existsOptions?: ExistsOptions
+      timeout: number = WAIT_FOR_EXISTS_TIME
     ): Promise<void | never> {
-      if (await this.exists(selector, existsOptions)) {
-        throw new Error(`expected testSubject(${selector}) to not exist`);
-      }
+      log.debug(`TestSubjects.missingOrFail(${selector})`);
+      await find.waitForDeletedByCssSelector(testSubjSelector(selector), timeout);
     }
 
     public async append(selector: string, text: string): Promise<void> {
