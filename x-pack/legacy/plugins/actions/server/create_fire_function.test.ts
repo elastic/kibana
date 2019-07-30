@@ -38,12 +38,12 @@ describe('fire()', () => {
 Array [
   Object {
     "params": Object {
-      "actionTypeParams": Object {
-        "baz": false,
-      },
       "basePath": "/s/default",
       "id": "123",
       "namespace": "abc",
+      "params": Object {
+        "baz": false,
+      },
     },
     "scope": Array [
       "actions",
