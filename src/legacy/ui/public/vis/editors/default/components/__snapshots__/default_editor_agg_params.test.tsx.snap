@@ -46,39 +46,43 @@ exports[`DefaultEditorAggParams component should init with the default set of pa
       }
     }
   />
-  <EuiAccordion
-    buttonContent="Advanced"
-    id="advancedAccordion"
-    initialIsOpen={false}
-    paddingSize="none"
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    labelType="label"
   >
-    <EuiSpacer
-      size="m"
-    />
-    <DefaultEditorAggParam
-      aggParam={
-        Object {
-          "advanced": true,
-          "name": "json",
-          "type": "json",
+    <EuiAccordion
+      buttonContent="Advanced"
+      id="advancedAccordion"
+      initialIsOpen={false}
+      paddingSize="none"
+    >
+      <EuiSpacer
+        size="s"
+      />
+      <DefaultEditorAggParam
+        aggParam={
+          Object {
+            "advanced": true,
+            "name": "json",
+            "type": "json",
+          }
         }
-      }
-      key="jsonundefined"
-      onChange={[MockFunction]}
-      setTouched={[Function]}
-      setValidity={[Function]}
-      showValidation={false}
-      subAggParams={
-        Object {
-          "formIsTouched": false,
-          "onAggParamsChange": [MockFunction],
-          "onAggTypeChange": [MockFunction],
+        key="jsonundefined"
+        onChange={[MockFunction]}
+        setTouched={[Function]}
+        setValidity={[Function]}
+        showValidation={false}
+        subAggParams={
+          Object {
+            "formIsTouched": false,
+            "onAggParamsChange": [MockFunction],
+            "onAggTypeChange": [MockFunction],
+          }
         }
-      }
-    />
-  </EuiAccordion>
-  <EuiSpacer
-    size="m"
-  />
+      />
+    </EuiAccordion>
+  </EuiFormRow>
 </EuiForm>
 `;
