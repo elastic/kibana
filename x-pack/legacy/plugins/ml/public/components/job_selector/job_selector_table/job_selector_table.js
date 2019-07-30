@@ -232,7 +232,7 @@ export function JobSelectorTable({
   return (
     <Fragment>
       {jobs.length === 0 && <EuiLoadingSpinner size="l" />}
-      {jobs.length !== 0 && singleSelection === 'true' && renderJobsTable()}
+      {jobs.length !== 0 && singleSelection === true && renderJobsTable()}
       {jobs.length !== 0 && singleSelection === undefined && renderTabs()}
     </Fragment>
   );
@@ -244,6 +244,6 @@ JobSelectorTable.propTypes = {
   jobs: PropTypes.array,
   onSelection: PropTypes.func.isRequired,
   selectedIds: PropTypes.array.isRequired,
-  singleSelection: PropTypes.string,
-  timeseriesOnly: PropTypes.string
+  singleSelection: PropTypes.bool,
+  timeseriesOnly: PropTypes.bool
 };

@@ -43,8 +43,6 @@ export class ServerOptions {
 
   public readonly maxWorkspace: number = this.options.maxWorkspace;
 
-  public readonly disableIndexScheduler: boolean = this.options.disableIndexScheduler;
-
   public readonly enableGlobalReference: boolean = this.options.enableGlobalReference;
 
   public readonly lsp: LspOptions = this.options.lsp;
