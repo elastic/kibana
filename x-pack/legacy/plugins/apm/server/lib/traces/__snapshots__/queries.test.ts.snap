@@ -29,9 +29,31 @@ Object {
             },
           },
         ],
+        "should": Object {
+          "exists": Object {
+            "field": "parent.id",
+          },
+        },
       },
     },
-    "size": 1000,
+    "size": "myIndex",
+    "sort": Array [
+      Object {
+        "_score": Object {
+          "order": "asc",
+        },
+      },
+      Object {
+        "transaction.duration.us": Object {
+          "order": "desc",
+        },
+      },
+      Object {
+        "span.duration.us": Object {
+          "order": "desc",
+        },
+      },
+    ],
   },
   "index": Array [
     "myIndex",
