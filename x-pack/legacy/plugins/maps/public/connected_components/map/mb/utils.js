@@ -35,7 +35,13 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
 
 }
 
-export function syncLayerOrder(mbMap, layerList) {
+/**
+ * This is function assumes only a single layer moved in the layerList, compared to mbMap
+ * It is optimized to minimize the amount of mbMap.moveLayer calls.
+ * @param mbMap
+ * @param layerList
+ */
+export function syncLayerOrderForSingleLayer(mbMap, layerList) {
 
   if (!layerList || layerList.length === 0) {
     return;
@@ -43,12 +49,6 @@ export function syncLayerOrder(mbMap, layerList) {
 
 
   const mbLayers = mbMap.getStyle().layers.slice();
-
-  //This assumes that:
-  //- a single source-id identifies a single kibana layer
-  //- all layer-ids have a pattern that is sourceId_layerName, where sourceId cannot have any underscores
-
-
   const layerIds = mbLayers.map(mbLayer => {
     const layer = layerList.find(layer => layer.ownsMbLayerId(mbLayer.id));
     return layer.getId();
@@ -67,16 +67,19 @@ export function syncLayerOrder(mbMap, layerList) {
     accu.push({ id, movement });
     return accu;
   }, []);
-  if (netPos === 0 && netNeg === 0) { return; }
-  const movedLayer = (netPos >= netNeg) && movementArr.find(l => l.movement < 0).id ||
+  if (netPos === 0 && netNeg === 0) {
+    return;
+  }
+  const movedLayerId = (netPos >= netNeg) && movementArr.find(l => l.movement < 0).id ||
       (netPos < netNeg) && movementArr.find(l => l.movement > 0).id;
-  const nextLayerIdx = newLayerOrderLayerIds.findIndex(layerId => layerId === movedLayer) + 1;
-  const nextLayerId = nextLayerIdx === newLayerOrderLayerIds.length ? null :
+  const nextLayerIdx = newLayerOrderLayerIds.findIndex(layerId => layerId === movedLayerId) + 1;
+  const nextMbLayerId = nextLayerIdx === newLayerOrderLayerIds.length ? null :
     mbLayers.find(({ id }) => id.startsWith(newLayerOrderLayerIds[nextLayerIdx])).id;
 
-  mbLayers.forEach(({ id }) => {
-    if (id.startsWith(movedLayer)) {
-      mbMap.moveLayer(id, nextLayerId);
+  const movedLayer = layerList.find(layer => layer.getId() === movedLayerId);
+  mbLayers.forEach(({ id: mbLayerId }) => {
+    if (movedLayer.ownsMbLayerId(mbLayerId)) {
+      mbMap.moveLayer(mbLayerId, nextMbLayerId);
     }
   });
 
