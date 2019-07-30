@@ -99,7 +99,7 @@ export class JobCreateUi extends Component {
     );
 
     this.state = {
-      jobToClone: { ...stepDefaultOverrides },
+      jobToClone: stepDefaultOverrides || null,
       checkpointStepId: stepIds[0],
       currentStepId: stepIds[0],
       nextStepId: stepIds[1],
