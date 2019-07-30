@@ -28,7 +28,7 @@ import { LegacyDependenciesPluginSetup } from './shim/legacy_dependencies_plugin
  * Interface for any dependencies on other plugins' `setup` contracts.
  *
  * @internal
- * /
+ */
 export interface DataPluginSetupDependencies {
   __LEGACY: LegacyDependenciesPluginSetup;
   interpreter: any;
