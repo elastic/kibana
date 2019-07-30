@@ -36,7 +36,7 @@ export const getAt = (path: string, object: any, throwIfNotFound = true): unknow
   }
 
   if (throwIfNotFound) {
-    throw new Error(`Can't acess path "${path}" on ${JSON.stringify(object)}`);
+    throw new Error(`Can't access path "${path}" on ${JSON.stringify(object)}`);
   }
 
   return undefined;

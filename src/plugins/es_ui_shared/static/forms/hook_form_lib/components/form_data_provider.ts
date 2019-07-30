@@ -39,7 +39,7 @@ export const FormDataProvider = ({ children, form, pathsToWatch }: Props) => {
       if (didUnsubscribe) {
         return;
       }
-      // To avoid re-rendering the the children for updates on the form data
+      // To avoid re-rendering the children for updates on the form data
       // that we are **not** interested in, we can specify one or multiple path(s)
       // to watch.
       if (pathsToWatch) {

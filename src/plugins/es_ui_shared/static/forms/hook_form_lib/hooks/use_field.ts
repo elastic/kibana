@@ -146,7 +146,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
       return validationResult;
     };
 
-    // Execute each validations for the field sequencially
+    // Execute each validations for the field sequentially
     validations.forEach(validation => {
       const validationResult = runValidation(validation);
 
@@ -318,7 +318,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
    * method allows us to retrieve error messages for certain types of validation.
    *
    * For example, if we want to validation error messages to be displayed when the user clicks the "save" button
-   * _but_ in caase of an asynchronous validation (for ex. an HTTP request that would validate an index name) we
+   * _but_ in case of an asynchronous validation (for ex. an HTTP request that would validate an index name) we
    * want to immediately display the error message, we would have 2 types of validation: FIELD & ASYNC
    *
    * @param validationType The validation type to return error messages from
