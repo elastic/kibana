@@ -18,7 +18,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { CoreStart, Plugin } from 'kibana/public';
+import { CoreStart, Plugin } from '../../../../../../src/core/public';
 import { initLegacyModule } from './legacy_module';
 
 /** @internal */
