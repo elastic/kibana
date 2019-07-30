@@ -30,7 +30,7 @@ export function plugin() {
 export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
 
 /** @public types */
-export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
+export { IndexPattern, StaticIndexPattern, Field } from './index_patterns';
 export { Query, QueryBar, QueryBarInput } from './query';
 export { FilterBar, ApplyFiltersPopover } from './filter';
 export {

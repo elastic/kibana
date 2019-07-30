@@ -17,15 +17,18 @@
  * under the License.
  */
 
-export interface Field {
-  name: string;
-  type: string;
-  // esTypes might be undefined on old index patterns that have not been refreshed since we added
-  // this prop. It is also undefined on scripted fields.
-  esTypes?: string[];
-  aggregatable: boolean;
-  filterable: boolean;
-  searchable: boolean;
-  parent?: string;
-  subType?: string;
+import { IndexedArray } from 'ui/indexed_array';
+import { IndexPattern } from 'ui/index_patterns/_index_pattern';
+import { Field, FieldSpec } from './_field';
+
+export class FieldList extends IndexedArray<Field> {
+  constructor(indexPattern: IndexPattern, specs: FieldSpec[], shortDotsEnable = false) {
+    super({
+      index: ['name'],
+      group: ['type'],
+      initialSet: specs.map(function(field) {
+        return new Field(indexPattern, field, shortDotsEnable);
+      }),
+    });
+  }
 }

@@ -17,13 +17,12 @@
  * under the License.
  */
 
-export { IndexPatternSelect } from './components/index_pattern_select';
-
-export { IndexPatterns, IndexPatternsProvider } from './index_patterns';
-
-export {
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-} from './constants';
-
-export { validateIndexPattern, CONTAINS_SPACES, ILLEGAL_CHARACTERS } from './validate';
+export function getRoutes() {
+  return {
+    edit: '/management/kibana/index_patterns/{{id}}',
+    addField: '/management/kibana/index_patterns/{{id}}/create-field',
+    indexedFields: '/management/kibana/index_patterns/{{id}}?_a=(tab:indexedFields)',
+    scriptedFields: '/management/kibana/index_patterns/{{id}}?_a=(tab:scriptedFields)',
+    sourceFilters: '/management/kibana/index_patterns/{{id}}?_a=(tab:sourceFilters)',
+  };
+}
