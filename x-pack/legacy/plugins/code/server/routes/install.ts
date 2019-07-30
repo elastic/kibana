@@ -5,13 +5,14 @@
  */
 
 import * as Boom from 'boom';
-import { Request } from 'hapi';
+
+import { RequestFacade } from '../..';
 import { enabledLanguageServers, LanguageServerDefinition } from '../lsp/language_servers';
 import { LspService } from '../lsp/lsp_service';
 import { CodeServerRouter } from '../security';
 
-export function installRoute(server: CodeServerRouter, lspService: LspService) {
-  const kibanaVersion = server.server.config().get('pkg.version') as string;
+export function installRoute(router: CodeServerRouter, lspService: LspService) {
+  const kibanaVersion = router.server.config().get('pkg.version') as string;
   const status = (def: LanguageServerDefinition) => ({
     name: def.name,
     status: lspService.languageServerStatus(def.name),
@@ -24,19 +25,19 @@ export function installRoute(server: CodeServerRouter, lspService: LspService) {
     pluginName: def.installationPluginName,
   });
 
-  server.route({
+  router.route({
     path: '/api/code/install',
     handler() {
-      return enabledLanguageServers(server.server).map(status);
+      return enabledLanguageServers(router.server).map(status);
     },
     method: 'GET',
   });
 
-  server.route({
+  router.route({
     path: '/api/code/install/{name}',
-    handler(req: Request) {
+    handler(req: RequestFacade) {
       const name = req.params.name;
-      const def = enabledLanguageServers(server.server).find(d => d.name === name);
+      const def = enabledLanguageServers(router.server).find(d => d.name === name);
       if (def) {
         return status(def);
       } else {

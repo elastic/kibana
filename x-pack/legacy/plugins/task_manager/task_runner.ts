@@ -11,7 +11,7 @@
  */
 
 import Joi from 'joi';
-import { intervalFromNow, minutesFromNow } from './lib/intervals';
+import { intervalFromDate, intervalFromNow } from './lib/intervals';
 import { Logger } from './lib/logger';
 import { BeforeRunFunction } from './lib/middleware';
 import {
@@ -22,8 +22,10 @@ import {
   SanitizedTaskDefinition,
   TaskDictionary,
   validateRunResult,
+  TaskStatus,
 } from './task';
-import { RemoveResult } from './task_store';
+
+const defaultBackoffPerFailure = 5 * 60 * 1000;
 
 export interface TaskRunner {
   numWorkers: number;
@@ -37,7 +39,7 @@ export interface TaskRunner {
 interface Updatable {
   readonly maxAttempts: number;
   update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
-  remove(id: string): Promise<RemoveResult>;
+  remove(id: string): Promise<void>;
 }
 
 interface Opts {
@@ -119,7 +121,7 @@ export class TaskManagerRunner implements TaskRunner {
    * Gets whether or not this task has run longer than its expiration setting allows.
    */
   public get isExpired() {
-    return this.instance.runAt < new Date();
+    return intervalFromDate(this.instance.startedAt!, this.definition.timeout)! < new Date();
   }
 
   /**
@@ -166,12 +168,24 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public async claimOwnership(): Promise<boolean> {
     const VERSION_CONFLICT_STATUS = 409;
+    const attempts = this.instance.attempts + 1;
+    const now = new Date();
 
     try {
       this.instance = await this.store.update({
         ...this.instance,
         status: 'running',
-        runAt: intervalFromNow(this.definition.timeout)!,
+        startedAt: now,
+        attempts,
+        retryAt: this.instance.interval
+          ? intervalFromNow(this.definition.timeout)!
+          : this.getRetryDelay({
+              attempts,
+              // Fake an error. This allows retry logic when tasks keep timing out
+              // and lets us set a proper "retryAt" value each time.
+              error: new Error('Task timeout'),
+              addDuration: this.definition.timeout,
+            }),
       });
 
       return true;
@@ -211,19 +225,32 @@ export class TaskManagerRunner implements TaskRunner {
 
   private async processResultForRecurringTask(result: RunResult): Promise<RunResult> {
     // recurring task: update the task instance
+    const startedAt = this.instance.startedAt!;
     const state = result.state || this.instance.state || {};
-    const status = this.instance.attempts < this.store.maxAttempts ? 'idle' : 'failed';
+    let status: TaskStatus = this.getInstanceStatus();
 
     let runAt;
     if (status === 'failed') {
       // task run errored, keep the same runAt
       runAt = this.instance.runAt;
+    } else if (result.runAt) {
+      runAt = result.runAt;
+    } else if (result.error) {
+      // when result.error is truthy, then we're retrying because it failed
+      const newRunAt = this.instance.interval
+        ? intervalFromDate(startedAt, this.instance.interval)!
+        : this.getRetryDelay({
+            attempts: this.instance.attempts,
+            error: result.error,
+          });
+      if (!newRunAt) {
+        status = 'failed';
+        runAt = this.instance.runAt;
+      } else {
+        runAt = newRunAt;
+      }
     } else {
-      runAt =
-        result.runAt ||
-        intervalFromNow(this.instance.interval) ||
-        // when result.error is truthy, then we're retrying because it failed
-        minutesFromNow((this.instance.attempts + 1) * 5); // incrementally backs off an extra 5m per failure
+      runAt = intervalFromDate(startedAt, this.instance.interval)!;
     }
 
     await this.store.update({
@@ -231,7 +258,9 @@ export class TaskManagerRunner implements TaskRunner {
       runAt,
       state,
       status,
-      attempts: result.error ? this.instance.attempts + 1 : 0,
+      startedAt: null,
+      retryAt: null,
+      attempts: result.error ? this.instance.attempts : 0,
     });
 
     return result;
@@ -260,6 +289,45 @@ export class TaskManagerRunner implements TaskRunner {
     } else {
       await this.processResultWhenDone(result);
     }
+    return result;
+  }
+
+  private getInstanceStatus() {
+    if (this.instance.interval) {
+      return 'idle';
+    }
+
+    const maxAttempts = this.definition.maxAttempts || this.store.maxAttempts;
+    return this.instance.attempts < maxAttempts ? 'idle' : 'failed';
+  }
+
+  private getRetryDelay({
+    error,
+    attempts,
+    addDuration,
+  }: {
+    error: any;
+    attempts: number;
+    addDuration?: string;
+  }): Date | null {
+    let result = null;
+
+    // Use custom retry logic, if any, otherwise we'll use the default logic
+    const retry: boolean | Date = this.definition.getRetry
+      ? this.definition.getRetry(attempts, error)
+      : true;
+
+    if (retry instanceof Date) {
+      result = retry;
+    } else if (retry === true) {
+      result = new Date(Date.now() + attempts * defaultBackoffPerFailure);
+    }
+
+    // Add a duration to the result
+    if (addDuration && result) {
+      result = intervalFromDate(result, addDuration)!;
+    }
+
     return result;
   }
 }
