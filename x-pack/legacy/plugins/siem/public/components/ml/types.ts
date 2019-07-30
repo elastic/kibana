@@ -135,3 +135,12 @@ const sourceOrDestination = ['source.ip', 'destination.ip'];
 
 export const isDestinationOrSource = (value: string | null): value is DestinationOrSource =>
   value != null && sourceOrDestination.includes(value);
+
+export interface MlError {
+  msg: string;
+  response: string;
+  statusCode: number;
+  path?: string;
+  query?: {};
+  body?: string;
+}
