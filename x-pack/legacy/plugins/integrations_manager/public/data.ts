@@ -5,9 +5,7 @@
  */
 
 import { npStart } from 'ui/new_platform';
-// disabling pending https://github.com/elastic/kibana/pull/42001
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { HttpHandler } from 'src/core/public/http';
+import { HttpHandler } from 'src/core/public';
 import { STATUS_INSTALLED, STATUS_NOT_INSTALLED } from '../common/constants';
 import { getInstallPath, getInfoPath, getListPath, getRemovePath } from '../common/routes';
 import { IntegrationInfo, IntegrationList, IntegrationsGroupedByStatus } from '../common/types';
