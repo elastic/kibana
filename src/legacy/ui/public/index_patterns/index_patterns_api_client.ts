@@ -17,71 +17,66 @@
  * under the License.
  */
 
-import { kfetch } from '../kfetch';
+import { kfetch, KFetchQuery } from '../kfetch';
 
 import { IndexPatternMissingIndices } from './errors';
 
-function join(...uriComponents) {
-  return uriComponents.filter(Boolean).map(encodeURIComponent).join('/');
-}
-
-function request(method, url, query, body) {
+function request(url: string, query: KFetchQuery) {
   return kfetch({
-    method,
+    method: 'GET',
     pathname: url,
     query,
-    body,
-  })
-    .catch((resp) => {
-      if (resp.body.statusCode === 404 && resp.body.statuscode === 'no_matching_indices') {
-        throw new IndexPatternMissingIndices(resp.body.message);
-      }
+  }).catch(resp => {
+    if (resp.body.statusCode === 404 && resp.body.statuscode === 'no_matching_indices') {
+      throw new IndexPatternMissingIndices(resp.body.message);
+    }
 
-      const err = new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
-      err.status = resp.body.statusCode;
-      err.body = resp.body.message;
-      throw err;
-    });
+    throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
+  });
+}
+
+const API_BASE_URL: string = `/api/index_patterns/`;
+
+export interface GetFieldsOptions {
+  pattern?: string;
+  type?: string;
+  params?: any;
+  lookBack?: boolean;
+  metaFields?: string;
 }
 
 export class IndexPatternsApiClient {
-  constructor() {
-    this.apiBaseUrl = `/api/index_patterns/`;
+  constructor() {}
+
+  _getUrl(path: string[]) {
+    return (
+      API_BASE_URL +
+      path
+        .filter(Boolean)
+        .map(encodeURIComponent)
+        .join('/')
+    );
   }
 
-  _getUrl(path) {
-    return this.apiBaseUrl + join(...path);
-  }
-
-
-  getFieldsForTimePattern(options = {}) {
-    const {
-      pattern,
-      lookBack,
-      metaFields,
-    } = options;
+  getFieldsForTimePattern(options: GetFieldsOptions = {}) {
+    const { pattern, lookBack, metaFields } = options;
 
     const url = this._getUrl(['_fields_for_time_pattern']);
 
-    return request('GET', url, {
+    return request(url, {
       pattern,
       look_back: lookBack,
       meta_fields: metaFields,
     }).then(resp => resp.fields);
   }
 
-  getFieldsForWildcard(options = {}) {
-    const {
-      pattern,
-      metaFields,
-      type,
-      params,
-    } = options;
+  getFieldsForWildcard(options: GetFieldsOptions = {}) {
+    const { pattern, metaFields, type, params } = options;
 
     let url;
     let query;
 
-    if(type) {
+    if (type) {
       url = this._getUrl([type, '_fields_for_wildcard']);
       query = {
         pattern,
@@ -96,6 +91,6 @@ export class IndexPatternsApiClient {
       };
     }
 
-    return request('GET', url, query).then(resp => resp.fields);
+    return request(url, query).then(resp => resp.fields);
   }
 }

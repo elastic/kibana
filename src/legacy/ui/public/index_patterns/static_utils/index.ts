@@ -17,12 +17,32 @@
  * under the License.
  */
 
-export function getRoutes() {
+// @ts-ignore
+import { get } from 'lodash';
+// @ts-ignore
+import { KBN_FIELD_TYPES } from '../../../../utils/kbn_field_types';
+import { Field } from '../_field';
+
+const filterableTypes = KBN_FIELD_TYPES.filter((type: any) => type.filterable).map(
+  (type: any) => type.name
+);
+
+export function isFilterable(field: Field): boolean {
+  return (
+    field.name === '_id' ||
+    field.scripted ||
+    (field.searchable && filterableTypes.includes(field.type))
+  );
+}
+
+export function getFromSavedObject(savedObject: any) {
+  if (get(savedObject, 'attributes.fields') === undefined) {
+    return;
+  }
+
   return {
-    edit: '/management/kibana/index_patterns/{{id}}',
-    addField: '/management/kibana/index_patterns/{{id}}/create-field',
-    indexedFields: '/management/kibana/index_patterns/{{id}}?_a=(tab:indexedFields)',
-    scriptedFields: '/management/kibana/index_patterns/{{id}}?_a=(tab:scriptedFields)',
-    sourceFilters: '/management/kibana/index_patterns/{{id}}?_a=(tab:sourceFilters)'
+    id: savedObject.id,
+    fields: JSON.parse(savedObject.attributes.fields),
+    title: savedObject.attributes.title,
   };
 }

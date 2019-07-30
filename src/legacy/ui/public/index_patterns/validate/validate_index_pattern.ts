@@ -22,24 +22,26 @@ import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../constants';
 export const ILLEGAL_CHARACTERS = 'ILLEGAL_CHARACTERS';
 export const CONTAINS_SPACES = 'CONTAINS_SPACES';
 
-function findIllegalCharacters(indexPattern) {
-  const illegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
-    if (indexPattern.includes(char)) {
-      chars.push(char);
-    }
-
-    return chars;
-  }, []);
+function findIllegalCharacters(indexPattern: string): string[] {
+  const illegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce(
+    (chars: string[], char: string) => {
+      if (indexPattern.includes(char)) {
+        chars.push(char);
+      }
+      return chars;
+    },
+    []
+  );
 
   return illegalCharacters;
 }
 
-function indexPatternContainsSpaces(indexPattern) {
+function indexPatternContainsSpaces(indexPattern: string): boolean {
   return indexPattern.includes(' ');
 }
 
-export function validateIndexPattern(indexPattern) {
-  const errors = {};
+export function validateIndexPattern(indexPattern: string) {
+  const errors: Record<string, any> = {};
 
   const illegalCharacters = findIllegalCharacters(indexPattern);
 
