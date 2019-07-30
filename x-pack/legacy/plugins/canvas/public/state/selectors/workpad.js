@@ -369,9 +369,9 @@ export function getRenderedWorkpad(state) {
   const currentPages = getPages(state);
   const args = get(state, ['transient', 'resolvedArgs']);
   const renderedPages = currentPages.map(page => {
-    const elements = get(page, 'elements');
+    const { elements, ...rest } = page;
     return {
-      id: page.id,
+      ...rest,
       elements: elements.map(element => {
         const { id, position } = element;
         const arg = args[id];

@@ -1,0 +1,18 @@
+<html>
+
+<head>
+  <script src="canvas_external_runtime.js"></script>
+</head>
+
+<body>
+  <div id="canvas"></div>
+  <script>
+    new ElasticCanvasEmbed.Runtime(document.getElementById('canvas'), '/test.json', {
+      height: 400,
+      width: 600,
+      page: 0,
+    });
+  </script>
+</body>
+
+</html>

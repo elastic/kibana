@@ -26,9 +26,10 @@ export class StaticWorkpadPage extends PureComponent {
       >
         {elements
           .filter(node => !isGroupId(node.id))
-          .map(element => (
-            <ElementWrapper key={element.id} element={element} />
-          ))}
+          .map(element => {
+            console.log('HEY', element);
+            return <ElementWrapper key={element.id} element={element} />;
+          })}
       </div>
     );
   }
