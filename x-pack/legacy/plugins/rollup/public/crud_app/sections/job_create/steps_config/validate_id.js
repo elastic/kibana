@@ -12,7 +12,7 @@ export function validateId(id, clonedId) {
     return [
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.idSameAsCloned"
-        defaultMessage={`Name cannot be the same as cloned name: "{clonedId}".`}
+        defaultMessage='Name cannot be the same as cloned name: "{clonedId}".'
         values={{ clonedId }}
       />,
     ];
