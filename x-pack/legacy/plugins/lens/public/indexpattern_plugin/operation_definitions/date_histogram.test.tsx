@@ -70,7 +70,6 @@ describe('date_histogram', () => {
           columnOrder: ['col2'],
           columns: {
             col2: {
-              operationId: 'op2',
               label: 'Value of timestamp',
               dataType: 'date',
               isBucketed: true,
