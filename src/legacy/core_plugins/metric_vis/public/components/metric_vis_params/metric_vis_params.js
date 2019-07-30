@@ -17,14 +17,11 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import { i18n } from '@kbn/i18n';
-import 'ui/directives/inequality';
-import metricVisParamsTemplate from './metric_vis_params.html';
 import _ from 'lodash';
-const module = uiModules.get('kibana');
+import { i18n } from '@kbn/i18n';
+import metricVisParamsTemplate from './metric_vis_params.html';
 
-module.directive('metricVisParams', function () {
+export function MetricVisParams() {
   return {
     restrict: 'E',
     template: metricVisParamsTemplate,
@@ -84,6 +81,6 @@ module.directive('metricVisParams', function () {
 
       $scope.editorState.requiredDescription = i18n.translate(
         'metricVis.params.ranges.warning.requiredDescription', { defaultMessage: 'Required:' });
-    }
+    },
   };
-});
+}
