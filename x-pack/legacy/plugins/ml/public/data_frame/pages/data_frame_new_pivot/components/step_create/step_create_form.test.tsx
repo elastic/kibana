@@ -10,6 +10,7 @@ import React from 'react';
 import { KibanaContext } from '../../../../../contexts/kibana';
 
 import { StepCreateForm } from './step_create_form';
+import { IndexPattern } from 'ui/index_patterns';
 
 jest.mock('../../../../../contexts/ui/use_ui_chrome_context');
 
@@ -29,11 +30,11 @@ describe('Data Frame: <StepCreateForm />', () => {
       onChange() {},
     };
 
-    const currentIndexPattern = {
+    const currentIndexPattern = ({
       id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
       fields: [],
-    };
+    } as unknown) as IndexPattern;
 
     // Using a wrapping <div> element because shallow() would fail
     // with the Provider being the outer most component.

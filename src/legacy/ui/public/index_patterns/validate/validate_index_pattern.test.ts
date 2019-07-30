@@ -17,7 +17,28 @@
  * under the License.
  */
 
-import { Field, StaticIndexPattern } from 'ui/index_patterns';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../constants';
 
-export function isFilterable(field: Field): boolean;
-export function getFromSavedObject(savedObject: any): StaticIndexPattern;
+import {
+  ILLEGAL_CHARACTERS,
+  CONTAINS_SPACES,
+  validateIndexPattern,
+} from './validate_index_pattern';
+
+describe('Index Pattern Validation', () => {
+  it('should not allow space in the pattern', () => {
+    const errors = validateIndexPattern('my pattern');
+    expect(errors[CONTAINS_SPACES]).toBe(true);
+  });
+
+  it('should not allow illegal characters', () => {
+    INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.forEach(char => {
+      const errors = validateIndexPattern(`pattern${char}`);
+      expect(errors[ILLEGAL_CHARACTERS]).toEqual([char]);
+    });
+  });
+
+  it('should return empty object when there are no errors', () => {
+    expect(validateIndexPattern('my-pattern-*')).toEqual({});
+  });
+});

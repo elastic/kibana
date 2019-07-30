@@ -17,6 +17,8 @@ import {
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
 
+import { IndexPattern } from 'ui/index_patterns';
+
 import { PivotPreview } from './pivot_preview';
 
 // workaround to make React.memo() work with enzyme
@@ -27,11 +29,11 @@ jest.mock('react', () => {
 
 describe('Data Frame: <PivotPreview />', () => {
   test('Minimal initialization', () => {
-    const currentIndexPattern = {
+    const currentIndexPattern = ({
       id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
       fields: [],
-    };
+    } as unknown) as IndexPattern;
 
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
