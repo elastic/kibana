@@ -1115,6 +1115,164 @@ class MyPlugin {
   }
 ```
 
+### Handle HTTP request with New Platform HTTP Service
+Kibana HTTP Service provides own abstraction for work with HTTP stack.
+Plugins don't have direct access to `hapi` server and its primitives anymore. Moreover,
+you shouldn't rely on the fact that HTTP Service uses one or another library under the hood, there are high chances that we can switch to another stack at all. If HTTP Service
+lacks needed functionality we happy to discuss and support your needs.
+
+To handle an incoming request in your plugin you should:
+- create Router instance. Use `plugin id` as a prefix path segment for your routes.
+```ts
+import { Router } from 'src/core/server';
+const router = new Router('my-app');
+```
+
+- use `@kbn/config-schema` package to create a schema to validate `request params`, `query`, `body` if an incoming request used them to pass additional details. Every incoming request will be validated against the created schema. If validation failed, the request is rejected with `400` status and `Bad request` error.
+To opt out of validating the request, specify `false`.
+```ts
+import { schema, TypeOf } from '@kbn/config-schema';
+const validate = {
+  params: schema.object({
+    id: schema.string(),
+  }),
+};
+```
+
+- declare a function to respond to incoming request.
+The function will receive `request` object containing request details: url, headers, matched route, as well as validated `params`, `query`, `body`.
+And `createResponse` object instructing HTTP server to create HTTP response with information sent back to the client as the response body, headers, and HTTP status.
+Unlike, `hapi` route handler in the Legacy platform, any exception raised during the handler call will generate `500 Server error` response and log error details for further investigation.
+```ts
+  const handler = async (request: KibanaRequest, createResponse: ResponseFactory) => {
+    const data = await findObject(request.params.id);
+    // creates a command to respond with 'not found' error
+    if (!data) return createResponse.notFound();
+    // creates a command to send found data to the client and set response headers
+    return createResponse.ok(data, {
+      headers: {
+        'content-type': 'application/json'
+      }
+    });
+  }
+```
+
+- register route handler for GET request to 'my-app/path/{id}' path
+```ts
+import { schema, TypeOf } from '@kbn/config-schema';
+import { Router } from 'src/core/server';
+const router = new Router('my-app');
+
+const validate = {
+  params: schema.object({
+    id: schema.string(),
+  }),
+};
+
+router.get(
+  {
+    path: 'path/{id}',
+    validate
+  },
+  async (request, createResponse) => {
+    const data = await findObject(request.params.id);
+    if (!data) return createResponse.notFound();
+    return createResponse.ok(data, {
+      headers: {
+        'content-type': 'application/json'
+      }
+    });
+  }
+);
+```
+#### What data I can send back with a response?
+You have several options to create a response utilizing `createResponse`:
+1. create a successful response. Supported types of response body are:
+- `undefined`, no content to send.
+- `string`, send text
+- `JSON`, send JSON object, HTTP server will throw if given object is not valid (has circular references, for example)
+- `Stream` send data stream
+- `Buffer` send binary stream
+```js
+return response.ok(undefined);
+return response.ok('ack');
+return response.ok({ id: '1' });
+return response.ok(Buffer.from(...););
+
+const stream = new Stream.PassThrough();
+fs.createReadStream('./file').pipe(stream);
+return res.ok(stream);
+```
+HTTP headers are configurable via response factory parameter `options`.
+
+```js
+return response.ok({ id: '1' }, {
+  headers: {
+    'content-type': 'application/json'
+  }
+});
+```
+2. create redirect response. Redirection URL is configures via 'Location' header.
+```js
+return response.redirected('The document has moved', {
+  headers: {
+    location: '/new-url',
+  },
+});
+```
+3. create error response. You may pass an error message to the client, where error message can be:
+- `string` send message text
+- `Error` send the message text of given Error object.
+- `{ message: string | Error, meta: {data: Record<string, any>, ...} }` - send message text and attach additional error metadata.
+```js
+return response.unauthorized('User has no access to the requested resource.', {
+  headers: {
+    'WWW-Authenticate': 'challenge',
+  }
+})
+return response.badRequest();
+return response.badRequest('validation error');
+
+try {
+  // ...
+} catch(error){
+ return response.badRequest(error);
+}
+
+return response.badRequest({
+  message: 'validation error',
+  meta: {
+    data: {
+      requestBody: request.body,
+      failedFields: validationResult
+    },
+  }
+});
+
+try {
+  // ...
+} catch(error){
+ return response.badRequest({
+  message: error,
+  meta: {
+    data: {
+      requestBody: request.body,
+    },
+  }
+});
+}
+
+```
+4. create a custom response. It might happen that `response factory` doesn't cover your use case and you want to specify HTTP response status code as well.
+```js
+return response.custom('ok', {
+  statusCode: 201,
+  headers: {
+    location: '/created-url'
+  }
+})
+```
+
 ### Mock core services in tests
 Core services already provide mocks to simplify testing and make sure plugins always rely on valid public contracts.
 ```typescript
