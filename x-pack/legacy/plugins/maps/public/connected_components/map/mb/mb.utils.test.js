@@ -211,7 +211,7 @@ describe('mb/utils', () => {
 
 
 
-  test('should move multiple layers (this tests a limitation of the sync)', async () => {
+  test('should fail at moving multiple layers (this tests a limitation of the sync)', async () => {
 
     //This is a known limitation of the layer order syncing.
     //It assumes only a single layer will have moved.
