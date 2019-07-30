@@ -11,6 +11,7 @@ import path from 'path';
 
 import { AnyObject } from './lib/esqueue';
 import { ServerOptions } from './server_options';
+import { ServerFacade } from '..';
 
 // TODO migrate other duplicate classes, functions
 
@@ -38,7 +39,6 @@ const TEST_OPTIONS = {
   },
   repos: [],
   maxWorkspace: 5, // max workspace folder for each language server
-  disableIndexScheduler: true, // Temp option to disable index scheduler.
 };
 
 export function createTestServerOption() {
@@ -56,7 +56,7 @@ export function createTestServerOption() {
 }
 
 export function createTestHapiServer() {
-  const server = new Server();
+  const server: ServerFacade = new Server();
   // @ts-ignore
   server.config = () => {
     return {

@@ -13,14 +13,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import React, { Fragment } from 'react';
-import chrome from 'ui/chrome';
+import { InternalCoreStart } from 'src/core/public';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { MachineLearningFlyout } from './MachineLearningFlyout';
 import { WatcherFlyout } from './WatcherFlyout';
+import { CoreContext } from '../../../../context/CoreContext';
 
 interface Props {
-  transactionTypes: string[];
   urlParams: IUrlParams;
 }
 interface State {
@@ -30,6 +30,7 @@ interface State {
 type FlyoutName = null | 'ML' | 'Watcher';
 
 export class ServiceIntegrations extends React.Component<Props, State> {
+  static contextType = CoreContext;
   public state: State = { isPopoverOpen: false, activeFlyout: null };
 
   public getPanelItems = memoize((mlAvailable: boolean) => {
@@ -65,6 +66,8 @@ export class ServiceIntegrations extends React.Component<Props, State> {
   };
 
   public getWatcherPanelItems = () => {
+    const core: InternalCoreStart = this.context;
+
     return [
       {
         name: i18n.translate(
@@ -87,7 +90,7 @@ export class ServiceIntegrations extends React.Component<Props, State> {
           }
         ),
         icon: 'watchesApp',
-        href: chrome.addBasePath(
+        href: core.http.basePath.prepend(
           '/app/kibana#/management/elasticsearch/watcher'
         ),
         target: '_blank',
@@ -153,7 +156,6 @@ export class ServiceIntegrations extends React.Component<Props, State> {
               isOpen={this.state.activeFlyout === 'ML'}
               onClose={this.closeFlyouts}
               urlParams={this.props.urlParams}
-              serviceTransactionTypes={this.props.transactionTypes}
             />
             <WatcherFlyout
               isOpen={this.state.activeFlyout === 'Watcher'}
