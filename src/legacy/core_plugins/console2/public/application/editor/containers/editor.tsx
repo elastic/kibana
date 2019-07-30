@@ -23,16 +23,18 @@ import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { Language } from '../language';
 import { ThemeMode } from '../../../types';
 import { getThemeConfig } from '../monaco';
+import * as editor from '../index';
 
 interface Props {
   options?: monaco.editor.IEditorConstructionOptions;
   themeMode: ThemeMode;
   language: Language;
+  workerSrc: string;
   value?: string;
 }
 
 export function Editor(props: Props) {
-  const { themeMode, language, value, options } = props;
+  const { themeMode, language, value, options, workerSrc } = props;
   const ref = useRef<HTMLDivElement>(null);
   const [, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
 
@@ -41,6 +43,9 @@ export function Editor(props: Props) {
   }, [themeMode]);
 
   useEffect(() => {
+    editor.setup();
+    editor.registerLanguage(language, workerSrc);
+
     setEditor(
       monaco.editor.create(ref.current!, {
         language: language.id,
