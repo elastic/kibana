@@ -32,10 +32,9 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
   errors,
 }) => {
   const {
-    core: {
-      i18n: { FormattedMessage },
-    },
+    core: { i18n },
   } = useAppDependencies();
+  const { FormattedMessage } = i18n;
   const {
     indices: snapshotIndices,
     includeGlobalState: snapshotIncludeGlobalState,
@@ -66,6 +65,8 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
   );
 
   // State for using selectable indices list or custom patterns
+  // Users with more than 100 indices will probably want to use an index pattern to select
+  // them instead, so we'll default to showing them the index pattern input.
   const [selectIndicesMode, setSelectIndicesMode] = useState<'list' | 'custom'>(
     typeof restoreIndices === 'string' || snapshotIndices.length > 100 ? 'custom' : 'list'
   );
@@ -193,7 +194,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                           >
                             <FormattedMessage
                               id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesToggleCustomLink"
-                              defaultMessage="Enter index patterns"
+                              defaultMessage="Use index patterns"
                             />
                           </EuiLink>
                         </EuiFlexItem>
@@ -215,7 +216,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                           >
                             <FormattedMessage
                               id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesToggleListLink"
-                              defaultMessage="Select from indices list"
+                              defaultMessage="Select indices"
                             />
                           </EuiLink>
                         </EuiFlexItem>
@@ -305,7 +306,12 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                   ) : (
                     <EuiComboBox
                       options={snapshotIndices.map(index => ({ label: index }))}
-                      placeholder="Enter index patterns or indices, i.e. logstash-*"
+                      placeholder={i18n.translate(
+                        'xpack.snapshotRestore.restoreForm.stepLogistics.indicesPatternPlaceholder',
+                        {
+                          defaultMessage: 'Enter index patterns, i.e. logstash-*',
+                        }
+                      )}
                       selectedOptions={restoreIndexPatterns.map(pattern => ({ label: pattern }))}
                       onCreateOption={(pattern: string) => {
                         if (!pattern.trim().length) {
