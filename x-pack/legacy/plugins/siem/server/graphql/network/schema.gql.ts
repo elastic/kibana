@@ -23,11 +23,16 @@ export const networkSchema = gql`
     bytes_out: Float
   }
 
+  type GeoItem {
+    geo: GeoEcsFields
+    flowTarget: FlowTarget
+  }
+
   type TopNFlowItem {
     autonomous_system: String
     domain: [String!]
     ip: String
-    location: String
+    location: GeoItem
   }
 
   enum NetworkTopNFlowFields {

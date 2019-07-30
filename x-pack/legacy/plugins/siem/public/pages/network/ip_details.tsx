@@ -51,7 +51,7 @@ const IpOverviewManage = manageQuery(IpOverview);
 
 interface IPDetailsComponentReduxProps {
   filterQuery: string;
-  flowTarget: FlowTarget;
+  flowTarget: FlowTarget.destination | FlowTarget.source | FlowTarget.client | FlowTarget.server;
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
     from: number;

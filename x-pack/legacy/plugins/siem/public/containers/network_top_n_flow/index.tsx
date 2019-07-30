@@ -108,6 +108,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
               if (!fetchMoreResult) {
                 return prev;
               }
+
               return {
                 ...fetchMoreResult,
                 source: {

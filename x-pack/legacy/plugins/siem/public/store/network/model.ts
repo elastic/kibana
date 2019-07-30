@@ -82,7 +82,7 @@ interface IpOverviewQueries {
 export interface NetworkDetailsModel {
   filterQuery: SerializedFilterQuery | null;
   filterQueryDraft: KueryFilterQuery | null;
-  flowTarget: FlowTarget;
+  flowTarget: FlowTarget.destination | FlowTarget.source | FlowTarget.client | FlowTarget.server;
   queries: IpOverviewQueries;
 }
 

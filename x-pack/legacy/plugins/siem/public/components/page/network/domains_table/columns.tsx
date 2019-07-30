@@ -18,7 +18,6 @@ import {
   FlowDirection,
   FlowTarget,
 } from '../../../../graphql/types';
-import { assertUnreachable } from '../../../../lib/helpers';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -195,6 +194,7 @@ const getFlowTargetTitle = (flowTarget: FlowTarget): string => {
       return i18n.UNIQUE_DESTINATIONS;
     case FlowTarget.destination:
       return i18n.UNIQUE_SOURCES;
+    case FlowTarget.unified:
+      return '';
   }
-  assertUnreachable(flowTarget);
 };

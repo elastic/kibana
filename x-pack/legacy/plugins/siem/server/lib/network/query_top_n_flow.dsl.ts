@@ -204,7 +204,10 @@ const getFlowTargetAggs = (
       ),
     };
   }
-  return generateFlowTargetAggs(networkTopNFlowSortField, flowTarget, querySize);
+  // can remove when client/server are actually unreachable
+  const definedFlowTarget =
+    flowTarget === FlowTarget.source ? FlowTarget.source : FlowTarget.destination;
+  return generateFlowTargetAggs(networkTopNFlowSortField, definedFlowTarget, querySize);
 };
 
 const getOppositeField = (flowTarget: FlowTarget.source | FlowTarget.destination): FlowTarget => {
@@ -214,7 +217,8 @@ const getOppositeField = (flowTarget: FlowTarget.source | FlowTarget.destination
     case FlowTarget.destination:
       return FlowTarget.source;
   }
-  assertUnreachable(flowTarget);
+  // bring back when client/server are actually unreachable
+  // assertUnreachable(flowTarget);
 };
 
 type QueryOrder = { bytes_in: Direction } | { bytes_out: Direction };

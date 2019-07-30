@@ -40,7 +40,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               flowTarget: FlowTarget.source,
-              sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
+              sort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.desc },
               flowDirection: FlowDirection.uniDirectional,
               pagination: {
                 activePage: 0,
@@ -76,7 +76,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               flowTarget: FlowTarget.source,
-              sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.asc },
+              sort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.asc },
               flowDirection: FlowDirection.uniDirectional,
               pagination: {
                 activePage: 0,
@@ -111,7 +111,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
-              sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
+              sort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.desc },
               flowTarget: FlowTarget.source,
               flowDirection: FlowDirection.biDirectional,
               pagination: {
@@ -144,7 +144,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
-              sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
+              sort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.desc },
               flowTarget: FlowTarget.destination,
               flowDirection: FlowDirection.uniDirectional,
               pagination: {
@@ -177,7 +177,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
-              sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
+              sort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.desc },
               flowTarget: FlowTarget.destination,
               flowDirection: FlowDirection.biDirectional,
               pagination: {
@@ -210,7 +210,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
-              sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
+              sort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.desc },
               flowTarget: FlowTarget.source,
               flowDirection: FlowDirection.uniDirectional,
               pagination: {
@@ -251,7 +251,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
-              sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
+              sort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.desc },
               flowTarget: FlowTarget.client,
               flowDirection: FlowDirection.biDirectional,
               pagination: {
@@ -284,7 +284,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
-              sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
+              sort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.desc },
               flowTarget: FlowTarget.server,
               flowDirection: FlowDirection.biDirectional,
               pagination: {

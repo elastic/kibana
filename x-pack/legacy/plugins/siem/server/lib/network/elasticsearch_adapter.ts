@@ -7,7 +7,9 @@
 import { get, getOr } from 'lodash/fp';
 
 import {
+  Direction,
   FlowTarget,
+  GeoItem,
   NetworkDnsData,
   NetworkDnsEdges,
   NetworkTopNFlowData,
@@ -23,7 +25,6 @@ import { NetworkDnsRequestOptions, NetworkTopNFlowRequestOptions } from './index
 import { buildDnsQuery } from './query_dns.dsl';
 import { buildTopNFlowQuery } from './query_top_n_flow.dsl';
 import { NetworkAdapter, NetworkDnsBuckets, NetworkTopNFlowBuckets } from './types';
-import { Direction } from '../../../public/graphql/types';
 
 export class ElasticsearchNetworkAdapter implements NetworkAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -124,37 +125,103 @@ const getTopNFlowEdges = (
   );
 };
 
-const getGeo = (result: NetworkTopNFlowBuckets) =>
-  result.location.top_geo.hits.hits.length > 0
-    ? getOr(
-        '',
-        `location.top_geo.hits.hits[0]._source.${
-          Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-        }.geo.country_iso_code`,
-        result
-      )
-    : '';
+// const getGeo = (result: NetworkTopNFlowBuckets): string => {
+//   if (result.location.top_geo.hits.hits.length > 0) {
+//     const cityName: string =
+//       getOr(
+//         '',
+//         `location.top_geo.hits.hits[0]._source.${
+//           Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+//         }.geo.city_name`,
+//         result
+//       ).length > 0
+//         ? `${getOr(
+//             '',
+//             `location.top_geo.hits.hits[0]._source.${
+//               Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+//             }.geo.city_name`,
+//             result
+//           )}, `
+//         : '';
+//
+//     const regionName: string =
+//       getOr(
+//         '',
+//         `location.top_geo.hits.hits[0]._source.${
+//           Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+//         }.geo.region_name`,
+//         result
+//       ).length > 0
+//         ? `${getOr(
+//             '',
+//             `location.top_geo.hits.hits[0]._source.${
+//               Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+//             }.geo.region_name`,
+//             result
+//           )}, `
+//         : '';
+//
+//     const countryCode: string = getOr(
+//       '',
+//       `location.top_geo.hits.hits[0]._source.${
+//         Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+//       }.geo.country_iso_code`,
+//       result
+//     );
+//     return cityName + regionName + countryCode;
+//   }
+//
+//   return '';
+// };
 
-const getAs = (result: NetworkTopNFlowBuckets) =>
-  result.autonomous_system.top_as.hits.hits.length > 0
-    ? getOr(
-        '',
-        `autonomous_system.top_as.hits.hits[0]._source.${
-          Object.keys(result.autonomous_system.top_as.hits.hits[0]._source)[0]
-        }.as.organization.name`,
-        result
-      )
-    : '';
+const getFlowTargetFromString = (flowAsString: string) =>
+  flowAsString === 'source' ? FlowTarget.source : FlowTarget.destination;
+
+const getGeoItem = (result: NetworkTopNFlowBuckets): GeoItem => {
+  if (result.location.top_geo.hits.hits.length > 0) {
+    const flowTarget = getFlowTargetFromString(
+      Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+    );
+    return {
+      geo: getOr('', `location.top_geo.hits.hits[0]._source.${flowTarget}.geo`, result),
+      flowTarget: flowTarget === 'source' ? FlowTarget.source : FlowTarget.destination,
+    };
+  }
+  return {};
+};
+
+const getAs = (result: NetworkTopNFlowBuckets): string => {
+  if (result.autonomous_system.top_as.hits.hits.length > 0) {
+    const asNumber: number = getOr(
+      0,
+      `autonomous_system.top_as.hits.hits[0]._source.${
+        Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+      }.as.number`,
+      result
+    );
+
+    const asName: string = getOr(
+      '',
+      `autonomous_system.top_as.hits.hits[0]._source.${
+        Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+      }.as.organization.name`,
+      result
+    );
+    return asName.length > 0 && asNumber > 0 ? `${asName} / ${asNumber}` : asName + asNumber;
+  }
+
+  return '';
+};
 
 const unifiedSorter = (networkTopNFlowSortField: NetworkTopNFlowSortField) => {
   if (networkTopNFlowSortField.direction === Direction.asc) {
     return (a: NetworkTopNFlowEdges, b: NetworkTopNFlowEdges) =>
-      getOrNumber(`node.network[${networkTopNFlowSortField.field}]`, a) -
-      getOrNumber(`node.network[${networkTopNFlowSortField.field}]`, b);
+      getOr(0, `node.network[${networkTopNFlowSortField.field}]`, a) -
+      getOr(0, `node.network[${networkTopNFlowSortField.field}]`, b);
   }
   return (a: NetworkTopNFlowEdges, b: NetworkTopNFlowEdges) =>
-    getOrNumber(`node.network[${networkTopNFlowSortField.field}]`, b) -
-    getOrNumber(`node.network[${networkTopNFlowSortField.field}]`, a);
+    getOr(0, `node.network[${networkTopNFlowSortField.field}]`, b) -
+    getOr(0, `node.network[${networkTopNFlowSortField.field}]`, a);
 };
 
 const formatTopNFlowEdgesUnified = (
@@ -173,7 +240,7 @@ const formatTopNFlowEdgesUnified = (
                 unified: {
                   domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key),
                   ip: bucket.key,
-                  location: getGeo(bucket),
+                  location: getGeoItem(bucket),
                   autonomous_system: getAs(bucket),
                 },
                 network: {
@@ -198,7 +265,7 @@ const formatTopNFlowEdgesUnified = (
                 ip: bucket.key,
                 location:
                   getOr('', 'node.unified.location', acc[bucket.key]).length === 0
-                    ? getGeo(bucket)
+                    ? getGeoItem(bucket)
                     : getOr('', 'node.unified.location', acc[bucket.key]),
                 autonomous_system:
                   getOr('', 'node.unified.autonomous_system', acc[bucket.key]).length === 0
@@ -235,20 +302,12 @@ const formatTopNFlowEdges = (
       [flowTarget]: {
         domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key),
         ip: bucket.key,
-        location: getOr(
-          '',
-          `location.top_geo.hits.hits[0]._source.${flowTarget}.geo.country_iso_code`,
-          bucket
-        ),
-        autonomous_system: getOr(
-          '',
-          `autonomous_system.top_as.hits.hits[0]._source.${flowTarget}.as.organization.name`,
-          bucket
-        ),
+        location: getGeoItem(bucket),
+        autonomous_system: getAs(bucket),
       },
       network: {
-        bytes_in: getOrNumber('bytes_in.value', bucket),
-        bytes_out: getOrNumber('bytes_out.value', bucket),
+        bytes_in: getOr(0, 'bytes_in.value', bucket),
+        bytes_out: getOr(0, 'bytes_out.value', bucket),
       },
     },
     cursor: {

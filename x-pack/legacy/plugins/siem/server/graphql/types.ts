@@ -1213,7 +1213,13 @@ export interface TopNFlowItem {
 
   ip?: string | null;
 
-  location?: string | null;
+  location?: GeoItem | null;
+}
+
+export interface GeoItem {
+  geo?: GeoEcsFields | null;
+
+  flowTarget?: FlowTarget | null;
 }
 
 export interface TopNFlowNetworkEcsField {
@@ -6349,7 +6355,7 @@ export namespace TopNFlowItemResolvers {
 
     ip?: IpResolver<string | null, TypeParent, Context>;
 
-    location?: LocationResolver<string | null, TypeParent, Context>;
+    location?: LocationResolver<GeoItem | null, TypeParent, Context>;
   }
 
   export type AutonomousSystemResolver<
@@ -6368,8 +6374,27 @@ export namespace TopNFlowItemResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type LocationResolver<
-    R = string | null,
+    R = GeoItem | null,
     Parent = TopNFlowItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace GeoItemResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = GeoItem> {
+    geo?: GeoResolver<GeoEcsFields | null, TypeParent, Context>;
+
+    flowTarget?: FlowTargetResolver<FlowTarget | null, TypeParent, Context>;
+  }
+
+  export type GeoResolver<
+    R = GeoEcsFields | null,
+    Parent = GeoItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type FlowTargetResolver<
+    R = FlowTarget | null,
+    Parent = GeoItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

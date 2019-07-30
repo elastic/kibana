@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkTopNFlowData } from '../../../../graphql/types';
+import { NetworkTopNFlowData, FlowTarget } from '../../../../graphql/types';
 
 export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
   NetworkTopNFlow: {
@@ -13,10 +13,20 @@ export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
       {
         node: {
           source: {
-            autonomous_system: 'Google, Inc',
+            autonomous_system: 'Google, Inc / 15169',
             domain: ['test.domain.com'],
             ip: '8.8.8.8',
-            location: 'US',
+            location: {
+              geo: {
+                continent_name: ['North America'],
+                country_name: null,
+                country_iso_code: ['US'],
+                city_name: ['Mountain View'],
+                region_iso_code: ['US-CA'],
+                region_name: ['California'],
+              },
+              flowTarget: FlowTarget.source,
+            },
           },
           destination: null,
           network: {
@@ -31,10 +41,20 @@ export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
       {
         node: {
           source: {
-            autonomous_system: 'Google, Inc',
+            autonomous_system: 'TM Net, Internet Service Provider / 4788',
             domain: ['test.domain.net', 'test.old.domain.net'],
             ip: '9.9.9.9',
-            location: 'DE',
+            location: {
+              geo: {
+                continent_name: ['Asia'],
+                country_name: null,
+                country_iso_code: ['MY'],
+                city_name: ['Petaling Jaya'],
+                region_iso_code: ['MY-10'],
+                region_name: ['Selangor'],
+              },
+              flowTarget: FlowTarget.source,
+            },
           },
           destination: null,
           network: {

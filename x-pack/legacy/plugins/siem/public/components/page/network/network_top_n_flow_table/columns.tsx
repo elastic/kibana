@@ -9,6 +9,7 @@ import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import {
+  GeoItem,
   FlowDirection,
   FlowTarget,
   NetworkTopNFlowEdges,
@@ -26,6 +27,8 @@ import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../tables/helpers';
 import { PreferenceFormattedBytes } from '../../../formatted_bytes';
+import { asArrayIfExists } from '../../../../lib/helpers';
+import { GeoFields } from '../../../source_destination/geo_fields';
 
 export type NetworkTopNFlowColumns = [
   Columns<NetworkTopNFlowEdges>,
@@ -138,8 +141,27 @@ export const getNetworkTopNFlowColumns = (
     hideForMobile: false,
     sortable: true,
     render: location => {
-      if (location != null) {
-        return location;
+      const makeGeoFields = ({ geo, flowTarget: flowTargetTarget }: GeoItem) =>
+        geo
+          ? {
+              [`${flowTargetTarget}GeoCountryIsoCode`]: asArrayIfExists(
+                geo.country_iso_code ? geo.country_iso_code : ''
+              ),
+            }
+          : {};
+      if (
+        location &&
+        (location.flowTarget === FlowTarget.source ||
+          location.flowTarget === FlowTarget.destination)
+      ) {
+        return (
+          <GeoFields
+            type={location.flowTarget}
+            {...makeGeoFields(location)}
+            contextId="ha"
+            eventId="blah"
+          />
+        );
       } else {
         return getEmptyTagValue();
       }

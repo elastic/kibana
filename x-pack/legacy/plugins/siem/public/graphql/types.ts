@@ -1184,7 +1184,13 @@ export interface TopNFlowItem {
 
   ip?: string | null;
 
-  location?: string | null;
+  location?: GeoItem | null;
+}
+
+export interface GeoItem {
+  geo?: GeoEcsFields | null;
+
+  flowTarget?: FlowTarget | null;
 }
 
 export interface TopNFlowNetworkEcsField {
@@ -3337,7 +3343,31 @@ export namespace GetNetworkTopNFlowQuery {
 
     ip?: string | null;
 
-    location?: string | null;
+    location?: Location | null;
+  };
+
+  export type Location = {
+    __typename?: 'GeoItem';
+
+    geo?: Geo | null;
+
+    flowTarget?: FlowTarget | null;
+  };
+
+  export type Geo = {
+    __typename?: 'GeoEcsFields';
+
+    continent_name?: ToStringArray | null;
+
+    country_name?: ToStringArray | null;
+
+    country_iso_code?: ToStringArray | null;
+
+    city_name?: ToStringArray | null;
+
+    region_iso_code?: ToStringArray | null;
+
+    region_name?: ToStringArray | null;
   };
 
   export type Destination = {
@@ -3349,7 +3379,31 @@ export namespace GetNetworkTopNFlowQuery {
 
     ip?: string | null;
 
-    location?: string | null;
+    location?: _Location | null;
+  };
+
+  export type _Location = {
+    __typename?: 'GeoItem';
+
+    geo?: _Geo | null;
+
+    flowTarget?: FlowTarget | null;
+  };
+
+  export type _Geo = {
+    __typename?: 'GeoEcsFields';
+
+    continent_name?: ToStringArray | null;
+
+    country_name?: ToStringArray | null;
+
+    country_iso_code?: ToStringArray | null;
+
+    city_name?: ToStringArray | null;
+
+    region_iso_code?: ToStringArray | null;
+
+    region_name?: ToStringArray | null;
   };
 
   export type Unified = {
@@ -3361,7 +3415,31 @@ export namespace GetNetworkTopNFlowQuery {
 
     ip?: string | null;
 
-    location?: string | null;
+    location?: __Location | null;
+  };
+
+  export type __Location = {
+    __typename?: 'GeoItem';
+
+    geo?: __Geo | null;
+
+    flowTarget?: FlowTarget | null;
+  };
+
+  export type __Geo = {
+    __typename?: 'GeoEcsFields';
+
+    continent_name?: ToStringArray | null;
+
+    country_name?: ToStringArray | null;
+
+    country_iso_code?: ToStringArray | null;
+
+    city_name?: ToStringArray | null;
+
+    region_iso_code?: ToStringArray | null;
+
+    region_name?: ToStringArray | null;
   };
 
   export type Network = {

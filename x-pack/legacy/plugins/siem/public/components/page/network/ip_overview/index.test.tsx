@@ -7,13 +7,12 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { ActionCreator } from 'typescript-fsa';
 
 import { FlowTarget } from '../../../../graphql/types';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
 
-import { IpOverview } from './index';
+import { IpOverview, OwnProps } from './index';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../ml/mock';
 import { NarrowDateRange } from '../../../ml/types';
@@ -28,7 +27,7 @@ describe('IP Overview Component', () => {
   });
 
   describe('rendering', () => {
-    const mockProps = {
+    const mockProps: OwnProps = {
       anomaliesData: mockAnomalies,
       data: mockData.IpOverview,
       endDate: new Date('2019-06-18T06:00:00.000Z').valueOf(),
@@ -40,9 +39,6 @@ describe('IP Overview Component', () => {
       narrowDateRange: (jest.fn() as unknown) as NarrowDateRange,
       startDate: new Date('2019-06-15T06:00:00.000Z').valueOf(),
       type: networkModel.NetworkType.details,
-      updateFlowTargetAction: (jest.fn() as unknown) as ActionCreator<{
-        flowTarget: FlowTarget;
-      }>,
     };
 
     test('it renders the default IP Overview', () => {

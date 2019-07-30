@@ -20,7 +20,7 @@ import {
 } from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
 
-import { NetworkTopNFlowTable, NetworkTopNFlowTableId } from '.';
+import { NetworkTopNFlowTable } from '.';
 import { mockData } from './mock';
 
 describe('NetworkTopNFlow Table Component', () => {

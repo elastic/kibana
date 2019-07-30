@@ -175,6 +175,8 @@ const getOppositeField = (flowTarget: FlowTarget): FlowTarget => {
       return FlowTarget.client;
     case FlowTarget.client:
       return FlowTarget.server;
+    case FlowTarget.unified:
+      return FlowTarget.destination;
     default:
       return assertUnreachable(flowTarget);
   }

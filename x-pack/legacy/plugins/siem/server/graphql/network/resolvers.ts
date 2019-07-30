@@ -40,6 +40,7 @@ export const createNetworkResolvers = (
         networkTopNFlowSort: args.sort,
         flowDirection: args.flowDirection,
       };
+
       return libs.network.getNetworkTopNFlow(req, options);
     },
     async NetworkDns(source, args, { req }, info) {

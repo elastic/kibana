@@ -32,9 +32,9 @@ import { MlCapabilitiesContext } from '../../../ml/permissions/ml_capabilities_p
 import { hasMlUserPermissions } from '../../../ml/permissions/has_ml_user_permissions';
 import { InspectButton } from '../../../inspect';
 
-interface OwnProps {
+export interface OwnProps {
   data: IpOverviewData;
-  flowTarget: FlowTarget;
+  flowTarget: FlowTarget.destination | FlowTarget.source | FlowTarget.client | FlowTarget.server;
   id: string;
   ip: string;
   loading: boolean;

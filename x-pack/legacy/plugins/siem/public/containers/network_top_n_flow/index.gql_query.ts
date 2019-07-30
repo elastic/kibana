@@ -36,19 +36,49 @@ export const networkTopNFlowQuery = gql`
               autonomous_system
               domain
               ip
-              location
+              location {
+                geo {
+                  continent_name
+                  country_name
+                  country_iso_code
+                  city_name
+                  region_iso_code
+                  region_name
+                }
+                flowTarget
+              }
             }
             destination {
               autonomous_system
               domain
               ip
-              location
+              location {
+                geo {
+                  continent_name
+                  country_name
+                  country_iso_code
+                  city_name
+                  region_iso_code
+                  region_name
+                }
+                flowTarget
+              }
             }
             unified {
               autonomous_system
               domain
               ip
-              location
+              location {
+                geo {
+                  continent_name
+                  country_name
+                  country_iso_code
+                  city_name
+                  region_iso_code
+                  region_name
+                }
+                flowTarget
+              }
             }
             network {
               bytes_in

@@ -5883,13 +5883,34 @@ Object {
     Object {
       "cursor": Object {
         "tiebreaker": null,
+        "value": "10.100.7.196",
+      },
+      "node": Object {
+        "_id": "10.100.7.196",
+        "network": Object {
+          "bytes_in": 9436594641,
+          "bytes_out": 159738496,
+        },
+        "unified": Object {
+          "autonomous_system": "",
+          "domain": Array [
+            "samsungtv-kitchen.iot.sr.local.crowbird.com",
+          ],
+          "ip": "10.100.7.196",
+          "location": "",
+        },
+      },
+    },
+    Object {
+      "cursor": Object {
+        "tiebreaker": null,
         "value": "10.100.7.197",
       },
       "node": Object {
         "_id": "10.100.7.197",
         "network": Object {
-          "bytes_in": 372031697,
-          "bytes_out": 10977897,
+          "bytes_in": 5758012728,
+          "bytes_out": 184628837,
         },
         "unified": Object {
           "autonomous_system": "",
@@ -5928,8 +5949,8 @@ Object {
       "node": Object {
         "_id": "63.88.73.76",
         "network": Object {
-          "bytes_in": 61391425,
-          "bytes_out": 1841364423,
+          "bytes_in": 61529345,
+          "bytes_out": 1845143680,
         },
         "unified": Object {
           "autonomous_system": "",
@@ -5961,6 +5982,29 @@ Object {
             "r6---sn-8xgp1vo-p5qe.googlevideo.com",
           ],
           "ip": "63.88.73.17",
+          "location": "US",
+        },
+      },
+    },
+    Object {
+      "cursor": Object {
+        "tiebreaker": null,
+        "value": "63.88.73.13",
+      },
+      "node": Object {
+        "_id": "63.88.73.13",
+        "network": Object {
+          "bytes_in": 44672049,
+          "bytes_out": 1507866063,
+        },
+        "unified": Object {
+          "autonomous_system": "",
+          "domain": Array [
+            "13.73.88.63.ashburn.google-ggc.verizon.com",
+            "r2.sn-8xgp1vo-p5qe.googlevideo.com",
+            "r2---sn-8xgp1vo-p5qe.googlevideo.com",
+          ],
+          "ip": "63.88.73.13",
           "location": "US",
         },
       },
@@ -6012,29 +6056,6 @@ Object {
     Object {
       "cursor": Object {
         "tiebreaker": null,
-        "value": "63.88.73.13",
-      },
-      "node": Object {
-        "_id": "63.88.73.13",
-        "network": Object {
-          "bytes_in": 33714266,
-          "bytes_out": 1135948050,
-        },
-        "unified": Object {
-          "autonomous_system": "",
-          "domain": Array [
-            "13.73.88.63.ashburn.google-ggc.verizon.com",
-            "r2.sn-8xgp1vo-p5qe.googlevideo.com",
-            "r2---sn-8xgp1vo-p5qe.googlevideo.com",
-          ],
-          "ip": "63.88.73.13",
-          "location": "US",
-        },
-      },
-    },
-    Object {
-      "cursor": Object {
-        "tiebreaker": null,
         "value": "45.57.63.172",
       },
       "node": Object {
@@ -6062,8 +6083,8 @@ Object {
       "node": Object {
         "_id": "63.88.73.140",
         "network": Object {
-          "bytes_in": 29750376,
-          "bytes_out": 692399561,
+          "bytes_in": 29754376,
+          "bytes_out": 692489502,
         },
         "unified": Object {
           "autonomous_system": "",
@@ -6073,28 +6094,6 @@ Object {
             "r1---sn-8xgp1vo-p5qs.googlevideo.com",
           ],
           "ip": "63.88.73.140",
-          "location": "US",
-        },
-      },
-    },
-    Object {
-      "cursor": Object {
-        "tiebreaker": null,
-        "value": "45.57.63.187",
-      },
-      "node": Object {
-        "_id": "45.57.63.187",
-        "network": Object {
-          "bytes_in": 15244446,
-          "bytes_out": 1031544713,
-        },
-        "unified": Object {
-          "autonomous_system": "",
-          "domain": Array [
-            "ipv4_1.mce0.c121.was001.ix.nflxvideo.net",
-            "ipv4-c121-was001-ix.1.oca.nflxvideo.net",
-          ],
-          "ip": "45.57.63.187",
           "location": "US",
         },
       },
@@ -10266,7 +10265,7 @@ Object {
         "_id": "10.142.0.7",
         "network": Object {
           "bytes_in": 2361869470,
-          "bytes_out": 0,
+          "bytes_out": 1053237260,
         },
         "unified": Object {
           "autonomous_system": "",
@@ -14025,6 +14024,32 @@ Object {
     Object {
       "cursor": Object {
         "tiebreaker": null,
+        "value": "10.100.7.197",
+      },
+      "node": Object {
+        "_id": "10.100.7.197",
+        "network": Object {
+          "bytes_in": 5758013448,
+          "bytes_out": 184629473,
+        },
+        "unified": Object {
+          "autonomous_system": "",
+          "domain": Array [
+            "appletv-livingroom.iot.sr.local.crowbird.com",
+            "ocsp.digicert.com",
+            "www.hulu.com",
+            "ocsp.int-x3.letsencrypt.org",
+            "ocsp.entrust.net",
+            "isrg.trustid.ocsp.identrust.com",
+          ],
+          "ip": "10.100.7.197",
+          "location": "",
+        },
+      },
+    },
+    Object {
+      "cursor": Object {
+        "tiebreaker": null,
         "value": "10.142.0.7",
       },
       "node": Object {
@@ -14082,32 +14107,6 @@ Object {
           ],
           "ip": "35.227.125.33",
           "location": "US",
-        },
-      },
-    },
-    Object {
-      "cursor": Object {
-        "tiebreaker": null,
-        "value": "10.100.7.197",
-      },
-      "node": Object {
-        "_id": "10.100.7.197",
-        "network": Object {
-          "bytes_in": 372032297,
-          "bytes_out": 10977897,
-        },
-        "unified": Object {
-          "autonomous_system": "",
-          "domain": Array [
-            "appletv-livingroom.iot.sr.local.crowbird.com",
-            "ocsp.digicert.com",
-            "www.hulu.com",
-            "ocsp.int-x3.letsencrypt.org",
-            "ocsp.entrust.net",
-            "isrg.trustid.ocsp.identrust.com",
-          ],
-          "ip": "10.100.7.197",
-          "location": "",
         },
       },
     },
