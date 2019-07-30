@@ -38,9 +38,11 @@ export function getCreateTaskRunnerFunction({
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
       run: async () => {
+        const namespace = spaceIdToNamespace(taskInstance.params.spaceId);
         const alertSavedObject = await internalSavedObjectsRepository.get(
           'alert',
-          taskInstance.params.alertId
+          taskInstance.params.alertId,
+          { namespace }
         );
 
         // Validate

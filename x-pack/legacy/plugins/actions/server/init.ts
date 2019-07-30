@@ -55,10 +55,12 @@ export function init(server: Legacy.Server) {
     getServices,
     taskManager: taskManager!,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
-    getBasePath: server.plugins.spaces ? server.plugins.spaces.getBasePath : () => undefined,
-    spaceIdToNamespace: server.plugins.spaces
-      ? server.plugins.spaces.spaceIdToNamespace
-      : () => undefined,
+    getBasePath(spaceId: string) {
+      return server.plugins.spaces ? server.plugins.spaces.getBasePath(spaceId) : undefined;
+    },
+    spaceIdToNamespace(spaceId: string) {
+      return server.plugins.spaces ? server.plugins.spaces.spaceIdToNamespace(spaceId) : undefined;
+    },
   });
 
   registerBuiltInActionTypes(actionTypeRegistry);
@@ -79,9 +81,9 @@ export function init(server: Legacy.Server) {
   const fireFn = createFireFunction({
     taskManager: taskManager!,
     internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
-    spaceIdToNamespace: server.plugins.spaces
-      ? server.plugins.spaces.spaceIdToNamespace
-      : () => undefined,
+    spaceIdToNamespace(spaceId: string) {
+      return server.plugins.spaces ? server.plugins.spaces.spaceIdToNamespace(spaceId) : undefined;
+    },
   });
 
   // Expose functions to server

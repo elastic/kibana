@@ -43,10 +43,12 @@ export function init(server: Legacy.Server) {
     taskManager: taskManager!,
     fireAction: server.plugins.actions!.fire,
     internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
-    getBasePath: server.plugins.spaces ? server.plugins.spaces.getBasePath : () => undefined,
-    spaceIdToNamespace: server.plugins.spaces
-      ? server.plugins.spaces.spaceIdToNamespace
-      : () => undefined,
+    getBasePath(spaceId: string) {
+      return server.plugins.spaces ? server.plugins.spaces.getBasePath(spaceId) : undefined;
+    },
+    spaceIdToNamespace(spaceId: string) {
+      return server.plugins.spaces ? server.plugins.spaces.spaceIdToNamespace(spaceId) : undefined;
+    },
   });
 
   // Register routes

@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ES_ARCHIVER_ACTION_ID } from './constants';
+import { ES_ARCHIVER_ACTION_ID, SPACE_1_ES_ARCHIVER_ACTION_ID } from './constants';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
@@ -24,6 +24,31 @@ export default function getActionTests({ getService }: KibanaFunctionalTestDefau
         .then((resp: any) => {
           expect(resp.body).to.eql({
             id: ES_ARCHIVER_ACTION_ID,
+            type: 'action',
+            references: [],
+            version: resp.body.version,
+            attributes: {
+              actionTypeId: 'test.index-record',
+              description: 'My action',
+              actionTypeConfig: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+            },
+          });
+        });
+    });
+
+    it('should return 404 when finding a record in another space', async () => {
+      await supertest.get(`/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}`).expect(404);
+    });
+
+    it('should return 200 when finding a record in a space', async () => {
+      await supertest
+        .get(`/s/space_1/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}`)
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            id: SPACE_1_ES_ARCHIVER_ACTION_ID,
             type: 'action',
             references: [],
             version: resp.body.version,

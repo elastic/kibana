@@ -5,3 +5,4 @@
  */
 
 export const ES_ARCHIVER_ACTION_ID = '19cfba7c-711a-4170-8590-9a99a281e85c';
+export const SPACE_1_ES_ARCHIVER_ACTION_ID = 'acf2f0fc-d1dc-460b-bfbe-ec833d388077';

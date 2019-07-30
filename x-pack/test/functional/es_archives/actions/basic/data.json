@@ -32,3 +32,22 @@
     }
   }
 }
+
+{
+  "value": {
+    "id" : "space_1:action:acf2f0fc-d1dc-460b-bfbe-ec833d388077",
+    "index" : ".kibana",
+    "source" : {
+      "action" : {
+        "description" : "My action",
+        "actionTypeId" : "test.index-record",
+        "actionTypeConfig" : {
+          "unencrypted" : "This value shouldn't get encrypted"
+        },
+        "actionTypeConfigSecrets" : "+QZzv0ydEpI0YqBG+uKl+65XncJMrmynkWVNfxnWs8eFZtKnSRY3nTtyaMi1gDxG/arzBU8tMnsLPKG/AKJp/JDDq/8oajiszZFLaB2Nt6N7UVY3iOZGl7rCjDe4CfzKb8XtXAQvZ5/iJ+zO7IQMZE0GSBcuwrvolH2G9V92RCNtFPvJsCC+nFnu"
+      },
+      "type": "action",
+      "namespace": "space_1"
+    }
+  }
+}

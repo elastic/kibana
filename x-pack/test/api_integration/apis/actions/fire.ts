@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ES_ARCHIVER_ACTION_ID } from './constants';
+import { ES_ARCHIVER_ACTION_ID, SPACE_1_ES_ARCHIVER_ACTION_ID } from './constants';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
@@ -108,6 +108,75 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       });
     });
 
+    it(`can't fire from another space`, async () => {
+      await supertest
+        .post(`/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}/_fire`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            index: esTestIndexName,
+            reference: 'actions-fire-2',
+            message: 'Testing 123',
+          },
+        })
+        .expect(404);
+    });
+
+    it('fire works in a space', async () => {
+      await supertest
+        .post(`/s/space_1/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}/_fire`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            index: esTestIndexName,
+            reference: 'actions-fire-3',
+            message: 'Testing 123',
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body).to.be.an('object');
+        });
+      const indexedRecord = await retry.tryForTime(5000, async () => {
+        const searchResult = await es.search({
+          index: esTestIndexName,
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      source: 'action:test.index-record',
+                    },
+                  },
+                  {
+                    term: {
+                      reference: 'actions-fire-3',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+        expect(searchResult.hits.total.value).to.eql(1);
+        return searchResult.hits.hits[0];
+      });
+      expect(indexedRecord._source).to.eql({
+        params: {
+          index: esTestIndexName,
+          reference: 'actions-fire-3',
+          message: 'Testing 123',
+        },
+        config: {
+          unencrypted: `This value shouldn't get encrypted`,
+          encrypted: 'This value should be encrypted',
+        },
+        reference: 'actions-fire-3',
+        source: 'action:test.index-record',
+      });
+    });
+
     it('fire still works with encrypted attributes after updating an action', async () => {
       const { body: updatedAction } = await supertest
         .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
@@ -131,7 +200,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         .send({
           params: {
             index: esTestIndexName,
-            reference: 'actions-fire-2',
+            reference: 'actions-fire-4',
             message: 'Testing 123',
           },
         })
@@ -153,7 +222,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   },
                   {
                     term: {
-                      reference: 'actions-fire-2',
+                      reference: 'actions-fire-4',
                     },
                   },
                 ],
@@ -167,14 +236,14 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       expect(indexedRecord._source).to.eql({
         params: {
           index: esTestIndexName,
-          reference: 'actions-fire-2',
+          reference: 'actions-fire-4',
           message: 'Testing 123',
         },
         config: {
           unencrypted: `This value shouldn't get encrypted`,
           encrypted: 'This value should be encrypted',
         },
-        reference: 'actions-fire-2',
+        reference: 'actions-fire-4',
         source: 'action:test.index-record',
       });
     });

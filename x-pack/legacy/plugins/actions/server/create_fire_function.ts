@@ -10,7 +10,7 @@ import { TaskManager } from '../../task_manager';
 interface CreateFireFunctionOptions {
   taskManager: TaskManager;
   internalSavedObjectsRepository: SavedObjectsClientContract;
-  spaceIdToNamespace: (spaceId: string) => string;
+  spaceIdToNamespace: (spaceId: string) => string | undefined;
 }
 
 export interface FireOptions {

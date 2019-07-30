@@ -38,6 +38,29 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         });
     });
 
+    it('should return 200 when creating an action inside a space and to not be accessible from another space', async () => {
+      const { body: createdAction } = await supertest
+        .post('/s/space_1/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            description: 'My action',
+            actionTypeId: 'test.index-record',
+            actionTypeConfig: {
+              unencrypted: `This value shouldn't get encrypted`,
+              encrypted: 'This value should be encrypted',
+            },
+          },
+        })
+        .expect(200);
+      expect(createdAction).to.eql({
+        id: createdAction.id,
+      });
+      expect(typeof createdAction.id).to.be('string');
+      await supertest.get(`/s/space_1/api/action/${createdAction.id}`).expect(200);
+      await supertest.get(`/api/action/${createdAction.id}`).expect(404);
+    });
+
     it(`should return 400 when action type isn't registered`, async () => {
       await supertest
         .post('/api/action')

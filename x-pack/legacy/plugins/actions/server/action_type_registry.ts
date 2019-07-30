@@ -16,7 +16,7 @@ interface ConstructorOptions {
   getServices: GetServicesFunction;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
   spaceIdToNamespace: (spaceId: string) => string;
-  getBasePath: (spaceId: string) => string;
+  getBasePath: (spaceId: string) => string | undefined;
 }
 
 export class ActionTypeRegistry {
