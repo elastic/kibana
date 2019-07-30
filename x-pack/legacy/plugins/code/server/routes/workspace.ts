@@ -5,8 +5,8 @@
  */
 
 import Boom from 'boom';
-import hapi, { RequestQuery } from 'hapi';
 
+import { RequestFacade, RequestQueryFacade } from '../../';
 import { GitOperations } from '../git_operations';
 import { Logger } from '../log';
 import { WorkspaceCommand } from '../lsp/workspace_command';
@@ -17,11 +17,11 @@ import { ServerLoggerFactory } from '../utils/server_logger_factory';
 import { CodeServerRouter } from '../security';
 
 export function workspaceRoute(
-  server: CodeServerRouter,
+  router: CodeServerRouter,
   serverOptions: ServerOptions,
   gitOps: GitOperations
 ) {
-  server.route({
+  router.route({
     path: '/api/code/workspace',
     method: 'GET',
     async handler() {
@@ -29,22 +29,22 @@ export function workspaceRoute(
     },
   });
 
-  server.route({
+  router.route({
     path: '/api/code/workspace/{uri*3}/{revision}',
     requireAdmin: true,
     method: 'POST',
-    async handler(req: hapi.Request, reply) {
+    async handler(req: RequestFacade) {
       const repoUri = req.params.uri as string;
       const revision = req.params.revision as string;
       const repoConfig = serverOptions.repoConfigs[repoUri];
-      const force = !!(req.query as RequestQuery).force;
+      const force = !!(req.query as RequestQueryFacade).force;
       if (repoConfig) {
-        const log = new Logger(server.server, ['workspace', repoUri]);
+        const log = new Logger(router.server, ['workspace', repoUri]);
         const workspaceHandler = new WorkspaceHandler(
           gitOps,
           serverOptions.workspacePath,
           new EsClientWithRequest(req),
-          new ServerLoggerFactory(server.server)
+          new ServerLoggerFactory(router.server)
         );
         try {
           const { workspaceDir, workspaceRevision } = await workspaceHandler.openWorkspace(
