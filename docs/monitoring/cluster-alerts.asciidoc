@@ -50,4 +50,6 @@ To receive email notifications for the Cluster Alerts:
 {stack-ov}/actions-email.html#configuring-email[Configuring Email Accounts].
 2. Configure the `xpack.monitoring.cluster_alerts.email_notifications.email_address` setting in `kibana.yml` with your email address.
 
+NOTE: If you're using a dedicated monitoring cluster this setting needs to be set in the cluster thats being monitored, and not in the cluster thats monitoring it.
+
 Email notifications are sent only when Cluster Alerts are triggered and resolved.
