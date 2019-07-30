@@ -21,7 +21,7 @@ import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import '..';
-import { EventsProvider } from '../../events';
+import { EventsProvider } from '../../../events';
 
 describe('listen component', function () {
 
