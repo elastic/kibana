@@ -28,7 +28,7 @@ test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
   const checkPrivilegesDynamically = checkPrivilegesDynamicallyWithRequestFactory(
     mockCheckPrivilegesWithRequest,
     mockSpaces
-  )(request);
+  )(request as any);
   const result = await checkPrivilegesDynamically(privilegeOrPrivileges);
 
   expect(result).toBe(expectedResult);
@@ -50,7 +50,7 @@ test(`checkPrivileges.globally when spaces is disabled`, async () => {
   const checkPrivilegesDynamically = checkPrivilegesDynamicallyWithRequestFactory(
     mockCheckPrivilegesWithRequest,
     mockSpaces
-  )(request);
+  )(request as any);
   const result = await checkPrivilegesDynamically(privilegeOrPrivileges);
 
   expect(result).toBe(expectedResult);
