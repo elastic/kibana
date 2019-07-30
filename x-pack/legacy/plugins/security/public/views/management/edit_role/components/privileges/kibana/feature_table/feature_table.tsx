@@ -202,15 +202,24 @@ export class FeatureTable extends Component<Props, {}> {
         if (!canChangePrivilege) {
           const assignedBasePrivilege =
             this.props.role.kibana[this.props.spacesIndex].base.length > 0;
-          const tooltipContent =
-            assignedBasePrivilege && actualPrivilegeValue === NO_PRIVILEGE_VALUE
-              ? `Use "Custom" to grant access. ${featureName} isn't part of the base privileges.`
-              : undefined;
+
+          const excludedFromBasePrivilegsTooltip = (
+            <FormattedMessage
+              id="xpack.security.management.editRole.featureTable.excludedFromBasePrivilegsTooltip"
+              defaultMessage={`Use "Custom" to grant access. {featureName} isn't part of the base privileges.`}
+              values={{ featureName }}
+            />
+          );
+
           return (
             <PrivilegeDisplay
               privilege={actualPrivilegeValue}
               explanation={privilegeExplanation}
-              tooltipContent={tooltipContent}
+              tooltipContent={
+                assignedBasePrivilege && actualPrivilegeValue === NO_PRIVILEGE_VALUE
+                  ? excludedFromBasePrivilegsTooltip
+                  : undefined
+              }
             />
           );
         }
