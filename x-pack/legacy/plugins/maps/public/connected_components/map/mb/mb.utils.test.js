@@ -250,9 +250,6 @@ describe('mb/utils', () => {
   //   const orderedStyle = mockMbMap.getStyle();
   //
   //   const nextStyle = getMockStyle(nextLayerListOrder);
-  //
-  //   console.log(orderedStyle);
-  //   console.log(nextStyle);
   //   expect(orderedStyle).toEqual(nextStyle);
   //
   // });

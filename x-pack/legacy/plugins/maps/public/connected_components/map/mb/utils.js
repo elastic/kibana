@@ -73,8 +73,18 @@ export function syncLayerOrderForSingleLayer(mbMap, layerList) {
   const movedLayerId = (netPos >= netNeg) && movementArr.find(l => l.movement < 0).id ||
       (netPos < netNeg) && movementArr.find(l => l.movement > 0).id;
   const nextLayerIdx = newLayerOrderLayerIds.findIndex(layerId => layerId === movedLayerId) + 1;
-  const nextMbLayerId = nextLayerIdx === newLayerOrderLayerIds.length ? null :
-    mbLayers.find(({ id }) => id.startsWith(newLayerOrderLayerIds[nextLayerIdx])).id;
+
+  let nextMbLayerId;
+  if (nextLayerIdx === newLayerOrderLayerIds.length) {
+    nextMbLayerId = null;
+  } else {
+    const foundLayer = mbLayers.find(({ id: mbLayerId }) => {
+      const layerId = newLayerOrderLayerIds[nextLayerIdx];
+      const layer = layerList.find(layer => layer.getId() === layerId);
+      return layer.ownsMbLayerId(mbLayerId);
+    });
+    nextMbLayerId = foundLayer.id;
+  }
 
   const movedLayer = layerList.find(layer => layer.getId() === movedLayerId);
   mbLayers.forEach(({ id: mbLayerId }) => {
