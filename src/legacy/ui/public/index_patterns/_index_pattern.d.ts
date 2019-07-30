@@ -34,6 +34,7 @@ export interface IndexPattern {
 // that currently depend on an interface without methods to succeed
 export interface IndexPatternEnhanced extends IndexPattern {
   isTimeNanosBased: () => boolean;
+  getFieldByName: (name: string) => StaticIndexPatternField | undefined;
 }
 
 export interface IndexPatternGetProvider {
@@ -45,6 +46,7 @@ export interface StaticIndexPatternField {
   type: string;
   aggregatable: boolean;
   searchable: boolean;
+  sortable?: boolean;
 }
 
 export interface StaticIndexPattern {

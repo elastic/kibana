@@ -7,17 +7,26 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
+
+import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
+import moment from 'moment';
+
 import 'ui/autoload/all';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
+
 import { APP_TITLE } from '../common/constants';
 import { App } from './components/app';
 import { HelpMenu } from './components/help_menu';
 import { store } from './stores';
 
 if (chrome.getInjected('codeUiEnabled')) {
+  // TODO the entire Kibana uses moment, we might need to move it to a more common place
+  moment.locale(i18n.getLocale());
+
   const app = uiModules.get('apps/code');
 
   app.config(($locationProvider: any) => {
@@ -34,9 +43,11 @@ if (chrome.getInjected('codeUiEnabled')) {
 
     // render react to DOM
     render(
-      <Provider store={store}>
-        <App />
-      </Provider>,
+      <I18nProvider>
+        <Provider store={store}>
+          <App />
+        </Provider>
+      </I18nProvider>,
       domNode
     );
 
@@ -55,7 +66,12 @@ if (chrome.getInjected('codeUiEnabled')) {
   ]);
 
   chrome.helpExtension.set(domNode => {
-    render(<HelpMenu />, domNode);
+    render(
+      <I18nProvider>
+        <HelpMenu />
+      </I18nProvider>,
+      domNode
+    );
     return () => {
       unmountComponentAtNode(domNode);
     };
