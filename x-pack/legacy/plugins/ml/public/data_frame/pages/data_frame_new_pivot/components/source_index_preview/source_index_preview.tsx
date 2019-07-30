@@ -43,7 +43,7 @@ import { KBN_FIELD_TYPES } from '../../../../../../common/constants/field_types'
 import { Dictionary } from '../../../../../../common/types/common';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 
-import { useCurrentIndexPattern } from '../../../../../contexts/angular';
+import { useCurrentIndexPattern } from '../../../../../contexts/kibana';
 
 import {
   toggleSelectedField,

@@ -6,10 +6,10 @@
 
 import { useContext } from 'react';
 
-import { AngularContext, AngularContextValue } from './angular_context';
+import { KibanaContext, KibanaContextValue } from './kibana_context';
 
-export const useAngularContext = () => {
-  const context = useContext(AngularContext);
+export const useKibanaContext = () => {
+  const context = useContext(KibanaContext);
 
   if (
     context.combinedQuery === undefined ||
@@ -22,5 +22,5 @@ export const useAngularContext = () => {
     throw new Error('required attribute is undefined');
   }
 
-  return context as Required<AngularContextValue>;
+  return context as Required<KibanaContextValue>;
 };

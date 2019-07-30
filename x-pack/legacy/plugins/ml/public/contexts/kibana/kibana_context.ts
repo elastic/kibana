@@ -8,7 +8,7 @@ import React from 'react';
 
 import { IndexPattern } from 'ui/index_patterns';
 
-export interface AngularContextValue {
+export interface KibanaContextValue {
   combinedQuery?: any;
   currentIndexPattern?: IndexPattern;
   currentSavedSearch?: any;
@@ -34,4 +34,4 @@ export type SavedSearchQuery = object;
 // Multiple custom hooks can be created to access subsets of
 // the overall context value if necessary too,
 // see useCurrentIndexPattern() for example.
-export const AngularContext = React.createContext<AngularContextValue>({});
+export const KibanaContext = React.createContext<KibanaContextValue>({});

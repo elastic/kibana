@@ -12,7 +12,7 @@ import { toastNotifications } from 'ui/notify';
 
 import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { useAngularContext } from '../../../../../contexts/angular';
+import { useKibanaContext } from '../../../../../contexts/kibana';
 import { isValidIndexName } from '../../../../../../common/util/es_utils';
 
 import { ml } from '../../../../../services/ml_api_service';
@@ -57,7 +57,7 @@ interface Props {
 }
 
 export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
-  const angularContext = useAngularContext();
+  const kibanaContext = useKibanaContext();
 
   const defaults = { ...getDefaultStepDetailsState(), ...overrides };
 
@@ -75,7 +75,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   const [isContinuousModeEnabled, setContinuousModeEnabled] = useState(
     defaults.isContinuousModeEnabled
   );
-  const dateFieldNames = angularContext.currentIndexPattern.fields
+  const dateFieldNames = kibanaContext.currentIndexPattern.fields
     .filter(f => f.type === 'date')
     .map(f => f.name)
     .sort();
@@ -118,7 +118,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       }
 
       try {
-        setIndexPatternTitles(await angularContext.indexPatterns.getTitles());
+        setIndexPatternTitles(await kibanaContext.indexPatterns.getTitles());
       } catch (e) {
         toastNotifications.addDanger(
           i18n.translate('xpack.ml.dataframe.stepDetailsForm.errorGettingIndexPatternTitles', {

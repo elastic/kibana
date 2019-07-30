@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { useAngularContext } from '../../../../../contexts/angular';
+import { useKibanaContext } from '../../../../../contexts/kibana';
 
 import { getCreateRequestBody } from '../../../../common';
 
@@ -63,15 +63,15 @@ const StepDefine: SFC<DefinePivotStepProps> = ({
 };
 
 export const Wizard: SFC = React.memo(() => {
-  const angularContext = useAngularContext();
+  const kibanaContext = useKibanaContext();
 
-  const indexPattern = angularContext.currentIndexPattern;
+  const indexPattern = kibanaContext.currentIndexPattern;
 
   // The current WIZARD_STEP
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
 
   // The DEFINE state
-  const [stepDefineState, setStepDefineState] = useState(getDefaultStepDefineState(angularContext));
+  const [stepDefineState, setStepDefineState] = useState(getDefaultStepDefineState(kibanaContext));
 
   // The DETAILS state
   const [stepDetailsState, setStepDetailsState] = useState(getDefaultStepDetailsState());

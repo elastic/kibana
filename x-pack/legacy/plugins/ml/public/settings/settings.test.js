@@ -9,7 +9,10 @@ import React from 'react';
 
 import { Settings } from './settings';
 
-jest.mock('../contexts/navigation_menu/use_navigation_menu_context');
+jest.mock('../contexts/ui/use_ui_chrome_context');
+jest.mock('../components/navigation_menu/navigation_menu', () => ({
+  NavigationMenu: () => <div id="mockNavigationMenu" />,
+}));
 
 describe('Settings', () => {
   test('Renders settings page with all buttons enabled.', () => {

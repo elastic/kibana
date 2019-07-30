@@ -38,10 +38,10 @@ import { KqlFilterBar } from '../../../../../components/kql_filter_bar';
 import { SwitchModal } from './switch_modal';
 
 import {
-  useAngularContext,
-  AngularContextValue,
+  useKibanaContext,
+  KibanaContextValue,
   SavedSearchQuery,
-} from '../../../../../contexts/angular';
+} from '../../../../../contexts/kibana';
 
 import {
   AggName,
@@ -75,7 +75,7 @@ const defaultSearch = '*';
 const emptySearch = '';
 
 export function getDefaultStepDefineState(
-  angularContext: AngularContextValue
+  kibanaContext: KibanaContextValue
 ): StepDefineExposedState {
   return {
     aggList: {} as PivotAggsConfigDict,
@@ -83,12 +83,12 @@ export function getDefaultStepDefineState(
     isAdvancedPivotEditorEnabled: false,
     isAdvancedSourceEditorEnabled: false,
     searchString:
-      angularContext.currentSavedSearch.id !== undefined
-        ? angularContext.combinedQuery
+      kibanaContext.currentSavedSearch.id !== undefined
+        ? kibanaContext.combinedQuery
         : defaultSearch,
     searchQuery:
-      angularContext.currentSavedSearch.id !== undefined
-        ? angularContext.combinedQuery
+      kibanaContext.currentSavedSearch.id !== undefined
+        ? kibanaContext.combinedQuery
         : defaultSearch,
     sourceConfigUpdated: false,
     valid: false,
@@ -199,11 +199,11 @@ interface Props {
 }
 
 export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
-  const angularContext = useAngularContext();
+  const kibanaContext = useKibanaContext();
 
-  const indexPattern = angularContext.currentIndexPattern;
+  const indexPattern = kibanaContext.currentIndexPattern;
 
-  const defaults = { ...getDefaultStepDefineState(angularContext), ...overrides };
+  const defaults = { ...getDefaultStepDefineState(kibanaContext), ...overrides };
 
   // The search filter
   const [searchString, setSearchString] = useState(defaults.searchString);
@@ -505,7 +505,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <EuiForm>
-          {angularContext.currentSavedSearch.id === undefined && typeof searchString === 'string' && (
+          {kibanaContext.currentSavedSearch.id === undefined && typeof searchString === 'string' && (
             <Fragment>
               <EuiFormRow
                 label={i18n.translate('xpack.ml.dataframe.stepDefineForm.indexPatternLabel', {
@@ -524,7 +524,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                     : ''
                 }
               >
-                <span>{angularContext.currentIndexPattern.title}</span>
+                <span>{kibanaContext.currentIndexPattern.title}</span>
               </EuiFormRow>
               {!disabledQuery && (
                 <Fragment>
@@ -604,7 +604,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
               </EuiFormRow>
             </Fragment>
           )}
-          {angularContext.currentSavedSearch.id === undefined && (
+          {kibanaContext.currentSavedSearch.id === undefined && (
             <EuiFormRow>
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem>
@@ -654,13 +654,13 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
               </EuiFlexGroup>
             </EuiFormRow>
           )}
-          {angularContext.currentSavedSearch.id !== undefined && (
+          {kibanaContext.currentSavedSearch.id !== undefined && (
             <EuiFormRow
               label={i18n.translate('xpack.ml.dataframe.stepDefineForm.savedSearchLabel', {
                 defaultMessage: 'Saved search',
               })}
             >
-              <span>{angularContext.currentSavedSearch.title}</span>
+              <span>{kibanaContext.currentSavedSearch.title}</span>
             </EuiFormRow>
           )}
 

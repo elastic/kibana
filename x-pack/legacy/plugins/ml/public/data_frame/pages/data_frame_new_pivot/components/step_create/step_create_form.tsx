@@ -31,8 +31,8 @@ import {
 } from '@elastic/eui';
 
 import { ml } from '../../../../../services/ml_api_service';
-import { useAngularContext } from '../../../../../contexts/angular';
-import { useUiChromeContext } from '../../../../../contexts/ui';
+import { useKibanaContext } from '../../../../../contexts/kibana/use_kibana_context';
+import { useUiChromeContext } from '../../../../../contexts/ui/use_ui_chrome_context';
 import { PROGRESS_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 
 import { moveToDataFrameTransformList, moveToDiscover } from '../../../../common';
@@ -70,8 +70,8 @@ export const StepCreateForm: SFC<Props> = React.memo(
       undefined
     );
 
-    const angularContext = useAngularContext();
-    const baseUrl = useUiChromeContext().addBasePath(angularContext.kbnBaseUrl);
+    const kibanaContext = useKibanaContext();
+    const baseUrl = useUiChromeContext().addBasePath(kibanaContext.kbnBaseUrl);
 
     useEffect(() => {
       onChange({ created, started, indexPatternId });
@@ -141,7 +141,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
       const indexPatternName = transformConfig.dest.index;
 
       try {
-        const newIndexPattern = await angularContext.indexPatterns.get();
+        const newIndexPattern = await kibanaContext.indexPatterns.get();
 
         Object.assign(newIndexPattern, {
           id: '',
@@ -152,8 +152,8 @@ export const StepCreateForm: SFC<Props> = React.memo(
 
         // check if there's a default index pattern, if not,
         // set the newly created one as the default index pattern.
-        if (!angularContext.kibanaConfig.get('defaultIndex')) {
-          await angularContext.kibanaConfig.set('defaultIndex', id);
+        if (!kibanaContext.kibanaConfig.get('defaultIndex')) {
+          await kibanaContext.kibanaConfig.set('defaultIndex', id);
         }
 
         toastNotifications.addSuccess(

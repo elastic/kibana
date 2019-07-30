@@ -7,9 +7,11 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { AngularContext } from '../../../../../contexts/angular';
+import { KibanaContext } from '../../../../../contexts/kibana';
 
 import { StepCreateForm } from './step_create_form';
+
+jest.mock('../../../../../contexts/ui/use_ui_chrome_context');
 
 // workaround to make React.memo() work with enzyme
 jest.mock('react', () => {
@@ -37,7 +39,7 @@ describe('Data Frame: <StepCreateForm />', () => {
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <AngularContext.Provider
+        <KibanaContext.Provider
           value={{
             combinedQuery: {},
             currentIndexPattern,
@@ -48,7 +50,7 @@ describe('Data Frame: <StepCreateForm />', () => {
           }}
         >
           <StepCreateForm {...props} />
-        </AngularContext.Provider>
+        </KibanaContext.Provider>
       </div>
     );
 

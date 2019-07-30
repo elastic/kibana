@@ -6,14 +6,14 @@
 
 import { useContext } from 'react';
 
-import { AngularContext } from './angular_context';
+import { KibanaContext } from './kibana_context';
 
-export const useCurrentIndexPattern = () => {
-  const context = useContext(AngularContext);
+export const useCurrentSavedSearch = () => {
+  const context = useContext(KibanaContext);
 
-  if (context.currentIndexPattern === undefined) {
-    throw new Error('currentIndexPattern is undefined');
+  if (context.currentSavedSearch === undefined) {
+    throw new Error('currentSavedSearch is undefined');
   }
 
-  return context.currentIndexPattern;
+  return context.currentSavedSearch;
 };

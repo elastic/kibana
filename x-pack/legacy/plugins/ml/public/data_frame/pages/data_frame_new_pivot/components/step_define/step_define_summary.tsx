@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { useAngularContext } from '../../../../../contexts/angular';
+import { useKibanaContext } from '../../../../../contexts/kibana';
 
 import { AggListSummary } from '../aggregation_list';
 import { GroupByListSummary } from '../group_by_list';
@@ -35,7 +35,7 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
   groupByList,
   aggList,
 }) => {
-  const angularContext = useAngularContext();
+  const kibanaContext = useKibanaContext();
 
   const pivotQuery = getPivotQuery(searchQuery);
   let useCodeBlock = false;
@@ -54,14 +54,14 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <EuiForm>
-          {angularContext.currentSavedSearch.id === undefined && typeof searchString === 'string' && (
+          {kibanaContext.currentSavedSearch.id === undefined && typeof searchString === 'string' && (
             <Fragment>
               <EuiFormRow
                 label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.indexPatternLabel', {
                   defaultMessage: 'Index pattern',
                 })}
               >
-                <span>{angularContext.currentIndexPattern.title}</span>
+                <span>{kibanaContext.currentIndexPattern.title}</span>
               </EuiFormRow>
               {useCodeBlock === false && displaySearch !== emptySearch && (
                 <EuiFormRow
@@ -96,13 +96,13 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
             </Fragment>
           )}
 
-          {angularContext.currentSavedSearch.id !== undefined && (
+          {kibanaContext.currentSavedSearch.id !== undefined && (
             <EuiFormRow
               label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.savedSearchLabel', {
                 defaultMessage: 'Saved search',
               })}
             >
-              <span>{angularContext.currentSavedSearch.title}</span>
+              <span>{kibanaContext.currentSavedSearch.title}</span>
             </EuiFormRow>
           )}
 

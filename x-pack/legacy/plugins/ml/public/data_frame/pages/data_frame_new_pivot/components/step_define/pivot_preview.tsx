@@ -28,7 +28,7 @@ import { Dictionary, dictionaryToArray } from '../../../../../../common/types/co
 import { ES_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 
-import { useCurrentIndexPattern } from '../../../../../contexts/angular';
+import { useCurrentIndexPattern } from '../../../../../contexts/kibana';
 
 import {
   getFlattenedFields,
