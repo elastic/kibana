@@ -16,60 +16,73 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import angular from 'angular';
 import _ from 'lodash';
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
+import chrome from 'ui/chrome';
 
 import '../filters/trust_as_html';
 import tableHtml from './table.html';
 import { i18n } from '@kbn/i18n';
 
+
+function controller($scope) {
+  $scope.mapping = $scope.indexPattern.fields.byName;
+  $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
+  $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
+  $scope.fields = _.keys($scope.flattened).sort();
+
+  $scope.canToggleColumns = function canToggleColumn() {
+    return _.isFunction($scope.onAddColumn) && _.isFunction($scope.onRemoveColumn);
+  };
+
+  $scope.toggleColumn = function toggleColumn(columnName) {
+    if ($scope.columns.includes(columnName)) {
+      $scope.onRemoveColumn(columnName);
+    } else {
+      $scope.onAddColumn(columnName);
+    }
+  };
+
+  $scope.isColumnActive = function isColumnActive(columnName) {
+    return $scope.columns.includes(columnName);
+  };
+
+  $scope.showArrayInObjectsWarning = function (row, field) {
+    const value = $scope.flattened[field];
+    return Array.isArray(value) && typeof value[0] === 'object';
+  };
+}
+
+async function compileAngular(domNode, props) {
+  const $injector = await chrome.dangerouslyGetActiveInjector();
+  const rootScope = $injector.get('$rootScope');
+  const newScope = Object.assign(rootScope.$new(), props);
+  controller(newScope);
+
+  const linkFn = $injector.get('$compile')(tableHtml)(newScope);
+  newScope.$digest();
+  angular
+    .element(domNode)
+    .empty()
+    .append(linkFn);
+
+  return () => {
+    newScope.$destroy();
+  };
+}
+
 DocViewsRegistryProvider.register(function () {
   return {
     title: i18n.translate('kbnDocViews.table.tableTitle', {
-      defaultMessage: 'Table'
+      defaultMessage: 'Table',
     }),
     order: 10,
-    directive: {
-      template: tableHtml,
-      scope: {
-        hit: '=',
-        indexPattern: '=',
-        filter: '=',
-        columns: '=',
-        onAddColumn: '=',
-        onRemoveColumn: '=',
-      },
-      controller: function ($scope) {
-        $scope.mapping = $scope.indexPattern.fields.byName;
-        $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
-        $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
-        $scope.fields = _.keys($scope.flattened).sort();
-
-        $scope.canToggleColumns = function canToggleColumn() {
-          return (
-            _.isFunction($scope.onAddColumn)
-            && _.isFunction($scope.onRemoveColumn)
-          );
-        };
-
-        $scope.toggleColumn = function toggleColumn(columnName) {
-          if ($scope.columns.includes(columnName)) {
-            $scope.onRemoveColumn(columnName);
-          } else {
-            $scope.onAddColumn(columnName);
-          }
-        };
-
-        $scope.isColumnActive = function isColumnActive(columnName) {
-          return $scope.columns.includes(columnName);
-        };
-
-        $scope.showArrayInObjectsWarning = function (row, field) {
-          const value = $scope.flattened[field];
-          return Array.isArray(value) && typeof value[0] === 'object';
-        };
-      }
-    }
+    render: (domNode, props) => {
+      const cleanupFnPromise = compileAngular(domNode, props);
+      return () => {
+        cleanupFnPromise.then(cleanup => cleanup());
+      };
+    },
   };
 });
