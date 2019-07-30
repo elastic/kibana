@@ -315,7 +315,7 @@ describe('XYConfigPanel', () => {
         .first()
         .simulate('click');
 
-      expect(frame.removeLayer).toHaveBeenCalled();
+      expect(frame.removeLayers).toHaveBeenCalled();
       expect(setState).toHaveBeenCalledTimes(1);
       expect(setState.mock.calls[0][0]).toMatchObject({
         layers: [],

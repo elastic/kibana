@@ -179,7 +179,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                       setState(updateLayer(state, { ...layer, seriesType }, index))
                     }
                     removeLayer={() => {
-                      frame.removeLayer(layer.layerId);
+                      frame.removeLayers([layer.layerId]);
                       setState({ ...state, layers: state.layers.filter(l => l !== layer) });
                     }}
                   />

@@ -243,7 +243,7 @@ describe('editor_frame', () => {
       expect(mockVisualization.initialize).toHaveBeenCalledWith({
         datasourceLayers: {},
         addNewLayer: expect.any(Function),
-        removeLayer: expect.any(Function),
+        removeLayers: expect.any(Function),
       });
     });
 

@@ -166,10 +166,10 @@ describe('config_panel_header', () => {
   });
 
   it('should remove unused layers', () => {
-    const removeLayer = jest.fn();
+    const removeLayers = jest.fn();
     const frame = {
       ...mockFrame(['a', 'b', 'c']),
-      removeLayer,
+      removeLayers,
     };
     const component = mount(
       <ConfigPanelHeader
@@ -184,9 +184,8 @@ describe('config_panel_header', () => {
     switchTo('subvisB', component);
     confirm(component);
 
-    expect(removeLayer).toHaveBeenCalledTimes(2);
-    expect(removeLayer).toHaveBeenCalledWith('b');
-    expect(removeLayer).toHaveBeenCalledWith('c');
+    expect(removeLayers).toHaveBeenCalledTimes(1);
+    expect(removeLayers).toHaveBeenCalledWith(['b', 'c']);
   });
 
   it('should not prompt for confirmation if the visualization is not changing', () => {

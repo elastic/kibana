@@ -10,7 +10,6 @@ import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon } from '@elastic/eui';
 import { getSuggestions } from './xy_suggestions';
 import { XYConfigPanel } from './xy_config_panel';
 import { Visualization } from '../types';
@@ -54,16 +53,12 @@ export const xyVisualization: Visualization<State, PersistableState> = {
 
   visualizationTypes,
 
-  renderDescription(el, state) {
+  getDescription(state) {
     const { icon, label } = getDescription(state);
-
-    render(
-      <>
-        <EuiIcon type={icon || defaultIcon} />
-        {label}
-      </>,
-      el
-    );
+    return {
+      icon: icon || defaultIcon,
+      label,
+    };
   },
 
   switchVisualizationType(seriesType: string, state: State) {

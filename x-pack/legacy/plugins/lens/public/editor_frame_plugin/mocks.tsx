@@ -19,7 +19,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
         label: 'TEST',
       },
     ],
-    renderDescription: jest.fn(),
+    getDescription: jest.fn(_state => ({ label: '' })),
     switchVisualizationType: jest.fn((_, x) => x),
     getPersistableState: jest.fn(_state => _state),
     getSuggestions: jest.fn(_options => []),
@@ -53,7 +53,7 @@ export function createMockDatasource(): DatasourceMock {
     renderDataPanel: jest.fn(),
     toExpression: jest.fn((_frame, _state) => null),
     insertLayer: jest.fn((_state, _newLayerId) => {}),
-    removeLayer: jest.fn((_state, _layerId) => {}),
+    removeLayers: jest.fn((_state, _layerIds) => {}),
     getLayers: jest.fn(_state => []),
     getMetaData: jest.fn(_state => ({ filterableIndexPatterns: [] })),
 
@@ -69,7 +69,7 @@ export function createMockFramePublicAPI(): FrameMock {
   return {
     datasourceLayers: {},
     addNewLayer: jest.fn(() => ''),
-    removeLayer: jest.fn(),
+    removeLayers: jest.fn(),
   };
 }
 

@@ -267,9 +267,12 @@ export function getIndexPatternDatasource({
       };
     },
 
-    removeLayer(state: IndexPatternPrivateState, layerId: string) {
+    removeLayers(state: IndexPatternPrivateState, layerIds: string[]) {
       const newLayers = { ...state.layers };
-      delete newLayers[layerId];
+      layerIds.forEach(layerId => {
+        delete newLayers[layerId];
+      });
+
       return {
         ...state,
         layers: newLayers,

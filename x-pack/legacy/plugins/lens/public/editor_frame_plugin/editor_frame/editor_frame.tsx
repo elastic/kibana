@@ -107,10 +107,10 @@ export function EditorFrame(props: EditorFrameProps) {
 
       return newLayerId;
     },
-    removeLayer: (layerId: string) => {
-      const newState = props.datasourceMap[state.activeDatasourceId!].removeLayer(
+    removeLayers: (layerIds: string[]) => {
+      const newState = props.datasourceMap[state.activeDatasourceId!].removeLayers(
         state.datasourceStates[state.activeDatasourceId!].state,
-        layerId
+        layerIds
       );
 
       dispatch({

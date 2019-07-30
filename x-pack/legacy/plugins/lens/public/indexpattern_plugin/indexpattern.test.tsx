@@ -780,7 +780,7 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
-  describe('#removeLayer', () => {
+  describe('#removeLayers', () => {
     it('should remove a layer', () => {
       const state = {
         indexPatterns: expectedIndexPatterns,
@@ -798,7 +798,41 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      expect(indexPatternDatasource.removeLayer(state, 'first')).toEqual({
+      expect(indexPatternDatasource.removeLayers(state, ['first'])).toEqual({
+        ...state,
+        layers: {
+          second: {
+            indexPatternId: '2',
+            columnOrder: [],
+            columns: {},
+          },
+        },
+      });
+    });
+
+    it('should remove multiple layers', () => {
+      const state = {
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+          second: {
+            indexPatternId: '2',
+            columnOrder: [],
+            columns: {},
+          },
+          third: {
+            indexPatternId: '2',
+            columnOrder: [],
+            columns: {},
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(indexPatternDatasource.removeLayers(state, ['first', 'third'])).toEqual({
         ...state,
         layers: {
           second: {

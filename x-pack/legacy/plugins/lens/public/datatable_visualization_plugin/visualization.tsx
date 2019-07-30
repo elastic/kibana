@@ -103,15 +103,13 @@ export const datatableVisualization: Visualization<
     },
   ],
 
-  renderDescription(el) {
-    render(
-      <>
-        {i18n.translate('xpack.lens.datatable.label', {
-          defaultMessage: 'Datatable',
-        })}
-      </>,
-      el
-    );
+  getDescription(state) {
+    return {
+      icon: 'empty',
+      label: i18n.translate('xpack.lens.datatable.label', {
+        defaultMessage: 'Datatable',
+      }),
+    };
   },
 
   switchVisualizationType: (_, state) => state,

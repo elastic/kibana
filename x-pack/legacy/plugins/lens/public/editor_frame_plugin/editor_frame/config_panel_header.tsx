@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { NativeRenderer } from '../../native_renderer';
 import { Visualization, FramePublicAPI } from '../../types';
 import { Action } from './state_management';
 
@@ -72,11 +71,10 @@ function dropUnusedLayers(frame: FramePublicAPI, suggestion: unknown, layerId?: 
   // Remove any layers that are not used by the new visualization. If we don't do this,
   // we get orphaned objects, and weird edge cases such as prompting the user that
   // layers are going to be dropped, when the user is unaware of any extraneous layers.
-  Object.keys(frame.datasourceLayers).forEach(id => {
-    if (!suggestion || id !== layerId) {
-      frame.removeLayer(id);
-    }
+  const layerIds = Object.keys(frame.datasourceLayers).filter(id => {
+    return !suggestion || id !== layerId;
   });
+  frame.removeLayers(layerIds);
 }
 
 function getNewVisualizationState(frame: FramePublicAPI, visualization: Visualization) {
@@ -100,11 +98,13 @@ function VisualizationSummary(props: Props) {
     );
   }
 
+  const description = visualization.getDescription(props.visualizationState);
+
   return (
-    <NativeRenderer
-      render={visualization.renderDescription}
-      nativeProps={props.visualizationState}
-    />
+    <>
+      {description.icon && <EuiIcon type={description.icon} />}
+      {description.label}
+    </>
   );
 }
 
