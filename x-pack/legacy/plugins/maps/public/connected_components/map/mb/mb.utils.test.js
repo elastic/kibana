@@ -216,7 +216,7 @@ describe('mb/utils', () => {
     //This is a known limitation of the layer order syncing.
     //It assumes only a single layer will have moved.
     //In practice, the Maps app will likely not cause multiple layers to move at once:
-    // - the UX only allows dragging a sinle layer
+    // - the UX only allows dragging a single layer
     // - redux triggers a updates frequently enough
     //But this is conceptually "wrong", as the sync does not actually operate in the same way as all the other mb-syncing methods
 
