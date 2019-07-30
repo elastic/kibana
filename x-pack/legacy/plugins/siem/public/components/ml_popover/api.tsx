@@ -15,7 +15,11 @@ import {
   StartDatafeedResponse,
   StopDatafeedResponse,
 } from './types';
-import { throwIfNotOk, throwIfErrorAttached } from '../ml/api/throw_if_not_ok';
+import {
+  throwIfNotOk,
+  throwIfErrorAttached,
+  throwIfErrorAttachedToSetup,
+} from '../ml/api/throw_if_not_ok';
 
 const emptyIndexPattern: string = '';
 
@@ -73,7 +77,9 @@ export const setupMlJob = async ({
     },
   });
   await throwIfNotOk(response);
-  return await response.json();
+  const json = await response.json();
+  throwIfErrorAttachedToSetup(json);
+  return json;
 };
 
 /**

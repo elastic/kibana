@@ -20,6 +20,8 @@ export default function({ getService }: TestInvoker) {
     expectNotSpaceAwareResults,
     expectNotSpaceAwareRbacForbidden,
     expectSpaceAwareRbacForbidden,
+    expectBadRequestForHiddenType,
+    expectHiddenTypeRbacForbidden,
   } = createTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
   describe('create', () => {
@@ -33,6 +35,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 403,
           response: expectNotSpaceAwareRbacForbidden,
+        },
+        hiddenType: {
+          statusCode: 403,
+          response: expectHiddenTypeRbacForbidden,
         },
       },
     });
@@ -48,6 +54,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
         },
+        hiddenType: {
+          statusCode: 400,
+          response: expectBadRequestForHiddenType,
+        },
       },
     });
 
@@ -61,6 +71,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 403,
           response: expectNotSpaceAwareRbacForbidden,
+        },
+        hiddenType: {
+          statusCode: 403,
+          response: expectHiddenTypeRbacForbidden,
         },
       },
     });
@@ -76,6 +90,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
         },
+        hiddenType: {
+          statusCode: 403,
+          response: expectHiddenTypeRbacForbidden,
+        },
       },
     });
 
@@ -89,6 +107,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 403,
           response: expectNotSpaceAwareRbacForbidden,
+        },
+        hiddenType: {
+          statusCode: 403,
+          response: expectHiddenTypeRbacForbidden,
         },
       },
     });
@@ -104,6 +126,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
         },
+        hiddenType: {
+          statusCode: 403,
+          response: expectHiddenTypeRbacForbidden,
+        },
       },
     });
 
@@ -117,6 +143,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 403,
           response: expectNotSpaceAwareRbacForbidden,
+        },
+        hiddenType: {
+          statusCode: 403,
+          response: expectHiddenTypeRbacForbidden,
         },
       },
     });
@@ -132,6 +162,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectNotSpaceAwareRbacForbidden,
         },
+        hiddenType: {
+          statusCode: 403,
+          response: expectHiddenTypeRbacForbidden,
+        },
       },
     });
 
@@ -145,6 +179,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 403,
           response: expectNotSpaceAwareRbacForbidden,
+        },
+        hiddenType: {
+          statusCode: 403,
+          response: expectHiddenTypeRbacForbidden,
         },
       },
     });
@@ -160,6 +198,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectNotSpaceAwareRbacForbidden,
         },
+        hiddenType: {
+          statusCode: 403,
+          response: expectHiddenTypeRbacForbidden,
+        },
       },
     });
 
@@ -173,6 +215,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 403,
           response: expectNotSpaceAwareRbacForbidden,
+        },
+        hiddenType: {
+          statusCode: 403,
+          response: expectHiddenTypeRbacForbidden,
         },
       },
     });

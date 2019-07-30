@@ -222,7 +222,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
         this.logger.debug('Clearing session since both access and refresh tokens are expired.');
 
         // Set state to `null` to let `Authenticator` know that we want to clear current session.
-        return AuthenticationResult.redirectTo(this.getLoginPageURL(request), null);
+        return AuthenticationResult.redirectTo(this.getLoginPageURL(request), { state: null });
       }
 
       return AuthenticationResult.failed(

@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import chrome from 'ui/chrome';
 import url from 'url';
 import uuid from 'uuid';
 import {
@@ -46,6 +45,7 @@ interface Arguments {
     value: number;
     unit: string;
   };
+  apmIndexPatternTitle: string;
 }
 
 interface Actions {
@@ -60,10 +60,10 @@ export async function createErrorGroupWatch({
   serviceName,
   slackUrl,
   threshold,
-  timeRange
+  timeRange,
+  apmIndexPatternTitle
 }: Arguments) {
   const id = `apm-${uuid.v4()}`;
-  const apmIndexPatternTitle = chrome.getInjected('apmIndexPatternTitle');
 
   const slackUrlPath = getSlackPathUrl(slackUrl);
   const emailTemplate = i18n.translate(
