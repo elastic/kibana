@@ -25,7 +25,7 @@ import { NotFoundPage } from '../404';
 import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
-import { PageRoute } from '../../components/page_router/pageroute';
+import { PageRoute } from '../../components/page_route/pageroute';
 import { Timelines } from '../timelines';
 import { WithSource } from '../../containers/source';
 import { MlPopover } from '../../components/ml_popover/ml_popover';

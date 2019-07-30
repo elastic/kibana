@@ -8,7 +8,7 @@ import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 import { i18n } from '@kbn/i18n';
-import { PageRoute } from '../../components/page_router/pageroute';
+import { PageRoute } from '../../components/page_route/pageroute';
 
 import { HostComponentProps } from '../../components/link_to/redirect_to_hosts';
 

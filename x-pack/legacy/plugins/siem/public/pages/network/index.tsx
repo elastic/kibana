@@ -14,7 +14,7 @@ import { NetworkComponentProps } from '../../components/link_to/redirect_to_netw
 
 import { IPDetails } from './ip_details';
 import { Network } from './network';
-import { PageRoute } from '../../components/page_router/pageroute';
+import { PageRoute } from '../../components/page_route/pageroute';
 
 export const NetworkContainer = pure<NetworkComponentProps>(({ match }) => (
   <>
