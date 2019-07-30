@@ -83,7 +83,16 @@ export const stepIdToStepConfigMap = {
       };
     },
     fieldsValidator: fields => {
-      const { id, indexPattern, rollupIndex, rollupCron, rollupPageSize, rollupDelay, clonedRollupIndex, clonedRollupId } = fields;
+      const {
+        id,
+        indexPattern,
+        rollupIndex,
+        rollupCron,
+        rollupPageSize,
+        rollupDelay,
+        clonedRollupIndex,
+        clonedRollupId,
+      } = fields;
       return {
         id: validateId(id, clonedRollupId),
         indexPattern: validateIndexPattern(indexPattern, rollupIndex),
