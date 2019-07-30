@@ -21,6 +21,7 @@ interface FindTests {
   unknownType: FindTest;
   pageBeyondTotal: FindTest;
   unknownSearchField: FindTest;
+  hiddenType: FindTest;
   noType: FindTest;
 }
 
@@ -136,6 +137,13 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           .auth(user.username, user.password)
           .expect(tests.notSpaceAwareType.statusCode)
           .then(tests.notSpaceAwareType.response));
+
+      it(`finding a hiddentype should return ${tests.hiddenType.statusCode} with ${tests.hiddenType.description}`, async () =>
+        await supertest
+          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=hiddentype&fields=name`)
+          .auth(user.username, user.password)
+          .expect(tests.hiddenType.statusCode)
+          .then(tests.hiddenType.response));
 
       describe('unknown type', () => {
         it(`should return ${tests.unknownType.statusCode} with ${tests.unknownType.description}`, async () =>
