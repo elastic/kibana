@@ -35,10 +35,18 @@ export function _clearCache() {
   cache.reset();
 }
 
-export async function callApi<T = void>(
-  fetchOptions: KFetchOptions,
+interface CallApiOptions<Q extends Record<string, any>> extends KFetchOptions {
+  query?: Q;
+}
+
+interface Route {
+  method: string;
+  handler: (req: any) => any;
+}
+export async function callApi<R extends Route>(
+  fetchOptions: CallApiOptions<Parameters<R['handler']>[0]['query']>,
   options?: KFetchKibanaOptions
-): Promise<T> {
+): Promise<ReturnType<R['handler']>> {
   const cacheKey = getCacheKey(fetchOptions);
   const cacheResponse = cache.get(cacheKey);
   if (cacheResponse) {

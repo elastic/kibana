@@ -9,7 +9,7 @@ import { loadTransactionList } from '../services/rest/apm/transaction_groups';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useUiFilters } from '../context/UrlParamsContext';
 import { useFetcher } from './useFetcher';
-import { TransactionGroupListAPIResponse } from '../../server/lib/transaction_groups';
+import { TransactionGroupListAPIResponse } from '../../server/routes/transaction_groups/transaction_group_list_route';
 
 const getRelativeImpact = (
   impact: number,

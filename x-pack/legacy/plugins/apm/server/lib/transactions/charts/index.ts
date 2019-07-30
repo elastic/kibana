@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { getAnomalySeries } from './get_anomaly_data';
 import { getApmTimeseriesData } from './get_timeseries_data';
@@ -14,9 +13,6 @@ function getDates(apmTimeseries: ApmTimeSeriesResponse) {
   return apmTimeseries.responseTimes.avg.map(p => p.x);
 }
 
-export type TimeSeriesAPIResponse = PromiseReturnType<
-  typeof getTransactionCharts
->;
 export async function getTransactionCharts(options: {
   serviceName: string;
   transactionType: string | undefined;

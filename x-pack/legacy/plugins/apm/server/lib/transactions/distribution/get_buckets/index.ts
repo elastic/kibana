@@ -8,24 +8,16 @@ import { Setup } from '../../../helpers/setup_request';
 import { bucketFetcher } from './fetcher';
 import { bucketTransformer } from './transform';
 
-export async function getBuckets(
-  serviceName: string,
-  transactionName: string,
-  transactionType: string,
-  transactionId: string,
-  traceId: string,
-  bucketSize: number,
-  setup: Setup
-) {
-  const response = await bucketFetcher(
-    serviceName,
-    transactionName,
-    transactionType,
-    transactionId,
-    traceId,
-    bucketSize,
-    setup
-  );
+export async function getBuckets(options: {
+  serviceName: string;
+  transactionName: string;
+  transactionType: string;
+  transactionId?: string;
+  traceId?: string;
+  bucketSize: number;
+  setup: Setup;
+}) {
+  const response = await bucketFetcher(options);
 
   return bucketTransformer(response);
 }

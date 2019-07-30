@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TransactionBreakdownAPIResponse } from '../../../../server/lib/transactions/breakdown';
-import { TimeSeriesAPIResponse } from '../../../../server/lib/transactions/charts';
-import { TransactionDistributionAPIResponse } from '../../../../server/lib/transactions/distribution';
 import { callApi } from '../callApi';
 import { UIFilters } from '../../../../typings/ui-filters';
-import { TransactionGroupListAPIResponse } from '../../../../server/lib/transaction_groups';
+import { transactionChartsRoute } from '../../../../server/routes/transaction_groups/transaction_charts_route';
+import { transactionGroupListRoute } from '../../../../server/routes/transaction_groups/transaction_group_list_route';
+import { transactionDistributionRoute } from '../../../../server/routes/transaction_groups/transactionDistributionRoute';
+import { transactionBreakdownRoute } from '../../../../server/routes/transaction_groups/transaction_breakdown_route';
 
 export async function loadTransactionList({
   serviceName,
@@ -24,7 +24,7 @@ export async function loadTransactionList({
   transactionType: string;
   uiFilters: UIFilters;
 }) {
-  return await callApi<TransactionGroupListAPIResponse>({
+  return await callApi<typeof transactionGroupListRoute>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups`,
     query: {
       start,
@@ -54,7 +54,7 @@ export async function loadTransactionDistribution({
   traceId?: string;
   uiFilters: UIFilters;
 }) {
-  return callApi<TransactionDistributionAPIResponse>({
+  return callApi<typeof transactionDistributionRoute>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/distribution`,
     query: {
       start,
@@ -83,7 +83,7 @@ export async function loadTransactionCharts({
   transactionName?: string;
   uiFilters: UIFilters;
 }) {
-  return callApi<TimeSeriesAPIResponse>({
+  return callApi<typeof transactionChartsRoute>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/charts`,
     query: {
       start,
@@ -110,7 +110,7 @@ export async function loadTransactionBreakdown({
   transactionType: string;
   uiFilters: UIFilters;
 }) {
-  return callApi<TransactionBreakdownAPIResponse>({
+  return callApi<typeof transactionBreakdownRoute>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/breakdown`,
     query: {
       start,

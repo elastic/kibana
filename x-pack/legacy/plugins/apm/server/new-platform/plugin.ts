@@ -11,7 +11,7 @@ import { initErrorsApi } from '../routes/errors';
 import { initMetricsApi } from '../routes/metrics';
 import { initServicesApi } from '../routes/services';
 import { initTracesApi } from '../routes/traces';
-import { initTransactionGroupsApi } from '../routes/transaction_groups';
+import { initTransactionGroupsApi } from '../routes/transaction_groups/init';
 import { initUIFiltersApi } from '../routes/ui_filters';
 import { initIndexPatternApi } from '../routes/index_pattern';
 import { initSettingsApi } from '../routes/settings';

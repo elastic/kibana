@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { difference, zipObject } from 'lodash';
 import mean from 'lodash.mean';
 import { rgba } from 'polished';
-import { TimeSeriesAPIResponse } from '../../server/lib/transactions/charts';
 import { ApmTimeSeriesResponse } from '../../server/lib/transactions/charts/get_timeseries_data/transform';
 import { StringMap } from '../../typings/common';
 import {
@@ -20,6 +19,7 @@ import {
 import { asDecimal, asMillis, tpmUnit } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
+import { TransactionChartsAPIResponse } from '../../server/routes/transaction_groups/transaction_charts_route';
 
 export interface ITpmBucket {
   title: string;
@@ -49,7 +49,10 @@ const INITIAL_DATA = {
 
 export function getTransactionCharts(
   { transactionType }: IUrlParams,
-  { apmTimeseries, anomalyTimeseries }: TimeSeriesAPIResponse = INITIAL_DATA
+  {
+    apmTimeseries,
+    anomalyTimeseries
+  }: TransactionChartsAPIResponse = INITIAL_DATA
 ): ITransactionChartData {
   const tpmSeries = getTpmSeries(apmTimeseries, transactionType);
 
@@ -67,7 +70,7 @@ export function getTransactionCharts(
 export function getResponseTimeSeries({
   apmTimeseries,
   anomalyTimeseries
-}: TimeSeriesAPIResponse) {
+}: TransactionChartsAPIResponse) {
   const { overallAvgDuration } = apmTimeseries;
   const { avg, p95, p99 } = apmTimeseries.responseTimes;
 

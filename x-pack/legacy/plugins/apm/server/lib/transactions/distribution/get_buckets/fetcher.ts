@@ -17,15 +17,23 @@ import {
 import { rangeFilter } from '../../../helpers/range_filter';
 import { Setup } from '../../../helpers/setup_request';
 
-export function bucketFetcher(
-  serviceName: string,
-  transactionName: string,
-  transactionType: string,
-  transactionId: string,
-  traceId: string,
-  bucketSize: number,
-  setup: Setup
-) {
+export function bucketFetcher({
+  serviceName,
+  transactionName,
+  transactionType,
+  transactionId,
+  traceId,
+  bucketSize,
+  setup
+}: {
+  serviceName: string;
+  transactionName: string;
+  transactionType: string;
+  transactionId?: string;
+  traceId?: string;
+  bucketSize: number;
+  setup: Setup;
+}) {
   const { start, end, uiFiltersES, client, config } = setup;
   const bucketTargetCount = config.get<number>('xpack.apm.bucketTargetCount');
 
@@ -44,8 +52,8 @@ export function bucketFetcher(
             ...uiFiltersES
           ],
           should: [
-            { term: { [TRACE_ID]: traceId } },
-            { term: { [TRANSACTION_ID]: transactionId } },
+            { term: { [TRACE_ID]: traceId } }, // TODO: might fail when undefined
+            { term: { [TRANSACTION_ID]: transactionId } }, // TODO: might fail when undefined
             { term: { [TRANSACTION_SAMPLED]: true } }
           ]
         }

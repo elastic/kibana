@@ -4,14 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { calculateBucketSize } from './calculate_bucket_size';
 import { getBuckets } from './get_buckets';
 
-export type TransactionDistributionAPIResponse = PromiseReturnType<
-  typeof getTransactionDistribution
->;
 export async function getTransactionDistribution({
   serviceName,
   transactionName,
@@ -23,8 +19,8 @@ export async function getTransactionDistribution({
   serviceName: string;
   transactionName: string;
   transactionType: string;
-  transactionId: string;
-  traceId: string;
+  transactionId?: string;
+  traceId?: string;
   setup: Setup;
 }) {
   const bucketSize = await calculateBucketSize(
@@ -34,7 +30,7 @@ export async function getTransactionDistribution({
     setup
   );
 
-  const { buckets, totalHits } = await getBuckets(
+  const { buckets, totalHits } = await getBuckets({
     serviceName,
     transactionName,
     transactionType,
@@ -42,7 +38,7 @@ export async function getTransactionDistribution({
     traceId,
     bucketSize,
     setup
-  );
+  });
 
   return {
     totalHits,

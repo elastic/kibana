@@ -16,6 +16,7 @@ import { Legacy } from 'kibana';
 import { cloneDeep, has, isString, set } from 'lodash';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 import { StringMap } from '../../../typings/common';
+import { APMRequest } from './setup_request';
 
 function getApmIndices(config: Legacy.KibanaConfig) {
   return [
@@ -66,7 +67,7 @@ function addFilterForLegacyData(
 
 // add additional params for search (aka: read) requests
 async function getParamsForSearchRequest(
-  req: Legacy.Request,
+  req: APMRequest,
   params: SearchParams,
   apmOptions?: APMOptions
 ) {
@@ -85,7 +86,7 @@ interface APMOptions {
   includeLegacyData: boolean;
 }
 
-export function getESClient(req: Legacy.Request) {
+export function getESClient(req: APMRequest) {
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
   const query = req.query as StringMap;
 

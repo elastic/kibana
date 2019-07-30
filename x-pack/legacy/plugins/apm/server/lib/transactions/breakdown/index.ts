@@ -14,15 +14,10 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_BREAKDOWN_COUNT
 } from '../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS, COLORS } from './constants';
-
-export type TransactionBreakdownAPIResponse = PromiseReturnType<
-  typeof getTransactionBreakdown
->;
 
 export async function getTransactionBreakdown({
   setup,

@@ -19,7 +19,18 @@ function decodeUiFilters(server: Server, uiFiltersEncoded?: string) {
   return getUiFiltersES(server, uiFilters);
 }
 
-export interface APMRequestQuery {
+// overwrite "query" on Legacy.Request
+export type APMRequest<Q extends Record<string, any> | unknown = unknown> = {
+  query: Q;
+} & Omit<Legacy.Request, 'query'>;
+
+export interface DefaultQueryParams {
+  start: string;
+  end: string;
+  uiFilters: string;
+}
+
+interface APMRequestQuery {
   _debug?: string;
   start?: string;
   end?: string;
@@ -27,8 +38,8 @@ export interface APMRequestQuery {
 }
 
 export type Setup = PromiseReturnType<typeof setupRequest>;
-export async function setupRequest(req: Legacy.Request) {
-  const query = (req.query as unknown) as APMRequestQuery;
+export async function setupRequest(req: APMRequest<unknown>) {
+  const query = req.query as APMRequestQuery;
   const { server } = req;
   const config = server.config();
 
