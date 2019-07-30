@@ -30,6 +30,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiFormRow,
 } from '@elastic/eui';
 import dateMath from '@elastic/datemath';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -110,96 +111,99 @@ function DateRangesParamEditor({
     );
 
   return (
-    <>
-      <EuiText size="xs">
-        <EuiLink href={getDocLink('date.dateMath')} target="_blank" rel="noopener">
-          <FormattedMessage
-            id="common.ui.aggTypes.dateRanges.acceptedDateFormatsLinkText"
-            defaultMessage="Acceptable date formats"
-          />
-        </EuiLink>
-      </EuiText>
-      <EuiSpacer size="s" />
+    <EuiFormRow compressed>
+      <>
+        <EuiText size="xs">
+          <EuiLink href={getDocLink('date.dateMath')} target="_blank" rel="noopener">
+            <FormattedMessage
+              id="common.ui.aggTypes.dateRanges.acceptedDateFormatsLinkText"
+              defaultMessage="Acceptable date formats"
+            />
+          </EuiLink>
+        </EuiText>
+        <EuiSpacer size="s" />
 
-      {ranges.map(({ from, to, id }) => {
-        const deleteBtnTitle = i18n.translate(
-          'common.ui.aggTypes.dateRanges.removeRangeButtonAriaLabel',
-          {
-            defaultMessage: 'Remove the range of {from} to {to}',
-            values: { from: from || FROM_PLACEHOLDER, to: to || TO_PLACEHOLDER },
-          }
-        );
-        const areBothEmpty = !from && !to;
+        {ranges.map(({ from, to, id }) => {
+          const deleteBtnTitle = i18n.translate(
+            'common.ui.aggTypes.dateRanges.removeRangeButtonAriaLabel',
+            {
+              defaultMessage: 'Remove the range of {from} to {to}',
+              values: { from: from || FROM_PLACEHOLDER, to: to || TO_PLACEHOLDER },
+            }
+          );
+          const areBothEmpty = !from && !to;
 
-        return (
-          <Fragment key={id}>
-            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-              <EuiFlexItem>
-                <EuiFieldText
-                  aria-label={i18n.translate('common.ui.aggTypes.dateRanges.fromColumnLabel', {
-                    defaultMessage: 'From',
-                    description: 'Beginning of a date range, e.g. *From* 2018-02-26 To 2018-02-28',
-                  })}
-                  compressed
-                  fullWidth={true}
-                  isInvalid={areBothEmpty || !validateDateMath(from)}
-                  placeholder={FROM_PLACEHOLDER}
-                  value={from || ''}
-                  onChange={ev => onChangeRange(id, 'from', ev.target.value)}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="sortRight" color="subdued" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFieldText
-                  aria-label={i18n.translate('common.ui.aggTypes.dateRanges.toColumnLabel', {
-                    defaultMessage: 'To',
-                    description: 'End of a date range, e.g. From 2018-02-26 *To* 2018-02-28',
-                  })}
-                  compressed
-                  fullWidth={true}
-                  isInvalid={areBothEmpty || !validateDateMath(to)}
-                  placeholder={TO_PLACEHOLDER}
-                  value={to || ''}
-                  onChange={ev => onChangeRange(id, 'to', ev.target.value)}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  title={deleteBtnTitle}
-                  aria-label={deleteBtnTitle}
-                  disabled={value.length === 1}
-                  color="danger"
-                  iconType="trash"
-                  onClick={() => onRemoveRange(id)}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="xs" />
-          </Fragment>
-        );
-      })}
+          return (
+            <Fragment key={id}>
+              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                <EuiFlexItem>
+                  <EuiFieldText
+                    aria-label={i18n.translate('common.ui.aggTypes.dateRanges.fromColumnLabel', {
+                      defaultMessage: 'From',
+                      description:
+                        'Beginning of a date range, e.g. *From* 2018-02-26 To 2018-02-28',
+                    })}
+                    compressed
+                    fullWidth={true}
+                    isInvalid={areBothEmpty || !validateDateMath(from)}
+                    placeholder={FROM_PLACEHOLDER}
+                    value={from || ''}
+                    onChange={ev => onChangeRange(id, 'from', ev.target.value)}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="sortRight" color="subdued" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFieldText
+                    aria-label={i18n.translate('common.ui.aggTypes.dateRanges.toColumnLabel', {
+                      defaultMessage: 'To',
+                      description: 'End of a date range, e.g. From 2018-02-26 *To* 2018-02-28',
+                    })}
+                    compressed
+                    fullWidth={true}
+                    isInvalid={areBothEmpty || !validateDateMath(to)}
+                    placeholder={TO_PLACEHOLDER}
+                    value={to || ''}
+                    onChange={ev => onChangeRange(id, 'to', ev.target.value)}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    title={deleteBtnTitle}
+                    aria-label={deleteBtnTitle}
+                    disabled={value.length === 1}
+                    color="danger"
+                    iconType="trash"
+                    onClick={() => onRemoveRange(id)}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="xs" />
+            </Fragment>
+          );
+        })}
 
-      {hasInvalidRange && (
-        <EuiFormErrorText>
-          <FormattedMessage
-            id="common.ui.aggTypes.dateRanges.errorMessage"
-            defaultMessage="Each range should have at least one valid date."
-          />
-        </EuiFormErrorText>
-      )}
+        {hasInvalidRange && (
+          <EuiFormErrorText>
+            <FormattedMessage
+              id="common.ui.aggTypes.dateRanges.errorMessage"
+              defaultMessage="Each range should have at least one valid date."
+            />
+          </EuiFormErrorText>
+        )}
 
-      <EuiSpacer size="s" />
-      <EuiFlexItem>
-        <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAddRange} size="xs">
-          <FormattedMessage
-            id="common.ui.aggTypes.dateRanges.addRangeButtonLabel"
-            defaultMessage="Add range"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </>
+        <EuiSpacer size="s" />
+        <EuiFlexItem>
+          <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAddRange} size="xs">
+            <FormattedMessage
+              id="common.ui.aggTypes.dateRanges.addRangeButtonLabel"
+              defaultMessage="Add range"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </>
+    </EuiFormRow>
   );
 }
 
