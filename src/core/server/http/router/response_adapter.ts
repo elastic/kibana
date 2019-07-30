@@ -19,8 +19,7 @@
 import { ResponseObject as HapiResponseObject, ResponseToolkit as HapiResponseToolkit } from 'hapi';
 import typeDetect from 'type-detect';
 
-import { HttpResponsePayload, KibanaResponse } from './response';
-import { ResponseError } from './response_error';
+import { HttpResponsePayload, KibanaResponse, ResponseError } from './response';
 
 function setHeaders(response: HapiResponseObject, headers: Record<string, string | string[]> = {}) {
   Object.entries(headers).forEach(([header, value]) => {
@@ -94,13 +93,24 @@ export class HapiResponseAdapter {
   }
 
   private toError(kibanaResponse: KibanaResponse<ResponseError>) {
-    if (!(kibanaResponse.payload instanceof Error)) {
-      throw new Error(`expected Error object, but given ${typeDetect(kibanaResponse.payload)}`);
-    }
-    const payload = {
-      error: kibanaResponse.payload.message,
-      meta: kibanaResponse.payload.meta,
-    };
-    return this.responseToolkit.response(payload).code(kibanaResponse.status);
+    const { payload } = kibanaResponse;
+    return this.responseToolkit
+      .response({
+        error: getErrorMessage(payload),
+        meta: getErrorMeta(payload),
+      })
+      .code(kibanaResponse.status);
   }
+}
+
+function getErrorMessage(payload?: ResponseError): string {
+  if (!payload) {
+    throw new Error('expected error message to be provided');
+  }
+  if (typeof payload === 'string') return payload;
+  return getErrorMessage(payload.message);
+}
+
+function getErrorMeta(payload?: ResponseError) {
+  return typeof payload === 'object' && 'meta' in payload ? payload.meta : undefined;
 }

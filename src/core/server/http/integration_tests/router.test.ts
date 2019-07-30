@@ -22,7 +22,7 @@ import Boom from 'boom';
 import supertest from 'supertest';
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 
-import { createResponseError, HttpConfig, Router } from '..';
+import { HttpConfig, Router } from '..';
 import { HttpServer } from '../http_server';
 
 import { LoggerFactory } from '../../logging';
@@ -562,12 +562,29 @@ describe('Response factory', () => {
       expect(result.body).toEqual({ error: 'some message' });
     });
 
+    it('400 Bad request with default message', async () => {
+      const router = new Router('/');
+
+      router.get({ path: '/', validate: false }, (req, res) => {
+        return res.badRequest();
+      });
+
+      const { registerRouter, server: innerServer } = await server.setup(config);
+      registerRouter(router);
+      await server.start();
+
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .expect(400);
+
+      expect(result.body).toEqual({ error: 'Bad Request' });
+    });
+
     it('400 Bad request with additional data', async () => {
       const router = new Router('/');
 
       router.get({ path: '/', validate: false }, (req, res) => {
-        const error = createResponseError('some message', { data: ['good', 'bad'] });
-        return res.badRequest(error);
+        return res.badRequest({ message: 'some message', meta: { data: ['good', 'bad'] } });
       });
 
       const { registerRouter, server: innerServer } = await server.setup(config);
@@ -610,6 +627,24 @@ describe('Response factory', () => {
       expect(result.header['www-authenticate']).toBe('challenge');
     });
 
+    it('401 Unauthorized with default message', async () => {
+      const router = new Router('/');
+
+      router.get({ path: '/', validate: false }, (req, res) => {
+        return res.unauthorized();
+      });
+
+      const { registerRouter, server: innerServer } = await server.setup(config);
+      registerRouter(router);
+      await server.start();
+
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .expect(401);
+
+      expect(result.body.error).toBe('Unauthorized');
+    });
+
     it('403 Forbidden', async () => {
       const router = new Router('/');
 
@@ -627,6 +662,24 @@ describe('Response factory', () => {
         .expect(403);
 
       expect(result.body.error).toBe('reason');
+    });
+
+    it('403 Forbidden with default message', async () => {
+      const router = new Router('/');
+
+      router.get({ path: '/', validate: false }, (req, res) => {
+        return res.forbidden();
+      });
+
+      const { registerRouter, server: innerServer } = await server.setup(config);
+      registerRouter(router);
+      await server.start();
+
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .expect(403);
+
+      expect(result.body.error).toBe('Forbidden');
     });
 
     it('404 Not Found', async () => {
@@ -648,6 +701,24 @@ describe('Response factory', () => {
       expect(result.body.error).toBe('file is not found');
     });
 
+    it('404 Not Found with default message', async () => {
+      const router = new Router('/');
+
+      router.get({ path: '/', validate: false }, (req, res) => {
+        return res.notFound();
+      });
+
+      const { registerRouter, server: innerServer } = await server.setup(config);
+      registerRouter(router);
+      await server.start();
+
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .expect(404);
+
+      expect(result.body.error).toBe('Not Found');
+    });
+
     it('409 Conflict', async () => {
       const router = new Router('/');
 
@@ -665,6 +736,24 @@ describe('Response factory', () => {
         .expect(409);
 
       expect(result.body.error).toBe('stale version');
+    });
+
+    it('409 Conflict with default message', async () => {
+      const router = new Router('/');
+
+      router.get({ path: '/', validate: false }, (req, res) => {
+        return res.conflict();
+      });
+
+      const { registerRouter, server: innerServer } = await server.setup(config);
+      registerRouter(router);
+      await server.start();
+
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .expect(409);
+
+      expect(result.body.error).toBe('Conflict');
     });
   });
 
@@ -767,10 +856,44 @@ describe('Response factory', () => {
       const router = new Router('/');
 
       router.get({ path: '/', validate: false }, (req, res) => {
-        const error = createResponseError('unauthorized', { errorCode: 'K401' });
-        return res.custom(error, {
-          statusCode: 401,
-        });
+        return res.custom(
+          {
+            message: 'unauthorized',
+            meta: { errorCode: 'K401' },
+          },
+          {
+            statusCode: 401,
+          }
+        );
+      });
+
+      const { registerRouter, server: innerServer } = await server.setup(config);
+      registerRouter(router);
+      await server.start();
+
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .expect(401);
+
+      expect(result.body).toEqual({
+        error: 'unauthorized',
+        meta: { errorCode: 'K401' },
+      });
+    });
+
+    it('creates error response with additional data and error object', async () => {
+      const router = new Router('/');
+
+      router.get({ path: '/', validate: false }, (req, res) => {
+        return res.custom(
+          {
+            message: new Error('unauthorized'),
+            meta: { errorCode: 'K401' },
+          },
+          {
+            statusCode: 401,
+          }
+        );
       });
 
       const { registerRouter, server: innerServer } = await server.setup(config);
@@ -812,8 +935,7 @@ describe('Response factory', () => {
       const router = new Router('/');
 
       router.get({ path: '/', validate: false }, (req, res) => {
-        const error = createResponseError('reason');
-        return res.custom(error, {
+        return res.custom('reason', {
           statusCode: 500,
         });
       });
@@ -835,7 +957,7 @@ describe('Response factory', () => {
 
       router.get({ path: '/', validate: false }, (req, res) => {
         return res.custom(
-          { message: 'error-message' },
+          { error: 'error-message' },
           {
             statusCode: 401,
           }
@@ -854,7 +976,34 @@ describe('Response factory', () => {
       expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: expected Error object, but given Object],
+            [Error: expected error message to be provided],
+          ],
+        ]
+      `);
+    });
+
+    it('throws if an error not provided', async () => {
+      const router = new Router('/');
+
+      router.get({ path: '/', validate: false }, (req, res) => {
+        return res.custom(undefined, {
+          statusCode: 401,
+        });
+      });
+
+      const { registerRouter, server: innerServer } = await server.setup(config);
+      registerRouter(router);
+      await server.start();
+
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .expect(500);
+
+      expect(result.body.error).toBe('An internal server error occurred.');
+      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            [Error: expected error message to be provided],
           ],
         ]
       `);

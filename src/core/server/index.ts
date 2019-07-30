@@ -64,7 +64,6 @@ export {
   AuthResultParams,
   AuthToolkit,
   GetAuthHeaders,
-  createResponseError,
   KibanaRequest,
   KibanaRequestRoute,
   OnPreAuthHandler,

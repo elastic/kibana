@@ -19,7 +19,23 @@
 import { IncomingHttpHeaders } from 'http';
 import { Stream } from 'stream';
 
-import { ResponseError } from './response_error';
+/**
+ * Additional metadata to enhance error output or provide error details.
+ * @public
+ */
+export interface ResponseErrorMeta {
+  data?: Record<string, any>;
+  errorCode?: string;
+  docLink?: string;
+}
+
+export type ResponseError =
+  | string
+  | Error
+  | {
+      message: string | Error;
+      meta?: ResponseErrorMeta;
+    };
 
 export class KibanaResponse<T extends HttpResponsePayload | ResponseError> {
   constructor(
@@ -90,7 +106,7 @@ export const responseFactory = {
    * @param payload - {@link HttpResponsePayload} payload to send to the client
    * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
    */
-  ok: <T extends HttpResponsePayload>(payload: T, options: HttpResponseOptions = {}) =>
+  ok: (payload: HttpResponsePayload, options: HttpResponseOptions = {}) =>
     new KibanaResponse(200, payload, options),
 
   /**
@@ -99,7 +115,7 @@ export const responseFactory = {
    * @param payload - {@link HttpResponsePayload} payload to send to the client
    * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
    */
-  accepted: <T extends HttpResponsePayload>(payload?: T, options: HttpResponseOptions = {}) =>
+  accepted: (payload?: HttpResponsePayload, options: HttpResponseOptions = {}) =>
     new KibanaResponse(202, payload, options),
 
   /**
@@ -114,10 +130,7 @@ export const responseFactory = {
    * @param payload - {@link HttpResponsePayload} payload to send to the client
    * @param options - {@link CustomResponseOptions} configures HTTP response parameters.
    */
-  custom: <T extends HttpResponsePayload | ResponseError>(
-    payload: T,
-    options: CustomResponseOptions
-  ) => {
+  custom: (payload: HttpResponsePayload | ResponseError, options: CustomResponseOptions) => {
     if (!options || !options.statusCode) {
       throw new Error(`options.statusCode is expected to be set. given options: ${options}`);
     }
@@ -133,7 +146,7 @@ export const responseFactory = {
    * @param options - {@link RedirectResponseOptions} configures HTTP response parameters.
    * Expects `location` header to be set.
    */
-  redirected: <T extends HttpResponsePayload>(payload: T, options: RedirectResponseOptions) =>
+  redirected: (payload: HttpResponsePayload, options: RedirectResponseOptions) =>
     new KibanaResponse(302, payload, options),
 
   // Client error
@@ -143,7 +156,7 @@ export const responseFactory = {
    * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
    * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
    */
-  badRequest: <T extends ResponseError>(error: T, options: HttpResponseOptions = {}) =>
+  badRequest: (error: ResponseError = 'Bad Request', options: HttpResponseOptions = {}) =>
     new KibanaResponse(400, error, options),
 
   /**
@@ -152,7 +165,7 @@ export const responseFactory = {
    * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
    * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
    */
-  unauthorized: <T extends ResponseError>(error: T, options: HttpResponseOptions = {}) =>
+  unauthorized: (error: ResponseError = 'Unauthorized', options: HttpResponseOptions = {}) =>
     new KibanaResponse(401, error, options),
 
   /**
@@ -161,7 +174,7 @@ export const responseFactory = {
    * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
    * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
    */
-  forbidden: <T extends ResponseError>(error: T, options: HttpResponseOptions = {}) =>
+  forbidden: (error: ResponseError = 'Forbidden', options: HttpResponseOptions = {}) =>
     new KibanaResponse(403, error, options),
 
   /**
@@ -170,7 +183,7 @@ export const responseFactory = {
    * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
    * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
    */
-  notFound: <T extends ResponseError>(error: T, options: HttpResponseOptions = {}) =>
+  notFound: (error: ResponseError = 'Not Found', options: HttpResponseOptions = {}) =>
     new KibanaResponse(404, error, options),
 
   /**
@@ -179,7 +192,7 @@ export const responseFactory = {
    * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
    * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
    */
-  conflict: <T extends ResponseError>(error: T, options: HttpResponseOptions = {}) =>
+  conflict: (error: ResponseError = 'Conflict', options: HttpResponseOptions = {}) =>
     new KibanaResponse(409, error, options),
 
   // Server error
@@ -189,7 +202,7 @@ export const responseFactory = {
    * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
    * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
    */
-  internal: <T extends ResponseError>(error: T, options: HttpResponseOptions = {}) =>
+  internal: (error: ResponseError = 'Internal Error', options: HttpResponseOptions = {}) =>
     new KibanaResponse(500, error, options),
 };
 
