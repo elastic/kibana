@@ -21,10 +21,12 @@ import { once } from 'lodash';
 
 import { wrapInI18nContext } from 'ui/i18n';
 import { Filter } from '@kbn/es-query';
+
+// @ts-ignore
 import { uiModules } from 'ui/modules';
 import { FilterBar } from '../filter';
 import { ApplyFiltersPopover } from '../filter';
-import template from './directive.html';
+import template from './apply_filter_directive.html';
 
 // @ts-ignore
 import { mapAndFlattenFilters } from '../filter/filter_manager/lib/map_and_flatten_filters';

@@ -39,7 +39,7 @@ import {
 import { timefilter } from 'ui/timefilter';
 
 // load directives
-import 'plugins/data/legacy';
+import 'plugins/data/setup';
 
 const module = uiModules.get('apps/context', [
   'elasticsearch',

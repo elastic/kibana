@@ -17,12 +17,6 @@
  * under the License.
  */
 
-// TODO these are imports from the old plugin world.
-// Once the new platform is ready, they can get removed
-// and handled by the platform itself in the setup method
-// of the ExpressionExectorService
-// @ts-ignore
-
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { ExpressionsService, ExpressionsSetup } from './expressions';
 import { QueryService, QuerySetup } from './query';
@@ -30,11 +24,21 @@ import { FilterService, FilterSetup } from './filter';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 import { LegacyDependenciesPluginSetup } from './shim/legacy_dependencies_plugin';
 
+/**
+ * Interface for any dependencies on other plugins' `setup` contracts.
+ *
+ * @internal
+ */
 export interface DataPluginSetupDependencies {
   __LEGACY: LegacyDependenciesPluginSetup;
   interpreter: any;
 }
 
+/**
+ * Interface for this plugin's returned `setup` contract.
+ *
+ * @public
+ */
 export interface DataSetup {
   expressions: ExpressionsSetup;
   indexPatterns: IndexPatternsSetup;
@@ -42,19 +46,23 @@ export interface DataSetup {
   query: QuerySetup;
 }
 
-export class DataPlugin implements Plugin<DataSetup, void> {
+/**
+ * Data Plugin - public
+ *
+ * This is the entry point for the entire client-side public contract of the plugin.
+ * If something is not explicitly exported here, you can safely assume it is private
+ * to the plugin and not considered stable.
+ *
+ * All stateful contracts will be injected by the platform at runtime, and are defined
+ * in the setup/start interfaces. The remaining items exported here are either types,
+ * or static code.
+ */
+export class DataPlugin implements Plugin<DataSetup, void, DataPluginSetupDependencies> {
   // Exposed services, sorted alphabetically
-  private readonly expressions: ExpressionsService;
-  private readonly filter: FilterService;
-  private readonly indexPatterns: IndexPatternsService;
-  private readonly query: QueryService;
-
-  constructor() {
-    this.indexPatterns = new IndexPatternsService();
-    this.filter = new FilterService();
-    this.query = new QueryService();
-    this.expressions = new ExpressionsService();
-  }
+  private readonly expressions: ExpressionsService = new ExpressionsService();
+  private readonly filter: FilterService = new FilterService();
+  private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
+  private readonly query: QueryService = new QueryService();
 
   public setup(core: CoreSetup, { __LEGACY, interpreter }: DataPluginSetupDependencies): DataSetup {
     const { uiSettings } = core;

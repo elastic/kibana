@@ -40,7 +40,7 @@ import { uiModules } from 'ui/modules';
 import 'ui/capabilities/route_setup';
 
 // load directives
-import 'plugins/data/legacy';
+import 'plugins/data/setup';
 
 const app = uiModules.get('app/dashboard', [
   'ngRoute',

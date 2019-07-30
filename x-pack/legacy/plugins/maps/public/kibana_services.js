@@ -8,7 +8,7 @@ import { uiModules } from 'ui/modules';
 import { SearchSourceProvider } from 'ui/courier';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 export { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
-import { setup } from 'plugins/data/legacy';
+import { setup } from 'plugins/data/setup';
 
 export const indexPatternService = setup.indexPatterns.indexPatterns;
 

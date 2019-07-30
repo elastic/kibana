@@ -17,6 +17,23 @@
  * under the License.
  */
 
+/**
+ * New Platform Shim
+ *
+ * In this file, we import any legacy dependencies we have, and shim them into
+ * our plugin by manually constructing the values that the new platform will
+ * eventually be passing to the `setup` method of our plugin definition.
+ *
+ * The idea is that our `plugin.ts` can stay "pure" and not contain any legacy
+ * world code. Then when it comes time to migrate to the new platform, we can
+ * simply delete this shim file.
+ *
+ * We are also calling `setup` here and exporting our public contract so that
+ * other legacy plugins are able to import from '../core_plugins/data/setup'
+ * and receive the response value of the `setup` contract, mimicking the
+ * data that will eventually be injected by the new platform.
+ */
+
 import { npSetup } from 'ui/new_platform';
 // @ts-ignore
 import { renderersRegistry } from 'plugins/interpreter/registries';
@@ -34,3 +51,6 @@ export const setup = dataPlugin.setup(npSetup.core, {
     getInterpreter,
   },
 });
+
+// for backwards compatibility with 7.3
+export const data = setup;
