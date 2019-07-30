@@ -18,7 +18,7 @@ import { PropertyEditor } from './property_editor';
 
 interface Props {
   form: Form;
-  depthLevel?: string;
+  depthLevel?: number;
   path?: string;
   fieldName?: string;
 }
@@ -39,7 +39,7 @@ export const PropertiesManager = ({
     removeItem: (id: number) => void;
   }) => (
     <Fragment>
-      <ul className="tree" style={depthLevel === '0' ? { marginLeft: 0 } : {}}>
+      <ul className="tree" style={depthLevel === 0 ? { marginLeft: 0 } : {}}>
         {items.map(({ id, path: itemPath, isNew }) => {
           return (
             <li key={id}>
@@ -63,7 +63,8 @@ export const PropertiesManager = ({
     <Fragment>
       <UseArray path={path} form={form}>
         {({ items, addItem, removeItem }) => {
-          if (depthLevel === '0') {
+          if (depthLevel === 0) {
+            // At the root level we don't add the accordion
             return renderPropertiesTree({ items, addItem, removeItem });
           }
           return (
@@ -78,7 +79,6 @@ export const PropertiesManager = ({
           );
         }}
       </UseArray>
-      <EuiSpacer size="l" />
     </Fragment>
   );
 };

@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiForm } from '@elastic/eui';
 import {
   useForm,
   UseField,
@@ -19,10 +19,10 @@ import { schema } from './form.schema';
 import { PropertiesManager } from './components';
 import { propertiesArrayToObject, propertiesObjectToArray } from './helpers';
 import { dataTypesDefinition, getTypeFromSubType } from './config';
+import { DYNAMIC_SETTING_OPTIONS } from './constants';
 
 interface Props {
   setGetDataHandler: (handler: () => Promise<{ isValid: boolean; data: Mappings }>) => void;
-  FormattedMessage: typeof ReactIntl.FormattedMessage;
   defaultValue?: Mappings;
   areErrorsVisible?: boolean;
 }
@@ -73,7 +73,6 @@ const deSerializer = (data: Record<string, unknown>): Record<string, unknown> =>
 
 export const MappingsEditor = ({
   setGetDataHandler,
-  FormattedMessage,
   areErrorsVisible = true,
   defaultValue,
 }: Props) => {
@@ -84,20 +83,14 @@ export const MappingsEditor = ({
   }, [form]);
 
   return (
-    <div className="mappings-editor">
+    <EuiForm className="mappings-editor">
       {/* Global Mappings configuration */}
       <FormRow title="Configuration" description="Global settings for the index mappings">
         <UseField
           path="dynamic"
           form={form}
           componentProps={{
-            fieldProps: {
-              options: [
-                { value: true, text: 'true' },
-                { value: false, text: 'false' },
-                { value: 'strict', text: 'strict' },
-              ],
-            },
+            fieldProps: { options: DYNAMIC_SETTING_OPTIONS },
           }}
           component={Field}
         />
@@ -111,7 +104,7 @@ export const MappingsEditor = ({
         <h4>Document fields</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <PropertiesManager form={form} depthLevel="0" />
-    </div>
+      <PropertiesManager form={form} depthLevel={0} />
+    </EuiForm>
   );
 };

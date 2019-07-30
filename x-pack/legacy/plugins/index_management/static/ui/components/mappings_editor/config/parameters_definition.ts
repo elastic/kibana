@@ -39,7 +39,7 @@ export interface Parameter {
 export const parametersDefinition: { [key in ParameterName]: Parameter } = {
   name: {
     fieldConfig: {
-      label: 'Name',
+      label: 'Field name',
       defaultValue: '',
       validations: [
         {
@@ -56,7 +56,7 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
   },
   type: {
     fieldConfig: {
-      label: 'Type',
+      label: 'Field type',
       defaultValue: 'text',
       type: FIELD_TYPES.SELECT,
     },
