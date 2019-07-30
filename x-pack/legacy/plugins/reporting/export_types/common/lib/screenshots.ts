@@ -11,8 +11,6 @@ import { promisify } from 'util';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../../../common/constants';
 import { LevelLogger } from '../../../server/lib/level_logger';
-import { PLUGIN_ID } from '../../../common/constants';
-import { LevelLogger } from '../../../server/lib/level_logger';
 import { KbnServer, ElementPosition } from '../../../types';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../server/browsers/chromium/driver';
 import { Layout, LayoutInstance } from '../layouts/layout';
