@@ -108,10 +108,17 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   private getFilterTriggerButton() {
-    const filtersAppliedText = this.props.intl.formatMessage({
-      id: 'kibana_react.search.searchBar.filtersButtonFiltersAppliedTitle',
-      defaultMessage: 'filters applied.',
-    });
+    const filterCount = this.getFilterLength();
+    const filtersAppliedText = this.props.intl.formatMessage(
+      {
+        id: 'kibana_react.search.searchBar.filtersButtonFiltersAppliedTitle',
+        defaultMessage:
+          '{filterCount} {filterCount, plural, one {filter} other {filters}} applied.',
+      },
+      {
+        filterCount,
+      }
+    );
     const clickToShowOrHideText = this.state.isFiltersVisible
       ? this.props.intl.formatMessage({
           id: 'kibana_react.search.searchBar.filtersButtonClickToShowTitle',
@@ -122,7 +129,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           defaultMessage: 'Select to show',
         });
 
-    const filterCount = this.getFilterLength();
     return (
       <EuiFilterButton
         onClick={this.toggleFiltersVisible}

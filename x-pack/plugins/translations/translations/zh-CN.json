@@ -800,7 +800,6 @@
     "data.query.queryBar.syntaxOptionsTitle": "语法选项",
     "kibana_react.search.searchBar.filtersButtonClickToHideTitle": "选择以显示",
     "kibana_react.search.searchBar.filtersButtonClickToShowTitle": "选择以隐藏",
-    "kibana_react.search.searchBar.filtersButtonFiltersAppliedTitle": "个筛选已应用。",
     "embeddableApi.actionPanel.title": "选项",
     "embeddableApi.actions.applyFilterActionTitle": "将筛选应用于当前视图",
     "embeddableApi.addPanel.createNew": "创建新的{factoryName}",
