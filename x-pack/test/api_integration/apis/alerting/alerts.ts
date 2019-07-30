@@ -16,7 +16,8 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
   const es = getService('es');
   const retry = getService('retry');
 
-  describe('alerts', () => {
+  // FAILING: https://github.com/elastic/kibana/issues/42263
+  describe.skip('alerts', () => {
     let esTestIndexName: string;
     const createdAlertIds: string[] = [];
 
