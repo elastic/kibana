@@ -222,7 +222,8 @@ describe('request lib', () => {
           sinon.assert.calledTwice(sendPost);
         });
 
-        it('resets the pollIntervalMs', async () => {
+        // TODO: Fix flakiness caused by all of these waits.
+        it.skip('resets the pollIntervalMs', async () => {
           initUseRequest({ ...successRequest, pollIntervalMs: 30 });
           await wait(5);
           sinon.assert.calledOnce(sendPost);
