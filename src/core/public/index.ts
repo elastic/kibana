@@ -66,6 +66,7 @@ import { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
+import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
 
 /** @interal */
 export { CoreContext, CoreSystem } from './core_system';
@@ -94,6 +95,8 @@ export {
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
+  /** {@link ContextSetup} */
+  context: ContextSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
@@ -160,6 +163,10 @@ export {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeStart,
+  IContextContainer,
+  IContextHandler,
+  IContextProvider,
+  ContextSetup,
   DocLinksStart,
   ErrorToastOptions,
   FatalErrorInfo,
