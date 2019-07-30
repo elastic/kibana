@@ -18,24 +18,38 @@
  */
 
 import _ from 'lodash';
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import chrome from 'ui/chrome';
 
 import { EuiComboBox } from '@elastic/eui';
 
-const getIndexPatterns = async (search, fields) => {
+interface IndexPatternSelectProps {
+  onChange: (opt: any) => void;
+  indexPatternId: string;
+  placeholder: string;
+  fieldTypes: string[];
+  onNoIndexPatterns: () => void;
+}
+
+interface IndexPatternSelectState {
+  isLoading: boolean;
+  options: [];
+  selectedIndexPattern: string | undefined;
+  searchValue: string | undefined;
+}
+
+const getIndexPatterns = async (search: string, fields: string[]) => {
   const resp = await chrome.getSavedObjectsClient().find({
     type: 'index-pattern',
     fields,
     search: `${search}*`,
-    search_fields: ['title'],
-    perPage: 100
+    searchFields: ['title'],
+    perPage: 100,
   });
   return resp.savedObjects;
 };
 
-const getIndexPatternTitle = async (indexPatternId) => {
+const getIndexPatternTitle = async (indexPatternId: string) => {
   const savedObject = await chrome.getSavedObjectsClient().get('index-pattern', indexPatternId);
   if (savedObject.error) {
     throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
@@ -43,8 +57,11 @@ const getIndexPatternTitle = async (indexPatternId) => {
   return savedObject.attributes.title;
 };
 
-export class IndexPatternSelect extends Component {
-  constructor(props) {
+export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
+  private isMounted: boolean = false;
+  state: IndexPatternSelectState;
+
+  constructor(props: IndexPatternSelectProps) {
     super(props);
 
     this.state = {
@@ -56,26 +73,26 @@ export class IndexPatternSelect extends Component {
   }
 
   componentWillUnmount() {
-    this._isMounted = false;
+    this.isMounted = false;
     this.debouncedFetch.cancel();
   }
 
   componentDidMount() {
-    this._isMounted = true;
+    this.isMounted = true;
     this.fetchOptions();
     this.fetchSelectedIndexPattern(this.props.indexPatternId);
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps: IndexPatternSelectProps) {
     if (nextProps.indexPatternId !== this.props.indexPatternId) {
       this.fetchSelectedIndexPattern(nextProps.indexPatternId);
     }
   }
 
-  fetchSelectedIndexPattern = async (indexPatternId) => {
+  fetchSelectedIndexPattern = async (indexPatternId: string) => {
     if (!indexPatternId) {
       this.setState({
-        selectedIndexPattern: undefined
+        selectedIndexPattern: undefined,
       });
       return;
     }
@@ -88,7 +105,7 @@ export class IndexPatternSelect extends Component {
       return;
     }
 
-    if (!this._isMounted) {
+    if (!this.isMounted) {
       return;
     }
 
@@ -96,11 +113,11 @@ export class IndexPatternSelect extends Component {
       selectedIndexPattern: {
         value: indexPatternId,
         label: indexPatternTitle,
-      }
+      },
     });
-  }
+  };
 
-  debouncedFetch = _.debounce(async (searchValue) => {
+  debouncedFetch = _.debounce(async (searchValue: string) => {
     const { fieldTypes, onNoIndexPatterns } = this.props;
 
     const savedObjectFields = ['title'];
@@ -112,9 +129,9 @@ export class IndexPatternSelect extends Component {
     if (fieldTypes) {
       savedObjects = savedObjects.filter(savedObject => {
         try {
-          const indexPatternFields = JSON.parse(savedObject.attributes.fields);
-          return indexPatternFields.some(({ type }) => {
-            return fieldTypes.includes(type);
+          const indexPatternFields = JSON.parse(savedObject.attributes.fields as any);
+          return indexPatternFields.some((field: any) => {
+            return fieldTypes.includes(field.type);
           });
         } catch (err) {
           // Unable to parse fields JSON, invalid index pattern
@@ -123,17 +140,17 @@ export class IndexPatternSelect extends Component {
       });
     }
 
-    if (!this._isMounted) {
+    if (!this.isMounted) {
       return;
     }
 
     // We need this check to handle the case where search results come back in a different
     // order than they were sent out. Only load results for the most recent search.
     if (searchValue === this.state.searchValue) {
-      const options = savedObjects.map((indexPatternSavedObject) => {
+      const options = savedObjects.map(indexPatternSavedObject => {
         return {
           label: indexPatternSavedObject.attributes.title,
-          value: indexPatternSavedObject.id
+          value: indexPatternSavedObject.id,
         };
       });
       this.setState({
@@ -148,15 +165,18 @@ export class IndexPatternSelect extends Component {
   }, 300);
 
   fetchOptions = (searchValue = '') => {
-    this.setState({
-      isLoading: true,
-      searchValue
-    }, this.debouncedFetch.bind(null, searchValue));
-  }
+    this.setState(
+      {
+        isLoading: true,
+        searchValue,
+      },
+      this.debouncedFetch.bind(null, searchValue)
+    );
+  };
 
-  onChange = (selectedOptions) => {
+  onChange = (selectedOptions: any) => {
     this.props.onChange(_.get(selectedOptions, '0.value'));
-  }
+  };
 
   render() {
     const {
@@ -182,18 +202,3 @@ export class IndexPatternSelect extends Component {
     );
   }
 }
-
-IndexPatternSelect.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  indexPatternId: PropTypes.string,
-  placeholder: PropTypes.string,
-  /**
-   * Filter index patterns to only those that include the field types
-   */
-  fieldTypes: PropTypes.arrayOf(PropTypes.string),
-  /**
-   * Callback called when there are no Kibana index patterns (or none that match the field types filter).
-   * Does not get called when user provided index pattern title search does match any index patterns.
-   */
-  onNoIndexPatterns: PropTypes.func,
-};

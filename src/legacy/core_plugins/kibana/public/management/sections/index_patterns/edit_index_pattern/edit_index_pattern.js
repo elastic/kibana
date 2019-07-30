@@ -273,7 +273,7 @@ uiModules.get('apps/management')
           }
         }
 
-        Promise.resolve(indexPatterns.delete($scope.indexPattern))
+        Promise.resolve($scope.indexPattern.destroy())
           .then(function () {
             $location.url('/management/kibana/index_patterns');
           })

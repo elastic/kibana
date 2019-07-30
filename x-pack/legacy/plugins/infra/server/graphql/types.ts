@@ -1,6 +1,7 @@
 /* tslint:disable */
 import { InfraContext } from '../lib/infra_types';
 import { GraphQLResolveInfo } from 'graphql';
+import { FieldType } from 'ui/index_patterns';
 
 export type Resolver<Result, Parent = any, Context = any, Args = never> = (
   parent: Parent,
@@ -148,7 +149,7 @@ export interface InfraSourceStatus {
   indexFields: InfraIndexField[];
 }
 /** A descriptor of a field in an index */
-export interface InfraIndexField {
+export interface InfraIndexField extends FieldType {
   /** The name of the field */
   name: string;
   /** The type of the field's values as recognized by Kibana */
