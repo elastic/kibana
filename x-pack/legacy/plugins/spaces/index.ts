@@ -23,6 +23,16 @@ import {
 } from './server/new_platform/plugin';
 import { initSpacesRequestInterceptors } from './server/lib/request_interceptors';
 import { SecurityPlugin } from '../security';
+import { SpacesServiceSetup } from './server/new_platform/spaces_service/spaces_service';
+
+export interface SpacesPlugin {
+  getSpaceId: SpacesServiceSetup['getSpaceId'];
+  spaceIdToNamespace: SpacesServiceSetup['spaceIdToNamespace'];
+  namespaceToSpaceId: SpacesServiceSetup['namespaceToSpaceId'];
+  getBasePath: SpacesServiceSetup['getBasePath'];
+  getScopedSpacesClient: SpacesServiceSetup['scopedClient'];
+}
+
 export const spaces = (kibana: Record<string, any>) =>
   new kibana.Plugin({
     id: 'spaces',
