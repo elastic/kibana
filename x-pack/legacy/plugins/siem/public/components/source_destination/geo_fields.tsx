@@ -5,11 +5,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { get } from 'lodash/fp';
-import { uniq } from 'lodash/fp';
+import { get, isEmpty, uniq } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+import countries from 'i18n-iso-countries';
+import countryJson from 'i18n-iso-countries/langs/en.json';
 
 import { DefaultDraggable } from '../draggables';
 
@@ -70,10 +71,11 @@ const GeoFlexItem = styled(EuiFlexItem)`
 
 const GeoFieldValues = pure<{
   contextId: string;
+  displayFullCountryName?: boolean;
   eventId: string;
   fieldName: string;
   values?: string[] | null;
-}>(({ contextId, eventId, fieldName, values }) =>
+}>(({ contextId, displayFullCountryName = false, eventId, fieldName, values }) =>
   values != null ? (
     <>
       {uniq(values).map(value => (
@@ -86,15 +88,30 @@ const GeoFieldValues = pure<{
               </EuiFlexItem>
             ) : null}
 
-            <EuiFlexItem grow={false}>
-              <DefaultDraggable
-                data-test-subj={fieldName}
-                field={fieldName}
-                id={`${contextId}-${eventId}-${fieldName}-${value}`}
-                tooltipContent={fieldName}
-                value={value}
-              />
-            </EuiFlexItem>
+            {(fieldName === SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME ||
+              fieldName === DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME) &&
+            displayFullCountryName ? (
+              <EuiFlexItem grow={false}>
+                <DefaultDraggable
+                  data-test-subj={fieldName}
+                  field={fieldName}
+                  id={`${contextId}-${eventId}-${fieldName}-${value}`}
+                  name={countries.getName(value, 'en')}
+                  tooltipContent={fieldName}
+                  value={value}
+                />
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem grow={false}>
+                <DefaultDraggable
+                  data-test-subj={fieldName}
+                  field={fieldName}
+                  id={`${contextId}-${eventId}-${fieldName}-${value}`}
+                  tooltipContent={fieldName}
+                  value={value}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </GeoFlexItem>
       ))}
@@ -110,21 +127,30 @@ const GeoFieldValues = pure<{
  * - `source|destination.geo.region_iso_code`
  * - `source|destination.geo.city_name`
  */
-export const GeoFields = pure<GeoFieldsProps>(props => {
-  const { contextId, eventId, type } = props;
+export class GeoFields extends React.Component<GeoFieldsProps> {
+  componentDidMount(): void {
+    if (isEmpty(countries.getNames('en'))) {
+      countries.registerLocale(countryJson);
+    }
+  }
 
-  const propNameToFieldName = getGeoFieldPropNameToFieldNameMap(type);
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
-      {uniq(propNameToFieldName).map(geo => (
-        <GeoFieldValues
-          contextId={contextId}
-          eventId={eventId}
-          fieldName={geo.fieldName}
-          key={geo.fieldName}
-          values={get(geo.prop, props)}
-        />
-      ))}
-    </EuiFlexGroup>
-  );
-});
+  public render() {
+    const { contextId, displayFullCountryName, eventId, type } = this.props;
+
+    const propNameToFieldName = getGeoFieldPropNameToFieldNameMap(type);
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="none">
+        {uniq(propNameToFieldName).map(geo => (
+          <GeoFieldValues
+            contextId={contextId}
+            displayFullCountryName={displayFullCountryName}
+            eventId={eventId}
+            fieldName={geo.fieldName}
+            key={geo.fieldName}
+            values={get(geo.prop, this.props)}
+          />
+        ))}
+      </EuiFlexGroup>
+    );
+  }
+}

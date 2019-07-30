@@ -108,7 +108,7 @@ export const DefaultDraggable = pure<DefaultDraggableType>(
               children={children}
               field={field}
               tooltipContent={tooltipContent}
-              value={value}
+              value={name ? name : value}
             />
           )
         }

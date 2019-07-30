@@ -163,6 +163,7 @@ export const getNetworkTopNFlowColumns = (
             {...makeGeoFields(location)}
             contextId={tableId}
             eventId={id}
+            displayFullCountryName={true}
           />
         );
       } else {

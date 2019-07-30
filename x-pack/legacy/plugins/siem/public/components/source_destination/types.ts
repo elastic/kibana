@@ -8,17 +8,18 @@ export type SourceDestinationType = 'source' | 'destination';
 
 export interface GeoFieldsProps {
   contextId: string;
-  destinationGeoContinentName?: string[] | null;
-  destinationGeoCountryName?: string[] | null;
-  destinationGeoCountryIsoCode?: string[] | null;
-  destinationGeoRegionName?: string[] | null;
   destinationGeoCityName?: string[] | null;
+  destinationGeoContinentName?: string[] | null;
+  destinationGeoCountryIsoCode?: string[] | null;
+  destinationGeoCountryName?: string[] | null;
+  destinationGeoRegionName?: string[] | null;
+  displayFullCountryName?: boolean;
   eventId: string;
-  sourceGeoContinentName?: string[] | null;
-  sourceGeoCountryName?: string[] | null;
-  sourceGeoCountryIsoCode?: string[] | null;
-  sourceGeoRegionName?: string[] | null;
   sourceGeoCityName?: string[] | null;
+  sourceGeoContinentName?: string[] | null;
+  sourceGeoCountryIsoCode?: string[] | null;
+  sourceGeoCountryName?: string[] | null;
+  sourceGeoRegionName?: string[] | null;
   type: SourceDestinationType;
 }
 
