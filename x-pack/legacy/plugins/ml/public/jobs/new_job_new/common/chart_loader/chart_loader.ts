@@ -5,7 +5,8 @@
  */
 
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
-import { IndexPatternWithType, IndexPatternTitle } from '../../../../../common/types/kibana';
+import { IndexPattern } from 'ui/index_patterns';
+import { IndexPatternTitle } from '../../../../../common/types/kibana';
 import { Field, SplitField, AggFieldPair } from '../../../../../common/types/fields';
 import { ml } from '../../../../services/ml_api_service';
 import { mlResultsService } from '../../../../services/results_service';
@@ -20,13 +21,13 @@ type SplitFieldValue = string | null;
 export type LineChartData = Record<DetectorIndex, LineChartPoint[]>;
 
 export class ChartLoader {
-  protected _indexPattern: IndexPatternWithType;
+  protected _indexPattern: IndexPattern;
   protected _savedSearch: SavedSearch;
   protected _indexPatternTitle: IndexPatternTitle = '';
   protected _timeFieldName: string = '';
   protected _query: object = {};
 
-  constructor(indexPattern: IndexPatternWithType, savedSearch: SavedSearch, query: object) {
+  constructor(indexPattern: IndexPattern, savedSearch: SavedSearch, query: object) {
     this._indexPattern = indexPattern;
     this._savedSearch = savedSearch;
     this._indexPatternTitle = indexPattern.title;
