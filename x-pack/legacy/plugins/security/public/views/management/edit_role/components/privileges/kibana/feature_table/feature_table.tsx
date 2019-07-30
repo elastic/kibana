@@ -206,7 +206,7 @@ export class FeatureTable extends Component<Props, {}> {
           const excludedFromBasePrivilegsTooltip = (
             <FormattedMessage
               id="xpack.security.management.editRole.featureTable.excludedFromBasePrivilegsTooltip"
-              defaultMessage={`Use "Custom" to grant access. {featureName} isn't part of the base privileges.`}
+              defaultMessage='Use "Custom" privileges to grant access. {featureName} isn&apos;t part of the base privileges.'
               values={{ featureName }}
             />
           );
