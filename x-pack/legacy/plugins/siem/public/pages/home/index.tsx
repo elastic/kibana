@@ -141,7 +141,7 @@ export const HomePage = pure(() => (
                         <PageRoute
                           {...props}
                           component={Overview}
-                          title={i18n.translate('xpack.siem.pages.home.OverviewTitle', {
+                          title={i18n.translate('xpack.siem.pages.home.overviewTitle', {
                             defaultMessage: 'Overview',
                           })}
                         />
@@ -155,7 +155,7 @@ export const HomePage = pure(() => (
                         <PageRoute
                           {...props}
                           component={Timelines}
-                          title={i18n.translate('xpack.siem.pages.home.TimelinesTitle', {
+                          title={i18n.translate('xpack.siem.pages.home.timelinesTitle', {
                             defaultMessage: 'Timelines',
                           })}
                         />
