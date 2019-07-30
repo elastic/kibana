@@ -18,6 +18,7 @@
  */
 
 import Boom from 'boom';
+import { createListStream } from '../../../../legacy/utils/streams';
 import { SavedObjectsClientContract } from '../';
 import { injectNestedDependencies } from './inject_nested_depdendencies';
 import { sortObjects } from './sort_objects';
@@ -86,9 +87,12 @@ export async function getSortedObjectsForExport({
     savedObjectsClient,
     exportSizeLimit,
   });
-  return sortObjects(
+
+  const exportedObjects = sortObjects(
     includeReferencesDeep
       ? await injectNestedDependencies(objectsToExport, savedObjectsClient)
       : objectsToExport
   );
+
+  return createListStream(exportedObjects);
 }

@@ -25,7 +25,12 @@ import {
 } from '../../sources';
 import { getBuiltinRules } from './builtin_rules';
 import { convertDocumentSourceToLogItemFields } from './convert_document_source_to_log_item_fields';
-import { compileFormattingRules, CompiledLogMessageFormattingRule } from './message';
+import {
+  CompiledLogMessageFormattingRule,
+  Fields,
+  Highlights,
+  compileFormattingRules,
+} from './message';
 
 export class InfraLogEntriesDomain {
   constructor(
@@ -40,7 +45,7 @@ export class InfraLogEntriesDomain {
     maxCountBefore: number,
     maxCountAfter: number,
     filterQuery?: LogEntryQuery,
-    highlightQuery?: string
+    highlightQuery?: LogEntryQuery
   ): Promise<{ entriesBefore: InfraLogEntry[]; entriesAfter: InfraLogEntry[] }> {
     if (maxCountBefore <= 0 && maxCountAfter <= 0) {
       return {
@@ -100,7 +105,7 @@ export class InfraLogEntriesDomain {
     startKey: TimeKey,
     endKey: TimeKey,
     filterQuery?: LogEntryQuery,
-    highlightQuery?: string
+    highlightQuery?: LogEntryQuery
   ): Promise<InfraLogEntry[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
     const messageFormattingRules = compileFormattingRules(
@@ -120,6 +125,79 @@ export class InfraLogEntriesDomain {
       convertLogDocumentToEntry(sourceId, configuration.logColumns, messageFormattingRules.format)
     );
     return entries;
+  }
+
+  public async getLogEntryHighlights(
+    request: InfraFrameworkRequest,
+    sourceId: string,
+    startKey: TimeKey,
+    endKey: TimeKey,
+    highlights: Array<{
+      query: JsonObject;
+      countBefore: number;
+      countAfter: number;
+    }>,
+    filterQuery?: LogEntryQuery
+  ): Promise<InfraLogEntry[][]> {
+    const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
+    const messageFormattingRules = compileFormattingRules(
+      getBuiltinRules(configuration.fields.message)
+    );
+    const requiredFields = getRequiredFields(configuration, messageFormattingRules);
+
+    const documentSets = await Promise.all(
+      highlights.map(async highlight => {
+        const query = filterQuery
+          ? {
+              bool: {
+                filter: [filterQuery, highlight.query],
+              },
+            }
+          : highlight.query;
+        const [documentsBefore, documents, documentsAfter] = await Promise.all([
+          this.adapter.getAdjacentLogEntryDocuments(
+            request,
+            configuration,
+            requiredFields,
+            startKey,
+            'desc',
+            highlight.countBefore,
+            query,
+            highlight.query
+          ),
+          this.adapter.getContainedLogEntryDocuments(
+            request,
+            configuration,
+            requiredFields,
+            startKey,
+            endKey,
+            query,
+            highlight.query
+          ),
+          this.adapter.getAdjacentLogEntryDocuments(
+            request,
+            configuration,
+            requiredFields,
+            endKey,
+            'asc',
+            highlight.countAfter,
+            query,
+            highlight.query
+          ),
+        ]);
+        const entries = [...documentsBefore, ...documents, ...documentsAfter].map(
+          convertLogDocumentToEntry(
+            sourceId,
+            configuration.logColumns,
+            messageFormattingRules.format
+          )
+        );
+
+        return entries;
+      })
+    );
+
+    return documentSets;
   }
 
   public async getLogSummaryBucketsBetween(
@@ -185,7 +263,7 @@ export interface LogEntriesAdapter {
     direction: 'asc' | 'desc',
     maxCount: number,
     filterQuery?: LogEntryQuery,
-    highlightQuery?: string
+    highlightQuery?: LogEntryQuery
   ): Promise<LogEntryDocument[]>;
 
   getContainedLogEntryDocuments(
@@ -195,7 +273,7 @@ export interface LogEntriesAdapter {
     start: TimeKey,
     end: TimeKey,
     filterQuery?: LogEntryQuery,
-    highlightQuery?: string
+    highlightQuery?: LogEntryQuery
   ): Promise<LogEntryDocument[]>;
 
   getContainedLogSummaryBuckets(
@@ -217,19 +295,16 @@ export interface LogEntriesAdapter {
 export type LogEntryQuery = JsonObject;
 
 export interface LogEntryDocument {
-  fields: LogEntryDocumentFields;
+  fields: Fields;
   gid: string;
+  highlights: Highlights;
   key: TimeKey;
-}
-
-export interface LogEntryDocumentFields {
-  [fieldName: string]: string | number | boolean | null;
 }
 
 const convertLogDocumentToEntry = (
   sourceId: string,
   logColumns: InfraSourceConfiguration['logColumns'],
-  formatLogMessage: (fields: LogEntryDocumentFields) => InfraLogMessageSegment[]
+  formatLogMessage: (fields: Fields, highlights: Highlights) => InfraLogMessageSegment[]
 ) => (document: LogEntryDocument): InfraLogEntry => ({
   key: document.key,
   gid: document.gid,
@@ -237,15 +312,19 @@ const convertLogDocumentToEntry = (
   columns: logColumns.map(logColumn => {
     if (SavedSourceConfigurationTimestampColumnRuntimeType.is(logColumn)) {
       return {
+        columnId: logColumn.timestampColumn.id,
         timestamp: document.key.time,
       };
     } else if (SavedSourceConfigurationMessageColumnRuntimeType.is(logColumn)) {
       return {
-        message: formatLogMessage(document.fields),
+        columnId: logColumn.messageColumn.id,
+        message: formatLogMessage(document.fields, document.highlights),
       };
     } else {
       return {
+        columnId: logColumn.fieldColumn.id,
         field: logColumn.fieldColumn.field,
+        highlights: document.highlights[logColumn.fieldColumn.field] || [],
         value: stringify(document.fields[logColumn.fieldColumn.field] || null),
       };
     }

@@ -186,6 +186,7 @@ export class Worker extends events.EventEmitter {
       docOutput.content_type = output.content_type || unknownMime;
       docOutput.max_size_reached = output.max_size_reached;
       docOutput.size = output.size;
+      docOutput.csv_contains_formulas = output.csv_contains_formulas;
     } else {
       docOutput.content = output || defaultOutput;
       docOutput.content_type = unknownMime;

@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
 
+import { ActionCreator } from 'typescript-fsa';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -36,19 +37,29 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
+import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_table';
+import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+import { InputsModelId } from '../../store/inputs/constants';
+import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const HostsTableManage = manageQuery(HostsTable);
 const EventsTableManage = manageQuery(EventsTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
+
 interface HostsComponentReduxProps {
   filterQuery: string;
+  setAbsoluteRangeDatePicker: ActionCreator<{
+    id: InputsModelId;
+    from: number;
+    to: number;
+  }>;
 }
 
 type HostsComponentProps = HostsComponentReduxProps;
 
-const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
+const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRangeDatePicker }) => (
   <WithSource sourceId="default">
     {({ indicesExist, indexPattern }) =>
       indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -74,13 +85,16 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       sourceId="default"
                       startDate={from}
                     >
-                      {({ kpiHosts, loading, id, refetch }) => (
+                      {({ kpiHosts, loading, id, inspect, refetch }) => (
                         <KpiHostsComponentManage
-                          id={id}
-                          setQuery={setQuery}
-                          refetch={refetch}
                           data={kpiHosts}
+                          from={from}
+                          id={id}
+                          inspect={inspect}
                           loading={loading}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          to={to}
                         />
                       )}
                     </KpiHostsQuery>
@@ -95,18 +109,28 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       startDate={from}
                       type={hostsModel.HostsType.page}
                     >
-                      {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
+                      {({
+                        hosts,
+                        totalCount,
+                        loading,
+                        pageInfo,
+                        loadPage,
+                        id,
+                        inspect,
+                        refetch,
+                      }) => (
                         <HostsTableManage
+                          data={hosts}
+                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           id={id}
                           indexPattern={indexPattern}
+                          inspect={inspect}
+                          loading={loading}
+                          loadPage={loadPage}
                           refetch={refetch}
                           setQuery={setQuery}
-                          loading={loading}
-                          data={hosts}
+                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
                           totalCount={totalCount}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                          loadMore={loadMore}
                           type={hostsModel.HostsType.page}
                         />
                       )}
@@ -127,20 +151,22 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                         totalCount,
                         loading,
                         pageInfo,
-                        loadMore,
+                        loadPage,
                         id,
+                        inspect,
                         refetch,
                       }) => (
                         <AuthenticationTableManage
-                          id={id}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          loading={loading}
                           data={authentications}
+                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                          id={id}
+                          inspect={inspect}
+                          loading={loading}
+                          loadPage={loadPage}
+                          refetch={refetch}
+                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+                          setQuery={setQuery}
                           totalCount={totalCount}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          loadMore={loadMore}
                           type={hostsModel.HostsType.page}
                         />
                       )}
@@ -161,24 +187,43 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                         totalCount,
                         loading,
                         pageInfo,
-                        loadMore,
+                        loadPage,
                         id,
+                        inspect,
                         refetch,
                       }) => (
                         <UncommonProcessTableManage
+                          data={uncommonProcesses}
+                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           id={id}
+                          inspect={inspect}
+                          loading={loading}
+                          loadPage={loadPage}
                           refetch={refetch}
                           setQuery={setQuery}
-                          loading={loading}
-                          data={uncommonProcesses}
+                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
                           totalCount={totalCount}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          loadMore={loadMore}
                           type={hostsModel.HostsType.page}
                         />
                       )}
                     </UncommonProcessesQuery>
+
+                    <EuiSpacer />
+
+                    <AnomaliesHostTable
+                      startDate={from}
+                      endDate={to}
+                      skip={isInitializing}
+                      type={hostsModel.HostsType.page}
+                      narrowDateRange={(score, interval) => {
+                        const fromTo = scoreIntervalToDateTime(score, interval);
+                        setAbsoluteRangeDatePicker({
+                          id: 'global',
+                          from: fromTo.from,
+                          to: fromTo.to,
+                        });
+                      }}
+                    />
 
                     <EuiSpacer />
 
@@ -190,18 +235,27 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       startDate={from}
                       type={hostsModel.HostsType.page}
                     >
-                      {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
+                      {({
+                        events,
+                        loading,
+                        id,
+                        inspect,
+                        refetch,
+                        totalCount,
+                        pageInfo,
+                        loadPage,
+                      }) => (
                         <EventsTableManage
+                          data={events}
+                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           id={id}
+                          inspect={inspect}
+                          loading={loading}
+                          loadPage={loadPage}
                           refetch={refetch}
                           setQuery={setQuery}
-                          data={events!}
-                          loading={loading}
+                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
                           totalCount={totalCount}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                          tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          loadMore={loadMore}
                           type={hostsModel.HostsType.page}
                         />
                       )}
@@ -230,4 +284,9 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const Hosts = connect(makeMapStateToProps)(HostsComponent);
+export const Hosts = connect(
+  makeMapStateToProps,
+  {
+    setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
+  }
+)(HostsComponent);

@@ -22,7 +22,6 @@ import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import { toArray } from 'rxjs/operators';
-import wreck from '@hapi/wreck';
 
 import { deleteIndex } from './delete_index';
 import { collectUiExports } from '../../../legacy/ui/ui_exports';
@@ -33,11 +32,8 @@ import { findPluginSpecs } from '../../../legacy/plugin_discovery';
  * Load the uiExports for a Kibana instance, only load uiExports from xpack if
  * it is enabled in the Kibana server.
  */
-const getUiExports = async kibanaUrl => {
-  const xpackEnabled = await getKibanaPluginEnabled({
-    kibanaUrl,
-    pluginId: 'xpack_main',
-  });
+const getUiExports = async (kibanaPluginIds) => {
+  const xpackEnabled = kibanaPluginIds.includes('xpack_main');
 
   const { spec$ } = await findPluginSpecs({
     plugins: {
@@ -79,8 +75,8 @@ export async function deleteKibanaIndices({ client, stats, log }) {
  * builds up an object that implements just enough of the kbnMigrations interface
  * as is required by migrations.
  */
-export async function migrateKibanaIndex({ client, log, kibanaUrl }) {
-  const uiExports = await getUiExports(kibanaUrl);
+export async function migrateKibanaIndex({ client, log, kibanaPluginIds }) {
+  const uiExports = await getUiExports(kibanaPluginIds);
   const version = await loadElasticVersion();
   const config = {
     'kibana.index': '.kibana',
@@ -118,46 +114,6 @@ async function loadElasticVersion() {
   return JSON.parse(packageJson).version;
 }
 
-export async function isSpacesEnabled({ kibanaUrl }) {
-  return await getKibanaPluginEnabled({
-    kibanaUrl,
-    pluginId: 'spaces',
-  });
-}
-
-async function getKibanaPluginEnabled({ pluginId, kibanaUrl }) {
-  try {
-    const { payload } = await wreck.get('/api/status', {
-      baseUrl: kibanaUrl,
-      json: true,
-    });
-
-    return payload.status.statuses.some(({ id }) => id.includes(`plugin:${pluginId}@`));
-  } catch (error) {
-    throw new Error(
-      `Unable to fetch Kibana status API response from Kibana at ${kibanaUrl}: ${error}`
-    );
-  }
-}
-
-export async function createDefaultSpace({ index, client }) {
-  await client.index({
-    index,
-    type: '_doc',
-    id: 'space:default',
-    body: {
-      type: 'space',
-      updated_at: new Date().toISOString(),
-      space: {
-        name: 'Default Space',
-        description: 'This is the default space',
-        disabledFeatures: [],
-        _reserved: true,
-      },
-    },
-  });
-}
-
 /**
  * Migrations mean that the Kibana index will look something like:
  * .kibana, .kibana_1, .kibana_323, etc. This finds all indices starting
@@ -172,8 +128,8 @@ async function fetchKibanaIndices(client) {
   return kibanaIndices.map(x => x.index).filter(isKibanaIndex);
 }
 
-export async function cleanKibanaIndices({ client, stats, log, kibanaUrl }) {
-  if (!(await isSpacesEnabled({ kibanaUrl }))) {
+export async function cleanKibanaIndices({ client, stats, log, kibanaPluginIds }) {
+  if (!kibanaPluginIds.includes('spaces')) {
     return await deleteKibanaIndices({
       client,
       stats,
@@ -202,4 +158,23 @@ export async function cleanKibanaIndices({ client, stats, log, kibanaUrl }) {
   );
 
   stats.deletedIndex('.kibana');
+}
+
+export async function createDefaultSpace({ index, client }) {
+  await client.create({
+    index,
+    type: '_doc',
+    id: 'space:default',
+    ignore: 409,
+    body: {
+      type: 'space',
+      updated_at: new Date().toISOString(),
+      space: {
+        name: 'Default Space',
+        description: 'This is the default space',
+        disabledFeatures: [],
+        _reserved: true,
+      },
+    },
+  });
 }

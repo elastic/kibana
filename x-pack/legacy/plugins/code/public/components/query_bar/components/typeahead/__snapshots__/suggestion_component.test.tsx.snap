@@ -139,9 +139,7 @@ exports[`render symbol item 1`] = `
         className="codeSearch-suggestion__token"
       >
         <EuiToken
-          displayOptions={Object {}}
           iconType="tokenClass"
-          size="s"
         >
           <div
             className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small"

@@ -7,23 +7,41 @@
 import { i18n } from '@kbn/i18n';
 import { revealImage } from '../../functions/common/revealImage';
 import { FunctionHelp } from '.';
-import { FunctionFactory, Position } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { Position } from '../../../types';
+import { BASE64, URL } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof revealImage>> = {
   help: i18n.translate('xpack.canvas.functions.revealImageHelpText', {
-    defaultMessage: 'Configure an image reveal element',
+    defaultMessage: 'Configure an image reveal element.',
   }),
   args: {
     image: i18n.translate('xpack.canvas.functions.revealImage.args.imageHelpText', {
-      defaultMessage: 'The image to reveal',
+      defaultMessage:
+        'The image to reveal. Provide an image asset as a {BASE64} data {URL}, ' +
+        'or pass in a sub-expression.',
+      values: {
+        BASE64,
+        URL,
+      },
     }),
     emptyImage: i18n.translate('xpack.canvas.functions.revealImage.args.emptyImageHelpText', {
-      defaultMessage: 'An optional background image to reveal over',
+      defaultMessage:
+        'An optional background image to reveal over. ' +
+        'Provide an image asset as a `{BASE64}` data {URL}, or pass in a sub-expression.',
+      values: {
+        BASE64,
+        URL,
+      },
     }),
     origin: i18n.translate('xpack.canvas.functions.revealImage.args.originHelpText', {
-      defaultMessage: 'Where to start from, eg {position}',
+      defaultMessage: 'The position to start the image fill. For example, {list}, or {end}.',
       values: {
-        position: Object.values(Position).join(', '),
+        list: Object.values(Position)
+          .slice(0, -1)
+          .map(position => `\`"${position}"\``)
+          .join(', '),
+        end: Object.values(Position).slice(-1)[0],
       },
     }),
   },

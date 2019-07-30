@@ -101,25 +101,20 @@ export class ActionStatus {
 
   // generate object from elasticsearch response
   static fromUpstreamJson(json) {
+    const missingPropertyError = missingProperty => i18n.translate(
+      'xpack.watcher.models.actionStatus.actionStatusJsonPropertyMissingBadRequestMessage',
+      {
+        defaultMessage: 'JSON argument must contain an "{missingProperty}" property',
+        values: { missingProperty }
+      }
+    );
+
     if (!json.id) {
-      throw badRequest(
-        i18n.translate('xpack.watcher.models.actionStatus.idPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {id} property',
-          values: {
-            id: 'id'
-          }
-        }),
-      );
+      throw badRequest(missingPropertyError('id'));
     }
+
     if (!json.actionStatusJson) {
-      throw badRequest(
-        i18n.translate('xpack.watcher.models.actionStatus.actionStatusJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionStatusJson} property',
-          values: {
-            actionStatusJson: 'actionStatusJson'
-          }
-        }),
-      );
+      throw badRequest(missingPropertyError('actionStatusJson'));
     }
 
     return new ActionStatus(json);

@@ -5,6 +5,7 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { IPosition } from 'monaco-editor';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -14,17 +15,19 @@ import { history } from '../../utils/url';
 import { CodeBlock } from '../codeblock/codeblock';
 
 interface Props {
+  query: string;
   results: any[];
 }
 
 export class CodeResult extends React.PureComponent<Props> {
   public render() {
-    return this.props.results.map(item => {
+    const { results, query } = this.props;
+    return results.map(item => {
       const { uri, filePath, hits, compositeContent } = item;
       const { content, lineMapping, ranges } = compositeContent;
       const repoLinkUrl = `/${uri}/tree/HEAD/`;
       const fileLinkUrl = `/${uri}/blob/HEAD/${filePath}`;
-      const key = `${uri}${filePath}`;
+      const key = `${uri}-${filePath}-${query}`;
       const lineMappingFunc = (l: number) => {
         return lineMapping[l - 1];
       };
@@ -61,7 +64,10 @@ export class CodeResult extends React.PureComponent<Props> {
               <EuiBadge color="default">{hits}</EuiBadge>
             </EuiFlexItem>
             <EuiText size="s">
-              &nbsp;hits from&nbsp;
+              <FormattedMessage
+                id="xpack.code.searchPage.hitsCountText"
+                defaultMessage=" hits from "
+              />
               <Link to={fileLinkUrl} data-test-subj="codeSearchResultFileItem">
                 {filePath}
               </Link>

@@ -79,7 +79,8 @@ NodeList [
                    
                   <a
                     class="euiLink euiLink--primary"
-                    href="/app/kibana#/management/elasticsearch/upgrade_assistant"
+                    href="/basepath/app/kibana#/management/elasticsearch/upgrade_assistant"
+                    rel="noreferrer"
                   >
                     Learn more by visiting the Kibana Upgrade Assistant
                   </a>
@@ -95,7 +96,8 @@ NodeList [
             />
             <a
               class="euiLink euiLink--primary"
-              href="/app/kibana#/home/tutorial/apm"
+              href="/basepath/app/kibana#/home/tutorial/apm"
+              rel="noreferrer"
             >
               <button
                 class="euiButton euiButton--primary euiButton--small euiButton--fill"
@@ -163,7 +165,8 @@ NodeList [
           <a
             aria-describedby="service-name-tooltip"
             class="euiLink euiLink--primary sc-bdVaJa eQDnXY"
-            href="#/My Go Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+            href="#/services/My Go Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+            rel="noreferrer"
           >
             My Go Service
           </a>
@@ -261,7 +264,8 @@ NodeList [
           <a
             aria-describedby="service-name-tooltip"
             class="euiLink euiLink--primary sc-bdVaJa eQDnXY"
-            href="#/My Python Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+            href="#/services/My Python Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+            rel="noreferrer"
           >
             My Python Service
           </a>

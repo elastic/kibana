@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 // @ts-ignore
 import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
@@ -34,14 +34,14 @@ interface SchemaConfigParams {
   useGeocentroid?: boolean;
 }
 
-interface SchemaConfig {
+export interface SchemaConfig {
   accessor: number;
   format: SchemaFormat | {};
   params: SchemaConfigParams;
   aggType: string;
 }
 
-interface Schemas {
+export interface Schemas {
   metric: SchemaConfig[];
   bucket?: any[];
   geo_centroid?: any[];
@@ -153,10 +153,6 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   const isHierarchical = vis.isHierarchical();
   const metrics = responseAggs.filter((agg: AggConfig) => agg.type.type === 'metrics');
   responseAggs.forEach((agg: AggConfig) => {
-    if (!agg.enabled) {
-      cnt++;
-      return;
-    }
     let skipMetrics = false;
     let schemaName = agg.schema ? agg.schema.name || agg.schema : null;
     if (typeof schemaName === 'object') {
@@ -193,17 +189,79 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
 };
 
 export const prepareJson = (variable: string, data: object): string => {
+  if (data === undefined) {
+    return '';
+  }
   return `${variable}='${JSON.stringify(data)
     .replace(/\\/g, `\\\\`)
     .replace(/'/g, `\\'`)}' `;
 };
 
-export const prepareString = (variable: string, data: string): string => {
+export const escapeString = (data: string): string => {
+  return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
+};
+
+export const prepareString = (variable: string, data?: string): string => {
+  if (data === undefined) {
+    return '';
+  }
   return `${variable}='${escapeString(data)}' `;
 };
 
-export const escapeString = (data: string): string => {
-  return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
+export const prepareValue = (variable: string, data: any, raw: boolean = false) => {
+  if (data === undefined) {
+    return '';
+  }
+  if (raw) {
+    return `${variable}=${data} `;
+  }
+  switch (typeof data) {
+    case 'string':
+      return prepareString(variable, data);
+    case 'object':
+      return prepareJson(variable, data);
+    default:
+      return `${variable}=${data} `;
+  }
+};
+
+export const prepareDimension = (variable: string, data: any) => {
+  if (data === undefined) {
+    return '';
+  }
+
+  let expr = `${variable}={visdimension ${data.accessor} `;
+  if (data.format) {
+    expr += prepareValue('format', data.format.id);
+    expr += prepareJson('formatParams', data.format.params);
+  }
+  expr += '} ';
+
+  return expr;
+};
+
+const adjustVislibDimensionFormmaters = (vis: Vis, dimensions: { y: any[] }): void => {
+  const visState = vis.getCurrentState();
+  const visConfig = visState.params;
+  const responseAggs = vis.aggs.getResponseAggs().filter((agg: AggConfig) => agg.enabled);
+
+  (dimensions.y || []).forEach(yDimension => {
+    const yAgg = responseAggs[yDimension.accessor];
+    const seriesParam = (visConfig.seriesParams || []).find(
+      (param: any) => param.data.id === yAgg.id
+    );
+    if (seriesParam) {
+      const usedValueAxis = (visConfig.valueAxes || []).find(
+        (valueAxis: any) => valueAxis.id === seriesParam.valueAxis
+      );
+      if (get(usedValueAxis, 'scale.mode') === 'percentage') {
+        yDimension.format = { id: 'percent' };
+      }
+    }
+    if (get(visConfig, 'gauge.percentageMode') === true) {
+      yDimension.format = { id: 'percent' };
+    }
+  });
 };
 
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
@@ -231,12 +289,8 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
       escapedMarkdown = escapeString(markdown.toString());
     }
     let expr = `markdownvis '${escapedMarkdown}' `;
-    if (fontSize) {
-      expr += ` fontSize=${fontSize} `;
-    }
-    if (openLinksInNewTab) {
-      expr += `openLinksInNewTab=${openLinksInNewTab} `;
-    }
+    expr += prepareValue('font', `{font size=${fontSize}}`, true);
+    expr += prepareValue('openLinksInNewTab', openLinksInNewTab);
     return expr;
   },
   table: (visState, schemas) => {
@@ -247,41 +301,62 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `kibana_table ${prepareJson('visConfig', visConfig)}`;
   },
   metric: (visState, schemas) => {
-    const visConfig = {
-      ...visState.params,
-      ...buildVisConfig.metric(schemas),
-    };
-    return `kibana_metric ${prepareJson('visConfig', visConfig)}`;
+    const {
+      percentageMode,
+      useRanges,
+      colorSchema,
+      metricColorMode,
+      colorsRange,
+      labels,
+      invertColors,
+      style,
+    } = visState.params.metric;
+    const { metrics, bucket } = buildVisConfig.metric(schemas).dimensions;
+
+    // fix formatter for percentage mode
+    if (get(visState.params, 'metric.percentageMode') === true) {
+      metrics.forEach((metric: SchemaConfig) => {
+        metric.format = { id: 'percent' };
+      });
+    }
+
+    let expr = `metricvis `;
+    expr += prepareValue('percentage', percentageMode);
+    expr += prepareValue('colorScheme', colorSchema);
+    expr += prepareValue('colorMode', metricColorMode);
+    expr += prepareValue('useRanges', useRanges);
+    expr += prepareValue('invertColors', invertColors);
+    expr += prepareValue('showLabels', labels && labels.show);
+    if (style) {
+      expr += prepareValue('bgFill', style.bgFill);
+      expr += prepareValue('font', `{font size=${style.fontSize}}`, true);
+      expr += prepareValue('subText', style.subText);
+      expr += prepareDimension('bucket', bucket);
+    }
+
+    if (colorsRange) {
+      colorsRange.forEach((range: any) => {
+        expr += prepareValue('colorRange', `{range from=${range.from} to=${range.to}}`, true);
+      });
+    }
+
+    metrics.forEach((metric: SchemaConfig) => {
+      expr += prepareDimension('metric', metric);
+    });
+
+    return expr;
   },
   tagcloud: (visState, schemas) => {
     const { scale, orientation, minFontSize, maxFontSize, showLabel } = visState.params;
     const { metric, bucket } = buildVisConfig.tagcloud(schemas);
     let expr = `tagcloud metric={visdimension ${metric.accessor}} `;
+    expr += prepareValue('scale', scale);
+    expr += prepareValue('orientation', orientation);
+    expr += prepareValue('minFontSize', minFontSize);
+    expr += prepareValue('maxFontSize', maxFontSize);
+    expr += prepareValue('showLabel', showLabel);
+    expr += prepareDimension('bucket', bucket);
 
-    if (scale) {
-      expr += `scale='${scale}' `;
-    }
-    if (orientation) {
-      expr += `orientation='${orientation}' `;
-    }
-    if (minFontSize) {
-      expr += `minFontSize=${minFontSize} `;
-    }
-    if (maxFontSize) {
-      expr += `maxFontSize=${maxFontSize} `;
-    }
-    if (showLabel !== undefined) {
-      expr += `showLabel=${showLabel} `;
-    }
-
-    if (bucket) {
-      expr += ` bucket={visdimension ${bucket.accessor} `;
-      if (bucket.format) {
-        expr += `format=${bucket.format.id} `;
-        expr += prepareJson('formatParams', bucket.format.params);
-      }
-      expr += '} ';
-    }
     return expr;
   },
   region_map: (visState, schemas) => {
@@ -404,6 +479,7 @@ export const buildVislibDimensions = async (
     }
   }
 
+  adjustVislibDimensionFormmaters(vis, dimensions);
   return dimensions;
 };
 
@@ -467,9 +543,13 @@ export const buildPipeline = async (
     visConfig.dimensions = await buildVislibDimensions(vis, params);
 
     pipeline += `vislib ${prepareJson('visConfig', visState.params)}`;
+  } else if (vis.type.toExpression) {
+    pipeline += await vis.type.toExpression(vis, params);
   } else {
+    const visConfig = visState.params;
+    visConfig.dimensions = schemas;
     pipeline += `visualization type='${vis.type.name}'
-    ${prepareJson('visConfig', visState.params)}
+    ${prepareJson('visConfig', visConfig)}
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false} `;
     if (indexPattern) {

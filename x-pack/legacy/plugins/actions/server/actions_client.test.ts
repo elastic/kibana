@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
+
 import { ActionTypeRegistry } from './action_type_registry';
 import { ActionsClient } from './actions_client';
+import { ExecutorType } from './types';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
@@ -33,6 +35,10 @@ const actionTypeRegistryParams = {
   encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
 };
 
+const executor: ExecutorType = async options => {
+  return { status: 'ok' };
+};
+
 beforeEach(() => jest.resetAllMocks());
 
 describe('create()', () => {
@@ -47,7 +53,8 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      async executor() {},
+      unencryptedAttributes: [],
+      executor,
     });
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
@@ -68,20 +75,20 @@ describe('create()', () => {
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  "action",
-  Object {
-    "actionTypeConfig": Object {},
-    "actionTypeConfigSecrets": Object {},
-    "actionTypeId": "my-action-type",
-    "description": "my description",
-  },
-  Object {
-    "migrationVersion": Object {},
-    "references": Array [],
-  },
-]
-`);
+      Array [
+        "action",
+        Object {
+          "actionTypeConfig": Object {},
+          "actionTypeConfigSecrets": Object {},
+          "actionTypeId": "my-action-type",
+          "description": "my description",
+        },
+        Object {
+          "migrationVersion": Object {},
+          "references": Array [],
+        },
+      ]
+    `);
   });
 
   test('validates actionTypeConfig', async () => {
@@ -93,14 +100,13 @@ Array [
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       validate: {
-        config: Joi.object()
-          .keys({
-            param1: Joi.string().required(),
-          })
-          .required(),
+        config: schema.object({
+          param1: schema.string(),
+        }),
       },
-      async executor() {},
+      executor,
     });
     await expect(
       actionsClient.create({
@@ -111,7 +117,7 @@ Array [
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"The following actionTypeConfig attributes are invalid: param1 [any.required]"`
+      `"The actionTypeConfig is invalid: [param1]: expected value of type [string] but got [undefined]"`
     );
   });
 
@@ -146,7 +152,7 @@ Array [
       id: 'my-action-type',
       name: 'My action type',
       unencryptedAttributes: ['a', 'c'],
-      async executor() {},
+      executor,
     });
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
@@ -167,22 +173,22 @@ Array [
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  "action",
-  Object {
-    "actionTypeConfig": Object {
-      "a": true,
-      "c": true,
-    },
-    "actionTypeConfigSecrets": Object {
-      "b": true,
-    },
-    "actionTypeId": "my-action-type",
-    "description": "my description",
-  },
-  undefined,
-]
-`);
+      Array [
+        "action",
+        Object {
+          "actionTypeConfig": Object {
+            "a": true,
+            "c": true,
+          },
+          "actionTypeConfigSecrets": Object {
+            "b": true,
+          },
+          "actionTypeId": "my-action-type",
+          "description": "my description",
+        },
+        undefined,
+      ]
+    `);
   });
 });
 
@@ -204,11 +210,11 @@ describe('get()', () => {
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  "action",
-  "1",
-]
-`);
+      Array [
+        "action",
+        "1",
+      ]
+    `);
   });
 });
 
@@ -237,12 +243,12 @@ describe('find()', () => {
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "type": "action",
-  },
-]
-`);
+      Array [
+        Object {
+          "type": "action",
+        },
+      ]
+    `);
   });
 });
 
@@ -259,11 +265,11 @@ describe('delete()', () => {
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  "action",
-  "1",
-]
-`);
+      Array [
+        "action",
+        "1",
+      ]
+    `);
   });
 });
 
@@ -279,7 +285,8 @@ describe('update()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      async executor() {},
+      unencryptedAttributes: [],
+      executor,
     });
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
@@ -305,25 +312,25 @@ describe('update()', () => {
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  "action",
-  "my-action",
-  Object {
-    "actionTypeConfig": Object {},
-    "actionTypeConfigSecrets": Object {},
-    "actionTypeId": "my-action-type",
-    "description": "my description",
-  },
-  Object {},
-]
-`);
+      Array [
+        "action",
+        "my-action",
+        Object {
+          "actionTypeConfig": Object {},
+          "actionTypeConfigSecrets": Object {},
+          "actionTypeId": "my-action-type",
+          "description": "my description",
+        },
+        Object {},
+      ]
+    `);
     expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  "action",
-  "my-action",
-]
-`);
+      Array [
+        "action",
+        "my-action",
+      ]
+    `);
   });
 
   test('validates actionTypeConfig', async () => {
@@ -335,14 +342,13 @@ Array [
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       validate: {
-        config: Joi.object()
-          .keys({
-            param1: Joi.string().required(),
-          })
-          .required(),
+        config: schema.object({
+          param1: schema.string(),
+        }),
       },
-      async executor() {},
+      executor,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: 'my-action',
@@ -362,7 +368,7 @@ Array [
         options: {},
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"The following actionTypeConfig attributes are invalid: param1 [any.required]"`
+      `"The actionTypeConfig is invalid: [param1]: expected value of type [string] but got [undefined]"`
     );
   });
 
@@ -378,7 +384,7 @@ Array [
       id: 'my-action-type',
       name: 'My action type',
       unencryptedAttributes: ['a', 'c'],
-      async executor() {},
+      executor,
     });
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
@@ -408,22 +414,22 @@ Array [
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  "action",
-  "my-action",
-  Object {
-    "actionTypeConfig": Object {
-      "a": true,
-      "c": true,
-    },
-    "actionTypeConfigSecrets": Object {
-      "b": true,
-    },
-    "actionTypeId": "my-action-type",
-    "description": "my description",
-  },
-  Object {},
-]
-`);
+      Array [
+        "action",
+        "my-action",
+        Object {
+          "actionTypeConfig": Object {
+            "a": true,
+            "c": true,
+          },
+          "actionTypeConfigSecrets": Object {
+            "b": true,
+          },
+          "actionTypeId": "my-action-type",
+          "description": "my description",
+        },
+        Object {},
+      ]
+    `);
   });
 });

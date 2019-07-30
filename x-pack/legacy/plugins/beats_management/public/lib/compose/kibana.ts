@@ -6,7 +6,7 @@
 
 import { camelCase } from 'lodash';
 // @ts-ignore not typed yet
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import 'ui/autoload/all';
 import chrome from 'ui/chrome';
 // @ts-ignore not typed yet
@@ -52,7 +52,7 @@ export function compose(): FrontendLibs {
       routes,
       chrome.getBasePath,
       onKibanaReady,
-      XPackInfoProvider,
+      xpackInfo,
       chrome.getKibanaVersion()
     )
   );

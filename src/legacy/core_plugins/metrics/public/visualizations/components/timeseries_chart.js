@@ -162,8 +162,10 @@ export class TimeseriesChart extends Component {
             </div>
             <div className="tvbTooltip__item">
               <EuiIcon className="tvbTooltip__icon" type="dot" color={item.series.color} />
-              <div className="tvbTooltip__label">{item.series.label}</div>
-              <div className="tvbTooltip__value">{formatter(value)}</div>
+              <div className="tvbTooltip__labelContainer">
+                <div className="tvbTooltip__label">{item.series.label}</div>
+                <div className="tvbTooltip__value">{formatter(value)}</div>
+              </div>
             </div>
           </div>
         </div>

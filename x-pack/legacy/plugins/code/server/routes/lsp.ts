@@ -5,21 +5,23 @@
  */
 
 import Boom from 'boom';
-import hapi from 'hapi';
 import { groupBy, last } from 'lodash';
 import { ResponseError } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Location } from 'vscode-languageserver-types';
+
 import {
+  LanguageServerStartFailed,
   ServerNotInitialized,
   UnknownFileLanguage,
-  LanguageServerStartFailed,
 } from '../../common/lsp_error_codes';
 import { parseLspUrl } from '../../common/uri_util';
 import { GitOperations } from '../git_operations';
 import { Logger } from '../log';
+import { CTAGS, GO } from '../lsp/language_servers';
 import { LspService } from '../lsp/lsp_service';
 import { SymbolSearchClient } from '../search';
+import { CodeServerRouter } from '../security';
 import { ServerOptions } from '../server_options';
 import {
   expandRanges,
@@ -30,7 +32,7 @@ import {
 import { detectLanguage } from '../utils/detect_language';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { promiseTimeout } from '../utils/timeout';
-import { CodeServerRouter } from '../security';
+import { RequestFacade, ResponseToolkitFacade } from '../..';
 
 const LANG_SERVER_ERROR = 'language server error';
 
@@ -42,17 +44,8 @@ export function lspRoute(
   const log = new Logger(server.server);
 
   server.route({
-    path: '/api/code/repo/{uri*3}/{ref}/lspstate',
-    method: 'GET',
-    async handler(req) {
-      const { uri, ref } = req.params;
-      return lspService.initializeState(uri, ref);
-    },
-  });
-
-  server.route({
     path: '/api/code/lsp/textDocument/{method}',
-    async handler(req, h: hapi.ResponseToolkit) {
+    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
       if (typeof req.payload === 'object' && req.payload != null) {
         const method = req.params.method;
         if (method) {
@@ -99,7 +92,7 @@ export function lspRoute(
   server.route({
     path: '/api/code/lsp/findReferences',
     method: 'POST',
-    async handler(req, h: hapi.ResponseToolkit) {
+    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
       try {
         // @ts-ignore
         const { textDocument, position } = req.payload;
@@ -118,9 +111,29 @@ export function lspRoute(
         });
         let title: string;
         if (hover.result && hover.result.contents) {
-          title = Array.isArray(hover.result.contents)
-            ? hover.result.contents[0].value
-            : (hover.result.contents as 'string');
+          if (Array.isArray(hover.result.contents)) {
+            const content = hover.result.contents[0];
+            title = hover.result.contents[0].value;
+            const lang = await detectLanguage(uri.replace('file://', ''));
+            // TODO(henrywong) Find a gernal approach to construct the reference title.
+            if (content.kind) {
+              // The format of the hover result is 'MarkupContent', extract appropriate pieces as the references title.
+              if (GO.languages.includes(lang)) {
+                title = title.substring(title.indexOf('```go\n') + 5, title.lastIndexOf('\n```'));
+                if (title.includes('{\n')) {
+                  title = title.substring(0, title.indexOf('{\n'));
+                }
+              }
+            } else if (CTAGS.languages.includes(lang)) {
+              // There are language servers may provide hover results with markdown syntax, like ctags-langserver,
+              // extract the plain text.
+              if (title.substring(0, 2) === '**' && title.includes('**\n')) {
+                title = title.substring(title.indexOf('**\n') + 3);
+              }
+            }
+          } else {
+            title = hover.result.contents as 'string';
+          }
         } else {
           title = last(uri.toString().split('/')) + `(${position.line}, ${position.character})`;
         }
@@ -188,11 +201,11 @@ export function lspRoute(
   });
 }
 
-export function symbolByQnameRoute(server: CodeServerRouter, log: Logger) {
-  server.route({
+export function symbolByQnameRoute(router: CodeServerRouter, log: Logger) {
+  router.route({
     path: '/api/code/lsp/symbol/{qname}',
     method: 'GET',
-    async handler(req) {
+    async handler(req: RequestFacade) {
       try {
         const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(req), log);
         const res = await symbolSearchClient.findByQname(req.params.qname);

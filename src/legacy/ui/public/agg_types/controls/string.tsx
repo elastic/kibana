@@ -33,18 +33,15 @@ function StringParamEditor({
 }: AggParamEditorProps<string>) {
   const isValid = aggParam.required ? !!value : true;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
   return (
     <EuiFormRow
       label={aggParam.displayName || aggParam.name}
       fullWidth={true}
-      className="visEditorSidebar__aggParamFormRow"
+      compressed
       isInvalid={showValidation ? !isValid : false}
     >
       <EuiFieldText

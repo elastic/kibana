@@ -412,8 +412,8 @@ export const migrations = {
           id: savedSearchId,
         });
         doc.attributes.savedSearchRefName = 'search_0';
-        delete doc.attributes.savedSearchId;
       }
+      delete doc.attributes.savedSearchId;
 
       // Migrate controls
       const visStateJSON = get(doc, 'attributes.visState');

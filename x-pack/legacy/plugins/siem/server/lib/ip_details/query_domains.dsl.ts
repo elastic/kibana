@@ -20,7 +20,7 @@ const getAggs = (
   flowTarget: FlowTarget,
   flowDirection: FlowDirection,
   domainsSortField: DomainsSortField,
-  limit: number
+  querySize: number
 ) => {
   return {
     domain_count: {
@@ -31,17 +31,12 @@ const getAggs = (
     [`${flowTarget}_domains`]: {
       terms: {
         field: `${flowTarget}.domain`,
-        size: limit + 1,
+        size: querySize,
         order: {
           ...getQueryOrder(domainsSortField),
         },
       },
       aggs: {
-        firstSeen: {
-          min: {
-            field: '@timestamp',
-          },
-        },
         lastSeen: {
           max: {
             field: '@timestamp',
@@ -96,38 +91,34 @@ const getBiDirectionalFilter = (flowDirection: FlowDirection, flowTarget: FlowTa
     flowDirection === FlowDirection.biDirectional &&
     [FlowTarget.source, FlowTarget.destination].includes(flowTarget)
   ) {
-    return {
-      must: [
-        {
-          exists: {
-            field: 'source.bytes',
-          },
+    return [
+      {
+        exists: {
+          field: 'source.bytes',
         },
-        {
-          exists: {
-            field: 'destination.bytes',
-          },
+      },
+      {
+        exists: {
+          field: 'destination.bytes',
         },
-      ],
-    };
+      },
+    ];
   } else if (
     flowDirection === FlowDirection.biDirectional &&
     [FlowTarget.client, FlowTarget.server].includes(flowTarget)
   ) {
-    return {
-      must: [
-        {
-          exists: {
-            field: 'client.bytes',
-          },
+    return [
+      {
+        exists: {
+          field: 'client.bytes',
         },
-        {
-          exists: {
-            field: 'server.bytes',
-          },
+      },
+      {
+        exists: {
+          field: 'server.bytes',
         },
-      ],
-    };
+      },
+    ];
   }
   return [];
 };
@@ -138,7 +129,7 @@ export const buildDomainsQuery = ({
   filterQuery,
   flowDirection,
   flowTarget,
-  pagination: { limit },
+  pagination: { querySize },
   defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
@@ -149,6 +140,7 @@ export const buildDomainsQuery = ({
     ...createQueryFilterClauses(filterQuery),
     { range: { [timestamp]: { gte: from, lte: to } } },
     { term: { [`${flowTarget}.ip`]: ip } },
+    ...getBiDirectionalFilter(flowDirection, flowTarget),
   ];
 
   const dslQuery = {
@@ -157,17 +149,16 @@ export const buildDomainsQuery = ({
     ignoreUnavailable: true,
     body: {
       aggs: {
-        ...getAggs(ip, flowTarget, flowDirection, domainsSortField, limit),
+        ...getAggs(ip, flowTarget, flowDirection, domainsSortField, querySize),
       },
       query: {
         bool: {
           filter,
           ...getUniDirectionalFilter(flowDirection),
-          ...getBiDirectionalFilter(flowDirection, flowTarget),
         },
       },
       size: 0,
-      track_total_hits: true,
+      track_total_hits: false,
     },
   };
 

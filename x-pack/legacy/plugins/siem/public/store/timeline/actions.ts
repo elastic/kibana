@@ -15,6 +15,7 @@ import {
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 import { KqlMode, TimelineModel } from './model';
+import { TimelineResult } from '../../graphql/types';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/timeline');
 
@@ -76,7 +77,7 @@ export const updateTimeline = actionCreator<{
 
 export const addTimeline = actionCreator<{
   id: string;
-  timeline: TimelineModel;
+  timeline: TimelineResult;
 }>('ADD_TIMELINE');
 
 export const startTimelineSaving = actionCreator<{
@@ -183,3 +184,5 @@ export const updateAutoSaveMsg = actionCreator<{
   timelineId: string | null;
   newTimelineModel: TimelineModel | null;
 }>('UPDATE_AUTO_SAVE');
+
+export const showCallOutUnauthorizedMsg = actionCreator('SHOW_CALL_OUT_UNAUTHORIZED_MSG');

@@ -4,7 +4,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
 <EuiPopover
   anchorPosition="downRight"
   button={
-    <SpacesGlobalNavButton
+    <SpacesHeaderNavButton
       linkIcon={
         <SpaceAvatar
           announceSpaceName={true}
@@ -26,6 +26,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
   }
   closePopover={[Function]}
   data-test-subj="spacesNavSelector"
+  display="inlineBlock"
   hasArrow={true}
   id="spcMenuPopover"
   isOpen={false}

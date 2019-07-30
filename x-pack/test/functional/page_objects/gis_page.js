@@ -270,6 +270,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('layerVisibilityToggleButton');
     }
 
+    async closeLegend() {
+      const isOpen = await testSubjects.exists('mapLayerTOC');
+      if (isOpen) {
+        await testSubjects.click('mapToggleLegendButton');
+        await testSubjects.waitForDeleted('mapLayerTOC');
+      }
+    }
+
     async clickFitToBounds(layerName) {
       log.debug(`Fit to bounds, layer: ${layerName}`);
       const origView = await this.getView();
@@ -353,6 +361,19 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.waitForLayersToLoad();
     }
 
+    async setJoinWhereQuery(layerName, query) {
+      await this.openLayerPanel(layerName);
+      await testSubjects.click('mapJoinWhereExpressionButton');
+      const filterEditorContainer = await testSubjects.find('mapJoinWhereFilterEditor');
+      const queryBarInFilterEditor = await testSubjects.findDescendant('queryInput', filterEditorContainer);
+      await queryBarInFilterEditor.click();
+      const input = await find.activeElement();
+      await input.clearValue();
+      await input.type(query);
+      await testSubjects.click('mapWhereFilterEditorSubmitButton');
+      await this.waitForLayersToLoad();
+    }
+
     async selectVectorSource() {
       log.debug(`Select vector source`);
       await testSubjects.click('vectorShapes');
@@ -379,6 +400,27 @@ export function GisPageProvider({ getService, getPageObjects }) {
       log.debug(`Remove layer ${layerName}`);
       await this.openLayerPanel(layerName);
       return await testSubjects.getVisibleText(`layerErrorMessage`);
+    }
+
+    async fullScreenModeMenuItemExists() {
+      return await testSubjects.exists('mapsFullScreenMode');
+    }
+
+    async clickFullScreenMode() {
+      log.debug(`clickFullScreenMode`);
+      await testSubjects.click('mapsFullScreenMode');
+    }
+
+    async exitFullScreenLogoButtonExists() {
+      return await testSubjects.exists('exitFullScreenModeLogo');
+    }
+
+    async getExitFullScreenLogoButton() {
+      return await testSubjects.find('exitFullScreenModeLogo');
+    }
+
+    async clickExitFullScreenTextButton() {
+      await testSubjects.click('exitFullScreenModeText');
     }
 
     async openInspectorMapView() {

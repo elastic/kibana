@@ -33,3 +33,4 @@ export { RecordOfOptions, RecordOfType } from './record_type';
 export { StringOptions, StringType } from './string_type';
 export { UnionType } from './union_type';
 export { URIOptions, URIType } from './uri_type';
+export { NeverType } from './never_type';

@@ -29,7 +29,7 @@ export class Plugin {
     esSection.register(PLUGIN.ID, {
       visible: true,
       display: i18n.translate('xpack.snapshotRestore.appName', {
-        defaultMessage: 'Snapshot Repositories',
+        defaultMessage: 'Snapshot and Restore',
       }),
       order: 7,
       url: `#${CLIENT_BASE_PATH}`,
@@ -39,7 +39,7 @@ export class Plugin {
     textService.init(i18n);
     breadcrumbService.init(chrome, management.constants.BREADCRUMB);
     documentationLinksService.init(documentation.esDocBasePath, documentation.esPluginDocBasePath);
-    uiMetricService.init(uiMetric.track);
+    uiMetricService.init(uiMetric.createUiStatsReporter);
 
     const unmountReactApp = (): void => {
       const elem = document.getElementById(REACT_ROOT_ID);

@@ -52,10 +52,13 @@ const tlsTests: KbnTestProvider = ({ getService }) => {
               flowTarget: FlowTarget.source,
               sort: { field: TlsFields._id, direction: Direction.desc },
               pagination: {
-                limit: 10,
-                cursor: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 30,
+                querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -81,10 +84,13 @@ const tlsTests: KbnTestProvider = ({ getService }) => {
               flowTarget: FlowTarget.destination,
               sort: { field: TlsFields._id, direction: Direction.desc },
               pagination: {
-                limit: 10,
-                cursor: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 30,
+                querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {

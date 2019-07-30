@@ -46,6 +46,7 @@ export const hostsSchema = gql`
     lastSeen: Date
     host: HostEcsFields
     cloud: CloudFields
+    inspect: Inspect
   }
 
   type HostsEdges {
@@ -56,10 +57,12 @@ export const hostsSchema = gql`
   type HostsData {
     edges: [HostsEdges!]!
     totalCount: Float!
-    pageInfo: PageInfo!
+    pageInfo: PageInfoPaginated!
+    inspect: Inspect
   }
 
   type FirstLastSeenHost {
+    inspect: Inspect
     firstSeen: Date
     lastSeen: Date
   }
@@ -79,7 +82,7 @@ export const hostsSchema = gql`
     Hosts(
       id: String
       timerange: TimerangeInput!
-      pagination: PaginationInput!
+      pagination: PaginationInputPaginated!
       sort: HostsSortField!
       filterQuery: String
       defaultIndex: [String!]!

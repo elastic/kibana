@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { DiscoveredPlugin, PluginName } from '../../server';
+import { omit } from 'lodash';
+
+import { DiscoveredPlugin } from '../../server';
 import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
@@ -59,8 +61,8 @@ export function createPluginInitializerContext(
 export function createPluginSetupContext<
   TSetup,
   TStart,
-  TPluginsSetup extends Record<PluginName, unknown>,
-  TPluginsStart extends Record<PluginName, unknown>
+  TPluginsSetup extends object,
+  TPluginsStart extends object
 >(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
@@ -87,8 +89,8 @@ export function createPluginSetupContext<
 export function createPluginStartContext<
   TSetup,
   TStart,
-  TPluginsSetup extends Record<PluginName, unknown>,
-  TPluginsStart extends Record<PluginName, unknown>
+  TPluginsSetup extends object,
+  TPluginsStart extends object
 >(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,
@@ -100,7 +102,7 @@ export function createPluginStartContext<
     },
     docLinks: deps.docLinks,
     http: deps.http,
-    chrome: deps.chrome,
+    chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,

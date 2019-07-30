@@ -14,7 +14,7 @@ import { isEqual } from 'lodash';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { EuiSideNavItem, MainRouteParams } from '../../common/types';
-import { SymbolWithMembers } from '../../reducers/symbol';
+import { SymbolWithMembers } from '../../actions/structure';
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   structureTree: SymbolWithMembers[];

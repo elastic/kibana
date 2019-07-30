@@ -19,4 +19,4 @@
 
 export { ToastsService, ToastsSetup, ToastsStart } from './toasts_service';
 export { ErrorToastOptions, ToastsApi, ToastInput } from './toasts_api';
-export { Toast } from '@elastic/eui';
+export { EuiGlobalToastListToast as Toast } from '@elastic/eui';

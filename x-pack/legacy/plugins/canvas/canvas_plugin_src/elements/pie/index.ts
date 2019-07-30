@@ -6,7 +6,7 @@
 
 import header from './header.png';
 
-import { ElementFactory } from '../types';
+import { ElementFactory } from '../../../types';
 export const pie: ElementFactory = () => ({
   name: 'pie',
   displayName: 'Pie chart',

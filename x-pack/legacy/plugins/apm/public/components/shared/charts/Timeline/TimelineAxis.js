@@ -15,26 +15,26 @@ import { px } from '../../../../style/variables';
 import { getTimeFormatter } from '../../../../utils/formatters';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 
-// Remove any tick that is too close to traceRootDuration
-const getXAxisTickValues = (tickValues, traceRootDuration) => {
-  if (traceRootDuration == null) {
+// Remove any tick that is too close to topTraceDuration
+const getXAxisTickValues = (tickValues, topTraceDuration) => {
+  if (topTraceDuration == null) {
     return tickValues;
   }
 
   const padding = (tickValues[1] - tickValues[0]) / 2;
-  const lowerBound = traceRootDuration - padding;
-  const upperBound = traceRootDuration + padding;
+  const lowerBound = topTraceDuration - padding;
+  const upperBound = topTraceDuration + padding;
 
   return tickValues.filter(value => {
     const isInRange = inRange(value, lowerBound, upperBound);
-    return !isInRange && value !== traceRootDuration;
+    return !isInRange && value !== topTraceDuration;
   });
 };
 
-function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
+function TimelineAxis({ plotValues, agentMarks, topTraceDuration }) {
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
   const tickFormat = getTimeFormatter(xMax);
-  const xAxisTickValues = getXAxisTickValues(tickValues, traceRootDuration);
+  const xAxisTickValues = getXAxisTickValues(tickValues, topTraceDuration);
 
   return (
     <Sticky disableCompensation>
@@ -73,10 +73,10 @@ function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
                 }}
               />
 
-              {traceRootDuration > 0 && (
+              {topTraceDuration > 0 && (
                 <LastTickValue
-                  x={xScale(traceRootDuration)}
-                  value={tickFormat(traceRootDuration)}
+                  x={xScale(topTraceDuration)}
+                  value={tickFormat(topTraceDuration)}
                   marginTop={28}
                 />
               )}

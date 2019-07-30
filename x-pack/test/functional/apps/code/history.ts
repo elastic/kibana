@@ -23,7 +23,6 @@ export default function manageRepositoriesFunctionalTests({
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/37859
   describe('History', function() {
     this.tags('skipFirefox');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
@@ -131,7 +130,8 @@ export default function manageRepositoriesFunctionalTests({
         });
       });
 
-      it('in search page, change language filters can go back and forward', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/39163
+      it.skip('in search page, change language filters can go back and forward', async () => {
         log.debug('it select typescript language filter');
         const url = `${PageObjects.common.getHostPort()}/app/code#/search?q=string&p=&langs=typescript`;
         await browser.get(url);
@@ -168,15 +168,32 @@ export default function manageRepositoriesFunctionalTests({
         expect(filter.indexOf('javascript')).to.equal(0);
       });
 
-      it('in source view page file line number changed can go back and forward', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/39958
+      it.skip('in source view page file line number changed can go back and forward', async () => {
         log.debug('it goes back after line number changed');
         const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/Microsoft/TypeScript-Node-Starter`;
         await browser.get(url);
         const lineNumber = 20;
+        await retry.try(async () => {
+          const existence = await testSubjects.exists('codeFileTreeNode-File-tsconfig.json');
+          expect(existence).to.be(true);
+        });
+        await testSubjects.click('codeFileTreeNode-File-tsconfig.json');
+        await retry.try(async () => {
+          const existence = await testSubjects.exists('codeFileTreeNode-File-package.json');
+          expect(existence).to.be(true);
+        });
         await testSubjects.click('codeFileTreeNode-File-package.json');
-        const lineNumberElements = await find.allByCssSelector('.line-numbers');
 
+        await retry.try(async () => {
+          const currentUrl: string = await browser.getCurrentUrl();
+          // click line number should stay in the same file
+          expect(currentUrl.indexOf('package.json')).greaterThan(0);
+        });
+
+        const lineNumberElements = await find.allByCssSelector('.line-numbers');
         await lineNumberElements[lineNumber].click();
+
         await retry.try(async () => {
           const existence = await find.existsByCssSelector('.code-line-number-21', FIND_TIME);
           expect(existence).to.be(true);
