@@ -25,11 +25,10 @@ const TransactionNameLink = styled(TransactionLink)`
 
 interface Props {
   items: ITransactionGroup[];
-  serviceName: string;
   isLoading: boolean;
 }
 
-export function TransactionList({ items, serviceName, isLoading }: Props) {
+export function TransactionList({ items, isLoading }: Props) {
   const columns: Array<ITableColumn<ITransactionGroup>> = useMemo(
     () => [
       {
@@ -39,7 +38,7 @@ export function TransactionList({ items, serviceName, isLoading }: Props) {
         }),
         width: '50%',
         sortable: true,
-        render: (transactionName: string, item: typeof items[0]) => {
+        render: (transactionName: string, item: ITransactionGroup) => {
           return (
             <EuiToolTip
               id="transaction-name-link-tooltip"
@@ -104,7 +103,7 @@ export function TransactionList({ items, serviceName, isLoading }: Props) {
         render: (value: number) => <ImpactBar value={value} />
       }
     ],
-    [serviceName]
+    []
   );
 
   const noItemsMessage = (
