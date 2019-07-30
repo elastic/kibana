@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { KibanaContext } from '../../../../common';
+import { AngularContext } from '../../../../../contexts/angular';
 
 import { StepCreateForm } from './step_create_form';
 
@@ -37,7 +37,7 @@ describe('Data Frame: <StepCreateForm />', () => {
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <KibanaContext.Provider
+        <AngularContext.Provider
           value={{
             combinedQuery: {},
             currentIndexPattern,
@@ -48,7 +48,7 @@ describe('Data Frame: <StepCreateForm />', () => {
           }}
         >
           <StepCreateForm {...props} />
-        </KibanaContext.Provider>
+        </AngularContext.Provider>
       </div>
     );
 

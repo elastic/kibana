@@ -7,7 +7,9 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { getPivotQuery, KibanaContext } from '../../../../common';
+import { AngularContext } from '../../../../../contexts/angular';
+
+import { getPivotQuery } from '../../../../common';
 
 import { SourceIndexPreview } from './source_index_preview';
 
@@ -33,7 +35,7 @@ describe('Data Frame: <SourceIndexPreview />', () => {
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <KibanaContext.Provider
+        <AngularContext.Provider
           value={{
             combinedQuery: {},
             currentIndexPattern,
@@ -44,7 +46,7 @@ describe('Data Frame: <SourceIndexPreview />', () => {
           }}
         >
           <SourceIndexPreview {...props} />
-        </KibanaContext.Provider>
+        </AngularContext.Provider>
       </div>
     );
 

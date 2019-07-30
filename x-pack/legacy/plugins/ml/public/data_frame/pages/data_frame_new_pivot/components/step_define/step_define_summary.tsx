@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext } from 'react';
+import React, { Fragment, SFC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow, EuiText } from '@elastic/eui';
 
+import { useAngularContext } from '../../../../../contexts/angular';
+
 import { AggListSummary } from '../aggregation_list';
 import { GroupByListSummary } from '../group_by_list';
 import { PivotPreview } from './pivot_preview';
 
-import { getPivotQuery, isKibanaContext, KibanaContext } from '../../../../common';
+import { getPivotQuery } from '../../../../common';
 import { StepDefineExposedState } from './step_define_form';
 
 const defaultSearch = '*';
@@ -26,11 +28,7 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
   groupByList,
   aggList,
 }) => {
-  const kibanaContext = useContext(KibanaContext);
-
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
+  const angularContext = useAngularContext();
 
   const pivotQuery = getPivotQuery(searchQuery);
 
@@ -40,14 +38,14 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <EuiForm>
-          {kibanaContext.currentSavedSearch.id === undefined && typeof searchString === 'string' && (
+          {angularContext.currentSavedSearch.id === undefined && typeof searchString === 'string' && (
             <Fragment>
               <EuiFormRow
                 label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.indexPatternLabel', {
                   defaultMessage: 'Index pattern',
                 })}
               >
-                <span>{kibanaContext.currentIndexPattern.title}</span>
+                <span>{angularContext.currentIndexPattern.title}</span>
               </EuiFormRow>
               {displaySearch !== emptySearch && (
                 <EuiFormRow
@@ -61,13 +59,13 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
             </Fragment>
           )}
 
-          {kibanaContext.currentSavedSearch.id !== undefined && (
+          {angularContext.currentSavedSearch.id !== undefined && (
             <EuiFormRow
               label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.savedSearchLabel', {
                 defaultMessage: 'Saved search',
               })}
             >
-              <span>{kibanaContext.currentSavedSearch.title}</span>
+              <span>{angularContext.currentSavedSearch.title}</span>
             </EuiFormRow>
           )}
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, SFC, useEffect, useState } from 'react';
 import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
@@ -31,14 +31,10 @@ import {
 } from '@elastic/eui';
 
 import { ml } from '../../../../../services/ml_api_service';
+import { useAngularContext } from '../../../../../contexts/angular';
 import { PROGRESS_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 
-import {
-  isKibanaContext,
-  KibanaContext,
-  moveToDataFrameTransformList,
-  moveToDiscover,
-} from '../../../../common';
+import { moveToDataFrameTransformList, moveToDiscover } from '../../../../common';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -73,11 +69,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
       undefined
     );
 
-    const kibanaContext = useContext(KibanaContext);
-
-    if (!isKibanaContext(kibanaContext)) {
-      return null;
-    }
+    const angularContext = useAngularContext();
 
     useEffect(() => {
       onChange({ created, started, indexPatternId });
@@ -147,7 +139,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
       const indexPatternName = transformConfig.dest.index;
 
       try {
-        const newIndexPattern = await kibanaContext.indexPatterns.get();
+        const newIndexPattern = await angularContext.indexPatterns.get();
 
         Object.assign(newIndexPattern, {
           id: '',
@@ -158,8 +150,8 @@ export const StepCreateForm: SFC<Props> = React.memo(
 
         // check if there's a default index pattern, if not,
         // set the newly created one as the default index pattern.
-        if (!kibanaContext.kibanaConfig.get('defaultIndex')) {
-          await kibanaContext.kibanaConfig.set('defaultIndex', id);
+        if (!angularContext.kibanaConfig.get('defaultIndex')) {
+          await angularContext.kibanaConfig.set('defaultIndex', id);
         }
 
         toastNotifications.addSuccess(
@@ -391,7 +383,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
                         defaultMessage: 'Use Discover to explore the data frame pivot.',
                       }
                     )}
-                    onClick={() => moveToDiscover(indexPatternId, kibanaContext.kbnBaseUrl)}
+                    onClick={() => moveToDiscover(indexPatternId, angularContext.kbnBaseUrl)}
                   />
                 </EuiFlexItem>
               )}

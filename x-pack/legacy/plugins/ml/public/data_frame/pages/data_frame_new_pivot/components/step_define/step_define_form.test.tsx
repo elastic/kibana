@@ -7,8 +7,9 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { AngularContext } from '../../../../../contexts/angular';
+
 import {
-  KibanaContext,
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PIVOT_SUPPORTED_AGGS,
@@ -34,7 +35,7 @@ describe('Data Frame: <DefinePivotForm />', () => {
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <KibanaContext.Provider
+        <AngularContext.Provider
           value={{
             combinedQuery: {},
             currentIndexPattern,
@@ -45,7 +46,7 @@ describe('Data Frame: <DefinePivotForm />', () => {
           }}
         >
           <StepDefineForm onChange={() => {}} />
-        </KibanaContext.Provider>
+        </AngularContext.Provider>
       </div>
     );
 

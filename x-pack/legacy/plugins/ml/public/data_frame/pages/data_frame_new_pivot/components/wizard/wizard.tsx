@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useRef, useState } from 'react';
+import React, { Fragment, SFC, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { isKibanaContext, getCreateRequestBody, KibanaContext } from '../../../../common';
+import { useAngularContext } from '../../../../../contexts/angular';
+
+import { getCreateRequestBody } from '../../../../common';
 
 import {
   StepDefineExposedState,
@@ -61,19 +63,15 @@ const StepDefine: SFC<DefinePivotStepProps> = ({
 };
 
 export const Wizard: SFC = React.memo(() => {
-  const kibanaContext = useContext(KibanaContext);
+  const angularContext = useAngularContext();
 
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
-
-  const indexPattern = kibanaContext.currentIndexPattern;
+  const indexPattern = angularContext.currentIndexPattern;
 
   // The current WIZARD_STEP
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
 
   // The DEFINE state
-  const [stepDefineState, setStepDefineState] = useState(getDefaultStepDefineState(kibanaContext));
+  const [stepDefineState, setStepDefineState] = useState(getDefaultStepDefineState(angularContext));
 
   // The DETAILS state
   const [stepDetailsState, setStepDetailsState] = useState(getDefaultStepDetailsState());

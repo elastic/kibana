@@ -26,7 +26,7 @@ type CreateSearchItems = () => {
   combinedQuery: any;
 };
 
-import { KibanaContext } from '../../common';
+import { AngularContext } from '../../../contexts/angular';
 import { Page } from './page';
 
 module.directive('mlNewDataFrame', ($injector: InjectorService) => {
@@ -45,7 +45,7 @@ module.directive('mlNewDataFrame', ($injector: InjectorService) => {
       const createSearchItems: CreateSearchItems = Private(SearchItemsProvider);
       const { indexPattern, savedSearch, combinedQuery } = createSearchItems();
 
-      const kibanaContext = {
+      const angularContext = {
         combinedQuery,
         currentIndexPattern: indexPattern,
         currentSavedSearch: savedSearch,
@@ -56,9 +56,9 @@ module.directive('mlNewDataFrame', ($injector: InjectorService) => {
 
       ReactDOM.render(
         <I18nContext>
-          <KibanaContext.Provider value={kibanaContext}>
+          <AngularContext.Provider value={angularContext}>
             <Page />
-          </KibanaContext.Provider>
+          </AngularContext.Provider>
         </I18nContext>,
         element[0]
       );

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, SFC, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -39,13 +39,16 @@ import { PivotPreview } from './pivot_preview';
 import { KqlFilterBar } from '../../../../../components/kql_filter_bar';
 
 import {
+  useAngularContext,
+  AngularContextValue,
+  SavedSearchQuery,
+} from '../../../../../contexts/angular';
+
+import {
   AggName,
   DropDownLabel,
   getPivotQuery,
   getPreviewRequestBody,
-  isKibanaContext,
-  KibanaContext,
-  KibanaContextValue,
   PivotAggDict,
   PivotAggsConfig,
   PivotAggsConfigDict,
@@ -54,7 +57,6 @@ import {
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
   PIVOT_SUPPORTED_AGGS,
-  SavedSearchQuery,
 } from '../../../../common';
 
 import { getPivotDropdownOptions } from './common';
@@ -72,19 +74,19 @@ const defaultSearch = '*';
 const emptySearch = '';
 
 export function getDefaultStepDefineState(
-  kibanaContext: KibanaContextValue
+  angularContext: AngularContextValue
 ): StepDefineExposedState {
   return {
     aggList: {} as PivotAggsConfigDict,
     groupByList: {} as PivotGroupByConfigDict,
     isAdvancedEditorEnabled: false,
     searchString:
-      kibanaContext.currentSavedSearch.id !== undefined
-        ? kibanaContext.combinedQuery
+      angularContext.currentSavedSearch.id !== undefined
+        ? angularContext.combinedQuery
         : defaultSearch,
     searchQuery:
-      kibanaContext.currentSavedSearch.id !== undefined
-        ? kibanaContext.combinedQuery
+      angularContext.currentSavedSearch.id !== undefined
+        ? angularContext.combinedQuery
         : defaultSearch,
     valid: false,
   };
@@ -194,15 +196,11 @@ interface Props {
 }
 
 export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
-  const kibanaContext = useContext(KibanaContext);
+  const angularContext = useAngularContext();
 
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
+  const indexPattern = angularContext.currentIndexPattern;
 
-  const indexPattern = kibanaContext.currentIndexPattern;
-
-  const defaults = { ...getDefaultStepDefineState(kibanaContext), ...overrides };
+  const defaults = { ...getDefaultStepDefineState(angularContext), ...overrides };
 
   // The search filter
   const [searchString, setSearchString] = useState(defaults.searchString);
@@ -428,7 +426,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <EuiForm>
-          {kibanaContext.currentSavedSearch.id === undefined && typeof searchString === 'string' && (
+          {angularContext.currentSavedSearch.id === undefined && typeof searchString === 'string' && (
             <Fragment>
               <EuiFormRow
                 label={i18n.translate('xpack.ml.dataframe.stepDefineForm.indexPatternLabel', {
@@ -447,7 +445,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                     : ''
                 }
               >
-                <span>{kibanaContext.currentIndexPattern.title}</span>
+                <span>{angularContext.currentIndexPattern.title}</span>
               </EuiFormRow>
               {!disabledQuery && (
                 <EuiFormRow
@@ -475,13 +473,13 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
             </Fragment>
           )}
 
-          {kibanaContext.currentSavedSearch.id !== undefined && (
+          {angularContext.currentSavedSearch.id !== undefined && (
             <EuiFormRow
               label={i18n.translate('xpack.ml.dataframe.stepDefineForm.savedSearchLabel', {
                 defaultMessage: 'Saved search',
               })}
             >
-              <span>{kibanaContext.currentSavedSearch.title}</span>
+              <span>{angularContext.currentSavedSearch.title}</span>
             </EuiFormRow>
           )}
 

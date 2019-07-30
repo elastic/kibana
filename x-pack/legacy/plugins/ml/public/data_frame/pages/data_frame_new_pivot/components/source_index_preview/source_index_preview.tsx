@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useContext, useState } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
@@ -43,13 +43,13 @@ import { KBN_FIELD_TYPES } from '../../../../../../common/constants/field_types'
 import { Dictionary } from '../../../../../../common/types/common';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 
+import { useCurrentIndexPattern } from '../../../../../contexts/angular';
+
 import {
-  isKibanaContext,
   toggleSelectedField,
   EsDoc,
   EsFieldName,
   MAX_COLUMNS,
-  KibanaContext,
   PivotQuery,
 } from '../../../../common';
 
@@ -100,13 +100,7 @@ interface Props {
 export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, query }) => {
   const [clearTable, setClearTable] = useState(false);
 
-  const kibanaContext = useContext(KibanaContext);
-
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
-
-  const indexPattern = kibanaContext.currentIndexPattern;
+  const indexPattern = useCurrentIndexPattern();
 
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
