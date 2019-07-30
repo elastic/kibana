@@ -11,9 +11,18 @@ export class UnauthorizedResponseInterceptor implements HttpInterceptor {
 
   responseError(httpErrorResponse, controller) {
     const response = httpErrorResponse.error.response;
+    // if we happen to not have a response, for example if there is no
+    // network connectivity, we don't do anything
     if (!response) {
       return;
     }
+
+    // We can't do the following until https://github.com/elastic/kibana/issues/42307 is fixed
+    // if the request was omitting credentials it's to an anonymous endpoint
+    // (for example to login) and we don't wish to ever redirect
+    // if (httpErrorResponse.request.credentials === 'omit') {
+    //   return;
+    // }
 
     if (response.status === 401) {
       this.logout();
