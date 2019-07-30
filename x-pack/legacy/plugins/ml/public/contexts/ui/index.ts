@@ -5,4 +5,5 @@
  */
 
 export { UiContext } from './ui_context';
-export { useUiChromeContext, useUiContext } from './use_ui_context';
+export { useUiContext } from './use_ui_context';
+export { useUiChromeContext } from './use_ui_chrome_context';
