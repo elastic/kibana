@@ -6,4 +6,7 @@
 
 
 
-import './forecasting_modal_directive';
+export {
+  ForecastingModal,
+  FORECAST_DURATION_MAX_DAYS,
+}from './forecasting_modal';

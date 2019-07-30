@@ -4,9 +4,11 @@
 
 ## ChromeNavLink.subUrlBase property
 
-A url base that legacy apps can set to match deep URLs to an applcation.
+> Warning: This API is now obsolete.
+> 
+> 
 
-NOTE: this should be removed once legacy apps are gone.
+A url base that legacy apps can set to match deep URLs to an applcation.
 
 <b>Signature:</b>
 
