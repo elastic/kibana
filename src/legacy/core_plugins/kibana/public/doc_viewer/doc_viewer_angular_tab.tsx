@@ -17,31 +17,24 @@
  * under the License.
  */
 import React, { useRef, useEffect } from 'react';
-import chrome from 'ui/chrome';
+import { compileAngular } from './doc_viewer_helper';
+import { Directive } from './doc_viewer_types';
 
-async function compileAngular(domElement, scopeProps, controller) {
-  const $injector = await chrome.dangerouslyGetActiveInjector();
-  const $rootScope = $injector.get('$rootScope');
-  const newScope = Object.assign($rootScope.$new(), scopeProps);
-  if (controller) {
-    controller(newScope);
-  }
-  const $compile = $injector.get('$compile');
-  $compile(domElement)(newScope);
-  newScope.$digest();
-  return newScope;
+interface Props {
+  directive: Directive;
+  renderProps: object;
 }
 
-export function DocViewerAngularTab(props) {
-  const containerRef = useRef();
-  const { template, controller } = props.directive;
+export function DocViewerAngularTab({ directive, renderProps }: Props) {
+  const containerRef = useRef(null);
+  const { template, controller } = directive;
   useEffect(() => {
-    const newScope = compileAngular(containerRef.current, props.renderProps, controller);
+    const cleanupFnPromise = compileAngular(containerRef.current, renderProps, controller);
 
     return () => {
       // for cleanup
       // http://roubenmeschian.com/rubo/?p=51
-      newScope.$destroy;
+      cleanupFnPromise.then(cleanup => cleanup());
     };
   });
 
