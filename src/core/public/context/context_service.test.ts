@@ -17,6 +17,20 @@
  * under the License.
  */
 
-export * from './plugins_service';
-export { Plugin, PluginInitializer, PluginOpaqueId } from './plugin';
-export { PluginInitializerContext } from './plugin_context';
+import { MockContextConstructor } from './context_service.test.mocks';
+import { ContextService } from './context_service';
+import { PluginOpaqueId } from '../plugins';
+
+const pluginDependencies = new Map<PluginOpaqueId, PluginOpaqueId[]>();
+
+describe('ContextService', () => {
+  describe('#setup()', () => {
+    test('createContextContainer returns a new container configured with pluginDependencies', () => {
+      const coreId = Symbol();
+      const service = new ContextService({ coreId });
+      const setup = service.setup({ pluginDependencies });
+      expect(setup.createContextContainer()).toBeDefined();
+      expect(MockContextConstructor).toHaveBeenCalledWith(pluginDependencies, coreId);
+    });
+  });
+});
