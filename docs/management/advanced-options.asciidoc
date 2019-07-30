@@ -210,7 +210,9 @@ might increase the search time.
 `timelion:default_rows`:: The default number of rows to use on a Timelion sheet.
 `timelion:es.default_index`:: The default index when using the `.es()` query.
 `timelion:es.timefield`:: The default field containing a timestamp when using the `.es()` query.
-`timelion:graphite.url`:: [experimental] Used with graphite queries, this is the URL of your graphite host.
+`timelion:graphite.url`:: [experimental] Used with graphite queries, this is the URL of your graphite host 
+in the form https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite. This URL can be 
+selected from a whitelist configured in the `kibana.yml` under `timelion.graphiteUrls`.
 `timelion:max_buckets`:: The maximum number of buckets a single data source can return.
 This value is used for calculating automatic intervals in visualizations.
 `timelion:min_interval`:: The smallest interval to calculate when using "auto".

@@ -137,7 +137,7 @@ describe('kfetch', () => {
     }
   });
 
-  describe('when throwing response error (KFetchError)', async () => {
+  describe('when throwing response error (KFetchError)', () => {
     let error: KFetchError;
     beforeEach(async () => {
       fetchMock.get('*', { status: 404, body: { foo: 'bar' } });
@@ -352,7 +352,7 @@ describe('kfetch', () => {
     });
   });
 
-  describe('when interceptors return synchronously', async () => {
+  describe('when interceptors return synchronously', () => {
     let resp: any;
     beforeEach(async () => {
       fetchMock.get('*', { foo: 'bar' });
@@ -385,7 +385,7 @@ describe('kfetch', () => {
     });
   });
 
-  describe('when interceptors return promise', async () => {
+  describe('when interceptors return promise', () => {
     let resp: any;
     beforeEach(async () => {
       fetchMock.get('*', { foo: 'bar' });

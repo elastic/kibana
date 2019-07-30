@@ -40,8 +40,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
     });
 
-    describe('Security', async () => {
-      describe('navigation', async () => {
+    describe('Security', () => {
+      describe('navigation', () => {
         it('Can navigate to create user section', async () => {
           await PageObjects.security.clickElasticsearchUsers();
           await PageObjects.security.clickCreateNewUser();

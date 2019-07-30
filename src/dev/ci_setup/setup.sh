@@ -2,11 +2,6 @@
 
 set -e
 
-###
-### keep until 7.2.0 snapshots are available
-###
-export TEST_ES_BRANCH=7.2.0
-
 dir="$(pwd)"
 cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
 
@@ -113,46 +108,9 @@ yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
 yarnGlobalDir="$(yarn global bin)"
 export PATH="$PATH:$yarnGlobalDir"
 
-###
-### use the chromedriver cache if it exists
-###
-if [ -d "$dir/.chromedriver" ]; then
-  branchPkgVersion="$(node -e "console.log(require('./package.json').devDependencies.chromedriver)")"
-  cachedPkgVersion="$(cat "$dir/.chromedriver/pkgVersion")"
-  if [ "$cachedPkgVersion" == "$branchPkgVersion" ]; then
-    export CHROMEDRIVER_FILEPATH="$dir/.chromedriver/chromedriver.zip"
-    export CHROMEDRIVER_SKIP_DOWNLOAD=true
-    echo " -- Using chromedriver cache at $CHROMEDRIVER_FILEPATH"
-  else
-    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    echo "  SKIPPING CHROMEDRIVER CACHE: cached($cachedPkgVersion) branch($branchPkgVersion)"
-    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-  fi
-else
-  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-  echo "  CHROMEDRIVER CACHE NOT FOUND"
-  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-fi
-
-###
-### use the geckodriver cache if it exists
-###
-if [ -d "$dir/.geckodriver" ]; then
-  branchPkgVersion="$(node -e "console.log(require('./package.json').devDependencies.geckodriver)")"
-  cachedPkgVersion="$(cat "$dir/.geckodriver/pkgVersion")"
-  if [ "$cachedPkgVersion" == "$branchPkgVersion" ]; then
-    export GECKODRIVER_FILEPATH="$dir/.geckodriver/geckodriver.tar.gz"
-    echo " -- Using geckodriver cache at '$GECKODRIVER_FILEPATH'"
-  else
-    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    echo "  SKIPPING GECKODRIVER CACHE: cached($cachedPkgVersion) branch($branchPkgVersion)"
-    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-  fi
-else
-  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-  echo "  GECKODRIVER CACHE NOT FOUND"
-  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-fi
+# use a proxy to fetch chromedriver/geckodriver asset
+export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
+export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 
 ###
 ### install dependencies

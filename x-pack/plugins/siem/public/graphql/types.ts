@@ -79,6 +79,10 @@ export interface ResponseNotes {
 }
 
 export interface PinnedEvent {
+  code?: number | null;
+
+  message?: string | null;
+
   pinnedEventId: string;
 
   eventId?: string | null;
@@ -832,15 +836,7 @@ export interface TimelineDetailsData {
 }
 
 export interface DetailItem {
-  category: string;
-
-  description?: string | null;
-
-  example?: string | null;
-
   field: string;
-
-  type: string;
 
   values?: ToStringArray | null;
 
@@ -1338,6 +1334,8 @@ export interface QueryMatchResult {
   value?: string | null;
 
   displayValue?: string | null;
+
+  operator?: string | null;
 }
 
 export interface DateRangePickerResult {
@@ -1420,6 +1418,10 @@ export interface ResponseTimeline {
 }
 
 export interface ResponseFavoriteTimeline {
+  code?: number | null;
+
+  message?: string | null;
+
   savedObjectId: string;
 
   version: string;
@@ -1625,6 +1627,8 @@ export interface QueryMatchInput {
   value?: string | null;
 
   displayValue?: string | null;
+
+  operator?: string | null;
 }
 
 export interface SerializedFilterQueryInput {
@@ -3504,15 +3508,7 @@ export namespace GetTimelineDetailsQuery {
   export type Data = {
     __typename?: 'DetailItem';
 
-    category: string;
-
-    description?: string | null;
-
-    example?: string | null;
-
     field: string;
-
-    type: string;
 
     values?: ToStringArray | null;
 
@@ -4384,6 +4380,8 @@ export namespace GetOneTimeline {
     value?: string | null;
 
     displayValue?: string | null;
+
+    operator?: string | null;
   };
 
   export type And = {
@@ -4412,6 +4410,8 @@ export namespace GetOneTimeline {
     value?: string | null;
 
     displayValue?: string | null;
+
+    operator?: string | null;
   };
 
   export type DateRange = {
@@ -4640,6 +4640,8 @@ export namespace PersistTimelineMutation {
     value?: string | null;
 
     displayValue?: string | null;
+
+    operator?: string | null;
   };
 
   export type And = {
@@ -4668,6 +4670,8 @@ export namespace PersistTimelineMutation {
     value?: string | null;
 
     displayValue?: string | null;
+
+    operator?: string | null;
   };
 
   export type Favorite = {

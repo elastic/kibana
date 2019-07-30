@@ -171,7 +171,7 @@ export const topHitMetricAgg = new MetricAggType({
     {
       name: 'sortField',
       type: 'field',
-      editor: null,
+      editorComponent: null,
       filterFieldTypes: [ 'number', 'date', 'ip',  'string' ],
       default: function (agg) {
         return agg.getIndexPattern().timeFieldName;

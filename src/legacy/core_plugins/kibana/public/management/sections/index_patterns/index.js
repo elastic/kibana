@@ -132,7 +132,11 @@ uiModules.get('apps/management')
               id: id,
               title:
   <span>
-    {pattern.get('title')}{$scope.defaultIndex === id && (<EuiBadge className="indexPatternList__badge">Default</EuiBadge>)}
+    {pattern.get('title')} {tags && tags.length ? tags.map(({ key: tagKey, name: tagName }) => (
+      <EuiBadge className="indexPatternList__badge" key={tagKey}>
+        {tagName}
+      </EuiBadge>
+    )) : null}
   </span>,
               url: kbnUrl.eval('#/management/kibana/index_patterns/{{id}}', { id: id }),
               active: $scope.editingId === id,

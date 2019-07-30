@@ -14,12 +14,13 @@ import { filter, mergeMap, withLatestFrom, startWith, takeUntil } from 'rxjs/ope
 
 import { persistTimelineFavoriteMutation } from '../../containers/timeline/favorite/persist.gql_query';
 import { PersistTimelineFavoriteMutation, ResponseFavoriteTimeline } from '../../graphql/types';
-
+import { addError } from '../app/actions';
 import {
   endTimelineSaving,
   updateIsFavorite,
   updateTimeline,
   startTimelineSaving,
+  showCallOutUnauthorizedMsg,
 } from './actions';
 import { TimelineById } from './reducer';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
@@ -53,7 +54,10 @@ export const epicPersistTimelineFavorite = (
     mergeMap(([result, recentTimelines]) => {
       const savedTimeline = recentTimelines[get('payload.id', action)];
       const response: ResponseFavoriteTimeline = get('data.persistFavorite', result);
+      const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
+
       return [
+        ...callOutMsg,
         updateTimeline({
           id: get('payload.id', action),
           timeline: {
@@ -73,6 +77,9 @@ export const epicPersistTimelineFavorite = (
       action$.pipe(
         withLatestFrom(timeline$),
         filter(([checkAction, updatedTimeline]) => {
+          if (checkAction.type === addError.type) {
+            return true;
+          }
           if (
             checkAction.type === endTimelineSaving.type &&
             updatedTimeline[get('payload.id', checkAction)].savedObjectId != null
