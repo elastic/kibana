@@ -26,6 +26,7 @@ module.exports = () => {
           useBuiltIns: 'entry',
           modules: 'cjs',
           corejs: 2,
+          debug: true
         },
       ],
       require('./common_preset'),
