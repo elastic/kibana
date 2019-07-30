@@ -67,10 +67,10 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
         await infraSourceConfigurationForm.saveConfiguration();
       });
 
-      it('renders the waffle map again', async () => {
-        await pageObjects.common.navigateToApp('infraOps');
-        await pageObjects.infraHome.getWaffleMap();
-      });
+      // it('renders the waffle map again', async () => {
+      //   await pageObjects.common.navigateToApp('infraOps');
+      //   await pageObjects.infraHome.getWaffleMap();
+      // });
     });
   });
 };
