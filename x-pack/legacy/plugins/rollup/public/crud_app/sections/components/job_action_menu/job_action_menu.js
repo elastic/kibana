@@ -8,7 +8,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import first from 'lodash/array/first';
 
 import {
   EuiButton,
@@ -98,7 +97,7 @@ class JobActionMenuUi extends Component {
         onClick: () => {
           this.closePopover();
           const { jobs } = this.props;
-          cloneJob(first(jobs));
+          cloneJob(jobs[0]);
         },
       });
     }
