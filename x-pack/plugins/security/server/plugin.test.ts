@@ -36,6 +36,7 @@ describe('Security Plugin', () => {
       await expect(plugin.setup(mockCoreSetup)).resolves.toMatchInlineSnapshot(`
               Object {
                 "authc": Object {
+                  "createApiKey": [Function],
                   "getCurrentUser": [Function],
                   "isAuthenticated": [Function],
                   "login": [Function],
