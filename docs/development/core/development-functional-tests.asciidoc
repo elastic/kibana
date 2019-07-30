@@ -151,7 +151,7 @@ A test suite is a collection of tests defined by calling `describe()`, and then 
 
 **Tags**:::
 Use tags in `describe()` function to group functional tests. Tags include:
-* `ciGroup{id} - Assigns test suite to a specific CI worker
+* `ciGroup{id}` - Assigns test suite to a specific CI worker
 * `skipCloud` and `skipFirefox` - Excludes test suite from running on Cloud or Firefox
 * `smoke` - Groups tests that run on Chrome and Firefox
 
