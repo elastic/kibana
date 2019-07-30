@@ -1,0 +1,117 @@
+[role="xpack"]
+[[saved-objects-api-copy-to-space]]
+=== Copy to Space
+
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+
+The copy-to-space saved object API enables you to copy one or more saved objects from one space to other spaces.
+
+Note: You cannot access this endpoint via the Console in Kibana.
+
+==== Request
+
+`POST /api/spaces/copySavedObjects`
+
+`POST /s/<space_id>/api/spaces/copySavedObjects`
+
+==== Path Parameters
+`space_id` (optional)::
+(string) Identifies the source space from which saved objects will be copied. If `space_id` is not specified in the URL, the default space is used.
+
+
+==== Request Body
+
+The request body must be a JSON object which contains the following properties:
+
+`spaces` (required)::
+  (string array) the ids of the spaces the specified object(s) will be copied into
+
+`objects` (required)::
+  (object array) the saved objects to copy.
+  `type` (required) :::
+    (string) the saved object type
+  `id` (required) :::
+    (string) the saved object id
+
+`includeReferences` (optional)::
+  (boolean, default: `false`) When set to true, all saved objects related to the specified saved objects will also be copied into the target spaces.
+
+`overwrite` (optional)::
+  (boolean, default: `false`) When set to true, all conflicts will be automatically overitten. If a saved object with a matching `type` and `id` exists in the target space, then that version will be replaced with the version from the source space.
+
+
+==== Response body
+
+The response body will have a summary of the copy operation, with a top level property for each source space specified in the request.
+
+
+==== Examples
+
+The following example attempts to copy a dashboard with id `my-dashboard`, including all references from the `default` space to the `marketing` and `sales` spaces. The `marketing` space succeeds, while the `sales` space fails due to a conflict on the underlying index pattern:
+
+[source,js]
+--------------------------------------------------
+POST api/spaces/copySavedObjects
+{
+  "objects": [{
+    "type": "dashboard",
+    "id": "my-dashboard"
+  }],
+  "spaces": ["marketing", "sales"],
+  "includeReferences": true
+}
+--------------------------------------------------
+// KIBANA
+
+A successful call returns a response code of `200` and a response body
+containing a JSON structure similar to the following example:
+
+[source,js]
+--------------------------------------------------
+{
+  "marketing": {
+    "success": true,
+    "successCount": 5
+  },
+  "sales": {
+    "success": false,
+    "successCount": 4,
+    "errors": [{
+      "id": "my-index-pattern",
+      "type": "index-pattern",
+      "error": {
+        "type": "conflict"
+      }
+    }]
+  }
+}
+--------------------------------------------------
+
+
+The following example attempts to copy a visualization with id `my-viz` from the `marketing` space to the `default` space:
+
+[source,js]
+--------------------------------------------------
+POST /s/marketing/api/spaces/copySavedObjects
+{
+  "objects": [{
+    "type": "visualization",
+    "id": "my-viz"
+  }],
+  "spaces": ["default"]
+}
+--------------------------------------------------
+// KIBANA
+
+A successful call returns a response code of `200` and a response body
+containing a JSON structure similar to the following example:
+
+[source,js]
+--------------------------------------------------
+{
+  "default": {
+    "success": true,
+    "successCount": 1
+  }
+}
+--------------------------------------------------
