@@ -16,6 +16,7 @@ import { parametersDefinition, dataTypesDefinition, DataType } from '../config';
 import { hasNestedProperties } from '../helpers';
 import { PropertyBasicParameters } from './property_basic_parameters';
 import { PropertiesManager } from './properties_manager';
+import { getComponentForParameter } from './parameters';
 
 interface Props {
   form: Form;
@@ -67,7 +68,7 @@ export const PropertyEditor = ({
                     form={form}
                     defaultValue={isEditMode ? undefined : ''} // "undefined" will  into the "defaultValue" object passed to the form
                     config={parametersDefinition.name.fieldConfig}
-                    component={Field}
+                    component={getComponentForParameter('name')}
                   />
                 </EuiFlexItem>
               )}

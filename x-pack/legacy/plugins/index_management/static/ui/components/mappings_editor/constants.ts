@@ -9,3 +9,7 @@ export const DYNAMIC_SETTING_OPTIONS = [
   { value: false, text: 'false' },
   { value: 'strict', text: 'strict' },
 ];
+
+export const ERROR_CODES = {
+  NAME_CONFLICT: 'ERR_NAME_CONCLICT',
+};

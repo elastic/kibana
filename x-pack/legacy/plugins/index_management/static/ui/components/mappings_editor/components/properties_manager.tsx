@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiSpacer, EuiButton, EuiAccordion } from '@elastic/eui';
+import { EuiButton, EuiAccordion } from '@elastic/eui';
 import uuid from 'uuid';
 
 import {
