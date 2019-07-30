@@ -21,6 +21,7 @@
 import { EuiFilterButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
@@ -132,7 +133,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         aria-expanded={!!this.state.isFiltersVisible}
         title={`${filterCount ? filtersAppliedText : ''} ${clickToShowOrHideText}`}
       >
-        Filters
+        {i18n.translate('kibana_react.search.searchBar.filtersButtonLabel', {
+          defaultMessage: 'Filters',
+          description: 'The noun "filter" in plural.',
+        })}
       </EuiFilterButton>
     );
   }
