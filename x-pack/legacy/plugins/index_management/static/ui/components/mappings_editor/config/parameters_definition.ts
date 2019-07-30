@@ -14,6 +14,8 @@ import {
   containsCharsField,
 } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/lib/field_validators';
 
+import { ERROR_CODES } from '../constants';
+
 export type ParameterName =
   | 'name'
   | 'type'
@@ -50,6 +52,29 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
             chars: ' ',
             message: 'Spaces are not allowed in the name.',
           }),
+        },
+        {
+          validator: ({ path, value, formData }) => {
+            const regEx = /(.+)(\d+\.name)$/;
+            const regExResult = regEx.exec(path);
+
+            if (regExResult) {
+              const { 1: parentPath } = regExResult;
+              // Get all the "name" properties on the parent path
+              const namePropertyPaths = Object.keys(formData).filter(
+                key => key !== path && key.startsWith(parentPath) && key.endsWith('name')
+              );
+
+              for (const namePath of namePropertyPaths) {
+                if (formData[namePath] === value) {
+                  return {
+                    code: ERROR_CODES.NAME_CONFLICT,
+                    message: 'A field with the same name already exists.',
+                  };
+                }
+              }
+            }
+          },
         },
       ],
     },

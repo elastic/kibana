@@ -5,3 +5,4 @@
  */
 
 export * from './properties_manager';
+export { getComponentForParameter } from './parameters';
