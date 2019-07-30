@@ -5,7 +5,7 @@
  */
 
 import createContainer from 'constate-latest';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   CreateSourceConfigurationMutation,
@@ -20,6 +20,19 @@ import { sourceQuery } from './query_source.gql_query';
 import { updateSourceMutation } from './update_source.gql_query';
 
 type Source = SourceQuery.Query['source'];
+
+const pickIndexPattern = (source: Source | undefined, type: 'logs' | 'metrics' | 'both') => {
+  if (!source) {
+    return 'unknown-index';
+  }
+  if (type === 'logs') {
+    return source.configuration.logAlias;
+  }
+  if (type === 'metrics') {
+    return source.configuration.metricAlias;
+  }
+  return `${source.configuration.logAlias},${source.configuration.metricAlias}`;
+};
 
 export const useSource = ({ sourceId }: { sourceId: string }) => {
   const apolloClient = useApolloClient();
@@ -108,11 +121,13 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     [apolloClient, sourceId]
   );
 
-  const derivedIndexPattern = useMemo(
-    () => ({
-      fields: source ? source.status.indexFields : [],
-      title: source ? `${source.configuration.logAlias}` : 'unknown-index',
-    }),
+  const createDerivedIndexPattern = useCallback(
+    (type: 'logs' | 'metrics' | 'both') => {
+      return {
+        fields: source ? source.status.indexFields : [],
+        title: pickIndexPattern(source, type),
+      };
+    },
     [source]
   );
 
@@ -146,7 +161,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
 
   return {
     createSourceConfiguration,
-    derivedIndexPattern,
+    createDerivedIndexPattern,
     logIndicesExist,
     isLoading,
     isLoadingSource: loadSourceRequest.state === 'pending',
