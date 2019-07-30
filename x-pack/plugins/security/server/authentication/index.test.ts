@@ -35,6 +35,7 @@ import { getErrorStatusCode } from '../errors';
 import { LegacyAPI } from '../plugin';
 import { AuthenticationResult } from './authentication_result';
 import { setupAuthentication } from '.';
+import { CreateApiKeyResult, CreateApiKeyOptions } from './api_key';
 
 function mockXPackFeature({ isEnabled = true }: Partial<{ isEnabled: boolean }> = {}) {
   return {
@@ -334,6 +335,59 @@ describe('setupAuthentication()', () => {
       await expect(isAuthenticated(httpServerMock.createKibanaRequest())).rejects.toBe(
         failureReason
       );
+    });
+  });
+
+  describe('createApiKey()', () => {
+    let createApiKey: (
+      r: KibanaRequest,
+      body: CreateApiKeyOptions['body']
+    ) => Promise<CreateApiKeyResult | null>;
+    beforeEach(async () => {
+      createApiKey = (await setupAuthentication(mockSetupAuthenticationParams)).createApiKey;
+    });
+
+    it('returns `null` if Security is disabled', async () => {
+      mockXpackInfo.feature.mockReturnValue(mockXPackFeature({ isEnabled: false }));
+
+      await expect(
+        createApiKey(httpServerMock.createKibanaRequest(), {
+          name: 'my-key',
+          role_descriptors: {},
+          expiration: '1d',
+        })
+      ).resolves.toBe(null);
+    });
+
+    it('fails if `authenticate` call fails', async () => {
+      const failureReason = new Error('Something went wrong');
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
+
+      await expect(
+        createApiKey(httpServerMock.createKibanaRequest(), {
+          name: 'my-key',
+          role_descriptors: {},
+          expiration: '1d',
+        })
+      ).rejects.toBe(failureReason);
+    });
+
+    it('returns result of `createApiKey` call.', async () => {
+      const mockKey = {
+        id: '123',
+        name: 'my-key',
+        expiration: '1d',
+        api_key: '123abc',
+      };
+      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(mockKey);
+
+      await expect(
+        createApiKey(httpServerMock.createKibanaRequest(), {
+          name: 'my-key',
+          role_descriptors: {},
+          expiration: '1d',
+        })
+      ).resolves.toBe(mockKey);
     });
   });
 });

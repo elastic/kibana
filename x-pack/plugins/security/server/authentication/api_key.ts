@@ -17,7 +17,7 @@ export interface CreateApiKeyOptions {
 export interface CreateApiKeyResult {
   id: string;
   name: string;
-  expiration?: number;
+  expiration?: string;
   api_key: string;
 }
 

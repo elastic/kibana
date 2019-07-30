@@ -147,7 +147,7 @@ export const security = (kibana) => new kibana.Plugin({
 
     server.expose({
       getUser: request => securityPlugin.authc.getCurrentUser(KibanaRequest.from(request)),
-      createApiKey: (...args) => securityPlugin.authc.createApiKey(...args),
+      createApiKey: (request, body) => securityPlugin.authc.createApiKey(KibanaRequest.from(request), body),
     });
 
     const { savedObjects } = server;
