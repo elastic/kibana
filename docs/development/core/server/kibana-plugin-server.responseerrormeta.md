@@ -4,7 +4,7 @@
 
 ## ResponseErrorMeta interface
 
-Additional meta-data to enhance error output or provide error details.
+Additional metadata to enhance error output or provide error details.
 
 <b>Signature:</b>
 

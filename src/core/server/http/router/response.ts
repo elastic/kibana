@@ -28,7 +28,10 @@ export interface ResponseErrorMeta {
   errorCode?: string;
   docLink?: string;
 }
-
+/**
+ * Error message and optional data send to the client in case of error.
+ * @public
+ */
 export type ResponseError =
   | string
   | Error

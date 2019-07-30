@@ -110,9 +110,6 @@ export interface CoreStart {
 }
 
 // @public
-export const createResponseError: (error: string | Error, meta?: ResponseErrorMeta | undefined) => ResponseError;
-
-// @public
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
     readonly id: PluginName;
@@ -391,11 +388,10 @@ export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T ext
 }> : T;
 
 // @public
-export class ResponseError extends Error {
-    constructor(error: Error | string, meta?: ResponseErrorMeta | undefined);
-    // (undocumented)
-    readonly meta?: ResponseErrorMeta | undefined;
-}
+export type ResponseError = string | Error | {
+    message: string | Error;
+    meta?: ResponseErrorMeta;
+};
 
 // @public
 export interface ResponseErrorMeta {

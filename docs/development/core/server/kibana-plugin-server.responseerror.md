@@ -2,25 +2,15 @@
 
 [Home](./index.md) &gt; [kibana-plugin-server](./kibana-plugin-server.md) &gt; [ResponseError](./kibana-plugin-server.responseerror.md)
 
-## ResponseError class
+## ResponseError type
 
-Kibana ResponseError object to store error details
+Error message and optional data send to the client in case of error.
 
 <b>Signature:</b>
 
 ```typescript
-export declare class ResponseError extends Error 
+export declare type ResponseError = string | Error | {
+    message: string | Error;
+    meta?: ResponseErrorMeta;
+};
 ```
-
-## Constructors
-
-|  Constructor | Modifiers | Description |
-|  --- | --- | --- |
-|  [(constructor)(error, meta)](./kibana-plugin-server.responseerror.(constructor).md) |  | Constructs a new instance of the <code>ResponseError</code> class |
-
-## Properties
-
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [meta](./kibana-plugin-server.responseerror.meta.md) |  | <code>ResponseErrorMeta &#124; undefined</code> |  |
-
