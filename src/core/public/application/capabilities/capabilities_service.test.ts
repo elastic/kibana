@@ -30,25 +30,33 @@ describe('#start', () => {
         navLinks: {
           app1: true,
           app2: false,
+          legacyApp1: true,
+          legacyApp2: false,
         },
         foo: { feature: true },
         bar: { feature: true },
       },
     } as any,
   }).start();
+
   const apps = [{ id: 'app1' }, { id: 'app2', capabilities: { app2: { feature: true } } }] as any;
+  const legacyApps = [
+    { id: 'legacyApp1' },
+    { id: 'legacyApp2', capabilities: { app2: { feature: true } } },
+  ] as any;
 
   it('filters available apps based on returned navLinks', async () => {
     const service = new CapabilitiesService();
-    expect((await service.start({ apps, injectedMetadata })).availableApps).toEqual([
-      { id: 'app1' },
-    ]);
+    const startContract = await service.start({ apps, legacyApps, injectedMetadata });
+    expect(startContract.availableApps).toEqual([{ id: 'app1' }]);
+    expect(startContract.availableLegacyApps).toEqual([{ id: 'legacyApp1' }]);
   });
 
   it('does not allow Capabilities to be modified', async () => {
     const service = new CapabilitiesService();
     const { capabilities } = await service.start({
       apps,
+      legacyApps,
       injectedMetadata,
     });
 

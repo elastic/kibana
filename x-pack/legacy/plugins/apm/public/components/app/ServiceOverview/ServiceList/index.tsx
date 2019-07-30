@@ -12,7 +12,7 @@ import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_s
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
-import { APMLink } from '../../../shared/Links/APMLink';
+import { APMLink } from '../../../shared/Links/apm/APMLink';
 import { ManagedTable } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 
@@ -50,7 +50,7 @@ export const SERVICE_COLUMNS = [
     sortable: true,
     render: (serviceName: string) => (
       <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
-        <AppLink path={`/${serviceName}/transactions`}>
+        <AppLink path={`/services/${serviceName}/transactions`}>
           {formatString(serviceName)}
         </AppLink>
       </EuiToolTip>

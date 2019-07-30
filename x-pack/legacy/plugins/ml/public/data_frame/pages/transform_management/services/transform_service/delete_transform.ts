@@ -17,10 +17,10 @@ import {
 
 export const deleteTransform = async (d: DataFrameTransformListRow) => {
   try {
-    if (d.state.task_state === DATA_FRAME_TASK_STATE.FAILED) {
+    if (d.stats.task_state === DATA_FRAME_TASK_STATE.FAILED) {
       await ml.dataFrame.stopDataFrameTransform(
         d.config.id,
-        d.state.task_state === DATA_FRAME_TASK_STATE.FAILED,
+        d.stats.task_state === DATA_FRAME_TASK_STATE.FAILED,
         true
       );
     }
