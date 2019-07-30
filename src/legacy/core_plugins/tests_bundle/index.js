@@ -104,11 +104,14 @@ export default (kibana) => {
           modules: [...modules],
           template: createTestEntryTemplate(uiSettingDefaults),
           extendConfig(webpackConfig) {
-            return webpackMerge({
+            const mergedConfig = webpackMerge({
               resolve: {
                 extensions: ['.karma_mock.js', '.karma_mock.tsx', '.karma_mock.ts']
               }
             }, webpackConfig);
+            delete mergedConfig.optimization.splitChunks.cacheGroups.commons;
+
+            return mergedConfig;
           }
         });
 
