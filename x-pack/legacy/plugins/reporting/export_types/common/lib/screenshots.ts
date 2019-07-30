@@ -36,9 +36,9 @@ interface ScreenShotOpts {
 }
 
 interface Screenshot {
-  base64EncodedData: any;
-  title: any;
-  description: any;
+  base64EncodedData: string;
+  title: string;
+  description: string;
 }
 
 interface TimeRangeOpts {
@@ -56,9 +56,9 @@ export function screenshotsObservableFactory(server: KbnServer) {
   const captureConfig = config.get('xpack.reporting.capture');
 
   const asyncDurationLogger = async (description: string, promise: Promise<any>) => {
-    const start = new Date().valueOf();
+    const start: number = Date.now();
     const result = await promise;
-    logger.debug(`${description} took ${new Date().valueOf() - start}ms`);
+    logger.debug(`${description} took ${Date.now() - start}ms`);
     return result;
   };
 
@@ -117,7 +117,10 @@ export function screenshotsObservableFactory(server: KbnServer) {
     );
   };
 
-  const getNumberOfItems = async (browser: HeadlessBrowser, layout: LayoutInstance) => {
+  const getNumberOfItems = async (
+    browser: HeadlessBrowser,
+    layout: LayoutInstance
+  ): Promise<number> => {
     // returns the value of the `itemsCountAttribute` if it's there, otherwise
     // we just count the number of `itemSelector`
     const itemsCount = await browser.evaluate({
@@ -283,7 +286,7 @@ export function screenshotsObservableFactory(server: KbnServer) {
     browser,
     elementsPositionAndAttributes,
   }: ScreenShotOpts): Promise<Screenshot[]> => {
-    const screenshots = [];
+    const screenshots: Screenshot[] = [];
     for (const item of elementsPositionAndAttributes) {
       const base64EncodedData = await asyncDurationLogger(
         'screenshot',
