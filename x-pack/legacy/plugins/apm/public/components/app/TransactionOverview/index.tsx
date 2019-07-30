@@ -118,7 +118,7 @@ export function TransactionOverview({ urlParams }: Props) {
             onChange={event => {
               history.push({
                 ...location,
-                pathname: `/${urlParams.serviceName}/transactions`,
+                pathname: `/services/${urlParams.serviceName}/transactions`,
                 search: fromQuery({
                   ...toQuery(location.search),
                   transactionType: event.target.value
@@ -152,7 +152,6 @@ export function TransactionOverview({ urlParams }: Props) {
         <TransactionList
           isLoading={transactionListStatus === 'loading'}
           items={transactionListData}
-          serviceName={serviceName}
         />
       </EuiPanel>
     </React.Fragment>
