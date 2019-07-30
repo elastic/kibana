@@ -396,6 +396,14 @@ module.exports = {
         'no-console': ['warn', { allow: ['error'] }],
       },
     },
+    {
+      plugins: ['react-hooks'],
+      files: ['x-pack/legacy/plugins/apm/**/*.{ts,tsx}'],
+      rules: {
+        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
+        'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
+      },
+    },
 
     /**
      * GIS overrides

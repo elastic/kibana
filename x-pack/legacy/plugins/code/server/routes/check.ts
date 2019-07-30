@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import fetch from 'node-fetch';
+
 import { Logger } from '../log';
+import { ServerFacade } from '../..';
 
 export async function checkCodeNode(url: string, log: Logger, rndStr: string) {
   const res = await fetch(`${url}/api/code/codeNode?rndStr=${rndStr}`, {});
@@ -18,7 +19,7 @@ export async function checkCodeNode(url: string, log: Logger, rndStr: string) {
   return null;
 }
 
-export function checkRoute(server: Server, rndStr: string) {
+export function checkRoute(server: ServerFacade, rndStr: string) {
   server.route({
     method: 'GET',
     path: '/api/code/codeNode',
