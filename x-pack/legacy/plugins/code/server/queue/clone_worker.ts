@@ -14,6 +14,7 @@ import {
   CloneWorkerResult,
   WorkerReservedProgress,
 } from '../../model';
+import { DiskWatermarkService } from '../disk_watermark';
 import { GitOperations } from '../git_operations';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -35,9 +36,10 @@ export class CloneWorker extends AbstractGitWorker {
     protected readonly gitOps: GitOperations,
     private readonly indexWorker: IndexWorker,
     private readonly repoServiceFactory: RepositoryServiceFactory,
-    private readonly cancellationService: CancellationSerivce
+    private readonly cancellationService: CancellationSerivce,
+    protected readonly watermarkService: DiskWatermarkService
   ) {
-    super(queue, log, client, serverOptions, gitOps);
+    super(queue, log, client, serverOptions, gitOps, watermarkService);
   }
 
   public async executeJob(job: Job) {

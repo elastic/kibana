@@ -104,7 +104,7 @@ export const code = (kibana: any) =>
         }).default(),
         disk: Joi.object({
           thresholdEnabled: Joi.bool().default(true),
-          watermarkLowMb: Joi.number().default(),
+          watermarkLowMb: Joi.number().default(2048),
         }).default(),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now

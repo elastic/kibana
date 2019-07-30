@@ -31,7 +31,8 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly serverOptions: ServerOptions,
-    protected readonly gitOps: GitOperations
+    protected readonly gitOps: GitOperations,
+    protected readonly watermarkService: DiskWatermarkService
   ) {
     super(queue, log);
     this.objectClient = new RepositoryObjectClient(client);
@@ -40,11 +41,7 @@ export abstract class AbstractGitWorker extends AbstractWorker {
   public async executeJob(_: Job): Promise<WorkerResult> {
     const { thresholdEnabled, watermarkLowMb } = this.serverOptions.disk;
     if (thresholdEnabled) {
-      const watermarkService = new DiskWatermarkService(
-        watermarkLowMb,
-        this.serverOptions.repoPath
-      );
-      const isLowWatermark = await watermarkService.isLowWatermark();
+      const isLowWatermark = await this.watermarkService.isLowWatermark();
       if (isLowWatermark) {
         const msg = i18n.translate('xpack.code.git.diskWatermarkLow', {
           defaultMessage: `Disk watermark level lower than {watermarkLowMb} MB`,
