@@ -5,11 +5,11 @@
  */
 
 import { useMemo } from 'react';
-import { TransactionListAPIResponse } from '../../server/lib/transactions/get_top_transactions';
 import { loadTransactionList } from '../services/rest/apm/transaction_groups';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useUiFilters } from '../context/UrlParamsContext';
 import { useFetcher } from './useFetcher';
+import { TransactionGroupListAPIResponse } from '../../server/lib/transaction_groups';
 
 const getRelativeImpact = (
   impact: number,
@@ -21,7 +21,7 @@ const getRelativeImpact = (
     1
   );
 
-function getWithRelativeImpact(items: TransactionListAPIResponse) {
+function getWithRelativeImpact(items: TransactionGroupListAPIResponse) {
   const impacts = items
     .map(({ impact }) => impact)
     .filter(impact => impact !== null) as number[];

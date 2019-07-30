@@ -745,7 +745,7 @@ app.controller('graphuiPlugin', function (
     }
   }
 
-  $scope.indices = $route.current.locals.indexPatterns.filter(indexPattern => !indexPattern.get('type'));
+  $scope.indices = $route.current.locals.indexPatterns.filter(indexPattern => !indexPattern.type);
 
 
   $scope.setDetail = function (data) {

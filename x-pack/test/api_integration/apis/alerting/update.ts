@@ -32,7 +32,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
       await supertest
         .delete(`/api/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
-        .expect(200);
+        .expect(204, '');
       await esArchiver.unload('actions/basic');
     });
 

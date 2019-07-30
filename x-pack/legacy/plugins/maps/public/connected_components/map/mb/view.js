@@ -8,11 +8,12 @@ import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ResizeChecker } from 'ui/resize_checker';
-import { syncLayerOrder, removeOrphanedSourcesAndLayers, createMbMapInstance } from './utils';
+import { syncLayerOrder, removeOrphanedSourcesAndLayers } from './utils';
 import {
   DECIMAL_DEGREES_PRECISION,
   FEATURE_ID_PROPERTY_NAME,
-  ZOOM_PRECISION
+  ZOOM_PRECISION,
+  MAKI_SPRITE_PATH
 } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw-unminified';
@@ -20,6 +21,13 @@ import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import { FeatureTooltip } from '../feature_tooltip';
 import { DRAW_TYPE } from '../../../actions/map_actions';
 import { createShapeFilterWithMeta, createExtentFilterWithMeta } from '../../../elasticsearch_geo_utils';
+import chrome from 'ui/chrome';
+
+function relativeToAbsolute(url) {
+  const a = document.createElement('a');
+  a.setAttribute('href', url);
+  return a.href;
+}
 
 const mbDrawModes = MapboxDraw.modes;
 mbDrawModes.draw_rectangle = DrawRectangle;
@@ -340,13 +348,45 @@ export class MBMapContainer extends React.Component {
     this._mbDrawControl.changeMode(mbDrawMode);
   }
 
+
+  async _createMbMapInstance() {
+    const initialView = this.props.goto ? this.props.goto.center : null;
+    const makiUrl = relativeToAbsolute(chrome.addBasePath(MAKI_SPRITE_PATH));
+    return new Promise((resolve) => {
+      const options = {
+        attributionControl: false,
+        container: this.refs.mapContainer,
+        style: {
+          version: 8,
+          sources: {},
+          layers: [],
+          sprite: makiUrl
+        },
+        scrollZoom: this.props.scrollZoom,
+        preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false)
+      };
+      if (initialView) {
+        options.zoom = initialView.zoom;
+        options.center = {
+          lng: initialView.lon,
+          lat: initialView.lat
+        };
+      }
+      const mbMap = new mapboxgl.Map(options);
+      mbMap.dragRotate.disable();
+      mbMap.touchZoomRotate.disableRotation();
+      mbMap.addControl(
+        new mapboxgl.NavigationControl({ showCompass: false }), 'top-left'
+      );
+      mbMap.on('load', () => {
+        resolve(mbMap);
+      });
+    });
+  }
+
   async _initializeMap() {
     try {
-      this._mbMap = await createMbMapInstance({
-        node: this.refs.mapContainer,
-        initialView: this.props.goto ? this.props.goto.center : null,
-        scrollZoom: this.props.scrollZoom
-      });
+      this._mbMap = await this._createMbMapInstance();
     } catch(error) {
       this.props.setMapInitError(error.message);
       return;
