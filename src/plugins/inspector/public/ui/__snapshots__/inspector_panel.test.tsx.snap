@@ -216,7 +216,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                     >
                       <FormattedMessage
                         defaultMessage="View: {viewName}"
-                        id="common.ui.inspector.view"
+                        id="plugins.inspector.view"
                         values={
                           Object {
                             "viewName": "View 1",
@@ -297,7 +297,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                               >
                                 <FormattedMessage
                                   defaultMessage="View: {viewName}"
-                                  id="common.ui.inspector.view"
+                                  id="plugins.inspector.view"
                                   values={
                                     Object {
                                       "viewName": "View 1",
