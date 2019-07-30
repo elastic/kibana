@@ -25,11 +25,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AggType } from 'ui/agg_types';
 import { IndexPattern } from 'ui/index_patterns';
 import { documentationLinks } from '../../../../documentation_links/documentation_links';
-import { ComboBoxGroupedOption } from '../default_editor_utils';
+import { ComboBoxGroupedOptions } from '../default_editor_utils';
 
 interface DefaultEditorAggSelectProps {
   aggError?: string;
-  aggTypeOptions: Array<ComboBoxGroupedOption<AggType>>;
+  aggTypeOptions: ComboBoxGroupedOptions<AggType>;
   id: string;
   indexPattern: IndexPattern;
   showValidation: boolean;
@@ -52,7 +52,7 @@ function DefaultEditorAggSelect({
   setTouched,
   setValidity,
 }: DefaultEditorAggSelectProps) {
-  const selectedOptions: Array<ComboBoxGroupedOption<AggType>> = value
+  const selectedOptions: ComboBoxGroupedOptions<AggType> = value
     ? [{ label: value.title, target: value }]
     : [];
 

@@ -17,19 +17,21 @@
  * under the License.
  */
 
-interface ComboBoxOption<T> {
+export interface ComboBoxOption<T> {
   label: string;
   target: T;
 }
-
-// NOTE: we cannot export the interface with export { InterfaceName }
-// as there is currently a bug on babel typescript transform plugin for it
-// https://github.com/babel/babel/issues/7641
-//
 export interface ComboBoxGroupedOption<T> {
   label: string;
-  target?: T;
-  options?: Array<ComboBoxOption<T>>;
+  options: Array<ComboBoxOption<T>>;
+}
+
+type GroupOrOption<T> = ComboBoxGroupedOption<T> | ComboBoxOption<T>;
+
+export type ComboBoxGroupedOptions<T> = Array<GroupOrOption<T>> | [];
+
+export interface IndexType {
+  [key: string]: string;
 }
 
 /**
@@ -41,35 +43,33 @@ export interface ComboBoxGroupedOption<T> {
  *
  * @returns An array of grouped and sorted alphabetically `objects` that are compatible with EuiComboBox options.
  */
-function groupAndSortBy<T>(
+function groupAndSortBy<T extends IndexType>(
   objects: T[],
-  groupBy = 'type',
-  labelName = 'title'
-): Array<ComboBoxGroupedOption<T>> | [] {
-  const groupedOptions: Array<ComboBoxGroupedOption<T>> = objects.reduce(
-    (array: Array<ComboBoxGroupedOption<T>>, obj: T) => {
-      const group = array.find(
-        element => element.label === (obj as { [key: string]: any })[groupBy]
-      );
-      const option: ComboBoxOption<T> = {
-        label: (obj as { [key: string]: any })[labelName],
+  groupBy: string = 'type',
+  labelName: string = 'title'
+): ComboBoxGroupedOptions<T> {
+  const groupedOptions = objects.reduce(
+    (array, obj) => {
+      const group = array.find(element => element.label === obj[groupBy]);
+      const option = {
+        label: obj[labelName],
         target: obj,
       };
 
       if (group && group.options) {
         group.options.push(option);
       } else {
-        array.push({ label: (obj as { [key: string]: any })[groupBy], options: [option] });
+        array.push({ label: obj[groupBy], options: [option] });
       }
 
       return array;
     },
-    []
+    [] as Array<ComboBoxGroupedOption<T>>
   );
 
   groupedOptions.sort(sortByLabel);
 
-  groupedOptions.forEach((group: ComboBoxGroupedOption<T>) => {
+  groupedOptions.forEach(group => {
     if (Array.isArray(group.options)) {
       group.options.sort(sortByLabel);
     }
@@ -82,7 +82,7 @@ function groupAndSortBy<T>(
   return groupedOptions;
 }
 
-function sortByLabel<T>(a: ComboBoxGroupedOption<T>, b: ComboBoxGroupedOption<T>) {
+function sortByLabel<T>(a: GroupOrOption<T>, b: GroupOrOption<T>) {
   return (a.label || '').toLowerCase().localeCompare((b.label || '').toLowerCase());
 }
 

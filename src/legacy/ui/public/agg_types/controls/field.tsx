@@ -26,7 +26,11 @@ import { AggConfig } from 'ui/vis';
 import { Field } from 'ui/index_patterns';
 import { formatListAsProse, parseCommaSeparatedList } from '../../../../utils';
 import { AggParamEditorProps } from '../../vis/editors/default';
-import { ComboBoxGroupedOption } from '../../vis/editors/default/default_editor_utils';
+import {
+  ComboBoxGroupedOptions,
+  ComboBoxGroupedOption,
+  ComboBoxOption,
+} from '../../vis/editors/default/default_editor_utils';
 
 const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
 
@@ -47,7 +51,7 @@ function FieldParamEditor({
   setValidity,
   setValue,
 }: FieldParamEditorProps) {
-  const selectedOptions: Array<ComboBoxGroupedOption<Field>> = value
+  const selectedOptions: ComboBoxGroupedOptions<Field> = value
     ? [{ label: value.displayName || value.name, target: value }]
     : [];
 
@@ -92,10 +96,10 @@ function FieldParamEditor({
       return;
     }
 
-    const options = indexedFields[0].options;
+    const options = (indexedFields[0] as ComboBoxGroupedOption<Field>).options;
 
     if (!options) {
-      setValue(indexedFields[0].target);
+      setValue((indexedFields[0] as ComboBoxOption<Field>).target);
     } else if (options.length === 1) {
       setValue(options[0].target);
     }
