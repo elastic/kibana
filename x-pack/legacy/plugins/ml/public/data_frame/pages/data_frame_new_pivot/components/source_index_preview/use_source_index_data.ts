@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
-
 import React, { useEffect, useState } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
+
+import { idx } from '@kbn/elastic-idx';
 
 import { IndexPattern } from 'ui/index_patterns';
 
@@ -82,7 +82,7 @@ export const useSourceIndexData = (
           [key: string]: any;
         };
         flattenedFields.forEach(ff => {
-          item[ff] = get(doc._source, ff);
+          item[ff] = idx(doc._source, _ => _[ff]);
           if (item[ff] === undefined) {
             item[ff] = doc._source[`"${ff}"`];
           }

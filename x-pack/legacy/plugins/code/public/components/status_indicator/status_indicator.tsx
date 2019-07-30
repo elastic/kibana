@@ -17,6 +17,7 @@ import {
   LangServerType,
   REPO_FILE_STATUS_SEVERITY,
   RepoFileStatus,
+  RepoFileStatusText as StatusText,
   Severity,
   StatusReport,
 } from '../../../common/repo_file_status';
@@ -80,7 +81,7 @@ export class StatusIndicatorComponent extends React.Component<Props, State> {
             </p>
           );
         } else {
-          children.push(<p key={`${error}_key`}>{error}</p>);
+          children.push(<p key={`${error}_key`}>{StatusText[error]}</p>);
         }
       }
     };

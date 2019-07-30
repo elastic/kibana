@@ -18,6 +18,7 @@
  */
 
 import chrome from 'ui/chrome';
+import 'ui/es'; // required for $injector.get('es') below
 import { CoreStart, Plugin } from 'kibana/public';
 import { initVegaLegacyModule } from './vega_legacy_module';
 
