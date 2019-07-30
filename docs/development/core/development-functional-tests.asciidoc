@@ -156,7 +156,7 @@ Use tags in `describe()` function to group functional tests. Tags include:
 * `smoke` - Groups tests that run on Chrome and Firefox
 
 **Cross-browser testing**:::
-On CI, all the functional tests are executed in Chrome by default. To run tests on Firefox, assign the `smoke` tag:
+On CI, all the functional tests are executed in Chrome by default. To also run a suite against Firefox, assign the `smoke` tag:
 
 ["source","js"]
 -----------
