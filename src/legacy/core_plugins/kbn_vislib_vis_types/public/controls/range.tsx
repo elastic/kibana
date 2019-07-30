@@ -18,42 +18,33 @@
  */
 
 import React from 'react';
-
-import { EuiSwitch, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiRange } from '@elastic/eui';
 import { VisOptionsSetValue } from 'ui/vis/editors/default';
 
-interface SwitchOptionProps {
-  dataTestSubj?: string;
-  label?: string;
-  tooltip?: string;
-  disabled?: boolean;
-  value?: boolean;
+interface RangeOptionProps {
+  label: string;
+  max: number;
+  min: number;
   paramName: string;
+  step?: number;
+  value: string | number;
   setValue: VisOptionsSetValue;
 }
 
-function SwitchOption({
-  dataTestSubj,
-  tooltip,
-  label,
-  disabled,
-  paramName,
-  value = false,
-  setValue,
-}: SwitchOptionProps) {
+function RangeOption({ label, max, min, step, paramName, value, setValue }: RangeOptionProps) {
   return (
-    <div className="visEditorSidebar__switchOptionFormRow">
-      <EuiToolTip content={tooltip} delay="long" position="right">
-        <EuiSwitch
-          label={label}
-          checked={value}
-          disabled={disabled}
-          data-test-subj={dataTestSubj}
-          onChange={ev => setValue(paramName, ev.target.checked)}
-        />
-      </EuiToolTip>
-    </div>
+    <EuiFormRow label={label} fullWidth={true} compressed>
+      <EuiRange
+        fullWidth
+        showValue
+        max={max}
+        min={min}
+        step={step}
+        value={value}
+        onChange={ev => setValue(paramName, ev.target.value)}
+      />
+    </EuiFormRow>
   );
 }
 
-export { SwitchOption };
+export { RangeOption };

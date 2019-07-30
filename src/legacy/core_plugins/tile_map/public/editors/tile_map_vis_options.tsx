@@ -23,9 +23,13 @@ import { i18n } from '@kbn/i18n';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { SelectOption } from '../../../kbn_vislib_vis_types/public/controls/select';
+import { RangeOption } from '../../../kbn_vislib_vis_types/public/controls/range';
+import { BasicOptions } from '../../../kbn_vislib_vis_types/public/controls/basic_options';
 import { SwitchOption } from '../../../kbn_vislib_vis_types/public/controls/switch';
 
-function TileMapOptions({ stateParams, setValue, vis }: VisOptionsProps) {
+function TileMapOptions(props: VisOptionsProps) {
+  const { stateParams, setValue, vis } = props;
+
   useEffect(() => {
     if (!stateParams.mapType) {
       setValue('mapType', vis.type.editorConfig.collections.mapTypes[0]);
@@ -51,6 +55,36 @@ function TileMapOptions({ stateParams, setValue, vis }: VisOptionsProps) {
         options={vis.type.editorConfig.collections.colorSchemas}
         paramName="colorSchema"
         value={stateParams.colorSchema}
+        setValue={setValue}
+      />
+
+      {stateParams.mapType === 'Heatmap' && (
+        <RangeOption
+          label={i18n.translate('tileMap.visParams.clusterSizeLabel', {
+            defaultMessage: 'Cluster size',
+          })}
+          max={3}
+          min={1}
+          paramName="heatClusterSize"
+          step={0.1}
+          value={stateParams.heatClusterSize}
+          setValue={setValue}
+        />
+      )}
+
+      <BasicOptions {...props} />
+
+      <SwitchOption
+        disabled={!vis.type.visConfig.canDesaturate}
+        label={i18n.translate('tileMap.visParams.desaturateTilesLabel', {
+          defaultMessage: 'Desaturate tiles',
+        })}
+        tooltip={i18n.translate('tileMap.visParams.reduceVibrancyOfTileColorsTip', {
+          defaultMessage:
+            'Reduce the vibrancy of tile colors. This does not work in any version of Internet Explorer.',
+        })}
+        paramName="isDesaturated"
+        value={stateParams.isDesaturated}
         setValue={setValue}
       />
     </EuiPanel>
