@@ -182,7 +182,6 @@ Array [
                 },
               },
             ],
-            "must_not": Array [],
             "should": Array [
               Object {
                 "term": Object {

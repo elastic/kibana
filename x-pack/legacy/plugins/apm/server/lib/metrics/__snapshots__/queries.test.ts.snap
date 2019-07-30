@@ -166,12 +166,12 @@ Object {
           },
           Object {
             "term": Object {
-              "agent.name": "java",
+              "service.environment": "prod",
             },
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "agent.name": "java",
             },
           },
         ],
@@ -256,6 +256,11 @@ Object {
             },
           },
           Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+          Object {
             "exists": Object {
               "field": "system.memory.actual.free",
             },
@@ -263,11 +268,6 @@ Object {
           Object {
             "exists": Object {
               "field": "system.memory.total",
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "prod",
             },
           },
         ],
@@ -351,12 +351,12 @@ Object {
           },
           Object {
             "term": Object {
-              "agent.name": "java",
+              "service.environment": "prod",
             },
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "agent.name": "java",
             },
           },
         ],
@@ -430,12 +430,12 @@ Object {
           },
           Object {
             "term": Object {
-              "agent.name": "java",
+              "service.environment": "prod",
             },
           },
           Object {
             "term": Object {
-              "service.environment": "prod",
+              "agent.name": "java",
             },
           },
         ],
