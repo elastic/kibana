@@ -99,20 +99,20 @@ export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
+    const legacyAppLinks = application.availableLegacyApps.map(
+      app =>
+        [
+          app.id,
+          new NavLinkWrapper({
+            ...app,
+            legacy: true,
+            baseUrl: relativeToAbsolute(http.basePath.prepend(app.appUrl)),
+          }),
+        ] as [string, NavLinkWrapper]
+    );
+
     const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(
-      new Map(
-        application.availableApps.map(
-          app =>
-            [
-              app.id,
-              new NavLinkWrapper({
-                ...app,
-                // Either rootRoute or appUrl must be defined.
-                baseUrl: relativeToAbsolute(http.basePath.prepend((app.rootRoute || app.appUrl)!)),
-              }),
-            ] as [string, NavLinkWrapper]
-        )
-      )
+      new Map(legacyAppLinks)
     );
     const forceAppSwitcherNavigation$ = new BehaviorSubject(false);
 
