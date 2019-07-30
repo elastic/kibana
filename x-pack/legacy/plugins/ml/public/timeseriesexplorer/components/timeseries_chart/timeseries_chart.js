@@ -19,6 +19,8 @@ import _ from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 
+import chrome from 'ui/chrome';
+
 import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
@@ -64,6 +66,7 @@ const contextChartLineTopMargin = 3;
 const chartSpacing = 25;
 const swimlaneHeight = 30;
 const margin = { top: 20, right: 10, bottom: 15, left: 40 };
+const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 const ZOOM_INTERVAL_OPTIONS = [
   { duration: moment.duration(1, 'h'), label: '1h' },
@@ -89,7 +92,6 @@ function getSvgHeight() {
 
 const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Component {
   static propTypes = {
-    annotationsEnabled: PropTypes.bool,
     annotation: PropTypes.object,
     autoZoomDuration: PropTypes.number,
     contextAggregationInterval: PropTypes.object,
@@ -129,10 +131,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
   }
 
   componentDidMount() {
-    const {
-      annotationsEnabled,
-      svgWidth
-    } = this.props;
+    const { svgWidth } = this.props;
 
     this.vizWidth = svgWidth - margin.left - margin.right;
     const vizWidth = this.vizWidth;
@@ -163,7 +162,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     this.fieldFormat = undefined;
 
     // Annotations Brush
-    if (annotationsEnabled) {
+    if (mlAnnotationsEnabled) {
       this.annotateBrush = getAnnotationBrush.call(this);
     }
 
@@ -210,7 +209,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
     this.renderFocusChart();
 
-    if (this.props.annotationsEnabled && this.props.annotation === null) {
+    if (mlAnnotationsEnabled && this.props.annotation === null) {
       const chartElement = d3.select(this.rootNode);
       chartElement.select('g.mlAnnotationBrush').call(this.annotateBrush.extent([0, 0]));
     }
@@ -218,7 +217,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
   renderChart() {
     const {
-      annotationsEnabled,
       contextChartData,
       contextForecastData,
       detectorIndex,
@@ -320,7 +318,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       .attr('transform', 'translate(' + margin.left + ',' + (focusHeight + margin.top + chartSpacing) + ')');
 
     // Mask to hide annotations overflow
-    if (annotationsEnabled) {
+    if (mlAnnotationsEnabled) {
       const annotationsMask = svg
         .append('defs')
         .append('mask')
@@ -352,8 +350,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       return;
     }
 
-    const setContextBrushExtent = this.setContextBrushExtent.bind(this);
-
     // Make appropriate selection in the context chart to trigger loading of the focus chart.
     let focusLoadFrom;
     let focusLoadTo;
@@ -381,7 +377,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     focusLoadTo = Math.min(focusLoadTo, contextXMax);
 
     if ((focusLoadFrom !== contextXMin) || (focusLoadTo !== contextXMax)) {
-      setContextBrushExtent(new Date(focusLoadFrom), new Date(focusLoadTo), true);
+      this.setContextBrushExtent(new Date(focusLoadFrom), new Date(focusLoadTo), true);
     } else {
       // Don't set the brush if the selection is the full context chart domain.
       this.setBrushVisibility(false);
@@ -395,10 +391,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     // Split out creation of the focus chart from the rendering,
     // as we want to re-render the paths and points when the zoom area changes.
 
-    const {
-      annotationsEnabled,
-      contextForecastData
-    } = this.props;
+    const { contextForecastData } = this.props;
 
     // Add a group at the top to display info on the chart aggregation interval
     // and links to set the brush span to 1h, 1d, 1w etc.
@@ -413,7 +406,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     this.createZoomInfoElements(zoomGroup, fcsWidth);
 
     // Create the elements for annotations
-    if (annotationsEnabled) {
+    if (mlAnnotationsEnabled) {
       const annotateBrush = this.annotateBrush.bind(this);
 
       let brushX = 0;
@@ -505,7 +498,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
   renderFocusChart() {
     const {
-      annotationsEnabled,
       focusAggregationInterval,
       focusAnnotationData,
       focusChartData,
@@ -607,7 +599,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
       // if annotations are present, we extend yMax to avoid overlap
       // between annotation labels, chart lines and anomalies.
-      if (annotationsEnabled && focusAnnotationData && focusAnnotationData.length > 0) {
+      if (mlAnnotationsEnabled && focusAnnotationData && focusAnnotationData.length > 0) {
         const levels = getAnnotationLevels(focusAnnotationData);
         const maxLevel = d3.max(Object.keys(levels).map(key => levels[key]));
         // TODO needs revisiting to be a more robust normalization
@@ -643,7 +635,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
         .classed('hidden', !showModelBounds);
     }
 
-    if (annotationsEnabled) {
+    if (mlAnnotationsEnabled) {
       renderAnnotations(
         focusChart,
         focusAnnotationData,
@@ -853,12 +845,9 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
     const data = contextChartData;
 
-    const calculateContextXAxisDomain = this.calculateContextXAxisDomain.bind(this);
-    const drawContextBrush = this.drawContextBrush.bind(this);
-    const drawSwimlane = this.drawSwimlane.bind(this);
 
     this.contextXScale = d3.time.scale().range([0, cxtWidth])
-      .domain(calculateContextXAxisDomain());
+      .domain(this.calculateContextXAxisDomain());
 
     const combinedData = contextForecastData === undefined ? data : data.concat(contextForecastData);
     const valuesRange = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
@@ -969,7 +958,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       .attr('class', 'swimlane')
       .attr('transform', 'translate(0,' + cxtChartHeight + ')');
 
-    drawSwimlane(swimlane, cxtWidth, swlHeight);
+    this.drawSwimlane(swimlane, cxtWidth, swlHeight);
 
     // Draw a mask over the sections of the context chart and swimlane
     // which fall outside of the zoom brush selection area.
@@ -988,17 +977,16 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
     filterAxisLabels(cxtGroup.selectAll('.x.context-chart-axis'), cxtWidth);
 
-    drawContextBrush(cxtGroup);
+    this.drawContextBrush(cxtGroup);
   }
 
-  drawContextBrush(contextGroup) {
+  drawContextBrush = (contextGroup) => {
     const {
       contextChartSelected
     } = this.props;
 
     const brush = this.brush;
     const contextXScale = this.contextXScale;
-    const setBrushVisibility = this.setBrushVisibility.bind(this);
     const mask = this.mask;
 
     // Create the brush for zooming in to the focus area of interest.
@@ -1023,6 +1011,8 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       .attr('x', 0)
       .attr('width', 10);
 
+    const handleBrushExtent = brush.extent();
+
     const topBorder = contextGroup.append('rect')
       .attr('class', 'top-border')
       .attr('y', -2)
@@ -1034,16 +1024,16 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       .attr('width', 10)
       .attr('height', 90)
       .attr('class', 'brush-handle')
+      .attr('x', contextXScale(handleBrushExtent[0]) - 10)
       .html('<div class="brush-handle-inner brush-handle-inner-left"><i class="fa fa-caret-left"></i></div>');
     const rightHandle = contextGroup.append('foreignObject')
       .attr('width', 10)
       .attr('height', 90)
       .attr('class', 'brush-handle')
+      .attr('x', contextXScale(handleBrushExtent[1]) + 0)
       .html('<div class="brush-handle-inner brush-handle-inner-right"><i class="fa fa-caret-right"></i></div>');
 
-    setBrushVisibility(!brush.empty());
-
-    function showBrush(show) {
+    const showBrush = (show) => {
       if (show === true) {
         const brushExtent = brush.extent();
         mask.reveal(brushExtent);
@@ -1054,8 +1044,10 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
         topBorder.attr('width', contextXScale(brushExtent[1]) - contextXScale(brushExtent[0]) - 2);
       }
 
-      setBrushVisibility(show);
-    }
+      this.setBrushVisibility(show);
+    };
+
+    showBrush(!brush.empty());
 
     function brushing() {
       const isEmpty = brush.empty();
@@ -1087,7 +1079,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     }
   }
 
-  setBrushVisibility(show) {
+  setBrushVisibility = (show) => {
     const mask = this.mask;
 
     if (mask !== undefined) {
@@ -1107,13 +1099,11 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     }
   }
 
-  drawSwimlane(swlGroup, swlWidth, swlHeight) {
+  drawSwimlane = (swlGroup, swlWidth, swlHeight) => {
     const {
       contextAggregationInterval,
       swimlaneData
     } = this.props;
-
-    const calculateContextXAxisDomain = this.calculateContextXAxisDomain.bind(this);
 
     const data = swimlaneData;
 
@@ -1126,7 +1116,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     // x-axis min to the start of the aggregation interval.
     // Need to use the min(earliest) and max(earliest) of the context chart
     // aggregation to align the axes of the chart and swimlane elements.
-    const xAxisDomain = calculateContextXAxisDomain();
+    const xAxisDomain = this.calculateContextXAxisDomain();
     const x = d3.time.scale().range([0, swlWidth])
       .domain(xAxisDomain);
 
@@ -1182,7 +1172,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
   }
 
-  calculateContextXAxisDomain() {
+  calculateContextXAxisDomain = () => {
     const {
       contextAggregationInterval,
       swimlaneData,
@@ -1211,9 +1201,19 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
   // Sets the extent of the brush on the context chart to the
   // supplied from and to Date objects.
-  setContextBrushExtent(from, to, fireEvent) {
+  setContextBrushExtent = (from, to, fireEvent) => {
     const brush = this.brush;
-    brush.extent([from, to]);
+    const brushExtent = brush.extent();
+
+    const newExtent = [from, to];
+    if (
+      newExtent[0].getTime() === brushExtent[0].getTime() &&
+      newExtent[1].getTime() === brushExtent[1].getTime()
+    ) {
+      fireEvent = false;
+    }
+
+    brush.extent(newExtent);
     brush(d3.select('.brush'));
     if (fireEvent) {
       brush.event(d3.select('.brush'));
@@ -1225,8 +1225,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       timefilter,
       zoomTo
     } = this.props;
-
-    const setContextBrushExtent = this.setContextBrushExtent.bind(this);
 
     const bounds = timefilter.getActiveBounds();
     const minBoundsMs = bounds.min.valueOf();
@@ -1242,12 +1240,11 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       to = Math.min(minBoundsMs + millis, maxBoundsMs);
     }
 
-    setContextBrushExtent(new Date(from), new Date(to), true);
+    this.setContextBrushExtent(new Date(from), new Date(to), true);
   }
 
   showFocusChartTooltip(marker, circle) {
     const {
-      annotationsEnabled,
       modelPlotEnabled,
       intl
     } = this.props;
@@ -1388,7 +1385,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       });
     }
 
-    if (annotationsEnabled && _.has(marker, 'annotation')) {
+    if (mlAnnotationsEnabled && _.has(marker, 'annotation')) {
       contents = mlEscape(marker.annotation);
       contents += `<br />${moment(marker.timestamp).format('MMMM Do YYYY, HH:mm')}`;
 

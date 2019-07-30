@@ -47,10 +47,6 @@ export function AddSettingsFlyout({
   onSubmit,
   selectedConfig
 }: Props) {
-  if (!isOpen) {
-    return null;
-  }
-
   const [environment, setEnvironment] = useState<string | undefined>(
     selectedConfig
       ? selectedConfig.service.environment || ENVIRONMENT_NOT_DEFINED
@@ -88,6 +84,11 @@ export function AddSettingsFlyout({
   const hasCorrectDecimals = Number.isInteger(sampleRateFloat * 1000);
   const isSampleRateValid =
     sampleRateFloat >= 0 && sampleRateFloat <= 1 && hasCorrectDecimals;
+
+  if (!isOpen) {
+    return null;
+  }
+
   return (
     <EuiPortal>
       <EuiFlyout size="s" onClose={onClose} ownFocus={true}>
