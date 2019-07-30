@@ -26,7 +26,7 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
           <PageRoute
             {...props}
             component={Hosts}
-            title={i18n.translate('xpack.siem.pages.Hosts.HostsTitle', {
+            title={i18n.translate('xpack.siem.pages.hosts.hostsTitle', {
               defaultMessage: 'Hosts',
             })}
           />

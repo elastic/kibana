@@ -27,7 +27,7 @@ export const NetworkContainer = pure<NetworkComponentProps>(({ match }) => (
           <PageRoute
             {...props}
             component={Network}
-            title={i18n.translate('xpack.siem.pages.Network.NetworkTitle', {
+            title={i18n.translate('xpack.siem.pages.network.networkTitle', {
               defaultMessage: 'Network',
             })}
           />
