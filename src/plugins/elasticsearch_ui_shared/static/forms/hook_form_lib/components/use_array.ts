@@ -24,15 +24,15 @@ interface Props {
   path: string;
   form: Form<any>;
   children: (args: {
-    rows: Row[];
-    addRow: () => void;
-    removeRow: (id: number) => void;
+    items: ArrayItem[];
+    addItem: () => void;
+    removeItem: (id: number) => void;
   }) => JSX.Element;
 }
 
-interface Row {
+export interface ArrayItem {
   id: number;
-  rowPath: string;
+  path: string;
   isNew: boolean;
 }
 
@@ -40,51 +40,47 @@ export const UseArray = ({ path, form, children }: Props) => {
   const defaultValues = form.__getFieldDefaultValue(path) as any[];
   const uniqueId = useRef(0);
 
-  const getInitialRowsFromValues = (values: any[]): Row[] =>
+  const getInitialRowsFromValues = (values: any[]): ArrayItem[] =>
     values.map((_, index) => ({
       id: uniqueId.current++,
-      rowPath: `${path}.${index}`,
+      path: `${path}.${index}`,
       isNew: false,
     }));
 
-  const getNewRowAtIndex = (index: number): Row => ({
+  const getNewItemAtIndex = (index: number): ArrayItem => ({
     id: uniqueId.current++,
-    rowPath: `${path}.${index}`,
+    path: `${path}.${index}`,
     isNew: true,
   });
 
   const initialState = defaultValues
     ? getInitialRowsFromValues(defaultValues)
-    : [getNewRowAtIndex(0)];
+    : [getNewItemAtIndex(0)];
 
-  const [rows, setRows] = useState<Row[]>(initialState);
+  const [items, setItems] = useState<ArrayItem[]>(initialState);
 
-  const updatePrefixes = (_rows: Row[]) =>
+  const updatePaths = (_rows: ArrayItem[]) =>
     _rows.map(
       (row, index) =>
         ({
-          id: row.id,
-          rowPath: `${path}.${index}`,
-        } as Row)
+          ...row,
+          path: `${path}.${index}`,
+        } as ArrayItem)
     );
 
-  const addRow = () => {
-    setRows(previous => {
-      const rowIndex = previous.length;
-      return [...previous, getNewRowAtIndex(rowIndex)];
+  const addItem = () => {
+    setItems(previousItems => {
+      const itemIndex = previousItems.length;
+      return [...previousItems, getNewItemAtIndex(itemIndex)];
     });
   };
 
-  const removeRow = (id: number) => {
-    const rowIndexToDelete = rows.length - 1;
-
-    setRows(previousRows => {
-      const updatedRows = previousRows.filter(row => row.id !== id);
-      return updatePrefixes(updatedRows);
+  const removeItem = (id: number) => {
+    setItems(previousItems => {
+      const updatedItems = previousItems.filter(item => item.id !== id);
+      return updatePaths(updatedItems);
     });
-
-    form.__removeFieldsStartingWith(`${path}.${rowIndexToDelete}`);
   };
 
-  return children({ rows, addRow, removeRow });
+  return children({ items, addItem, removeItem });
 };
