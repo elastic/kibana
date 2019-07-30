@@ -22,15 +22,9 @@ export interface SecurityOptions {
   enableGitCertCheck: boolean;
 }
 
-export interface DiskWatermarkOptions {
-  lowMb: number;
-  highMb: number;
-  floodStageMb: number;
-}
-
 export interface DiskOptions {
   thresholdEnabled: boolean;
-  watermark: DiskWatermarkOptions;
+  watermarkLowMb: number;
 }
 
 export class ServerOptions {

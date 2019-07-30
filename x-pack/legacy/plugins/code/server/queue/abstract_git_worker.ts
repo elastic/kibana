@@ -11,7 +11,7 @@ import {
   WorkerReservedProgress,
   WorkerResult,
 } from '../../model';
-import { DiskWatermarkLevel, DiskWatermarkService } from '../disk_watermark';
+import { DiskWatermarkService } from '../disk_watermark';
 import { GitOperations } from '../git_operations';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -36,15 +36,15 @@ export abstract class AbstractGitWorker extends AbstractWorker {
   }
 
   public async executeJob(_: Job): Promise<WorkerResult> {
-    if (this.serverOptions.disk.thresholdEnabled) {
+    const { thresholdEnabled, watermarkLowMb } = this.serverOptions.disk;
+    if (thresholdEnabled) {
       const watermarkService = new DiskWatermarkService(
-        this.serverOptions.disk.watermark,
+        watermarkLowMb,
         this.serverOptions.repoPath
       );
-      const diskWatermarkLevel = await watermarkService.detect();
-
-      if (diskWatermarkLevel !== DiskWatermarkLevel.NORMAL) {
-        const msg = `Disk watermark level ${diskWatermarkLevel}.`;
+      const isLowWatermark = await watermarkService.isLowWatermark();
+      if (isLowWatermark) {
+        const msg = `Disk watermark level lower than ${watermarkLowMb} MB.`;
         this.log.error(msg);
         throw new Error(msg);
       }
