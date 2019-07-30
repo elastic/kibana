@@ -38,44 +38,25 @@ export function teardown() {
   delete (window as any)[MonacoEnvironment];
 }
 
-const loadLanguage = (lang: Language, workerSrc: string) => {
+const loadLanguage = (lang: Language, workerSrc: string, completionItemProviderFactory: any) => {
+  registerWorker(lang, workerSrc);
+
   disposables.push(monaco.languages.setMonarchTokensProvider(lang.id, lang.def));
   disposables.push(monaco.languages.setLanguageConfiguration(lang.id, lang.conf));
-  registerWorker(lang, workerSrc);
+  disposables.push(
+    monaco.languages.registerCompletionItemProvider(lang.id, completionItemProviderFactory(worker))
+  );
 };
 
-export function registerLanguage(lang: Language, workerSrc: string) {
+export function registerLanguage(
+  lang: Language,
+  workerSrc: string,
+  completionItemProviderFactory: (worker: any) => monaco.languages.CompletionItemProvider
+) {
   monaco.languages.register(lang);
 
-  disposables.push(
-    monaco.languages.registerCompletionItemProvider(lang.id, {
-      async provideCompletionItems(
-        model: monaco.editor.ITextModel,
-        position: monaco.Position,
-        context: monaco.languages.CompletionContext,
-        token: any
-      ): Promise<monaco.languages.CompletionList> {
-        // const workerProxy = await worker.getProxy();
-        return {
-          incomplete: false,
-          suggestions: [
-            {
-              insertText: 'abc',
-              kind: monaco.languages.CompletionItemKind.Value,
-              label: 'here it is!',
-              range: { startColumn: 1, endColumn: 1, endLineNumber: 1, startLineNumber: 1 },
-            },
-          ],
-        };
-      },
-      resolveCompletionItem(model, position, item, token) {
-        return item;
-      },
-    })
-  );
-
   monaco.languages.onLanguage(lang.id, () => {
-    loadLanguage(lang, workerSrc);
+    loadLanguage(lang, workerSrc, completionItemProviderFactory);
   });
 }
 
@@ -96,8 +77,4 @@ export function registerWorker(lang: Language, src: string) {
     const blob = new Blob([finalBlob], { type: 'application/javascript' });
     return new Worker(window.URL.createObjectURL(blob));
   };
-
-  (async function() {
-    await worker.getProxy();
-  })();
 }

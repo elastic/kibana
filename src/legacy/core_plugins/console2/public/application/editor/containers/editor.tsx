@@ -30,11 +30,12 @@ interface Props {
   themeMode: ThemeMode;
   language: Language;
   workerSrc: string;
+  completionItemProviderFactory: (worker: any) => monaco.languages.CompletionItemProvider;
   value?: string;
 }
 
 export function Editor(props: Props) {
-  const { themeMode, language, value, options, workerSrc } = props;
+  const { themeMode, language, value, options, workerSrc, completionItemProviderFactory } = props;
   const ref = useRef<HTMLDivElement>(null);
   const [, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
 
@@ -44,7 +45,7 @@ export function Editor(props: Props) {
 
   useEffect(() => {
     editor.setup();
-    editor.registerLanguage(language, workerSrc);
+    editor.registerLanguage(language, workerSrc, completionItemProviderFactory);
 
     setEditor(
       monaco.editor.create(ref.current!, {

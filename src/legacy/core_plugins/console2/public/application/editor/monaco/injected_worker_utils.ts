@@ -18,14 +18,10 @@
  */
 
 // @ts-ignore
-import txt1 from '!!raw-loader!monaco-editor/min/vs/base/worker/workerMain';
-// @ts-ignore
-import txt2 from '!!raw-loader!monaco-editor/min/vs/loader';
+import utils from '!!raw-loader!./worker_utils/index.js';
 
 export const injectJS = {
   code: `
-  ${txt1}
- 
-  ${txt2} 
+    ${utils}
   `,
 };

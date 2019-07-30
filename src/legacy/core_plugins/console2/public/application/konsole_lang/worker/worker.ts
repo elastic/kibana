@@ -17,10 +17,22 @@
  * under the License.
  */
 
-function MyWorker() {}
-// MyWorker.prototype.sayHello = () => console.log('hello');
+/* Only import types here */
+/* eslint-disable */
+class KonsoleWorker {
+  doComplete() {
+    return [
+      {
+        label: 'here it is!',
+        insertText: 'abc',
+        documentation: 'This is the thing you have been looking for!',
+      },
+    ];
+  }
+}
 
 self.onmessage = (a: any) => {
-  // console.log(self);
-  // self.postMessage({ success: true });
+  (self as any).worker.initialize(() => {
+    return new KonsoleWorker();
+  });
 };

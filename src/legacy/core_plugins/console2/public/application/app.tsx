@@ -18,10 +18,38 @@
  */
 
 import React from 'react';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { Editor } from './editor';
 import { useAppContext } from './context';
-import { konsole } from './konsole_lang';
+import * as konsoleLang from './konsole_lang';
+
+const completionItemProvider = (worker: any): monaco.languages.CompletionItemProvider => ({
+  async provideCompletionItems(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    context: monaco.languages.CompletionContext,
+    token: any
+  ): Promise<monaco.languages.CompletionList> {
+    const workerProxy = await worker.getProxy();
+    const results = await workerProxy.doComplete();
+    return {
+      incomplete: false,
+      suggestions: results.map((result: any) => {
+        return {
+          insertText: result.insertText,
+          kind: monaco.languages.CompletionItemKind.Value,
+          label: result.label,
+          range: { startColumn: 1, startLineNumber: 1, endColumn: 1, endLineNumber: 1 },
+          documentation: result.documentation,
+        };
+      }),
+    };
+  },
+  resolveCompletionItem(model, position, item, token) {
+    return item;
+  },
+});
 
 export const App = () => {
   const [ctx] = useAppContext();
@@ -30,8 +58,10 @@ export const App = () => {
   return (
     <Editor
       value={`POST /_rollup/job/t/_start`}
-      language={konsole}
+      language={konsoleLang.konsole}
       themeMode={themeMode}
+      workerSrc={konsoleLang.worker.src}
+      completionItemProviderFactory={completionItemProvider}
       options={{
         hover: { enabled: true },
         tabCompletion: true,
