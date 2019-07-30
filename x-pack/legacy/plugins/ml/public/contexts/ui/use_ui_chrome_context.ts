@@ -4,5 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { NavigationMenuContext } from './navigation_menu_context';
-export { useNavigationMenuContext } from './use_navigation_menu_context';
+import { useContext } from 'react';
+
+import { UiContext } from './ui_context';
+
+export const useUiChromeContext = () => {
+  return useContext(UiContext).chrome;
+};

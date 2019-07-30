@@ -6,8 +6,8 @@
 
 import { useContext } from 'react';
 
-import { NavigationMenuContext } from './navigation_menu_context';
+import { UiContext } from './ui_context';
 
-export const useNavigationMenuContext = () => {
-  return useContext(NavigationMenuContext);
+export const useUiContext = () => {
+  return useContext(UiContext);
 };

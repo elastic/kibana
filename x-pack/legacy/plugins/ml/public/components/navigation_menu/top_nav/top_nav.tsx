@@ -9,7 +9,7 @@ import { EuiSuperDatePicker } from '@elastic/eui';
 import { TimeHistory, TimeRange } from 'ui/timefilter/time_history';
 
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
-import { useNavigationMenuContext } from '../../../contexts/navigation_menu/use_navigation_menu_context';
+import { useUiContext } from '../../../contexts/ui';
 
 interface Duration {
   start: string;
@@ -28,9 +28,8 @@ function getRecentlyUsedRangesFactory(timeHistory: TimeHistory) {
 }
 
 export const TopNav: FC = () => {
-  const navigationMenuContext = useNavigationMenuContext();
-  const timefilter = navigationMenuContext.timefilter;
-  const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(navigationMenuContext.timeHistory);
+  const { timefilter, timeHistory } = useUiContext();
+  const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(timeHistory);
 
   const [refreshInterval, setRefreshInterval] = useState(timefilter.getRefreshInterval());
   const [time, setTime] = useState(timefilter.getTime());
@@ -42,7 +41,7 @@ export const TopNav: FC = () => {
     timefilter.isTimeRangeSelectorEnabled
   );
 
-  const dateFormat = navigationMenuContext.chrome.getUiSettingsClient().get('dateFormat');
+  const dateFormat = ui.chrome.getUiSettingsClient().get('dateFormat');
 
   useEffect(() => {
     timefilter.on('refreshIntervalUpdate', timefilterUpdateListener);

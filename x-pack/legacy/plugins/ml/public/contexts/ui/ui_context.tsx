@@ -10,7 +10,7 @@ import chrome from 'ui/chrome';
 import { timefilter } from 'ui/timefilter';
 import { timeHistory } from 'ui/timefilter/time_history';
 
-export const NavigationMenuContext = React.createContext({
+export const UiContext = React.createContext({
   chrome,
   timefilter,
   timeHistory,
