@@ -19,13 +19,11 @@
 
   .tree,
   .tree ul {
-    margin:0 0 0 1em; /* indentation */
+    margin:0;
     padding:0;
     list-style:none;
     position:relative;
   }
-
-  .tree ul {margin-left:.5em}
 
   .tree:before,
   .tree ul:before {

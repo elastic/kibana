@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiButton, EuiAccordion } from '@elastic/eui';
+import { EuiButton, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 
 import {
@@ -53,6 +53,7 @@ export const PropertiesManager = ({
           );
         })}
       </ul>
+      <EuiSpacer size="l" />
       <EuiButton color="primary" onClick={addItem}>
         Add property
       </EuiButton>
@@ -60,25 +61,23 @@ export const PropertiesManager = ({
   );
 
   return (
-    <Fragment>
-      <UseArray path={path} form={form}>
-        {({ items, addItem, removeItem }) => {
-          if (depthLevel === 0) {
-            // At the root level we don't add the accordion
-            return renderPropertiesTree({ items, addItem, removeItem });
-          }
-          return (
-            <EuiAccordion
-              id={uuid()}
-              buttonContent={`${fieldName} properties`}
-              paddingSize="s"
-              initialIsOpen={true}
-            >
-              {renderPropertiesTree({ items, addItem, removeItem })}
-            </EuiAccordion>
-          );
-        }}
-      </UseArray>
-    </Fragment>
+    <UseArray path={path} form={form}>
+      {({ items, addItem, removeItem }) => {
+        if (depthLevel === 0) {
+          // At the root level we don't add the accordion
+          return renderPropertiesTree({ items, addItem, removeItem });
+        }
+        return (
+          <EuiAccordion
+            id={uuid()}
+            buttonContent={`${fieldName} properties`}
+            paddingSize="s"
+            initialIsOpen={true}
+          >
+            {renderPropertiesTree({ items, addItem, removeItem })}
+          </EuiAccordion>
+        );
+      }}
+    </UseArray>
   );
 };
