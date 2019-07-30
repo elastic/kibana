@@ -18,7 +18,7 @@ export function cloneJob(state = initialState, action) {
   }
 
   if (type === CLONE_JOB_CLEAR) {
-    return { job: undefined };
+    return { ...initialState };
   }
 
   return state;
