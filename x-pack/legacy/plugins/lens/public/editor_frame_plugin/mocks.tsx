@@ -53,7 +53,7 @@ export function createMockDatasource(): DatasourceMock {
     renderDataPanel: jest.fn(),
     toExpression: jest.fn((_frame, _state) => null),
     insertLayer: jest.fn((_state, _newLayerId) => {}),
-    removeLayers: jest.fn((_state, _layerIds) => {}),
+    removeLayer: jest.fn((_state, _layerId) => {}),
     getLayers: jest.fn(_state => []),
     getMetaData: jest.fn(_state => ({ filterableIndexPatterns: [] })),
 

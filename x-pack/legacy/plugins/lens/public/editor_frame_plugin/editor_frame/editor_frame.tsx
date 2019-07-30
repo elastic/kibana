@@ -94,29 +94,27 @@ export function EditorFrame(props: EditorFrameProps) {
     addNewLayer() {
       const newLayerId = generateId();
 
-      const newState = props.datasourceMap[state.activeDatasourceId!].insertLayer(
-        state.datasourceStates[state.activeDatasourceId!].state,
-        newLayerId
-      );
-
       dispatch({
-        type: 'UPDATE_DATASOURCE_STATE',
+        type: 'INSERT_LAYER',
         datasourceId: state.activeDatasourceId!,
-        newState,
+        layerId: newLayerId,
+        reducer: props.datasourceMap[state.activeDatasourceId!].insertLayer,
       });
 
       return newLayerId;
     },
     removeLayers: (layerIds: string[]) => {
-      const newState = props.datasourceMap[state.activeDatasourceId!].removeLayers(
-        state.datasourceStates[state.activeDatasourceId!].state,
-        layerIds
-      );
-
-      dispatch({
-        type: 'UPDATE_DATASOURCE_STATE',
-        datasourceId: state.activeDatasourceId!,
-        newState,
+      layerIds.forEach(layerId => {
+        const layerDatasourceId = Object.entries(props.datasourceMap).find(
+          ([datasourceId, datasource]) =>
+            datasource.getLayers(state.datasourceStates[datasourceId].state)
+        )![0];
+        dispatch({
+          type: 'REMOVE_LAYER',
+          layerId,
+          datasourceId: layerDatasourceId,
+          reducer: props.datasourceMap[layerDatasourceId].removeLayer,
+        });
       });
     },
   };

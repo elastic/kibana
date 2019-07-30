@@ -267,11 +267,9 @@ export function getIndexPatternDatasource({
       };
     },
 
-    removeLayers(state: IndexPatternPrivateState, layerIds: string[]) {
+    removeLayer(state: IndexPatternPrivateState, layerId: string) {
       const newLayers = { ...state.layers };
-      layerIds.forEach(layerId => {
-        delete newLayers[layerId];
-      });
+      delete newLayers[layerId];
 
       return {
         ...state,
@@ -311,11 +309,9 @@ export function getIndexPatternDatasource({
           return state.layers[layerId].columnOrder.map(colId => ({ columnId: colId }));
         },
         getOperationForColumnId: (columnId: string) => {
-          const layer = Object.values(state.layers).find(l =>
-            l.columnOrder.find(id => id === columnId)
-          );
+          const layer = state.layers[layerId];
 
-          if (layer) {
+          if (layer && layer.columns[columnId]) {
             return columnToOperation(layer.columns[columnId]);
           }
           return null;

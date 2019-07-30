@@ -62,7 +62,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getPersistableState: (state: T) => P;
 
   insertLayer: (state: T, newLayerId: string) => T;
-  removeLayers: (state: T, layerIds: string[]) => T;
+  removeLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
 
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
