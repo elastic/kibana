@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const DEFAULT_FILTER_BY_MAP_BOUNDS = false;
 export const DEFAULT_APPLY_GLOBAL_QUERY = false;
