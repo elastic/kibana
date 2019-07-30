@@ -22,7 +22,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import 'ui/render_directive';
+import 'ui/directives/render_directive';
 import '../views/table';
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 import StubbedLogstashIndexPattern from 'fixtures/stubbed_logstash_index_pattern';

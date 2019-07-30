@@ -18,7 +18,7 @@
  */
 
 import { isPlainObject } from 'lodash';
-import { uiModules } from '../modules';
+import { uiModules } from '../../modules';
 import { ApplyScopeBindingsProvider } from './apply_scope_bindings';
 
 /**
