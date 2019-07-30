@@ -21,6 +21,8 @@ export default function({ getService }: TestInvoker) {
     expectSpaceAwareRbacForbidden,
     expectNotSpaceAwareRbacForbidden,
     expectDoesntExistRbacForbidden,
+    expectHiddenTypeRbacForbidden,
+    expectHiddenTypeNotFound,
     getTest,
   } = getTestSuiteFactory(esArchiver, supertest);
 
@@ -69,6 +71,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: expectNotSpaceAwareRbacForbidden,
           },
+          hiddenType: {
+            statusCode: 403,
+            response: expectHiddenTypeRbacForbidden,
+          },
           doesntExist: {
             statusCode: 403,
             response: expectDoesntExistRbacForbidden,
@@ -87,6 +93,10 @@ export default function({ getService }: TestInvoker) {
           notSpaceAware: {
             statusCode: 200,
             response: createExpectNotSpaceAwareResults(scenario.spaceId),
+          },
+          hiddenType: {
+            statusCode: 404,
+            response: expectHiddenTypeNotFound,
           },
           doesntExist: {
             statusCode: 404,
@@ -107,6 +117,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: expectNotSpaceAwareRbacForbidden,
           },
+          hiddenType: {
+            statusCode: 403,
+            response: expectHiddenTypeRbacForbidden,
+          },
           doesntExist: {
             statusCode: 403,
             response: expectDoesntExistRbacForbidden,
@@ -125,6 +139,10 @@ export default function({ getService }: TestInvoker) {
           notSpaceAware: {
             statusCode: 200,
             response: createExpectNotSpaceAwareResults(scenario.spaceId),
+          },
+          hiddenType: {
+            statusCode: 403,
+            response: expectHiddenTypeRbacForbidden,
           },
           doesntExist: {
             statusCode: 404,
@@ -145,6 +163,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectNotSpaceAwareResults(scenario.spaceId),
           },
+          hiddenType: {
+            statusCode: 403,
+            response: expectHiddenTypeRbacForbidden,
+          },
           doesntExist: {
             statusCode: 404,
             response: createExpectDoesntExistNotFound(scenario.spaceId),
@@ -163,6 +185,10 @@ export default function({ getService }: TestInvoker) {
           notSpaceAware: {
             statusCode: 200,
             response: createExpectNotSpaceAwareResults(scenario.spaceId),
+          },
+          hiddenType: {
+            statusCode: 403,
+            response: expectHiddenTypeRbacForbidden,
           },
           doesntExist: {
             statusCode: 404,
@@ -183,6 +209,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectNotSpaceAwareResults(scenario.spaceId),
           },
+          hiddenType: {
+            statusCode: 403,
+            response: expectHiddenTypeRbacForbidden,
+          },
           doesntExist: {
             statusCode: 404,
             response: createExpectDoesntExistNotFound(scenario.spaceId),
@@ -201,6 +231,10 @@ export default function({ getService }: TestInvoker) {
           notSpaceAware: {
             statusCode: 200,
             response: createExpectNotSpaceAwareResults(scenario.spaceId),
+          },
+          hiddenType: {
+            statusCode: 403,
+            response: expectHiddenTypeRbacForbidden,
           },
           doesntExist: {
             statusCode: 404,
@@ -221,6 +255,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectNotSpaceAwareResults(scenario.spaceId),
           },
+          hiddenType: {
+            statusCode: 403,
+            response: expectHiddenTypeRbacForbidden,
+          },
           doesntExist: {
             statusCode: 404,
             response: createExpectDoesntExistNotFound(scenario.spaceId),
@@ -239,6 +277,10 @@ export default function({ getService }: TestInvoker) {
           notSpaceAware: {
             statusCode: 403,
             response: expectNotSpaceAwareRbacForbidden,
+          },
+          hiddenType: {
+            statusCode: 403,
+            response: expectHiddenTypeRbacForbidden,
           },
           doesntExist: {
             statusCode: 403,

@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResponseToolkit } from 'hapi';
+import { RequestFacade, ResponseToolkitFacade } from '../..';
 import { CodeServerRouter } from '../security';
 
-export function setupRoute(server: CodeServerRouter) {
-  server.route({
+export function setupRoute(router: CodeServerRouter) {
+  router.route({
     method: 'get',
     path: '/api/code/setup',
-    handler(req, h: ResponseToolkit) {
+    handler(req: RequestFacade, h: ResponseToolkitFacade) {
       return h.response('').code(200);
     },
   });
