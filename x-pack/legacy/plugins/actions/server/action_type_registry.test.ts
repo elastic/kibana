@@ -106,8 +106,8 @@ describe('register()', () => {
     expect(getRetry(0, new Error())).toEqual(false);
     expect(getRetry(0, new ExecutorError('my message', {}, true))).toEqual(true);
     expect(getRetry(0, new ExecutorError('my message', {}, false))).toEqual(false);
-    expect(getRetry(0, new ExecutorError('my message', {}, null))).toEqual(true);
-    expect(getRetry(0, new ExecutorError('my message', {}, undefined))).toEqual(true);
+    expect(getRetry(0, new ExecutorError('my message', {}, null))).toEqual(false);
+    expect(getRetry(0, new ExecutorError('my message', {}, undefined))).toEqual(false);
     expect(getRetry(0, new ExecutorError('my message', {}, retryTime))).toEqual(retryTime);
   });
 });
