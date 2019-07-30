@@ -5,15 +5,12 @@
  */
 
 /**
- * Used when cloning a job from it's deserialised config.
+ * Re-associate type information with the metric type (e.g., 'date', or 'numeric').
  *
  * When a job is being cloned the metrics returned from the server do not have
- * type information (e.g., numeric, date etc) associated with them. When, for instance,
- * querying the validity of an index we retrieve type information for fields that we use to
- * display specific UI. That can be used to build up a mapping from keys to type fields
+ * type information (e.g., numeric, date etc) associated with them.
  *
- * This function reconnects type information with the metric type (e.g., 'date', or 'numeric').
- * @param object { metrics: deserialised job metric object, typeMaps: { fields: string[], type: string } }
+ * @param object { metrics: deserialized job metric object, typeMaps: { fields: string[], type: string } }
  * @returns { { : string, type: string, types: string[] }[] }
  */
 export function retypeMetrics({ metrics, typeMaps }) {
