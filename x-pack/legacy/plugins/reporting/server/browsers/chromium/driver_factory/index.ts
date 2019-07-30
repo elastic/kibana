@@ -31,7 +31,7 @@ const compactWhitespace = (str: string) => {
 
 export class HeadlessChromiumDriverFactory {
   private binaryPath: binaryPath;
-  private logger: Logger;
+  private callerLogger: Logger;
   private browserConfig: IBrowserConfig;
   private queueTimeout: queueTimeout;
 
@@ -42,9 +42,9 @@ export class HeadlessChromiumDriverFactory {
     queueTimeout: queueTimeout
   ) {
     this.binaryPath = binaryPath;
-    this.logger = logger.clone(['chromium-driver-factory']);
     this.browserConfig = browserConfig;
     this.queueTimeout = queueTimeout;
+    this.callerLogger = logger;
   }
 
   type = 'chromium';
@@ -93,7 +93,7 @@ export class HeadlessChromiumDriverFactory {
       const chromiumArgs = args({
         userDataDir,
         viewport,
-        verboseLogging: this.logger.isVerbose,
+        verboseLogging: this.callerLogger.isVerbose,
         disableSandbox: this.browserConfig.disableSandbox,
         proxyConfig: this.browserConfig.proxy,
       });
@@ -126,6 +126,7 @@ export class HeadlessChromiumDriverFactory {
       }
 
       safeChildProcess(
+        this.callerLogger,
         {
           async kill() {
             await browser.close();
@@ -150,7 +151,7 @@ export class HeadlessChromiumDriverFactory {
 
       const driver$ = Rx.of(
         new HeadlessChromiumDriver(page, {
-          logger: this.logger,
+          logger: this.callerLogger,
           inspect: this.browserConfig.inspect,
         })
       );
@@ -226,14 +227,15 @@ export class HeadlessChromiumDriverFactory {
         exit$,
       });
 
+      const factoryLogger = this.callerLogger.clone(['chromium-driver-factory']);
       // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
       observer.add(() => {
-        this.logger.debug(`deleting chromium user data directory at [${userDataDir}]`);
+        factoryLogger.debug(`deleting chromium user data directory at [${userDataDir}]`);
         // the unsubscribe function isn't `async` so we're going to make our best effort at
         // deleting the userDataDir and if it fails log an error.
         rimraf(userDataDir, err => {
           if (err) {
-            return this.logger.error(
+            return factoryLogger.error(
               `error deleting user data directory at [${userDataDir}]: [${err}]`
             );
           }

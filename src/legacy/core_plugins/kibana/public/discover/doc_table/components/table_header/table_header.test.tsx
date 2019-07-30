@@ -23,16 +23,16 @@ import { TableHeader } from './table_header';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { SortOrder } from './helpers';
-import { IndexPatternEnhanced, StaticIndexPatternField } from 'ui/index_patterns/_index_pattern';
+import { IndexPattern, FieldType } from 'ui/index_patterns';
 
 function getMockIndexPattern() {
-  return {
+  return ({
     id: 'test',
     title: 'Test',
     timeFieldName: 'time',
     fields: [],
     isTimeNanosBased: () => false,
-    getFieldByName: name => {
+    getFieldByName: (name: string) => {
       if (name === 'test1') {
         return {
           name,
@@ -40,7 +40,7 @@ function getMockIndexPattern() {
           aggregatable: false,
           searchable: true,
           sortable: true,
-        } as StaticIndexPatternField;
+        } as FieldType;
       } else {
         return {
           name,
@@ -48,10 +48,10 @@ function getMockIndexPattern() {
           aggregatable: false,
           searchable: true,
           sortable: false,
-        } as StaticIndexPatternField;
+        } as FieldType;
       }
     },
-  } as IndexPatternEnhanced;
+  } as unknown) as IndexPattern;
 }
 
 function getMockProps(props = {}) {

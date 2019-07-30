@@ -132,6 +132,7 @@ test('throws an error when config is invalid', async () => {
   const result = await execute(executeParams);
   expect(result).toEqual({
     status: 'error',
+    retry: false,
     message: `The actionTypeConfig is invalid: [param1]: expected value of type [string] but got [undefined]`,
   });
 });
@@ -163,6 +164,7 @@ test('throws an error when params is invalid', async () => {
   const result = await execute(executeParams);
   expect(result).toEqual({
     status: 'error',
+    retry: false,
     message: `The actionParams is invalid: [param1]: expected value of type [string] but got [undefined]`,
   });
 });
