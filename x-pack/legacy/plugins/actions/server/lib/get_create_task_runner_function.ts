@@ -14,7 +14,7 @@ interface CreateTaskRunnerFunctionOptions {
   actionTypeRegistry: ActionTypeRegistryContract;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
   spaceIdToNamespace: (spaceId: string) => string;
-  getBasePath: (spaceId: string) => string;
+  getBasePath: (spaceId: string) => string | undefined;
 }
 
 interface TaskRunnerOptions {
