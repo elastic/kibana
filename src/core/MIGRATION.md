@@ -27,7 +27,7 @@
   * [How do I build my shim for New Platform services?](#how-do-i-build-my-shim-for-new-platform-services)
 * [How to](#how-to)
   * [Configure plugin](#configure-plugin)
-  * [Mock core services in tests](#mock-core-services-in-tests)
+  * [Mock new platform services in tests](#mock-new-platform-services-in-tests)
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
@@ -1115,20 +1115,23 @@ class MyPlugin {
   }
 ```
 
-### Mock core services in tests
-Core services already provide mocks to simplify testing and make sure plugins always rely on valid public contracts.
+### Mock new platform services in tests
+
+#### Writing mocks for your plugin
+Core services already provide mocks to simplify testing and make sure plugins always rely on valid public contracts:
 ```typescript
 // my_plugin/server/plugin.test.ts
-Import { configServiceMock } from 'src/core/server/mocks.ts'
+import { configServiceMock } from 'src/core/server/mocks';
 
 const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(config$);
 …
 const plugin = new MyPlugin({ configService }, …)
 ```
-However it's not mandatory, we strongly recommended to export your plugin mocks as well, in order for dependent plugins to use them in tests. Your plugin mocks should be exported from the root level of the plugin. Plugin mocks should consist of mocks for *public API only*: setup/start/stop contracts. Mocks aren't necessary for pure functions as other plugins can call original implementation in tests.
+
+Although it isn't mandatory, we strongly recommended you export your plugin mocks as well, in order for dependent plugins to use them in tests. Your plugin mocks should be exported from the root `/server` and `/public` directories in your plugin:
 ```typescript
-// my_plugin/server/mocks.ts
+// my_plugin/server/mocks.ts or my_plugin/public/mocks.ts
 const createSetupContractMock = () => {
   const startContract: jest.Mocked<MyPluginStartContract>= {
     isValid: jest.fn();
@@ -1143,3 +1146,26 @@ export const myPluginMocks = {
   createStart: ...
 }
 ```
+Plugin mocks should consist of mocks for *public APIs only*: setup/start/stop contracts. Mocks aren't necessary for pure functions as other plugins can call the original implementation in tests.
+
+#### Using mocks in your tests
+During the migration process, it is likely you are preparing your plugin by shimming in new platform-ready dependencies via the legacy `ui/new_platform` module:
+```typescript
+import { npSetup, npStart } from 'ui/new_platform';
+```
+
+If you are using this approach, the easiest way to mock core and new platform-ready plugins in your legacy tests is to mock the `ui/new_platform` module:
+```typescript
+jest.mock('ui/new_platform');
+```
+
+This will automatically mock the services in `ui/new_platform` thanks to the [helpers that have been added](https://github.com/streamich/kibana/blob/master/src/legacy/ui/public/new_platform/__mocks__/helpers.ts) to that module.
+
+If others are consuming your plugin's new platform contracts via the `ui/new_platform` module, you'll want to update the helpers as well to ensure your contracts are properly mocked.
+
+#### What about karma tests?
+While our plan is to only provide first-class mocks for jest tests, there are many legacy karma tests that cannot be quickly or easily converted to jest -- particularly those which are still relying on mocking Angular services via `ngMock`.
+
+For these tests, we are maintaining a separate set of mocks. Files with a `.karma_mock.{js|ts|tsx}` extension will be loaded _globally_ before karma tests are run.
+
+It is important to note that this behavior is different from `jest.mock('ui/new_platform')`, which only mocks tests on an individual basis. If you encounter any failures in karma tests as a result of new platform migration efforts, you may need to add a `.karma_mock.js` file for the affected services, or add to the existing karma mock we are maintaining in `ui/new_platform`.
