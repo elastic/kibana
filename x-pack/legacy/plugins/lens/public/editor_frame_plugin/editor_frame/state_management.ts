@@ -47,13 +47,7 @@ export type Action =
       newState: unknown;
     }
   | {
-      type: 'REMOVE_LAYER';
-      layerId: string;
-      datasourceId: string;
-      reducer: (state: unknown, layerId: string) => unknown;
-    }
-  | {
-      type: 'INSERT_LAYER';
+      type: 'UPDATE_LAYER';
       layerId: string;
       datasourceId: string;
       reducer: (state: unknown, layerId: string) => unknown;
@@ -109,7 +103,7 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
       return { ...state, persistedId: action.id };
     case 'UPDATE_TITLE':
       return { ...state, title: action.title };
-    case 'INSERT_LAYER':
+    case 'UPDATE_LAYER':
       return {
         ...state,
         datasourceStates: {
@@ -120,18 +114,6 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
               state.datasourceStates[action.datasourceId].state,
               action.layerId
             ),
-          },
-        },
-      };
-    case 'REMOVE_LAYER':
-      const layerDatasourceId = action.datasourceId;
-      return {
-        ...state,
-        datasourceStates: {
-          ...state.datasourceStates,
-          [layerDatasourceId]: {
-            ...state.datasourceStates[layerDatasourceId],
-            state: action.reducer(state.datasourceStates[layerDatasourceId].state, action.layerId),
           },
         },
       };

@@ -10,6 +10,7 @@ import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { ConfigPanelHeader } from './config_panel_header';
 import { Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
+import { EuiKeyPadMenuItemButton } from '@elastic/eui';
 
 describe('config_panel_header', () => {
   function generateVisualization(id: string): jest.Mocked<Visualization> {
@@ -97,36 +98,15 @@ describe('config_panel_header', () => {
       .simulate('click');
   }
 
-  function confirm(component: ReactWrapper) {
-    component
-      .find('[data-test-subj="confirmModalConfirmButton"]')
-      .first()
-      .simulate('click');
+  function getMenuItem(subType: string, component: ReactWrapper) {
+    showFlyout(component);
+    return component
+      .find(EuiKeyPadMenuItemButton)
+      .find(`[data-test-subj="lnsConfigPanelHeaderPopover_${subType}"]`)
+      .first();
   }
 
-  function chooseOption(component: ReactWrapper, option: number) {
-    component
-      .find(`[data-test-subj="lnsLayerOption-${option}"]`)
-      .last()
-      .simulate('click');
-  }
-
-  function deny(component: ReactWrapper) {
-    component
-      .find('[data-test-subj="confirmModalCancelButton"]')
-      .first()
-      .simulate('click');
-  }
-
-  function isModalVisible(component: ReactWrapper) {
-    return component.find('[data-test-subj="lnsConfirmDropLayer"]').length > 0;
-  }
-
-  function isChooseModalVisible(component: ReactWrapper) {
-    return component.find('[data-test-subj="lnsChooseOption"]').length > 0;
-  }
-
-  it('should not prompt for confirmation if there is a suggestion from the target visualization', () => {
+  it('should use suggested state if there is a suggestion from the target visualization', () => {
     const dispatch = jest.fn();
     const visualizations = mockVisualizations();
     const component = mount(
@@ -148,7 +128,7 @@ describe('config_panel_header', () => {
     });
   });
 
-  it('should not prompt for confirmation if there is no data in the layers', () => {
+  it('should use initial state if there is no suggestion from the target visualization', () => {
     const dispatch = jest.fn();
     const visualizations = mockVisualizations();
     visualizations.visB.getSuggestions.mockReturnValueOnce([]);
@@ -174,55 +154,49 @@ describe('config_panel_header', () => {
     });
   });
 
-  it('should prompt for confirmation if there is no suggestion from the target visualization', () => {
+  it('should indicate data loss if not all layers will be used', () => {
+    const dispatch = jest.fn();
+    const visualizations = mockVisualizations();
+    const frame = mockFrame(['a', 'b']);
+
+    const component = mount(
+      <ConfigPanelHeader
+        visualizationId="visA"
+        visualizationState={{}}
+        visualizationMap={visualizations}
+        dispatch={dispatch}
+        framePublicAPI={frame}
+      />
+    );
+
+    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toEqual('bolt');
+  });
+
+  it('should indicate data loss if no data will be used', () => {
     const dispatch = jest.fn();
     const visualizations = mockVisualizations();
     visualizations.visB.getSuggestions.mockReturnValueOnce([]);
+    const frame = mockFrame(['a']);
+
     const component = mount(
       <ConfigPanelHeader
         visualizationId="visA"
         visualizationState={{}}
         visualizationMap={visualizations}
         dispatch={dispatch}
-        framePublicAPI={mockFrame(['a'])}
+        framePublicAPI={frame}
       />
     );
 
-    switchTo('subvisB', component);
-
-    expect(dispatch).not.toHaveBeenCalled();
-
-    expect(isModalVisible(component)).toBeTruthy();
-    confirm(component);
-
-    expect(isModalVisible(component)).toBeFalsy();
-
-    expect(dispatch).toHaveBeenCalledWith({
-      initialState: 'visB initial state',
-      newVisualizationId: 'visB',
-      type: 'SWITCH_VISUALIZATION',
-    });
+    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toEqual('bolt');
   });
 
-  it('should prompt for confirmation if there is more than one layer', () => {
+  it('should not indicate data loss if there is no data', () => {
     const dispatch = jest.fn();
     const visualizations = mockVisualizations();
-    visualizations.visB.getSuggestions.mockReturnValue([
-      {
-        score: 1,
-        title: '',
-        state: `suggestion visb 1`,
-        datasourceSuggestionId: 0,
-        previewIcon: 'empty',
-      },
-      {
-        score: 1,
-        title: '',
-        state: `suggestion visb 2`,
-        datasourceSuggestionId: 1,
-        previewIcon: 'empty',
-      },
-    ]);
+    visualizations.visB.getSuggestions.mockReturnValueOnce([]);
+    const frame = mockFrame(['a']);
+    (frame.datasourceLayers.a.getTableSpec as jest.Mock).mockReturnValue([]);
 
     const component = mount(
       <ConfigPanelHeader
@@ -230,24 +204,36 @@ describe('config_panel_header', () => {
         visualizationState={{}}
         visualizationMap={visualizations}
         dispatch={dispatch}
-        framePublicAPI={mockFrame(['a', 'b'])}
+        framePublicAPI={frame}
       />
     );
 
-    switchTo('subvisB', component);
+    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toBeUndefined();
+  });
 
-    expect(dispatch).not.toHaveBeenCalled();
+  it('should not indicate data loss if visualization is not changed', () => {
+    const dispatch = jest.fn();
+    const removeLayers = jest.fn();
+    const frame = {
+      ...mockFrame(['a', 'b', 'c']),
+      removeLayers,
+    };
+    const visualizations = mockVisualizations();
+    const switchVisualizationType = jest.fn(() => 'therebedragons');
 
-    expect(isChooseModalVisible(component)).toBeTruthy();
-    chooseOption(component, 1);
+    visualizations.visC.switchVisualizationType = switchVisualizationType;
 
-    expect(isChooseModalVisible(component)).toBeFalsy();
+    const component = mount(
+      <ConfigPanelHeader
+        visualizationId="visC"
+        visualizationState={'therebegriffins'}
+        visualizationMap={visualizations}
+        dispatch={dispatch}
+        framePublicAPI={frame}
+      />
+    );
 
-    expect(dispatch).toHaveBeenCalledWith({
-      initialState: 'suggestion visb 2',
-      newVisualizationId: 'visB',
-      type: 'SWITCH_VISUALIZATION',
-    });
+    expect(getMenuItem('subvisC2', component).prop('betaBadgeIconType')).toBeUndefined();
   });
 
   it('should remove unused layers', () => {
@@ -267,14 +253,18 @@ describe('config_panel_header', () => {
     );
 
     switchTo('subvisB', component);
-    chooseOption(component, 0);
 
     expect(removeLayers).toHaveBeenCalledTimes(1);
     expect(removeLayers).toHaveBeenCalledWith(['b', 'c']);
   });
 
-  it('should not prompt for confirmation if the visualization is not changing', () => {
+  it('should not remove layers if the visualization is not changing', () => {
     const dispatch = jest.fn();
+    const removeLayers = jest.fn();
+    const frame = {
+      ...mockFrame(['a', 'b', 'c']),
+      removeLayers,
+    };
     const visualizations = mockVisualizations();
     const switchVisualizationType = jest.fn(() => 'therebedragons');
 
@@ -286,12 +276,12 @@ describe('config_panel_header', () => {
         visualizationState={'therebegriffins'}
         visualizationMap={visualizations}
         dispatch={dispatch}
-        framePublicAPI={mockFrame(['a', 'b'])}
+        framePublicAPI={frame}
       />
     );
 
     switchTo('subvisC2', component);
-    expect(isModalVisible(component)).toBeFalsy();
+    expect(removeLayers).not.toHaveBeenCalled();
     expect(switchVisualizationType).toHaveBeenCalledWith('subvisC2', 'therebegriffins');
     expect(dispatch).toHaveBeenCalledWith({
       type: 'UPDATE_VISUALIZATION_STATE',
@@ -325,54 +315,6 @@ describe('config_panel_header', () => {
       newVisualizationId: 'visB',
       type: 'SWITCH_VISUALIZATION',
     });
-  });
-
-  it('should not process the change, if cancelled', () => {
-    const dispatch = jest.fn();
-    const visualizations = mockVisualizations();
-    visualizations.visB.getSuggestions.mockReturnValueOnce([]);
-    const component = mount(
-      <ConfigPanelHeader
-        visualizationId="visA"
-        visualizationState={{}}
-        visualizationMap={visualizations}
-        dispatch={dispatch}
-        framePublicAPI={mockFrame(['a', 'b'])}
-      />
-    );
-
-    switchTo('subvisB', component);
-
-    expect(isModalVisible(component)).toBeTruthy();
-    expect(dispatch).not.toHaveBeenCalled();
-
-    deny(component);
-
-    expect(isModalVisible(component)).toBeFalsy();
-    expect(dispatch).not.toHaveBeenCalled();
-  });
-
-  it('should not process the change if there are options, if cancelled', () => {
-    const dispatch = jest.fn();
-    const component = mount(
-      <ConfigPanelHeader
-        visualizationId="visA"
-        visualizationState={{}}
-        visualizationMap={mockVisualizations()}
-        dispatch={dispatch}
-        framePublicAPI={mockFrame(['a', 'b'])}
-      />
-    );
-
-    switchTo('subvisB', component);
-
-    expect(isChooseModalVisible(component)).toBeTruthy();
-    expect(dispatch).not.toHaveBeenCalled();
-
-    deny(component);
-
-    expect(isChooseModalVisible(component)).toBeFalsy();
-    expect(dispatch).not.toHaveBeenCalled();
   });
 
   it('should show all visualization types', () => {

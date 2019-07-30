@@ -275,6 +275,37 @@ describe('editor_frame', () => {
       expect(mockDatasource2.insertLayer).toHaveBeenCalledWith(initialState, expect.anything());
     });
 
+    it('should remove layer on active datasource on frame api call', async () => {
+      const initialState = { datasource2: '' };
+      mockDatasource2.initialize.mockReturnValue(Promise.resolve(initialState));
+      mockDatasource2.getLayers.mockReturnValue(['abc', 'def']);
+      mockDatasource2.removeLayer.mockReturnValue({ removed: true });
+      act(() => {
+        mount(
+          <EditorFrame
+            {...defaultProps}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+              testDatasource2: mockDatasource2,
+            }}
+            initialDatasourceId="testDatasource2"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
+
+      await waitForPromises();
+
+      mockVisualization.initialize.mock.calls[0][0].removeLayers(['abc', 'def']);
+
+      expect(mockDatasource2.removeLayer).toHaveBeenCalledWith(initialState, 'abc');
+      expect(mockDatasource2.removeLayer).toHaveBeenCalledWith({ removed: true }, 'def');
+    });
+
     it('should render data panel after initialization is complete', async () => {
       const initialState = {};
       let databaseInitialized: ({}) => void;

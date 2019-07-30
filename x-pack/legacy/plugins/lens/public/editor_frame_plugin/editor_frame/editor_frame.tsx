@@ -95,7 +95,7 @@ export function EditorFrame(props: EditorFrameProps) {
       const newLayerId = generateId();
 
       dispatch({
-        type: 'INSERT_LAYER',
+        type: 'UPDATE_LAYER',
         datasourceId: state.activeDatasourceId!,
         layerId: newLayerId,
         reducer: props.datasourceMap[state.activeDatasourceId!].insertLayer,
@@ -107,10 +107,11 @@ export function EditorFrame(props: EditorFrameProps) {
       layerIds.forEach(layerId => {
         const layerDatasourceId = Object.entries(props.datasourceMap).find(
           ([datasourceId, datasource]) =>
-            datasource.getLayers(state.datasourceStates[datasourceId].state)
+            state.datasourceStates[datasourceId] &&
+            datasource.getLayers(state.datasourceStates[datasourceId].state).includes(layerId)
         )![0];
         dispatch({
-          type: 'REMOVE_LAYER',
+          type: 'UPDATE_LAYER',
           layerId,
           datasourceId: layerDatasourceId,
           reducer: props.datasourceMap[layerDatasourceId].removeLayer,
