@@ -148,8 +148,12 @@ describe('workspace_panel', () => {
           Object {
             "arguments": Object {
               "filters": Array [],
-              "query": Array [],
-              "timeRange": Array [],
+              "query": Array [
+                "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
+              ],
+              "timeRange": Array [
+                "{\\"from\\":\\"now-7d\\",\\"to\\":\\"now\\"}",
+              ],
             },
             "function": "kibana_context",
             "type": "function",
@@ -233,39 +237,39 @@ describe('workspace_panel', () => {
     expect(
       (instance.find(expressionRendererMock).prop('expression') as Ast).chain[2].arguments.tables
     ).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "chain": Array [
-                  Object {
-                    "arguments": Object {},
-                    "function": "datasource",
-                    "type": "function",
-                  },
-                ],
-                "type": "expression",
-              },
-              Object {
-                "chain": Array [
-                  Object {
-                    "arguments": Object {},
-                    "function": "datasource2",
-                    "type": "function",
-                  },
-                ],
-                "type": "expression",
-              },
-              Object {
-                "chain": Array [
-                  Object {
-                    "arguments": Object {},
-                    "function": "datasource2",
-                    "type": "function",
-                  },
-                ],
-                "type": "expression",
-              },
-            ]
-        `);
+                  Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {},
+                          "function": "datasource",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {},
+                          "function": "datasource2",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {},
+                          "function": "datasource2",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                  ]
+            `);
   });
 
   describe('expression failures', () => {

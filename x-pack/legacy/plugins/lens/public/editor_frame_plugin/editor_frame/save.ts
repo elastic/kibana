@@ -32,6 +32,7 @@ export async function getSavedObjectFormat({
     datasourceMap: activeDatasources,
     datasourceStates: state.datasourceStates,
     framePublicAPI,
+    removeDateRange: true,
   });
 
   const datasourceStates: Record<string, unknown> = {};

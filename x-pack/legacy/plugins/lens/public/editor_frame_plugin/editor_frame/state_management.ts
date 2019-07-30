@@ -10,7 +10,6 @@ import { Document } from '../../persistence/saved_object_store';
 
 export interface EditorFrameState {
   persistedId?: string;
-  // saving: boolean;
   title: string;
   visualization: {
     activeId: string | null;
@@ -25,18 +24,10 @@ export type Action =
       type: 'RESET';
       state: EditorFrameState;
     }
-  // | {
-  //     type: 'SAVING';
-  //     isSaving: boolean;
-  //   }
   | {
       type: 'UPDATE_TITLE';
       title: string;
     }
-  // | {
-  //     type: 'UPDATE_PERSISTED_ID';
-  //     id: string;
-  //   }
   | {
       type: 'UPDATE_DATASOURCE_STATE';
       newState: unknown;
@@ -76,7 +67,6 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
   }
 
   return {
-    // saving: false,
     title: i18n.translate('xpack.lens.chartTitle', { defaultMessage: 'New visualization' }),
     datasourceStates,
     activeDatasourceId: props.initialDatasourceId ? props.initialDatasourceId : null,
@@ -89,12 +79,8 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
 
 export const reducer = (state: EditorFrameState, action: Action): EditorFrameState => {
   switch (action.type) {
-    // case 'SAVING':
-    //   return { ...state, saving: action.isSaving };
     case 'RESET':
       return action.state;
-    // case 'UPDATE_PERSISTED_ID':
-    //   return { ...state, persistedId: action.id };
     case 'UPDATE_TITLE':
       return { ...state, title: action.title };
     case 'VISUALIZATION_LOADED':

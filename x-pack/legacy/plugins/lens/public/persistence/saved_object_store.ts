@@ -33,7 +33,7 @@ interface SavedObjectClient {
     id: string;
     type: string;
     attributes: SavedObjectAttributes;
-    error?: { message: string };
+    error?: { statusCode: number; message: string };
   }>;
 }
 

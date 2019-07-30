@@ -8,11 +8,8 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Registry } from '@kbn/interpreter/target/common';
-// import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup } from 'src/core/public';
-// import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
 import chrome, { Chrome } from 'ui/chrome';
-// import { I18nContext } from 'ui/i18n';
 import {
   EmbeddablePlugin,
   embeddablePlugin,
@@ -32,9 +29,6 @@ import {
   // ErrorCallback,
 } from '../types';
 import { EditorFrame } from './editor_frame';
-// import { SavedObjectIndexStore, SavedObjectStore, Document } from '../persistence';
-// import { SavedObjectStore, Document } from '../persistence';
-// import { InitializableComponent } from './initializable_component';
 import { mergeTables } from './merge_tables';
 import { EmbeddableFactory } from './embeddable/embeddable_factory';
 
@@ -56,7 +50,6 @@ export class EditorFramePlugin {
   constructor() {}
 
   private ExpressionRenderer: ExpressionRenderer | null = null;
-  // private chrome: Chrome | null = null;
   private readonly datasources: Record<string, Datasource> = {};
   private readonly visualizations: Record<string, Visualization> = {};
 
@@ -67,6 +60,7 @@ export class EditorFramePlugin {
         domElement = element;
         const firstDatasourceId = Object.keys(this.datasources)[0];
         const firstVisualizationId = Object.keys(this.visualizations)[0];
+
         render(
           <I18nProvider>
             <EditorFrame
@@ -101,7 +95,6 @@ export class EditorFramePlugin {
     plugins.interpreter.functionsRegistry.register(() => mergeTables);
 
     this.ExpressionRenderer = plugins.data.expressions.ExpressionRenderer;
-    // this.chrome = plugins.chrome;
     plugins.embeddables.addEmbeddableFactory(
       new EmbeddableFactory(plugins.chrome, this.ExpressionRenderer, plugins.data.indexPatterns)
     );

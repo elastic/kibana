@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { Storage } from 'ui/storage';
 import { toastNotifications } from 'ui/notify';
+import { Chrome } from 'ui/chrome';
 import { Document, SavedObjectStore } from '../persistence';
 import { QuerySetup, Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { EditorFrameInstance } from '../types';
@@ -29,26 +31,32 @@ interface State {
 export function App({
   editorFrame,
   store,
+  chrome,
   docId,
   docStorage,
   QueryBar,
   redirectTo,
 }: {
   editorFrame: EditorFrameInstance;
+  chrome: Chrome;
   store: Storage;
   docId?: string;
   docStorage: SavedObjectStore;
   QueryBar: QuerySetup['ui']['QueryBar'];
-  redirectTo: (id: string) => void;
+  redirectTo: (id?: string) => void;
 }) {
-  const [state, setState] = useState({
-    query: { query: '', language: 'kuery' },
+  const uiSettings = chrome.getUiSettingsClient();
+  const timeDefaults = uiSettings.get('timepicker:timeDefaults');
+  const language = store.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage');
+
+  const [state, setState] = useState<State>({
+    query: { query: '', language },
     dateRange: {
-      fromDate: 'now-15m',
-      toDate: 'now',
+      fromDate: timeDefaults.from,
+      toDate: timeDefaults.to,
     },
     indexPatterns: [],
-  } as State);
+  });
 
   useEffect(() => {
     if (docId) {
@@ -60,9 +68,14 @@ export function App({
             persistedDoc: doc,
           });
         })
-        .catch((error: Error) => {
-          // TODO: Do error stuff
-          return { error };
+        .catch(() => {
+          toastNotifications.addDanger(
+            i18n.translate('xpack.lens.editorFrame.docLoadingError', {
+              defaultMessage: 'Error loading saved document',
+            })
+          );
+
+          redirectTo();
         });
     }
   }, [docId]);
@@ -97,14 +110,29 @@ export function App({
             <EuiLink
               onClick={() => {
                 if (state.lastKnownDoc) {
-                  docStorage.save(state.lastKnownDoc).then(({ id }) => {
-                    redirectTo(id);
-                  });
+                  docStorage
+                    .save(state.lastKnownDoc)
+                    .then(({ id }) => {
+                      redirectTo(id);
+                    })
+                    .catch(reason => {
+                      toastNotifications.addDanger(
+                        i18n.translate('xpack.lens.editorFrame.docSavingError', {
+                          defaultMessage: 'Error saving document {reason}',
+                          values: { reason },
+                        })
+                      );
+                    });
                 }
               }}
-              // disabled={state.saving || !state.activeDatasourceId || !state.visualization.activeId}
+              color={
+                !state.lastKnownDoc || _.isEqual(state.lastKnownDoc, state.persistedDoc)
+                  ? 'subdued'
+                  : 'primary'
+              }
+              disabled={!state.lastKnownDoc || _.isEqual(state.lastKnownDoc, state.persistedDoc)}
             >
-              {i18n.translate('xpack.lens.editorFrame.Save', {
+              {i18n.translate('xpack.lens.editorFrame.save', {
                 defaultMessage: 'Save',
               })}
             </EuiLink>

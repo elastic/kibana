@@ -77,6 +77,10 @@ describe('editor_frame', () => {
             initialDatasourceId="testDatasource"
             initialVisualizationId="testVis"
             ExpressionRenderer={expressionRendererMock}
+            dateRange={{ fromDate: '', toDate: '' }}
+            query={{ query: '', language: 'lucene' }}
+            onIndexPatternChange={() => {}}
+            onStateChange={() => {}}
           />
         );
       });
@@ -98,6 +102,10 @@ describe('editor_frame', () => {
             initialDatasourceId={null}
             initialVisualizationId={null}
             ExpressionRenderer={expressionRendererMock}
+            dateRange={{ fromDate: '', toDate: '' }}
+            query={{ query: '', language: 'lucene' }}
+            onIndexPatternChange={() => {}}
+            onStateChange={() => {}}
           />
         );
       });
@@ -142,6 +150,10 @@ describe('editor_frame', () => {
                 },
               },
             }}
+            dateRange={{ fromDate: '', toDate: '' }}
+            query={{ query: '', language: 'lucene' }}
+            onIndexPatternChange={() => {}}
+            onStateChange={() => {}}
           />
         );
       });
@@ -165,6 +177,10 @@ describe('editor_frame', () => {
             initialDatasourceId="testDatasource"
             initialVisualizationId="testVis"
             ExpressionRenderer={expressionRendererMock}
+            dateRange={{ fromDate: '', toDate: '' }}
+            query={{ query: '', language: 'lucene' }}
+            onIndexPatternChange={() => {}}
+            onStateChange={() => {}}
           />
         );
       });
@@ -187,6 +203,10 @@ describe('editor_frame', () => {
             initialDatasourceId="testDatasource"
             initialVisualizationId="testVis"
             ExpressionRenderer={expressionRendererMock}
+            dateRange={{ fromDate: '', toDate: '' }}
+            query={{ query: '', language: 'lucene' }}
+            onIndexPatternChange={() => {}}
+            onStateChange={() => {}}
           />
         );
       });
@@ -212,6 +232,10 @@ describe('editor_frame', () => {
             initialDatasourceId="testDatasource"
             initialVisualizationId="testVis"
             ExpressionRenderer={expressionRendererMock}
+            dateRange={{ fromDate: 'now-7d', toDate: 'now' }}
+            query={{ query: '', language: 'lucene' }}
+            onIndexPatternChange={() => {}}
+            onStateChange={() => {}}
           />
         );
       });
@@ -224,6 +248,8 @@ describe('editor_frame', () => {
         datasourceLayers: {},
         addNewLayer: expect.any(Function),
         removeLayer: expect.any(Function),
+        query: { query: '', language: 'lucene' },
+        dateRange: { fromDate: 'now-7d', toDate: 'now' },
       });
     });
 
@@ -244,6 +270,10 @@ describe('editor_frame', () => {
             initialDatasourceId="testDatasource2"
             initialVisualizationId="testVis"
             ExpressionRenderer={expressionRendererMock}
+            dateRange={{ fromDate: '', toDate: '' }}
+            query={{ query: '', language: 'lucene' }}
+            onIndexPatternChange={() => {}}
+            onStateChange={() => {}}
           />
         );
       });
@@ -278,6 +308,10 @@ describe('editor_frame', () => {
             initialDatasourceId="testDatasource"
             initialVisualizationId="testVis"
             ExpressionRenderer={expressionRendererMock}
+            dateRange={{ fromDate: '', toDate: '' }}
+            query={{ query: '', language: 'lucene' }}
+            onIndexPatternChange={() => {}}
+            onStateChange={() => {}}
           />
         );
       });
@@ -309,6 +343,10 @@ describe('editor_frame', () => {
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
           ExpressionRenderer={expressionRendererMock}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
 
@@ -337,6 +375,10 @@ describe('editor_frame', () => {
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
           ExpressionRenderer={expressionRendererMock}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
 
@@ -355,8 +397,12 @@ describe('editor_frame', () => {
             Object {
               "arguments": Object {
                 "filters": Array [],
-                "query": Array [],
-                "timeRange": Array [],
+                "query": Array [
+                  "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
+                ],
+                "timeRange": Array [
+                  "{\\"from\\":\\"\\",\\"to\\":\\"\\"}",
+                ],
               },
               "function": "kibana_context",
               "type": "function",
@@ -428,6 +474,10 @@ describe('editor_frame', () => {
               },
             },
           }}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
 
@@ -446,8 +496,12 @@ describe('editor_frame', () => {
             Object {
               "arguments": Object {
                 "filters": Array [],
-                "query": Array [],
-                "timeRange": Array [],
+                "query": Array [
+                  "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
+                ],
+                "timeRange": Array [
+                  "{\\"from\\":\\"\\",\\"to\\":\\"\\"}",
+                ],
               },
               "function": "kibana_context",
               "type": "function",
@@ -456,8 +510,6 @@ describe('editor_frame', () => {
               "arguments": Object {
                 "layerIds": Array [
                   "first",
-                  "second",
-                  "third",
                 ],
                 "tables": Array [
                   Object {
@@ -465,26 +517,6 @@ describe('editor_frame', () => {
                       Object {
                         "arguments": Object {},
                         "function": "datasource",
-                        "type": "function",
-                      },
-                    ],
-                    "type": "expression",
-                  },
-                  Object {
-                    "chain": Array [
-                      Object {
-                        "arguments": Object {},
-                        "function": "datasource2_1",
-                        "type": "function",
-                      },
-                    ],
-                    "type": "expression",
-                  },
-                  Object {
-                    "chain": Array [
-                      Object {
-                        "arguments": Object {},
-                        "function": "datasource2_2",
                         "type": "function",
                       },
                     ],
@@ -521,6 +553,10 @@ describe('editor_frame', () => {
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
           ExpressionRenderer={expressionRendererMock}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
 
@@ -555,6 +591,10 @@ describe('editor_frame', () => {
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
           ExpressionRenderer={expressionRendererMock}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
 
@@ -592,6 +632,10 @@ describe('editor_frame', () => {
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
           ExpressionRenderer={expressionRendererMock}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
 
@@ -656,6 +700,10 @@ describe('editor_frame', () => {
               },
             },
           }}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
 
@@ -708,6 +756,10 @@ describe('editor_frame', () => {
               },
             },
           }}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
 
@@ -747,6 +799,10 @@ describe('editor_frame', () => {
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
           ExpressionRenderer={expressionRendererMock}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
 
@@ -773,6 +829,10 @@ describe('editor_frame', () => {
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
           ExpressionRenderer={expressionRendererMock}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
 
@@ -811,6 +871,10 @@ describe('editor_frame', () => {
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
           ExpressionRenderer={expressionRendererMock}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
       await waitForPromises();
@@ -933,6 +997,10 @@ describe('editor_frame', () => {
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
           ExpressionRenderer={expressionRendererMock}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
 
@@ -957,6 +1025,10 @@ describe('editor_frame', () => {
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
           ExpressionRenderer={expressionRendererMock}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
 
@@ -1019,6 +1091,10 @@ describe('editor_frame', () => {
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
           ExpressionRenderer={expressionRendererMock}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
 
@@ -1065,6 +1141,10 @@ describe('editor_frame', () => {
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis2"
           ExpressionRenderer={expressionRendererMock}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
 
@@ -1129,6 +1209,10 @@ describe('editor_frame', () => {
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
           ExpressionRenderer={expressionRendererMock}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
 
@@ -1197,6 +1281,10 @@ describe('editor_frame', () => {
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
           ExpressionRenderer={expressionRendererMock}
+          dateRange={{ fromDate: '', toDate: '' }}
+          query={{ query: '', language: 'lucene' }}
+          onIndexPatternChange={() => {}}
+          onStateChange={() => {}}
         />
       );
 

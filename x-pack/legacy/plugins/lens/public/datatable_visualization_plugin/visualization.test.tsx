@@ -22,6 +22,11 @@ function mockFrame(): FramePublicAPI {
     addNewLayer: () => 'aaa',
     removeLayer: () => {},
     datasourceLayers: {},
+    query: { query: '', language: 'lucene' },
+    dateRange: {
+      fromDate: 'now-7d',
+      toDate: 'now',
+    },
   };
 }
 
@@ -71,15 +76,13 @@ describe('Datatable Visualization', () => {
       const setState = jest.fn();
       const datasource = createMockDatasource();
       const layer = { layerId: 'a', columns: ['b', 'c'] };
+      const frame = mockFrame();
+      frame.datasourceLayers = { a: datasource.publicAPIMock };
 
       mount(
         <DataTableLayer
           dragDropContext={{ dragging: undefined, setDragging: () => {} }}
-          frame={{
-            addNewLayer: jest.fn(),
-            removeLayer: jest.fn(),
-            datasourceLayers: { a: datasource.publicAPIMock },
-          }}
+          frame={frame}
           layer={layer}
           setState={setState}
           state={{ layers: [layer] }}
@@ -110,14 +113,12 @@ describe('Datatable Visualization', () => {
       const setState = jest.fn();
       const datasource = createMockDatasource();
       const layer = { layerId: 'a', columns: ['b', 'c'] };
+      const frame = mockFrame();
+      frame.datasourceLayers = { a: datasource.publicAPIMock };
       const component = mount(
         <DataTableLayer
           dragDropContext={{ dragging: undefined, setDragging: () => {} }}
-          frame={{
-            addNewLayer: jest.fn(),
-            removeLayer: jest.fn(),
-            datasourceLayers: { a: datasource.publicAPIMock },
-          }}
+          frame={frame}
           layer={layer}
           setState={setState}
           state={{ layers: [layer] }}
@@ -146,14 +147,12 @@ describe('Datatable Visualization', () => {
       const setState = jest.fn();
       const datasource = createMockDatasource();
       const layer = { layerId: 'a', columns: ['b', 'c'] };
+      const frame = mockFrame();
+      frame.datasourceLayers = { a: datasource.publicAPIMock };
       const component = mount(
         <DataTableLayer
           dragDropContext={{ dragging: undefined, setDragging: () => {} }}
-          frame={{
-            addNewLayer: jest.fn(),
-            removeLayer: jest.fn(),
-            datasourceLayers: { a: datasource.publicAPIMock },
-          }}
+          frame={frame}
           layer={layer}
           setState={setState}
           state={{ layers: [layer] }}

@@ -101,6 +101,7 @@ export function buildExpression({
   datasourceMap,
   datasourceStates,
   framePublicAPI,
+  removeDateRange,
 }: {
   visualization: Visualization | null;
   visualizationState: unknown;
@@ -113,20 +114,25 @@ export function buildExpression({
     }
   >;
   framePublicAPI: FramePublicAPI;
+  removeDateRange?: boolean;
 }): Ast | null {
   if (visualization === null) {
     return null;
   }
   const visualizationExpression = visualization.toExpression(visualizationState, framePublicAPI);
 
+  const expressionContext = removeDateRange
+    ? { query: framePublicAPI.query }
+    : {
+        query: framePublicAPI.query,
+        timeRange: {
+          from: framePublicAPI.dateRange.fromDate,
+          to: framePublicAPI.dateRange.toDate,
+        },
+      };
+
   return prependKibanaContext(
     prependDatasourceExpression(visualizationExpression, datasourceMap, datasourceStates),
-    {
-      timeRange: {
-        from: framePublicAPI.dateRange.fromDate,
-        to: framePublicAPI.dateRange.toDate,
-      },
-      query: framePublicAPI.query,
-    }
+    expressionContext
   );
 }

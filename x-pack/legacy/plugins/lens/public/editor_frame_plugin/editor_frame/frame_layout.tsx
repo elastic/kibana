@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiPage, EuiPageSideBar, EuiPageBody, EuiHorizontalRule } from '@elastic/eui';
+import { EuiPage, EuiPageSideBar, EuiPageBody } from '@elastic/eui';
 import { RootDragDropProvider } from '../../drag_drop';
 
 export interface FrameLayoutProps {
@@ -13,15 +13,12 @@ export interface FrameLayoutProps {
   configPanel?: React.ReactNode;
   suggestionsPanel?: React.ReactNode;
   workspacePanel?: React.ReactNode;
-  // navPanel?: React.ReactNode;
 }
 
 export function FrameLayout(props: FrameLayoutProps) {
   return (
     <RootDragDropProvider>
       <EuiPage className="lnsPage">
-        {/* <header className="lnsHeader">{props.navPanel}</header>
-        <EuiHorizontalRule margin="s" /> */}
         <div className="lnsPageMainContent">
           <EuiPageSideBar className="lnsSidebar">{props.dataPanel}</EuiPageSideBar>
           <EuiPageBody className="lnsPageBody" restrictWidth={false}>
