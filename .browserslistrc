@@ -1,3 +1,13 @@
-last 2 versions
-> 5%
+# Desktop
+last 2 Chrome versions
+last 2 Firefox versions
+last 2 Edge versions
+last 2 Safari versions
+# Mobile
+last 2 ChromeAndroid versions
+last 2 iOS versions
+# Additional
+Firefox ESR
+ie 11
 Safari 7 # for PhantomJS support: https://github.com/elastic/kibana/issues/27136
+not dead
