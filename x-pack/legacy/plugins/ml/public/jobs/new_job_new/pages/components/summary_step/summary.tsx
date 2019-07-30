@@ -6,6 +6,8 @@
 
 import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
@@ -28,9 +30,19 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     jobCreator.subscribeToProgress(setProgress);
   }, []);
 
-  function start() {
+  async function start() {
     setShowJsonFlyout(false);
-    jobCreator.createAndStartJob();
+    try {
+      await jobCreator.createAndStartJob();
+    } catch (error) {
+      // catch and display all job creation errors
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.ml.newJob.wizard.createJobError', {
+          defaultMessage: `Job creation error`,
+        }),
+        text: error.message,
+      });
+    }
   }
 
   function viewResults() {

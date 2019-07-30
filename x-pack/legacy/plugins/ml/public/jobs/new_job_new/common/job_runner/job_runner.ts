@@ -55,49 +55,41 @@ export class JobRunner {
     this._refreshInterval = REFRESH_INTERVAL_MS;
   }
 
-  private async openJob(): Promise<boolean> {
-    let success = false;
+  private async openJob(): Promise<void> {
     try {
       await mlJobService.openJob(this._jobId);
-      success = true;
     } catch (error) {
-      success = false;
+      throw error;
     }
-    return success;
   }
 
   // start the datafeed and then start polling for progress
   // the complete percentage is added to an observable
   // so all pre-subscribed listeners can follow along.
-  public async startDatafeed(): Promise<boolean> {
-    const openSuccess = await this.openJob();
-    if (openSuccess) {
-      try {
-        await mlJobService.startDatafeed(this._datafeedId, this._jobId, this._start, this._end);
-        this._datafeedState = DATAFEED_STATE.STARTED;
-        this._percentageComplete = 0;
+  public async startDatafeed(): Promise<void> {
+    try {
+      await this.openJob();
+      await mlJobService.startDatafeed(this._datafeedId, this._jobId, this._start, this._end);
+      this._datafeedState = DATAFEED_STATE.STARTED;
+      this._percentageComplete = 0;
 
-        const check = async () => {
-          const { isRunning, progress } = await this.getProgress();
+      const check = async () => {
+        const { isRunning, progress } = await this.getProgress();
 
-          this._percentageComplete = progress;
-          this._progress$.next(this._percentageComplete);
+        this._percentageComplete = progress;
+        this._progress$.next(this._percentageComplete);
 
-          if (isRunning === true && this._stopRefreshPoll.stop === false) {
-            setTimeout(async () => {
-              await check();
-            }, this._refreshInterval);
-          }
-        };
-        // wait for the first check to run and then return success.
-        // all subsequent checks will update the observable
-        await check();
-        return true;
-      } catch (error) {
-        return false;
-      }
-    } else {
-      return false;
+        if (isRunning === true && this._stopRefreshPoll.stop === false) {
+          setTimeout(async () => {
+            await check();
+          }, this._refreshInterval);
+        }
+      };
+      // wait for the first check to run and then return success.
+      // all subsequent checks will update the observable
+      await check();
+    } catch (error) {
+      throw error;
     }
   }
 

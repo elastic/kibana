@@ -258,7 +258,12 @@ export class JobCreator {
 
   public async createJob(): Promise<object> {
     try {
-      return await mlJobService.saveNewJob(this._job_config);
+      const { success, resp } = await mlJobService.saveNewJob(this._job_config);
+      if (success === true) {
+        return resp;
+      } else {
+        throw resp;
+      }
     } catch (error) {
       throw error;
     }
@@ -275,7 +280,7 @@ export class JobCreator {
   // create a jobRunner instance, start it and return it
   public async startDatafeed(): Promise<JobRunner> {
     const jobRunner = new JobRunner(this);
-    jobRunner.startDatafeed();
+    await jobRunner.startDatafeed();
     return jobRunner;
   }
 
