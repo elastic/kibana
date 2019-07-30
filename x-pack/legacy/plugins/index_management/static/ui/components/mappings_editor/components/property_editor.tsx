@@ -34,23 +34,8 @@ export const PropertyEditor = ({
   isDeletable = true,
   isEditMode = false,
 }: Props) => {
-  const renderNestedProperties = (selectedType: DataType, fieldName: string) => {
-    if (selectedType === 'array') {
-      return (
-        <ul className="tree">
-          <li>
-            <PropertyEditor
-              form={form}
-              fieldPathPrefix={`${fieldPathPrefix}arrayItem.`}
-              isDeletable={false}
-              isAnonymous
-            />
-          </li>
-        </ul>
-      );
-    }
-
-    return hasNestedProperties(selectedType) ? (
+  const renderNestedProperties = (selectedType: DataType, fieldName: string) =>
+    hasNestedProperties(selectedType) ? (
       <Fragment>
         <EuiSpacer size="l" />
         <PropertiesManager
@@ -60,7 +45,6 @@ export const PropertyEditor = ({
         />
       </Fragment>
     ) : null;
-  };
 
   return (
     <FormDataProvider
@@ -160,8 +144,6 @@ export const PropertyEditor = ({
             )}
 
             {renderNestedProperties(selectedDatatype, fieldName)}
-
-            <EuiSpacer size="l" />
           </div>
         );
       }}

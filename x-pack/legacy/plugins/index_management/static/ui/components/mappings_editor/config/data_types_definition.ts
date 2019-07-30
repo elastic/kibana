@@ -15,8 +15,7 @@ export type DataType =
   | 'boolean'
   | 'range'
   | 'object'
-  | 'nested'
-  | 'array';
+  | 'nested';
 
 export type SubType = NumericType | DateType | RangeType;
 
@@ -102,9 +101,6 @@ export const dataTypesDefinition: { [key in DataType]: DataTypeDefinition } = {
   nested: {
     label: 'Nested',
     basicParameters: ['dynamic'],
-  },
-  array: {
-    label: 'Array',
   },
 };
 

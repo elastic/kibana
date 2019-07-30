@@ -9,7 +9,12 @@
 
   .property-editor {
     border-bottom: 1px solid #eee;
-    padding-top: 24px;
+    margin: -12px;
+    padding: 12px;
+
+    &:hover {
+      background-color: #fafbfd;
+    }
   }
 
   .tree,
@@ -20,7 +25,7 @@
     position:relative;
   }
 
-  .tree ul {margin-left:.5em} /* (indentation/2) */
+  .tree ul {margin-left:.5em}
 
   .tree:before,
   .tree ul:before {
@@ -31,15 +36,15 @@
     top:0;
     bottom:0;
     left:0;
-    border-left:1px dotted;
+    border-left:1px dotted #aaa;
   }
 
   .tree li {
     margin:0;
-    padding-left: 1.5em; /* indentation + .5em */
-    line-height:2em; /* default list item's `line-height` */
+    padding-left: 1.5em;
+    line-height:2em;
     position:relative;
-
+    margin-bottom: 12px;
 
     &:last-child {
       .property-editor {
@@ -51,17 +56,16 @@
   .tree li:before {
     content:"";
     display:block;
-    width:10px; /* same with indentation */
     height:0;
-    border-top:1px dotted;
-    margin-top:-1px; /* border top width */
+    border-top:1px dotted #aaa;
+    margin-top:-1px;
     position:absolute;
     top: 64px;
     left:0;
   }
 
   .tree li:last-child:before {
-    background:white; /* same with body background */
+    background:white;
     height:auto;
     top: 64px;
     bottom:0;
