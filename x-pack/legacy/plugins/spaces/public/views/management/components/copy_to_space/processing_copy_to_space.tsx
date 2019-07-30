@@ -5,15 +5,17 @@
  */
 
 import React, { Fragment } from 'react';
-import { ProcessedImportResponse } from 'ui/management/saved_objects_management';
+import { ProcessedImportResponse, SavedObjectRecord } from 'ui/management/saved_objects_management';
 import { SpaceAvatar } from 'plugins/spaces/components';
 import { SavedObjectsImportRetry } from 'src/core/server/saved_objects/import/types';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { summarizeCopyResult } from 'plugins/spaces/lib/copy_to_space';
 import { Space } from '../../../../../common/model/space';
 import { CopyStatusIndicator } from './copy_status_indicator';
 import { CopyResultDetails } from './copy_result_details';
 
 interface Props {
+  savedObject: SavedObjectRecord;
   copyInProgress: boolean;
   copyResult: Record<string, ProcessedImportResponse>;
   retries: Record<string, SavedObjectsImportRetry[]>;
@@ -32,31 +34,45 @@ export const ProcessingCopyToSpace = (props: Props) => {
 
   return (
     <Fragment>
-      <ul>
-        {props.selectedSpaceIds.map(id => {
-          const space = props.spaces.find(s => s.id === id) as Space;
-          const result = props.copyResult[space.id];
-          return (
-            <li key={id} style={{ margin: '10px 0' }}>
-              <div>
-                <SpaceAvatar space={space} /> {space.name}:{' '}
-                <CopyStatusIndicator copyResult={result} />
-              </div>
+      {props.selectedSpaceIds.map(id => {
+        const space = props.spaces.find(s => s.id === id) as Space;
+        const result = props.copyResult[space.id];
+        const summarizedCopyResult = summarizeCopyResult(props.savedObject, result);
+
+        return (
+          <Fragment>
+            <EuiAccordion
+              id={`copyToSpace-${id}`}
+              buttonContent={
+                <EuiFlexGroup responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <SpaceAvatar space={space} size="s" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText>{space.name}</EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              extraAction={<CopyStatusIndicator summarizedCopyResult={summarizedCopyResult} />}
+            >
               {result && (
                 <>
                   <EuiSpacer size="s" />
                   <CopyResultDetails
+                    savedObject={props.savedObject}
                     copyResult={result}
+                    summarizedCopyResult={summarizedCopyResult}
                     space={space}
                     retries={props.retries[space.id] || []}
                     onRetriesChange={updatedRetries => updateRetries(space.id, updatedRetries)}
                   />
                 </>
               )}
-            </li>
-          );
-        })}
-      </ul>
+            </EuiAccordion>
+            <EuiSpacer />
+          </Fragment>
+        );
+      })}
     </Fragment>
   );
 };

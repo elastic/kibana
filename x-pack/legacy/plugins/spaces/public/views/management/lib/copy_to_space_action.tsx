@@ -32,7 +32,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
     if (!this.record) {
       throw new Error('No record available! `render()` was likely called before `start()`.');
     }
-    return <CopyToSpaceFlyout onClose={this.onClose} object={this.record} />;
+    return <CopyToSpaceFlyout onClose={this.onClose} savedObject={this.record} />;
   };
 
   private onClose = () => {

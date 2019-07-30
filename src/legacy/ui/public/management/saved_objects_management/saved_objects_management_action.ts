@@ -19,6 +19,11 @@
 
 import { ReactNode } from '@elastic/eui/node_modules/@types/react';
 
+export interface SavedObjectReference {
+  type: string;
+  id: string;
+  name: string;
+}
 export interface SavedObjectRecord {
   type: string;
   id: string;
@@ -26,6 +31,7 @@ export interface SavedObjectRecord {
     icon: string;
     title: string;
   };
+  references: SavedObjectReference[];
 }
 
 export abstract class SavedObjectsManagementAction {

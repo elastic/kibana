@@ -18,7 +18,11 @@
  */
 
 export { SavedObjectsManagementActionRegistry } from './saved_objects_management_action_registry';
-export { SavedObjectsManagementAction, SavedObjectRecord } from './saved_objects_management_action';
+export {
+  SavedObjectsManagementAction,
+  SavedObjectRecord,
+  SavedObjectReference,
+} from './saved_objects_management_action';
 export {
   processImportResponse,
   ProcessedImportResponse,

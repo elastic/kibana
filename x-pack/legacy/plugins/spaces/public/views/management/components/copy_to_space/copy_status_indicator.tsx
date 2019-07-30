@@ -5,63 +5,54 @@
  */
 
 import React from 'react';
-import { ProcessedImportResponse } from 'ui/management/saved_objects_management';
 import { EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { summarizeCopyResult } from '../../../../lib/copy_to_space';
+import {
+  SummarizedCopyToSpaceResponse,
+  SummarizedSavedObjectResult,
+} from '../../../../lib/copy_to_space';
 
 interface Props {
-  copyResult: ProcessedImportResponse | undefined;
+  summarizedCopyResult: SummarizedCopyToSpaceResponse | undefined;
+  object?: { type: string; id: string };
+  overwritePending?: boolean;
 }
 
 export const CopyStatusIndicator = (props: Props) => {
-  const { copyResult } = props;
-  if (!copyResult) {
-    return (
-      <span>
-        <EuiLoadingSpinner />{' '}
-        <FormattedMessage
-          id="xpack.spaces.management.copyToSpace.inProgressText"
-          defaultMessage="processing..."
-        />
-      </span>
-    );
+  const { summarizedCopyResult } = props;
+  if (!summarizedCopyResult) {
+    return <EuiLoadingSpinner />;
   }
 
-  const { successful, hasConflicts, hasUnresolvableErrors } = summarizeCopyResult(copyResult);
+  let successful = false;
+  let successColor = 'success';
+  let hasConflicts = false;
+  let hasUnresolvableErrors = false;
+
+  if (props.object) {
+    const objectResult = summarizedCopyResult.objects.find(
+      o => o.type === props.object!.type && o.id === props.object!.id
+    ) as SummarizedSavedObjectResult;
+
+    successful =
+      !objectResult.hasUnresolvableErrors &&
+      (objectResult.conflicts.length === 0 || props.overwritePending === true);
+    successColor = props.overwritePending ? 'warning' : 'success';
+    hasConflicts = objectResult.conflicts.length > 0;
+    hasUnresolvableErrors = objectResult.hasUnresolvableErrors;
+  } else {
+    successful = summarizedCopyResult.successful;
+    hasConflicts = summarizedCopyResult.hasConflicts;
+    hasUnresolvableErrors = summarizedCopyResult.hasUnresolvableErrors;
+  }
 
   if (successful) {
-    return (
-      <span>
-        <EuiIcon type={'check'} color={'success'} />{' '}
-        <FormattedMessage
-          id="xpack.spaces.management.copyToSpace.copySuccessful"
-          defaultMessage="finished!"
-        />
-      </span>
-    );
+    return <EuiIcon type={'check'} color={successColor} />;
   }
   if (hasUnresolvableErrors) {
-    return (
-      <span>
-        <EuiIcon type={'cross'} color={'danger'} />{' '}
-        <FormattedMessage
-          id="xpack.spaces.management.copyToSpace.copyUnsuccessful"
-          defaultMessage="error"
-        />
-      </span>
-    );
+    return <EuiIcon type={'cross'} color={'danger'} />;
   }
   if (hasConflicts) {
-    return (
-      <span>
-        <EuiIcon type={'alert'} color={'warning'} />{' '}
-        <FormattedMessage
-          id="xpack.spaces.management.copyToSpace.hasConflicts"
-          defaultMessage="conflicts detected"
-        />
-      </span>
-    );
+    return <EuiIcon type={'alert'} color={'warning'} />;
   }
   return null;
 };

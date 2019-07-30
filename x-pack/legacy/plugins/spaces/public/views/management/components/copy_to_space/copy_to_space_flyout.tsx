@@ -36,10 +36,10 @@ import { ProcessingCopyToSpace } from './processing_copy_to_space';
 
 interface Props {
   onClose: () => void;
-  object: SavedObjectRecord;
+  savedObject: SavedObjectRecord;
 }
 
-export const CopyToSpaceFlyout = ({ onClose, object }: Props) => {
+export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
   const [includeRelated, setIncludeRelated] = useState(true);
   const [overwrite, setOverwrite] = useState(true);
   const [selectedSpaceIds, setSelectedSpaceIds] = useState<string[]>([]);
@@ -51,6 +51,10 @@ export const CopyToSpaceFlyout = ({ onClose, object }: Props) => {
   const [copyInProgress, setCopyInProgress] = useState(false);
   const [copyResult, setCopyResult] = useState<Record<string, ProcessedImportResponse>>({});
   const [retries, setRetries] = useState<Record<string, SavedObjectsImportRetry[]>>({});
+
+  const onRetriesChange = (updatedRetries: Record<string, SavedObjectsImportRetry[]>) => {
+    setRetries(updatedRetries);
+  };
 
   let actionButton = (
     <EuiButton
@@ -85,49 +89,44 @@ export const CopyToSpaceFlyout = ({ onClose, object }: Props) => {
     );
   }
 
-  useEffect(
-    () => {
-      if (copyInProgress) {
-        // simulating copy operation
-        setTimeout(() => {
-          const dummyResponse = selectedSpaceIds.reduce<Record<string, SavedObjectsImportResponse>>(
-            (acc, id) => {
-              const successCount = Math.floor(Math.random() * 10);
-              const hasErrors = successCount % 2 === 0;
-              return {
-                ...acc,
-                [id]: {
-                  successCount,
-                  success: true,
-                  errors: hasErrors
-                    ? [
-                        {
-                          type: object.type,
-                          id: object.id,
-                          error: {
-                            type: overwrite ? 'missing_references' : 'conflict',
-                            references: [],
-                          },
+  useEffect(() => {
+    if (copyInProgress) {
+      // simulating copy operation
+      setTimeout(() => {
+        const dummyResponse = selectedSpaceIds.reduce<Record<string, SavedObjectsImportResponse>>(
+          (acc, id) => {
+            const successCount = Math.floor(Math.random() * 10);
+            const hasErrors = successCount % 2 === 0;
+            return {
+              ...acc,
+              [id]: {
+                successCount,
+                success: true,
+                errors: hasErrors
+                  ? [
+                      {
+                        type: savedObject.type,
+                        id: savedObject.id,
+                        error: {
+                          type: overwrite ? 'missing_references' : 'conflict',
+                          references: [],
                         },
-                      ]
-                    : undefined,
-                } as SavedObjectsImportResponse,
-              };
-            },
-            {}
-          );
+                      },
+                    ]
+                  : undefined,
+              } as SavedObjectsImportResponse,
+            };
+          },
+          {}
+        );
 
-          const processedResult = mapValues(dummyResponse, processImportResponse);
-          setCopyResult(processedResult);
-          const inProgress = Object.values(processedResult).some(
-            res => res.failedImports.length > 0
-          );
-          setCopyInProgress(inProgress);
-        }, 5000);
-      }
-    },
-    [copyInProgress]
-  );
+        const processedResult = mapValues(dummyResponse, processImportResponse);
+        setCopyResult(processedResult);
+        const inProgress = Object.values(processedResult).some(res => res.failedImports.length > 0);
+        setCopyInProgress(inProgress);
+      }, 1000);
+    }
+  }, [copyInProgress]);
 
   function startCopy() {
     setCopyInProgress(true);
@@ -200,19 +199,20 @@ export const CopyToSpaceFlyout = ({ onClose, object }: Props) => {
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiText>
-          <EuiIcon type={object.meta.icon || 'apps'} /> {object.meta.title}
+          <EuiIcon type={savedObject.meta.icon || 'apps'} /> {savedObject.meta.title}
         </EuiText>
 
         <EuiSpacer />
 
         {copyInProgress && (
           <ProcessingCopyToSpace
+            savedObject={savedObject}
             copyInProgress={copyInProgress}
             copyResult={copyResult}
             spaces={spaces}
             selectedSpaceIds={selectedSpaceIds}
             retries={retries}
-            onRetriesChange={setRetries}
+            onRetriesChange={onRetriesChange}
           />
         )}
         {!copyInProgress && form}
