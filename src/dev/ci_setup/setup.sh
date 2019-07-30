@@ -2,6 +2,12 @@
 
 set -e
 
+###
+### keep until 7.2.2 snapshots are available
+###
+export TEST_ES_BRANCH=7.2.1
+
+
 dir="$(pwd)"
 cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
 
