@@ -18,8 +18,6 @@
  */
 // @ts-ignore
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
-import React from 'react';
-import ReactDom from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { JsonCodeEditor } from './json_code_editor';
 
@@ -33,8 +31,6 @@ DocViewsRegistryProvider.register(function() {
       defaultMessage: 'JSON',
     }),
     order: 20,
-    render: (domNode: any, props: any) => {
-      ReactDom.render(<JsonCodeEditor hit={props.hit} />, domNode);
-    },
+    component: JsonCodeEditor,
   };
 });
