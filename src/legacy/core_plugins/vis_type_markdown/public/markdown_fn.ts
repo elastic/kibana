@@ -37,7 +37,7 @@ export interface MarkdownVisParams {
 
 type Return = Promise<Render<{ visType: 'markdown'; visConfig: MarkdownVisParams }>>;
 
-export const kibanaMarkdown = (): ExpressionFunction<
+export const createMarkdownVisFn = (): ExpressionFunction<
   typeof name,
   KibanaDatatable,
   Arguments,

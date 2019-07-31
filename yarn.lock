@@ -1761,10 +1761,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/node-ctags/-/node-ctags-1.0.2.tgz#447d7694a5598f9413fe2b6f356d56f64f612dfd"
   integrity sha512-EHhJ0NPlCvYy+gbzBMU4/Z/55hftfdwlAG8JwOy7g0ITmH6rFPanEnzg1WL3/L+pp8OlYHyvDLwmyg0+06y8LQ==
 
-"@elastic/nodegit@0.25.0-alpha.22":
-  version "0.25.0-alpha.22"
-  resolved "https://registry.yarnpkg.com/@elastic/nodegit/-/nodegit-0.25.0-alpha.22.tgz#71c112c7f5284eabef91fa3e1acf689ba9cdc875"
-  integrity sha512-V49tzdAO9geWqukc4Xe073kQw9VW5mCh+DYvkZRwJPS3/+o5eMY5R+PMLfkd1BasjnrWkp/PZFl8OQUk+qjByg==
+"@elastic/nodegit@0.25.0-alpha.23":
+  version "0.25.0-alpha.23"
+  resolved "https://registry.yarnpkg.com/@elastic/nodegit/-/nodegit-0.25.0-alpha.23.tgz#34d06497030a45a3b8090c3fcb9504d722b9d0c9"
+  integrity sha512-2zSLGigYW58g+DbcRtbCwwj6boTGNhyCG85IDK8yx/jlycLS6gnmxEbZ6FFfgdS2qKWi911lmKQ/3l0LpUaDRw==
   dependencies:
     fs-extra "^7.0.0"
     json5 "^2.1.0"
@@ -19952,11 +19952,6 @@ no-case@^2.2.0, no-case@^2.3.2:
   integrity sha512-rmTZ9kz+f3rCvK2TD1Ue/oZlns7OGoIWP4fc3llxxRXlOkHKoWPPWJOfFYpITabSow43QJbRIoHQXtt10VldyQ==
   dependencies:
     lower-case "^1.1.1"
-
-no-ui-slider@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/no-ui-slider/-/no-ui-slider-1.2.0.tgz#1f64f5a8b82e6786f3261d82b0cc99b598817e69"
-  integrity sha1-H2T1qLguZ4bzJh2CsMyZtZiBfmk=
 
 nock@10.0.6:
   version "10.0.6"
