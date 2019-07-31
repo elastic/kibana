@@ -13,7 +13,10 @@ export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
       {
         node: {
           source: {
-            autonomous_system: 'Google, Inc / 15169',
+            autonomous_system: {
+              name: 'Google, Inc',
+              number: 15169,
+            },
             domain: ['test.domain.com'],
             ip: '8.8.8.8',
             location: {
@@ -41,7 +44,10 @@ export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
       {
         node: {
           source: {
-            autonomous_system: 'TM Net, Internet Service Provider / 4788',
+            autonomous_system: {
+              name: 'TM Net, Internet Service Provider',
+              number: 4788,
+            },
             domain: ['test.domain.net', 'test.old.domain.net'],
             ip: '9.9.9.9',
             location: {

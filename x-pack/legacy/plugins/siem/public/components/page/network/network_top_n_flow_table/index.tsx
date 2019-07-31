@@ -45,7 +45,7 @@ interface NetworkTopNFlowTableReduxProps {
   limit: number;
   flowDirection: FlowDirection;
   topNFlowSort: NetworkTopNFlowSortField;
-  flowTarget: FlowTarget;
+  flowTarget: FlowTarget.destination | FlowTarget.source | FlowTarget.unified;
 }
 
 interface NetworkTopNFlowTableDispatchProps {
@@ -66,7 +66,7 @@ interface NetworkTopNFlowTableDispatchProps {
     networkType: networkModel.NetworkType;
   }>;
   updateTopNFlowTarget: ActionCreator<{
-    flowTarget: FlowTarget;
+    flowTarget: FlowTarget.destination | FlowTarget.source | FlowTarget.unified;
   }>;
 }
 

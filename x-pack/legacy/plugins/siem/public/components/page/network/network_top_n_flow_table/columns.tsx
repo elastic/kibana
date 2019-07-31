@@ -33,16 +33,16 @@ import { GeoFields } from '../../../source_destination/geo_fields';
 export type NetworkTopNFlowColumns = [
   Columns<NetworkTopNFlowEdges>,
   Columns<NetworkTopNFlowEdges>,
-  Columns<TopNFlowNetworkEcsField['bytes_in']>,
-  Columns<TopNFlowNetworkEcsField['bytes_out']>,
   Columns<TopNFlowItem['location'], NetworkTopNFlowEdges>,
-  Columns<TopNFlowItem['autonomous_system']>
+  Columns<TopNFlowItem['autonomous_system'], NetworkTopNFlowEdges>,
+  Columns<TopNFlowNetworkEcsField['bytes_in']>,
+  Columns<TopNFlowNetworkEcsField['bytes_out']>
 ];
 
 export const getNetworkTopNFlowColumns = (
   indexPattern: StaticIndexPattern,
   flowDirection: FlowDirection,
-  flowTarget: FlowTarget,
+  flowTarget: FlowTarget.source | FlowTarget.destination | FlowTarget.unified,
   type: networkModel.NetworkType,
   tableId: string
 ): NetworkTopNFlowColumns => [
@@ -107,34 +107,6 @@ export const getNetworkTopNFlowColumns = (
     },
   },
   {
-    field: 'node.network.bytes_in',
-    name: i18n.BYTES_IN,
-    truncateText: false,
-    hideForMobile: false,
-    sortable: true,
-    render: bytes => {
-      if (bytes != null) {
-        return <PreferenceFormattedBytes value={bytes} />;
-      } else {
-        return getEmptyTagValue();
-      }
-    },
-  },
-  {
-    field: 'node.network.bytes_out',
-    name: i18n.BYTES_OUT,
-    truncateText: false,
-    hideForMobile: false,
-    sortable: true,
-    render: bytes => {
-      if (bytes != null) {
-        return <PreferenceFormattedBytes value={bytes} />;
-      } else {
-        return getEmptyTagValue();
-      }
-    },
-  },
-  {
     field: `node.${flowTarget}.location`,
     name: i18n.LOCATION,
     truncateText: false,
@@ -177,9 +149,73 @@ export const getNetworkTopNFlowColumns = (
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: as => {
+    render: (as, { cursor: { value: ipAddress } }) => {
       if (as != null) {
-        return as;
+        const id = escapeDataProviderId(
+          `${tableId}-table-${flowTarget}-${flowDirection}-ip-${ipAddress}`
+        );
+        const attrFlowTarget = FlowTarget.unified ? FlowTarget.source : flowTarget;
+        if (as.name && as.number) {
+          return (
+            <>
+              {getRowItemDraggables({
+                rowItems: [as.name],
+                attrName: `${attrFlowTarget}.as.organization.name`,
+                idPrefix: `${id}-name`,
+              })}
+              {'/'}
+              {getRowItemDraggables({
+                rowItems: [`${as.number}`],
+                attrName: `${attrFlowTarget}.as.number`,
+                idPrefix: `${id}-number`,
+              })}
+            </>
+          );
+        }
+        return (
+          <>
+            {as.name &&
+              getRowItemDraggables({
+                rowItems: [as.name],
+                attrName: `${attrFlowTarget}.as.organization.name`,
+                idPrefix: `${id}-name`,
+              })}
+            {as.number &&
+              getRowItemDraggables({
+                rowItems: [`${as.number}`],
+                attrName: `${attrFlowTarget}.as.number`,
+                idPrefix: `${id}-number`,
+              })}
+          </>
+        );
+      } else {
+        return getEmptyTagValue();
+      }
+    },
+  },
+  {
+    field: 'node.network.bytes_in',
+    name: i18n.BYTES_IN,
+    truncateText: false,
+    hideForMobile: false,
+    sortable: true,
+    render: bytes => {
+      if (bytes != null) {
+        return <PreferenceFormattedBytes value={bytes} />;
+      } else {
+        return getEmptyTagValue();
+      }
+    },
+  },
+  {
+    field: 'node.network.bytes_out',
+    name: i18n.BYTES_OUT,
+    truncateText: false,
+    hideForMobile: false,
+    sortable: true,
+    render: bytes => {
+      if (bytes != null) {
+        return <PreferenceFormattedBytes value={bytes} />;
       } else {
         return getEmptyTagValue();
       }

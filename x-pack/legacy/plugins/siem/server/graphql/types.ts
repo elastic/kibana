@@ -1207,13 +1207,19 @@ export interface NetworkTopNFlowItem {
 }
 
 export interface TopNFlowItem {
-  autonomous_system?: string | null;
+  autonomous_system?: AutonomousSystemItem | null;
 
   domain?: string[] | null;
 
   ip?: string | null;
 
   location?: GeoItem | null;
+}
+
+export interface AutonomousSystemItem {
+  name?: string | null;
+
+  number?: number | null;
 }
 
 export interface GeoItem {
@@ -6349,7 +6355,7 @@ export namespace NetworkTopNFlowItemResolvers {
 
 export namespace TopNFlowItemResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = TopNFlowItem> {
-    autonomous_system?: AutonomousSystemResolver<string | null, TypeParent, Context>;
+    autonomous_system?: AutonomousSystemResolver<AutonomousSystemItem | null, TypeParent, Context>;
 
     domain?: DomainResolver<string[] | null, TypeParent, Context>;
 
@@ -6359,7 +6365,7 @@ export namespace TopNFlowItemResolvers {
   }
 
   export type AutonomousSystemResolver<
-    R = string | null,
+    R = AutonomousSystemItem | null,
     Parent = TopNFlowItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -6376,6 +6382,25 @@ export namespace TopNFlowItemResolvers {
   export type LocationResolver<
     R = GeoItem | null,
     Parent = TopNFlowItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace AutonomousSystemItemResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = AutonomousSystemItem> {
+    name?: NameResolver<string | null, TypeParent, Context>;
+
+    number?: NumberResolver<number | null, TypeParent, Context>;
+  }
+
+  export type NameResolver<
+    R = string | null,
+    Parent = AutonomousSystemItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NumberResolver<
+    R = number | null,
+    Parent = AutonomousSystemItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

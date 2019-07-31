@@ -1178,13 +1178,19 @@ export interface NetworkTopNFlowItem {
 }
 
 export interface TopNFlowItem {
-  autonomous_system?: string | null;
+  autonomous_system?: AutonomousSystemItem | null;
 
   domain?: string[] | null;
 
   ip?: string | null;
 
   location?: GeoItem | null;
+}
+
+export interface AutonomousSystemItem {
+  name?: string | null;
+
+  number?: number | null;
 }
 
 export interface GeoItem {
@@ -3337,13 +3343,21 @@ export namespace GetNetworkTopNFlowQuery {
   export type _Source = {
     __typename?: 'TopNFlowItem';
 
-    autonomous_system?: string | null;
+    autonomous_system?: AutonomousSystem | null;
 
     domain?: string[] | null;
 
     ip?: string | null;
 
     location?: Location | null;
+  };
+
+  export type AutonomousSystem = {
+    __typename?: 'AutonomousSystemItem';
+
+    name?: string | null;
+
+    number?: number | null;
   };
 
   export type Location = {
@@ -3373,13 +3387,21 @@ export namespace GetNetworkTopNFlowQuery {
   export type Destination = {
     __typename?: 'TopNFlowItem';
 
-    autonomous_system?: string | null;
+    autonomous_system?: _AutonomousSystem | null;
 
     domain?: string[] | null;
 
     ip?: string | null;
 
     location?: _Location | null;
+  };
+
+  export type _AutonomousSystem = {
+    __typename?: 'AutonomousSystemItem';
+
+    name?: string | null;
+
+    number?: number | null;
   };
 
   export type _Location = {
@@ -3409,13 +3431,21 @@ export namespace GetNetworkTopNFlowQuery {
   export type Unified = {
     __typename?: 'TopNFlowItem';
 
-    autonomous_system?: string | null;
+    autonomous_system?: __AutonomousSystem | null;
 
     domain?: string[] | null;
 
     ip?: string | null;
 
     location?: __Location | null;
+  };
+
+  export type __AutonomousSystem = {
+    __typename?: 'AutonomousSystemItem';
+
+    name?: string | null;
+
+    number?: number | null;
   };
 
   export type __Location = {

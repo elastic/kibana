@@ -7,6 +7,7 @@
 import { get, getOr } from 'lodash/fp';
 
 import {
+  AutonomousSystemItem,
   Direction,
   FlowTarget,
   GeoItem,
@@ -177,41 +178,41 @@ const getTopNFlowEdges = (
 const getFlowTargetFromString = (flowAsString: string) =>
   flowAsString === 'source' ? FlowTarget.source : FlowTarget.destination;
 
-const getGeoItem = (result: NetworkTopNFlowBuckets): GeoItem => {
-  if (result.location.top_geo.hits.hits.length > 0) {
-    const flowTarget = getFlowTargetFromString(
-      Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-    );
-    return {
-      geo: getOr('', `location.top_geo.hits.hits[0]._source.${flowTarget}.geo`, result),
-      flowTarget: flowTarget === 'source' ? FlowTarget.source : FlowTarget.destination,
-    };
-  }
-  return {};
-};
+const getGeoItem = (result: NetworkTopNFlowBuckets): GeoItem | null =>
+  result.location.top_geo.hits.hits.length > 0
+    ? {
+        geo: getOr(
+          '',
+          `location.top_geo.hits.hits[0]._source.${
+            Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+          }.geo`,
+          result
+        ),
+        flowTarget: getFlowTargetFromString(
+          Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+        ),
+      }
+    : null;
 
-const getAs = (result: NetworkTopNFlowBuckets): string => {
-  if (result.autonomous_system.top_as.hits.hits.length > 0) {
-    const asNumber: number = getOr(
-      0,
-      `autonomous_system.top_as.hits.hits[0]._source.${
-        Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-      }.as.number`,
-      result
-    );
-
-    const asName: string = getOr(
-      '',
-      `autonomous_system.top_as.hits.hits[0]._source.${
-        Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-      }.as.organization.name`,
-      result
-    );
-    return asName.length > 0 && asNumber > 0 ? `${asName} / ${asNumber}` : asName + asNumber;
-  }
-
-  return '';
-};
+const getAsItem = (result: NetworkTopNFlowBuckets): AutonomousSystemItem | null =>
+  result.autonomous_system.top_as.hits.hits.length > 0
+    ? {
+        number: getOr(
+          null,
+          `autonomous_system.top_as.hits.hits[0]._source.${
+            Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+          }.as.number`,
+          result
+        ),
+        name: getOr(
+          '',
+          `autonomous_system.top_as.hits.hits[0]._source.${
+            Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+          }.as.organization.name`,
+          result
+        ),
+      }
+    : null;
 
 const unifiedSorter = (networkTopNFlowSortField: NetworkTopNFlowSortField) => {
   if (networkTopNFlowSortField.direction === Direction.asc) {
@@ -241,7 +242,7 @@ const formatTopNFlowEdgesUnified = (
                   domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key),
                   ip: bucket.key,
                   location: getGeoItem(bucket),
-                  autonomous_system: getAs(bucket),
+                  autonomous_system: getAsItem(bucket),
                 },
                 network: {
                   bytes_in: getOr(0, 'bytes_in.value', bucket),
@@ -263,14 +264,12 @@ const formatTopNFlowEdgesUnified = (
               unified: {
                 domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key),
                 ip: bucket.key,
-                location:
-                  getOr('', 'node.unified.location', acc[bucket.key]).length === 0
-                    ? getGeoItem(bucket)
-                    : getOr('', 'node.unified.location', acc[bucket.key]),
-                autonomous_system:
-                  getOr('', 'node.unified.autonomous_system', acc[bucket.key]).length === 0
-                    ? getAs(bucket)
-                    : getOr('', 'node.unified.autonomous_system', acc[bucket.key]),
+                location: getOr(null, 'node.unified.location', acc[bucket.key])
+                  ? getGeoItem(bucket)
+                  : getOr('', 'node.unified.location', acc[bucket.key]),
+                autonomous_system: getOr(null, 'node.unified.autonomous_system', acc[bucket.key])
+                  ? getAsItem(bucket)
+                  : getOr('', 'node.unified.autonomous_system', acc[bucket.key]),
               },
               network: {
                 bytes_in:
@@ -303,7 +302,7 @@ const formatTopNFlowEdges = (
         domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key),
         ip: bucket.key,
         location: getGeoItem(bucket),
-        autonomous_system: getAs(bucket),
+        autonomous_system: getAsItem(bucket),
       },
       network: {
         bytes_in: getOr(0, 'bytes_in.value', bucket),

@@ -14,19 +14,27 @@ import { FlowTarget } from '../../graphql/types';
 import * as i18n from './translations';
 
 interface OwnProps {
-  selectedTarget: FlowTarget;
+  selectedTarget: FlowTarget.destination | FlowTarget.source | FlowTarget.unified;
   displayTextOverride?: string[];
-  updateFlowTarget: ActionCreator<{ flowTarget: FlowTarget }>;
+  updateFlowTarget: ActionCreator<{
+    flowTarget: FlowTarget.destination | FlowTarget.source | FlowTarget.unified;
+  }>;
 }
 
 const onChangeTarget = (
-  flowTarget: FlowTarget,
-  updateFlowTarget: ActionCreator<{ flowTarget: FlowTarget }>
+  flowTarget: FlowTarget.destination | FlowTarget.source | FlowTarget.unified,
+  updateFlowTarget: ActionCreator<{
+    flowTarget: FlowTarget.destination | FlowTarget.source | FlowTarget.unified;
+  }>
 ) => {
   updateFlowTarget({ flowTarget });
 };
 
-const onClearTarget = (updateFlowTarget: ActionCreator<{ flowTarget: FlowTarget }>) => {
+const onClearTarget = (
+  updateFlowTarget: ActionCreator<{
+    flowTarget: FlowTarget.destination | FlowTarget.source | FlowTarget.unified;
+  }>
+) => {
   updateFlowTarget({ flowTarget: FlowTarget.unified });
 };
 

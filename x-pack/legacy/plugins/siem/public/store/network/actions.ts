@@ -57,7 +57,7 @@ export const updateTopNFlowSort = actionCreator<{
 }>('UPDATE_TOP_N_FLOW_SORT');
 
 export const updateTopNFlowTarget = actionCreator<{
-  flowTarget: FlowTarget;
+  flowTarget: FlowTarget.destination | FlowTarget.source | FlowTarget.unified;
 }>('UPDATE_TOP_N_FLOW_TARGET');
 
 export const updateTopNFlowDirection = actionCreator<{
@@ -77,7 +77,7 @@ export const applyNetworkFilterQuery = actionCreator<{
 
 // IP Details Actions
 export const updateIpDetailsFlowTarget = actionCreator<{
-  flowTarget: FlowTarget;
+  flowTarget: FlowTarget.destination | FlowTarget.source | FlowTarget.client | FlowTarget.server;
 }>('UPDATE_IP_DETAILS_TARGET');
 
 // Domains Table Actions

@@ -33,7 +33,10 @@ export const networkTopNFlowQuery = gql`
         edges {
           node {
             source {
-              autonomous_system
+              autonomous_system {
+                name
+                number
+              }
               domain
               ip
               location {
@@ -49,7 +52,10 @@ export const networkTopNFlowQuery = gql`
               }
             }
             destination {
-              autonomous_system
+              autonomous_system {
+                name
+                number
+              }
               domain
               ip
               location {
@@ -65,7 +71,10 @@ export const networkTopNFlowQuery = gql`
               }
             }
             unified {
-              autonomous_system
+              autonomous_system {
+                name
+                number
+              }
               domain
               ip
               location {

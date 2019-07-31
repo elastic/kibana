@@ -28,8 +28,13 @@ export const networkSchema = gql`
     flowTarget: FlowTarget
   }
 
+  type AutonomousSystemItem {
+    name: String
+    number: Float
+  }
+
   type TopNFlowItem {
-    autonomous_system: String
+    autonomous_system: AutonomousSystemItem
     domain: [String!]
     ip: String
     location: GeoItem
