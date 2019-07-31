@@ -15,6 +15,7 @@ export interface GeoFieldsProps {
   destinationGeoRegionName?: string[] | null;
   displayFullCountryName?: boolean;
   eventId: string;
+  hideTooltipContent?: boolean;
   sourceGeoCityName?: string[] | null;
   sourceGeoContinentName?: string[] | null;
   sourceGeoCountryIsoCode?: string[] | null;

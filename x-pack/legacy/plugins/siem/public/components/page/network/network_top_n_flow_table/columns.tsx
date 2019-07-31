@@ -136,6 +136,7 @@ export const getNetworkTopNFlowColumns = (
             contextId={tableId}
             eventId={id}
             displayFullCountryName={true}
+            hideTooltipContent={true}
           />
         );
       } else {

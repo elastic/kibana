@@ -71,11 +71,12 @@ const GeoFlexItem = styled(EuiFlexItem)`
 
 const GeoFieldValues = pure<{
   contextId: string;
-  displayFullCountryName?: boolean;
+  displayFullCountryName: boolean;
   eventId: string;
   fieldName: string;
+  hideTooltipContent: boolean;
   values?: string[] | null;
-}>(({ contextId, displayFullCountryName = false, eventId, fieldName, values }) =>
+}>(({ contextId, displayFullCountryName, eventId, fieldName, hideTooltipContent, values }) =>
   values != null ? (
     <>
       {uniq(values).map(value => (
@@ -97,7 +98,7 @@ const GeoFieldValues = pure<{
                   field={fieldName}
                   id={`${contextId}-${eventId}-${fieldName}-${value}`}
                   name={countries.getName(value, 'en')}
-                  tooltipContent={fieldName}
+                  tooltipContent={hideTooltipContent ? null : fieldName}
                   value={value}
                 />
               </EuiFlexItem>
@@ -107,7 +108,7 @@ const GeoFieldValues = pure<{
                   data-test-subj={fieldName}
                   field={fieldName}
                   id={`${contextId}-${eventId}-${fieldName}-${value}`}
-                  tooltipContent={fieldName}
+                  tooltipContent={hideTooltipContent ? null : fieldName}
                   value={value}
                 />
               </EuiFlexItem>
@@ -135,7 +136,13 @@ export class GeoFields extends React.Component<GeoFieldsProps> {
   }
 
   public render() {
-    const { contextId, displayFullCountryName, eventId, type } = this.props;
+    const {
+      contextId,
+      displayFullCountryName = false,
+      eventId,
+      hideTooltipContent = false,
+      type,
+    } = this.props;
 
     const propNameToFieldName = getGeoFieldPropNameToFieldNameMap(type);
     return (
@@ -146,6 +153,7 @@ export class GeoFields extends React.Component<GeoFieldsProps> {
             displayFullCountryName={displayFullCountryName}
             eventId={eventId}
             fieldName={geo.fieldName}
+            hideTooltipContent={hideTooltipContent}
             key={geo.fieldName}
             values={get(geo.prop, this.props)}
           />
