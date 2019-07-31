@@ -6,7 +6,6 @@
 
 
 import { GIS_API_PATH, EMS_META_PATH, EMS_DATA_TMS_PATH, EMS_DATA_FILE_PATH } from '../common/constants';
-import _ from 'lodash';
 import { getEMSResources } from '../common/ems_util';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
@@ -58,11 +57,6 @@ export async function getEMSDataSources() {
     }
   });
   return loadingMetaPromise;
-}
-
-export async function getEmsVectorFilesMeta() {
-  const dataSource = await getEMSDataSources();
-  return _.get(dataSource, 'ems.file', []);
 }
 
 export function getKibanaRegionList() {
