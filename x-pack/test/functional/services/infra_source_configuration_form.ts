@@ -10,7 +10,6 @@ import { WebElementWrapper } from '../../../../test/functional/services/lib/web_
 export function InfraSourceConfigurationFormProvider({
   getService,
 }: KibanaFunctionalTestDefaultProviders) {
-  const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');

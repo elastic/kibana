@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+// import expect from '@kbn/expect';
 
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
   const esArchiver = getService('esArchiver');
-  const infraLogStream = getService('infraLogStream');
+  // const infraLogStream = getService('infraLogStream');
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const pageObjects = getPageObjects(['common', 'infraLogs']);
 
