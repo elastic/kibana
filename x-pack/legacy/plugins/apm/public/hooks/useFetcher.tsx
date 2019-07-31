@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext, useEffect, useState, useMemo } from 'react';
+import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { idx } from '@kbn/elastic-idx/target';
 import { i18n } from '@kbn/i18n';
@@ -67,7 +67,23 @@ export function useFetcher<Response>(
             title: i18n.translate('xpack.apm.fetcher.error.title', {
               defaultMessage: `Error while fetching resource`
             }),
-            text: `${idx(err.res, r => r.status)}: ${idx(err.res, r => r.url)}`
+            text: (
+              <div>
+                <h5>
+                  {i18n.translate('xpack.apm.fetcher.error.status', {
+                    defaultMessage: `Error`
+                  })}
+                </h5>
+                {idx(err.res, r => r.statusText)} ({idx(err.res, r => r.status)}
+                )
+                <h5>
+                  {i18n.translate('xpack.apm.fetcher.error.url', {
+                    defaultMessage: `URL`
+                  })}
+                </h5>
+                {idx(err.res, r => r.url)}
+              </div>
+            )
           });
           dispatchStatus({ id, isLoading: false });
           setResult({
