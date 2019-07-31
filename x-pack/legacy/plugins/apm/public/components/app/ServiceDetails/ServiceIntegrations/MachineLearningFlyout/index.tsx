@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { startMLJob } from '../../../../../services/rest/ml';
-import { getAPMIndexPattern } from '../../../../../services/rest/savedObjects';
+import { getAPMIndexPattern } from '../../../../../services/rest/apm/index_patterns';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MachineLearningFlyoutView } from './view';

@@ -35,7 +35,7 @@ export function DiscoverLink({ query = {}, ...rest }: Props) {
   const apmIndexPattern = useAPMIndexPattern();
   const location = useLocation();
 
-  if (!apmIndexPattern.id) {
+  if (!apmIndexPattern || !apmIndexPattern.id) {
     return null;
   }
 

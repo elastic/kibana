@@ -8,9 +8,9 @@ import { ESFilter } from 'elasticsearch';
 import { Server } from 'hapi';
 import { idx } from '@kbn/elastic-idx/target';
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
-import { ISavedObject } from '../../../../public/services/rest/savedObjects';
 import { StaticIndexPattern } from '../../../../../../../../src/legacy/core_plugins/data/public';
 import { getAPMIndexPattern } from '../../../lib/index_pattern';
+import { IndexPatternApiResponse } from '../../../routes/index_patterns/index_pattern';
 
 export async function getKueryUiFilterES(
   server: Server,
@@ -31,7 +31,7 @@ export async function getKueryUiFilterES(
 }
 
 // lifted from src/legacy/ui/public/index_patterns/static_utils/index.js
-export function getFromSavedObject(apmIndexPattern: ISavedObject) {
+export function getFromSavedObject(apmIndexPattern: IndexPatternApiResponse) {
   if (idx(apmIndexPattern, _ => _.attributes.fields) === undefined) {
     return;
   }

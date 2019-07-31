@@ -5,13 +5,11 @@
  */
 
 import { useEffect, useState } from 'react';
-import {
-  getAPMIndexPattern,
-  ISavedObject
-} from '../services/rest/savedObjects';
+import { getAPMIndexPattern } from '../services/rest/apm/index_patterns';
+import { IndexPatternApiResponse } from '../../server/routes/index_patterns/index_pattern';
 
 export function useAPMIndexPattern() {
-  const [pattern, setPattern] = useState({} as ISavedObject);
+  const [pattern, setPattern] = useState<IndexPatternApiResponse | null>(null);
 
   async function fetchPattern() {
     const indexPattern = await getAPMIndexPattern();

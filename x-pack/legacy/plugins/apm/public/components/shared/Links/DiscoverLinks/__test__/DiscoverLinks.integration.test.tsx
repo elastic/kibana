@@ -9,20 +9,21 @@ import React from 'react';
 import { APMError } from '../../../../../../typings/es_schemas/ui/APMError';
 import { Span } from '../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction';
-import * as savedObjects from '../../../../../services/rest/savedObjects';
+import * as indexPatterns from '../../../../../services/rest/apm/index_patterns';
 import { getRenderedHref } from '../../../../../utils/testHelpers';
 import { DiscoverErrorLink } from '../DiscoverErrorLink';
 import { DiscoverSpanLink } from '../DiscoverSpanLink';
 import { DiscoverTransactionLink } from '../DiscoverTransactionLink';
 import * as hooks from '../../../../../hooks/useCore';
 import { InternalCoreStart } from 'src/core/public';
+import { IndexPatternApiResponse } from '../../../../../../server/routes/index_patterns/index_pattern';
 
 jest.mock('ui/kfetch');
 
 jest
-  .spyOn(savedObjects, 'getAPMIndexPattern')
+  .spyOn(indexPatterns, 'getAPMIndexPattern')
   .mockReturnValue(
-    Promise.resolve({ id: 'apm-index-pattern-id' } as savedObjects.ISavedObject)
+    Promise.resolve({ id: 'apm-index-pattern-id' } as IndexPatternApiResponse)
   );
 
 beforeAll(() => {

@@ -13,7 +13,7 @@ import { initServicesApi } from '../routes/services';
 import { initTracesApi } from '../routes/traces';
 import { initTransactionGroupsApi } from '../routes/transaction_groups/init';
 import { initUIFiltersApi } from '../routes/ui_filters';
-import { initIndexPatternApi } from '../routes/index_pattern';
+import { initIndexPatternApi } from '../routes/index_patterns/index_pattern';
 import { initSettingsApi } from '../routes/settings';
 
 export class Plugin {

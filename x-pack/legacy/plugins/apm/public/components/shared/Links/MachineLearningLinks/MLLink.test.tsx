@@ -8,9 +8,10 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../../utils/testHelpers';
 import { MLLink } from './MLLink';
-import * as savedObjects from '../../../../services/rest/savedObjects';
+import * as indexPatterns from '../../../../services/rest/apm/index_patterns';
 import * as hooks from '../../../../hooks/useCore';
 import { InternalCoreStart } from 'src/core/public';
+import { IndexPatternApiResponse } from '../../../../../server/routes/index_patterns/index_pattern';
 
 jest.mock('ui/kfetch');
 
@@ -25,9 +26,9 @@ const coreMock = ({
 jest.spyOn(hooks, 'useCore').mockReturnValue(coreMock);
 
 jest
-  .spyOn(savedObjects, 'getAPMIndexPattern')
+  .spyOn(indexPatterns, 'getAPMIndexPattern')
   .mockReturnValue(
-    Promise.resolve({ id: 'apm-index-pattern-id' } as savedObjects.ISavedObject)
+    Promise.resolve({ id: 'apm-index-pattern-id' } as IndexPatternApiResponse)
   );
 
 beforeAll(() => {

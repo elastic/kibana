@@ -12,8 +12,8 @@ import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import * as Transactions from './mockData';
 import * as apmIndexPatternHooks from '../../../../hooks/useAPMIndexPattern';
 import * as coreHoooks from '../../../../hooks/useCore';
-import { ISavedObject } from '../../../../services/rest/savedObjects';
 import { InternalCoreStart } from 'src/core/public';
+import { IndexPatternApiResponse } from '../../../../../server/routes/index_patterns/index_pattern';
 
 jest.mock('ui/kfetch');
 
@@ -39,7 +39,7 @@ describe('TransactionActionMenu component', () => {
 
     jest
       .spyOn(apmIndexPatternHooks, 'useAPMIndexPattern')
-      .mockReturnValue({ id: 'foo' } as ISavedObject);
+      .mockReturnValue({ id: 'foo' } as IndexPatternApiResponse);
     jest.spyOn(coreHoooks, 'useCore').mockReturnValue(coreMock);
   });
 
