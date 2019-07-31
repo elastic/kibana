@@ -17,5 +17,14 @@
  * under the License.
  */
 
-export { ExpressionsService, ExpressionsSetup } from './expressions_service';
-export { ExpressionRenderer, ExpressionRendererProps } from './expression_renderer';
+import { IInterpreter } from './lib/_types';
+
+let interpreter: IInterpreter;
+
+export const getInterpreter = (): IInterpreter => {
+  return interpreter;
+};
+
+export const setInterpreter = (interpreterInstance: IInterpreter) => {
+  interpreter = interpreterInstance;
+};

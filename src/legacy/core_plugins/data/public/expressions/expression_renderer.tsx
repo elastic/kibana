@@ -21,27 +21,24 @@ import { useRef, useEffect } from 'react';
 import React from 'react';
 import { Ast } from '@kbn/interpreter/common';
 
-import { ExpressionRunnerOptions, ExpressionRunner } from './expression_runner';
-import { Result } from './expressions_service';
+import { IInterpreterResult } from './lib/_types';
+import { IExpressionLoader } from './lib/loader';
 
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
-export type ExpressionRendererProps = Pick<
-  ExpressionRunnerOptions,
-  Exclude<keyof ExpressionRunnerOptions, 'element'>
-> & {
+export interface ExpressionRendererProps {
   expression: string | Ast;
   /**
    * If an element is specified, but the response of the expression run can't be rendered
    * because it isn't a valid response or the specified renderer isn't available,
    * this callback is called with the given result.
    */
-  onRenderFailure?: (result: Result) => void;
-};
+  onRenderFailure?: (result: IInterpreterResult) => void;
+}
 
 export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
 
-export const createRenderer = (run: ExpressionRunner): ExpressionRenderer => ({
+export const createRenderer = (loader: IExpressionLoader): ExpressionRenderer => ({
   expression,
   onRenderFailure,
   ...options
@@ -50,7 +47,8 @@ export const createRenderer = (run: ExpressionRunner): ExpressionRenderer => ({
 
   useEffect(() => {
     if (mountpoint.current) {
-      run(expression, { ...options, element: mountpoint.current }).catch(result => {
+      const handler = loader(mountpoint.current, expression, options);
+      handler.data$.toPromise().catch(result => {
         if (onRenderFailure) {
           onRenderFailure(result);
         }
