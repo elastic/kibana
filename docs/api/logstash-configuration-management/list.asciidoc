@@ -38,12 +38,3 @@ A successful call returns a JSON structure. For example:
 --------------------------------------------------
 
 <1> The `username` property may or may not be present, depending on if the Elastic Security was enabled when the pipeline was created or last updated.
-
-[[logstash-configuration-management-api-list-example]]
-==== Examples
-
-[source,js]
---------------------------------------------------
-GET api/logstash/pipelines
---------------------------------------------------
-// KIBANA
