@@ -22,6 +22,9 @@ import { PluginInitializerContext } from './plugin_context';
 import { loadPluginBundle } from './plugin_loader';
 import { CoreStart, CoreSetup } from '..';
 
+/** @public */
+export type PluginOpaqueId = symbol;
+
 /**
  * The interface that should be returned by a `PluginInitializer`.
  *
@@ -72,6 +75,7 @@ export class PluginWrapper<
 
   constructor(
     readonly discoveredPlugin: DiscoveredPlugin,
+    public readonly opaqueId: PluginOpaqueId,
     private readonly initializerContext: PluginInitializerContext
   ) {
     this.name = discoveredPlugin.id;
