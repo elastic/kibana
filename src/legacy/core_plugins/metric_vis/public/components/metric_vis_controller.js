@@ -23,7 +23,7 @@ import { isColorDark } from '@elastic/eui';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
 import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 
-import { MetricVisValue } from './components/metric_vis_value';
+import { MetricVisValue } from './metric_vis_value';
 
 export class MetricVisComponent extends Component {
 
