@@ -23,7 +23,7 @@ export type SavedSearchQuery = object;
 // via angularjs only (like services, currentIndexPattern etc.).
 // Because we cannot just import these dependencies, the default value
 // for the context is just {} and the value's type has optional
-// attributes for the angularjs based dependencies. Therefor, the
+// attributes for the angularjs based dependencies. Therefore, the
 // actual dependencies are set like we did previously with KibanaContext
 // in the wrapping angularjs directive. In the custom hook we check if
 // the dependencies are present with error reporting if they weren't
