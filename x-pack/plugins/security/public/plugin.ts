@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
+import { Plugin, CoreSetup } from 'src/core/public';
 import { UnauthorizedResponseInterceptor } from './unauthorized_response_interceptor';
 
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {

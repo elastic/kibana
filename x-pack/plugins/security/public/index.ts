@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializer } from 'kibana/public';
+import { PluginInitializer } from 'src/core/public';
 import { SecurityPlugin, SecurityPluginSetup, SecurityPluginStart } from './plugin';
 
 export const plugin: PluginInitializer<SecurityPluginSetup, SecurityPluginStart> = () =>

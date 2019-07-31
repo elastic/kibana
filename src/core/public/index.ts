@@ -82,6 +82,7 @@ export {
   HttpResponse,
   HttpHandler,
   HttpBody,
+  HttpInterceptController,
 } from './http';
 
 /**
