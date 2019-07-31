@@ -12,7 +12,7 @@ const mockCallAsCurrentUser = jest.fn();
 beforeAll(() => jest.resetAllMocks());
 
 describe('createAPIKey()', () => {
-  test('returns null when security feature is disabled', async () => {
+  it('returns null when security feature is disabled', async () => {
     const result = await createAPIKey({
       body: {
         name: '',
@@ -26,7 +26,7 @@ describe('createAPIKey()', () => {
     expect(mockCallAsCurrentUser).not.toHaveBeenCalled();
   });
 
-  test('calls callCluster with proper body arguments', async () => {
+  it('calls callCluster with proper body arguments', async () => {
     mockCallAsCurrentUser.mockResolvedValueOnce({
       id: '123',
       name: 'key-name',

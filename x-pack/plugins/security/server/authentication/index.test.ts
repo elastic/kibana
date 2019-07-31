@@ -36,6 +36,7 @@ import { getErrorStatusCode } from '../errors';
 import { LegacyAPI } from '../plugin';
 import { AuthenticationResult } from './authentication_result';
 import { setupAuthentication } from '.';
+import { CreateAPIKeyResult, CreateAPIKeyOptions } from './api_keys';
 
 function mockXPackFeature({ isEnabled = true }: Partial<{ isEnabled: boolean }> = {}) {
   return {
@@ -339,10 +340,12 @@ describe('setupAuthentication()', () => {
   });
 
   describe('createAPIKey()', () => {
-    let createAPIKey: jest.Mock;
+    let createAPIKey: (
+      request: KibanaRequest,
+      body: CreateAPIKeyOptions['body']
+    ) => Promise<CreateAPIKeyResult | null>;
     beforeEach(async () => {
-      createAPIKey = (await setupAuthentication(mockSetupAuthenticationParams))
-        .createAPIKey as jest.Mock;
+      createAPIKey = (await setupAuthentication(mockSetupAuthenticationParams)).createAPIKey;
     });
 
     it('calls createAPIKey with given arguments', async () => {
@@ -358,9 +361,9 @@ describe('setupAuthentication()', () => {
       });
       expect(createAPIKeyMock).toHaveBeenCalledWith({
         body: options,
-        loggers: expect.anything(),
-        callAsCurrentUser: expect.anything(),
-        isSecurityFeatureDisabled: expect.anything(),
+        loggers: mockSetupAuthenticationParams.loggers,
+        callAsCurrentUser: mockScopedClusterClient.callAsCurrentUser,
+        isSecurityFeatureDisabled: expect.any(Function),
       });
     });
   });

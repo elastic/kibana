@@ -35,7 +35,7 @@ export interface CreateAPIKeyResult {
   /**
    * Optional expiration in milliseconds for this API key
    */
-  expiration?: string;
+  expiration?: number;
   /**
    * Generated API key
    */
@@ -59,7 +59,7 @@ export async function createAPIKey({
   // User needs `manage_api_key` privilege to use this API
   const key = (await callAsCurrentUser('shield.createAPIKey', { body })) as CreateAPIKeyResult;
 
-  logger.debug('Api key was created successfully');
+  logger.debug('API key was created successfully');
 
   return key;
 }
