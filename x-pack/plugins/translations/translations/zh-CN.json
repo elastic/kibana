@@ -4324,6 +4324,7 @@
     "xpack.code.adminPage.setupGuide.permissionChangesDescription": "Kibana 的角色和权限模型有新的改动，请了解这些改动对您 Code 部署的影响",
     "xpack.code.adminPage.setupGuide.permissionChangesTitle": "权限模型变动",
     "xpack.code.featureRegistry.codeFeatureName": "Code",
+    "xpack.code.git.diskWatermarkLowMessage": "存储空间低于{watermarkLowMb}MB",
     "xpack.code.gitUrlUtil.urlNotWhitelistedMessage": "Git URL 主机地址没有在白名单中。",
     "xpack.code.gitUrlUtil.protocolNotWhitelistedMessage": "Git URL 的协议没有在白名单中。",
     "xpack.code.helpMenu.codeDocumentationButtonLabel": "Code 文档",

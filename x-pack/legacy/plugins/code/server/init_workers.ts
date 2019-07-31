@@ -5,6 +5,7 @@
  */
 
 import { Server } from 'hapi';
+import { DiskWatermarkService } from './disk_watermark';
 import { EsClient, Esqueue } from './lib/esqueue';
 import { LspService } from './lsp/lsp_service';
 import { GitOperations } from './git_operations';
@@ -43,6 +44,10 @@ export function initWorkers(
 
   const repoServiceFactory: RepositoryServiceFactory = new RepositoryServiceFactory();
 
+  const watermarkService = new DiskWatermarkService(
+    serverOptions.disk.watermarkLowMb,
+    serverOptions.repoPath
+  );
   const cloneWorker = new CloneWorker(
     queue,
     log,
@@ -51,7 +56,8 @@ export function initWorkers(
     gitOps,
     indexWorker,
     repoServiceFactory,
-    cancellationService
+    cancellationService,
+    watermarkService
   ).bind();
   const deleteWorker = new DeleteWorker(
     queue,
@@ -70,9 +76,9 @@ export function initWorkers(
     serverOptions,
     gitOps,
     repoServiceFactory,
-    cancellationService
+    cancellationService,
+    watermarkService
   ).bind();
-
   codeServices.registerHandler(
     RepositoryServiceDefinition,
     getRepositoryHandler(cloneWorker, deleteWorker, indexWorker)
