@@ -27,7 +27,7 @@ import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
 import { createTileMapVisualization } from './tile_map_visualization';
 import { visFactory } from '../../visualizations/public';
-import { TileMapOptions } from './editors/tile_map_vis_options';
+import { TileMapOptions } from './components/tile_map_options';
 
 export function createTileMapTypeDefinition(dependencies) {
   const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
