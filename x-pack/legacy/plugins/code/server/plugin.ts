@@ -82,6 +82,8 @@ export class CodePlugin {
       navLinkId: 'code',
       app: ['code', 'kibana'],
       catalogue: [], // TODO add catalogue here
+      excludeFromBasePrivileges: true,
+      privilegesTooltip: 'Code is currently in beta.',
       privileges: {
         all: {
           api: ['code_user', 'code_admin'],
