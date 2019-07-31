@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { formatNumber } from 'plugins/monitoring/lib/format_number';
-import { ClusterItemContainer, HealthStatusIndicator, BytesPercentageUsage } from './helpers';
+import { ClusterItemContainer, HealthStatusIndicator, BytesPercentageUsage, DisabledIfNoDataAndInSetupModeLink } from './helpers';
 import { get } from 'lodash';
 import {
   EuiFlexGrid,
@@ -39,11 +39,11 @@ export function KibanaPanel(props) {
   const goToKibana = () => props.changeUrl('kibana');
   const goToInstances = () => props.changeUrl('kibana/instances');
 
+  const setupModeKibanaData = get(setupMode.data, 'kibana');
   let setupModeInstancesData = null;
   if (setupMode.enabled && setupMode.data) {
-    const kibanaData = get(setupMode.data, 'kibana.byUuid');
-    const migratedNodesCount = Object.values(kibanaData).filter(node => node.isFullyMigrated).length;
-    const totalNodesCount = Object.values(kibanaData).length;
+    const migratedNodesCount = Object.values(setupModeKibanaData.byUuid).filter(node => node.isFullyMigrated).length;
+    const totalNodesCount = Object.values(setupModeKibanaData.byUuid).length;
 
     const badgeColor = migratedNodesCount === totalNodesCount
       ? 'secondary'
@@ -81,7 +81,9 @@ export function KibanaPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeKibanaData}
                   onClick={goToKibana}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'Kibana Overview'
@@ -92,7 +94,7 @@ export function KibanaPanel(props) {
                     id="xpack.monitoring.cluster.overview.kibanaPanel.overviewLinkLabel"
                     defaultMessage="Overview"
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
