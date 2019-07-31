@@ -213,7 +213,8 @@ describe('request lib', () => {
       });
     });
 
-    describe('callbacks', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/42225
+    describe.skip('callbacks', () => {
       describe('sendRequest', () => {
         it('sends the request', () => {
           initUseRequest({ ...successRequest });

@@ -3850,6 +3850,19 @@
     "@types/podium" "*"
     "@types/shot" "*"
 
+"@types/hapi__boom@*":
+  version "7.4.0"
+  resolved "https://registry.yarnpkg.com/@types/hapi__boom/-/hapi__boom-7.4.0.tgz#81d58cffb67c54896614560c007a5015a79c30ba"
+  integrity sha512-i4nerd/aJd5zW8OPHxgeuDYiuiuHxHczkqIaALhINUqBCavRgbiwjfndpgrarB43jcb/2LxzrohMOH7akyt3og==
+
+"@types/hapi__wreck@^15.0.1":
+  version "15.0.1"
+  resolved "https://registry.yarnpkg.com/@types/hapi__wreck/-/hapi__wreck-15.0.1.tgz#41df4e122c49316f0057cb5e9c6eb4c00e671e95"
+  integrity sha512-OXhOaFWPFkWkqU5IlFwgTK/Q3yzc3iDhC1/S+3rQ6d2qkl6xvcRZaayJGjDXORf3krnGtDN1l3bIajNcuUl6QA==
+  dependencies:
+    "@types/hapi__boom" "*"
+    "@types/node" "*"
+
 "@types/has-ansi@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/has-ansi/-/has-ansi-3.0.0.tgz#636403dc4e0b2649421c4158e5c404416f3f0330"
@@ -19939,11 +19952,6 @@ no-case@^2.2.0, no-case@^2.3.2:
   integrity sha512-rmTZ9kz+f3rCvK2TD1Ue/oZlns7OGoIWP4fc3llxxRXlOkHKoWPPWJOfFYpITabSow43QJbRIoHQXtt10VldyQ==
   dependencies:
     lower-case "^1.1.1"
-
-no-ui-slider@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/no-ui-slider/-/no-ui-slider-1.2.0.tgz#1f64f5a8b82e6786f3261d82b0cc99b598817e69"
-  integrity sha1-H2T1qLguZ4bzJh2CsMyZtZiBfmk=
 
 nock@10.0.6:
   version "10.0.6"
