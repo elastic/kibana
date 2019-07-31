@@ -26,8 +26,8 @@ function InfoPanel(info: IntegrationInfo) {
   const { description, version } = info;
   // TODO: Need title or something which uses correct capitalization (e.g. PostgreSQL)
   const title = description.split(' ')[0];
-  const links = useLinks();
-  useBreadcrumbs([{ text: PLUGIN.TITLE, href: links.toListView() }, { text: title }]);
+  const { toListView } = useLinks();
+  useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }, { text: title }]);
 
   return (
     <EuiPage restrictWidth={1200}>

@@ -16,8 +16,8 @@ export function IntegrationCard({
   version,
   icon: iconUrl,
 }: IntegrationCardProps) {
-  const links = useLinks();
-  const url = links.toDetailView({ name, version });
+  const { toDetailView } = useLinks();
+  const url = toDetailView({ name, version });
 
   // TODO: Need title or something which uses correct capitalization (e.g. PostgreSQL)
   const title = description.split(' ')[0];

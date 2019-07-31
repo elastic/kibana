@@ -21,8 +21,8 @@ import { getIntegrationsGroupedByStatus } from '../data';
 import { useBreadcrumbs, useLinks } from '../hooks';
 
 export function Home() {
-  const links = useLinks();
-  useBreadcrumbs([{ text: PLUGIN.TITLE, href: links.toListView() }]);
+  const { toListView } = useLinks();
+  useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }]);
 
   const [map, setMap] = useState<IntegrationsGroupedByStatus>({
     [STATUS_INSTALLED]: [],
@@ -82,12 +82,12 @@ function HeroCopy() {
 }
 
 function HeroImage() {
-  const links = useLinks();
+  const { toAssets } = useLinks();
   return (
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiImage
         alt="Illustration of computer"
-        url={links.toAssets('illustration_kibana_getting_started@2x.png')}
+        url={toAssets('illustration_kibana_getting_started@2x.png')}
         style={{ width: '475px', height: '273px' }}
       />
     </EuiFlexGroup>
