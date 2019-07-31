@@ -21,6 +21,7 @@ import {
   EuiBadge,
   EuiToolTip,
   EuiFlexGroup,
+  EuiIcon
 } from '@elastic/eui';
 import { LicenseText } from './license_text';
 import { i18n } from '@kbn/i18n';
@@ -139,6 +140,7 @@ export function ElasticsearchPanel(props) {
   const clusterStats = props.cluster_stats || {};
   const nodes = clusterStats.nodes;
   const indices = clusterStats.indices;
+  const setupMode = props.setupMode;
 
   const goToElasticsearch = () => props.changeUrl('elasticsearch');
   const goToNodes = () => props.changeUrl('elasticsearch/nodes');
@@ -149,6 +151,50 @@ export function ElasticsearchPanel(props) {
   const statusIndicator = (
     <HealthStatusIndicator status={clusterStats.status} />
   );
+
+  const licenseText = <LicenseText license={props.license} showLicenseExpiration={props.showLicenseExpiration} />;
+
+  const setupModeElasticsearchData = get(setupMode.data, 'elasticsearch');
+  let setupModeNodesData = null;
+  if (setupMode.enabled && setupModeElasticsearchData) {
+    const {
+      totalUniqueInstanceCount,
+      totalUniqueFullyMigratedCount,
+      totalUniquePartiallyMigratedCount
+    } = setupModeElasticsearchData;
+    const allMonitoredByMetricbeat = totalUniqueInstanceCount > 0 &&
+      (totalUniqueFullyMigratedCount === totalUniqueInstanceCount || totalUniquePartiallyMigratedCount === totalUniqueInstanceCount);
+    const internalCollectionOn = totalUniquePartiallyMigratedCount > 0;
+    if (!allMonitoredByMetricbeat || internalCollectionOn) {
+      let tooltipText = null;
+
+      if (!allMonitoredByMetricbeat) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.elasticsearchPanel.setupModeNodesTooltip.oneInternal', {
+          defaultMessage: `There's at least one node that isn't being monitored using Metricbeat. Click the flag icon to visit the nodes
+          listing page and find out more information about the status of each node.`
+        });
+      }
+      else if (internalCollectionOn) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.elasticsearchPanel.setupModeNodesTooltip.disableInternal', {
+          defaultMessage: `All nodes are being monitored using Metricbeat but internal collection still needs to be turned off. Click the
+          flag icon to visit the nodes listing page and disable internal collection.`
+        });
+      }
+
+      setupModeNodesData = (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={tooltipText}
+          >
+            <EuiLink onClick={goToNodes}>
+              <EuiIcon type="flag" color="warning"/>
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      );
+    }
+  }
 
   const showMlJobs = () => {
     // if license doesn't support ML, then `ml === null`
