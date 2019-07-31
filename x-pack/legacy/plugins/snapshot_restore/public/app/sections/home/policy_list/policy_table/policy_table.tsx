@@ -122,7 +122,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                         aria-label={i18n.translate(
                           'xpack.snapshotRestore.policyList.table.actionExecuteAriaLabel',
                           {
-                            defaultMessage: 'Run policy `{name}`',
+                            defaultMessage: `Run policy '{name}'`,
                             values: { name },
                           }
                         )}
@@ -153,7 +153,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                         aria-label={i18n.translate(
                           'xpack.snapshotRestore.policyList.table.actionDeleteAriaLabel',
                           {
-                            defaultMessage: 'Delete policy `{name}`',
+                            defaultMessage: `Delete policy '{name}'`,
                             values: { name },
                           }
                         )}

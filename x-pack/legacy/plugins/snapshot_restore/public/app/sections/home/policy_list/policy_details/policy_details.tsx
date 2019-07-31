@@ -193,7 +193,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                     return (
                       <EuiButtonEmpty
                         color="danger"
-                        data-test-subj="srPoicyDetailsDeleteActionButton"
+                        data-test-subj="srPolicyDetailsDeleteActionButton"
                         onClick={() => deletePolicyPrompt([policyName], onPolicyDeleted)}
                       >
                         <FormattedMessage
@@ -218,7 +218,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                         }
                         fill
                         color="primary"
-                        data-test-subj="srPoicyDetailsExecuteActionButton"
+                        data-test-subj="srPolicyDetailsExecuteActionButton"
                       >
                         <FormattedMessage
                           id="xpack.snapshotRestore.policyDetails.executeButtonLabel"
