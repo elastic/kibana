@@ -1,0 +1,125 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React from 'react';
+import {
+  EuiTitle,
+  EuiSpacer,
+  EuiHorizontalRule,
+  EuiButtonEmpty
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
+import { Filter } from './Filter';
+import { useLocalUIFilters } from '../../../hooks/useLocalUIFilters';
+import { TransactionTypeFilter } from './TransactionTypeFilter';
+
+type Props = Parameters<typeof useLocalUIFilters>[0] & {
+  showCount?: boolean;
+} & (
+    | {
+        showTransactionTypeFilter: true;
+        allowEmptyTransactionType?: boolean;
+        transactionTypes: string[];
+      }
+    | {});
+
+const ButtonWrapper = styled.div`
+   {
+    display: inline-block;
+  }
+`;
+
+const LocalUIFilters: React.FC<Props> = props => {
+  const { projection, params, filterNames, showCount = true } = props;
+
+  const {
+    showTransactionTypeFilter = false,
+    allowEmptyTransactionType = false,
+    transactionTypes = []
+  } = 'showTransactionTypeFilter' in props ? props : {};
+
+  const { data: filters, values, setValues } = useLocalUIFilters({
+    filterNames,
+    projection,
+    params
+  });
+
+  return (
+    <>
+      <EuiTitle size="s">
+        <h3>
+          {i18n.translate('xpack.apm.localFiltersTitle', {
+            defaultMessage: 'Filters'
+          })}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      {showTransactionTypeFilter ? (
+        <>
+          <TransactionTypeFilter
+            transactionTypes={transactionTypes}
+            showEmptyOption={allowEmptyTransactionType}
+          ></TransactionTypeFilter>
+          {!allowEmptyTransactionType && <EuiSpacer size="m" />}
+        </>
+      ) : null}
+      {filters.map(filter => {
+        const { name } = filter;
+        const filterValue = (name in values && values[name]) || [];
+
+        return (
+          <React.Fragment key={filter.name}>
+            <Filter
+              {...filter}
+              onChange={value => {
+                setValues({
+                  ...values,
+                  [filter.name]: value
+                });
+              }}
+              value={filterValue}
+              showCount={showCount}
+            />
+            <EuiHorizontalRule margin="none" />
+          </React.Fragment>
+        );
+      })}
+      <EuiSpacer size="s" />
+      <ButtonWrapper>
+        <EuiButtonEmpty
+          size="xs"
+          iconType="cross"
+          flush="left"
+          onClick={() => {
+            let clearedValues = Object.keys(values).reduce(
+              (acc, key) => {
+                return {
+                  ...acc,
+                  [key]: []
+                };
+              },
+              {} as Record<string, string[] | string>
+            );
+            if (showTransactionTypeFilter && allowEmptyTransactionType) {
+              clearedValues = {
+                ...clearedValues,
+                transactionType: ''
+              };
+            }
+            setValues(clearedValues);
+          }}
+        >
+          {i18n.translate('xpack.apm.clearFilters', {
+            defaultMessage: 'Clear filters'
+          })}
+        </EuiButtonEmpty>
+      </ButtonWrapper>
+    </>
+  );
+};
+
+export { LocalUIFilters };
