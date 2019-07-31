@@ -4,7 +4,7 @@
 // short-version can be:    8, 7, 6, etc.
 // release-state is only:   released | prerelease | unreleased
 
-:version:         7.3.1
+:version:         7.3.0
 :branch:          7.3
 :major-version:   7.x
 :short-version:   7
