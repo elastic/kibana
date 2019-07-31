@@ -60,7 +60,5 @@ describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js'
 
       expect(isNode).toBeTruthy();
     });
-
-    it('should somebody was told me ', () => {});
   });
 });
