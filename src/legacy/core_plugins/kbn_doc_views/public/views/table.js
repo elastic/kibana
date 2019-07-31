@@ -16,15 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import angular from 'angular';
+
 import _ from 'lodash';
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
-import chrome from 'ui/chrome';
-
 import '../filters/trust_as_html';
 import tableHtml from './table.html';
 import { i18n } from '@kbn/i18n';
-
+import { injectAngularElement } from './table_helper';
 
 function controller($scope) {
   $scope.mapping = $scope.indexPattern.fields.byName;
@@ -54,24 +52,6 @@ function controller($scope) {
   };
 }
 
-async function compileAngular(domNode, props) {
-  const $injector = await chrome.dangerouslyGetActiveInjector();
-  const rootScope = $injector.get('$rootScope');
-  const newScope = Object.assign(rootScope.$new(), props);
-  controller(newScope);
-
-  const linkFn = $injector.get('$compile')(tableHtml)(newScope);
-  newScope.$digest();
-  angular
-    .element(domNode)
-    .empty()
-    .append(linkFn);
-
-  return () => {
-    newScope.$destroy();
-  };
-}
-
 DocViewsRegistryProvider.register(function () {
   return {
     title: i18n.translate('kbnDocViews.table.tableTitle', {
@@ -79,7 +59,7 @@ DocViewsRegistryProvider.register(function () {
     }),
     order: 10,
     render: (domNode, props) => {
-      const cleanupFnPromise = compileAngular(domNode, props);
+      const cleanupFnPromise = injectAngularElement(domNode, tableHtml, props, controller);
       return () => {
         cleanupFnPromise.then(cleanup => cleanup());
       };
