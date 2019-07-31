@@ -13,14 +13,15 @@ import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from './validate_alert_type_params';
+import { SpacesPlugin } from '../../../spaces';
 
 interface CreateTaskRunnerFunctionOptions {
   getServices: (basePath: string) => Services;
   alertType: AlertType;
   fireAction: ActionsPlugin['fire'];
   internalSavedObjectsRepository: SavedObjectsClientContract;
-  spaceIdToNamespace: (spaceId: string) => string;
-  getBasePath: (spaceId: string) => string;
+  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
+  getBasePath: SpacesPlugin['getBasePath'];
 }
 
 interface TaskRunnerOptions {

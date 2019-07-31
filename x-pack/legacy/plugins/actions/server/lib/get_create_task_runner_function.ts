@@ -9,13 +9,14 @@ import { ExecutorError } from './executor_error';
 import { ActionTypeRegistryContract, GetServicesFunction } from '../types';
 import { TaskInstance } from '../../../task_manager';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
+import { SpacesPlugin } from '../../../spaces';
 
 interface CreateTaskRunnerFunctionOptions {
   getServices: GetServicesFunction;
   actionTypeRegistry: ActionTypeRegistryContract;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
-  spaceIdToNamespace: (spaceId: string) => string;
-  getBasePath: (spaceId: string) => string | undefined;
+  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
+  getBasePath: SpacesPlugin['getBasePath'];
 }
 
 interface TaskRunnerOptions {

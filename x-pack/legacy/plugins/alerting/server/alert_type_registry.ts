@@ -11,14 +11,15 @@ import { AlertType, Services } from './types';
 import { TaskManager } from '../../task_manager';
 import { getCreateTaskRunnerFunction } from './lib';
 import { ActionsPlugin } from '../../actions';
+import { SpacesPlugin } from '../../spaces';
 
 interface ConstructorOptions {
   getServices: (basePath: string) => Services;
   taskManager: TaskManager;
   fireAction: ActionsPlugin['fire'];
   internalSavedObjectsRepository: SavedObjectsClientContract;
-  spaceIdToNamespace: (spaceId: string) => string;
-  getBasePath: (spaceId: string) => string;
+  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
+  getBasePath: SpacesPlugin['getBasePath'];
 }
 
 export class AlertTypeRegistry {
@@ -27,8 +28,8 @@ export class AlertTypeRegistry {
   private readonly fireAction: ActionsPlugin['fire'];
   private readonly alertTypes: Map<string, AlertType> = new Map();
   private readonly internalSavedObjectsRepository: SavedObjectsClientContract;
-  private readonly spaceIdToNamespace: (spaceId: string) => string;
-  private readonly getBasePath: (spaceId: string) => string;
+  private readonly spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
+  private readonly getBasePath: SpacesPlugin['getBasePath'];
 
   constructor({
     internalSavedObjectsRepository,

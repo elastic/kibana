@@ -6,11 +6,12 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { TaskManager } from '../../task_manager';
+import { SpacesPlugin } from '../../spaces';
 
 interface CreateFireFunctionOptions {
   taskManager: TaskManager;
   internalSavedObjectsRepository: SavedObjectsClientContract;
-  spaceIdToNamespace: (spaceId: string) => string | undefined;
+  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
 }
 
 export interface FireOptions {

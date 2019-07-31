@@ -10,13 +10,14 @@ import { ActionType, GetServicesFunction } from './types';
 import { TaskManager, TaskRunCreatorFunction } from '../../task_manager';
 import { getCreateTaskRunnerFunction, ExecutorError } from './lib';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
+import { SpacesPlugin } from '../../spaces';
 
 interface ConstructorOptions {
   taskManager: TaskManager;
   getServices: GetServicesFunction;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
-  spaceIdToNamespace: (spaceId: string) => string;
-  getBasePath: (spaceId: string) => string | undefined;
+  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
+  getBasePath: SpacesPlugin['getBasePath'];
 }
 
 export class ActionTypeRegistry {

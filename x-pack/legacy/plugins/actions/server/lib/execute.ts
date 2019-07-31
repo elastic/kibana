@@ -11,7 +11,7 @@ import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
 
 interface ExecuteOptions {
   actionId: string;
-  namespace: string;
+  namespace?: string;
   services: Services;
   params: Record<string, any>;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
