@@ -98,6 +98,10 @@ export type CoreId = symbol;
 // @public
 export interface CoreSetup {
     // (undocumented)
+    context: {
+        createContextContainer: ContextSetup['createContextContainer'];
+    };
+    // (undocumented)
     elasticsearch: {
         adminClient$: Observable<ClusterClient>;
         dataClient$: Observable<ClusterClient>;
@@ -441,6 +445,8 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     };
     // (undocumented)
     logger: LoggerFactory;
+    // (undocumented)
+    opaqueId: PluginOpaqueId;
 }
 
 // @public
@@ -999,7 +1005,8 @@ export interface SessionStorageFactory<T> {
 // Warnings were encountered during analysis:
 // 
 // src/core/server/http/router/response.ts:188:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:38:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:155:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
+// src/core/server/index.ts:152:5 - (ae-forgotten-export) The symbol "ContextSetup" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:39:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:156:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 
 ```

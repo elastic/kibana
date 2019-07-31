@@ -17,20 +17,27 @@
  * under the License.
  */
 
-import { ConfigService, Env } from './config';
-import { LoggerFactory } from './logging';
+import { ContextService, ContextSetup } from './context_service';
+import { contextMock } from '../../utils/context.mock';
 
-/** @internal */
-export type CoreId = symbol;
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<ContextSetup> = {
+    createContextContainer: jest.fn().mockImplementation(() => contextMock.create()),
+    setPluginDependencies: jest.fn(),
+  };
+  return setupContract;
+};
 
-/**
- * Groups all main Kibana's core modules/systems/services that are consumed in a
- * variety of places within the core itself.
- * @internal
- */
-export interface CoreContext {
-  coreId: CoreId;
-  env: Env;
-  configService: ConfigService;
-  logger: LoggerFactory;
-}
+type ContextServiceContract = PublicMethodsOf<ContextService>;
+const createMock = () => {
+  const mocked: jest.Mocked<ContextServiceContract> = {
+    setup: jest.fn(),
+  };
+  mocked.setup.mockReturnValue(createSetupContractMock());
+  return mocked;
+};
+
+export const contextServiceMock = {
+  create: createMock,
+  createSetupContract: createSetupContractMock,
+};

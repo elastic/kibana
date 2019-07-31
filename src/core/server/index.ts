@@ -43,6 +43,7 @@ import {
 } from './elasticsearch';
 import { HttpServiceSetup, HttpServiceStart } from './http';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
+import { ContextSetup } from './context';
 
 export { bootstrap } from './bootstrap';
 export { ConfigService } from './config';
@@ -147,6 +148,9 @@ export { RecursiveReadonly } from '../utils';
  * @public
  */
 export interface CoreSetup {
+  context: {
+    createContextContainer: ContextSetup['createContextContainer'];
+  };
   elasticsearch: {
     adminClient$: Observable<ClusterClient>;
     dataClient$: Observable<ClusterClient>;

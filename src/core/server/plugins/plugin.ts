@@ -29,6 +29,7 @@ import {
   PluginManifest,
   PluginConfigSchema,
   PluginInitializer,
+  PluginOpaqueId,
 } from './types';
 import { CoreSetup, CoreStart } from '..';
 
@@ -58,6 +59,7 @@ export class PluginWrapper<
   constructor(
     public readonly path: string,
     public readonly manifest: PluginManifest,
+    public readonly opaqueId: PluginOpaqueId,
     private readonly initializerContext: PluginInitializerContext
   ) {
     this.log = initializerContext.logger.get();

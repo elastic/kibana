@@ -152,6 +152,7 @@ export interface Plugin<
  * @public
  */
 export interface PluginInitializerContext<ConfigSchema = unknown> {
+  opaqueId: PluginOpaqueId;
   env: { mode: EnvironmentMode };
   logger: LoggerFactory;
   config: {

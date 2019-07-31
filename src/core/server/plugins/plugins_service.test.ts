@@ -33,14 +33,17 @@ import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 import { config } from './plugins_config';
+import { contextServiceMock } from '../context/context_service.mock';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem> = PluginsSystem as any;
 
 let pluginsService: PluginsService;
 let configService: ConfigService;
+let coreId: symbol;
 let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
 const setupDeps = {
+  context: contextServiceMock.createSetupContract(),
   elasticsearch: elasticsearchServiceMock.createSetupContract(),
   http: httpServiceMock.createSetupContract(),
 };
@@ -63,6 +66,7 @@ beforeEach(async () => {
     },
   };
 
+  coreId = Symbol('core');
   env = Env.createDefault(getEnvOptions());
 
   configService = new ConfigService(
@@ -71,7 +75,7 @@ beforeEach(async () => {
     logger
   );
   await configService.setSchema(config.path, config.schema);
-  pluginsService = new PluginsService({ env, logger, configService });
+  pluginsService = new PluginsService({ coreId, env, logger, configService });
 
   [mockPluginSystem] = MockPluginsSystem.mock.instances as any;
 });
@@ -136,6 +140,7 @@ test('`setup` throws if discovered plugins with conflicting names', async () => 
           server: true,
           ui: true,
         },
+        Symbol(),
         { logger } as any
       ),
       new PluginWrapper(
@@ -150,6 +155,7 @@ test('`setup` throws if discovered plugins with conflicting names', async () => 
           server: true,
           ui: false,
         },
+        Symbol(),
         { logger } as any
       ),
     ]),
@@ -186,6 +192,7 @@ test('`setup` properly detects plugins that should be disabled.', async () => {
           server: true,
           ui: true,
         },
+        Symbol(),
         { logger } as any
       ),
       new PluginWrapper(
@@ -200,6 +207,7 @@ test('`setup` properly detects plugins that should be disabled.', async () => {
           server: true,
           ui: true,
         },
+        Symbol(),
         { logger } as any
       ),
       new PluginWrapper(
@@ -214,6 +222,7 @@ test('`setup` properly detects plugins that should be disabled.', async () => {
           server: true,
           ui: true,
         },
+        Symbol(),
         { logger } as any
       ),
       new PluginWrapper(
@@ -228,6 +237,7 @@ test('`setup` properly detects plugins that should be disabled.', async () => {
           server: true,
           ui: true,
         },
+        Symbol(),
         { logger } as any
       ),
     ]),
@@ -273,6 +283,7 @@ test('`setup` properly invokes `discover` and ignores non-critical errors.', asy
       server: true,
       ui: true,
     },
+    Symbol(),
     { logger } as any
   );
 
@@ -288,6 +299,7 @@ test('`setup` properly invokes `discover` and ignores non-critical errors.', asy
       server: true,
       ui: false,
     },
+    Symbol(),
     { logger } as any
   );
 
@@ -325,7 +337,7 @@ test('`setup` properly invokes `discover` and ignores non-critical errors.', asy
         resolve(process.cwd(), '..', 'kibana-extra'),
       ],
     },
-    { env, logger, configService }
+    { coreId, env, logger, configService }
   );
 
   const logs = loggingServiceMock.collect(logger);
@@ -367,6 +379,7 @@ test('`setup` registers plugin config schema in config service', async () => {
           server: true,
           ui: true,
         },
+        Symbol(),
         { logger } as any
       ),
     ]),

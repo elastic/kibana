@@ -29,6 +29,7 @@ import { PluginWrapper } from './plugin';
 import { DiscoveredPlugin, DiscoveredPluginInternal, PluginName } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
+import { ContextSetup } from '../context';
 
 /** @public */
 export interface PluginsServiceSetup {
@@ -46,6 +47,7 @@ export interface PluginsServiceStart {
 
 /** @internal */
 export interface PluginsServiceSetupDeps {
+  context: ContextSetup;
   elasticsearch: ElasticsearchServiceSetup;
   http: HttpServiceSetup;
 }
@@ -83,6 +85,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         uiPlugins: this.pluginsSystem.uiPlugins(),
       };
     }
+
+    // Configure context service with dependency tree
+    deps.context.setPluginDependencies(this.pluginsSystem.getOpaqueIds());
 
     return {
       contracts: await this.pluginsSystem.setupPlugins(deps),

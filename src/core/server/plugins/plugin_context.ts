@@ -20,7 +20,7 @@
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { PluginInitializerContext, PluginManifest } from './types';
+import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
 import { CoreSetup, CoreStart } from '..';
 
 /**
@@ -38,9 +38,12 @@ import { CoreSetup, CoreStart } from '..';
  */
 export function createPluginInitializerContext(
   coreContext: CoreContext,
+  opaqueId: PluginOpaqueId,
   pluginManifest: PluginManifest
 ): PluginInitializerContext {
   return {
+    opaqueId,
+
     /**
      * Environment information that is safe to expose to plugins and may be beneficial for them.
      */
@@ -96,6 +99,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreSetup {
   return {
+    context: {
+      createContextContainer: deps.context.createContextContainer,
+    },
     elasticsearch: {
       adminClient$: deps.elasticsearch.adminClient$,
       dataClient$: deps.elasticsearch.dataClient$,

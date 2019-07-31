@@ -34,6 +34,7 @@ import { loggingServiceMock } from '../logging/logging_service.mock';
 import { PluginWrapper } from './plugin';
 import { PluginName } from './types';
 import { PluginsSystem } from './plugins_system';
+import { contextServiceMock } from '../context/context_service.mock';
 
 const logger = loggingServiceMock.create();
 function createPlugin(
@@ -56,6 +57,7 @@ function createPlugin(
       server,
       ui: true,
     },
+    Symbol(id),
     { logger } as any
   );
 }
@@ -66,13 +68,14 @@ configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 let env: Env;
 let coreContext: CoreContext;
 const setupDeps = {
+  context: contextServiceMock.createSetupContract(),
   elasticsearch: elasticsearchServiceMock.createSetupContract(),
   http: httpServiceMock.createSetupContract(),
 };
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 
-  coreContext = { env, logger, configService: configService as any };
+  coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
 
   pluginsSystem = new PluginsSystem(coreContext);
 });
@@ -86,6 +89,27 @@ test('can be setup even without plugins', async () => {
 
   expect(pluginsSetup).toBeInstanceOf(Map);
   expect(pluginsSetup.size).toBe(0);
+});
+
+test('getOpaqueIds returns dependency tree of symbols', () => {
+  pluginsSystem.addPlugin(createPlugin('plugin-a', { required: ['no-dep'] }));
+  pluginsSystem.addPlugin(
+    createPlugin('plugin-b', { required: ['plugin-a'], optional: ['no-dep', 'other'] })
+  );
+  pluginsSystem.addPlugin(createPlugin('no-dep'));
+
+  expect(pluginsSystem.getOpaqueIds()).toMatchInlineSnapshot(`
+    Map {
+      Symbol(plugin-a) => Array [
+        Symbol(no-dep),
+      ],
+      Symbol(plugin-b) => Array [
+        Symbol(plugin-a),
+        Symbol(no-dep),
+      ],
+      Symbol(no-dep) => Array [],
+    }
+  `);
 });
 
 test('`setupPlugins` throws plugin has missing required dependency', async () => {
