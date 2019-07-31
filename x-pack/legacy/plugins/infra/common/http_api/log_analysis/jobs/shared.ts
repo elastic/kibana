@@ -6,17 +6,7 @@
 
 import * as rt from 'io-ts';
 
-export const jobTypeRT = rt.keyof({
-  entry_rate: null,
-  rare_categories: null,
-  high_categories: null,
-});
-
-export const jobStatusRT = rt.keyof({
-  created: null,
-  missing: null,
-  running: null,
-});
+import { jobStatusRT, jobTypeRT } from '../../../log_analysis';
 
 export const jobDescriptorRT = rt.type({
   jobId: rt.string,

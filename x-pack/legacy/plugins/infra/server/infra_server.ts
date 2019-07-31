@@ -15,7 +15,10 @@ import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
 import { InfraBackendLibs } from './lib/infra_types';
 import { initMetricExplorerRoute } from './routes/metrics_explorer';
-import { initLogAnalysisCreateJobRoute } from './routes/log_analysis';
+import {
+  initLogAnalysisCreateJobRoute,
+  initLogAnalysisGetLogEntryRateRoute,
+} from './routes/log_analysis';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
@@ -34,5 +37,6 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
 
   initIpToHostName(libs);
   initLogAnalysisCreateJobRoute(libs);
+  initLogAnalysisGetLogEntryRateRoute(libs);
   initMetricExplorerRoute(libs);
 };

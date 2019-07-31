@@ -18,6 +18,7 @@ import { InfraLogEntriesDomain } from '../domains/log_entries_domain';
 import { InfraMetadataDomain } from '../domains/metadata_domain';
 import { InfraMetricsDomain } from '../domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from '../infra_types';
+import { InfraLogAnalysis } from '../log_analysis';
 import { InfraSnapshot } from '../snapshot';
 import { InfraSourceStatus } from '../source_status';
 import { InfraSources } from '../sources';
@@ -33,6 +34,7 @@ export function compose(server: Server): InfraBackendLibs {
     sources,
   });
   const snapshot = new InfraSnapshot({ sources, framework });
+  const logAnalysis = new InfraLogAnalysis({ framework });
 
   const domainLibs: InfraDomainLibs = {
     metadata: new InfraMetadataDomain(new ElasticsearchMetadataAdapter(framework), {
@@ -50,6 +52,7 @@ export function compose(server: Server): InfraBackendLibs {
   const libs: InfraBackendLibs = {
     configuration,
     framework,
+    logAnalysis,
     snapshot,
     sources,
     sourceStatus,

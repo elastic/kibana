@@ -49,11 +49,17 @@ export interface InfraBackendFrameworkAdapter {
   ): Promise<InfraDatabaseGetIndicesResponse>;
   callWithRequest(
     req: InfraFrameworkRequest,
+    method: 'ml.getBuckets',
+    options?: object
+  ): Promise<InfraDatabaseGetIndicesResponse>;
+  callWithRequest(
+    req: InfraFrameworkRequest,
     method: string,
     options?: object
   ): Promise<InfraDatabaseSearchResponse>;
   getIndexPatternsService(req: InfraFrameworkRequest<any>): Legacy.IndexPatternsService;
   getSavedObjectsService(): Legacy.SavedObjectsService;
+  getSpaceId(request: InfraFrameworkRequest<any>): string;
   makeTSVBRequest(
     req: InfraFrameworkRequest,
     model: InfraMetricModel,

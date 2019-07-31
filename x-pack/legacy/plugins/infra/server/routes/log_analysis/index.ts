@@ -5,3 +5,4 @@
  */
 
 export * from './jobs';
+export * from './results';
