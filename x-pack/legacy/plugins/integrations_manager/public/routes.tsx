@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { generatePath, Route } from 'react-router-dom';
-import { npStart } from 'ui/new_platform';
 import { Detail } from './screens/detail';
 import { Home } from './screens/home';
 import { PLUGIN } from '../common/constants';
@@ -26,9 +25,8 @@ interface DetailMatch {
   };
 }
 
-const { prepend } = npStart.core.http.basePath;
 // include '#' because we're using HashRouter
-const prependRoot = (path: string) => prepend(patterns.APP_ROOT + '#' + path);
+const prependRoot = (path: string) => `${patterns.APP_ROOT}#${path}`;
 
 // TODO: get this from server/integrations/handlers.ts (move elsewhere?)
 // seems like part of the name@version change
