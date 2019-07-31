@@ -84,8 +84,7 @@ export class TMSService {
     const attributions = this._config.attribution.map(attribution => {
       const url = this._emsClient.getValueInLanguage(attribution.url);
       const label = this._emsClient.getValueInLanguage(attribution.label);
-      const markdown = `[${label}](${url})`;
-      return markdown;
+      return `[${label}](${url})`;
     });
     return attributions.join('|');
   }
@@ -111,5 +110,4 @@ export class TMSService {
   getOrigin() {
     return ORIGIN.EMS;
   }
-
 }

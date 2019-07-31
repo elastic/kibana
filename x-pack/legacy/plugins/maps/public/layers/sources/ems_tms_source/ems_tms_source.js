@@ -10,7 +10,7 @@ import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
 
-import { getEmsTMSServices } from '../../../meta';
+import { getEMSClient, getTMSMetaFromTMSService } from '../../../meta';
 import { EMSTMSCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -75,18 +75,17 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   async _getEmsTmsMeta() {
-    const emsTileServices = await getEmsTMSServices();
+    const emsClient = getEMSClient();
+    const emsTMSServices = await emsClient.getTMSServices();
     const emsTileLayerId = this._getEmsTileLayerId();
-    const meta = emsTileServices.find(service => {
-      return service.id === emsTileLayerId;
-    });
-    if (!meta) {
+    const tmsService = emsTMSServices.find(tmsService => tmsService.getId() === emsTileLayerId);
+    if (!tmsService) {
       throw new Error(i18n.translate('xpack.maps.source.emsTile.errorMessage', {
         defaultMessage: `Unable to find EMS tile configuration for id: {id}`,
         values: { id: emsTileLayerId }
       }));
     }
-    return meta;
+    return await getTMSMetaFromTMSService(tmsService);
   }
 
   _createDefaultLayerDescriptor(options) {

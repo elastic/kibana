@@ -5,7 +5,7 @@
  */
 
 
-import { GIS_API_PATH, EMS_META_PATH } from '../common/constants';
+import { GIS_API_PATH, EMS_META_PATH, EMS_DATA_TMS_PATH } from '../common/constants';
 import _ from 'lodash';
 import { getEMSResources } from '../common/ems_util';
 import chrome from 'ui/chrome';
@@ -65,12 +65,6 @@ export async function getEmsVectorFilesMeta() {
   return _.get(dataSource, 'ems.file', []);
 }
 
-export async function getEmsTMSServices() {
-  const dataSource = await getEMSDataSources();
-  const tmsServices = _.get(dataSource, 'ems.tms', []);
-  return [...tmsServices];
-}
-
 export function getKibanaRegionList() {
   return chrome.getInjected('regionmapLayers');
 }
@@ -115,4 +109,20 @@ export function getEMSClient() {
   }
   return emsClient;
 
+}
+
+
+export async function getTMSMetaFromTMSService(tmsService) {
+  const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
+  return {
+    name: tmsService.getDisplayName(),
+    origin: tmsService.getOrigin(),
+    id: tmsService.getId(),
+    minZoom: await tmsService.getMinZoom(),
+    maxZoom: await tmsService.getMaxZoom(),
+    attribution: tmsService.getHTMLAttribution(),
+    attributionMarkdown: tmsService.getMarkdownAttribution(),
+    // eslint-disable-next-line max-len
+    url: proxyElasticMapsServiceInMaps ?   `../${GIS_API_PATH}/${EMS_DATA_TMS_PATH}?id=${encodeURIComponent(tmsService.getId())}&x={x}&y={y}&z={z}` : await tmsService.getUrlTemplate()
+  };
 }
