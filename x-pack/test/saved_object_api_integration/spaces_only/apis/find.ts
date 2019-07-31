@@ -35,6 +35,11 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
         },
+        hiddenType: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
+        },
         unknownType: {
           description: 'empty result',
           statusCode: 200,
@@ -70,6 +75,11 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 200,
           response: expectNotSpaceAwareResults,
+        },
+        hiddenType: {
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
         },
         unknownType: {
           description: 'empty result',
