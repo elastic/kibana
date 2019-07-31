@@ -5,7 +5,7 @@
  */
 
 import createContainer from 'constate-latest';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   CreateSourceConfigurationMutation,
@@ -121,15 +121,12 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     [apolloClient, sourceId]
   );
 
-  const createDerivedIndexPattern = useCallback(
-    (type: 'logs' | 'metrics' | 'both') => {
-      return {
-        fields: source ? source.status.indexFields : [],
-        title: pickIndexPattern(source, type),
-      };
-    },
-    [source]
-  );
+  const createDerivedIndexPattern = (type: 'logs' | 'metrics' | 'both') => {
+    return {
+      fields: source ? source.status.indexFields : [],
+      title: pickIndexPattern(source, type),
+    };
+  };
 
   const isLoading = useMemo(
     () =>
