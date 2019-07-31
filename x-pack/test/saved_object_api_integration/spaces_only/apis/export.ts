@@ -16,6 +16,7 @@ export default function({ getService }: TestInvoker) {
   const {
     expectTypeOrObjectsRequired,
     createExpectVisualizationResults,
+    expectInvalidTypeSpecified,
     exportTest,
   } = exportTestSuiteFactory(esArchiver, supertest);
 
@@ -27,6 +28,11 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 200,
           response: createExpectVisualizationResults(SPACES.SPACE_1.spaceId),
+        },
+        hiddenType: {
+          description: 'exporting space not allowed',
+          statusCode: 400,
+          response: expectInvalidTypeSpecified,
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -43,6 +49,11 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 200,
           response: createExpectVisualizationResults(SPACES.DEFAULT.spaceId),
+        },
+        hiddenType: {
+          description: 'exporting space not allowed',
+          statusCode: 400,
+          response: expectInvalidTypeSpecified,
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
