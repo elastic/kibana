@@ -396,7 +396,7 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
       return savedObjectsClient.create(esType, source, options)
         .catch(err => {
           // record exists, confirm overwriting
-          if (_.get(err, 'res.status') === 409) {
+          if (_.get(err, 'response.status') === 409) {
             const confirmMessage = i18n.translate('common.ui.savedObjects.confirmModal.overwriteConfirmationMessage', {
               defaultMessage: 'Are you sure you want to overwrite {title}?',
               values: { title: this.title }
