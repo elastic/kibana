@@ -30,6 +30,7 @@ import { IndexPatternPrivateState, IndexPatternField, IndexPattern } from './ind
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
 import { FieldIcon } from './field_icon';
+import { hasField } from './utils';
 
 // TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
 const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.FunctionComponent<
@@ -50,6 +51,58 @@ const fieldTypeNames: Record<DataType, string> = {
   date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
 };
 
+function updateLayerIndexPatterns(
+  layers: IndexPatternPrivateState['layers'],
+  currentIndexPattern: IndexPattern,
+  newIndexPattern: IndexPattern
+) {
+  const currentlyUsedIndexPatterns = _.uniq(
+    Object.values(layers).map(layer => layer.indexPatternId)
+  );
+  if (
+    currentlyUsedIndexPatterns.length === 1 &&
+    currentlyUsedIndexPatterns[0] !== newIndexPattern.id
+  ) {
+    // only try to auto-change the index pattern if there is a single one used
+    const usedFields = _.uniq(
+      _.flatten(
+        Object.values(layers).map(layer =>
+          Object.values(layer.columns).map(column => hasField(column) && column.sourceField)
+        )
+      ).filter(fieldName => Boolean(fieldName))
+    );
+    const isTransferable = usedFields.every(fieldName => {
+      const newField = newIndexPattern.fields.find(field => field.name === fieldName);
+      if (!newField) {
+        return false;
+      }
+      const oldField = currentIndexPattern.fields.find(field => field.name === fieldName)!;
+      if (
+        (!newField.aggregatable && oldField.aggregatable) ||
+        (!newField.searchable && oldField.searchable) ||
+        (newField.aggregationRestrictions &&
+          !_.isEqual(oldField.aggregationRestrictions, newField.aggregationRestrictions))
+      ) {
+        return false;
+      }
+      return true;
+    });
+
+    if (isTransferable) {
+      return _.mapValues(layers, layer => ({
+        ...layer,
+        indexPatternId: newIndexPattern.id,
+        columns: _.mapValues(layer.columns, column => ({
+          ...column,
+          indexPatternId: newIndexPattern.id,
+        })),
+      }));
+    }
+  }
+
+  return layers;
+}
+
 export function IndexPatternDataPanel({
   setState,
   state,
@@ -63,6 +116,11 @@ export function IndexPatternDataPanel({
       setState({
         ...state,
         currentIndexPatternId: newIndexPattern,
+        layers: updateLayerIndexPatterns(
+          state.layers,
+          indexPatterns[currentIndexPatternId],
+          indexPatterns[newIndexPattern]
+        ),
       });
     },
     [state, setState]
@@ -332,4 +390,4 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   );
 };
 
-const MemoizedDataPanel = memo(InnerIndexPatternDataPanel);
+export const MemoizedDataPanel = memo(InnerIndexPatternDataPanel);
