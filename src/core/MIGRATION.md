@@ -1142,15 +1142,15 @@ const validate = {
 
 - declare a function to respond to incoming request.
 The function will receive `request` object containing request details: url, headers, matched route, as well as validated `params`, `query`, `body`.
-And `createResponse` object instructing HTTP server to create HTTP response with information sent back to the client as the response body, headers, and HTTP status.
+And `response` object instructing HTTP server to create HTTP response with information sent back to the client as the response body, headers, and HTTP status.
 Unlike, `hapi` route handler in the Legacy platform, any exception raised during the handler call will generate `500 Server error` response and log error details for further investigation.
 ```ts
-  const handler = async (request: KibanaRequest, createResponse: ResponseFactory) => {
+  const handler = async (request: KibanaRequest, response: ResponseFactory) => {
     const data = await findObject(request.params.id);
     // creates a command to respond with 'not found' error
-    if (!data) return createResponse.notFound();
+    if (!data) return response.notFound();
     // creates a command to send found data to the client and set response headers
-    return createResponse.ok(data, {
+    return response.ok(data, {
       headers: {
         'content-type': 'application/json'
       }
@@ -1175,10 +1175,10 @@ router.get(
     path: 'path/{id}',
     validate
   },
-  async (request, createResponse) => {
+  async (request, response) => {
     const data = await findObject(request.params.id);
-    if (!data) return createResponse.notFound();
-    return createResponse.ok(data, {
+    if (!data) return response.notFound();
+    return response.ok(data, {
       headers: {
         'content-type': 'application/json'
       }
@@ -1187,7 +1187,7 @@ router.get(
 );
 ```
 #### What data I can send back with a response?
-You have several options to create a response utilizing `createResponse`:
+You have several options to create a response utilizing `response`:
 1. create a successful response. Supported types of response body are:
 - `undefined`, no content to send.
 - `string`, send text
