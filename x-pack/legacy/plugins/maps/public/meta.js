@@ -7,9 +7,6 @@
 
 import {
   GIS_API_PATH,
-  EMS_DATA_TMS_PATH,
-  EMS_DATA_FILE_PATH,
-
   EMS_CATALOGUE_PATH,
   EMS_TILES_CATALOGUE_PATH,
   EMS_FILES_CATALOGUE_PATH,
@@ -21,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import { EMSClient } from 'ui/vis/map/ems_client';
 import { xpackInfo } from './kibana_services';
 
-
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
 export function getKibanaRegionList() {
@@ -31,7 +27,6 @@ export function getKibanaRegionList() {
 export function getKibanaTileMap() {
   return chrome.getInjected('tilemap');
 }
-
 
 let emsClient = null;
 let latestLicenseId = null;

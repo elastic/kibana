@@ -24,13 +24,13 @@ export class TMSService {
 
   _getDefaultStyleJson = _.once(async () => {
     const url = this._getDefaultStyleUrl();
-    this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
+    return this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
   });
 
   constructor(config,  emsClient, proxyOptions) {
     this._config = config;
     this._emsClient = emsClient;
-    this._proxyOptions = null;
+    this._proxyOptions = proxyOptions;
   }
 
   _getRasterFormats(locale) {
@@ -54,12 +54,12 @@ export class TMSService {
   }
 
   async getUrlTemplate() {
-    const tileJson = await this._getDefaultStyleJson();
     let url;
     if (this._proxyOptions) {
       const serviceId = encodeURIComponent(this.getId());
       url = `${this._proxyOptions.tmsServiceDefaultRaster}?id=${serviceId}&x={x}&y={y}&z={z}`;
     } else {
+      const tileJson = await this._getDefaultStyleJson();
       const directUrl = tileJson.tiles[0];
       url = this._emsClient.extendUrlWithParams(directUrl);
     }
