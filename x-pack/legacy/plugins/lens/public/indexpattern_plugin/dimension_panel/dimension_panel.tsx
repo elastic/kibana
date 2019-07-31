@@ -88,8 +88,13 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
 
   function canHandleDrop() {
     const { dragging } = props.dragDropContext;
+    const layerIndexPatternId = props.state.layers[props.layerId].indexPatternId;
 
-    return isIndexPatternField(dragging) && Boolean(hasOperationForField(dragging));
+    return (
+      isIndexPatternField(dragging) &&
+      layerIndexPatternId === dragging.indexPatternId &&
+      Boolean(hasOperationForField(dragging))
+    );
   }
 
   return (
