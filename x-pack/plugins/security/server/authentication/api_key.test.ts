@@ -21,6 +21,7 @@ describe('createApiKey()', () => {
       isSecurityFeatureDisabled: () => true,
     });
     expect(result).toBeNull();
+    expect(mockCallCluster).not.toHaveBeenCalled();
   });
 
   test('calls callCluster with proper body arguments', async () => {
