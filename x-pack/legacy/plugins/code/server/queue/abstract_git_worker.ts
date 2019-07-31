@@ -43,7 +43,7 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     if (thresholdEnabled) {
       const isLowWatermark = await this.watermarkService.isLowWatermark();
       if (isLowWatermark) {
-        const msg = i18n.translate('xpack.code.git.diskWatermarkLow', {
+        const msg = i18n.translate('xpack.code.git.diskWatermarkLowMessage', {
           defaultMessage: `Disk watermark level lower than {watermarkLowMb} MB`,
           values: {
             watermarkLowMb,
