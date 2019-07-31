@@ -9,7 +9,7 @@ import { last } from 'lodash';
 import React from 'react';
 import { InternalCoreStart } from 'src/core/public';
 import { useCore } from '../../../hooks/useCore';
-import { getAPMHref } from '../../shared/Links/APMLink';
+import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import { Breadcrumb, ProvideBreadcrumbs } from './ProvideBreadcrumbs';
 import { routes } from './route_config';
 

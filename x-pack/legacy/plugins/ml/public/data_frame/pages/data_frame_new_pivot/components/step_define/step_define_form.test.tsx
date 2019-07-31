@@ -14,6 +14,7 @@ import {
   PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
+import { IndexPattern } from 'ui/index_patterns';
 import { StepDefineForm, isAggNameConflict } from './step_define_form';
 
 // workaround to make React.memo() work with enzyme
@@ -24,11 +25,11 @@ jest.mock('react', () => {
 
 describe('Data Frame: <DefinePivotForm />', () => {
   test('Minimal initialization', () => {
-    const currentIndexPattern = {
+    const currentIndexPattern = ({
       id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
       fields: [],
-    };
+    } as unknown) as IndexPattern;
 
     // Using a wrapping <div> element because shallow() would fail
     // with the Provider being the outer most component.

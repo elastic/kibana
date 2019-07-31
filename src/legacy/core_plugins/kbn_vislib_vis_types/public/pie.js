@@ -20,7 +20,7 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import pieTemplate from './editors/pie.html';
+import { PieOptions } from './editors/pie';
 
 export default function HistogramVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -64,7 +64,7 @@ export default function HistogramVisType(Private) {
           text: 'bottom',
         }],
       },
-      optionsTemplate: pieTemplate,
+      optionsTemplate: PieOptions,
       schemas: new Schemas([
         {
           group: 'metrics',
