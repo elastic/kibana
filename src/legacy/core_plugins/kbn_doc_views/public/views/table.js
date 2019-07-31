@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
+import { addDocView } from 'ui/registry/doc_views';
 import '../filters/trust_as_html';
 import tableHtml from './table.html';
 import { i18n } from '@kbn/i18n';
@@ -52,17 +52,15 @@ function controller($scope) {
   };
 }
 
-DocViewsRegistryProvider.register(function () {
-  return {
-    title: i18n.translate('kbnDocViews.table.tableTitle', {
-      defaultMessage: 'Table',
-    }),
-    order: 10,
-    render: (domNode, props) => {
-      const cleanupFnPromise = injectAngularElement(domNode, tableHtml, props, controller);
-      return () => {
-        cleanupFnPromise.then(cleanup => cleanup());
-      };
-    },
-  };
+addDocView({
+  title: i18n.translate('kbnDocViews.table.tableTitle', {
+    defaultMessage: 'Table',
+  }),
+  order: 10,
+  render: (domNode, props) => {
+    const cleanupFnPromise = injectAngularElement(domNode, tableHtml, props, controller);
+    return () => {
+      cleanupFnPromise.then(cleanup => cleanup());
+    };
+  },
 });

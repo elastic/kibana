@@ -16,18 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+export const docViews = [];
 
-import _ from 'lodash';
-import { uiRegistry } from './_registry';
-
-export const DocViewsRegistryProvider = uiRegistry({
-  name: 'docViews',
-  index: ['name'],
-  order: ['order'],
-  constructor() {
-    this.forEach(docView => {
-      docView.shouldShow = docView.shouldShow || _.constant(true);
-      docView.name = docView.name || docView.title;
-    });
+export function addDocView(docViewRaw) {
+  const docView = typeof docViewRaw === 'function' ? docViewRaw() : docViewRaw;
+  if (typeof docView.shouldShow !== 'function') {
+    docView.shouldShow = () => true;
   }
-});
+  docViews.push(docView);
+}
+
+export function getDocViewsSorted(hit) {
+  return docViews.filter(docView => docView.shouldShow(hit)).sort(docView => Number(docView.order));
+}
+/**
+ * for compatiblity with 3rd Party plugins
+ */
+export const DocViewsRegistryProvider = {
+  register: docView => {
+    addDocView(docView);
+  },
+};

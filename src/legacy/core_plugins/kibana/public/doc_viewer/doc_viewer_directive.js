@@ -19,11 +19,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { uiModules } from 'ui/modules';
-import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
+import { getDocViewsSorted } from 'ui/registry/doc_views';
 import { DocViewer } from './doc_viewer';
 
-uiModules.get('apps/discover').directive('docViewer', function (Private) {
-  const docViews = Private(DocViewsRegistryProvider);
+uiModules.get('apps/discover').directive('docViewer', function () {
   return {
     restrict: 'E',
     scope: {
@@ -44,6 +43,7 @@ uiModules.get('apps/discover').directive('docViewer', function (Private) {
         onRemoveColumn: scope.onRemoveColumn,
         hit: scope.hit,
       };
+      const docViews = getDocViewsSorted(scope.hit);
       ReactDOM.render(
         <DocViewer renderProps={props} docViews={docViews} />,
         element[0]

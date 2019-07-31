@@ -17,7 +17,7 @@
  * under the License.
  */
 // @ts-ignore
-import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
+import { addDocView } from 'ui/registry/doc_views';
 import { i18n } from '@kbn/i18n';
 import { JsonCodeEditor } from './json_code_editor';
 
@@ -25,12 +25,10 @@ import { JsonCodeEditor } from './json_code_editor';
  * Registration of the the doc view: json
  * - used to display an ES hit as pretty printed JSON at Discover
  */
-DocViewsRegistryProvider.register(function() {
-  return {
-    title: i18n.translate('kbnDocViews.json.jsonTitle', {
-      defaultMessage: 'JSON',
-    }),
-    order: 20,
-    component: JsonCodeEditor,
-  };
+addDocView({
+  title: i18n.translate('kbnDocViews.json.jsonTitle', {
+    defaultMessage: 'JSON',
+  }),
+  order: 20,
+  component: JsonCodeEditor,
 });
