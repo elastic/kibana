@@ -7,7 +7,7 @@
 import { getEntries } from '../get_entries';
 
 export const getHostNameFromInfluencers = (
-  influencers: Array<Record<string, string>>,
+  influencers: Array<Record<string, string>> = [],
   hostName?: string
 ): string | null => {
   const recordFound = influencers.find(influencer => {
