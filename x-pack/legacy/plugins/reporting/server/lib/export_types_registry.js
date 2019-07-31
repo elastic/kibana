@@ -6,8 +6,9 @@
 
 import { resolve } from 'path';
 import glob from 'glob';
+import { PLUGIN_ID } from '../../common/constants';
 import { ExportTypesRegistry } from '../../common/export_types_registry';
-import { oncePerServer } from './once_per_server';
+import { oncePerServer, LevelLogger } from './';
 
 function scan(pattern) {
   return new Promise((resolve, reject) => {
@@ -23,10 +24,12 @@ function scan(pattern) {
 
 const pattern = resolve(__dirname, '../../export_types/*/server/index.[jt]s');
 async function exportTypesRegistryFn(server) {
+  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'exportTypes']);
   const exportTypesRegistry = new ExportTypesRegistry();
   const files = await scan(pattern);
+
   files.forEach(file => {
-    server.log(['reporting', 'debug', 'exportTypes'], `Found exportType at ${file}`);
+    logger.debug(`Found exportType at ${file}`);
 
     const { register } = require(file); // eslint-disable-line import/no-dynamic-require
     register(exportTypesRegistry);

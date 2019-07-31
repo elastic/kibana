@@ -18,6 +18,8 @@
  */
 
 import _ from 'lodash';
+
+// TODO: reference to TILE_MAP plugin should be removed
 import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
 
 export function mapToLayerWithId(prefix, layer) {

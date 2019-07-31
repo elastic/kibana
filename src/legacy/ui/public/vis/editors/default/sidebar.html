@@ -151,10 +151,24 @@
 
     <div class="visEditorSidebar__config" ng-show="sidebar.section == 'data'">
       <!-- metrics -->
-      <vis-editor-agg-group ng-if="vis.type.schemas.metrics" data-test-subj="metricsAggGroup" group-name="metrics"></vis-editor-agg-group>
-
+      <vis-editor-agg-group
+        class="visEditorSidebar__aggGroup"
+        ng-if="vis.type.schemas.metrics"
+        group-name="metrics"
+        ng-model="_internalNgModelState"
+        data-test-subj="metricsAggGroup"
+        schemas="vis.type.schemas.metrics"
+      ></vis-editor-agg-group>
+      <div class="euiSpacer euiSpacer--s"></div>
       <!-- buckets -->
-      <vis-editor-agg-group ng-if="vis.type.schemas.buckets" data-test-subj="bucketsAggGroup" group-name="buckets"></vis-editor-agg-group>
+      <vis-editor-agg-group
+        class="visEditorSidebar__aggGroup"
+        ng-if="vis.type.schemas.buckets"
+        group-name="buckets"
+        ng-model="_internalNgModelState"
+        data-test-subj="bucketsAggGroup"
+        schemas="vis.type.schemas.buckets"
+      ></vis-editor-agg-group>
     </div>
 
     <div class="visEditorSidebar__config" ng-repeat="tab in vis.type.editorConfig.optionTabs" ng-show="sidebar.section == tab.name">

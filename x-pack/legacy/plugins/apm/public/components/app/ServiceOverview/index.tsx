@@ -70,7 +70,7 @@ export function ServiceOverview() {
         )
       });
     }
-  }, [data.hasLegacyData]);
+  }, [data.hasLegacyData, core.http.basePath]);
 
   useTrackPageview({ app: 'apm', path: 'services_overview' });
   useTrackPageview({ app: 'apm', path: 'services_overview', delay: 15000 });

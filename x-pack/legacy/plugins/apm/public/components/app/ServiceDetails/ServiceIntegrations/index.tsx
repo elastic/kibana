@@ -21,7 +21,6 @@ import { WatcherFlyout } from './WatcherFlyout';
 import { CoreContext } from '../../../../context/CoreContext';
 
 interface Props {
-  transactionTypes: string[];
   urlParams: IUrlParams;
 }
 interface State {
@@ -157,7 +156,6 @@ export class ServiceIntegrations extends React.Component<Props, State> {
               isOpen={this.state.activeFlyout === 'ML'}
               onClose={this.closeFlyouts}
               urlParams={this.props.urlParams}
-              serviceTransactionTypes={this.props.transactionTypes}
             />
             <WatcherFlyout
               isOpen={this.state.activeFlyout === 'Watcher'}
