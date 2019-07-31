@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: 'Transport Address\n127.0.0.1:9302',
           jvmHeap: 'JVM Heap\n17%',
-          freeDiskSpace: 'Free Disk Space\n173.9 GB',
+          freeDiskSpace: 'Free Disk Space\n173.9 GB (37.42%)',
           documentCount: 'Documents\n240',
           dataSize: 'Data\n1.4 MB',
           indicesCount: 'Indices\n4',
