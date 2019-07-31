@@ -39,61 +39,49 @@
       </div>
 
       <div class="dscWrapper col-md-10">
-        <div class="dscWrapper__content">
-          <discover-unsupported-index-pattern
-            ng-if="isUnsupportedIndexPattern"
-            unsupported-type="unsupportedIndexPatternType"
-          ></discover-unsupported-index-pattern>
+        <discover-unsupported-index-pattern
+          ng-if="isUnsupportedIndexPattern"
+          unsupported-type="unsupportedIndexPatternType"
+        ></discover-unsupported-index-pattern>
 
-          <div ng-show="resultState === 'uninitialized'">
-            <div class="euiText">
-              <h3
-                i18n-id="kbn.discover.uninitializedTitle"
-                i18n-default-message="Start searching"
-              ></h3>
-              <p
-                i18n-id="kbn.discover.uninitializedText"
-                i18n-default-message="Write a query, add some filters, or simply hit Refresh to retrieve results for the current query"
-              ></p>
-            </div>
-          </div>
+        <discover-no-results
+          ng-show="resultState === 'none'"
+          shard-failures="failures"
+          time-field-name="opts.timefield"
+          query-language="state.query.language"
+          get-doc-link="getDocLink"
+        ></discover-no-results>
 
-          <discover-no-results
-            ng-show="resultState === 'none'"
-            shard-failures="failures"
-            time-field-name="opts.timefield"
-            query-language="state.query.language"
-            get-doc-link="getDocLink"
-          ></discover-no-results>
+        <discover-uninitialized ng-show="resultState === 'uninitialized'"></discover-uninitialized>
 
-          <!-- loading -->
-          <div ng-show="resultState === 'loading'">
-            <discover-fetch-error
-              ng-show="fetchError"
-              fetch-error="fetchError"
-            ></discover-fetch-error>
+        <!-- loading -->
+        <div ng-show="resultState === 'loading'">
+          <discover-fetch-error
+            ng-show="fetchError"
+            fetch-error="fetchError"
+          ></discover-fetch-error>
 
+          <div ng-hide="fetchError" class="dscOverlay">
+            <h2
+              i18n-id="kbn.discover.searchingTitle"
+              i18n-default-message="Searching"
+              class="euiTitle euiTitle--small"
+            ></h2>
+            <div class="euiSpacer euiSpacer--m"></div>
             <div
-              ng-hide="fetchError"
-              class="dscOverlay"
-            >
-              <h2
-                i18n-id="kbn.discover.searchingTitle"
-                i18n-default-message="Searching"
-                class="euiTitle euiTitle--small"
-              ></h2>
-              <div class="euiSpacer euiSpacer--m"></div>
-              <div class="euiLoadingSpinner euiLoadingSpinner--large" data-test-subj="loadingSpinner"></div>
-            </div>
+              class="euiLoadingSpinner euiLoadingSpinner--large"
+              data-test-subj="loadingSpinner"
+            ></div>
           </div>
+        </div>
 
+        <div class="dscWrapper__content" ng-show="resultState === 'ready'">
           <!-- result -->
-          <div class="dscResults" ng-show="resultState === 'ready'">
+          <div class="dscResults">
             <button
               class="kuiButton kuiButton--basic kuiButton--iconText dscSkipButton"
               ng-click="showAllRows(); scrollToBottom()"
             >
-
               <span class="kuiButton__inner">
                 <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-chevron-down"></span>
                 <span
