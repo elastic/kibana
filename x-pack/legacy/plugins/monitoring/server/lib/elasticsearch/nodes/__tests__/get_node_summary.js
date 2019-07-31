@@ -109,7 +109,8 @@ describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {
                   },
                   fs: {
                     total: {
-                      available_in_bytes: 8700
+                      available_in_bytes: 8700,
+                      total_in_bytes: 10000
                     }
                   },
                   jvm: {
