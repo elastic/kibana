@@ -50,19 +50,32 @@ export default function HistogramVisType(Private) {
     },
     editorConfig: {
       collections: {
-        legendPositions: [{
-          value: 'left',
-          text: 'left',
-        }, {
-          value: 'right',
-          text: 'right',
-        }, {
-          value: 'top',
-          text: 'top',
-        }, {
-          value: 'bottom',
-          text: 'bottom',
-        }],
+        legendPositions: [
+          {
+            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.leftText', {
+              defaultMessage: 'Left'
+            }),
+            value: 'left'
+          },
+          {
+            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.rightText', {
+              defaultMessage: 'Right'
+            }),
+            value: 'right'
+          },
+          {
+            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.topText', {
+              defaultMessage: 'Top'
+            }),
+            value: 'top'
+          },
+          {
+            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.bottomText', {
+              defaultMessage: 'Bottom'
+            }),
+            value: 'bottom'
+          },
+        ],
       },
       optionsTemplate: PieOptions,
       schemas: new Schemas([

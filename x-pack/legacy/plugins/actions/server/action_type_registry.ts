@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { ActionType, GetServicesFunction } from './types';
 import { TaskManager, TaskRunCreatorFunction } from '../../task_manager';
-import { getCreateTaskRunnerFunction } from './lib';
+import { getCreateTaskRunnerFunction, ExecutorError } from './lib';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 
 interface ConstructorOptions {
@@ -61,6 +61,14 @@ export class ActionTypeRegistry {
       [`actions:${actionType.id}`]: {
         title: actionType.name,
         type: `actions:${actionType.id}`,
+        maxAttempts: actionType.maxAttempts || 1,
+        getRetry(attempts: number, error: any) {
+          if (error instanceof ExecutorError) {
+            return error.retry == null ? false : error.retry;
+          }
+          // Don't retry other kinds of errors
+          return false;
+        },
         createTaskRunner: this.taskRunCreatorFunction,
       },
     });

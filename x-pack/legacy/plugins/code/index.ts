@@ -32,7 +32,7 @@ export const code = (kibana: any) =>
     uiExports: {
       app: {
         title: APP_TITLE,
-        main: 'plugins/code/app',
+        main: 'plugins/code/index',
         euiIconType: 'codeApp',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),

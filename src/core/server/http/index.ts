@@ -24,6 +24,8 @@ export {
   isRealRequest,
   KibanaRequest,
   KibanaRequestRoute,
+  ResponseError,
+  ResponseErrorMeta,
   Router,
   RouteMethod,
   RouteConfigOptions,
