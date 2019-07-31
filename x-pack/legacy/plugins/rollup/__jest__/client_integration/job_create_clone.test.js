@@ -10,7 +10,7 @@ import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual(
     '../../../../../../src/legacy/ui/public/index_patterns/constants'
-  ); // eslint-disable-line max-len
+  );
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 
@@ -27,7 +27,7 @@ const {
   jobs: [{ config: jobConfig }],
 } = JOB_TO_CLONE;
 
-describe('Cloning a job with the create job wizard', () => {
+describe('Smoke test for starting with job clone', () => {
   let httpRequestsMockHelpers;
   let server;
   let find;
