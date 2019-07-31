@@ -93,7 +93,7 @@ class JobActionMenuUi extends Component {
         name: i18n.translate('xpack.rollupJobs.jobActionMenu.cloneJobLabel', {
           defaultMessage: 'Clone job',
         }),
-        icon: <EuiIcon type="copy" />,
+        icon: <EuiIcon data-test-subj="jobCloneActionContextMenu" type="copy" />,
         onClick: () => {
           this.closePopover();
           const { jobs } = this.props;
