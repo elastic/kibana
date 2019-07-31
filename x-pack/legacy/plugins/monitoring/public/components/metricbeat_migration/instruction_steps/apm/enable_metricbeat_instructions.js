@@ -83,7 +83,7 @@ export function getApmInstructionsForEnablingMetricbeat(product, _meta, {
 
   const enableMetricbeatModuleStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.apmInstructions.enableMetricbeatModuleTitle', {
-      defaultMessage: 'Enable and configure the beat x-pack module in Metricbeat'
+      defaultMessage: 'Enable and configure the Beat x-pack module in Metricbeat'
     }),
     children: (
       <Fragment>
