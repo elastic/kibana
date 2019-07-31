@@ -121,9 +121,6 @@ export {
   SavedObjectsImportResponse,
   SavedObjectsImportRetry,
   SavedObjectsResolveImportErrorsOptions,
-  getSortedObjectsForExport,
-  importSavedObjects,
-  resolveImportErrors,
 } from './saved_objects';
 
 export { RecursiveReadonly } from '../utils';

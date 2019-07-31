@@ -165,12 +165,6 @@ export interface FakeRequest {
 // @public
 export type GetAuthHeaders = (request: KibanaRequest | Request) => AuthHeaders | undefined;
 
-// Warning: (ae-forgotten-export) The symbol "ExportObjectsOptions" needs to be exported by the entry point index.d.ts
-// Warning: (ae-missing-release-tag) "getSortedObjectsForExport" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
-export function getSortedObjectsForExport({ types, objects, savedObjectsClient, exportSizeLimit, includeReferencesDeep, namespace, }: ExportObjectsOptions): Promise<import("stream").Readable>;
-
 // @public (undocumented)
 export type Headers = Record<string, string | string[] | undefined>;
 
@@ -188,11 +182,6 @@ export interface HttpServiceSetup extends HttpServerSetup {
 export interface HttpServiceStart {
     isListening: (port: number) => boolean;
 }
-
-// Warning: (ae-missing-release-tag) "importSavedObjects" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
-export function importSavedObjects({ readStream, objectLimit, overwrite, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
 
 // @internal (undocumented)
 export interface InternalCoreSetup {
@@ -398,11 +387,6 @@ export interface PluginsServiceStart {
 export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
     [K in keyof T]: RecursiveReadonly<T[K]>;
 }> : T;
-
-// Warning: (ae-missing-release-tag) "resolveImportErrors" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
-export function resolveImportErrors({ readStream, objectLimit, retries, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 
 // @public
 export type ResponseError = string | Error | {
@@ -912,5 +896,6 @@ export interface SessionStorageFactory<T> {
 // 
 // src/core/server/plugins/plugin_context.ts:34:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:37:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/saved_objects/service/index.ts:47:5 - (ae-forgotten-export) The symbol "ExportObjectsOptions" needs to be exported by the entry point index.d.ts
 
 ```
