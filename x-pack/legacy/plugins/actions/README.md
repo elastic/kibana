@@ -156,7 +156,7 @@ This example makes action `3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5` fire an email. 
 ```
 server.plugins.actions.fire({
   id: '3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5',
-  spaceId: undefined, // The spaceId of the action
+  spaceId: 'default', // The spaceId of the action
   params: {
     from: 'example@elastic.co',
     to: ['destination@elastic.co'],

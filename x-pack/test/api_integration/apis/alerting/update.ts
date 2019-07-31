@@ -50,43 +50,31 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
     });
 
     it('should return 200 when updating an alert', async () => {
+      const alert = {
+        alertTypeParams: {
+          foo: true,
+        },
+        interval: '12s',
+        actions: [
+          {
+            group: 'default',
+            id: ES_ARCHIVER_ACTION_ID,
+            params: {
+              message:
+                'UPDATED: instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
+            },
+          },
+        ],
+      };
       await supertest
         .put(`/api/alert/${alertId}`)
         .set('kbn-xsrf', 'foo')
-        .send({
-          alertTypeParams: {
-            foo: true,
-          },
-          interval: '12s',
-          actions: [
-            {
-              group: 'default',
-              id: ES_ARCHIVER_ACTION_ID,
-              params: {
-                message:
-                  'UPDATED: instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
-              },
-            },
-          ],
-        })
+        .send(alert)
         .expect(200)
         .then((resp: any) => {
           expect(resp.body).to.eql({
+            ...alert,
             id: alertId,
-            alertTypeParams: {
-              foo: true,
-            },
-            interval: '12s',
-            actions: [
-              {
-                group: 'default',
-                id: ES_ARCHIVER_ACTION_ID,
-                params: {
-                  message:
-                    'UPDATED: instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
-                },
-              },
-            ],
           });
         });
     });
@@ -115,43 +103,31 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
     });
 
     it('should return 200 when updating an alert in a space', async () => {
+      const alert = {
+        alertTypeParams: {
+          foo: true,
+        },
+        interval: '12s',
+        actions: [
+          {
+            group: 'default',
+            id: SPACE_1_ES_ARCHIVER_ACTION_ID,
+            params: {
+              message:
+                'UPDATED: instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
+            },
+          },
+        ],
+      };
       await supertest
         .put(`/s/space_1/api/alert/${space1AlertId}`)
         .set('kbn-xsrf', 'foo')
-        .send({
-          alertTypeParams: {
-            foo: true,
-          },
-          interval: '12s',
-          actions: [
-            {
-              group: 'default',
-              id: SPACE_1_ES_ARCHIVER_ACTION_ID,
-              params: {
-                message:
-                  'UPDATED: instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
-              },
-            },
-          ],
-        })
+        .send(alert)
         .expect(200)
         .then((resp: any) => {
           expect(resp.body).to.eql({
+            ...alert,
             id: space1AlertId,
-            alertTypeParams: {
-              foo: true,
-            },
-            interval: '12s',
-            actions: [
-              {
-                group: 'default',
-                id: SPACE_1_ES_ARCHIVER_ACTION_ID,
-                params: {
-                  message:
-                    'UPDATED: instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
-                },
-              },
-            ],
           });
         });
     });
