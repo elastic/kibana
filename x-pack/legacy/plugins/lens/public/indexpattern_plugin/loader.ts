@@ -50,10 +50,12 @@ export const getIndexPatterns = (chrome: Chrome, toastNotifications: ToastNotifi
           id,
           type,
           title: attributes.title,
-          fields: (JSON.parse(attributes.fields) as IndexPatternField[]).filter(
-            ({ type: fieldType, esTypes }) =>
-              fieldType !== 'string' || (esTypes && esTypes.includes('keyword'))
-          ),
+          fields: (JSON.parse(attributes.fields) as IndexPatternField[])
+            .map(field => ({ ...field, indexPatternId: id }))
+            .filter(
+              ({ type: fieldType, esTypes }) =>
+                fieldType !== 'string' || (esTypes && esTypes.includes('keyword'))
+            ),
           typeMeta: attributes.typeMeta
             ? (JSON.parse(attributes.typeMeta) as SavedRestrictionsInfo)
             : undefined,

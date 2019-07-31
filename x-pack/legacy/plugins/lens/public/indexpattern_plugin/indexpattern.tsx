@@ -111,6 +111,7 @@ export interface IndexPatternField {
   esTypes?: string[];
   aggregatable: boolean;
   searchable: boolean;
+  indexPatternId: string;
   aggregationRestrictions?: Partial<
     Record<
       string,

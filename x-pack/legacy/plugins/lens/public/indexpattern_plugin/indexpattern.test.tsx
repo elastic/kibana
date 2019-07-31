@@ -39,36 +39,42 @@ const expectedIndexPatterns = {
         type: 'date',
         aggregatable: true,
         searchable: true,
+        indexPatternId: '1',
       },
       {
         name: 'start_date',
         type: 'date',
         aggregatable: true,
         searchable: true,
+        indexPatternId: '1',
       },
       {
         name: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
+        indexPatternId: '1',
       },
       {
         name: 'memory',
         type: 'number',
         aggregatable: true,
         searchable: true,
+        indexPatternId: '1',
       },
       {
         name: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
+        indexPatternId: '1',
       },
       {
         name: 'dest',
         type: 'string',
         aggregatable: true,
         searchable: true,
+        indexPatternId: '1',
       },
     ],
   },
@@ -90,6 +96,7 @@ const expectedIndexPatterns = {
             time_zone: 'UTC',
           },
         },
+        indexPatternId: '2',
       },
       {
         name: 'bytes',
@@ -115,6 +122,7 @@ const expectedIndexPatterns = {
             agg: 'sum',
           },
         },
+        indexPatternId: '2',
       },
       {
         name: 'source',
@@ -126,6 +134,7 @@ const expectedIndexPatterns = {
             agg: 'terms',
           },
         },
+        indexPatternId: '2',
       },
     ],
   },
@@ -268,6 +277,7 @@ describe('IndexPattern Data Source', () => {
           type: 'string',
           aggregatable: true,
           searchable: true,
+          indexPatternId: '1',
         });
 
         expect(suggestions).toHaveLength(1);
@@ -310,6 +320,7 @@ describe('IndexPattern Data Source', () => {
           type: 'date',
           aggregatable: true,
           searchable: true,
+          indexPatternId: '1',
         });
 
         expect(suggestions).toHaveLength(1);
@@ -352,6 +363,7 @@ describe('IndexPattern Data Source', () => {
           type: 'number',
           aggregatable: true,
           searchable: true,
+          indexPatternId: '1',
         });
 
         expect(suggestions).toHaveLength(1);
@@ -402,6 +414,7 @@ describe('IndexPattern Data Source', () => {
                   type: 'number',
                   aggregatable: true,
                   searchable: true,
+                  indexPatternId: '1',
                 },
               ],
             },
@@ -420,6 +433,7 @@ describe('IndexPattern Data Source', () => {
           type: 'number',
           aggregatable: true,
           searchable: true,
+          indexPatternId: '1',
         });
 
         expect(suggestions).toHaveLength(0);
@@ -448,6 +462,7 @@ describe('IndexPattern Data Source', () => {
           type: 'string',
           aggregatable: true,
           searchable: true,
+          indexPatternId: '1',
         });
 
         expect(suggestions).toHaveLength(1);
@@ -490,6 +505,7 @@ describe('IndexPattern Data Source', () => {
           type: 'date',
           aggregatable: true,
           searchable: true,
+          indexPatternId: '1',
         });
 
         expect(suggestions).toHaveLength(1);
@@ -532,6 +548,7 @@ describe('IndexPattern Data Source', () => {
           type: 'number',
           aggregatable: true,
           searchable: true,
+          indexPatternId: '1',
         });
 
         expect(suggestions).toHaveLength(1);
@@ -582,6 +599,7 @@ describe('IndexPattern Data Source', () => {
                   type: 'number',
                   aggregatable: true,
                   searchable: true,
+                  indexPatternId: '1',
                 },
               ],
             },
@@ -600,6 +618,7 @@ describe('IndexPattern Data Source', () => {
           type: 'number',
           aggregatable: true,
           searchable: true,
+          indexPatternId: '1',
         });
 
         expect(suggestions).toHaveLength(0);
@@ -608,6 +627,8 @@ describe('IndexPattern Data Source', () => {
 
     describe('suggesting extensions to non-empty tables', () => {
       let initialState: IndexPatternPrivateState;
+
+      // TODO add test to fill most empty layers first
 
       beforeEach(async () => {
         jest.resetAllMocks();
@@ -688,6 +709,7 @@ describe('IndexPattern Data Source', () => {
             type: 'date',
             aggregatable: true,
             searchable: true,
+            indexPatternId: '1',
           }
         );
 
@@ -717,6 +739,7 @@ describe('IndexPattern Data Source', () => {
           type: 'date',
           aggregatable: true,
           searchable: true,
+          indexPatternId: '1',
         });
 
         expect(suggestions).toHaveLength(1);
@@ -761,6 +784,7 @@ describe('IndexPattern Data Source', () => {
           type: 'string',
           aggregatable: true,
           searchable: true,
+          indexPatternId: '1',
         });
 
         expect(suggestions).toHaveLength(0);
@@ -772,6 +796,7 @@ describe('IndexPattern Data Source', () => {
           type: 'string',
           aggregatable: true,
           searchable: true,
+          indexPatternId: '1',
         });
 
         expect(suggestions).toHaveLength(1);
@@ -800,6 +825,7 @@ describe('IndexPattern Data Source', () => {
           type: 'number',
           aggregatable: true,
           searchable: true,
+          indexPatternId: '1',
         });
 
         expect(suggestions).toHaveLength(1);
@@ -828,6 +854,7 @@ describe('IndexPattern Data Source', () => {
           type: 'number',
           aggregatable: true,
           searchable: true,
+          indexPatternId: '1',
         });
 
         expect(suggestions).toHaveLength(1);
@@ -878,6 +905,7 @@ describe('IndexPattern Data Source', () => {
           type: 'date',
           aggregatable: true,
           searchable: true,
+          indexPatternId: '2',
           aggregationRestrictions: {
             date_histogram: {
               agg: 'date_histogram',
@@ -921,6 +949,49 @@ describe('IndexPattern Data Source', () => {
           ],
           layerId: 'currentLayer',
         });
+      });
+
+      it('suggests on the layer with the fewest columns that matches by indexPatternId', () => {
+        const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(
+          {
+            ...initialState,
+            layers: {
+              ...initialState.layers,
+              previousLayer: {
+                ...initialState.layers.previousLayer,
+                indexPatternId: '1',
+              },
+            },
+          },
+          {
+            name: 'timestamp',
+            type: 'date',
+            aggregatable: true,
+            searchable: true,
+            indexPatternId: '1',
+          }
+        );
+
+        expect(suggestions).toHaveLength(1);
+        expect(suggestions[0].state).toEqual(
+          expect.objectContaining({
+            layers: {
+              currentLayer: initialState.layers.currentLayer,
+              previousLayer: expect.objectContaining({
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: expect.objectContaining({
+                    operationType: 'date_histogram',
+                    sourceField: 'timestamp',
+                  }),
+                  col2: expect.objectContaining({
+                    operationType: 'count',
+                  }),
+                },
+              }),
+            },
+          })
+        );
       });
     });
   });
