@@ -63,6 +63,8 @@ function DefaultEditorAgg({
   setValidity,
 }: DefaultEditorAggProps) {
   const [isEditorOpen, setIsEditorOpen] = useState(agg.brandNew);
+  // A description of the aggregation, for displaying in the collapsed agg header
+  const [aggDescription, setAggDescription] = useState('');
   const [validState, setValidState] = useState(true);
   const showDescription = !isEditorOpen && validState;
   const showError = !isEditorOpen && !validState;
@@ -98,12 +100,10 @@ function DefaultEditorAgg({
     }
   }, [lastParentPipelineAggTitle, isLastBucket, agg.type]);
 
-  // A description of the aggregation, for displaying in the collapsed agg header
-  const aggDescription = agg.type && agg.type.makeLabel ? agg.type.makeLabel(agg) : '';
-
   const onToggle = (isOpen: boolean) => {
     setIsEditorOpen(isOpen);
     if (!isOpen) {
+      setAggDescription(agg.type && agg.type.makeLabel ? agg.type.makeLabel(agg) : '');
       setTouched(true);
     }
   };

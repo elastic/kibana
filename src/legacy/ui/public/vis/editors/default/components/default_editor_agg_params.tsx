@@ -119,35 +119,39 @@ function DefaultEditorAggParams({
   // reset validity before component destroyed
   useUnmount(() => setValidity(true));
 
+  const hasConfig = !!Object.keys(editorConfig).length;
+
   useEffect(() => {
-    Object.entries(editorConfig).forEach(([param, paramConfig]) => {
-      const paramOptions = agg.type.params.find(
-        (paramOption: AggParam) => paramOption.name === param
-      );
+    if (hasConfig) {
+      Object.entries(editorConfig).forEach(([param, paramConfig]) => {
+        const paramOptions = agg.type.params.find(
+          (paramOption: AggParam) => paramOption.name === param
+        );
 
-      const hasFixedValue = paramConfig.hasOwnProperty(FIXED_VALUE_PROP);
-      const hasDefault = paramConfig.hasOwnProperty(DEFAULT_PROP);
-      // If the parameter has a fixed value in the config, set this value.
-      // Also for all supported configs we should freeze the editor for this param.
-      if (hasFixedValue || hasDefault) {
-        let newValue;
-        let property = FIXED_VALUE_PROP;
-        let typedParamConfig: EditorParamConfigType = paramConfig as FixedParam;
+        const hasFixedValue = paramConfig.hasOwnProperty(FIXED_VALUE_PROP);
+        const hasDefault = paramConfig.hasOwnProperty(DEFAULT_PROP);
+        // If the parameter has a fixed value in the config, set this value.
+        // Also for all supported configs we should freeze the editor for this param.
+        if (hasFixedValue || hasDefault) {
+          let newValue;
+          let property = FIXED_VALUE_PROP;
+          let typedParamConfig: EditorParamConfigType = paramConfig as FixedParam;
 
-        if (hasDefault) {
-          property = DEFAULT_PROP;
-          typedParamConfig = paramConfig as TimeIntervalParam;
+          if (hasDefault) {
+            property = DEFAULT_PROP;
+            typedParamConfig = paramConfig as TimeIntervalParam;
+          }
+
+          if (paramOptions && paramOptions.deserialize) {
+            newValue = paramOptions.deserialize(typedParamConfig[property]);
+          } else {
+            newValue = typedParamConfig[property];
+          }
+          onAggParamsChange(agg.params, param, newValue);
         }
-
-        if (paramOptions && paramOptions.deserialize) {
-          newValue = paramOptions.deserialize(typedParamConfig[property]);
-        } else {
-          newValue = typedParamConfig[property];
-        }
-        onAggParamsChange(agg.params, param, newValue);
-      }
-    });
-  }, [agg.type]);
+      });
+    }
+  }, [agg.type, hasConfig]);
 
   useEffect(() => {
     setTouched(false);
