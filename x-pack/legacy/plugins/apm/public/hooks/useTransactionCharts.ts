@@ -31,7 +31,7 @@ export function useTransactionCharts() {
 
   const memoizedData = useMemo(
     () => getTransactionCharts({ transactionType }, data),
-    [data]
+    [data, transactionType]
   );
 
   return {
