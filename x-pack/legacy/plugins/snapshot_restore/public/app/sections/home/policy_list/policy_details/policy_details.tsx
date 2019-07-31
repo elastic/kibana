@@ -62,7 +62,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
 
   const { FormattedMessage } = i18n;
   const { trackUiMetric } = uiMetricService;
-  const { error, data: policyDetails, request: reload } = useLoadPolicy(policyName);
+  const { error, data: policyDetails, sendRequest: reload } = useLoadPolicy(policyName);
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
 
   // Reset tab when we look at a different policy
