@@ -116,10 +116,19 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
       }
     }
 
+    const frozenIndicesParams = ['search', 'msearch'].includes(endpoint)
+      ? {
+          ignore_throttled: !includeFrozen,
+        }
+      : {};
+
     const fields = await callWithRequest(
       internalRequest,
       endpoint,
-      { ...params, ignore_throttled: !includeFrozen },
+      {
+        ...params,
+        ...frozenIndicesParams,
+      },
       ...rest
     );
     return fields;
