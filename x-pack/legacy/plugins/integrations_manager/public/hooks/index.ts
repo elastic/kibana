@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { useCore } from './core';
 export { useBreadcrumbs } from './breadcrumbs';
+export { useCore } from './core';
+export { useLinks } from './links';

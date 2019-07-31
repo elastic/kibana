@@ -8,8 +8,7 @@ import { EuiPage, EuiPageBody, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { PLUGIN } from '../../common/constants';
 import { IntegrationInfo } from '../../common/types';
 import { getIntegrationInfoByKey } from '../data';
-import { useBreadcrumbs } from '../hooks';
-import { linkToListView } from '../routes';
+import { useBreadcrumbs, useLinks } from '../hooks';
 
 export function Detail(props: { package: string }) {
   const [info, setInfo] = useState<IntegrationInfo | null>(null);
@@ -27,8 +26,8 @@ function InfoPanel(info: IntegrationInfo) {
   const { description, version } = info;
   // TODO: Need title or something which uses correct capitalization (e.g. PostgreSQL)
   const title = description.split(' ')[0];
-
-  useBreadcrumbs([{ text: PLUGIN.TITLE, href: linkToListView() }, { text: title }]);
+  const links = useLinks();
+  useBreadcrumbs([{ text: PLUGIN.TITLE, href: links.toListView() }, { text: title }]);
 
   return (
     <EuiPage restrictWidth={1200}>

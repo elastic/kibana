@@ -18,11 +18,11 @@ import { PLUGIN, STATUS_INSTALLED, STATUS_NOT_INSTALLED } from '../../common/con
 import { IntegrationsGroupedByStatus } from '../../common/types';
 import { IntegrationsGridByStatus } from '../components/integration_list_grid';
 import { getIntegrationsGroupedByStatus } from '../data';
-import { useBreadcrumbs } from '../hooks';
-import { linkToListView } from '../routes';
+import { useBreadcrumbs, useLinks } from '../hooks';
 
 export function Home() {
-  useBreadcrumbs([{ text: PLUGIN.TITLE, href: linkToListView() }]);
+  const links = useLinks();
+  useBreadcrumbs([{ text: PLUGIN.TITLE, href: links.toListView() }]);
 
   const [map, setMap] = useState<IntegrationsGroupedByStatus>({
     [STATUS_INSTALLED]: [],
@@ -82,11 +82,12 @@ function HeroCopy() {
 }
 
 function HeroImage() {
+  const links = useLinks();
   return (
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiImage
         alt="Illustration of computer"
-        url="/plugins/integrations_manager/assets/illustration_kibana_getting_started@2x.png"
+        url={links.toAssets('illustration_kibana_getting_started@2x.png')}
         style={{ width: '475px', height: '273px' }}
       />
     </EuiFlexGroup>

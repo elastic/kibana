@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { generatePath, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import { Detail } from './screens/detail';
 import { Home } from './screens/home';
 import { PLUGIN } from '../common/constants';
@@ -25,16 +25,6 @@ interface DetailMatch {
   };
 }
 
-// include '#' because we're using HashRouter
-const prependRoot = (path: string) => `${patterns.APP_ROOT}#${path}`;
-
-// TODO: get this from server/integrations/handlers.ts (move elsewhere?)
-// seems like part of the name@version change
-interface DetailParams {
-  name: string;
-  version: string;
-}
-
 export const routes = [
   <Route key="home" path={patterns.LIST_VIEW} exact={true} component={Home} />,
   <Route
@@ -44,9 +34,3 @@ export const routes = [
     render={(props: DetailMatch) => <Detail package={props.match.params.pkgkey} />}
   />,
 ];
-
-// linkTo* are for EUILink and other places which need a full path
-export const linkToListView = () => prependRoot(patterns.LIST_VIEW);
-
-export const linkToDetailView = ({ name, version }: DetailParams) =>
-  prependRoot(generatePath(patterns.DETAIL_VIEW, { pkgkey: `${name}-${version}` }));

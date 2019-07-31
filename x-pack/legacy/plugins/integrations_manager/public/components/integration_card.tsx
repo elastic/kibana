@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { EuiCard, EuiIcon, ICON_TYPES } from '@elastic/eui';
-import { linkToDetailView } from '../routes';
+import { useLinks } from '../hooks';
 import { IntegrationListItem, IntegrationInfo } from '../../common/types';
 
 type IntegrationCardProps = IntegrationListItem | IntegrationInfo;
@@ -16,7 +16,8 @@ export function IntegrationCard({
   version,
   icon: iconUrl,
 }: IntegrationCardProps) {
-  const url = linkToDetailView({ name, version });
+  const links = useLinks();
+  const url = links.toDetailView({ name, version });
 
   // TODO: Need title or something which uses correct capitalization (e.g. PostgreSQL)
   const title = description.split(' ')[0];
