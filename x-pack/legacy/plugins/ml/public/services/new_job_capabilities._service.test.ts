@@ -5,7 +5,7 @@
  */
 
 import { newJobCapsService } from './new_job_capabilities_service';
-import { IndexPatternWithType } from '../../common/types/kibana';
+import { IndexPattern } from 'ui/index_patterns';
 
 // there is magic happening here. starting the include name with `mock..`
 // ensures it can be lazily loaded by the jest.mock function below.
@@ -19,11 +19,10 @@ jest.mock('./ml_api_service', () => ({
   },
 }));
 
-const indexPattern: IndexPatternWithType = {
+const indexPattern = ({
   id: 'farequote-*',
-  fields: [],
   title: 'farequote-*',
-};
+} as unknown) as IndexPattern;
 
 describe('new_job_capabilities_service', () => {
   describe('farequote newJobCaps()', () => {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPatternWithType } from '../../common/types/kibana';
+import { IndexPattern } from 'ui/index_patterns';
 import {
   Field,
   Aggregation,
@@ -23,7 +23,7 @@ export function loadNewJobCapabilities(indexPatterns: any, $route: Record<string
   return new Promise(resolve => {
     indexPatterns
       .get($route.current.params.index)
-      .then(async (indexPattern: IndexPatternWithType) => {
+      .then(async (indexPattern: IndexPattern) => {
         await newJobCapsService.initializeFromIndexPattern(indexPattern);
         resolve(newJobCapsService.newJobCaps);
       })
@@ -65,7 +65,7 @@ class NewJobCapsService {
     return this._fields.filter(f => categoryFieldTypes.includes(f.type));
   }
 
-  public async initializeFromIndexPattern(indexPattern: IndexPatternWithType) {
+  public async initializeFromIndexPattern(indexPattern: IndexPattern) {
     try {
       const resp = await ml.jobs.newJobCaps(indexPattern.title, indexPattern.type === 'rollup');
       const { fields, aggs } = createObjects(resp, indexPattern.title);

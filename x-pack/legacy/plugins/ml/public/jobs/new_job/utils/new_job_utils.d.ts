@@ -5,10 +5,11 @@
  */
 
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
-import { IndexPatternWithType, IndexPatternTitle } from '../../../../common/types/kibana';
+import { IndexPattern } from 'ui/index_patterns';
+import { IndexPatternTitle } from '../../../../common/types/kibana';
 
 export interface SearchItems {
-  indexPattern: IndexPatternWithType;
+  indexPattern: IndexPattern;
   savedSearch: SavedSearch;
   query: any;
   combinedQuery: any;

@@ -5,8 +5,8 @@
  */
 
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
+import { IndexPattern } from 'ui/index_patterns';
 import { JobCreator } from './job_creator';
-import { IndexPatternWithType } from '../../../../../common/types/kibana';
 import { Field, Aggregation, SplitField, AggFieldPair } from '../../../../../common/types/fields';
 import { Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
@@ -19,7 +19,7 @@ export class PopulationJobCreator extends JobCreator {
   private _byFields: SplitField[] = [];
   protected _type: JOB_TYPE = JOB_TYPE.POPULATION;
 
-  constructor(indexPattern: IndexPatternWithType, savedSearch: SavedSearch, query: object) {
+  constructor(indexPattern: IndexPattern, savedSearch: SavedSearch, query: object) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.POPULATION;
   }

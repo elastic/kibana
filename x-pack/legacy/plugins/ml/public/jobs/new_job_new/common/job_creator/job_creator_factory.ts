@@ -5,15 +5,15 @@
  */
 
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
+import { IndexPattern } from 'ui/index_patterns';
 import { SingleMetricJobCreator } from './single_metric_job_creator';
 import { MultiMetricJobCreator } from './multi_metric_job_creator';
 import { PopulationJobCreator } from './population_job_creator';
-import { IndexPatternWithType } from '../../../../../common/types/kibana';
 
 import { JOB_TYPE } from './util/constants';
 
 export const jobCreatorFactory = (jobType: JOB_TYPE) => (
-  indexPattern: IndexPatternWithType,
+  indexPattern: IndexPattern,
   savedSearch: SavedSearch,
   query: object
 ) => {

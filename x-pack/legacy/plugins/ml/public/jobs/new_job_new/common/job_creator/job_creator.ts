@@ -5,7 +5,8 @@
  */
 
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
-import { IndexPatternWithType, IndexPatternTitle } from '../../../../../common/types/kibana';
+import { IndexPattern } from 'ui/index_patterns';
+import { IndexPatternTitle } from '../../../../../common/types/kibana';
 import { Job, Datafeed, Detector, JobId, DatafeedId, BucketSpan } from './configs';
 import { Aggregation, Field } from '../../../../../common/types/fields';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
@@ -15,7 +16,7 @@ import { JOB_TYPE } from './util/constants';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
-  protected _indexPattern: IndexPatternWithType;
+  protected _indexPattern: IndexPattern;
   protected _savedSearch: SavedSearch;
   protected _indexPatternTitle: IndexPatternTitle = '';
   protected _job_config: Job;
@@ -32,7 +33,7 @@ export class JobCreator {
     stop: boolean;
   };
 
-  constructor(indexPattern: IndexPatternWithType, savedSearch: SavedSearch, query: object) {
+  constructor(indexPattern: IndexPattern, savedSearch: SavedSearch, query: object) {
     this._indexPattern = indexPattern;
     this._savedSearch = savedSearch;
     this._indexPatternTitle = indexPattern.title;
