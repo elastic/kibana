@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
 
-export const tagcloud = () => ({
+export const createTagCloudFn = () => ({
   name: 'tagcloud',
   type: 'render',
   context: {
-    types: [
-      'kibana_datatable'
-    ],
+    types: ['kibana_datatable'],
   },
   help: i18n.translate('tagCloud.function.help', {
-    defaultMessage: 'Tagcloud visualization'
+    defaultMessage: 'Tagcloud visualization',
   }),
   args: {
     scale: {
@@ -37,7 +34,7 @@ export const tagcloud = () => ({
       default: 'linear',
       options: ['linear', 'log', 'square root'],
       help: i18n.translate('tagCloud.function.scale.help', {
-        defaultMessage: 'Scale to determine font size of a word'
+        defaultMessage: 'Scale to determine font size of a word',
       }),
     },
     orientation: {
@@ -45,7 +42,7 @@ export const tagcloud = () => ({
       default: 'single',
       options: ['single', 'right angled', 'multiple'],
       help: i18n.translate('tagCloud.function.orientation.help', {
-        defaultMessage: 'Orientation of words inside tagcloud'
+        defaultMessage: 'Orientation of words inside tagcloud',
       }),
     },
     minFontSize: {
@@ -54,7 +51,7 @@ export const tagcloud = () => ({
     },
     maxFontSize: {
       types: ['number'],
-      default: 72
+      default: 72,
     },
     showLabel: {
       types: ['boolean'],
@@ -63,18 +60,18 @@ export const tagcloud = () => ({
     metric: {
       types: ['vis_dimension'],
       help: i18n.translate('tagCloud.function.metric.help', {
-        defaultMessage: 'metric dimension configuration'
+        defaultMessage: 'metric dimension configuration',
       }),
       required: true,
     },
     bucket: {
       types: ['vis_dimension'],
       help: i18n.translate('tagCloud.function.bucket.help', {
-        defaultMessage: 'bucket dimension configuration'
+        defaultMessage: 'bucket dimension configuration',
       }),
     },
   },
-  fn(context, args) {
+  fn(context: any, args: any) {
     const visConfig = {
       scale: args.scale,
       orientation: args.orientation,
@@ -82,6 +79,7 @@ export const tagcloud = () => ({
       maxFontSize: args.maxFontSize,
       showLabel: args.showLabel,
       metric: args.metric,
+      bucket: undefined,
     };
 
     if (args.bucket !== undefined) {
@@ -97,10 +95,8 @@ export const tagcloud = () => ({
         visConfig,
         params: {
           listenOnChange: true,
-        }
+        },
       },
     };
   },
 });
-
-functionsRegistry.register(tagcloud);
