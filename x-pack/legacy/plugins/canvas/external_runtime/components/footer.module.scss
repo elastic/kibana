@@ -1,0 +1,33 @@
+@import '@elastic/eui/src/theme_light.scss';
+
+.footer {
+  background: #fff;
+  position: absolute;
+  bottom: -124px;
+  left: 0;
+  right: 0;
+  padding: 8px 0 0 0;
+  transition: bottom 0.25s;
+  height: 124px;
+}
+
+.visible {
+  bottom: 0;
+}
+
+.slideContainer {
+  @include euiScrollBar;
+  display: flex;
+  overflow: auto;
+  width: 100%;
+}
+
+.slide {
+  transform-origin: top left;
+  margin: 0 8px;
+  cursor: pointer;
+}
+
+.slide :global .canvasPage {
+  position: relative;
+}

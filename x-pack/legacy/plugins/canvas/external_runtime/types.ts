@@ -24,7 +24,7 @@ export interface CanvasWorkpad {
 
 export interface CanvasPage {
   id: string;
-  style: string;
+  style: any;
   transitions: any[];
   groups: string[];
   elements: CanvasElement[];

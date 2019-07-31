@@ -49,8 +49,9 @@ export const routes = [
             return router.redirectTo('home');
           }
 
-          dispatch(setWorkpad(fetchedWorkpad));
-          dispatch(fetchAllRenderables());
+          const { assets, ...workpad } = fetchedWorkpad;
+          dispatch(setAssets(assets));
+          dispatch(setWorkpad(workpad));
         },
         meta: {
           component: ExternalEmbed,

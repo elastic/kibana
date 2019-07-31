@@ -7,10 +7,8 @@
 <body>
   <div id="canvas"></div>
   <script>
-    new ElasticCanvasEmbed.Runtime(document.getElementById('canvas'), '/test.json', {
-      height: 400,
-      width: 600,
-      page: 0,
+    new ElasticCanvas.EmbedWorkpadFromURL(document.getElementById('canvas'), '/test/austin.json', {
+      height: 400
     });
   </script>
 </body>

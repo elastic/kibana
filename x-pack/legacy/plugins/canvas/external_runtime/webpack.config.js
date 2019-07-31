@@ -15,14 +15,14 @@ module.exports = {
   context: KIBANA_ROOT,
   mode: 'development',
   entry: {
-    canvas_external_runtime: require.resolve('./index.tsx'),
+    canvas_external_runtime: require.resolve('./index.ts'),
   },
   plugins: [],
   // Output the DLL JS file
   output: {
     path: RUNTIME_OUTPUT,
     filename: '[name].js',
-    library: 'ElasticCanvasEmbed',
+    library: 'ElasticCanvas',
   },
   // Include a require alias for legacy UI code and styles
   resolve: {
@@ -63,7 +63,40 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
+        exclude: /components/,
+        use: [
+          { loader: 'style-loader' },
+          { loader: 'css-loader' },
+          {
+            loader: 'string-replace-loader',
+            options: {
+              search: '__REPLACE_WITH_PUBLIC_PATH__',
+              replace: '/',
+              flags: 'g',
+            },
+          },
+        ],
+      },
+      {
+        test: /\.module\.s(a|c)ss$/,
+        loader: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true,
+              localIdentName: '[name]__[local]___[hash:base64:5]',
+              camelCase: true,
+              sourceMap: true,
+            },
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true,
+            },
+          },
+        ],
       },
       {
         test: /\.less$/,
@@ -91,6 +124,7 @@ module.exports = {
       },
       {
         test: /\.scss$/,
+        exclude: /\.module.(s(a|c)ss)$/,
         use: [
           { loader: 'style-loader' },
           { loader: 'css-loader', options: { importLoaders: 2 } },
