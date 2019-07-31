@@ -431,6 +431,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
         await searchFilter.type(dashName.replace('-', ' '));
         await PageObjects.common.pressEnterKey();
+        await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 5000);
       });
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -461,7 +462,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await this.selectDashboard(dashName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         // check Dashboard landing page is not present
-        await testSubjects.missingOrFail('newItemButton');
+        await testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
       });
     }
 
