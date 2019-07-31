@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
   return {
-    async navigateTo() {
+    async navigateToMl() {
       return await PageObjects.common.navigateToApp('ml');
     },
 
@@ -43,46 +43,6 @@ export function MachineLearningProvider({ getService, getPageObjects }: FtrProvi
     async navigateToSettings() {
       await testSubjects.click('mlTabSettings');
       await testSubjects.exists('mlPageSettings');
-    },
-
-    async assertJobTableExists() {
-      await testSubjects.existOrFail('mlJobListTable');
-    },
-
-    async assertCreateNewJobButtonExists() {
-      await testSubjects.existOrFail('mlCreateNewJobButton');
-    },
-
-    async assertJobStatsBarExists() {
-      await testSubjects.existOrFail('mlJobStatsBar');
-    },
-
-    async assertAnomalyExplorerEmptyListMessageExists() {
-      await testSubjects.existOrFail('mlNoJobsFound');
-    },
-
-    async assertSingleMetricViewerEmptyListMessageExsist() {
-      await testSubjects.existOrFail('mlNoSingleMetricJobsFound');
-    },
-
-    async assertDataFrameEmptyListMessageExists() {
-      await testSubjects.existOrFail('mlNoDataFrameTransformsFound');
-    },
-
-    async assertDataVisualizerImportDataCardExists() {
-      await testSubjects.existOrFail('mlDataVisualizerCardImportData');
-    },
-
-    async assertDataVisualizerIndexDataCardExists() {
-      await testSubjects.existOrFail('mlDataVisualizerCardIndexData');
-    },
-
-    async assertSettingsCalendarLinkExists() {
-      await testSubjects.existOrFail('ml_calendar_mng_button');
-    },
-
-    async assertSettingsFilterlistLinkExists() {
-      await testSubjects.existOrFail('ml_filter_lists_button');
     },
   };
 }
