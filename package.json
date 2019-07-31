@@ -144,7 +144,7 @@
     "check-disk-space": "^2.1.0",
     "color": "1.0.3",
     "commander": "2.20.0",
-    "compare-versions": "3.4.0",
+    "compare-versions": "3.5.1",
     "core-js": "2.6.9",
     "css-loader": "2.1.1",
     "custom-event-polyfill": "^0.3.0",
