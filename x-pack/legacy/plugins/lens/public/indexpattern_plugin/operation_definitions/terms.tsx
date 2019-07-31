@@ -34,6 +34,8 @@ function isSortableByColumn(column: IndexPatternColumn) {
   return !column.isBucketed && column.operationType !== 'filter_ratio';
 }
 
+const DEFAULT_SIZE = 3;
+
 export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   type: 'terms',
   displayName: i18n.translate('xpack.lens.indexPattern.terms', {
@@ -65,7 +67,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       isBucketed: true,
       indexPatternId,
       params: {
-        size: 5,
+        size: DEFAULT_SIZE,
         orderBy: existingMetricColumn
           ? { type: 'column', columnId: existingMetricColumn }
           : { type: 'alphabetical' },
