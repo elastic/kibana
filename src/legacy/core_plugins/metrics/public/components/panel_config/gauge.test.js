@@ -28,6 +28,12 @@ jest.mock('plugins/data', () => {
 
 import { GaugePanelConfig } from './gauge';
 
+jest.mock('plugins/data', () => {
+  return {
+    QueryBar: () => <div className="queryBar" />,
+  };
+});
+
 describe('GaugePanelConfig', () => {
   it('call switch tab onChange={handleChange}', () => {
     const props = {

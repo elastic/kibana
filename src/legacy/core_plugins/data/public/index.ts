@@ -17,20 +17,20 @@
  * under the License.
  */
 
-// /// Define plguin function
+// /// Define plugin function
 import { DataPlugin as Plugin } from './plugin';
 
 export function plugin() {
   return new Plugin();
 }
 
-// /// Export types
+// /// Export types & static code
 
 /** @public types */
 export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
 
 /** @public types */
-export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
+export { IndexPattern, StaticIndexPattern, Field } from './index_patterns';
 export { Query, QueryBar, QueryBarInput } from './query';
 export { FilterBar, ApplyFiltersPopover } from './filter';
 export {

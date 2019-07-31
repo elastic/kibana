@@ -21,6 +21,7 @@
 import { EuiFilterButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
@@ -109,10 +110,17 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   private getFilterTriggerButton() {
-    const filtersAppliedText = this.props.intl.formatMessage({
-      id: 'kibana_react.search.searchBar.filtersButtonFiltersAppliedTitle',
-      defaultMessage: 'filters applied.',
-    });
+    const filterCount = this.getFilterLength();
+    const filtersAppliedText = this.props.intl.formatMessage(
+      {
+        id: 'kibana_react.search.searchBar.filtersButtonFiltersAppliedTitle',
+        defaultMessage:
+          '{filterCount} {filterCount, plural, one {filter} other {filters}} applied.',
+      },
+      {
+        filterCount,
+      }
+    );
     const clickToShowOrHideText = this.state.isFiltersVisible
       ? this.props.intl.formatMessage({
           id: 'kibana_react.search.searchBar.filtersButtonClickToShowTitle',
@@ -123,7 +131,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           defaultMessage: 'Select to show',
         });
 
-    const filterCount = this.getFilterLength();
     return (
       <EuiFilterButton
         onClick={this.toggleFiltersVisible}
@@ -134,7 +141,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         aria-expanded={!!this.state.isFiltersVisible}
         title={`${filterCount ? filtersAppliedText : ''} ${clickToShowOrHideText}`}
       >
-        Filters
+        {i18n.translate('kibana_react.search.searchBar.filtersButtonLabel', {
+          defaultMessage: 'Filters',
+          description: 'The noun "filter" in plural.',
+        })}
       </EuiFilterButton>
     );
   }

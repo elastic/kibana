@@ -30,6 +30,7 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { QueryBarInput, QueryBarInputUI } from './query_bar_input';
 import { coreMock } from '../../../../../../../core/public/mocks';
 const setupMock = coreMock.createSetup();
+import { IndexPattern } from '../../../index';
 
 const noop = () => {
   return;
@@ -75,7 +76,7 @@ const mockIndexPattern = {
       searchable: true,
     },
   ],
-};
+} as IndexPattern;
 
 const createMockSavedObjectsClient = () => {
   return {
