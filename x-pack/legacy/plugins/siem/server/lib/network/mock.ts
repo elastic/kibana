@@ -21,7 +21,12 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
     },
   },
   timerange: { interval: '12h', to: 1549852006071, from: 1549765606071 },
-  pagination: { limit: 10, cursor: null, tiebreaker: null },
+  pagination: {
+    activePage: 0,
+    cursorStart: 0,
+    fakePossibleCount: 50,
+    querySize: 10,
+  },
   filterQuery: {},
   fields: [
     'totalCount',
@@ -40,9 +45,11 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
     'edges.cursor.value',
     'edges.cursor.__typename',
     'edges.__typename',
-    'pageInfo.endCursor.value',
-    'pageInfo.endCursor.__typename',
-    'pageInfo.hasNextPage',
+    'pageInfo.activePage',
+    'pageInfo.__typename',
+    'pageInfo.fakeTotalCount',
+    'pageInfo.__typename',
+    'pageInfo.showMorePagesIndicator',
     'pageInfo.__typename',
     '__typename',
   ],
@@ -59,7 +66,12 @@ export const mockRequest = {
       filterQuery: '',
       flowDirection: FlowDirection.uniDirectional,
       flowType: FlowTarget.source,
-      pagination: { limit: 10, cursor: null, tiebreaker: null },
+      pagination: {
+        activePage: 0,
+        cursorStart: 0,
+        fakePossibleCount: 50,
+        querySize: 10,
+      },
       sourceId: 'default',
       timerange: { interval: '12h', from: 1549765830772, to: 1549852230772 },
     },
@@ -97,11 +109,11 @@ export const mockRequest = {
             __typename
           }
           pageInfo {
-            endCursor {
-              value
-              __typename
-            }
-            hasNextPage
+            activePage
+            __typename
+            fakeTotalCount
+            __typename
+            showMorePagesIndicator
             __typename
           }
           __typename
@@ -634,11 +646,9 @@ export const mockResult = {
     },
   ],
   pageInfo: {
-    endCursor: {
-      tiebreaker: null,
-      value: '10',
-    },
-    hasNextPage: true,
+    activePage: 0,
+    fakeTotalCount: 50,
+    showMorePagesIndicator: true,
   },
   totalCount: 545,
 };

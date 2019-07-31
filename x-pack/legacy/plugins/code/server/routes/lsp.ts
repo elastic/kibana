@@ -5,21 +5,19 @@
  */
 
 import Boom from 'boom';
-import hapi from 'hapi';
 import { groupBy, last } from 'lodash';
 import { ResponseError } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Location } from 'vscode-languageserver-types';
+
 import {
   LanguageServerStartFailed,
   ServerNotInitialized,
   UnknownFileLanguage,
 } from '../../common/lsp_error_codes';
 import { parseLspUrl } from '../../common/uri_util';
-import { GitOperations } from '../git_operations';
 import { Logger } from '../log';
 import { CTAGS, GO } from '../lsp/language_servers';
-import { LspService } from '../lsp/lsp_service';
 import { SymbolSearchClient } from '../search';
 import { CodeServerRouter } from '../security';
 import { ServerOptions } from '../server_options';
@@ -32,28 +30,37 @@ import {
 import { detectLanguage } from '../utils/detect_language';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { promiseTimeout } from '../utils/timeout';
+import { RequestFacade, ResponseToolkitFacade } from '../..';
+import { CodeServices } from '../distributed/code_services';
+import { GitServiceDefinition, LspServiceDefinition } from '../distributed/apis';
 
 const LANG_SERVER_ERROR = 'language server error';
 
 export function lspRoute(
   server: CodeServerRouter,
-  lspService: LspService,
+  codeServices: CodeServices,
   serverOptions: ServerOptions
 ) {
   const log = new Logger(server.server);
-
+  const lspService = codeServices.serviceFor(LspServiceDefinition);
+  const gitService = codeServices.serviceFor(GitServiceDefinition);
   server.route({
     path: '/api/code/lsp/textDocument/{method}',
-    async handler(req, h: hapi.ResponseToolkit) {
+    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
       if (typeof req.payload === 'object' && req.payload != null) {
         const method = req.params.method;
         if (method) {
           try {
-            const result = await promiseTimeout(
-              serverOptions.lsp.requestTimeoutMs,
-              lspService.sendRequest(`textDocument/${method}`, req.payload, 1000)
-            );
-            return result;
+            const params = (req.payload as unknown) as any;
+            const uri = params.textDocument.uri;
+            const { repoUri } = parseLspUrl(uri)!;
+            const endpoint = await codeServices.locate(req, repoUri);
+            const requestPromise = lspService.sendRequest(endpoint, {
+              method: `textDocument/${method}`,
+              params: req.payload,
+              timeoutForInitializeMs: 1000,
+            });
+            return await promiseTimeout(serverOptions.lsp.requestTimeoutMs, requestPromise);
           } catch (error) {
             if (error instanceof ResponseError) {
               // hide some errors;
@@ -91,22 +98,26 @@ export function lspRoute(
   server.route({
     path: '/api/code/lsp/findReferences',
     method: 'POST',
-    async handler(req, h: hapi.ResponseToolkit) {
+    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
       try {
         // @ts-ignore
         const { textDocument, position } = req.payload;
         const { uri } = textDocument;
+        const endpoint = await codeServices.locate(req, parseLspUrl(uri).repoUri);
         const response: ResponseMessage = await promiseTimeout(
           serverOptions.lsp.requestTimeoutMs,
-          lspService.sendRequest(
-            `textDocument/references`,
-            { textDocument: { uri }, position },
-            1000
-          )
+          lspService.sendRequest(endpoint, {
+            method: `textDocument/references`,
+            params: { textDocument: { uri }, position },
+            timeoutForInitializeMs: 1000,
+          })
         );
-        const hover = await lspService.sendRequest('textDocument/hover', {
-          textDocument: { uri },
-          position,
+        const hover = await lspService.sendRequest(endpoint, {
+          method: 'textDocument/hover',
+          params: {
+            textDocument: { uri },
+            position,
+          },
         });
         let title: string;
         if (hover.result && hover.result.contents) {
@@ -136,11 +147,11 @@ export function lspRoute(
         } else {
           title = last(uri.toString().split('/')) + `(${position.line}, ${position.character})`;
         }
-        const gitOperations = new GitOperations(serverOptions.repoPath);
         const files = [];
         const groupedLocations = groupBy(response.result as Location[], 'uri');
         for (const url of Object.keys(groupedLocations)) {
           const { repoUri, revision, file } = parseLspUrl(url)!;
+          const ep = await codeServices.locate(req, repoUri);
           const locations: Location[] = groupedLocations[url];
           const lines = locations.map(l => ({
             startLine: l.range.start.line,
@@ -148,36 +159,35 @@ export function lspRoute(
           }));
           const ranges = expandRanges(lines, 1);
           const mergedRanges = mergeRanges(ranges);
-          const blob = await gitOperations.fileContent(repoUri, file!, revision);
-          const source = blob
-            .content()
-            .toString('utf8')
-            .split('\n');
-          const language = await detectLanguage(file!, blob.content());
-          const lineMappings = new LineMapping();
-          const code = extractSourceContent(mergedRanges, source, lineMappings).join('\n');
-          const lineNumbers = lineMappings.toStringArray();
-          const highlights = locations.map(l => {
-            const { start, end } = l.range;
-            const startLineNumber = lineMappings.lineNumber(start.line);
-            const endLineNumber = lineMappings.lineNumber(end.line);
-            return {
-              startLineNumber,
-              startColumn: start.character + 1,
-              endLineNumber,
-              endColumn: end.character + 1,
-            };
-          });
-          files.push({
-            repo: repoUri,
-            file,
-            language,
-            uri: url,
-            revision,
-            code,
-            lineNumbers,
-            highlights,
-          });
+          const blob = await gitService.blob(ep, { uri: repoUri, path: file!, revision });
+          if (blob.content) {
+            const source = blob.content.split('\n');
+            const language = blob.lang;
+            const lineMappings = new LineMapping();
+            const code = extractSourceContent(mergedRanges, source, lineMappings).join('\n');
+            const lineNumbers = lineMappings.toStringArray();
+            const highlights = locations.map(l => {
+              const { start, end } = l.range;
+              const startLineNumber = lineMappings.lineNumber(start.line);
+              const endLineNumber = lineMappings.lineNumber(end.line);
+              return {
+                startLineNumber,
+                startColumn: start.character + 1,
+                endLineNumber,
+                endColumn: end.character + 1,
+              };
+            });
+            files.push({
+              repo: repoUri,
+              file,
+              language,
+              uri: url,
+              revision,
+              code,
+              lineNumbers,
+              highlights,
+            });
+          }
         }
         return { title, files: groupBy(files, 'repo'), uri, position };
       } catch (error) {
@@ -200,11 +210,11 @@ export function lspRoute(
   });
 }
 
-export function symbolByQnameRoute(server: CodeServerRouter, log: Logger) {
-  server.route({
+export function symbolByQnameRoute(router: CodeServerRouter, log: Logger) {
+  router.route({
     path: '/api/code/lsp/symbol/{qname}',
     method: 'GET',
-    async handler(req) {
+    async handler(req: RequestFacade) {
       try {
         const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(req), log);
         const res = await symbolSearchClient.findByQname(req.params.qname);
