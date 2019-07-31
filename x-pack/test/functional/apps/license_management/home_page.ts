@@ -19,6 +19,8 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
 
     it('Loads the app', async () => {
       await log.debug('Checking for license header.');
+      // Added 5 second sleep to ensure that the page is loading due to possible long load times.
+      await pageObjects.common.sleep(5000);
       const licenseText = await pageObjects.licenseManagement.licenseText();
       expect(licenseText).to.be('Your Trial license is active');
     });
