@@ -6,8 +6,9 @@
 
 import React from 'react';
 import { HashRouter, Switch } from 'react-router-dom';
-import { ChromeStart, CoreSetup, I18nStart } from 'src/core/public';
+import { ChromeStart, CoreSetup, HttpStart, I18nStart } from 'src/core/public';
 import { CoreProvider } from './contexts/core';
+import { setClient } from './data';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginInitializerContext {}
@@ -16,8 +17,9 @@ export type PluginSetup = ReturnType<Plugin['setup']>;
 export type PluginStart = ReturnType<Plugin['start']>;
 
 export interface PluginCore {
-  i18n: I18nStart;
   chrome: ChromeStart;
+  http: HttpStart;
+  i18n: I18nStart;
   routes: JSX.Element[];
 }
 
@@ -27,6 +29,8 @@ export class Plugin {
   public setup(core: CoreSetup) {}
   // called after all plugins are set up
   public start(core: PluginCore) {
+    setClient(core.http.fetch);
+
     return {
       root: <Root core={core} />,
     };
