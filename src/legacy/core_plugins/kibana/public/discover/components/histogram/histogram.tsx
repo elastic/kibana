@@ -37,6 +37,7 @@ import {
   Settings,
   RectAnnotation,
   TooltipValue,
+  TooltipType,
 } from '@elastic/charts';
 
 import { i18n } from '@kbn/i18n';
@@ -213,6 +214,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
 
     const tooltipProps = {
       headerFormatter: this.renderBarTooltip(xInterval, domainStart, domainEnd),
+      type: TooltipType.Follow,
     };
 
     return (
