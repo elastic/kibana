@@ -1,7 +1,6 @@
 /* tslint:disable */
 import { InfraContext } from '../lib/infra_types';
 import { GraphQLResolveInfo } from 'graphql';
-import { FieldType } from 'ui/index_patterns';
 
 export type Resolver<Result, Parent = any, Context = any, Args = never> = (
   parent: Parent,
@@ -57,8 +56,6 @@ export interface InfraSource {
   configuration: InfraSourceConfiguration;
   /** The status of the source */
   status: InfraSourceStatus;
-  /** A hierarchy of metadata entries by node */
-  metadataByNode: InfraNodeMetadata;
   /** A consecutive span of log entries surrounding a point in time */
   logEntriesAround: InfraLogEntryInterval;
   /** A consecutive span of log entries within an interval */
@@ -151,79 +148,15 @@ export interface InfraSourceStatus {
   indexFields: InfraIndexField[];
 }
 /** A descriptor of a field in an index */
-export interface InfraIndexField extends FieldType {}
-
-/** One metadata entry for a node. */
-export interface InfraNodeMetadata {
-  id: string;
-
+export interface InfraIndexField {
+  /** The name of the field */
   name: string;
-
-  info?: InfraNodeInfo | null;
-
-  features: InfraNodeFeature[];
-}
-/** The info object for the node */
-export interface InfraNodeInfo {
-  host?: InfraNodeHost | null;
-
-  cloud?: InfraNodeCloud | null;
-}
-/** The host object for the node */
-export interface InfraNodeHost {
-  name?: string | null;
-
-  os?: InfraNodeHostOs | null;
-
-  architecture?: string | null;
-
-  containerized?: boolean | null;
-}
-/** The operation system object for the node */
-export interface InfraNodeHostOs {
-  codename?: string | null;
-
-  family?: string | null;
-
-  kernel?: string | null;
-
-  name?: string | null;
-
-  platform?: string | null;
-
-  version?: string | null;
-}
-/** The cloud object for the node */
-export interface InfraNodeCloud {
-  instance?: InfraNodeCloudInstance | null;
-
-  provider?: string | null;
-
-  availability_zone?: string | null;
-
-  project?: InfraNodeCloudProject | null;
-
-  machine?: InfraNodeCloudMachine | null;
-}
-/** The cloud instance object for the node */
-export interface InfraNodeCloudInstance {
-  id?: string | null;
-
-  name?: string | null;
-}
-/** The cloud project object for the node */
-export interface InfraNodeCloudProject {
-  id?: string | null;
-}
-/** The Cloud machine object for the node */
-export interface InfraNodeCloudMachine {
-  type?: string | null;
-}
-
-export interface InfraNodeFeature {
-  name: string;
-
-  source: string;
+  /** The type of the field's values as recognized by Kibana */
+  type: string;
+  /** Whether the field's values can be efficiently searched for */
+  searchable: boolean;
+  /** Whether the field's values can be aggregated */
+  aggregatable: boolean;
 }
 /** A consecutive sequence of log entries */
 export interface InfraLogEntryInterval {
@@ -503,11 +436,6 @@ export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
 }
-export interface MetadataByNodeInfraSourceArgs {
-  nodeId: string;
-
-  nodeType: InfraNodeType;
-}
 export interface LogEntriesAroundInfraSourceArgs {
   /** The sort key that corresponds to the point in time */
   key: InfraTimeKeyInput;
@@ -714,8 +642,6 @@ export namespace InfraSourceResolvers {
     configuration?: ConfigurationResolver<InfraSourceConfiguration, TypeParent, Context>;
     /** The status of the source */
     status?: StatusResolver<InfraSourceStatus, TypeParent, Context>;
-    /** A hierarchy of metadata entries by node */
-    metadataByNode?: MetadataByNodeResolver<InfraNodeMetadata, TypeParent, Context>;
     /** A consecutive span of log entries surrounding a point in time */
     logEntriesAround?: LogEntriesAroundResolver<InfraLogEntryInterval, TypeParent, Context>;
     /** A consecutive span of log entries within an interval */
@@ -762,17 +688,6 @@ export namespace InfraSourceResolvers {
     Parent = InfraSource,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
-  export type MetadataByNodeResolver<
-    R = InfraNodeMetadata,
-    Parent = InfraSource,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context, MetadataByNodeArgs>;
-  export interface MetadataByNodeArgs {
-    nodeId: string;
-
-    nodeType: InfraNodeType;
-  }
-
   export type LogEntriesAroundResolver<
     R = InfraLogEntryInterval,
     Parent = InfraSource,
@@ -1154,240 +1069,6 @@ export namespace InfraIndexFieldResolvers {
   export type AggregatableResolver<
     R = boolean,
     Parent = InfraIndexField,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** One metadata entry for a node. */
-export namespace InfraNodeMetadataResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeMetadata> {
-    id?: IdResolver<string, TypeParent, Context>;
-
-    name?: NameResolver<string, TypeParent, Context>;
-
-    info?: InfoResolver<InfraNodeInfo | null, TypeParent, Context>;
-
-    features?: FeaturesResolver<InfraNodeFeature[], TypeParent, Context>;
-  }
-
-  export type IdResolver<R = string, Parent = InfraNodeMetadata, Context = InfraContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type NameResolver<
-    R = string,
-    Parent = InfraNodeMetadata,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type InfoResolver<
-    R = InfraNodeInfo | null,
-    Parent = InfraNodeMetadata,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type FeaturesResolver<
-    R = InfraNodeFeature[],
-    Parent = InfraNodeMetadata,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** The info object for the node */
-export namespace InfraNodeInfoResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeInfo> {
-    host?: HostResolver<InfraNodeHost | null, TypeParent, Context>;
-
-    cloud?: CloudResolver<InfraNodeCloud | null, TypeParent, Context>;
-  }
-
-  export type HostResolver<
-    R = InfraNodeHost | null,
-    Parent = InfraNodeInfo,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type CloudResolver<
-    R = InfraNodeCloud | null,
-    Parent = InfraNodeInfo,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** The host object for the node */
-export namespace InfraNodeHostResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeHost> {
-    name?: NameResolver<string | null, TypeParent, Context>;
-
-    os?: OsResolver<InfraNodeHostOs | null, TypeParent, Context>;
-
-    architecture?: ArchitectureResolver<string | null, TypeParent, Context>;
-
-    containerized?: ContainerizedResolver<boolean | null, TypeParent, Context>;
-  }
-
-  export type NameResolver<
-    R = string | null,
-    Parent = InfraNodeHost,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type OsResolver<
-    R = InfraNodeHostOs | null,
-    Parent = InfraNodeHost,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type ArchitectureResolver<
-    R = string | null,
-    Parent = InfraNodeHost,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type ContainerizedResolver<
-    R = boolean | null,
-    Parent = InfraNodeHost,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** The operation system object for the node */
-export namespace InfraNodeHostOsResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeHostOs> {
-    codename?: CodenameResolver<string | null, TypeParent, Context>;
-
-    family?: FamilyResolver<string | null, TypeParent, Context>;
-
-    kernel?: KernelResolver<string | null, TypeParent, Context>;
-
-    name?: NameResolver<string | null, TypeParent, Context>;
-
-    platform?: PlatformResolver<string | null, TypeParent, Context>;
-
-    version?: VersionResolver<string | null, TypeParent, Context>;
-  }
-
-  export type CodenameResolver<
-    R = string | null,
-    Parent = InfraNodeHostOs,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type FamilyResolver<
-    R = string | null,
-    Parent = InfraNodeHostOs,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type KernelResolver<
-    R = string | null,
-    Parent = InfraNodeHostOs,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type NameResolver<
-    R = string | null,
-    Parent = InfraNodeHostOs,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type PlatformResolver<
-    R = string | null,
-    Parent = InfraNodeHostOs,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type VersionResolver<
-    R = string | null,
-    Parent = InfraNodeHostOs,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** The cloud object for the node */
-export namespace InfraNodeCloudResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeCloud> {
-    instance?: InstanceResolver<InfraNodeCloudInstance | null, TypeParent, Context>;
-
-    provider?: ProviderResolver<string | null, TypeParent, Context>;
-
-    availability_zone?: AvailabilityZoneResolver<string | null, TypeParent, Context>;
-
-    project?: ProjectResolver<InfraNodeCloudProject | null, TypeParent, Context>;
-
-    machine?: MachineResolver<InfraNodeCloudMachine | null, TypeParent, Context>;
-  }
-
-  export type InstanceResolver<
-    R = InfraNodeCloudInstance | null,
-    Parent = InfraNodeCloud,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type ProviderResolver<
-    R = string | null,
-    Parent = InfraNodeCloud,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type AvailabilityZoneResolver<
-    R = string | null,
-    Parent = InfraNodeCloud,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type ProjectResolver<
-    R = InfraNodeCloudProject | null,
-    Parent = InfraNodeCloud,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type MachineResolver<
-    R = InfraNodeCloudMachine | null,
-    Parent = InfraNodeCloud,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** The cloud instance object for the node */
-export namespace InfraNodeCloudInstanceResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeCloudInstance> {
-    id?: IdResolver<string | null, TypeParent, Context>;
-
-    name?: NameResolver<string | null, TypeParent, Context>;
-  }
-
-  export type IdResolver<
-    R = string | null,
-    Parent = InfraNodeCloudInstance,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type NameResolver<
-    R = string | null,
-    Parent = InfraNodeCloudInstance,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** The cloud project object for the node */
-export namespace InfraNodeCloudProjectResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeCloudProject> {
-    id?: IdResolver<string | null, TypeParent, Context>;
-  }
-
-  export type IdResolver<
-    R = string | null,
-    Parent = InfraNodeCloudProject,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** The Cloud machine object for the node */
-export namespace InfraNodeCloudMachineResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeCloudMachine> {
-    type?: TypeResolver<string | null, TypeParent, Context>;
-  }
-
-  export type TypeResolver<
-    R = string | null,
-    Parent = InfraNodeCloudMachine,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace InfraNodeFeatureResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeFeature> {
-    name?: NameResolver<string, TypeParent, Context>;
-
-    source?: SourceResolver<string, TypeParent, Context>;
-  }
-
-  export type NameResolver<
-    R = string,
-    Parent = InfraNodeFeature,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type SourceResolver<
-    R = string,
-    Parent = InfraNodeFeature,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }

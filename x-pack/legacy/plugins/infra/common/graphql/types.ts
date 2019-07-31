@@ -28,8 +28,6 @@ export interface InfraSource {
   configuration: InfraSourceConfiguration;
   /** The status of the source */
   status: InfraSourceStatus;
-  /** A hierarchy of metadata entries by node */
-  metadataByNode: InfraNodeMetadata;
   /** A consecutive span of log entries surrounding a point in time */
   logEntriesAround: InfraLogEntryInterval;
   /** A consecutive span of log entries within an interval */
@@ -131,78 +129,6 @@ export interface InfraIndexField {
   searchable: boolean;
   /** Whether the field's values can be aggregated */
   aggregatable: boolean;
-}
-/** One metadata entry for a node. */
-export interface InfraNodeMetadata {
-  id: string;
-
-  name: string;
-
-  info?: InfraNodeInfo | null;
-
-  features: InfraNodeFeature[];
-}
-/** The info object for the node */
-export interface InfraNodeInfo {
-  host?: InfraNodeHost | null;
-
-  cloud?: InfraNodeCloud | null;
-}
-/** The host object for the node */
-export interface InfraNodeHost {
-  name?: string | null;
-
-  os?: InfraNodeHostOs | null;
-
-  architecture?: string | null;
-
-  containerized?: boolean | null;
-}
-/** The operation system object for the node */
-export interface InfraNodeHostOs {
-  codename?: string | null;
-
-  family?: string | null;
-
-  kernel?: string | null;
-
-  name?: string | null;
-
-  platform?: string | null;
-
-  version?: string | null;
-}
-/** The cloud object for the node */
-export interface InfraNodeCloud {
-  instance?: InfraNodeCloudInstance | null;
-
-  provider?: string | null;
-
-  availability_zone?: string | null;
-
-  project?: InfraNodeCloudProject | null;
-
-  machine?: InfraNodeCloudMachine | null;
-}
-/** The cloud instance object for the node */
-export interface InfraNodeCloudInstance {
-  id?: string | null;
-
-  name?: string | null;
-}
-/** The cloud project object for the node */
-export interface InfraNodeCloudProject {
-  id?: string | null;
-}
-/** The Cloud machine object for the node */
-export interface InfraNodeCloudMachine {
-  type?: string | null;
-}
-
-export interface InfraNodeFeature {
-  name: string;
-
-  source: string;
 }
 /** A consecutive sequence of log entries */
 export interface InfraLogEntryInterval {
@@ -481,11 +407,6 @@ export interface UpdateSourceTimestampLogColumnInput {
 export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
-}
-export interface MetadataByNodeInfraSourceArgs {
-  nodeId: string;
-
-  nodeType: InfraNodeType;
 }
 export interface LogEntriesAroundInfraSourceArgs {
   /** The sort key that corresponds to the point in time */
@@ -777,116 +698,6 @@ export namespace LogSummary {
     end: number;
 
     entriesCount: number;
-  };
-}
-
-export namespace MetadataQuery {
-  export type Variables = {
-    sourceId: string;
-    nodeId: string;
-    nodeType: InfraNodeType;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'InfraSource';
-
-    id: string;
-
-    metadataByNode: MetadataByNode;
-  };
-
-  export type MetadataByNode = {
-    __typename?: 'InfraNodeMetadata';
-
-    name: string;
-
-    features: Features[];
-
-    info?: Info | null;
-  };
-
-  export type Features = {
-    __typename?: 'InfraNodeFeature';
-
-    name: string;
-
-    source: string;
-  };
-
-  export type Info = {
-    __typename?: 'InfraNodeInfo';
-
-    cloud?: Cloud | null;
-
-    host?: Host | null;
-  };
-
-  export type Cloud = {
-    __typename?: 'InfraNodeCloud';
-
-    instance?: Instance | null;
-
-    provider?: string | null;
-
-    availability_zone?: string | null;
-
-    project?: Project | null;
-
-    machine?: Machine | null;
-  };
-
-  export type Instance = {
-    __typename?: 'InfraNodeCloudInstance';
-
-    id?: string | null;
-
-    name?: string | null;
-  };
-
-  export type Project = {
-    __typename?: 'InfraNodeCloudProject';
-
-    id?: string | null;
-  };
-
-  export type Machine = {
-    __typename?: 'InfraNodeCloudMachine';
-
-    type?: string | null;
-  };
-
-  export type Host = {
-    __typename?: 'InfraNodeHost';
-
-    name?: string | null;
-
-    os?: Os | null;
-
-    architecture?: string | null;
-
-    containerized?: boolean | null;
-  };
-
-  export type Os = {
-    __typename?: 'InfraNodeHostOS';
-
-    codename?: string | null;
-
-    family?: string | null;
-
-    kernel?: string | null;
-
-    name?: string | null;
-
-    platform?: string | null;
-
-    version?: string | null;
   };
 }
 
