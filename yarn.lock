@@ -3815,6 +3815,19 @@
     "@types/podium" "*"
     "@types/shot" "*"
 
+"@types/hapi__boom@*":
+  version "7.4.0"
+  resolved "https://registry.yarnpkg.com/@types/hapi__boom/-/hapi__boom-7.4.0.tgz#81d58cffb67c54896614560c007a5015a79c30ba"
+  integrity sha512-i4nerd/aJd5zW8OPHxgeuDYiuiuHxHczkqIaALhINUqBCavRgbiwjfndpgrarB43jcb/2LxzrohMOH7akyt3og==
+
+"@types/hapi__wreck@^15.0.1":
+  version "15.0.1"
+  resolved "https://registry.yarnpkg.com/@types/hapi__wreck/-/hapi__wreck-15.0.1.tgz#41df4e122c49316f0057cb5e9c6eb4c00e671e95"
+  integrity sha512-OXhOaFWPFkWkqU5IlFwgTK/Q3yzc3iDhC1/S+3rQ6d2qkl6xvcRZaayJGjDXORf3krnGtDN1l3bIajNcuUl6QA==
+  dependencies:
+    "@types/hapi__boom" "*"
+    "@types/node" "*"
+
 "@types/has-ansi@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/has-ansi/-/has-ansi-3.0.0.tgz#636403dc4e0b2649421c4158e5c404416f3f0330"
