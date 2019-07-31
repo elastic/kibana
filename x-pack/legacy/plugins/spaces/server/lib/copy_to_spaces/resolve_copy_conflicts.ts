@@ -98,7 +98,7 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
 
       const retries = entryRetries.map(retry => ({ ...retry, replaceReferences: [] }));
 
-      response[space] = await resolveConflictsForSpace(space, readStream, retries);
+      response[space] = await resolveConflictsForSpace(space, readStream!, retries);
     }
 
     return response;

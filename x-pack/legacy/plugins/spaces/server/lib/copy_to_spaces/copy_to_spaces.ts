@@ -91,7 +91,7 @@ export function copySavedObjectsToSpacesFactory(
     let readStream: Readable | null = null;
     for (const spaceId of destinationSpaceIds) {
       readStream = readStream ? rereadableStream.reread() : rereadableStream;
-      response[spaceId] = await importObjectsToSpace(spaceId, readStream, options);
+      response[spaceId] = await importObjectsToSpace(spaceId, readStream!, options);
     }
 
     return response;

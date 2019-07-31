@@ -204,7 +204,7 @@ describe('#getAll', () => {
           },
         },
       });
-      const maxSpaces = 1234;
+
       const mockConfig = createMockConfig({
         maxSpaces: 1234,
       });
