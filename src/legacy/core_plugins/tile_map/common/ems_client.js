@@ -90,7 +90,7 @@ export class EMSClient {
 
   EMS_LOAD_TIMEOUT = 32000;
 
-  constructor({ kbnVersion, manifestServiceUrl, htmlSanitizer, language, landingPageUrl }) {
+  constructor({ kbnVersion, manifestServiceUrl, htmlSanitizer, language, landingPageUrl, proxyElasticMapsServiceInMaps, proxyElasticMapsServiceInMapsOptions }) {
 
     this._queryParams = {
       elastic_tile_service_tos: 'agree',
@@ -104,6 +104,9 @@ export class EMSClient {
     this._loadTMSServices = null;
     this._emsLandingPageUrl = typeof landingPageUrl === 'string' ? landingPageUrl : '';
     this._language = typeof language === 'string' ? language : DEFAULT_LANGUAGE;
+
+    this._proxyElasticMapsServiceInMaps = typeof proxyElasticMapsServiceInMaps === 'boolean' ? proxyElasticMapsServiceInMaps : false;
+    this._proxyElasticMapsServiceInMapsOptions = proxyElasticMapsServiceInMapsOptions || {};
 
     this._invalidateSettings();
 
@@ -185,7 +188,8 @@ export class EMSClient {
   }
 
   async _getManifestWithParams(url) {
-    return await this.getManifest(this.extendUrlWithParams(url));
+    const extendedUrl = this.extendUrlWithParams(url);
+    return await this.getManifest(extendedUrl);
   }
 
   _invalidateSettings() {

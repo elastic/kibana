@@ -30,7 +30,9 @@ export function initRoutes(server, licenseUid) {
     language: i18n.getLocale(),
     kbnVersion: serverConfig.get('pkg.version'),
     manifestServiceUrl: mapConfig.manifestServiceUrl,
-    landingPageUrl: mapConfig.emsLandingPageUrl
+    landingPageUrl: mapConfig.emsLandingPageUrl,
+    proxyElasticMapsServiceInMaps: false,
+    proxyElasticMapsServiceInMapsOptions: null
   });
 
   server.route({

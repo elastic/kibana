@@ -8,7 +8,7 @@ import { AbstractVectorSource } from '../vector_source';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import React from 'react';
 import { EMS_FILE } from '../../../../common/constants';
-import { getUrlFromFileLayer, getEMSClient } from '../../../meta';
+import { getEMSClient } from '../../../meta';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -77,7 +77,7 @@ export class EMSFileSource extends AbstractVectorSource {
     const featureCollection = await AbstractVectorSource.getGeoJson({
       format: emsFileLayer.getDefaultFormatType(),
       featureCollectionPath: 'data',
-      fetchUrl: await getUrlFromFileLayer(emsFileLayer)
+      fetchUrl: emsFileLayer.getDefaultFormatUrl()
     });
     return {
       data: featureCollection,

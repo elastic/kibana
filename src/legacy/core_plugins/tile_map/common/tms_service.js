@@ -22,11 +22,15 @@ import { ORIGIN } from './origin';
 
 export class TMSService {
 
-  _getTileJson = _.once(async url => this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url)));
+  _getDefaultStyleJson = _.once(async () => {
+    const url = this._getDefaultStyleUrl();
+    this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
+  });
 
-  constructor(config,  emsClient) {
+  constructor(config,  emsClient, proxyOptions) {
     this._config = config;
     this._emsClient = emsClient;
+    this._proxyOptions = null;
   }
 
   _getRasterFormats(locale) {
@@ -50,9 +54,16 @@ export class TMSService {
   }
 
   async getUrlTemplate() {
-    const defaultStyle = this._getDefaultStyleUrl();
-    const tileJson = await this._getTileJson(defaultStyle);
-    return this._emsClient.extendUrlWithParams(tileJson.tiles[0]);
+    const tileJson = await this._getDefaultStyleJson();
+    let url;
+    if (this._proxyOptions) {
+      const serviceId = encodeURIComponent(this.getId());
+      url = `${this._proxyOptions.tmsServiceDefaultRaster}?id=${serviceId}&x={x}&y={y}&z={z}`;
+    } else {
+      const directUrl = tileJson.tiles[0];
+      url = this._emsClient.extendUrlWithParams(directUrl);
+    }
+    return url;
   }
 
   getDisplayName() {
@@ -90,12 +101,12 @@ export class TMSService {
   }
 
   async getMinZoom() {
-    const tileJson = await this._getTileJson(this._getDefaultStyleUrl());
+    const tileJson = await this._getDefaultStyleJson();
     return tileJson.minzoom;
   }
 
   async getMaxZoom() {
-    const tileJson = await this._getTileJson(this._getDefaultStyleUrl());
+    const tileJson = await this._getDefaultStyleJson();
     return tileJson.maxzoom;
   }
 

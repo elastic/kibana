@@ -5,12 +5,24 @@
  */
 
 
-import { GIS_API_PATH, EMS_DATA_TMS_PATH, EMS_DATA_FILE_PATH } from '../common/constants';
+import {
+  GIS_API_PATH,
+  EMS_DATA_TMS_PATH,
+  EMS_DATA_FILE_PATH,
+
+  EMS_CATALOGUE_PATH,
+  EMS_TILES_CATALOGUE_PATH,
+  EMS_FILES_CATALOGUE_PATH,
+  EMS_FILES_DATA_PATH,
+  EMS_TILES_RASTER_PATH
+} from '../common/constants';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { EMSClient } from 'ui/vis/map/ems_client';
 import { xpackInfo } from './kibana_services';
 
+
+const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
 export function getKibanaRegionList() {
   return chrome.getInjected('regionmapLayers');
@@ -27,14 +39,26 @@ export function getEMSClient() {
   if (!emsClient) {
     const isEmsEnabled = chrome.getInjected('isEmsEnabled', true);
     if (isEmsEnabled) {
+
+      const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
+      const proxyOptions = proxyElasticMapsServiceInMaps ? {
+        catalogueUrl: `${GIS_API_RELATIVE}/${EMS_CATALOGUE_PATH}`,
+        tilesCatalogue: `${GIS_API_RELATIVE}/${EMS_TILES_CATALOGUE_PATH}`,
+        filesCatalogue: `${GIS_API_RELATIVE}/${EMS_FILES_CATALOGUE_PATH}`,
+        fileLayerDefaultJson: `${GIS_API_RELATIVE}/${EMS_FILES_DATA_PATH}`,
+        tmsServiceDefaultRaster: `${GIS_API_RELATIVE}/${EMS_TILES_RASTER_PATH}`
+      } : null;
+
       emsClient = new EMSClient({
         language: i18n.getLocale(),
         kbnVersion: chrome.getInjected('kbnPkgVersion'),
         manifestServiceUrl: chrome.getInjected('emsManifestServiceUrl'),
         landingPageUrl: chrome.getInjected('emsLandingPageUrl'),
-        proxyElasticMapsServiceInMaps: false
+        proxyElasticMapsServiceInMaps: proxyElasticMapsServiceInMaps,
+        proxyElasticMapsServiceInMapsOptions: proxyOptions
       });
     } else {
+      //EMS is turned off. Mock API.
       emsClient = {
         async getFileLayers() {
           return [];
@@ -46,8 +70,6 @@ export function getEMSClient() {
       };
     }
   }
-
-  //add the license each time, so new
   const xpackMapsFeature = xpackInfo.get('features.maps');
   const licenseId = xpackMapsFeature && xpackMapsFeature.maps && xpackMapsFeature.uid ? xpackMapsFeature.uid :  '';
   if (latestLicenseId !== licenseId) {
@@ -57,16 +79,3 @@ export function getEMSClient() {
   return emsClient;
 
 }
-
-export async function getUrlFromFileLayer(fileLayer) {
-  const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
-  // eslint-disable-next-line max-len
-  return proxyElasticMapsServiceInMaps ? `../${GIS_API_PATH}/${EMS_DATA_FILE_PATH}?id=${encodeURIComponent(fileLayer.getId())}` : fileLayer.getDefaultFormatUrl();
-}
-
-export async function getURLFromTMSService(tmsService) {
-  const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
-  // eslint-disable-next-line max-len
-  return proxyElasticMapsServiceInMaps ?  `../${GIS_API_PATH}/${EMS_DATA_TMS_PATH}?id=${encodeURIComponent(tmsService.getId())}&x={x}&y={y}&z={z}` : await tmsService.getUrlTemplate();
-}
-

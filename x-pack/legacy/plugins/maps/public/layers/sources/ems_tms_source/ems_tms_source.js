@@ -10,7 +10,7 @@ import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
 
-import { getEMSClient, getURLFromTMSService } from '../../../meta';
+import { getEMSClient } from '../../../meta';
 import { EMSTMSCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -132,7 +132,7 @@ export class EMSTMSSource extends AbstractTMSSource {
 
   async getUrlTemplate() {
     const emsTMSService = await this._getEMSTMSService();
-    return getURLFromTMSService(emsTMSService);
+    return await emsTMSService.getUrlTemplate();
   }
 
   _getEmsTileLayerId() {
