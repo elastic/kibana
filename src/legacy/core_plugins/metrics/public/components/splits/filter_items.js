@@ -27,8 +27,7 @@ import uuid from 'uuid';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-import { QueryBarInput } from 'plugins/data';
-import { QueryInputBarContext } from '../../contexts/query_input_bar_context';
+import { QueryBarWrapper } from '../query_bar_wrapper';
 class FilterItemsUi extends Component {
   constructor(props) {
     super(props);
@@ -78,19 +77,14 @@ class FilterItemsUi extends Component {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <QueryInputBarContext.Consumer>
-            {context => (
-              <QueryBarInput
-                query={{
-                  language: model.filter.language || getDefaultQueryLanguage(),
-                  query: model.filter.query || '',
-                }}
-                onChange={query => this.handleQueryChange(model, query)}
-                indexPatterns={[indexPatterns]}
-                {...context}
-              />
-            )}
-          </QueryInputBarContext.Consumer>
+          <QueryBarWrapper
+            query={{
+              language: model.filter.language || getDefaultQueryLanguage(),
+              query: model.filter.query || '',
+            }}
+            onChange={query => this.handleQueryChange(model, query)}
+            indexPatterns={[indexPatterns]}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldText

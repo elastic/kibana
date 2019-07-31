@@ -43,8 +43,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-import { QueryBarInput } from 'plugins/data';
-import { QueryInputBarContext } from '../../contexts/query_input_bar_context';
+import { QueryBarWrapper } from '../query_bar_wrapper';
 
 export class TopNPanelConfig extends Component {
   constructor(props) {
@@ -141,21 +140,16 @@ export class TopNPanelConfig extends Component {
                   }
                   fullWidth
                 >
-                  <QueryInputBarContext.Consumer>
-                    {context => (
-                      <QueryBarInput
-                        query={{
-                          language: model.filter.language
-                            ? model.filter.language
-                            : getDefaultQueryLanguage(),
-                          query: model.filter.query || '',
-                        }}
-                        onChange={filter => this.props.onChange({ filter })}
-                        indexPatterns={[model.index_pattern || model.default_index_pattern]}
-                        {...context}
-                      />
-                    )}
-                  </QueryInputBarContext.Consumer>
+                  <QueryBarWrapper
+                    query={{
+                      language: model.filter.language
+                        ? model.filter.language
+                        : getDefaultQueryLanguage(),
+                      query: model.filter.query || '',
+                    }}
+                    onChange={filter => this.props.onChange({ filter })}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

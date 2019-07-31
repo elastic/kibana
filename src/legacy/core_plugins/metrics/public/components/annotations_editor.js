@@ -28,8 +28,7 @@ import { FieldSelect } from './aggs/field_select';
 import uuid from 'uuid';
 import { IconSelect } from './icon_select';
 import { YesNo } from './yes_no';
-import { QueryBarInput } from 'plugins/data';
-import { QueryInputBarContext } from '../contexts/query_input_bar_context';
+import { QueryBarWrapper } from './query_bar_wrapper';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 
 import {
@@ -171,19 +170,14 @@ export class AnnotationsEditor extends Component {
                   }
                   fullWidth
                 >
-                  <QueryInputBarContext.Consumer>
-                    {context => (
-                      <QueryBarInput
-                        query={{
-                          language: model.query_string.language || getDefaultQueryLanguage(),
-                          query: model.query_string.query || '',
-                        }}
-                        onChange={query => this.handleQueryChange(model, query)}
-                        indexPatterns={[model.index_pattern]}
-                        {...context}
-                      />
-                    )}
-                  </QueryInputBarContext.Consumer>
+                  <QueryBarWrapper
+                    query={{
+                      language: model.query_string.language || getDefaultQueryLanguage(),
+                      query: model.query_string.query || '',
+                    }}
+                    onChange={query => this.handleQueryChange(model, query)}
+                    indexPatterns={[model.index_pattern]}
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

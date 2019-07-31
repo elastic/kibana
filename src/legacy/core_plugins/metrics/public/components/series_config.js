@@ -37,8 +37,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
-import { QueryBarInput } from 'plugins/data';
-import { QueryInputBarContext } from '../contexts/query_input_bar_context';
+import { QueryBarWrapper } from './query_bar_wrapper';
 
 export const SeriesConfig = props => {
   const defaults = { offset_time: '', value_template: '' };
@@ -62,22 +61,17 @@ export const SeriesConfig = props => {
         label={<FormattedMessage id="tsvb.seriesConfig.filterLabel" defaultMessage="Filter" />}
         fullWidth
       >
-        <QueryInputBarContext.Consumer>
-          {context => (
-            <QueryBarInput
-              query={{
-                language:
-                  model.filter && model.filter.language
-                    ? model.filter.language
-                    : getDefaultQueryLanguage(),
-                query: model.filter && model.filter.query ? model.filter.query : '',
-              }}
-              onChange={filter => props.onChange({ filter })}
-              indexPatterns={[seriesIndexPattern]}
-              {...context}
-            />
-          )}
-        </QueryInputBarContext.Consumer>
+        <QueryBarWrapper
+          query={{
+            language:
+              model.filter && model.filter.language
+                ? model.filter.language
+                : getDefaultQueryLanguage(),
+            query: model.filter && model.filter.query ? model.filter.query : '',
+          }}
+          onChange={filter => props.onChange({ filter })}
+          indexPatterns={[seriesIndexPattern]}
+        />
       </EuiFormRow>
 
       <EuiHorizontalRule margin="s" />
