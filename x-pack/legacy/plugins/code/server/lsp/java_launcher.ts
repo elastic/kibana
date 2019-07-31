@@ -43,6 +43,13 @@ export class JavaLauncher extends AbstractLauncher {
             'java.autobuild.enabled': false,
           },
         },
+        clientCapabilities: {
+          textDocument: {
+            documentSymbol: {
+              hierarchicalDocumentSymbolSupport: true,
+            },
+          },
+        },
       } as InitializeOptions,
       this.log
     );

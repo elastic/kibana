@@ -17,9 +17,32 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../core/public';
-import { MarkdownPlugin as Plugin } from './plugin';
+import sinon from 'sinon';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
+export const npSetup = {
+  core: {},
+  plugins: {
+    data: {
+      expressions: {
+        registerFunction: sinon.fake(),
+        registerRenderer: sinon.fake(),
+        registerType: sinon.fake(),
+      },
+    },
+  },
+};
+
+export const npStart = {
+  core: {},
+  plugins: {
+    data: {},
+  },
+};
+
+export function __setup__(coreSetup) {
+  npSetup.core = coreSetup;
+}
+
+export function __start__(coreStart) {
+  npStart.core = coreStart;
 }
