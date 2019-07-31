@@ -148,7 +148,8 @@ export function initRoutes(server, licenseUid) {
         throw Boom.notFound();
       }
 
-      return await emsClient.getMainManifest();
+      const main =  await emsClient.getMainManifest();
+      return main;
     }
   });
 
@@ -162,7 +163,8 @@ export function initRoutes(server, licenseUid) {
         throw Boom.notFound();
       }
 
-      return await emsClient.getDefaultFileManifest();
+      const file = await emsClient.getDefaultFileManifest();
+      return file;
     }
   });
 
@@ -176,7 +178,8 @@ export function initRoutes(server, licenseUid) {
         throw Boom.notFound();
       }
 
-      return await emsClient.getDefaultTMSManifest();
+      const tiles =  await emsClient.getDefaultTMSManifest();
+      return tiles;
     }
   });
 

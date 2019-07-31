@@ -28,6 +28,12 @@ export function getKibanaTileMap() {
   return chrome.getInjected('tilemap');
 }
 
+function relativeToAbsolute(url) {
+  const a = document.createElement('a');
+  a.setAttribute('href', url);
+  return a.href;
+}
+
 let emsClient = null;
 let latestLicenseId = null;
 export function getEMSClient() {
@@ -37,13 +43,14 @@ export function getEMSClient() {
 
       const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
       const proxyOptions = proxyElasticMapsServiceInMaps ? {
-        catalogue: `${GIS_API_RELATIVE}/${EMS_CATALOGUE_PATH}`,
-        tilesCatalogue: `${GIS_API_RELATIVE}/${EMS_TILES_CATALOGUE_PATH}`,
-        filesCatalogue: `${GIS_API_RELATIVE}/${EMS_FILES_CATALOGUE_PATH}`,
-        fileLayerDefaultJson: `${GIS_API_RELATIVE}/${EMS_FILES_DEFAULT_JSON_PATH}`,
-        tmsServiceDefaultRaster: `${GIS_API_RELATIVE}/${EMS_TILES_RASTER_TILE_PATH}`
+        catalogue: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_CATALOGUE_PATH}`),
+        tilesCatalogue: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_TILES_CATALOGUE_PATH}`),
+        filesCatalogue: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_FILES_CATALOGUE_PATH}`),
+        fileLayerDefaultJson: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_FILES_DEFAULT_JSON_PATH}`),
+        tmsServiceDefaultRaster: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_TILES_RASTER_TILE_PATH}`)
       } : null;
 
+      console.log('make ems client', proxyElasticMapsServiceInMaps, proxyElasticMapsServiceInMaps);
       emsClient = new EMSClient({
         language: i18n.getLocale(),
         kbnVersion: chrome.getInjected('kbnPkgVersion'),

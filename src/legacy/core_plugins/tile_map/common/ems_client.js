@@ -100,6 +100,8 @@ export class EMSClient {
     proxyElasticMapsServiceInMapsOptions
   }) {
 
+    console.log('should proxy?', proxyElasticMapsServiceInMaps, proxyElasticMapsServiceInMapsOptions);
+
     this._queryParams = {
       elastic_tile_service_tos: 'agree',
       my_app_name: 'kibana',
@@ -206,7 +208,7 @@ export class EMSClient {
   _invalidateSettings() {
 
     this._getMainCatalog = _.once(async () => {
-      const url = this._proxyElasticMapsServiceInMaps ? this._proxyElasticMapsServiceInMaps.catalogue : this._manifestServiceUrl;
+      const url = this._proxyElasticMapsServiceInMaps ? this._proxyElasticMapsServiceInMapsOptions.catalogue : this._manifestServiceUrl;
       return await this._getManifestWithParams(url);
     });
 
@@ -216,7 +218,7 @@ export class EMSClient {
       if (!firstService) {
         return [];
       }
-      const url = this._proxyElasticMapsServiceInMaps ? this._proxyElasticMapsServiceInMaps.tilesCatalogue : firstService.manifest;
+      const url = this._proxyElasticMapsServiceInMaps ? this._proxyElasticMapsServiceInMapsOptions.tilesCatalogue : firstService.manifest;
       return await this.getManifest(url);
     });
 
@@ -226,7 +228,7 @@ export class EMSClient {
       if (!firstService) {
         return [];
       }
-      const url = this._proxyElasticMapsServiceInMaps ? this._proxyElasticMapsServiceInMaps.filesCatalogue : firstService.manifest;
+      const url = this._proxyElasticMapsServiceInMaps ? this._proxyElasticMapsServiceInMapsOptions.filesCatalogue : firstService.manifest;
       return await this.getManifest(url);
     });
 
@@ -254,6 +256,14 @@ export class EMSClient {
     return await this._getDefaultTMSCatalog();
   }
 
+  async getFileLayers() {
+    return await this._loadFileLayers();
+  }
+
+  async getTMSServices() {
+    return await this._loadTMSServices();
+  }
+
   getLandingPageUrl() {
     return this._emsLandingPageUrl;
   }
@@ -266,14 +276,6 @@ export class EMSClient {
     return unescapeTemplateVars(extendUrl(url, {
       query: this._queryParams
     }));
-  }
-
-  async getFileLayers() {
-    return await this._loadFileLayers();
-  }
-
-  async getTMSServices() {
-    return await this._loadTMSServices();
   }
 
   async findFileLayerById(id) {
