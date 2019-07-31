@@ -293,7 +293,7 @@ const formatTopNFlowEdgesUnified = (
 
 const formatTopNFlowEdges = (
   buckets: NetworkTopNFlowBuckets[],
-  flowTarget: FlowTarget
+  flowTarget: FlowTarget.source | FlowTarget.destination | FlowTarget.unified
 ): NetworkTopNFlowEdges[] =>
   buckets.map((bucket: NetworkTopNFlowBuckets) => ({
     node: {

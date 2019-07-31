@@ -52,6 +52,7 @@ export const getNetworkTopNFlowColumns = (
     hideForMobile: false,
     render: ({ node }) => {
       const ipAttr = `${flowTarget}.ip`;
+      const ipKql = `${flowTarget === FlowTarget.unified ? '*' : flowTarget}.ip`;
       const ip: string | null = get(ipAttr, node);
       const id = escapeDataProviderId(`${tableId}-table-${flowTarget}-${flowDirection}-ip-${ip}`);
       if (ip != null) {
@@ -65,7 +66,7 @@ export const getNetworkTopNFlowColumns = (
               name: ip,
               excluded: false,
               kqlQuery: '',
-              queryMatch: { field: ipAttr, value: ip, operator: IS_OPERATOR },
+              queryMatch: { field: ipKql, value: ip, operator: IS_OPERATOR },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -89,6 +90,7 @@ export const getNetworkTopNFlowColumns = (
     hideForMobile: false,
     render: ({ node }) => {
       const domainAttr = `${flowTarget}.domain`;
+      const domainKql = `${flowTarget === FlowTarget.unified ? '*' : flowTarget}.domain`;
       const ipAttr = `${flowTarget}.ip`;
       const domains: string[] = get(domainAttr, node);
       const ip: string | null = get(ipAttr, node);
@@ -97,7 +99,7 @@ export const getNetworkTopNFlowColumns = (
         const id = escapeDataProviderId(`${tableId}-table-${ip}-${flowDirection}`);
         return getRowItemDraggables({
           rowItems: domains,
-          attrName: domainAttr,
+          attrName: domainKql,
           idPrefix: id,
           displayCount: 1,
         });
@@ -155,7 +157,7 @@ export const getNetworkTopNFlowColumns = (
         const id = escapeDataProviderId(
           `${tableId}-table-${flowTarget}-${flowDirection}-ip-${ipAddress}`
         );
-        const attrFlowTarget = FlowTarget.unified ? FlowTarget.source : flowTarget;
+        const attrFlowTarget = FlowTarget.unified ? '*' : flowTarget;
         if (as.name && as.number) {
           return (
             <>
