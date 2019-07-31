@@ -75,6 +75,13 @@ export const TimeseriesConfig = injectI18n(function(props) {
       value: 'stacked',
     },
     {
+      label: intl.formatMessage({
+        id: 'tsvb.timeSeries.stackedWithinSeriesLabel',
+        defaultMessage: 'Stacked within series',
+      }),
+      value: 'stacked_within_series',
+    },
+    {
       label: intl.formatMessage({ id: 'tsvb.timeSeries.percentLabel', defaultMessage: 'Percent' }),
       value: 'percent',
       disabled: isPercentDisabled(props.seriesQuantity[model.id]),

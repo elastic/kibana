@@ -22,6 +22,7 @@ import { X_ACCESSOR_INDEX, STACKED_OPTIONS } from '../../../constants';
 export const getStackAccessors = stack => {
   switch (stack) {
     case STACKED_OPTIONS.STACKED:
+    case STACKED_OPTIONS.STACKED_WITHIN_SERIES:
     case STACKED_OPTIONS.PERCENT:
       return [X_ACCESSOR_INDEX];
     default:
