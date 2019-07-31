@@ -197,7 +197,6 @@ describe('Doc Table', function () {
         'index-pattern="indexPattern"' +
         '></tr>'
     );
-    let $details;
     let row;
 
     beforeEach(function () {
@@ -219,7 +218,7 @@ describe('Doc Table', function () {
       // Open the row
       $scope.toggleRow();
       $scope.$digest();
-      $details = $elem.next();
+      $elem.next();
     });
 
     afterEach(function () {
