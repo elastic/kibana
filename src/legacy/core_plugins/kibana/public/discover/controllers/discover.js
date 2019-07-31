@@ -31,7 +31,7 @@ import { getSort } from '../doc_table/lib/get_sort';
 import * as columnActions from '../doc_table/actions/columns';
 import * as filterActions from '../doc_table/actions/filter';
 
-import 'ui/listen';
+import 'ui/directives/listen';
 import 'ui/visualize';
 import 'ui/fixed_scroll';
 import 'ui/index_patterns';

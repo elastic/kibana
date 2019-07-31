@@ -36,11 +36,11 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
 
   const {
     error,
-    loading,
+    isLoading,
     data: { policies } = {
       policies: undefined,
     },
-    request: reload,
+    sendRequest: reload,
   } = useLoadPolicies();
 
   const openPolicyDetailsUrl = (newPolicyName: SlmPolicy['name']): string => {
@@ -61,7 +61,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
 
   let content;
 
-  if (loading) {
+  if (isLoading) {
     content = (
       <SectionLoading>
         <FormattedMessage

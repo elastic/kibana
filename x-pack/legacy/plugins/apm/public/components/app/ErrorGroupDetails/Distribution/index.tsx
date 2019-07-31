@@ -16,7 +16,7 @@ interface IBucket {
   count: number;
 }
 
-// TODO: cleanup duplication of this in distribution/get_distribution.ts (ErrorDistributionAPIResponse) and transactions/distribution/index.ts (ITransactionDistributionAPIResponse)
+// TODO: cleanup duplication of this in distribution/get_distribution.ts (ErrorDistributionAPIResponse) and transactions/distribution/index.ts (TransactionDistributionAPIResponse)
 interface IDistribution {
   totalHits: number;
   buckets: IBucket[];
