@@ -5,6 +5,9 @@
  */
 
 import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiTitle, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import 'github-markdown-css/github-markdown.css';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -67,13 +70,6 @@ enum ButtonOption {
   Blame = 'Blame',
   History = 'History',
   Folder = 'Directory',
-}
-
-enum ButtonLabel {
-  Code = 'Code',
-  Content = 'Content',
-  Download = 'Download',
-  Raw = 'Raw',
 }
 
 class CodeContent extends React.PureComponent<Props> {
@@ -161,20 +157,40 @@ class CodeContent extends React.PureComponent<Props> {
       const buttonOptions = [
         {
           id: ButtonOption.Code,
-          label: isText && !isMarkdown ? ButtonLabel.Code : ButtonLabel.Content,
+          label:
+            isText && !isMarkdown
+              ? i18n.translate('xpack.code.mainPage.content.buttons.codeButtonLabel', {
+                  defaultMessage: 'Code',
+                })
+              : i18n.translate('xpack.code.mainPage.content.buttons.contentButtonLabel', {
+                  defaultMessage: 'content',
+                }),
         },
         {
           id: ButtonOption.Blame,
-          label: ButtonOption.Blame,
+          label: i18n.translate('xpack.code.mainPage.content.buttons.blameButtonLabel', {
+            defaultMessage: 'Blame',
+          }),
           isDisabled: isUnsupported || isImage || isOversize,
         },
         {
           id: ButtonOption.History,
-          label: ButtonOption.History,
+          label: i18n.translate('xpack.code.mainPage.content.buttons.historyButtonLabel', {
+            defaultMessage: 'History',
+          }),
         },
       ];
       const rawButtonOptions = [
-        { id: 'Raw', label: isText ? ButtonLabel.Raw : ButtonLabel.Download },
+        {
+          id: 'Raw',
+          label: isText
+            ? i18n.translate('xpack.code.mainPage.content.buttons.rawButtonLabel', {
+                defaultMessage: 'Raw',
+              })
+            : i18n.translate('xpack.code.mainPage.content.buttons.downloadButtonLabel', {
+                defaultMessage: 'Download',
+              }),
+        },
       ];
 
       return (
@@ -210,11 +226,15 @@ class CodeContent extends React.PureComponent<Props> {
             options={[
               {
                 id: ButtonOption.Folder,
-                label: ButtonOption.Folder,
+                label: i18n.translate('xpack.code.mainPage.content.buttons.folderButtonLabel', {
+                  defaultMessage: 'Directory',
+                }),
               },
               {
                 id: ButtonOption.History,
-                label: ButtonOption.History,
+                label: i18n.translate('xpack.code.mainPage.content.buttons.historyButtonLabel', {
+                  defaultMessage: 'History',
+                }),
               },
             ]}
             type="single"
@@ -296,7 +316,12 @@ class CodeContent extends React.PureComponent<Props> {
               header={
                 <React.Fragment>
                   <EuiTitle size="s" className="codeMargin__title">
-                    <h3>Recent Commits</h3>
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.code.mainPage.directory.recentCommitsTitle"
+                        defaultMessage="Recent Commits"
+                      />
+                    </h3>
                   </EuiTitle>
                   <EuiButton
                     size="s"
@@ -304,7 +329,10 @@ class CodeContent extends React.PureComponent<Props> {
                       revision
                     )}/${path || ''}`}
                   >
-                    View All
+                    <FormattedMessage
+                      id="xpack.code.mainPage.directory.viewAllCommitsButtonLabel"
+                      defaultMessage="View All"
+                    />
                   </EuiButton>
                 </React.Fragment>
               }
@@ -383,7 +411,12 @@ class CodeContent extends React.PureComponent<Props> {
               repoUri={repoUri}
               header={
                 <EuiTitle className="codeMargin__title">
-                  <h3>Commit History</h3>
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.code.mainPage.history.commitHistoryTitle"
+                      defaultMessage="Commit History"
+                    />
+                  </h3>
                 </EuiTitle>
               }
               showPagination={true}

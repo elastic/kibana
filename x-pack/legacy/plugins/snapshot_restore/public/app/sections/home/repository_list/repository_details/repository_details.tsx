@@ -293,8 +293,8 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
           <EuiSpacer size="m" />
           <EuiButton onClick={verifyRepository} color="primary" isLoading={isLoadingVerification}>
             <FormattedMessage
-              id="xpack.snapshotRestore.repositoryDetails.reverifyButtonLabel"
-              defaultMessage="Re-verify repository"
+              id="xpack.snapshotRestore.repositoryDetails.verifyButtonLabel"
+              defaultMessage="Verify repository"
             />
           </EuiButton>
         </Fragment>
