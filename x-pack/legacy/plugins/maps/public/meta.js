@@ -105,26 +105,15 @@ export function getEMSClient() {
 
 }
 
-
-export async function getTMSMetaFromTMSService(tmsService) {
-  const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
-  return {
-    name: tmsService.getDisplayName(),
-    origin: tmsService.getOrigin(),
-    id: tmsService.getId(),
-    minZoom: await tmsService.getMinZoom(),
-    maxZoom: await tmsService.getMaxZoom(),
-    attribution: tmsService.getHTMLAttribution(),
-    attributionMarkdown: tmsService.getMarkdownAttribution(),
-    // eslint-disable-next-line max-len
-    url: proxyElasticMapsServiceInMaps ?   `../${GIS_API_PATH}/${EMS_DATA_TMS_PATH}?id=${encodeURIComponent(tmsService.getId())}&x={x}&y={y}&z={z}` : await tmsService.getUrlTemplate()
-  };
-}
-
 export async function getUrlFromFileLayer(fileLayer) {
   const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
   // eslint-disable-next-line max-len
   return proxyElasticMapsServiceInMaps ? `../${GIS_API_PATH}/${EMS_DATA_FILE_PATH}?id=${encodeURIComponent(fileLayer.getId())}` : fileLayer.getDefaultFormatUrl();
 }
 
+export async function getURLFromTMSService(tmsService) {
+  const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
+  // eslint-disable-next-line max-len
+  return proxyElasticMapsServiceInMaps ?  `../${GIS_API_PATH}/${EMS_DATA_TMS_PATH}?id=${encodeURIComponent(tmsService.getId())}&x={x}&y={y}&z={z}` : await tmsService.getUrlTemplate();
+}
 

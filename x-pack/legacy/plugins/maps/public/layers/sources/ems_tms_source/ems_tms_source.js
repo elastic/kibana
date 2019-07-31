@@ -10,7 +10,7 @@ import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
 
-import { getEMSClient, getTMSMetaFromTMSService } from '../../../meta';
+import { getEMSClient, getURLFromTMSService } from '../../../meta';
 import { EMSTMSCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -74,7 +74,7 @@ export class EMSTMSSource extends AbstractTMSSource {
     ];
   }
 
-  async _getEmsTmsMeta() {
+  async _getEMSTMSService() {
     const emsClient = getEMSClient();
     const emsTMSServices = await emsClient.getTMSServices();
     const emsTileLayerId = this._getEmsTileLayerId();
@@ -85,7 +85,7 @@ export class EMSTMSSource extends AbstractTMSSource {
         values: { id: emsTileLayerId }
       }));
     }
-    return await getTMSMetaFromTMSService(tmsService);
+    return tmsService;
   }
 
   _createDefaultLayerDescriptor(options) {
@@ -104,20 +104,21 @@ export class EMSTMSSource extends AbstractTMSSource {
 
   async getDisplayName() {
     try {
-      const emsTmsMeta = await this._getEmsTmsMeta();
-      return emsTmsMeta.name;
+      const emsTMSService = await this._getEMSTMSService();
+      return emsTMSService.getDisplayName();
     } catch (error) {
       return this._getEmsTileLayerId();
     }
   }
 
   async getAttributions() {
-    const emsTmsMeta = await this._getEmsTmsMeta();
-    if (!emsTmsMeta.attributionMarkdown) {
+    const emsTMSService = await this._getEMSTMSService();
+    const markdown = emsTMSService.getMarkdownAttribution();
+    if (!markdown) {
       return [];
     }
 
-    return emsTmsMeta.attributionMarkdown.split('|').map((attribution) => {
+    return markdown.split('|').map((attribution) => {
       attribution = attribution.trim();
       //this assumes attribution is plain markdown link
       const extractLink = /\[(.*)\]\((.*)\)/;
@@ -130,8 +131,8 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   async getUrlTemplate() {
-    const emsTmsMeta = await this._getEmsTmsMeta();
-    return emsTmsMeta.url;
+    const emsTMSService = await this._getEMSTMSService();
+    return getURLFromTMSService(emsTMSService);
   }
 
   _getEmsTileLayerId() {
