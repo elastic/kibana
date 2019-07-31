@@ -894,7 +894,7 @@ describe('IndexPatternDimensionPanel', () => {
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
-            dragging: { type: 'number', name: 'bar' },
+            dragging: { type: 'number', name: 'bar', indexPatternId: 'foo' },
           }}
           state={dragDropState()}
           filterOperations={op => op.dataType === 'number'}
@@ -908,6 +908,28 @@ describe('IndexPatternDimensionPanel', () => {
           .first()
           .prop('droppable')
       ).toBeTruthy();
+    });
+
+    it('is notdroppable if the field belongs to another index pattern', () => {
+      wrapper = shallow(
+        <IndexPatternDimensionPanel
+          {...defaultProps}
+          dragDropContext={{
+            ...dragDropContext,
+            dragging: { type: 'number', name: 'bar', indexPatternId: 'foo2' },
+          }}
+          state={dragDropState()}
+          filterOperations={op => op.dataType === 'number'}
+          layerId="myLayer"
+        />
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="indexPattern-dropTarget"]')
+          .first()
+          .prop('droppable')
+      ).toBeFalsy();
     });
 
     it('appends the dropped column when a field is dropped', () => {
