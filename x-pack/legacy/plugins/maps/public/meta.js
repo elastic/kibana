@@ -5,7 +5,7 @@
  */
 
 
-import { GIS_API_PATH, EMS_META_PATH, EMS_DATA_TMS_PATH } from '../common/constants';
+import { GIS_API_PATH, EMS_META_PATH, EMS_DATA_TMS_PATH, EMS_DATA_FILE_PATH } from '../common/constants';
 import _ from 'lodash';
 import { getEMSResources } from '../common/ems_util';
 import chrome from 'ui/chrome';
@@ -126,3 +126,11 @@ export async function getTMSMetaFromTMSService(tmsService) {
     url: proxyElasticMapsServiceInMaps ?   `../${GIS_API_PATH}/${EMS_DATA_TMS_PATH}?id=${encodeURIComponent(tmsService.getId())}&x={x}&y={y}&z={z}` : await tmsService.getUrlTemplate()
   };
 }
+
+export async function getUrlFromFileLayer(fileLayer) {
+  const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
+  // eslint-disable-next-line max-len
+  return proxyElasticMapsServiceInMaps ? `../${GIS_API_PATH}/${EMS_DATA_FILE_PATH}?id=${encodeURIComponent(fileLayer.getId())}` : fileLayer.getDefaultFormatUrl();
+}
+
+

@@ -13,7 +13,7 @@ class MockEMSFileSource {
 
   constructor(emsFileSource) {
     this._emsFileSource = emsFileSource;
-    this._emsFileSource._getEmsVectorFileMeta = () => {
+    this._emsFileSource._getEMSFileLayer = () => {
       return {
         fields: [{
           name: 'iso2',
