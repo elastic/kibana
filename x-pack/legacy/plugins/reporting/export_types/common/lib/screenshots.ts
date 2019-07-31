@@ -128,8 +128,8 @@ export function screenshotsObservableFactory(server: KbnServer) {
         const elementWithCount = document.querySelector(`[${countAttribute}]`);
         if (elementWithCount) {
           const count = elementWithCount.getAttribute(countAttribute);
-          // the conditional around parsing allows count === "0"
-          if (count !== null && count !== '') {
+          // the conditional allows count === "0", not null or undefined
+          if (count != null && count !== '') {
             return parseInt(count, 10);
           }
         }
