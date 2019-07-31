@@ -5,6 +5,7 @@
  */
 
 import { Location } from 'history';
+import { pick } from 'lodash';
 import { IUrlParams } from './types';
 import {
   getPathParams,
@@ -17,6 +18,10 @@ import {
 } from './helpers';
 import { toQuery } from '../../components/shared/Links/url_helpers';
 import { TIMEPICKER_DEFAULTS } from './constants';
+import {
+  localUIFilterNames,
+  LocalUIFilterName
+} from '../../../server/lib/ui_filters/local_ui_filters/config';
 
 type TimeUrlParams = Pick<
   IUrlParams,
@@ -27,6 +32,8 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
   const { processorEvent, serviceName, errorGroupId } = getPathParams(
     location.pathname
   );
+
+  const query = toQuery(location.search);
 
   const {
     traceId,
@@ -47,7 +54,11 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     rangeFrom = TIMEPICKER_DEFAULTS.rangeFrom,
     rangeTo = TIMEPICKER_DEFAULTS.rangeTo,
     environment
-  } = toQuery(location.search);
+  } = query;
+
+  const localUIFilters = pick(query, localUIFilterNames) as Partial<
+    Pick<IUrlParams, LocalUIFilterName>
+  >;
 
   return removeUndefinedProps({
     // date params
@@ -79,6 +90,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     errorGroupId,
 
     // ui filters
-    environment
+    environment,
+    ...localUIFilters
   });
 }

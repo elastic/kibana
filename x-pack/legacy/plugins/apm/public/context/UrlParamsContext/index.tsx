@@ -12,19 +12,36 @@ import React, {
   useState
 } from 'react';
 import { withRouter } from 'react-router-dom';
-import { uniqueId } from 'lodash';
+import { uniqueId, mapValues, pick } from 'lodash';
 import { IUrlParams } from './types';
 import { getParsedDate } from './helpers';
 import { resolveUrlParams } from './resolveUrlParams';
 import { UIFilters } from '../../../typings/ui-filters';
+import {
+  localUIFilterNames,
+  LocalUIFilterName
+} from '../../../server/lib/ui_filters/local_ui_filters/config';
 
 interface TimeRange {
   rangeFrom: string;
   rangeTo: string;
 }
 
-function useUiFilters({ kuery, environment }: IUrlParams): UIFilters {
-  return useMemo(() => ({ kuery, environment }), [kuery, environment]);
+function useUiFilters(
+  params: Pick<IUrlParams, 'kuery' | 'environment' | LocalUIFilterName>
+): UIFilters {
+  return useMemo(() => {
+    const { kuery, environment, ...localUIFilters } = params;
+    const mappedLocalFilters = mapValues(
+      pick(localUIFilters, localUIFilterNames) as Record<
+        LocalUIFilterName,
+        IUrlParams[LocalUIFilterName]
+      >,
+      val => (val ? val.split(',') : [])
+    );
+
+    return { kuery, environment, ...mappedLocalFilters };
+  }, [params]);
 }
 
 const defaultRefresh = (time: TimeRange) => {};
