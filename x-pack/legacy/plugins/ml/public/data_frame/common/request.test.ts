@@ -133,8 +133,11 @@ describe('Data Frame: Common', () => {
     const pivotState: StepDefineExposedState = {
       aggList: { 'the-agg-name': agg },
       groupByList: { 'the-group-by-name': groupBy },
-      isAdvancedEditorEnabled: false,
-      search: 'the-query',
+      isAdvancedPivotEditorEnabled: false,
+      isAdvancedSourceEditorEnabled: false,
+      sourceConfigUpdated: false,
+      searchString: 'the-query',
+      searchQuery: 'the-search-query',
       valid: true,
     };
     const transformDetailsState: StepDetailsExposedState = {
@@ -164,7 +167,7 @@ describe('Data Frame: Common', () => {
       },
       source: {
         index: ['the-index-pattern-title'],
-        query: { query_string: { default_operator: 'AND', query: 'the-query' } },
+        query: { query_string: { default_operator: 'AND', query: 'the-search-query' } },
       },
     });
   });

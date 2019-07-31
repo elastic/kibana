@@ -17,6 +17,7 @@ import {
   LangServerType,
   REPO_FILE_STATUS_SEVERITY,
   RepoFileStatus,
+  RepoFileStatusText as StatusText,
   Severity,
   StatusReport,
 } from '../../../common/repo_file_status';
@@ -80,7 +81,7 @@ export class StatusIndicatorComponent extends React.Component<Props, State> {
             </p>
           );
         } else {
-          children.push(<p key={`${error}_key`}>{error}</p>);
+          children.push(<p key={`${error}_key`}>{StatusText[error]}</p>);
         }
       }
     };
@@ -129,7 +130,11 @@ export class StatusIndicatorComponent extends React.Component<Props, State> {
         return <Link to="/admin?tab=LanguageServers">install it here</Link>;
       case CTA.SWITCH_TO_HEAD:
         const { uri, path } = this.props.currentStatusPath!;
-        return <Link to={`/${uri}/${this.props.pathType}/HEAD/${path}`}>switch to HEAD</Link>;
+        const headUrl = path
+          ? `/${uri}/${this.props.pathType}/HEAD/${path}`
+          : `/${uri}/${this.props.pathType}/HEAD/`;
+
+        return <Link to={headUrl}>switch to HEAD</Link>;
     }
   }
 }

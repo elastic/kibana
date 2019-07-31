@@ -32,10 +32,11 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { FieldFilter, Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
-import { Field, IndexPattern } from 'ui/index_patterns';
+import { Field, IndexPattern } from '../../../index_patterns';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
   buildCustomFilter,
@@ -293,7 +294,11 @@ class FilterEditorUI extends Component<Props, State> {
 
   private renderCustomEditor() {
     return (
-      <EuiFormRow label="Value">
+      <EuiFormRow
+        label={i18n.translate('data.filter.filterEditor.queryDslLabel', {
+          defaultMessage: 'Elasticsearch Query DSL',
+        })}
+      >
         <EuiCodeEditor
           value={this.state.queryDsl}
           onChange={this.onQueryDslChange}
@@ -449,7 +454,7 @@ class FilterEditorUI extends Component<Props, State> {
 
     if (isCustomEditorOpen) {
       const { index, disabled, negate } = this.props.filter.meta;
-      const newIndex = index || this.props.indexPatterns[0].id;
+      const newIndex = index || this.props.indexPatterns[0].id!;
       const body = JSON.parse(queryDsl);
       const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
       this.props.onSubmit(filter);
