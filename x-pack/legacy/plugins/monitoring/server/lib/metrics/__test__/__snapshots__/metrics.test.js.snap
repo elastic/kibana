@@ -3101,6 +3101,46 @@ Object {
     "units": "e/s",
     "uuidField": "logstash_stats.logstash.uuid",
   },
+  "logstash_cluster_queue_depth": LogstashEventsRateClusterMetric {
+    "aggs": Object {
+      "event_rate": Object {
+        "sum_bucket": Object {
+          "buckets_path": "logstash_uuids>event_rate_per_node",
+          "gap_policy": "skip",
+        },
+      },
+      "logstash_uuids": Object {
+        "aggs": Object {
+          "event_rate_per_node": Object {
+            "max": Object {
+              "field": "logstash_stats.queue.events_count",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "logstash_stats.logstash.uuid",
+          "size": 1000,
+        },
+      },
+      "metric_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_rate",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+    },
+    "app": "logstash",
+    "derivative": true,
+    "description": "Depth of queue",
+    "field": "logstash_stats.queue.events_count",
+    "format": "0,0.[00]",
+    "label": "Queue depth",
+    "metricAgg": "max",
+    "timestampField": "logstash_stats.timestamp",
+    "units": "/s",
+    "uuidField": "cluster_uuid",
+  },
   "logstash_events_input_rate": LogstashEventsRateMetric {
     "app": "logstash",
     "derivative": true,
