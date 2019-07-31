@@ -16,13 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export interface Scope {
-  $new: () => Scope;
+import { IndexPattern } from 'src/legacy/core_plugins/data/public';
+
+export interface DocViewerTab {
+  component?: JSX.Element;
+  directive?: AngularDirective;
+  render?: DockViewerTabRenderFunc;
+  title: string;
+}
+
+export type DockViewerTabRenderFunc = (
+  domeNode: unknown,
+  renderProps: DocViewerTabRenderProps
+) => () => void;
+
+export interface DocViewerTabRenderProps {
+  columns: string[];
+  filter: (field: string, value: string | number, operation: string) => void;
+  hit: Record<string, string | number | Record<string, unknown>>;
+  indexPattern: IndexPattern;
+  onAddColumn: (columnName: string) => void;
+  onRemoveColumn: (columnName: string) => void;
+}
+
+export interface AngularScope {
+  $new: () => AngularScope;
   $digest: () => void;
   $destroy: () => void;
 }
 
-export interface Directive {
-  controller: (scope: Scope) => void;
+export interface AngularDirective {
+  controller: (scope: AngularScope) => void;
   template: string;
 }

@@ -18,10 +18,10 @@
  */
 import React, { useRef, useEffect } from 'react';
 import { compileAngular } from './doc_viewer_helper';
-import { Directive } from './doc_viewer_types';
+import { AngularDirective } from './doc_viewer_types';
 
 interface Props {
-  directive: Directive;
+  directive: AngularDirective;
   renderProps: object;
 }
 

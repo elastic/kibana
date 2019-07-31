@@ -17,9 +17,15 @@
  * under the License.
  */
 import React, { useRef, useEffect } from 'react';
+import { DocViewerTabRenderProps, DockViewerTabRenderFunc } from './doc_viewer_types';
 
-export function DocViewRenderTab({ render, renderProps }) {
-  const containerRef = useRef();
+interface Props {
+  render: DockViewerTabRenderFunc;
+  renderProps: DocViewerTabRenderProps;
+}
+
+export function DocViewRenderTab({ render, renderProps }: Props) {
+  const containerRef = useRef(null);
   useEffect(() => render(containerRef.current, renderProps), [render, renderProps]);
-  return <div ref={containerRef}/>;
+  return <div ref={containerRef} />;
 }

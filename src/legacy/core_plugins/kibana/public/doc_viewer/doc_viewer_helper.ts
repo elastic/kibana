@@ -17,7 +17,7 @@
  * under the License.
  */
 import chrome from 'ui/chrome';
-import { Scope } from './doc_viewer_types';
+import { AngularScope } from './doc_viewer_types';
 /**
  * compiles the angular markup provided by domElement
  * injects scope with given scopeProps
@@ -29,11 +29,11 @@ import { Scope } from './doc_viewer_types';
 export async function compileAngular(
   domElement: unknown,
   scopeProps: object,
-  controller?: (scope: Scope) => void
+  controller?: (scope: AngularScope) => void
 ): Promise<() => void> {
   const $injector = await chrome.dangerouslyGetActiveInjector();
-  const rootScope: Scope = $injector.get('$rootScope');
-  const newScope: Scope = Object.assign(rootScope.$new(), scopeProps);
+  const rootScope: AngularScope = $injector.get('$rootScope');
+  const newScope: AngularScope = Object.assign(rootScope.$new(), scopeProps);
   if (controller) {
     controller(newScope);
   }

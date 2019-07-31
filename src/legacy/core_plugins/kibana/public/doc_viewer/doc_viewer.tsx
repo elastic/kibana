@@ -20,17 +20,26 @@ import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerAngularTab } from './doc_viewer_angular_tab';
+import { DocViewerTabRenderProps, DocViewerTab } from './doc_viewer_types';
 
-export function DocViewer({ docViews, renderProps }) {
+interface Props {
+  docViews: DocViewerTab[];
+  renderProps: DocViewerTabRenderProps;
+}
+
+export function DocViewer({ docViews, renderProps }: Props) {
   const tabs = docViews.map(({ title, render, directive, component }) => {
     let content;
     if (component) {
       const Component = component;
+      // @ts-ignore
       content = <Component {...renderProps} />;
     } else if (render) {
       content = <DocViewRenderTab render={render} renderProps={renderProps} />;
-    } else {
+    } else if (directive) {
       content = <DocViewerAngularTab renderProps={renderProps} directive={directive} />;
+    } else {
+      content = <div>Invalid Doc Viewer properties</div>;
     }
 
     return {
