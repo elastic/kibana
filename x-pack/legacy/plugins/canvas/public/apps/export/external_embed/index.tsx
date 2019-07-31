@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { connect, MapDispatchToProps } from 'react-redux';
+import React from 'react';
+import { connect } from 'react-redux';
 import { compose, branch, renderComponent } from 'recompose';
 // @ts-ignore
 import { getInFlight } from '../../../state/selectors/resolved_args';
-// @ts-ignore
-import { initializeWorkpad } from '../../../state/actions/workpad';
 // @ts-ignore
 import { getRenderedWorkpad } from '../../../state/selectors/workpad';
 import { Props, ExternalEmbed as Component } from './external_embed';
@@ -17,26 +16,17 @@ import { Props, ExternalEmbed as Component } from './external_embed';
 import { LoadWorkpad } from '../export/load_workpad';
 
 const mapStateToProps = (state: any) => ({
-  inFlight: getInFlight(state),
+  isInFlight: getInFlight(state),
   workpad: getRenderedWorkpad(state),
 });
 
-const mapDispatchToProps: MapDispatchToProps<{}, {}> = dispatch => ({
-  initializeWorkpad() {
-    dispatch(initializeWorkpad());
-  },
-});
+const wait = () => <div>Please Wait...</div>;
 
-const branches = [branch<Props>(({ workpad }) => workpad == null, renderComponent(LoadWorkpad))];
+const branches = [
+  branch<Props>(({ workpad, isInFlight }) => workpad == null || isInFlight, renderComponent(wait)),
+];
 
-export const RefreshControl = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Component);
 export const ExternalEmbed = compose<Props, Props>(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
+  connect(mapStateToProps),
   ...branches
 )(Component);

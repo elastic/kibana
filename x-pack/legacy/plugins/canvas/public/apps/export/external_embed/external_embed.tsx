@@ -8,17 +8,31 @@ import React from 'react';
 
 export interface Props {
   workpad: object;
+  isInFlight: boolean;
+  isAppReady: boolean;
 }
 
 export class ExternalEmbed extends React.PureComponent<Props> {
   static propTypes = {};
 
   render() {
-    const { workpad } = this.props;
+    const { workpad, isInFlight } = this.props;
+
+    if (isInFlight) {
+      return null;
+    }
+
+    const blob = new Blob([JSON.stringify(workpad)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    // @ts-ignore Untyped object
+    const fileName = workpad.name;
 
     return (
-      <div className="canvasExternalEmbed">
-        <pre>{JSON.stringify(workpad, null, 2)}</pre>
+      <div>
+        <a href={url} download={fileName}>
+          Download Workpad
+        </a>
       </div>
     );
   }

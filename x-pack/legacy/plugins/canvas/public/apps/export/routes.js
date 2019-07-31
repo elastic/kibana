@@ -51,7 +51,8 @@ export const routes = [
 
           const { assets, ...workpad } = fetchedWorkpad;
           dispatch(setAssets(assets));
-          dispatch(setWorkpad(workpad));
+          dispatch(setWorkpad(workpad, { loadPages: false }));
+          dispatch(fetchAllRenderables({ onlyActivePage: false }));
         },
         meta: {
           component: ExternalEmbed,
