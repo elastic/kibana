@@ -43,7 +43,7 @@ export async function execute({
     validatedConfig = validateActionTypeConfig(actionType, mergedActionTypeConfig);
     validatedParams = validateActionTypeParams(actionType, params);
   } catch (err) {
-    return { status: 'error', message: err.message };
+    return { status: 'error', message: err.message, retry: false };
   }
 
   let result: ActionTypeExecutorResult | null = null;

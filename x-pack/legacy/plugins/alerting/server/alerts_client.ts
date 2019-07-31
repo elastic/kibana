@@ -8,7 +8,7 @@ import { omit } from 'lodash';
 import { SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Log } from './types';
 import { TaskManager } from '../../task_manager';
-import { validateAlertTypeParams, parseDuration } from './lib';
+import { validateAlertTypeParams } from './lib';
 
 interface ConstructorOptions {
   log: Log;
@@ -213,10 +213,7 @@ export class AlertsClient {
         basePath,
       },
       state: {
-        // This is here because we can't rely on the task manager's internal runAt.
-        // It changes it for timeout, etc when a task is running.
-        scheduledRunAt: new Date(Date.now() + parseDuration(interval)),
-        previousScheduledRunAt: null,
+        previousStartedAt: null,
         alertTypeState: {},
         alertInstances: {},
       },
