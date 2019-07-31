@@ -12,14 +12,19 @@ export const createEntityFromRecord = (entity: Record<string, string>): string =
 export const createEntity = (entityName: string, entityValue: string): string =>
   `${entityName}:'${entityValue}'`;
 
-export const createEntitiesFromScore = (score: Anomaly): string => {
-  const influencers = score.influencers.reduce((accum, item, index) => {
+export const createInfluencersFromScore = (
+  influencers: Array<Record<string, string>> = []
+): string =>
+  influencers.reduce((accum, item, index) => {
     if (index === 0) {
       return createEntityFromRecord(item);
     } else {
       return `${accum},${createEntityFromRecord(item)}`;
     }
   }, '');
+
+export const createEntitiesFromScore = (score: Anomaly): string => {
+  const influencers = createInfluencersFromScore(score.influencers);
 
   if (influencers.length === 0) {
     return createEntity(score.entityName, score.entityValue);

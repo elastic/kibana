@@ -54,7 +54,7 @@ export interface Anomaly {
   detectorIndex: number;
   entityName: string;
   entityValue: string;
-  influencers: Array<Record<string, string>>;
+  influencers?: Array<Record<string, string>>;
   jobId: string;
   rowId: string;
   severity: number;
