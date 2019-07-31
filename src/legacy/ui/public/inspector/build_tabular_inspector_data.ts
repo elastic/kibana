@@ -43,7 +43,7 @@ interface Table {
  * Do not use this function.
  *
  * @todo This function is used only by Courier. Courier will
- *   soon be removed, and this function will be deleted, too. If Courier is no removed,
+ *   soon be removed, and this function will be deleted, too. If Courier is not removed,
  *   move this function inside Courier.
  *
  * ---
