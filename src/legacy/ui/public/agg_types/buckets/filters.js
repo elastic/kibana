@@ -27,9 +27,9 @@ import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
 import { buildEsQuery } from '@kbn/es-query';
-import { setup } from '../../../../core_plugins/data/public/legacy';
+import { setup as data } from '../../../../core_plugins/data/public/legacy';
 
-const { getQueryLog } = setup.query.helpers;
+const { getQueryLog } = data.query.helpers;
 const config = chrome.getUiSettingsClient();
 
 export const filtersBucketAgg = new BucketAggType({
