@@ -16,6 +16,7 @@ import routes from 'ui/routes';
 import 'plugins/security/services/shield_user';
 import { JOBS_LIST_PATH } from '../management_urls';
 import { JobsListPage } from './components';
+import { getJobsListBreadcrumbs } from '../breadcrumbs';
 
 const template = `<kbn-management-app section="ml/jobs-list">
 <div id="jobsListReactRoot" />
@@ -23,7 +24,7 @@ const template = `<kbn-management-app section="ml/jobs-list">
 
 routes.when(JOBS_LIST_PATH, {
   template,
-  // k7Breadcrumbs: getJobsListBreadcrumbs, // TODO
+  k7Breadcrumbs: getJobsListBreadcrumbs,
   controller($scope, $http, kbnUrl) {
     $scope.$on('$destroy', () => {
       const elem = document.getElementById('jobsListReactRoot');
