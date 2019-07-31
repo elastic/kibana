@@ -6,15 +6,14 @@
 
 
 import {
-  EMS_DATA_FILE_PATH,
-  EMS_DATA_TMS_PATH,
-  EMS_META_PATH,
+  EMS_CATALOGUE_PATH, EMS_FILES_CATALOGUE_PATH,
+  EMS_FILES_DEFAULT_JSON_PATH, EMS_TILES_CATALOGUE_PATH,
+  EMS_TILES_RASTER_TILE_PATH,
   GIS_API_PATH,
   SPRITE_PATH,
 } from '../common/constants';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
-import { getEMSResources } from '../common/ems_util';
 import path from 'path';
 
 import Boom from 'boom';
@@ -26,18 +25,41 @@ export function initRoutes(server, licenseUid) {
   const serverConfig = server.config();
   const mapConfig = serverConfig.get('map');
 
-  const emsClient = new server.plugins.tile_map.EMSClient({
-    language: i18n.getLocale(),
-    kbnVersion: serverConfig.get('pkg.version'),
-    manifestServiceUrl: mapConfig.manifestServiceUrl,
-    landingPageUrl: mapConfig.emsLandingPageUrl,
-    proxyElasticMapsServiceInMaps: false,
-    proxyElasticMapsServiceInMapsOptions: null
-  });
+  let emsClient;
+  if (mapConfig.includeElasticMapsService) {
+    emsClient = new server.plugins.tile_map.EMSClient({
+      language: i18n.getLocale(),
+      kbnVersion: serverConfig.get('pkg.version'),
+      manifestServiceUrl: mapConfig.manifestServiceUrl,
+      landingPageUrl: mapConfig.emsLandingPageUrl,
+      proxyElasticMapsServiceInMaps: false,
+      proxyElasticMapsServiceInMapsOptions: null
+    });
+    emsClient.addQueryParams({ license: licenseUid });
+  } else {
+    emsClient = {
+      async getFileLayers() {
+        return [];
+      },
+      async getTMSServices() {
+        return [];
+      },
+      getMainManifest: async function () {
+        return null;
+      },
+      getDefaultFileManifest: async function () {
+        return null;
+      },
+      getDefaultTMSManifest: async function () {
+        return null;
+      },
+      addQueryParams() {}
+    };
+  }
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/${EMS_DATA_FILE_PATH}`,
+    path: `${ROOT}/${EMS_FILES_DEFAULT_JSON_PATH}`,
     handler: async (request) => {
 
       if (!mapConfig.proxyElasticMapsServiceInMaps) {
@@ -50,14 +72,14 @@ export function initRoutes(server, licenseUid) {
         return null;
       }
 
-      const ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, false);
-      const layer = ems.fileLayers.find(layer => layer.id === request.query.id);
+      const fileLayers = await emsClient.getFileLayers();
+      const layer = fileLayers.find(layer => layer.getId() === request.query.id);
       if (!layer) {
         return null;
       }
 
       try {
-        const file = await fetch(layer.url);
+        const file = await fetch(layer.getDefaultFormatUrl());
         return await file.json();
       } catch(e) {
         server.log('warning', `Cannot connect to EMS for file, error: ${e.message}`);
@@ -70,7 +92,7 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/${EMS_DATA_TMS_PATH}`,
+    path: `${ROOT}/${EMS_TILES_RASTER_TILE_PATH}`,
     handler: async (request, h) => {
 
       if (!mapConfig.proxyElasticMapsServiceInMaps) {
@@ -87,13 +109,14 @@ export function initRoutes(server, licenseUid) {
         return null;
       }
 
-      const ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, false);
-      const tmsService = ems.tmsServices.find(layer => layer.id === request.query.id);
+      const tmsServices = await emsClient.getTMSServices();
+      const tmsService = tmsServices.find(layer => layer.getId() === request.query.id);
       if (!tmsService) {
         return null;
       }
 
-      const url = tmsService.url
+      const urlTemplate = await tmsService.getUrlTemplate();
+      const url = urlTemplate
         .replace('{x}', request.query.x)
         .replace('{y}', request.query.y)
         .replace('{z}', request.query.z);
@@ -117,7 +140,7 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/${EMS_META_PATH}`,
+    path: `${ROOT}/${EMS_CATALOGUE_PATH}`,
     handler: async () => {
 
       if (!mapConfig.proxyElasticMapsServiceInMaps) {
@@ -125,23 +148,35 @@ export function initRoutes(server, licenseUid) {
         throw Boom.notFound();
       }
 
-      let ems;
-      try {
-        ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, true);
-      } catch (e) {
-        server.log('warning', `Cannot connect to EMS, error: ${e.message}`);
-        ems = {
-          fileLayers: [],
-          tmsServices: []
-        };
+      return await emsClient.getMainManifest();
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: `${ROOT}/${EMS_FILES_CATALOGUE_PATH}`,
+    handler: async () => {
+
+      if (!mapConfig.proxyElasticMapsServiceInMaps) {
+        server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
+        throw Boom.notFound();
       }
 
-      return ({
-        ems: {
-          file: ems.fileLayers,
-          tms: ems.tmsServices
-        }
-      });
+      return await emsClient.getDefaultFileManifest();
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: `${ROOT}/${EMS_TILES_CATALOGUE_PATH}`,
+    handler: async () => {
+
+      if (!mapConfig.proxyElasticMapsServiceInMaps) {
+        server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
+        throw Boom.notFound();
+      }
+
+      return await emsClient.getDefaultTMSManifest();
     }
   });
 

@@ -10,8 +10,8 @@ import {
   EMS_CATALOGUE_PATH,
   EMS_TILES_CATALOGUE_PATH,
   EMS_FILES_CATALOGUE_PATH,
-  EMS_FILES_DATA_PATH,
-  EMS_TILES_RASTER_PATH
+  EMS_FILES_DEFAULT_JSON_PATH,
+  EMS_TILES_RASTER_TILE_PATH
 } from '../common/constants';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
@@ -37,11 +37,11 @@ export function getEMSClient() {
 
       const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
       const proxyOptions = proxyElasticMapsServiceInMaps ? {
-        catalogueUrl: `${GIS_API_RELATIVE}/${EMS_CATALOGUE_PATH}`,
+        catalogue: `${GIS_API_RELATIVE}/${EMS_CATALOGUE_PATH}`,
         tilesCatalogue: `${GIS_API_RELATIVE}/${EMS_TILES_CATALOGUE_PATH}`,
         filesCatalogue: `${GIS_API_RELATIVE}/${EMS_FILES_CATALOGUE_PATH}`,
-        fileLayerDefaultJson: `${GIS_API_RELATIVE}/${EMS_FILES_DATA_PATH}`,
-        tmsServiceDefaultRaster: `${GIS_API_RELATIVE}/${EMS_TILES_RASTER_PATH}`
+        fileLayerDefaultJson: `${GIS_API_RELATIVE}/${EMS_FILES_DEFAULT_JSON_PATH}`,
+        tmsServiceDefaultRaster: `${GIS_API_RELATIVE}/${EMS_TILES_RASTER_TILE_PATH}`
       } : null;
 
       emsClient = new EMSClient({

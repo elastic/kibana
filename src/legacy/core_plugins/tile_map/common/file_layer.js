@@ -20,14 +20,13 @@
 
 import { ORIGIN } from './origin';
 import url from 'url';
-import {EMS_DATA_FILE_PATH, GIS_API_PATH} from '../../../../../x-pack/legacy/plugins/maps/common/constants';
 
 export class FileLayer {
 
   constructor(config, emsClient, proxyOptions) {
     this._config = config;
     this._emsClient = emsClient;
-    this._proxyOptions = null;
+    this._proxyOptions = proxyOptions;
   }
 
   getAttributions() {
@@ -109,7 +108,7 @@ export class FileLayer {
 
   getDefaultFormatUrl() {
     let url;
-    if (this._proxyOptions){
+    if (this._proxyOptions) {
       const id = encodeURIComponent(this.getId());
       url = `${this._proxyOptions.fileLayerDefaultJson}?id=${id}`;
     }else {
