@@ -10010,7 +10010,6 @@
     "xpack.snapshotRestore.repositoryDetails.removeManagedRepositoryButtonTitle": "管理されているレポジトリは削除できません。",
     "xpack.snapshotRestore.repositoryDetails.repositoryNotFoundErrorMessage": "レポジトリ「{name}」は存在しません。",
     "xpack.snapshotRestore.repositoryDetails.repositoryTypeDocLink": "レポジトリドキュメント",
-    "xpack.snapshotRestore.repositoryDetails.reverifyButtonLabel": "レポジトリを再検証",
     "xpack.snapshotRestore.repositoryDetails.settingsTitle": "設定",
     "xpack.snapshotRestore.repositoryDetails.snapshotsDescription": "{count} 件の {count, plural, one {スナップショット} other {スナップショット}}が見つかりました",
     "xpack.snapshotRestore.repositoryDetails.snapshotsTitle": "スナップショット",
