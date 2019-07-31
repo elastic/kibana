@@ -45,8 +45,7 @@
 }
 .visTooltip__labelContainer,
 .visTooltip__valueContainer {
-  overflow-wrap: break-word;
-  word-wrap: break-word;
+  @include euiTextOverflowWrap;
 }
 
 .visTooltip__headerIcon {
