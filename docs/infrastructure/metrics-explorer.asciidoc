@@ -34,9 +34,10 @@ Before we start, if you don't have any Metricbeat data, you'll need to head over
 The *Inventory* tab shows the host or hosts you are monitoring.
 
 2. Select the *Metrics Explorer* tab.
-The initial configuration has the *Average* aggregation selected, the *of* (metric selection) field empty and the *graph per* dropdown set to `Everything`.
+The initial configuration has the *Average* aggregation selected, the *of* field populated with some default metrics, and the *graph per* dropdown set to `Everything`.
 
-3. To select the metrics to view, in the metric selection field, start typing `system.load.1` and select this metric.
+3. To select the metrics to view, firstly delete all the metrics currently shown in the *of* field by clicking the *X* by each metric name.
+Then, in this field, start typing `system.load.1` and select this metric.
 Also add metrics for `system.load.5` and `system.load.15`.
 You will see a graph showing the average values of the metrics you selected.
 In this step we'll leave the aggregation dropdown set to *Average* but you can try different values later if you like.
@@ -63,11 +64,7 @@ You will now see a separate graph for each network interface.
 
 8. If you like, you can put one of these graphs in a dashboard.
 Choose a graph, click the *Actions* dropdown and select *Open In Visualize*.
-This opens the graph in the Time Series Visual Builder.
+This opens the graph in {kibana-ref}/TSVB.html[TSVB].
 From here you can save the graph and add it to a dashboard as usual.
-
-////
-MJ-to-revisit: For step 8, there are some Kibana index patterns that need to be in place for this to work without errors.
-////
 
 Who's the Metrics Explorer now? You are!
