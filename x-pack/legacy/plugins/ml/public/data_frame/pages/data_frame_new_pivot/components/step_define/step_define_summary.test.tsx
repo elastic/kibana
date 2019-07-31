@@ -14,7 +14,7 @@ import {
   PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
-
+import { IndexPattern } from 'ui/index_patterns';
 import { StepDefineExposedState } from './step_define_form';
 import { StepDefineSummary } from './step_define_summary';
 
@@ -26,11 +26,11 @@ jest.mock('react', () => {
 
 describe('Data Frame: <DefinePivotSummary />', () => {
   test('Minimal initialization', () => {
-    const currentIndexPattern = {
+    const currentIndexPattern = ({
       id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
       fields: [],
-    };
+    } as unknown) as IndexPattern;
 
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
