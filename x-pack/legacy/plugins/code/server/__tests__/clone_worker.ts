@@ -13,6 +13,7 @@ import rimraf from 'rimraf';
 import sinon from 'sinon';
 
 import { Repository } from '../../model';
+import { DiskWatermarkService } from '../disk_watermark';
 import { GitOperations } from '../git_operations';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -106,6 +107,12 @@ describe('clone_worker_tests', () => {
     cancellationService.cancelCloneJob = cancelCloneJobSpy;
     cancellationService.registerCancelableCloneJob = registerCancelableCloneJobSpy;
 
+    // Setup DiskWatermarkService
+    const isLowWatermarkSpy = sinon.stub().resolves(false);
+    const diskWatermarkService: any = {
+      isLowWatermark: isLowWatermarkSpy,
+    };
+
     const cloneWorker = new CloneWorker(
       esQueue as Esqueue,
       log,
@@ -114,7 +121,8 @@ describe('clone_worker_tests', () => {
       gitOps,
       {} as IndexWorker,
       (repoServiceFactory as any) as RepositoryServiceFactory,
-      cancellationService as CancellationSerivce
+      cancellationService as CancellationSerivce,
+      diskWatermarkService as DiskWatermarkService
     );
 
     await cloneWorker.executeJob({
@@ -125,6 +133,7 @@ describe('clone_worker_tests', () => {
       timestamp: 0,
     });
 
+    assert.ok(isLowWatermarkSpy.calledOnce);
     assert.ok(newInstanceSpy.calledOnce);
     assert.ok(cloneSpy.calledOnce);
   });
@@ -154,6 +163,12 @@ describe('clone_worker_tests', () => {
     cancellationService.cancelCloneJob = cancelCloneJobSpy;
     cancellationService.registerCancelableCloneJob = registerCancelableCloneJobSpy;
 
+    // Setup DiskWatermarkService
+    const isLowWatermarkSpy = sinon.stub().resolves(false);
+    const diskWatermarkService: any = {
+      isLowWatermark: isLowWatermarkSpy,
+    };
+
     const cloneWorker = new CloneWorker(
       esQueue as Esqueue,
       log,
@@ -162,7 +177,8 @@ describe('clone_worker_tests', () => {
       gitOps,
       (indexWorker as any) as IndexWorker,
       {} as RepositoryServiceFactory,
-      cancellationService as CancellationSerivce
+      cancellationService as CancellationSerivce,
+      diskWatermarkService as DiskWatermarkService
     );
 
     await cloneWorker.onJobCompleted(
@@ -190,6 +206,8 @@ describe('clone_worker_tests', () => {
     // Index request is issued after a 1s delay.
     await delay(1000);
     assert.ok(enqueueJobSpy.calledOnce);
+
+    assert.ok(isLowWatermarkSpy.notCalled);
   });
 
   it('On clone job completed because of cancellation', async () => {
@@ -217,6 +235,12 @@ describe('clone_worker_tests', () => {
     cancellationService.cancelCloneJob = cancelCloneJobSpy;
     cancellationService.registerCancelableCloneJob = registerCancelableCloneJobSpy;
 
+    // Setup DiskWatermarkService
+    const isLowWatermarkSpy = sinon.stub().resolves(false);
+    const diskWatermarkService: any = {
+      isLowWatermark: isLowWatermarkSpy,
+    };
+
     const cloneWorker = new CloneWorker(
       esQueue as Esqueue,
       log,
@@ -225,7 +249,8 @@ describe('clone_worker_tests', () => {
       gitOps,
       (indexWorker as any) as IndexWorker,
       {} as RepositoryServiceFactory,
-      cancellationService as CancellationSerivce
+      cancellationService as CancellationSerivce,
+      diskWatermarkService as DiskWatermarkService
     );
 
     await cloneWorker.onJobCompleted(
@@ -252,6 +277,8 @@ describe('clone_worker_tests', () => {
     // Index request should not be issued after clone request is done.
     await delay(1000);
     assert.ok(enqueueJobSpy.notCalled);
+
+    assert.ok(isLowWatermarkSpy.notCalled);
   });
 
   it('On clone job enqueued.', async () => {
@@ -272,6 +299,12 @@ describe('clone_worker_tests', () => {
     cancellationService.cancelCloneJob = cancelCloneJobSpy;
     cancellationService.registerCancelableCloneJob = registerCancelableCloneJobSpy;
 
+    // Setup DiskWatermarkService
+    const isLowWatermarkSpy = sinon.stub().resolves(false);
+    const diskWatermarkService: any = {
+      isLowWatermark: isLowWatermarkSpy,
+    };
+
     const cloneWorker = new CloneWorker(
       esQueue as Esqueue,
       log,
@@ -280,7 +313,8 @@ describe('clone_worker_tests', () => {
       gitOps,
       {} as IndexWorker,
       {} as RepositoryServiceFactory,
-      cancellationService as CancellationSerivce
+      cancellationService as CancellationSerivce,
+      diskWatermarkService as DiskWatermarkService
     );
 
     await cloneWorker.onJobEnqueued({
@@ -320,6 +354,12 @@ describe('clone_worker_tests', () => {
     cancellationService.cancelCloneJob = cancelCloneJobSpy;
     cancellationService.registerCancelableCloneJob = registerCancelableCloneJobSpy;
 
+    // Setup DiskWatermarkService
+    const isLowWatermarkSpy = sinon.stub().resolves(false);
+    const diskWatermarkService: any = {
+      isLowWatermark: isLowWatermarkSpy,
+    };
+
     const cloneWorker = new CloneWorker(
       esQueue as Esqueue,
       log,
@@ -328,7 +368,8 @@ describe('clone_worker_tests', () => {
       gitOps,
       {} as IndexWorker,
       (repoServiceFactory as any) as RepositoryServiceFactory,
-      cancellationService as CancellationSerivce
+      cancellationService as CancellationSerivce,
+      diskWatermarkService as DiskWatermarkService
     );
 
     const result1 = await cloneWorker.executeJob({
@@ -342,6 +383,7 @@ describe('clone_worker_tests', () => {
     assert.ok(result1.repo === null);
     assert.ok(newInstanceSpy.notCalled);
     assert.ok(cloneSpy.notCalled);
+    assert.ok(isLowWatermarkSpy.calledOnce);
 
     const result2 = await cloneWorker.executeJob({
       payload: {
@@ -354,5 +396,66 @@ describe('clone_worker_tests', () => {
     assert.ok(result2.repo === null);
     assert.ok(newInstanceSpy.notCalled);
     assert.ok(cloneSpy.notCalled);
+    assert.ok(isLowWatermarkSpy.calledTwice);
+  });
+
+  it('Execute clone job failed because of low disk watermark', async () => {
+    // Setup RepositoryService
+    const cloneSpy = sinon.spy();
+    const repoService = {
+      clone: emptyAsyncFunc,
+    };
+    repoService.clone = cloneSpy;
+    const repoServiceFactory = {
+      newInstance: (): void => {
+        return;
+      },
+    };
+    const newInstanceSpy = sinon.fake.returns(repoService);
+    repoServiceFactory.newInstance = newInstanceSpy;
+
+    // Setup CancellationService
+    const cancelCloneJobSpy = sinon.spy();
+    const registerCancelableCloneJobSpy = sinon.spy();
+    const cancellationService: any = {
+      cancelCloneJob: emptyAsyncFunc,
+      registerCancelableCloneJob: emptyAsyncFunc,
+    };
+    cancellationService.cancelCloneJob = cancelCloneJobSpy;
+    cancellationService.registerCancelableCloneJob = registerCancelableCloneJobSpy;
+
+    // Setup DiskWatermarkService
+    const isLowWatermarkSpy = sinon.stub().resolves(true);
+    const diskWatermarkService: any = {
+      isLowWatermark: isLowWatermarkSpy,
+    };
+
+    const cloneWorker = new CloneWorker(
+      esQueue as Esqueue,
+      log,
+      {} as EsClient,
+      serverOptions,
+      gitOps,
+      {} as IndexWorker,
+      (repoServiceFactory as any) as RepositoryServiceFactory,
+      cancellationService as CancellationSerivce,
+      diskWatermarkService as DiskWatermarkService
+    );
+
+    try {
+      await cloneWorker.executeJob({
+        payload: {
+          url: 'https://github.com/Microsoft/TypeScript-Node-Starter.git',
+        },
+        options: {},
+        timestamp: 0,
+      });
+      // This step should not be touched.
+      assert.ok(false);
+    } catch (error) {
+      assert.ok(isLowWatermarkSpy.calledOnce);
+      assert.ok(newInstanceSpy.notCalled);
+      assert.ok(cloneSpy.notCalled);
+    }
   });
 });

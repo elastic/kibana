@@ -26,6 +26,7 @@ import { Filter, FilterStateStore } from '@kbn/es-query';
 import { FilterStateManager } from './filter_state_manager';
 import { FilterManager } from './filter_manager';
 
+import { IndexPatterns } from 'ui/index_patterns';
 import { getFilter } from './test_helpers/get_stub_filter';
 import { StubIndexPatterns } from './test_helpers/stub_index_pattern';
 import { StubState } from './test_helpers/stub_state';
@@ -78,7 +79,7 @@ describe('filter_manager', () => {
     appStateStub = new StubState();
     globalStateStub = new StubState();
     indexPatterns = new StubIndexPatterns();
-    filterManager = new FilterManager(indexPatterns);
+    filterManager = new FilterManager(indexPatterns as IndexPatterns);
     readyFilters = getFiltersArray();
 
     // FilterStateManager is tested indirectly.
@@ -216,6 +217,30 @@ describe('filter_manager', () => {
       // listener should be called just once
       expect(updateListener.called).toBeTruthy();
       expect(updateListener.callCount).toBe(2);
+    });
+
+    test('changing a disabled filter should fire only update event', async function() {
+      const updateStub = jest.fn();
+      const fetchStub = jest.fn();
+      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, true, false, 'age', 34);
+
+      await filterManager.setFilters([f1]);
+
+      filterManager.getUpdates$().subscribe({
+        next: updateStub,
+      });
+
+      filterManager.getFetches$().subscribe({
+        next: fetchStub,
+      });
+
+      const f2 = _.cloneDeep(f1);
+      f2.meta.negate = true;
+      await filterManager.setFilters([f2]);
+
+      // this time, events should be emitted
+      expect(fetchStub).toBeCalledTimes(0);
+      expect(updateStub).toBeCalledTimes(1);
     });
   });
 

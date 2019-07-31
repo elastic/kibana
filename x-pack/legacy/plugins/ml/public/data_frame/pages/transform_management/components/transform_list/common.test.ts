@@ -6,22 +6,25 @@
 
 import mockDataFrameTransformListRow from './__mocks__/data_frame_transform_list_row.json';
 
-import { DATA_FRAME_TASK_STATE, isCompletedBatchTransform } from './common';
+import {
+  DataFrameTransformListRow,
+  isCompletedBatchTransform,
+  DATA_FRAME_TASK_STATE,
+} from './common';
 
 describe('Data Frame: isCompletedBatchTransform()', () => {
   test('isCompletedBatchTransform()', () => {
     // check the transform config/state against the conditions
     // that will be used by isCompletedBatchTransform()
     // followed by a call to isCompletedBatchTransform() itself
-    expect(mockDataFrameTransformListRow.state.checkpoint === 1).toBe(true);
-    expect(mockDataFrameTransformListRow.sync === undefined).toBe(true);
-    expect(mockDataFrameTransformListRow.state.task_state === DATA_FRAME_TASK_STATE.STOPPED).toBe(
-      true
-    );
+    const row = mockDataFrameTransformListRow as DataFrameTransformListRow;
+    expect(row.stats.checkpointing.last.checkpoint === 1).toBe(true);
+    expect(row.config.sync === undefined).toBe(true);
+    expect(row.stats.task_state === DATA_FRAME_TASK_STATE.STOPPED).toBe(true);
     expect(isCompletedBatchTransform(mockDataFrameTransformListRow)).toBe(true);
 
     // adapt the mock config to resemble a non-completed transform.
-    mockDataFrameTransformListRow.state.checkpoint = 0;
+    row.stats.checkpointing.last.checkpoint = 0;
     expect(isCompletedBatchTransform(mockDataFrameTransformListRow)).toBe(false);
   });
 });
