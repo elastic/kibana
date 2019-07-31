@@ -26,9 +26,9 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 let allContents = [];
 
-const tooltipColumnPadding = Number(theme.euiSizeXS.split('px')[0]) * 2;
-const tooltipTableMargin = Number(theme.euiSizeS.split('px')[0]) * 2;
-const tooltipMaxWidth = Number(theme.euiSizeXL.split('px')[0]) * 10;
+const tooltipColumnPadding = parseInt(theme.euiSizeXS || 0, 10) * 2;
+const tooltipTableMargin = parseInt(theme.euiSizeS || 0, 10) * 2;
+const tooltipMaxWidth = parseInt(theme.euiSizeXL || 0, 10) * 10;
 
 /**
  * Add tooltip and listeners to visualization elements
