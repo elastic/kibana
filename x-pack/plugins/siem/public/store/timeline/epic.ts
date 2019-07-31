@@ -29,6 +29,7 @@ import {
   TimelineResult,
 } from '../../graphql/types';
 import { AppApolloClient } from '../../lib/lib';
+import { addError } from '../app/actions';
 import { NotesById } from '../app/model';
 import { TimeRange } from '../inputs/model';
 
@@ -55,6 +56,7 @@ import {
   endTimelineSaving,
   createTimeline,
   addTimeline,
+  showCallOutUnauthorizedMsg,
 } from './actions';
 import { TimelineModel } from './model';
 import { TimelineById } from './reducer';
@@ -131,6 +133,9 @@ export const createTimelineEpic = <State>(): Epic<
       withLatestFrom(timeline$),
       filter(([action, timeline]) => {
         const timelineId: TimelineModel = timeline[get('payload.id', action)];
+        if (action.type === addError.type) {
+          return true;
+        }
         if (action.type === createTimeline.type) {
           myEpicTimelineId.setTimelineId(null);
           myEpicTimelineId.setTimelineVersion(null);
@@ -186,6 +191,7 @@ export const createTimelineEpic = <State>(): Epic<
             mergeMap(([result, recentTimeline]) => {
               const savedTimeline = recentTimeline[get('payload.id', action)];
               const response: ResponseTimeline = get('data.persistTimeline', result);
+              const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
               return [
                 response.code === 409
@@ -202,6 +208,7 @@ export const createTimelineEpic = <State>(): Epic<
                         isSaving: false,
                       },
                     }),
+                ...callOutMsg,
                 endTimelineSaving({
                   id: get('payload.id', action),
                 }),

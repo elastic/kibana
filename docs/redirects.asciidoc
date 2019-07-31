@@ -24,3 +24,8 @@ For more {kib} configuration settings, see <<settings>>.
 == Uptime security
 
 This page has moved. Please see the new section in the {uptime-guide}/uptime-security.html[Uptime Monitoring Guide].
+
+[role="exclude",id="tutorial-load-dataset"]
+== Loading sample data
+
+This page has moved. Please see <<tutorial-build-dashboard>>.

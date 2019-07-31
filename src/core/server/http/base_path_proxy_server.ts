@@ -24,7 +24,7 @@ import { sample } from 'lodash';
 import { DevConfig } from '../dev';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
-import { createServer, getListenerOptions, getServerOptions } from './http_tools';
+import { createServer, getServerOptions } from './http_tools';
 
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
@@ -62,8 +62,7 @@ export class BasePathProxyServer {
     this.log.debug('starting basepath proxy server');
 
     const serverOptions = getServerOptions(this.httpConfig);
-    const listenerOptions = getListenerOptions(this.httpConfig);
-    this.server = createServer(serverOptions, listenerOptions);
+    this.server = createServer(serverOptions);
 
     // Register hapi plugin that adds proxying functionality. It can be configured
     // through the route configuration object (see { handler: { proxy: ... } }).
