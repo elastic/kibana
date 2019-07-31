@@ -21,3 +21,4 @@ export { Headers, filterHeaders, ResponseHeaders } from './headers';
 export { Router } from './router';
 export { KibanaRequest, KibanaRequestRoute, ensureRawRequest, isRealRequest } from './request';
 export { RouteMethod, RouteConfigOptions } from './route';
+export { ResponseError, ResponseErrorMeta } from './response';

@@ -18,11 +18,12 @@
  */
 
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
-import { MixedApp } from '../application_service';
+import { LegacyApp, App } from '../application_service';
 import { InjectedMetadataStart } from '../../injected_metadata';
 
 interface StartDeps {
-  apps: readonly MixedApp[];
+  apps: readonly App[];
+  legacyApps: readonly LegacyApp[];
   injectedMetadata: InjectedMetadataStart;
 }
 
@@ -49,35 +50,28 @@ export interface Capabilities {
   [key: string]: Record<string, boolean | Record<string, boolean>>;
 }
 
-/**
- * Capabilities Setup.
- * @public
- */
-export interface CapabilitiesStart {
-  /**
-   * Gets the read-only capabilities.
-   */
-  capabilities: RecursiveReadonly<Capabilities>;
-
-  /**
-   * Apps available based on the current capabilities. Should be used
-   * to show navigation links and make routing decisions.
-   */
-  availableApps: readonly MixedApp[];
-}
-
 /** @internal */
+export interface CapabilitiesStart {
+  capabilities: RecursiveReadonly<Capabilities>;
+  availableApps: readonly App[];
+  availableLegacyApps: readonly LegacyApp[];
+}
 
 /**
  * Service that is responsible for UI Capabilities.
+ * @internal
  */
 export class CapabilitiesService {
-  public async start({ apps, injectedMetadata }: StartDeps): Promise<CapabilitiesStart> {
+  public async start({
+    apps,
+    legacyApps,
+    injectedMetadata,
+  }: StartDeps): Promise<CapabilitiesStart> {
     const capabilities = deepFreeze(injectedMetadata.getCapabilities());
-    const availableApps = apps.filter(app => capabilities.navLinks[app.id]);
 
     return {
-      availableApps,
+      availableApps: apps.filter(app => capabilities.navLinks[app.id]),
+      availableLegacyApps: legacyApps.filter(app => capabilities.navLinks[app.id]),
       capabilities,
     };
   }
