@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import uiRoutes from'ui/routes';
@@ -13,6 +13,8 @@ import template from './index.html';
 import { ApmServerInstances } from '../../../components/apm/instances';
 import { MonitoringViewBaseEuiTableController } from '../..';
 import { I18nContext } from 'ui/i18n';
+import { SetupModeRenderer } from '../../../components/renderers';
+import { APM_CUSTOM_ID } from '../../../../common/constants';
 
 uiRoutes.when('/apm/instances', {
   template,
@@ -45,6 +47,9 @@ uiRoutes.when('/apm/instances', {
         $injector
       });
 
+      this.scope = $scope;
+      this.injector = $injector;
+
       $scope.$watch(() => this.data, data => {
         this.renderReact(data);
       });
@@ -59,13 +64,24 @@ uiRoutes.when('/apm/instances', {
 
       const component = (
         <I18nContext>
-          <ApmServerInstances
-            apms={{
-              pagination,
-              sorting,
-              onTableChange,
-              data,
-            }}
+          <SetupModeRenderer
+            scope={this.scope}
+            injector={this.injector}
+            productName={APM_CUSTOM_ID}
+            render={({ setupMode, flyoutComponent }) => (
+              <Fragment>
+                {flyoutComponent}
+                <ApmServerInstances
+                  setupMode={setupMode}
+                  apms={{
+                    pagination,
+                    sorting,
+                    onTableChange,
+                    data,
+                  }}
+                />
+              </Fragment>
+            )}
           />
         </I18nContext>
       );
