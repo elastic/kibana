@@ -4,11 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createJob, deleteJobs, loadJobs, startJobs, stopJobs, validateIndexPattern } from './api';
+export {
+  createJob,
+  deleteJobs,
+  loadJobs,
+  startJobs,
+  stopJobs,
+  validateIndexPattern,
+} from './api';
 
-export { showApiError, showApiWarning } from './api_errors';
+export {
+  showApiError,
+  showApiWarning,
+} from './api_errors';
 
-export { listBreadcrumb, createBreadcrumb } from './breadcrumbs';
+export {
+  listBreadcrumb,
+  createBreadcrumb,
+} from './breadcrumbs';
 
 export {
   cronExpressionToParts,
@@ -31,21 +44,42 @@ export {
   cronUrl,
 } from './documentation_links';
 
-export { filterItems } from './filter_items';
+export {
+  filterItems
+} from './filter_items';
 
-export { flattenPanelTree } from './flatten_panel_tree';
+export {
+  flattenPanelTree,
+} from './flatten_panel_tree';
 
-export { formatFields } from './format_fields';
+export {
+  formatFields,
+} from './format_fields';
 
-export { setHttp, getHttp } from './http_provider';
+export {
+  setHttp,
+  getHttp,
+} from './http_provider';
 
-export { getOrdinalValue, getDayName, getMonthName } from './humanized_numbers';
+export {
+  getOrdinalValue,
+  getDayName,
+  getMonthName,
+} from './humanized_numbers';
 
-export { serializeJob, deserializeJob, deserializeJobs } from './jobs';
+export {
+  serializeJob,
+  deserializeJob,
+  deserializeJobs,
+} from './jobs';
 
-export { createNoticeableDelay } from './noticeable_delay';
+export {
+  createNoticeableDelay,
+} from './noticeable_delay';
 
-export { extractQueryParams } from './query_params';
+export {
+  extractQueryParams,
+} from './query_params';
 
 export {
   setUserHasLeftApp,
@@ -55,8 +89,12 @@ export {
   getRouterLinkProps,
 } from './routing';
 
-export { sortTable, } from './sort_table';
+export {
+  sortTable,
+} from './sort_table';
 
-export { retypeMetrics } from './retype_metrics';
+export {
+  retypeMetrics,
+} from './retype_metrics';
 
 export { trackUiMetric, METRIC_TYPE } from './track_ui_metric';

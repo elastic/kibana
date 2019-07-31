@@ -7,11 +7,19 @@
 import { connect } from 'react-redux';
 import { JobCreate as JobCreateView } from './job_create';
 
-import { isSaving, getCreateJobError, getCloneJobConfig } from '../../store/selectors';
+import {
+  isSaving,
+  getCreateJobError,
+  getCloneJobConfig,
+} from '../../store/selectors';
 
-import { createJob, clearCreateJobErrors, clearCloneJob } from '../../store/actions';
+import {
+  createJob,
+  clearCreateJobErrors,
+  clearCloneJob,
+} from '../../store/actions';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     isSaving: isSaving(state),
     saveError: getCreateJobError(state),
@@ -19,7 +27,7 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
     createJob: jobConfig => {
       dispatch(createJob(jobConfig));
@@ -33,7 +41,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export const JobCreate = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(JobCreateView);
+export const JobCreate = connect(mapStateToProps, mapDispatchToProps)(JobCreateView);

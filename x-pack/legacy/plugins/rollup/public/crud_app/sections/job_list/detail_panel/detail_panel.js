@@ -71,11 +71,11 @@ export class DetailPanelUi extends Component {
     panelType: PropTypes.oneOf(JOB_DETAILS_TABS),
     closeDetailPanel: PropTypes.func.isRequired,
     openDetailPanel: PropTypes.func.isRequired,
-  };
+  }
 
   static defaultProps = {
     panelType: JOB_DETAILS_TABS[0],
-  };
+  }
 
   constructor(props) {
     super(props);
@@ -88,7 +88,12 @@ export class DetailPanelUi extends Component {
       return;
     }
 
-    const { id, terms, histogram, metrics } = job;
+    const {
+      id,
+      terms,
+      histogram,
+      metrics,
+    } = job;
 
     const renderedTabs = [];
 
@@ -124,7 +129,9 @@ export class DetailPanelUi extends Component {
     return (
       <Fragment>
         <EuiSpacer size="s" />
-        <EuiTabs>{renderedTabs}</EuiTabs>
+        <EuiTabs>
+          {renderedTabs}
+        </EuiTabs>
       </Fragment>
     );
   }
@@ -132,7 +139,14 @@ export class DetailPanelUi extends Component {
   renderJob() {
     const { panelType, job, intl } = this.props;
 
-    const { status, documentsProcessed, pagesProcessed, rollupsIndexed, triggerCount, json } = job;
+    const {
+      status,
+      documentsProcessed,
+      pagesProcessed,
+      rollupsIndexed,
+      triggerCount,
+      json,
+    } = job;
 
     const stats = {
       status,
@@ -146,7 +160,12 @@ export class DetailPanelUi extends Component {
       <Fragment>
         <EuiFlyoutBody data-test-subj="rollupJobDetailTabContent">
           <EuiErrorBoundary>
-            <JobDetails tab={panelType} job={job} stats={stats} json={json} />
+            <JobDetails
+              tab={panelType}
+              job={job}
+              stats={stats}
+              json={json}
+            />
           </EuiErrorBoundary>
         </EuiFlyoutBody>
 
@@ -172,7 +191,13 @@ export class DetailPanelUi extends Component {
   }
 
   render() {
-    const { isOpen, isLoading, closeDetailPanel, job, jobId } = this.props;
+    const {
+      isOpen,
+      isLoading,
+      closeDetailPanel,
+      job,
+      jobId,
+    } = this.props;
 
     if (!isOpen) {
       return null;
@@ -182,8 +207,14 @@ export class DetailPanelUi extends Component {
 
     if (isLoading) {
       content = (
-        <EuiFlyoutBody data-test-subj="rollupJobDetailLoading">
-          <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
+        <EuiFlyoutBody
+          data-test-subj="rollupJobDetailLoading"
+        >
+          <EuiFlexGroup
+            justifyContent="flexStart"
+            alignItems="center"
+            gutterSize="s"
+          >
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner size="m" />
             </EuiFlexItem>
@@ -205,8 +236,14 @@ export class DetailPanelUi extends Component {
       content = this.renderJob();
     } else {
       content = (
-        <EuiFlyoutBody data-test-subj="rollupJobDetailJobNotFound">
-          <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
+        <EuiFlyoutBody
+          data-test-subj="rollupJobDetailJobNotFound"
+        >
+          <EuiFlexGroup
+            justifyContent="flexStart"
+            alignItems="center"
+            gutterSize="s"
+          >
             <EuiFlexItem grow={false}>
               <EuiIcon size="m" type="alert" color="danger" />
             </EuiFlexItem>
