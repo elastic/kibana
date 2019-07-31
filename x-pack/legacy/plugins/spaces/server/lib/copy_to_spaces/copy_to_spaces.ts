@@ -4,20 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsService,
-  SavedObjectsImportError,
-} from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsService } from 'src/core/server';
 import { Readable } from 'stream';
 import { SavedObjectsClientProviderOptions } from 'src/core/server';
 import { SpacesClient } from '../spaces_client';
 import { Rereadable } from './lib/rereadable_stream';
 import { spaceIdToNamespace } from '../utils/namespace';
-import { CopyToSpaceError, CopyOptions } from './types';
+import { CopyOptions } from './types';
 import { canImportIntoSpace } from './lib/can_import_into_space';
 import { CopyResponse } from './types';
 import { getEligibleTypes } from './lib/get_eligible_types';
+import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
 
 export const COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS: SavedObjectsClientProviderOptions = {
   excludedWrappers: ['spaces'],
@@ -30,14 +27,6 @@ export function copySavedObjectsToSpacesFactory(
 ) {
   const { importExport, types, schema } = savedObjectsService;
   const eligibleTypes = getEligibleTypes({ types, schema });
-
-  const createEmptyFailureResponse = (
-    errors?: Array<SavedObjectsImportError | CopyToSpaceError>
-  ) => ({
-    success: false,
-    successCount: 0,
-    errors,
-  });
 
   const exportRequestedObjects = async (
     sourceSpaceId: string,

@@ -4,18 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsService,
-  SavedObjectsImportError,
-} from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsService } from 'src/core/server';
 import { Readable } from 'stream';
 import { SpacesClient } from '../spaces_client';
 import { Rereadable } from './lib/rereadable_stream';
 import { spaceIdToNamespace } from '../utils/namespace';
-import { CopyOptions, CopyToSpaceError, ResolveConflictsOptions, CopyResponse } from './types';
+import { CopyOptions, ResolveConflictsOptions, CopyResponse } from './types';
 import { canImportIntoSpace } from './lib/can_import_into_space';
 import { getEligibleTypes } from './lib/get_eligible_types';
+import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
 
 export function resolveCopySavedObjectsToSpacesConflictsFactory(
   spacesClient: SpacesClient,
@@ -39,14 +36,6 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
     });
     return objectStream;
   };
-
-  const createEmptyFailureResponse = (
-    errors?: Array<SavedObjectsImportError | CopyToSpaceError>
-  ) => ({
-    success: false,
-    successCount: 0,
-    errors,
-  });
 
   const resolveConflictsForSpace = async (
     spaceId: string,
