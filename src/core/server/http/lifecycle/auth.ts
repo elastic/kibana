@@ -27,7 +27,7 @@ enum ResultType {
   rejected = 'rejected',
 }
 
-interface Authenticated extends AuthResultData {
+interface Authenticated extends AuthResultParams {
   type: ResultType.authenticated;
 }
 
@@ -45,11 +45,12 @@ interface Rejected {
 type AuthResult = Authenticated | Rejected | Redirected;
 
 const authResult = {
-  authenticated(data: Partial<AuthResultData> = {}): AuthResult {
+  authenticated(data: Partial<AuthResultParams> = {}): AuthResult {
     return {
       type: ResultType.authenticated,
-      state: data.state || {},
-      headers: data.headers || {},
+      state: data.state,
+      requestHeaders: data.requestHeaders,
+      responseHeaders: data.responseHeaders,
     };
   },
   redirected(url: string): AuthResult {
@@ -82,21 +83,27 @@ const authResult = {
  * @public
  * */
 
-export type AuthHeaders = Record<string, string>;
+export type AuthHeaders = Record<string, string | string[]>;
 
 /**
  * Result of an incoming request authentication.
  * @public
  * */
-export interface AuthResultData {
+export interface AuthResultParams {
   /**
    * Data to associate with an incoming request. Any downstream plugin may get access to the data.
    */
-  state: Record<string, any>;
+  state?: Record<string, any>;
   /**
-   * Auth specific headers to authenticate a user against Elasticsearch.
+   * Auth specific headers to attach to a request object.
+   * Used to perform a request to Elasticsearch on behalf of an authenticated user.
    */
-  headers: AuthHeaders;
+  requestHeaders?: AuthHeaders;
+  /**
+   * Auth specific headers to attach to a response object.
+   * Used to send back authentication mechanism related headers to a client when needed.
+   */
+  responseHeaders?: AuthHeaders;
 }
 
 /**
@@ -105,7 +112,7 @@ export interface AuthResultData {
  */
 export interface AuthToolkit {
   /** Authentication is successful with given credentials, allow request to pass through */
-  authenticated: (data?: Partial<AuthResultData>) => AuthResult;
+  authenticated: (data?: AuthResultParams) => AuthResult;
   /** Authentication requires to interrupt request handling and redirect to a configured url */
   redirected: (url: string) => AuthResult;
   /** Authentication is unsuccessful, fail the request with specified error. */
@@ -127,7 +134,7 @@ export type AuthenticationHandler = (
 /** @public */
 export function adoptToHapiAuthFormat(
   fn: AuthenticationHandler,
-  onSuccess: (req: Request, data: AuthResultData) => void = noop
+  onSuccess: (req: Request, data: AuthResultParams) => void = noop
 ) {
   return async function interceptAuth(
     req: Request,
@@ -141,7 +148,11 @@ export function adoptToHapiAuthFormat(
         );
       }
       if (authResult.isAuthenticated(result)) {
-        onSuccess(req, { state: result.state, headers: result.headers });
+        onSuccess(req, {
+          state: result.state,
+          requestHeaders: result.requestHeaders,
+          responseHeaders: result.responseHeaders,
+        });
         return h.authenticated({ credentials: result.state || {} });
       }
       if (authResult.isRedirected(result)) {

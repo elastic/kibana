@@ -44,6 +44,10 @@ export class HeatmapLayer extends VectorLayer {
     return [this._getHeatmapLayerId()];
   }
 
+  ownsMbLayerId(mbLayerId) {
+    return this._getHeatmapLayerId() === mbLayerId;
+  }
+
   syncLayerWithMB(mbMap) {
     super._syncSourceBindingWithMb(mbMap);
 

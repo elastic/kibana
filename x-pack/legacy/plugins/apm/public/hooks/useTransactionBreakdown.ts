@@ -30,7 +30,7 @@ export function useTransactionBreakdown() {
         uiFilters
       });
     }
-  }, [serviceName, start, end, uiFilters]);
+  }, [serviceName, start, end, transactionType, transactionName, uiFilters]);
 
   const receivedDataDuringLifetime = useRef(false);
 
