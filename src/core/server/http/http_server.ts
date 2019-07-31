@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Request, Server } from 'hapi';
+import { Request, Server, ResponseToolkit } from 'hapi';
 
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
@@ -153,7 +153,8 @@ export class HttpServer {
       for (const route of router.getRoutes()) {
         const { authRequired = true, tags } = route.options;
         this.server.route({
-          handler: route.handler,
+          handler: (req: Request, responseToolkit: ResponseToolkit) =>
+            route.handler(req, responseToolkit, this.log),
           method: route.method,
           path: this.getRouteFullPath(router.path, route.path),
           options: {

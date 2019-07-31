@@ -12,15 +12,3 @@
   text-align: center;
   font-weight: $euiFontWeightBold;
 }
-
-.tgcFontSizeSlider {
-  margin: $euiSize;
-
-  .noUi-connect {
-    background: $euiColorLightShade;
-  }
-}
-
-.tgcFontSizeSlider__input {
-  width: $euiSizeXXL * 2;
-}

@@ -32,3 +32,19 @@
     }
   }
 }
+
+{
+  "value": {
+    "id": "action:ce37997f-0fb6-460a-8baf-f81ac5d38348",
+    "index": ".kibana",
+    "source": {
+      "type": "action",
+      "migrationVersion": {},
+      "action": {
+        "description": "My rate limited action",
+        "actionTypeId": "test.rate-limit",
+        "actionTypeConfig": {}
+      }
+    }
+  }
+}
