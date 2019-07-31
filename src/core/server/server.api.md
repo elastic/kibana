@@ -534,22 +534,16 @@ export class SavedObjectsClient {
 // @public
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
-// Warning: (ae-missing-release-tag) "SavedObjectsClientProviderOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface SavedObjectsClientProviderOptions {
     // (undocumented)
     excludedWrappers?: string[];
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsClientWrapperFactory" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export type SavedObjectsClientWrapperFactory<Request = unknown> = (options: SavedObjectsClientWrapperOptions<Request>) => SavedObjectsClientContract;
 
-// Warning: (ae-missing-release-tag) "SavedObjectsClientWrapperOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface SavedObjectsClientWrapperOptions<Request = unknown> {
     // (undocumented)
     client: SavedObjectsClientContract;
@@ -655,17 +649,13 @@ export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any>
     total: number;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsImportConflictError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface SavedObjectsImportConflictError {
     // (undocumented)
     type: 'conflict';
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsImportError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface SavedObjectsImportError {
     // (undocumented)
     error: SavedObjectsImportConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
@@ -677,9 +667,7 @@ export interface SavedObjectsImportError {
     type: string;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsImportMissingReferencesError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface SavedObjectsImportMissingReferencesError {
     // (undocumented)
     blocking: Array<{
@@ -695,9 +683,7 @@ export interface SavedObjectsImportMissingReferencesError {
     type: 'missing_references';
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsImportOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface SavedObjectsImportOptions {
     // (undocumented)
     namespace?: string;
@@ -713,9 +699,7 @@ export interface SavedObjectsImportOptions {
     supportedTypes: string[];
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsImportResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface SavedObjectsImportResponse {
     // (undocumented)
     errors?: SavedObjectsImportError[];
@@ -725,9 +709,7 @@ export interface SavedObjectsImportResponse {
     successCount: number;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsImportRetry" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface SavedObjectsImportRetry {
     // (undocumented)
     id: string;
@@ -743,9 +725,7 @@ export interface SavedObjectsImportRetry {
     type: string;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsImportUnknownError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface SavedObjectsImportUnknownError {
     // (undocumented)
     message: string;
@@ -755,9 +735,7 @@ export interface SavedObjectsImportUnknownError {
     type: 'unknown';
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsImportUnsupportedTypeError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface SavedObjectsImportUnsupportedTypeError {
     // (undocumented)
     type: 'unsupported_type';
@@ -785,9 +763,7 @@ export interface SavedObjectsRawDoc {
     _type?: string;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsResolveImportErrorsOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface SavedObjectsResolveImportErrorsOptions {
     // (undocumented)
     namespace?: string;

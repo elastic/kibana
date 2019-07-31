@@ -4,6 +4,8 @@
 
 ## SavedObjectsImportConflictError interface
 
+Represents a failure to import due to a conflict.
+
 <b>Signature:</b>
 
 ```typescript

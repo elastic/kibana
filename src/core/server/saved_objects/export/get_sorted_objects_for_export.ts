@@ -28,6 +28,10 @@ interface ObjectToExport {
   type: string;
 }
 
+/**
+ * Options controlling the export operation.
+ * @public
+ */
 export interface ExportObjectsOptions {
   types?: string[];
   objects?: ObjectToExport[];

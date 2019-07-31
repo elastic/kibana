@@ -4,6 +4,8 @@
 
 ## SavedObjectsImportMissingReferencesError interface
 
+Represents a failure to import due to missing references.
+
 <b>Signature:</b>
 
 ```typescript

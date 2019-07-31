@@ -4,6 +4,8 @@
 
 ## SavedObjectsResolveImportErrorsOptions interface
 
+Options to control the "resolve import" operation.
+
 <b>Signature:</b>
 
 ```typescript

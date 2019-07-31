@@ -4,6 +4,8 @@
 
 ## SavedObjectsImportError interface
 
+Represents a failure to import.
+
 <b>Signature:</b>
 
 ```typescript

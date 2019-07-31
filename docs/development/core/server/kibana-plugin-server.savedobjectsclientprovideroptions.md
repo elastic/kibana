@@ -4,6 +4,8 @@
 
 ## SavedObjectsClientProviderOptions interface
 
+Options to control the creation of the Saved Objects Client.
+
 <b>Signature:</b>
 
 ```typescript

@@ -4,6 +4,8 @@
 
 ## SavedObjectsImportUnknownError interface
 
+Represents a failure to import due to an unknown reason.
+
 <b>Signature:</b>
 
 ```typescript

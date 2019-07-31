@@ -4,6 +4,8 @@
 
 ## SavedObjectsImportOptions interface
 
+Options to control the import operation.
+
 <b>Signature:</b>
 
 ```typescript

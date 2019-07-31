@@ -4,6 +4,8 @@
 
 ## SavedObjectsImportUnsupportedTypeError interface
 
+Represents a failure to import due to having an unsupported saved object type.
+
 <b>Signature:</b>
 
 ```typescript

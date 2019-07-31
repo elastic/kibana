@@ -20,6 +20,10 @@
 import { Readable } from 'stream';
 import { SavedObjectsClientContract } from '../service';
 
+/**
+ * Describes a retry operation for importing a saved object.
+ * @public
+ */
 export interface SavedObjectsImportRetry {
   type: string;
   id: string;
@@ -31,20 +35,36 @@ export interface SavedObjectsImportRetry {
   }>;
 }
 
+/**
+ * Represents a failure to import due to a conflict.
+ * @public
+ */
 export interface SavedObjectsImportConflictError {
   type: 'conflict';
 }
 
+/**
+ * Represents a failure to import due to having an unsupported saved object type.
+ * @public
+ */
 export interface SavedObjectsImportUnsupportedTypeError {
   type: 'unsupported_type';
 }
 
+/**
+ * Represents a failure to import due to an unknown reason.
+ * @public
+ */
 export interface SavedObjectsImportUnknownError {
   type: 'unknown';
   message: string;
   statusCode: number;
 }
 
+/**
+ * Represents a failure to import due to missing references.
+ * @public
+ */
 export interface SavedObjectsImportMissingReferencesError {
   type: 'missing_references';
   references: Array<{
@@ -57,6 +77,10 @@ export interface SavedObjectsImportMissingReferencesError {
   }>;
 }
 
+/**
+ * Represents a failure to import.
+ * @public
+ */
 export interface SavedObjectsImportError {
   id: string;
   type: string;
@@ -68,12 +92,20 @@ export interface SavedObjectsImportError {
     | SavedObjectsImportUnknownError;
 }
 
+/**
+ * The response describing the result of an import.
+ * @public
+ */
 export interface SavedObjectsImportResponse {
   success: boolean;
   successCount: number;
   errors?: SavedObjectsImportError[];
 }
 
+/**
+ * Options to control the import operation.
+ * @public
+ */
 export interface SavedObjectsImportOptions {
   readStream: Readable;
   objectLimit: number;
@@ -83,6 +115,10 @@ export interface SavedObjectsImportOptions {
   namespace?: string;
 }
 
+/**
+ * Options to control the "resolve import" operation.
+ * @public
+ */
 export interface SavedObjectsResolveImportErrorsOptions {
   readStream: Readable;
   objectLimit: number;
