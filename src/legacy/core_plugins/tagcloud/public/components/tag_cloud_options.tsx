@@ -23,8 +23,8 @@ import { i18n } from '@kbn/i18n';
 
 import { ValidatedDualRange } from 'ui/validated_range';
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { SelectOption } from '../../kbn_vislib_vis_types/public/controls/select';
-import { SwitchOption } from '../../kbn_vislib_vis_types/public/controls/switch';
+import { SelectOption } from '../../../kbn_vislib_vis_types/public/controls/select';
+import { SwitchOption } from '../../../kbn_vislib_vis_types/public/controls/switch';
 
 function TagCloudOptions({ stateParams, setValue, vis }: VisOptionsProps) {
   const handleFontSizeChange = ([minFontSize, maxFontSize]: string[]) => {

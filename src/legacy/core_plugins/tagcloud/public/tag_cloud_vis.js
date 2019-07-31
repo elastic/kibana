@@ -23,7 +23,7 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { TagCloudVisualization } from './tag_cloud_visualization';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { Status } from 'ui/vis/update_status';
-import { TagCloudOptions } from './tag_cloud_vis_options';
+import { TagCloudOptions } from './components/tag_cloud_options';
 
 VisTypesRegistryProvider.register(function (Private) {
 
