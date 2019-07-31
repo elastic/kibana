@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { contextMock } from './context.mock';
+import { contextMock } from '../../utils/context.mock';
 
 export const MockContextConstructor = jest.fn(contextMock.create);
-jest.doMock('./context', () => ({
+jest.doMock('../../utils/context', () => ({
   ContextContainer: MockContextConstructor,
 }));

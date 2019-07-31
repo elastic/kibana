@@ -18,7 +18,7 @@
  */
 
 import { ContextService, ContextSetup } from './context_service';
-import { contextMock } from './context.mock';
+import { contextMock } from '../../utils/context.mock';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<ContextSetup> = {

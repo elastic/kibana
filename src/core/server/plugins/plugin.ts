@@ -22,142 +22,15 @@ import typeDetect from 'type-detect';
 
 import { Type } from '@kbn/config-schema';
 
-import { ConfigPath } from '../config';
 import { Logger } from '../logging';
-import { PluginInitializerContext } from './plugin_context';
+import {
+  Plugin,
+  PluginInitializerContext,
+  PluginManifest,
+  PluginConfigSchema,
+  PluginInitializer,
+} from './types';
 import { CoreSetup, CoreStart } from '..';
-
-export type PluginConfigSchema = Type<unknown> | null;
-
-/**
- * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
- * that use it as a key or value more obvious.
- *
- * @public
- */
-export type PluginName = string;
-
-/**
- * Describes the set of required and optional properties plugin can define in its
- * mandatory JSON manifest file.
- * @internal
- */
-export interface PluginManifest {
-  /**
-   * Identifier of the plugin.
-   */
-  readonly id: PluginName;
-
-  /**
-   * Version of the plugin.
-   */
-  readonly version: string;
-
-  /**
-   * The version of Kibana the plugin is compatible with, defaults to "version".
-   */
-  readonly kibanaVersion: string;
-
-  /**
-   * Root configuration path used by the plugin, defaults to "id".
-   */
-  readonly configPath: ConfigPath;
-
-  /**
-   * An optional list of the other plugins that **must be** installed and enabled
-   * for this plugin to function properly.
-   */
-  readonly requiredPlugins: readonly PluginName[];
-
-  /**
-   * An optional list of the other plugins that if installed and enabled **may be**
-   * leveraged by this plugin for some additional functionality but otherwise are
-   * not required for this plugin to work properly.
-   */
-  readonly optionalPlugins: readonly PluginName[];
-
-  /**
-   * Specifies whether plugin includes some client/browser specific functionality
-   * that should be included into client bundle via `public/ui_plugin.js` file.
-   */
-  readonly ui: boolean;
-
-  /**
-   * Specifies whether plugin includes some server-side specific functionality.
-   */
-  readonly server: boolean;
-}
-
-/**
- * Small container object used to expose information about discovered plugins that may
- * or may not have been started.
- * @public
- */
-export interface DiscoveredPlugin {
-  /**
-   * Identifier of the plugin.
-   */
-  readonly id: PluginName;
-
-  /**
-   * Root configuration path used by the plugin, defaults to "id".
-   */
-  readonly configPath: ConfigPath;
-
-  /**
-   * An optional list of the other plugins that **must be** installed and enabled
-   * for this plugin to function properly.
-   */
-  readonly requiredPlugins: readonly PluginName[];
-
-  /**
-   * An optional list of the other plugins that if installed and enabled **may be**
-   * leveraged by this plugin for some additional functionality but otherwise are
-   * not required for this plugin to work properly.
-   */
-  readonly optionalPlugins: readonly PluginName[];
-}
-
-/**
- * An extended `DiscoveredPlugin` that exposes more sensitive information. Should never
- * be exposed to client-side code.
- * @internal
- */
-export interface DiscoveredPluginInternal extends DiscoveredPlugin {
-  /**
-   * Path on the filesystem where plugin was loaded from.
-   */
-  readonly path: string;
-}
-
-/**
- * The interface that should be returned by a `PluginInitializer`.
- *
- * @public
- */
-export interface Plugin<
-  TSetup = void,
-  TStart = void,
-  TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
-> {
-  setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
-  start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
-  stop?(): void;
-}
-
-/**
- * The `plugin` export at the root of a plugin's `server` directory should conform
- * to this interface.
- *
- * @public
- */
-export type PluginInitializer<
-  TSetup,
-  TStart,
-  TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
-> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating

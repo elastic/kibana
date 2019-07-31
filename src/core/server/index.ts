@@ -42,10 +42,11 @@ import {
   ElasticsearchServiceSetup,
 } from './elasticsearch';
 import { HttpServiceSetup, HttpServiceStart } from './http';
-import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
+import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 
 export { bootstrap } from './bootstrap';
 export { ConfigService } from './config';
+export { CoreId } from './core_context';
 export {
   CallAPIOptions,
   ClusterClient,
@@ -191,4 +192,5 @@ export {
   ElasticsearchServiceSetup,
   PluginsServiceSetup,
   PluginsServiceStart,
+  PluginOpaqueId,
 };

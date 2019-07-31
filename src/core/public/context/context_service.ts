@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { IContextContainer, ContextContainer } from './context';
+import { PluginOpaqueId } from '../../server';
+import { IContextContainer, ContextContainer } from '../../utils/context';
 import { CoreContext } from '../core_system';
-import { PluginOpaqueId } from '../plugins';
 
 interface StartDeps {
   pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;

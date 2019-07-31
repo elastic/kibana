@@ -25,7 +25,8 @@ import { ElasticsearchServiceSetup } from '../elasticsearch/elasticsearch_servic
 import { HttpServiceSetup } from '../http/http_service';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
-import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName } from './plugin';
+import { PluginWrapper } from './plugin';
+import { DiscoveredPlugin, DiscoveredPluginInternal, PluginName } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 

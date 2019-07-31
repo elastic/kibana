@@ -29,7 +29,8 @@ import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service
 import { httpServiceMock } from '../http/http_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 
-import { PluginWrapper, PluginManifest } from './plugin';
+import { PluginWrapper } from './plugin';
+import { PluginManifest } from './types';
 import { createPluginInitializerContext, createPluginSetupContext } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();

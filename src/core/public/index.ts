@@ -62,11 +62,13 @@ import {
   ToastsApi,
 } from './notifications';
 import { OverlayRef, OverlayStart } from './overlays';
-import { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
+import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
+// import { PluginOpaqueId } from '../server';
+// export { PluginOpaqueId } from '../server';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
@@ -181,6 +183,7 @@ export {
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
+  PluginOpaqueId,
   Toast,
   ToastInput,
   ToastsApi,

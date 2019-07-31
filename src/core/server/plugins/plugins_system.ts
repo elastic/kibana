@@ -21,7 +21,8 @@ import { pick } from 'lodash';
 
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName } from './plugin';
+import { PluginWrapper } from './plugin';
+import { DiscoveredPlugin, DiscoveredPluginInternal, PluginName } from './types';
 import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 

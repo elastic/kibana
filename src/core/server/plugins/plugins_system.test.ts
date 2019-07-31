@@ -31,7 +31,8 @@ import { configServiceMock } from '../config/config_service.mock';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
-import { PluginWrapper, PluginName } from './plugin';
+import { PluginWrapper } from './plugin';
+import { PluginName } from './types';
 import { PluginsSystem } from './plugins_system';
 
 const logger = loggingServiceMock.create();
