@@ -5,6 +5,7 @@
  */
 
 jest.mock('./authenticator');
+jest.mock('./api_keys', () => ({ createAPIKey: jest.fn() }));
 
 import Boom from 'boom';
 import { errors } from 'elasticsearch';
@@ -35,6 +36,7 @@ import { getErrorStatusCode } from '../errors';
 import { LegacyAPI } from '../plugin';
 import { AuthenticationResult } from './authentication_result';
 import { setupAuthentication } from '.';
+import { CreateAPIKeyResult, CreateAPIKeyOptions } from './api_keys';
 
 function mockXPackFeature({ isEnabled = true }: Partial<{ isEnabled: boolean }> = {}) {
   return {
@@ -377,6 +379,35 @@ describe('setupAuthentication()', () => {
       await expect(isAuthenticated(httpServerMock.createKibanaRequest())).rejects.toBe(
         failureReason
       );
+    });
+  });
+
+  describe('createAPIKey()', () => {
+    let createAPIKey: (
+      request: KibanaRequest,
+      body: CreateAPIKeyOptions['body']
+    ) => Promise<CreateAPIKeyResult | null>;
+    beforeEach(async () => {
+      createAPIKey = (await setupAuthentication(mockSetupAuthenticationParams)).createAPIKey;
+    });
+
+    it('calls createAPIKey with given arguments', async () => {
+      const { createAPIKey: createAPIKeyMock } = jest.requireMock('./api_keys');
+      const options = {
+        name: 'my-key',
+        role_descriptors: {},
+        expiration: '1d',
+      };
+      createAPIKeyMock.mockResolvedValueOnce({ success: true });
+      await expect(createAPIKey(httpServerMock.createKibanaRequest(), options)).resolves.toEqual({
+        success: true,
+      });
+      expect(createAPIKeyMock).toHaveBeenCalledWith({
+        body: options,
+        loggers: mockSetupAuthenticationParams.loggers,
+        callAsCurrentUser: mockScopedClusterClient.callAsCurrentUser,
+        isSecurityFeatureDisabled: expect.any(Function),
+      });
     });
   });
 });
