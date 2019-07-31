@@ -54,7 +54,9 @@ export function init(server: Legacy.Server) {
     fireAction: server.plugins.actions!.fire,
     internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
     getBasePath(...args) {
-      return spaces.isEnabled ? spaces.getBasePath(...args) : '';
+      return spaces.isEnabled
+        ? spaces.getBasePath(...args)
+        : server.config().get('server.basePath');
     },
     spaceIdToNamespace(...args) {
       return spaces.isEnabled ? spaces.spaceIdToNamespace(...args) : undefined;

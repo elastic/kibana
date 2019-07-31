@@ -65,7 +65,9 @@ export function init(server: Legacy.Server) {
     taskManager: taskManager!,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
     getBasePath(...args) {
-      return spaces.isEnabled ? spaces.getBasePath(...args) : '';
+      return spaces.isEnabled
+        ? spaces.getBasePath(...args)
+        : server.config().get('server.basePath');
     },
     spaceIdToNamespace(...args) {
       return spaces.isEnabled ? spaces.spaceIdToNamespace(...args) : undefined;
