@@ -50,7 +50,7 @@ export function NodeDetailStatus({ stats }) {
       label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.freeDiskSpaceLabel', {
         defaultMessage: 'Free Disk Space',
       }),
-      value: formatMetric(freeSpace, '0.0 b') + ' (' + formatMetric(percentSpaceUsed, '0,0.[00]', '%') + ')',
+      value: formatMetric(freeSpace, '0.0 b') + ' (' + formatMetric(percentSpaceUsed, '0,0.[00]', '%', { prependSpace: false  }) + ')',
       'data-test-subj': 'freeDiskSpace'
     },
     {
