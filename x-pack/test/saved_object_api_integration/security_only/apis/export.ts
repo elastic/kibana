@@ -18,6 +18,7 @@ export default function({ getService }: TestInvoker) {
       createExpectRbacForbidden,
       expectTypeOrObjectsRequired,
       createExpectVisualizationResults,
+      expectInvalidTypeSpecified,
       exportTest,
     } = exportTestSuiteFactory(esArchiver, supertest);
 
@@ -28,6 +29,11 @@ export default function({ getService }: TestInvoker) {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
+        },
+        hiddenType: {
+          description: 'exporting space not allowed',
+          statusCode: 400,
+          response: expectInvalidTypeSpecified,
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -45,6 +51,11 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectVisualizationResults(),
         },
+        hiddenType: {
+          description: 'exporting space not allowed',
+          statusCode: 400,
+          response: expectInvalidTypeSpecified,
+        },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
           statusCode: 400,
@@ -60,6 +71,11 @@ export default function({ getService }: TestInvoker) {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
+        },
+        hiddenType: {
+          description: 'exporting space not allowed',
+          statusCode: 400,
+          response: expectInvalidTypeSpecified,
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -77,6 +93,11 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectVisualizationResults(),
         },
+        hiddenType: {
+          description: 'exporting space not allowed',
+          statusCode: 400,
+          response: expectInvalidTypeSpecified,
+        },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
           statusCode: 400,
@@ -92,6 +113,11 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 200,
           response: createExpectVisualizationResults(),
+        },
+        hiddenType: {
+          description: 'exporting space not allowed',
+          statusCode: 400,
+          response: expectInvalidTypeSpecified,
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -109,6 +135,11 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectVisualizationResults(),
         },
+        hiddenType: {
+          description: 'exporting space not allowed',
+          statusCode: 400,
+          response: expectInvalidTypeSpecified,
+        },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
           statusCode: 400,
@@ -124,6 +155,11 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 200,
           response: createExpectVisualizationResults(),
+        },
+        hiddenType: {
+          description: 'exporting space not allowed',
+          statusCode: 400,
+          response: expectInvalidTypeSpecified,
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -141,6 +177,11 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
         },
+        hiddenType: {
+          description: 'exporting space not allowed',
+          statusCode: 400,
+          response: expectInvalidTypeSpecified,
+        },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
           statusCode: 400,
@@ -156,6 +197,11 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
+        },
+        hiddenType: {
+          description: 'exporting space not allowed',
+          statusCode: 400,
+          response: expectInvalidTypeSpecified,
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -173,6 +219,11 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
         },
+        hiddenType: {
+          description: 'exporting space not allowed',
+          statusCode: 400,
+          response: expectInvalidTypeSpecified,
+        },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
           statusCode: 400,
@@ -188,6 +239,11 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
+        },
+        hiddenType: {
+          description: 'exporting space not allowed',
+          statusCode: 400,
+          response: expectInvalidTypeSpecified,
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
