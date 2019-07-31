@@ -55,7 +55,6 @@ describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js'
 
     it('should render non-empty <div/> node', () => {
       const wrapper = mountWithIntl(<ColorRules.WrappedComponent {...defaultProps} />);
-      console.log(wrapper.debug());
       const isNode = wrapper.find('div.tvbColorPicker').exists();
 
       expect(isNode).toBeTruthy();
