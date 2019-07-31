@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Vis, VisParams } from 'ui/vis';
+import { Vis, VisParams } from './../..';
 
 export type VisOptionsSetValue = (paramName: string, value: unknown) => void;
 export interface VisOptionsProps {

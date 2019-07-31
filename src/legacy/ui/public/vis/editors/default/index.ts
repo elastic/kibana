@@ -18,7 +18,7 @@
  */
 
 export { AggParamEditorProps } from './components/agg_param_props';
-export { DefaultEditorAggParams } from './components/agg_params';
+export { DefaultEditorAggParams, SubAggParamsProp } from './components/agg_params';
 export * from './vis_options_props';
 export * from './utils';
 export * from './agg_groups';
