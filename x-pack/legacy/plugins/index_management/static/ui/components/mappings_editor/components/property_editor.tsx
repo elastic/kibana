@@ -48,12 +48,8 @@ export const PropertyEditor = ({
     ) : null;
 
   return (
-    <FormDataProvider
-      form={form}
-      pathsToWatch={[`${fieldPathPrefix}type`, `${fieldPathPrefix}name`]}
-    >
+    <FormDataProvider form={form} pathsToWatch={[`${fieldPathPrefix}type`]}>
       {formData => {
-        const fieldName = formData[`${fieldPathPrefix}name`] as string;
         const selectedDatatype = formData[`${fieldPathPrefix}type`] as DataType;
         const typeDefinition = dataTypesDefinition[selectedDatatype];
 
@@ -66,7 +62,7 @@ export const PropertyEditor = ({
                   <UseField
                     path={`${fieldPathPrefix}name`}
                     form={form}
-                    defaultValue={isEditMode ? undefined : ''} // "undefined" will  into the "defaultValue" object passed to the form
+                    defaultValue={isEditMode ? undefined : ''} // "undefined" means: look into the "defaultValue" object passed to the form
                     config={parametersDefinition.name.fieldConfig}
                     component={getComponentForParameter('name')}
                   />
@@ -144,7 +140,12 @@ export const PropertyEditor = ({
               </Fragment>
             )}
 
-            {renderNestedProperties(selectedDatatype, fieldName)}
+            <FormDataProvider form={form} pathsToWatch={[`${fieldPathPrefix}name`]}>
+              {_formData => {
+                const fieldName = _formData[`${fieldPathPrefix}name`] as string;
+                return renderNestedProperties(selectedDatatype, fieldName);
+              }}
+            </FormDataProvider>
           </div>
         );
       }}
