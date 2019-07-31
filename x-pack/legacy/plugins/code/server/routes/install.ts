@@ -8,14 +8,17 @@ import * as Boom from 'boom';
 
 import { RequestFacade } from '../..';
 import { enabledLanguageServers, LanguageServerDefinition } from '../lsp/language_servers';
-import { LspService } from '../lsp/lsp_service';
 import { CodeServerRouter } from '../security';
+import { CodeServices } from '../distributed/code_services';
+import { LspServiceDefinition } from '../distributed/apis';
+import { Endpoint } from '../distributed/resource_locator';
 
-export function installRoute(router: CodeServerRouter, lspService: LspService) {
+export function installRoute(router: CodeServerRouter, codeServices: CodeServices) {
+  const lspService = codeServices.serviceFor(LspServiceDefinition);
   const kibanaVersion = router.server.config().get('pkg.version') as string;
-  const status = (def: LanguageServerDefinition) => ({
+  const status = (endpoint: Endpoint, def: LanguageServerDefinition) => ({
     name: def.name,
-    status: lspService.languageServerStatus(def.name),
+    status: lspService.languageServerStatus(endpoint, { lang: def.name }),
     version: def.version,
     build: def.build,
     languages: def.languages,
@@ -27,19 +30,21 @@ export function installRoute(router: CodeServerRouter, lspService: LspService) {
 
   router.route({
     path: '/api/code/install',
-    handler() {
-      return enabledLanguageServers(router.server).map(status);
+    async handler(req: RequestFacade) {
+      const endpoint = await codeServices.locate(req, '');
+      return enabledLanguageServers(router.server).map(def => status(endpoint, def));
     },
     method: 'GET',
   });
 
   router.route({
     path: '/api/code/install/{name}',
-    handler(req: RequestFacade) {
+    async handler(req: RequestFacade) {
       const name = req.params.name;
       const def = enabledLanguageServers(router.server).find(d => d.name === name);
+      const endpoint = await codeServices.locate(req, '');
       if (def) {
-        return status(def);
+        return status(endpoint, def);
       } else {
         return Boom.notFound(`language server ${name} not found.`);
       }

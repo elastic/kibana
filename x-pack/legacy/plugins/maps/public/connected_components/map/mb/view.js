@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ResizeChecker } from 'ui/resize_checker';
-import { syncLayerOrder, removeOrphanedSourcesAndLayers } from './utils';
+import { syncLayerOrderForSingleLayer, removeOrphanedSourcesAndLayers } from './utils';
 import {
   DECIMAL_DEGREES_PRECISION,
   FEATURE_ID_PROPERTY_NAME,
@@ -558,7 +558,7 @@ export class MBMapContainer extends React.Component {
       layer.syncLayerWithMB(this._mbMap);
     });
 
-    syncLayerOrder(this._mbMap, this.props.layerList);
+    syncLayerOrderForSingleLayer(this._mbMap, this.props.layerList);
   };
 
   _syncMbMapWithInspector = () => {
