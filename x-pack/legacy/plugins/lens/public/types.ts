@@ -33,7 +33,6 @@ export interface EditorFrameInstance {
 }
 
 export interface EditorFrameSetup {
-  // render: () => EditorFrameInstance;
   createInstance: (options: EditorFrameOptions) => EditorFrameInstance;
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
   registerDatasource: <T, P>(name: string, datasource: Datasource<T, P>) => void;

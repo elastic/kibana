@@ -8,7 +8,6 @@ import React from 'react';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
 import chrome, { Chrome } from 'ui/chrome';
-// import { Chrome } from 'ui/chrome';
 import { localStorage } from 'ui/storage/storage_service';
 import { data as dataSetup } from '../../../../../../src/legacy/core_plugins/data/public/setup';
 import { editorFrameSetup, editorFrameStop } from '../editor_frame_plugin';

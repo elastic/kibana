@@ -59,7 +59,7 @@ export function App({
   });
 
   useEffect(() => {
-    if (docId) {
+    if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
       docStorage
         .load(docId)
         .then(doc => {
@@ -80,11 +80,20 @@ export function App({
     }
   }, [docId]);
 
+  // Can save if the frame has told us what it has, and there is either:
+  // a) No saved doc
+  // b) A saved doc that differs from the frame state
+  const isSaveable =
+    state.lastKnownDoc &&
+    (!state.persistedDoc ||
+      (state.persistedDoc && !_.isEqual(state.lastKnownDoc, state.persistedDoc)));
+
   return (
     <I18nProvider>
       <div className="lnsApp">
         <div className="lnsAppHeader">
           <QueryBar
+            data-test-subj="lnsApp_queryBar"
             screenTitle={'lens'}
             onSubmit={({ dateRange, query }) => {
               setState({
@@ -108,12 +117,22 @@ export function App({
 
           <nav>
             <EuiLink
+              data-test-subj="lnsApp_saveButton"
               onClick={() => {
-                if (state.lastKnownDoc) {
+                if (isSaveable && state.lastKnownDoc) {
                   docStorage
                     .save(state.lastKnownDoc)
                     .then(({ id }) => {
-                      redirectTo(id);
+                      // Prevents unnecessary network request and disables save button
+                      const newDoc = { ...(state.lastKnownDoc as Document), id };
+                      setState({
+                        ...state,
+                        persistedDoc: newDoc,
+                        lastKnownDoc: newDoc,
+                      });
+                      if (docId !== id) {
+                        redirectTo(id);
+                      }
                     })
                     .catch(reason => {
                       toastNotifications.addDanger(
@@ -125,12 +144,8 @@ export function App({
                     });
                 }
               }}
-              color={
-                !state.lastKnownDoc || _.isEqual(state.lastKnownDoc, state.persistedDoc)
-                  ? 'subdued'
-                  : 'primary'
-              }
-              disabled={!state.lastKnownDoc || _.isEqual(state.lastKnownDoc, state.persistedDoc)}
+              color={isSaveable ? 'primary' : 'subdued'}
+              disabled={!isSaveable}
             >
               {i18n.translate('xpack.lens.editorFrame.save', {
                 defaultMessage: 'Save',
