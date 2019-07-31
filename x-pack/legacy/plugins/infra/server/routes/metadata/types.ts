@@ -4,13 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InfraNodeType } from '../../graphql/types';
+import { InfraWrappableRequest } from '../../lib/adapters/framework';
+
+export interface MetadataRequest {
+  nodeId: string;
+  nodeType: InfraNodeType;
+  sourceId: string;
+}
+export type MetadataWrappedRequest = InfraWrappableRequest<MetadataRequest>;
+
 export interface Metadata {
   name: string;
-  features: MetadataFeatures[];
+  features: MetadataFeature[];
   info?: MetadataInfo | null;
 }
 
-export interface MetadataFeatures {
+export interface MetadataFeature {
   name: string;
   source: string;
 }

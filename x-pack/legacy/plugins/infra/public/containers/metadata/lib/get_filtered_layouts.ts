@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { MetadataFeatures } from '../../../../server/routes/metadata/types';
+import { MetadataFeature } from '../../../../server/routes/metadata/types';
 import { InfraMetricLayout } from '../../../pages/metrics/layouts/types';
 
 export const getFilteredLayouts = (
   layouts: InfraMetricLayout[],
-  metadata: Array<MetadataFeatures | null> | undefined
+  metadata: Array<MetadataFeature | null> | undefined
 ): InfraMetricLayout[] => {
   if (!metadata) {
     return layouts;

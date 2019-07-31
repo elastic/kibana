@@ -38,7 +38,7 @@ export function useMetadata(
     })();
   }, [nodeId, nodeType, sourceId]);
   return {
-    name: (data && data.name) || null,
+    name: (data && data.name) || '',
     filteredLayouts: (data && getFilteredLayouts(layouts, data.features)) || [],
     error: (error && error.message) || null,
     loading,
