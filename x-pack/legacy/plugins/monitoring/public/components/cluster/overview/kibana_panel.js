@@ -23,7 +23,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 export function KibanaPanel(props) {
-  if (!props.count) {
+  const setupMode = props.setupMode;
+  const showDetectedKibanas = setupMode.enabled && get(setupMode.data, 'kibana.detected.doesExist', false);
+  if (!props.count && !showDetectedKibanas) {
     return null;
   }
 
