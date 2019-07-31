@@ -15,6 +15,7 @@ import { LoggerFactory } from '../utils/log_factory';
 import { LanguageServerController } from './controller';
 import { InstallManager } from './install_manager';
 import { WorkspaceHandler } from './workspace_handler';
+import { LanguageServerDefinition } from './language_servers';
 
 export class LspService {
   public readonly controller: LanguageServerController;
@@ -79,15 +80,15 @@ export class LspService {
   }
 
   public supportLanguage(lang: string) {
-    return this.controller.getLanguageServerDef(lang) !== null;
+    return this.controller.getLanguageServerDef(lang).length === 0;
   }
 
   public getLanguageSeverDef(lang: string) {
     return this.controller.getLanguageServerDef(lang);
   }
 
-  public languageServerStatus(lang: string): LanguageServerStatus {
-    return this.controller.status(lang);
+  public languageServerStatus(def: LanguageServerDefinition): LanguageServerStatus {
+    return this.controller.status(def);
   }
 
   public async initializeState(repoUri: string, revision: string) {

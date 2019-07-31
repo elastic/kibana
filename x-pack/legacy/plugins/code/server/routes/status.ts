@@ -64,29 +64,38 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
     } else {
       report.fileStatus = RepoFileStatus.FILE_IS_TOO_BIG;
     }
+    return [];
   }
 
   async function handleLspStatus(
     endpoint: Endpoint,
     report: StatusReport,
-    def: LanguageServerDefinition,
+    defs: LanguageServerDefinition[],
     repoUri: string,
     revision: string
   ) {
-    report.langServerType = def === CTAGS ? LangServerType.GENERIC : LangServerType.DEDICATED;
-    const status = await lspService.languageServerStatus(endpoint, { lang: def.languages[0] });
-    if (status === LanguageServerStatus.NOT_INSTALLED) {
+    const dedicated = defs.find(d => d !== CTAGS);
+    const generic = defs.find(d => d === CTAGS);
+    report.langServerType = dedicated ? LangServerType.DEDICATED : LangServerType.GENERIC;
+    if (
+      dedicated &&
+      lspService.languageServerStatus(dedicated) === LanguageServerStatus.NOT_INSTALLED
+    ) {
       report.langServerStatus = RepoFileStatus.LANG_SERVER_NOT_INSTALLED;
+      if (generic) {
+        // dedicated lang server not installed, fallback to generic
+        report.langServerType = LangServerType.GENERIC;
+      }
     } else {
-      const state = await lspService.initializeState(endpoint, { repoUri, revision });
-      const initState = state[def.name];
+      const def = dedicated || generic;
+      const state = await lspService.initializeState(repoUri, revision);
+      const initState = state[def!.name];
       report.langServerStatus =
         initState === WorkspaceStatus.Initialized
           ? RepoFileStatus.LANG_SERVER_INITIALIZED
           : RepoFileStatus.LANG_SERVER_IS_INITIALIZING;
     }
   }
-
   router.route({
     path: '/api/code/repo/{uri*3}/status/{ref}/{path*}',
     method: 'GET',
@@ -112,10 +121,10 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
               revision: decodeURIComponent(ref),
             });
             // text file
-            if (!blob.isBinary) {
-              const def = await handleFileStatus(endpoint, report, blob);
-              if (def) {
-                await handleLspStatus(endpoint, report, def, uri, ref);
+            if (!blob.isBinary()) {
+              const defs = await handleFileStatus(report, blob.content(), path);
+              if (defs.length > 0) {
+                await handleLspStatus(report, defs, uri, ref);
               }
             }
           } catch (e) {
