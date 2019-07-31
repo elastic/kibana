@@ -7,6 +7,8 @@ Some of the features of Kibana are provided via a REST API, which is ideal for
 people that want to create an integration with Kibana or that want to automate
 certain aspects of configuring and deploying Kibana.
 
+NOTE: You cannot access these APIs via the Console in Kibana.
+
 Each API in this documentation should be clearly marked as either `stable`,
 `beta`, or `experimental`. If an API is not marked, it should be considered
 `experimental`.
@@ -23,8 +25,6 @@ wherever possible.
 * *Experimental* APIs are just that - an experiment. An experimental API might
 have breaking changes in any version of Kibana, or it might even be removed
 entirely.
-
-NOTE: You cannot access these APIs via the Console in Kibana.
 
 [float]
 == APIs

@@ -39,12 +39,3 @@ A successful call returns a JSON structure. For example:
   }
 }
 --------------------------------------------------
-
-[[logstash-configuration-management-api-retrieve-example]]
-==== Examples
-
-[source,js]
---------------------------------------------------
-GET api/logstash/pipeline/hello-world
---------------------------------------------------
-// KIBANA
