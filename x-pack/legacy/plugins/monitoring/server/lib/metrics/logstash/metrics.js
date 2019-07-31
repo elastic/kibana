@@ -80,10 +80,10 @@ export const metrics = {
   logstash_cluster_queue_depth: new LogstashEventsRateClusterMetric({
     field: 'logstash_stats.queue.events_count',
     label: i18n.translate('xpack.monitoring.metrics.logstash.queueDepthLabel', {
-      defaultMessage: 'Queue depth'
+      defaultMessage: 'Events Enqueued Rate'
     }),
     description: i18n.translate('xpack.monitoring.metrics.logstash.queueDepthDescription', {
-      defaultMessage: 'Depth of queue'
+      defaultMessage: 'Events enqueued per second'
     })
   }),
   logstash_cluster_events_latency: new LogstashEventsLatencyClusterMetric({

@@ -826,12 +826,12 @@
 
         "metric": {
           "app": "logstash",
-          "description": "Depth of queue",
+          "description": "Events enqueued per second",
           "field": "logstash_stats.queue.events_count",
           "format": "0,0.[00]",
           "hasCalculation": false,
           "isDerivative": true,
-          "label": "Queue depth",
+          "label": "Events Enqueued Rate",
           "metricAgg": "max",
           "units": "/s"
         },
