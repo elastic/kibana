@@ -57,7 +57,7 @@ export function getLogstashInstructionsForDisablingInternalCollection(product, m
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.logstashInstructions.disableInternalCollection.note"
-              defaultMessage="You'll need to restart logstash after making this change"
+              defaultMessage="You'll need to restart Logstash after making this change."
             />
           </p>
         </EuiText>

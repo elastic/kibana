@@ -57,7 +57,7 @@ export function getApmInstructionsForDisablingInternalCollection(product, meta, 
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.apmInstructions.disableInternalCollection.note"
-              defaultMessage="You'll need to restart the APM server after making this change"
+              defaultMessage="You'll need to restart the APM server after making this change."
             />
           </p>
         </EuiText>

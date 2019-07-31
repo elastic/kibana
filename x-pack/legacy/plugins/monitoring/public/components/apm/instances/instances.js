@@ -104,8 +104,8 @@ export function ApmServerInstances({ apms, setupMode }) {
         >
           <p>
             {i18n.translate('xpack.monitoring.apm.instances.metricbeatMigration.detectedInstanceDescription', {
-              defaultMessage: `Based on your indices, we think you might have an apm server. Click the 'Setup monitoring'
-              button below to start monitoring this apm server.`
+              defaultMessage: `Based on your indices, we think you might have an APM server. Click the 'Setup monitoring'
+              button below to start monitoring this APM server.`
             })}
           </p>
         </EuiCallOut>
