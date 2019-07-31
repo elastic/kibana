@@ -11,6 +11,7 @@ import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 import { EuiSpacer } from '@elastic/eui';
 import { chunk as _chunk } from 'lodash/fp';
+import { ActionCreator } from 'typescript-fsa';
 import {
   StatItemsComponent,
   StatItemsProps,
@@ -20,6 +21,7 @@ import {
 import { KpiNetworkData } from '../../../../graphql/types';
 
 import * as i18n from './translations';
+import { InputsModelId } from '../../../../store/inputs/constants';
 
 const kipsPerRow = 2;
 const kpiWidgetHeight = 228;
@@ -34,6 +36,11 @@ interface KpiNetworkProps {
   id: string;
   loading: boolean;
   to: number;
+  setAbsoluteRangeDatePicker: ActionCreator<{
+    id: InputsModelId;
+    from: number;
+    to: number;
+  }>;
 }
 
 export const fieldTitleChartMapping: Readonly<StatItems[]> = [
@@ -124,14 +131,27 @@ export const KpiNetworkBaseComponent = ({
   id,
   from,
   to,
+  setAbsoluteRangeDatePicker,
 }: {
   fieldsMapping: Readonly<StatItems[]>;
   data: KpiNetworkData;
   id: string;
   from: number;
   to: number;
+  setAbsoluteRangeDatePicker: ActionCreator<{
+    id: InputsModelId;
+    from: number;
+    to: number;
+  }>;
 }) => {
-  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(fieldsMapping, data, id, from, to);
+  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
+    fieldsMapping,
+    data,
+    id,
+    from,
+    to,
+    setAbsoluteRangeDatePicker
+  );
 
   return (
     <EuiFlexGroup wrap>
@@ -143,7 +163,7 @@ export const KpiNetworkBaseComponent = ({
 };
 
 export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
-  ({ data, from, id, loading, to }) => {
+  ({ data, from, id, loading, to, setAbsoluteRangeDatePicker }) => {
     return loading ? (
       <FlexGroup justifyContent="center" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -162,6 +182,7 @@ export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
                 fieldsMapping={mappingsPerLine}
                 from={from}
                 to={to}
+                setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
               />
             </React.Fragment>
           ))}
@@ -173,6 +194,7 @@ export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
             fieldsMapping={fieldTitleChartMapping}
             from={from}
             to={to}
+            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

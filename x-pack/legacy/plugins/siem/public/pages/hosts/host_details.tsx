@@ -151,6 +151,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                             refetch={refetch}
                             setQuery={setQuery}
                             to={to}
+                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                           />
                         )}
                       </KpiHostDetailsQuery>

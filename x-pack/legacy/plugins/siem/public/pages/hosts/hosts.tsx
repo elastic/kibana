@@ -96,6 +96,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                             refetch={refetch}
                             setQuery={setQuery}
                             to={to}
+                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                           />
                         )}
                       </KpiHostsQuery>
@@ -120,25 +121,25 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                           inspect,
                           refetch,
                         }) => (
-                          <HostsTableManage
-                            data={hosts}
-                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                            id={id}
-                            indexPattern={indexPattern}
-                            inspect={inspect}
-                            loading={loading}
-                            loadPage={loadPage}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            showMorePagesIndicator={getOr(
-                              false,
-                              'showMorePagesIndicator',
-                              pageInfo
-                            )}
-                            totalCount={totalCount}
-                            type={hostsModel.HostsType.page}
-                          />
-                        )}
+                            <HostsTableManage
+                              data={hosts}
+                              fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                              id={id}
+                              indexPattern={indexPattern}
+                              inspect={inspect}
+                              loading={loading}
+                              loadPage={loadPage}
+                              refetch={refetch}
+                              setQuery={setQuery}
+                              showMorePagesIndicator={getOr(
+                                false,
+                                'showMorePagesIndicator',
+                                pageInfo
+                              )}
+                              totalCount={totalCount}
+                              type={hostsModel.HostsType.page}
+                            />
+                          )}
                       </HostsQuery>
 
                       <EuiSpacer />
@@ -161,24 +162,24 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                           inspect,
                           refetch,
                         }) => (
-                          <AuthenticationTableManage
-                            data={authentications}
-                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                            id={id}
-                            inspect={inspect}
-                            loading={loading}
-                            loadPage={loadPage}
-                            refetch={refetch}
-                            showMorePagesIndicator={getOr(
-                              false,
-                              'showMorePagesIndicator',
-                              pageInfo
-                            )}
-                            setQuery={setQuery}
-                            totalCount={totalCount}
-                            type={hostsModel.HostsType.page}
-                          />
-                        )}
+                            <AuthenticationTableManage
+                              data={authentications}
+                              fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                              id={id}
+                              inspect={inspect}
+                              loading={loading}
+                              loadPage={loadPage}
+                              refetch={refetch}
+                              showMorePagesIndicator={getOr(
+                                false,
+                                'showMorePagesIndicator',
+                                pageInfo
+                              )}
+                              setQuery={setQuery}
+                              totalCount={totalCount}
+                              type={hostsModel.HostsType.page}
+                            />
+                          )}
                       </AuthenticationsQuery>
 
                       <EuiSpacer />
@@ -201,24 +202,24 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                           inspect,
                           refetch,
                         }) => (
-                          <UncommonProcessTableManage
-                            data={uncommonProcesses}
-                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                            id={id}
-                            inspect={inspect}
-                            loading={loading}
-                            loadPage={loadPage}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            showMorePagesIndicator={getOr(
-                              false,
-                              'showMorePagesIndicator',
-                              pageInfo
-                            )}
-                            totalCount={totalCount}
-                            type={hostsModel.HostsType.page}
-                          />
-                        )}
+                            <UncommonProcessTableManage
+                              data={uncommonProcesses}
+                              fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                              id={id}
+                              inspect={inspect}
+                              loading={loading}
+                              loadPage={loadPage}
+                              refetch={refetch}
+                              setQuery={setQuery}
+                              showMorePagesIndicator={getOr(
+                                false,
+                                'showMorePagesIndicator',
+                                pageInfo
+                              )}
+                              totalCount={totalCount}
+                              type={hostsModel.HostsType.page}
+                            />
+                          )}
                       </UncommonProcessesQuery>
 
                       <EuiSpacer />
@@ -258,24 +259,24 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                           pageInfo,
                           loadPage,
                         }) => (
-                          <EventsTableManage
-                            data={events}
-                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                            id={id}
-                            inspect={inspect}
-                            loading={loading}
-                            loadPage={loadPage}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            showMorePagesIndicator={getOr(
-                              false,
-                              'showMorePagesIndicator',
-                              pageInfo
-                            )}
-                            totalCount={totalCount}
-                            type={hostsModel.HostsType.page}
-                          />
-                        )}
+                            <EventsTableManage
+                              data={events}
+                              fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                              id={id}
+                              inspect={inspect}
+                              loading={loading}
+                              loadPage={loadPage}
+                              refetch={refetch}
+                              setQuery={setQuery}
+                              showMorePagesIndicator={getOr(
+                                false,
+                                'showMorePagesIndicator',
+                                pageInfo
+                              )}
+                              totalCount={totalCount}
+                              type={hostsModel.HostsType.page}
+                            />
+                          )}
                       </EventsQuery>
                     </>
                   )}
@@ -284,11 +285,11 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
             </GlobalTime>
           </StickyContainer>
         ) : (
-          <>
-            <HeaderPage title={i18n.PAGE_TITLE} />
-            <HostsEmptyPage />
-          </>
-        )
+            <>
+              <HeaderPage title={i18n.PAGE_TITLE} />
+              <HostsEmptyPage />
+            </>
+          )
       }
     </WithSource>
   );

@@ -85,6 +85,7 @@ const NetworkComponent = pure<NetworkComponentProps>(
                             loading={loading}
                             from={from}
                             to={to}
+                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                           />
                         )}
                       </KpiNetworkQuery>
