@@ -11,7 +11,6 @@ import {
   SET_IS_LAYER_TOC_OPEN,
   SET_FULL_SCREEN,
   SET_READ_ONLY,
-  SET_FILTERABLE,
   SET_OPEN_TOC_DETAILS,
   SHOW_TOC_DETAILS,
   HIDE_TOC_DETAILS,
@@ -38,7 +37,6 @@ const INITIAL_STATE = {
   isFullScreen: false,
   isReadOnly: false,
   isLayerTOCOpen: DEFAULT_IS_LAYER_TOC_OPEN,
-  isFilterable: false,
   isSetViewOpen: false,
   // storing TOC detail visibility outside of map.layerList because its UI state and not map rendering state.
   // This also makes for easy read/write access for embeddables.
@@ -61,8 +59,6 @@ export function ui(state = INITIAL_STATE, action) {
       return { ...state, isFullScreen: action.isFullScreen };
     case SET_READ_ONLY:
       return { ...state, isReadOnly: action.isReadOnly };
-    case SET_FILTERABLE:
-      return { ...state, isFilterable: action.isFilterable };
     case SET_OPEN_TOC_DETAILS:
       return { ...state, openTOCDetails: action.layerIds };
     case SHOW_TOC_DETAILS:

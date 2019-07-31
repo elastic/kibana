@@ -30,7 +30,7 @@ import {
   verifyRepository as verifyRepositoryRequest,
 } from '../../../../services/http';
 import { textService } from '../../../../services/text';
-import { linkToSnapshots } from '../../../../services/navigation';
+import { linkToSnapshots, linkToEditRepository } from '../../../../services/navigation';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository, RepositoryVerification } from '../../../../../../common/types';
@@ -40,7 +40,6 @@ import {
   SectionLoading,
   RepositoryVerificationBadge,
 } from '../../../../components';
-import { BASE_PATH } from '../../../../constants';
 import { TypeDetails } from './type_details';
 
 interface Props {
@@ -294,8 +293,8 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
           <EuiSpacer size="m" />
           <EuiButton onClick={verifyRepository} color="primary" isLoading={isLoadingVerification}>
             <FormattedMessage
-              id="xpack.snapshotRestore.repositoryDetails.reverifyButtonLabel"
-              defaultMessage="Re-verify repository"
+              id="xpack.snapshotRestore.repositoryDetails.verifyButtonLabel"
+              defaultMessage="Verify repository"
             />
           </EuiButton>
         </Fragment>
@@ -371,11 +370,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  href={`#${BASE_PATH}/edit_repository/${repositoryName}`}
-                  fill
-                  color="primary"
-                >
+                <EuiButton href={linkToEditRepository(repositoryName)} fill color="primary">
                   <FormattedMessage
                     id="xpack.snapshotRestore.repositoryDetails.editButtonLabel"
                     defaultMessage="Edit"

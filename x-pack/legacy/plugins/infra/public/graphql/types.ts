@@ -8,6 +8,8 @@
 // Types
 // ====================================================
 
+import { FieldType } from 'ui/index_patterns';
+
 export interface Query {
   /** Get an infrastructure data source by id.The resolution order for the source configuration attributes is as followswith the first defined value winning:1. The attributes of the saved object with the given 'id'.2. The attributes defined in the static Kibana configuration key'xpack.infra.sources.default'.3. The hard-coded default values.As a consequence, querying a source that doesn't exist doesn't error out,but returns the configured or hardcoded defaults. */
   source: InfraSource;
@@ -122,16 +124,8 @@ export interface InfraSourceStatus {
   indexFields: InfraIndexField[];
 }
 /** A descriptor of a field in an index */
-export interface InfraIndexField {
-  /** The name of the field */
-  name: string;
-  /** The type of the field's values as recognized by Kibana */
-  type: string;
-  /** Whether the field's values can be efficiently searched for */
-  searchable: boolean;
-  /** Whether the field's values can be aggregated */
-  aggregatable: boolean;
-}
+export interface InfraIndexField extends FieldType {}
+
 /** One metadata entry for a node. */
 export interface InfraNodeMetadata {
   id: string;
@@ -334,9 +328,14 @@ export interface InfraTimeKeyInput {
 
   tiebreaker: number;
 }
-
+/** A highlighting definition */
 export interface InfraLogEntryHighlightInput {
+  /** The query to highlight by */
   query: string;
+  /** The number of highlighted documents to include beyond the beginning of the interval */
+  countBefore: number;
+  /** The number of highlighted documents to include beyond the end of the interval */
+  countAfter: number;
 }
 
 export interface InfraTimerangeInput {
