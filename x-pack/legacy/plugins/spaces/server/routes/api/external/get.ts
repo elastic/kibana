@@ -5,9 +5,11 @@
  */
 
 import Boom from 'boom';
+import Joi from 'joi';
+import { RequestQuery } from 'hapi';
 import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
-import { SpacesClient } from '../../../lib/spaces_client';
+import { SpacesClient, GetSpacePurpose } from '../../../lib/spaces_client';
 import { ExternalRouteDeps, ExternalRouteRequestFacade } from '.';
 
 export function initGetSpacesApi(deps: ExternalRouteDeps) {
@@ -19,16 +21,18 @@ export function initGetSpacesApi(deps: ExternalRouteDeps) {
     async handler(request: ExternalRouteRequestFacade) {
       log.debug(`Inside GET /api/spaces/space`);
 
+      const purpose: GetSpacePurpose = (request.query as RequestQuery).purpose as GetSpacePurpose;
+
       const spacesClient: SpacesClient = await spacesService.scopedClient(request);
 
       let spaces: Space[];
 
       try {
-        log.debug(`Attempting to retrieve all spaces`);
-        spaces = await spacesClient.getAll();
-        log.debug(`Retrieved ${spaces.length} spaces`);
+        log.debug(`Attempting to retrieve all spaces for ${purpose} purpose`);
+        spaces = await spacesClient.getAll(purpose);
+        log.debug(`Retrieved ${spaces.length} spaces for ${purpose} purpose`);
       } catch (error) {
-        log.debug(`Error retrieving spaces: ${error}`);
+        log.debug(`Error retrieving spaces for ${purpose} purpose: ${error}`);
         return wrapError(error);
       }
 
@@ -36,6 +40,13 @@ export function initGetSpacesApi(deps: ExternalRouteDeps) {
     },
     options: {
       pre: [routePreCheckLicenseFn],
+      validate: {
+        query: Joi.object().keys({
+          purpose: Joi.string()
+            .valid('any', 'copySavedObjects')
+            .default('any'),
+        }),
+      },
     },
   });
 

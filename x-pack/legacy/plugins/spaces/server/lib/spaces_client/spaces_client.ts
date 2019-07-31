@@ -14,6 +14,16 @@ import { SpacesAuditLogger } from '../audit_logger';
 import { SpacesConfigType } from '../../new_platform/config';
 
 type SpacesClientRequestFacade = Legacy.Request | KibanaRequest;
+export type GetSpacePurpose = 'any' | 'copySavedObjects';
+
+const PURPOSE_PRIVILEGE_MAP: Record<
+  GetSpacePurpose,
+  (authorization: AuthorizationService) => string
+> = {
+  any: authorization => authorization.actions.login,
+  copySavedObjects: authorization => authorization.actions.ui.get('savedObjectsManagement', 'edit'),
+};
+
 export class SpacesClient {
   constructor(
     private readonly auditLogger: SpacesAuditLogger,
@@ -40,8 +50,13 @@ export class SpacesClient {
     return true;
   }
 
-  public async getAll(): Promise<Space[]> {
+  public async getAll(purpose: GetSpacePurpose = 'any'): Promise<Space[]> {
     if (this.useRbac()) {
+      const privilegeFactory = PURPOSE_PRIVILEGE_MAP[purpose];
+      if (!privilegeFactory) {
+        throw Boom.badRequest(`unsupported space purpose: ${purpose}`);
+      }
+
       const { saved_objects } = await this.internalSavedObjectRepository.find({
         type: 'space',
         page: 1,
@@ -55,13 +70,13 @@ export class SpacesClient {
 
       const spaceIds = spaces.map((space: Space) => space.id);
       const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
-      const { username, spacePrivileges } = await checkPrivileges.atSpaces(
-        spaceIds,
-        this.authorization!.actions.login
-      );
+
+      const privilege = privilegeFactory(this.authorization!);
+
+      const { username, spacePrivileges } = await checkPrivileges.atSpaces(spaceIds, privilege);
 
       const authorized = Object.keys(spacePrivileges).filter(spaceId => {
-        return spacePrivileges[spaceId][this.authorization!.actions.login];
+        return spacePrivileges[spaceId][privilege];
       });
 
       this.debugLogger(

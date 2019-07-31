@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SpacesClient } from './spaces_client';
+export { SpacesClient, GetSpacePurpose } from './spaces_client';

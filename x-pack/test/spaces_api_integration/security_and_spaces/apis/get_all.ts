@@ -32,6 +32,12 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
           readAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
           allAtDefaultSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
           readAtDefaultSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
+          readSavedObjectsAtDefaultSpace:
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_SAVED_OBJECTS_READ_USER,
+          allSavedObjectsAtDefaultSpace:
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_SAVED_OBJECTS_ALL_USER,
+          readSavedObjectsAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_SAVED_OBJECTS_READ_USER,
+          allSavedObjectsAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_SAVED_OBJECTS_ALL_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
@@ -52,6 +58,12 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
           readAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
           allAtDefaultSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
           readAtDefaultSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
+          readSavedObjectsAtDefaultSpace:
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_SAVED_OBJECTS_READ_USER,
+          allSavedObjectsAtDefaultSpace:
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_SAVED_OBJECTS_ALL_USER,
+          readSavedObjectsAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_SAVED_OBJECTS_READ_USER,
+          allSavedObjectsAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_SAVED_OBJECTS_ALL_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
@@ -70,6 +82,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 403,
             response: expectRbacForbidden,
           },
+          copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
         },
       });
 
@@ -78,6 +94,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
         user: scenario.users.superuser,
         tests: {
           exists: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
+          copySavedObjectsPurpose: {
             statusCode: 200,
             response: createExpectResults('default', 'space_1', 'space_2'),
           },
@@ -92,6 +112,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults('default', 'space_1', 'space_2'),
           },
+          copySavedObjectsPurpose: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
         },
       });
 
@@ -100,6 +124,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
         user: scenario.users.dualAll,
         tests: {
           exists: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
+          copySavedObjectsPurpose: {
             statusCode: 200,
             response: createExpectResults('default', 'space_1', 'space_2'),
           },
@@ -114,6 +142,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 403,
             response: expectRbacForbidden,
           },
+          copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
         },
       });
 
@@ -124,6 +156,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
           exists: {
             statusCode: 200,
             response: createExpectResults('default', 'space_1', 'space_2'),
+          },
+          copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
           },
         },
       });
@@ -136,6 +172,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults('default', 'space_1', 'space_2'),
           },
+          copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
         },
       });
 
@@ -144,6 +184,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
         user: scenario.users.allAtSpace_1,
         tests: {
           exists: {
+            statusCode: 200,
+            response: createExpectResults('space_1'),
+          },
+          copySavedObjectsPurpose: {
             statusCode: 200,
             response: createExpectResults('space_1'),
           },
@@ -158,6 +202,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults('space_1'),
           },
+          copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
         },
       });
 
@@ -168,6 +216,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
           user: scenario.users.allAtDefaultSpace,
           tests: {
             exists: {
+              statusCode: 200,
+              response: createExpectResults('default'),
+            },
+            copySavedObjectsPurpose: {
               statusCode: 200,
               response: createExpectResults('default'),
             },
@@ -185,6 +237,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
               statusCode: 200,
               response: createExpectResults('default'),
             },
+            copySavedObjectsPurpose: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
           },
         }
       );
@@ -194,6 +250,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
         user: scenario.users.apmUser,
         tests: {
           exists: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          copySavedObjectsPurpose: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
@@ -208,6 +268,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 403,
             response: expectRbacForbidden,
           },
+          copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
         },
       });
 
@@ -219,6 +283,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 403,
             response: expectRbacForbidden,
           },
+          copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
         },
       });
 
@@ -227,6 +295,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
         user: scenario.users.monitoringUser,
         tests: {
           exists: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          copySavedObjectsPurpose: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
