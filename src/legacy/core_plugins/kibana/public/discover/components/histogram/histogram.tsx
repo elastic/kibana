@@ -165,7 +165,10 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
     // Domain end of 'now' will be milliseconds behind current time, so we extend time by 1 minute and check if
     // the annotation is within this range; if so, the line annotation uses the domainEnd as its value
     const now = moment();
-    const isAnnotationAtEdge = domainEnd + 60000 > now && now > domainEnd;
+    const isAnnotationAtEdge =
+      moment(domainEnd)
+        .add(60000)
+        .isAfter(now) && now.isAfter(domainEnd);
     const lineAnnotationValue = isAnnotationAtEdge ? domainEnd : now;
 
     const lineAnnotationData = [
