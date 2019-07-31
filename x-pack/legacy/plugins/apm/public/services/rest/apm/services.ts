@@ -8,7 +8,6 @@ import { ServiceAgentNameAPIResponse } from '../../../../server/lib/services/get
 import { ServiceListAPIResponse } from '../../../../server/lib/services/get_services';
 import { callApi } from '../callApi';
 import { UIFilters } from '../../../../typings/ui-filters';
-import { ServiceTransactionTypesAPIResponse } from '../../../../server/lib/services/get_service_transaction_types';
 
 export async function loadServiceList({
   start,
@@ -47,25 +46,4 @@ export async function loadServiceAgentName({
   });
 
   return agentName;
-}
-
-export async function loadServiceTransactionTypes({
-  serviceName,
-  start,
-  end
-}: {
-  serviceName: string;
-  start: string;
-  end: string;
-}) {
-  const { transactionTypes } = await callApi<
-    ServiceTransactionTypesAPIResponse
-  >({
-    pathname: `/api/apm/services/${serviceName}/transaction_types`,
-    query: {
-      start,
-      end
-    }
-  });
-  return transactionTypes;
 }

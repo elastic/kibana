@@ -10,7 +10,7 @@ import { TransactionOverview } from '..';
 import * as useLocationHook from '../../../../hooks/useLocation';
 import { history } from '../../../../utils/history';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import * as useServiceTransactionTypesHook from '../../../../hooks/useServiceTransactionTypes';
+import * as useTransactionTypesHook from '../../../../hooks/useTransactionTypes';
 
 jest.mock('ui/kfetch');
 
@@ -37,7 +37,7 @@ function setup({
     .mockReturnValue({ pathname: '' } as any);
 
   jest
-    .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypes')
+    .spyOn(useTransactionTypesHook, 'useTransactionTypes')
     .mockReturnValue(serviceTransactionTypes);
 
   const { container } = render(<TransactionOverview urlParams={urlParams} />);

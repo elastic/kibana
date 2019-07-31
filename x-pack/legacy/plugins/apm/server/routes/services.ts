@@ -12,7 +12,6 @@ import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
-import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
 
 const ROOT = '/api/apm/services';
 const defaultErrorHandler = (err: Error) => {
@@ -60,24 +59,6 @@ export function initServicesApi(core: InternalCoreSetup) {
       const setup = await setupRequest(req);
       const { serviceName } = req.params;
       return getServiceAgentName(serviceName, setup).catch(defaultErrorHandler);
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/{serviceName}/transaction_types`,
-    options: {
-      validate: {
-        query: withDefaultValidators()
-      },
-      tags: ['access:apm']
-    },
-    handler: async req => {
-      const setup = await setupRequest(req);
-      const { serviceName } = req.params;
-      return getServiceTransactionTypes(serviceName, setup).catch(
-        defaultErrorHandler
-      );
     }
   });
 }

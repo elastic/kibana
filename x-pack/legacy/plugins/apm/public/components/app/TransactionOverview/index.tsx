@@ -29,7 +29,7 @@ import { useLocation } from '../../../hooks/useLocation';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { useTrackPageview } from '../../../../../infra/public';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
-import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
+import { useTransactionTypes } from '../../../hooks/useTransactionTypes';
 
 interface Props {
   urlParams: IUrlParams;
@@ -63,7 +63,7 @@ export function TransactionOverview({ urlParams }: Props) {
   const { serviceName, transactionType } = urlParams;
 
   // TODO: fetching of transaction types should perhaps be lifted since it is needed in several places. Context?
-  const serviceTransactionTypes = useServiceTransactionTypes(urlParams);
+  const serviceTransactionTypes = useTransactionTypes(urlParams);
 
   // redirect to first transaction type
   useRedirect(

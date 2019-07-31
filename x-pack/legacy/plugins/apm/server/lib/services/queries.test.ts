@@ -5,7 +5,6 @@
  */
 
 import { getServiceAgentName } from './get_service_agent_name';
-import { getServiceTransactionTypes } from './get_service_transaction_types';
 import { getServicesItems } from './get_services/get_services_items';
 import { getLegacyDataStatus } from './get_services/get_legacy_data_status';
 import { getAgentStatus } from './get_services/get_agent_status';
@@ -24,14 +23,6 @@ describe('services queries', () => {
   it('fetches the service agent name', async () => {
     mock = await inspectSearchParams(setup =>
       getServiceAgentName('foo', setup)
-    );
-
-    expect(mock.params).toMatchSnapshot();
-  });
-
-  it('fetches the service transaction types', async () => {
-    mock = await inspectSearchParams(setup =>
-      getServiceTransactionTypes('foo', setup)
     );
 
     expect(mock.params).toMatchSnapshot();
