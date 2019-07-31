@@ -78,3 +78,41 @@ export function getKibanaRegionList() {
 export function getKibanaTileMap() {
   return chrome.getInjected('tilemap');
 }
+
+
+let emsClient = null;
+let latestLicenseId = null;
+export function getEMSClient() {
+  if (!emsClient) {
+    const isEmsEnabled = chrome.getInjected('isEmsEnabled', true);
+    if (isEmsEnabled) {
+      emsClient = new EMSClient({
+        language: i18n.getLocale(),
+        kbnVersion: chrome.getInjected('kbnPkgVersion'),
+        manifestServiceUrl: chrome.getInjected('emsManifestServiceUrl'),
+        landingPageUrl: chrome.getInjected('emsLandingPageUrl'),
+        proxyElasticMapsServiceInMaps: false
+      });
+    } else {
+      emsClient = {
+        async getFileLayers() {
+          return [];
+        },
+        async getTMSServices() {
+          return [];
+        },
+        addQueryParams() {}
+      };
+    }
+  }
+
+  //add the license each time, so new
+  const xpackMapsFeature = xpackInfo.get('features.maps');
+  const licenseId = xpackMapsFeature && xpackMapsFeature.maps && xpackMapsFeature.uid ? xpackMapsFeature.uid :  '';
+  if (latestLicenseId !== licenseId) {
+    latestLicenseId = licenseId;
+    emsClient.addQueryParams({ license: licenseId });
+  }
+  return emsClient;
+
+}

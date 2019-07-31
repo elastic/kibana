@@ -21,8 +21,8 @@ import _ from 'lodash';
 import { ORIGIN } from './origin';
 
 export class TMSService {
-  _getTileJson = _.once(
-    async url => this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url)));
+
+  _getTileJson = _.once(async url => this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url)));
 
   constructor(config,  emsClient) {
     this._config = config;

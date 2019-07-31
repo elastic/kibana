@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import MarkdownIt from 'markdown-it';
 import _ from 'lodash';
 import { TMSService } from './tms_service';
 import { FileLayer } from './file_layer';
@@ -27,11 +26,6 @@ import { format as formatUrl, parse as parseUrl } from 'url';
 const extendUrl = (url, props) => (
   modifyUrlLocal(url, parsed => _.merge(parsed, props))
 );
-
-const markdownIt = new MarkdownIt({
-  html: false,
-  linkify: true
-});
 
 /**
  * plugins cannot have upstream dependencies on core/*-kibana.
@@ -190,10 +184,11 @@ export class EMSClient {
     }
   }
 
-  _invalidateSettings() {
+  async _getManifestWithParams(url) {
+    return await this.getManifest(this.extendUrlWithParams(url));
+  }
 
-    this._getManifestWithParams = _.once(
-      async url => this.getManifest(this.extendUrlWithParams(url)));
+  _invalidateSettings() {
 
     this._getCatalogueService = async serviceType => {
       const catalogueManifest = await this._getManifestWithParams(this._manifestServiceUrl);
@@ -232,10 +227,6 @@ export class EMSClient {
 
   getLandingPageUrl() {
     return this._emsLandingPageUrl;
-  }
-
-  sanitizeMarkdown(markdown) {
-    return this._sanitizer(markdownIt.render(markdown));
   }
 
   sanitizeHtml(html) {
