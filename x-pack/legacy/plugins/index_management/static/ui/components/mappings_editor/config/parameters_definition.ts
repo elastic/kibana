@@ -14,6 +14,7 @@ import {
   containsCharsField,
 } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/lib/field_validators';
 
+import { nameConflictError } from '../errors';
 import { ERROR_CODES } from '../constants';
 
 export type ParameterName =
@@ -54,24 +55,69 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
           }),
         },
         {
-          validator: ({ path, value, formData }) => {
+          validator: ({ path, value, form, formData }) => {
             const regEx = /(.+)(\d+\.name)$/;
             const regExResult = regEx.exec(path);
 
             if (regExResult) {
               const { 1: parentPath } = regExResult;
               // Get all the "name" properties on the parent path
-              const namePropertyPaths = Object.keys(formData).filter(
-                key => key !== path && key.startsWith(parentPath) && key.endsWith('name')
-              );
+              const namePropertyPaths = Object.keys(formData).filter(key => {
+                // Make sure we are filtering *only* the properties at the
+                // same nested object level
+                const isSameNestedLevel = Math.abs(key.length - path.length) <= 3;
+
+                return (
+                  key !== path &&
+                  isSameNestedLevel &&
+                  key.startsWith(parentPath) &&
+                  key.endsWith('name')
+                );
+              });
+
+              // Keep a referende of all the field name that have
+              // a conflict with the current field.
+              const conflictPaths: string[] = [];
 
               for (const namePath of namePropertyPaths) {
+                const nameField = form.getFields()[namePath];
+                const nameFieldConflictError = nameField.errors.filter(
+                  err => err.code === ERROR_CODES.NAME_CONFLICT
+                )[0];
+
+                let error;
                 if (formData[namePath] === value) {
-                  return {
-                    code: ERROR_CODES.NAME_CONFLICT,
-                    message: 'A field with the same name already exists.',
-                  };
+                  conflictPaths.push(namePath);
+                  if (!nameFieldConflictError) {
+                    error = nameConflictError([path]);
+                  } else {
+                    error = nameConflictError([...nameFieldConflictError.conflictPaths, path]);
+                  }
+                } else if (
+                  nameFieldConflictError &&
+                  (nameFieldConflictError.conflictPaths as string[]).some(
+                    conflictPath => conflictPath === path
+                  )
+                ) {
+                  if ((nameFieldConflictError.conflictPaths as string[]).length > 1) {
+                    const updatedConflictPaths = (nameFieldConflictError.conflictPaths as string[]).filter(
+                      p => p !== path
+                    );
+                    error = nameConflictError(updatedConflictPaths);
+                  } else {
+                    nameField.setErrors([]);
+                  }
                 }
+
+                if (error) {
+                  // Update the validation on the other field
+                  nameField.setErrors([error]);
+                }
+              }
+
+              if (conflictPaths.length) {
+                // Update the validation on the current field being validated
+                return nameConflictError(conflictPaths);
               }
             }
           },
