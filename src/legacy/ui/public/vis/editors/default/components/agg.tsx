@@ -28,9 +28,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggConfig } from '../../../';
-import { DefaultEditorAggParams } from './default_editor_agg_params';
-import { DefaultEditorAggCommonProps } from './default_editor_agg_common_props';
+import { AggConfig } from '../../..';
+import { DefaultEditorAggParams } from './agg_params';
+import { DefaultEditorAggCommonProps } from './agg_common_props';
 
 interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   agg: AggConfig;

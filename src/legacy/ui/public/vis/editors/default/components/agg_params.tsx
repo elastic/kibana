@@ -24,15 +24,15 @@ import { i18n } from '@kbn/i18n';
 import { aggTypes, AggType, AggParam } from 'ui/agg_types';
 import { AggConfig, VisState } from 'ui/vis';
 import { IndexPattern } from 'ui/index_patterns';
-import { DefaultEditorAggSelect } from './default_editor_agg_select';
-import { DefaultEditorAggParam } from './default_editor_agg_param';
+import { DefaultEditorAggSelect } from './agg_select';
+import { DefaultEditorAggParam } from './agg_param';
 import {
   getAggParamsToRender,
   getError,
   getAggTypeOptions,
   ParamInstance,
   isInvalidParamsTouched,
-} from './default_editor_agg_params_helper';
+} from './agg_params_helper';
 import {
   aggTypeReducer,
   AGG_TYPE_ACTION_KEYS,
@@ -40,14 +40,14 @@ import {
   AGG_PARAMS_ACTION_KEYS,
   initAggParamsState,
   AggParamsItem,
-} from './default_editor_agg_params_state';
+} from './agg_params_state';
 import { editorConfigProviders } from '../../config/editor_config_providers';
 import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/types';
 // TODO: Below import is temporary, use `react-use` lib instead.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { useUnmount } from '../../../../../../../plugins/kibana_react/public/util/use_unmount';
 import { AggGroupNames } from '../agg_groups';
-import { OnAggParamsChange } from './default_editor_agg_common_props';
+import { OnAggParamsChange } from './agg_common_props';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';

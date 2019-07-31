@@ -19,8 +19,8 @@
 
 import React, { useEffect } from 'react';
 
-import { AggParamEditorProps, AggParamCommonProps } from './default_editor_agg_param_props';
-import { OnAggParamsChange } from './default_editor_agg_common_props';
+import { AggParamEditorProps, AggParamCommonProps } from './agg_param_props';
+import { OnAggParamsChange } from './agg_common_props';
 
 interface DefaultEditorAggParamProps<T> extends AggParamCommonProps<T> {
   paramEditor: React.ComponentType<AggParamEditorProps<T>>;

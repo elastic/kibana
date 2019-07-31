@@ -19,7 +19,7 @@
 
 import { findIndex, reduce, isEmpty } from 'lodash';
 import { AggConfig } from '../../../agg_config';
-import { AggsState } from './default_editor_agg_group_state';
+import { AggsState } from './agg_group_state';
 
 const isAggRemovable = (agg: AggConfig, group: AggConfig[]) => {
   const metricCount = reduce(

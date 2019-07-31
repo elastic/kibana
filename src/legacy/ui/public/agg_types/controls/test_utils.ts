@@ -19,7 +19,7 @@
 
 import { AggConfig, VisState } from 'ui/vis';
 import { EditorConfig } from 'ui/vis/editors/config/types';
-import { SubAggParamsProp } from 'ui/vis/editors/default/components/default_editor_agg_params';
+import { SubAggParamsProp } from 'ui/vis/editors/default/components/agg_params';
 import { AggParam } from '..';
 
 export const aggParamCommonPropsMock = {

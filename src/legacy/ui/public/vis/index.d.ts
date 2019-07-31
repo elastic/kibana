@@ -19,7 +19,7 @@
 
 export { AggConfig } from './agg_config';
 export { AggParams } from './editors/default/agg_params';
-export { AggParamEditorProps } from './editors/default/components/default_editor_agg_param_props';
+export { AggParamEditorProps } from './editors/default/components/agg_param_props';
 export { Vis, VisProvider, VisParams, VisState } from './vis';
 export { VisualizationController, VisType } from './vis_types/vis_type';
 export * from './request_handlers';

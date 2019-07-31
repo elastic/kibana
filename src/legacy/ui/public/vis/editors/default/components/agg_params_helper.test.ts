@@ -25,7 +25,7 @@ import {
   getError,
   getAggTypeOptions,
   isInvalidParamsTouched,
-} from './default_editor_agg_params_helper';
+} from './agg_params_helper';
 import { EditorConfig } from '../../config/types';
 
 jest.mock('ui/agg_types', () => ({
@@ -36,7 +36,7 @@ jest.mock('ui/agg_types', () => ({
     },
   },
 }));
-jest.mock('../default_editor_utils', () => ({
+jest.mock('../utils', () => ({
   groupAggregationsBy: jest.fn(() => ['indexedFields']),
 }));
 

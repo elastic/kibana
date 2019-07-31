@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { AggConfig } from 'ui/vis';
 import { formatListAsProse, parseCommaSeparatedList } from '../../../../utils';
 import { AggParamEditorProps } from '../../vis/editors/default';
-import { ComboBoxGroupedOption } from '../../vis/editors/default/default_editor_utils';
+import { ComboBoxGroupedOption } from '../../vis/editors/default/utils';
 import { FieldParamType } from '../param_types';
 
 const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });

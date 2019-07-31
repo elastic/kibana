@@ -29,15 +29,11 @@ import {
 
 import { AggConfig } from '../../../agg_config';
 import { aggGroupNamesMap, AggGroupNames } from '../agg_groups';
-import { DefaultEditorAgg } from './default_editor_agg';
-import { DefaultEditorAggAdd } from './default_editor_agg_add';
-import { DefaultEditorAggCommonProps } from './default_editor_agg_common_props';
-import {
-  isInvalidAggsTouched,
-  isAggRemovable,
-  calcAggIsTooLow,
-} from './default_editor_agg_group_helper';
-import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './default_editor_agg_group_state';
+import { DefaultEditorAgg } from './agg';
+import { DefaultEditorAggAdd } from './agg_add';
+import { DefaultEditorAggCommonProps } from './agg_common_props';
+import { isInvalidAggsTouched, isAggRemovable, calcAggIsTooLow } from './agg_group_helper';
+import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
 import { Schema } from '../schemas';
 
 interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {

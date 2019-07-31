@@ -21,7 +21,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { IndexPattern } from 'ui/index_patterns';
 import { VisState } from 'ui/vis';
-import { DefaultEditorAggParams, DefaultEditorAggParamsProps } from './default_editor_agg_params';
+import { DefaultEditorAggParams, DefaultEditorAggParamsProps } from './agg_params';
 
 const mockEditorConfig = {
   useNormalizedEsInterval: { hidden: false, fixedValue: false },
@@ -46,7 +46,7 @@ jest.mock('../../config/editor_config_providers', () => ({
     getConfigForAgg: jest.fn(() => mockEditorConfig),
   },
 }));
-jest.mock('./default_editor_agg_params_helper', () => ({
+jest.mock('./agg_params_helper', () => ({
   getAggParamsToRender: jest.fn(() => ({
     basic: [
       {
@@ -71,10 +71,10 @@ jest.mock('./default_editor_agg_params_helper', () => ({
   getError: jest.fn((agg, aggIsTooLow) => (aggIsTooLow ? ['error'] : [])),
   isInvalidParamsTouched: jest.fn(() => false),
 }));
-jest.mock('./default_editor_agg_select', () => ({
+jest.mock('./agg_select', () => ({
   DefaultEditorAggSelect: () => null,
 }));
-jest.mock('./default_editor_agg_param', () => ({
+jest.mock('./agg_param', () => ({
   DefaultEditorAggParam: () => null,
 }));
 
