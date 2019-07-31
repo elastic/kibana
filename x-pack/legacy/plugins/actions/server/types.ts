@@ -55,6 +55,7 @@ export interface ActionType {
   id: string;
   name: string;
   unencryptedAttributes: string[];
+  maxAttempts?: number;
   validate?: {
     params?: { validate: (object: any) => any };
     config?: { validate: (object: any) => any };

@@ -4,18 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import sinon from 'sinon';
 import { schema } from '@kbn/config-schema';
 import { AlertExecutorOptions } from '../types';
+import { ConcreteTaskInstance } from '../../../task_manager';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
 
-const mockedNow = new Date('2019-06-03T18:55:25.982Z');
-const mockedLastRunAt = new Date('2019-06-03T18:55:20.982Z');
-(global as any).Date = class Date extends global.Date {
-  static now() {
-    return mockedNow.getTime();
-  }
-};
+let fakeTimer: sinon.SinonFakeTimers;
+let mockedTaskInstance: ConcreteTaskInstance;
+
+beforeAll(() => {
+  fakeTimer = sinon.useFakeTimers();
+  mockedTaskInstance = {
+    id: '',
+    attempts: 0,
+    status: 'running',
+    version: '123',
+    runAt: new Date(),
+    scheduledAt: new Date(),
+    startedAt: new Date(),
+    retryAt: new Date(Date.now() + 5 * 60 * 1000),
+    state: {
+      startedAt: new Date(Date.now() - 5 * 60 * 1000),
+    },
+    taskType: 'alerting:test',
+    params: {
+      alertId: '1',
+    },
+  };
+});
+
+afterAll(() => fakeTimer.restore());
 
 const savedObjectsClient = SavedObjectsClientMock.create();
 
@@ -36,17 +56,6 @@ const getCreateTaskRunnerFunctionParams = {
   internalSavedObjectsRepository: savedObjectsClient,
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
-};
-
-const mockedTaskInstance = {
-  runAt: mockedLastRunAt,
-  state: {
-    scheduledRunAt: mockedLastRunAt,
-  },
-  taskType: 'alerting:test',
-  params: {
-    alertId: '1',
-  },
 };
 
 const mockedAlertTypeSavedObject = {
@@ -87,23 +96,22 @@ test('successfully executes the task', async () => {
   const runnerResult = await runner.run();
   expect(runnerResult).toMatchInlineSnapshot(`
         Object {
-          "runAt": 2019-06-03T18:55:30.982Z,
+          "runAt": 1970-01-01T00:00:10.000Z,
           "state": Object {
             "alertInstances": Object {},
             "alertTypeState": undefined,
-            "previousScheduledRunAt": 2019-06-03T18:55:20.982Z,
-            "scheduledRunAt": 2019-06-03T18:55:30.982Z,
+            "previousStartedAt": 1970-01-01T00:00:00.000Z,
           },
         }
     `);
   expect(getCreateTaskRunnerFunctionParams.alertType.executor).toHaveBeenCalledTimes(1);
   const call = getCreateTaskRunnerFunctionParams.alertType.executor.mock.calls[0][0];
   expect(call.params).toMatchInlineSnapshot(`
-        Object {
-          "bar": true,
-        }
-    `);
-  expect(call.scheduledRunAt).toMatchInlineSnapshot(`2019-06-03T18:55:20.982Z`);
+            Object {
+              "bar": true,
+            }
+      `);
+  expect(call.startedAt).toMatchInlineSnapshot(`1970-01-01T00:00:00.000Z`);
   expect(call.state).toMatchInlineSnapshot(`Object {}`);
   expect(call.services.alertInstanceFactory).toBeTruthy();
   expect(call.services.callCluster).toBeTruthy();
@@ -159,7 +167,7 @@ test('persists alertInstances passed in from state, only if they fire', async ()
         Object {
           "1": Object {
             "meta": Object {
-              "lastFired": 1559588125982,
+              "lastFired": 0,
             },
             "state": Object {
               "bar": false,

@@ -245,5 +245,78 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
         source: 'action:test.index-record',
       });
     });
+
+    it('should handle custom retry logic', async () => {
+      // We'll use this start time to query tasks created after this point
+      const testStart = new Date();
+      // We have to provide the test.rate-limit the next runAt, for testing purposes
+      const retryDate = new Date(Date.now() + 60000);
+
+      const { body: createdAlert } = await supertest
+        .post('/api/alert')
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            interval: '1m',
+            alertTypeId: 'test.always-firing',
+            alertTypeParams: {
+              index: esTestIndexName,
+              reference: 'create-test-2',
+            },
+            actions: [
+              {
+                group: 'default',
+                id: 'ce37997f-0fb6-460a-8baf-f81ac5d38348',
+                params: {
+                  index: esTestIndexName,
+                  reference: 'create-test-1',
+                  retryAt: retryDate.getTime(),
+                },
+              },
+            ],
+          })
+        )
+        .expect(200);
+      createdAlertIds.push(createdAlert.id);
+
+      const scheduledActionTask = await retry.tryForTime(15000, async () => {
+        const searchResult = await es.search({
+          index: '.kibana_task_manager',
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'task.status': 'idle',
+                    },
+                  },
+                  {
+                    term: {
+                      'task.attempts': 1,
+                    },
+                  },
+                  {
+                    term: {
+                      'task.taskType': 'actions:test.rate-limit',
+                    },
+                  },
+                  {
+                    range: {
+                      'task.scheduledAt': {
+                        gte: testStart,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+        expect(searchResult.hits.total.value).to.eql(1);
+        return searchResult.hits.hits[0];
+      });
+      expect(scheduledActionTask._source.task.runAt).to.eql(retryDate.toISOString());
+    });
   });
 }

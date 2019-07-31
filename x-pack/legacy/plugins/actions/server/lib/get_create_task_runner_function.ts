@@ -5,6 +5,7 @@
  */
 
 import { execute } from './execute';
+import { ExecutorError } from './executor_error';
 import { ActionTypeRegistryContract, GetServicesFunction } from '../types';
 import { TaskInstance } from '../../../task_manager';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
@@ -33,7 +34,7 @@ export function getCreateTaskRunnerFunction({
       run: async () => {
         const { spaceId, id, actionTypeParams } = taskInstance.params;
         const namespace = spaceIdToNamespace(spaceId);
-        await execute({
+        const executorResult = await execute({
           namespace,
           actionTypeRegistry,
           encryptedSavedObjectsPlugin,
@@ -41,6 +42,15 @@ export function getCreateTaskRunnerFunction({
           services: getServices(taskInstance.params.basePath),
           params: actionTypeParams,
         });
+        if (executorResult.status === 'error') {
+          // Task manager error handler only kicks in when an error thrown (at this time)
+          // So what we have to do is throw when the return status is `error`.
+          throw new ExecutorError(
+            executorResult.message,
+            executorResult.data,
+            executorResult.retry
+          );
+        }
       },
     };
   };
