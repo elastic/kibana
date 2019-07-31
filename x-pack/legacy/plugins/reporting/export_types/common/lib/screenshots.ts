@@ -126,9 +126,10 @@ export function screenshotsObservableFactory(server: KbnServer) {
     const itemsCount = await browser.evaluate({
       fn: (selector, countAttribute) => {
         const elementWithCount = document.querySelector(`[${countAttribute}]`);
-        if (elementWithCount && elementWithCount != null) {
+        if (elementWithCount) {
           const count = elementWithCount.getAttribute(countAttribute);
-          if (count && count != null) {
+          // the conditional around parsing allows count === "0"
+          if (count !== null && count !== '') {
             return parseInt(count, 10);
           }
         }
