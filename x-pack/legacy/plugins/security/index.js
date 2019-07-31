@@ -145,10 +145,7 @@ export const security = (kibana) => new kibana.Plugin({
     // to re-compute the license check results for this plugin
     xpackInfoFeature.registerLicenseCheckResultsGenerator(checkLicense);
 
-    server.expose({
-      getUser: request => securityPlugin.authc.getCurrentUser(KibanaRequest.from(request)),
-      createApiKey: (request, body) => securityPlugin.authc.createApiKey(KibanaRequest.from(request), body),
-    });
+    server.expose({ getUser: request => securityPlugin.authc.getCurrentUser(KibanaRequest.from(request)) });
 
     const { savedObjects } = server;
 

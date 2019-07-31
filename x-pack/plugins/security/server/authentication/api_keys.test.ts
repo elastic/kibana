@@ -4,51 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createApiKey } from './api_key';
+import { createAPIKey } from './api_keys';
+import { loggingServiceMock } from '../../../../../src/core/server/mocks';
 
-const mockCallCluster = jest.fn();
+const mockCallAsCurrentUser = jest.fn();
 
 beforeAll(() => jest.resetAllMocks());
 
-describe('createApiKey()', () => {
+describe('createAPIKey()', () => {
   test('returns null when security feature is disabled', async () => {
-    const result = await createApiKey({
+    const result = await createAPIKey({
       body: {
         name: '',
         role_descriptors: {},
       },
-      callCluster: mockCallCluster,
+      loggers: loggingServiceMock.create(),
+      callAsCurrentUser: mockCallAsCurrentUser,
       isSecurityFeatureDisabled: () => true,
     });
     expect(result).toBeNull();
-    expect(mockCallCluster).not.toHaveBeenCalled();
+    expect(mockCallAsCurrentUser).not.toHaveBeenCalled();
   });
 
   test('calls callCluster with proper body arguments', async () => {
-    mockCallCluster.mockResolvedValueOnce({
+    mockCallAsCurrentUser.mockResolvedValueOnce({
       id: '123',
       name: 'key-name',
       expiration: '1d',
       api_key: 'abc123',
     });
-    const result = await createApiKey({
+    const result = await createAPIKey({
       body: {
         name: 'key-name',
         role_descriptors: { foo: true },
         expiration: '1d',
       },
-      callCluster: mockCallCluster,
+      loggers: loggingServiceMock.create(),
+      callAsCurrentUser: mockCallAsCurrentUser,
       isSecurityFeatureDisabled: () => false,
     });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "api_key": "abc123",
-        "expiration": "1d",
-        "id": "123",
-        "name": "key-name",
-      }
-    `);
-    expect(mockCallCluster).toHaveBeenCalledWith('shield.createApiKey', {
+    expect(result).toEqual({
+      api_key: 'abc123',
+      expiration: '1d',
+      id: '123',
+      name: 'key-name',
+    });
+    expect(mockCallAsCurrentUser).toHaveBeenCalledWith('shield.createAPIKey', {
       body: {
         name: 'key-name',
         role_descriptors: { foo: true },

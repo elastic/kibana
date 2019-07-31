@@ -499,9 +499,17 @@
     });
 
     /**
-     * Perform a [shield.createApiKey](Creates an API Key for the current user) request
+     * Creates an API key in Elasticsearch for the current user.
+     *
+     * @param {string} name A name for this API key
+     * @param {object} role_descriptors Role descriptors for this API key, if not
+     * provided then permissions of authenticated user are applied.
+     * @param {string} [expiration] Optional expiration for the API key being generated. If expiration
+     * is not provided then the API keys do not expire.
+     *
+     * @returns {{id: string, name: string, api_key: string, expiration?: number}}
     */
-    shield.createApiKey = ca({
+    shield.createAPIKey = ca({
       method: 'POST',
       needBody: true,
       url: {
