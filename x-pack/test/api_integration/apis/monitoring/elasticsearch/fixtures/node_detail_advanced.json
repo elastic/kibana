@@ -16,6 +16,7 @@
     "documents": 24830,
     "dataSize": 52847579,
     "freeSpace": 186755088384,
+    "totalSpace": 1000000000000,
     "usedHeap": 29,
     "status": "Online",
     "isOnline": true
