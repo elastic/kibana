@@ -29,6 +29,7 @@ const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
+// 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 class JobsListUI extends Component {
   constructor(props) {
     super(props);
@@ -100,7 +101,7 @@ class JobsListUI extends Component {
   }
 
   render() {
-    const { intl, loading } = this.props;
+    const { intl, loading, isManagementTable } = this.props;
     const selectionControls = {
       selectable: job => (job.deleting !== true),
       selectableMessage: (selectable, rowItem) => (
@@ -148,7 +149,8 @@ class JobsListUI extends Component {
               )}
             data-row-id={item.id}
           />
-        )
+        ),
+        width: '3%'
       }, {
         field: 'id',
         name: intl.formatMessage({
@@ -157,7 +159,7 @@ class JobsListUI extends Component {
         }),
         sortable: true,
         truncateText: false,
-
+        width: '20%'
       }, {
         field: 'auditMessage',
         name: '',
@@ -175,6 +177,7 @@ class JobsListUI extends Component {
           <JobDescription job={item} />
         ),
         textOnly: true,
+        width: '20%'
       }, {
         field: 'processed_record_count',
         name: intl.formatMessage({
@@ -184,7 +187,8 @@ class JobsListUI extends Component {
         sortable: true,
         truncateText: false,
         dataType: 'number',
-        render: count => toLocaleString(count)
+        render: count => toLocaleString(count),
+        width: '10%'
       }, {
         field: 'memory_status',
         name: intl.formatMessage({
@@ -193,6 +197,7 @@ class JobsListUI extends Component {
         }),
         sortable: true,
         truncateText: false,
+        width: '5%'
       }, {
         field: 'jobState',
         name: intl.formatMessage({
@@ -201,6 +206,7 @@ class JobsListUI extends Component {
         }),
         sortable: true,
         truncateText: false,
+        width: '8%'
       }, {
         field: 'datafeedState',
         name: intl.formatMessage({
@@ -209,6 +215,7 @@ class JobsListUI extends Component {
         }),
         sortable: true,
         truncateText: false,
+        width: '8%'
       }, {
         name: intl.formatMessage({
           id: 'xpack.ml.jobsList.latestTimestampLabel',
@@ -225,6 +232,7 @@ class JobsListUI extends Component {
           </span>
         ),
         textOnly: true,
+        width: '15%'
       }, {
         name: intl.formatMessage({
           id: 'xpack.ml.jobsList.actionsLabel',
@@ -233,7 +241,11 @@ class JobsListUI extends Component {
         render: (item) => (
           <ResultLinks jobs={[item]} />
         )
-      }, {
+      }
+    ];
+
+    if (isManagementTable === undefined) {
+      columns.push({
         name: '',
         actions: actionsMenuContent(
           this.props.showEditJobFlyout,
@@ -241,8 +253,8 @@ class JobsListUI extends Component {
           this.props.showStartDatafeedModal,
           this.props.refreshJobs,
         )
-      }
-    ];
+      });
+    }
 
     const {
       pageIndex,
@@ -292,7 +304,7 @@ class JobsListUI extends Component {
         columns={columns}
         pagination={pagination}
         onChange={this.onTableChange}
-        selection={selectionControls}
+        selection={isManagementTable ? undefined : selectionControls}
         itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
         isExpandable={true}
         sorting={sorting}
@@ -307,10 +319,10 @@ JobsListUI.propTypes = {
   itemIdToExpandedRowMap: PropTypes.object.isRequired,
   toggleRow: PropTypes.func.isRequired,
   selectJobChange: PropTypes.func.isRequired,
-  showEditJobFlyout: PropTypes.func.isRequired,
-  showDeleteJobModal: PropTypes.func.isRequired,
-  showStartDatafeedModal: PropTypes.func.isRequired,
-  refreshJobs: PropTypes.func.isRequired,
+  showEditJobFlyout: PropTypes.func,
+  showDeleteJobModal: PropTypes.func,
+  showStartDatafeedModal: PropTypes.func,
+  refreshJobs: PropTypes.func,
   selectedJobsCount: PropTypes.number.isRequired,
   loading: PropTypes.bool,
 };
