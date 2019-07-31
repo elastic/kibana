@@ -34,7 +34,7 @@ import {
   showAutoCreateIndexErrorPage,
 } from '../../../legacy/ui/public/error_auto_create_index/error_auto_create_index';
 import { SimpleSavedObject } from './simple_saved_object';
-import { HttpFetchQuery, HttpSetup } from '../http';
+import { HttpSetup, HttpFetchOptions } from '../http';
 
 type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
 
@@ -49,13 +49,6 @@ export {
 } from '../../server/types';
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
-
-interface RequestParams {
-  method: 'POST' | 'GET' | 'PUT' | 'DELETE';
-  path: string;
-  query?: HttpFetchQuery;
-  body?: object;
-}
 
 /** @public */
 export interface SavedObjectsCreateOptions {
@@ -211,15 +204,14 @@ export class SavedObjectsClient {
       overwrite: options.overwrite,
     };
 
-    const createRequest: Promise<SavedObject<T>> = this.request({
+    const createRequest: Promise<SavedObject<T>> = this.savedObjectsFetch(path, {
       method: 'POST',
-      path,
       query,
-      body: {
+      body: JSON.stringify({
         attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
-      },
+      }),
     });
 
     return createRequest
@@ -248,11 +240,10 @@ export class SavedObjectsClient {
     const path = this.getPath(['_bulk_create']);
     const query = { overwrite: options.overwrite };
 
-    const request: ReturnType<SavedObjectsApi['bulkCreate']> = this.request({
+    const request: ReturnType<SavedObjectsApi['bulkCreate']> = this.savedObjectsFetch(path, {
       method: 'POST',
-      path,
       query,
-      body: objects,
+      body: JSON.stringify(objects),
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
@@ -275,7 +266,7 @@ export class SavedObjectsClient {
       return Promise.reject(new Error('requires type and id'));
     }
 
-    return this.request({ method: 'DELETE', path: this.getPath([type, id]) });
+    return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE' });
   };
 
   /**
@@ -311,9 +302,8 @@ export class SavedObjectsClient {
       options
     );
 
-    const request: ReturnType<SavedObjectsApi['find']> = this.request({
+    const request: ReturnType<SavedObjectsApi['find']> = this.savedObjectsFetch(path, {
       method: 'GET',
-      path,
       query,
     });
     return request.then(resp => {
@@ -370,10 +360,9 @@ export class SavedObjectsClient {
     const path = this.getPath(['_bulk_get']);
     const filteredObjects = objects.map(obj => pick(obj, ['id', 'type']));
 
-    const request: ReturnType<SavedObjectsApi['bulkGet']> = this.request({
+    const request: ReturnType<SavedObjectsApi['bulkGet']> = this.savedObjectsFetch(path, {
       method: 'POST',
-      path,
-      body: filteredObjects,
+      body: JSON.stringify(filteredObjects),
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
@@ -413,10 +402,9 @@ export class SavedObjectsClient {
       version,
     };
 
-    return this.request({
+    return this.savedObjectsFetch(path, {
       method: 'PUT',
-      path,
-      body,
+      body: JSON.stringify(body),
     }).then((resp: SavedObject<T>) => {
       return this.createSavedObject(resp);
     });
@@ -432,16 +420,13 @@ export class SavedObjectsClient {
     return resolveUrl(API_BASE_URL, join(...path));
   }
 
-  private request({ method, path, query, body }: RequestParams) {
-    if (method === 'GET' && body) {
-      return Promise.reject(new Error('body not permitted for GET requests'));
-    }
-
-    return this.http.fetch(path, { method, query, body: JSON.stringify(body) }).catch(err => {
-      // To ensure we don't break backwards compatibility, we keep the old
-      // kfetch error format of `{res: {status: number}}` whereas `http.fetch`
-      // uses `{response: {status: number}}`
-
+  /**
+   * To ensure we don't break backwards compatibility, savedObjectsFetch keeps
+   * the old kfetch error format of `{res: {status: number}}` whereas `http.fetch`
+   * uses `{response: {status: number}}`
+   */
+  private savedObjectsFetch(path: string, { method, query, body }: HttpFetchOptions) {
+    return this.http.fetch(path, { method, query, body }).catch(err => {
       const kfetchError = Object.assign(err, { res: err.response });
       return Promise.reject(kfetchError);
     });
