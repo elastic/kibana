@@ -209,9 +209,7 @@ exports[`ObjectsTable import should show the flyout 1`] = `
   done={[Function]}
   indexPatterns={
     Object {
-      "cache": Object {
-        "clearAll": [MockFunction],
-      },
+      "clearCache": [MockFunction],
     }
   }
   newIndexPatternUrl=""
