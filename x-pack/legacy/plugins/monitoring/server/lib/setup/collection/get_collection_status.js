@@ -5,13 +5,12 @@
  */
 
 import { get, uniq } from 'lodash';
-import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
+import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN, ELASTICSEARCH_CUSTOM_ID, APM_CUSTOM_ID } from '../../../../common/constants';
 import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../../telemetry/common/constants';
 
 const NUMBER_OF_SECONDS_AGO_TO_LOOK = 30;
-const APM_CUSTOM_ID = 'apm';
 
-const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => {
+const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nodeUuid) => {
   const start = get(req.payload, 'timeRange.min', `now-${NUMBER_OF_SECONDS_AGO_TO_LOOK}s`);
   const end = get(req.payload, 'timeRange.max', 'now');
 
@@ -30,6 +29,20 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
     filters.push({ term: { 'cluster_uuid': clusterUuid } });
   }
 
+  const nodesClause = [];
+  if (nodeUuid) {
+    nodesClause.push({
+      bool: {
+        should: [
+          { term: { 'node_stats.node_id': nodeUuid } },
+          { term: { 'kibana_stats.kibana.uuid': nodeUuid } },
+          { term: { 'beats_stats.beat.uuid': nodeUuid } },
+          { term: { 'logstash_stats.logstash.uuid': nodeUuid } }
+        ]
+      }
+    });
+  }
+
   const params = {
     index: Object.values(indexPatterns),
     size: 0,
@@ -41,6 +54,7 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
       query: {
         bool: {
           filter: filters,
+          must: nodesClause,
         }
       },
       aggs: {
@@ -88,6 +102,11 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
                   terms: {
                     field: 'beats_stats.beat.type'
                   }
+                },
+                cluster_uuid: {
+                  terms: {
+                    field: 'cluster_uuid'
+                  }
                 }
               }
             },
@@ -99,6 +118,11 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
                 by_timestamp: {
                   max: {
                     field: 'timestamp'
+                  }
+                },
+                cluster_uuid: {
+                  terms: {
+                    field: 'cluster_uuid'
                   }
                 }
               }
@@ -245,8 +269,10 @@ function shouldSkipBucket(product, bucket) {
  * @param {*} req Standard request object. Can contain a timeRange to use for the query
  * @param {*} indexPatterns Map of index patterns to search against (will be all .monitoring-* indices)
  * @param {*} clusterUuid Optional and will be used to filter down the query if used
+ * @param {*} nodeUuid Optional and will be used to filter down the query if used
+ * @param {*} skipLiveData Optional and will not make any live api calls if set to true
  */
-export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
+export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeUuid, skipLiveData) => {
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
 
@@ -262,7 +288,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
     recentDocuments,
     detectedProducts
   ] = await Promise.all([
-    await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid),
+    await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid, nodeUuid),
     await detectProducts(req)
   ]);
 
@@ -306,6 +332,12 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
           map[key] = { lastTimestamp: get(byTimestamp, 'value') };
           if (product.name === KIBANA_SYSTEM_ID && key === kibanaUuid) {
             map[key].isPrimary = true;
+          }
+          if (product.name === BEATS_SYSTEM_ID) {
+            map[key].beatType = get(bucket.beat_type, 'buckets[0].key');
+          }
+          if (bucket.cluster_uuid) {
+            map[key].clusterUuid = get(bucket.cluster_uuid, 'buckets[0].key', '') || null;
           }
         }
       }
@@ -351,6 +383,12 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
               map[key] = {};
               if (product.name === KIBANA_SYSTEM_ID && key === kibanaUuid) {
                 map[key].isPrimary = true;
+              }
+              if (product.name === BEATS_SYSTEM_ID) {
+                map[key].beatType = get(bucket.beat_type, 'buckets[0].key');
+              }
+              if (bucket.cluster_uuid) {
+                map[key].clusterUuid = get(bucket.cluster_uuid, 'buckets[0].key', '') || null;
               }
             }
           }
@@ -401,6 +439,8 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
 
   status._meta = {
     secondsAgo: NUMBER_OF_SECONDS_AGO_TO_LOOK,
+    clusterUuid: liveClusterUuid,
+    isOnCloud: get(req.server.plugins, 'cloud.config.isCloudEnabled', false)
   };
 
   return status;

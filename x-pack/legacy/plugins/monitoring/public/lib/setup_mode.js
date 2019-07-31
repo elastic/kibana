@@ -5,6 +5,7 @@
  */
 
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
+import { get } from 'lodash';
 
 const angularState = {
   injector: null,
@@ -30,7 +31,17 @@ const setupModeState = {
 
 export const getSetupModeState = () => setupModeState;
 
-export const fetchCollectionData = async () => {
+export const setNewlyDiscoveredClusterUuid = clusterUuid => {
+  const globalState = angularState.injector.get('globalState');
+  const executor = angularState.injector.get('$executor');
+  angularState.scope.$apply(() => {
+    globalState.cluster_uuid = clusterUuid;
+    globalState.save();
+  });
+  executor.run();
+};
+
+export const fetchCollectionData = async (uuid, fetchWithoutClusterUuid = false) => {
   checkAngularState();
 
   const http = angularState.injector.get('$http');
@@ -39,8 +50,11 @@ export const fetchCollectionData = async () => {
   const ccs = globalState.ccs;
 
   let url = '../api/monitoring/v1/setup/collection';
-  if (clusterUuid) {
-    url += `/${clusterUuid}`;
+  if (uuid) {
+    url += `/node/${uuid}`;
+  }
+  else if (!fetchWithoutClusterUuid && clusterUuid) {
+    url += `/cluster/${clusterUuid}`;
   }
 
   try {
@@ -54,13 +68,17 @@ export const fetchCollectionData = async () => {
   }
 };
 
-const notifySetupModeDataChange = () => {
-  setupModeState.callbacks.forEach(cb => cb());
+const notifySetupModeDataChange = (oldData) => {
+  setupModeState.callbacks.forEach(cb => cb(oldData));
 };
 
-export const updateSetupModeData = async () => {
-  setupModeState.data = await fetchCollectionData();
-  notifySetupModeDataChange();
+export const updateSetupModeData = async (uuid, fetchWithoutClusterUuid = false) => {
+  const oldData = setupModeState.data;
+  setupModeState.data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
+  if (get(setupModeState.data, '_meta.isOnCloud', false)) {
+    return toggleSetupMode(false); // eslint-disable-line no-use-before-define
+  }
+  notifySetupModeDataChange(oldData);
 };
 
 export const toggleSetupMode = inSetupMode => {

@@ -157,6 +157,9 @@ export class KibanaInstances extends PureComponent {
               setupMode={setupMode}
               uuidField="kibana.uuid"
               nameField="name"
+              setupNewButtonLabel={i18n.translate('xpack.monitoring.kibana.metricbeatMigration.setupNewButtonLabel', {
+                defaultMessage: 'Setup monitoring for new Kibana instance'
+              })}
               search={{
                 box: {
                   incremental: true,

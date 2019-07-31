@@ -9,16 +9,30 @@ import { handleError } from '../../../../lib/errors';
 import { getCollectionStatus } from '../../../../lib/setup/collection';
 import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 
-export function clustersSetupStatusRoute(server) {
+export function nodeSetupStatusRoute(server) {
   /*
    * Monitoring Home
    * Route Init (for checking license and compatibility for multi-cluster monitoring
    */
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/setup/collection',
+    path: '/api/monitoring/v1/setup/collection/node/{nodeUuid}',
     config: {
       validate: {
+        params: Joi.object({
+          nodeUuid: Joi.string().required(),
+        }),
+        query: Joi.object({
+          // This flag is not intended to be used in production. It was introduced
+          // as a way to ensure consistent API testing - the typical data source
+          // for API tests are archived data, where the cluster configuration and data
+          // are consistent from environment to environment. However, this endpoint
+          // also attempts to retrieve data from the running stack products (ES and Kibana)
+          // which will vary from environment to environment making it difficult
+          // to write tests against. Therefore, this flag exists and should only be used
+          // in our testing environment.
+          skipLiveData: Joi.boolean().default(false)
+        }),
         payload: Joi.object({
           timeRange: Joi.object({
             min: Joi.date().required(),
@@ -36,7 +50,7 @@ export function clustersSetupStatusRoute(server) {
       try {
         await verifyMonitoringAuth(req);
         const indexPatterns = getIndexPatterns(server);
-        status = await getCollectionStatus(req, indexPatterns, null, null, req.query.skipLiveData);
+        status = await getCollectionStatus(req, indexPatterns, null, req.params.nodeUuid, req.query.skipLiveData);
       } catch (err) {
         throw handleError(err, req);
       }

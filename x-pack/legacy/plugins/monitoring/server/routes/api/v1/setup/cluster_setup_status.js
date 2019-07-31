@@ -16,11 +16,11 @@ export function clusterSetupStatusRoute(server) {
    */
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/setup/collection/{clusterUuid}',
+    path: '/api/monitoring/v1/setup/collection/cluster/{clusterUuid}',
     config: {
       validate: {
         params: Joi.object({
-          clusterUuid: Joi.string().required()
+          clusterUuid: Joi.string().required(),
         }),
         payload: Joi.object({
           timeRange: Joi.object({
@@ -39,7 +39,7 @@ export function clusterSetupStatusRoute(server) {
       try {
         await verifyMonitoringAuth(req);
         const indexPatterns = getIndexPatterns(server);
-        status = await getCollectionStatus(req, indexPatterns, req.params.clusterUuid);
+        status = await getCollectionStatus(req, indexPatterns, req.params.clusterUuid, null, req.query.skipLiveData);
       } catch (err) {
         throw handleError(err, req);
       }

@@ -1,7 +1,4 @@
 {
-  "_meta": {
-    "secondsAgo": 30
-  },
   "kibana": {
     "totalUniqueInstanceCount": 1,
     "totalUniqueFullyMigratedCount": 1,
@@ -22,6 +19,8 @@
     "detected": null,
     "byUuid": {
       "8eba4902-df80-43b0-b6c2-ed8ca290984e": {
+        "beatType": "metricbeat",
+        "clusterUuid": "jJ9oySUPR8G0wuV82vG5-g",
         "isInternalCollector": true,
         "lastTimestamp": 1554821536716
       }
@@ -41,6 +40,7 @@
     "detected": null,
     "byUuid": {
       "4134a00e-89e4-4896-a3d4-c3a9aa03a594": {
+        "clusterUuid": "jJ9oySUPR8G0wuV82vG5-g",
         "isInternalCollector": true,
         "lastTimestamp": 1554821539784
       }
@@ -57,5 +57,10 @@
         "lastInternallyCollectedTimestamp": 1554821531545
       }
     }
+  },
+  "_meta": {
+    "secondsAgo": 30,
+    "isOnCloud": false,
+    "clusterUuid": null
   }
 }

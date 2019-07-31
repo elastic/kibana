@@ -1,7 +1,4 @@
 {
-  "_meta": {
-    "secondsAgo": 30
-  },
   "kibana": {
     "totalUniqueInstanceCount": 1,
     "totalUniqueFullyMigratedCount": 1,
@@ -53,5 +50,10 @@
         "lastInternallyCollectedTimestamp": 1554841077638
       }
     }
+  },
+  "_meta": {
+    "secondsAgo": 30,
+    "isOnCloud": false,
+    "clusterUuid": null
   }
 }

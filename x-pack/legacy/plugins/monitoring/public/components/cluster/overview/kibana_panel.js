@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { formatNumber } from 'plugins/monitoring/lib/format_number';
-import { ClusterItemContainer, HealthStatusIndicator, BytesPercentageUsage } from './helpers';
-
+import { ClusterItemContainer, HealthStatusIndicator, BytesPercentageUsage, DisabledIfNoDataAndInSetupModeLink } from './helpers';
+import { get } from 'lodash';
 import {
   EuiFlexGrid,
   EuiFlexItem,
@@ -34,6 +34,34 @@ export function KibanaPanel(props) {
   const goToKibana = () => props.changeUrl('kibana');
   const goToInstances = () => props.changeUrl('kibana/instances');
 
+  const setupModeKibanaData = get(setupMode.data, 'kibana');
+  let setupModeInstancesData = null;
+  if (setupMode.enabled && setupMode.data) {
+    const migratedNodesCount = Object.values(setupModeKibanaData.byUuid).filter(node => node.isFullyMigrated).length;
+    const totalNodesCount = Object.values(setupModeKibanaData.byUuid).length;
+
+    const badgeColor = migratedNodesCount === totalNodesCount
+      ? 'secondary'
+      : 'danger';
+
+    setupModeInstancesData = (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.setupModeNodesTooltip', {
+            defaultMessage: `These numbers indicate how many detected monitored instances versus how many
+            detected total instances. If there are more detected instances than monitored instances, click
+            the instances link and you will be guided in how to setup monitoring for the missing node.`
+          })}
+        >
+          <EuiBadge color={badgeColor}>
+            {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
+          </EuiBadge>
+        </EuiToolTip>
+      </EuiFlexItem>
+    );
+  }
+
   return (
     <ClusterItemContainer
       {...props}
@@ -48,7 +76,9 @@ export function KibanaPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeKibanaData}
                   onClick={goToKibana}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'Kibana Overview'
@@ -59,7 +89,7 @@ export function KibanaPanel(props) {
                     id="xpack.monitoring.cluster.overview.kibanaPanel.overviewLinkLabel"
                     defaultMessage="Overview"
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
