@@ -44,13 +44,13 @@ export function initRoutes(server, licenseUid) {
       async getTMSServices() {
         return [];
       },
-      getMainManifest: async function () {
+      async getMainManifest() {
         return null;
       },
-      getDefaultFileManifest: async function () {
+      async getDefaultFileManifest() {
         return null;
       },
-      getDefaultTMSManifest: async function () {
+      async getDefaultTMSManifest() {
         return null;
       },
       addQueryParams() {}
