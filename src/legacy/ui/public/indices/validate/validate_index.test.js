@@ -25,14 +25,6 @@ import {
   indexNameContainsSpaces,
 } from './validate_index';
 
-jest.mock('ui/index_patterns/index_patterns.js', () => ({
-  IndexPatterns: jest.fn(),
-}));
-
-jest.mock('ui/index_patterns/index_patterns_api_client.js', () => ({
-  IndexPatternsApiClient: jest.fn(),
-}));
-
 describe('Index name validation', () => {
   it('should not allow name to begin with a period', () => {
     const beginsWithPeriod = indexNameBeginsWithPeriod('.system_index');

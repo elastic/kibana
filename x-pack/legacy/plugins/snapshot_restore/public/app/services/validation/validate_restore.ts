@@ -37,6 +37,14 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
     },
   };
 
+  if (typeof indices === 'string' && indices.trim().length === 0) {
+    validation.errors.indices.push(
+      i18n.translate('xpack.snapshotRestore.restoreValidation.indexPatternRequiredError', {
+        defaultMessage: 'At least one index pattern is required.',
+      })
+    );
+  }
+
   if (Array.isArray(indices) && indices.length === 0) {
     validation.errors.indices.push(
       i18n.translate('xpack.snapshotRestore.restoreValidation.indicesRequiredError', {
