@@ -9929,7 +9929,6 @@
     "xpack.snapshotRestore.repositoryDetails.removeManagedRepositoryButtonTitle": "您无法删除托管存储库。",
     "xpack.snapshotRestore.repositoryDetails.repositoryNotFoundErrorMessage": "存储库“{name}”不存在。",
     "xpack.snapshotRestore.repositoryDetails.repositoryTypeDocLink": "存储库文档",
-    "xpack.snapshotRestore.repositoryDetails.reverifyButtonLabel": "重新验证存储库",
     "xpack.snapshotRestore.repositoryDetails.settingsTitle": "设置",
     "xpack.snapshotRestore.repositoryDetails.snapshotsDescription": "找到 {count} 个 {count, plural, one {快照} other {快照}}",
     "xpack.snapshotRestore.repositoryDetails.snapshotsTitle": "快照",
