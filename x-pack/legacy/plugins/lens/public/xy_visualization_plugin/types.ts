@@ -192,15 +192,15 @@ export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar',
     icon: 'visBarVertical',
-    label: i18n.translate('xpack.lens.xyVisualization.verticalBarLabel', {
-      defaultMessage: 'Vertical Bar',
+    label: i18n.translate('xpack.lens.xyVisualization.barLabel', {
+      defaultMessage: 'Bar',
     }),
   },
   {
     id: 'bar_stacked',
     icon: 'visBarVertical',
-    label: i18n.translate('xpack.lens.xyVisualization.stackedVerticalBarLabel', {
-      defaultMessage: 'Stacked Vertical Bar',
+    label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
+      defaultMessage: 'Stacked Bar',
     }),
   },
   {

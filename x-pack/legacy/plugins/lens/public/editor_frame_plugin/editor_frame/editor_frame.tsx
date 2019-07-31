@@ -98,7 +98,7 @@ export function EditorFrame(props: EditorFrameProps) {
         type: 'UPDATE_LAYER',
         datasourceId: state.activeDatasourceId!,
         layerId: newLayerId,
-        reducer: props.datasourceMap[state.activeDatasourceId!].insertLayer,
+        updater: props.datasourceMap[state.activeDatasourceId!].insertLayer,
       });
 
       return newLayerId;
@@ -114,7 +114,7 @@ export function EditorFrame(props: EditorFrameProps) {
           type: 'UPDATE_LAYER',
           layerId,
           datasourceId: layerDatasourceId,
-          reducer: props.datasourceMap[layerDatasourceId].removeLayer,
+          updater: props.datasourceMap[layerDatasourceId].removeLayer,
         });
       });
     },

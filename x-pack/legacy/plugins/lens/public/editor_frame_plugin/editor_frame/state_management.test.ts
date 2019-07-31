@@ -174,7 +174,7 @@ describe('editor_frame state management', () => {
         {
           type: 'UPDATE_LAYER',
           layerId: 'abc',
-          reducer: layerReducer,
+          updater: layerReducer,
           datasourceId: 'testDatasource',
         }
       );

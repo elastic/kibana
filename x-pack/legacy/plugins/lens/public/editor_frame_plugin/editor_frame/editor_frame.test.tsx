@@ -849,7 +849,7 @@ describe('editor_frame', () => {
     function switchTo(subType: string) {
       act(() => {
         instance
-          .find('[data-test-subj="lnsConfigPanelHeaderPopover"]')
+          .find('[data-test-subj="lnsChartSwitchPopover"]')
           .last()
           .simulate('click');
       });
@@ -858,7 +858,7 @@ describe('editor_frame', () => {
 
       act(() => {
         instance
-          .find(`[data-test-subj="lnsConfigPanelHeaderPopover_${subType}"]`)
+          .find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`)
           .last()
           .simulate('click');
       });

@@ -8,11 +8,11 @@ import React from 'react';
 import { createMockVisualization, createMockFramePublicAPI } from '../mocks';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
-import { ConfigPanelHeader } from './config_panel_header';
+import { ChartSwitch } from './chart_switch';
 import { Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import { EuiKeyPadMenuItemButton } from '@elastic/eui';
 
-describe('config_panel_header', () => {
+describe('chart_switch', () => {
   function generateVisualization(id: string): jest.Mocked<Visualization> {
     return {
       ...createMockVisualization(),
@@ -85,7 +85,7 @@ describe('config_panel_header', () => {
 
   function showFlyout(component: ReactWrapper) {
     component
-      .find('[data-test-subj="lnsConfigPanelHeaderPopover"]')
+      .find('[data-test-subj="lnsChartSwitchPopover"]')
       .first()
       .simulate('click');
   }
@@ -93,7 +93,7 @@ describe('config_panel_header', () => {
   function switchTo(subType: string, component: ReactWrapper) {
     showFlyout(component);
     component
-      .find(`[data-test-subj="lnsConfigPanelHeaderPopover_${subType}"]`)
+      .find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`)
       .first()
       .simulate('click');
   }
@@ -102,7 +102,7 @@ describe('config_panel_header', () => {
     showFlyout(component);
     return component
       .find(EuiKeyPadMenuItemButton)
-      .find(`[data-test-subj="lnsConfigPanelHeaderPopover_${subType}"]`)
+      .find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`)
       .first();
   }
 
@@ -110,7 +110,7 @@ describe('config_panel_header', () => {
     const dispatch = jest.fn();
     const visualizations = mockVisualizations();
     const component = mount(
-      <ConfigPanelHeader
+      <ChartSwitch
         visualizationId="visA"
         visualizationState={{}}
         visualizationMap={visualizations}
@@ -136,7 +136,7 @@ describe('config_panel_header', () => {
     (frame.datasourceLayers.a.getTableSpec as jest.Mock).mockReturnValue([]);
 
     const component = mount(
-      <ConfigPanelHeader
+      <ChartSwitch
         visualizationId="visA"
         visualizationState={{}}
         visualizationMap={visualizations}
@@ -160,7 +160,7 @@ describe('config_panel_header', () => {
     const frame = mockFrame(['a', 'b']);
 
     const component = mount(
-      <ConfigPanelHeader
+      <ChartSwitch
         visualizationId="visA"
         visualizationState={{}}
         visualizationMap={visualizations}
@@ -179,7 +179,7 @@ describe('config_panel_header', () => {
     const frame = mockFrame(['a']);
 
     const component = mount(
-      <ConfigPanelHeader
+      <ChartSwitch
         visualizationId="visA"
         visualizationState={{}}
         visualizationMap={visualizations}
@@ -199,7 +199,7 @@ describe('config_panel_header', () => {
     (frame.datasourceLayers.a.getTableSpec as jest.Mock).mockReturnValue([]);
 
     const component = mount(
-      <ConfigPanelHeader
+      <ChartSwitch
         visualizationId="visA"
         visualizationState={{}}
         visualizationMap={visualizations}
@@ -224,7 +224,7 @@ describe('config_panel_header', () => {
     visualizations.visC.switchVisualizationType = switchVisualizationType;
 
     const component = mount(
-      <ConfigPanelHeader
+      <ChartSwitch
         visualizationId="visC"
         visualizationState={'therebegriffins'}
         visualizationMap={visualizations}
@@ -243,7 +243,7 @@ describe('config_panel_header', () => {
       removeLayers,
     };
     const component = mount(
-      <ConfigPanelHeader
+      <ChartSwitch
         visualizationId="visA"
         visualizationState={{}}
         visualizationMap={mockVisualizations()}
@@ -271,7 +271,7 @@ describe('config_panel_header', () => {
     visualizations.visC.switchVisualizationType = switchVisualizationType;
 
     const component = mount(
-      <ConfigPanelHeader
+      <ChartSwitch
         visualizationId="visC"
         visualizationState={'therebegriffins'}
         visualizationMap={visualizations}
@@ -299,7 +299,7 @@ describe('config_panel_header', () => {
     visualizations.visB.switchVisualizationType = switchVisualizationType;
 
     const component = mount(
-      <ConfigPanelHeader
+      <ChartSwitch
         visualizationId="visA"
         visualizationState={{}}
         visualizationMap={visualizations}
@@ -319,7 +319,7 @@ describe('config_panel_header', () => {
 
   it('should show all visualization types', () => {
     const component = mount(
-      <ConfigPanelHeader
+      <ChartSwitch
         visualizationId="visA"
         visualizationState={{}}
         visualizationMap={mockVisualizations()}
@@ -331,8 +331,7 @@ describe('config_panel_header', () => {
     showFlyout(component);
 
     const allDisplayed = ['subvisA', 'subvisB', 'subvisC1', 'subvisC2'].every(
-      subType =>
-        component.find(`[data-test-subj="lnsConfigPanelHeaderPopover_${subType}"]`).length > 0
+      subType => component.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).length > 0
     );
 
     expect(allDisplayed).toBeTruthy();

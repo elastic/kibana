@@ -67,7 +67,7 @@ function VisualizationSummary(props: Props) {
   );
 }
 
-export function ConfigPanelHeader(props: Props) {
+export function ChartSwitch(props: Props) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
 
   const commitSelection = (selection: VisualizationSelection) => {
@@ -186,14 +186,14 @@ export function ConfigPanelHeader(props: Props) {
   return (
     <>
       <EuiPopover
-        id="lnsConfigPanelHeaderPopover"
+        id="lnsChartSwitchPopover"
         ownFocus
         button={
           <EuiButton
             iconType="arrowDown"
             iconSide="right"
             onClick={() => setFlyoutOpen(!flyoutOpen)}
-            data-test-subj="lnsConfigPanelHeaderPopover"
+            data-test-subj="lnsChartSwitchPopover"
           >
             <VisualizationSummary {...props} />
           </EuiButton>
@@ -213,20 +213,19 @@ export function ConfigPanelHeader(props: Props) {
               key={`${v.visualizationId}:${v.id}`}
               label={<span data-test-subj="visTypeTitle">{v.label}</span>}
               role="menuitem"
-              data-test-subj={`lnsConfigPanelHeaderPopover_${v.id}`}
+              data-test-subj={`lnsChartSwitchPopover_${v.id}`}
               onClick={() => commitSelection(v.selection)}
               betaBadgeLabel={
                 v.selection.dataLoss !== 'nothing'
-                  ? i18n.translate('xpack.lens.configPanel.dataLossLabel', {
+                  ? i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
                       defaultMessage: 'Data loss',
                     })
                   : undefined
               }
               betaBadgeTooltipContent={
                 v.selection.dataLoss !== 'nothing'
-                  ? i18n.translate('xpack.lens.configPanel.dataLossDescription', {
-                      defaultMessage:
-                        'Switching to this chart will loose some of the configuration',
+                  ? i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
+                      defaultMessage: 'Switching to this chart will lose some of the configuration',
                     })
                   : undefined
               }

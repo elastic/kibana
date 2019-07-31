@@ -9,7 +9,7 @@ import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
 import { Visualization, FramePublicAPI } from '../../types';
 import { DragContext } from '../../drag_drop';
-import { ConfigPanelHeader } from './config_panel_header';
+import { ChartSwitch } from './chart_switch';
 
 interface ConfigPanelWrapperProps {
   visualizationState: unknown;
@@ -33,8 +33,8 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
 
   return (
     <>
-      <ConfigPanelHeader
-        data-test-subj="lnsConfigPanelHeader"
+      <ChartSwitch
+        data-test-subj="lnsChartSwitcher"
         visualizationMap={props.visualizationMap}
         visualizationId={props.activeVisualizationId}
         visualizationState={props.visualizationState}

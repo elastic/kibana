@@ -50,7 +50,7 @@ export type Action =
       type: 'UPDATE_LAYER';
       layerId: string;
       datasourceId: string;
-      reducer: (state: unknown, layerId: string) => unknown;
+      updater: (state: unknown, layerId: string) => unknown;
     }
   | {
       type: 'VISUALIZATION_LOADED';
@@ -110,7 +110,7 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
           ...state.datasourceStates,
           [action.datasourceId]: {
             ...state.datasourceStates[action.datasourceId],
-            state: action.reducer(
+            state: action.updater(
               state.datasourceStates[action.datasourceId].state,
               action.layerId
             ),
