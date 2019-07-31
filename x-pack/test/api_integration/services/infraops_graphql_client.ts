@@ -10,22 +10,33 @@ import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemo
 import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
 
+import { FtrProviderContext } from '../ftr_provider_context';
+
 import introspectionQueryResultData from '../../../legacy/plugins/infra/public/graphql/introspection.json';
 
-export function InfraOpsGraphQLClientProvider({ getService }) {
-  return new InfraOpsGraphQLClientFactoryProvider({ getService })();
+export function InfraOpsGraphQLClientProvider(context: FtrProviderContext) {
+  return InfraOpsGraphQLClientFactoryProvider(context)();
 }
 
-export function InfraOpsGraphQLClientFactoryProvider({ getService }) {
-  const config = getService('config');
-  const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
+interface InfraOpsGraphQLClientFactoryOptions {
+  username?: string;
+  password?: string;
+  basePath?: string;
+}
 
-  return function ({ username = superUsername, password = superPassword, basePath = null } = {}) {
+export function InfraOpsGraphQLClientFactoryProvider({ getService }: FtrProviderContext) {
+  const config = getService('config');
+  const superAuth: string = config.get('servers.elasticsearch.auth');
+  const [superUsername, superPassword] = superAuth.split(':');
+
+  return function(options?: InfraOpsGraphQLClientFactoryOptions) {
+    const { username = superUsername, password = superPassword, basePath = null } = options || {};
+
     const kbnURLWithoutAuth = formatUrl({ ...config.get('servers.kibana'), auth: false });
 
     const httpLink = new HttpLink({
       credentials: 'same-origin',
-      fetch,
+      fetch: fetch as any,
       headers: {
         'kbn-xsrf': 'xxx',
         authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
@@ -41,14 +52,14 @@ export function InfraOpsGraphQLClientFactoryProvider({ getService }) {
       }),
       defaultOptions: {
         query: {
-          fetchPolicy: 'no-cache'
+          fetchPolicy: 'no-cache',
         },
         watchQuery: {
-          fetchPolicy: 'no-cache'
+          fetchPolicy: 'no-cache',
         },
         mutate: {
-          fetchPolicy: 'no-cache'
-        },
+          fetchPolicy: 'no-cache',
+        } as any,
       },
       link: httpLink,
     });

@@ -5,12 +5,9 @@
  */
 
 import { getTestAlertData } from './utils';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function createDisableAlertTests({
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
+export default function createDisableAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

@@ -8,9 +8,9 @@ import expect from '@kbn/expect';
 
 import { metadataQuery } from '../../../../legacy/plugins/infra/public/containers/metadata/metadata.gql_query';
 import { MetadataQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-const metadataTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
@@ -67,7 +67,4 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default metadataTests;
+}
