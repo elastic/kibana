@@ -32,7 +32,7 @@ function TagCloudOptions({ stateParams, setValue, vis }: VisOptionsProps) {
     setValue('maxFontSize', maxFontSize);
   };
   const fontSizeRangeLabel = i18n.translate('tagCloud.visParams.fontSizeLabel', {
-    defaultMessage: 'Font size range (pixels)',
+    defaultMessage: 'Font size range in pixels',
   });
 
   return (
