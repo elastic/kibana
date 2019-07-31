@@ -67,7 +67,7 @@ function addFilterForLegacyData(
 
 // add additional params for search (aka: read) requests
 async function getParamsForSearchRequest(
-  req: APMRequest,
+  req: APMRequest<unknown>,
   params: SearchParams,
   apmOptions?: APMOptions
 ) {
@@ -86,7 +86,7 @@ interface APMOptions {
   includeLegacyData: boolean;
 }
 
-export function getESClient(req: APMRequest) {
+export function getESClient(req: APMRequest<unknown>) {
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
   const query = req.query as StringMap;
 

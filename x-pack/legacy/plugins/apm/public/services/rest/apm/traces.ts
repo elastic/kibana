@@ -7,7 +7,7 @@
 import { TraceAPIResponse } from '../../../../server/lib/traces/get_trace';
 import { callApi } from '../callApi';
 import { UIFilters } from '../../../../typings/ui-filters';
-import { TransactionGroupListAPIResponse } from '../../../../server/lib/transaction_groups';
+import { TransactionGroupListAPIResponse } from '../../../../server/routes/transaction_groups/transaction_group_list_route';
 
 export async function loadTrace({
   traceId,

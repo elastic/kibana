@@ -5,12 +5,12 @@
  */
 
 import { memoize } from 'lodash';
-import { callApi } from '../callApi';
+import { callApmApi } from '../callApi';
 import { indexPatternRoute } from '../../../../server/routes/index_patterns/index_pattern';
 
 export const getAPMIndexPattern = memoize(async () => {
   try {
-    return await callApi<typeof indexPatternRoute>({
+    return await callApmApi<typeof indexPatternRoute>({
       method: 'GET',
       pathname: `/api/apm/index_pattern`
     });

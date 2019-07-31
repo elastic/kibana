@@ -11,7 +11,6 @@ import moment from 'moment';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { ErrorGroupListAPIResponse } from '../../../../../server/lib/errors/get_error_group_list';
 import {
   fontFamilyCode,
   fontSizes,
@@ -22,6 +21,7 @@ import {
 import { APMLink } from '../../../shared/Links/apm/APMLink';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ManagedTable } from '../../../shared/ManagedTable';
+import { ErrorGroupListAPIResponse } from '../../../../../server/routes/errors/error_group_list_route';
 
 const GroupIdLink = styled(APMLink)`
   font-family: ${fontFamilyCode};

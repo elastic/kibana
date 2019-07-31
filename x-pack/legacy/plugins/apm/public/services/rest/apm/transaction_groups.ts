@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { callApi } from '../callApi';
+import { callApmApi } from '../callApi';
 import { UIFilters } from '../../../../typings/ui-filters';
 import { transactionChartsRoute } from '../../../../server/routes/transaction_groups/transaction_charts_route';
 import { transactionGroupListRoute } from '../../../../server/routes/transaction_groups/transaction_group_list_route';
@@ -24,7 +24,7 @@ export async function loadTransactionList({
   transactionType: string;
   uiFilters: UIFilters;
 }) {
-  return await callApi<typeof transactionGroupListRoute>({
+  return await callApmApi<typeof transactionGroupListRoute>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups`,
     query: {
       start,
@@ -54,7 +54,7 @@ export async function loadTransactionDistribution({
   traceId?: string;
   uiFilters: UIFilters;
 }) {
-  return callApi<typeof transactionDistributionRoute>({
+  return callApmApi<typeof transactionDistributionRoute>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/distribution`,
     query: {
       start,
@@ -83,7 +83,7 @@ export async function loadTransactionCharts({
   transactionName?: string;
   uiFilters: UIFilters;
 }) {
-  return callApi<typeof transactionChartsRoute>({
+  return callApmApi<typeof transactionChartsRoute>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/charts`,
     query: {
       start,
@@ -110,7 +110,7 @@ export async function loadTransactionBreakdown({
   transactionType: string;
   uiFilters: UIFilters;
 }) {
-  return callApi<typeof transactionBreakdownRoute>({
+  return callApmApi<typeof transactionBreakdownRoute>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/breakdown`,
     query: {
       start,

@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { callApi } from '../callApi';
 import { UIFilters } from '../../../../typings/ui-filters';
 import { errorGroupListRoute } from '../../../../server/routes/errors/error_group_list_route';
 import { errorGroupRoute } from '../../../../server/routes/errors/error_group_route';
 import { errorDistributionRoute } from '../../../../server/routes/errors/error_distribution_route';
+import { callApmApi } from '../callApi';
 
 export async function loadErrorGroupList({
   serviceName,
@@ -25,7 +25,7 @@ export async function loadErrorGroupList({
   sortField?: string;
   sortDirection?: string;
 }) {
-  return callApi<typeof errorGroupListRoute>({
+  return callApmApi<typeof errorGroupListRoute>({
     pathname: `/api/apm/services/${serviceName}/errors`,
     query: {
       start,
@@ -50,7 +50,7 @@ export async function loadErrorGroupDetails({
   errorGroupId: string;
   uiFilters: UIFilters;
 }) {
-  return callApi<typeof errorGroupRoute>({
+  return callApmApi<typeof errorGroupRoute>({
     pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}`,
     query: {
       start,
@@ -73,7 +73,7 @@ export async function loadErrorDistribution({
   uiFilters: UIFilters;
   errorGroupId?: string;
 }) {
-  return callApi<typeof errorDistributionRoute>({
+  return callApmApi<typeof errorDistributionRoute>({
     pathname: `/api/apm/services/${serviceName}/errors/distribution`,
     query: {
       start,
