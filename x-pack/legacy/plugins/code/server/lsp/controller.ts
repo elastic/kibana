@@ -76,7 +76,7 @@ export class LanguageServerController implements ILanguageServerHandler {
     this.languageServerMap = this.languageServers.reduce(
       (map, ls) => {
         ls.languages.forEach(lang => add2map(map, lang, ls));
-        add2map(map, ls.definition.name, ls);
+        map[ls.definition.name] = [ls];
         return map;
       },
       {} as { [lang: string]: LanguageServerData[] }

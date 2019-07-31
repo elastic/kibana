@@ -55,11 +55,11 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
   ) {
     if (blob.content) {
       const lang: string = blob.lang!;
-      const def = await lspService.languageSeverDef(endpoint, { lang });
-      if (def === null) {
+      const defs = await lspService.languageSeverDef(endpoint, { lang });
+      if (defs.length === 0) {
         report.fileStatus = RepoFileStatus.FILE_NOT_SUPPORTED;
       } else {
-        return def;
+        return defs;
       }
     } else {
       report.fileStatus = RepoFileStatus.FILE_IS_TOO_BIG;
@@ -79,7 +79,8 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
     report.langServerType = dedicated ? LangServerType.DEDICATED : LangServerType.GENERIC;
     if (
       dedicated &&
-      lspService.languageServerStatus(dedicated) === LanguageServerStatus.NOT_INSTALLED
+      (await lspService.languageServerStatus(endpoint, { langName: dedicated.name })) ===
+        LanguageServerStatus.NOT_INSTALLED
     ) {
       report.langServerStatus = RepoFileStatus.LANG_SERVER_NOT_INSTALLED;
       if (generic) {
@@ -88,7 +89,7 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
       }
     } else {
       const def = dedicated || generic;
-      const state = await lspService.initializeState(repoUri, revision);
+      const state = await lspService.initializeState(endpoint, { repoUri, revision });
       const initState = state[def!.name];
       report.langServerStatus =
         initState === WorkspaceStatus.Initialized
@@ -121,10 +122,10 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
               revision: decodeURIComponent(ref),
             });
             // text file
-            if (!blob.isBinary()) {
-              const defs = await handleFileStatus(report, blob.content(), path);
+            if (!blob.isBinary) {
+              const defs = await handleFileStatus(endpoint, report, blob);
               if (defs.length > 0) {
-                await handleLspStatus(report, defs, uri, ref);
+                await handleLspStatus(endpoint, report, defs, uri, ref);
               }
             }
           } catch (e) {
