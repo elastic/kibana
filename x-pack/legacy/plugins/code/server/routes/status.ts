@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import hapi from 'hapi';
+
 import Boom from 'boom';
 
+import { RequestFacade } from '../../';
 import { LspService } from '../lsp/lsp_service';
 import { GitOperations } from '../git_operations';
 import { CodeServerRouter } from '../security';
@@ -19,7 +20,7 @@ import { TEXT_FILE_LIMIT } from '../../common/file';
 import { detectLanguage } from '../utils/detect_language';
 
 export function statusRoute(
-  server: CodeServerRouter,
+  router: CodeServerRouter,
   gitOps: GitOperations,
   lspService: LspService
 ) {
@@ -72,20 +73,19 @@ export function statusRoute(
     } else {
       const state = await lspService.initializeState(repoUri, revision);
       const initState = state[def.name];
-      if (initState !== WorkspaceStatus.Initialized) {
-        report.langServerStatus = RepoFileStatus.LANG_SERVER_IS_INITIALIZING;
-      }
+      report.langServerStatus =
+        initState === WorkspaceStatus.Initialized
+          ? RepoFileStatus.LANG_SERVER_INITIALIZED
+          : RepoFileStatus.LANG_SERVER_IS_INITIALIZING;
     }
   }
 
-  server.route({
+  router.route({
     path: '/api/code/repo/{uri*3}/status/{ref}/{path*}',
     method: 'GET',
-    async handler(req: hapi.Request) {
+    async handler(req: RequestFacade) {
       const { uri, path, ref } = req.params;
-      const report: StatusReport = {
-        langServerType: LangServerType.NONE,
-      };
+      const report: StatusReport = {};
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
       try {
         // Check if the repository already exists
@@ -94,7 +94,6 @@ export function statusRoute(
         return Boom.notFound(`repo ${uri} not found`);
       }
       await handleRepoStatus(report, uri, ref, repoObjectClient);
-
       if (path) {
         try {
           try {

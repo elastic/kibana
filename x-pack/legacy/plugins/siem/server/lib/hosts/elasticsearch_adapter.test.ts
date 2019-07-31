@@ -88,7 +88,7 @@ describe('hosts elasticsearch_adapter', () => {
     };
 
     test('it formats a host with a source of name correctly', () => {
-      const fields: ReadonlyArray<string> = ['host.name'];
+      const fields: readonly string[] = ['host.name'];
       const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
@@ -99,7 +99,7 @@ describe('hosts elasticsearch_adapter', () => {
     });
 
     test('it formats a host with a source of os correctly', () => {
-      const fields: ReadonlyArray<string> = ['host.os.name'];
+      const fields: readonly string[] = ['host.os.name'];
       const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
@@ -110,7 +110,7 @@ describe('hosts elasticsearch_adapter', () => {
     });
 
     test('it formats a host with a source of version correctly', () => {
-      const fields: ReadonlyArray<string> = ['host.os.version'];
+      const fields: readonly string[] = ['host.os.version'];
       const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
@@ -121,7 +121,7 @@ describe('hosts elasticsearch_adapter', () => {
     });
 
     test('it formats a host with a source of id correctly', () => {
-      const fields: ReadonlyArray<string> = ['host.name'];
+      const fields: readonly string[] = ['host.name'];
       const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
@@ -132,7 +132,7 @@ describe('hosts elasticsearch_adapter', () => {
     });
 
     test('it formats a host with a source of name, lastBeat, os, and version correctly', () => {
-      const fields: ReadonlyArray<string> = ['host.name', 'host.os.name', 'host.os.version'];
+      const fields: readonly string[] = ['host.name', 'host.os.name', 'host.os.version'];
       const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
@@ -149,7 +149,7 @@ describe('hosts elasticsearch_adapter', () => {
     });
 
     test('it formats a host without any data if fields are empty', () => {
-      const fields: ReadonlyArray<string> = [];
+      const fields: readonly string[] = [];
       const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
         cursor: {

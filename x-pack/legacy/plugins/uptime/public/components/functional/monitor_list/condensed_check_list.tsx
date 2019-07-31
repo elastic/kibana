@@ -83,9 +83,9 @@ export const CondensedCheckList = ({
                 ) : null
             )}
           >
-            <EuiBadge color={getBadgeColor(status, successColor, dangerColor)}>{`${
-              childStatuses.length
-            } checks`}</EuiBadge>
+            <EuiBadge
+              color={getBadgeColor(status, successColor, dangerColor)}
+            >{`${childStatuses.length} checks`}</EuiBadge>
           </EuiToolTip>
         </EuiFlexItem>
       </React.Fragment>

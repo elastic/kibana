@@ -9,13 +9,14 @@ import gql from 'graphql-tag';
 export const eventsSchema = gql`
   scalar EsValue
 
-  type KpiItem {
-    value: String
-    count: Float!
+  type EventsData {
+    edges: [EcsEdges!]!
+    totalCount: Float!
+    pageInfo: PageInfoPaginated!
+    inspect: Inspect
   }
 
-  type EventsData {
-    kpiEventType: [KpiItem!]
+  type EventsTimelineData {
     edges: [EcsEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
@@ -47,11 +48,7 @@ export const eventsSchema = gql`
   }
 
   type DetailItem {
-    category: String!
-    description: String
-    example: String
     field: String!
-    type: String!
     values: ToStringArray
     originalValue: EsValue
   }
@@ -81,7 +78,7 @@ export const eventsSchema = gql`
   extend type Source {
     "Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
     Events(
-      pagination: PaginationInput!
+      pagination: PaginationInputPaginated!
       sortField: SortField!
       timerange: TimerangeInput
       filterQuery: String

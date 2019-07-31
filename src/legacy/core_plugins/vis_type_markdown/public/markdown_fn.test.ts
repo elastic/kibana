@@ -21,9 +21,7 @@
 import { functionWrapper } from '../../interpreter/test_helpers';
 import { kibanaMarkdown } from './markdown_fn';
 
-jest.mock('ui/new_platform', () =>
-  require('../../../ui/public/new_platform/index.test.mocks').mockNewPlatformBackdoor()
-);
+jest.mock('ui/new_platform');
 
 describe('interpreter/functions#markdown', () => {
   const fn = functionWrapper(kibanaMarkdown);

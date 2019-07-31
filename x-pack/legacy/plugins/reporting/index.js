@@ -8,13 +8,19 @@ import { resolve } from 'path';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { registerRoutes } from './server/routes';
-
-import { createQueueFactory } from './server/lib/create_queue';
+import {
+  LevelLogger,
+  checkLicenseFactory,
+  createQueueFactory,
+  exportTypesRegistryFactory,
+  runValidations,
+} from './server/lib';
 import { config as appConfig } from './server/config/config';
-import { checkLicenseFactory } from './server/lib/check_license';
-import { runValidations } from './server/lib/validate';
-import { exportTypesRegistryFactory } from './server/lib/export_types_registry';
-import { CHROMIUM, createBrowserDriverFactory, getDefaultChromiumSandboxDisabled } from './server/browsers';
+import {
+  CHROMIUM,
+  createBrowserDriverFactory,
+  getDefaultChromiumSandboxDisabled,
+} from './server/browsers';
 import { logConfiguration } from './log_configuration';
 
 import { getReportingUsageCollector } from './server/usage';
@@ -36,7 +42,7 @@ export const reporting = (kibana) => {
         'plugins/reporting/share_context_menu/register_csv_reporting',
         'plugins/reporting/share_context_menu/register_reporting',
       ],
-      contextMenuActions: [
+      embeddableActions: [
         'plugins/reporting/panel_actions/get_csv_panel_action',
       ],
       hacks: ['plugins/reporting/hacks/job_completion_notifier'],
@@ -163,15 +169,14 @@ export const reporting = (kibana) => {
       // Register a function with server to manage the collection of usage stats
       server.usage.collectorSet.register(getReportingUsageCollector(server, isReady));
 
-      const exportTypesRegistry = await exportTypesRegistryFactory(server);
-      const browserFactory = await createBrowserDriverFactory(server);
+      const logger = LevelLogger.createForServer(server, [PLUGIN_ID], true);
+      const [exportTypesRegistry, browserFactory] = await Promise.all([
+        exportTypesRegistryFactory(server),
+        createBrowserDriverFactory(server),
+      ]);
       server.expose('exportTypesRegistry', exportTypesRegistry);
 
       const config = server.config();
-      const logger = {
-        debug: message => server.log(['reporting', 'debug'], message),
-        warning: message => server.log(['reporting', 'warning'], message),
-      };
       logConfiguration(config, logger);
       runValidations(server, config, logger, browserFactory);
 
@@ -191,7 +196,7 @@ export const reporting = (kibana) => {
       server.expose('queue', createQueueFactory(server));
 
       // Reporting routes
-      registerRoutes(server);
+      registerRoutes(server, logger);
     },
 
     deprecations: function ({ unused }) {

@@ -24,7 +24,7 @@ export function MonitoringKibanaSummaryStatusProvider({ getService }) {
         requests: await testSubjects.getVisibleText(SUBJ_SUMMARY_REQUESTS),
         connections: await testSubjects.getVisibleText(SUBJ_SUMMARY_CONNECTIONS),
         maxResponseTime: await testSubjects.getVisibleText(SUBJ_SUMMARY_MAX_RESPONSE_TIME),
-        health: await testSubjects.getProperty(SUBJ_SUMMARY_HEALTH, 'alt'),
+        health: await testSubjects.getAttribute(SUBJ_SUMMARY_HEALTH, 'alt'),
       };
     }
 

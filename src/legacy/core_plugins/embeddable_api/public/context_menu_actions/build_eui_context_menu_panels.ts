@@ -104,12 +104,10 @@ function convertPanelActionToContextMenuItem({
     'data-test-subj': `embeddablePanelAction-${action.id}`,
   };
 
-  if (action.getHref(actionContext) === undefined) {
-    menuPanelItem.onClick = () => {
-      action.execute(actionContext);
-      closeMenu();
-    };
-  }
+  menuPanelItem.onClick = () => {
+    action.execute(actionContext);
+    closeMenu();
+  };
 
   if (action.getHref(actionContext)) {
     menuPanelItem.href = action.getHref(actionContext);

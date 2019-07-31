@@ -19,7 +19,7 @@
 import { get, has } from 'lodash';
 import React, { useEffect } from 'react';
 
-import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggType } from 'ui/agg_types';
@@ -72,17 +72,14 @@ function DefaultEditorAggSelect({
   }
 
   const helpLink = value && aggHelpLink && (
-    <EuiLink
-      href={aggHelpLink}
-      target="_blank"
-      rel="noopener"
-      className="visEditorAggSelect__helpLink"
-    >
-      <FormattedMessage
-        id="common.ui.vis.defaultEditor.aggSelect.helpLinkLabel"
-        defaultMessage="{aggTitle} help"
-        values={{ aggTitle: value ? value.title : '' }}
-      />
+    <EuiLink href={aggHelpLink} target="_blank" rel="noopener">
+      <EuiText size="xs">
+        <FormattedMessage
+          id="common.ui.vis.defaultEditor.aggSelect.helpLinkLabel"
+          defaultMessage="{aggTitle} help"
+          values={{ aggTitle: value ? value.title : '' }}
+        />
+      </EuiText>
     </EuiLink>
   );
 
@@ -102,21 +99,15 @@ function DefaultEditorAggSelect({
 
   const isValid = !!value && !errors.length;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
-  useEffect(
-    () => {
-      if (errors.length) {
-        setTouched();
-      }
-    },
-    [errors.length]
-  );
+  useEffect(() => {
+    if (errors.length) {
+      setTouched();
+    }
+  }, [errors.length]);
 
   const onChange = (options: EuiComboBoxOptionProps[]) => {
     const selectedOption = get(options, '0.value');
@@ -132,7 +123,7 @@ function DefaultEditorAggSelect({
       error={errors}
       isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
-      className="visEditorAggSelect__formRow"
+      compressed
     >
       <EuiComboBox
         placeholder={i18n.translate('common.ui.vis.defaultEditor.aggSelect.selectAggPlaceholder', {

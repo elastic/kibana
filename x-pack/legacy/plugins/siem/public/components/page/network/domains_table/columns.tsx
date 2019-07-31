@@ -34,6 +34,15 @@ import { AddToKql } from '../../add_to_kql';
 
 import * as i18n from './translations';
 
+export type DomainsColumns = [
+  Columns<DomainsItem['domainName']>,
+  Columns<DomainsNetworkField['direction']>,
+  Columns<DomainsNetworkField['bytes']>,
+  Columns<DomainsNetworkField['packets']>,
+  Columns<DomainsItem['uniqueIpCount']>,
+  Columns<DomainsEdges>
+];
+
 export const getDomainsColumns = (
   indexPattern: StaticIndexPattern,
   ip: string,
@@ -41,14 +50,7 @@ export const getDomainsColumns = (
   flowTarget: FlowTarget,
   type: networkModel.NetworkType,
   tableId: string
-): [
-  Columns<DomainsItem['domainName']>,
-  Columns<DomainsNetworkField['direction']>,
-  Columns<DomainsNetworkField['bytes']>,
-  Columns<DomainsNetworkField['packets']>,
-  Columns<DomainsItem['uniqueIpCount']>,
-  Columns<DomainsEdges>
-] => [
+): DomainsColumns => [
   {
     field: `node.${flowTarget}.domainName`,
     name: i18n.DOMAIN_NAME,

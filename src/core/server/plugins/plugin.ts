@@ -67,14 +67,14 @@ export interface PluginManifest {
    * An optional list of the other plugins that **must be** installed and enabled
    * for this plugin to function properly.
    */
-  readonly requiredPlugins: ReadonlyArray<PluginName>;
+  readonly requiredPlugins: readonly PluginName[];
 
   /**
    * An optional list of the other plugins that if installed and enabled **may be**
    * leveraged by this plugin for some additional functionality but otherwise are
    * not required for this plugin to work properly.
    */
-  readonly optionalPlugins: ReadonlyArray<PluginName>;
+  readonly optionalPlugins: readonly PluginName[];
 
   /**
    * Specifies whether plugin includes some client/browser specific functionality
@@ -108,14 +108,14 @@ export interface DiscoveredPlugin {
    * An optional list of the other plugins that **must be** installed and enabled
    * for this plugin to function properly.
    */
-  readonly requiredPlugins: ReadonlyArray<PluginName>;
+  readonly requiredPlugins: readonly PluginName[];
 
   /**
    * An optional list of the other plugins that if installed and enabled **may be**
    * leveraged by this plugin for some additional functionality but otherwise are
    * not required for this plugin to work properly.
    */
-  readonly optionalPlugins: ReadonlyArray<PluginName>;
+  readonly optionalPlugins: readonly PluginName[];
 }
 
 /**
@@ -138,8 +138,8 @@ export interface DiscoveredPluginInternal extends DiscoveredPlugin {
 export interface Plugin<
   TSetup = void,
   TStart = void,
-  TPluginsSetup extends {} = {},
-  TPluginsStart extends {} = {}
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
 > {
   setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
@@ -155,8 +155,8 @@ export interface Plugin<
 export type PluginInitializer<
   TSetup,
   TStart,
-  TPluginsSetup extends Record<PluginName, unknown> = {},
-  TPluginsStart extends Record<PluginName, unknown> = {}
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
 > = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
@@ -168,8 +168,8 @@ export type PluginInitializer<
 export class PluginWrapper<
   TSetup = unknown,
   TStart = unknown,
-  TPluginsSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>,
-  TPluginsStart extends Record<PluginName, unknown> = Record<PluginName, unknown>
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
 > {
   public readonly name: PluginManifest['id'];
   public readonly configPath: PluginManifest['configPath'];

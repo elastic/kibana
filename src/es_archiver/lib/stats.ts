@@ -64,7 +64,7 @@ export function createStats(name: string, log: ToolingLog) {
     return indices[index];
   };
 
-  return new class Stats {
+  return new (class Stats {
     /**
      * Record that an index was not restored because it already existed
      * @param index
@@ -149,5 +149,5 @@ export function createStats(name: string, log: ToolingLog) {
         fn(index, clone[index]);
       });
     }
-  }();
+  })();
 }

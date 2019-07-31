@@ -6,33 +6,31 @@
 
 import { useRef } from 'react';
 import { useFetcher } from './useFetcher';
-import { callApi } from '../services/rest/callApi';
-import { getUiFiltersES } from '../services/ui_filters/get_ui_filters_es';
-import { TransactionBreakdownAPIResponse } from '../../server/lib/transactions/breakdown';
 import { useUrlParams } from './useUrlParams';
+import { loadTransactionBreakdown } from '../services/rest/apm/transaction_groups';
 
 export function useTransactionBreakdown() {
   const {
-    urlParams: { serviceName, start, end, transactionName },
+    urlParams: { serviceName, start, end, transactionName, transactionType },
     uiFilters
   } = useUrlParams();
 
-  const { data, error, status } = useFetcher(
-    async () => {
-      if (serviceName && start && end) {
-        return callApi<TransactionBreakdownAPIResponse>({
-          pathname: `/api/apm/services/${serviceName}/transaction_groups/breakdown`,
-          query: {
-            start,
-            end,
-            transactionName,
-            uiFiltersES: await getUiFiltersES(uiFilters)
-          }
-        });
-      }
-    },
-    [serviceName, start, end, uiFilters]
-  );
+  const {
+    data = { kpis: [], timeseries: [] },
+    error,
+    status
+  } = useFetcher(() => {
+    if (serviceName && start && end && transactionType) {
+      return loadTransactionBreakdown({
+        start,
+        end,
+        serviceName,
+        transactionName,
+        transactionType,
+        uiFilters
+      });
+    }
+  }, [serviceName, start, end, transactionType, transactionName, uiFilters]);
 
   const receivedDataDuringLifetime = useRef(false);
 

@@ -22,16 +22,16 @@ import {
 } from '@elastic/eui';
 import React, { Fragment, useState, useEffect } from 'react';
 
+import { SnapshotDetails as ISnapshotDetails } from '../../../../../../common/types';
 import { SectionError, SectionLoading, SnapshotDeleteProvider } from '../../../../components';
 import { useAppDependencies } from '../../../../index';
 import {
-  BASE_PATH,
   UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
   UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
   SNAPSHOT_STATE,
 } from '../../../../constants';
 import { useLoadSnapshot } from '../../../../services/http';
-import { linkToRepository } from '../../../../services/navigation';
+import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
 import { uiMetricService } from '../../../../services/ui_metric';
 import { TabSummary, TabFailures } from './tabs';
 
@@ -66,19 +66,16 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
 
   // Reset tab when we look at a different snapshot.
-  useEffect(
-    () => {
-      setActiveTab(TAB_SUMMARY);
-    },
-    [repositoryName, snapshotId]
-  );
+  useEffect(() => {
+    setActiveTab(TAB_SUMMARY);
+  }, [repositoryName, snapshotId]);
 
   let tabs;
 
   let content;
 
   if (snapshotDetails) {
-    const { indexFailures, state: snapshotState } = snapshotDetails;
+    const { indexFailures, state: snapshotState } = snapshotDetails as ISnapshotDetails;
     const tabOptions = [
       {
         id: TAB_SUMMARY,
@@ -224,7 +221,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
 
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  href={`#${BASE_PATH}/restore/${repositoryName}/${snapshotId}`}
+                  href={linkToRestoreSnapshot(repositoryName, snapshotId)}
                   fill
                   color="primary"
                   isDisabled={

@@ -20,6 +20,7 @@ import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
+import { useTrackPageview } from '../../../infra/public';
 
 interface OverviewPageProps {
   basePath: string;
@@ -34,21 +35,17 @@ interface OverviewPageProps {
 
 type Props = OverviewPageProps;
 
-export type UptimeSearchBarQueryChangeHandler = (
-  queryChangedEvent: { query?: { text: string }; queryText?: string }
-) => void;
+export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
+  query?: { text: string };
+  queryText?: string;
+}) => void;
 
-export const OverviewPage = ({
-  basePath,
-  logOverviewPageLoad,
-  setBreadcrumbs,
-  history,
-  location,
-}: Props) => {
+export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
   const { absoluteStartDate, absoluteEndDate, colors, refreshApp, setHeadingText } = useContext(
     UptimeSettingsContext
   );
-  const [params, updateUrl] = useUrlParams(history, location);
+  const [getUrlParams, updateUrl] = useUrlParams();
+  const params = getUrlParams();
   const {
     dateRangeStart,
     dateRangeEnd,
@@ -73,6 +70,9 @@ export const OverviewPage = ({
       );
     }
   }, []);
+
+  useTrackPageview({ app: 'uptime', path: 'overview' });
+  useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
   const filterQueryString = search || '';
   let error: any;
@@ -110,7 +110,7 @@ export const OverviewPage = ({
 
   return (
     <Fragment>
-      <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={sharedProps}>
+      <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
         <FilterBar
           currentQuery={filterQueryString}
           error={error}

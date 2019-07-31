@@ -13,14 +13,12 @@ interface OwnProps {
   id: string;
   loading: boolean;
   refetch: inputsModel.Refetch;
-  setQuery: (
-    params: {
-      id: string;
-      inspect: inputsModel.InspectQuery | null;
-      loading: boolean;
-      refetch: inputsModel.Refetch;
-    }
-  ) => void;
+  setQuery: (params: {
+    id: string;
+    inspect: inputsModel.InspectQuery | null;
+    loading: boolean;
+    refetch: inputsModel.Refetch;
+  }) => void;
   inspect?: inputsModel.InspectQuery;
 }
 

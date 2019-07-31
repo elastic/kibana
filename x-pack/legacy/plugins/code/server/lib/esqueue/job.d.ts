@@ -88,14 +88,7 @@ export class Job<P> extends EventEmitter {
 
   public on(
     name: typeof events['EVENT_JOB_CREATED'],
-    handler: (
-      info: {
-        id: string;
-        type: string;
-        index: string;
-        version: number;
-      }
-    ) => void
+    handler: (info: { id: string; type: string; index: string; version: number }) => void
   ): this;
   public on(name: typeof events['EVENT_JOB_CREATE_ERROR'], handler: (error: Error) => void): this;
   public on(name: string, ...args: any[]): this;

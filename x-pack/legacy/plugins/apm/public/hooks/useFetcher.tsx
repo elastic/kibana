@@ -29,62 +29,67 @@ export function useFetcher<Response>(
   }>({});
   const [counter, setCounter] = useState(0);
 
-  useEffect(
-    () => {
-      let didCancel = false;
+  useEffect(() => {
+    let didCancel = false;
 
-      async function doFetch() {
-        const promise = fn();
-        if (!promise) {
-          return;
-        }
-
-        dispatchStatus({ id, isLoading: true });
-
-        setResult({
-          data: preservePreviousResponse ? result.data : undefined, // preserve data from previous state while loading next state
-          status: FETCH_STATUS.LOADING,
-          error: undefined
-        });
-
-        try {
-          const data = await promise;
-          if (!didCancel) {
-            dispatchStatus({ id, isLoading: false });
-            setResult({
-              data,
-              status: FETCH_STATUS.SUCCESS,
-              error: undefined
-            });
-          }
-        } catch (e) {
-          if (!didCancel) {
-            dispatchStatus({ id, isLoading: false });
-            setResult({
-              data: undefined,
-              status: FETCH_STATUS.FAILURE,
-              error: e
-            });
-          }
-        }
+    async function doFetch() {
+      const promise = fn();
+      if (!promise) {
+        return;
       }
 
-      doFetch();
+      dispatchStatus({ id, isLoading: true });
 
-      return () => {
-        dispatchStatus({ id, isLoading: false });
-        didCancel = true;
-      };
-    },
-    [...effectKey, counter]
-  );
+      setResult({
+        data: preservePreviousResponse ? result.data : undefined, // preserve data from previous state while loading next state
+        status: FETCH_STATUS.LOADING,
+        error: undefined
+      });
+
+      try {
+        const data = await promise;
+        if (!didCancel) {
+          dispatchStatus({ id, isLoading: false });
+          setResult({
+            data,
+            status: FETCH_STATUS.SUCCESS,
+            error: undefined
+          });
+        }
+      } catch (e) {
+        if (!didCancel) {
+          dispatchStatus({ id, isLoading: false });
+          setResult({
+            data: undefined,
+            status: FETCH_STATUS.FAILURE,
+            error: e
+          });
+        }
+      }
+    }
+
+    doFetch();
+
+    return () => {
+      dispatchStatus({ id, isLoading: false });
+      didCancel = true;
+    };
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [
+    counter,
+    id,
+    preservePreviousResponse,
+    dispatchStatus,
+    ...effectKey
+    /* eslint-enable react-hooks/exhaustive-deps */
+  ]);
 
   return useMemo(
     () => ({
       ...result,
       refresh: () => {
         // this will invalidate the effectKey and will result in a new request
-        setCounter(counter + 1);
+        setCounter(count => count + 1);
       }
     }),
     [result]

@@ -19,25 +19,22 @@
 
 import React, { useEffect } from 'react';
 
-import { AggParams } from '../agg_params';
 import { AggParamEditorProps, AggParamCommonProps } from './default_editor_agg_param_props';
+import { OnAggParamsChange } from './default_editor_agg_common_props';
 
 interface DefaultEditorAggParamProps<T> extends AggParamCommonProps<T> {
   paramEditor: React.ComponentType<AggParamEditorProps<T>>;
-  onChange(aggParams: AggParams, paramName: string, value?: T): void;
+  onChange: OnAggParamsChange;
 }
 
 function DefaultEditorAggParam<T>(props: DefaultEditorAggParamProps<T>) {
   const { agg, aggParam, paramEditor: ParamEditor, onChange, setValidity, ...rest } = props;
 
-  useEffect(
-    () => {
-      if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
-        setValidity(true);
-      }
-    },
-    [agg, agg.params.field]
-  );
+  useEffect(() => {
+    if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
+      setValidity(true);
+    }
+  }, [agg, agg.params.field]);
 
   if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
     return null;

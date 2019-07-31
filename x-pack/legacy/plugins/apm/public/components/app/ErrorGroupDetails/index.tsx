@@ -30,6 +30,7 @@ import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useTrackPageview } from '../../../../../infra/public';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
@@ -65,35 +66,32 @@ export function ErrorGroupDetails() {
   const { urlParams, uiFilters } = useUrlParams();
   const { serviceName, start, end, errorGroupId } = urlParams;
 
-  const { data: errorGroupData } = useFetcher(
-    () => {
-      if (serviceName && start && end && errorGroupId) {
-        return loadErrorGroupDetails({
-          serviceName,
-          start,
-          end,
-          errorGroupId,
-          uiFilters
-        });
-      }
-    },
-    [serviceName, start, end, errorGroupId, uiFilters]
-  );
+  const { data: errorGroupData } = useFetcher(() => {
+    if (serviceName && start && end && errorGroupId) {
+      return loadErrorGroupDetails({
+        serviceName,
+        start,
+        end,
+        errorGroupId,
+        uiFilters
+      });
+    }
+  }, [serviceName, start, end, errorGroupId, uiFilters]);
 
-  const { data: errorDistributionData } = useFetcher(
-    () => {
-      if (serviceName && start && end && errorGroupId) {
-        return loadErrorDistribution({
-          serviceName,
-          start,
-          end,
-          errorGroupId,
-          uiFilters
-        });
-      }
-    },
-    [serviceName, start, end, errorGroupId, uiFilters]
-  );
+  const { data: errorDistributionData } = useFetcher(() => {
+    if (serviceName && start && end && errorGroupId) {
+      return loadErrorDistribution({
+        serviceName,
+        start,
+        end,
+        errorGroupId,
+        uiFilters
+      });
+    }
+  }, [serviceName, start, end, errorGroupId, uiFilters]);
+
+  useTrackPageview({ app: 'apm', path: 'error_group_details' });
+  useTrackPageview({ app: 'apm', path: 'error_group_details', delay: 15000 });
 
   if (!errorGroupData || !errorDistributionData) {
     return null;

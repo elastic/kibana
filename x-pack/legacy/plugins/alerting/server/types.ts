@@ -29,8 +29,8 @@ export interface AlertServices extends Services {
 }
 
 export interface AlertExecutorOptions {
-  scheduledRunAt: Date;
-  previousScheduledRunAt?: Date;
+  startedAt: Date;
+  previousStartedAt?: Date;
   services: AlertServices;
   params: Record<string, any>;
   state: State;
@@ -40,7 +40,7 @@ export interface AlertType {
   id: string;
   name: string;
   validate?: {
-    params?: any;
+    params?: { validate: (object: any) => any };
   };
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
 }
@@ -60,16 +60,18 @@ export interface RawAlertAction extends SavedObjectAttributes {
 }
 
 export interface Alert {
+  enabled: boolean;
   alertTypeId: string;
-  interval: number;
+  interval: string;
   actions: AlertAction[];
   alertTypeParams: Record<string, any>;
   scheduledTaskId?: string;
 }
 
 export interface RawAlert extends SavedObjectAttributes {
+  enabled: boolean;
   alertTypeId: string;
-  interval: number;
+  interval: string;
   actions: RawAlertAction[];
   alertTypeParams: SavedObjectAttributes;
   scheduledTaskId?: string;

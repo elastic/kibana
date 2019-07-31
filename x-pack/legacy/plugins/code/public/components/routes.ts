@@ -8,9 +8,7 @@ import { PathTypes } from '../common/types';
 
 export const ROOT = '/';
 export const SETUP = '/setup-guide';
-const pathTypes = `:pathType(${PathTypes.blob}|${PathTypes.tree}|${PathTypes.blame}|${
-  PathTypes.commits
-})`;
+const pathTypes = `:pathType(${PathTypes.blob}|${PathTypes.tree}|${PathTypes.blame}|${PathTypes.commits})`;
 export const MAIN = `/:resource/:org/:repo/${pathTypes}/:revision/:path*:goto(!.*)?`;
 export const DIFF = '/:resource/:org/:repo/commit/:commitId';
 export const REPO = `/:resource/:org/:repo`;

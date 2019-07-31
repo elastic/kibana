@@ -8,3 +8,4 @@ export { execute } from './execute';
 export { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
 export { validateActionTypeConfig } from './validate_action_type_config';
 export { validateActionTypeParams } from './validate_action_type_params';
+export { ExecutorError } from './executor_error';

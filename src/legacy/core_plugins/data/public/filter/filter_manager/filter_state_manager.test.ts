@@ -20,10 +20,9 @@
 import sinon from 'sinon';
 
 import { FilterStateStore } from '@kbn/es-query';
-
-import { Subscription } from 'rxjs';
 import { FilterStateManager } from './filter_state_manager';
 
+import { IndexPatterns } from 'ui/index_patterns';
 import { StubState } from './test_helpers/stub_state';
 import { getFilter } from './test_helpers/get_stub_filter';
 import { FilterManager } from './filter_manager';
@@ -50,77 +49,132 @@ describe('filter_state_manager', () => {
   let appStateStub: StubState;
   let globalStateStub: StubState;
 
-  let subscription: Subscription | undefined;
   let filterManager: FilterManager;
 
   beforeEach(() => {
     appStateStub = new StubState();
     globalStateStub = new StubState();
     const indexPatterns = new StubIndexPatterns();
-    filterManager = new FilterManager(indexPatterns);
-
-    // FilterStateManager is tested indirectly.
-    // Therefore, we don't need it's instance.
-    new FilterStateManager(
-      globalStateStub,
-      () => {
-        return appStateStub;
-      },
-      filterManager
-    );
+    filterManager = new FilterManager(indexPatterns as IndexPatterns);
   });
 
-  afterEach(() => {
-    if (subscription) {
-      subscription.unsubscribe();
-    }
+  describe('app_state_undefined', () => {
+    beforeEach(() => {
+      // FilterStateManager is tested indirectly.
+      // Therefore, we don't need it's instance.
+      new FilterStateManager(
+        globalStateStub,
+        () => {
+          return undefined;
+        },
+        filterManager
+      );
+    });
+
+    test('should NOT watch state until both app and global state are defined', done => {
+      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
+      globalStateStub.filters.push(f1);
+
+      setTimeout(() => {
+        expect(filterManager.getGlobalFilters()).toHaveLength(0);
+        done();
+      }, 100);
+    });
+
+    test('should NOT update app URL when filter manager filters are set', async () => {
+      appStateStub.save = sinon.stub();
+      globalStateStub.save = sinon.stub();
+
+      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+      const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
+
+      await filterManager.setFilters([f1, f2]);
+
+      sinon.assert.notCalled(appStateStub.save);
+      sinon.assert.calledOnce(globalStateStub.save);
+    });
   });
 
-  test('should update filter manager global filters', done => {
-    const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-    globalStateStub.filters.push(f1);
+  describe('app_state_defined', () => {
+    beforeEach(() => {
+      // FilterStateManager is tested indirectly.
+      // Therefore, we don't need it's instance.
+      new FilterStateManager(
+        globalStateStub,
+        () => {
+          return appStateStub;
+        },
+        filterManager
+      );
+    });
 
-    setTimeout(() => {
-      expect(filterManager.getGlobalFilters()).toHaveLength(1);
-      done();
-    }, 100);
+    test('should update filter manager global filters', done => {
+      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
+      globalStateStub.filters.push(f1);
+
+      setTimeout(() => {
+        expect(filterManager.getGlobalFilters()).toHaveLength(1);
+        done();
+      }, 100);
+    });
+
+    test('should update filter manager app filters', done => {
+      expect(filterManager.getAppFilters()).toHaveLength(0);
+
+      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+      appStateStub.filters.push(f1);
+
+      setTimeout(() => {
+        expect(filterManager.getAppFilters()).toHaveLength(1);
+        done();
+      }, 100);
+    });
+
+    test('should update URL when filter manager filters are set', async () => {
+      appStateStub.save = sinon.stub();
+      globalStateStub.save = sinon.stub();
+
+      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+      const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
+
+      await filterManager.setFilters([f1, f2]);
+
+      sinon.assert.calledOnce(appStateStub.save);
+      sinon.assert.calledOnce(globalStateStub.save);
+    });
+
+    test('should update URL when filter manager filters are added', async () => {
+      appStateStub.save = sinon.stub();
+      globalStateStub.save = sinon.stub();
+
+      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+      const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
+
+      await filterManager.addFilters([f1, f2]);
+
+      sinon.assert.calledOnce(appStateStub.save);
+      sinon.assert.calledOnce(globalStateStub.save);
+    });
   });
 
-  test('should update filter manager app filters', done => {
-    expect(filterManager.getAppFilters()).toHaveLength(0);
+  describe('bug fixes', () => {
+    /*
+     ** This test is here to reproduce a bug where a filter manager update
+     ** would cause filter state manager detects those changes
+     ** And triggers *another* filter manager update.
+     */
+    test('should NOT re-trigger filter manager', async done => {
+      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+      filterManager.setFilters([f1]);
+      const setFiltersSpy = sinon.spy(filterManager, 'setFilters');
 
-    const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
-    appStateStub.filters.push(f1);
+      f1.meta.negate = true;
+      await filterManager.setFilters([f1]);
 
-    setTimeout(() => {
-      expect(filterManager.getAppFilters()).toHaveLength(1);
-      done();
-    }, 100);
-  });
-
-  test('should update URL when filter manager filters are set', async () => {
-    appStateStub.save = sinon.stub();
-    globalStateStub.save = sinon.stub();
-
-    const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
-    const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-
-    await filterManager.setFilters([f1, f2]);
-
-    sinon.assert.calledOnce(appStateStub.save);
-    sinon.assert.calledOnce(globalStateStub.save);
-  });
-
-  test('should update URL when filter manager filters are added', async () => {
-    appStateStub.save = sinon.stub();
-    globalStateStub.save = sinon.stub();
-
-    const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
-    const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-
-    await filterManager.addFilters([f1, f2]);
-
-    sinon.assert.calledOnce(appStateStub.save);
-    sinon.assert.calledOnce(globalStateStub.save);
+      setTimeout(() => {
+        expect(setFiltersSpy.callCount).toEqual(1);
+        done();
+      }, 100);
+    });
   });
 });

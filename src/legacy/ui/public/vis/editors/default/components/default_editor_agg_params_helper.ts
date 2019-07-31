@@ -32,7 +32,7 @@ import { AggParamEditorProps } from './default_editor_agg_param_props';
 interface ParamInstanceBase {
   agg: AggConfig;
   editorConfig: EditorConfig;
-  responseValueAggs: AggConfig[] | null;
+  metricAggs: AggConfig[];
   state: VisState;
 }
 
@@ -43,7 +43,7 @@ export interface ParamInstance extends ParamInstanceBase {
   value: unknown;
 }
 
-function getAggParamsToRender({ agg, editorConfig, responseValueAggs, state }: ParamInstanceBase) {
+function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamInstanceBase) {
   const params = {
     basic: [] as ParamInstance[],
     advanced: [] as ParamInstance[],
@@ -88,7 +88,7 @@ function getAggParamsToRender({ agg, editorConfig, responseValueAggs, state }: P
         editorConfig,
         indexedFields,
         paramEditor: param.editorComponent,
-        responseValueAggs,
+        metricAggs,
         state,
         value: agg.params[param.name],
       } as ParamInstance);
@@ -106,16 +106,6 @@ function getError(agg: AggConfig, aggIsTooLow: boolean) {
         defaultMessage: '"{schema}" aggs must run before all other buckets!',
         values: { schema: agg.schema.title },
       })
-    );
-  }
-  if (agg.schema.deprecate) {
-    errors.push(
-      agg.schema.deprecateMessage
-        ? agg.schema.deprecateMessage
-        : i18n.translate('common.ui.vis.editors.aggParams.errors.schemaIsDeprecatedErrorMessage', {
-            defaultMessage: '"{schema}" has been deprecated.',
-            values: { schema: agg.schema.title },
-          })
     );
   }
 

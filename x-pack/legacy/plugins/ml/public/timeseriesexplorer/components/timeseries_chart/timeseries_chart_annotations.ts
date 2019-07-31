@@ -257,6 +257,19 @@ export function renderAnnotations(
   annotations.exit().remove();
 }
 
+export function getAnnotationWidth(
+  annotation: Annotation,
+  focusXScale: TimeseriesChart['focusXScale']
+) {
+  const start = focusXScale(annotation.timestamp) + 1;
+  const end =
+    typeof annotation.end_timestamp !== 'undefined'
+      ? focusXScale(annotation.end_timestamp) - 1
+      : start + ANNOTATION_MIN_WIDTH;
+  const width = Math.max(ANNOTATION_MIN_WIDTH, end - start);
+  return width;
+}
+
 export function highlightFocusChartAnnotation(annotation: Annotation) {
   const annotations = d3.selectAll('.mlAnnotation');
 

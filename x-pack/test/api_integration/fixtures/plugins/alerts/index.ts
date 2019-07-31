@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { AlertExecutorOptions, AlertType } from '../../../../../legacy/plugins/alerting';
 import { ActionTypeExecutorOptions, ActionType } from '../../../../../legacy/plugins/actions';
 
@@ -20,19 +20,15 @@ export default function(kibana: any) {
         name: 'Test: Index Record',
         unencryptedAttributes: ['unencrypted'],
         validate: {
-          params: Joi.object()
-            .keys({
-              index: Joi.string().required(),
-              reference: Joi.string().required(),
-              message: Joi.string().required(),
-            })
-            .required(),
-          config: Joi.object()
-            .keys({
-              encrypted: Joi.string().required(),
-              unencrypted: Joi.string().required(),
-            })
-            .required(),
+          params: schema.object({
+            index: schema.string(),
+            reference: schema.string(),
+            message: schema.string(),
+          }),
+          config: schema.object({
+            encrypted: schema.string(),
+            unencrypted: schema.string(),
+          }),
         },
         async executor({ config, params, services }: ActionTypeExecutorOptions) {
           return await services.callCluster('index', {
@@ -52,12 +48,10 @@ export default function(kibana: any) {
         name: 'Test: Failing',
         unencryptedAttributes: [],
         validate: {
-          params: Joi.object()
-            .keys({
-              index: Joi.string().required(),
-              reference: Joi.string().required(),
-            })
-            .required(),
+          params: schema.object({
+            index: schema.string(),
+            reference: schema.string(),
+          }),
         },
         async executor({ config, params, services }: ActionTypeExecutorOptions) {
           await services.callCluster('index', {
@@ -73,8 +67,38 @@ export default function(kibana: any) {
           throw new Error('Failed to execute action type');
         },
       };
+      const rateLimitedActionType: ActionType = {
+        id: 'test.rate-limit',
+        name: 'Test: Rate Limit',
+        unencryptedAttributes: [],
+        maxAttempts: 2,
+        validate: {
+          params: schema.object({
+            index: schema.string(),
+            reference: schema.string(),
+            retryAt: schema.number(),
+          }),
+        },
+        async executor({ config, params, services }: ActionTypeExecutorOptions) {
+          await services.callCluster('index', {
+            index: params.index,
+            refresh: 'wait_for',
+            body: {
+              params,
+              config,
+              reference: params.reference,
+              source: 'action:test.rate-limit',
+            },
+          });
+          return {
+            status: 'error',
+            retry: new Date(params.retryAt),
+          };
+        },
+      };
       server.plugins.actions.registerType(indexRecordActionType);
       server.plugins.actions.registerType(failingActionType);
+      server.plugins.actions.registerType(rateLimitedActionType);
 
       // Alert types
       const alwaysFiringAlertType: AlertType = {
@@ -143,11 +167,9 @@ export default function(kibana: any) {
         id: 'test.validation',
         name: 'Test: Validation',
         validate: {
-          params: Joi.object()
-            .keys({
-              param1: Joi.string().required(),
-            })
-            .required(),
+          params: schema.object({
+            param1: schema.string(),
+          }),
         },
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };

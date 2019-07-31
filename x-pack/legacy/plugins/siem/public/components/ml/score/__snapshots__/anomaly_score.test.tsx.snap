@@ -88,6 +88,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
       }
       closePopover={[Function]}
       data-test-subj="anomaly-score-popover"
+      display="inlineBlock"
       hasArrow={true}
       id="anomaly-score-popover"
       isOpen={false}
@@ -138,7 +139,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 <EuiSpacer
                   size="m"
                 />
-                Anomaly Job
+                Job
               </React.Fragment>,
             },
             Object {
@@ -179,10 +180,10 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 <EuiFlexItem
                   grow={false}
                 >
-                  process.name: “du”
+                  process.name: "du"
                 </EuiFlexItem>
               </EuiFlexGroup>,
-              "title": "Top Anomaly Suspect",
+              "title": "Anomalous Entity",
             },
             Object {
               "description": <EuiFlexGroup
@@ -190,23 +191,21 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 gutterSize="none"
                 responsive={false}
               >
-                <React.Fragment>
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    host.name: “zeek-iowa”
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    process.name: “du”
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    user.name: “root”
-                  </EuiFlexItem>
-                </React.Fragment>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  host.name: "zeek-iowa"
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  process.name: "du"
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  user.name: "root"
+                </EuiFlexItem>
               </EuiFlexGroup>,
               "title": "Influenced By",
             },

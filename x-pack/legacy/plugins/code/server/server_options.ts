@@ -10,7 +10,6 @@ import { RepoConfig, RepoConfigs } from '../model';
 export interface LspOptions {
   requestTimeoutMs: number;
   detach: boolean;
-  verbose: boolean;
   oomScoreAdj: boolean;
 }
 
@@ -43,8 +42,6 @@ export class ServerOptions {
   public readonly indexRepoFrequencyMs: number = this.options.indexRepoFrequencyMs;
 
   public readonly maxWorkspace: number = this.options.maxWorkspace;
-
-  public readonly disableIndexScheduler: boolean = this.options.disableIndexScheduler;
 
   public readonly enableGlobalReference: boolean = this.options.enableGlobalReference;
 

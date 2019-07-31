@@ -6,7 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import React, { ChangeEvent } from 'react';
-import { SearchOptions, SearchScope } from '../../../model';
+import { SearchOptions, SearchScope, Repository } from '../../../model';
 import { ReferenceInfo } from '../../../model/commit';
 import { MainRouteParams } from '../../common/types';
 import { encodeRevisionString, decodeRevisionString } from '../../../common/uri_util';
@@ -22,6 +22,7 @@ interface Props {
   searchOptions: SearchOptions;
   branches: ReferenceInfo[];
   query: string;
+  currentRepository?: Repository;
 }
 
 export class TopBar extends React.Component<Props, { value: string }> {
@@ -32,12 +33,15 @@ export class TopBar extends React.Component<Props, { value: string }> {
     value: decodeRevisionString(this.props.routeParams.revision),
   };
 
-  get branch() {
+  public get branch() {
     return this.getBranch(this.state.value);
   }
 
   getBranch = (revision: string) => {
     const r = decodeRevisionString(revision);
+    if (r.toUpperCase() === 'HEAD' && this.props.currentRepository) {
+      return this.props.currentRepository.defaultBranch;
+    }
     const branch = this.props.branches.find(b => b.name === r);
     if (branch) {
       return branch.name;
@@ -46,7 +50,7 @@ export class TopBar extends React.Component<Props, { value: string }> {
     }
   };
 
-  get branchOptions() {
+  public get branchOptions() {
     return this.props.branches.map(b => ({
       value: b.name,
       text: b.name,
@@ -83,7 +87,7 @@ export class TopBar extends React.Component<Props, { value: string }> {
           justifyContent="spaceBetween"
           className="codeTopBar__toolbar"
         >
-          <EuiFlexItem>
+          <EuiFlexItem className="codeTopBar__left">
             <EuiFlexGroup gutterSize="l" alignItems="center">
               <EuiFlexItem className="codeContainer__select" grow={false}>
                 <EuiSelect
