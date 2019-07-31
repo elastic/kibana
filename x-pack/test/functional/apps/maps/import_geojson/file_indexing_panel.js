@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
     return indexName;
   }
 
-  describe('On index name & pattern operation complete', () => {
+  describe('On GeoJSON index name & pattern operation complete', () => {
     before(async () => {
       await PageObjects.maps.openNewMap();
     });
@@ -104,8 +104,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     const GEO_POINT = 'geo_point';
-    const pointFiles = ['point.json', 'multi_point.json'];
-    pointFiles.forEach(async pointFile => {
+    const pointGeojsonFiles = ['point.json', 'multi_point.json'];
+    pointGeojsonFiles.forEach(async pointFile => {
       it(`should index with type geo_point for file: ${pointFile}`,
         async () => {
           await loadFileAndIndex(pointFile);
@@ -118,11 +118,11 @@ export default function ({ getService, getPageObjects }) {
     });
 
     const GEO_SHAPE = 'geo_shape';
-    const shapeFiles = [
+    const nonPointGeojsonFiles = [
       'line_string.json', 'multi_line_string.json', 'multi_polygon.json',
       'polygon.json'
     ];
-    shapeFiles.forEach(async shapeFile => {
+    nonPointGeojsonFiles.forEach(async shapeFile => {
       it(`should index with type geo_shape for file: ${shapeFile}`,
         async () => {
           await loadFileAndIndex(shapeFile);

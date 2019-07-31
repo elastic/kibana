@@ -31,8 +31,7 @@ export function getGeoIndexTypesForFeatures(featureTypes) {
     return [];
   }
 
-  const isPoint = featureTypes.includes('Point')
-    || featureTypes.includes('MultiPoint');
+  const isPoint = featureTypes.includes('Point') || featureTypes.includes('MultiPoint');
   if (!isPoint) {
     return [ES_GEO_FIELD_TYPE.GEO_SHAPE];
   } else if (isPoint && featureTypes.length === 1) {

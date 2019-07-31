@@ -14,7 +14,7 @@ export default function ({ getPageObjects }) {
   const FILE_LOAD_DIR = 'test_upload_files';
   const DEFAULT_LOAD_FILE_NAME = 'point.json';
 
-  describe('Import layer panel', () => {
+  describe('GeoJSON import layer panel', () => {
     before(async () => {
       await PageObjects.maps.openNewMap();
     });
@@ -61,8 +61,7 @@ export default function ({ getPageObjects }) {
         );
         await PageObjects.maps.waitForLayersToLoad();
         // Check second file is loaded in file picker
-        const filePickerLoadedFile = await PageObjects.maps
-          .hasFilePickerLoadedFile(secondLoadFileName);
+        const filePickerLoadedFile = await PageObjects.maps.hasFilePickerLoadedFile(secondLoadFileName);
         expect(filePickerLoadedFile).to.be(true);
       });
 
