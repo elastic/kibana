@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ChildProcess } from 'child_process';
+import { spawn } from 'child_process';
+import fs from 'fs';
 import getPort from 'get-port';
-import { Logger, MarkupKind } from 'vscode-languageserver-protocol';
+import * as glob from 'glob';
+import path from 'path';
+import { MarkupKind } from 'vscode-languageserver-protocol';
+import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
 import { AbstractLauncher } from './abstract_launcher';
@@ -22,13 +26,6 @@ export class GoServerLauncher extends AbstractLauncher {
     readonly loggerFactory: LoggerFactory
   ) {
     super('go', targetHost, options, loggerFactory);
-  }
-
-  async getPort() {
-    if (!this.options.lsp.detach) {
-      return await getPort();
-    }
-    return GO_LANG_DETACH_PORT;
   }
 
   createExpander(
@@ -53,8 +50,81 @@ export class GoServerLauncher extends AbstractLauncher {
       this.log
     );
   }
-  // TODO(henrywong): Once go langugage server ready to release, we should support this mode.
-  async spawnProcess(installationPath: string, port: number, log: Logger): Promise<ChildProcess> {
-    throw new Error('Go language server currently only support detach mode');
+
+  async startConnect(proxy: LanguageServerProxy) {
+    await proxy.connect();
+  }
+
+  async getPort() {
+    if (!this.options.lsp.detach) {
+      return await getPort();
+    }
+    return GO_LANG_DETACH_PORT;
+  }
+
+  private async getBundledGoToolchain(installationPath: string, log: Logger) {
+    const GoToolchain = glob.sync('**/go/**', {
+      cwd: installationPath,
+    });
+    if (!GoToolchain.length) {
+      return undefined;
+    }
+    return path.resolve(installationPath, GoToolchain[0]);
+  }
+
+  async spawnProcess(installationPath: string, port: number, log: Logger) {
+    const launchersFound = glob.sync('go-langserver', {
+      cwd: installationPath,
+    });
+    if (!launchersFound.length) {
+      throw new Error('Cannot find executable go language server');
+    }
+
+    // Use the local installed go if it exists, or otherwise use the bundled go toolchain.
+    let goRoot = process.env.GOROOT;
+    let envPath = process.env.PATH;
+    let goPath = process.env.GOPATH;
+    if (!goRoot) {
+      const goToolchain = await this.getBundledGoToolchain(installationPath, log);
+      if (!goToolchain) {
+        throw new Error('Cannot find go toolchain in bundle installation');
+      }
+      // Construct $GOROOT from the bundled fo toolchain.
+      goRoot = goToolchain;
+      const goHome = path.resolve(goToolchain, 'bin');
+      envPath = envPath + ':' + goHome;
+    }
+    if (!goPath) {
+      // Construct $GOPATH under 'kibana/data/code'.
+      goPath = this.options.goPath;
+      if (!fs.existsSync(goPath)) {
+        fs.mkdirSync(goPath);
+      }
+    }
+
+    const params: string[] = ['-mode=stdio', '-port=' + port.toString()];
+    const golsp = path.resolve(installationPath, launchersFound[0]);
+    const p = spawn(golsp, params, {
+      detached: false,
+      stdio: 'pipe',
+      env: {
+        ...process.env,
+        CLIENT_HOST: '127.0.0.1',
+        CLIENT_PORT: port.toString(),
+        GOROOT: goRoot,
+        GOPATH: goPath,
+        PATH: envPath,
+      },
+    });
+    p.stdout.on('data', data => {
+      log.stdout(data.toString());
+    });
+    p.stderr.on('data', data => {
+      log.stderr(data.toString());
+    });
+    log.info(
+      `Launch Go Language Server at port ${port.toString()}, pid:${p.pid}, GOROOT:${goRoot}`
+    );
+    return p;
   }
 }
