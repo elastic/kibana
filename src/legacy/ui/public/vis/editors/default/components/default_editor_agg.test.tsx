@@ -22,6 +22,8 @@ import { mount, shallow } from 'enzyme';
 import { VisState } from 'ui/vis';
 import { AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg, DefaultEditorAggProps } from './default_editor_agg';
+import { act } from 'react-dom/test-utils';
+import { DefaultEditorAggParamsProps } from './default_editor_agg_params';
 
 jest.mock('./default_editor_agg_params', () => ({
   DefaultEditorAggParams: () => null,
@@ -33,19 +35,21 @@ describe('DefaultEditorAgg component', () => {
   let setTouched: jest.Mock;
   let onToggleEnableAgg: jest.Mock;
   let removeAgg: jest.Mock;
+  let setValidity: jest.Mock;
 
   beforeEach(() => {
     onAggParamsChange = jest.fn();
     setTouched = jest.fn();
     onToggleEnableAgg = jest.fn();
     removeAgg = jest.fn();
+    setValidity = jest.fn();
 
     defaultProps = {
       agg: {
         id: 1,
         brandNew: true,
         getIndexPattern: () => ({}),
-        schema: {},
+        schema: { title: 'Schema name' },
         title: 'Metrics',
         params: {},
       },
@@ -61,7 +65,7 @@ describe('DefaultEditorAgg component', () => {
       state: {} as VisState,
       onAggParamsChange,
       onAggTypeChange: () => {},
-      setValidity: () => {},
+      setValidity,
       setTouched,
       onToggleEnableAgg,
       removeAgg,
@@ -80,32 +84,67 @@ describe('DefaultEditorAgg component', () => {
     expect(comp.props()).toHaveProperty('initialIsOpen', true);
   });
 
-  it('should not show description when no type', () => {
+  it('should not show description when agg is invalid', () => {
+    defaultProps.agg.brandNew = false;
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
+
+    act(() => {
+      (comp.find('DefaultEditorAggParams').props() as DefaultEditorAggParamsProps).setValidity(
+        false
+      );
+    });
+    comp.update();
+    expect(setValidity).toBeCalledWith(false);
 
     expect(
       comp.find('.visEditorSidebar__aggGroupAccordionButtonContent span').exists()
     ).toBeFalsy();
   });
 
-  it('should show description when type selected', () => {
+  it('should show description when agg is valid', () => {
     defaultProps.agg.brandNew = false;
     defaultProps.agg.type = {
       makeLabel: () => 'Agg description',
     };
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
+    act(() => {
+      (comp.find('DefaultEditorAggParams').props() as DefaultEditorAggParamsProps).setValidity(
+        true
+      );
+    });
+    comp.update();
+    expect(setValidity).toBeCalledWith(true);
+
     expect(comp.find('.visEditorSidebar__aggGroupAccordionButtonContent span').text()).toBe(
       'Agg description'
     );
   });
 
-  it('should call setTouched when invalid agg closed', () => {
+  it('should call setTouched when accordion is collapsed', () => {
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
     expect(defaultProps.setTouched).toBeCalledTimes(0);
+
+    expect(comp.find('.euiAccordion-isOpen').exists()).toBeTruthy();
     comp.find('.euiAccordion__button').simulate('click');
 
     expect(defaultProps.setTouched).toBeCalledWith(true);
+  });
+
+  it('should call setValidity inside onSetValidity', () => {
+    const comp = mount(<DefaultEditorAgg {...defaultProps} />);
+
+    act(() => {
+      (comp.find('DefaultEditorAggParams').props() as DefaultEditorAggParamsProps).setValidity(
+        false
+      );
+    });
+
+    expect(setValidity).toBeCalledWith(false);
+
+    expect(
+      comp.find('.visEditorSidebar__aggGroupAccordionButtonContent span').exists()
+    ).toBeFalsy();
   });
 
   it('should add schema component', () => {

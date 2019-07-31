@@ -2,10 +2,11 @@
 
 exports[`DefaultEditorAgg component should init with the default set of props 1`] = `
 <EuiAccordion
-  aria-label="Toggle  editor"
+  aria-label="Toggle Schema name editor"
   buttonClassName="eui-textTruncate"
   buttonContent={
     <React.Fragment>
+      Schema name
        
     </React.Fragment>
   }
@@ -46,7 +47,9 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
         "getIndexPattern": [Function],
         "id": 1,
         "params": Object {},
-        "schema": Object {},
+        "schema": Object {
+          "title": "Schema name",
+        },
         "title": "Metrics",
       }
     }

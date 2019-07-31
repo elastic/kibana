@@ -116,24 +116,24 @@ describe('DefaultEditorGroup helpers', () => {
     });
 
     it('should return false when there are no invalid aggs', () => {
-      const isRemovable = isInvalidAggsTouched(aggsState);
+      const isAllInvalidAggsTouched = isInvalidAggsTouched(aggsState);
 
-      expect(isRemovable).toBeFalsy();
+      expect(isAllInvalidAggsTouched).toBeFalsy();
     });
 
     it('should return false when not all invalid aggs are touched', () => {
       aggsState[1].valid = false;
-      const isRemovable = isInvalidAggsTouched(aggsState);
+      const isAllInvalidAggsTouched = isInvalidAggsTouched(aggsState);
 
-      expect(isRemovable).toBeFalsy();
+      expect(isAllInvalidAggsTouched).toBeFalsy();
     });
 
     it('should return true when all invalid aggs are touched', () => {
       aggsState[1].valid = false;
       aggsState[1].touched = true;
-      const isRemovable = isInvalidAggsTouched(aggsState);
+      const isAllInvalidAggsTouched = isInvalidAggsTouched(aggsState);
 
-      expect(isRemovable).toBeTruthy();
+      expect(isAllInvalidAggsTouched).toBeTruthy();
     });
   });
 });
