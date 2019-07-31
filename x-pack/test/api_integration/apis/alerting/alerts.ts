@@ -69,7 +69,7 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
         .then((resp: any) => {
           createdAlertIds.push({ space: 'default', id: resp.body.id });
         });
-      const alertTestRecord = await retry.tryForTime(5000, async () => {
+      const alertTestRecord = await retry.tryForTime(15000, async () => {
         const searchResult = await es.search({
           index: esTestIndexName,
           body: {
@@ -103,7 +103,7 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
           reference: 'create-test-1',
         },
       });
-      const actionTestRecord = await retry.tryForTime(5000, async () => {
+      const actionTestRecord = await retry.tryForTime(15000, async () => {
         const searchResult = await es.search({
           index: esTestIndexName,
           body: {
@@ -172,7 +172,7 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
         .expect(200);
       createdAlertIds.push({ space: 'space_1', id: createdAlert.id });
 
-      const alertTestRecord = await retry.tryForTime(5000, async () => {
+      const alertTestRecord = await retry.tryForTime(15000, async () => {
         const searchResult = await es.search({
           index: esTestIndexName,
           body: {
@@ -206,7 +206,7 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
           reference: 'create-test-2',
         },
       });
-      const actionTestRecord = await retry.tryForTime(5000, async () => {
+      const actionTestRecord = await retry.tryForTime(15000, async () => {
         const searchResult = await es.search({
           index: esTestIndexName,
           body: {
@@ -277,7 +277,7 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
           })
         )
         .expect(200);
-      createdAlertIds.push(createdAlert.id);
+      createdAlertIds.push({ space: 'default', id: createdAlert.id });
 
       const scheduledActionTask = await retry.tryForTime(15000, async () => {
         const searchResult = await es.search({
