@@ -1,0 +1,176 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { Fragment } from 'react';
+import { ProcessedImportResponse } from 'ui/management/saved_objects_management';
+import { SavedObjectsImportRetry } from 'src/core/server';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiStat } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+interface Props {
+  copyInProgress: boolean;
+  conflictResolutionInProgress: boolean;
+  initialCopyFinished: boolean;
+  copyResult: Record<string, ProcessedImportResponse>;
+  retries: Record<string, SavedObjectsImportRetry[]>;
+  numberOfSelectedSpaces: number;
+  onCopyStart: () => void;
+  onCopyFinish: () => void;
+}
+export const CopyToSpaceFlyoutFooter = (props: Props) => {
+  const { copyInProgress, initialCopyFinished, copyResult, retries } = props;
+
+  let summarizedResults = {
+    successCount: 0,
+    overwriteConflictCount: 0,
+    conflictCount: 0,
+    unresolvableErrorCount: 0,
+  };
+  if (copyResult) {
+    summarizedResults = Object.entries(copyResult).reduce((acc, result) => {
+      const [spaceId, spaceResult] = result;
+      const overwriteCount = (retries[spaceId] || []).filter(c => c.overwrite).length;
+      return {
+        loading: false,
+        successCount: acc.successCount + spaceResult.importCount,
+        overwriteConflictCount: acc.overwriteConflictCount + overwriteCount,
+        conflictCount:
+          acc.conflictCount +
+          spaceResult.failedImports.filter(i => i.error.type === 'conflict').length -
+          overwriteCount,
+        unresolvableErrorCount:
+          acc.unresolvableErrorCount +
+          spaceResult.failedImports.filter(i => i.error.type !== 'conflict').length,
+      };
+    }, summarizedResults);
+  }
+
+  const getButton = () => {
+    let actionButton;
+    if (initialCopyFinished) {
+      actionButton = (
+        <EuiButton
+          fill
+          isLoading={props.conflictResolutionInProgress}
+          onClick={() => props.onCopyFinish()}
+          data-test-subj="finishCopyToSpacesButton"
+        >
+          <FormattedMessage
+            id="xpack.spaces.management.copyToSpace.finishCopyToSpacesButton"
+            defaultMessage="Finish"
+          />
+        </EuiButton>
+      );
+    } else {
+      actionButton = (
+        <EuiButton
+          fill
+          isLoading={copyInProgress}
+          onClick={() => props.onCopyStart()}
+          data-test-subj="initiateCopyToSpacesButton"
+          disabled={props.numberOfSelectedSpaces === 0 || copyInProgress}
+        >
+          {props.numberOfSelectedSpaces > 0 ? (
+            <FormattedMessage
+              id="xpack.spaces.management.copyToSpace.copyToSpacesButton"
+              defaultMessage="Copy to {spaceCount} {spaceCount, plural, one {space} other {spaces}}"
+              values={{ spaceCount: props.numberOfSelectedSpaces }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.spaces.management.copyToSpace.disabledCopyToSpacesButton"
+              defaultMessage="Copy"
+            />
+          )}
+        </EuiButton>
+      );
+    }
+
+    return (
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>{actionButton}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
+  if (!copyInProgress) {
+    return getButton();
+  }
+
+  return (
+    <Fragment>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiStat
+            title={summarizedResults.successCount}
+            titleSize="s"
+            titleColor={initialCopyFinished ? 'secondary' : 'subdued'}
+            isLoading={!initialCopyFinished}
+            description={
+              <FormattedMessage
+                id="xpack.spaces.management.copyToSpaceFlyoutFooter.successCount"
+                defaultMessage="copied"
+              />
+            }
+          >
+            <EuiIcon type="empty" />
+          </EuiStat>
+        </EuiFlexItem>
+        {summarizedResults.overwriteConflictCount > 0 && (
+          <EuiFlexItem>
+            <EuiStat
+              title={summarizedResults.overwriteConflictCount}
+              titleSize="s"
+              titleColor={summarizedResults.overwriteConflictCount > 0 ? 'primary' : 'subdued'}
+              isLoading={!initialCopyFinished}
+              description={
+                <FormattedMessage
+                  id="xpack.spaces.management.copyToSpaceFlyoutFooter.conflictCount"
+                  defaultMessage="pending"
+                />
+              }
+            >
+              <EuiIcon type="empty" />
+            </EuiStat>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem>
+          <EuiStat
+            title={summarizedResults.conflictCount}
+            titleSize="s"
+            titleColor={summarizedResults.conflictCount > 0 ? 'primary' : 'subdued'}
+            isLoading={!initialCopyFinished}
+            description={
+              <FormattedMessage
+                id="xpack.spaces.management.copyToSpaceFlyoutFooter.conflictCount"
+                defaultMessage="skipped"
+              />
+            }
+          >
+            <EuiIcon type="empty" />
+          </EuiStat>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiStat
+            title={summarizedResults.unresolvableErrorCount}
+            titleSize="s"
+            titleColor={summarizedResults.unresolvableErrorCount > 0 ? 'danger' : 'subdued'}
+            isLoading={!initialCopyFinished}
+            description={
+              <FormattedMessage
+                id="xpack.spaces.management.copyToSpaceFlyoutFooter.errorCount"
+                defaultMessage="errors"
+              />
+            }
+          >
+            <EuiIcon type="empty" />
+          </EuiStat>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {getButton()}
+    </Fragment>
+  );
+};

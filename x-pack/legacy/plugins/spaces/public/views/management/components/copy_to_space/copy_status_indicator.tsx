@@ -5,54 +5,94 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiText, EuiIconTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   SummarizedCopyToSpaceResponse,
   SummarizedSavedObjectResult,
 } from '../../../../lib/copy_to_space';
 
 interface Props {
-  summarizedCopyResult: SummarizedCopyToSpaceResponse | undefined;
-  object?: { type: string; id: string };
-  overwritePending?: boolean;
+  summarizedCopyResult: SummarizedCopyToSpaceResponse;
+  object: { type: string; id: string };
+  overwritePending: boolean;
+  conflictResolutionInProgress: boolean;
 }
 
 export const CopyStatusIndicator = (props: Props) => {
-  const { summarizedCopyResult } = props;
-  if (!summarizedCopyResult) {
+  const { summarizedCopyResult, conflictResolutionInProgress } = props;
+  if (summarizedCopyResult.processing || conflictResolutionInProgress) {
     return <EuiLoadingSpinner />;
   }
 
-  let successful = false;
-  let successColor = 'success';
-  let hasConflicts = false;
-  let hasUnresolvableErrors = false;
+  const objectResult = summarizedCopyResult.objects.find(
+    o => o.type === props.object!.type && o.id === props.object!.id
+  ) as SummarizedSavedObjectResult;
 
-  if (props.object) {
-    const objectResult = summarizedCopyResult.objects.find(
-      o => o.type === props.object!.type && o.id === props.object!.id
-    ) as SummarizedSavedObjectResult;
-
-    successful =
-      !objectResult.hasUnresolvableErrors &&
-      (objectResult.conflicts.length === 0 || props.overwritePending === true);
-    successColor = props.overwritePending ? 'warning' : 'success';
-    hasConflicts = objectResult.conflicts.length > 0;
-    hasUnresolvableErrors = objectResult.hasUnresolvableErrors;
-  } else {
-    successful = summarizedCopyResult.successful;
-    hasConflicts = summarizedCopyResult.hasConflicts;
-    hasUnresolvableErrors = summarizedCopyResult.hasUnresolvableErrors;
-  }
+  const successful =
+    !objectResult.hasUnresolvableErrors &&
+    (objectResult.conflicts.length === 0 || props.overwritePending === true);
+  const successColor = props.overwritePending ? 'warning' : 'success';
+  const hasConflicts = objectResult.conflicts.length > 0;
+  const hasUnresolvableErrors = objectResult.hasUnresolvableErrors;
 
   if (successful) {
-    return <EuiIcon type={'check'} color={successColor} />;
+    const message = props.overwritePending ? (
+      <FormattedMessage
+        id="xpack.spaces.management.copyToSpace.copyStatus.pendingOverwriteMessage"
+        defaultMessage="Saved object will be overwritten. Click 'Skip' to cancel this operation."
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.spaces.management.copyToSpace.copyStatus.successMessage"
+        defaultMessage="Saved object copied successfully."
+      />
+    );
+    return <EuiIconTip type={'check'} color={successColor} content={message} />;
   }
   if (hasUnresolvableErrors) {
-    return <EuiIcon type={'cross'} color={'danger'} />;
+    return (
+      <EuiIconTip
+        type={'cross'}
+        color={'danger'}
+        content={
+          <FormattedMessage
+            id="xpack.spaces.management.copyToSpace.copyStatus.errorMessage"
+            defaultMessage="There was an error copying this saved object."
+          />
+        }
+      />
+    );
   }
   if (hasConflicts) {
-    return <EuiIcon type={'alert'} color={'warning'} />;
+    return (
+      <EuiIconTip
+        type={'alert'}
+        color={'warning'}
+        content={
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.spaces.management.copyToSpace.copyStatus.conflictsMessage"
+                defaultMessage="A saved object with a matching id ({id}) already exists in this space."
+                values={{
+                  id: objectResult.conflicts[0].obj.id,
+                }}
+              />
+            </p>
+            <p>
+              <FormattedMessage
+                id="xpack.spaces.management.copyToSpace.copyStatus.conflictsOverwriteMessage"
+                defaultMessage="Click 'Overwrite' to replace this version with the copied one."
+                values={{
+                  id: objectResult.conflicts[0].obj.id,
+                }}
+              />
+            </p>
+          </EuiText>
+        }
+      />
+    );
   }
   return null;
 };

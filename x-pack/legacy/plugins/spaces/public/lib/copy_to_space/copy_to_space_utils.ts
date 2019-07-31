@@ -19,38 +19,57 @@ interface SuccessfulResponse {
   hasConflicts: false;
   hasUnresolvableErrors: false;
   objects: SummarizedSavedObjectResult[];
+  processing: false;
 }
 interface UnsuccessfulResponse {
   successful: false;
   hasConflicts: boolean;
   hasUnresolvableErrors: boolean;
   objects: SummarizedSavedObjectResult[];
+  processing: false;
 }
 
-export type SummarizedCopyToSpaceResponse = SuccessfulResponse | UnsuccessfulResponse;
+interface ProcessingResponse {
+  objects: SummarizedSavedObjectResult[];
+  processing: true;
+}
 
-export function summarizeCopyResult(savedObject: SavedObjectRecord, copyResult: undefined): null;
+export type SummarizedCopyToSpaceResponse =
+  | SuccessfulResponse
+  | UnsuccessfulResponse
+  | ProcessingResponse;
+
 export function summarizeCopyResult(
   savedObject: SavedObjectRecord,
-  copyResult: ProcessedImportResponse
+  copyResult: undefined,
+  includeRelated: boolean
+): null;
+export function summarizeCopyResult(
+  savedObject: SavedObjectRecord,
+  copyResult: ProcessedImportResponse | undefined,
+  includeRelated: boolean
 ): SummarizedCopyToSpaceResponse;
 
 export function summarizeCopyResult(
   savedObject: SavedObjectRecord,
-  copyResult: ProcessedImportResponse | undefined
+  copyResult: ProcessedImportResponse | undefined,
+  includeRelated: boolean
 ): SummarizedCopyToSpaceResponse | null {
-  if (typeof copyResult === 'undefined') {
-    return null;
-  }
+  const successful = Boolean(copyResult && copyResult.failedImports.length === 0);
 
-  const successful = copyResult && copyResult.failedImports.length === 0;
-  const conflicts = copyResult.failedImports.filter(failed => failed.error.type === 'conflict');
-  const unresolvableErrors = copyResult.failedImports.filter(
-    failed => failed.error.type !== 'conflict'
-  );
+  const conflicts = copyResult
+    ? copyResult.failedImports.filter(failed => failed.error.type === 'conflict')
+    : [];
+
+  const unresolvableErrors = copyResult
+    ? copyResult.failedImports.filter(failed => failed.error.type !== 'conflict')
+    : [];
+
   const hasConflicts = conflicts.length > 0;
-  const hasUnresolvableErrors =
-    copyResult && copyResult.failedImports.some(failed => failed.error.type !== 'conflict');
+
+  const hasUnresolvableErrors = Boolean(
+    copyResult && copyResult.failedImports.some(failed => failed.error.type !== 'conflict')
+  );
 
   const objects: SummarizedSavedObjectResult[] = [
     {
@@ -66,17 +85,26 @@ export function summarizeCopyResult(
     },
   ];
 
-  savedObject.references.forEach(ref => {
-    objects.push({
-      type: ref.type,
-      id: ref.id,
-      name: ref.name,
-      conflicts: conflicts.filter(c => c.obj.type === ref.type && c.obj.id === ref.id),
-      hasUnresolvableErrors: unresolvableErrors.some(
-        e => e.obj.type === ref.type && e.obj.id === ref.id
-      ),
+  if (includeRelated) {
+    savedObject.references.forEach(ref => {
+      objects.push({
+        type: ref.type,
+        id: ref.id,
+        name: ref.name,
+        conflicts: conflicts.filter(c => c.obj.type === ref.type && c.obj.id === ref.id),
+        hasUnresolvableErrors: unresolvableErrors.some(
+          e => e.obj.type === ref.type && e.obj.id === ref.id
+        ),
+      });
     });
-  });
+  }
+
+  if (typeof copyResult === 'undefined') {
+    return {
+      processing: true,
+      objects,
+    };
+  }
 
   if (successful) {
     return {
@@ -84,6 +112,7 @@ export function summarizeCopyResult(
       hasConflicts: false,
       objects,
       hasUnresolvableErrors: false,
+      processing: false,
     };
   }
 
@@ -92,5 +121,6 @@ export function summarizeCopyResult(
     hasConflicts,
     objects,
     hasUnresolvableErrors,
+    processing: false,
   };
 }

@@ -5,43 +5,24 @@
  */
 
 import React from 'react';
-import { ProcessedImportResponse, SavedObjectRecord } from 'ui/management/saved_objects_management';
-import {
-  summarizeCopyResult,
-  SummarizedCopyToSpaceResponse,
-} from 'plugins/spaces/lib/copy_to_space';
-import {
-  EuiCallOut,
-  EuiButtonGroup,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { SavedObjectRecord } from 'ui/management/saved_objects_management';
+import { SummarizedCopyToSpaceResponse } from 'plugins/spaces/lib/copy_to_space';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import { SavedObjectsImportRetry } from 'src/core/server/saved_objects/import/types';
 import { Space } from '../../../../../common/model/space';
 import { CopyStatusIndicator } from './copy_status_indicator';
 
 interface Props {
   savedObject: SavedObjectRecord;
-  copyResult: ProcessedImportResponse;
   summarizedCopyResult: SummarizedCopyToSpaceResponse;
   space: Space;
   retries: SavedObjectsImportRetry[];
   onRetriesChange: (retries: SavedObjectsImportRetry[]) => void;
+  conflictResolutionInProgress: boolean;
 }
-type RetryOperation = 'overwrite' | 'skip';
 
 export const CopyResultDetails = (props: Props) => {
-  const { successful, hasConflicts, objects, hasUnresolvableErrors } = summarizeCopyResult(
-    props.savedObject,
-    props.copyResult
-  );
-
   const onOverwriteClick = (object: { type: string; id: string }) => {
     const retry = props.retries.find(r => r.type === object.type && r.id === object.id);
 
@@ -59,13 +40,24 @@ export const CopyResultDetails = (props: Props) => {
   const hasPendingOverwrite = (object: { type: string; id: string }) => {
     const retry = props.retries.find(r => r.type === object.type && r.id === object.id);
 
-    return retry && retry.overwrite;
+    return Boolean(retry && retry.overwrite);
   };
+
+  const { objects } = props.summarizedCopyResult;
 
   return (
     <div style={{ paddingLeft: '24px', backgroundColor: '#f4f7fa' }}>
       {objects.map((object, index) => {
         const objectOverwritePending = hasPendingOverwrite(object);
+
+        const showOverwriteButton =
+          object.conflicts.length > 0 &&
+          !objectOverwritePending &&
+          !props.conflictResolutionInProgress;
+
+        const showSkipButton =
+          !showOverwriteButton && objectOverwritePending && !props.conflictResolutionInProgress;
+
         return (
           <EuiFlexGroup
             responsive={false}
@@ -74,14 +66,14 @@ export const CopyResultDetails = (props: Props) => {
             style={{ width: '100%' }}
             gutterSize="s"
           >
-            <EuiFlexItem grow={3}>
+            <EuiFlexItem grow={5} style={{ minWidth: 0 }}>
               <EuiText>
-                <p className="eui-textTruncate">
+                <p className="eui-textTruncate" title={object.name || object.id}>
                   {object.type}: {object.name || object.id}
                 </p>
               </EuiText>
             </EuiFlexItem>
-            {object.conflicts.length > 0 && !objectOverwritePending && (
+            {showOverwriteButton && (
               <EuiFlexItem grow={1}>
                 <EuiText>
                   <EuiButtonEmpty onClick={() => onOverwriteClick(object)} size="xs">
@@ -93,7 +85,7 @@ export const CopyResultDetails = (props: Props) => {
                 </EuiText>
               </EuiFlexItem>
             )}
-            {objectOverwritePending && (
+            {showSkipButton && (
               <EuiFlexItem grow={1}>
                 <EuiText>
                   <EuiButtonEmpty onClick={() => onOverwriteClick(object)} size="xs">
@@ -111,6 +103,9 @@ export const CopyResultDetails = (props: Props) => {
                   summarizedCopyResult={props.summarizedCopyResult}
                   object={object}
                   overwritePending={hasPendingOverwrite(object)}
+                  conflictResolutionInProgress={
+                    props.conflictResolutionInProgress && objectOverwritePending
+                  }
                 />
               </div>
             </EuiFlexItem>
@@ -119,80 +114,4 @@ export const CopyResultDetails = (props: Props) => {
       })}
     </div>
   );
-
-  if (hasConflicts) {
-    return (
-      <div>
-        <EuiCallOut
-          color="warning"
-          iconType="alert"
-          size="s"
-          title={
-            <FormattedMessage
-              id="xpack.spaces.management.copyToSpace.copyDetail.conflictCallout"
-              defaultMessage="Choose how to resolve conflicts below"
-            />
-          }
-        />
-        <EuiSpacer size="s" />
-        {conflicts.map(({ obj }) => {
-          const retry = props.retries.find(r => r.id === obj.id);
-          return (
-            <EuiFormRow
-              label={
-                <span>
-                  {obj.title || obj.id} ({obj.type})
-                </span>
-              }
-            >
-              <EuiButtonGroup
-                type="single"
-                idSelected={
-                  retry && retry.overwrite
-                    ? operationToId('overwrite', obj.id)
-                    : operationToId('skip', obj.id)
-                }
-                options={[
-                  {
-                    id: operationToId('overwrite', obj.id),
-                    label: i18n.translate(
-                      'xpack.spaces.management.copyToSpace.copyDetail.overwriteLabel',
-                      { defaultMessage: 'Overwrite' }
-                    ),
-                  },
-                  {
-                    id: operationToId('skip', obj.id),
-                    label: i18n.translate(
-                      'xpack.spaces.management.copyToSpace.copyDetail.skipLabel',
-                      { defaultMessage: 'Skip' }
-                    ),
-                  },
-                ]}
-                onChange={id =>
-                  props.onRetriesChange([
-                    ...props.retries.filter(r => r.id !== obj.id),
-                    {
-                      id: obj.id,
-                      type: obj.type,
-                      overwrite: idToOperation(id) === 'overwrite',
-                      replaceReferences: [],
-                    },
-                  ])
-                }
-              />
-            </EuiFormRow>
-          );
-        })}
-      </div>
-    );
-  }
-  return null;
 };
-
-function idToOperation(id: string): RetryOperation {
-  return id.split('__', 1)[0] as RetryOperation;
-}
-
-function operationToId(operation: RetryOperation, objectId: string): string {
-  return `${operation}__${objectId}`;
-}

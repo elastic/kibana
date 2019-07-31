@@ -15,11 +15,9 @@ import {
   EuiSwitch,
   EuiFormRow,
   EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
 } from '@elastic/eui';
 import { mapValues } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   SavedObjectRecord,
@@ -30,9 +28,11 @@ import {
   SavedObjectsImportResponse,
   SavedObjectsImportRetry,
 } from 'src/core/server/saved_objects/import/types';
+import { toastNotifications } from 'ui/notify';
 import { useKibanaSpaces } from '../../../../lib/hooks';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
+import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
 
 interface Props {
   onClose: () => void;
@@ -49,45 +49,15 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
   const isLoading = spaces.length === 0;
 
   const [copyInProgress, setCopyInProgress] = useState(false);
+  const [conflictResolutionInProgress, setConflictResolutionInProgress] = useState(false);
   const [copyResult, setCopyResult] = useState<Record<string, ProcessedImportResponse>>({});
   const [retries, setRetries] = useState<Record<string, SavedObjectsImportRetry[]>>({});
+
+  const initialCopyFinished = Object.values(copyResult).length > 0;
 
   const onRetriesChange = (updatedRetries: Record<string, SavedObjectsImportRetry[]>) => {
     setRetries(updatedRetries);
   };
-
-  let actionButton = (
-    <EuiButton
-      fill
-      isLoading={copyInProgress}
-      onClick={() => startCopy()}
-      data-test-subj="initiateCopyToSpacesButton"
-      disabled={selectedSpaceIds.length === 0 || copyInProgress}
-    >
-      {selectedSpaceIds.length > 0 ? (
-        <FormattedMessage
-          id="xpack.spaces.management.copyToSpace.copyToSpacesButton"
-          defaultMessage="Copy to {spaceCount} {spaceCount, plural, one {space} other {spaces}}"
-          values={{ spaceCount: selectedSpaceIds.length }}
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.spaces.management.copyToSpace.disabledCopyToSpacesButton"
-          defaultMessage="Copy"
-        />
-      )}
-    </EuiButton>
-  );
-  if (Object.values(copyResult).length > 0) {
-    actionButton = (
-      <EuiButton fill onClick={() => startCopy()} data-test-subj="finishCopyToSpacesButton">
-        <FormattedMessage
-          id="xpack.spaces.management.copyToSpace.finishCopyToSpacesButton"
-          defaultMessage="Finish"
-        />
-      </EuiButton>
-    );
-  }
 
   useEffect(() => {
     if (copyInProgress) {
@@ -124,13 +94,76 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
         setCopyResult(processedResult);
         const inProgress = Object.values(processedResult).some(res => res.failedImports.length > 0);
         setCopyInProgress(inProgress);
-      }, 1000);
+      }, 5000);
     }
   }, [copyInProgress]);
 
   function startCopy() {
     setCopyInProgress(true);
     setCopyResult({});
+  }
+
+  function finishCopy() {
+    const needsConflictResolution = Object.values(retries).some(spaceRetry =>
+      spaceRetry.some(retry => retry.overwrite)
+    );
+    if (needsConflictResolution) {
+      setConflictResolutionInProgress(true);
+      // simulating conflict resolution operation
+      setTimeout(() => {
+        setConflictResolutionInProgress(false);
+
+        const dummyResponse = selectedSpaceIds.reduce<Record<string, SavedObjectsImportResponse>>(
+          (acc, id) => {
+            const successCount = Math.floor(Math.random() * 10);
+            const hasErrors = false; // successCount % 2 === 0;
+            return {
+              ...acc,
+              [id]: {
+                successCount,
+                success: true,
+                errors: hasErrors
+                  ? [
+                      {
+                        type: savedObject.type,
+                        id: savedObject.id,
+                        error: {
+                          type: overwrite ? 'missing_references' : 'conflict',
+                          references: [],
+                        },
+                      },
+                    ]
+                  : undefined,
+              } as SavedObjectsImportResponse,
+            };
+          },
+          {}
+        );
+
+        if (dummyResponse.success) {
+          toastNotifications.addSuccess(
+            i18n.translate('xpack.spaces.management.copyToSpace.copyWithConflictSuccess', {
+              defaultMessage: 'Copy successful',
+            })
+          );
+        } else {
+          toastNotifications.addDanger(
+            i18n.translate('xpack.spaces.management.copyToSpace.copyWithConflictError', {
+              defaultMessage: 'Error resolving conflicts. Please try again.',
+            })
+          );
+        }
+
+        onClose();
+      }, 5000);
+    } else {
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.spaces.management.copyToSpace.copySuccess', {
+          defaultMessage: 'Copy successful',
+        })
+      );
+      onClose();
+    }
   }
 
   const form = (
@@ -184,7 +217,7 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
   );
 
   return (
-    <EuiFlyout onClose={onClose} maxWidth={400}>
+    <EuiFlyout onClose={onClose} maxWidth={600}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
@@ -208,20 +241,29 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
           <ProcessingCopyToSpace
             savedObject={savedObject}
             copyInProgress={copyInProgress}
+            conflictResolutionInProgress={conflictResolutionInProgress}
             copyResult={copyResult}
             spaces={spaces}
             selectedSpaceIds={selectedSpaceIds}
             retries={retries}
             onRetriesChange={onRetriesChange}
+            includeRelated={includeRelated}
           />
         )}
         {!copyInProgress && form}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>{actionButton}</EuiFlexItem>
-        </EuiFlexGroup>
+        <CopyToSpaceFlyoutFooter
+          copyInProgress={copyInProgress}
+          conflictResolutionInProgress={conflictResolutionInProgress}
+          initialCopyFinished={initialCopyFinished}
+          copyResult={copyResult}
+          numberOfSelectedSpaces={selectedSpaceIds.length}
+          retries={retries}
+          onCopyStart={startCopy}
+          onCopyFinish={finishCopy}
+        />
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

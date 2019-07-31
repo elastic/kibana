@@ -11,17 +11,19 @@ import { SavedObjectsImportRetry } from 'src/core/server/saved_objects/import/ty
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { summarizeCopyResult } from 'plugins/spaces/lib/copy_to_space';
 import { Space } from '../../../../../common/model/space';
-import { CopyStatusIndicator } from './copy_status_indicator';
+import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
 import { CopyResultDetails } from './copy_result_details';
 
 interface Props {
   savedObject: SavedObjectRecord;
   copyInProgress: boolean;
+  conflictResolutionInProgress: boolean;
   copyResult: Record<string, ProcessedImportResponse>;
   retries: Record<string, SavedObjectsImportRetry[]>;
   onRetriesChange: (retries: Record<string, SavedObjectsImportRetry[]>) => void;
   spaces: Space[];
   selectedSpaceIds: string[];
+  includeRelated: boolean;
 }
 
 export const ProcessingCopyToSpace = (props: Props) => {
@@ -37,7 +39,13 @@ export const ProcessingCopyToSpace = (props: Props) => {
       {props.selectedSpaceIds.map(id => {
         const space = props.spaces.find(s => s.id === id) as Space;
         const result = props.copyResult[space.id];
-        const summarizedCopyResult = summarizeCopyResult(props.savedObject, result);
+        const summarizedCopyResult = summarizeCopyResult(
+          props.savedObject,
+          result,
+          props.includeRelated
+        );
+
+        const spaceHasPendingOverwrites = (props.retries[space.id] || []).some(r => r.overwrite);
 
         return (
           <Fragment>
@@ -53,21 +61,26 @@ export const ProcessingCopyToSpace = (props: Props) => {
                   </EuiFlexItem>
                 </EuiFlexGroup>
               }
-              extraAction={<CopyStatusIndicator summarizedCopyResult={summarizedCopyResult} />}
+              extraAction={
+                <CopyStatusSummaryIndicator
+                  summarizedCopyResult={summarizedCopyResult}
+                  conflictResolutionInProgress={
+                    props.conflictResolutionInProgress && spaceHasPendingOverwrites
+                  }
+                />
+              }
             >
-              {result && (
-                <>
-                  <EuiSpacer size="s" />
-                  <CopyResultDetails
-                    savedObject={props.savedObject}
-                    copyResult={result}
-                    summarizedCopyResult={summarizedCopyResult}
-                    space={space}
-                    retries={props.retries[space.id] || []}
-                    onRetriesChange={updatedRetries => updateRetries(space.id, updatedRetries)}
-                  />
-                </>
-              )}
+              <EuiSpacer size="s" />
+              <CopyResultDetails
+                savedObject={props.savedObject}
+                summarizedCopyResult={summarizedCopyResult}
+                space={space}
+                retries={props.retries[space.id] || []}
+                onRetriesChange={updatedRetries => updateRetries(space.id, updatedRetries)}
+                conflictResolutionInProgress={
+                  props.conflictResolutionInProgress && spaceHasPendingOverwrites
+                }
+              />
             </EuiAccordion>
             <EuiSpacer />
           </Fragment>
