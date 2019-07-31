@@ -246,7 +246,11 @@ describe('find()', () => {
         {
           id: '1',
           type: 'type',
-          attributes: {},
+          attributes: {
+            config: {
+              foo: 'bar',
+            },
+          },
           references: [],
         },
       ],
@@ -258,7 +262,19 @@ describe('find()', () => {
     });
     savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.find({});
-    expect(result).toEqual(expectedResult);
+    expect(result).toEqual({
+      total: 1,
+      perPage: 10,
+      page: 1,
+      data: [
+        {
+          id: '1',
+          config: {
+            foo: 'bar',
+          },
+        },
+      ],
+    });
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
