@@ -68,7 +68,7 @@ export const FieldsConfigurationPanel = ({
         fullWidth
         helpText={
           <FormattedMessage
-            id="xpack.infra.sourceConfiguration.timestampFieldDescription"
+            id="xpack.infra.sourceConfiguration.timestampFieldRecommendedValue"
             defaultMessage="The recommended value is {defaultValue}"
             values={{
               defaultValue: <EuiCode>@timestamp</EuiCode>,
@@ -113,7 +113,7 @@ export const FieldsConfigurationPanel = ({
         fullWidth
         helpText={
           <FormattedMessage
-            id="xpack.infra.sourceConfiguration.tiebreakerFieldDescription"
+            id="xpack.infra.sourceConfiguration.tiebreakerFieldRecommendedValue"
             defaultMessage="The recommended value is {defaultValue}"
             values={{
               defaultValue: <EuiCode>_doc</EuiCode>,
@@ -158,7 +158,7 @@ export const FieldsConfigurationPanel = ({
         fullWidth
         helpText={
           <FormattedMessage
-            id="xpack.infra.sourceConfiguration.containerFieldDescription"
+            id="xpack.infra.sourceConfiguration.containerFieldRecommendedValue"
             defaultMessage="The recommended value is {defaultValue}"
             values={{
               defaultValue: <EuiCode>container.id</EuiCode>,
@@ -248,7 +248,7 @@ export const FieldsConfigurationPanel = ({
         fullWidth
         helpText={
           <FormattedMessage
-            id="xpack.infra.sourceConfiguration.podFieldDescription"
+            id="xpack.infra.sourceConfiguration.podFieldRecommendedValue"
             defaultMessage="The recommended value is {defaultValue}"
             values={{
               defaultValue: <EuiCode>kubernetes.pod.uid</EuiCode>,

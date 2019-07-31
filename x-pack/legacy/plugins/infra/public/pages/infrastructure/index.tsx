@@ -62,7 +62,7 @@ export const InfrastructurePage = injectI18n(({ match, intl }: InfrastructurePag
             },
             {
               title: intl.formatMessage({
-                id: 'xpack.infrastructure.homePage.settingsTabTitle',
+                id: 'xpack.infra.homePage.settingsTabTitle',
                 defaultMessage: 'Settings',
               }),
               path: `${match.path}/settings`,

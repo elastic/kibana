@@ -26,7 +26,7 @@ export const StreamPageHeader = injectUICapabilities(
           breadcrumbs={[
             {
               text: intl.formatMessage({
-                id: 'xpack.infra.logsPage.logsBreadcrumbsText',
+                id: 'xpack.infra.logs.streamPage.logsBreadcrumbsText',
                 defaultMessage: 'Logs',
               }),
             },
@@ -37,7 +37,7 @@ export const StreamPageHeader = injectUICapabilities(
           title={(previousTitle: string) =>
             intl.formatMessage(
               {
-                id: 'xpack.logs.streamPage.documentTitle',
+                id: 'xpack.infra.logs.streamPage.documentTitle',
                 defaultMessage: '{previousTitle} | Stream',
               },
               {

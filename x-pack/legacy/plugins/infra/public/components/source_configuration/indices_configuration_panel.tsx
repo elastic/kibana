@@ -45,7 +45,7 @@ export const IndicesConfigurationPanel = ({
       idAria="matricIndices"
       title={
         <FormattedMessage
-          id="xpack.infra.sourceConfiguration.metricIndicesLabel"
+          id="xpack.infra.sourceConfiguration.metricIndicesTitle"
           defaultMessage="Metric Indices"
         />
       }
@@ -62,7 +62,7 @@ export const IndicesConfigurationPanel = ({
         fullWidth
         helpText={
           <FormattedMessage
-            id="xpack.infra.sourceConfiguration.metricIndicesDescription"
+            id="xpack.infra.sourceConfiguration.metricIndicesRecommendedValue"
             defaultMessage="The recommended value is {defaultValue}"
             values={{
               defaultValue: <EuiCode>metricbeat-*</EuiCode>,
@@ -91,7 +91,7 @@ export const IndicesConfigurationPanel = ({
       idAria="logIndices"
       title={
         <FormattedMessage
-          id="xpack.infra.sourceConfiguration.logIndicesLabel"
+          id="xpack.infra.sourceConfiguration.logIndicesTitle"
           defaultMessage="Log Indices"
         />
       }
@@ -108,7 +108,7 @@ export const IndicesConfigurationPanel = ({
         fullWidth
         helpText={
           <FormattedMessage
-            id="xpack.infra.sourceConfiguration.logIndicesDescription"
+            id="xpack.infra.sourceConfiguration.logIndicesRecommendedValue"
             defaultMessage="The recommended value is {defaultValue}"
             values={{
               defaultValue: <EuiCode>filebeat-*</EuiCode>,
