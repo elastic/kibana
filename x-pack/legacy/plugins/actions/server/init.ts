@@ -18,10 +18,19 @@ import {
   listActionTypesRoute,
   fireRoute,
 } from './routes';
-
 import { registerBuiltInActionTypes } from './builtin_action_types';
+import { SpacesPlugin } from '../../spaces';
+import { createOptionalPlugin } from '../../../server/lib/optional_plugin';
 
 export function init(server: Legacy.Server) {
+  const config = server.config();
+  const spaces = createOptionalPlugin<SpacesPlugin>(
+    config,
+    'xpack.spaces',
+    server.plugins,
+    'spaces'
+  );
+
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
     callWithInternalUser
@@ -56,10 +65,10 @@ export function init(server: Legacy.Server) {
     taskManager: taskManager!,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
     getBasePath(...args) {
-      return server.plugins.spaces ? server.plugins.spaces.getBasePath(...args) : undefined;
+      return spaces.isEnabled ? spaces.getBasePath(...args) : '';
     },
     spaceIdToNamespace(...args) {
-      return server.plugins.spaces ? server.plugins.spaces.spaceIdToNamespace(...args) : undefined;
+      return spaces.isEnabled ? spaces.spaceIdToNamespace(...args) : undefined;
     },
   });
 
@@ -82,7 +91,7 @@ export function init(server: Legacy.Server) {
     taskManager: taskManager!,
     internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
     spaceIdToNamespace(...args) {
-      return server.plugins.spaces ? server.plugins.spaces.spaceIdToNamespace(...args) : undefined;
+      return spaces.isEnabled ? spaces.spaceIdToNamespace(...args) : undefined;
     },
   });
 

@@ -18,8 +18,18 @@ import {
 import { AlertingPlugin, Services } from './types';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { AlertsClient } from './alerts_client';
+import { SpacesPlugin } from '../../spaces';
+import { createOptionalPlugin } from '../../../server/lib/optional_plugin';
 
 export function init(server: Legacy.Server) {
+  const config = server.config();
+  const spaces = createOptionalPlugin<SpacesPlugin>(
+    config,
+    'xpack.spaces',
+    server.plugins,
+    'spaces'
+  );
+
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
     callWithInternalUser
@@ -44,10 +54,10 @@ export function init(server: Legacy.Server) {
     fireAction: server.plugins.actions!.fire,
     internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
     getBasePath(...args) {
-      return server.plugins.spaces ? server.plugins.spaces.getBasePath(...args) : undefined;
+      return spaces.isEnabled ? spaces.getBasePath(...args) : '';
     },
     spaceIdToNamespace(...args) {
-      return server.plugins.spaces ? server.plugins.spaces.spaceIdToNamespace(...args) : undefined;
+      return spaces.isEnabled ? spaces.spaceIdToNamespace(...args) : undefined;
     },
   });
 
@@ -70,7 +80,7 @@ export function init(server: Legacy.Server) {
       savedObjectsClient,
       alertTypeRegistry,
       taskManager: taskManager!,
-      spaceId: request.server.plugins.spaces && request.server.plugins.spaces.getSpaceId(request),
+      spaceId: spaces.isEnabled ? spaces.getSpaceId(request) : undefined,
     });
     return alertsClient;
   });

@@ -35,12 +35,13 @@ export function getCreateTaskRunnerFunction({
       run: async () => {
         const { spaceId, id, actionTypeParams } = taskInstance.params;
         const namespace = spaceIdToNamespace(spaceId);
+        const basePath = getBasePath(spaceId);
         const executorResult = await execute({
           namespace,
           actionTypeRegistry,
           encryptedSavedObjectsPlugin,
           actionId: id,
-          services: getServices(taskInstance.params.basePath),
+          services: getServices(basePath),
           params: actionTypeParams,
         });
         if (executorResult.status === 'error') {

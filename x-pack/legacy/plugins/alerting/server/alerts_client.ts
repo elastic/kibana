@@ -15,7 +15,7 @@ interface ConstructorOptions {
   taskManager: TaskManager;
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
-  spaceId: string;
+  spaceId?: string;
 }
 
 interface FindOptions {
@@ -53,7 +53,7 @@ interface UpdateOptions {
 
 export class AlertsClient {
   private readonly log: Log;
-  private readonly spaceId: string;
+  private readonly spaceId?: string;
   private readonly taskManager: TaskManager;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly alertTypeRegistry: AlertTypeRegistry;
