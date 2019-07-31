@@ -52,7 +52,10 @@
           get-doc-link="getDocLink"
         ></discover-no-results>
 
-        <discover-uninitialized ng-show="resultState === 'uninitialized'"></discover-uninitialized>
+        <discover-uninitialized
+          ng-show="resultState === 'uninitialized'"
+          on-refresh="fetch"
+        ></discover-uninitialized>
 
         <!-- loading -->
         <div ng-show="resultState === 'loading'">
