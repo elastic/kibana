@@ -12,7 +12,7 @@ describe('getNextMidnight', () => {
     const nextMidnightMoment = moment()
       .add(1, 'days')
       .startOf('day')
-      .toISOString();
+      .toDate();
 
     expect(getNextMidnight()).toEqual(nextMidnightMoment);
   });

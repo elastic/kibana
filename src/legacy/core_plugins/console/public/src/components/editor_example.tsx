@@ -19,7 +19,7 @@
 
 import React, { useEffect } from 'react';
 // @ts-ignore
-import exampleText from 'raw-loader!./helpExample.txt';
+import exampleText from 'raw-loader!./help_example.txt';
 import $ from 'jquery';
 // @ts-ignore
 import SenseEditor from '../sense_editor/editor';

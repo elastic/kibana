@@ -9,13 +9,14 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { ConfigOptions } from 'elasticsearch';
 import { Duration } from 'moment';
+import { IncomingHttpHeaders } from 'http';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
-import { Schema } from '@kbn/config-schema';
 import { Server } from 'hapi';
+import { Stream } from 'stream';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { Url } from 'url';
@@ -29,17 +30,18 @@ export type APICaller = (endpoint: string, clientParams: Record<string, any>, op
 export type AuthenticationHandler = (request: KibanaRequest, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
 
 // @public
-export type AuthHeaders = Record<string, string>;
+export type AuthHeaders = Record<string, string | string[]>;
 
 // @public
-export interface AuthResultData {
-    headers: AuthHeaders;
-    state: Record<string, any>;
+export interface AuthResultParams {
+    requestHeaders?: AuthHeaders;
+    responseHeaders?: AuthHeaders;
+    state?: Record<string, any>;
 }
 
 // @public
 export interface AuthToolkit {
-    authenticated: (data?: Partial<AuthResultData>) => AuthResult;
+    authenticated: (data?: AuthResultParams) => AuthResult;
     redirected: (url: string) => AuthResult;
     rejected: (error: Error, options?: {
         statusCode?: number;
@@ -386,6 +388,22 @@ export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T ext
 }> : T;
 
 // @public
+export type ResponseError = string | Error | {
+    message: string | Error;
+    meta?: ResponseErrorMeta;
+};
+
+// @public
+export interface ResponseErrorMeta {
+    // (undocumented)
+    data?: Record<string, any>;
+    // (undocumented)
+    docLink?: string;
+    // (undocumented)
+    errorCode?: string;
+}
+
+// @public
 export interface RouteConfigOptions {
     authRequired?: boolean;
     tags?: readonly string[];
@@ -633,6 +651,48 @@ export interface SavedObjectsMigrationVersion {
     // (undocumented)
     [pluginName: string]: string;
 }
+
+// Warning: (ae-missing-release-tag) "RawDoc" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public
+export interface SavedObjectsRawDoc {
+    // (undocumented)
+    _id: string;
+    // (undocumented)
+    _primary_term?: number;
+    // (undocumented)
+    _seq_no?: number;
+    // (undocumented)
+    _source: any;
+    // (undocumented)
+    _type?: string;
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsSchema" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export class SavedObjectsSchema {
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsSchemaDefinition" needs to be exported by the entry point index.d.ts
+    constructor(schemaDefinition?: SavedObjectsSchemaDefinition);
+    // (undocumented)
+    getIndexForType(type: string): string | undefined;
+    // (undocumented)
+    isHiddenType(type: string): boolean;
+    // (undocumented)
+    isNamespaceAgnostic(type: string): boolean;
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsSerializer" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export class SavedObjectsSerializer {
+    constructor(schema: SavedObjectsSchema);
+    generateRawId(namespace: string | undefined, type: string, id?: string): string;
+    isRawSavedObject(rawDoc: SavedObjectsRawDoc): any;
+    // Warning: (ae-forgotten-export) The symbol "SanitizedSavedObjectDoc" needs to be exported by the entry point index.d.ts
+    rawToSavedObject(doc: SavedObjectsRawDoc): SanitizedSavedObjectDoc;
+    savedObjectToRaw(savedObj: SanitizedSavedObjectDoc): SavedObjectsRawDoc;
+    }
 
 // @public (undocumented)
 export interface SavedObjectsService<Request = any> {
