@@ -11,3 +11,10 @@ The available core services passed to a `PluginInitializer`
 ```typescript
 export interface PluginInitializerContext 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [opaqueId](./kibana-plugin-public.plugininitializercontext.opaqueid.md) | <code>PluginOpaqueId</code> | A symbol used to identify this plugin in the system. Needed when registering handlers or context providers. |
+

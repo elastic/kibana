@@ -17,18 +17,20 @@
  * under the License.
  */
 
-import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
+import { ObjectType, TypeOf, Type } from '@kbn/config-schema';
 import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 
+import { Logger } from '../../logging';
 import { KibanaRequest } from './request';
 import { KibanaResponse, ResponseFactory, responseFactory } from './response';
 import { RouteConfig, RouteConfigOptions, RouteMethod, RouteSchemas } from './route';
+import { HapiResponseAdapter } from './response_adapter';
 
 export interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions;
-  handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject>;
+  handler: (req: Request, responseToolkit: ResponseToolkit, log: Logger) => Promise<ResponseObject>;
 }
 
 /** @public */
@@ -47,8 +49,8 @@ export class Router {
     const { path, options = {} } = route;
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'get');
     this.routes.push({
-      handler: async (req, responseToolkit) =>
-        await this.handle(routeSchemas, req, responseToolkit, handler),
+      handler: async (req, responseToolkit, log) =>
+        await this.handle(routeSchemas, req, responseToolkit, handler, log),
       method: 'get',
       path,
       options,
@@ -65,8 +67,8 @@ export class Router {
     const { path, options = {} } = route;
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'post');
     this.routes.push({
-      handler: async (req, responseToolkit) =>
-        await this.handle(routeSchemas, req, responseToolkit, handler),
+      handler: async (req, responseToolkit, log) =>
+        await this.handle(routeSchemas, req, responseToolkit, handler, log),
       method: 'post',
       path,
       options,
@@ -83,8 +85,8 @@ export class Router {
     const { path, options = {} } = route;
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'put');
     this.routes.push({
-      handler: async (req, responseToolkit) =>
-        await this.handle(routeSchemas, req, responseToolkit, handler),
+      handler: async (req, responseToolkit, log) =>
+        await this.handle(routeSchemas, req, responseToolkit, handler, log),
       method: 'put',
       path,
       options,
@@ -101,8 +103,8 @@ export class Router {
     const { path, options = {} } = route;
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'delete');
     this.routes.push({
-      handler: async (req, responseToolkit) =>
-        await this.handle(routeSchemas, req, responseToolkit, handler),
+      handler: async (req, responseToolkit, log) =>
+        await this.handle(routeSchemas, req, responseToolkit, handler, log),
       method: 'delete',
       path,
       options,
@@ -136,46 +138,45 @@ export class Router {
       );
     }
 
-    return route.validate ? route.validate(schema) : undefined;
+    if (route.validate !== false) {
+      Object.entries(route.validate).forEach(([key, schema]) => {
+        if (!(schema instanceof Type)) {
+          throw new Error(
+            `Expected a valid schema declared with '@kbn/config-schema' package at key: [${key}].`
+          );
+        }
+      });
+    }
+
+    return route.validate ? route.validate : undefined;
   }
 
   private async handle<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     routeSchemas: RouteSchemas<P, Q, B> | undefined,
     request: Request,
     responseToolkit: ResponseToolkit,
-    handler: RequestHandler<P, Q, B>
+    handler: RequestHandler<P, Q, B>,
+    log: Logger
   ) {
     let kibanaRequest: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>;
-
+    const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
       kibanaRequest = KibanaRequest.from(request, routeSchemas);
     } catch (e) {
-      // TODO Handle failed validation
-      return responseToolkit.response({ error: e.message }).code(400);
+      return hapiResponseAdapter.toBadRequest(e.message);
     }
 
     try {
       const kibanaResponse = await handler(kibanaRequest, responseFactory);
-
-      let payload = null;
-      if (kibanaResponse.payload instanceof Error) {
-        // TODO Design an error format
-        payload = { error: kibanaResponse.payload.message };
-      } else if (kibanaResponse.payload !== undefined) {
-        payload = kibanaResponse.payload;
-      }
-
-      return responseToolkit.response(payload).code(kibanaResponse.status);
+      return hapiResponseAdapter.handle(kibanaResponse);
     } catch (e) {
-      // TODO Handle `KibanaResponseError`
-
-      // Otherwise we default to something along the lines of
-      return responseToolkit.response({ error: e.message }).code(500);
+      log.error(e);
+      return hapiResponseAdapter.toInternalError();
     }
   }
 }
 
 export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (
-  req: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
+  request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
   createResponse: ResponseFactory
 ) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
