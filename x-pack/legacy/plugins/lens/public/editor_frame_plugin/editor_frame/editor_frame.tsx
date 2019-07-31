@@ -157,6 +157,7 @@ export function EditorFrame(props: EditorFrameProps) {
     }
   }, [allLoaded, state.visualization.activeId, state.visualization.state]);
 
+  // There are two callbacks that the frame needs to call every time its internal state changes
   useEffect(() => {
     const filterableIndexPatterns: string[] = [];
     Object.entries(props.datasourceMap)

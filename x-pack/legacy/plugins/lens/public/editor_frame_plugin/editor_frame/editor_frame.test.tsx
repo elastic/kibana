@@ -1305,4 +1305,208 @@ describe('editor_frame', () => {
       );
     });
   });
+
+  describe('passing state back to the caller', () => {
+    let resolver: (value: unknown) => void;
+    let instance: ReactWrapper;
+
+    it('should update index patterns on initial render', async () => {
+      const onIndexPatternChange = jest.fn();
+
+      const initialState = { datasource: '' };
+      mockDatasource.initialize.mockReturnValue(Promise.resolve(initialState));
+      mockDatasource.getLayers.mockReturnValue(['first']);
+      mockDatasource.getMetaData.mockReturnValue({ filterableIndexPatterns: [] });
+
+      act(() => {
+        mount(
+          <EditorFrame
+            {...defaultProps}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+            dateRange={{ fromDate: 'now-7d', toDate: 'now' }}
+            query={{ query: '', language: 'lucene' }}
+            onIndexPatternChange={onIndexPatternChange}
+            onStateChange={() => {}}
+          />
+        );
+      });
+
+      expect(onIndexPatternChange).toHaveBeenCalledTimes(2);
+      expect(onIndexPatternChange).toHaveBeenNthCalledWith(1, []);
+      expect(onIndexPatternChange).toHaveBeenNthCalledWith(2, []);
+    });
+
+    it('should update index patterns when the datasource finishes loading them', async () => {
+      const onIndexPatternChange = jest.fn();
+
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+
+      mockDatasource.initialize.mockReturnValue(promise);
+      mockDatasource.getLayers.mockReturnValue(['first']);
+      mockDatasource.getMetaData.mockReturnValue({ filterableIndexPatterns: [] });
+
+      act(() => {
+        mount(
+          <EditorFrame
+            {...defaultProps}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+            dateRange={{ fromDate: 'now-7d', toDate: 'now' }}
+            query={{ query: '', language: 'lucene' }}
+            onIndexPatternChange={onIndexPatternChange}
+            onStateChange={() => {}}
+          />
+        );
+      });
+
+      expect(onIndexPatternChange).toHaveBeenCalledTimes(2);
+      expect(onIndexPatternChange).toHaveBeenNthCalledWith(1, []);
+      expect(onIndexPatternChange).toHaveBeenNthCalledWith(2, []);
+
+      mockDatasource.getMetaData.mockReturnValue({ filterableIndexPatterns: ['resolved'] });
+      resolver({ loadedDatasource: '' });
+
+      await waitForPromises();
+
+      expect(onIndexPatternChange).toHaveBeenCalledTimes(4);
+      expect(onIndexPatternChange).toHaveBeenNthCalledWith(3, ['resolved']);
+      expect(onIndexPatternChange).toHaveBeenNthCalledWith(4, ['resolved']);
+    });
+
+    it('should send back a persistable document during load', async () => {
+      const onStateChange = jest.fn();
+
+      const initialState = { datasource: '' };
+
+      mockDatasource.initialize.mockResolvedValue(initialState);
+      mockDatasource.getLayers.mockReturnValue(['first']);
+
+      mockVisualization.initialize.mockReturnValue({ initialState: true });
+
+      act(() => {
+        mount(
+          <EditorFrame
+            {...defaultProps}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+            dateRange={{ fromDate: 'now-7d', toDate: 'now' }}
+            query={{ query: '', language: 'lucene' }}
+            onIndexPatternChange={() => {}}
+            onStateChange={onStateChange}
+          />
+        );
+      });
+
+      await waitForPromises();
+
+      expect(onStateChange).toHaveBeenCalledTimes(2);
+      expect(onStateChange).toHaveBeenNthCalledWith(1, {
+        activeDatasourceId: 'testDatasource',
+        expression: '',
+        id: undefined,
+        state: {
+          datasourceMetaData: { filterableIndexPatterns: [] },
+          datasourceStates: { testDatasource: undefined },
+          visualization: null, // Not yet loaded
+        },
+        title: 'New visualization',
+        type: 'lens',
+        visualizationType: 'testVis',
+      });
+      expect(onStateChange).toHaveBeenLastCalledWith({
+        activeDatasourceId: 'testDatasource',
+        expression: '',
+        id: undefined,
+        state: {
+          datasourceMetaData: { filterableIndexPatterns: [] },
+          datasourceStates: { testDatasource: undefined },
+          visualization: { initialState: true }, // Now loaded
+        },
+        title: 'New visualization',
+        type: 'lens',
+        visualizationType: 'testVis',
+      });
+    });
+
+    it('should send back a persistable document when the state changes', async () => {
+      const onStateChange = jest.fn();
+
+      const initialState = { datasource: '' };
+
+      mockDatasource.initialize.mockResolvedValue(initialState);
+      mockDatasource.getLayers.mockReturnValue(['first']);
+
+      mockVisualization.initialize.mockReturnValue({ initialState: true });
+
+      act(() => {
+        instance = mount(
+          <EditorFrame
+            {...defaultProps}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+            dateRange={{ fromDate: 'now-7d', toDate: 'now' }}
+            query={{ query: '', language: 'lucene' }}
+            onIndexPatternChange={() => {}}
+            onStateChange={onStateChange}
+          />
+        );
+      });
+
+      await waitForPromises();
+
+      expect(onStateChange).toHaveBeenCalledTimes(2);
+
+      mockDatasource.toExpression.mockReturnValue('data expression');
+      mockVisualization.toExpression.mockReturnValue('vis expression');
+      instance.setProps({ query: { query: 'new query', language: 'lucene' } });
+      instance.update();
+
+      await waitForPromises();
+      expect(onStateChange).toHaveBeenCalledTimes(3);
+      expect(onStateChange).toHaveBeenNthCalledWith(3, {
+        activeDatasourceId: 'testDatasource',
+        expression: expect.stringContaining('vis "expression"'),
+        id: undefined,
+        state: {
+          datasourceMetaData: { filterableIndexPatterns: [] },
+          datasourceStates: { testDatasource: undefined },
+          visualization: { initialState: true },
+        },
+        title: 'New visualization',
+        type: 'lens',
+        visualizationType: 'testVis',
+      });
+    });
+  });
 });

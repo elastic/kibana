@@ -272,6 +272,57 @@ describe('workspace_panel', () => {
             `);
   });
 
+  it('should run the expression again if the date range changes', async () => {
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+    mockDatasource.getLayers.mockReturnValue(['first']);
+
+    mockDatasource.toExpression
+      .mockReturnValueOnce('datasource')
+      .mockReturnValueOnce('datasource second');
+
+    expressionRendererMock = jest.fn(_arg => <span />);
+
+    instance = mount(
+      <InnerWorkspacePanel
+        activeDatasourceId={'mock'}
+        datasourceStates={{
+          mock: {
+            state: {},
+            isLoading: false,
+          },
+        }}
+        datasourceMap={{
+          mock: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        activeVisualizationId="vis"
+        visualizationMap={{
+          vis: { ...mockVisualization, toExpression: () => 'vis' },
+        }}
+        visualizationState={{}}
+        dispatch={() => {}}
+        ExpressionRenderer={expressionRendererMock}
+      />
+    );
+
+    // "wait" for the expression to execute
+    await waitForPromises();
+    instance.update();
+
+    expect(expressionRendererMock).toHaveBeenCalledTimes(1);
+
+    framePublicAPI.dateRange = { fromDate: 'now-90d', toDate: 'now-30d' };
+    instance.setProps({ visualizationState: {} });
+
+    await waitForPromises();
+    instance.update();
+
+    expect(expressionRendererMock).toHaveBeenCalledTimes(2);
+  });
+
   describe('expression failures', () => {
     it('should show an error message if the expression fails to parse', () => {
       mockDatasource.toExpression.mockReturnValue('|||');
