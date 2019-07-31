@@ -185,14 +185,18 @@ export class LanguageServerController implements ILanguageServerHandler {
 
   public status(lang: string): LanguageServerStatus {
     const ls = this.languageServerMap[lang];
-    const status = this.installManager.status(ls.definition);
-    // installed, but is it running?
-    if (status === LanguageServerStatus.READY) {
-      if (ls.launcher.running) {
-        return LanguageServerStatus.RUNNING;
+    if (ls) {
+      const status = this.installManager.status(ls.definition);
+      // installed, but is it running?
+      if (status === LanguageServerStatus.READY) {
+        if (ls.launcher.running) {
+          return LanguageServerStatus.RUNNING;
+        }
       }
+      return status;
+    } else {
+      return LanguageServerStatus.NOT_INSTALLED;
     }
-    return status;
   }
 
   public getLanguageServerDef(lang: string): LanguageServerDefinition | null {
