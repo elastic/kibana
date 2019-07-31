@@ -26,7 +26,7 @@ export const LogsPage = injectI18n(({ match, intl }: LogsPageProps) => (
     <ColumnarPage>
       <DocumentTitle
         title={intl.formatMessage({
-          id: 'xpack.logs.homePage.documentTitle',
+          id: 'xpack.infra.logs.index.documentTitle',
           defaultMessage: 'Logs',
         })}
       />
