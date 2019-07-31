@@ -245,10 +245,7 @@ describe('DefaultEditorAgg component', () => {
       };
       const comp = shallow(<DefaultEditorAgg {...defaultProps} />);
 
-      expect(comp.find('DefaultEditorAggParams').props()).toHaveProperty(
-        'aggError',
-        'Last bucket aggregation must be "Date Histogram" or "Histogram" when using "ParentPipelineAgg" metric aggregation.'
-      );
+      expect(comp.find('DefaultEditorAggParams').prop('aggError')).toBeDefined();
     });
 
     it('should set min_doc_count to true when agg type was changed to histogram', () => {
