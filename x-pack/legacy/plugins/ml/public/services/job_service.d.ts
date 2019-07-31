@@ -10,6 +10,7 @@ export interface ExistingJobsAndGroups {
 }
 
 declare interface JobService {
+  currentJob: any;
   saveNewJob(job: any): Promise<any>;
   openJob(jobId: string): Promise<any>;
   saveNewDatafeed(datafeedConfig: any, jobId: string): Promise<any>;

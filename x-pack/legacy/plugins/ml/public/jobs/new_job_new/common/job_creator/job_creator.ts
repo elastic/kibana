@@ -356,4 +356,15 @@ export class JobCreator {
   public get formattedDatafeedJson() {
     return JSON.stringify(this._datafeed_config, null, 2);
   }
+
+  public overrideConfigs(job: Job, datafeed: Datafeed) {
+    this._job_config = job;
+    this._datafeed_config = datafeed;
+
+    this._detectors = this._job_config.analysis_config.detectors;
+    this._influencers = this._job_config.analysis_config.influencers;
+    if (this._job_config.groups === undefined) {
+      this._job_config.groups = [];
+    }
+  }
 }

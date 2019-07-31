@@ -12,6 +12,7 @@ import {
   jobCreatorFactory,
   isSingleMetricJobCreator,
   isPopulationJobCreator,
+  CombinedJobConfig,
 } from '../../common/job_creator';
 import {
   JOB_TYPE,
@@ -25,7 +26,8 @@ import { KibanaContext, isKibanaContext } from '../../../../data_frame/common/ki
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 import { newJobDefaults } from '../../../new_job/utils/new_job_defaults';
-import { ExistingJobsAndGroups } from '../../../../services/job_service';
+import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
+import { ml } from '../../../../services/ml_api_service';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
@@ -43,8 +45,17 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   }
 
   const jobDefaults = newJobDefaults();
+  const currentJob = mlJobService.currentJob;
+  let existingJobConfig: CombinedJobConfig | undefined;
+  if (currentJob !== undefined) {
+    existingJobConfig = {
+      job: currentJob,
+      datafeed: currentJob.datafeed_config,
+    };
+    delete currentJob.datafeed_config;
+  }
 
-  const jobCreator = jobCreatorFactory(jobType)(
+  const jobCreator = jobCreatorFactory(jobType, existingJobConfig)(
     kibanaContext.currentIndexPattern,
     kibanaContext.currentSavedSearch,
     kibanaContext.combinedQuery
@@ -53,18 +64,20 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const { from, to } = getTimeFilterRange();
   jobCreator.setTimeRange(from, to);
 
-  jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
+  if (currentJob === undefined) {
+    jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
 
-  if (isPopulationJobCreator(jobCreator) === true) {
-    // for population jobs use the default mml (1GB)
-    jobCreator.modelMemoryLimit = jobDefaults.anomaly_detectors.model_memory_limit;
-  } else {
-    // for all other jobs, use 10MB
-    jobCreator.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
-  }
+    if (isPopulationJobCreator(jobCreator) === true) {
+      // for population jobs use the default mml (1GB)
+      jobCreator.modelMemoryLimit = jobDefaults.anomaly_detectors.model_memory_limit;
+    } else {
+      // for all other jobs, use 10MB
+      jobCreator.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+    }
 
-  if (isSingleMetricJobCreator(jobCreator) === true) {
-    jobCreator.modelPlot = true;
+    if (isSingleMetricJobCreator(jobCreator) === true) {
+      jobCreator.modelPlot = true;
+    }
   }
 
   const chartInterval = new MlTimeBuckets();
@@ -85,6 +98,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   useEffect(() => {
     return () => {
       jobCreator.forceStopRefreshPolls();
+      mlJobService.currentJob = undefined;
     };
   });
 
