@@ -38,6 +38,7 @@ export class LogTextWrapControls extends React.PureComponent<LogTextWrapControls
             />
           }
           checked={wrap}
+          aria-checked={wrap}
           onChange={this.toggleWrap}
         />
       </EuiFormRow>
