@@ -65,7 +65,6 @@ export class AutocompleteField extends React.Component<
             onKeyDown={this.handleKeyDown}
             onKeyUp={this.handleKeyUp}
             onSearch={this.submit}
-            onBlur={this.submit}
             placeholder={placeholder}
             value={value}
           />

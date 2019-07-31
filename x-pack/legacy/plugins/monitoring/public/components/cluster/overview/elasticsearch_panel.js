@@ -11,7 +11,8 @@ import {
   ClusterItemContainer,
   HealthStatusIndicator,
   BytesUsage,
-  BytesPercentageUsage
+  BytesPercentageUsage,
+  DisabledIfNoDataAndInSetupModeLink
 } from './helpers';
 import {
   EuiFlexGrid,
@@ -208,21 +209,25 @@ export function ElasticsearchPanel(props) {
       return (
         <>
           <EuiDescriptionListTitle>
-            <EuiLink
+            <DisabledIfNoDataAndInSetupModeLink
+              setupModeEnabled={setupMode.enabled}
+              setupModeData={setupModeElasticsearchData}
               href={gotoURL}
             >
               <FormattedMessage
                 id="xpack.monitoring.cluster.overview.esPanel.jobsLabel"
                 defaultMessage="Jobs"
               />
-            </EuiLink>
+            </DisabledIfNoDataAndInSetupModeLink>
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="esMlJobs">
-            <EuiLink
+            <DisabledIfNoDataAndInSetupModeLink
+              setupModeEnabled={setupMode.enabled}
+              setupModeData={setupModeElasticsearchData}
               href={gotoURL}
             >
               {props.ml.jobs}
-            </EuiLink>
+            </DisabledIfNoDataAndInSetupModeLink>
           </EuiDescriptionListDescription>
         </>
       );
@@ -244,7 +249,9 @@ export function ElasticsearchPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeElasticsearchData}
                   onClick={goToElasticsearch}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.esPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'Elasticsearch Overview'
@@ -255,7 +262,7 @@ export function ElasticsearchPanel(props) {
                     id="xpack.monitoring.cluster.overview.esPanel.overviewLinkLabel"
                     defaultMessage="Overview"
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
@@ -344,7 +351,9 @@ export function ElasticsearchPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeElasticsearchData}
                   onClick={goToIndices}
                   data-test-subj="esNumberOfIndices"
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.esPanel.indicesCountLinkAriaLabel', {
@@ -357,7 +366,7 @@ export function ElasticsearchPanel(props) {
                     defaultMessage="Indices: {indicesCount}"
                     values={{ indicesCount: formatNumber(get(indices, 'count'), 'int_commas') }}
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
@@ -409,7 +418,9 @@ export function ElasticsearchPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeElasticsearchData}
                   onClick={goToElasticsearch}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.esPanel.logsLinkAriaLabel', {
                     defaultMessage: 'Elasticsearch Logs'
@@ -420,7 +431,7 @@ export function ElasticsearchPanel(props) {
                     id="xpack.monitoring.cluster.overview.esPanel.logsLinkLabel"
                     defaultMessage="Logs"
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />

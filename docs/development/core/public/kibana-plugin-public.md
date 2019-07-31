@@ -34,6 +34,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeRecentlyAccessed](./kibana-plugin-public.chromerecentlyaccessed.md) | [APIs](./kibana-plugin-public.chromerecentlyaccessed.md) for recently accessed history. |
 |  [ChromeRecentlyAccessedHistoryItem](./kibana-plugin-public.chromerecentlyaccessedhistoryitem.md) |  |
 |  [ChromeStart](./kibana-plugin-public.chromestart.md) | ChromeStart allows plugins to customize the global chrome header UI and enrich the UX with additional information about the current location of the browser. |
+|  [ContextSetup](./kibana-plugin-public.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [CoreSetup](./kibana-plugin-public.coresetup.md) | Core services exposed to the <code>Plugin</code> setup lifecycle |
 |  [CoreStart](./kibana-plugin-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
 |  [DocLinksStart](./kibana-plugin-public.doclinksstart.md) |  |
@@ -50,6 +51,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpResponse](./kibana-plugin-public.httpresponse.md) |  |
 |  [HttpServiceBase](./kibana-plugin-public.httpservicebase.md) |  |
 |  [I18nStart](./kibana-plugin-public.i18nstart.md) | I18nStart.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
+|  [IContextContainer](./kibana-plugin-public.icontextcontainer.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [LegacyNavLink](./kibana-plugin-public.legacynavlink.md) |  |
 |  [NotificationsSetup](./kibana-plugin-public.notificationssetup.md) |  |
 |  [NotificationsStart](./kibana-plugin-public.notificationsstart.md) |  |
@@ -69,6 +71,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpHandler](./kibana-plugin-public.httphandler.md) |  |
 |  [HttpSetup](./kibana-plugin-public.httpsetup.md) |  |
 |  [HttpStart](./kibana-plugin-public.httpstart.md) |  |
+|  [IContextHandler](./kibana-plugin-public.icontexthandler.md) | A function registered by a plugin to perform some action. |
+|  [IContextProvider](./kibana-plugin-public.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [PluginInitializer](./kibana-plugin-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [RecursiveReadonly](./kibana-plugin-public.recursivereadonly.md) |  |
 |  [ToastInput](./kibana-plugin-public.toastinput.md) |  |
