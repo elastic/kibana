@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { getBuckets } from './get_buckets';
 
@@ -12,10 +11,6 @@ function getBucketSize({ start, end, config }: Setup) {
   const bucketTargetCount = config.get<number>('xpack.apm.bucketTargetCount');
   return Math.floor((end - start) / bucketTargetCount);
 }
-
-export type ErrorDistributionAPIResponse = PromiseReturnType<
-  typeof getErrorDistribution
->;
 
 export async function getErrorDistribution({
   serviceName,

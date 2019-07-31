@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { withDefaultValidators } from '../../lib/helpers/input_validation';
+import { withDefaultQueryParamValidators } from '../../lib/helpers/input_validation';
 import {
   setupRequest,
   APMRequest,
@@ -29,7 +29,7 @@ export const transactionDistributionRoute = {
   path: `/api/apm/services/{serviceName}/transaction_groups/distribution`,
   options: {
     validate: {
-      query: withDefaultValidators({
+      query: withDefaultQueryParamValidators({
         transactionType: Joi.string().required(),
         transactionName: Joi.string().required(),
         transactionId: Joi.string(),

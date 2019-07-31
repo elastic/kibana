@@ -11,13 +11,10 @@ import {
   SERVICE_NAME,
   TRANSACTION_SAMPLED
 } from '../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../typings/common';
 import { APMError } from '../../../typings/es_schemas/ui/APMError';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
-
-export type ErrorGroupAPIResponse = PromiseReturnType<typeof getErrorGroup>;
 
 // TODO: rename from "getErrorGroup"  to "getErrorGroupSample" (since a single error is returned, not an errorGroup)
 export async function getErrorGroup({

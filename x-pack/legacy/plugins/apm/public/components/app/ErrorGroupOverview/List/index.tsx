@@ -11,7 +11,7 @@ import moment from 'moment';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { ErrorGroupListAPIResponse } from '../../../../../server/lib/errors/get_error_groups';
+import { ErrorGroupListAPIResponse } from '../../../../../server/lib/errors/get_error_group_list';
 import {
   fontFamilyCode,
   fontSizes,

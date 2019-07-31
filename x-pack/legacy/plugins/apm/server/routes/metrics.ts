@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { InternalCoreSetup } from 'src/core/server';
-import { withDefaultValidators } from '../lib/helpers/input_validation';
+import { withDefaultQueryParamValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getMetricsChartDataByAgent } from '../lib/metrics/get_metrics_chart_data_by_agent';
 
@@ -25,7 +25,7 @@ export function initMetricsApi(core: InternalCoreSetup) {
     path: `/api/apm/services/{serviceName}/metrics/charts`,
     options: {
       validate: {
-        query: withDefaultValidators({
+        query: withDefaultQueryParamValidators({
           agentName: Joi.string().required()
         })
       },

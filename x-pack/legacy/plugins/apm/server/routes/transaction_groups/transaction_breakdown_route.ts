@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { withDefaultValidators } from '../../lib/helpers/input_validation';
+import { withDefaultQueryParamValidators } from '../../lib/helpers/input_validation';
 import {
   setupRequest,
   APMRequest,
@@ -27,7 +27,7 @@ export const transactionBreakdownRoute = {
   path: `/api/apm/services/{serviceName}/transaction_groups/breakdown`,
   options: {
     validate: {
-      query: withDefaultValidators({
+      query: withDefaultQueryParamValidators({
         transactionName: Joi.string(),
         transactionType: Joi.string().required()
       })

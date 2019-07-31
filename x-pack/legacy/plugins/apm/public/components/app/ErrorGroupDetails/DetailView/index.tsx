@@ -18,7 +18,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { first } from 'lodash';
 import { idx } from '@kbn/elastic-idx';
-import { ErrorGroupAPIResponse } from '../../../../../server/lib/errors/get_error_group';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { px, unit } from '../../../../style/variables';
@@ -34,6 +33,7 @@ import {
   logStacktraceTab
 } from './ErrorTabs';
 import { StickyErrorProperties } from './StickyErrorProperties';
+import { ErrorGroupAPIResponse } from '../../../../../server/routes/errors/error_group_route';
 
 const HeaderContainer = styled.div`
   display: flex;

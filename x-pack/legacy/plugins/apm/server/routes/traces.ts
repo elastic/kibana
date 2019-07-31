@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { InternalCoreSetup } from 'src/core/server';
-import { withDefaultValidators } from '../lib/helpers/input_validation';
+import { withDefaultQueryParamValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getTrace } from '../lib/traces/get_trace';
 import { getTransactionGroupList } from '../lib/transaction_groups';
@@ -27,7 +27,7 @@ export function initTracesApi(core: InternalCoreSetup) {
     path: ROOT,
     options: {
       validate: {
-        query: withDefaultValidators()
+        query: withDefaultQueryParamValidators()
       },
       tags: ['access:apm']
     },
@@ -45,7 +45,7 @@ export function initTracesApi(core: InternalCoreSetup) {
     path: `${ROOT}/{traceId}`,
     options: {
       validate: {
-        query: withDefaultValidators()
+        query: withDefaultQueryParamValidators()
       },
       tags: ['access:apm']
     },

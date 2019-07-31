@@ -6,30 +6,31 @@
 
 import Joi from 'joi';
 import { withDefaultQueryParamValidators } from '../../lib/helpers/input_validation';
-import { getTransactionCharts } from '../../lib/transactions/charts';
 import {
   setupRequest,
   APMRequest,
   DefaultQueryParams
 } from '../../lib/helpers/setup_request';
+import { getErrorGroupList } from '../../lib/errors/get_error_group_list';
 import { PromiseReturnType } from '../../../typings/common';
 
 interface Query extends DefaultQueryParams {
-  transactionType?: string;
-  transactionName?: string;
+  sortField?: string;
+  sortDirection?: string;
 }
 
-export type TransactionChartsAPIResponse = PromiseReturnType<
-  typeof transactionChartsRoute['handler']
+export type ErrorGroupListAPIResponse = PromiseReturnType<
+  typeof errorGroupListRoute['handler']
 >;
-export const transactionChartsRoute = {
+
+export const errorGroupListRoute = {
   method: 'GET',
-  path: `/api/apm/services/{serviceName}/transaction_groups/charts`,
+  path: `/api/apm/services/{serviceName}/errors`,
   options: {
     validate: {
       query: withDefaultQueryParamValidators({
-        transactionType: Joi.string(),
-        transactionName: Joi.string()
+        sortField: Joi.string(),
+        sortDirection: Joi.string()
       })
     },
     tags: ['access:apm']
@@ -37,12 +38,12 @@ export const transactionChartsRoute = {
   handler: async (req: APMRequest<Query>) => {
     const setup = await setupRequest(req);
     const { serviceName } = req.params;
-    const { transactionType, transactionName } = req.query;
+    const { sortField, sortDirection } = req.query;
 
-    return getTransactionCharts({
+    return getErrorGroupList({
       serviceName,
-      transactionType,
-      transactionName,
+      sortField,
+      sortDirection,
       setup
     });
   }

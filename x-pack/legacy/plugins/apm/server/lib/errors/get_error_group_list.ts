@@ -14,24 +14,19 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME
 } from '../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../typings/common';
 import { APMError } from '../../../typings/es_schemas/ui/APMError';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
-export type ErrorGroupListAPIResponse = PromiseReturnType<
-  typeof getErrorGroups
->;
-
-export async function getErrorGroups({
+export async function getErrorGroupList({
   serviceName,
   sortField,
   sortDirection = 'desc',
   setup
 }: {
   serviceName: string;
-  sortField: string;
-  sortDirection: string;
+  sortField?: string;
+  sortDirection?: string;
   setup: Setup;
 }) {
   const { start, end, uiFiltersES, client, config } = setup;

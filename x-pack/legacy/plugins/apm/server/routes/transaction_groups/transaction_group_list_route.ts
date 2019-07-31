@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Joi from 'joi';
-import { withDefaultValidators } from '../../lib/helpers/input_validation';
+import { withDefaultQueryParamValidators } from '../../lib/helpers/input_validation';
 import {
   setupRequest,
   APMRequest,
@@ -26,7 +26,7 @@ export const transactionGroupListRoute = {
   path: '/api/apm/services/{serviceName}/transaction_groups',
   options: {
     validate: {
-      query: withDefaultValidators({
+      query: withDefaultQueryParamValidators({
         transactionType: Joi.string().required()
       })
     },

@@ -8,7 +8,7 @@ import { callApi } from '../callApi';
 import { UIFilters } from '../../../../typings/ui-filters';
 import { transactionChartsRoute } from '../../../../server/routes/transaction_groups/transaction_charts_route';
 import { transactionGroupListRoute } from '../../../../server/routes/transaction_groups/transaction_group_list_route';
-import { transactionDistributionRoute } from '../../../../server/routes/transaction_groups/transactionDistributionRoute';
+import { transactionDistributionRoute } from '../../../../server/routes/transaction_groups/transaction_distribution_route';
 import { transactionBreakdownRoute } from '../../../../server/routes/transaction_groups/transaction_breakdown_route';
 
 export async function loadTransactionList({

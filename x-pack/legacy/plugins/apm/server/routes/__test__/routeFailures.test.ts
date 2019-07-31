@@ -6,7 +6,7 @@
 
 import { flatten } from 'lodash';
 import { InternalCoreSetup } from 'src/core/server';
-import { initErrorsApi } from '../errors';
+import { initErrorsApi } from '../errors/init';
 import { initServicesApi } from '../services';
 import { initTracesApi } from '../traces';
 

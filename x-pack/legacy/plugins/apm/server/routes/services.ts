@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { InternalCoreSetup } from 'src/core/server';
 import { AgentName } from '../../typings/es_schemas/ui/fields/Agent';
 import { createApmTelementry, storeApmTelemetry } from '../lib/apm_telemetry';
-import { withDefaultValidators } from '../lib/helpers/input_validation';
+import { withDefaultQueryParamValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
@@ -28,7 +28,7 @@ export function initServicesApi(core: InternalCoreSetup) {
     path: ROOT,
     options: {
       validate: {
-        query: withDefaultValidators()
+        query: withDefaultQueryParamValidators()
       },
       tags: ['access:apm']
     },
@@ -52,7 +52,7 @@ export function initServicesApi(core: InternalCoreSetup) {
     path: `${ROOT}/{serviceName}/agent_name`,
     options: {
       validate: {
-        query: withDefaultValidators()
+        query: withDefaultQueryParamValidators()
       },
       tags: ['access:apm']
     },
@@ -68,7 +68,7 @@ export function initServicesApi(core: InternalCoreSetup) {
     path: `${ROOT}/{serviceName}/transaction_types`,
     options: {
       validate: {
-        query: withDefaultValidators()
+        query: withDefaultQueryParamValidators()
       },
       tags: ['access:apm']
     },

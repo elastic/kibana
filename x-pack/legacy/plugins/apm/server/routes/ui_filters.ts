@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { InternalCoreSetup } from 'src/core/server';
-import { withDefaultValidators } from '../lib/helpers/input_validation';
+import { withDefaultQueryParamValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getEnvironments } from '../lib/ui_filters/get_environments';
 
@@ -24,7 +24,7 @@ export function initUIFiltersApi(core: InternalCoreSetup) {
     path: '/api/apm/ui_filters/environments',
     options: {
       validate: {
-        query: withDefaultValidators({
+        query: withDefaultQueryParamValidators({
           serviceName: Joi.string()
         })
       },

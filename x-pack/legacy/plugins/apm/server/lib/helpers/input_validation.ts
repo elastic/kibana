@@ -9,7 +9,7 @@ export const dateValidation = Joi.alternatives()
   .try(Joi.date().iso(), Joi.number())
   .required();
 
-export const withDefaultValidators = (
+export const withDefaultQueryParamValidators = (
   validators: { [key: string]: Schema } = {}
 ) => {
   return Joi.object().keys({

@@ -20,7 +20,7 @@ function decodeUiFilters(server: Server, uiFiltersEncoded?: string) {
 }
 
 // overwrite "query" on Legacy.Request
-export type APMRequest<Q extends Record<string, any> | unknown = unknown> = {
+export type APMRequest<Q extends Record<string, any> | unknown> = {
   query: Q;
 } & Omit<Legacy.Request, 'query'>;
 
