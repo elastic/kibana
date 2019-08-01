@@ -114,6 +114,8 @@ export class GoServerLauncher extends AbstractLauncher {
         GOROOT: goRoot,
         GOPATH: goPath,
         PATH: envPath,
+        GO111MODULE: 'on',
+        CGO_ENABLED: '0',
       },
     });
     p.stdout.on('data', data => {
