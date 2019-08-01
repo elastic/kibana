@@ -1,27 +1,57 @@
 [[tutorial-dashboard]]
-=== Displaying your visualizations in a dashboard
+=== Add visualizations to a dashboard
 
 A dashboard is a collection of visualizations that you can arrange and share.
 You'll build a dashboard that contains the visualizations you saved during
 this tutorial.
 
 . Open *Dashboard*.
-. Click *Create new dashboard*.
-. Click *Add*.
+. On the Dashboard overview page, click *Create new dashboard*.
+. Click *Add* in the menu bar.
 . Add *Bar Example*, *Map Example*, *Markdown Example*, and *Pie Example*.
-
-
-Your sample dashboard look like this:
-
++
+Your sample dashboard should look like this:
++
 [role="screenshot"]
 image::images/tutorial-dashboard.png[]
 
+. Try out the editing controls.
++
 You can rearrange the visualizations by clicking a the header of a
 visualization and dragging. The gear icon in the top right of a visualization
 displays controls for editing and deleting the visualization.  A resize control
 is on the lower right.
 
-To get a link to share or HTML code to embed the dashboard in a web page, save
-the dashboard and click  *Share*.
+. *Save* your dashboard.
 
-*Save* your dashboard.
+==== Inspect the data
+
+Seeing visualizations of your data is great, 
+but sometimes you need to look at the actual data to
+understand what's really going on. You can inspect the data behind any visualization
+and view the {es} query used to retrieve it.
+
+. In the dashboard, hover the pointer over the pie chart, and then click the icon in the upper right. 
+. From the *Options* menu, select *Inspect*.
++
+[role="screenshot"]
+image::images/tutorial-full-inspect1.png[]
+
+. To look at the query used to fetch the data for the visualization, select *View > Requests*
+in the upper right of the Inspect pane.
+
+[float]
+=== Next steps
+
+Now that you have a handle on the basics, you're ready to start exploring
+your own data with Kibana.
+
+* See {kibana-ref}/discover.html[Discover] for information about searching and filtering
+your data.
+* See {kibana-ref}/visualize.html[Visualize] for information about the visualization
+types Kibana has to offer.
+* See {kibana-ref}/management.html[Management] for information about configuring Kibana
+and managing your saved objects.
+* See {kibana-ref}/console-kibana.html[Console] to learn about the interactive
+console you can use to submit REST requests to Elasticsearch.
+
