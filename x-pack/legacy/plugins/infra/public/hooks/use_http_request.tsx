@@ -14,9 +14,10 @@ import { useTrackedPromise } from '../utils/use_tracked_promise';
 export function useHTTPRequest<Response>(
   pathname: string,
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD',
-  body?: string
+  body?: string,
+  decode: (response: any) => Response = response => response
 ) {
-  const [data, setData] = useState<Response | null>(null);
+  const [response, setResponse] = useState<Response | null>(null);
   const [error, setError] = useState<KFetchError | null>(null);
   const [request, makeRequest] = useTrackedPromise(
     {
@@ -27,7 +28,7 @@ export function useHTTPRequest<Response>(
           pathname,
           body,
         }),
-      onResolve: setData,
+      onResolve: resp => setResponse(decode(resp)),
       onReject: (e: unknown) => {
         const err = e as KFetchError;
         setError(err);
@@ -60,7 +61,7 @@ export function useHTTPRequest<Response>(
   const loading = useMemo(() => request.state === 'pending', [request.state]);
 
   return {
-    response: data,
+    response,
     error,
     loading,
     makeRequest,
