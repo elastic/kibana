@@ -16,13 +16,13 @@ NOTE: You cannot access the endpoint via the Console in Kibana.
 To use the get role API, you must have the `manage_security` cluster privilege.
 
 [[role-management-api-retrieve-all-request-body]]
-===== Request
+==== Request
 
 [source,js]
 `GET /api/security/role`
 
 [[role-management-api-retrieve-all-response-body]]
-===== Response body
+==== Response body
 
 A successful call returns a response code of `200` and a response body containing a JSON
 representation of the roles. For example:

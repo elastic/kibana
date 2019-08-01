@@ -13,8 +13,10 @@ NOTE: You cannot access these endpoints via the Console in Kibana.
 
 * <<role-management-api-put>>
 * <<role-management-api-get>>
+* <<role-management-specific-api-get>>
 * <<role-management-api-delete>>
 
 include::role-management/put.asciidoc[]
 include::role-management/get.asciidoc[]
+include::role-management/get-all.asciidoc[]
 include::role-management/delete.asciidoc[]
