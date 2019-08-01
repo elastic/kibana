@@ -9,6 +9,7 @@ import { WebElementWrapper } from '../../../../test/functional/services/lib/web_
 
 export function InfraLogStreamProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async getColumnHeaderLabels(): Promise<string[]> {
@@ -22,7 +23,14 @@ export function InfraLogStreamProvider({ getService }: KibanaFunctionalTestDefau
       return await testSubjects.find('logStream');
     },
 
-    async getStreamEntries(): Promise<WebElementWrapper[]> {
+    async getStreamEntries(minimumItems = 1): Promise<WebElementWrapper[]> {
+      await retry.try(async () => {
+        const elements = await testSubjects.findAll('streamEntry');
+        if (!elements || elements.length < minimumItems) {
+          throw new Error();
+        }
+      });
+
       return await testSubjects.findAll('streamEntry');
     },
 

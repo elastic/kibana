@@ -39,16 +39,23 @@ export function InfraSourceConfigurationFormProvider({
     },
     async addTimestampLogColumn() {
       await (await this.getAddLogColumnButton()).click();
-      await (await testSubjects.findDescendant(
-        'addTimestampLogColumn',
-        await this.getAddLogColumnPopover()
-      )).click();
+      await retry.try(async () => {
+        await (await testSubjects.findDescendant(
+          'addTimestampLogColumn',
+          await this.getAddLogColumnPopover()
+        )).click();
+      });
     },
     async addFieldLogColumn(fieldName: string) {
       await (await this.getAddLogColumnButton()).click();
-      const popover = await this.getAddLogColumnPopover();
-      await (await testSubjects.findDescendant('fieldSearchInput', popover)).type(fieldName);
-      await (await testSubjects.findDescendant(`addFieldLogColumn:${fieldName}`, popover)).click();
+      await retry.try(async () => {
+        const popover = await this.getAddLogColumnPopover();
+        await (await testSubjects.findDescendant('fieldSearchInput', popover)).type(fieldName);
+        await (await testSubjects.findDescendant(
+          `addFieldLogColumn:${fieldName}`,
+          popover
+        )).click();
+      });
     },
     async getLogColumnPanels(): Promise<WebElementWrapper[]> {
       return await testSubjects.findAllDescendant('logColumnPanel', await this.getForm());
