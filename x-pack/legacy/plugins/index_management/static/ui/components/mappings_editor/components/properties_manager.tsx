@@ -18,17 +18,28 @@ import { PropertyEditor } from './property_editor';
 
 interface Props {
   form: Form;
-  depthLevel?: number;
+  parentType?: string;
   path?: string;
   fieldName?: string;
 }
 
-export const PropertiesManager = ({
-  form,
-  depthLevel,
-  path = 'properties',
-  fieldName = '',
-}: Props) => {
+export const PropertiesManager = ({ form, parentType = 'root', path, fieldName = '' }: Props) => {
+  const getArrayPath = () => {
+    if (parentType === 'root') {
+      return 'properties';
+    }
+
+    return parentType === 'text' || parentType === 'keyword'
+      ? `${path}fields`
+      : `${path}properties`;
+  };
+
+  const getAccordionButtonContent = () => {
+    return parentType === 'text' || parentType === 'keyword'
+      ? `${fieldName} child fields`
+      : `${fieldName} properties`;
+  };
+
   const renderPropertiesTree = ({
     items,
     addItem,
@@ -39,38 +50,48 @@ export const PropertiesManager = ({
     removeItem: (id: number) => void;
   }) => (
     <Fragment>
-      <ul className="tree" style={depthLevel === 0 ? { marginLeft: 0 } : {}}>
-        {items.map(({ id, path: itemPath, isNew }) => {
-          return (
-            <li key={id}>
-              <PropertyEditor
-                fieldPathPrefix={`${itemPath}.`}
-                form={form}
-                onRemove={() => removeItem(id)}
-                isEditMode={!isNew}
-              />
-            </li>
-          );
-        })}
-      </ul>
-      <EuiSpacer size="l" />
+      {items.length > 0 && (
+        <Fragment>
+          <ul className="tree" style={parentType === 'root' ? { marginLeft: 0 } : {}}>
+            {items.map(({ id, path: itemPath, isNew }) => {
+              return (
+                <li key={id}>
+                  <PropertyEditor
+                    fieldPathPrefix={`${itemPath}.`}
+                    form={form}
+                    onRemove={() => removeItem(id)}
+                    isEditMode={!isNew}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+          <EuiSpacer size="l" />
+        </Fragment>
+      )}
+
       <EuiButton color="primary" onClick={addItem}>
-        Add property
+        {parentType === 'text' || parentType === 'keyword' ? 'Add child field' : 'Add property'}
       </EuiButton>
     </Fragment>
   );
 
   return (
-    <UseArray path={path} form={form}>
+    <UseArray
+      path={getArrayPath()}
+      form={form}
+      initialNumberOfItems={parentType === 'text' || parentType === 'keyword' ? 0 : 1}
+    >
       {({ items, addItem, removeItem }) => {
-        if (depthLevel === 0) {
-          // At the root level we don't add the accordion
+        if (parentType === 'root' || items.length === 0) {
+          // At the root level or if there aren't any property
+          // we don't add the accordion
           return renderPropertiesTree({ items, addItem, removeItem });
         }
         return (
           <EuiAccordion
             id={uuid()}
-            buttonContent={`${fieldName} properties`}
+            buttonContent={getAccordionButtonContent()}
             paddingSize="s"
             initialIsOpen={true}
           >
