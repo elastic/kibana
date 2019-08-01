@@ -27,7 +27,8 @@ import {
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
-} from '../../server/types';
+} from '../../server';
+
 // TODO: Migrate to an error modal powered by the NP?
 import {
   isAutoCreateIndexError,
@@ -37,16 +38,6 @@ import { SimpleSavedObject } from './simple_saved_object';
 import { HttpSetup, HttpFetchOptions } from '../http';
 
 type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
-
-export {
-  SavedObject,
-  SavedObjectAttribute,
-  SavedObjectAttributes,
-  SavedObjectReference,
-  SavedObjectsBaseOptions,
-  SavedObjectsFindOptions,
-  SavedObjectsMigrationVersion,
-} from '../../server/types';
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 

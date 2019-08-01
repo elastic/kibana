@@ -146,7 +146,6 @@ module.exports = {
                   'src/core/server/**/*',
                   '!src/core/server/index.ts',
                   '!src/core/server/mocks.ts',
-                  '!src/core/server/types.ts',
                   '!src/core/server/*.test.mocks.ts',
 
                   'src/plugins/**/public/**/*',
