@@ -8,7 +8,7 @@ import { omit } from 'lodash';
 import { SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Log } from './types';
 import { TaskManager } from '../../task_manager';
-import { validateAlertTypeParams, parseDuration } from './lib';
+import { validateAlertTypeParams } from './lib';
 
 interface ConstructorOptions {
   log: Log;
@@ -32,6 +32,13 @@ interface FindOptions {
     };
     fields?: string[];
   };
+}
+
+interface FindResult {
+  page: number;
+  perPage: number;
+  total: number;
+  data: object[];
 }
 
 interface CreateOptions {
@@ -124,14 +131,22 @@ export class AlertsClient {
     return this.getAlertFromRaw(result.id, result.attributes, result.references);
   }
 
-  public async find({ options = {} }: FindOptions = {}) {
+  public async find({ options = {} }: FindOptions = {}): Promise<FindResult> {
     const results = await this.savedObjectsClient.find({
       ...options,
       type: 'alert',
     });
-    return results.saved_objects.map(result =>
+
+    const data = results.saved_objects.map(result =>
       this.getAlertFromRaw(result.id, result.attributes, result.references)
     );
+
+    return {
+      page: results.page,
+      perPage: results.per_page,
+      total: results.total,
+      data,
+    };
   }
 
   public async delete({ id }: { id: string }) {
@@ -213,10 +228,7 @@ export class AlertsClient {
         basePath,
       },
       state: {
-        // This is here because we can't rely on the task manager's internal runAt.
-        // It changes it for timeout, etc when a task is running.
-        scheduledRunAt: new Date(Date.now() + parseDuration(interval)),
-        previousScheduledRunAt: null,
+        previousStartedAt: null,
         alertTypeState: {},
         alertInstances: {},
       },
