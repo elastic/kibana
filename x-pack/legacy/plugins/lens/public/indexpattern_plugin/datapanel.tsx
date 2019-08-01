@@ -319,6 +319,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 .sort(sortFields)
                 .map(field => (
                   <FieldItem
+                    indexPatternId={currentIndexPatternId}
                     key={field.name}
                     field={field}
                     highlight={state.nameFilter.toLowerCase()}
