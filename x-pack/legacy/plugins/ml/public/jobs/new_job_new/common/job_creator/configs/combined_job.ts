@@ -10,11 +10,11 @@ import { Job } from './job';
 
 // in older implementations of the job config, the datafeed was placed inside the job
 // for convenience.
-export interface CombinedJobConfig extends Job {
+export interface CombinedJob extends Job {
   datafeed_config: Datafeed;
 }
 
-export function expandCombinedJobConfig(combinedJob: CombinedJobConfig) {
+export function expandCombinedJobConfig(combinedJob: CombinedJob) {
   const combinedJobClone = cloneDeep(combinedJob);
   const job = combinedJobClone;
   const datafeed = combinedJobClone.datafeed_config;

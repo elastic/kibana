@@ -9,7 +9,7 @@ import { IndexPattern } from 'ui/index_patterns';
 import { SingleMetricJobCreator } from './single_metric_job_creator';
 import { MultiMetricJobCreator } from './multi_metric_job_creator';
 import { PopulationJobCreator } from './population_job_creator';
-import { CombinedJobConfig, expandCombinedJobConfig } from './configs';
+import { CombinedJob, expandCombinedJobConfig } from './configs';
 import {
   isSingleMetricJobCreator,
   isMultiMetricJobCreator,
@@ -45,7 +45,7 @@ export const jobCreatorFactory = (jobType: JOB_TYPE) => (
 
 export function prePopulateJob(
   jobCreator: SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator,
-  combinedJob: CombinedJobConfig
+  combinedJob: CombinedJob
 ) {
   const { job, datafeed } = expandCombinedJobConfig(combinedJob);
 
