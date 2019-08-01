@@ -29,7 +29,12 @@ function getLogger(opts, id, logLevel) {
     const tags = ['worker', logLevel];
 
     if (err) {
-      logger(`${message}: ${err.stack  ? err.stack : err }`, tags);
+      const errString = `${message}: ${err.stack ? err.stack : err}`;
+      logger(errString.substring(0, 1000), tags);
+      logger(
+        `The first 1000 characters of the error message were logged. The entire error message length: ${errString.length} characters.`,
+        tags
+      );
       return;
     }
 
