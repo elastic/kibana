@@ -49,11 +49,13 @@ export class HeadlessChromiumDriver {
       waitForSelector,
     }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string }
   ) {
-    this.logger.debug(`opening url ${url}`);
+    this.logger.info(`opening url ${url}`); // intentionally info
     await this.page.setRequestInterception(true);
+    let interceptedCount = 0;
     this.page.on('request', (interceptedRequest: any) => {
+      let isData = false;
       if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedRequest.url())) {
-        this.logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
+        // this.logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
         interceptedRequest.continue({
           headers: {
             ...interceptedRequest.headers(),
@@ -62,13 +64,17 @@ export class HeadlessChromiumDriver {
         });
       } else {
         let interceptedUrl = interceptedRequest.url();
+
         if (interceptedUrl.startsWith('data:')) {
           // `data:image/xyz;base64` can be very long URLs
           interceptedUrl = interceptedUrl.substring(0, 100) + '[truncated]';
+          isData = true;
         }
-        this.logger.debug(`No custom headers for ${interceptedUrl}`);
+
+        // this.logger.debug(`No custom headers for ${interceptedUrl}`);
         interceptedRequest.continue();
       }
+      interceptedCount = interceptedCount + (isData ? 0 : 1);
     });
 
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
@@ -78,6 +84,7 @@ export class HeadlessChromiumDriver {
     }
 
     await this.waitForSelector(waitForSelector);
+    this.logger.info(`handled ${interceptedCount} page requests`);
   }
 
   public async screenshot(elementPosition: ElementPosition) {
@@ -106,7 +113,7 @@ export class HeadlessChromiumDriver {
 
   public async waitForSelector(selector: string, opts: WaitForSelectorOpts = {}) {
     const { silent = false } = opts;
-    this.logger.debug(`waitForSelector ${selector}`);
+    // this.logger.debug(`waitForSelector ${selector}`);
 
     let resp;
     try {
@@ -125,7 +132,7 @@ export class HeadlessChromiumDriver {
       throw err;
     }
 
-    this.logger.debug(`waitForSelector ${selector} resolved`);
+    // this.logger.debug(`waitForSelector ${selector} resolved`);
     return resp;
   }
 

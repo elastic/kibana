@@ -41,8 +41,6 @@ export function screenshotsObservableFactory(server: KbnServer) {
     layout,
     browserTimezone,
   }: ScreenshotObservableOpts): Rx.Observable<void> {
-    logger.debug(`Creating browser driver factory`);
-
     const create$ = browserDriverFactory.create({
       viewport: layout.getBrowserViewport(),
       browserTimezone,

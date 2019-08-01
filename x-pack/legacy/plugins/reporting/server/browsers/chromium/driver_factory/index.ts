@@ -13,11 +13,11 @@ import * as Rx from 'rxjs';
 import { map, share, mergeMap, filter, partition } from 'rxjs/operators';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 
+import { LevelLogger as Logger } from '../../../lib/level_logger';
 import { HeadlessChromiumDriver } from '../driver';
 import { args, IArgOptions } from './args';
 import { safeChildProcess } from '../../safe_child_process';
 import { getChromeLogLocation } from '../paths';
-import { Logger } from '../../../../types';
 
 type binaryPath = string;
 type queueTimeout = number;
@@ -37,7 +37,7 @@ export class HeadlessChromiumDriverFactory {
 
   constructor(
     binaryPath: binaryPath,
-    logger: any,
+    logger: Logger,
     browserConfig: IBrowserConfig,
     queueTimeout: queueTimeout
   ) {
@@ -127,6 +127,8 @@ export class HeadlessChromiumDriverFactory {
         // "TimeoutError: waiting for selector ".application" failed: timeout 30000ms exceeded"
         // @ts-ignore outdated typedefs for puppteer
         page.setDefaultTimeout(this.queueTimeout);
+
+        this.logger.debug(`Browser driver factory created`);
       } catch (err) {
         observer.error(new Error(`Error spawning Chromium browser: [${err}]`));
         throw err;
