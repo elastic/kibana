@@ -10,7 +10,8 @@ import { Action } from './state_management';
 
 export interface Suggestion {
   visualizationId: string;
-  datasourceState: unknown;
+  // todo include kept layer id and affected data source here
+  datasourceSuggestion: DatasourceSuggestion;
   score: number;
   title: string;
   state: unknown;
@@ -44,10 +45,10 @@ export function getSuggestions(
         .map(({ datasourceSuggestionId, ...suggestion }) => ({
           ...suggestion,
           visualizationId,
-          datasourceState: datasourceTableSuggestions.find(
+          datasourceSuggestion: datasourceTableSuggestions.find(
             datasourceSuggestion =>
               datasourceSuggestion.table.datasourceSuggestionId === datasourceSuggestionId
-          )!.state,
+          )!,
         }));
     })
     .reduce((globalList, currentList) => [...globalList, ...currentList], [])
@@ -59,6 +60,7 @@ export function toSwitchAction(suggestion: Suggestion): Action {
     type: 'SWITCH_VISUALIZATION',
     newVisualizationId: suggestion.visualizationId,
     initialState: suggestion.state,
-    datasourceState: suggestion.datasourceState,
+    datasourceState: suggestion.datasourceSuggestion.state,
+    // TODO pass the datasource id here
   };
 }

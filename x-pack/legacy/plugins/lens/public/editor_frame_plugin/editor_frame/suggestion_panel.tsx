@@ -55,6 +55,7 @@ const SuggestionPreview = ({
       paddingSize="s"
       data-test-subj="suggestion"
       onClick={() => {
+        // TODO drop unused layers here
         dispatch(toSwitchAction(suggestion));
       }}
     >
@@ -109,6 +110,7 @@ function InnerSuggestionPanel({
   if (!activeDatasourceId) {
     return null;
   }
+  // TODO query all loaded data sources, not just the currently actibve one
   const datasourceSuggestions = datasourceMap[
     activeDatasourceId
   ].getDatasourceSuggestionsFromCurrentState(datasourceStates[activeDatasourceId].state);
