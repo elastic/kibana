@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
 import { ensureBrowserDownloaded } from './download';
+// @ts-ignore
 import { installBrowser } from './install';
 import { LevelLogger } from '../lib/level_logger';
+import { KbnServer } from '../../types';
 
-export async function createBrowserDriverFactory(server) {
+export async function createBrowserDriverFactory(server: KbnServer) {
   const config = server.config();
   const logger = LevelLogger.createForServer(server, ['reporting', 'browser-driver']);
 
@@ -24,14 +27,20 @@ export async function createBrowserDriverFactory(server) {
   }
 
   try {
-    const browserDriverFactory = await installBrowser(logger, BROWSER_CONFIG, BROWSER_TYPE, DATA_DIR, REPORTING_TIMEOUT);
+    const browserDriverFactory = await installBrowser(
+      logger,
+      BROWSER_CONFIG,
+      BROWSER_TYPE,
+      DATA_DIR,
+      REPORTING_TIMEOUT
+    );
     logger.debug(`Browser installed at ${browserDriverFactory.binaryPath}`);
     return browserDriverFactory;
   } catch (error) {
     if (error.cause && ['EACCES', 'EEXIST'].includes(error.cause.code)) {
       logger.error(
         `Error code ${error.cause.code}: Insufficient permissions for extracting the browser archive. ` +
-        `Make sure the Kibana data directory (path.data) is owned by the same user that is running Kibana.`
+          `Make sure the Kibana data directory (path.data) is owned by the same user that is running Kibana.`
       );
     }
 
