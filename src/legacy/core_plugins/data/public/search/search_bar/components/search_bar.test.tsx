@@ -22,7 +22,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { SearchBar } from './search_bar';
 import { IndexPattern } from 'ui/index_patterns';
 
-jest.mock('../../../../data/public', () => {
+jest.mock('../../../../../data/public', () => {
   return {
     FilterBar: () => <div className="filterBar"></div>,
     QueryBar: () => <div className="queryBar"></div>,

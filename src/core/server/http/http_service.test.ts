@@ -133,46 +133,6 @@ test('spins up notReady server until started if configured with `autoListen:true
   expect(notReadyHapiServer.stop).toBeCalledTimes(1);
 });
 
-// this is an integration test!
-test('creates and sets up second http server', async () => {
-  const configService = createConfigService({
-    host: 'localhost',
-    port: 1234,
-  });
-  const { HttpServer } = jest.requireActual('./http_server');
-
-  mockHttpServer.mockImplementation((...args) => new HttpServer(...args));
-
-  const service = new HttpService({ configService, env, logger });
-  const serverSetup = await service.setup();
-  const cfg = { port: 2345 };
-  await serverSetup.createNewServer(cfg);
-  const server = await service.start();
-  expect(server.isListening()).toBeTruthy();
-  expect(server.isListening(cfg.port)).toBeTruthy();
-
-  try {
-    await serverSetup.createNewServer(cfg);
-  } catch (err) {
-    expect(err.message).toBe('port 2345 is already in use');
-  }
-
-  try {
-    await serverSetup.createNewServer({ port: 1234 });
-  } catch (err) {
-    expect(err.message).toBe('port 1234 is already in use');
-  }
-
-  try {
-    await serverSetup.createNewServer({ host: 'example.org' });
-  } catch (err) {
-    expect(err.message).toBe('port must be defined');
-  }
-  await service.stop();
-  expect(server.isListening()).toBeFalsy();
-  expect(server.isListening(cfg.port)).toBeFalsy();
-});
-
 test('logs error if already set up', async () => {
   const configService = createConfigService();
 
@@ -273,8 +233,7 @@ test('returns http server contract on setup', async () => {
   }));
 
   const service = new HttpService({ configService, env, logger });
-  const { createNewServer, ...setupHttpServer } = await service.setup();
-  expect(createNewServer).toBeDefined();
+  const setupHttpServer = await service.setup();
   expect(setupHttpServer).toEqual(httpServer);
 });
 

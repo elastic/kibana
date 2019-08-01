@@ -6,3 +6,4 @@
 
 export * from './job';
 export * from './datafeed';
+export * from './combined_job';
