@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n } from '@kbn/i18n';
 
-export { clustersSetupStatusRoute } from './clusters_setup_status';
-export { clusterSetupStatusRoute } from './cluster_setup_status';
-export { nodeSetupStatusRoute } from './node_setup_status';
+export const statusTitle = i18n.translate('xpack.monitoring.metricbeatMigration.apmInstructions.statusTitle', {
+  defaultMessage: `Migration status`
+});
