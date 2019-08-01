@@ -13,7 +13,7 @@ export const EVENTS = i18n.translate('xpack.siem.eventsTable.eventsTitle', {
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.siem.eventsTable.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {Event} other {Events}}`,
+    defaultMessage: `{totalCount, plural, =1 {event} other {events}}`,
   });
 
 export const TIMESTAMP = i18n.translate('xpack.siem.eventsTable.timestampTitle', {
@@ -21,11 +21,11 @@ export const TIMESTAMP = i18n.translate('xpack.siem.eventsTable.timestampTitle',
 });
 
 export const HOST_NAME = i18n.translate('xpack.siem.eventsTable.hostsNameTitle', {
-  defaultMessage: 'Host Name',
+  defaultMessage: 'Host name',
 });
 
 export const EVENT_ACTION = i18n.translate('xpack.siem.eventsTable.eventTypeAction', {
-  defaultMessage: 'Event Action',
+  defaultMessage: 'Event action',
 });
 
 export const SOURCE = i18n.translate('xpack.siem.eventsTable.sourceTitle', {
@@ -41,7 +41,7 @@ export const MESSAGE = i18n.translate('xpack.siem.eventsTable.messageTitle', {
 });
 
 export const EVENT_MODULE_DATASET = i18n.translate('xpack.siem.eventsTable.moduleDatasetTitle', {
-  defaultMessage: 'Module/Dataset',
+  defaultMessage: 'Module/dataset',
 });
 
 export const USER = i18n.translate('xpack.siem.eventsTable.userTitle', {
