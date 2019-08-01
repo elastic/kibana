@@ -1,58 +1,114 @@
 [role="xpack"]
 [[canvas-elements]]
-== Customize your workpad with elements
+== Bring your workpad to life with elements
 
-Elements are the core building blocks of your workpad. When you add elements to your workpad, you can use the elements that come with Canvas, or create your own.
+Elements are the core building blocks of your workpad.
 
 [float]
 [[add-canvas-element]]
-== Add a Canvas element to your workpad
+=== Add a Canvas element
 
 . Click *Add Element*, then select the best element to show off your data. 
 +
 image::images/canvas-element-select.gif[]
 
+. To move the element, click and drag it across your workpad.
+
+. To resize the element, select the sizing icons, then drag to the size you want.
+
 . Elements come preselected with default styles and demo data so that you can familiarize yourself with the element. Play around with the default settings and see what the element can do. 
 
 [float]
 [[connect-element-data]]
-=== Connect your own data
+=== Connect the element to your data
 
-When you are ready, connect the element to your own data using the panel on the right.
+To connect the element to your own data, use the panel on the right.
 
 . Make sure that the element is selected, then select *Data*.
 
 . Click *Change your data source*.
 
-. Click on the type of data source you want to use.
+. Choose one of the following data sources:
 
-. Specify the data source options, then click *Preview*.
+* *Elasticsearch SQL* — Uses Elasticsearch SQL to generate a data table.
+
+* *Elasticsearch raw documents* — Uses the Lucene query syntax to pull back raw documentation from Elasticsearch.
+
+* *Timelion* — Uses Timelion syntax to retrieve time series data.
+
+* *Demo data* — Uses mock data sets.
+
+. Specify your data source preferences, then click *Preview*.
 
 . If the element looks correct, click *Save*.
 
+. To specify the auto-refresh interval for the element, click the *Control settings* icon in the top left corner, then click the interval you want to use.
++
+To manually refresh the data, click the *Refresh data* icon. 
+
+[float]
+[[elasticsearch-sql-data-source]]
+==== Connect the element to Elasticsearch SQL
+
+. Make sure that the element is selected, then select *Data*.
+
+. Click *Change your data source*.
+
+
 [float]
 [[element-display-options]]
-
 === Choose the display options
+
+Choose how you want the element to appear on your workpad. For each element type, the display options are different.
 
 . Make sure that the element is selected, then select *Display*.
 
-. For each element type, the display options are different. To expand the options, click *+*.
+. Specify the display options you want to use.
 
-. For advanced display options, expand and use the *Element style* options.
+. To use the advanced display options, click *+* next to *Element style*, then choose one of these options:
 
-. To move the element, click and drag it across your workpad.
+* To make small changes to the appearance of the element, click *Container style*.
 
-. To resize the element, select the sizing icons, then drag to the size you want.
+* To apply a CSS stylesheet to the element, click *CSS*.
 
+. To change the order of the element, use the icons next to *Selected element*.
 
-
-[float]
-[[create-custom-element]]
-== Create a custom element
+//TIP: For more advanced customization options, create Canvas plugins.
 
 [float]
-== Add more pages to your workpad
+[[canvas-expression-editor]]
+=== Customize your element with the expression editor
+
+Further define the appearance and behavior of the element with the expression editor.
+
+. In the lower right corner, click *Expression editor*.
+
+. Edit the parts of the element expression that you want to change. 
+
+. Click *Run*.
+
+. If you like what you see, click *Close*.
+
+For information about the Canvas expression language, see <<canvas-function-reference,Canvas function reference>>.
+
+//Insert expression video.
+
+[float]
+[[element-save]]
+=== Save the element
+
+After you have made changes to the element, save it so that you can use it in future workpads.
+
+. Next to *Selected element, click the *Save as new element* icon.
+
+. In the *Create new element* window, enter a *Name* for the element.
+
+. Enter an optional *Description*, then click *Save*.
++
+To access the element, click *Add element*, then select *My elements*.
+
+[float]
+== Add more pages
 
 Add more pages to your workpad, then select the page transition.
 

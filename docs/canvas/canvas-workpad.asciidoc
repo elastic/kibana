@@ -6,28 +6,28 @@ When you create a workpad, you'll start with a blank page, or you can choose a w
 
 . Open *Canvas*.
 
-. Choose one of the following options:
+. On the *Canvas workpads* page, choose one of the following options:
 
 * To start with a single, blank workpad, click *Create workpad*.
 
-* To create a workpad from a template, select *Templates*, then select a preconfigured template.
+* To create a workpad from a template, select *Templates*, then click on a preconfigured template.
 
 * To import an existing workpad, click and drag a workpad JSON file to the *Import workpad JSON file* field.
 
-For advanced workpad examples, add a {kibana-ref}/add-sample-data.html[sample Kibana data set], then select *Canvas* from the *View Data* dropdown list.
+* To use a sample data workpad, click *Try the sample data workpads*, add the data, then select *Canvas* from the *View Data* dropdown list.
 
-For more workpad inspiration, go to the link:https://www.elastic.co/blog/[Elastic Blog]. 
+For workpad inspiration, go to the link:https://www.elastic.co/blog/[Elastic Blog]. 
 
 [float]
-=== Personalize your workpad
+=== Customize your workpad
 
-To personalize your workpad, use the editor on the right.
+To make your workpad look the way you want, use the editor on the right.
 
-. Add a *Name* to your workpad, for example, `My Canvas Workpad`.
+. Add a *Name* to your workpad. For example, `My Canvas Workpad`.
 
-. In the *Width* and *Height* fields, specify the size of your workpad. 
+. In the *Width* and *Height* fields, specify the size. 
 
-. Select the layout for your workpad. 
+. Select the layout. 
 +
 For example, click *720p* for a traditional presentation layout.
 
@@ -35,7 +35,7 @@ For example, click *720p* for a traditional presentation layout.
 +
 image::images/canvas-background-color-picker.gif[]
 
-. If you already know that you want to apply styles to the entire workpad, use the *Global CCS overrides*.
+. Apply a set of styles to the entire workpad.
 
 .. Expand *Global CCS overrides*.
 
@@ -44,10 +44,10 @@ image::images/canvas-background-color-picker.gif[]
 [float]
 === Share your workpad
 
-When you are ready to share your workpad, create a PDF, or export your workpad to another author.
+When you are ready to share your workpad, create a PDF, or export your workpad.
 
 [float]
-==== Create a PDF of your workpad
+==== Create a PDF
 
 To view your workpad outside of Kibana, generate a PDF. 
 
