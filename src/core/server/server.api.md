@@ -5,7 +5,6 @@
 ```ts
 
 import Boom from 'boom';
-import { ByteSizeValue } from '@kbn/config-schema';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { ConfigOptions } from 'elasticsearch';
 import { Duration } from 'moment';
@@ -100,7 +99,6 @@ export interface CoreSetup {
         registerAuth: HttpServiceSetup['registerAuth'];
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         basePath: HttpServiceSetup['basePath'];
-        createNewServer: HttpServiceSetup['createNewServer'];
         isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
     };
 }
@@ -170,12 +168,7 @@ export type Headers = Record<string, string | string[] | undefined>;
 // Warning: (ae-forgotten-export) The symbol "HttpServerSetup" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export interface HttpServiceSetup extends HttpServerSetup {
-    // Warning: (ae-forgotten-export) The symbol "HttpConfig" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
-}
+export type HttpServiceSetup = HttpServerSetup;
 
 // @public (undocumented)
 export interface HttpServiceStart {
