@@ -28,14 +28,14 @@ export function getCreateTaskRunnerFunction({
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
       run: async () => {
-        const { namespace, id, actionTypeParams } = taskInstance.params;
+        const { namespace, id, params } = taskInstance.params;
         const executorResult = await execute({
           namespace,
           actionTypeRegistry,
           encryptedSavedObjectsPlugin,
           actionId: id,
           services: getServices(taskInstance.params.basePath),
-          params: actionTypeParams,
+          params,
         });
         if (executorResult.status === 'error') {
           // Task manager error handler only kicks in when an error thrown (at this time)

@@ -61,6 +61,8 @@ yarn test:server
 
 #### Running functional tests
 
+For more info, see [the Elastic functional test development guide](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html).
+
 The functional UI tests, the API integration tests, and the SAML API integration tests are all run against a live browser, Kibana, and Elasticsearch install. Each set of tests is specified with a unique config that describes how to start the Elasticsearch server, the Kibana server, and what tests to run against them. The sets of tests that exist today are *functional UI tests* ([specified by this config](test/functional/config.js)), *API integration tests* ([specified by this config](test/api_integration/config.js)), and *SAML API integration tests* ([specified by this config](test/saml_api_integration/config.js)).
 
 The script runs all sets of tests sequentially like so:
