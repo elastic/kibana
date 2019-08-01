@@ -4,33 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { LegacyPluginInitializer, LegacyPluginOptions } from 'src/legacy/types';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { Feature } from '../xpack_main/server/lib/feature_registry';
-import { PLUGIN_ID } from './common/constants';
+import { PLUGIN } from './common/constants';
 import manifest from './kibana.json';
 import { CoreSetup, Plugin as ServerPlugin, PluginInitializerContext } from './server/plugin';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
 
-const ICON = 'merge';
-const ROOT = `plugins/${PLUGIN_ID}`;
-const pluginTitle = i18n.translate('xpack.integrationsManager.pluginTitle', {
-  defaultMessage: 'Integrations Manager',
-});
+const ROOT = `plugins/${PLUGIN.ID}`;
 
 const feature: Feature = {
-  id: PLUGIN_ID,
-  name: pluginTitle,
-  icon: ICON,
-  navLinkId: PLUGIN_ID,
-  app: [PLUGIN_ID, 'kibana'],
-  catalogue: [PLUGIN_ID],
+  id: PLUGIN.ID,
+  name: PLUGIN.TITLE,
+  icon: PLUGIN.ICON,
+  navLinkId: PLUGIN.ID,
+  app: [PLUGIN.ID, 'kibana'],
+  catalogue: [PLUGIN.ID],
   privileges: {
     all: {
-      api: [PLUGIN_ID],
-      catalogue: [PLUGIN_ID],
+      api: [PLUGIN.ID],
+      catalogue: [PLUGIN.ID],
       savedObject: {
         all: [],
         read: [],
@@ -38,8 +33,8 @@ const feature: Feature = {
       ui: ['show', 'save'],
     },
     read: {
-      api: [PLUGIN_ID],
-      catalogue: [PLUGIN_ID],
+      api: [PLUGIN.ID],
+      catalogue: [PLUGIN.ID],
       savedObject: {
         all: [],
         read: [],
@@ -50,16 +45,16 @@ const feature: Feature = {
 };
 
 const pluginOptions: LegacyPluginOptions = {
-  id: PLUGIN_ID,
+  id: PLUGIN.ID,
   require: manifest.requiredPlugins,
   version: manifest.version,
   kibanaVersion: manifest.kibanaVersion,
   uiExports: {
     app: {
-      title: pluginTitle,
-      description: pluginTitle,
+      title: PLUGIN.TITLE,
+      description: PLUGIN.TITLE,
       main: `${ROOT}/index`,
-      euiIconType: ICON,
+      euiIconType: PLUGIN.ICON,
       order: 8100,
     },
     // This defines what shows up in the registry found at /app/kibana#/home and /app/kibana#/home/feature_directory
@@ -67,7 +62,7 @@ const pluginOptions: LegacyPluginOptions = {
     mappings,
     savedObjectSchemas,
   },
-  configPrefix: 'xpack.integrationsManager',
+  configPrefix: PLUGIN.CONFIG_PREFIX,
   publicDir: resolve(__dirname, 'public'),
   config: undefined,
   deprecations: undefined,

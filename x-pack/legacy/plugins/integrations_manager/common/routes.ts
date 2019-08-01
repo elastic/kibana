@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PLUGIN_ID } from './constants';
+import { PLUGIN } from './constants';
 import { AssetType } from './types';
 
-export const API_ROOT = `/api/${PLUGIN_ID}`;
+export const API_ROOT = `/api/${PLUGIN.ID}`;
 export const API_LIST_PATTERN = `${API_ROOT}/list`;
 export const API_INFO_PATTERN = `${API_ROOT}/package/{pkgkey}`;
 export const API_INSTALL_PATTERN = `${API_ROOT}/install/{pkgkey}/{asset?}`;

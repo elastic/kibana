@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { CoreSetup, CoreStart, I18nStart } from 'src/core/public';
 import { HashRouter, Switch } from 'react-router-dom';
-import { EuiPage } from '@elastic/eui';
-import { routes } from './routes';
+import { ChromeStart, CoreSetup, HttpStart, I18nStart } from 'src/core/public';
+import { CoreProvider } from './contexts/core';
+import { setClient } from './data';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginInitializerContext {}
@@ -16,34 +16,37 @@ export interface PluginInitializerContext {}
 export type PluginSetup = ReturnType<Plugin['setup']>;
 export type PluginStart = ReturnType<Plugin['start']>;
 
+export interface PluginCore {
+  chrome: ChromeStart;
+  http: HttpStart;
+  i18n: I18nStart;
+  routes: JSX.Element[];
+}
+
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
   // called when plugin is setting up during Kibana's startup sequence
   public setup(core: CoreSetup) {}
   // called after all plugins are set up
-  public start(core: CoreStart) {
-    const { i18n } = core;
+  public start(core: PluginCore) {
+    setClient(core.http.fetch);
 
     return {
-      root: <Root i18n={i18n} />,
+      root: <Root core={core} />,
     };
   }
 }
 
-interface RootProps {
-  i18n: I18nStart;
-}
-
-function Root(props: RootProps) {
-  const { i18n } = props;
+function Root(props: { core: PluginCore }) {
+  const { i18n, routes } = props.core;
 
   return (
-    <i18n.Context>
-      <HashRouter>
-        <EuiPage style={{ flexWrap: 'wrap' }}>
+    <CoreProvider core={props.core}>
+      <i18n.Context>
+        <HashRouter>
           <Switch>{routes}</Switch>
-        </EuiPage>
-      </HashRouter>
-    </i18n.Context>
+        </HashRouter>
+      </i18n.Context>
+    </CoreProvider>
   );
 }

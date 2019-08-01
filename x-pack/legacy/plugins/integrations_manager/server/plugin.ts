@@ -10,7 +10,7 @@ import {
   ElasticsearchServiceSetup,
   HttpServiceSetup,
 } from 'src/core/server';
-import { PLUGIN_ID } from '../common/constants';
+import { PLUGIN } from '../common/constants';
 import { fetchList } from './registry';
 import { routes } from './routes';
 
@@ -34,7 +34,7 @@ export class Plugin {
     const { http, elasticsearch } = core;
     const { server } = http;
     const pluginContext: PluginContext = {
-      esClient: elasticsearch.createClient(PLUGIN_ID),
+      esClient: elasticsearch.createClient(PLUGIN.ID),
     };
 
     // make pluginContext entries available to handlers via h.context
