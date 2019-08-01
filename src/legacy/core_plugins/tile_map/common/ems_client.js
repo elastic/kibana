@@ -97,7 +97,8 @@ export class EMSClient {
     language,
     landingPageUrl,
     proxyElasticMapsServiceInMaps,
-    proxyElasticMapsServiceInMapsOptions
+    proxyElasticMapsServiceInMapsOptions,
+    fetchFunction
   }) {
 
     console.log('should proxy?', proxyElasticMapsServiceInMaps, proxyElasticMapsServiceInMapsOptions);
@@ -123,6 +124,10 @@ export class EMSClient {
     this._tmsProxyOptions = this._proxyElasticMapsServiceInMaps ? {
       tmsServiceDefaultRaster: this._proxyElasticMapsServiceInMapsOptions.tmsServiceDefaultRaster
     } : null;
+
+    this._fetchFunction = typeof fetchFunction === 'function' ? fetchFunction : (...args) => {
+      return fetch(...args);
+    };
 
     this._invalidateSettings();
   }
@@ -168,7 +173,7 @@ export class EMSClient {
           () => reject(new Error(`Request to ${url} timed out`)),
           this.EMS_LOAD_TIMEOUT
         );
-        fetch(url)
+        this._fetchFunction(url)
           .then(
             response => {
               clearTimeout(timer);

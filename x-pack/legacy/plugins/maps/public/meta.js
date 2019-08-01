@@ -34,6 +34,11 @@ function relativeToAbsolute(url) {
   return a.href;
 }
 
+
+function fetchFunction(...args) {
+  return fetch(...args);
+}
+
 let emsClient = null;
 let latestLicenseId = null;
 export function getEMSClient() {
@@ -57,7 +62,8 @@ export function getEMSClient() {
         manifestServiceUrl: chrome.getInjected('emsManifestServiceUrl'),
         landingPageUrl: chrome.getInjected('emsLandingPageUrl'),
         proxyElasticMapsServiceInMaps: proxyElasticMapsServiceInMaps,
-        proxyElasticMapsServiceInMapsOptions: proxyOptions
+        proxyElasticMapsServiceInMapsOptions: proxyOptions,
+        fetchFunction: fetchFunction //import this from client-side, so the right instance is returned (bootstrapped from common/* would not work
       });
     } else {
       //EMS is turned off. Mock API.
