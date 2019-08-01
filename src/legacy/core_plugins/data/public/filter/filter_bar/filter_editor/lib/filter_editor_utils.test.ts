@@ -253,7 +253,15 @@ describe('Filter editor utils', () => {
       const params = 'foo';
       const alias = 'bar';
       const state = FilterStateStore.APP_STATE;
-      const filter = buildFilter(mockIndexPattern, mockFields[0], isOperator, params, alias, state);
+      const filter = buildFilter(
+        mockIndexPattern,
+        mockFields[0],
+        isOperator,
+        false,
+        params,
+        alias,
+        state
+      );
       expect(filter.meta.negate).toBe(isOperator.negate);
       expect(filter.meta.alias).toBe(alias);
 
@@ -271,6 +279,7 @@ describe('Filter editor utils', () => {
         mockIndexPattern,
         mockFields[0],
         isOneOfOperator,
+        false,
         params,
         alias,
         state
@@ -292,6 +301,7 @@ describe('Filter editor utils', () => {
         mockIndexPattern,
         mockFields[0],
         isBetweenOperator,
+        false,
         params,
         alias,
         state
@@ -312,6 +322,7 @@ describe('Filter editor utils', () => {
         mockIndexPattern,
         mockFields[0],
         existsOperator,
+        false,
         params,
         alias,
         state
@@ -324,6 +335,22 @@ describe('Filter editor utils', () => {
       }
     });
 
+    it('should include disabled state', () => {
+      const params = undefined;
+      const alias = 'bar';
+      const state = FilterStateStore.APP_STATE;
+      const filter = buildFilter(
+        mockIndexPattern,
+        mockFields[0],
+        doesNotExistOperator,
+        true,
+        params,
+        alias,
+        state
+      );
+      expect(filter.meta.disabled).toBe(true);
+    });
+
     it('should negate based on operator', () => {
       const params = undefined;
       const alias = 'bar';
@@ -332,6 +359,7 @@ describe('Filter editor utils', () => {
         mockIndexPattern,
         mockFields[0],
         doesNotExistOperator,
+        false,
         params,
         alias,
         state
