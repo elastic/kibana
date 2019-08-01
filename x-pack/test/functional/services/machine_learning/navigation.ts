@@ -17,32 +17,32 @@ export function MachineLearningProvider({ getService, getPageObjects }: FtrProvi
 
     async navigateToJobManagement() {
       await testSubjects.click('mlTabJobManagement');
-      await testSubjects.exists('mlPageJobManagement');
+      await testSubjects.existOrFail('mlPageJobManagement');
     },
 
     async navigateToAnomalyExplorert() {
       await testSubjects.click('mlTabAnomalyExplorer');
-      await testSubjects.exists('mlPageAnomalyExplorer');
+      await testSubjects.existOrFail('mlPageAnomalyExplorer');
     },
 
     async navigateToSingleMetricViewer() {
       await testSubjects.click('mlTabSingleMetricViewer');
-      await testSubjects.exists('mlPageSingleMetricViewer');
+      await testSubjects.existOrFail('mlPageSingleMetricViewer');
     },
 
     async navigateToDataFrames() {
       await testSubjects.click('mlTabDataFrames');
-      await testSubjects.exists('mlPageDataFrame');
+      await testSubjects.existOrFail('mlPageDataFrame');
     },
 
     async navigateToDataVisualizer() {
       await testSubjects.click('mlTabDataVisualizer');
-      await testSubjects.exists('mlPageDataVisualizerSelector');
+      await testSubjects.existOrFail('mlPageDataVisualizerSelector');
     },
 
     async navigateToSettings() {
       await testSubjects.click('mlTabSettings');
-      await testSubjects.exists('mlPageSettings');
+      await testSubjects.existOrFail('mlPageSettings');
     },
   };
 }
