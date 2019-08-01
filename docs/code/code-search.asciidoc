@@ -1,3 +1,4 @@
+[role="xpack"]
 [[code-search]]
 == Search
 

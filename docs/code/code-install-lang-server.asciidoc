@@ -1,3 +1,4 @@
+[role="xpack"]
 [[code-install-lang-server]]
 == Install language server
 

@@ -1,3 +1,4 @@
+[role="xpack"]
 [[code-getting-started]]
 == Getting Started with Code
 

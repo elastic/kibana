@@ -1,3 +1,4 @@
+[role="xpack"]
 [[code-semantic-nav]]
 
 == Semantic code navigation
