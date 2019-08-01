@@ -39,6 +39,15 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
       createdActionId = createdAction.id;
       expect(createdAction).to.eql({
         id: createdActionId,
+        description: 'An email action',
+        actionTypeId: '.email',
+        config: {
+          service: '__json',
+          host: null,
+          port: null,
+          secure: null,
+          from: 'bob@example.com',
+        },
       });
 
       expect(typeof createdActionId).to.be('string');

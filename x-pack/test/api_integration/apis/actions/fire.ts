@@ -126,6 +126,11 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         .expect(200);
       expect(updatedAction).to.eql({
         id: ES_ARCHIVER_ACTION_ID,
+        actionTypeId: 'test.index-record',
+        description: 'My action updated',
+        config: {
+          unencrypted: `This value shouldn't get encrypted`,
+        },
       });
       await supertest
         .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_fire`)
