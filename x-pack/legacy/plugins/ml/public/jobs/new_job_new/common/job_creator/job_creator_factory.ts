@@ -32,6 +32,5 @@ export const jobCreatorFactory = (jobType: JOB_TYPE) => (
       jc = SingleMetricJobCreator;
       break;
   }
-
   return new jc(indexPattern, savedSearch, query);
 };

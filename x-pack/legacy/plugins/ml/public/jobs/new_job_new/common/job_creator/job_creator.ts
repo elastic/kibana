@@ -357,7 +357,7 @@ export class JobCreator {
     return JSON.stringify(this._datafeed_config, null, 2);
   }
 
-  public overrideConfigs(job: Job, datafeed: Datafeed) {
+  protected _overrideConfigs(job: Job, datafeed: Datafeed) {
     this._job_config = job;
     this._datafeed_config = datafeed;
 
