@@ -106,8 +106,7 @@ describe('buildRequestBody(req)', () => {
       size: 0,
       query: {
         bool: {
-          filter: [],
-          must: [
+          filter: [
             {
               bool: {
                 must: [
@@ -121,6 +120,8 @@ describe('buildRequestBody(req)', () => {
                 must_not: [],
               },
             },
+          ],
+          must: [
             {
               range: {
                 '@timestamp': {

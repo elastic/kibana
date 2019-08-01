@@ -67,7 +67,7 @@ export const setupMlJob = async ({
       groups,
       indexPatternName,
       startDatafeed: false,
-      useDedicatedIndex: false,
+      useDedicatedIndex: true,
     }),
     headers: {
       'kbn-system-api': 'true',
