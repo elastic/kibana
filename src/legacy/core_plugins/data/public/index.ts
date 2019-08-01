@@ -17,74 +17,28 @@
  * under the License.
  */
 
-// TODO these are imports from the old plugin world.
-// Once the new platform is ready, they can get removed
-// and handled by the platform itself in the setup method
-// of the ExpressionExectorService
-// @ts-ignore
-import { renderersRegistry } from 'plugins/interpreter/registries';
-import { ExpressionsService, ExpressionsSetup } from './expressions';
-import { QueryService, QuerySetup } from './query';
-import { FilterService, FilterSetup } from './filter';
-import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
+// /// Define plugin function
+import { DataPlugin as Plugin } from './plugin';
 
-export class DataPlugin {
-  // Exposed services, sorted alphabetically
-  private readonly expressions: ExpressionsService;
-  private readonly filter: FilterService;
-  private readonly indexPatterns: IndexPatternsService;
-  private readonly query: QueryService;
-
-  constructor() {
-    this.indexPatterns = new IndexPatternsService();
-    this.filter = new FilterService();
-    this.query = new QueryService();
-    this.expressions = new ExpressionsService();
-  }
-
-  public setup(): DataSetup {
-    // TODO: this is imported here to avoid circular imports.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getInterpreter } = require('plugins/interpreter/interpreter');
-    const indexPatternsService = this.indexPatterns.setup();
-    return {
-      expressions: this.expressions.setup({
-        interpreter: {
-          getInterpreter,
-          renderersRegistry,
-        },
-      }),
-      indexPatterns: indexPatternsService,
-      filter: this.filter.setup({
-        indexPatterns: indexPatternsService.indexPatterns,
-      }),
-      query: this.query.setup(),
-    };
-  }
-
-  public stop() {
-    this.expressions.stop();
-    this.indexPatterns.stop();
-    this.filter.stop();
-    this.query.stop();
-  }
+export function plugin() {
+  return new Plugin();
 }
 
-/** @public */
-export interface DataSetup {
-  expressions: ExpressionsSetup;
-  indexPatterns: IndexPatternsSetup;
-  filter: FilterSetup;
-  query: QuerySetup;
-}
+// /// Export types & static code
 
 /** @public types */
 export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
 
 /** @public types */
-export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
-export { Query, QueryBar } from './query';
-export { FilterBar } from './filter';
+export {
+  IndexPattern,
+  IndexPatterns,
+  StaticIndexPattern,
+  StaticIndexPatternField,
+  Field,
+} from './index_patterns';
+export { Query, QueryBar, QueryBarInput } from './query';
+export { FilterBar, ApplyFiltersPopover } from './filter';
 export {
   FilterManager,
   FilterStateManager,
