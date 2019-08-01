@@ -5,13 +5,11 @@
  */
 
 import { isEmpty } from 'lodash';
-import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { getAgentStatus } from './get_agent_status';
 import { getLegacyDataStatus } from './get_legacy_data_status';
 import { getServicesItems } from './get_services_items';
 
-export type ServiceListAPIResponse = PromiseReturnType<typeof getServices>;
 export async function getServices(setup: Setup) {
   const items = await getServicesItems(setup);
   const hasLegacyData = await getLegacyDataStatus(setup);

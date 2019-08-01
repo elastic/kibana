@@ -12,11 +12,9 @@ import {
   SERVICE_NAME,
   TRANSACTION_DURATION
 } from '../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../typings/common';
 import { rangeFilter } from '../../helpers/range_filter';
 import { Setup } from '../../helpers/setup_request';
 
-export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
 export async function getServicesItems(setup: Setup) {
   const { start, end, uiFiltersES, client, config } = setup;
 

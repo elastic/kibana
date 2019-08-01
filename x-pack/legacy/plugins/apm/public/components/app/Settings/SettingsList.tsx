@@ -22,13 +22,13 @@ import {
   EuiLink
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import { loadAgentConfigurationList } from '../../../services/rest/apm/settings';
+import { loadAgentConfigurationList } from '../../../services/rest/apm/agent_configuration';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
-import { AgentConfigurationListAPIResponse } from '../../../../server/lib/settings/agent_configuration/list_configurations';
 import { AddSettingsFlyout } from './AddSettings/AddSettingFlyout';
 import { APMLink } from '../../shared/Links/apm/APMLink';
 import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
+import { AgentConfigurationListAPIResponse } from '../../../../server/routes/agent_configuration/agent_configuration_list_route';
 
 export type Config = AgentConfigurationListAPIResponse[0];
 

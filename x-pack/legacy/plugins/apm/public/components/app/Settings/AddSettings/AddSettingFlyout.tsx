@@ -31,7 +31,7 @@ import {
   deleteAgentConfiguration,
   updateAgentConfiguration,
   createAgentConfiguration
-} from '../../../../services/rest/apm/settings';
+} from '../../../../services/rest/apm/agent_configuration';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 
 interface Props {

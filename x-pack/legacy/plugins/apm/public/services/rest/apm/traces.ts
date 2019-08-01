@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TraceAPIResponse } from '../../../../server/lib/traces/get_trace';
-import { callApi } from '../callApi';
+import { callApmApi } from '../callApi';
 import { UIFilters } from '../../../../typings/ui-filters';
-import { TransactionGroupListAPIResponse } from '../../../../server/routes/transaction_groups/transaction_group_list_route';
+import { traceListRoute } from '../../../../server/routes/traces/trace_list_route';
+import { traceRoute } from '../../../../server/routes/traces/trace_route';
 
 export async function loadTrace({
   traceId,
@@ -18,11 +18,12 @@ export async function loadTrace({
   start: string;
   end: string;
 }) {
-  return callApi<TraceAPIResponse>({
+  return callApmApi<typeof traceRoute>({
     pathname: `/api/apm/traces/${traceId}`,
     query: {
       start,
-      end
+      end,
+      uiFilters: undefined // TODO: should uiFilters be required like this?
     }
   });
 }
@@ -36,7 +37,7 @@ export async function loadTraceList({
   end: string;
   uiFilters: UIFilters;
 }) {
-  return callApi<TransactionGroupListAPIResponse>({
+  return callApmApi<typeof traceListRoute>({
     pathname: '/api/apm/traces',
     query: {
       start,

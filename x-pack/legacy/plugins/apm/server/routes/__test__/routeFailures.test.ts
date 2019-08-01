@@ -7,8 +7,8 @@
 import { flatten } from 'lodash';
 import { InternalCoreSetup } from 'src/core/server';
 import { initErrorsApi } from '../errors/init';
-import { initServicesApi } from '../services';
-import { initTracesApi } from '../traces';
+import { initServicesApi } from '../services/init';
+import { initTracesApi } from '../traces/init';
 
 describe('route handlers should fail with a Boom error', () => {
   let consoleErrorSpy: any;

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EnvironmentUIFilterAPIResponse } from '../../../../server/lib/ui_filters/get_environments';
-import { callApi } from '../callApi';
+import { callApmApi } from '../callApi';
+import { environmentsRoute } from '../../../../server/routes/ui_filters/environments_route';
 
 export async function loadEnvironmentsFilter({
   serviceName,
@@ -16,7 +16,7 @@ export async function loadEnvironmentsFilter({
   start: string;
   end: string;
 }) {
-  return callApi<EnvironmentUIFilterAPIResponse>({
+  return callApmApi<typeof environmentsRoute>({
     pathname: '/api/apm/ui_filters/environments',
     query: {
       start,

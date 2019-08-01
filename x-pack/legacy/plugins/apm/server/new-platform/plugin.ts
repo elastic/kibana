@@ -9,12 +9,12 @@ import { makeApmUsageCollector } from '../lib/apm_telemetry';
 import { CoreSetupWithUsageCollector } from '../lib/apm_telemetry/make_apm_usage_collector';
 import { initErrorsApi } from '../routes/errors/init';
 import { initMetricsApi } from '../routes/metrics/init';
-import { initServicesApi } from '../routes/services';
-import { initTracesApi } from '../routes/traces';
+import { initServicesApi } from '../routes/services/init';
+import { initTracesApi } from '../routes/traces/init';
 import { initTransactionGroupsApi } from '../routes/transaction_groups/init';
-import { initUIFiltersApi } from '../routes/ui_filters';
+import { initUIFiltersApi } from '../routes/ui_filters/init';
 import { initIndexPatternApi } from '../routes/index_patterns/index_pattern';
-import { initSettingsApi } from '../routes/settings';
+import { initSettingsApi } from '../routes/agent_configuration/init';
 
 export class Plugin {
   public setup(core: InternalCoreSetup) {

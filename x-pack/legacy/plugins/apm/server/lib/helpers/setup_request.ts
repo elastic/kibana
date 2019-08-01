@@ -27,7 +27,7 @@ export type APMRequest<Q extends Record<string, any> | unknown> = {
 export interface DefaultQueryParams {
   start: string;
   end: string;
-  uiFilters: string;
+  uiFilters: string | undefined;
 }
 
 interface APMRequestQuery {

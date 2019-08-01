@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServiceAgentNameAPIResponse } from '../../../../server/lib/services/get_service_agent_name';
-import { ServiceListAPIResponse } from '../../../../server/lib/services/get_services';
-import { callApi } from '../callApi';
+import { callApmApi } from '../callApi';
 import { UIFilters } from '../../../../typings/ui-filters';
-import { ServiceTransactionTypesAPIResponse } from '../../../../server/lib/services/get_service_transaction_types';
+import { serviceListRoute } from '../../../../server/routes/services/service_list_route';
+import { serviceAgentNameRoute } from '../../../../server/routes/services/service_agent_name_route';
+import { serviceTransactionTypesRoute } from '../../../../server/routes/services/service_transaction_types_routes';
 
 export async function loadServiceList({
   start,
@@ -19,7 +19,7 @@ export async function loadServiceList({
   end: string;
   uiFilters: UIFilters;
 }) {
-  return callApi<ServiceListAPIResponse>({
+  return callApmApi<typeof serviceListRoute>({
     pathname: `/api/apm/services`,
     query: {
       start,
@@ -38,11 +38,12 @@ export async function loadServiceAgentName({
   start: string;
   end: string;
 }) {
-  const { agentName } = await callApi<ServiceAgentNameAPIResponse>({
+  const { agentName } = await callApmApi<typeof serviceAgentNameRoute>({
     pathname: `/api/apm/services/${serviceName}/agent_name`,
     query: {
       start,
-      end
+      end,
+      uiFilters: undefined // TODO: should uiFilters be required like this?
     }
   });
 
@@ -58,13 +59,14 @@ export async function loadServiceTransactionTypes({
   start: string;
   end: string;
 }) {
-  const { transactionTypes } = await callApi<
-    ServiceTransactionTypesAPIResponse
+  const { transactionTypes } = await callApmApi<
+    typeof serviceTransactionTypesRoute
   >({
     pathname: `/api/apm/services/${serviceName}/transaction_types`,
     query: {
       start,
-      end
+      end,
+      uiFilters: undefined // TODO: should uiFilters be required like this?
     }
   });
   return transactionTypes;

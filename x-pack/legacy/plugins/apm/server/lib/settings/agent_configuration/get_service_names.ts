@@ -5,15 +5,11 @@
  */
 
 import { Setup } from '../../helpers/setup_request';
-import { PromiseReturnType } from '../../../../typings/common';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME
 } from '../../../../common/elasticsearch_fieldnames';
 
-export type AgentConfigurationServicesAPIResponse = PromiseReturnType<
-  typeof getServiceNames
->;
 export async function getServiceNames({ setup }: { setup: Setup }) {
   const { client, config } = setup;
 

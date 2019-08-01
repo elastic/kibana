@@ -16,10 +16,10 @@ import {
   zipObject
 } from 'lodash';
 import { idx } from '@kbn/elastic-idx';
-import { TraceAPIResponse } from '../../../../../../../../server/lib/traces/get_trace';
 import { StringMap } from '../../../../../../../../typings/common';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+import { TraceAPIResponse } from '../../../../../../../../server/routes/traces/trace_route';
 
 interface IWaterfallIndex {
   [key: string]: IWaterfallItem;

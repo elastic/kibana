@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UpdateAgentConfigurationAPIResponse } from '../../../../server/lib/settings/agent_configuration/update_configuration';
-import { callApi } from '../callApi';
+import { callApmApi } from '../callApi';
 import { AgentConfigurationIntake } from '../../../../server/lib/settings/agent_configuration/configuration_types';
-import { AgentConfigurationServicesAPIResponse } from '../../../../server/lib/settings/agent_configuration/get_service_names';
-import { CreateAgentConfigurationAPIResponse } from '../../../../server/lib/settings/agent_configuration/create_configuration';
-import { AgentConfigurationListAPIResponse } from '../../../../server/lib/settings/agent_configuration/list_configurations';
-import { AgentConfigurationEnvironmentsAPIResponse } from '../../../../server/lib/settings/agent_configuration/get_environments';
+import { agentConfigurationListRoute } from '../../../../server/routes/agent_configuration/agent_configuration_list_route';
+import { environmentsRoute } from '../../../../server/routes/agent_configuration/environments_route';
+import { serviceNamesRoute } from '../../../../server/routes/agent_configuration/service_names_route';
+import { createAgentConfigurationRoute } from '../../../../server/routes/agent_configuration/create_agent_configuration_route';
+import { updateAgentConfigurationRoute } from '../../../../server/routes/agent_configuration/update_agent_configuration_route';
 
 export async function loadAgentConfigurationServices() {
-  return callApi<AgentConfigurationServicesAPIResponse>({
+  return callApmApi<typeof serviceNamesRoute>({
     pathname: `/api/apm/settings/agent-configuration/services`
   });
 }
@@ -23,7 +23,7 @@ export async function loadAgentConfigurationEnvironments({
 }: {
   serviceName: string;
 }) {
-  return callApi<AgentConfigurationEnvironmentsAPIResponse>({
+  return callApmApi<typeof environmentsRoute>({
     pathname: `/api/apm/settings/agent-configuration/services/${serviceName}/environments`
   });
 }
@@ -31,7 +31,7 @@ export async function loadAgentConfigurationEnvironments({
 export async function createAgentConfiguration(
   configuration: AgentConfigurationIntake
 ) {
-  return callApi<CreateAgentConfigurationAPIResponse>({
+  return callApmApi<typeof createAgentConfigurationRoute>({
     pathname: `/api/apm/settings/agent-configuration/new`,
     method: 'POST',
     body: JSON.stringify(configuration)
@@ -42,7 +42,7 @@ export async function updateAgentConfiguration(
   configurationId: string,
   configuration: AgentConfigurationIntake
 ) {
-  return callApi<UpdateAgentConfigurationAPIResponse>({
+  return callApmApi<typeof updateAgentConfigurationRoute>({
     pathname: `/api/apm/settings/agent-configuration/${configurationId}`,
     method: 'PUT',
     body: JSON.stringify(configuration)
@@ -50,14 +50,14 @@ export async function updateAgentConfiguration(
 }
 
 export async function deleteAgentConfiguration(configId: string) {
-  return callApi({
+  return callApmApi({
     pathname: `/api/apm/settings/agent-configuration/${configId}`,
     method: 'DELETE'
   });
 }
 
 export async function loadAgentConfigurationList() {
-  return callApi<AgentConfigurationListAPIResponse>({
+  return callApmApi<typeof agentConfigurationListRoute>({
     pathname: `/api/apm/settings/agent-configuration`
   });
 }

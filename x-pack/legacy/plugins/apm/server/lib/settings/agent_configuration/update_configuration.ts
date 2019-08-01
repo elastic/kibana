@@ -5,13 +5,9 @@
  */
 
 import { Setup } from '../../helpers/setup_request';
-import { PromiseReturnType } from '../../../../typings/common';
 import { AgentConfigurationIntake } from './configuration_types';
 
-export type UpdateAgentConfigurationAPIResponse = PromiseReturnType<
-  typeof updateConfiguration
->;
-export async function updateConfiguration({
+export async function updateAgentConfiguration({
   configurationId,
   configuration,
   setup

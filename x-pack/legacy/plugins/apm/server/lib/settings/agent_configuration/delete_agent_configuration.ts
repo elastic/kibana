@@ -6,7 +6,7 @@
 
 import { Setup } from '../../helpers/setup_request';
 
-export async function deleteConfiguration({
+export async function deleteAgentConfiguration({
   configurationId,
   setup
 }: {
