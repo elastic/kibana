@@ -124,9 +124,7 @@ export class EMSClient {
       tmsServiceDefaultRaster: this._proxyElasticMapsServiceInMapsOptions.tmsServiceDefaultRaster
     } : null;
 
-    this._fetchFunction = typeof fetchFunction === 'function' ? fetchFunction : (...args) => {
-      return fetch(...args);
-    };
+    this._fetchFunction = typeof fetchFunction === 'function' ? fetchFunction : fetch;
 
     this._invalidateSettings();
   }

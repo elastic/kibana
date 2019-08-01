@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// export const EMS_DATA_FILE_PATH = 'ems/file';
-// export const EMS_DATA_TMS_PATH = 'ems/tms';
-// export const EMS_META_PATH = 'ems/meta';
-
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 export const EMS_FILES_CATALOGUE_PATH = 'ems/files';
 export const EMS_FILES_DEFAULT_JSON_PATH = 'ems/files/file';
