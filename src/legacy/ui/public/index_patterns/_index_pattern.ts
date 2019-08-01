@@ -26,9 +26,10 @@ import { fieldFormats } from 'ui/registry/field_formats';
 // @ts-ignore
 import { expandShorthand } from 'ui/utils/mapping_setup';
 import { toastNotifications } from 'ui/notify';
-import { findObjectByTitle, SavedObjectsClient } from 'ui/saved_objects';
-
+import { findObjectByTitle } from 'ui/saved_objects';
 import { IndexPatternsApiClient } from 'ui/index_patterns/index_patterns_api_client';
+import { SavedObjectsClientContract } from 'src/core/public';
+
 import { IndexPatternMissingIndices } from './errors';
 import { getRoutes } from './get_routes';
 import { FieldList } from './_field_list';
@@ -75,7 +76,7 @@ export class IndexPattern implements StaticIndexPattern {
   public metaFields: string[];
 
   private version: string | undefined;
-  private savedObjectsClient: SavedObjectsClient;
+  private savedObjectsClient: SavedObjectsClientContract;
   private patternCache: any;
   private getConfig: any;
   private sourceFilters?: [];
@@ -108,7 +109,7 @@ export class IndexPattern implements StaticIndexPattern {
   constructor(
     id: string | undefined,
     getConfig: any,
-    savedObjectsClient: SavedObjectsClient,
+    savedObjectsClient: SavedObjectsClientContract,
     apiClient: IndexPatternsApiClient,
     patternCache: any
   ) {

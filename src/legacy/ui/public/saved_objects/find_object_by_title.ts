@@ -19,19 +19,19 @@
 
 import { find } from 'lodash';
 import { SavedObjectAttributes } from 'src/core/server';
-import { SavedObjectsClient } from 'src/core/public';
+import { SavedObjectsClientContract } from 'src/core/public';
 import { SimpleSavedObject } from 'src/core/public';
 
 /**
  * Returns an object matching a given title
  *
- * @param savedObjectsClient {SavedObjectsClient}
+ * @param savedObjectsClient {SavedObjectsClientContract}
  * @param type {string}
  * @param title {string}
  * @returns {Promise<SimpleSavedObject|undefined>}
  */
 export function findObjectByTitle<T extends SavedObjectAttributes>(
-  savedObjectsClient: SavedObjectsClient,
+  savedObjectsClient: SavedObjectsClientContract,
   type: string,
   title: string
 ): Promise<SimpleSavedObject<T> | void> {

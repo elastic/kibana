@@ -82,7 +82,7 @@ describe('Saved Object', function () {
   }
 
   const mock409FetchError = {
-    res: { status: 409 }
+    response: { status: 409 }
   };
 
   beforeEach(ngMock.module(
