@@ -23,7 +23,8 @@ export function routeInitProvider(Private, monitoringClusters, globalState, lice
    * all the clusters are basic and this is the primary cluster
    */
   return function routeInit() {
-    return monitoringClusters()
+    const clusterUuid = globalState.cluster_uuid;
+    return monitoringClusters(clusterUuid)
     // Set the clusters collection and current cluster in globalState
       .then((clusters) => {
         const inSetupMode = getSetupModeState().enabled;
@@ -41,7 +42,8 @@ export function routeInitProvider(Private, monitoringClusters, globalState, lice
           }
 
           // check if we need to redirect because of attempt at unsupported multi-cluster monitoring
-          if (!isOnPage('home') && !cluster.isSupported) {
+          const clusterSupported = cluster.isSupported || clusters.length === 1;
+          if (!isOnPage('home') && !clusterSupported) {
             return kbnUrl.redirect('/home');
           }
         }

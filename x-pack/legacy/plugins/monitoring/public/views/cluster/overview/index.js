@@ -20,9 +20,6 @@ uiRoutes.when('/overview', {
       // checks license info of all monitored clusters for multi-cluster monitoring usage and capability
       const routeInit = Private(routeInitProvider);
       return routeInit();
-    },
-    cluster(monitoringClusters, globalState) {
-      return monitoringClusters(globalState.cluster_uuid, globalState.ccs);
     }
   },
   controller: class extends MonitoringViewBaseController {
@@ -36,7 +33,10 @@ uiRoutes.when('/overview', {
           defaultMessage: 'Overview'
         }),
         defaultData: {},
-        getPageData: () => monitoringClusters(globalState.cluster_uuid, globalState.ccs),
+        getPageData: async () => {
+          const clusters = await monitoringClusters(globalState.cluster_uuid, globalState.ccs);
+          return clusters[0];
+        },
         reactNodeId: 'monitoringClusterOverviewApp',
         $scope,
         $injector

@@ -41,9 +41,6 @@ uiModule.service('monitoringClusters', ($injector) => {
     })
       .then(response => response.data)
       .then(data => {
-        if (clusterUuid) {
-          return formatCluster(data[0]); // return single cluster
-        }
         return formatClusters(data); // return set of clusters
       })
       .catch(err => {
