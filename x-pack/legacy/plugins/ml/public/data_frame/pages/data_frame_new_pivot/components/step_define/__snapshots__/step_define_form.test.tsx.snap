@@ -5,7 +5,10 @@ exports[`Data Frame: <DefinePivotForm /> Minimal initialization 1`] = `
   <ContextProvider
     value={
       Object {
-        "combinedQuery": Object {},
+        "combinedQuery": Object {
+          "language": "the-query-language",
+          "query": "the-query-string",
+        },
         "currentIndexPattern": Object {
           "fields": Array [],
           "id": "the-index-pattern-id",

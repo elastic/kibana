@@ -10,7 +10,10 @@ import { kibanaConfigMock } from './kibana_config';
 import { savedSearchMock } from './saved_search';
 
 export const kibanaContextValueMock = {
-  combinedQuery: {},
+  combinedQuery: {
+    query: 'the-query-string',
+    language: 'the-query-language',
+  },
   currentIndexPattern: indexPatternMock,
   currentSavedSearch: savedSearchMock,
   indexPatterns: indexPatternsMock,
