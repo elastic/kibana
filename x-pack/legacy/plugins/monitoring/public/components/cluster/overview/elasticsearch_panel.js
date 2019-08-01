@@ -219,8 +219,6 @@ export function ElasticsearchPanel(props) {
     return null;
   };
 
-  const licenseText = <LicenseText license={props.license} showLicenseExpiration={props.showLicenseExpiration} />;
-
   return (
     <ClusterItemContainer
       {...props}
@@ -233,22 +231,25 @@ export function ElasticsearchPanel(props) {
 
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiTitle size="s">
-              <h3>
-                <EuiLink
-                  onClick={goToElasticsearch}
-                  aria-label={i18n.translate('xpack.monitoring.cluster.overview.esPanel.overviewLinkAriaLabel', {
-                    defaultMessage: 'Elasticsearch Overview'
-                  })}
-                  data-test-subj="esOverview"
-                >
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.esPanel.overviewLinkLabel"
-                    defaultMessage="Overview"
-                  />
-                </EuiLink>
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h3>
+                    <EuiLink
+                      data-test-subj="esNumberOfNodes"
+                      onClick={goToNodes}
+                    >
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.overview.esPanel.nodesTotalLinkLabel"
+                        defaultMessage="Nodes: {nodesTotal}"
+                        values={{ nodesTotal: formatNumber(get(nodes, 'count.total'), 'int_commas') }}
+                      />
+                    </EuiLink>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              {setupModeNodesData}
+            </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
               <EuiDescriptionListTitle>
