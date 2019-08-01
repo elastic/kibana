@@ -76,6 +76,11 @@ export function TopNavMenu(props: Props) {
         refreshInterval={props.refreshInterval}
         indexPatterns={props.indexPatterns}
         store={props.store}
+        savedQuery={props.savedQuery}
+        showSaveQuery={props.showSaveQuery}
+        onClearSavedQuery={props.onClearSavedQuery}
+        onSaved={props.onSaved}
+        onSavedQueryUpdated={props.onSavedQueryUpdated}
       />
     );
   }

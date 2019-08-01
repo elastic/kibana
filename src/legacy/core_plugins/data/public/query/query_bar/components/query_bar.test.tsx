@@ -122,6 +122,8 @@ describe('QueryBar', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
         onSubmit={noop}
+        onChange={noop}
+        isDirty={false}
         appName={'discover'}
         store={createMockStorage()}
         intl={null as any}
@@ -136,6 +138,8 @@ describe('QueryBar', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
         onSubmit={noop}
+        onChange={noop}
+        isDirty={false}
         appName={'discover'}
         store={createMockStorage()}
         intl={null as any}
@@ -151,6 +155,8 @@ describe('QueryBar', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
         onSubmit={noop}
+        onChange={noop}
+        isDirty={false}
         appName={'discover'}
         screenTitle={'Another Screen'}
         store={createMockStorage()}
@@ -170,6 +176,8 @@ describe('QueryBar', () => {
       <QueryBar.WrappedComponent
         query={kqlQuery}
         onSubmit={noop}
+        onChange={noop}
+        isDirty={false}
         appName={'discover'}
         screenTitle={'Another Screen'}
         indexPatterns={[mockIndexPattern]}
@@ -188,6 +196,8 @@ describe('QueryBar', () => {
       <QueryBar.WrappedComponent
         query={kqlQuery}
         onSubmit={noop}
+        onChange={noop}
+        isDirty={false}
         appName={'discover'}
         screenTitle={'Another Screen'}
         indexPatterns={[mockIndexPattern]}
@@ -206,6 +216,8 @@ describe('QueryBar', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
         onSubmit={noop}
+        onChange={noop}
+        isDirty={false}
         appName={'discover'}
         screenTitle={'Another Screen'}
         store={createMockStorage()}

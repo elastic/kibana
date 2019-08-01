@@ -52,12 +52,12 @@ interface Props {
   query?: Query;
   savedQuery?: SavedQueryAttributes;
   onSubmit: (payload: { dateRange: DateRange; query?: Query }) => void;
-  onChange: (payload: { dateRange: DateRange; query: Query }) => void;
+  onChange: (payload: { dateRange: DateRange; query?: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;
   screenTitle?: string;
   indexPatterns?: Array<IndexPattern | string>;
-  store: Storage;
+  store?: Storage;
   intl: InjectedIntl;
   prepend?: React.ReactNode;
   showQueryInput?: boolean;
@@ -70,11 +70,11 @@ interface Props {
   showSaveQuery?: boolean;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   customSubmitButton?: any;
-  onSave: () => void;
-  onSaveNew: () => void;
-  onLoadSavedQuery: (savedQuery: SavedQuery) => void;
+  onSave?: () => void;
+  onSaveNew?: () => void;
+  onLoadSavedQuery?: (savedQuery: SavedQuery) => void;
   isDirty: boolean;
-  onClearSavedQuery: () => void;
+  onClearSavedQuery?: () => void;
 }
 
 interface State {
@@ -82,7 +82,6 @@ interface State {
 }
 
 export class QueryBarUI extends Component<Props, State> {
-
   public static defaultProps = {
     showQueryInput: true,
     showDatePicker: true,
@@ -152,7 +151,7 @@ export class QueryBarUI extends Component<Props, State> {
     );
   };
 
-  public onSubmit = ({ query, dateRange }: { query: Query; dateRange: DateRange }) => {
+  public onSubmit = ({ query, dateRange }: { query?: Query; dateRange: DateRange }) => {
     this.handleLuceneSyntaxWarning();
     timeHistory.add(this.getDateRange());
 
@@ -206,13 +205,13 @@ export class QueryBarUI extends Component<Props, State> {
           onChange={this.onQueryChange}
           onSubmit={this.onInputSubmit}
           persistedLog={this.persistedLog}
-            savedQuery={this.props.savedQuery}
-            showSaveQuery={this.props.showSaveQuery}
-            onSave={this.props.onSave}
-            onSaveNew={this.props.onSaveNew}
-            onLoadSavedQuery={this.props.onLoadSavedQuery}
-            isDirty={this.props.isDirty}
-            onClearSavedQuery={this.props.onClearSavedQuery}
+          savedQuery={this.props.savedQuery}
+          showSaveQuery={this.props.showSaveQuery}
+          onSave={this.props.onSave}
+          onSaveNew={this.props.onSaveNew}
+          onLoadSavedQuery={this.props.onLoadSavedQuery}
+          isDirty={this.props.isDirty}
+          onClearSavedQuery={this.props.onClearSavedQuery}
         />
       </EuiFlexItem>
     );
@@ -300,7 +299,7 @@ export class QueryBarUI extends Component<Props, State> {
     if (
       language === 'kuery' &&
       typeof query === 'string' &&
-      !store.get('kibana.luceneSyntaxWarningOptOut') &&
+      (!store || !store.get('kibana.luceneSyntaxWarningOptOut')) &&
       doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {
       const toast = toastNotifications.addWarning({
@@ -341,6 +340,7 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   private onLuceneSyntaxWarningOptOut(toast: Toast) {
+    if (!this.props.store) return;
     this.props.store.set('kibana.luceneSyntaxWarningOptOut', true);
     toastNotifications.remove(toast);
   }

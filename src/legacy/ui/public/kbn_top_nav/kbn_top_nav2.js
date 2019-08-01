@@ -88,6 +88,7 @@ module.directive('kbnTopNavV2Helper', (reactDirective) => {
       ['disabledButtons', { watchDepth: 'reference' }],
 
       ['query', { watchDepth: 'reference' }],
+      ['savedQuery', { watchDepth: 'reference' }],
       ['store', { watchDepth: 'reference' }],
       ['intl', { watchDepth: 'reference' }],
       ['store', { watchDepth: 'reference' }],
@@ -95,6 +96,9 @@ module.directive('kbnTopNavV2Helper', (reactDirective) => {
       ['onQuerySubmit', { watchDepth: 'reference' }],
       ['onFiltersUpdated', { watchDepth: 'reference' }],
       ['onRefreshChange', { watchDepth: 'reference' }],
+      ['onClearSavedQuery', { watchDepth: 'reference' }],
+      ['onSaved', { watchDepth: 'reference' }],
+      ['onSavedQueryUpdated', { watchDepth: 'reference' }],
 
       ['indexPatterns', { watchDepth: 'collection' }],
       ['filters', { watchDepth: 'collection' }],
@@ -106,6 +110,7 @@ module.directive('kbnTopNavV2Helper', (reactDirective) => {
       'showQueryBar',
       'showQueryInput',
       'showDatePicker',
+      'showSaveQuery',
 
       'appName',
       'screenTitle',

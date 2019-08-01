@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SearchBar, setupDirective as setupSearchBarDirective } from './search_bar';
+import { SearchBar } from './search_bar';
 import * as savedQueryService from './search_bar/lib/saved_query_service';
 
 /**
