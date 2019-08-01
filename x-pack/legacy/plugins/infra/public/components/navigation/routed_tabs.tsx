@@ -27,25 +27,20 @@ export class RoutedTabs extends React.Component<RoutedTabsProps> {
     return this.props.tabs.map(tab => {
       return (
         <Route
-          key={`${tab.path}${tab.title}`}
+          key={`${tab.path}-${tab.title}`}
           path={tab.path}
-          children={({ match }) => (
-            <TabContainer className="euiTab">
-              <EuiLink href={`#${tab.path}`}>
-                <EuiTab onClick={() => {}} isSelected={match !== null}>
-                  {tab.title}
-                </EuiTab>
-              </EuiLink>
-            </TabContainer>
+          children={({ match, history }) => (
+            <EuiTab
+              onClick={() => {
+                history.push(tab.path);
+              }}
+              isSelected={match !== null}
+            >
+              {tab.title}
+            </EuiTab>
           )}
         />
       );
     });
   }
 }
-
-const TabContainer = euiStyled.div`
-  .euiLink {
-    color: inherit !important;
-  }
-`;
