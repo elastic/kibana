@@ -202,7 +202,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                 const featureEffectivePrivilege = effectivePrivilege.feature[featureId];
                 return (
                   featureEffectivePrivilege &&
-                  featureEffectivePrivilege.directlyAssignedPrivilegeMorePermissiveThanInherited
+                  featureEffectivePrivilege.directlyAssignedPrivilegeMorePermissiveThanBase
                 );
               }
             );
