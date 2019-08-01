@@ -10,7 +10,6 @@ import {
   InfraBackendFrameworkAdapter,
 } from '../../../lib/adapters/framework';
 import { InfraSourceConfiguration } from '../../../lib/sources';
-import { InfraNodeType } from '../../../graphql/types';
 import { getIdFieldName } from './get_id_field_name';
 
 export const getPodNodeName = async (
@@ -18,7 +17,7 @@ export const getPodNodeName = async (
   req: InfraFrameworkRequest,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
-  nodeType: InfraNodeType
+  nodeType: 'host' | 'pod' | 'container'
 ): Promise<string | undefined> => {
   const params = {
     allowNoIndices: true,

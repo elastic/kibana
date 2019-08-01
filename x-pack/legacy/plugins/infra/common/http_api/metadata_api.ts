@@ -4,65 +4,97 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraNodeType } from '../graphql/types';
+import * as rt from 'io-ts';
 import { InfraWrappableRequest } from '../../server/lib/adapters/framework';
 
-export interface InfraMetadataRequest {
-  nodeId: string;
-  nodeType: InfraNodeType;
-  sourceId: string;
-}
+export const InfraMetadataNodeTypeRT = rt.keyof({
+  host: null,
+  pod: null,
+  container: null,
+});
+
+export const InfraMetadataRequestRT = rt.type({
+  nodeId: rt.string,
+  nodeType: InfraMetadataNodeTypeRT,
+  sourceId: rt.string,
+});
+
+export const InfraMetadataFeatureRT = rt.type({
+  name: rt.string,
+  source: rt.string,
+});
+
+export const InfraMetadataOSRT = rt.partial({
+  codename: rt.string,
+  family: rt.string,
+  kernel: rt.string,
+  name: rt.string,
+  platform: rt.string,
+  version: rt.string,
+});
+
+export const InfraMetadataHostRT = rt.partial({
+  name: rt.string,
+  os: InfraMetadataOSRT,
+  architecture: rt.string,
+  containerized: rt.boolean,
+});
+
+export const InfraMetadataInstanceRT = rt.partial({
+  id: rt.string,
+  name: rt.string,
+});
+
+export const InfraMetadataProjectRT = rt.partial({
+  id: rt.string,
+});
+
+export const InfraMetadataMachineRT = rt.partial({
+  interface: rt.string,
+});
+
+export const InfraMetadataCloudRT = rt.partial({
+  instance: InfraMetadataInstanceRT,
+  provider: rt.string,
+  availability_zone: rt.string,
+  project: InfraMetadataProjectRT,
+  machine: InfraMetadataMachineRT,
+});
+
+export const InfraMetadataInfoRT = rt.partial({
+  cloud: InfraMetadataCloudRT,
+  host: InfraMetadataHostRT,
+});
+
+const InfraMetadataRequiredRT = rt.type({
+  name: rt.string,
+  features: rt.array(InfraMetadataFeatureRT),
+});
+
+const InfraMetadataOptionalRT = rt.partial({
+  info: InfraMetadataInfoRT,
+});
+
+export const InfraMetadataRT = rt.intersection([InfraMetadataRequiredRT, InfraMetadataOptionalRT]);
+
+export type InfraMetadata = rt.TypeOf<typeof InfraMetadataRT>;
+
+export type InfraMetadataRequest = rt.TypeOf<typeof InfraMetadataRequestRT>;
+
 export type InfraMetadataWrappedRequest = InfraWrappableRequest<InfraMetadataRequest>;
 
-export interface InfraMetadata {
-  name: string;
-  features: InfraMetadataFeature[];
-  info?: InfraMetadataInfo | null;
-}
+export type InfraMetadataFeature = rt.TypeOf<typeof InfraMetadataFeatureRT>;
 
-export interface InfraMetadataFeature {
-  name: string;
-  source: string;
-}
+export type InfraMetadataInfo = rt.TypeOf<typeof InfraMetadataInfoRT>;
 
-export interface InfraMetadataInfo {
-  cloud?: InfraMetadataCloud | null;
-  host?: InfraMetadataHost | null;
-}
+export type InfraMetadataCloud = rt.TypeOf<typeof InfraMetadataCloudRT>;
 
-export interface InfraMetadataCloud {
-  instance?: InfraMetadataInstance | null;
-  provider?: string | null;
-  availability_zone?: string | null;
-  project?: InfraMetadataProject | null;
-  machine?: InfraMetadataMachine | null;
-}
+export type InfraMetadataInstance = rt.TypeOf<typeof InfraMetadataInstanceRT>;
 
-export interface InfraMetadataInstance {
-  id?: string | null;
-  name?: string | null;
-}
+export type InfraMetadataProject = rt.TypeOf<typeof InfraMetadataProjectRT>;
 
-export interface InfraMetadataProject {
-  id?: string | null;
-}
+export type InfraMetadataMachine = rt.TypeOf<typeof InfraMetadataMachineRT>;
 
-export interface InfraMetadataMachine {
-  interface?: string | null;
-}
+export type InfraMetadataHost = rt.TypeOf<typeof InfraMetadataHostRT>;
 
-export interface InfraMetadataHost {
-  name?: string | null;
-  os?: InfraMetadataOS | null;
-  architecture?: string | null;
-  containerized?: boolean | null;
-}
-
-export interface InfraMetadataOS {
-  codename?: string | null;
-  family?: string | null;
-  kernel?: string | null;
-  name?: string | null;
-  platform?: string | null;
-  version?: string | null;
-}
+export type InfraMEtadataOS = rt.TypeOf<typeof InfraMetadataOSRT>;

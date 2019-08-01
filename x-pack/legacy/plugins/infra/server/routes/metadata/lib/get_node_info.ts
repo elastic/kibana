@@ -21,7 +21,7 @@ export const getNodeInfo = async (
   req: InfraFrameworkRequest,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
-  nodeType: InfraNodeType
+  nodeType: 'host' | 'pod' | 'container'
 ): Promise<InfraMetadataInfo> => {
   // If the nodeType is a Kubernetes pod then we need to get the node info
   // from a host record instead of a pod. This is due to the fact that any host

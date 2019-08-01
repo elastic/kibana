@@ -7,9 +7,10 @@
 import { useEffect } from 'react';
 import { InfraNodeType } from '../../graphql/types';
 import { InfraMetricLayout } from '../../pages/metrics/layouts/types';
-import { InfraMetadata } from '../../../common/http_api/metadata_api';
+import { InfraMetadata, InfraMetadataRT } from '../../../common/http_api/metadata_api';
 import { getFilteredLayouts } from './lib/get_filtered_layouts';
 import { useHTTPRequest } from '../../hooks/use_http_request';
+import { throwErrors, createPlainError } from '../../../common/runtime_types';
 
 export function useMetadata(
   nodeId: string,
@@ -17,6 +18,10 @@ export function useMetadata(
   layouts: InfraMetricLayout[],
   sourceId: string
 ) {
+  const decodeResponse = (response: any) => {
+    return InfraMetadataRT.decode(response).getOrElseL(throwErrors(createPlainError));
+  };
+
   const { error, loading, response, makeRequest } = useHTTPRequest<InfraMetadata>(
     '/api/infra/metadata',
     'POST',
@@ -24,6 +29,7 @@ export function useMetadata(
       nodeId,
       nodeType,
       sourceId,
+      decodeResponse,
     })
   );
 

@@ -4,19 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { boomify } from 'boom';
+import Boom, { boomify } from 'boom';
 import { get } from 'lodash';
 import {
   InfraMetadata,
   InfraMetadataWrappedRequest,
   InfraMetadataFeature,
+  InfraMetadataRequestRT,
+  InfraMetadataRT,
 } from '../../../common/http_api/metadata_api';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { schema } from './schema';
 import { getMetricMetadata } from './lib/get_metric_metadata';
 import { pickFeatureName } from './lib/pick_feature_name';
 import { getCloudMetricsMetadata } from './lib/get_cloud_metric_metadata';
 import { getNodeInfo } from './lib/get_node_info';
+import { throwErrors } from '../../../common/runtime_types';
 
 export const initMetadataRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;
@@ -24,14 +26,12 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
   framework.registerRoute<InfraMetadataWrappedRequest, Promise<InfraMetadata>>({
     method: 'POST',
     path: '/api/infra/metadata',
-    options: {
-      validate: {
-        payload: schema,
-      },
-    },
     handler: async req => {
       try {
-        const { nodeId, nodeType, sourceId } = req.payload;
+        const { nodeId, nodeType, sourceId } = InfraMetadataRequestRT.decode(
+          req.payload
+        ).getOrElseL(throwErrors(Boom.badRequest));
+
         const { configuration } = await libs.sources.getSourceConfiguration(req, sourceId);
         const metricsMetadata = await getMetricMetadata(
           framework,
@@ -56,7 +56,12 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
 
         const id = metricsMetadata.id;
         const name = metricsMetadata.name || id;
-        return { id, name, features: [...metricFeatures, ...cloudMetricsFeatures], info };
+        return InfraMetadataRT.decode({
+          id,
+          name,
+          features: [...metricFeatures, ...cloudMetricsFeatures],
+          info,
+        }).getOrElseL(throwErrors(Boom.badImplementation));
       } catch (error) {
         throw boomify(error);
       }

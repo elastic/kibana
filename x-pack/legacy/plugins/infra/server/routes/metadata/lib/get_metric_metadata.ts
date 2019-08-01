@@ -12,7 +12,6 @@ import {
   InfraMetadataAggregationResponse,
 } from '../../../lib/adapters/framework';
 import { InfraSourceConfiguration } from '../../../lib/sources';
-import { InfraNodeType } from '../../../graphql/types';
 import { getIdFieldName } from './get_id_field_name';
 import { NAME_FIELDS } from '../../../lib/constants';
 
@@ -27,7 +26,7 @@ export const getMetricMetadata = async (
   req: InfraFrameworkRequest,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
-  nodeType: InfraNodeType
+  nodeType: 'host' | 'pod' | 'container'
 ): Promise<InfraMetricsAdapterResponse> => {
   const idFieldName = getIdFieldName(sourceConfiguration, nodeType);
 
