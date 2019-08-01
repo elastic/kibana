@@ -9,10 +9,11 @@ import { IndexPattern } from 'ui/index_patterns';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { JobCreator } from './job_creator';
 import { Field, Aggregation, AggFieldPair } from '../../../../../common/types/fields';
-import { Detector, BucketSpan } from './configs';
+import { Job, Datafeed, Detector, BucketSpan } from './configs';
 import { createBasicDetector } from './util/default_configs';
 import { KIBANA_AGGREGATION } from '../../../../../common/constants/aggregation_types';
 import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
+import { getRichDetectors } from './util/general';
 
 export class SingleMetricJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -174,6 +175,19 @@ export class SingleMetricJobCreator extends JobCreator {
         agg: this._aggs[0],
         field: this._fields[0],
       };
+    }
+  }
+
+  public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
+    this.overrideConfigs(job, datafeed);
+    this.jobId = '';
+    const detectors = getRichDetectors(job.analysis_config.detectors);
+
+    this.removeAllDetectors();
+
+    const dtr = detectors[0];
+    if (detectors.length && dtr.agg !== null && dtr.field !== null) {
+      this.setDetector(dtr.agg, dtr.field);
     }
   }
 }

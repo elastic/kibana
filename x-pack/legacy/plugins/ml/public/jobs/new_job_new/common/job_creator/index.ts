@@ -13,4 +13,4 @@ export {
   isMultiMetricJobCreator,
   isPopulationJobCreator,
 } from './type_guards';
-export { jobCreatorFactory, prePopulateJob } from './job_creator_factory';
+export { jobCreatorFactory } from './job_creator_factory';

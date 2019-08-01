@@ -366,5 +366,9 @@ export class JobCreator {
     if (this._job_config.groups === undefined) {
       this._job_config.groups = [];
     }
+
+    if (this._job_config.analysis_config.influencers !== undefined) {
+      this._job_config.analysis_config.influencers.forEach(i => this.addInfluencer(i));
+    }
   }
 }
