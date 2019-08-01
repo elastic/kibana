@@ -5,58 +5,66 @@
  */
 
 import React, { useState } from 'react';
-import { useAppStateValue } from '../context';
+import { useExternalEmbedState, setPage, setScrubberVisible } from '../context';
 import { Page } from './page';
-import { Footer } from './footer';
+import { Footer, FOOTER_HEIGHT } from './footer/footer';
+import { getTimeInterval } from '../../public/lib/time_interval';
+
+// @ts-ignore CSS Module
+import css from './canvas.module';
 
 export const Canvas = () => {
-  const [{ workpad, height: containerHeight, width: containerWidth, page }] = useAppStateValue();
+  const [
+    { workpad, height: containerHeight, width: containerWidth, page, settings },
+    dispatch,
+  ] = useExternalEmbedState();
+
   if (!workpad) {
     return null;
   }
 
-  const [isFooterVisible, setFooterVisible] = useState(false);
+  const { toolbar, autoplay } = settings;
   const { height, width, pages } = workpad;
   const ratio = Math.max(width / containerWidth, height / containerHeight);
   const transform = `scale3d(${containerHeight / (containerHeight * ratio)}, ${containerWidth /
     (containerWidth * ratio)}, 1)`;
 
+  const pageStyle = {
+    height,
+    transform,
+    width,
+  };
+
+  if (autoplay.enabled && autoplay.interval) {
+    setTimeout(
+      () => dispatch(setPage(page >= workpad.pages.length - 1 ? 0 : page + 1)),
+      getTimeInterval(autoplay.interval)
+    );
+  }
+
+  const [toolbarHidden, setToolbarHidden] = useState(toolbar.autohide);
+  const rootHeight = containerHeight + (toolbar.autohide ? 0 : FOOTER_HEIGHT);
+
+  const hideToolbar = (hidden: boolean) => {
+    if (hidden) {
+      dispatch(setScrubberVisible(false));
+    }
+    setToolbarHidden(hidden);
+  };
+
   return (
     <div
-      style={{
-        position: 'relative',
-        height: containerHeight,
-        width: containerWidth,
-        overflow: 'hidden',
-      }}
-      onFocus={() => setFooterVisible(true)}
-      onMouseOver={() => setFooterVisible(true)}
-      onMouseOut={() => setFooterVisible(false)}
-      onBlur={() => setFooterVisible(false)}
+      className={css.root}
+      style={{ height: rootHeight, width: containerWidth }}
+      onMouseEnter={() => hideToolbar(false)}
+      onMouseLeave={() => hideToolbar(true)}
     >
-      <div
-        className="canvas canvasContainer"
-        style={{
-          alignItems: 'center',
-          display: 'flex',
-          height: containerHeight,
-          width: containerWidth,
-          justifyContent: 'center',
-        }}
-      >
-        <div
-          style={{
-            height,
-            transform,
-            position: 'absolute',
-            transformOrigin: 'center center',
-            width,
-          }}
-        >
+      <div className={css.container} style={{ height: containerHeight, width: containerWidth }}>
+        <div className={css.page} style={pageStyle}>
           <Page page={pages[page]} />
         </div>
       </div>
-      <Footer isVisible={isFooterVisible} />
+      <Footer autohide={toolbar.autohide} hidden={toolbarHidden} />
     </div>
   );
 };

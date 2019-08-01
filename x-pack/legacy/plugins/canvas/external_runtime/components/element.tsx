@@ -12,14 +12,18 @@ import { Positionable } from '../../public/components/positionable/positionable'
 // @ts-ignore Untyped local
 import { elementToShape } from '../../public/components/workpad_page/utils';
 import { CanvasElement } from '../types';
-import { AppContext } from '../context';
+import { ExternalEmbedContext } from '../context';
+
+// @ts-ignore CSS Module
+import css from './element.module';
 
 interface Props {
   element: CanvasElement;
+  number?: number;
 }
 
 export class ExternalEmbedElement extends React.PureComponent<Props> {
-  static contextType = AppContext;
+  static contextType = ExternalEmbedContext;
   protected ref: React.RefObject<HTMLDivElement>;
 
   constructor(props: Props) {
@@ -50,26 +54,22 @@ export class ExternalEmbedElement extends React.PureComponent<Props> {
   }
 
   render() {
-    const { element } = this.props;
-    const shape = elementToShape(element, 1);
+    const { element, number } = this.props;
+    const shape = elementToShape(element, number || 1);
     const { id, expressionRenderable, position } = element;
     const { value } = expressionRenderable;
-    const { as, css, containerStyle } = value;
+    const { as, css: elementCSS, containerStyle } = value;
     const { height, width } = position;
+
     return (
       <Positionable height={height} width={width} transformMatrix={shape.transformMatrix}>
-        <div style={{ height: '100%', width: '100%' }}>
+        <div className={css.root}>
           {Style.it(
-            css,
-            <div className={'canvas__element canvasElement'} style={{ ...containerStyle }}>
-              <div className="canvasElement__content">
-                <div className="canvasWorkpad--element_render canvasRenderEl">
-                  <div
-                    key={id}
-                    ref={this.ref}
-                    data-renderer={as}
-                    style={{ height: '100%', width: '100%' }}
-                  />
+            elementCSS,
+            <div className={css.container} style={{ ...containerStyle }}>
+              <div className={css.content}>
+                <div className={css.renderContainer}>
+                  <div key={id} ref={this.ref} data-renderer={as} className={css.render} />
                 </div>
               </div>
             </div>

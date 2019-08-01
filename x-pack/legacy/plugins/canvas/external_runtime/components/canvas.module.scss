@@ -1,0 +1,19 @@
+.root {
+  position: relative;
+  overflow: hidden;
+  transition: height 1s;
+}
+
+.container {
+  composes: canvas from global;
+  composes: canvasContainer from global;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.page {
+  position: absolute;
+  transform-origin: center center;
+}

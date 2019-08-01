@@ -1,13 +1,13 @@
 <html>
 
 <head>
-  <script src="canvas_external_runtime.js"></script>
+  <script src="/canvas_external_runtime.js"></script>
 </head>
 
 <body>
   <div id="canvas"></div>
   <script>
-    new ElasticCanvas.EmbedWorkpadFromURL(document.getElementById('canvas'), '/test/austin.json', {
+    new ElasticCanvas.EmbedFromURL(document.getElementById('canvas'), '/test/austin.json', {
       height: 400
     });
   </script>

@@ -6,15 +6,18 @@
 
 import React from 'react';
 import { ExternalEmbedElement } from './element';
-import { useAppStateValue } from '../context';
+import { useExternalEmbedState } from '../context';
 import { CanvasPage, CanvasElement } from '../types';
+
+// @ts-ignore CSS Module
+import css from './page.module';
 
 interface Props {
   page: CanvasPage;
 }
 
 export const Page = (props: Props) => {
-  const [{ workpad }] = useAppStateValue();
+  const [{ workpad }] = useExternalEmbedState();
   if (!workpad) {
     return null;
   }
@@ -22,16 +25,12 @@ export const Page = (props: Props) => {
   const { height, width, id } = workpad;
   const { elements, style } = props.page;
 
-  const output = elements.map((element: CanvasElement) => (
-    <ExternalEmbedElement key={element.id} element={element} />
+  const output = elements.map((element: CanvasElement, index) => (
+    <ExternalEmbedElement key={element.id} element={element} number={index + 1} />
   ));
 
   return (
-    <div
-      id={`page-${id}`}
-      className="canvasPage canvasInteractivePage kbn-resetFocusState"
-      style={{ height, width, overflow: 'hidden', ...style }}
-    >
+    <div id={`page-${id}`} className={css.root} style={{ height, width, ...style }}>
       {output}
     </div>
   );

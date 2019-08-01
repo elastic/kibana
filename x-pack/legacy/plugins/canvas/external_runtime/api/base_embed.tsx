@@ -23,6 +23,7 @@ export abstract class BaseEmbed {
   async _render() {
     try {
       const workpad = await this._getWorkpad();
+
       if (workpad) {
         const { page } = this.options;
         let { height, width } = this.options;

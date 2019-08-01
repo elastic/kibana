@@ -6,25 +6,22 @@
 
 import 'whatwg-fetch';
 import { BaseEmbed, Options } from './base_embed';
+import { CanvasWorkpad } from '../types';
 
-export class EmbedFromURL extends BaseEmbed {
-  protected workpadURL: string;
+export class Embed extends BaseEmbed {
+  protected workpad: CanvasWorkpad;
   protected element: HTMLElement;
   protected options: Options = {};
 
-  constructor(element: HTMLElement, workpadURL: string, options: Options = {}) {
+  constructor(element: HTMLElement, workpad: CanvasWorkpad, options: Options = {}) {
     super();
-    this.workpadURL = workpadURL;
+    this.workpad = workpad;
     this.options = options;
     this.element = element;
     this._render();
   }
 
   async _getWorkpad() {
-    const workpadResponse = await fetch(this.workpadURL);
-    if (workpadResponse) {
-      return await workpadResponse.json();
-    }
-    return null;
+    return this.workpad;
   }
 }

@@ -1,0 +1,11 @@
+@import '@elastic/eui/src/theme_light.scss';
+
+.root .bar {
+  position: absolute;
+}
+
+.bar {
+  composes: euiBottomBar from global;
+  composes: euiBottomBar--paddingSmall from global;
+  transition: bottom 0.25s;
+}

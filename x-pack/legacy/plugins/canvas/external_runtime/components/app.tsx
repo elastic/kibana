@@ -8,7 +8,11 @@ import React from 'react';
 // @ts-ignore
 import { RenderFunctionsRegistry } from 'data/interpreter';
 import { Canvas } from './canvas';
-import { AppStateProvider, AppState, AppAction } from '../context';
+import {
+  initialExternalEmbedState,
+  ExternalEmbedStateProvider,
+  ExternalEmbedState,
+} from '../context';
 // @ts-ignore
 import { renderFunctions } from '../../canvas_plugin_src/renderers';
 import { CanvasWorkpad } from '../types';
@@ -25,37 +29,18 @@ export const App = (props: Props) => {
   const renderersRegistry = new RenderFunctionsRegistry();
   renderFunctions.forEach((fn: Function) => renderersRegistry.register(fn));
 
-  const initialState = {
-    renderersRegistry,
-    workpad,
-    page,
+  const initialState: ExternalEmbedState = {
+    ...initialExternalEmbedState,
     height,
+    page,
+    renderersRegistry,
     width,
-  };
-
-  const reducer = (state: AppState, action: AppAction) => {
-    switch (action.type) {
-      case 'setWorkpad': {
-        return {
-          ...state,
-          workpad: action.workpad,
-        };
-      }
-      case 'setPage': {
-        return {
-          ...state,
-          page: action.page,
-        };
-      }
-      default: {
-        return state;
-      }
-    }
+    workpad,
   };
 
   return (
-    <AppStateProvider initialState={initialState} reducer={reducer}>
+    <ExternalEmbedStateProvider initialState={initialState}>
       <Canvas />
-    </AppStateProvider>
+    </ExternalEmbedStateProvider>
   );
 };
