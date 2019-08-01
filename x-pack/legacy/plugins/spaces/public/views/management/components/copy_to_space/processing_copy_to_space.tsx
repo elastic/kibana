@@ -8,8 +8,17 @@ import React, { Fragment } from 'react';
 import { ProcessedImportResponse, SavedObjectRecord } from 'ui/management/saved_objects_management';
 import { SpaceAvatar } from 'plugins/spaces/components';
 import { SavedObjectsImportRetry } from 'src/core/server/saved_objects/import/types';
-import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiListGroup,
+  EuiListGroupItem,
+} from '@elastic/eui';
 import { summarizeCopyResult } from 'plugins/spaces/lib/copy_to_space';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Space } from '../../../../../common/model/space';
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
 import { CopyResultDetails } from './copy_result_details';
@@ -24,6 +33,7 @@ interface Props {
   spaces: Space[];
   selectedSpaceIds: string[];
   includeRelated: boolean;
+  overwrite: boolean;
 }
 
 export const ProcessingCopyToSpace = (props: Props) => {
@@ -36,6 +46,41 @@ export const ProcessingCopyToSpace = (props: Props) => {
 
   return (
     <Fragment>
+      <EuiListGroup className="spcCopyToSpaceOptionsView">
+        <EuiListGroupItem
+          iconType={props.includeRelated ? 'check' : 'cross'}
+          label={
+            props.includeRelated ? (
+              <FormattedMessage
+                id="xpack.spaces.management.copyToSpace.includeRelatedLabel"
+                defaultMessage="Including related saved objects"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.spaces.management.copyToSpace.dontIncludeRelatedLabel"
+                defaultMessage="Not including related saved objects"
+              />
+            )
+          }
+        />
+        <EuiListGroupItem
+          iconType={props.overwrite ? 'check' : 'cross'}
+          label={
+            props.overwrite ? (
+              <FormattedMessage
+                id="xpack.spaces.management.copyToSpace.overwriteLabel"
+                defaultMessage="Automatically overwriting saved objects"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.spaces.management.copyToSpace.dontOverwriteLabel"
+                defaultMessage="Not overwriting saved objects"
+              />
+            )
+          }
+        />
+      </EuiListGroup>
+      <EuiSpacer />
       {props.selectedSpaceIds.map(id => {
         const space = props.spaces.find(s => s.id === id) as Space;
         const result = props.copyResult[space.id];
@@ -51,6 +96,7 @@ export const ProcessingCopyToSpace = (props: Props) => {
           <Fragment>
             <EuiAccordion
               id={`copyToSpace-${id}`}
+              className="spcCopyToSpaceResult"
               buttonContent={
                 <EuiFlexGroup responsive={false}>
                   <EuiFlexItem grow={false}>
@@ -82,7 +128,7 @@ export const ProcessingCopyToSpace = (props: Props) => {
                 }
               />
             </EuiAccordion>
-            <EuiSpacer />
+            <EuiSpacer size="s" />
           </Fragment>
         );
       })}

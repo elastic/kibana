@@ -1,14 +1,15 @@
 
+.spcCopyToSpaceResult {
+  padding-bottom: $euiSizeS;
+  border-bottom: 1px solid $euiColorLightShade;
+}
+
 .spcCopyToSpaceResultDetails {
   background-color: $euiColorLightestShade;
   padding-left: $euiSize;
 }
 
 .spcCopyToSpaceResultDetails__savedObjectName {
+  // Constrains name to the flex item, and allows for truncation when necessary
   min-width: 0;
 }
-
-.spcCopyToSpaceResultDetails__statusIndicator{
-  margin-right: 0;
-}
-

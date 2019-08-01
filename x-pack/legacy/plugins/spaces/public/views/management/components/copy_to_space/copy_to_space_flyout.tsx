@@ -168,6 +168,7 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
 
   const form = (
     <Fragment>
+      <EuiSpacer />
       <EuiSwitch
         label={
           <FormattedMessage
@@ -235,8 +236,6 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
           <EuiIcon type={savedObject.meta.icon || 'apps'} /> {savedObject.meta.title}
         </EuiText>
 
-        <EuiSpacer />
-
         {copyInProgress && (
           <ProcessingCopyToSpace
             savedObject={savedObject}
@@ -248,6 +247,7 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
             retries={retries}
             onRetriesChange={onRetriesChange}
             includeRelated={includeRelated}
+            overwrite={overwrite}
           />
         )}
         {!copyInProgress && form}
