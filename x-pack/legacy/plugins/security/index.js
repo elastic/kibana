@@ -173,13 +173,15 @@ export const security = (kibana) => new kibana.Plugin({
       return new savedObjects.SavedObjectsClient(callWithRequestRepository);
     });
 
-    savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_SAFE_INTEGER, 'security', ({ client, request }) => {
+    savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MAX_SAFE_INTEGER - 1, 'security', ({ client, request }) => {
       if (authorization.mode.useRbacForRequest(request)) {
         return new SecureSavedObjectsClientWrapper({
           actions: authorization.actions,
           auditLogger,
           baseClient: client,
-          checkPrivilegesDynamicallyWithRequest: authorization.checkPrivilegesDynamicallyWithRequest,
+          checkPrivilegesWithRequest: authorization.checkPrivilegesWithRequest,
+          spacesEnabled: spaces.isEnabled,
+          namespaceToSpaceId: spaces.isEnabled ? spaces.namespaceToSpaceId : () => undefined,
           errors: savedObjects.SavedObjectsClient.errors,
           request,
           savedObjectTypes: savedObjects.types,
