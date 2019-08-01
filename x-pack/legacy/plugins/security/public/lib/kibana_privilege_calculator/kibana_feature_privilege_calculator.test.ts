@@ -323,7 +323,7 @@ describe('getMostPermissiveFeaturePrivilege', () => {
         actualPrivilege: 'read',
         actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
         isDirectlyAssigned: true,
-        directlyAssignedPrivilegeMorePermissiveThanBase: true,
+        directlyAssignedFeaturePrivilegeMorePermissiveThanBase: true,
       },
     });
 
@@ -460,7 +460,7 @@ describe('getMostPermissiveFeaturePrivilege', () => {
           actualPrivilege: 'all',
           actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
           isDirectlyAssigned: true,
-          directlyAssignedPrivilegeMorePermissiveThanBase: true,
+          directlyAssignedFeaturePrivilegeMorePermissiveThanBase: true,
         },
       }
     );
@@ -545,7 +545,7 @@ describe('getMostPermissiveFeaturePrivilege', () => {
         actualPrivilege: 'all',
         actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
         isDirectlyAssigned: true,
-        directlyAssignedPrivilegeMorePermissiveThanBase: false,
+        directlyAssignedFeaturePrivilegeMorePermissiveThanBase: false,
       },
     });
 
@@ -628,7 +628,7 @@ describe('getMostPermissiveFeaturePrivilege', () => {
             actualPrivilege: 'read',
             actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
             isDirectlyAssigned: true,
-            directlyAssignedPrivilegeMorePermissiveThanBase: false,
+            directlyAssignedFeaturePrivilegeMorePermissiveThanBase: false,
           },
         }
       );
@@ -658,7 +658,7 @@ describe('getMostPermissiveFeaturePrivilege', () => {
             actualPrivilege: 'all',
             actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
             isDirectlyAssigned: true,
-            directlyAssignedPrivilegeMorePermissiveThanBase: true,
+            directlyAssignedFeaturePrivilegeMorePermissiveThanBase: true,
           },
         }
       );

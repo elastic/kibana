@@ -51,8 +51,8 @@ export class KibanaFeaturePrivilegeCalculator {
             actualPrivilege: featurePrivilege,
             actualPrivilegeSource: scenario.actualPrivilegeSource,
             isDirectlyAssigned: scenario.isDirectlyAssigned,
-            directlyAssignedPrivilegeMorePermissiveThanBase:
-              scenario.directlyAssignedPrivilegeMorePermissiveThanBase,
+            directlyAssignedFeaturePrivilegeMorePermissiveThanBase:
+              scenario.directlyAssignedFeaturePrivilegeMorePermissiveThanBase,
             ...this.buildSupercededFields(
               !scenario.isDirectlyAssigned,
               scenario.supersededPrivilege,
@@ -147,14 +147,14 @@ export class KibanaFeaturePrivilegeCalculator {
         featureId,
         this.getAssignedFeaturePrivilege(privilegeSpec, featureId)
       );
-      const directlyAssignedPrivilegeMorePermissiveThanBase = !areActionsFullyCovered(
+      const directlyAssignedFeaturePrivilegeMorePermissiveThanBase = !areActionsFullyCovered(
         this.assignedGlobalBaseActions,
         actions
       );
       scenarios.push({
         actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
         isDirectlyAssigned: true,
-        directlyAssignedPrivilegeMorePermissiveThanBase,
+        directlyAssignedFeaturePrivilegeMorePermissiveThanBase,
         actions,
       });
     }

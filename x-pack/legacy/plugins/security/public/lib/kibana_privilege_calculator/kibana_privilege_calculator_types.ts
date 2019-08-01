@@ -27,7 +27,7 @@ export interface PrivilegeExplanation {
   isDirectlyAssigned: boolean;
   supersededPrivilege?: string;
   supersededPrivilegeSource?: PRIVILEGE_SOURCE;
-  directlyAssignedPrivilegeMorePermissiveThanBase?: boolean;
+  directlyAssignedFeaturePrivilegeMorePermissiveThanBase?: boolean;
 }
 
 export interface CalculatedPrivilege {
@@ -44,7 +44,7 @@ export interface PrivilegeScenario {
   supersededPrivilege?: string;
   supersededPrivilegeSource?: PRIVILEGE_SOURCE;
   actions: string[];
-  directlyAssignedPrivilegeMorePermissiveThanBase?: boolean;
+  directlyAssignedFeaturePrivilegeMorePermissiveThanBase?: boolean;
 }
 
 export interface AllowedPrivilege {
