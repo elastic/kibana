@@ -22,7 +22,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       },
     ];
   },
-  buildColumn({ suggestedPriority, indexPatternId }) {
+  buildColumn({ suggestedPriority }) {
     return {
       label: i18n.translate('xpack.lens.indexPattern.countOf', {
         defaultMessage: 'Count of documents',
@@ -31,7 +31,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       operationType: 'count',
       suggestedPriority,
       isBucketed: false,
-      indexPatternId,
     };
   },
   toEsAggsConfig: (column, columnId) => ({
