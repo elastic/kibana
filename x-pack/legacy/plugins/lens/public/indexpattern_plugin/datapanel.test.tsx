@@ -51,35 +51,30 @@ const initialState: IndexPatternPrivateState = {
           type: 'date',
           aggregatable: true,
           searchable: true,
-          indexPatternId: '1',
         },
         {
           name: 'bytes',
           type: 'number',
           aggregatable: true,
           searchable: true,
-          indexPatternId: '1',
         },
         {
           name: 'memory',
           type: 'number',
           aggregatable: true,
           searchable: true,
-          indexPatternId: '1',
         },
         {
           name: 'unsupported',
           type: 'geo',
           aggregatable: true,
           searchable: true,
-          indexPatternId: '1',
         },
         {
           name: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,
-          indexPatternId: '1',
         },
       ],
     },
@@ -93,7 +88,6 @@ const initialState: IndexPatternPrivateState = {
           type: 'date',
           aggregatable: true,
           searchable: true,
-          indexPatternId: '2',
           aggregationRestrictions: {
             date_histogram: {
               agg: 'date_histogram',
@@ -108,7 +102,6 @@ const initialState: IndexPatternPrivateState = {
           type: 'number',
           aggregatable: true,
           searchable: true,
-          indexPatternId: '2',
           aggregationRestrictions: {
             histogram: {
               agg: 'histogram',
@@ -133,7 +126,6 @@ const initialState: IndexPatternPrivateState = {
           type: 'string',
           aggregatable: true,
           searchable: true,
-          indexPatternId: '2',
           aggregationRestrictions: {
             terms: {
               agg: 'terms',

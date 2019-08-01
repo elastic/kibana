@@ -5,11 +5,7 @@
  */
 
 import _ from 'lodash';
-import {
-  BaseIndexPatternColumn,
-  FieldBasedIndexPatternColumn,
-  IndexPatternField,
-} from './indexpattern';
+import { BaseIndexPatternColumn, FieldBasedIndexPatternColumn, DraggedField } from './indexpattern';
 
 export function hasField(column: BaseIndexPatternColumn): column is FieldBasedIndexPatternColumn {
   return 'sourceField' in column;
@@ -24,11 +20,11 @@ export function sortByField<C extends BaseIndexPatternColumn>(columns: C[]) {
   });
 }
 
-export function isIndexPatternField(fieldCandidate: unknown): fieldCandidate is IndexPatternField {
+export function isDraggedField(fieldCandidate: unknown): fieldCandidate is DraggedField {
   return (
     typeof fieldCandidate === 'object' &&
     fieldCandidate !== null &&
-    'type' in fieldCandidate &&
-    'name' in fieldCandidate
+    'field' in fieldCandidate &&
+    'indexPatternId' in fieldCandidate
   );
 }

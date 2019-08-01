@@ -27,7 +27,7 @@ import {
   getDatasourceSuggestionsFromCurrentState,
 } from './indexpattern_suggestions';
 
-import { isIndexPatternField } from './utils';
+import { isDraggedField } from './utils';
 import { Datasource, DataType } from '..';
 
 export type OperationType = IndexPatternColumn['operationType'];
@@ -111,7 +111,6 @@ export interface IndexPatternField {
   esTypes?: string[];
   aggregatable: boolean;
   searchable: boolean;
-  indexPatternId: string;
   aggregationRestrictions?: Partial<
     Record<
       string,
@@ -125,6 +124,11 @@ export interface IndexPatternField {
       }
     >
   >;
+}
+
+export interface DraggedField {
+  field: IndexPatternField;
+  indexPatternId: string;
 }
 
 export interface IndexPatternLayer {
@@ -336,8 +340,10 @@ export function getIndexPatternDatasource({
         duplicateColumn: () => [],
       };
     },
-    getDatasourceSuggestionsForField(state, field) {
-      return isIndexPatternField(field) ? getDatasourceSuggestionsForField(state, field) : [];
+    getDatasourceSuggestionsForField(state, draggedField) {
+      return isDraggedField(draggedField)
+        ? getDatasourceSuggestionsForField(state, draggedField.indexPatternId, draggedField.field)
+        : [];
     },
     getDatasourceSuggestionsFromCurrentState,
   };

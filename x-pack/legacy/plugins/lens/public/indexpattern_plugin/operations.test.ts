@@ -29,21 +29,18 @@ const expectedIndexPatterns = {
         type: 'date',
         aggregatable: true,
         searchable: true,
-        indexPatternId: '1',
       },
       {
         name: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
-        indexPatternId: '1',
       },
       {
         name: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
-        indexPatternId: '1',
       },
     ],
   },
@@ -58,7 +55,6 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          indexPatternId: '1',
         })
       ).toEqual(expect.arrayContaining(['terms']));
     });
@@ -70,7 +66,6 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          indexPatternId: '1',
         })
       ).toEqual(expect.arrayContaining(['avg', 'sum', 'min', 'max']));
     });
@@ -82,7 +77,6 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          indexPatternId: '1',
         })
       ).toEqual(expect.arrayContaining(['date_histogram']));
     });
@@ -94,7 +88,6 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          indexPatternId: '1',
         })
       ).toEqual([]);
     });
@@ -108,7 +101,6 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          indexPatternId: '1',
           aggregationRestrictions: {
             terms: {
               agg: 'terms',
@@ -125,7 +117,6 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          indexPatternId: '1',
           aggregationRestrictions: {
             min: {
               agg: 'min',
@@ -145,7 +136,6 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          indexPatternId: '1',
           aggregationRestrictions: {
             date_histogram: {
               agg: 'date_histogram',

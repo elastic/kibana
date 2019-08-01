@@ -22,7 +22,7 @@ import { getAvailableOperationsByMetadata, buildColumn } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
-import { isIndexPatternField } from '../utils';
+import { isDraggedField } from '../utils';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
@@ -91,9 +91,9 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
     const layerIndexPatternId = props.state.layers[props.layerId].indexPatternId;
 
     return (
-      isIndexPatternField(dragging) &&
+      isDraggedField(dragging) &&
       layerIndexPatternId === dragging.indexPatternId &&
-      Boolean(hasOperationForField(dragging))
+      Boolean(hasOperationForField(dragging.field))
     );
   }
 
@@ -103,10 +103,8 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
         className="lnsConfigPanel__summary"
         data-test-subj="indexPattern-dropTarget"
         droppable={canHandleDrop()}
-        onDrop={field => {
-          const column = isIndexPatternField(field) && hasOperationForField(field);
-
-          if (!column) {
+        onDrop={droppedItem => {
+          if (!isDraggedField(droppedItem) || !hasOperationForField(droppedItem.field)) {
             // TODO: What do we do if we couldn't find a column?
             return;
           }
@@ -121,7 +119,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
                 indexPattern: currentIndexPattern,
                 layerId,
                 suggestedPriority: props.suggestedPriority,
-                field: field as IndexPatternField,
+                field: droppedItem.field,
               }),
             })
           );

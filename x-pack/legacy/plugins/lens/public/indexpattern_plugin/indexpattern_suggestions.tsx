@@ -57,20 +57,21 @@ function buildSuggestion({
 
 export function getDatasourceSuggestionsForField(
   state: IndexPatternPrivateState,
+  indexPatternId: string,
   field: IndexPatternField
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
   const layers = Object.keys(state.layers);
-  const layerIds = layers.filter(id => state.layers[id].indexPatternId === field.indexPatternId);
+  const layerIds = layers.filter(id => state.layers[id].indexPatternId === indexPatternId);
 
   if (layerIds.length === 0) {
     // The field we're suggesting on does not match any existing layer. This will always add
     // a new layer if possible, but that might not be desirable if the layers are too complicated
     // already
-    return getEmptyLayerSuggestionsForField(state, generateId(), field);
+    return getEmptyLayerSuggestionsForField(state, generateId(), indexPatternId, field);
   } else {
     const mostEmptyLayerId = _.min(layerIds, layerId => state.layers[layerId].columnOrder.length);
     if (state.layers[mostEmptyLayerId].columnOrder.length === 0) {
-      return getEmptyLayerSuggestionsForField(state, mostEmptyLayerId, field);
+      return getEmptyLayerSuggestionsForField(state, mostEmptyLayerId, indexPatternId, field);
     } else {
       return getExistingLayerSuggestionsForField(state, mostEmptyLayerId, field);
     }
@@ -144,7 +145,7 @@ function addFieldAsMetricOperation(
   const updatedColumnOrder = [...layer.columnOrder, newColumnId];
 
   return {
-    indexPatternId: field.indexPatternId,
+    indexPatternId: indexPattern.id,
     columns: updatedColumns,
     columnOrder: updatedColumnOrder,
   };
@@ -193,7 +194,7 @@ function addFieldAsBucketOperation(
     }
   }
   return {
-    indexPatternId: field.indexPatternId,
+    indexPatternId: indexPattern.id,
     columns: updatedColumns,
     columnOrder: updatedColumnOrder,
   };
@@ -202,9 +203,10 @@ function addFieldAsBucketOperation(
 function getEmptyLayerSuggestionsForField(
   state: IndexPatternPrivateState,
   layerId: string,
+  indexPatternId: string,
   field: IndexPatternField
 ) {
-  const indexPattern = state.indexPatterns[field.indexPatternId];
+  const indexPattern = state.indexPatterns[indexPatternId];
   let newLayer: IndexPatternLayer | undefined;
   if (getBucketOperation(field)) {
     newLayer = createNewLayerWithBucketAggregation(layerId, indexPattern, field);
@@ -248,7 +250,7 @@ function createNewLayerWithBucketAggregation(
   });
 
   return {
-    indexPatternId: field.indexPatternId,
+    indexPatternId: indexPattern.id,
     columns: {
       col1: column,
       col2: countColumn,

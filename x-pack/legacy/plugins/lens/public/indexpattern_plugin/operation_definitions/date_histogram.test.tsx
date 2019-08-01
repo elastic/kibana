@@ -28,7 +28,6 @@ describe('date_histogram', () => {
               esTypes: ['date'],
               aggregatable: true,
               searchable: true,
-              indexPatternId: '1',
             },
           ],
         },
@@ -42,7 +41,6 @@ describe('date_histogram', () => {
               esTypes: ['date'],
               aggregatable: true,
               searchable: true,
-              indexPatternId: '2',
             },
           ],
         },
@@ -103,7 +101,6 @@ describe('date_histogram', () => {
           esTypes: ['date'],
           aggregatable: true,
           searchable: true,
-          indexPatternId: '1',
         },
       });
       expect(column.params.interval).toEqual('d');
@@ -121,7 +118,6 @@ describe('date_histogram', () => {
           esTypes: ['date'],
           aggregatable: true,
           searchable: true,
-          indexPatternId: '1',
           aggregationRestrictions: {
             date_histogram: {
               agg: 'date_histogram',
