@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { InfraNodeType } from '../../graphql/types';
 import { InfraMetricLayout } from '../../pages/metrics/layouts/types';
 import { InfraMetadata } from '../../../common/http_api/metadata_api';
-import { fetch } from '../../utils/fetch';
 import { getFilteredLayouts } from './lib/get_filtered_layouts';
+import { useHTTPRequest } from '../../hooks/use_http_request';
 
 export function useMetadata(
   nodeId: string,
@@ -17,29 +17,25 @@ export function useMetadata(
   layouts: InfraMetricLayout[],
   sourceId: string
 ) {
-  const [error, setError] = useState<Error | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [data, setData] = useState<InfraMetadata | null>(null);
+  const { error, loading, response, makeRequest } = useHTTPRequest<InfraMetadata>(
+    '/api/infra/metadata',
+    'POST',
+    JSON.stringify({
+      nodeId,
+      nodeType,
+      sourceId,
+    })
+  );
 
   useEffect(() => {
     (async () => {
-      setLoading(true);
-      try {
-        const response = await fetch.post<InfraMetadata>('../api/infra/metadata', {
-          nodeId,
-          nodeType,
-          sourceId,
-        });
-        setData(response.data);
-      } catch (e) {
-        setError(e);
-      }
-      setLoading(false);
+      await makeRequest();
     })();
-  }, [nodeId, nodeType, sourceId]);
+  }, [makeRequest]);
+
   return {
-    name: (data && data.name) || '',
-    filteredLayouts: (data && getFilteredLayouts(layouts, data.features)) || [],
+    name: (response && response.name) || '',
+    filteredLayouts: (response && getFilteredLayouts(layouts, response.features)) || [],
     error: (error && error.message) || null,
     loading,
   };
