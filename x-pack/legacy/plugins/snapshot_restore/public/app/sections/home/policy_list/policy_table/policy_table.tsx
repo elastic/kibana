@@ -4,31 +4,48 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiLink } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiToolTip,
+  EuiButtonIcon,
+} from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
 import { UIM_POLICY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
-import { FormattedDateTime } from '../../../../components';
+import {
+  FormattedDateTime,
+  PolicyExecuteProvider,
+  PolicyDeleteProvider,
+} from '../../../../components';
 import { uiMetricService } from '../../../../services/ui_metric';
 
 interface Props {
   policies: SlmPolicy[];
   reload: () => Promise<void>;
   openPolicyDetailsUrl: (name: SlmPolicy['name']) => string;
+  onPolicyDeleted: (policiesDeleted: Array<SlmPolicy['name']>) => void;
+  onPolicyExecuted: () => void;
 }
 
 export const PolicyTable: React.FunctionComponent<Props> = ({
   policies,
   reload,
   openPolicyDetailsUrl,
+  onPolicyDeleted,
+  onPolicyExecuted,
 }) => {
   const {
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
   const { trackUiMetric } = uiMetricService;
+  const [selectedItems, setSelectedItems] = useState<SlmPolicy[]>([]);
 
   const columns = [
     {
@@ -85,6 +102,76 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         <FormattedDateTime epochMs={nextExecutionMillis} />
       ),
     },
+    {
+      name: i18n.translate('xpack.snapshotRestore.policyList.table.actionsColumnTitle', {
+        defaultMessage: 'Actions',
+      }),
+      actions: [
+        {
+          render: ({ name }: SlmPolicy) => {
+            return (
+              <PolicyExecuteProvider>
+                {executePolicyPrompt => {
+                  const label = i18n.translate(
+                    'xpack.snapshotRestore.policyList.table.actionExecuteTooltip',
+                    { defaultMessage: 'Run policy' }
+                  );
+                  return (
+                    <EuiToolTip content={label}>
+                      <EuiButtonIcon
+                        aria-label={i18n.translate(
+                          'xpack.snapshotRestore.policyList.table.actionExecuteAriaLabel',
+                          {
+                            defaultMessage: `Run policy '{name}'`,
+                            values: { name },
+                          }
+                        )}
+                        iconType="play"
+                        color="primary"
+                        data-test-subj="executePolicyButton"
+                        onClick={() => executePolicyPrompt(name, onPolicyExecuted)}
+                      />
+                    </EuiToolTip>
+                  );
+                }}
+              </PolicyExecuteProvider>
+            );
+          },
+        },
+        {
+          render: ({ name }: SlmPolicy) => {
+            return (
+              <PolicyDeleteProvider>
+                {deletePolicyPrompt => {
+                  const label = i18n.translate(
+                    'xpack.snapshotRestore.policyList.table.actionDeleteTooltip',
+                    { defaultMessage: 'Delete' }
+                  );
+                  return (
+                    <EuiToolTip content={label}>
+                      <EuiButtonIcon
+                        aria-label={i18n.translate(
+                          'xpack.snapshotRestore.policyList.table.actionDeleteAriaLabel',
+                          {
+                            defaultMessage: `Delete policy '{name}'`,
+                            values: { name },
+                          }
+                        )}
+                        iconType="trash"
+                        color="danger"
+                        data-test-subj="deletePolicyButton"
+                        onClick={() => deletePolicyPrompt([name], onPolicyDeleted)}
+                      />
+                    </EuiToolTip>
+                  );
+                }}
+              </PolicyDeleteProvider>
+            );
+          },
+        },
+      ],
+      width: '100px',
+    },
   ];
 
   const sorting = {
@@ -99,7 +186,41 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
     pageSizeOptions: [10, 20, 50],
   };
 
+  const selection = {
+    onSelectionChange: (newSelectedItems: SlmPolicy[]) => setSelectedItems(newSelectedItems),
+  };
+
   const search = {
+    toolsLeft: selectedItems.length ? (
+      <PolicyDeleteProvider>
+        {(
+          deletePolicyPrompt: (
+            names: Array<SlmPolicy['name']>,
+            onSuccess?: (policiesDeleted: Array<SlmPolicy['name']>) => void
+          ) => void
+        ) => {
+          return (
+            <EuiButton
+              onClick={() =>
+                deletePolicyPrompt(selectedItems.map(({ name }) => name), onPolicyDeleted)
+              }
+              color="danger"
+              data-test-subj="srPolicyListBulkDeleteActionButton"
+            >
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyList.table.deletePolicyButton"
+                defaultMessage="Delete {count, plural, one {policy} other {policies}}"
+                values={{
+                  count: selectedItems.length,
+                }}
+              />
+            </EuiButton>
+          );
+        }}
+      </PolicyDeleteProvider>
+    ) : (
+      undefined
+    ),
     toolsRight: (
       <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
         <EuiFlexItem>
@@ -151,6 +272,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       columns={columns}
       search={search}
       sorting={sorting}
+      selection={selection}
       pagination={pagination}
       isSelectable={true}
       rowProps={() => ({
