@@ -1,8 +1,8 @@
 [role="xpack"]
 [[ml-jobs]]
-== Creating machine learning jobs
+== Creating {anomaly-jobs}
 
-Machine learning jobs contain the configuration information and metadata
+{anomaly-jobs-cap} contain the configuration information and metadata
 necessary to perform an analytics task.
 
 {kib} provides the following wizards to make it easier to create jobs:
@@ -40,7 +40,7 @@ activity on your systems, the following wizards appear:
 [role="screenshot"]
 image::ml/images/ml-data-recognizer-auditbeat.jpg[A screenshot of the {auditbeat} job creation wizards]
 
-These wizards create {ml} jobs, dashboards, searches, and visualizations that
+These wizards create {anomaly-jobs}, dashboards, searches, and visualizations that
 are customized to help you analyze your {auditbeat} and {filebeat} data.
 
 If you are not certain which type of job to create, you can use the
@@ -51,7 +51,7 @@ a time field, it can identify possible fields for {ml} analysis.
 ===============================
 If your data is located outside of {es}, you cannot use {kib} to create
 your jobs and you cannot use {dfeeds} to retrieve your data in real time.
-Machine learning analysis is still possible, however, by using APIs to
+{anomaly-detect-cap} is still possible, however, by using APIs to
 create and manage jobs and post data to them. For more information, see
 {ref}/ml-apis.html[Machine Learning APIs].
 ===============================
