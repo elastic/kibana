@@ -24,19 +24,52 @@ import { Filter } from '@kbn/es-query';
 
 // @ts-ignore
 import { uiModules } from 'ui/modules';
+import { npSetup } from 'ui/new_platform';
 import { IndexPatterns } from 'src/legacy/core_plugins/data/public';
 import { FilterBar, ApplyFiltersPopover } from '../filter';
 import template from './apply_filter_directive.html';
 
 // @ts-ignore
 import { mapAndFlattenFilters } from '../filter/filter_manager/lib/map_and_flatten_filters';
-// @ts-ignore
 
 /** @internal */
 export const initLegacyModule = once((): void => {
   uiModules
     .get('app/kibana', ['react'])
-    .directive('filterBar', (reactDirective: any) => reactDirective(wrapInI18nContext(FilterBar)))
+    .directive('filterBar', () => {
+      return {
+        restrict: 'E',
+        template: '',
+        compile: (elem: any) => {
+          const child = document.createElement('filter-bar-helper');
+
+          // Copy attributes to the child directive
+          for (const attr of elem[0].attributes) {
+            child.setAttribute(attr.name, attr.value);
+          }
+
+          child.setAttribute('ui-settings', 'uiSettings');
+
+          // Append helper directive
+          elem.append(child);
+
+          const linkFn = ($scope: any) => {
+            $scope.uiSettings = npSetup.core.uiSettings;
+          };
+
+          return linkFn;
+        },
+      };
+    })
+    .directive('filterBarHelper', (reactDirective: any) => {
+      return reactDirective(wrapInI18nContext(FilterBar), [
+        ['uiSettings', { watchDepth: 'reference' }],
+        ['onFiltersUpdated', { watchDepth: 'reference' }],
+        ['indexPatterns', { watchDepth: 'collection' }],
+        ['filters', { watchDepth: 'collection' }],
+        ['className', { watchDepth: 'reference' }],
+      ]);
+    })
     .directive('applyFiltersPopoverComponent', (reactDirective: any) =>
       reactDirective(wrapInI18nContext(ApplyFiltersPopover))
     )
