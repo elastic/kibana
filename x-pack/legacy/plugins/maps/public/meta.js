@@ -17,6 +17,7 @@ import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { EMSClient } from 'ui/vis/map/ems_client';
 import { xpackInfo } from './kibana_services';
+import fetch from 'node-fetch';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
