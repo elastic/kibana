@@ -17,7 +17,7 @@
  * under the License.
  */
 import chrome from 'ui/chrome';
-import { AngularScope } from './doc_viewer_types';
+import { AngularScope } from 'ui/registry/doc_views';
 /**
  * compiles the angular markup provided by domElement
  * injects scope with given scopeProps

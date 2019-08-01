@@ -17,8 +17,8 @@
  * under the License.
  */
 import React, { useRef, useEffect } from 'react';
+import { AngularDirective } from 'ui/registry/doc_views';
 import { compileAngular } from './doc_viewer_helper';
-import { AngularDirective } from './doc_viewer_types';
 
 interface Props {
   directive: AngularDirective;

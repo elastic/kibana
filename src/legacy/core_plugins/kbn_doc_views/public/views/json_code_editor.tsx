@@ -20,12 +20,9 @@
 import { EuiCodeEditor } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { DocViewRenderProps } from 'ui/registry/doc_views';
 
-export interface JsonCodeEditorProps {
-  hit: Record<string, any>;
-}
-
-export function JsonCodeEditor({ hit }: JsonCodeEditorProps) {
+export function JsonCodeEditor({ hit }: DocViewRenderProps) {
   return (
     <EuiCodeEditor
       aria-label={

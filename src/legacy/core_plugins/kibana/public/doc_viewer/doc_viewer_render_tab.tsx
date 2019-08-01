@@ -17,11 +17,11 @@
  * under the License.
  */
 import React, { useRef, useEffect } from 'react';
-import { DocViewerTabRenderProps, DockViewerTabRenderFunc } from './doc_viewer_types';
+import { DocViewRenderFn, DocViewRenderProps } from 'ui/registry/doc_views';
 
 interface Props {
-  render: DockViewerTabRenderFunc;
-  renderProps: DocViewerTabRenderProps;
+  render: DocViewRenderFn;
+  renderProps: DocViewRenderProps;
 }
 
 export function DocViewRenderTab({ render, renderProps }: Props) {

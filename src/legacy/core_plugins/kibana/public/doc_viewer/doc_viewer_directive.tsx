@@ -18,11 +18,12 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
+// @ts-ignore
 import { uiModules } from 'ui/modules';
-import { getDocViewsSorted } from 'ui/registry/doc_views';
+import { getDocViewsSorted, DocViewRenderProps } from 'ui/registry/doc_views';
 import { DocViewer } from './doc_viewer';
 
-uiModules.get('apps/discover').directive('docViewer', function () {
+uiModules.get('apps/discover').directive('docViewer', () => {
   return {
     restrict: 'E',
     scope: {
@@ -34,7 +35,7 @@ uiModules.get('apps/discover').directive('docViewer', function () {
       onRemoveColumn: '=?',
     },
 
-    link: function (scope, element) {
+    link: (scope: DocViewRenderProps, element: Element[]) => {
       const props = {
         columns: scope.columns,
         filter: scope.filter,
@@ -44,10 +45,7 @@ uiModules.get('apps/discover').directive('docViewer', function () {
         hit: scope.hit,
       };
       const docViews = getDocViewsSorted(scope.hit);
-      ReactDOM.render(
-        <DocViewer renderProps={props} docViews={docViews} />,
-        element[0]
-      );
+      ReactDOM.render(<DocViewer renderProps={props} docViews={docViews} />, element[0]);
     },
   };
 });

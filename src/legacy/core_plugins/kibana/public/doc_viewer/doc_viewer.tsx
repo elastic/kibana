@@ -18,13 +18,13 @@
  */
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
+import { DocViewRenderProps, DocView } from 'ui/registry/doc_views';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerAngularTab } from './doc_viewer_angular_tab';
-import { DocViewerTabRenderProps, DocViewerTab } from './doc_viewer_types';
 
 interface Props {
-  docViews: DocViewerTab[];
-  renderProps: DocViewerTabRenderProps;
+  docViews: DocView[];
+  renderProps: DocViewRenderProps;
 }
 
 export function DocViewer({ docViews, renderProps }: Props) {
