@@ -7,15 +7,15 @@
 import expect from '@kbn/expect';
 import { InfraNodeType } from '../../../../legacy/plugins/infra/server/graphql/types';
 import {
-  Metadata,
-  MetadataRequest,
-} from '../../../../legacy/plugins/infra/server/routes/metadata/types';
+  InfraMetadata,
+  InfraMetadataRequest,
+} from '../../../../legacy/plugins/infra/common/http_api/metadata_api';
 import { KbnTestProvider } from './types';
 
 const metadataTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const fetchMetadata = async (body: MetadataRequest): Promise<Metadata | undefined> => {
+  const fetchMetadata = async (body: InfraMetadataRequest): Promise<InfraMetadata | undefined> => {
     const response = await supertest
       .post('/api/infra/metadata')
       .set('kbn-xsrf', 'xxx')

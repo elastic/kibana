@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react';
 import { InfraNodeType } from '../../graphql/types';
 import { InfraMetricLayout } from '../../pages/metrics/layouts/types';
-import { Metadata } from '../../../server/routes/metadata/types';
+import { InfraMetadata } from '../../../common/http_api/metadata_api';
 import { fetch } from '../../utils/fetch';
 import { getFilteredLayouts } from './lib/get_filtered_layouts';
 
@@ -19,13 +19,13 @@ export function useMetadata(
 ) {
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [data, setData] = useState<Metadata | null>(null);
+  const [data, setData] = useState<InfraMetadata | null>(null);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
       try {
-        const response = await fetch.post<Metadata>('../api/infra/metadata', {
+        const response = await fetch.post<InfraMetadata>('../api/infra/metadata', {
           nodeId,
           nodeType,
           sourceId,

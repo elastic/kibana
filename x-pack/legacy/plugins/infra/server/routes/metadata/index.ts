@@ -6,7 +6,11 @@
 
 import { boomify } from 'boom';
 import { get } from 'lodash';
-import { Metadata, MetadataWrappedRequest, MetadataFeature } from './types';
+import {
+  InfraMetadata,
+  InfraMetadataWrappedRequest,
+  InfraMetadataFeature,
+} from '../../../common/http_api/metadata_api';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { schema } from './schema';
 import { getMetricMetadata } from './lib/get_metric_metadata';
@@ -17,7 +21,7 @@ import { getNodeInfo } from './lib/get_node_info';
 export const initMetadataRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;
 
-  framework.registerRoute<MetadataWrappedRequest, Promise<Metadata>>({
+  framework.registerRoute<InfraMetadataWrappedRequest, Promise<InfraMetadata>>({
     method: 'POST',
     path: '/api/infra/metadata',
     options: {
@@ -60,4 +64,7 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
   });
 };
 
-const nameToFeature = (source: string) => (name: string): MetadataFeature => ({ name, source });
+const nameToFeature = (source: string) => (name: string): InfraMetadataFeature => ({
+  name,
+  source,
+});

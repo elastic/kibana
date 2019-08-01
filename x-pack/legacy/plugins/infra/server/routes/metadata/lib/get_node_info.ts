@@ -11,7 +11,7 @@ import {
 } from '../../../lib/adapters/framework';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { InfraNodeType } from '../../../graphql/types';
-import { MetadataInfo } from '../types';
+import { InfraMetadataInfo } from '../../../../common/http_api/metadata_api';
 import { getPodNodeName } from './get_pod_node_name';
 import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
 import { getIdFieldName } from './get_id_field_name';
@@ -22,7 +22,7 @@ export const getNodeInfo = async (
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
   nodeType: InfraNodeType
-): Promise<MetadataInfo> => {
+): Promise<InfraMetadataInfo> => {
   // If the nodeType is a Kubernetes pod then we need to get the node info
   // from a host record instead of a pod. This is due to the fact that any host
   // can report pod details and we can't rely on the host/cloud information associated
@@ -63,7 +63,7 @@ export const getNodeInfo = async (
       },
     },
   };
-  const response = await framework.callWithRequest<{ _source: MetadataInfo }, {}>(
+  const response = await framework.callWithRequest<{ _source: InfraMetadataInfo }, {}>(
     req,
     'search',
     params
