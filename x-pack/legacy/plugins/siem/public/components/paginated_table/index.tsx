@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { memo, useState, useEffect } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { Direction } from '../../graphql/types';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
@@ -253,36 +253,29 @@ export const PaginatedTable = memo<SiemTables>(
             />
 
             <FooterAction>
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem>
-                  {itemsPerRow &&
-                    itemsPerRow.length > 0 &&
-                    totalCount >= itemsPerRow[0].numberOfRow && (
-                      <EuiPopover
-                        id="customizablePagination"
-                        data-test-subj="loadingMoreSizeRowPopover"
-                        button={button}
-                        isOpen={isPopoverOpen}
-                        closePopover={closePopover}
-                        panelPaddingSize="none"
-                      >
-                        <EuiContextMenuPanel
-                          items={rowItems}
-                          data-test-subj="loadingMorePickSizeRow"
-                        />
-                      </EuiPopover>
-                    )}
-                </EuiFlexItem>
+              <EuiFlexItem>
+                {itemsPerRow && itemsPerRow.length > 0 && totalCount >= itemsPerRow[0].numberOfRow && (
+                  <EuiPopover
+                    id="customizablePagination"
+                    data-test-subj="loadingMoreSizeRowPopover"
+                    button={button}
+                    isOpen={isPopoverOpen}
+                    closePopover={closePopover}
+                    panelPaddingSize="none"
+                  >
+                    <EuiContextMenuPanel items={rowItems} data-test-subj="loadingMorePickSizeRow" />
+                  </EuiPopover>
+                )}
+              </EuiFlexItem>
 
-                <PaginationWrapper grow={false}>
-                  <EuiPagination
-                    data-test-subj="numberedPagination"
-                    pageCount={pageCount}
-                    activePage={activePage}
-                    onPageClick={goToPage}
-                  />
-                </PaginationWrapper>
-              </EuiFlexGroup>
+              <PaginationWrapper grow={false}>
+                <EuiPagination
+                  data-test-subj="numberedPagination"
+                  pageCount={pageCount}
+                  activePage={activePage}
+                  onPageClick={goToPage}
+                />
+              </PaginationWrapper>
             </FooterAction>
 
             {loading && <Loader data-test-subj="loadingPanelPaginatedTable" overlay size="xl" />}
@@ -312,23 +305,33 @@ const BasicTable = styled(EuiBasicTable)`
   }
 `;
 
-const FooterAction = styled.div`
-  margin-top: ${props => props.theme.eui.euiSize};
+const FooterAction = styled(EuiFlexGroup).attrs({
+  alignItems: 'center',
+  responsive: false,
+})`
+  margin-top: ${props => props.theme.eui.euiSizeXS};
 `;
 
 const PaginationEuiFlexItem = styled(EuiFlexItem)`
-  button.euiButtonIcon.euiButtonIcon--text {
-    margin-left: 20px;
-  }
-  .euiPagination {
-    position: relative;
-  }
-  .euiPagination::before {
-    content: '\\2026';
-    bottom: 5px;
-    color: ${props => props.theme.eui.euiButtonColorDisabled};
-    font-size: ${props => props.theme.eui.euiFontSizeS};
-    position: absolute;
-    right: 30px;
-  }
+  ${props => css`
+    @media only screen and (min-width: ${props.theme.eui.euiBreakpoints.m}) {
+      .euiButtonIcon:last-child {
+        margin-left: 28px;
+      }
+
+      .euiPagination {
+        position: relative;
+      }
+
+      .euiPagination::before {
+        bottom: 0;
+        color: ${props.theme.eui.euiButtonColorDisabled};
+        content: '\\2026';
+        font-size: ${props.theme.eui.euiFontSizeS};
+        padding: 5px ${props.theme.eui.euiSizeS};
+        position: absolute;
+        right: ${props.theme.eui.euiSizeL};
+      }
+    }
+  `}
 `;

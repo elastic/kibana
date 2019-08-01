@@ -31,7 +31,7 @@ export function createFireFunction({
         id,
         basePath,
         namespace,
-        actionTypeParams: params,
+        params,
       },
       state: {},
       scope: ['actions'],
