@@ -69,7 +69,13 @@ export const PropertyEditor = ({
     return (
       <Fragment>
         <EuiSpacer size="m" />
-        <AdvancedSettingsComponent />
+        <div style={{ backgroundColor: '#F5F7FA', padding: '12px' }}>
+          <AdvancedSettingsComponent
+            fieldPathPrefix={fieldPathPrefix}
+            form={form}
+            isEditMode={isEditMode}
+          />
+        </div>
       </Fragment>
     );
   };
