@@ -61,7 +61,7 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
                 attributes: {
                   description: 'My action',
                   actionTypeId: 'test.index-record',
-                  actionTypeConfig: {
+                  config: {
                     unencrypted: `This value shouldn't get encrypted`,
                   },
                 },
