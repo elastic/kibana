@@ -132,7 +132,7 @@ describe('setupAuthentication()', () => {
 
     it('replies with no credentials when security is disabled in elasticsearch', async () => {
       const mockRequest = httpServerMock.createKibanaRequest();
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockResponse = httpServerMock.createLifecycleResponseFactory();
 
       mockXpackInfo.feature.mockReturnValue(mockXPackFeature({ isEnabled: false }));
 
@@ -148,7 +148,7 @@ describe('setupAuthentication()', () => {
 
     it('continues request with credentials on success', async () => {
       const mockRequest = httpServerMock.createKibanaRequest();
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockResponse = httpServerMock.createLifecycleResponseFactory();
       const mockUser = mockAuthenticatedUser();
       const mockAuthHeaders = { authorization: 'Basic xxx' };
 
@@ -172,7 +172,7 @@ describe('setupAuthentication()', () => {
 
     it('returns authentication response headers on success if any', async () => {
       const mockRequest = httpServerMock.createKibanaRequest();
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockResponse = httpServerMock.createLifecycleResponseFactory();
       const mockUser = mockAuthenticatedUser();
       const mockAuthHeaders = { authorization: 'Basic xxx' };
       const mockAuthResponseHeaders = { 'WWW-Authenticate': 'Negotiate' };
@@ -200,7 +200,7 @@ describe('setupAuthentication()', () => {
     });
 
     it('redirects user if redirection is requested by the authenticator', async () => {
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockResponse = httpServerMock.createLifecycleResponseFactory();
       authenticate.mockResolvedValue(AuthenticationResult.redirectTo('/some/url'));
 
       await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
@@ -214,7 +214,7 @@ describe('setupAuthentication()', () => {
     });
 
     it('rejects with `Internal Server Error` when `authenticate` throws unhandled exception', async () => {
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockResponse = httpServerMock.createLifecycleResponseFactory();
       authenticate.mockRejectedValue(new Error('something went wrong'));
 
       await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
@@ -229,7 +229,7 @@ describe('setupAuthentication()', () => {
     });
 
     it('rejects with wrapped original error when `authenticate` fails to authenticate user', async () => {
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockResponse = httpServerMock.createLifecycleResponseFactory();
       const esError = Boom.badRequest('some message');
       authenticate.mockResolvedValue(AuthenticationResult.failed(esError));
 
@@ -244,7 +244,7 @@ describe('setupAuthentication()', () => {
     });
 
     it('includes `WWW-Authenticate` header if `authenticate` fails to authenticate user and provides challenges', async () => {
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockResponse = httpServerMock.createLifecycleResponseFactory();
       const originalError = Boom.unauthorized('some message');
       originalError.output.headers['WWW-Authenticate'] = [
         'Basic realm="Access to prod", charset="UTF-8"',
@@ -269,7 +269,7 @@ describe('setupAuthentication()', () => {
     });
 
     it('returns `unauthorized` when authentication can not be handled', async () => {
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockResponse = httpServerMock.createLifecycleResponseFactory();
       authenticate.mockResolvedValue(AuthenticationResult.notHandled());
 
       await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);

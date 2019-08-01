@@ -23,7 +23,7 @@ import querystring from 'querystring';
 
 import { schema } from '@kbn/config-schema';
 
-import { KibanaRequest, RouteMethod, ResponseFactory } from './router';
+import { KibanaRequest, LifecycleResponseFactory, RouteMethod, ResponseFactory } from './router';
 
 interface RequestFixtureOptions {
   headers?: Record<string, string>;
@@ -111,8 +111,19 @@ const createResponseFactoryMock = (): jest.Mocked<ResponseFactory> => ({
   internal: jest.fn(),
 });
 
+const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFactory> => ({
+  redirected: jest.fn(),
+  badRequest: jest.fn(),
+  unauthorized: jest.fn(),
+  forbidden: jest.fn(),
+  notFound: jest.fn(),
+  conflict: jest.fn(),
+  internal: jest.fn(),
+});
+
 export const httpServerMock = {
   createKibanaRequest: createKibanaRequestMock,
   createRawRequest: createRawRequestMock,
   createResponseFactory: createResponseFactoryMock,
+  createLifecycleResponseFactory: createLifecycleResponseFactoryMock,
 };

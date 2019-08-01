@@ -24,6 +24,7 @@ export {
   isRealRequest,
   KibanaRequest,
   KibanaRequestRoute,
+  LifecycleResponseFactory,
   ResponseError,
   ResponseErrorMeta,
   ResponseFactory,

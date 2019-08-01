@@ -195,7 +195,11 @@ describe('onPostAuthRequestInterceptor', () => {
           path,
           url: parse(path),
         };
-        await handler(preAuthRequest, httpServerMock.createResponseFactory(), preAuthToolkit);
+        await handler(
+          preAuthRequest,
+          httpServerMock.createLifecycleResponseFactory(),
+          preAuthToolkit
+        );
       });
 
       const service = new SpacesService(log, configFn().get('server.basePath'));

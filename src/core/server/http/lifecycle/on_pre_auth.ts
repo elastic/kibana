@@ -23,8 +23,8 @@ import {
   HapiResponseAdapter,
   KibanaRequest,
   KibanaResponse,
-  responseFactory,
-  ResponseFactory,
+  lifecycleResponseFactory,
+  LifecycleResponseFactory,
 } from '../router';
 
 enum ResultType {
@@ -81,7 +81,7 @@ const toolkit: OnPreAuthToolkit = {
 /** @public */
 export type OnPreAuthHandler = (
   request: KibanaRequest,
-  response: ResponseFactory,
+  response: LifecycleResponseFactory,
   toolkit: OnPreAuthToolkit
 ) => OnPreAuthResult | KibanaResponse<any> | Promise<OnPreAuthResult | KibanaResponse<any>>;
 
@@ -99,7 +99,7 @@ export function adoptToHapiOnPreAuthFormat(fn: OnPreAuthHandler, log: Logger) {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
 
     try {
-      const result = await fn(KibanaRequest.from(request), responseFactory, toolkit);
+      const result = await fn(KibanaRequest.from(request), lifecycleResponseFactory, toolkit);
       if (result instanceof KibanaResponse) {
         return hapiResponseAdapter.handle(result);
       }

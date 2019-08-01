@@ -23,6 +23,8 @@ export { KibanaRequest, KibanaRequestRoute, ensureRawRequest, isRealRequest } fr
 export { RouteMethod, RouteConfigOptions } from './route';
 export {
   KibanaResponse,
+  lifecycleResponseFactory,
+  LifecycleResponseFactory,
   ResponseError,
   ResponseErrorMeta,
   responseFactory,

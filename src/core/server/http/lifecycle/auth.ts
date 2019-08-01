@@ -22,8 +22,8 @@ import {
   HapiResponseAdapter,
   KibanaRequest,
   KibanaResponse,
-  responseFactory,
-  ResponseFactory,
+  lifecycleResponseFactory,
+  LifecycleResponseFactory,
 } from '../router';
 
 enum ResultType {
@@ -94,7 +94,7 @@ const toolkit: AuthToolkit = {
 /** @public */
 export type AuthenticationHandler = (
   request: KibanaRequest,
-  response: ResponseFactory,
+  response: LifecycleResponseFactory,
   t: AuthToolkit
 ) => AuthResult | KibanaResponse<any> | Promise<AuthResult | KibanaResponse<any>>;
 
@@ -112,7 +112,7 @@ export function adoptToHapiAuthFormat(
     try {
       const result = await fn(
         KibanaRequest.from(request, undefined, false),
-        responseFactory,
+        lifecycleResponseFactory,
         toolkit
       );
       if (result instanceof KibanaResponse) {

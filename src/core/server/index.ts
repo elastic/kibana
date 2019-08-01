@@ -66,6 +66,7 @@ export {
   GetAuthHeaders,
   KibanaRequest,
   KibanaRequestRoute,
+  LifecycleResponseFactory,
   OnPreAuthHandler,
   OnPreAuthToolkit,
   OnPostAuthHandler,

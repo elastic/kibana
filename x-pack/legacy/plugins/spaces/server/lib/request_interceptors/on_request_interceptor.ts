@@ -6,7 +6,7 @@
 import {
   KibanaRequest,
   OnPreAuthToolkit,
-  ResponseFactory,
+  LifecycleResponseFactory,
   HttpServiceSetup,
 } from 'src/core/server';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
@@ -24,7 +24,7 @@ export function initSpacesOnRequestInterceptor({ config, http }: OnRequestInterc
 
   http.registerOnPreAuth(async function spacesOnPreAuthHandler(
     request: KibanaRequest,
-    response: ResponseFactory,
+    response: LifecycleResponseFactory,
     toolkit: OnPreAuthToolkit
   ) {
     const path = request.url.pathname;

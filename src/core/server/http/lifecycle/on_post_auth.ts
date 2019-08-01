@@ -23,8 +23,8 @@ import {
   HapiResponseAdapter,
   KibanaRequest,
   KibanaResponse,
-  responseFactory,
-  ResponseFactory,
+  lifecycleResponseFactory,
+  LifecycleResponseFactory,
 } from '../router';
 
 enum ResultType {
@@ -58,7 +58,7 @@ export interface OnPostAuthToolkit {
 /** @public */
 export type OnPostAuthHandler = (
   request: KibanaRequest,
-  response: ResponseFactory,
+  response: LifecycleResponseFactory,
   toolkit: OnPostAuthToolkit
 ) => OnPostAuthResult | KibanaResponse<any> | Promise<OnPostAuthResult | KibanaResponse<any>>;
 
@@ -79,7 +79,7 @@ export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler, log: Logger) 
   ): Promise<Lifecycle.ReturnValue> {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
-      const result = await fn(KibanaRequest.from(request), responseFactory, toolkit);
+      const result = await fn(KibanaRequest.from(request), lifecycleResponseFactory, toolkit);
       if (result instanceof KibanaResponse) {
         return hapiResponseAdapter.handle(result);
       }
