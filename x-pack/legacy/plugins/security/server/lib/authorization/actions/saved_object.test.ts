@@ -15,13 +15,6 @@ describe('#all', () => {
   });
 });
 
-describe('#manage', () => {
-  test(`returns saved_object:manage`, () => {
-    const savedObjectActions = new SavedObjectActions(version);
-    expect(savedObjectActions.manage).toBe('saved_object:1.0.0-zeta1:manage');
-  });
-});
-
 describe('#get', () => {
   [null, undefined, '', 1, true, {}].forEach((type: any) => {
     test(`type of ${JSON.stringify(type)} throws error`, () => {
