@@ -67,7 +67,7 @@ offer the ability to drag and drop details of the anomaly to Timeline, such
 as the `Entity` itself, or any of the associated `Influencers`.
 
 [role="screenshot"]
-image::images/images/ml-ui.png[Machine Learning - Max Anomaly Score]
+image::siem/images/ml-ui.png[Machine Learning - Max Anomaly Score]
 
 [float]
 [[sample-workflow]]
