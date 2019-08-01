@@ -19,7 +19,6 @@
 
 import { Server } from 'hapi';
 import { HttpService } from './http_service';
-import { HttpServerSetup } from './http_server';
 import { HttpServiceSetup } from './http_service';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 import { AuthToolkit } from './lifecycle/auth';
@@ -52,10 +51,8 @@ const createSetupContractMock = () => {
       isAuthenticated: jest.fn(),
       getAuthHeaders: jest.fn(),
     },
-    createNewServer: jest.fn(),
     isTlsEnabled: false,
   };
-  setupContract.createNewServer.mockResolvedValue({} as HttpServerSetup);
   setupContract.createCookieSessionStorageFactory.mockResolvedValue(
     sessionStorageMock.createFactory()
   );
