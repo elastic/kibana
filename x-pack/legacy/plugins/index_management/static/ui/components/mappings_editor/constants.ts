@@ -10,6 +10,25 @@ export const DYNAMIC_SETTING_OPTIONS = [
   { value: 'strict', text: 'strict' },
 ];
 
+export const ANALYZERS_OPTIONS = [
+  { value: 'index_default', text: 'Index default' },
+  { value: 'standard', text: 'Standard' },
+  { value: 'simple', text: 'Simple' },
+  { value: 'whitespace', text: 'Whitespace' },
+  { value: 'stop', text: 'Stop' },
+  { value: 'keyword', text: 'Keyword' },
+  { value: 'pattern', text: 'Pattern' },
+  { value: 'language', text: 'Language' },
+  { value: 'fingerprint', text: 'Fingerprint' },
+];
+
+export const INDEX_OPTIONS = [
+  { value: 'docs', text: 'Docs' },
+  { value: 'freqs', text: 'Freqs' },
+  { value: 'positions', text: 'Positions' },
+  { value: 'offsets', text: 'Offsets' },
+];
+
 export const ERROR_CODES = {
   NAME_CONFLICT: 'ERR_NAME_CONCLICT',
 };

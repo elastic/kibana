@@ -31,7 +31,11 @@ export type ParameterName =
   | 'enabled'
   | 'boost'
   | 'locale'
-  | 'format';
+  | 'format'
+  | 'analyzer'
+  | 'search_analyzer'
+  | 'search_quote_analyzer'
+  | 'index_options';
 
 export interface Parameter {
   fieldConfig?: FieldConfig;
@@ -220,6 +224,34 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
         options.length ? options.join('||') : undefined,
       deSerializer: (formats?: string | any[]): any[] =>
         Array.isArray(formats) ? formats : (formats as string).split('||'),
+    },
+  },
+  analyzer: {
+    fieldConfig: {
+      label: 'Analyzer',
+      defaultValue: 'text',
+      type: FIELD_TYPES.SELECT,
+    },
+  },
+  search_analyzer: {
+    fieldConfig: {
+      label: 'Search analyzer',
+      defaultValue: 'text',
+      type: FIELD_TYPES.SELECT,
+    },
+  },
+  search_quote_analyzer: {
+    fieldConfig: {
+      label: 'Search quote analyzer',
+      defaultValue: 'text',
+      type: FIELD_TYPES.SELECT,
+    },
+  },
+  index_options: {
+    fieldConfig: {
+      label: 'Index options',
+      defaultValue: 'docs',
+      type: FIELD_TYPES.SELECT,
     },
   },
 };
