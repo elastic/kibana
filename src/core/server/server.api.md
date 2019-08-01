@@ -675,7 +675,9 @@ export class SavedObjectsSchema {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsSchemaDefinition" needs to be exported by the entry point index.d.ts
     constructor(schemaDefinition?: SavedObjectsSchemaDefinition);
     // (undocumented)
-    getIndexForType(type: string): string | undefined;
+    getConvertToAliasScript(type: string): string | undefined;
+    // (undocumented)
+    getIndexForType(config: Config, type: string): string | undefined;
     // (undocumented)
     isHiddenType(type: string): boolean;
     // (undocumented)

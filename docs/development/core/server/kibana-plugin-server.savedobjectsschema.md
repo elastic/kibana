@@ -20,7 +20,8 @@ export declare class SavedObjectsSchema
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [getIndexForType(type)](./kibana-plugin-server.savedobjectsschema.getindexfortype.md) |  |  |
+|  [getConvertToAliasScript(type)](./kibana-plugin-server.savedobjectsschema.getconverttoaliasscript.md) |  |  |
+|  [getIndexForType(config, type)](./kibana-plugin-server.savedobjectsschema.getindexfortype.md) |  |  |
 |  [isHiddenType(type)](./kibana-plugin-server.savedobjectsschema.ishiddentype.md) |  |  |
 |  [isNamespaceAgnostic(type)](./kibana-plugin-server.savedobjectsschema.isnamespaceagnostic.md) |  |  |
 
