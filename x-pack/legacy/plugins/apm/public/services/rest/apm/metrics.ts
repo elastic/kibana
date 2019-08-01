@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MetricsChartsByAgentAPIResponse } from '../../../../server/lib/metrics/get_metrics_chart_data_by_agent';
-import { callApi } from '../callApi';
+import { callApmApi } from '../callApi';
 import { UIFilters } from '../../../../typings/ui-filters';
+import { metricsChartDataByAgentRoute } from '../../../../server/routes/metrics/metrics_chart_data_by_agent_route';
 
 export async function loadMetricsChartData({
   serviceName,
@@ -21,7 +21,7 @@ export async function loadMetricsChartData({
   end: string;
   uiFilters: UIFilters;
 }) {
-  return callApi<MetricsChartsByAgentAPIResponse>({
+  return callApmApi<typeof metricsChartDataByAgentRoute>({
     pathname: `/api/apm/services/${serviceName}/metrics/charts`,
     query: {
       start,

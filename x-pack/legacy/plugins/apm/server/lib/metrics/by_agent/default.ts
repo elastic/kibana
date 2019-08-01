@@ -7,12 +7,13 @@
 import { Setup } from '../../helpers/setup_request';
 import { getCPUChartData } from './shared/cpu';
 import { getMemoryChartData } from './shared/memory';
+import { GenericMetricsChart } from '../transform_metrics_chart';
 
 export async function getDefaultMetricsCharts(
   setup: Setup,
   serviceName: string
 ) {
-  const charts = await Promise.all([
+  const charts: GenericMetricsChart[] = await Promise.all([
     getCPUChartData(setup, serviceName),
     getMemoryChartData(setup, serviceName)
   ]);

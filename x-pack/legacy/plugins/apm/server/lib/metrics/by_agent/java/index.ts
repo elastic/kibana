@@ -10,9 +10,10 @@ import { getNonHeapMemoryChart } from './non_heap_memory';
 import { getThreadCountChart } from './thread_count';
 import { getCPUChartData } from '../shared/cpu';
 import { getMemoryChartData } from '../shared/memory';
+import { GenericMetricsChart } from '../../transform_metrics_chart';
 
 export async function getJavaMetricsCharts(setup: Setup, serviceName: string) {
-  const charts = await Promise.all([
+  const charts: GenericMetricsChart[] = await Promise.all([
     getCPUChartData(setup, serviceName),
     getMemoryChartData(setup, serviceName),
     getHeapMemoryChart(setup, serviceName),
