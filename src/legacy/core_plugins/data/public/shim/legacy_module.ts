@@ -26,6 +26,7 @@ import { Filter } from '@kbn/es-query';
 import { uiModules } from 'ui/modules';
 import { FilterBar } from '../filter';
 import { ApplyFiltersPopover } from '../filter';
+import { IndexPatterns } from 'src/legacy/core_plugins/data/public'
 import template from './apply_filter_directive.html';
 
 // @ts-ignore
@@ -42,7 +43,7 @@ export const initLegacyModule = once((): void => {
     .directive('applyFiltersPopoverComponent', (reactDirective: any) => {
       return reactDirective(wrapInI18nContext(ApplyFiltersPopover));
     })
-    .directive('applyFiltersPopover', (indexPatterns: any) => {
+    .directive('applyFiltersPopover', (indexPatterns: IndexPatterns) => {
       return {
         template,
         restrict: 'E',
