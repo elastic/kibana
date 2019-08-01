@@ -12,7 +12,8 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { useFetcher } from '../../../hooks/useFetcher';
 import {
   loadErrorDistribution,
@@ -22,28 +23,39 @@ import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
+import { PROJECTION } from '../../../projections/typings';
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { useTransactionTypes } from '../../../hooks/useTransactionTypes';
 
 const ErrorGroupOverview: React.SFC = () => {
+  const { urlParams, uiFilters } = useUrlParams();
+
   const {
-    urlParams: { serviceName, start, end, sortField, sortDirection },
-    uiFilters
-  } = useUrlParams();
+    serviceName,
+    start,
+    end,
+    sortField,
+    sortDirection,
+    transactionType
+  } = urlParams;
 
   const { data: errorDistributionData } = useFetcher(() => {
     if (serviceName && start && end) {
       return loadErrorDistribution({
         serviceName,
+        transactionType,
         start,
         end,
         uiFilters
       });
     }
-  }, [serviceName, start, end, uiFilters]);
+  }, [serviceName, start, end, uiFilters, transactionType]);
 
   const { data: errorGroupListData } = useFetcher(() => {
     if (serviceName && start && end) {
       return loadErrorGroupList({
         serviceName,
+        transactionType,
         start,
         end,
         sortField,
@@ -51,44 +63,84 @@ const ErrorGroupOverview: React.SFC = () => {
         uiFilters
       });
     }
-  }, [serviceName, start, end, sortField, sortDirection, uiFilters]);
+  }, [
+    serviceName,
+    start,
+    end,
+    sortField,
+    sortDirection,
+    uiFilters,
+    transactionType
+  ]);
 
-  useTrackPageview({ app: 'apm', path: 'error_group_overview' });
+  const transactionTypes = useTransactionTypes(urlParams);
+
+  useTrackPageview({
+    app: 'apm',
+    path: 'error_group_overview'
+  });
   useTrackPageview({ app: 'apm', path: 'error_group_overview', delay: 15000 });
+
+  const localUIFiltersConfig = useMemo(
+    () => ({
+      filterNames: [
+        'transactionResult',
+        'host',
+        'containerId',
+        'podId'
+      ] as LocalUIFilterName[],
+      params: {
+        serviceName,
+        transactionType
+      },
+      projection: PROJECTION.ERROR_GROUPS
+    }),
+    [serviceName, transactionType]
+  );
 
   if (!errorDistributionData || !errorGroupListData) {
     return null;
   }
 
   return (
-    <React.Fragment>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiPanel>
-            <ErrorDistribution
-              distribution={errorDistributionData}
-              title={i18n.translate(
-                'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                {
-                  defaultMessage: 'Error occurrences'
-                }
-              )}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiFlexGroup>
+      <EuiFlexItem grow={1}>
+        <LocalUIFilters
+          {...localUIFiltersConfig}
+          showTransactionTypeFilter={true}
+          allowEmptyTransactionType
+          transactionTypes={transactionTypes}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={7}>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiPanel>
+              <ErrorDistribution
+                distribution={errorDistributionData}
+                title={i18n.translate(
+                  'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+                  {
+                    defaultMessage: 'Error occurrences'
+                  }
+                )}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
-
-      <EuiPanel>
-        <EuiTitle size="xs">
-          <h3>Errors</h3>
-        </EuiTitle>
         <EuiSpacer size="s" />
 
-        <ErrorGroupList items={errorGroupListData} />
-      </EuiPanel>
-    </React.Fragment>
+        <EuiPanel>
+          <EuiTitle size="xs">
+            <h3>Errors</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+
+          <ErrorGroupList items={errorGroupListData} />
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

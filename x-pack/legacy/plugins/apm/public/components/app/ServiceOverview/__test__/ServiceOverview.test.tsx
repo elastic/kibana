@@ -13,6 +13,8 @@ import { ServiceOverview } from '..';
 import * as urlParamsHooks from '../../../../hooks/useUrlParams';
 import * as coreHooks from '../../../../hooks/useCore';
 import { InternalCoreStart } from 'src/core/public';
+import * as useLocalUIFilters from '../../../../hooks/useLocalUIFilters';
+import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 
 jest.mock('ui/kfetch');
 
@@ -38,6 +40,13 @@ describe('Service Overview -> View', () => {
       }
     });
     spyOn(coreHooks, 'useCore').and.returnValue(coreMock);
+
+    jest.spyOn(useLocalUIFilters, 'useLocalUIFilters').mockReturnValue({
+      data: [],
+      values: {},
+      setValues: () => null,
+      status: FETCH_STATUS.SUCCESS
+    });
   });
 
   afterEach(() => {
