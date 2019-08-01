@@ -52,26 +52,38 @@ export const getNetworkTopNFlowColumns = (
     hideForMobile: false,
     render: ({ node }) => {
       const ipAttr = `${flowTarget}.ip`;
-      const ipKql = `${flowTarget === FlowTarget.unified ? '*' : flowTarget}.ip`;
       const ip: string | null = get(ipAttr, node);
       const id = escapeDataProviderId(`${tableId}-table-${flowTarget}-${flowDirection}-ip-${ip}`);
+
       if (ip != null) {
+        const dataProvider =
+          flowTarget === FlowTarget.unified
+            ? {
+                and: [],
+                enabled: true,
+                id,
+                name: ip,
+                excluded: false,
+                kqlQuery: `( destination.ip: ${ip} )`, // this shit still aint working dand d00d
+                queryMatch: { field: 'source.ip', value: ip, operator: IS_OPERATOR },
+              }
+            : {
+                and: [],
+                enabled: true,
+                id,
+                name: ip,
+                excluded: false,
+                kqlQuery: '',
+                queryMatch: { field: ipAttr, value: ip, operator: IS_OPERATOR },
+              };
         return (
           <DraggableWrapper
             key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: ip,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: { field: ipKql, value: ip, operator: IS_OPERATOR },
-            }}
-            render={(dataProvider, _, snapshot) =>
+            dataProvider={dataProvider}
+            render={(theDataProvider, _, snapshot) =>
               snapshot.isDragging ? (
                 <DragEffects>
-                  <Provider dataProvider={dataProvider} />
+                  <Provider dataProvider={theDataProvider} />
                 </DragEffects>
               ) : (
                 <IPDetailsLink ip={ip} />
@@ -157,7 +169,7 @@ export const getNetworkTopNFlowColumns = (
         const id = escapeDataProviderId(
           `${tableId}-table-${flowTarget}-${flowDirection}-ip-${ipAddress}`
         );
-        const attrFlowTarget = FlowTarget.unified ? '*' : flowTarget;
+        const attrFlowTarget = FlowTarget.unified ? FlowTarget.source : flowTarget;
         if (as.name && as.number) {
           return (
             <>
@@ -166,9 +178,9 @@ export const getNetworkTopNFlowColumns = (
                 attrName: `${attrFlowTarget}.as.organization.name`,
                 idPrefix: `${id}-name`,
               })}
-              {'/'}
+              <span style={{ width: '5px' }} />
               {getRowItemDraggables({
-                rowItems: [`${as.number}`],
+                rowItems: [`(${as.number})`],
                 attrName: `${attrFlowTarget}.as.number`,
                 idPrefix: `${id}-number`,
               })}
