@@ -18,7 +18,7 @@
  */
 
 import { get, has, set } from 'lodash';
-import { SavedObject as SavedObjectType, SavedObjectAttributes } from '../../server/types';
+import { SavedObject as SavedObjectType, SavedObjectAttributes } from '../../server';
 import { SavedObjectsClient } from './saved_objects_client';
 
 /**
