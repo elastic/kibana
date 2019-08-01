@@ -116,12 +116,12 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/dev_tools'),
       resolve(__dirname, './apps/apm'),
       resolve(__dirname, './apps/index_patterns'),
-      resolve(__dirname, './apps/license_management'),
       resolve(__dirname, './apps/index_management'),
       resolve(__dirname, './apps/index_lifecycle_management'),
       resolve(__dirname, './apps/snapshot_restore'),
       resolve(__dirname, './apps/cross_cluster_replication'),
       resolve(__dirname, './apps/remote_clusters'),
+      resolve(__dirname, './apps/license_management'),
     ],
 
     // define the name and providers for services that should be
