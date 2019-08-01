@@ -72,6 +72,7 @@ export {
   OnPostAuthToolkit,
   ResponseError,
   ResponseErrorMeta,
+  ResponseFactory,
   Router,
   RouteMethod,
   RouteConfigOptions,

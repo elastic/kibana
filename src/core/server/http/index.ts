@@ -26,6 +26,7 @@ export {
   KibanaRequestRoute,
   ResponseError,
   ResponseErrorMeta,
+  ResponseFactory,
   Router,
   RouteMethod,
   RouteConfigOptions,

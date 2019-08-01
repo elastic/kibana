@@ -186,14 +186,14 @@ export class HttpServer {
       return;
     }
 
-    this.registerOnPreAuth((request, toolkit) => {
+    this.registerOnPreAuth((request, response, toolkit) => {
       const oldUrl = request.url.href!;
       const newURL = basePathService.remove(oldUrl);
       const shouldRedirect = newURL !== oldUrl;
       if (shouldRedirect) {
-        return toolkit.redirected(newURL, { forward: true });
+        return toolkit.rewriteUrl(newURL);
       }
-      return toolkit.rejected(new Error('not found'), { statusCode: 404 });
+      return response.notFound(new Error('not found'));
     });
   }
 
@@ -209,7 +209,7 @@ export class HttpServer {
       throw new Error('Server is not created yet');
     }
 
-    this.server.ext('onPostAuth', adoptToHapiOnPostAuthFormat(fn));
+    this.server.ext('onPostAuth', adoptToHapiOnPostAuthFormat(fn, this.log));
   }
 
   private registerOnPreAuth(fn: OnPreAuthHandler) {
@@ -217,7 +217,7 @@ export class HttpServer {
       throw new Error('Server is not created yet');
     }
 
-    this.server.ext('onRequest', adoptToHapiOnPreAuthFormat(fn));
+    this.server.ext('onRequest', adoptToHapiOnPreAuthFormat(fn, this.log));
   }
 
   private async createCookieSessionStorageFactory<T>(
@@ -250,20 +250,24 @@ export class HttpServer {
     this.authRegistered = true;
 
     this.server.auth.scheme('login', () => ({
-      authenticate: adoptToHapiAuthFormat(fn, (req, { state, requestHeaders, responseHeaders }) => {
-        this.authState.set(req, state);
+      authenticate: adoptToHapiAuthFormat(
+        fn,
+        this.log,
+        (req, { state, requestHeaders, responseHeaders }) => {
+          this.authState.set(req, state);
 
-        if (responseHeaders) {
-          this.authResponseHeaders.set(req, responseHeaders);
-        }
+          if (responseHeaders) {
+            this.authResponseHeaders.set(req, responseHeaders);
+          }
 
-        if (requestHeaders) {
-          this.authRequestHeaders.set(req, requestHeaders);
-          // we mutate headers only for the backward compatibility with the legacy platform.
-          // where some plugin read directly from headers to identify whether a user is authenticated.
-          Object.assign(req.headers, requestHeaders);
+          if (requestHeaders) {
+            this.authRequestHeaders.set(req, requestHeaders);
+            // we mutate headers only for the backward compatibility with the legacy platform.
+            // where some plugin read directly from headers to identify whether a user is authenticated.
+            Object.assign(req.headers, requestHeaders);
+          }
         }
-      }),
+      ),
     }));
     this.server.auth.strategy('session', 'login');
 

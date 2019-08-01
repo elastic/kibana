@@ -18,12 +18,10 @@
  */
 
 import { Server } from 'hapi';
-import { HttpService } from './http_service';
 import { HttpServerSetup } from './http_server';
-import { HttpServiceSetup } from './http_service';
+import { HttpService, HttpServiceSetup } from './http_service';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 import { AuthToolkit } from './lifecycle/auth';
-import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 import { sessionStorageMock } from './cookie_session_storage.mocks';
 
 type ServiceSetupMockType = jest.Mocked<HttpServiceSetup> & {
@@ -75,20 +73,11 @@ const createHttpServiceMock = () => {
 
 const createOnPreAuthToolkitMock = (): jest.Mocked<OnPreAuthToolkit> => ({
   next: jest.fn(),
-  redirected: jest.fn(),
-  rejected: jest.fn(),
+  rewriteUrl: jest.fn(),
 });
 
 const createAuthToolkitMock = (): jest.Mocked<AuthToolkit> => ({
   authenticated: jest.fn(),
-  redirected: jest.fn(),
-  rejected: jest.fn(),
-});
-
-const createOnPostAuthToolkitMock = (): jest.Mocked<OnPostAuthToolkit> => ({
-  next: jest.fn(),
-  redirected: jest.fn(),
-  rejected: jest.fn(),
 });
 
 export const httpServiceMock = {
@@ -97,5 +86,4 @@ export const httpServiceMock = {
   createSetupContract: createSetupContractMock,
   createOnPreAuthToolkit: createOnPreAuthToolkitMock,
   createAuthToolkit: createAuthToolkitMock,
-  createOnPostAuthToolkit: createOnPostAuthToolkitMock,
 };

@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Request, ResponseToolkit } from 'hapi';
+import { Request } from 'hapi';
 import { merge } from 'lodash';
 
 import querystring from 'querystring';
 
 import { schema } from '@kbn/config-schema';
 
-import { KibanaRequest, RouteMethod } from './router';
+import { KibanaRequest, RouteMethod, ResponseFactory } from './router';
 
 interface RequestFixtureOptions {
   headers?: Record<string, string>;
@@ -97,12 +97,22 @@ function createRawRequestMock(customization: DeepPartial<Request> = {}) {
   ) as Request;
 }
 
-function createRawResponseToolkitMock(customization: DeepPartial<ResponseToolkit> = {}) {
-  return merge({}, customization) as ResponseToolkit;
-}
+const createResponseFactoryMock = (): jest.Mocked<ResponseFactory> => ({
+  ok: jest.fn(),
+  accepted: jest.fn(),
+  noContent: jest.fn(),
+  custom: jest.fn(),
+  redirected: jest.fn(),
+  badRequest: jest.fn(),
+  unauthorized: jest.fn(),
+  forbidden: jest.fn(),
+  notFound: jest.fn(),
+  conflict: jest.fn(),
+  internal: jest.fn(),
+});
 
 export const httpServerMock = {
   createKibanaRequest: createKibanaRequestMock,
   createRawRequest: createRawRequestMock,
-  createRawResponseToolkit: createRawResponseToolkitMock,
+  createResponseFactory: createResponseFactoryMock,
 };

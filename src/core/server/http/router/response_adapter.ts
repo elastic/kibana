@@ -18,13 +18,14 @@
  */
 import { ResponseObject as HapiResponseObject, ResponseToolkit as HapiResponseToolkit } from 'hapi';
 import typeDetect from 'type-detect';
+import Boom from 'boom';
 
 import { HttpResponsePayload, KibanaResponse, ResponseError } from './response';
 
 function setHeaders(response: HapiResponseObject, headers: Record<string, string | string[]> = {}) {
   Object.entries(headers).forEach(([header, value]) => {
     if (value !== undefined) {
-      // Hapi typings for header accept only string, although string[] is a valid value
+      // Hapi typings for header accept only strings, although string[] is a valid value
       response.header(header, value as any);
     }
   });
@@ -44,7 +45,15 @@ export class HapiResponseAdapter {
   }
 
   public toInternalError() {
-    return this.responseToolkit.response({ error: 'An internal server error occurred.' }).code(500);
+    const error = new Boom('', {
+      statusCode: 500,
+    });
+
+    error.output.payload = {
+      error: 'An internal server error occurred.',
+    } as any; // our error format is not compatible with boom
+
+    return error;
   }
 
   public handle(kibanaResponse: KibanaResponse<any>) {
@@ -56,20 +65,18 @@ export class HapiResponseAdapter {
       );
     }
 
-    const response = this.toHapiResponse(kibanaResponse);
-    setHeaders(response, kibanaResponse.options.headers);
-    return response;
+    return this.toHapiResponse(kibanaResponse);
   }
 
   private toHapiResponse(kibanaResponse: KibanaResponse<any>) {
+    if (statusHelpers.isError(kibanaResponse.status)) {
+      return this.toError(kibanaResponse);
+    }
     if (statusHelpers.isSuccess(kibanaResponse.status)) {
       return this.toSuccess(kibanaResponse);
     }
     if (statusHelpers.isRedirect(kibanaResponse.status)) {
       return this.toRedirect(kibanaResponse);
-    }
-    if (statusHelpers.isError(kibanaResponse.status)) {
-      return this.toError(kibanaResponse);
     }
     throw new Error(
       `Unexpected Http status code. Expected from 100 to 599, but given: ${kibanaResponse.status}.`
@@ -77,7 +84,11 @@ export class HapiResponseAdapter {
   }
 
   private toSuccess(kibanaResponse: KibanaResponse<HttpResponsePayload>) {
-    return this.responseToolkit.response(kibanaResponse.payload).code(kibanaResponse.status);
+    const response = this.responseToolkit
+      .response(kibanaResponse.payload)
+      .code(kibanaResponse.status);
+    setHeaders(response, kibanaResponse.options.headers);
+    return response;
   }
 
   private toRedirect(kibanaResponse: KibanaResponse<HttpResponsePayload>) {
@@ -86,20 +97,34 @@ export class HapiResponseAdapter {
       throw new Error("expected 'location' header to be set");
     }
 
-    return this.responseToolkit
+    const response = this.responseToolkit
       .response(kibanaResponse.payload)
       .redirect(headers.location)
-      .code(kibanaResponse.status);
+      .code(kibanaResponse.status)
+      .takeover();
+
+    setHeaders(response, kibanaResponse.options.headers);
+    return response;
   }
 
   private toError(kibanaResponse: KibanaResponse<ResponseError>) {
     const { payload } = kibanaResponse;
-    return this.responseToolkit
-      .response({
-        error: getErrorMessage(payload),
-        meta: getErrorMeta(payload),
-      })
-      .code(kibanaResponse.status);
+    const error = new Boom('', {
+      statusCode: kibanaResponse.status,
+    });
+
+    error.output.payload = {
+      error: getErrorMessage(payload),
+      meta: getErrorMeta(payload),
+    } as any; // our error format is not compatible with boom
+
+    const headers = kibanaResponse.options.headers;
+    if (headers) {
+      // Hapi typings for header accept only strings, although string[] is a valid value
+      error.output.headers = headers as any;
+    }
+
+    return error;
   }
 }
 

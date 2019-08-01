@@ -21,4 +21,11 @@ export { Headers, filterHeaders, ResponseHeaders } from './headers';
 export { Router } from './router';
 export { KibanaRequest, KibanaRequestRoute, ensureRawRequest, isRealRequest } from './request';
 export { RouteMethod, RouteConfigOptions } from './route';
-export { ResponseError, ResponseErrorMeta } from './response';
+export {
+  KibanaResponse,
+  ResponseError,
+  ResponseErrorMeta,
+  responseFactory,
+  ResponseFactory,
+} from './response';
+export { HapiResponseAdapter } from './response_adapter';
