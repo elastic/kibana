@@ -45,7 +45,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       url: `/api/apm/services/foo/errors/distribution?start=${start}&end=${end}&groupId=bar`,
       expectForbidden: expect404,
       expectResponse: (result: any) => {
-        expect(result.response).to.have.property('statusCode', 400);
+        expect(result.response).to.have.property('statusCode', 500);
         expect(result.response.body).to.have.property(
           'message',
           "Cannot read property 'distribution' of undefined"
@@ -56,7 +56,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       url: `/api/apm/services/foo/errors/distribution?start=${start}&end=${end}`,
       expectForbidden: expect404,
       expectResponse: (result: any) => {
-        expect(result.response).to.have.property('statusCode', 400);
+        expect(result.response).to.have.property('statusCode', 500);
         expect(result.response.body).to.have.property(
           'message',
           "Cannot read property 'distribution' of undefined"
@@ -67,7 +67,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       url: `/api/apm/services/foo/metrics/charts?start=${start}&end=${end}&agentName=cool-agent`,
       expectForbidden: expect404,
       expectResponse: (result: any) => {
-        expect(result.response).to.have.property('statusCode', 400);
+        expect(result.response).to.have.property('statusCode', 500);
         expect(result.response.body).to.have.property(
           'message',
           "Cannot destructure property `timeseriesData` of 'undefined' or 'null'."
@@ -98,7 +98,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       url: `/api/apm/traces/foo?start=${start}&end=${end}`,
       expectForbidden: expect404,
       expectResponse: (result: any) => {
-        expect(result.response).to.have.property('statusCode', 400);
+        expect(result.response).to.have.property('statusCode', 500);
         expect(result.response.body).to.have.property(
           'message',
           "Cannot read property 'transactions' of undefined"
@@ -129,7 +129,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       url: `/api/apm/services/foo/transaction_groups/distribution?start=${start}&end=${end}&transactionType=bar&transactionName=baz`,
       expectForbidden: expect404,
       expectResponse: (result: any) => {
-        expect(result.response).to.have.property('statusCode', 400);
+        expect(result.response).to.have.property('statusCode', 500);
         expect(result.response.body).to.have.property(
           'message',
           "Cannot read property 'stats' of undefined"
