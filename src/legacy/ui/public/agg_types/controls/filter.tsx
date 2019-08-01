@@ -28,7 +28,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from 'ui/vis';
-// @ts-ignore
 import { Query, QueryBarInput } from 'plugins/data';
 import { npSetup } from 'ui/new_platform';
 import { Storage } from 'ui/storage';
