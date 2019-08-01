@@ -44,8 +44,10 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .set('kbn-xsrf', 'foo')
         .send({
           description: 'My action updated',
-          actionTypeConfig: {
+          config: {
             unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
             encrypted: 'This value should be encrypted',
           },
         })
@@ -63,7 +65,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .set('kbn-xsrf', 'foo')
         .send({
           description: 'My action updated',
-          actionTypeConfig: {
+          config: {
             unencrypted: `This value shouldn't get encrypted`,
             encrypted: 'This value should be encrypted',
           },

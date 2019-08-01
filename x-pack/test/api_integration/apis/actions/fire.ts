@@ -172,6 +172,8 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         },
         config: {
           unencrypted: `This value shouldn't get encrypted`,
+        },
+        secrets: {
           encrypted: 'This value should be encrypted',
         },
         reference: 'actions-fire-3',

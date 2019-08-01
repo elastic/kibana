@@ -47,17 +47,12 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
         .then((resp: any) => {
           expect(resp.body).to.eql({
             page: 1,
-            per_page: 20,
+            perPage: 20,
             total: 1,
-            saved_objects: [
+            data: [
               {
                 id: SPACE_1_ES_ARCHIVER_ACTION_ID,
-                type: 'action',
-                version: resp.body.saved_objects[0].version,
-                references: [],
-                attributes: {
-                  description: 'My action',
-                },
+                description: 'My action',
               },
             ],
           });

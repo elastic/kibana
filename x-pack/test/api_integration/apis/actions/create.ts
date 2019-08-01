@@ -43,13 +43,13 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         .post('/s/space_1/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'My action',
-            actionTypeId: 'test.index-record',
-            actionTypeConfig: {
-              unencrypted: `This value shouldn't get encrypted`,
-              encrypted: 'This value should be encrypted',
-            },
+          description: 'My action',
+          actionTypeId: 'test.index-record',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
           },
         })
         .expect(200);

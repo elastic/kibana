@@ -51,16 +51,16 @@
 
 {
   "value": {
-    "id" : "space_1:action:acf2f0fc-d1dc-460b-bfbe-ec833d388077",
+    "id" : "space_1:action:6c7d0f6b-2fb5-4821-b182-624fc3ccc7a3",
     "index" : ".kibana",
     "source" : {
       "action" : {
         "description" : "My action",
         "actionTypeId" : "test.index-record",
-        "actionTypeConfig" : {
+        "config" : {
           "unencrypted" : "This value shouldn't get encrypted"
         },
-        "actionTypeConfigSecrets" : "+QZzv0ydEpI0YqBG+uKl+65XncJMrmynkWVNfxnWs8eFZtKnSRY3nTtyaMi1gDxG/arzBU8tMnsLPKG/AKJp/JDDq/8oajiszZFLaB2Nt6N7UVY3iOZGl7rCjDe4CfzKb8XtXAQvZ5/iJ+zO7IQMZE0GSBcuwrvolH2G9V92RCNtFPvJsCC+nFnu"
+        "secrets" : "LEepwqGVUSkkAZSYCGDz3Y0DGoRgBGPRnu+Ta0jmEz+TiGUj3SBYWL6t2jqncBhsWgzSzwCusY+z5B/k+4wjaXW5t/KxNZP7bGpLQK0hL9IwKxqmRzRbEvX0nzeExxgfSaMRjjn2SnrE21MTw6qyBwGNqnuvmN7ILde4ZUbR9Jyjl8A6Y0GDcWvN"
       },
       "type": "action",
       "namespace": "space_1"

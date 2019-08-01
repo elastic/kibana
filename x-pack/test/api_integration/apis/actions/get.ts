@@ -44,15 +44,10 @@ export default function getActionTests({ getService }: KibanaFunctionalTestDefau
         .then((resp: any) => {
           expect(resp.body).to.eql({
             id: SPACE_1_ES_ARCHIVER_ACTION_ID,
-            type: 'action',
-            references: [],
-            version: resp.body.version,
-            attributes: {
-              actionTypeId: 'test.index-record',
-              description: 'My action',
-              actionTypeConfig: {
-                unencrypted: `This value shouldn't get encrypted`,
-              },
+            actionTypeId: 'test.index-record',
+            description: 'My action',
+            config: {
+              unencrypted: `This value shouldn't get encrypted`,
             },
           });
         });
