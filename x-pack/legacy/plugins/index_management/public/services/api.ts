@@ -28,6 +28,7 @@ import {
   UIM_INDEX_UNFREEZE_MANY,
   UIM_TEMPLATE_DELETE,
   UIM_TEMPLATE_DELETE_MANY,
+  UIM_TEMPLATE_CREATE,
 } from '../../common/constants';
 
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
@@ -44,6 +45,16 @@ export const setHttpClient = (client: ng.IHttpService) => {
 
 export const getHttpClient = () => {
   return httpClient;
+};
+
+let savedObjectsClient: any;
+
+export const setSavedObjectsClient = (aSavedObjectsClient: any) => {
+  savedObjectsClient = aSavedObjectsClient;
+};
+
+export const getSavedObjectsClient = () => {
+  return savedObjectsClient;
 };
 
 const apiPrefix = chrome.addBasePath('/api/index_management');
@@ -201,19 +212,41 @@ export function loadIndexTemplates() {
   });
 }
 
-export const deleteTemplates = async (names: Array<Template['name']>) => {
-  const uimActionType = names.length > 1 ? UIM_TEMPLATE_DELETE_MANY : UIM_TEMPLATE_DELETE;
-
-  return sendRequest({
+export async function deleteTemplates(names: Array<Template['name']>) {
+  const result = sendRequest({
     path: `${apiPrefix}/templates/${names.map(name => encodeURIComponent(name)).join(',')}`,
     method: 'delete',
-    uimActionType,
   });
-};
+
+  const uimActionType = names.length > 1 ? UIM_TEMPLATE_DELETE_MANY : UIM_TEMPLATE_DELETE;
+
+  trackUiMetric(METRIC_TYPE.COUNT, uimActionType);
+  return result;
+}
 
 export function loadIndexTemplate(name: Template['name']) {
   return useRequest({
     path: `${apiPrefix}/templates/${encodeURIComponent(name)}`,
     method: 'get',
   });
+}
+
+export async function loadIndexPatterns() {
+  const { savedObjects } = await getSavedObjectsClient().find({
+    type: 'index-pattern',
+    fields: ['title'],
+    perPage: 10000,
+  });
+  return savedObjects;
+}
+
+export async function saveTemplate(template: Template) {
+  const result = sendRequest({
+    path: `${apiPrefix}/templates`,
+    method: 'put',
+    body: template,
+  });
+
+  trackUiMetric(METRIC_TYPE.COUNT, UIM_TEMPLATE_CREATE);
+  return result;
 }

@@ -31,9 +31,8 @@ const NoneDescriptionText = () => (
 );
 
 export const SummaryTab: React.FunctionComponent<Props> = ({ templateDetails }) => {
-  const { version, order, indexPatterns = [], settings } = templateDetails;
+  const { version, order, indexPatterns = [], ilmPolicy } = templateDetails;
 
-  const ilmPolicy = settings && settings.index && settings.index.lifecycle;
   const numIndexPatterns = indexPatterns.length;
 
   return (

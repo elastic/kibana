@@ -92,10 +92,6 @@ const tabToUiMetricMap: { [key: string]: string } = {
   [ALIASES_TAB_ID]: UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
 };
 
-const hasEntries = (tabData: object) => {
-  return tabData ? Object.entries(tabData).length > 0 : false;
-};
-
 export const TemplateDetails: React.FunctionComponent<Props> = ({
   templateName,
   onClose,
@@ -133,9 +129,9 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
   } else if (templateDetails) {
     const { settings, mappings, aliases } = templateDetails;
 
-    const settingsTab = hasEntries(settings) ? [settingsTabData] : [];
-    const mappingsTab = hasEntries(mappings) ? [mappingsTabData] : [];
-    const aliasesTab = hasEntries(aliases) ? [aliasesTabData] : [];
+    const settingsTab = settings ? [settingsTabData] : [];
+    const mappingsTab = mappings ? [mappingsTabData] : [];
+    const aliasesTab = aliases ? [aliasesTabData] : [];
 
     const optionalTabs = [...settingsTab, ...mappingsTab, ...aliasesTab];
     const tabs = optionalTabs.length > 0 ? [summaryTabData, ...optionalTabs] : [];
@@ -188,13 +184,14 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
 
   return (
     <Fragment>
-      {templateToDelete.length ? (
+      {templateToDelete && templateToDelete.length > 0 ? (
         <DeleteTemplatesModal
           callback={data => {
             if (data && data.hasDeletedTemplates) {
               reload();
+            } else {
+              setTemplateToDelete([]);
             }
-            setTemplateToDelete([]);
             onClose();
           }}
           templatesToDelete={templateToDelete}
@@ -206,7 +203,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
         data-test-subj="templateDetails"
         aria-labelledby="templateDetailsFlyoutTitle"
         size="m"
-        maxWidth={400}
+        maxWidth={500}
       >
         <EuiFlyoutHeader>
           <EuiTitle size="m">
@@ -238,7 +235,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   color="danger"
-                  onClick={setTemplateToDelete.bind(null, [templateName])}
+                  onClick={() => setTemplateToDelete([templateName])}
                   data-test-subj="deleteTemplateButton"
                 >
                   <FormattedMessage

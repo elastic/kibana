@@ -16,9 +16,14 @@ export const registerHelpers = ({ supertest }) => {
     order: 1,
     indexPatterns: INDEX_PATTERNS,
     version: 1,
-    settings: {
-      number_of_shards: 1
-    },
+    settings: JSON.stringify({
+      number_of_shards: 1,
+      index: {
+        lifecycle: {
+          name: 'my_policy',
+        }
+      }
+    }),
     mappings: {
       _source: {
         enabled: false
@@ -33,9 +38,9 @@ export const registerHelpers = ({ supertest }) => {
         }
       }
     },
-    aliases: {
+    aliases: JSON.stringify({
       alias1: {}
-    }
+    })
   });
 
   const createTemplate = payload =>

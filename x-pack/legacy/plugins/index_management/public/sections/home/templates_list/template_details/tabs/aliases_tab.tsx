@@ -15,7 +15,6 @@ interface Props {
 
 export const AliasesTab: React.FunctionComponent<Props> = ({ templateDetails }) => {
   const { aliases } = templateDetails;
-  const aliasesJsonString = JSON.stringify(aliases, null, 2);
 
   return (
     <div data-test-subj="aliasesTab">
@@ -24,7 +23,7 @@ export const AliasesTab: React.FunctionComponent<Props> = ({ templateDetails }) 
         theme="textmate"
         width="100%"
         isReadOnly
-        value={aliasesJsonString}
+        value={aliases}
         aria-label={i18n.translate(
           'xpack.idxMgmt.templateDetails.aliasesTab.aliasesEditorAriaLabel',
           {

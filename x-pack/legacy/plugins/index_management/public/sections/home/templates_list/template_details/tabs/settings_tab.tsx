@@ -15,7 +15,6 @@ interface Props {
 
 export const SettingsTab: React.FunctionComponent<Props> = ({ templateDetails }) => {
   const { settings } = templateDetails;
-  const settingsJsonString = JSON.stringify(settings, null, 2);
 
   return (
     <div data-test-subj="settingsTab">
@@ -24,7 +23,7 @@ export const SettingsTab: React.FunctionComponent<Props> = ({ templateDetails })
         theme="textmate"
         width="100%"
         isReadOnly
-        value={settingsJsonString}
+        value={settings}
         aria-label={i18n.translate(
           'xpack.idxMgmt.templateDetails.settingsTab.settingsEditorAriaLabel',
           {

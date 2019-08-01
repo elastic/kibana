@@ -14,26 +14,22 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import { Template } from '../../../../../common/types';
+import { TemplateListItem } from '../../../../../common/types';
 import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../common/constants';
 import { DeleteTemplatesModal } from '../../../../components';
 import { trackUiMetric, METRIC_TYPE } from '../../../../services/track_ui_metric';
 
 interface Props {
-  templates: Template[];
+  templates: TemplateListItem[];
   reload: () => Promise<void>;
 }
 
-const Checkmark = ({ tableCellData }: { tableCellData: object }) => {
-  const isChecked = Object.entries(tableCellData).length > 0;
-
-  return isChecked ? <EuiIcon type="check" /> : null;
-};
-
 export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, reload }) => {
-  const [selection, setSelection] = useState<Template[]>([]);
-  const [templatesToDelete, setTemplatesToDelete] = useState<Array<Template['name']>>([]);
+  const [selection, setSelection] = useState<TemplateListItem[]>([]);
+  const [templatesToDelete, setTemplatesToDelete] = useState<Array<TemplateListItem['name']>>([]);
 
   const columns = [
     {
@@ -43,7 +39,7 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
       }),
       truncateText: true,
       sortable: true,
-      render: (name: Template['name']) => {
+      render: (name: TemplateListItem['name']) => {
         return (
           /* eslint-disable-next-line @elastic/eui/href-or-on-click */
           <EuiLink
@@ -66,24 +62,14 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
       render: (indexPatterns: string[]) => <strong>{indexPatterns.join(', ')}</strong>,
     },
     {
-      field: 'settings',
+      field: 'ilmPolicy',
       name: i18n.translate('xpack.idxMgmt.templatesList.table.ilmPolicyColumnTitle', {
         defaultMessage: 'ILM policy',
       }),
       truncateText: true,
       sortable: true,
-      render: (settings?: {
-        index: {
-          lifecycle: {
-            name: string;
-          };
-        };
-      }) => {
-        if (settings && settings.index && settings.index.lifecycle) {
-          return settings.index.lifecycle.name;
-        }
-        return null;
-      },
+      render: (ilmPolicy: { name: string }) =>
+        ilmPolicy && ilmPolicy.name ? ilmPolicy.name : null,
     },
     {
       field: 'order',
@@ -94,36 +80,34 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
       sortable: true,
     },
     {
-      field: 'mappings',
+      field: 'hasMappings',
       name: i18n.translate('xpack.idxMgmt.templatesList.table.mappingsColumnTitle', {
         defaultMessage: 'Mappings',
       }),
       truncateText: true,
       sortable: true,
       width: '100px',
-      render: (mappings: object) => <Checkmark tableCellData={mappings} />,
+      render: (hasMappings: boolean) => (hasMappings ? <EuiIcon type="check" /> : null),
     },
     {
-      field: 'settings',
+      field: 'hasSettings',
       name: i18n.translate('xpack.idxMgmt.templatesList.table.settingsColumnTitle', {
         defaultMessage: 'Settings',
       }),
       truncateText: true,
       sortable: true,
       width: '100px',
-      render: (settings: object) => <Checkmark tableCellData={settings} />,
+      render: (hasSettings: boolean) => (hasSettings ? <EuiIcon type="check" /> : null),
     },
     {
-      field: 'aliases',
+      field: 'hasAliases',
       name: i18n.translate('xpack.idxMgmt.templatesList.table.aliasesColumnTitle', {
         defaultMessage: 'Aliases',
       }),
       truncateText: true,
       sortable: true,
       width: '100px',
-      render: (aliases: object) => {
-        return <Checkmark tableCellData={aliases} />;
-      },
+      render: (hasAliases: boolean) => (hasAliases ? <EuiIcon type="check" /> : null),
     },
     {
       name: i18n.translate('xpack.idxMgmt.templatesList.table.actionColumnTitle', {
@@ -132,7 +116,7 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
       width: '75px',
       actions: [
         {
-          render: (template: Template) => {
+          render: (template: TemplateListItem) => {
             const { name } = template;
 
             return (
@@ -191,7 +175,7 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
     filters: [
       {
         type: 'is',
-        field: 'settings.index.lifecycle.name',
+        field: 'ilmPolicy.name',
         name: i18n.translate('xpack.idxMgmt.templatesList.table.ilmPolicyFilterLabel', {
           defaultMessage: 'ILM policy',
         }),
@@ -200,7 +184,9 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
     toolsLeft: selection.length && (
       <EuiButton
         data-test-subj="deleteTemplatesButton"
-        onClick={() => setTemplatesToDelete(selection.map((selected: Template) => selected.name))}
+        onClick={() =>
+          setTemplatesToDelete(selection.map((selected: TemplateListItem) => selected.name))
+        }
         color="danger"
       >
         <FormattedMessage
@@ -211,35 +197,53 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
       </EuiButton>
     ),
     toolsRight: (
-      <EuiButton
-        color="secondary"
-        iconType="refresh"
-        onClick={reload}
-        data-test-subj="reloadButton"
-      >
-        <FormattedMessage
-          id="xpack.idxMgmt.templatesList.table.reloadTemplatesButtonLabel"
-          defaultMessage="Reload"
-        />
-      </EuiButton>
+      <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
+        <EuiFlexItem>
+          <EuiButton
+            color="secondary"
+            iconType="refresh"
+            onClick={reload}
+            data-test-subj="reloadButton"
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.templatesList.table.reloadTemplatesButtonLabel"
+              defaultMessage="Reload"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton
+            href={`#${BASE_PATH}templates_create`}
+            fill
+            iconType="plusInCircle"
+            data-test-subj="createTemplateButton"
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.templatesList.table.createTemplatesButtonLabel"
+              defaultMessage="Create a template"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     ),
   };
 
   return (
     <Fragment>
-      {templatesToDelete.length ? (
+      {templatesToDelete && templatesToDelete.length > 0 ? (
         <DeleteTemplatesModal
           callback={data => {
             if (data && data.hasDeletedTemplates) {
               reload();
+            } else {
+              setTemplatesToDelete([]);
             }
-            setTemplatesToDelete([]);
           }}
           templatesToDelete={templatesToDelete}
         />
       ) : null}
       <EuiInMemoryTable
-        items={templates}
+        items={templates || []}
         itemId="name"
         columns={columns}
         search={searchConfig}

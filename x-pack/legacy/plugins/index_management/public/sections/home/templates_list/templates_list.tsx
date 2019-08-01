@@ -34,7 +34,7 @@ export const TemplatesList: React.FunctionComponent<RouteComponentProps<MatchPar
   },
   history,
 }) => {
-  const { error, isLoading, data: templates, createRequest: reload } = loadIndexTemplates();
+  const { error, isLoading, data: templates, sendRequest: reload } = loadIndexTemplates();
 
   let content;
 

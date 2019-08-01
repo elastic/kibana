@@ -19,6 +19,8 @@ export const DeleteTemplatesModal = ({
   templatesToDelete: Array<Template['name']>;
   callback: (data?: { hasDeletedTemplates: boolean }) => void;
 }) => {
+  const [isDeleteConfirmed, setIsDeleteConfirmed] = useState<boolean>(false);
+
   const numTemplatesToDelete = templatesToDelete.length;
 
   const hasSystemTemplate = Boolean(
@@ -68,8 +70,6 @@ export const DeleteTemplatesModal = ({
     setIsDeleteConfirmed(false);
     callback();
   };
-
-  const [isDeleteConfirmed, setIsDeleteConfirmed] = useState<boolean>(false);
 
   return (
     <EuiOverlayMask>

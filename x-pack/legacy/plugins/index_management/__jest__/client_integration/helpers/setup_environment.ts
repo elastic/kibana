@@ -7,15 +7,23 @@
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { init as initHttpRequests } from './http_requests';
-import { setHttpClient } from '../../../public/services/api';
+import { setHttpClient, setSavedObjectsClient } from '../../../public/services/api';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
+
+const mockSavedObjectsClient = () => {
+  return {
+    find: (_params?: any) => {},
+  };
+};
 
 export const setupEnvironment = () => {
   const { server, httpRequestsMockHelpers } = initHttpRequests();
 
   // @ts-ignore
   setHttpClient(mockHttpClient);
+
+  setSavedObjectsClient(mockSavedObjectsClient());
 
   return {
     server,

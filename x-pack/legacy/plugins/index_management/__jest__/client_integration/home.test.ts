@@ -27,6 +27,11 @@ const removeWhiteSpaceOnArrayValues = (array: any[]) =>
     return value.trim();
   });
 
+jest.mock('ui/chrome', () => ({
+  breadcrumbs: { set: () => {} },
+  addBasePath: (path: string) => path || '/api/index_management',
+}));
+
 // We need to skip the tests until react 16.9.0 is released
 // which supports asynchronous code inside act()
 describe.skip('<IndexManagementHome />', () => {
@@ -121,14 +126,14 @@ describe.skip('<IndexManagementHome />', () => {
         const template1 = fixtures.getTemplate({
           name: `a${getRandomString()}`,
           indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
-          settings: {
+          settings: JSON.stringify({
             index: {
               number_of_shards: '1',
               lifecycle: {
                 name: 'my_ilm_policy',
               },
             },
-          },
+          }),
         });
         const template2 = fixtures.getTemplate({
           name: `b${getRandomString()}`,
@@ -162,18 +167,17 @@ describe.skip('<IndexManagementHome />', () => {
 
           tableCellsValues.forEach((row, i) => {
             const template = templates[i];
-            const { name, indexPatterns, order, settings } = template;
-            const ilmPolicyName =
-              settings && settings.index && settings.index.lifecycle
-                ? settings.index.lifecycle.name
-                : '';
+            const { name, indexPatterns, order, ilmPolicy } = template;
+
+            const ilmPolicyName = ilmPolicy && ilmPolicy.name ? ilmPolicy.name : '';
+            const orderFormatted = order ? order.toString() : order;
 
             expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
               '',
               name,
               indexPatterns.join(', '),
               ilmPolicyName,
-              order.toString(),
+              orderFormatted,
               '',
               '',
               '',
@@ -391,11 +395,11 @@ describe.skip('<IndexManagementHome />', () => {
               const template = fixtures.getTemplate({
                 name: `a${getRandomString()}`,
                 indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
-                settings: {
+                settings: JSON.stringify({
                   index: {
                     number_of_shards: '1',
                   },
-                },
+                }),
                 mappings: {
                   _source: {
                     enabled: false,
@@ -407,9 +411,9 @@ describe.skip('<IndexManagementHome />', () => {
                     },
                   },
                 },
-                aliases: {
+                aliases: JSON.stringify({
                   alias1: {},
-                },
+                }),
               });
 
               const { find, actions, exists, component } = testBed;
@@ -494,11 +498,11 @@ describe.skip('<IndexManagementHome />', () => {
               const templateWithSomeTabs = fixtures.getTemplate({
                 name: `a${getRandomString()}`,
                 indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
-                settings: {
+                settings: JSON.stringify({
                   index: {
                     number_of_shards: '1',
                   },
-                },
+                }),
               });
 
               const { actions, find, exists, component } = testBed;

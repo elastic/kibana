@@ -30,11 +30,19 @@ export default function ({ getService }) {
     after(() => Promise.all([cleanUpEsResources()]));
 
     describe('get all', () => {
-      it('should list all the index templates with the expected properties', async () => {
-        const { body } = await getAllTemplates().expect(200);
-        const expectedKeys = ['name', 'indexPatterns', 'settings', 'aliases', 'mappings'];
+      const templateName = `template-${getRandomString()}`;
+      const payload = getTemplatePayload(templateName);
 
-        expectedKeys.forEach(key => expect(Object.keys(body[0]).includes(key)).to.be(true));
+      beforeEach(async () => {
+        await createTemplate(payload).expect(200);
+      });
+
+      it('should list all the index templates with the expected properties', async () => {
+        const { body: templates } = await getAllTemplates().expect(200);
+
+        const createdTemplate = templates.find(template => template.name === payload.name);
+        const expectedKeys = ['name', 'indexPatterns', 'hasSettings', 'hasAliases', 'hasMappings', 'ilmPolicy'];
+        expectedKeys.forEach(key => expect(Object.keys(createdTemplate).includes(key)).to.be(true));
       });
     });
 
@@ -48,7 +56,7 @@ export default function ({ getService }) {
 
       it('should list the index template with the expected properties', async () => {
         const { body } = await getOneTemplate(templateName).expect(200);
-        const expectedKeys = ['name', 'indexPatterns', 'settings', 'aliases', 'mappings'];
+        const expectedKeys = ['name', 'indexPatterns', 'settings', 'aliases', 'mappings', 'ilmPolicy'];
 
         expect(body.name).to.equal(templateName);
         expectedKeys.forEach(key => expect(Object.keys(body).includes(key)).to.be(true));

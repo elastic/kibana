@@ -9,12 +9,12 @@ import { Template } from '../../common/types';
 
 export const getTemplate = ({
   name = getRandomString(),
-  version = getRandomNumber(),
-  order = getRandomNumber(),
+  version = getRandomNumber().toString(),
+  order = getRandomNumber().toString(),
   indexPatterns = [],
-  settings = {},
-  aliases = {},
-  mappings = {},
+  settings,
+  aliases,
+  mappings,
 }: Partial<Template> = {}): Template => ({
   name,
   version,

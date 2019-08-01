@@ -11,5 +11,8 @@ const esBase = `${base}/elasticsearch/reference/${DOC_LINK_VERSION}`;
 const kibanaBase = `${base}/kibana/${DOC_LINK_VERSION}`;
 
 export const settingsDocumentationLink = `${esBase}/index-modules.html#index-modules-settings`;
+export const mappingDocumentationLink = `${esBase}/mapping.html`;
+export const aliasesDocumentationLink = `${esBase}/indices-aliases.html`;
+export const templatesDocumentationLink = `${esBase}/indices-templates.html`;
 
 export const idxMgmtDocumentationLink = `${kibanaBase}/managing-indices.html`;

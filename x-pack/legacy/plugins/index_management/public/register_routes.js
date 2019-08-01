@@ -7,8 +7,8 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { i18n } from '@kbn/i18n';
-import { setHttpClient } from './services/api';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { setHttpClient, setSavedObjectsClient } from './services/api';
 import { setUrlService } from './services/navigation';
 
 import { App } from './app';
@@ -16,7 +16,6 @@ import { BASE_PATH } from '../common/constants/base_path';
 
 import routes from 'ui/routes';
 import { I18nContext } from 'ui/i18n';
-import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import template from './main.html';
 import { manageAngularLifecycle } from './lib/manage_angular_lifecycle';
@@ -35,21 +34,15 @@ const renderReact = async (elem) => {
 };
 
 routes.when(`${BASE_PATH}:view?/:action?/:id?`, {
-  template: template,
-  k7Breadcrumbs: () => [
-    MANAGEMENT_BREADCRUMB,
-    {
-      text: i18n.translate('xpack.idxMgmt.breadcrumb', {
-        defaultMessage: 'Index management'
-      }),
-    }
-  ],
+  template,
   controllerAs: 'indexManagement',
   controller: class IndexManagementController {
-    constructor($scope, $route, $http, kbnUrl, $rootScope) {
+    constructor($scope, $route, $http, kbnUrl, $rootScope, $injector) {
+      const Private = $injector.get('Private');
       // clean up previously rendered React app if one exists
       // this happens because of React Router redirects
       elem && unmountComponentAtNode(elem);
+      setSavedObjectsClient(Private(SavedObjectsClientProvider));
       // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
       // e.g. to check license status per request.
       setHttpClient($http);
