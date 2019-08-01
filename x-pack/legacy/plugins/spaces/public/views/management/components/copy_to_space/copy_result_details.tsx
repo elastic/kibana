@@ -46,7 +46,7 @@ export const CopyResultDetails = (props: Props) => {
   const { objects } = props.summarizedCopyResult;
 
   return (
-    <div style={{ paddingLeft: '24px', backgroundColor: '#f4f7fa' }}>
+    <div className="spcCopyToSpaceResultDetails">
       {objects.map((object, index) => {
         const objectOverwritePending = hasPendingOverwrite(object);
 
@@ -59,14 +59,8 @@ export const CopyResultDetails = (props: Props) => {
           !showOverwriteButton && objectOverwritePending && !props.conflictResolutionInProgress;
 
         return (
-          <EuiFlexGroup
-            responsive={false}
-            key={index}
-            alignItems="center"
-            style={{ width: '100%' }}
-            gutterSize="s"
-          >
-            <EuiFlexItem grow={5} style={{ minWidth: 0 }}>
+          <EuiFlexGroup responsive={false} key={index} alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={5} className="spcCopyToSpaceResultDetails__savedObjectName">
               <EuiText>
                 <p className="eui-textTruncate" title={object.name || object.id}>
                   {object.type}: {object.name || object.id}
@@ -97,7 +91,7 @@ export const CopyResultDetails = (props: Props) => {
                 </EuiText>
               </EuiFlexItem>
             )}
-            <EuiFlexItem style={{ marginRight: 0 }} grow={1}>
+            <EuiFlexItem className="spcCopyToSpaceResultDetails__statusIndicator" grow={1}>
               <div className="eui-textRight">
                 <CopyStatusIndicator
                   summarizedCopyResult={props.summarizedCopyResult}
