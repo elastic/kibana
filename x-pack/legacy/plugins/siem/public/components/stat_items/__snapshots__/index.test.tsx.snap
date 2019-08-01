@@ -28,6 +28,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
     id="statItems"
     index={0}
     key="mock-keys"
+    narrowDateRange={[MockFunction]}
     to={1560837600000}
   >
     <Styled(EuiFlexItem)>
@@ -271,6 +272,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
     id="statItems"
     index={0}
     key="mock-keys"
+    narrowDateRange={[MockFunction]}
     to={1560837600000}
   >
     <Styled(EuiFlexItem)>
@@ -587,6 +589,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
     id="statItems"
     index={0}
     key="mock-keys"
+    narrowDateRange={[MockFunction]}
     to={1560837600000}
   >
     <Styled(EuiFlexItem)>
@@ -1139,7 +1142,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                 "yScaleType": "linear",
                               },
                               "settings": Object {
-                                "onBrushEnd": [Function],
+                                "onBrushEnd": [MockFunction],
                               },
                             }
                           }
@@ -1166,7 +1169,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                         "yScaleType": "linear",
                                       },
                                       "settings": Object {
-                                        "onBrushEnd": [Function],
+                                        "onBrushEnd": [MockFunction],
                                       },
                                     }
                                   }
@@ -1223,7 +1226,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                           "yScaleType": "linear",
                                         },
                                         "settings": Object {
-                                          "onBrushEnd": [Function],
+                                          "onBrushEnd": [MockFunction],
                                         },
                                       }
                                     }
