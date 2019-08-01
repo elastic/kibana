@@ -61,6 +61,10 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       ],
     },
   }),
+  isTransferable: (column, newIndexPattern) => {
+    // TODO parse the KQL tree and check whether this would work out
+    return false;
+  },
   paramEditor: ({ state, setState, columnId: currentColumnId, dataPlugin, storage, layerId }) => {
     const [hasDenominator, setDenominator] = useState(false);
 

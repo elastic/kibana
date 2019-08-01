@@ -41,4 +41,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
     schema: 'metric',
     params: {},
   }),
+  isTransferable: () => {
+    return true;
+  },
 };

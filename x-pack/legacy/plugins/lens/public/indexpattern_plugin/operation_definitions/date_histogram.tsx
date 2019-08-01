@@ -82,6 +82,27 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       },
     };
   },
+  isTransferable: (column, newIndexPattern) => {
+    const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+
+    if (!newField || !newField.aggregatable) {
+      return false;
+    }
+
+    if (!newField.aggregationRestrictions) {
+      return true;
+    }
+
+    if (newField.aggregationRestrictions.date_histogram) {
+      const restrictions = newField.aggregationRestrictions.date_histogram;
+      return (
+        restrictions.calendar_interval === column.params.interval &&
+        restrictions.time_zone === column.params.timeZone
+      );
+    } else {
+      return false;
+    }
+  },
   toEsAggsConfig: (column, columnId) => ({
     id: columnId,
     enabled: true,

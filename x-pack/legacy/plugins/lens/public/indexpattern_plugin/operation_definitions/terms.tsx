@@ -53,6 +53,15 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     }
     return [];
   },
+  isTransferable: (column, newIndexPattern) => {
+    const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+
+    return Boolean(
+      newField &&
+        newField.aggregatable &&
+        (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms)
+    );
+  },
   buildColumn({ suggestedPriority, columns, field, indexPatternId }) {
     const existingMetricColumn = Object.entries(columns)
       .filter(([_columnId, column]) => column && isSortableByColumn(column))

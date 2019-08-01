@@ -9,7 +9,7 @@ import React, { ChangeEvent, ReactElement } from 'react';
 import { EuiComboBox, EuiFieldSearch, EuiContextMenuPanel } from '@elastic/eui';
 import { IndexPatternPrivateState } from './indexpattern';
 import { createMockedDragDropContext } from './mocks';
-import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
+import { InnerIndexPatternDataPanel, IndexPatternDataPanel } from './datapanel';
 import { FieldItem } from './field_item';
 import { act } from 'react-dom/test-utils';
 import { DatasourceDataPanelProps } from '..';
@@ -145,9 +145,6 @@ const initialState: IndexPatternPrivateState = {
               agg: 'histogram',
               interval: 1000,
             },
-            avg: {
-              agg: 'avg',
-            },
             max: {
               agg: 'max',
             },
@@ -272,7 +269,7 @@ describe('IndexPattern Data Panel', () => {
       });
     });
 
-    it('should not update the index pattern of the layer if there are other restrictions on the target index pattern', () => {
+    it('should not update the index pattern of the layer if there are incompatible restrictions on the target index pattern', () => {
       const state: IndexPatternPrivateState = {
         ...initialState,
         layers: {
@@ -316,7 +313,7 @@ describe('IndexPattern Data Panel', () => {
                 label: 'My Op',
                 dataType: 'number',
                 isBucketed: false,
-                operationType: 'avg',
+                operationType: 'min',
                 sourceField: 'bytes',
                 indexPatternId: '2',
               },
