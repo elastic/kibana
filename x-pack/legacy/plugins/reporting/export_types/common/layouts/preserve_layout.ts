@@ -6,13 +6,13 @@
 import path from 'path';
 import { Size } from '../../../types';
 import { LayoutTypes } from '../constants';
-import { Layout, PageSizeParams } from './layout';
+import { Layout, LayoutSelectorDictionary, PageSizeParams } from './layout';
 
 // We use a zoom of two to bump up the resolution of the screenshot a bit.
 const ZOOM: number = 2;
 
 export class PreserveLayout extends Layout {
-  public readonly selectors = {
+  public readonly selectors: LayoutSelectorDictionary = {
     screenshot: '[data-shared-items-container]',
     renderComplete: '[data-shared-item]',
     itemsCountAttribute: 'data-shared-items-count',
