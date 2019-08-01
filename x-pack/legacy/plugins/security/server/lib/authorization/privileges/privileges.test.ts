@@ -638,7 +638,7 @@ describe('features', () => {
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
 
-    test('actions defined in a feature privilege with excludeFromBasePrivileges are not included in `all` or `read', () => {
+    test('actions defined in a feature with excludeFromBasePrivileges are not included in `all` or `read', () => {
       const features: Feature[] = [
         {
           id: 'foo',
@@ -675,6 +675,82 @@ describe('features', () => {
               ui: ['all-ui-1'],
             },
             read: {
+              management: {
+                'read-management': ['read-management-1'],
+              },
+              catalogue: ['read-catalogue-1'],
+              savedObject: {
+                all: ['read-savedObject-all-1'],
+                read: ['read-savedObject-read-1'],
+              },
+              ui: ['read-ui-1'],
+            },
+          },
+        },
+      ];
+
+      const mockXPackMainPlugin = {
+        getFeatures: jest.fn().mockReturnValue(features),
+      };
+
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+
+      const actual = privileges.get();
+      expect(actual).toHaveProperty(`${group}.all`, [
+        actions.login,
+        actions.version,
+        ...(expectGetFeatures ? [actions.api.get('features')] : []),
+        ...(expectManageSpaces
+          ? [
+              actions.space.manage,
+              actions.ui.get('spaces', 'manage'),
+              actions.ui.get('management', 'kibana', 'spaces'),
+            ]
+          : []),
+        actions.allHack,
+      ]);
+      expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
+    });
+
+    test('actions defined in an individual feature privilege with excludeFromBasePrivileges are not included in `all` or `read`', () => {
+      const features: Feature[] = [
+        {
+          id: 'foo',
+          name: 'Foo Feature',
+          icon: 'arrowDown',
+          navLinkId: 'kibana:foo',
+          app: [],
+          catalogue: ['ignore-me-1', 'ignore-me-2'],
+          management: {
+            foo: ['ignore-me-1', 'ignore-me-2'],
+          },
+          privileges: {
+            bar: {
+              excludeFromBasePrivileges: true,
+              management: {
+                'bar-management': ['bar-management-1'],
+              },
+              catalogue: ['bar-catalogue-1'],
+              savedObject: {
+                all: ['bar-savedObject-all-1'],
+                read: ['bar-savedObject-read-1'],
+              },
+              ui: ['bar-ui-1'],
+            },
+            all: {
+              excludeFromBasePrivileges: true,
+              management: {
+                'all-management': ['all-management-1'],
+              },
+              catalogue: ['all-catalogue-1'],
+              savedObject: {
+                all: ['all-savedObject-all-1'],
+                read: ['all-savedObject-read-1'],
+              },
+              ui: ['all-ui-1'],
+            },
+            read: {
+              excludeFromBasePrivileges: true,
               management: {
                 'read-management': ['read-management-1'],
               },
