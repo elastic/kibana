@@ -5,6 +5,7 @@
  */
 
 jest.mock('./authenticator');
+jest.mock('./api_keys', () => ({ createAPIKey: jest.fn() }));
 
 import Boom from 'boom';
 import { errors } from 'elasticsearch';
@@ -35,6 +36,7 @@ import { getErrorStatusCode } from '../errors';
 import { LegacyAPI } from '../plugin';
 import { AuthenticationResult } from './authentication_result';
 import { setupAuthentication } from '.';
+import { CreateAPIKeyResult, CreateAPIKeyOptions } from './api_keys';
 
 function mockXPackFeature({ isEnabled = true }: Partial<{ isEnabled: boolean }> = {}) {
   return {
@@ -158,7 +160,35 @@ describe('setupAuthentication()', () => {
       expect(mockAuthToolkit.authenticated).toHaveBeenCalledTimes(1);
       expect(mockAuthToolkit.authenticated).toHaveBeenCalledWith({
         state: mockUser,
-        headers: mockAuthHeaders,
+        requestHeaders: mockAuthHeaders,
+      });
+      expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
+      expect(mockAuthToolkit.rejected).not.toHaveBeenCalled();
+
+      expect(authenticate).toHaveBeenCalledTimes(1);
+      expect(authenticate).toHaveBeenCalledWith(mockRequest);
+    });
+
+    it('returns authentication response headers on success if any', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest();
+      const mockUser = mockAuthenticatedUser();
+      const mockAuthHeaders = { authorization: 'Basic xxx' };
+      const mockAuthResponseHeaders = { 'WWW-Authenticate': 'Negotiate' };
+
+      authenticate.mockResolvedValue(
+        AuthenticationResult.succeeded(mockUser, {
+          authHeaders: mockAuthHeaders,
+          authResponseHeaders: mockAuthResponseHeaders,
+        })
+      );
+
+      await authHandler(mockRequest, mockAuthToolkit);
+
+      expect(mockAuthToolkit.authenticated).toHaveBeenCalledTimes(1);
+      expect(mockAuthToolkit.authenticated).toHaveBeenCalledWith({
+        state: mockUser,
+        requestHeaders: mockAuthHeaders,
+        responseHeaders: mockAuthResponseHeaders,
       });
       expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
       expect(mockAuthToolkit.rejected).not.toHaveBeenCalled();
@@ -213,14 +243,18 @@ describe('setupAuthentication()', () => {
         'Basic',
         'Negotiate',
       ] as any;
-      authenticate.mockResolvedValue(AuthenticationResult.failed(originalError, ['Negotiate']));
+      authenticate.mockResolvedValue(
+        AuthenticationResult.failed(originalError, {
+          authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
+        })
+      );
 
       await authHandler(httpServerMock.createKibanaRequest(), mockAuthToolkit);
 
       expect(mockAuthToolkit.rejected).toHaveBeenCalledTimes(1);
       const [[error]] = mockAuthToolkit.rejected.mock.calls;
       expect(error.message).toBe(originalError.message);
-      expect((error as Boom).output.headers).toEqual({ 'WWW-Authenticate': ['Negotiate'] });
+      expect((error as Boom).output.headers).toEqual({ 'WWW-Authenticate': 'Negotiate' });
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
       expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
@@ -345,6 +379,35 @@ describe('setupAuthentication()', () => {
       await expect(isAuthenticated(httpServerMock.createKibanaRequest())).rejects.toBe(
         failureReason
       );
+    });
+  });
+
+  describe('createAPIKey()', () => {
+    let createAPIKey: (
+      request: KibanaRequest,
+      body: CreateAPIKeyOptions['body']
+    ) => Promise<CreateAPIKeyResult | null>;
+    beforeEach(async () => {
+      createAPIKey = (await setupAuthentication(mockSetupAuthenticationParams)).createAPIKey;
+    });
+
+    it('calls createAPIKey with given arguments', async () => {
+      const { createAPIKey: createAPIKeyMock } = jest.requireMock('./api_keys');
+      const options = {
+        name: 'my-key',
+        role_descriptors: {},
+        expiration: '1d',
+      };
+      createAPIKeyMock.mockResolvedValueOnce({ success: true });
+      await expect(createAPIKey(httpServerMock.createKibanaRequest(), options)).resolves.toEqual({
+        success: true,
+      });
+      expect(createAPIKeyMock).toHaveBeenCalledWith({
+        body: options,
+        loggers: mockSetupAuthenticationParams.loggers,
+        callAsCurrentUser: mockScopedClusterClient.callAsCurrentUser,
+        isSecurityFeatureDisabled: expect.any(Function),
+      });
     });
   });
 });

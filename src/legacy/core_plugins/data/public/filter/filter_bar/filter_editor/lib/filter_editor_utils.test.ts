@@ -18,7 +18,8 @@
  */
 
 import { FilterStateStore, toggleFilterNegated } from '@kbn/es-query';
-import { mockFields, mockIndexPattern } from 'ui/index_patterns/fixtures';
+
+import { fixtures } from '../../../../index_patterns';
 import {
   buildFilter,
   getFieldFromFilter,
@@ -41,6 +42,22 @@ import { existsFilter } from './fixtures/exists_filter';
 import { phraseFilter } from './fixtures/phrase_filter';
 import { phrasesFilter } from './fixtures/phrases_filter';
 import { rangeFilter } from './fixtures/range_filter';
+
+jest.mock('ui/kfetch', () => ({
+  kfetch: () => {},
+}));
+
+jest.mock(
+  'ui/notify',
+  () => ({
+    toastNotifications: {
+      addWarning: () => {},
+    },
+  }),
+  { virtual: true }
+);
+
+const { mockFields, mockIndexPattern } = fixtures;
 
 describe('Filter editor utils', () => {
   describe('getQueryDslFromFilter', () => {
@@ -236,7 +253,15 @@ describe('Filter editor utils', () => {
       const params = 'foo';
       const alias = 'bar';
       const state = FilterStateStore.APP_STATE;
-      const filter = buildFilter(mockIndexPattern, mockFields[0], isOperator, params, alias, state);
+      const filter = buildFilter(
+        mockIndexPattern,
+        mockFields[0],
+        isOperator,
+        false,
+        params,
+        alias,
+        state
+      );
       expect(filter.meta.negate).toBe(isOperator.negate);
       expect(filter.meta.alias).toBe(alias);
 
@@ -254,6 +279,7 @@ describe('Filter editor utils', () => {
         mockIndexPattern,
         mockFields[0],
         isOneOfOperator,
+        false,
         params,
         alias,
         state
@@ -275,6 +301,7 @@ describe('Filter editor utils', () => {
         mockIndexPattern,
         mockFields[0],
         isBetweenOperator,
+        false,
         params,
         alias,
         state
@@ -295,6 +322,7 @@ describe('Filter editor utils', () => {
         mockIndexPattern,
         mockFields[0],
         existsOperator,
+        false,
         params,
         alias,
         state
@@ -307,6 +335,22 @@ describe('Filter editor utils', () => {
       }
     });
 
+    it('should include disabled state', () => {
+      const params = undefined;
+      const alias = 'bar';
+      const state = FilterStateStore.APP_STATE;
+      const filter = buildFilter(
+        mockIndexPattern,
+        mockFields[0],
+        doesNotExistOperator,
+        true,
+        params,
+        alias,
+        state
+      );
+      expect(filter.meta.disabled).toBe(true);
+    });
+
     it('should negate based on operator', () => {
       const params = undefined;
       const alias = 'bar';
@@ -315,6 +359,7 @@ describe('Filter editor utils', () => {
         mockIndexPattern,
         mockFields[0],
         doesNotExistOperator,
+        false,
         params,
         alias,
         state

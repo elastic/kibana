@@ -515,7 +515,7 @@ describe('Authenticator', () => {
       const request = httpServerMock.createKibanaRequest();
 
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
-        AuthenticationResult.redirectTo('some-url', null)
+        AuthenticationResult.redirectTo('some-url', { state: null })
       );
       mockSessionStorage.get.mockResolvedValue({ expires: null, state, provider: 'basic' });
 

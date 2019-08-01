@@ -18,7 +18,7 @@
  */
 
 import { functionWrapper } from '../../interpreter/test_helpers';
-import { tilemap } from './tilemap_fn';
+import { createTileMapFn } from './tile_map_fn';
 
 jest.mock('ui/new_platform');
 
@@ -40,7 +40,7 @@ jest.mock('ui/vis/map/convert_to_geojson', () => ({
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
 describe('interpreter/functions#tilemap', () => {
-  const fn = functionWrapper(tilemap);
+  const fn = functionWrapper(createTileMapFn);
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],

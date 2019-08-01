@@ -70,6 +70,7 @@ test('successfully executes', async () => {
   expect(actionTypeRegistry.get).toHaveBeenCalledWith('test');
 
   expect(actionType.executor).toHaveBeenCalledWith({
+    id: '1',
     services: expect.anything(),
     config: {
       bar: true,
@@ -128,9 +129,12 @@ test('throws an error when config is invalid', async () => {
   encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
-  await expect(execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"The actionTypeConfig is invalid: [param1]: expected value of type [string] but got [undefined]"`
-  );
+  const result = await execute(executeParams);
+  expect(result).toEqual({
+    status: 'error',
+    retry: false,
+    message: `The actionTypeConfig is invalid: [param1]: expected value of type [string] but got [undefined]`,
+  });
 });
 
 test('throws an error when params is invalid', async () => {
@@ -157,7 +161,10 @@ test('throws an error when params is invalid', async () => {
   encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
-  await expect(execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"The actionParams is invalid: [param1]: expected value of type [string] but got [undefined]"`
-  );
+  const result = await execute(executeParams);
+  expect(result).toEqual({
+    status: 'error',
+    retry: false,
+    message: `The actionParams is invalid: [param1]: expected value of type [string] but got [undefined]`,
+  });
 });
