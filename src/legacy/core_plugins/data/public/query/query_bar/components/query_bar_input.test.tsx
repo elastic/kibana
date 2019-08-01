@@ -78,12 +78,6 @@ const mockIndexPattern = {
   ],
 } as IndexPattern;
 
-const createMockSavedObjectsClient = () => {
-  return {
-    get: async () => mockIndexPattern,
-  };
-};
-
 describe('QueryBarInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
