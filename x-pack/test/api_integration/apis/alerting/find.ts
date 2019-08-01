@@ -54,7 +54,11 @@ export default function createFindTests({ getService }: KibanaFunctionalTestDefa
         .get('/api/alert/_find')
         .expect(200)
         .then((resp: any) => {
-          const match = resp.body.find((obj: any) => obj.id === alertId);
+          const body = resp.body;
+          expect(body.page).to.equal(1);
+          expect(body.perPage).to.be.greaterThan(0);
+          expect(body.total).to.be.greaterThan(0);
+          const match = body.data.find((obj: any) => obj.id === alertId);
           expect(match).to.eql({
             id: alertId,
             alertTypeId: 'test.noop',

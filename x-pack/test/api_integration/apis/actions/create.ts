@@ -20,13 +20,13 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'My action',
-            actionTypeId: 'test.index-record',
-            actionTypeConfig: {
-              unencrypted: `This value shouldn't get encrypted`,
-              encrypted: 'This value should be encrypted',
-            },
+          description: 'My action',
+          actionTypeId: 'test.index-record',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
           },
         })
         .expect(200)
@@ -66,11 +66,9 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'My action',
-            actionTypeId: 'test.unregistered-action-type',
-            actionTypeConfig: {},
-          },
+          description: 'My action',
+          actionTypeId: 'test.unregistered-action-type',
+          config: {},
         })
         .expect(400)
         .then((resp: any) => {
@@ -92,52 +90,25 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'child "attributes" fails because ["attributes" is required]',
-            validation: {
-              source: 'payload',
-              keys: ['attributes'],
-            },
-          });
-        });
-    });
-
-    it('should return 400 when payload attributes are empty and invalid', async () => {
-      await supertest
-        .post('/api/action')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          attributes: {},
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
             message:
-              'child "attributes" fails because [child "description" fails because ["description" is required], child "actionTypeId" fails because ["actionTypeId" is required], child "actionTypeConfig" fails because ["actionTypeConfig" is required]]',
+              'child "description" fails because ["description" is required]. child "actionTypeId" fails because ["actionTypeId" is required]',
             validation: {
               source: 'payload',
-              keys: [
-                'attributes.description',
-                'attributes.actionTypeId',
-                'attributes.actionTypeConfig',
-              ],
+              keys: ['description', 'actionTypeId'],
             },
           });
         });
     });
 
-    it(`should return 400 when actionTypeConfig isn't valid`, async () => {
+    it(`should return 400 when config isn't valid`, async () => {
       await supertest
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'my description',
-            actionTypeId: 'test.index-record',
-            actionTypeConfig: {
-              unencrypted: 'my unencrypted text',
-            },
+          description: 'my description',
+          actionTypeId: 'test.index-record',
+          config: {
+            unencrypted: 'my unencrypted text',
           },
         })
         .expect(400)
@@ -146,7 +117,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'The actionTypeConfig is invalid: [encrypted]: expected value of type [string] but got [undefined]',
+              'error validating action type secrets: [encrypted]: expected value of type [string] but got [undefined]',
           });
         });
     });

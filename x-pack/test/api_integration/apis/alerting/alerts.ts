@@ -130,8 +130,10 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
       });
       expect(actionTestRecord._source).to.eql({
         config: {
-          encrypted: 'This value should be encrypted',
           unencrypted: `This value shouldn't get encrypted`,
+        },
+        secrets: {
+          encrypted: 'This value should be encrypted',
         },
         params: {
           index: esTestIndexName,

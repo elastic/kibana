@@ -34,6 +34,13 @@ interface FindOptions {
   };
 }
 
+interface FindResult {
+  page: number;
+  perPage: number;
+  total: number;
+  data: object[];
+}
+
 interface CreateOptions {
   data: Alert;
   options?: {
@@ -123,14 +130,22 @@ export class AlertsClient {
     return this.getAlertFromRaw(result.id, result.attributes, result.references);
   }
 
-  public async find({ options = {} }: FindOptions = {}) {
+  public async find({ options = {} }: FindOptions = {}): Promise<FindResult> {
     const results = await this.savedObjectsClient.find({
       ...options,
       type: 'alert',
     });
-    return results.saved_objects.map(result =>
+
+    const data = results.saved_objects.map(result =>
       this.getAlertFromRaw(result.id, result.attributes, result.references)
     );
+
+    return {
+      page: results.page,
+      perPage: results.per_page,
+      total: results.total,
+      data,
+    };
   }
 
   public async delete({ id }: { id: string }) {

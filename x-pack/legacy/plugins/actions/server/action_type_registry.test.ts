@@ -47,7 +47,6 @@ describe('register()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      unencryptedAttributes: [],
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
@@ -77,14 +76,12 @@ describe('register()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      unencryptedAttributes: [],
       executor,
     });
     expect(() =>
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
-        unencryptedAttributes: [],
         executor,
       })
     ).toThrowErrorMatchingInlineSnapshot(
@@ -97,7 +94,6 @@ describe('register()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      unencryptedAttributes: [],
       executor,
     });
     expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
@@ -120,7 +116,6 @@ describe('get()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      unencryptedAttributes: [],
       executor,
     });
     const actionType = actionTypeRegistry.get('my-action-type');
@@ -129,7 +124,6 @@ describe('get()', () => {
         "executor": [Function],
         "id": "my-action-type",
         "name": "My action type",
-        "unencryptedAttributes": Array [],
       }
     `);
   });
@@ -148,7 +142,6 @@ describe('list()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      unencryptedAttributes: [],
       executor,
     });
     const actionTypes = actionTypeRegistry.list();
@@ -172,7 +165,6 @@ describe('has()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      unencryptedAttributes: [],
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type'));

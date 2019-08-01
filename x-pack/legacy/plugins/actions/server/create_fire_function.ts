@@ -33,7 +33,7 @@ export function createFireFunction({
       params: {
         id,
         spaceId,
-        actionTypeParams: params,
+        params,
       },
       state: {},
       scope: ['actions'],

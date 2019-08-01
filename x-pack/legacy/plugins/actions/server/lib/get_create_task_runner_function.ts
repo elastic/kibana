@@ -33,7 +33,7 @@ export function getCreateTaskRunnerFunction({
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
       run: async () => {
-        const { spaceId, id, actionTypeParams } = taskInstance.params;
+        const { spaceId, id, params } = taskInstance.params;
         const namespace = spaceIdToNamespace(spaceId);
         const basePath = getBasePath(spaceId);
         const executorResult = await execute({
@@ -42,7 +42,7 @@ export function getCreateTaskRunnerFunction({
           encryptedSavedObjectsPlugin,
           actionId: id,
           services: getServices(basePath),
-          params: actionTypeParams,
+          params,
         });
         if (executorResult.status === 'error') {
           // Task manager error handler only kicks in when an error thrown (at this time)

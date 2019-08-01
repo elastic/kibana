@@ -36,6 +36,7 @@
 /src/core/  @elastic/kibana-platform
 /src/legacy/server/saved_objects/  @elastic/kibana-platform
 /src/legacy/ui/public/saved_objects  @elastic/kibana-platform
+/config/kibana.yml @elastic/kibana-platform
 
 # Security
 /x-pack/legacy/plugins/security/  @elastic/kibana-security

@@ -40,10 +40,10 @@ describe('fire()', () => {
       Array [
         Object {
           "params": Object {
-            "actionTypeParams": Object {
+            "id": "123",
+            "params": Object {
               "baz": false,
             },
-            "id": "123",
             "spaceId": "default",
           },
           "scope": Array [
@@ -56,14 +56,14 @@ describe('fire()', () => {
     `);
     expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "action",
-        "123",
-        Object {
-          "namespace": "namespace1",
-        },
-      ]
-    `);
+            Array [
+              "action",
+              "123",
+              Object {
+                "namespace": "namespace1",
+              },
+            ]
+        `);
     expect(spaceIdToNamespace).toHaveBeenCalledWith('default');
   });
 });

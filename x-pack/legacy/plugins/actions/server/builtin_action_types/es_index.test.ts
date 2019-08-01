@@ -12,7 +12,7 @@ import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
-import { validateActionTypeConfig, validateActionTypeParams } from '../lib';
+import { validateConfig, validateParams } from '../lib';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { registerBuiltInActionTypes } from './index';
 import { ActionParamsType, ActionTypeConfigType } from './es_index';
@@ -70,13 +70,13 @@ describe('config validation', () => {
   test('config validation succeeds when config is valid', () => {
     const config: Record<string, any> = {};
 
-    expect(validateActionTypeConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config)).toEqual({
       ...config,
       index: null,
     });
 
     config.index = 'testing-123';
-    expect(validateActionTypeConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config)).toEqual({
       ...config,
       index: 'testing-123',
     });
@@ -88,18 +88,18 @@ describe('config validation', () => {
     };
 
     expect(() => {
-      validateActionTypeConfig(actionType, baseConfig);
+      validateConfig(actionType, baseConfig);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionTypeConfig is invalid: [indeX]: definition for this key is missing"`
+      `"error validating action type config: [indeX]: definition for this key is missing"`
     );
 
     delete baseConfig.user;
     baseConfig.index = 666;
 
     expect(() => {
-      validateActionTypeConfig(actionType, baseConfig);
+      validateConfig(actionType, baseConfig);
     }).toThrowErrorMatchingInlineSnapshot(`
-"The actionTypeConfig is invalid: [index]: types that failed validation:
+"error validating action type config: [index]: types that failed validation:
 - [index.0]: expected value of type [string] but got [number]
 - [index.1]: expected value to equal [null] but got [666]"
 `);
@@ -114,7 +114,7 @@ describe('params validation', () => {
       refresh: true,
       documents: [{ rando: 'thing' }],
     };
-    expect(validateActionTypeParams(actionType, params)).toMatchInlineSnapshot(`
+    expect(validateParams(actionType, params)).toMatchInlineSnapshot(`
         Object {
           "documents": Array [
             Object {
@@ -130,7 +130,7 @@ describe('params validation', () => {
     delete params.index;
     delete params.refresh;
     delete params.executionTimeField;
-    expect(validateActionTypeParams(actionType, params)).toMatchInlineSnapshot(`
+    expect(validateParams(actionType, params)).toMatchInlineSnapshot(`
         Object {
           "documents": Array [
             Object {
@@ -143,45 +143,46 @@ describe('params validation', () => {
 
   test('params validation fails when params is not valid', () => {
     expect(() => {
-      validateActionTypeParams(actionType, { documents: [{}], jim: 'bob' });
+      validateParams(actionType, { documents: [{}], jim: 'bob' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: [jim]: definition for this key is missing"`
+      `"error validating action params: [jim]: definition for this key is missing"`
     );
 
     expect(() => {
-      validateActionTypeParams(actionType, {});
+      validateParams(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: [documents]: expected value of type [array] but got [undefined]"`
+      `"error validating action params: [documents]: expected value of type [array] but got [undefined]"`
     );
 
     expect(() => {
-      validateActionTypeParams(actionType, { index: 666 });
+      validateParams(actionType, { index: 666 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: [index]: expected value of type [string] but got [number]"`
+      `"error validating action params: [index]: expected value of type [string] but got [number]"`
     );
 
     expect(() => {
-      validateActionTypeParams(actionType, { executionTimeField: true });
+      validateParams(actionType, { executionTimeField: true });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: [executionTimeField]: expected value of type [string] but got [boolean]"`
+      `"error validating action params: [executionTimeField]: expected value of type [string] but got [boolean]"`
     );
 
     expect(() => {
-      validateActionTypeParams(actionType, { refresh: 'true' });
+      validateParams(actionType, { refresh: 'true' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: [refresh]: expected value of type [boolean] but got [string]"`
+      `"error validating action params: [refresh]: expected value of type [boolean] but got [string]"`
     );
 
     expect(() => {
-      validateActionTypeParams(actionType, { documents: ['should be an object'] });
+      validateParams(actionType, { documents: ['should be an object'] });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: [documents.0]: expected value of type [object] but got [string]"`
+      `"error validating action params: [documents.0]: expected value of type [object] but got [string]"`
     );
   });
 });
 
 describe('execute()', () => {
   test('ensure parameters are as expected', async () => {
+    const secrets = {};
     let config: ActionTypeConfigType;
     let params: ActionParamsType;
     let executorOptions: ActionTypeExecutorOptions;
@@ -197,7 +198,7 @@ describe('execute()', () => {
 
     const id = 'some-id';
 
-    executorOptions = { id, config, params, services };
+    executorOptions = { id, config, secrets, params, services };
     services.callCluster.mockClear();
     await actionType.executor(executorOptions);
 
@@ -229,7 +230,7 @@ describe('execute()', () => {
       refresh: true,
     };
 
-    executorOptions = { id, config, params, services };
+    executorOptions = { id, config, secrets, params, services };
     services.callCluster.mockClear();
     await actionType.executor(executorOptions);
 
@@ -266,7 +267,7 @@ describe('execute()', () => {
       refresh: undefined,
     };
 
-    executorOptions = { id, config, params, services };
+    executorOptions = { id, config, secrets, params, services };
     services.callCluster.mockClear();
     await actionType.executor(executorOptions);
 
@@ -298,7 +299,7 @@ describe('execute()', () => {
       refresh: undefined,
     };
 
-    executorOptions = { id, config, params, services };
+    executorOptions = { id, config, secrets, params, services };
     services.callCluster.mockClear();
     await actionType.executor(executorOptions);
 
