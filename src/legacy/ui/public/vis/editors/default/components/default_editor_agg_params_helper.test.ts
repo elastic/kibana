@@ -172,12 +172,6 @@ describe('DefaultEditorAggParams helpers', () => {
 
       expect(errors).toEqual(['"Split series" aggs must run before all other buckets!']);
     });
-
-    it('should push an error if a schema is deprecated', () => {
-      const errors = getError({ schema: { title: 'Split series', deprecate: true } }, false);
-
-      expect(errors).toEqual(['"Split series" has been deprecated.']);
-    });
   });
 
   describe('getAggTypeOptions', () => {

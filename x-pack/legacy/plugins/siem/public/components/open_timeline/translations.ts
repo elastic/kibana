@@ -19,7 +19,7 @@ export const DELETE = i18n.translate('xpack.siem.open.timeline.deleteButton', {
 });
 
 export const DELETE_SELECTED = i18n.translate('xpack.siem.open.timeline.deleteSelectedButton', {
-  defaultMessage: 'Delete Selected',
+  defaultMessage: 'Delete selected',
 });
 
 export const DELETE_WARNING = i18n.translate('xpack.siem.open.timeline.deleteWarningLabel', {
@@ -35,7 +35,7 @@ export const EXPAND = i18n.translate('xpack.siem.open.timeline.expandButton', {
 });
 
 export const FAVORITE_SELECTED = i18n.translate('xpack.siem.open.timeline.favoriteSelectedButton', {
-  defaultMessage: 'Favorite Selected',
+  defaultMessage: 'Favorite selected',
 });
 
 export const FAVORITES = i18n.translate('xpack.siem.open.timeline.favoritesTooltip', {
@@ -43,7 +43,7 @@ export const FAVORITES = i18n.translate('xpack.siem.open.timeline.favoritesToolt
 });
 
 export const LAST_MODIFIED = i18n.translate('xpack.siem.open.timeline.lastModifiedTableHeader', {
-  defaultMessage: 'Last Modified',
+  defaultMessage: 'Last modified',
 });
 
 export const MISSING_SAVED_OBJECT_ID = i18n.translate(
@@ -54,7 +54,7 @@ export const MISSING_SAVED_OBJECT_ID = i18n.translate(
 );
 
 export const MODIFIED_BY = i18n.translate('xpack.siem.open.timeline.modifiedByTableHeader', {
-  defaultMessage: 'Modified By',
+  defaultMessage: 'Modified by',
 });
 
 export const NOTES = i18n.translate('xpack.siem.open.timeline.notesTooltip', {
@@ -62,7 +62,7 @@ export const NOTES = i18n.translate('xpack.siem.open.timeline.notesTooltip', {
 });
 
 export const ONLY_FAVORITES = i18n.translate('xpack.siem.open.timeline.onlyFavoritesButtonLabel', {
-  defaultMessage: 'Only Favorites',
+  defaultMessage: 'Only favorites',
 });
 
 export const OPEN_AS_DUPLICATE = i18n.translate('xpack.siem.open.timeline.openAsDuplicateTooltip', {
@@ -70,7 +70,7 @@ export const OPEN_AS_DUPLICATE = i18n.translate('xpack.siem.open.timeline.openAs
 });
 
 export const OPEN_TIMELINE = i18n.translate('xpack.siem.open.timeline.openTimelineButton', {
-  defaultMessage: 'Open Timeline...',
+  defaultMessage: 'Open Timeline…',
 });
 
 export const OPEN_TIMELINE_TITLE = i18n.translate('xpack.siem.open.timeline.openTimelineTitle', {
@@ -78,7 +78,7 @@ export const OPEN_TIMELINE_TITLE = i18n.translate('xpack.siem.open.timeline.open
 });
 
 export const PINNED_EVENTS = i18n.translate('xpack.siem.open.timeline.pinnedEventsTooltip', {
-  defaultMessage: 'Pinned Events',
+  defaultMessage: 'Pinned events',
 });
 
 export const POSTED = i18n.translate('xpack.siem.open.timeline.postedLabel', {
@@ -90,11 +90,11 @@ export const SEARCH_PLACEHOLDER = i18n.translate('xpack.siem.open.timeline.searc
 });
 
 export const TIMELINE_NAME = i18n.translate('xpack.siem.open.timeline.timelineNameTableHeader', {
-  defaultMessage: 'Timeline Name',
+  defaultMessage: 'Timeline name',
 });
 
 export const UNTITLED_TIMELINE = i18n.translate('xpack.siem.open.timeline.untitledTimelineLabel', {
-  defaultMessage: 'Untitled Timeline',
+  defaultMessage: 'Untitled timeline',
 });
 
 export const WITH = i18n.translate('xpack.siem.open.timeline.withLabel', {

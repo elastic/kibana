@@ -27,10 +27,10 @@ const isEnabled = function(filter: Filter) {
  * Checks to see if only disabled filters have been changed
  * @returns {bool} Only disabled filters
  */
-export function onlyDisabledFiltersChanged(newFilters: Filter[], oldFilters: Filter[]) {
+export function onlyDisabledFiltersChanged(newFilters?: Filter[], oldFilters?: Filter[]) {
   // If it's the same - compare only enabled filters
-  const newEnabledFilters = _.filter(newFilters, isEnabled);
-  const oldEnabledFilters = _.filter(oldFilters, isEnabled);
+  const newEnabledFilters = _.filter(newFilters || [], isEnabled);
+  const oldEnabledFilters = _.filter(oldFilters || [], isEnabled);
 
   return _.isEqual(oldEnabledFilters, newEnabledFilters);
 }
