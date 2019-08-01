@@ -38,9 +38,12 @@ export const getMetricMetadata = async (
     body: {
       query: {
         bool: {
-          filter: {
-            term: { [idFieldName]: nodeId },
-          },
+          must_not: [{ match: { 'event.dataset': 'aws.ec2' } }],
+          filter: [
+            {
+              match: { [idFieldName]: nodeId },
+            },
+          ],
         },
       },
       size: 0,
