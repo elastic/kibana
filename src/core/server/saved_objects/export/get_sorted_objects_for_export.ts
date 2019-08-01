@@ -23,14 +23,16 @@ import { SavedObjectsClientContract } from '../';
 import { injectNestedDependencies } from './inject_nested_depdendencies';
 import { sortObjects } from './sort_objects';
 
-interface ObjectToExport {
-  id: string;
-  type: string;
-}
-
-export interface ExportObjectsOptions {
+/**
+ * Options controlling the export operation.
+ * @public
+ */
+export interface SavedObjectsExportOptions {
   types?: string[];
-  objects?: ObjectToExport[];
+  objects?: Array<{
+    id: string;
+    type: string;
+  }>;
   savedObjectsClient: SavedObjectsClientContract;
   exportSizeLimit: number;
   includeReferencesDeep?: boolean;
@@ -44,7 +46,7 @@ async function fetchObjectsToExport({
   savedObjectsClient,
   namespace,
 }: {
-  objects?: ObjectToExport[];
+  objects?: SavedObjectsExportOptions['objects'];
   types?: string[];
   exportSizeLimit: number;
   savedObjectsClient: SavedObjectsClientContract;
@@ -85,7 +87,7 @@ export async function getSortedObjectsForExport({
   exportSizeLimit,
   includeReferencesDeep = false,
   namespace,
-}: ExportObjectsOptions) {
+}: SavedObjectsExportOptions) {
   const objectsToExport = await fetchObjectsToExport({
     types,
     objects,

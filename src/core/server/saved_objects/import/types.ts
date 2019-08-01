@@ -20,7 +20,11 @@
 import { Readable } from 'stream';
 import { SavedObjectsClientContract } from '../service';
 
-export interface Retry {
+/**
+ * Describes a retry operation for importing a saved object.
+ * @public
+ */
+export interface SavedObjectsImportRetry {
   type: string;
   id: string;
   overwrite: boolean;
@@ -31,21 +35,37 @@ export interface Retry {
   }>;
 }
 
-export interface ConflictError {
+/**
+ * Represents a failure to import due to a conflict.
+ * @public
+ */
+export interface SavedObjectsImportConflictError {
   type: 'conflict';
 }
 
-export interface UnsupportedTypeError {
+/**
+ * Represents a failure to import due to having an unsupported saved object type.
+ * @public
+ */
+export interface SavedObjectsImportUnsupportedTypeError {
   type: 'unsupported_type';
 }
 
-export interface UnknownError {
+/**
+ * Represents a failure to import due to an unknown reason.
+ * @public
+ */
+export interface SavedObjectsImportUnknownError {
   type: 'unknown';
   message: string;
   statusCode: number;
 }
 
-export interface MissingReferencesError {
+/**
+ * Represents a failure to import due to missing references.
+ * @public
+ */
+export interface SavedObjectsImportMissingReferencesError {
   type: 'missing_references';
   references: Array<{
     type: string;
@@ -57,11 +77,55 @@ export interface MissingReferencesError {
   }>;
 }
 
+/**
+ * Represents a failure to import.
+ * @public
+ */
 export interface SavedObjectsImportError {
   id: string;
   type: string;
   title?: string;
-  error: ConflictError | UnsupportedTypeError | MissingReferencesError | UnknownError;
+  error:
+    | SavedObjectsImportConflictError
+    | SavedObjectsImportUnsupportedTypeError
+    | SavedObjectsImportMissingReferencesError
+    | SavedObjectsImportUnknownError;
+}
+
+/**
+ * The response describing the result of an import.
+ * @public
+ */
+export interface SavedObjectsImportResponse {
+  success: boolean;
+  successCount: number;
+  errors?: SavedObjectsImportError[];
+}
+
+/**
+ * Options to control the import operation.
+ * @public
+ */
+export interface SavedObjectsImportOptions {
+  readStream: Readable;
+  objectLimit: number;
+  overwrite: boolean;
+  savedObjectsClient: SavedObjectsClientContract;
+  supportedTypes: string[];
+  namespace?: string;
+}
+
+/**
+ * Options to control the "resolve import" operation.
+ * @public
+ */
+export interface SavedObjectsResolveImportErrorsOptions {
+  readStream: Readable;
+  objectLimit: number;
+  savedObjectsClient: SavedObjectsClientContract;
+  retries: SavedObjectsImportRetry[];
+  supportedTypes: string[];
+  namespace?: string;
 }
 
 export interface SavedObjectsImportResponse {

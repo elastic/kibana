@@ -121,6 +121,89 @@ describe('getSortedObjectsForExport()', () => {
     `);
   });
 
+  test('exports from the provided namespace when present', async () => {
+    savedObjectsClient.find.mockResolvedValueOnce({
+      total: 2,
+      saved_objects: [
+        {
+          id: '2',
+          type: 'search',
+          attributes: {},
+          references: [
+            {
+              name: 'name',
+              type: 'index-pattern',
+              id: '1',
+            },
+          ],
+        },
+        {
+          id: '1',
+          type: 'index-pattern',
+          attributes: {},
+          references: [],
+        },
+      ],
+      per_page: 1,
+      page: 0,
+    });
+    const exportStream = await getSortedObjectsForExport({
+      savedObjectsClient,
+      exportSizeLimit: 500,
+      types: ['index-pattern', 'search'],
+      namespace: 'foo',
+    });
+
+    const response = await readStreamToCompletion(exportStream);
+
+    expect(response).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "1",
+          "references": Array [],
+          "type": "index-pattern",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "name",
+              "type": "index-pattern",
+            },
+          ],
+          "type": "search",
+        },
+      ]
+    `);
+    expect(savedObjectsClient.find).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "namespace": "foo",
+              "perPage": 500,
+              "sortField": "_id",
+              "sortOrder": "asc",
+              "type": Array [
+                "index-pattern",
+                "search",
+              ],
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
+  });
+
   test('export selected types throws error when exceeding exportSizeLimit', async () => {
     savedObjectsClient.find.mockResolvedValueOnce({
       total: 2,

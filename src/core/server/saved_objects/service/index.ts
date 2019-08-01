@@ -17,9 +17,13 @@
  * under the License.
  */
 
+import { Readable } from 'stream';
 import { ScopedSavedObjectsClientProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
+import { SavedObjectsExportOptions } from '../export';
+import { SavedObjectsImportOptions, SavedObjectsImportResponse } from '../import';
 import { SavedObjectsSchema } from '../schema';
+import { SavedObjectsResolveImportErrorsOptions } from '../import/types';
 
 /**
  * @public
@@ -35,17 +39,16 @@ export interface SavedObjectsService<Request = any> {
   schema: SavedObjectsSchema;
   getSavedObjectsRepository(...rest: any[]): any;
   importExport: {
-    importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
-    resolveImportErrors(
-      options: SavedObjectsResolveImportErrorsOptions
-    ): Promise<SavedObjectsImportResponse>;
-    getSortedObjectsForExport(options: ExportObjectsOptions): Promise<Readable>;
+    objectLimit: number;
+    options: SavedObjectsResolveImportErrorsOptions;
+    getSortedObjectsForExport(options: SavedObjectsExportOptions): Promise<Readable>;
   };
 }
 
 export {
   SavedObjectsRepository,
   ScopedSavedObjectsClientProvider,
+  SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsErrorHelpers,

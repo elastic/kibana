@@ -8,8 +8,9 @@
 
 ```typescript
 importExport: {
+        objectLimit: number;
         importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
         resolveImportErrors(options: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
-        getSortedObjectsForExport(options: ExportObjectsOptions): Promise<Readable>;
+        getSortedObjectsForExport(options: SavedObjectsExportOptions): Promise<Readable>;
     };
 ```

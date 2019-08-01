@@ -23,4 +23,10 @@ export {
   SavedObjectsImportResponse,
   SavedObjectsImportError,
   SavedObjectsImportOptions,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsResolveImportErrorsOptions,
+  SavedObjectsImportRetry,
 } from './types';

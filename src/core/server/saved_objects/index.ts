@@ -23,8 +23,8 @@ export { SavedObjectsSchema } from './schema';
 
 export { SavedObjectsManagement } from './management';
 
-export { importSavedObjects, SavedObjectsImportError, resolveImportErrors } from './import';
+export * from './import';
 
-export { getSortedObjectsForExport } from './export';
+export { getSortedObjectsForExport, SavedObjectsExportOptions } from './export';
 
 export { SavedObjectsSerializer, RawDoc as SavedObjectsRawDoc } from './serialization';
