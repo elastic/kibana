@@ -137,7 +137,7 @@ function DefaultEditorAgg({
         tooltip: i18n.translate('common.ui.vis.editors.agg.disableAggButtonTooltip', {
           defaultMessage: 'Disable aggregation',
         }),
-        dataTestSubj: 'toggleDisableAggregationBtn',
+        dataTestSubj: 'toggleDisableAggregationBtn disable',
       });
     }
     if (!agg.enabled) {
@@ -149,7 +149,7 @@ function DefaultEditorAgg({
         tooltip: i18n.translate('common.ui.vis.editors.agg.enableAggButtonTooltip', {
           defaultMessage: 'Enable aggregation',
         }),
-        dataTestSubj: 'toggleDisableAggregationBtn',
+        dataTestSubj: 'toggleDisableAggregationBtn enable',
       });
     }
     if (isDraggable) {

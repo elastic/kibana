@@ -23,7 +23,7 @@ import { VisState } from 'ui/vis';
 import { AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg, DefaultEditorAggProps } from './default_editor_agg';
 import { act } from 'react-dom/test-utils';
-import { DefaultEditorAggParamsProps } from './default_editor_agg_params';
+import { DefaultEditorAggParams } from './default_editor_agg_params';
 
 jest.mock('./default_editor_agg_params', () => ({
   DefaultEditorAggParams: () => null,
@@ -89,9 +89,10 @@ describe('DefaultEditorAgg component', () => {
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
     act(() => {
-      (comp.find('DefaultEditorAggParams').props() as DefaultEditorAggParamsProps).setValidity(
-        false
-      );
+      comp
+        .find(DefaultEditorAggParams)
+        .props()
+        .setValidity(false);
     });
     comp.update();
     expect(setValidity).toBeCalledWith(false);
@@ -109,9 +110,10 @@ describe('DefaultEditorAgg component', () => {
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
     act(() => {
-      (comp.find('DefaultEditorAggParams').props() as DefaultEditorAggParamsProps).setValidity(
-        true
-      );
+      comp
+        .find(DefaultEditorAggParams)
+        .props()
+        .setValidity(true);
     });
     comp.update();
     expect(setValidity).toBeCalledWith(true);
@@ -125,8 +127,9 @@ describe('DefaultEditorAgg component', () => {
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
     expect(defaultProps.setTouched).toBeCalledTimes(0);
 
-    expect(comp.find('.euiAccordion-isOpen').exists()).toBeTruthy();
     comp.find('.euiAccordion__button').simulate('click');
+    // make sure that the accordion is collapsed
+    expect(comp.find('.euiAccordion-isOpen').exists()).toBeFalsy();
 
     expect(defaultProps.setTouched).toBeCalledWith(true);
   });
@@ -135,9 +138,10 @@ describe('DefaultEditorAgg component', () => {
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
     act(() => {
-      (comp.find('DefaultEditorAggParams').props() as DefaultEditorAggParamsProps).setValidity(
-        false
-      );
+      comp
+        .find(DefaultEditorAggParams)
+        .props()
+        .setValidity(false);
     });
 
     expect(setValidity).toBeCalledWith(false);
@@ -170,28 +174,25 @@ describe('DefaultEditorAgg component', () => {
 
     it('should have disable and remove actions', () => {
       defaultProps.isRemovable = true;
-      const comp = shallow(<DefaultEditorAgg {...defaultProps} />);
-      const actions = shallow(comp.prop('extraAction'));
+      const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
-      expect(actions.children().length).toBe(2);
-      expect(actions.childAt(0).props()).toHaveProperty('content', 'Disable aggregation');
-      expect(actions.childAt(1).props()).toHaveProperty('content', 'Remove dimension');
+      expect(
+        comp.find('[data-test-subj="toggleDisableAggregationBtn disable"] button').exists()
+      ).toBeTruthy();
+      expect(comp.find('[data-test-subj="removeDimensionBtn"] button').exists()).toBeTruthy();
     });
 
     it('should have draggable action', () => {
       defaultProps.isDraggable = true;
-      const comp = shallow(<DefaultEditorAgg {...defaultProps} />);
-      const actions = shallow(comp.prop('extraAction'));
+      const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
-      expect(actions.children().length).toBe(1);
-      expect(actions.childAt(0).props()).toHaveProperty('content', 'Modify priority by dragging');
-      expect(actions.childAt(0).props()).toHaveProperty('type', 'grab');
+      expect(comp.find('[data-test-subj="dragHandleBtn"]').exists()).toBeTruthy();
     });
 
     it('should disable agg', () => {
       defaultProps.isRemovable = true;
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
-      comp.find('[iconType="eye"]').simulate('click');
+      comp.find('[data-test-subj="toggleDisableAggregationBtn disable"] button').simulate('click');
 
       expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg, false);
     });
@@ -199,7 +200,7 @@ describe('DefaultEditorAgg component', () => {
     it('should enable agg', () => {
       defaultProps.agg.enabled = false;
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
-      comp.find('[iconType="eyeClosed"]').simulate('click');
+      comp.find('[data-test-subj="toggleDisableAggregationBtn enable"] button').simulate('click');
 
       expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg, true);
     });
@@ -207,7 +208,7 @@ describe('DefaultEditorAgg component', () => {
     it('should call removeAgg', () => {
       defaultProps.isRemovable = true;
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
-      comp.find('[iconType="cross"]').simulate('click');
+      comp.find('[data-test-subj="removeDimensionBtn"] button').simulate('click');
 
       expect(defaultProps.removeAgg).toBeCalledWith(defaultProps.agg);
     });
@@ -229,11 +230,10 @@ describe('DefaultEditorAgg component', () => {
       };
       const compDateHistogram = shallow(<DefaultEditorAgg {...defaultProps} />);
 
-      expect(compHistogram.find('DefaultEditorAggParams').props()).toHaveProperty(
-        'disabledParams',
-        ['min_doc_count']
-      );
-      expect(compDateHistogram.find('DefaultEditorAggParams').props()).toHaveProperty(
+      expect(compHistogram.find(DefaultEditorAggParams).props()).toHaveProperty('disabledParams', [
+        'min_doc_count',
+      ]);
+      expect(compDateHistogram.find(DefaultEditorAggParams).props()).toHaveProperty(
         'disabledParams',
         ['min_doc_count']
       );
@@ -245,7 +245,7 @@ describe('DefaultEditorAgg component', () => {
       };
       const comp = shallow(<DefaultEditorAgg {...defaultProps} />);
 
-      expect(comp.find('DefaultEditorAggParams').prop('aggError')).toBeDefined();
+      expect(comp.find(DefaultEditorAggParams).prop('aggError')).toBeDefined();
     });
 
     it('should set min_doc_count to true when agg type was changed to histogram', () => {

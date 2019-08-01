@@ -26,7 +26,8 @@ import { AggGroupNames } from '../agg_groups';
 import { AggConfig } from '../../../agg_config';
 import { AggConfigs } from '../../../agg_configs';
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './default_editor_agg_group';
-import { DefaultEditorAggProps } from './default_editor_agg';
+import { DefaultEditorAgg } from './default_editor_agg';
+import { DefaultEditorAggAdd } from './default_editor_agg_add';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',
@@ -148,7 +149,7 @@ describe('DefaultEditorAgg component', () => {
     defaultProps.groupName = AggGroupNames.Buckets;
     const comp = mount(<DefaultEditorAggGroup {...defaultProps} />);
     act(() => {
-      const aggProps = comp.find('DefaultEditorAgg').props() as DefaultEditorAggProps;
+      const aggProps = comp.find(DefaultEditorAgg).props();
       aggProps.setValidity(false);
       aggProps.setTouched(true);
     });
@@ -159,10 +160,11 @@ describe('DefaultEditorAgg component', () => {
   it('should mark group as touched when the form applied', () => {
     const comp = mount(<DefaultEditorAggGroup {...defaultProps} />);
     act(() => {
-      (comp
-        .find('DefaultEditorAgg')
+      comp
+        .find(DefaultEditorAgg)
         .first()
-        .props() as DefaultEditorAggProps).setValidity(false);
+        .props()
+        .setValidity(false);
     });
     expect(setTouched).toBeCalledWith(false);
     comp.setProps({ formIsTouched: true });
@@ -173,10 +175,11 @@ describe('DefaultEditorAgg component', () => {
   it('should mark group as invalid when at least one agg is invalid', () => {
     const comp = mount(<DefaultEditorAggGroup {...defaultProps} />);
     act(() => {
-      (comp
-        .find('DefaultEditorAgg')
+      comp
+        .find(DefaultEditorAgg)
         .first()
-        .props() as DefaultEditorAggProps).setValidity(false);
+        .props()
+        .setValidity(false);
     });
 
     expect(setValidity).toBeCalledWith(false);
@@ -185,7 +188,7 @@ describe('DefaultEditorAgg component', () => {
   it('should last bucket has truthy isLastBucket prop', () => {
     defaultProps.groupName = AggGroupNames.Buckets;
     const comp = mount(<DefaultEditorAggGroup {...defaultProps} />);
-    const lastAgg = comp.find('DefaultEditorAgg').last();
+    const lastAgg = comp.find(DefaultEditorAgg).last();
 
     expect(lastAgg.props()).toHaveProperty('isLastBucket', true);
   });
@@ -194,7 +197,7 @@ describe('DefaultEditorAgg component', () => {
     const comp = shallow(<DefaultEditorAggGroup {...defaultProps} />);
     act(() => {
       // simulate dragging ending
-      comp.props().onDragEnd({ source: { index: 0 }, destination: { index: 1 } } as any);
+      comp.props().onDragEnd({ source: { index: 0 }, destination: { index: 1 } });
     });
 
     expect(reorderAggs).toHaveBeenCalledWith([
@@ -207,12 +210,12 @@ describe('DefaultEditorAgg component', () => {
     defaultProps.groupName = AggGroupNames.Buckets;
     const comp = shallow(<DefaultEditorAggGroup {...defaultProps} />);
 
-    expect(comp.find('DefaultEditorAggAdd').exists()).toBeTruthy();
+    expect(comp.find(DefaultEditorAggAdd).exists()).toBeTruthy();
   });
 
   it('should not show add button when schemas count is not less than max', () => {
     const comp = shallow(<DefaultEditorAggGroup {...defaultProps} />);
 
-    expect(comp.find('DefaultEditorAggAdd').exists()).toBeFalsy();
+    expect(comp.find(DefaultEditorAggAdd).exists()).toBeFalsy();
   });
 });
