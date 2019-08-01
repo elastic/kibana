@@ -19,7 +19,7 @@ experimental[This functionality is *experimental* and may be changed or removed 
 `overwrite`::
   (Optional, boolean) When true, overwrites the document with the same ID.
 
-[[saved-objects-api-bulk-create-body]]
+[[saved-objects-api-bulk-create-request-body]]
 ==== Request body
 
 The request body must be a JSON array that contains objects and
@@ -40,7 +40,7 @@ includes the following properties:
 `version`::
   (Optional, number) Specifies the version.
 
-[[saved-objects-api-bulk-create-body]]
+[[saved-objects-api-bulk-create-response-body]]
 ==== Response body
 
 `saved_objects`:: 

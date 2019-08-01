@@ -32,7 +32,7 @@ NOTE: You must include `type` or `objects` in the request body.
 
 The format of the response body includes newline delimited JSON.
 
-[[saved-objects-api-create-request-codes]]
+[[export-objects-api-create-request-codes]]
 ==== Response code
 
 `200`:: 

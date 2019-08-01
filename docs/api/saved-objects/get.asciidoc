@@ -14,7 +14,7 @@ experimental[This functionality is *experimental* and may be changed or removed 
 `GET /api/saved_objects/<type>/<id>`
 
 [[saved-objects-api-get-params]]
-==== Path Parameters
+==== Path parameters
 
 `type`::
   (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
