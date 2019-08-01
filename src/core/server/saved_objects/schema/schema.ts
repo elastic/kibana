@@ -46,7 +46,7 @@ export class SavedObjectsSchema {
 
   public getIndexForType(config: Config, type: string): string | undefined {
     if (this.definition != null && this.definition.hasOwnProperty(type)) {
-      const indexPattern = this.definition[type].indexPattern;
+      const { indexPattern } = this.definition[type];
       return typeof indexPattern === 'function' ? indexPattern(config) : indexPattern;
     } else {
       return undefined;
