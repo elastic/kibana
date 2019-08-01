@@ -118,7 +118,7 @@ function InnerSuggestionPanel({
     visualizationMap,
     activeVisualizationId,
     visualizationState
-  );
+  ).slice(0, 3);
 
   return (
     <div className="lnsSidebar__suggestions">

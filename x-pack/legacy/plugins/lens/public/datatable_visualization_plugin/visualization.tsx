@@ -107,6 +107,7 @@ export const datatableVisualization: Visualization<
   }: SuggestionRequest<DatatableVisualizationState>): Array<
     VisualizationSuggestion<DatatableVisualizationState>
   > {
+    const maxColumnCount = Math.max.apply(undefined, tables.map(table => table.columns.length));
     return tables.map(table => {
       const title = i18n.translate('xpack.lens.datatable.visualizationOf', {
         defaultMessage: 'Table: {operations}',
@@ -117,7 +118,8 @@ export const datatableVisualization: Visualization<
 
       return {
         title,
-        score: 1,
+        // largest possible table will have a score of 0.5, less columns reduce score
+        score: (table.columns.length / maxColumnCount) * 0.5,
         datasourceSuggestionId: table.datasourceSuggestionId,
         state: {
           layers: [
