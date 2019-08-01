@@ -127,27 +127,3 @@ export interface SavedObjectsResolveImportErrorsOptions {
   supportedTypes: string[];
   namespace?: string;
 }
-
-export interface SavedObjectsImportResponse {
-  success: boolean;
-  successCount: number;
-  errors?: SavedObjectsImportError[];
-}
-
-export interface SavedObjectsImportOptions {
-  readStream: Readable;
-  objectLimit: number;
-  overwrite: boolean;
-  savedObjectsClient: SavedObjectsClientContract;
-  supportedTypes: string[];
-  namespace?: string;
-}
-
-export interface SavedObjectsResolveImportErrorsOptions {
-  readStream: Readable;
-  objectLimit: number;
-  savedObjectsClient: SavedObjectsClientContract;
-  retries: Retry[];
-  supportedTypes: string[];
-  namespace?: string;
-}

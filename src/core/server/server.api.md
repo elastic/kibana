@@ -661,25 +661,6 @@ export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any>
     total: number;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsImportError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
-export interface SavedObjectsImportError {
-    // Warning: (ae-forgotten-export) The symbol "ConflictError" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "UnsupportedTypeError" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "MissingReferencesError" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "UnknownError" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    error: ConflictError | UnsupportedTypeError | MissingReferencesError | UnknownError;
-    // (undocumented)
-    id: string;
-    // (undocumented)
-    title?: string;
-    // (undocumented)
-    type: string;
-}
-
 // @public
 export interface SavedObjectsImportConflictError {
     // (undocumented)
@@ -903,9 +884,5 @@ export interface SessionStorageFactory<T> {
 // 
 // src/core/server/plugins/plugin_context.ts:34:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:37:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
-// src/core/server/saved_objects/service/index.ts:42:5 - (ae-forgotten-export) The symbol "SavedObjectsImportOptions" needs to be exported by the entry point index.d.ts
-// src/core/server/saved_objects/service/index.ts:42:5 - (ae-forgotten-export) The symbol "SavedObjectsImportResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/saved_objects/service/index.ts:43:5 - (ae-forgotten-export) The symbol "SavedObjectsResolveImportErrorsOptions" needs to be exported by the entry point index.d.ts
-// src/core/server/saved_objects/service/index.ts:46:5 - (ae-forgotten-export) The symbol "ExportObjectsOptions" needs to be exported by the entry point index.d.ts
 
 ```
