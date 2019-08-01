@@ -17,6 +17,12 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
+import { CoreSetupContext } from '../contexts/query_input_bar_context';
+import { QueryBarInput } from 'plugins/data';
 
-export const CoreSetupContext = React.createContext({});
+export function QueryBarWrapper(props) {
+  const coreSetupContext = useContext(CoreSetupContext);
+
+  return <QueryBarInput {...props} {...coreSetupContext} />;
+}

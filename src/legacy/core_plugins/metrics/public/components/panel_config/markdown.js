@@ -23,7 +23,6 @@ import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import 'brace/mode/less';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { QueryInputBarContext } from '../../contexts/query_input_bar_context';
 import { ColorPicker } from '../color_picker';
 import { YesNo } from '../yes_no';
 import { MarkdownEditor } from '../markdown_editor';
@@ -45,7 +44,7 @@ import {
 } from '@elastic/eui';
 const lessC = less(window, { env: 'production' });
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { QueryBarInput } from 'plugins/data';
+import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from './../../contexts/vis_data_context';
 
@@ -157,21 +156,16 @@ class MarkdownPanelConfigUi extends Component {
                   }
                   fullWidth
                 >
-                  <QueryInputBarContext.Consumer>
-                    {context => (
-                      <QueryBarInput
-                        query={{
-                          language: model.filter.language
-                            ? model.filter.language
-                            : getDefaultQueryLanguage(),
-                          query: model.filter.query || '',
-                        }}
-                        onChange={filter => this.props.onChange({ filter })}
-                        indexPatterns={[model.index_pattern || model.default_index_pattern]}
-                        {...context}
-                      />
-                    )}
-                  </QueryInputBarContext.Consumer>
+                  <QueryBarWrapper
+                    query={{
+                      language: model.filter.language
+                        ? model.filter.language
+                        : getDefaultQueryLanguage(),
+                      query: model.filter.query || '',
+                    }}
+                    onChange={filter => this.props.onChange({ filter })}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

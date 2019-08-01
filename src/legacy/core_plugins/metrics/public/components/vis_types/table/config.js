@@ -42,8 +42,7 @@ import {
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 
-import { QueryBarInput } from 'plugins/data';
-import { QueryInputBarContext } from '../../../contexts/query_input_bar_context';
+import { QueryBarWrapper } from '../../query_bar_wrapper';
 class TableSeriesConfigUI extends Component {
   componentWillMount() {
     const { model } = this.props;
@@ -158,22 +157,17 @@ class TableSeriesConfigUI extends Component {
               label={<FormattedMessage id="tsvb.table.filterLabel" defaultMessage="Filter" />}
               fullWidth
             >
-              <QueryInputBarContext.Consumer>
-                {context => (
-                  <QueryBarInput
-                    query={{
-                      language:
-                        model.filter && model.filter.language
-                          ? model.filter.language
-                          : getDefaultQueryLanguage(),
-                      query: model.filter && model.filter.query ? model.filter.query : '',
-                    }}
-                    onChange={filter => this.props.onChange({ filter })}
-                    indexPatterns={[this.props.indexPatternForQuery]}
-                    {...context}
-                  />
-                )}
-              </QueryInputBarContext.Consumer>
+              <QueryBarWrapper
+                query={{
+                  language:
+                    model.filter && model.filter.language
+                      ? model.filter.language
+                      : getDefaultQueryLanguage(),
+                  query: model.filter && model.filter.query ? model.filter.query : '',
+                }}
+                onChange={filter => this.props.onChange({ filter })}
+                indexPatterns={[this.props.indexPatternForQuery]}
+              />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
