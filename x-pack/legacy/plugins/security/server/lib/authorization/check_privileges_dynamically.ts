@@ -30,15 +30,10 @@ export function checkPrivilegesDynamicallyWithRequestFactory(
 ): CheckPrivilegesDynamicallyWithRequest {
   return function checkPrivilegesDynamicallyWithRequest(request: Legacy.Request) {
     const checkPrivileges = checkPrivilegesWithRequest(request);
-    return async function checkPrivilegesDynamically(
-      privilegeOrPrivileges: string | string[],
-      spaceId?: string
-    ) {
+    return async function checkPrivilegesDynamically(privilegeOrPrivileges: string | string[]) {
       if (spaces.isEnabled) {
-        return await checkPrivileges.atSpace(
-          spaceId || spaces.getSpaceId(request),
-          privilegeOrPrivileges
-        );
+        const spaceId = spaces.getSpaceId(request);
+        return await checkPrivileges.atSpace(spaceId, privilegeOrPrivileges);
       } else {
         return await checkPrivileges.globally(privilegeOrPrivileges);
       }
