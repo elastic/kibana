@@ -80,26 +80,19 @@ export class GoServerLauncher extends AbstractLauncher {
       throw new Error('Cannot find executable go language server');
     }
 
-    // Use the local installed go if it exists, or otherwise use the bundled go toolchain.
-    let goRoot = process.env.GOROOT;
     let envPath = process.env.PATH;
-    let goPath = process.env.GOPATH;
-    if (!goRoot) {
-      const goToolchain = await this.getBundledGoToolchain(installationPath, log);
-      if (!goToolchain) {
-        throw new Error('Cannot find go toolchain in bundle installation');
-      }
-      // Construct $GOROOT from the bundled fo toolchain.
-      goRoot = goToolchain;
-      const goHome = path.resolve(goToolchain, 'bin');
-      envPath = envPath + ':' + goHome;
+    const goToolchain = await this.getBundledGoToolchain(installationPath, log);
+    if (!goToolchain) {
+      throw new Error('Cannot find go toolchain in bundle installation');
     }
-    if (!goPath) {
-      // Construct $GOPATH under 'kibana/data/code'.
-      goPath = this.options.goPath;
-      if (!fs.existsSync(goPath)) {
-        fs.mkdirSync(goPath);
-      }
+    // Construct $GOROOT from the bundled go toolchain.
+    const goRoot = goToolchain;
+    const goHome = path.resolve(goToolchain, 'bin');
+    envPath = envPath + ':' + goHome;
+    // Construct $GOPATH under 'kibana/data/code'.
+    const goPath = this.options.goPath;
+    if (!fs.existsSync(goPath)) {
+      fs.mkdirSync(goPath);
     }
 
     const params: string[] = ['-mode=stdio', '-port=' + port.toString()];
