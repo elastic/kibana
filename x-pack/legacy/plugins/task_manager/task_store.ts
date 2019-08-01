@@ -23,10 +23,10 @@ import {
   TaskDictionary,
   TaskInstance,
 } from './task';
-import { TASK_MANAGER_INDEX } from './constants';
 
 export interface StoreOpts {
   callCluster: ElasticJs;
+  index: string;
   maxAttempts: number;
   definitions: TaskDictionary<SanitizedTaskDefinition>;
   savedObjectsRepository: SavedObjectsClientContract;
@@ -50,6 +50,7 @@ export interface FetchResult {
  */
 export class TaskStore {
   public readonly maxAttempts: number;
+  public readonly index: string;
   private callCluster: ElasticJs;
   private definitions: TaskDictionary<SanitizedTaskDefinition>;
   private savedObjectsRepository: SavedObjectsClientContract;
@@ -59,6 +60,7 @@ export class TaskStore {
    * Constructs a new TaskStore.
    * @param {StoreOpts} opts
    * @prop {CallCluster} callCluster - The elastic search connection
+   * @prop {string} index - The name of the task manager index
    * @prop {number} maxAttempts - The maximum number of attempts before a task will be abandoned
    * @prop {TaskDefinition} definition - The definition of the task being run
    * @prop {serializer} - The saved object serializer
@@ -66,6 +68,7 @@ export class TaskStore {
    */
   constructor(opts: StoreOpts) {
     this.callCluster = opts.callCluster;
+    this.index = opts.index;
     this.maxAttempts = opts.maxAttempts;
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
@@ -229,7 +232,7 @@ export class TaskStore {
       : queryOnlyTasks;
 
     const result = await this.callCluster('search', {
-      index: TASK_MANAGER_INDEX,
+      index: this.index,
       ignoreUnavailable: true,
       body: {
         ...opts,

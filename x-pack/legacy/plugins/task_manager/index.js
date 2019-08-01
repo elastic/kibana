@@ -8,7 +8,6 @@ import { SavedObjectsSerializer, SavedObjectsSchema } from '../../../../src/core
 import { TaskManager } from './task_manager';
 import mappings from './mappings.json';
 import { migrations } from './migrations';
-import { TASK_MANAGER_INDEX } from './constants';
 
 export function taskManager(kibana) {
   return new kibana.Plugin({
@@ -26,6 +25,9 @@ export function taskManager(kibana) {
           .description('How often, in milliseconds, the task manager will look for more work.')
           .min(1000)
           .default(3000),
+        index: Joi.string()
+          .description('The name of the index used to store task information.')
+          .default('.kibana_task_manager'),
         max_workers: Joi.number()
           .description('The maximum number of tasks that this Kibana instance will run simultaneously.')
           .min(1) // disable the task manager rather than trying to specify it with 0 workers
@@ -61,8 +63,10 @@ export function taskManager(kibana) {
         task: {
           hidden: true,
           isNamespaceAgnostic: true,
-          indexPattern: TASK_MANAGER_INDEX,
           convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
+          indexPattern(config) {
+            return config.get('xpack.task_manager.index');
+          },
         },
       },
     },

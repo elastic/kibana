@@ -27,6 +27,7 @@ import { SavedObjectsErrorHelpers } from './errors';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 import { SavedObjectsSchema } from '../../schema';
 import { KibanaMigrator } from '../../migrations';
+import { Config } from '../../../config';
 import { SavedObjectsSerializer, SanitizedSavedObjectDoc, RawDoc } from '../../serialization';
 import {
   SavedObject,
@@ -64,6 +65,7 @@ const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => {
 
 export interface SavedObjectsRepositoryOptions {
   index: string;
+  config: Config;
   mappings: IndexMapping;
   callCluster: CallCluster;
   schema: SavedObjectsSchema;
@@ -80,6 +82,7 @@ export interface IncrementCounterOptions extends SavedObjectsBaseOptions {
 export class SavedObjectsRepository {
   private _migrator: KibanaMigrator;
   private _index: string;
+  private _config: Config;
   private _mappings: IndexMapping;
   private _schema: SavedObjectsSchema;
   private _allowedTypes: string[];
@@ -90,6 +93,7 @@ export class SavedObjectsRepository {
   constructor(options: SavedObjectsRepositoryOptions) {
     const {
       index,
+      config,
       mappings,
       callCluster,
       schema,
@@ -108,6 +112,7 @@ export class SavedObjectsRepository {
     // to returning them.
     this._migrator = migrator;
     this._index = index;
+    this._config = config;
     this._mappings = mappings;
     this._schema = schema;
     if (allowedTypes.length === 0) {
@@ -741,7 +746,7 @@ export class SavedObjectsRepository {
    * @param type - the type
    */
   private getIndexForType(type: string) {
-    return this._schema.getIndexForType(type) || this._index;
+    return this._schema.getIndexForType(this._config, type) || this._index;
   }
 
   /**
@@ -753,7 +758,7 @@ export class SavedObjectsRepository {
    */
   private getIndicesForTypes(types: string[]) {
     const unique = (array: string[]) => [...new Set(array)];
-    return unique(types.map(t => this._schema.getIndexForType(t) || this._index));
+    return unique(types.map(t => this._schema.getIndexForType(this._config, t) || this._index));
   }
 
   private _getCurrentTime() {

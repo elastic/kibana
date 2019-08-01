@@ -111,9 +111,11 @@ export function savedObjectsMixin(kbnServer, server) {
     });
     const combinedTypes = visibleTypes.concat(extraTypes);
     const allowedTypes = [...new Set(combinedTypes)];
+    const config = server.config();
 
     return new SavedObjectsRepository({
-      index: server.config().get('kibana.index'),
+      index: config.get('kibana.index'),
+      config,
       migrator,
       mappings,
       schema,
