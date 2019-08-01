@@ -27,7 +27,7 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { Storage } from 'ui/storage';
 
-import { IndexPattern, Query, QueryBar, FilterBar } from '../../../../data/public';
+import { IndexPattern, Query, QueryBar, FilterBar } from '../../../../../data/public';
 
 interface DateRange {
   from: string;
@@ -111,7 +111,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     const filterCount = this.getFilterLength();
     const filtersAppliedText = this.props.intl.formatMessage(
       {
-        id: 'kibana_react.search.searchBar.filtersButtonFiltersAppliedTitle',
+        id: 'data.search.searchBar.searchBar.filtersButtonFiltersAppliedTitle',
         defaultMessage:
           '{filterCount} {filterCount, plural, one {filter} other {filters}} applied.',
       },
@@ -121,11 +121,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
     const clickToShowOrHideText = this.state.isFiltersVisible
       ? this.props.intl.formatMessage({
-          id: 'kibana_react.search.searchBar.filtersButtonClickToShowTitle',
+          id: 'data.search.searchBar.searchBar.filtersButtonClickToShowTitle',
           defaultMessage: 'Select to hide',
         })
       : this.props.intl.formatMessage({
-          id: 'kibana_react.search.searchBar.filtersButtonClickToHideTitle',
+          id: 'data.search.searchBar.searchBar.filtersButtonClickToHideTitle',
           defaultMessage: 'Select to show',
         });
 
@@ -139,7 +139,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         aria-expanded={!!this.state.isFiltersVisible}
         title={`${filterCount ? filtersAppliedText : ''} ${clickToShowOrHideText}`}
       >
-        {i18n.translate('kibana_react.search.searchBar.filtersButtonLabel', {
+        {i18n.translate('data.search.searchBar.searchBar.filtersButtonLabel', {
           defaultMessage: 'Filters',
           description: 'The noun "filter" in plural.',
         })}
