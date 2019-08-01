@@ -11,20 +11,19 @@ import {
   EuiButton,
   EuiPopover,
   EuiExpression,
+  EuiFormHelpText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { data } from 'plugins/data/setup';
-const { SearchBar } = data.search.ui;
+import { QueryBar } from 'plugins/data';
 import { Storage } from 'ui/storage';
 
 const settings = chrome.getUiSettingsClient();
 const localStorage = new Storage(window.localStorage);
-const { savedQueryService } = data.search.services;
+
 export class WhereExpression extends Component {
 
   state = {
     isPopoverOpen: false,
-    savedQuery: null,
   };
 
   _togglePopover = () => {
@@ -42,36 +41,6 @@ export class WhereExpression extends Component {
   _onQueryChange = ({ query }) => {
     this.props.onChange(query);
     this._closePopover();
-  }
-
-  _onFiltersUpdated = () => {
-    return;
-  }
-
-  _onQuerySaved = (savedQuery) => {
-    this._addOrUpdateSavedQuery(savedQuery, this.state.savedQuery);
-  }
-
-  _getSavedQueryFromService = async (savedQuery) => {
-    if (!savedQuery.id) return;
-    const newSavedQuery = await savedQueryService.getSavedQuery(savedQuery.id);
-    await this.setState({ savedQuery: newSavedQuery });
-    this.props.onChange(newSavedQuery.attributes.query);
-    this._closePopover();
-  }
-
-  _onSavedQueryChange = (changedSavedQuery) => {
-    this._addOrUpdateSavedQuery(changedSavedQuery, this.state.savedQuery);
-  }
-
-  _addOrUpdateSavedQuery = async (currentSavedQuery, oldSavedQuery) => {
-    if (!currentSavedQuery) return;
-    await this._getSavedQueryFromService(currentSavedQuery);
-    await this.setState({ savedQuery: currentSavedQuery });
-    if (currentSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-      this.props.onChange(currentSavedQuery.attributes.query);
-      this._closePopover();
-    }
   }
 
   render() {
@@ -103,21 +72,19 @@ export class WhereExpression extends Component {
         }
       >
         <div className="mapFilterEditor" data-test-subj="mapJoinWhereFilterEditor">
-          <SearchBar
+          <EuiFormHelpText className="mapJoinExpressionHelpText">
+            <FormattedMessage
+              id="xpack.maps.layerPanel.whereExpression.helpText"
+              defaultMessage="Use a query to narrow right source."
+            />
+          </EuiFormHelpText>
+          <QueryBar
             query={whereQuery ? whereQuery : { language: settings.get('search:queryLanguage'), query: '' }}
-            onQuerySubmit={this._onQueryChange}
+            onSubmit={this._onQueryChange}
             appName="maps"
-            screenTitle="maps"
             showDatePicker={false}
-            showFilterBar={false}
-            showQueryBar={true}
-            filters={[]}
-            onFiltersUpdated={this._onFiltersUpdated}
             indexPatterns={[indexPattern]}
             store={localStorage}
-            savedQuery={this.state.savedQuery}
-            onSaved={this._onQuerySaved}
-            onSavedQueryUpdated={this._onSavedQueryChange}
             customSubmitButton={
               <EuiButton
                 fill

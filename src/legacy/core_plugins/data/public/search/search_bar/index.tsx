@@ -20,10 +20,7 @@
 import { Filter } from '@kbn/es-query';
 import { Query } from '../../query/query_bar';
 
-export { SearchBar } from './components';
-
-// @ts-ignore
-export { setupDirective } from './directive';
+export * from './components';
 
 interface RefreshInterval {
   pause: boolean;

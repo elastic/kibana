@@ -22,9 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { indexPatternService } from '../../../kibana_services';
 import { Storage } from 'ui/storage';
 
-import { data } from 'plugins/data/setup';
-const { SearchBar } = data.search.ui;
-const { savedQueryService } = data.search.services;
+import { QueryBar } from 'plugins/data';
 
 const settings = chrome.getUiSettingsClient();
 const localStorage = new Storage(window.localStorage);
@@ -34,7 +32,6 @@ export class FilterEditor extends Component {
   state = {
     isPopoverOpen: false,
     indexPatterns: [],
-    savedQuery: null,
   }
 
   componentDidMount() {
@@ -82,36 +79,6 @@ export class FilterEditor extends Component {
     this._close();
   }
 
-  _onFiltersUpdated = () => {
-    return;
-  }
-
-  _onQuerySaved = (savedQuery) => {
-    this._addOrUpdateSavedQuery(savedQuery, this.state.savedQuery);
-  }
-
-  _getSavedQueryFromService = async (savedQuery) => {
-    if (!savedQuery.id) return;
-    const newSavedQuery = await savedQueryService.getSavedQuery(savedQuery.id);
-    await this.setState({ savedQuery: newSavedQuery });
-    this.props.setLayerQuery(this.props.layer.getId(), newSavedQuery.attributes.query);
-    this._close();
-  }
-
-  _onSavedQueryChange = (changedSavedQuery) => {
-    this._addOrUpdateSavedQuery(changedSavedQuery, this.state.savedQuery);
-  }
-
-  _addOrUpdateSavedQuery = async (currentSavedQuery, oldSavedQuery) => {
-    if (!currentSavedQuery) return;
-    await this._getSavedQueryFromService(currentSavedQuery);
-    await this.setState({ savedQuery: currentSavedQuery });
-    if (currentSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-      this.props.setLayerQuery(this.props.layer.getId(), currentSavedQuery.attributes.query);
-      this._close();
-    }
-  }
-
   _renderQueryPopover() {
     const layerQuery = this.props.layer.getQuery();
 
@@ -124,21 +91,13 @@ export class FilterEditor extends Component {
         anchorPosition="leftCenter"
       >
         <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
-          <SearchBar
+          <QueryBar
             query={layerQuery ? layerQuery : { language: settings.get('search:queryLanguage'), query: '' }}
+            onSubmit={this._onQueryChange}
             appName="maps"
-            screenTitle="maps"
-            onQuerySubmit={this._onQueryChange}
-            indexPatterns={this.state.indexPatterns}
             showDatePicker={false}
-            filters={[]}
-            onFiltersUpdated={this._onFiltersUpdated}
-            showFilterBar={false}
-            showQueryBar={true}
+            indexPatterns={this.state.indexPatterns}
             store={localStorage}
-            savedQuery={this.state.savedQuery}
-            onSaved={this._onQuerySaved}
-            onSavedQueryUpdated={this._onSavedQueryChange}
             customSubmitButton={
               <EuiButton
                 fill

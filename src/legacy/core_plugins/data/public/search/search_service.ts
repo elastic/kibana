@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { once } from 'lodash';
 import { SearchBar, setupDirective as setupSearchBarDirective } from './search_bar';
 import * as savedQueryService from './search_bar/lib/saved_query_service';
 
@@ -25,6 +24,7 @@ import * as savedQueryService from './search_bar/lib/saved_query_service';
  * Search Service
  * @internal
  */
+
 export class SearchService {
   public setup() {
     return {
@@ -34,16 +34,14 @@ export class SearchService {
       services: {
         savedQueryService,
       },
-      loadLegacyDirectives: once(setupSearchBarDirective),
     };
   }
 
-  public stop() {
-    // nothing to do here yet
-  }
+  public stop() {}
 }
 
 /** @public */
+
 export type SearchSetup = ReturnType<SearchService['setup']>;
 
 export { SavedQuery, SavedQueryAttributes } from './search_bar';

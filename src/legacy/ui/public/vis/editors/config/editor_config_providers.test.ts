@@ -35,7 +35,7 @@ describe('EditorConfigProvider', () => {
         searchable: true,
       },
     ],
-  };
+  } as any;
 
   beforeEach(() => {
     registry = new EditorConfigProviderRegistry();

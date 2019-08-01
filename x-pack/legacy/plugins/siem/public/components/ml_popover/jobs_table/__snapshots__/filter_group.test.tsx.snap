@@ -33,7 +33,7 @@ exports[`FilterGroup renders correctly against snapshot 1`] = `
         type="button"
         withNext={true}
       >
-        Elastic Jobs
+        Elastic jobs
       </EuiFilterButton>
       <EuiFilterButton
         color="text"
@@ -44,7 +44,7 @@ exports[`FilterGroup renders correctly against snapshot 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Custom Jobs
+        Custom jobs
       </EuiFilterButton>
     </EuiFilterGroup>
   </EuiFlexItem>

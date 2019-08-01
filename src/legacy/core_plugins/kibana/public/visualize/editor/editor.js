@@ -108,7 +108,6 @@ uiRoutes
 
 uiModules
   .get('app/visualize', [
-    'kibana/notify',
     'kibana/url'
   ])
   .directive('visualizeApp', function () {
@@ -133,7 +132,10 @@ function VisEditor(
   Promise,
   config,
   kbnBaseUrl,
-  localStorage
+  localStorage,
+  // unused but required to initialize auto refresh :-\
+  /* eslint-disable no-unused-vars */
+  courier,
 ) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
@@ -152,7 +154,8 @@ function VisEditor(
   };
 
   $scope.topNavMenu = [...(capabilities.get().visualize.save ? [{
-    key: i18n.translate('kbn.topNavMenu.saveVisualizationButtonLabel', { defaultMessage: 'save' }),
+    id: 'save',
+    label: i18n.translate('kbn.topNavMenu.saveVisualizationButtonLabel', { defaultMessage: 'save' }),
     description: i18n.translate('kbn.visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
       defaultMessage: 'Save Visualization',
     }),
@@ -205,12 +208,13 @@ function VisEditor(
       showSaveModal(saveModal);
     }
   }] : []), {
-    key: i18n.translate('kbn.topNavMenu.shareVisualizationButtonLabel', { defaultMessage: 'share' }),
+    id: 'share',
+    label: i18n.translate('kbn.topNavMenu.shareVisualizationButtonLabel', { defaultMessage: 'share' }),
     description: i18n.translate('kbn.visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
       defaultMessage: 'Share Visualization',
     }),
     testId: 'shareTopNavButton',
-    run: (menuItem, navController, anchorElement) => {
+    run: (anchorElement) => {
       const hasUnappliedChanges = vis.dirty;
       const hasUnsavedChanges = $appStatus.dirty;
       showShareContextMenu({
@@ -228,7 +232,8 @@ function VisEditor(
       });
     }
   }, {
-    key: i18n.translate('kbn.topNavMenu.openInspectorButtonLabel', { defaultMessage: 'inspect' }),
+    id: 'inspector',
+    label: i18n.translate('kbn.topNavMenu.openInspectorButtonLabel', { defaultMessage: 'inspect' }),
     description: i18n.translate('kbn.visualize.topNavMenu.openInspectorButtonAriaLabel', {
       defaultMessage: 'Open Inspector for visualization',
     }),
@@ -251,7 +256,8 @@ function VisEditor(
       }
     }
   }, {
-    key: i18n.translate('kbn.topNavMenu.refreshButtonLabel', { defaultMessage: 'refresh' }),
+    id: 'refresh',
+    label: i18n.translate('kbn.topNavMenu.refreshButtonLabel', { defaultMessage: 'refresh' }),
     description: i18n.translate('kbn.visualize.topNavMenu.refreshButtonAriaLabel', {
       defaultMessage: 'Refresh',
     }),
@@ -359,8 +365,16 @@ function VisEditor(
 
     $scope.isAddToDashMode = () => addToDashMode;
 
-    $scope.showQueryBar = () => {
+    $scope.showFilterBar = () => {
+      return vis.type.options.showFilterBar;
+    };
+
+    $scope.showQueryInput = () => {
       return vis.type.requiresSearch && vis.type.options.showQueryBar;
+    };
+
+    $scope.showQueryBarTimePicker = () => {
+      return vis.type.options.showTimePicker;
     };
 
     $scope.timeRange = timefilter.getTime();
@@ -377,33 +391,6 @@ function VisEditor(
     });
 
     $state.replace();
-
-    $scope.$watchMulti([
-      'searchSource.getField("index")',
-      'vis.type.options.showTimePicker',
-      $scope.showQueryBar,
-    ], function ([index, requiresTimePicker, showQueryBar]) {
-      const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
-
-      if (showQueryBar) {
-        timefilter.disableTimeRangeSelector();
-        timefilter.disableAutoRefreshSelector();
-        $scope.enableQueryBarTimeRangeSelector = true;
-        $scope.showAutoRefreshOnlyInQueryBar = !showTimeFilter;
-      }
-      else if (showTimeFilter) {
-        timefilter.enableTimeRangeSelector();
-        timefilter.enableAutoRefreshSelector();
-        $scope.enableQueryBarTimeRangeSelector = false;
-        $scope.showAutoRefreshOnlyInQueryBar = false;
-      }
-      else {
-        timefilter.disableTimeRangeSelector();
-        timefilter.enableAutoRefreshSelector();
-        $scope.enableQueryBarTimeRangeSelector = false;
-        $scope.showAutoRefreshOnlyInQueryBar = false;
-      }
-    });
 
     const updateTimeRange = () => {
       $scope.timeRange = timefilter.getTime();

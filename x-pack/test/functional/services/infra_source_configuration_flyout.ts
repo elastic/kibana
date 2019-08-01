@@ -13,6 +13,7 @@ export function InfraSourceConfigurationFlyoutProvider({
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   return {
     /**
@@ -80,6 +81,28 @@ export function InfraSourceConfigurationFlyoutProvider({
       for (const _ of await this.getLogColumnPanels()) {
         await this.removeLogColumn(0);
       }
+    },
+    async moveLogColumn(sourceIndex: number, destinationIndex: number) {
+      const KEY_PRESS_DELAY_MS = 500; // This may need to be high for Jenkins; 100 works on desktop
+
+      const logColumnPanel = (await this.getLogColumnPanels())[sourceIndex];
+      const moveLogColumnHandle = await testSubjects.findDescendant(
+        'moveLogColumnHandle',
+        logColumnPanel
+      );
+      await moveLogColumnHandle.focus();
+      const movementDifference = destinationIndex - sourceIndex;
+      await moveLogColumnHandle.pressKeys(browser.keys.SPACE);
+      for (let i = 0; i < Math.abs(movementDifference); i++) {
+        await new Promise(res => setTimeout(res, KEY_PRESS_DELAY_MS));
+        if (movementDifference > 0) {
+          await moveLogColumnHandle.pressKeys(browser.keys.ARROW_DOWN);
+        } else {
+          await moveLogColumnHandle.pressKeys(browser.keys.ARROW_UP);
+        }
+      }
+      await moveLogColumnHandle.pressKeys(browser.keys.SPACE);
+      await new Promise(res => setTimeout(res, KEY_PRESS_DELAY_MS));
     },
 
     /**
