@@ -96,7 +96,7 @@ export type AuthenticationHandler = (
   request: KibanaRequest,
   response: LifecycleResponseFactory,
   t: AuthToolkit
-) => AuthResult | KibanaResponse<any> | Promise<AuthResult | KibanaResponse<any>>;
+) => AuthResult | KibanaResponse | Promise<AuthResult | KibanaResponse>;
 
 /** @public */
 export function adoptToHapiAuthFormat(

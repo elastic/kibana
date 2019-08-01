@@ -56,7 +56,7 @@ export class HapiResponseAdapter {
     return error;
   }
 
-  public handle(kibanaResponse: KibanaResponse<any>) {
+  public handle(kibanaResponse: KibanaResponse) {
     if (!(kibanaResponse instanceof KibanaResponse)) {
       throw new Error(
         `Unexpected result from Route Handler. Expected KibanaResponse, but given: ${typeDetect(
@@ -68,7 +68,7 @@ export class HapiResponseAdapter {
     return this.toHapiResponse(kibanaResponse);
   }
 
-  private toHapiResponse(kibanaResponse: KibanaResponse<any>) {
+  private toHapiResponse(kibanaResponse: KibanaResponse) {
     if (statusHelpers.isError(kibanaResponse.status)) {
       return this.toError(kibanaResponse);
     }

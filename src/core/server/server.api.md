@@ -25,9 +25,10 @@ import { Url } from 'url';
 export type APICaller = (endpoint: string, clientParams: Record<string, any>, options?: CallAPIOptions) => Promise<unknown>;
 
 // Warning: (ae-forgotten-export) The symbol "AuthResult" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type AuthenticationHandler = (request: KibanaRequest, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
+export type AuthenticationHandler = (request: KibanaRequest, response: LifecycleResponseFactory, t: AuthToolkit) => AuthResult | KibanaResponse | Promise<AuthResult | KibanaResponse>;
 
 // @public
 export type AuthHeaders = Record<string, string | string[]>;
@@ -42,10 +43,6 @@ export interface AuthResultParams {
 // @public
 export interface AuthToolkit {
     authenticated: (data?: AuthResultParams) => AuthResult;
-    redirected: (url: string) => AuthResult;
-    rejected: (error: Error, options?: {
-        statusCode?: number;
-    }) => AuthResult;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
@@ -233,6 +230,11 @@ export interface KibanaRequestRoute {
 // @public
 export type LegacyRequest = Request;
 
+// Warning: (ae-forgotten-export) The symbol "lifecycleResponseFactory" needs to be exported by the entry point index.d.ts
+// 
+// @public
+export type LifecycleResponseFactory = typeof lifecycleResponseFactory;
+
 // @public
 export interface Logger {
     debug(message: string, meta?: LogMeta): void;
@@ -305,31 +307,22 @@ export interface LogRecord {
 // Warning: (ae-forgotten-export) The symbol "OnPostAuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type OnPostAuthHandler<Params = any, Query = any, Body = any> = (request: KibanaRequest<Params, Query, Body>, t: OnPostAuthToolkit) => OnPostAuthResult | Promise<OnPostAuthResult>;
+export type OnPostAuthHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: OnPostAuthToolkit) => OnPostAuthResult | KibanaResponse | Promise<OnPostAuthResult | KibanaResponse>;
 
 // @public
 export interface OnPostAuthToolkit {
     next: () => OnPostAuthResult;
-    redirected: (url: string) => OnPostAuthResult;
-    rejected: (error: Error, options?: {
-        statusCode?: number;
-    }) => OnPostAuthResult;
 }
 
 // Warning: (ae-forgotten-export) The symbol "OnPreAuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type OnPreAuthHandler<Params = any, Query = any, Body = any> = (request: KibanaRequest<Params, Query, Body>, t: OnPreAuthToolkit) => OnPreAuthResult | Promise<OnPreAuthResult>;
+export type OnPreAuthHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: OnPreAuthToolkit) => OnPreAuthResult | KibanaResponse | Promise<OnPreAuthResult | KibanaResponse>;
 
 // @public
 export interface OnPreAuthToolkit {
     next: () => OnPreAuthResult;
-    redirected: (url: string, options?: {
-        forward: boolean;
-    }) => OnPreAuthResult;
-    rejected: (error: Error, options?: {
-        statusCode?: number;
-    }) => OnPreAuthResult;
+    rewriteUrl: (url: string) => OnPreAuthResult;
 }
 
 // @public
@@ -403,6 +396,11 @@ export interface ResponseErrorMeta {
     errorCode?: string;
 }
 
+// Warning: (ae-forgotten-export) The symbol "responseFactory" needs to be exported by the entry point index.d.ts
+// 
+// @public
+export type ResponseFactory = typeof responseFactory;
+
 // @public
 export interface RouteConfigOptions {
     authRequired?: boolean;
@@ -419,15 +417,12 @@ export class Router {
     // Warning: (ae-forgotten-export) The symbol "RouteConfig" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "RequestHandler" needs to be exported by the entry point index.d.ts
     get<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
+    // Warning: (ae-forgotten-export) The symbol "RouterRoute" needs to be exported by the entry point index.d.ts
     getRoutes(): Readonly<RouterRoute>[];
     // (undocumented)
     readonly path: string;
     post<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
     put<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
-    // Warning: (ae-forgotten-export) The symbol "RouterRoute" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    routes: Array<Readonly<RouterRoute>>;
     }
 
 // @public (undocumented)

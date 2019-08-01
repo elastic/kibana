@@ -40,7 +40,7 @@ export type ResponseError =
       meta?: ResponseErrorMeta;
     };
 
-export class KibanaResponse<T extends HttpResponsePayload | ResponseError> {
+export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any> {
   constructor(
     readonly status: number,
     readonly payload?: T,

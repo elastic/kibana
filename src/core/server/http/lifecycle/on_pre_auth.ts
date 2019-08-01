@@ -70,6 +70,7 @@ const preAuthResult = {
 export interface OnPreAuthToolkit {
   /** To pass request to the next handler */
   next: () => OnPreAuthResult;
+  /** Rewrite requested resources url before is was authenticated and routed to a handler */
   rewriteUrl: (url: string) => OnPreAuthResult;
 }
 
@@ -83,7 +84,7 @@ export type OnPreAuthHandler = (
   request: KibanaRequest,
   response: LifecycleResponseFactory,
   toolkit: OnPreAuthToolkit
-) => OnPreAuthResult | KibanaResponse<any> | Promise<OnPreAuthResult | KibanaResponse<any>>;
+) => OnPreAuthResult | KibanaResponse | Promise<OnPreAuthResult | KibanaResponse>;
 
 /**
  * @public

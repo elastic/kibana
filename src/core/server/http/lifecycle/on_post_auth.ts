@@ -60,7 +60,7 @@ export type OnPostAuthHandler = (
   request: KibanaRequest,
   response: LifecycleResponseFactory,
   toolkit: OnPostAuthToolkit
-) => OnPostAuthResult | KibanaResponse<any> | Promise<OnPostAuthResult | KibanaResponse<any>>;
+) => OnPostAuthResult | KibanaResponse | Promise<OnPostAuthResult | KibanaResponse>;
 
 const toolkit: OnPostAuthToolkit = {
   next: postAuthResult.next,

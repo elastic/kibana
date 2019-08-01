@@ -187,4 +187,4 @@ export class Router {
 export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (
   request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
   createResponse: ResponseFactory
-) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
+) => KibanaResponse | Promise<KibanaResponse>;

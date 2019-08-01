@@ -22,7 +22,6 @@ export declare class Router
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [path](./kibana-plugin-server.router.path.md) |  | <code>string</code> |  |
-|  [routes](./kibana-plugin-server.router.routes.md) |  | <code>Array&lt;Readonly&lt;RouterRoute&gt;&gt;</code> |  |
 
 ## Methods
 
