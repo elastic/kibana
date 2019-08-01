@@ -70,6 +70,8 @@ export {
   OnPreAuthToolkit,
   OnPostAuthHandler,
   OnPostAuthToolkit,
+  ResponseError,
+  ResponseErrorMeta,
   Router,
   RouteMethod,
   RouteConfigOptions,

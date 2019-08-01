@@ -67,6 +67,7 @@ import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './u
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
+import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
@@ -113,6 +114,8 @@ export {
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
+  /** {@link ContextSetup} */
+  context: ContextSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
@@ -181,6 +184,10 @@ export {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeStart,
+  IContextContainer,
+  IContextHandler,
+  IContextProvider,
+  ContextSetup,
   DocLinksStart,
   ErrorToastOptions,
   FatalErrorInfo,

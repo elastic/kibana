@@ -25,7 +25,7 @@ import {
   mockPluginInitializerProvider,
 } from './plugins_service.test.mocks';
 
-import { PluginName } from 'src/core/server';
+import { PluginName, DiscoveredPlugin } from 'src/core/server';
 import { CoreContext } from '../core_system';
 import {
   PluginsService,
@@ -44,6 +44,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { CoreSetup, CoreStart } from '..';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { savedObjectsMock } from '../saved_objects/saved_objects_service.mock';
+import { contextServiceMock } from '../context/context_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -51,35 +52,37 @@ mockPluginInitializerProvider.mockImplementation(
   pluginName => mockPluginInitializers.get(pluginName)!
 );
 
+let plugins: Array<{ id: string; plugin: DiscoveredPlugin }>;
+
 type DeeplyMocked<T> = { [P in keyof T]: jest.Mocked<T[P]> };
 
-const mockCoreContext: CoreContext = {};
+const mockCoreContext: CoreContext = { coreId: Symbol() };
 let mockSetupDeps: DeeplyMocked<PluginsServiceSetupDeps>;
 let mockSetupContext: DeeplyMocked<CoreSetup>;
 let mockStartDeps: DeeplyMocked<PluginsServiceStartDeps>;
 let mockStartContext: DeeplyMocked<CoreStart>;
 
 beforeEach(() => {
+  plugins = [
+    { id: 'pluginA', plugin: createManifest('pluginA') },
+    { id: 'pluginB', plugin: createManifest('pluginB', { required: ['pluginA'] }) },
+    {
+      id: 'pluginC',
+      plugin: createManifest('pluginC', { required: ['pluginA'], optional: ['nonexist'] }),
+    },
+  ];
   mockSetupDeps = {
     application: applicationServiceMock.createSetupContract(),
-    injectedMetadata: (function() {
-      const metadata = injectedMetadataServiceMock.createSetupContract();
-      metadata.getPlugins.mockReturnValue([
-        { id: 'pluginA', plugin: createManifest('pluginA') },
-        { id: 'pluginB', plugin: createManifest('pluginB', { required: ['pluginA'] }) },
-        {
-          id: 'pluginC',
-          plugin: createManifest('pluginC', { required: ['pluginA'], optional: ['nonexist'] }),
-        },
-      ]);
-      return metadata;
-    })(),
+    context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
     http: httpServiceMock.createSetupContract(),
+    injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
   };
-  mockSetupContext = omit(mockSetupDeps, 'application', 'injectedMetadata');
+  mockSetupContext = {
+    ...omit(mockSetupDeps, 'application', 'injectedMetadata'),
+  };
   mockStartDeps = {
     application: applicationServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
@@ -150,10 +153,25 @@ function createManifest(
   };
 }
 
+test('`PluginsService.getOpaqueIds` returns dependency tree of symbols', () => {
+  const pluginsService = new PluginsService(mockCoreContext, plugins);
+  expect(pluginsService.getOpaqueIds()).toMatchInlineSnapshot(`
+    Map {
+      Symbol(pluginA) => Array [],
+      Symbol(pluginB) => Array [
+        Symbol(pluginA),
+      ],
+      Symbol(pluginC) => Array [
+        Symbol(pluginA),
+      ],
+    }
+  `);
+});
+
 test('`PluginsService.setup` fails if any bundle cannot be loaded', async () => {
   mockLoadPluginBundle.mockRejectedValueOnce(new Error('Could not load bundle'));
 
-  const pluginsService = new PluginsService(mockCoreContext);
+  const pluginsService = new PluginsService(mockCoreContext, plugins);
   await expect(pluginsService.setup(mockSetupDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
     `"Could not load bundle"`
   );
@@ -161,14 +179,14 @@ test('`PluginsService.setup` fails if any bundle cannot be loaded', async () => 
 
 test('`PluginsService.setup` fails if any plugin instance does not have a setup function', async () => {
   mockPluginInitializers.set('pluginA', (() => ({})) as any);
-  const pluginsService = new PluginsService(mockCoreContext);
+  const pluginsService = new PluginsService(mockCoreContext, plugins);
   await expect(pluginsService.setup(mockSetupDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
     `"Instance of plugin \\"pluginA\\" does not define \\"setup\\" function."`
   );
 });
 
 test('`PluginsService.setup` calls loadPluginBundles with http and plugins', async () => {
-  const pluginsService = new PluginsService(mockCoreContext);
+  const pluginsService = new PluginsService(mockCoreContext, plugins);
   await pluginsService.setup(mockSetupDeps);
 
   expect(mockLoadPluginBundle).toHaveBeenCalledTimes(3);
@@ -177,17 +195,17 @@ test('`PluginsService.setup` calls loadPluginBundles with http and plugins', asy
   expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.basePath.prepend, 'pluginC');
 });
 
-test('`PluginsService.setup` initalizes plugins with CoreContext', async () => {
-  const pluginsService = new PluginsService(mockCoreContext);
+test('`PluginsService.setup` initalizes plugins with PluginIntitializerContext', async () => {
+  const pluginsService = new PluginsService(mockCoreContext, plugins);
   await pluginsService.setup(mockSetupDeps);
 
-  expect(mockPluginInitializers.get('pluginA')).toHaveBeenCalledWith(mockCoreContext);
-  expect(mockPluginInitializers.get('pluginB')).toHaveBeenCalledWith(mockCoreContext);
-  expect(mockPluginInitializers.get('pluginC')).toHaveBeenCalledWith(mockCoreContext);
+  expect(mockPluginInitializers.get('pluginA')).toHaveBeenCalledWith(expect.any(Object));
+  expect(mockPluginInitializers.get('pluginB')).toHaveBeenCalledWith(expect.any(Object));
+  expect(mockPluginInitializers.get('pluginC')).toHaveBeenCalledWith(expect.any(Object));
 });
 
 test('`PluginsService.setup` exposes dependent setup contracts to plugins', async () => {
-  const pluginsService = new PluginsService(mockCoreContext);
+  const pluginsService = new PluginsService(mockCoreContext, plugins);
   await pluginsService.setup(mockSetupDeps);
 
   const pluginAInstance = mockPluginInitializers.get('pluginA')!.mock.results[0].value;
@@ -205,15 +223,13 @@ test('`PluginsService.setup` exposes dependent setup contracts to plugins', asyn
 });
 
 test('`PluginsService.setup` does not set missing dependent setup contracts', async () => {
-  mockSetupDeps.injectedMetadata.getPlugins.mockReturnValue([
-    { id: 'pluginD', plugin: createManifest('pluginD', { required: ['missing'] }) },
-  ]);
+  plugins = [{ id: 'pluginD', plugin: createManifest('pluginD', { optional: ['missing'] }) }];
   mockPluginInitializers.set('pluginD', jest.fn(() => ({
     setup: jest.fn(),
     start: jest.fn(),
   })) as any);
 
-  const pluginsService = new PluginsService(mockCoreContext);
+  const pluginsService = new PluginsService(mockCoreContext, plugins);
   await pluginsService.setup(mockSetupDeps);
 
   // If a dependency is missing it should not be in the deps at all, not even as undefined.
@@ -224,7 +240,7 @@ test('`PluginsService.setup` does not set missing dependent setup contracts', as
 });
 
 test('`PluginsService.setup` returns plugin setup contracts', async () => {
-  const pluginsService = new PluginsService(mockCoreContext);
+  const pluginsService = new PluginsService(mockCoreContext, plugins);
   const { contracts } = await pluginsService.setup(mockSetupDeps);
 
   // Verify that plugin contracts were available
@@ -233,7 +249,7 @@ test('`PluginsService.setup` returns plugin setup contracts', async () => {
 });
 
 test('`PluginsService.start` exposes dependent start contracts to plugins', async () => {
-  const pluginsService = new PluginsService(mockCoreContext);
+  const pluginsService = new PluginsService(mockCoreContext, plugins);
   await pluginsService.setup(mockSetupDeps);
   await pluginsService.start(mockStartDeps);
 
@@ -252,15 +268,13 @@ test('`PluginsService.start` exposes dependent start contracts to plugins', asyn
 });
 
 test('`PluginsService.start` does not set missing dependent start contracts', async () => {
-  mockSetupDeps.injectedMetadata.getPlugins.mockReturnValue([
-    { id: 'pluginD', plugin: createManifest('pluginD', { required: ['missing'] }) },
-  ]);
+  plugins = [{ id: 'pluginD', plugin: createManifest('pluginD', { optional: ['missing'] }) }];
   mockPluginInitializers.set('pluginD', jest.fn(() => ({
     setup: jest.fn(),
     start: jest.fn(),
   })) as any);
 
-  const pluginsService = new PluginsService(mockCoreContext);
+  const pluginsService = new PluginsService(mockCoreContext, plugins);
   await pluginsService.setup(mockSetupDeps);
   await pluginsService.start(mockStartDeps);
 
@@ -272,7 +286,7 @@ test('`PluginsService.start` does not set missing dependent start contracts', as
 });
 
 test('`PluginsService.start` returns plugin start contracts', async () => {
-  const pluginsService = new PluginsService(mockCoreContext);
+  const pluginsService = new PluginsService(mockCoreContext, plugins);
   await pluginsService.setup(mockSetupDeps);
   const { contracts } = await pluginsService.start(mockStartDeps);
 
@@ -282,7 +296,7 @@ test('`PluginsService.start` returns plugin start contracts', async () => {
 });
 
 test('`PluginService.stop` calls the stop function on each plugin', async () => {
-  const pluginsService = new PluginsService(mockCoreContext);
+  const pluginsService = new PluginsService(mockCoreContext, plugins);
   await pluginsService.setup(mockSetupDeps);
 
   const pluginAInstance = mockPluginInitializers.get('pluginA')!.mock.results[0].value;

@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import { IndexedArray } from '../../indexed_array';
 import { IndexPattern } from '../_index_pattern';
+import { createFieldsFetcher } from '../fields_fetcher';
 import mockLogstashFields from '../../../../../fixtures/logstash_fields';
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 
@@ -57,27 +58,21 @@ jest.mock('../../notify', () => ({
   }
 }));
 
-jest.mock('../_format_hit', () => ({
-  formatHitProvider: jest.fn().mockImplementation(() => ({
-    formatField: jest.fn(),
-  }))
-}));
-
-jest.mock('../_get', () => ({
-  IndexPatternsGetProvider: jest.fn().mockImplementation(() => ({
-    clearCache: jest.fn(),
-  }))
-}));
-
-jest.mock('../_flatten_hit', () => ({
-  flattenHitWrapper: jest.fn(),
-}));
-
 jest.mock('../../saved_objects', () => {
   return {
     findObjectByTitle: jest.fn(),
   };
 });
+
+let fields = [];
+jest.mock('../fields_fetcher');
+
+createFieldsFetcher.mockImplementation(() => ({
+  fetch: jest.fn().mockImplementation(() => {
+    return new Promise(resolve => resolve(fields));
+  }),
+  every: jest.fn(),
+}));
 
 let object;
 const savedObjectsClient = {
@@ -106,21 +101,18 @@ const patternCache = {
   clear: jest.fn(),
 };
 
-let fields = [];
-const fieldsFetcher = {
-  fetch: jest.fn().mockImplementation(() => fields),
-  every: jest.fn(),
+const config = {
+  get: jest.fn(),
 };
 
-const getIds = {
-  clearCache: jest.fn(),
+const apiClient = {
+  getFieldsForTimePattern: jest.fn(),
+  getFieldsForWildcard: jest.fn(),
 };
-
-const getConfig = jest.fn();
 
 // helper function to create index patterns
 function create(id, payload) {
-  const indexPattern = new IndexPattern(id, getConfig, savedObjectsClient, patternCache, fieldsFetcher, getIds);
+  const indexPattern = new IndexPattern(id, cfg => config.get(cfg), savedObjectsClient, apiClient, patternCache);
 
   setDocsourcePayload(id, payload);
 
@@ -204,7 +196,6 @@ describe('IndexPattern', () => {
 
 
       await indexPattern.refreshFields();
-      expect(fieldsFetcher.fetch).toHaveBeenCalledTimes(1);
       fields = [];
 
       const newFields = indexPattern.getNonScriptedFields();
@@ -258,12 +249,15 @@ describe('IndexPattern', () => {
       expect(indexPattern.fields.byName[scriptedField.name]).toEqual(undefined);
     });
 
-    it('should not allow duplicate names', function () {
+    it('should not allow duplicate names', async () => {
       const scriptedFields = indexPattern.getScriptedFields();
       const scriptedField = _.last(scriptedFields);
-      expect(function () {
-        indexPattern.addScriptedField(scriptedField.name, '\'new script\'', 'string');
-      }).toThrow();
+      expect.assertions(1);
+      try {
+        await indexPattern.addScriptedField(scriptedField.name, '\'new script\'', 'string');
+      } catch (e) {
+        expect(e).toEqual({});
+      }
     });
   });
 
@@ -324,13 +318,13 @@ describe('IndexPattern', () => {
       }
     });
     // Create a normal index pattern
-    const pattern = new IndexPattern('foo', getConfig, savedObjectsClient, patternCache, fieldsFetcher, getIds);
+    const pattern = new IndexPattern('foo', cfg => config.get(cfg), savedObjectsClient, apiClient, patternCache);
     await pattern.init();
 
     expect(pattern.version).toBe('fooa');
 
     // Create the same one - we're going to handle concurrency
-    const samePattern = new IndexPattern('foo', getConfig, savedObjectsClient, patternCache, fieldsFetcher, getIds);
+    const samePattern = new IndexPattern('foo', cfg => config.get(cfg), savedObjectsClient, apiClient, patternCache);
     await samePattern.init();
 
     expect(samePattern.version).toBe('fooaa');

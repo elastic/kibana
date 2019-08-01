@@ -59,8 +59,10 @@ import { LegacyPlatformService } from './legacy_service';
 import { applicationServiceMock } from '../application/application_service.mock';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { savedObjectsMock } from '../saved_objects/saved_objects_service.mock';
+import { contextServiceMock } from '../context/context_service.mock';
 
 const applicationSetup = applicationServiceMock.createSetupContract();
+const contextSetup = contextServiceMock.createSetupContract();
 const fatalErrorsSetup = fatalErrorsServiceMock.createSetupContract();
 const httpSetup = httpServiceMock.createSetupContract();
 const injectedMetadataSetup = injectedMetadataServiceMock.createSetupContract();
@@ -76,6 +78,7 @@ const defaultParams = {
 const defaultSetupDeps = {
   core: {
     application: applicationSetup,
+    context: contextSetup,
     fatalErrors: fatalErrorsSetup,
     injectedMetadata: injectedMetadataSetup,
     notifications: notificationsSetup,

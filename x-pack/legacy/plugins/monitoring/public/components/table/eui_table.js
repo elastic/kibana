@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { get } from 'lodash';
 import {
   EuiInMemoryTable,
   EuiBadge,
   EuiButtonEmpty,
-  EuiHealth
+  EuiHealth,
+  EuiButton,
+  EuiSpacer
 } from '@elastic/eui';
 import { ELASTICSEARCH_CUSTOM_ID } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
@@ -46,6 +48,7 @@ export class EuiMonitoringTable extends React.PureComponent {
       return column;
     });
 
+    let footerContent = null;
     if (setupMode && setupMode.enabled) {
       columns.push({
         name: i18n.translate('xpack.monitoring.euiTable.setupStatusTitle', {
@@ -185,6 +188,15 @@ export class EuiMonitoringTable extends React.PureComponent {
           return null;
         }
       });
+
+      footerContent = (
+        <Fragment>
+          <EuiSpacer size="m"/>
+          <EuiButton onClick={() => setupMode.openFlyout({}, true)}>
+            {props.setupNewButtonLabel}
+          </EuiButton>
+        </Fragment>
+      );
     }
 
     return (
@@ -195,6 +207,7 @@ export class EuiMonitoringTable extends React.PureComponent {
           columns={columns}
           {...props}
         />
+        {footerContent}
       </div>
     );
   }
