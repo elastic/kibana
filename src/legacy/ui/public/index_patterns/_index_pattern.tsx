@@ -19,6 +19,11 @@
 
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
+import chrome from 'ui/chrome';
+
 // @ts-ignore
 import { SavedObjectNotFound, DuplicateField } from 'ui/errors';
 // @ts-ignore
@@ -57,6 +62,7 @@ export interface StaticIndexPattern {
   id?: string;
   type?: string;
   timeFieldName?: string;
+  intervalName?: string | null;
 }
 
 export class IndexPattern implements StaticIndexPattern {
@@ -69,6 +75,7 @@ export class IndexPattern implements StaticIndexPattern {
   public typeMeta: any;
   public fields: FieldList;
   public timeFieldName: string | undefined;
+  public intervalName: string | undefined | null;
   public formatHit: any;
   public formatField: any;
   public flattenHit: any;
@@ -173,7 +180,7 @@ export class IndexPattern implements StaticIndexPattern {
     this.initFields();
   }
 
-  private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
+  private async updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
     if (!response.found) {
       throw new SavedObjectNotFound(type, this.id, '#/management/kibana/index_pattern');
     }
@@ -190,6 +197,46 @@ export class IndexPattern implements StaticIndexPattern {
 
     if (!this.title && this.id) {
       this.title = this.id;
+    }
+
+    if (this.isUnsupportedTimePattern()) {
+      const warningTitle = i18n.translate('common.ui.indexPattern.warningTitle', {
+        defaultMessage: 'Support for time interval index patterns removed',
+      });
+
+      const warningText = i18n.translate('common.ui.indexPattern.warningText', {
+        defaultMessage:
+          'Currently querying all indices matching {index}. {title} should be migrated to a wildcard-based index pattern.',
+        values: {
+          title: this.title,
+          index: this.getIndex(),
+        },
+      });
+
+      // kbnUrl was added to this service in #35262 before it was de-angularized, and merged in a PR
+      // directly against the 7.x branch. Index patterns were de-angularized in #39247, and in order
+      // to preserve the functionality from #35262 we need to get the injector here just for kbnUrl.
+      // This has all been removed as of 8.0.
+      const $injector = await chrome.dangerouslyGetActiveInjector();
+      const kbnUrl = $injector.get('kbnUrl') as any; // `any` because KbnUrl interface doesn't have `getRouteHref`
+      toastNotifications.addWarning({
+        title: warningTitle,
+        text: (
+          <div>
+            <p>{warningText}</p>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton size="s" href={kbnUrl.getRouteHref(this, 'edit')}>
+                  <FormattedMessage
+                    id="common.ui.indexPattern.editIndexPattern"
+                    defaultMessage="Edit index pattern"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        ),
+      });
     }
 
     return this.indexFields(forceFieldRefresh);
@@ -261,6 +308,19 @@ export class IndexPattern implements StaticIndexPattern {
     return this;
   }
 
+  migrate(newTitle: string) {
+    return this.savedObjectsClient
+      .update(type, this.id!, {
+        title: newTitle,
+        intervalName: null,
+      })
+      .then(({ attributes: { title, intervalName } }) => {
+        this.title = title;
+        this.intervalName = intervalName;
+      })
+      .then(() => this);
+  }
+
   // Get the source filtering configuration for that index.
   getSourceFiltering() {
     return {
@@ -326,8 +386,31 @@ export class IndexPattern implements StaticIndexPattern {
     return _.where(this.fields, { scripted: true });
   }
 
+  getIndex() {
+    if (!this.isUnsupportedTimePattern()) {
+      return this.title;
+    }
+
+    // Take a time-based interval index pattern title (like [foo-]YYYY.MM.DD[-bar]) and turn it
+    // into the actual index (like foo-*-bar) by replacing anything not inside square brackets
+    // with a *.
+    const regex = /\[[^\]]*]/g; // Matches text inside brackets
+    const splits = this.title.split(regex); // e.g. ['', 'YYYY.MM.DD', ''] from the above example
+    const matches = this.title.match(regex) || []; // e.g. ['[foo-]', '[-bar]'] from the above example
+    return splits
+      .map((split, i) => {
+        const match = i >= matches.length ? '' : matches[i].replace(/[\[\]]/g, '');
+        return `${split.length ? '*' : ''}${match}`;
+      })
+      .join('');
+  }
+
   isTimeBased(): boolean {
     return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
+  }
+
+  isUnsupportedTimePattern(): boolean {
+    return !!this.intervalName;
   }
 
   isTimeNanosBased(): boolean {

@@ -309,6 +309,41 @@ describe('IndexPattern', () => {
     });
   });
 
+  describe('getIndex', () => {
+    it('should return the title when there is no intervalName', () => {
+      expect(indexPattern.getIndex()).toBe(indexPattern.title);
+    });
+
+    it('should convert time-based intervals to wildcards', () => {
+      const oldTitle = indexPattern.title;
+      indexPattern.intervalName = 'daily';
+
+      indexPattern.title = '[logstash-]YYYY.MM.DD';
+      expect(indexPattern.getIndex()).toBe('logstash-*');
+
+      indexPattern.title = 'YYYY.MM.DD[-logstash]';
+      expect(indexPattern.getIndex()).toBe('*-logstash');
+
+      indexPattern.title = 'YYYY[-logstash-]YYYY.MM.DD';
+      expect(indexPattern.getIndex()).toBe('*-logstash-*');
+
+      indexPattern.title = 'YYYY[-logstash-]YYYY[-foo-]MM.DD';
+      expect(indexPattern.getIndex()).toBe('*-logstash-*-foo-*');
+
+      indexPattern.title = 'YYYY[-logstash-]YYYY[-foo-]MM.DD[-bar]';
+      expect(indexPattern.getIndex()).toBe('*-logstash-*-foo-*-bar');
+
+      indexPattern.title = '[logstash-]YYYY[-foo-]MM.DD[-bar]';
+      expect(indexPattern.getIndex()).toBe('logstash-*-foo-*-bar');
+
+      indexPattern.title = '[logstash]';
+      expect(indexPattern.getIndex()).toBe('logstash');
+
+      indexPattern.title = oldTitle;
+      delete indexPattern.intervalName;
+    });
+  });
+
   it('should handle version conflicts', async () => {
     setDocsourcePayload(null, {
       _version: 'foo',

@@ -30,7 +30,7 @@ export const createFieldsFetcher = (
 ) => {
   const fieldFetcher = {
     fetch: (options: GetFieldsOptions) => {
-      return fieldFetcher.fetchForWildcard(indexPattern.title, {
+      return fieldFetcher.fetchForWildcard(indexPattern.getIndex(), {
         ...options,
         type: indexPattern.type,
         params: indexPattern.typeMeta && indexPattern.typeMeta.params,
