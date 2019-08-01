@@ -112,6 +112,7 @@ export {
   SavedObjectsService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsExportOptions,
   SavedObjectsImportError,
   SavedObjectsImportConflictError,
   SavedObjectsImportMissingReferencesError,

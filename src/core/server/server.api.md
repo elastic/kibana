@@ -611,6 +611,25 @@ export class SavedObjectsErrorHelpers {
     static isSavedObjectsClientError(error: any): error is DecoratedError;
 }
 
+// @public
+export interface SavedObjectsExportOptions {
+    // (undocumented)
+    exportSizeLimit: number;
+    // (undocumented)
+    includeReferencesDeep?: boolean;
+    // (undocumented)
+    namespace?: string;
+    // (undocumented)
+    objects?: Array<{
+        id: string;
+        type: string;
+    }>;
+    // (undocumented)
+    savedObjectsClient: SavedObjectsClientContract;
+    // (undocumented)
+    types?: string[];
+}
+
 // @public (undocumented)
 export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     // (undocumented)
@@ -820,7 +839,7 @@ export interface SavedObjectsService<Request = any> {
         objectLimit: number;
         importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
         resolveImportErrors(options: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
-        getSortedObjectsForExport(options: ExportObjectsOptions): Promise<Readable>;
+        getSortedObjectsForExport(options: SavedObjectsExportOptions): Promise<Readable>;
     };
     // Warning: (ae-incompatible-release-tags) The symbol "SavedObjectsClient" is marked as @public, but its signature references "SavedObjectsClient" which is marked as @internal
     // 
@@ -872,6 +891,5 @@ export interface SessionStorageFactory<T> {
 // 
 // src/core/server/plugins/plugin_context.ts:34:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:37:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
-// src/core/server/saved_objects/service/index.ts:47:5 - (ae-forgotten-export) The symbol "ExportObjectsOptions" needs to be exported by the entry point index.d.ts
 
 ```

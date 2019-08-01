@@ -25,6 +25,6 @@ export { SavedObjectsManagement } from './management';
 
 export * from './import';
 
-export { getSortedObjectsForExport } from './export';
+export { getSortedObjectsForExport, SavedObjectsExportOptions } from './export';
 
 export { SavedObjectsSerializer, RawDoc as SavedObjectsRawDoc } from './serialization';

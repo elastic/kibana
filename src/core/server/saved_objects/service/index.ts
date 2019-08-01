@@ -20,7 +20,7 @@
 import { Readable } from 'stream';
 import { ScopedSavedObjectsClientProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
-import { ExportObjectsOptions } from '../export';
+import { SavedObjectsExportOptions } from '../export';
 import { SavedObjectsImportOptions, SavedObjectsImportResponse } from '../import';
 import { SavedObjectsSchema } from '../schema';
 import { SavedObjectsResolveImportErrorsOptions } from '../import/types';
@@ -44,7 +44,7 @@ export interface SavedObjectsService<Request = any> {
     resolveImportErrors(
       options: SavedObjectsResolveImportErrorsOptions
     ): Promise<SavedObjectsImportResponse>;
-    getSortedObjectsForExport(options: ExportObjectsOptions): Promise<Readable>;
+    getSortedObjectsForExport(options: SavedObjectsExportOptions): Promise<Readable>;
   };
 }
 
