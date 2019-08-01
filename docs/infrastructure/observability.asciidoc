@@ -12,7 +12,7 @@
 Observability is a system attribute. An _observable_ system allows the operators responsible for it to:
 
 * detect undesirable behaviors (for example, service downtime, errors, slow responses)
-* view actionable information to pin down the root causes in an effective manner (for example, detailed event logs, granular resource usage information, and application traces)
+* view actionable information to pinn down the root causes in an effective manner (for example, detailed event logs, granular resource usage information, and application traces)
 
 The Elastic stack is a natural home for Observability.
 Elasticsearch can collect and store logs, system metrics, application traces and uptime information.

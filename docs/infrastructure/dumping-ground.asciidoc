@@ -5,16 +5,6 @@
 // +++ Unused content from index.asciidoc. Will be useful somewhere, i expect!
 
 [float]
-== Add data
-
-Kibana provides step-by-step instructions to help you add log data.
-The {infra-guide}[Infrastructure Monitoring Guide] is a good source for more detailed information and instructions.
-////
-add more informative link and description.
-Decide if this should be logs and Metrics
-////
-
-[float]
 == Configure data sources
 
 // +++ This could be clearer. link to more info

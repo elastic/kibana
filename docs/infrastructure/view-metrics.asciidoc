@@ -1,10 +1,9 @@
 [role="xpack"]
 [[xpack-view-metrics]]
-== Viewing metrics
 
 == Viewing infrastructure metrics
 
-When you select *View Metrics* for a component in your infrastructure from the {kibana-ref}/infra-ui.html[Infrastructure tab in Kibana], you can view detailed metrics for that component, and for any related components.
+When you select *View Metrics* for a component in your infrastructure from the <<infra-ui, Infrastructure tab in Kibana>>, you can view detailed metrics for that component, and for any related components.
 
 [role="screenshot"]
 image::infrastructure/images/infra-view-metrics.png[Infrastructure View Metrics in Kibana]
@@ -13,14 +12,15 @@ image::infrastructure/images/infra-view-metrics.png[Infrastructure View Metrics 
 [[infra-view-metrics-date]]
 === Specify the time and date range
 
-Use the time picker to select the time and date for which to show the metrics, and the time range to include. You can specify your own values, or select from some commonly used
+Use the time filter to select the time and date for which to show the metrics, and the time range to include. You can specify your own values, or select from some commonly used ranges.
 
+[float]
+[[infra-view-refresh-metrics-date]]
 == Refresh the metrics
 
 You can click *Refresh* to manually refresh the metrics. Alternatively, within the time picker, you can select an automatic refresh period, then click *Start* to start automatic refresh
 
-You can also
-
+You can also xxxxxx
 
 Something about whether it refreshes or not.
 

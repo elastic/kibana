@@ -72,16 +72,18 @@ Hover over a component to see more information about that component.
 Click a component to see the other actions for that component that you can carry out from the Infrastructure tab.
 You can select:
 
-* *View Metrics* to {kibana-ref}/xpack-view-metrics.html[view detailed metrics for the selected component].
+* *View Metrics* to <<xpack-view-metrics, view detailed metrics for the selected component>>.
 
-* *View Logs* to view the {kibana-ref}/xpack-logs-using.html[corresponding logs for the selected component] in the *Logs* tab.
+// +++ check ^^ link it's broken
+
+* *View Logs* to view the <<xpack-logs-using, corresponding logs for the selected component>> in the *Logs* tab.
 // +++ I think this is the best link, but I may need to explain here that the tab opens with the appropriate component etc pre-selected.
 
 Depending on the features you have installed and configured, you may also be able to select:
 
-* *View APM* to {kibana-ref}/traces.html[view APM traces for the selected component] in the *APM* tab.
+* *View APM* to <<traces, view APM traces for the selected component>> in the *APM* tab.
 // +++ Comment as for Logs link
 
-* *View Uptime* to {kibana-ref}/uptime-overview.html[view uptime information for the selected component] in the *Uptime* tab.
+* *View Uptime* to <<uptime-overview, view uptime information for the selected component>> in the *Uptime* tab.
 // +++ Comment as for logs link
 

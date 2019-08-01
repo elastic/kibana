@@ -2,8 +2,6 @@
 [[metrics-explorer]]
 == Metrics Explorer
 
-== Metrics Explorer
-
 Metrics Explorer allows you to visualize metrics data collected by Metricbeat and group it in various ways to visualize multiple metrics.
 It can be a starting point for further investigations.
 
@@ -14,7 +12,7 @@ image::infrastructure/images/metrics-explorer-screen.png[Metrics Explorer in Kib
 [[metrics-explorer-requirements]]
 === Metrics Explorer requirements and considerations
 
-* The Metrics Explorer uses data collected from {metricbeat-ref}/metricbeat-overview.html[Metricbeat].
+* Metrics Explorer uses data collected from {metricbeat-ref}/metricbeat-overview.html[Metricbeat].
 * You need read permissions on `metricbeat-*` or the metric index specified in the Infrastructure configuration UI.
 * Metrics Explorer uses the timestamp field set in the Infrastructure configuration UI.
 By default that is set to `@timestamp`.
