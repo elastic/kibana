@@ -17,6 +17,7 @@ import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_ser
 import {
   elasticsearchServiceMock,
   httpServiceMock,
+  httpServerMock,
 } from '../../../../../../../src/core/server/mocks';
 import * as kbnTestServer from '../../../../../../../src/test_utils/kbn_server';
 import { HttpServiceSetup } from 'src/core/server';
@@ -184,17 +185,17 @@ describe('onPostAuthRequestInterceptor', () => {
       httpMock.basePath.set = jest.fn().mockImplementation((req: any, newPath: string) => {
         basePath = newPath;
       });
+      const preAuthToolkit = httpServiceMock.createOnPreAuthToolkit();
+      preAuthToolkit.rewriteUrl.mockImplementation(url => {
+        path = url;
+        return null as any;
+      });
       httpMock.registerOnPreAuth = jest.fn().mockImplementation(async handler => {
         const preAuthRequest = {
           path,
           url: parse(path),
         };
-        await handler(preAuthRequest, {
-          redirected: jest.fn().mockImplementation(url => {
-            path = url;
-          }),
-          next: jest.fn(),
-        });
+        await handler(preAuthRequest, httpServerMock.createResponseFactory(), preAuthToolkit);
       });
 
       const service = new SpacesService(log, configFn().get('server.basePath'));

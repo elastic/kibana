@@ -3,7 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { KibanaRequest, OnPreAuthToolkit, HttpServiceSetup } from 'src/core/server';
+import {
+  KibanaRequest,
+  OnPreAuthToolkit,
+  ResponseFactory,
+  HttpServiceSetup,
+} from 'src/core/server';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { format } from 'url';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
@@ -19,6 +24,7 @@ export function initSpacesOnRequestInterceptor({ config, http }: OnRequestInterc
 
   http.registerOnPreAuth(async function spacesOnPreAuthHandler(
     request: KibanaRequest,
+    response: ResponseFactory,
     toolkit: OnPreAuthToolkit
   ) {
     const path = request.url.pathname;
@@ -41,7 +47,7 @@ export function initSpacesOnRequestInterceptor({ config, http }: OnRequestInterc
         };
       });
 
-      return toolkit.redirected(newUrl, { forward: true });
+      return toolkit.rewriteUrl(newUrl);
     }
 
     return toolkit.next();

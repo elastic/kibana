@@ -77,7 +77,7 @@ export async function setupAuthentication({
 
   authLogger.debug('Successfully initialized authenticator.');
 
-  core.http.registerAuth(async (request, t) => {
+  core.http.registerAuth(async (request, response, t) => {
     // If security is disabled continue with no user credentials and delete the client cookie as well.
     if (isSecurityFeatureDisabled()) {
       return t.authenticated();
@@ -88,7 +88,7 @@ export async function setupAuthentication({
       authenticationResult = await authenticator.authenticate(request);
     } catch (err) {
       authLogger.error(err);
-      return t.rejected(wrapError(err));
+      return response.unauthorized(wrapError(err));
     }
 
     if (authenticationResult.succeeded()) {
@@ -105,28 +105,25 @@ export async function setupAuthentication({
       // authentication (username and password) or arbitrary external page managed by 3rd party
       // Identity Provider for SSO authentication mechanisms. Authentication provider is the one who
       // decides what location user should be redirected to.
-      return t.redirected(authenticationResult.redirectURL!);
+      return response.redirected(undefined, {
+        headers: {
+          location: authenticationResult.redirectURL!,
+        },
+      });
     }
 
     let error;
     if (authenticationResult.failed()) {
       authLogger.info(`Authentication attempt failed: ${authenticationResult.error!.message}`);
       error = wrapError(authenticationResult.error);
-
-      const authResponseHeaders = authenticationResult.authResponseHeaders;
-      for (const [headerName, headerValue] of Object.entries(authResponseHeaders || {})) {
-        if (error.output.headers[headerName] !== undefined) {
-          authLogger.warn(`Server rewrites a error response header [${headerName}].`);
-        }
-        // Hapi typings don't support headers that are `string[]`.
-        error.output.headers[headerName] = headerValue as any;
-      }
     } else {
       authLogger.info('Could not handle authentication attempt');
       error = Boom.unauthorized();
     }
 
-    return t.rejected(error);
+    return response.unauthorized(error, {
+      headers: authenticationResult.authResponseHeaders,
+    });
   });
 
   authLogger.debug('Successfully registered core authentication handler.');

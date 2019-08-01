@@ -132,21 +132,23 @@ describe('setupAuthentication()', () => {
 
     it('replies with no credentials when security is disabled in elasticsearch', async () => {
       const mockRequest = httpServerMock.createKibanaRequest();
+      const mockResponse = httpServerMock.createResponseFactory();
 
       mockXpackInfo.feature.mockReturnValue(mockXPackFeature({ isEnabled: false }));
 
-      await authHandler(mockRequest, mockAuthToolkit);
+      await authHandler(mockRequest, mockResponse, mockAuthToolkit);
 
       expect(mockAuthToolkit.authenticated).toHaveBeenCalledTimes(1);
       expect(mockAuthToolkit.authenticated).toHaveBeenCalledWith();
-      expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
-      expect(mockAuthToolkit.rejected).not.toHaveBeenCalled();
+      expect(mockResponse.redirected).not.toHaveBeenCalled();
+      expect(mockResponse.unauthorized).not.toHaveBeenCalled();
 
       expect(authenticate).not.toHaveBeenCalled();
     });
 
     it('continues request with credentials on success', async () => {
       const mockRequest = httpServerMock.createKibanaRequest();
+      const mockResponse = httpServerMock.createResponseFactory();
       const mockUser = mockAuthenticatedUser();
       const mockAuthHeaders = { authorization: 'Basic xxx' };
 
@@ -154,15 +156,15 @@ describe('setupAuthentication()', () => {
         AuthenticationResult.succeeded(mockUser, { authHeaders: mockAuthHeaders })
       );
 
-      await authHandler(mockRequest, mockAuthToolkit);
+      await authHandler(mockRequest, mockResponse, mockAuthToolkit);
 
       expect(mockAuthToolkit.authenticated).toHaveBeenCalledTimes(1);
       expect(mockAuthToolkit.authenticated).toHaveBeenCalledWith({
         state: mockUser,
         requestHeaders: mockAuthHeaders,
       });
-      expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
-      expect(mockAuthToolkit.rejected).not.toHaveBeenCalled();
+      expect(mockResponse.redirected).not.toHaveBeenCalled();
+      expect(mockResponse.unauthorized).not.toHaveBeenCalled();
 
       expect(authenticate).toHaveBeenCalledTimes(1);
       expect(authenticate).toHaveBeenCalledWith(mockRequest);
@@ -170,6 +172,7 @@ describe('setupAuthentication()', () => {
 
     it('returns authentication response headers on success if any', async () => {
       const mockRequest = httpServerMock.createKibanaRequest();
+      const mockResponse = httpServerMock.createResponseFactory();
       const mockUser = mockAuthenticatedUser();
       const mockAuthHeaders = { authorization: 'Basic xxx' };
       const mockAuthResponseHeaders = { 'WWW-Authenticate': 'Negotiate' };
@@ -181,7 +184,7 @@ describe('setupAuthentication()', () => {
         })
       );
 
-      await authHandler(mockRequest, mockAuthToolkit);
+      await authHandler(mockRequest, mockResponse, mockAuthToolkit);
 
       expect(mockAuthToolkit.authenticated).toHaveBeenCalledTimes(1);
       expect(mockAuthToolkit.authenticated).toHaveBeenCalledWith({
@@ -189,53 +192,59 @@ describe('setupAuthentication()', () => {
         requestHeaders: mockAuthHeaders,
         responseHeaders: mockAuthResponseHeaders,
       });
-      expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
-      expect(mockAuthToolkit.rejected).not.toHaveBeenCalled();
+      expect(mockResponse.redirected).not.toHaveBeenCalled();
+      expect(mockResponse.unauthorized).not.toHaveBeenCalled();
 
       expect(authenticate).toHaveBeenCalledTimes(1);
       expect(authenticate).toHaveBeenCalledWith(mockRequest);
     });
 
     it('redirects user if redirection is requested by the authenticator', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
       authenticate.mockResolvedValue(AuthenticationResult.redirectTo('/some/url'));
 
-      await authHandler(httpServerMock.createKibanaRequest(), mockAuthToolkit);
+      await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
-      expect(mockAuthToolkit.redirected).toHaveBeenCalledTimes(1);
-      expect(mockAuthToolkit.redirected).toHaveBeenCalledWith('/some/url');
+      expect(mockResponse.redirected).toHaveBeenCalledTimes(1);
+      expect(mockResponse.redirected).toHaveBeenCalledWith(undefined, {
+        headers: { location: '/some/url' },
+      });
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
-      expect(mockAuthToolkit.rejected).not.toHaveBeenCalled();
+      expect(mockResponse.unauthorized).not.toHaveBeenCalled();
     });
 
     it('rejects with `Internal Server Error` when `authenticate` throws unhandled exception', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
       authenticate.mockRejectedValue(new Error('something went wrong'));
 
-      await authHandler(httpServerMock.createKibanaRequest(), mockAuthToolkit);
+      await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
-      expect(mockAuthToolkit.rejected).toHaveBeenCalledTimes(1);
-      const [[error]] = mockAuthToolkit.rejected.mock.calls;
-      expect(error.message).toBe('something went wrong');
+      expect(mockResponse.unauthorized).toHaveBeenCalledTimes(1);
+      const [[error]] = mockResponse.unauthorized.mock.calls;
+      expect(String(error)).toBe('Error: something went wrong');
       expect(getErrorStatusCode(error)).toBe(500);
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
-      expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
+      expect(mockResponse.redirected).not.toHaveBeenCalled();
     });
 
     it('rejects with wrapped original error when `authenticate` fails to authenticate user', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
       const esError = Boom.badRequest('some message');
       authenticate.mockResolvedValue(AuthenticationResult.failed(esError));
 
-      await authHandler(httpServerMock.createKibanaRequest(), mockAuthToolkit);
+      await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
-      expect(mockAuthToolkit.rejected).toHaveBeenCalledTimes(1);
-      const [[error]] = mockAuthToolkit.rejected.mock.calls;
+      expect(mockResponse.unauthorized).toHaveBeenCalledTimes(1);
+      const [[error]] = mockResponse.unauthorized.mock.calls;
       expect(error).toBe(esError);
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
-      expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
+      expect(mockResponse.redirected).not.toHaveBeenCalled();
     });
 
     it('includes `WWW-Authenticate` header if `authenticate` fails to authenticate user and provides challenges', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
       const originalError = Boom.unauthorized('some message');
       originalError.output.headers['WWW-Authenticate'] = [
         'Basic realm="Access to prod", charset="UTF-8"',
@@ -248,29 +257,31 @@ describe('setupAuthentication()', () => {
         })
       );
 
-      await authHandler(httpServerMock.createKibanaRequest(), mockAuthToolkit);
+      await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
-      expect(mockAuthToolkit.rejected).toHaveBeenCalledTimes(1);
-      const [[error]] = mockAuthToolkit.rejected.mock.calls;
-      expect(error.message).toBe(originalError.message);
-      expect((error as Boom).output.headers).toEqual({ 'WWW-Authenticate': 'Negotiate' });
+      expect(mockResponse.unauthorized).toHaveBeenCalledTimes(1);
+      const [[error, options]] = mockResponse.unauthorized.mock.calls;
+      expect(String(error)).toBe(`Error: ${originalError.message}`);
+      expect(options!.headers).toEqual({ 'WWW-Authenticate': 'Negotiate' });
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
-      expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
+      expect(mockResponse.redirected).not.toHaveBeenCalled();
     });
 
     it('returns `unauthorized` when authentication can not be handled', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
       authenticate.mockResolvedValue(AuthenticationResult.notHandled());
 
-      await authHandler(httpServerMock.createKibanaRequest(), mockAuthToolkit);
+      await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
-      expect(mockAuthToolkit.rejected).toHaveBeenCalledTimes(1);
-      const [[error]] = mockAuthToolkit.rejected.mock.calls;
-      expect(error.message).toBe('Unauthorized');
+      expect(mockResponse.unauthorized).toHaveBeenCalledTimes(1);
+      const [[error]] = mockResponse.unauthorized.mock.calls;
+
+      expect(String(error)).toBe('Error: Unauthorized');
       expect(getErrorStatusCode(error)).toBe(401);
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
-      expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
+      expect(mockResponse.redirected).not.toHaveBeenCalled();
     });
   });
 
