@@ -347,8 +347,8 @@ describe('Filter editor utils', () => {
       const alias = 'bar';
       const state = FilterStateStore.APP_STATE;
       const filter = buildFilter(
-        mockIndexPattern,
-        mockFields[0],
+        mockedIndexPattern,
+        mockedFields[0],
         doesNotExistOperator,
         true,
         params,
