@@ -49,7 +49,9 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
 
   const deleteRepository = () => {
     const repositoriesToDelete = [...repositoryNames];
-    deleteRepositories(repositoriesToDelete).then(({ data: { itemsDeleted, errors }, error }) => {
+    deleteRepositories(repositoriesToDelete).then(({ data, error }) => {
+      const { itemsDeleted, errors } = data || { itemsDeleted: undefined, errors: undefined };
+
       // Surface success notifications
       if (itemsDeleted && itemsDeleted.length) {
         const hasMultipleSuccesses = itemsDeleted.length > 1;

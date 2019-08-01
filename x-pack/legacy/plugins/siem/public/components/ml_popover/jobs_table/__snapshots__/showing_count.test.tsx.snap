@@ -10,7 +10,7 @@ exports[`ShowingCount renders correctly against snapshot 1`] = `
   >
     <FormattedMessage
       data-test-subj="query-message"
-      defaultMessage="Showing: {filterResultsLength} {filterResultsLength, plural, one {Job} other {Jobs}}"
+      defaultMessage="Showing: {filterResultsLength} {filterResultsLength, plural, one {job} other {jobs}}"
       id="xpack.siem.components.mlPopup.showingLabel"
       values={
         Object {
