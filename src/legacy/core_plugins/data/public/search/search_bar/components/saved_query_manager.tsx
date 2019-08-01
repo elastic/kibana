@@ -64,8 +64,10 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
       const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
       setSavedQueries(sortedAllSavedQueries);
     };
-    fetchQueries();
-  }); // we need the effect to trigger on every render because saved queries change and we need the updates.
+    if (isOpen) {
+      fetchQueries();
+    }
+  }, [isOpen]);
 
   const savedQueryDescriptionText = i18n.translate(
     'data.search.searchBar.savedQueryDescriptionText',
