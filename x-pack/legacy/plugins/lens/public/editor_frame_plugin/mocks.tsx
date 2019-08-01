@@ -11,6 +11,16 @@ import { EditorFrameSetupPlugins } from './plugin';
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
+    id: 'TEST_VIS',
+    visualizationTypes: [
+      {
+        icon: 'empty',
+        id: 'TEST_VIS',
+        label: 'TEST',
+      },
+    ],
+    getDescription: jest.fn(_state => ({ label: '' })),
+    switchVisualizationType: jest.fn((_, x) => x),
     getPersistableState: jest.fn(_state => _state),
     getSuggestions: jest.fn(_options => []),
     initialize: jest.fn((_frame, _state?) => ({})),
@@ -59,7 +69,7 @@ export function createMockFramePublicAPI(): FrameMock {
   return {
     datasourceLayers: {},
     addNewLayer: jest.fn(() => ''),
-    removeLayer: jest.fn(),
+    removeLayers: jest.fn(),
   };
 }
 

@@ -27,6 +27,7 @@ describe('XYConfigPanel', () => {
   function testState(): State {
     return {
       legend: { isVisible: true, position: Position.Right },
+      preferredSeriesType: 'bar',
       isHorizontal: false,
       layers: [
         {
@@ -119,11 +120,11 @@ describe('XYConfigPanel', () => {
       .prop('options') as EuiButtonGroupProps['options'];
 
     expect(options.map(({ id }) => id)).toEqual([
+      'bar',
+      'bar_stacked',
       'line',
       'area',
-      'bar',
       'area_stacked',
-      'bar_stacked',
     ]);
 
     expect(options.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
@@ -294,6 +295,7 @@ describe('XYConfigPanel', () => {
         ],
       });
     });
+
     it('removes layers', () => {
       const setState = jest.fn();
       const state = testState();
@@ -313,7 +315,7 @@ describe('XYConfigPanel', () => {
         .first()
         .simulate('click');
 
-      expect(frame.removeLayer).toHaveBeenCalled();
+      expect(frame.removeLayers).toHaveBeenCalled();
       expect(setState).toHaveBeenCalledTimes(1);
       expect(setState.mock.calls[0][0]).toMatchObject({
         layers: [],

@@ -15,55 +15,15 @@ import {
   EuiForm,
   EuiFormRow,
   EuiPanel,
-  EuiPopover,
-  IconType,
   EuiButtonIcon,
-  EuiIcon,
+  EuiPopover,
   EuiSwitch,
 } from '@elastic/eui';
-import { State, SeriesType, LayerConfig } from './types';
+import { State, SeriesType, LayerConfig, visualizationTypes } from './types';
 import { VisualizationProps, OperationMetadata } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { MultiColumnEditor } from '../multi_column_editor';
 import { generateId } from '../id_generator';
-
-export const chartTypeIcons: Array<{ id: SeriesType; label: string; iconType: IconType }> = [
-  {
-    id: 'line',
-    label: i18n.translate('xpack.lens.xyVisualization.lineChartLabel', {
-      defaultMessage: 'Line',
-    }),
-    iconType: 'visLine',
-  },
-  {
-    id: 'area',
-    label: i18n.translate('xpack.lens.xyVisualization.areaChartLabel', {
-      defaultMessage: 'Area',
-    }),
-    iconType: 'visArea',
-  },
-  {
-    id: 'bar',
-    label: i18n.translate('xpack.lens.xyVisualization.barChartLabel', {
-      defaultMessage: 'Bar',
-    }),
-    iconType: 'visBarVertical',
-  },
-  {
-    id: 'area_stacked',
-    label: i18n.translate('xpack.lens.xyVisualization.stackedAreaChartLabel', {
-      defaultMessage: 'Stacked Area',
-    }),
-    iconType: 'visArea',
-  },
-  {
-    id: 'bar_stacked',
-    label: i18n.translate('xpack.lens.xyVisualization.stackedBarChartLabel', {
-      defaultMessage: 'Stacked Bar',
-    }),
-    iconType: 'visBarVertical',
-  },
-];
 
 const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
@@ -80,39 +40,95 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
   };
 }
 
-function newLayerState(layerId: string): LayerConfig {
+function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
   return {
     layerId,
+    seriesType,
     xAccessor: generateId(),
-    seriesType: 'bar_stacked',
     accessors: [generateId()],
     title: '',
     splitAccessor: generateId(),
   };
 }
 
-interface LocalState {
-  isChartOptionsOpen: boolean;
-  openLayerId: string | null;
+function LayerSettings({
+  layer,
+  setSeriesType,
+  removeLayer,
+}: {
+  layer: LayerConfig;
+  setSeriesType: (seriesType: SeriesType) => void;
+  removeLayer: () => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const { icon } = visualizationTypes.find(c => c.id === layer.seriesType)!;
+
+  return (
+    <EuiPopover
+      id={`lnsXYSeriesTypePopover_${layer.layerId}`}
+      ownFocus
+      button={
+        <EuiButtonIcon
+          iconType={icon || 'lnsBarVertical'}
+          aria-label={i18n.translate('xpack.lens.xyChart.layerSettings', {
+            defaultMessage: 'Edit layer settings',
+          })}
+          onClick={() => setIsOpen(!isOpen)}
+          data-test-subj="lnsXY_layer_advanced"
+        />
+      }
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      anchorPosition="leftUp"
+    >
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.xyChart.chartTypeLabel', {
+          defaultMessage: 'Chart type',
+        })}
+      >
+        <EuiButtonGroup
+          legend={i18n.translate('xpack.lens.xyChart.chartTypeLegend', {
+            defaultMessage: 'Chart type',
+          })}
+          name="chartType"
+          className="eui-displayInlineBlock"
+          data-test-subj="lnsXY_seriesType"
+          options={visualizationTypes.map(t => ({
+            ...t,
+            iconType: t.icon || 'empty',
+          }))}
+          idSelected={layer.seriesType}
+          onChange={seriesType => setSeriesType(seriesType as SeriesType)}
+          isIconOnly
+        />
+      </EuiFormRow>
+      <EuiFormRow>
+        <EuiButton
+          iconType="trash"
+          color="danger"
+          data-test-subj="lnsXY_layer_remove"
+          onClick={removeLayer}
+        >
+          {i18n.translate('xpack.lens.xyChart.removeLayer', {
+            defaultMessage: 'Remove layer',
+          })}
+        </EuiButton>
+      </EuiFormRow>
+    </EuiPopover>
+  );
 }
 
 export function XYConfigPanel(props: VisualizationProps<State>) {
   const { state, setState, frame } = props;
-
-  const [localState, setLocalState] = useState({
-    isChartOptionsOpen: false,
-    openLayerId: null,
-  } as LocalState);
+  const [isChartOptionsOpen, setIsChartOptionsOpen] = useState(false);
 
   return (
     <EuiForm className="lnsConfigPanel">
       <EuiFormRow>
         <EuiPopover
           id="lnsXY_chartConfig"
-          isOpen={localState.isChartOptionsOpen}
-          closePopover={() => {
-            setLocalState({ ...localState, isChartOptionsOpen: false });
-          }}
+          isOpen={isChartOptionsOpen}
+          closePopover={() => setIsChartOptionsOpen(false)}
           button={
             <EuiFormRow>
               <>
@@ -120,9 +136,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                   iconType="gear"
                   size="s"
                   data-test-subj="lnsXY_chart_settings"
-                  onClick={() => {
-                    setLocalState({ ...localState, isChartOptionsOpen: true });
-                  }}
+                  onClick={() => setIsChartOptionsOpen(true)}
                 >
                   <FormattedMessage
                     id="xpack.lens.xyChart.chartSettings"
@@ -158,76 +172,18 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           <EuiPanel>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiPopover
-                  id="lnsXY_layer"
-                  isOpen={localState.openLayerId === layer.layerId}
-                  closePopover={() => {
-                    setLocalState({ ...localState, openLayerId: null });
-                  }}
-                  button={
-                    <EuiButtonIcon
-                      iconType="gear"
-                      data-test-subj="lnsXY_layer_advanced"
-                      aria-label={i18n.translate('xpack.lens.xyChart.layerSettings', {
-                        defaultMessage: 'Edit layer settings',
-                      })}
-                      onClick={() => {
-                        setLocalState({ ...localState, openLayerId: layer.layerId });
-                      }}
-                    />
-                  }
-                >
-                  <>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.lens.xyChart.chartTypeLabel', {
-                        defaultMessage: 'Chart type',
-                      })}
-                    >
-                      <EuiButtonGroup
-                        legend={i18n.translate('xpack.lens.xyChart.chartTypeLegend', {
-                          defaultMessage: 'Chart type',
-                        })}
-                        name="chartType"
-                        className="eui-displayInlineBlock"
-                        data-test-subj="lnsXY_seriesType"
-                        options={chartTypeIcons}
-                        idSelected={layer.seriesType}
-                        onChange={seriesType => {
-                          setState(
-                            updateLayer(
-                              state,
-                              { ...layer, seriesType: seriesType as SeriesType },
-                              index
-                            )
-                          );
-                        }}
-                        isIconOnly
-                      />
-                    </EuiFormRow>
-
-                    <EuiButton
-                      iconType="trash"
-                      color="danger"
-                      size="s"
-                      data-test-subj="lnsXY_layer_remove"
-                      onClick={() => {
-                        frame.removeLayer(layer.layerId);
-                        setState({ ...state, layers: state.layers.filter(l => l !== layer) });
-                      }}
-                    >
-                      <FormattedMessage
-                        id="xpack.lens.xyChart.removeLayer"
-                        defaultMessage="Remove Layer"
-                      />
-                    </EuiButton>
-                  </>
-                </EuiPopover>
-              </EuiFlexItem>
-
-              <EuiFlexItem>
-                <EuiIcon
-                  type={chartTypeIcons.find(icon => icon.id === layer.seriesType)!.iconType}
-                />
+                <EuiFormRow>
+                  <LayerSettings
+                    layer={layer}
+                    setSeriesType={seriesType =>
+                      setState(updateLayer(state, { ...layer, seriesType }, index))
+                    }
+                    removeLayer={() => {
+                      frame.removeLayers([layer.layerId]);
+                      setState({ ...state, layers: state.layers.filter(l => l !== layer) });
+                    }}
+                  />
+                </EuiFormRow>
               </EuiFlexItem>
 
               <EuiFlexItem>
@@ -238,7 +194,6 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-
             <EuiFormRow
               label={i18n.translate('xpack.lens.xyChart.xAxisLabel', {
                 defaultMessage: 'X Axis',
@@ -256,7 +211,6 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 }}
               />
             </EuiFormRow>
-
             <EuiFormRow
               label={i18n.translate('xpack.lens.xyChart.splitSeries', {
                 defaultMessage: 'Split series',
@@ -274,7 +228,6 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 }}
               />
             </EuiFormRow>
-
             <EuiFormRow
               label={i18n.translate('xpack.lens.xyChart.yAxisLabel', {
                 defaultMessage: 'Y Axis',
@@ -325,7 +278,10 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           onClick={() => {
             setState({
               ...state,
-              layers: [...state.layers, newLayerState(frame.addNewLayer())],
+              layers: [
+                ...state.layers,
+                newLayerState(state.preferredSeriesType, frame.addNewLayer()),
+              ],
             });
           }}
           iconType="plusInCircle"

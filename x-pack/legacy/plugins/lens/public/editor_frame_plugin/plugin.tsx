@@ -146,8 +146,8 @@ export class EditorFramePlugin {
       registerDatasource: (name, datasource) => {
         this.datasources[name] = datasource as Datasource<unknown, unknown>;
       },
-      registerVisualization: (name, visualization) => {
-        this.visualizations[name] = visualization as Visualization<unknown, unknown>;
+      registerVisualization: visualization => {
+        this.visualizations[visualization.id] = visualization as Visualization<unknown, unknown>;
       },
     };
   }
