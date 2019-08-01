@@ -1746,6 +1746,10 @@
     through2 "^2.0.0"
     update-notifier "^0.5.0"
 
+"@elastic/maki@github:nickpeihl/maki#sdf-icons":
+  version "6.1.0"
+  resolved "https://codeload.github.com/nickpeihl/maki/tar.gz/11441cf3332c64762c0b6097d55c068bafb75156"
+
 "@elastic/node-crypto@^0.1.2":
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-0.1.2.tgz#c18ac282f635e88f041cc1555d806e492ca8f3b1"

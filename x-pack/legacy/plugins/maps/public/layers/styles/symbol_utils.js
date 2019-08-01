@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { maki } from '@kbn/maki';
+import maki from '@elastic/maki';
 import xml2js from 'xml2js';
 import { parseXmlString } from '../../../common/parse_xml_string';
 
@@ -69,32 +69,4 @@ export async function styleSvg(svgString, fill) {
   }
   const builder = new xml2js.Builder();
   return builder.buildObject(svgXml);
-}
-
-function addImageToMap(imageUrl, imageId, symbolId, mbMap) {
-  return new Promise((resolve, reject) => {
-    const img = new Image(LARGE_MAKI_ICON_SIZE, LARGE_MAKI_ICON_SIZE);
-    img.onload = () => {
-      mbMap.addImage(imageId, img);
-      resolve();
-    };
-    img.onerror = (err) => {
-      reject(err);
-    };
-    img.src = imageUrl;
-  });
-}
-
-export async function loadImage(imageId, symbolId, color, mbMap) {
-  let symbolSvg;
-  try {
-    symbolSvg = getMakiSymbolSvg(symbolId);
-  } catch(error) {
-    return;
-  }
-
-  const styledSvg = await styleSvg(symbolSvg, color);
-  const imageUrl = buildSrcUrl(styledSvg);
-
-  await addImageToMap(imageUrl, imageId, symbolId, mbMap);
 }

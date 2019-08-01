@@ -8,12 +8,15 @@ import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ResizeChecker } from 'ui/resize_checker';
-import { syncLayerOrderForSingleLayer, removeOrphanedSourcesAndLayers } from './utils';
+import {
+  syncLayerOrderForSingleLayer,
+  removeOrphanedSourcesAndLayers,
+  addSpritesheetToMap
+} from './utils';
 import {
   DECIMAL_DEGREES_PRECISION,
   FEATURE_ID_PROPERTY_NAME,
-  ZOOM_PRECISION,
-  MAKI_SPRITE_PATH
+  ZOOM_PRECISION
 } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw-unminified';
@@ -22,12 +25,8 @@ import { FeatureTooltip } from '../feature_tooltip';
 import { DRAW_TYPE } from '../../../actions/map_actions';
 import { createShapeFilterWithMeta, createExtentFilterWithMeta } from '../../../elasticsearch_geo_utils';
 import chrome from 'ui/chrome';
-
-function relativeToAbsolute(url) {
-  const a = document.createElement('a');
-  a.setAttribute('href', url);
-  return a.href;
-}
+import { spritesheet } from '@elastic/maki';
+import sprites from '@elastic/maki/dist/sprite@1.png';
 
 const mbDrawModes = MapboxDraw.modes;
 mbDrawModes.draw_rectangle = DrawRectangle;
@@ -351,7 +350,6 @@ export class MBMapContainer extends React.Component {
 
   async _createMbMapInstance() {
     const initialView = this.props.goto ? this.props.goto.center : null;
-    const makiUrl = relativeToAbsolute(chrome.addBasePath(MAKI_SPRITE_PATH));
     return new Promise((resolve) => {
       const options = {
         attributionControl: false,
@@ -359,8 +357,7 @@ export class MBMapContainer extends React.Component {
         style: {
           version: 8,
           sources: {},
-          layers: [],
-          sprite: makiUrl
+          layers: []
         },
         scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false)
@@ -395,6 +392,8 @@ export class MBMapContainer extends React.Component {
     if (!this._isMounted) {
       return;
     }
+
+    this._loadMakiSprites();
 
     this._initResizerChecker();
 
@@ -434,6 +433,11 @@ export class MBMapContainer extends React.Component {
     this._checker.on('resize', () => {
       this._mbMap.resize();
     });
+  }
+
+  _loadMakiSprites() {
+    // TODO Should we preface sprite ids in @elastic/maki? e.g. `__kbn__airfield-15`
+    addSpritesheetToMap(spritesheet[1], sprites, this._mbMap);
   }
 
   _hideTooltip() {
