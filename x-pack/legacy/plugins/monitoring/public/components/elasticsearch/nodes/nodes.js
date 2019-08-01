@@ -330,6 +330,9 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             setupMode={setupMode}
             uuidField="resolver"
             nameField="name"
+            setupNewButtonLabel={i18n.translate('xpack.monitoring.elasticsearch.metricbeatMigration.setupNewButtonLabel', {
+              defaultMessage: 'Setup monitoring for new Elasticsearch node'
+            })}
             search={{
               box: {
                 incremental: true,

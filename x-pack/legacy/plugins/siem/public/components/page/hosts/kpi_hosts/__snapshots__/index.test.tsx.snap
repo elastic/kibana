@@ -3,23 +3,25 @@
 exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
 <EuiFlexGroup>
   <Memo()
-    description="User Authentications"
+    description="User authentications"
     enableAreaChart={true}
     enableBarChart={true}
     fields={
       Array [
         Object {
           "color": "#00B3A4",
-          "description": "Success",
+          "description": "success",
           "icon": "check",
           "key": "authSuccess",
+          "name": "Succ.",
           "value": null,
         },
         Object {
           "color": "#920000",
-          "description": "Fail",
+          "description": "fail",
           "icon": "cross",
           "key": "authFailure",
+          "name": "Fail",
           "value": null,
         },
       ]
@@ -36,7 +38,7 @@ exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
       Array [
         Object {
           "color": "#DB1374",
-          "description": "Source",
+          "description": "source",
           "icon": "visMapCoordinate",
           "key": "uniqueSourceIps",
           "name": "Src.",
@@ -44,9 +46,10 @@ exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
         },
         Object {
           "color": "#490092",
-          "description": "Destination",
+          "description": "destination",
           "icon": "visMapCoordinate",
           "key": "uniqueDestinationIps",
+          "name": "Dest.",
           "value": null,
         },
       ]
@@ -78,23 +81,25 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
     key="hosts"
   />
   <Memo()
-    description="User Authentications"
+    description="User authentications"
     enableAreaChart={true}
     enableBarChart={true}
     fields={
       Array [
         Object {
           "color": "#00B3A4",
-          "description": "Success",
+          "description": "success",
           "icon": "check",
           "key": "authSuccess",
+          "name": "Succ.",
           "value": null,
         },
         Object {
           "color": "#920000",
-          "description": "Fail",
+          "description": "fail",
           "icon": "cross",
           "key": "authFailure",
+          "name": "Fail",
           "value": null,
         },
       ]
@@ -111,7 +116,7 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
       Array [
         Object {
           "color": "#DB1374",
-          "description": "Source",
+          "description": "source",
           "icon": "visMapCoordinate",
           "key": "uniqueSourceIps",
           "name": "Src.",
@@ -119,9 +124,10 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
         },
         Object {
           "color": "#490092",
-          "description": "Destination",
+          "description": "destination",
           "icon": "visMapCoordinate",
           "key": "uniqueDestinationIps",
+          "name": "Dest.",
           "value": null,
         },
       ]
