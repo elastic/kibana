@@ -46,7 +46,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   // Load repository
   const {
     error: repositoryError,
-    loading: loadingRepository,
+    isLoading: loadingRepository,
     data: repositoryData,
   } = useLoadRepository(name);
 

@@ -120,15 +120,19 @@ export function KueryBar() {
     let didCancel = false;
 
     async function loadIndexPattern() {
-      setState({ ...state, isLoadingIndexPattern: true });
+      setState(value => ({ ...value, isLoadingIndexPattern: true }));
       const indexPattern = await getAPMIndexPatternForKuery();
       if (didCancel) {
         return;
       }
       if (!indexPattern) {
-        setState({ ...state, isLoadingIndexPattern: false });
+        setState(value => ({ ...value, isLoadingIndexPattern: false }));
       } else {
-        setState({ ...state, indexPattern, isLoadingIndexPattern: false });
+        setState(value => ({
+          ...value,
+          indexPattern,
+          isLoadingIndexPattern: false
+        }));
       }
     }
     loadIndexPattern();

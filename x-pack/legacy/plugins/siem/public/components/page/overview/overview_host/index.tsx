@@ -48,15 +48,15 @@ export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQu
           subtitle={
             <FormattedMessage
               id="xpack.siem.overview.hostsSubtitle"
-              defaultMessage="Showing: Last 24 Hours"
+              defaultMessage="Showing: Last 24 hours"
             />
           }
           title={
-            <FormattedMessage id="xpack.siem.overview.hostsTitle" defaultMessage="Host Events" />
+            <FormattedMessage id="xpack.siem.overview.hostsTitle" defaultMessage="Host events" />
           }
         >
           <EuiButton href="#/link-to/hosts">
-            <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View Hosts" />
+            <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View hosts" />
           </EuiButton>
         </HeaderPanel>
 
