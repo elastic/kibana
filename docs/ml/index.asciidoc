@@ -28,8 +28,9 @@ experimental[] You can also upload a CSV, NDJSON, or log file (up to 100 MB in s
 The *Data Visualizer* identifies the file format and field mappings. You can then 
 optionally import that data into an {es} index.  
 
-If you have a trial or platinum license, you can <<ml-jobs,create {anomaly-jobs}>> 
-and manage jobs and {dfeeds} from the *Job Management* pane: 
+If you have a trial or platinum license, you can 
+<<ml-jobs,create {anomaly-jobs}>> and manage jobs and {dfeeds} from the *Job 
+Management* pane: 
 
 [role="screenshot"]
 image::ml/images/ml-job-management.jpg[Job Management]
