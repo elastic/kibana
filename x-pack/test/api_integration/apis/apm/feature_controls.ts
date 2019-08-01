@@ -48,7 +48,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
         expect(result.response).to.have.property('statusCode', 500);
         expect(result.response.body).to.have.property(
           'message',
-          "Cannot read property 'distribution' of undefined"
+          'An internal server error occurred'
         );
       },
     },
@@ -59,7 +59,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
         expect(result.response).to.have.property('statusCode', 500);
         expect(result.response.body).to.have.property(
           'message',
-          "Cannot read property 'distribution' of undefined"
+          'An internal server error occurred'
         );
       },
     },
@@ -70,7 +70,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
         expect(result.response).to.have.property('statusCode', 500);
         expect(result.response.body).to.have.property(
           'message',
-          "Cannot destructure property `timeseriesData` of 'undefined' or 'null'."
+          'An internal server error occurred'
         );
       },
     },
@@ -101,7 +101,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
         expect(result.response).to.have.property('statusCode', 500);
         expect(result.response.body).to.have.property(
           'message',
-          "Cannot read property 'transactions' of undefined"
+          'An internal server error occurred'
         );
       },
     },
@@ -132,7 +132,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
         expect(result.response).to.have.property('statusCode', 500);
         expect(result.response.body).to.have.property(
           'message',
-          "Cannot read property 'stats' of undefined"
+          'An internal server error occurred'
         );
       },
     },
