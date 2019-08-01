@@ -35,13 +35,11 @@ import { mapAndFlattenFilters } from '../filter/filter_manager/lib/map_and_flatt
 /** @internal */
 export const initLegacyModule = once((): void => {
   uiModules
-    .get('app/kibana')
-    .directive('filterBar', (reactDirective: any) => {
-      return reactDirective(wrapInI18nContext(FilterBar));
-    })
-    .directive('applyFiltersPopoverComponent', (reactDirective: any) => {
-      return reactDirective(wrapInI18nContext(ApplyFiltersPopover));
-    })
+    .get('app/kibana', ['react'])
+    .directive('filterBar', (reactDirective: any) => reactDirective(wrapInI18nContext(FilterBar)))
+    .directive('applyFiltersPopoverComponent', (reactDirective: any) =>
+      reactDirective(wrapInI18nContext(ApplyFiltersPopover))
+    )
     .directive('applyFiltersPopover', (indexPatterns: IndexPatterns) => {
       return {
         template,
@@ -57,13 +55,12 @@ export const initLegacyModule = once((): void => {
           // Each time the new filters change we want to rebuild (not just re-render) the "apply filters"
           // popover, because it has to reset its state whenever the new filters change. Setting a `key`
           // property on the component accomplishes this due to how React handles the `key` property.
-          $scope.$watch('filters', (filters: any) => {
-            mapAndFlattenFilters(indexPatterns, filters).then((mappedFilters: Filter[]) => {
-              $scope.state = {
-                filters: mappedFilters,
-                key: Date.now(),
-              };
-            });
+          $scope.$watch('filters', async (filters: any) => {
+            const mappedFilters: Filter[] = await mapAndFlattenFilters(indexPatterns, filters);
+            $scope.state = {
+              filters: mappedFilters,
+              key: Date.now(),
+            };
           });
         },
       };
