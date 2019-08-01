@@ -891,6 +891,7 @@ describe('calculateAllowedPrivileges', () => {
           feature: {
             feature1: ['all'],
             feature2: ['read'],
+            feature4: ['all'],
           },
         },
         {
@@ -929,8 +930,8 @@ describe('calculateAllowedPrivileges', () => {
             canUnassign: true, // feature 3 has no "read" privilege governed by space "all"
           },
           feature4: {
-            privileges: ['all', 'read'],
-            canUnassign: true,
+            privileges: ['all'],
+            canUnassign: false,
           },
         },
       },
