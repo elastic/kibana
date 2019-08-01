@@ -39,42 +39,36 @@ const expectedIndexPatterns = {
         type: 'date',
         aggregatable: true,
         searchable: true,
-        indexPatternId: '1',
       },
       {
         name: 'start_date',
         type: 'date',
         aggregatable: true,
         searchable: true,
-        indexPatternId: '1',
       },
       {
         name: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
-        indexPatternId: '1',
       },
       {
         name: 'memory',
         type: 'number',
         aggregatable: true,
         searchable: true,
-        indexPatternId: '1',
       },
       {
         name: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
-        indexPatternId: '1',
       },
       {
         name: 'dest',
         type: 'string',
         aggregatable: true,
         searchable: true,
-        indexPatternId: '1',
       },
     ],
   },
@@ -96,7 +90,6 @@ const expectedIndexPatterns = {
             time_zone: 'UTC',
           },
         },
-        indexPatternId: '2',
       },
       {
         name: 'bytes',
@@ -122,7 +115,6 @@ const expectedIndexPatterns = {
             agg: 'sum',
           },
         },
-        indexPatternId: '2',
       },
       {
         name: 'source',
@@ -134,7 +126,6 @@ const expectedIndexPatterns = {
             agg: 'terms',
           },
         },
-        indexPatternId: '2',
       },
     ],
   },
@@ -273,10 +264,7 @@ describe('IndexPattern Data Source', () => {
 
       it('should apply a bucketed aggregation for a string field', () => {
         const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
-          name: 'source',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
+          field: { name: 'source', type: 'string', aggregatable: true, searchable: true },
           indexPatternId: '1',
         });
 
@@ -316,10 +304,7 @@ describe('IndexPattern Data Source', () => {
 
       it('should apply a bucketed aggregation for a date field', () => {
         const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
-          name: 'timestamp',
-          type: 'date',
-          aggregatable: true,
-          searchable: true,
+          field: { name: 'timestamp', type: 'date', aggregatable: true, searchable: true },
           indexPatternId: '1',
         });
 
@@ -359,10 +344,7 @@ describe('IndexPattern Data Source', () => {
 
       it('should select a metric for a number field', () => {
         const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
-          name: 'bytes',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
+          field: { name: 'bytes', type: 'number', aggregatable: true, searchable: true },
           indexPatternId: '1',
         });
 
@@ -428,10 +410,7 @@ describe('IndexPattern Data Source', () => {
         };
 
         const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(state, {
-          name: 'bytes',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
+          field: { name: 'bytes', type: 'number', aggregatable: true, searchable: true },
           indexPatternId: '1',
         });
 
@@ -457,10 +436,7 @@ describe('IndexPattern Data Source', () => {
 
       it('should apply a bucketed aggregation for a string field', () => {
         const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
-          name: 'source',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
+          field: { name: 'source', type: 'string', aggregatable: true, searchable: true },
           indexPatternId: '1',
         });
 
@@ -500,10 +476,7 @@ describe('IndexPattern Data Source', () => {
 
       it('should apply a bucketed aggregation for a date field', () => {
         const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
-          name: 'timestamp',
-          type: 'date',
-          aggregatable: true,
-          searchable: true,
+          field: { name: 'timestamp', type: 'date', aggregatable: true, searchable: true },
           indexPatternId: '1',
         });
 
@@ -543,10 +516,7 @@ describe('IndexPattern Data Source', () => {
 
       it('should select a metric for a number field', () => {
         const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
-          name: 'bytes',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
+          field: { name: 'bytes', type: 'number', aggregatable: true, searchable: true },
           indexPatternId: '1',
         });
 
@@ -612,10 +582,7 @@ describe('IndexPattern Data Source', () => {
         };
 
         const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(state, {
-          name: 'bytes',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
+          field: { name: 'bytes', type: 'number', aggregatable: true, searchable: true },
           indexPatternId: '1',
         });
 
@@ -703,10 +670,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           {
-            name: 'start_date',
-            type: 'date',
-            aggregatable: true,
-            searchable: true,
+            field: { name: 'start_date', type: 'date', aggregatable: true, searchable: true },
             indexPatternId: '1',
           }
         );
@@ -733,10 +697,7 @@ describe('IndexPattern Data Source', () => {
 
       it('puts a date histogram column after the last bucket column on date field', () => {
         const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
-          name: 'timestamp',
-          type: 'date',
-          aggregatable: true,
-          searchable: true,
+          field: { name: 'timestamp', type: 'date', aggregatable: true, searchable: true },
           indexPatternId: '1',
         });
 
@@ -778,10 +739,7 @@ describe('IndexPattern Data Source', () => {
 
       it('does not use the same field for bucketing multiple times', () => {
         const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
-          name: 'source',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
+          field: { name: 'source', type: 'string', aggregatable: true, searchable: true },
           indexPatternId: '1',
         });
 
@@ -790,10 +748,7 @@ describe('IndexPattern Data Source', () => {
 
       it('prepends a terms column on string field', () => {
         const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
-          name: 'dest',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
+          field: { name: 'dest', type: 'string', aggregatable: true, searchable: true },
           indexPatternId: '1',
         });
 
@@ -819,10 +774,7 @@ describe('IndexPattern Data Source', () => {
 
       it('appends a metric column on a number field', () => {
         const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
-          name: 'memory',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
+          field: { name: 'memory', type: 'number', aggregatable: true, searchable: true },
           indexPatternId: '1',
         });
 
@@ -848,10 +800,7 @@ describe('IndexPattern Data Source', () => {
 
       it('appends a metric column with a different operation on a number field if field is already in use', () => {
         const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
-          name: 'bytes',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
+          field: { name: 'bytes', type: 'number', aggregatable: true, searchable: true },
           indexPatternId: '1',
         });
 
@@ -899,19 +848,21 @@ describe('IndexPattern Data Source', () => {
 
       it('suggests on the layer that matches by indexPatternId', () => {
         const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(initialState, {
-          name: 'timestamp',
-          type: 'date',
-          aggregatable: true,
-          searchable: true,
-          indexPatternId: '2',
-          aggregationRestrictions: {
-            date_histogram: {
-              agg: 'date_histogram',
-              fixed_interval: '1d',
-              delay: '7d',
-              time_zone: 'UTC',
+          field: {
+            name: 'timestamp',
+            type: 'date',
+            aggregatable: true,
+            searchable: true,
+            aggregationRestrictions: {
+              date_histogram: {
+                agg: 'date_histogram',
+                fixed_interval: '1d',
+                delay: '7d',
+                time_zone: 'UTC',
+              },
             },
           },
+          indexPatternId: '2',
         });
 
         expect(suggestions).toHaveLength(1);
@@ -962,10 +913,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           {
-            name: 'timestamp',
-            type: 'date',
-            aggregatable: true,
-            searchable: true,
+            field: { name: 'timestamp', type: 'date', aggregatable: true, searchable: true },
             indexPatternId: '1',
           }
         );
