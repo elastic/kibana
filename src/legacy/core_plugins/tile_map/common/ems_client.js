@@ -101,7 +101,6 @@ export class EMSClient {
     fetchFunction
   }) {
 
-    console.log('should proxy?', proxyElasticMapsServiceInMaps, proxyElasticMapsServiceInMapsOptions);
 
     this._queryParams = {
       elastic_tile_service_tos: 'agree',

@@ -56,7 +56,6 @@ export function getEMSClient() {
         tmsServiceDefaultRaster: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_TILES_RASTER_TILE_PATH}`)
       } : null;
 
-      console.log('make ems client', proxyElasticMapsServiceInMaps, proxyElasticMapsServiceInMaps);
       emsClient = new EMSClient({
         language: i18n.getLocale(),
         kbnVersion: chrome.getInjected('kbnPkgVersion'),
