@@ -84,6 +84,8 @@ describe('save editor frame state', () => {
           },
         },
         visualization: { things: '4_vis_persisted' },
+        query: { query: '', language: 'lucene' },
+        filters: [],
       },
       title: 'bbb',
       type: 'lens',

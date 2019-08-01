@@ -285,7 +285,9 @@ export function getIndexPatternDatasource({
     getMetaData(state: IndexPatternPrivateState) {
       return {
         filterableIndexPatterns: _.uniq(
-          Object.values(state.layers).map(layer => layer.indexPatternId)
+          Object.values(state.layers)
+            .map(layer => layer.indexPatternId)
+            .map(indexPatternId => state.indexPatterns[indexPatternId].title)
         ),
       };
     },

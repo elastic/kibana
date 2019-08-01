@@ -834,6 +834,31 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
+  describe('#getMetadata', () => {
+    it('should return the title of the index patterns', () => {
+      expect(
+        indexPatternDatasource.getMetaData({
+          indexPatterns: expectedIndexPatterns,
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: [],
+              columns: {},
+            },
+            second: {
+              indexPatternId: '2',
+              columnOrder: [],
+              columns: {},
+            },
+          },
+          currentIndexPatternId: '1',
+        })
+      ).toEqual({
+        filterableIndexPatterns: ['my-fake-index-pattern', 'my-fake-restricted-pattern'],
+      });
+    });
+  });
+
   describe('#getPublicAPI', () => {
     let publicAPI: DatasourcePublicAPI;
 

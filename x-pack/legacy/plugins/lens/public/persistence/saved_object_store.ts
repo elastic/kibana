@@ -5,6 +5,8 @@
  */
 
 import { SavedObjectAttributes } from 'target/types/server';
+import { Filter } from '@kbn/es-query';
+import { Query } from 'src/plugins/data/common';
 import { DatasourceMetaData } from '../types';
 
 export interface Document {
@@ -18,6 +20,8 @@ export interface Document {
     datasourceMetaData: DatasourceMetaData;
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
+    query: Query;
+    filters: Filter[];
   };
 }
 

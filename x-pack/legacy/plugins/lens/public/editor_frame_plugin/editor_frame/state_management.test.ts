@@ -21,10 +21,9 @@ describe('editor_frame state management', () => {
         initialDatasourceId: 'testDatasource',
         initialVisualizationId: 'testVis',
         ExpressionRenderer: createExpressionRendererMock(),
-        onIndexPatternChange: jest.fn(),
+        onChange: jest.fn(),
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
         query: { query: '', language: 'lucene' },
-        onStateChange: jest.fn(),
       };
     });
 
@@ -57,6 +56,8 @@ describe('editor_frame state management', () => {
             datasourceMetaData: {
               filterableIndexPatterns: [],
             },
+            query: { query: '', language: 'lucene' },
+            filters: [],
           },
           title: '',
           visualizationType: 'testVis',
@@ -344,6 +345,8 @@ describe('editor_frame state management', () => {
               datasourceMetaData: { filterableIndexPatterns: [] },
               datasourceStates: { a: { foo: 'c' } },
               visualization: { bar: 'd' },
+              query: { query: '', language: 'lucene' },
+              filters: [],
             },
             title: 'heyo!',
             type: 'lens',

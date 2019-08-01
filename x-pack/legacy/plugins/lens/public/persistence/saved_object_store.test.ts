@@ -34,6 +34,8 @@ describe('LensStore', () => {
             indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
           },
           visualization: { x: 'foo', y: 'baz' },
+          query: { query: '', language: 'lucene' },
+          filters: [],
         },
       });
 
@@ -49,6 +51,8 @@ describe('LensStore', () => {
             indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
           },
           visualization: { x: 'foo', y: 'baz' },
+          query: { query: '', language: 'lucene' },
+          filters: [],
         },
       });
 
@@ -65,6 +69,8 @@ describe('LensStore', () => {
             indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
           },
           visualization: { x: 'foo', y: 'baz' },
+          query: { query: '', language: 'lucene' },
+          filters: [],
         }),
       });
     });
@@ -83,6 +89,8 @@ describe('LensStore', () => {
             indexpattern: { type: 'index_pattern', indexPattern: 'lotr' },
           },
           visualization: { gear: ['staff', 'pointy hat'] },
+          query: { query: '', language: 'lucene' },
+          filters: [],
         },
       });
 
@@ -98,6 +106,8 @@ describe('LensStore', () => {
             indexpattern: { type: 'index_pattern', indexPattern: 'lotr' },
           },
           visualization: { gear: ['staff', 'pointy hat'] },
+          query: { query: '', language: 'lucene' },
+          filters: [],
         },
       });
 
@@ -113,6 +123,8 @@ describe('LensStore', () => {
             indexpattern: { type: 'index_pattern', indexPattern: 'lotr' },
           },
           visualization: { gear: ['staff', 'pointy hat'] },
+          query: { query: '', language: 'lucene' },
+          filters: [],
         }),
       });
     });

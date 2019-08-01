@@ -23,9 +23,8 @@ export interface EditorFrameProps {
   };
   query: Query;
 
-  // These callback are provided by the frame loader (app or embeddable) and are called by the frame
-  onIndexPatternChange: (newIndexPatterns: string[]) => void;
-  onStateChange: (newDoc: Document) => void;
+  // Frame loader (app or embeddable) is expected to call this when it loads and updates
+  onChange: (newState: { indexPatterns: string[]; doc: Document }) => void;
 }
 export interface EditorFrameInstance {
   mount: (element: Element, props: EditorFrameProps) => void;

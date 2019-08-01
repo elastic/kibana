@@ -96,9 +96,8 @@ describe('Lens App', () => {
               "toDate": "now",
             },
             "doc": undefined,
+            "onChange": [Function],
             "onError": [Function],
-            "onIndexPatternChange": [Function],
-            "onStateChange": [Function],
             "query": Object {
               "language": "kuery",
               "query": "",
@@ -118,10 +117,13 @@ describe('Lens App', () => {
       expect(args.docStorage.load).not.toHaveBeenCalled();
     });
 
-    it('loads a document if there is a document id', async () => {
+    it('loads a document and uses query if there is a document id', async () => {
       const args = makeDefaultArgs();
       args.editorFrame = frame;
-      (args.docStorage.load as jest.Mock).mockResolvedValue({ id: '1234' });
+      (args.docStorage.load as jest.Mock).mockResolvedValue({
+        id: '1234',
+        state: { query: 'fake query', datasourceMetaData: { filterableIndexPatterns: ['saved'] } },
+      });
 
       const instance = mount(<App {...args} />);
 
@@ -129,9 +131,26 @@ describe('Lens App', () => {
       await waitForPromises();
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
+      expect(args.QueryBar).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+          query: 'fake query',
+          indexPatterns: ['saved'],
+        }),
+        {}
+      );
       expect(frame.mount).toHaveBeenCalledWith(
         expect.any(Element),
-        expect.objectContaining({ doc: { id: '1234' } })
+        expect.objectContaining({
+          doc: {
+            id: '1234',
+            state: {
+              query: 'fake query',
+              datasourceMetaData: { filterableIndexPatterns: ['saved'] },
+            },
+          },
+        })
       );
     });
 
@@ -184,8 +203,8 @@ describe('Lens App', () => {
             .prop('disabled')
         ).toEqual(true);
 
-        const onStateChange = frame.mount.mock.calls[0][1].onStateChange;
-        onStateChange(('will save this' as unknown) as Document);
+        const onChange = frame.mount.mock.calls[0][1].onChange;
+        onChange({ indexPatterns: [], doc: ('will save this' as unknown) as Document });
 
         instance.update();
 
@@ -206,8 +225,8 @@ describe('Lens App', () => {
 
         expect(frame.mount).toHaveBeenCalledTimes(1);
 
-        const onStateChange = frame.mount.mock.calls[0][1].onStateChange;
-        onStateChange(({ id: undefined } as unknown) as Document);
+        const onChange = frame.mount.mock.calls[0][1].onChange;
+        onChange({ indexPatterns: [], doc: ({ id: undefined } as unknown) as Document });
 
         instance.update();
 
@@ -248,8 +267,8 @@ describe('Lens App', () => {
 
         const instance = mount(<App {...args} />);
 
-        const onStateChange = frame.mount.mock.calls[0][1].onStateChange;
-        onStateChange(({ id: undefined } as unknown) as Document);
+        const onChange = frame.mount.mock.calls[0][1].onChange;
+        onChange({ indexPatterns: [], doc: ({ id: undefined } as unknown) as Document });
 
         instance.update();
 
@@ -313,8 +332,8 @@ describe('Lens App', () => {
         {}
       );
 
-      const onIndexPatternChange = frame.mount.mock.calls[0][1].onIndexPatternChange;
-      onIndexPatternChange(['newIndex']);
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      onChange({ indexPatterns: ['newIndex'], doc: ({ id: undefined } as unknown) as Document });
 
       instance.update();
 

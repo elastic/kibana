@@ -38,8 +38,7 @@ describe('editor_frame plugin', () => {
       const instance = publicAPI.createInstance({});
       instance.mount(mountpoint, {
         onError: jest.fn(),
-        onIndexPatternChange: jest.fn(),
-        onStateChange: jest.fn(),
+        onChange: jest.fn(),
         dateRange: { fromDate: '', toDate: '' },
         query: { query: '', language: 'lucene' },
       });
@@ -52,8 +51,7 @@ describe('editor_frame plugin', () => {
     const instance = publicAPI.createInstance({});
     instance.mount(mountpoint, {
       onError: jest.fn(),
-      onIndexPatternChange: jest.fn(),
-      onStateChange: jest.fn(),
+      onChange: jest.fn(),
       dateRange: { fromDate: '', toDate: '' },
       query: { query: '', language: 'lucene' },
     });

@@ -35,8 +35,7 @@ export interface EditorFrameProps {
     toDate: string;
   };
   query: Query;
-  onIndexPatternChange: (indexPatterns: string[]) => void;
-  onStateChange: (newDoc: Document) => void;
+  onChange: (arg: { indexPatterns: string[]; doc: Document }) => void;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -157,8 +156,21 @@ export function EditorFrame(props: EditorFrameProps) {
     }
   }, [allLoaded, state.visualization.activeId, state.visualization.state]);
 
-  // There are two callbacks that the frame needs to call every time its internal state changes
+  // The frame needs to call onChange every time its internal state changes
   useEffect(() => {
+    const activeDatasource =
+      state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
+        ? props.datasourceMap[state.activeDatasourceId]
+        : undefined;
+
+    const visualization = state.visualization.activeId
+      ? props.visualizationMap[state.visualization.activeId]
+      : undefined;
+
+    if (!activeDatasource || !visualization) {
+      return;
+    }
+
     const filterableIndexPatterns: string[] = [];
     Object.entries(props.datasourceMap)
       .filter(([id, datasource]) => {
@@ -175,22 +187,7 @@ export function EditorFrame(props: EditorFrameProps) {
         );
       });
 
-    props.onIndexPatternChange(filterableIndexPatterns);
-
-    const activeDatasource =
-      state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
-        ? props.datasourceMap[state.activeDatasourceId]
-        : undefined;
-
-    const visualization = state.visualization.activeId
-      ? props.visualizationMap[state.visualization.activeId]
-      : undefined;
-
-    if (!activeDatasource || !visualization) {
-      return;
-    }
-
-    getSavedObjectFormat({
+    const doc = getSavedObjectFormat({
       activeDatasources: Object.keys(state.datasourceStates).reduce(
         (datasourceMap, datasourceId) => ({
           ...datasourceMap,
@@ -202,8 +199,11 @@ export function EditorFrame(props: EditorFrameProps) {
       state,
       activeDatasourceId: state.activeDatasourceId!,
       framePublicAPI,
-    }).then(doc => {
-      props.onStateChange(doc);
+    });
+
+    props.onChange({
+      indexPatterns: filterableIndexPatterns,
+      doc,
     });
   }, [state.datasourceStates, state.visualization, props.query, props.dateRange, state.title]);
 

@@ -19,13 +19,13 @@ export interface Props {
   activeDatasourceId: string;
 }
 
-export async function getSavedObjectFormat({
+export function getSavedObjectFormat({
   activeDatasources,
   state,
   visualization,
   framePublicAPI,
   activeDatasourceId,
-}: Props): Promise<Document> {
+}: Props): Document {
   const expression = buildExpression({
     visualization,
     visualizationState: state.visualization.state,
@@ -60,6 +60,8 @@ export async function getSavedObjectFormat({
         filterableIndexPatterns: _.uniq(filterableIndexPatterns),
       },
       visualization: visualization.getPersistableState(state.visualization.state),
+      query: framePublicAPI.query,
+      filters: [], // TODO: Support filters
     },
   };
 }

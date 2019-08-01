@@ -21,13 +21,7 @@ import {
 import { data } from '../../../../../../src/legacy/core_plugins/data/public/setup';
 import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
 import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
-import {
-  Datasource,
-  Visualization,
-  EditorFrameSetup,
-  EditorFrameInstance,
-  // ErrorCallback,
-} from '../types';
+import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
 import { EditorFrame } from './editor_frame';
 import { mergeTables } from './merge_tables';
 import { EmbeddableFactory } from './embeddable/embeddable_factory';
@@ -56,7 +50,7 @@ export class EditorFramePlugin {
   private createInstance(): EditorFrameInstance {
     let domElement: Element;
     return {
-      mount: (element, { doc, onError, dateRange, query, onIndexPatternChange, onStateChange }) => {
+      mount: (element, { doc, onError, dateRange, query, onChange }) => {
         domElement = element;
         const firstDatasourceId = Object.keys(this.datasources)[0];
         const firstVisualizationId = Object.keys(this.visualizations)[0];
@@ -76,8 +70,7 @@ export class EditorFramePlugin {
               doc={doc}
               dateRange={dateRange}
               query={query}
-              onIndexPatternChange={onIndexPatternChange}
-              onStateChange={onStateChange}
+              onChange={onChange}
             />
           </I18nProvider>,
           domElement

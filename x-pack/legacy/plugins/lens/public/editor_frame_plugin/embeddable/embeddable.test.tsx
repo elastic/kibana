@@ -20,6 +20,8 @@ const savedVis: Document = {
     datasourceMetaData: {
       filterableIndexPatterns: [],
     },
+    query: { query: '', language: 'lucene' },
+    filters: [],
   },
   title: 'My title',
   visualizationType: '',

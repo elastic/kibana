@@ -5,10 +5,10 @@
  */
 
 import _ from 'lodash';
+import React, { useState, useEffect, useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiLink } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
+import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { toastNotifications } from 'ui/notify';
 import { Chrome } from 'ui/chrome';
@@ -18,6 +18,7 @@ import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 
 interface State {
+  isLoading: boolean;
   dateRange: {
     fromDate: string;
     toDate: string;
@@ -50,6 +51,7 @@ export function App({
   const language = store.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage');
 
   const [state, setState] = useState<State>({
+    isLoading: !!docId,
     query: { query: '', language },
     dateRange: {
       fromDate: timeDefaults.from,
@@ -60,15 +62,21 @@ export function App({
 
   useEffect(() => {
     if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
+      setState({ ...state, isLoading: true });
       docStorage
         .load(docId)
         .then(doc => {
           setState({
             ...state,
+            isLoading: false,
             persistedDoc: doc,
+            query: doc.state.query,
+            indexPatterns: doc.state.datasourceMetaData.filterableIndexPatterns,
           });
         })
         .catch(() => {
+          setState({ ...state, isLoading: false });
+
           toastNotifications.addDanger(
             i18n.translate('xpack.lens.editorFrame.docLoadingError', {
               defaultMessage: 'Error loading saved document',
@@ -88,10 +96,59 @@ export function App({
     (!state.persistedDoc ||
       (state.persistedDoc && !_.isEqual(state.lastKnownDoc, state.persistedDoc)));
 
+  const onError = useCallback(
+    (e: { message: string }) =>
+      toastNotifications.addDanger({
+        title: e.message,
+      }),
+    []
+  );
+
   return (
     <I18nProvider>
       <div className="lnsApp">
         <div className="lnsAppHeader">
+          <nav>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  data-test-subj="lnsApp_saveButton"
+                  onClick={() => {
+                    if (isSaveable && state.lastKnownDoc) {
+                      docStorage
+                        .save(state.lastKnownDoc)
+                        .then(({ id }) => {
+                          // Prevents unnecessary network request and disables save button
+                          const newDoc = { ...(state.lastKnownDoc as Document), id };
+                          setState({
+                            ...state,
+                            persistedDoc: newDoc,
+                            lastKnownDoc: newDoc,
+                          });
+                          if (docId !== id) {
+                            redirectTo(id);
+                          }
+                        })
+                        .catch(reason => {
+                          toastNotifications.addDanger(
+                            i18n.translate('xpack.lens.editorFrame.docSavingError', {
+                              defaultMessage: 'Error saving document {reason}',
+                              values: { reason },
+                            })
+                          );
+                        });
+                    }
+                  }}
+                  color={isSaveable ? 'primary' : 'subdued'}
+                  disabled={!isSaveable}
+                >
+                  {i18n.translate('xpack.lens.editorFrame.save', {
+                    defaultMessage: 'Save',
+                  })}
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </nav>
           <QueryBar
             data-test-subj="lnsApp_queryBar"
             screenTitle={'lens'}
@@ -114,71 +171,27 @@ export function App({
             dateRangeFrom={state.dateRange && state.dateRange.fromDate}
             dateRangeTo={state.dateRange && state.dateRange.toDate}
           />
-
-          <nav>
-            <EuiLink
-              data-test-subj="lnsApp_saveButton"
-              onClick={() => {
-                if (isSaveable && state.lastKnownDoc) {
-                  docStorage
-                    .save(state.lastKnownDoc)
-                    .then(({ id }) => {
-                      // Prevents unnecessary network request and disables save button
-                      const newDoc = { ...(state.lastKnownDoc as Document), id };
-                      setState({
-                        ...state,
-                        persistedDoc: newDoc,
-                        lastKnownDoc: newDoc,
-                      });
-                      if (docId !== id) {
-                        redirectTo(id);
-                      }
-                    })
-                    .catch(reason => {
-                      toastNotifications.addDanger(
-                        i18n.translate('xpack.lens.editorFrame.docSavingError', {
-                          defaultMessage: 'Error saving document {reason}',
-                          values: { reason },
-                        })
-                      );
-                    });
-                }
-              }}
-              color={isSaveable ? 'primary' : 'subdued'}
-              disabled={!isSaveable}
-            >
-              {i18n.translate('xpack.lens.editorFrame.save', {
-                defaultMessage: 'Save',
-              })}
-            </EuiLink>
-          </nav>
         </div>
 
-        <NativeRenderer
-          className="lnsAppFrame"
-          render={editorFrame.mount}
-          nativeProps={{
-            dateRange: state.dateRange,
-            query: state.query,
-            doc: state.persistedDoc,
-            onIndexPatternChange: (newIndexPatterns: string[]) => {
-              setState({
-                ...state,
-                indexPatterns: newIndexPatterns,
-              });
-            },
-            onStateChange: (newDoc: Document) => {
-              setState({
-                ...state,
-                lastKnownDoc: newDoc,
-              });
-            },
-            onError: (e: { message: string }) =>
-              toastNotifications.addDanger({
-                title: e.message,
-              }),
-          }}
-        />
+        {(!state.isLoading || state.persistedDoc) && (
+          <NativeRenderer
+            className="lnsAppFrame"
+            render={editorFrame.mount}
+            nativeProps={{
+              dateRange: state.dateRange,
+              query: state.query,
+              doc: state.persistedDoc,
+              onError,
+              onChange: ({ indexPatterns, doc }) => {
+                setState({
+                  ...state,
+                  indexPatterns,
+                  lastKnownDoc: doc,
+                });
+              },
+            }}
+          />
+        )}
       </div>
     </I18nProvider>
   );
