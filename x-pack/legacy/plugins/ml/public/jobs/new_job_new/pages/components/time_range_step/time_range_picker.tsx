@@ -9,26 +9,26 @@ import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
 import { EuiDatePickerRange, EuiDatePicker } from '@elastic/eui';
 
 import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';
-import { Duration } from './time_range';
+import { TimeRange } from './time_range';
 
 const WIDTH = '512px';
 
 interface Props {
-  setDuration: (d: Duration) => void;
-  duration: Duration;
+  setTimeRange: (d: TimeRange) => void;
+  timeRange: TimeRange;
 }
 
 type Moment = moment.Moment;
 
-export const TimeRangePicker: FC<Props> = ({ setDuration, duration }) => {
+export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
   const kibanaContext = useContext(KibanaContext);
   if (!isKibanaContext(kibanaContext)) {
     return null;
   }
   const dateFormat = kibanaContext.kibanaConfig.get('dateFormat');
 
-  const [startMoment, setStartMoment] = useState<Moment | undefined>(moment(duration.start));
-  const [endMoment, setEndMoment] = useState<Moment | undefined>(moment(duration.end));
+  const [startMoment, setStartMoment] = useState<Moment | undefined>(moment(timeRange.start));
+  const [endMoment, setEndMoment] = useState<Moment | undefined>(moment(timeRange.end));
 
   function handleChangeStart(date: Moment | null) {
     setStartMoment(date || undefined);
@@ -41,7 +41,7 @@ export const TimeRangePicker: FC<Props> = ({ setDuration, duration }) => {
   // update the parent start and end if the timepicker changes
   useEffect(() => {
     if (startMoment !== undefined && endMoment !== undefined) {
-      setDuration({
+      setTimeRange({
         start: startMoment.valueOf(),
         end: endMoment.valueOf(),
       });
@@ -52,9 +52,9 @@ export const TimeRangePicker: FC<Props> = ({ setDuration, duration }) => {
   // the parent start and end updates.
   // this happens if the use full data button is pressed.
   useEffect(() => {
-    setStartMoment(moment(duration.start));
-    setEndMoment(moment(duration.end));
-  }, [JSON.stringify(duration)]);
+    setStartMoment(moment(timeRange.start));
+    setEndMoment(moment(timeRange.end));
+  }, [JSON.stringify(timeRange)]);
 
   return (
     <Fragment>

@@ -7,6 +7,7 @@
 import { Detector } from '../configs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 
+// populate the detectors with Field and Agg objects loaded from the job capabilities service
 export function getRichDetectors(detectors: Detector[]) {
   return detectors.map(d => {
     return {

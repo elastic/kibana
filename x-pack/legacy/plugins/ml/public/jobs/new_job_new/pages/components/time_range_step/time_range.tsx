@@ -21,7 +21,7 @@ import { GetTimeFieldRangeResponse } from '../../../../../services/ml_api_servic
 import { mlJobService } from '../../../../../services/job_service';
 import { ml } from '../../../../../services/ml_api_service';
 
-export interface Duration {
+export interface TimeRange {
   start: number;
   end: number;
 }
@@ -39,7 +39,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     chartInterval,
   } = useContext(JobCreatorContext);
 
-  const [duration, setDuration] = useState<Duration>({
+  const [timeRange, setTimeRange] = useState<TimeRange>({
     start: jobCreator.start,
     end: jobCreator.end,
   });
@@ -55,7 +55,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
   }
 
   useEffect(() => {
-    const { start, end } = duration;
+    const { start, end } = timeRange;
     jobCreator.setTimeRange(start, end);
     chartInterval.setBounds({
       min: moment(start),
@@ -69,17 +69,17 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
 
     jobCreatorUpdate();
     loadChart();
-  }, [JSON.stringify(duration)]);
+  }, [JSON.stringify(timeRange)]);
 
   useEffect(() => {
-    setDuration({
+    setTimeRange({
       start: jobCreator.start,
       end: jobCreator.end,
     });
   }, [jobCreatorUpdated]);
 
   function fullTimeRangeCallback(range: GetTimeFieldRangeResponse) {
-    setDuration({
+    setTimeRange({
       start: range.start.epoch,
       end: range.end.epoch,
     });
@@ -93,7 +93,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
           timeFieldName,
           query,
         });
-        setDuration({
+        setTimeRange({
           start: resp.start.epoch,
           end: resp.end.epoch,
         });
@@ -113,7 +113,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
         <Fragment>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <TimeRangePicker setDuration={setDuration} duration={duration} />
+              <TimeRangePicker setTimeRange={setTimeRange} timeRange={timeRange} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FullTimeRangeSelector
