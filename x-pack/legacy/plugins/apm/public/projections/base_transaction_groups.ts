@@ -8,16 +8,23 @@ import { Setup } from '../../server/lib/helpers/setup_request';
 import {
   PROCESSOR_EVENT,
   TRANSACTION_SAMPLED,
-  TRANSACTION_NAME
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE
 } from '../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
 
 export function getBaseTransactionGroupsProjection({
-  setup
+  setup,
+  transactionType
 }: {
   setup: Setup;
+  transactionType?: string;
 }) {
   const { start, end, uiFiltersES, config } = setup;
+
+  const transactionTypeFilter = transactionType
+    ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
+    : [];
 
   const bool = {
     // prefer sampled transactions
@@ -25,6 +32,7 @@ export function getBaseTransactionGroupsProjection({
     filter: [
       { range: rangeFilter(start, end) },
       { term: { [PROCESSOR_EVENT]: 'transaction' } },
+      ...transactionTypeFilter,
       ...uiFiltersES
     ]
   };

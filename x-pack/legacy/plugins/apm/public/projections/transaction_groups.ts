@@ -8,7 +8,7 @@ import { Setup } from '../../server/lib/helpers/setup_request';
 import { getBaseTransactionGroupsProjection } from './base_transaction_groups';
 import {
   SERVICE_NAME,
-  TRANSACTION_TYPE
+  TRANSACTION_NAME
 } from '../../common/elasticsearch_fieldnames';
 import { mergeProjection } from './util/merge_projection';
 
@@ -24,10 +24,13 @@ export function getTransactionGroupsProjection({
   transactionName?: string;
 }) {
   const transactionNameFilter = transactionName
-    ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
+    ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
     : [];
 
-  const projection = getBaseTransactionGroupsProjection({ setup });
+  const projection = getBaseTransactionGroupsProjection({
+    setup,
+    transactionType
+  });
   return mergeProjection(projection, {
     body: {
       query: {
@@ -35,7 +38,6 @@ export function getTransactionGroupsProjection({
           filter: [
             ...projection.body.query.bool.filter,
             { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [TRANSACTION_TYPE]: transactionType } },
             ...transactionNameFilter
           ]
         }

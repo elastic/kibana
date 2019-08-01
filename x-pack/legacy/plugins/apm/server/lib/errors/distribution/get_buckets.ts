@@ -8,7 +8,8 @@ import { ESFilter } from 'elasticsearch';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
-  SERVICE_NAME
+  SERVICE_NAME,
+  TRANSACTION_TYPE
 } from '../../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../helpers/range_filter';
 import { Setup } from '../../helpers/setup_request';
@@ -16,11 +17,13 @@ import { Setup } from '../../helpers/setup_request';
 export async function getBuckets({
   serviceName,
   groupId,
+  transactionType,
   bucketSize,
   setup
 }: {
   serviceName: string;
   groupId?: string;
+  transactionType?: string;
   bucketSize: number;
   setup: Setup;
 }) {
@@ -34,6 +37,10 @@ export async function getBuckets({
 
   if (groupId) {
     filter.push({ term: { [ERROR_GROUP_ID]: groupId } });
+  }
+
+  if (transactionType) {
+    filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
   }
 
   const params = {

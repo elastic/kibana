@@ -12,6 +12,7 @@ import { UIFilters } from '../../../../typings/ui-filters';
 
 export async function loadErrorGroupList({
   serviceName,
+  transactionType,
   start,
   end,
   uiFilters,
@@ -19,6 +20,7 @@ export async function loadErrorGroupList({
   sortDirection
 }: {
   serviceName: string;
+  transactionType?: string;
   start: string;
   end: string;
   uiFilters: UIFilters;
@@ -28,6 +30,7 @@ export async function loadErrorGroupList({
   return callApi<ErrorGroupListAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/errors`,
     query: {
+      transactionType,
       start,
       end,
       sortField,
@@ -62,12 +65,14 @@ export async function loadErrorGroupDetails({
 
 export async function loadErrorDistribution({
   serviceName,
+  transactionType,
   start,
   end,
   uiFilters,
   errorGroupId
 }: {
   serviceName: string;
+  transactionType?: string;
   start: string;
   end: string;
   uiFilters: UIFilters;
@@ -76,6 +81,7 @@ export async function loadErrorDistribution({
   return callApi<ErrorDistributionAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/errors/distribution`,
     query: {
+      transactionType,
       start,
       end,
       groupId: errorGroupId,

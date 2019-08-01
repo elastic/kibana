@@ -36,7 +36,8 @@ describe('transaction group queries', () => {
     mock = await inspectSearchParams(setup =>
       transactionGroupsFetcher(
         {
-          type: 'top_traces'
+          type: 'top_traces',
+          transactionType: 'bar'
         },
         setup
       )

@@ -24,11 +24,13 @@ export type ErrorGroupListAPIResponse = PromiseReturnType<
 
 export async function getErrorGroups({
   serviceName,
+  transactionType,
   sortField,
   sortDirection = 'desc',
   setup
 }: {
   serviceName: string;
+  transactionType?: string;
   sortField: string;
   sortDirection: string;
   setup: Setup;
@@ -38,7 +40,11 @@ export async function getErrorGroups({
   // sort buckets by last occurrence of error
   const sortByLatestOccurrence = sortField === 'latestOccurrenceAt';
 
-  const projection = getErrorGroupsProjection({ setup, serviceName });
+  const projection = getErrorGroupsProjection({
+    setup,
+    serviceName,
+    transactionType
+  });
 
   const params = mergeProjection(projection, {
     body: {

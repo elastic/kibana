@@ -131,6 +131,86 @@ Object {
 }
 `;
 
+exports[`error queries fetches multiple error groups for a transactionType 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "error_groups": Object {
+        "aggs": Object {
+          "max_timestamp": Object {
+            "max": Object {
+              "field": "@timestamp",
+            },
+          },
+          "sample": Object {
+            "top_hits": Object {
+              "_source": Array [
+                "error.log.message",
+                "error.exception.message",
+                "error.exception.handled",
+                "error.culprit",
+                "error.grouping_key",
+                "@timestamp",
+              ],
+              "size": 1,
+              "sort": Array [
+                Object {
+                  "@timestamp": "desc",
+                },
+              ],
+            },
+          },
+        },
+        "terms": Object {
+          "field": "error.grouping_key",
+          "order": Object {
+            "max_timestamp": "asc",
+          },
+          "size": 500,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "serviceName",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "error",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.type": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
 exports[`error queries fetches multiple error groups when sortField = latestOccurrenceAt 1`] = `
 Object {
   "body": Object {

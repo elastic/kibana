@@ -32,7 +32,10 @@ describe('transactionGroupsFetcher', () => {
   describe('type: top_traces', () => {
     it('should call client.search with correct query', async () => {
       const setup = getSetup();
-      await transactionGroupsFetcher({ type: 'top_traces' }, setup);
+      await transactionGroupsFetcher(
+        { type: 'top_traces', transactionType: 'foo' },
+        setup
+      );
       expect(setup.client.search.mock.calls).toMatchSnapshot();
     });
   });

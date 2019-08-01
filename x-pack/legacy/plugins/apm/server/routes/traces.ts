@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import Joi from 'joi';
 import { InternalCoreSetup } from 'src/core/server';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -27,15 +28,19 @@ export function initTracesApi(core: InternalCoreSetup) {
     path: ROOT,
     options: {
       validate: {
-        query: withDefaultValidators()
+        query: withDefaultValidators({
+          transactionType: Joi.string()
+        })
       },
       tags: ['access:apm']
     },
     handler: async req => {
       const setup = await setupRequest(req);
-      return getTransactionGroupList({ type: 'top_traces' }, setup).catch(
-        defaultErrorHandler
-      );
+      const { transactionType } = req.query as { transactionType?: string };
+      return getTransactionGroupList(
+        { type: 'top_traces', transactionType },
+        setup
+      ).catch(defaultErrorHandler);
     }
   });
 

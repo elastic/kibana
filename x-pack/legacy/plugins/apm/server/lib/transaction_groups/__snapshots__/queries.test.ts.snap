@@ -68,6 +68,11 @@ Object {
           },
           Object {
             "term": Object {
+              "transaction.type": "bar",
+            },
+          },
+          Object {
+            "term": Object {
               "service.environment": "prod",
             },
           },
@@ -162,17 +167,17 @@ Object {
           },
           Object {
             "term": Object {
+              "transaction.type": "bar",
+            },
+          },
+          Object {
+            "term": Object {
               "service.environment": "prod",
             },
           },
           Object {
             "term": Object {
               "service.name": "foo",
-            },
-          },
-          Object {
-            "term": Object {
-              "transaction.type": "bar",
             },
           },
         ],

@@ -57,6 +57,20 @@ describe('error queries', () => {
     expect(mock.params).toMatchSnapshot();
   });
 
+  it('fetches multiple error groups for a transactionType', async () => {
+    mock = await inspectSearchParams(setup =>
+      getErrorGroups({
+        sortDirection: 'asc',
+        sortField: 'latestOccurrenceAt',
+        serviceName: 'serviceName',
+        transactionType: 'foo',
+        setup
+      })
+    );
+
+    expect(mock.params).toMatchSnapshot();
+  });
+
   it('fetches trace errors', async () => {
     mock = await inspectSearchParams(setup =>
       getTraceErrorsPerTransaction('foo', setup)

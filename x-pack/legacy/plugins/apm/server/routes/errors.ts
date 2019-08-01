@@ -28,7 +28,8 @@ export function initErrorsApi(core: InternalCoreSetup) {
       validate: {
         query: withDefaultValidators({
           sortField: Joi.string(),
-          sortDirection: Joi.string()
+          sortDirection: Joi.string(),
+          transactionType: Joi.string()
         })
       },
       tags: ['access:apm']
@@ -36,13 +37,15 @@ export function initErrorsApi(core: InternalCoreSetup) {
     handler: async req => {
       const setup = await setupRequest(req);
       const { serviceName } = req.params;
-      const { sortField, sortDirection } = req.query as {
+      const { sortField, sortDirection, transactionType } = req.query as {
+        transactionType?: string;
         sortField: string;
         sortDirection: string;
       };
 
       return getErrorGroups({
         serviceName,
+        transactionType,
         sortField,
         sortDirection,
         setup
@@ -74,7 +77,8 @@ export function initErrorsApi(core: InternalCoreSetup) {
     options: {
       validate: {
         query: withDefaultValidators({
-          groupId: Joi.string()
+          groupId: Joi.string(),
+          transactionType: Joi.string()
         })
       },
       tags: ['access:apm']
@@ -82,10 +86,16 @@ export function initErrorsApi(core: InternalCoreSetup) {
     handler: async req => {
       const setup = await setupRequest(req);
       const { serviceName } = req.params;
-      const { groupId } = req.query as { groupId?: string };
-      return getErrorDistribution({ serviceName, groupId, setup }).catch(
-        defaultErrorHandler
-      );
+      const { groupId, transactionType } = req.query as {
+        groupId?: string;
+        transactionType?: string;
+      };
+      return getErrorDistribution({
+        serviceName,
+        groupId,
+        transactionType,
+        setup
+      }).catch(defaultErrorHandler);
     }
   });
 }
