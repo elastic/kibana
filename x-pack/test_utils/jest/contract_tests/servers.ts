@@ -34,14 +34,30 @@ function _parseESConnectionString(connectionString: string) {
 }
 
 /**
+ * Set a global variable during global setup that can be safely acceded while running tests.
+ * See https://github.com/facebook/jest/issues/7184
+ * @param serverConfig
+ */
+function _setJestSafeGlobalServerConfig(serverConfig: ESServerConfig) {
+  process.env.__JEST__ESServer = JSON.stringify(serverConfig);
+}
+
+/**
+ * Get previously set global variable
+ */
+function _getJestSafeGlobalServerConfig(): ESServerConfig | undefined {
+  if (process.env.__JEST__ESServer) {
+    return JSON.parse(process.env.__JEST__ESServer);
+  }
+}
+
+/**
  * Create a new shared ES server,
  * this function should not be used outside of jest globalSetup
  */
 export async function _createSharedServer() {
   if (process.env.ES_SERVER_URL) {
-    process.env.__JEST__ESServer = JSON.stringify(
-      _parseESConnectionString(process.env.ES_SERVER_URL)
-    );
+    _setJestSafeGlobalServerConfig(_parseESConnectionString(process.env.ES_SERVER_URL));
     return;
   }
 
@@ -54,7 +70,7 @@ export async function _createSharedServer() {
   const { hosts, username, password } = ESServer;
 
   // Use process.env here as globals are set by jest testEnvironment
-  process.env.__JEST__ESServer = JSON.stringify({
+  _setJestSafeGlobalServerConfig({
     hosts,
     username,
     password,
@@ -72,10 +88,11 @@ export async function _stopSharedServer() {
 }
 
 export function getSharedESServer(): ESServerConfig {
-  if (!process.env.__JEST__ESServer) {
+  const esConfig = _getJestSafeGlobalServerConfig();
+  if (!esConfig) {
     throw new Error('Enable to get shared ES Server');
   }
-  return JSON.parse(process.env.__JEST__ESServer);
+  return esConfig;
 }
 
 /**
