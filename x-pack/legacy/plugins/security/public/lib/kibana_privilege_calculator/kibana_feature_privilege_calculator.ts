@@ -104,17 +104,10 @@ export class KibanaFeaturePrivilegeCalculator {
     });
 
     if (!isGlobalPrivilege || !ignoreAssigned) {
-      const isDirectlyAssigned = isGlobalPrivilege && hasAssignedFeaturePrivilege;
-      const actions = this.getFeatureActions(featureId, assignedGlobalFeaturePrivilege);
-      const directlyAssignedPrivilegeMorePermissiveThanInherited =
-        isDirectlyAssigned && !areActionsFullyCovered(this.assignedGlobalBaseActions, actions)
-          ? true
-          : undefined;
       scenarios.push({
         actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
-        actions,
-        isDirectlyAssigned,
-        directlyAssignedPrivilegeMorePermissiveThanInherited,
+        actions: this.getFeatureActions(featureId, assignedGlobalFeaturePrivilege),
+        isDirectlyAssigned: isGlobalPrivilege && hasAssignedFeaturePrivilege,
         ...this.buildSupercededFields(
           hasAssignedFeaturePrivilege && !isGlobalPrivilege,
           assignedFeaturePrivilege,
@@ -157,9 +150,7 @@ export class KibanaFeaturePrivilegeCalculator {
       const directlyAssignedPrivilegeMorePermissiveThanInherited = !areActionsFullyCovered(
         this.assignedGlobalBaseActions,
         actions
-      )
-        ? true
-        : undefined;
+      );
       scenarios.push({
         actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
         isDirectlyAssigned: true,
