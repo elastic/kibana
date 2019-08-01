@@ -20,9 +20,9 @@
 import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 
-import { CoreSetup, CoreStart } from '../';
 import { ConfigPath, EnvironmentMode } from '../config';
 import { LoggerFactory } from '../logging';
+import { CoreSetup, CoreStart } from '..';
 
 export type PluginConfigSchema = Type<unknown> | null;
 

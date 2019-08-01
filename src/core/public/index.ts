@@ -67,8 +67,6 @@ import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './u
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
-// import { PluginOpaqueId } from '../server';
-// export { PluginOpaqueId } from '../server';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
