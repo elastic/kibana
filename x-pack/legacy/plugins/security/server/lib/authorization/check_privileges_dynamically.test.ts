@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesPlugin } from '../../../../spaces/types';
+import { SpacesPlugin } from '../../../../spaces';
 import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 
@@ -18,6 +18,10 @@ test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
   const mockSpaces = {
     isEnabled: true,
     getSpaceId: jest.fn().mockReturnValue(spaceId),
+    spaceIdToNamespace: jest.fn(),
+    namespaceToSpaceId: jest.fn(),
+    getBasePath: jest.fn(),
+    getScopedSpacesClient: jest.fn(),
   } as OptionalPlugin<SpacesPlugin>;
   const request = Symbol();
   const privilegeOrPrivileges = ['foo', 'bar'];
