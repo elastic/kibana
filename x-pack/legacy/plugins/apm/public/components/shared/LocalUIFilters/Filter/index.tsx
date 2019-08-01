@@ -156,9 +156,8 @@ const Filter: React.FC<Props> = props => {
                     }}
                     size="s"
                   >
-                    {i18n.translate('xpack.apm.applyFilter', {
-                      defaultMessage: 'Apply options',
-                      values: { title }
+                    {i18n.translate('xpack.apm.applyOptions', {
+                      defaultMessage: 'Apply options'
                     })}
                   </ApplyButton>
                 </EuiFlexItem>
