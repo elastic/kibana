@@ -16,8 +16,7 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
   const es = getService('es');
   const retry = getService('retry');
 
-  // FAILING: https://github.com/elastic/kibana/issues/42263
-  describe.skip('alerts', () => {
+  describe('alerts', () => {
     let esTestIndexName: string;
     const createdAlertIds: string[] = [];
 
@@ -69,7 +68,7 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
         .then((resp: any) => {
           createdAlertIds.push(resp.body.id);
         });
-      const alertTestRecord = await retry.tryForTime(5000, async () => {
+      const alertTestRecord = await retry.tryForTime(15000, async () => {
         const searchResult = await es.search({
           index: esTestIndexName,
           body: {
@@ -103,7 +102,7 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
           reference: 'create-test-1',
         },
       });
-      const actionTestRecord = await retry.tryForTime(5000, async () => {
+      const actionTestRecord = await retry.tryForTime(15000, async () => {
         const searchResult = await es.search({
           index: esTestIndexName,
           body: {
@@ -130,8 +129,10 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
       });
       expect(actionTestRecord._source).to.eql({
         config: {
-          encrypted: 'This value should be encrypted',
           unencrypted: `This value shouldn't get encrypted`,
+        },
+        secrets: {
+          encrypted: 'This value should be encrypted',
         },
         params: {
           index: esTestIndexName,
@@ -176,7 +177,7 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
         .expect(200);
       createdAlertIds.push(createdAlert.id);
 
-      const scheduledActionTask = await retry.tryForTime(5000, async () => {
+      const scheduledActionTask = await retry.tryForTime(15000, async () => {
         const searchResult = await es.search({
           index: '.kibana_task_manager',
           body: {
