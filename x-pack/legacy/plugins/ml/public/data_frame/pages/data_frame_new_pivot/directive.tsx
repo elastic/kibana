@@ -11,10 +11,11 @@ import ReactDOM from 'react-dom';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
 import { I18nContext } from 'ui/i18n';
 import { IPrivate } from 'ui/private';
 import { timefilter } from 'ui/timefilter';
+
 import { InjectorService } from '../../../../common/types/angular';
 
 // @ts-ignore
@@ -26,7 +27,7 @@ type CreateSearchItems = () => {
   combinedQuery: any;
 };
 
-import { KibanaContext } from '../../../contexts/kibana';
+import { KibanaConfigTypeFix, KibanaContext } from '../../../contexts/kibana/kibana_context';
 import { Page } from './page';
 
 module.directive('mlNewDataFrame', ($injector: InjectorService) => {
@@ -34,9 +35,9 @@ module.directive('mlNewDataFrame', ($injector: InjectorService) => {
     scope: {},
     restrict: 'E',
     link: (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
-      const indexPatterns = $injector.get('indexPatterns');
+      const indexPatterns = $injector.get<IndexPatterns>('indexPatterns');
       const kbnBaseUrl = $injector.get<string>('kbnBaseUrl');
-      const kibanaConfig = $injector.get('config');
+      const kibanaConfig = $injector.get<KibanaConfigTypeFix>('config');
       const Private: IPrivate = $injector.get('Private');
 
       timefilter.disableTimeRangeSelector();

@@ -150,6 +150,18 @@ export const StepCreateForm: SFC<Props> = React.memo(
 
         const id = await newIndexPattern.create();
 
+        // id returns false if there's a duplicate index pattern.
+        if (id === false) {
+          toastNotifications.addDanger(
+            i18n.translate('xpack.ml.dataframe.stepCreateForm.duplicateIndexPatternErrorMessage', {
+              defaultMessage:
+                'An error occurred creating the Kibana index pattern {indexPatternName}: The index pattern already exists.',
+              values: { indexPatternName },
+            })
+          );
+          return;
+        }
+
         // check if there's a default index pattern, if not,
         // set the newly created one as the default index pattern.
         if (!kibanaContext.kibanaConfig.get('defaultIndex')) {
@@ -157,7 +169,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
         }
 
         toastNotifications.addSuccess(
-          i18n.translate('xpack.ml.dataframe.stepCreateForm.reateIndexPatternSuccessMessage', {
+          i18n.translate('xpack.ml.dataframe.stepCreateForm.createIndexPatternSuccessMessage', {
             defaultMessage: 'Kibana index pattern {indexPatternName} created successfully.',
             values: { indexPatternName },
           })

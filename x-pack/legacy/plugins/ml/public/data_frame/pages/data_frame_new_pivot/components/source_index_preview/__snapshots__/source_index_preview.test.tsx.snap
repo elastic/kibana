@@ -11,10 +11,33 @@ exports[`Data Frame: <SourceIndexPreview /> Minimal initialization 1`] = `
           "id": "the-index-pattern-id",
           "title": "the-index-pattern-title",
         },
-        "currentSavedSearch": Object {},
-        "indexPatterns": Object {},
+        "currentSavedSearch": Object {
+          "columns": Array [],
+          "destroy": [Function],
+          "id": "the-saved-search-id",
+          "searchSource": Object {},
+          "sort": Array [],
+          "title": "the-saved-search-title",
+        },
+        "indexPatterns": _temp {
+          "clearCache": [MockFunction],
+          "config": Object {},
+          "fieldFormats": Array [],
+          "get": [MockFunction],
+          "getDefault": [MockFunction],
+          "getFields": [MockFunction],
+          "getIds": [MockFunction],
+          "getTitles": [MockFunction],
+          "make": [MockFunction],
+          "refreshSavedObjectsCache": Object {},
+          "savedObjectsClient": Object {},
+        },
         "kbnBaseUrl": "url",
-        "kibanaConfig": Object {},
+        "kibanaConfig": Object {
+          "get": [Function],
+          "has": [Function],
+          "set": [Function],
+        },
       }
     }
   >

@@ -6,15 +6,23 @@
 
 import React from 'react';
 
-import { IndexPattern } from 'ui/index_patterns';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
+
+import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
+
+// set() method is missing in original d.ts
+export interface KibanaConfigTypeFix extends KibanaConfig {
+  set(key: string, value: any): void;
+}
 
 export interface KibanaContextValue {
-  combinedQuery?: any;
-  currentIndexPattern?: IndexPattern;
-  currentSavedSearch?: any;
-  indexPatterns?: any;
-  kbnBaseUrl?: string;
-  kibanaConfig?: any;
+  combinedQuery: any;
+  currentIndexPattern: IndexPattern;
+  currentSavedSearch: SavedSearch;
+  indexPatterns: IndexPatterns;
+  kbnBaseUrl: string;
+  kibanaConfig: KibanaConfigTypeFix;
 }
 
 export type SavedSearchQuery = object;
@@ -22,8 +30,8 @@ export type SavedSearchQuery = object;
 // This context provides dependencies which can be injected
 // via angularjs only (like services, currentIndexPattern etc.).
 // Because we cannot just import these dependencies, the default value
-// for the context is just {} and the value's type has optional
-// attributes for the angularjs based dependencies. Therefore, the
+// for the context is just {} and of type `Partial<KibanaContextValue>`
+// for the angularjs based dependencies. Therefore, the
 // actual dependencies are set like we did previously with KibanaContext
 // in the wrapping angularjs directive. In the custom hook we check if
 // the dependencies are present with error reporting if they weren't
@@ -34,4 +42,4 @@ export type SavedSearchQuery = object;
 // Multiple custom hooks can be created to access subsets of
 // the overall context value if necessary too,
 // see useCurrentIndexPattern() for example.
-export const KibanaContext = React.createContext<KibanaContextValue>({});
+export const KibanaContext = React.createContext<Partial<KibanaContextValue>>({});

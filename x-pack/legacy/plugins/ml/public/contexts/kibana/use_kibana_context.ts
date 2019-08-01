@@ -22,5 +22,5 @@ export const useKibanaContext = () => {
     throw new Error('required attribute is undefined');
   }
 
-  return context as Required<KibanaContextValue>;
+  return context as KibanaContextValue;
 };
