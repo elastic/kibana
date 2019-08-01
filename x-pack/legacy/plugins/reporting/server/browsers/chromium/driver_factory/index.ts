@@ -31,7 +31,7 @@ const compactWhitespace = (str: string) => {
 
 export class HeadlessChromiumDriverFactory {
   private binaryPath: binaryPath;
-  private callerLogger: Logger;
+  private logger: Logger;
   private browserConfig: IBrowserConfig;
   private queueTimeout: queueTimeout;
 
@@ -44,14 +44,14 @@ export class HeadlessChromiumDriverFactory {
     this.binaryPath = binaryPath;
     this.browserConfig = browserConfig;
     this.queueTimeout = queueTimeout;
-    this.callerLogger = logger;
+    this.logger = logger;
   }
 
   type = 'chromium';
 
   test(
     { viewport, browserTimezone }: { viewport: IArgOptions['viewport']; browserTimezone: string },
-    logger: any
+    logger: Logger
   ) {
     const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
     const chromiumArgs = args({
@@ -94,11 +94,13 @@ export class HeadlessChromiumDriverFactory {
     exit$: Rx.Observable<never>;
   }> {
     return Rx.Observable.create(async (observer: InnerSubscriber<any, any>) => {
+      this.logger.debug(`Creating browser driver factory`);
+
       const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
       const chromiumArgs = args({
         userDataDir,
         viewport,
-        verboseLogging: this.callerLogger.isVerbose,
+        verboseLogging: this.logger.isVerbose,
         disableSandbox: this.browserConfig.disableSandbox,
         proxyConfig: this.browserConfig.proxy,
       });
@@ -131,7 +133,7 @@ export class HeadlessChromiumDriverFactory {
       }
 
       safeChildProcess(
-        this.callerLogger,
+        this.logger,
         {
           async kill() {
             await browser.close();
@@ -156,7 +158,7 @@ export class HeadlessChromiumDriverFactory {
 
       const driver$ = Rx.of(
         new HeadlessChromiumDriver(page, {
-          logger: this.callerLogger,
+          logger: this.logger,
           inspect: this.browserConfig.inspect,
         })
       );
@@ -232,7 +234,7 @@ export class HeadlessChromiumDriverFactory {
         exit$,
       });
 
-      const factoryLogger = this.callerLogger.clone(['chromium-driver-factory']);
+      const factoryLogger = this.logger.clone(['chromium-driver-factory']);
       // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
       observer.add(() => {
         factoryLogger.debug(`deleting chromium user data directory at [${userDataDir}]`);

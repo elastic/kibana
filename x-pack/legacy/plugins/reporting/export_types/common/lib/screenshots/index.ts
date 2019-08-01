@@ -50,7 +50,6 @@ export function screenshotsObservableFactory(server: KbnServer) {
 
     return create$.pipe(
       mergeMap(({ driver$, exit$, message$, consoleMessage$ }) => {
-        logger.debug('Driver factory created');
         message$.subscribe((line: string) => {
           logger.debug(line, ['browser']);
         });
