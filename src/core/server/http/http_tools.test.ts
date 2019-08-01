@@ -69,7 +69,7 @@ describe('timeouts', () => {
   const logger = loggingServiceMock.create();
   const server = new HttpServer(logger, 'foo');
 
-  test('returns 408 on timeout error', async () => {
+  test('closes sockets on timeout', async () => {
     const router = new Router('');
     router.get({ path: '/a', validate: false }, async (req, res) => {
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -87,9 +87,8 @@ describe('timeouts', () => {
 
     await server.start();
 
-    await supertest(innerServer.listener)
-      .get('/a')
-      .expect(408);
+    expect(supertest(innerServer.listener).get('/a')).rejects.toThrow('socket hang up');
+
     await supertest(innerServer.listener)
       .get('/b')
       .expect(200);
