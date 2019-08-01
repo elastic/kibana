@@ -8,4 +8,4 @@
 :branch:          7.3
 :major-version:   7.x
 :short-version:   7
-:release-state:   unreleased
+:release-state:   released
