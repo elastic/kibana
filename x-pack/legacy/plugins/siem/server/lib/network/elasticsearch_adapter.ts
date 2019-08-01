@@ -21,7 +21,6 @@ import { inspectStringifyObject } from '../../utils/build_query';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
-
 import { NetworkDnsRequestOptions, NetworkTopNFlowRequestOptions } from './index';
 import { buildDnsQuery } from './query_dns.dsl';
 import { buildTopNFlowQuery } from './query_top_n_flow.dsl';
@@ -126,55 +125,6 @@ const getTopNFlowEdges = (
   );
 };
 
-// const getGeo = (result: NetworkTopNFlowBuckets): string => {
-//   if (result.location.top_geo.hits.hits.length > 0) {
-//     const cityName: string =
-//       getOr(
-//         '',
-//         `location.top_geo.hits.hits[0]._source.${
-//           Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-//         }.geo.city_name`,
-//         result
-//       ).length > 0
-//         ? `${getOr(
-//             '',
-//             `location.top_geo.hits.hits[0]._source.${
-//               Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-//             }.geo.city_name`,
-//             result
-//           )}, `
-//         : '';
-//
-//     const regionName: string =
-//       getOr(
-//         '',
-//         `location.top_geo.hits.hits[0]._source.${
-//           Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-//         }.geo.region_name`,
-//         result
-//       ).length > 0
-//         ? `${getOr(
-//             '',
-//             `location.top_geo.hits.hits[0]._source.${
-//               Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-//             }.geo.region_name`,
-//             result
-//           )}, `
-//         : '';
-//
-//     const countryCode: string = getOr(
-//       '',
-//       `location.top_geo.hits.hits[0]._source.${
-//         Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-//       }.geo.country_iso_code`,
-//       result
-//     );
-//     return cityName + regionName + countryCode;
-//   }
-//
-//   return '';
-// };
-
 const getFlowTargetFromString = (flowAsString: string) =>
   flowAsString === 'source' ? FlowTarget.source : FlowTarget.destination;
 
@@ -256,13 +206,20 @@ const formatTopNFlowEdgesUnified = (
             },
           };
         }
+
         return {
           ...acc,
           [bucket.key]: {
             node: {
               _id: bucket.key,
               unified: {
-                domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key),
+                domain: bucket.domain.buckets.reduce(
+                  (accu, additionalBucketDomain) =>
+                    accu.indexOf(additionalBucketDomain.key) === -1
+                      ? [...accu, additionalBucketDomain.key]
+                      : accu,
+                  [...getOr([], 'node.unified.domain', acc[bucket.key])]
+                ),
                 ip: bucket.key,
                 location: getOr(null, 'node.unified.location', acc[bucket.key])
                   ? getGeoItem(bucket)
