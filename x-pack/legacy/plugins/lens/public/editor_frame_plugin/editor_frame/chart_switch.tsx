@@ -188,6 +188,8 @@ export function ChartSwitch(props: Props) {
       <EuiPopover
         id="lnsChartSwitchPopover"
         ownFocus
+        initialFocus=".lnsChartSwitchPopoverPanel"
+        panelClassName="lnsChartSwitchPopoverPanel"
         button={
           <EuiButton
             iconType="arrowDown"
