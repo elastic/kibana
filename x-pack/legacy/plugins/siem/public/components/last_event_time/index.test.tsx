@@ -63,7 +63,7 @@ describe('Last Event Time Stat', () => {
     await wait();
 
     expect(container.innerHTML).toBe(
-      '<span class="euiToolTipAnchor">Last Event: 12 days ago</span>'
+      '<span class="euiToolTipAnchor">Last event: 12 days ago</span>'
     );
   });
   test('Bad date time string', async () => {
