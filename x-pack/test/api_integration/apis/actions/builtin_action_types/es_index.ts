@@ -29,11 +29,10 @@ export default function indexTest({ getService }: KibanaFunctionalTestDefaultPro
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'An index action',
-            actionTypeId: '.index',
-            actionTypeConfig: {},
-          },
+          description: 'An index action',
+          actionTypeId: '.index',
+          config: {},
+          secrets: {},
         })
         .expect(200);
 
@@ -46,16 +45,10 @@ export default function indexTest({ getService }: KibanaFunctionalTestDefaultPro
         .expect(200);
 
       expect(fetchedAction).to.eql({
-        type: 'action',
         id: fetchedAction.id,
-        attributes: {
-          description: 'An index action',
-          actionTypeId: '.index',
-          actionTypeConfig: { index: null },
-        },
-        references: [],
-        updated_at: fetchedAction.updated_at,
-        version: fetchedAction.version,
+        description: 'An index action',
+        actionTypeId: '.index',
+        config: { index: null },
       });
 
       // create action with index config
@@ -63,12 +56,10 @@ export default function indexTest({ getService }: KibanaFunctionalTestDefaultPro
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'An index action with index config',
-            actionTypeId: '.index',
-            actionTypeConfig: {
-              index: ES_TEST_INDEX_NAME,
-            },
+          description: 'An index action with index config',
+          actionTypeId: '.index',
+          config: {
+            index: ES_TEST_INDEX_NAME,
           },
         })
         .expect(200);
@@ -82,18 +73,12 @@ export default function indexTest({ getService }: KibanaFunctionalTestDefaultPro
         .expect(200);
 
       expect(fetchedActionWithIndex).to.eql({
-        type: 'action',
         id: fetchedActionWithIndex.id,
-        attributes: {
-          description: 'An index action with index config',
-          actionTypeId: '.index',
-          actionTypeConfig: {
-            index: ES_TEST_INDEX_NAME,
-          },
+        description: 'An index action with index config',
+        actionTypeId: '.index',
+        config: {
+          index: ES_TEST_INDEX_NAME,
         },
-        references: [],
-        updated_at: fetchedActionWithIndex.updated_at,
-        version: fetchedActionWithIndex.version,
       });
     });
 
@@ -102,11 +87,9 @@ export default function indexTest({ getService }: KibanaFunctionalTestDefaultPro
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'An index action',
-            actionTypeId: '.index',
-            actionTypeConfig: { index: 666 },
-          },
+          description: 'An index action',
+          actionTypeId: '.index',
+          config: { index: 666 },
         })
         .expect(400)
         .then((resp: any) => {
@@ -114,7 +97,7 @@ export default function indexTest({ getService }: KibanaFunctionalTestDefaultPro
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'The actionTypeConfig is invalid: [index]: types that failed validation:\n- [index.0]: expected value of type [string] but got [number]\n- [index.1]: expected value to equal [null] but got [666]',
+              'error validating action type config: [index]: types that failed validation:\n- [index.0]: expected value of type [string] but got [number]\n- [index.1]: expected value to equal [null] but got [666]',
           });
         });
     });
@@ -222,7 +205,7 @@ export default function indexTest({ getService }: KibanaFunctionalTestDefaultPro
       result = response.body;
       expect(result.status).to.equal('error');
       expect(result.message).to.eql(
-        'The actionParams is invalid: [indeX]: definition for this key is missing'
+        'error validating action params: [indeX]: definition for this key is missing'
       );
 
       response = await supertest

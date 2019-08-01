@@ -1,6 +1,6 @@
 {
   "value": {
-    "id": "action:19cfba7c-711a-4170-8590-9a99a281e85c",
+    "id": "action:60071910-1ef1-4a72-9a68-b94af6a836a7",
     "index": ".kibana",
     "source": {
       "type": "action",
@@ -8,10 +8,10 @@
       "action": {
         "description": "My action",
         "actionTypeId": "test.index-record",
-        "actionTypeConfig": {
+        "config": {
           "unencrypted" : "This value shouldn't get encrypted"
         },
-        "actionTypeConfigSecrets": "iQw4fXsPBWItxabHCqQOZhPgkvDzvB7RMEMeWjg7WbcWbhi05KWp7xAmfnUaUZ0wDgHHcrujMiVTYdfXRnL4IZdIbiFDoDsOTicF2PucUGlpspSSFI2KJQIr+bLiFz+LqULMouIkhtPYEZSQ1oU6OECxn54aNExZ+NLbC+TMewp7+C6lWZ+BVqHA"
+        "secrets": "P1k6WTkcODQcb9+xWwO9s9qrCTimK2pMJDOtN0gJsraa0zx5dRroZ2Ppsr6D5ffPSN5QpO0aPVvef7/TLTw3A2Fn7Q44hrz+nEqZ+NBQ2zmQFq+8208DrhNu/Z+4M175UW+u8mUX3tkGqGU/rcbw9HGHK8NcpZC6Fgx5wCmUSfQWklNN2FJXjyAG"
       }
     }
   }
@@ -27,7 +27,23 @@
       "action": {
         "description": "My failing action",
         "actionTypeId": "test.failing",
-        "actionTypeConfig": {}
+        "config": {}
+      }
+    }
+  }
+}
+
+{
+  "value": {
+    "id": "action:ce37997f-0fb6-460a-8baf-f81ac5d38348",
+    "index": ".kibana",
+    "source": {
+      "type": "action",
+      "migrationVersion": {},
+      "action": {
+        "description": "My rate limited action",
+        "actionTypeId": "test.rate-limit",
+        "config": {}
       }
     }
   }
