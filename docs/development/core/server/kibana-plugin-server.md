@@ -36,7 +36,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ElasticsearchError](./kibana-plugin-server.elasticsearcherror.md) |  |
 |  [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |  |
 |  [FakeRequest](./kibana-plugin-server.fakerequest.md) | Fake request object created manually by Kibana plugins. |
-|  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |  |
 |  [HttpServiceStart](./kibana-plugin-server.httpservicestart.md) |  |
 |  [InternalCoreStart](./kibana-plugin-server.internalcorestart.md) |  |
 |  [KibanaRequestRoute](./kibana-plugin-server.kibanarequestroute.md) | Request specific route information exposed to a handler. |
@@ -80,6 +79,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
 |  [Headers](./kibana-plugin-server.headers.md) |  |
+|  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |  |
 |  [LegacyRequest](./kibana-plugin-server.legacyrequest.md) | Support Legacy platform request for the period of migration. |
 |  [OnPostAuthHandler](./kibana-plugin-server.onpostauthhandler.md) |  |
 |  [OnPreAuthHandler](./kibana-plugin-server.onpreauthhandler.md) |  |
