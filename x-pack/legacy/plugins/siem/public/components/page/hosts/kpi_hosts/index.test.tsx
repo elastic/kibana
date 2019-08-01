@@ -12,18 +12,12 @@ import { KpiHostsComponent } from '.';
 import * as statItems from '../../../stat_items';
 import { kpiHostsMapping } from './kpi_hosts_mapping';
 import { kpiHostDetailsMapping } from './kpi_host_details_mapping';
-import { ActionCreator } from 'typescript-fsa';
-import { InputsModelId } from '../../../../store/inputs/constants';
 
 describe('kpiHostsComponent', () => {
   const ID = 'kpiHost';
   const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
   const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
-  const setAbsoluteRangeDatePicker = (jest.fn() as unknown) as ActionCreator<{
-    id: InputsModelId;
-    from: number;
-    to: number;
-  }>;
+  const narrowDateRange = () => {};
   describe('render', () => {
     test('it should render spinner if it is loading', () => {
       const wrapper: ShallowWrapper = shallow(
@@ -33,7 +27,7 @@ describe('kpiHostsComponent', () => {
           id={ID}
           loading={true}
           to={to}
-          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+          narrowDateRange={narrowDateRange}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -47,7 +41,7 @@ describe('kpiHostsComponent', () => {
           id={ID}
           loading={false}
           to={to}
-          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+          narrowDateRange={narrowDateRange}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -61,7 +55,7 @@ describe('kpiHostsComponent', () => {
           id={ID}
           loading={false}
           to={to}
-          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+          narrowDateRange={narrowDateRange}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -85,7 +79,7 @@ describe('kpiHostsComponent', () => {
           id={ID}
           loading={false}
           to={to}
-          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+          narrowDateRange={narrowDateRange}
         />
       );
     });
@@ -99,14 +93,7 @@ describe('kpiHostsComponent', () => {
     });
 
     test(`it should apply correct mapping by given data type`, () => {
-      expect(mockUseKpiMatrixStatus).toBeCalledWith(
-        mapping,
-        data,
-        ID,
-        from,
-        to,
-        setAbsoluteRangeDatePicker
-      );
+      expect(mockUseKpiMatrixStatus).toBeCalledWith(mapping, data, ID, from, to, narrowDateRange);
     });
   });
 });

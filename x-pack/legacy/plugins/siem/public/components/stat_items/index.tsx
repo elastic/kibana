@@ -19,15 +19,13 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { BrushEndListener, ElementClickListener } from '@elastic/charts/dist/state/chart_state';
-import { ActionCreator } from 'typescript-fsa';
 import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
 import { AreaChart } from '../charts/areachart';
 import { BarChart } from '../charts/barchart';
-import { ChartConfigsData, ChartData, ChartSeriesConfigs } from '../charts/common';
+import { ChartConfigsData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';
 import { getEmptyTagValue } from '../empty_value';
 
 import { InspectButton } from '../inspect';
-import { InputsModelId } from '../../store/inputs/constants';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
@@ -66,11 +64,7 @@ export interface StatItemsProps extends StatItems {
   from: number;
   id: string;
   to: number;
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: number;
-    to: number;
-  }>;
+  narrowDateRange: UpdateDateRange;
 }
 
 export const numberFormatter = (value: string | number): string => value.toLocaleString();
@@ -158,7 +152,7 @@ export const useKpiMatrixStatus = (
   id: string,
   from: number,
   to: number,
-  setAbsoluteRangeDatePicker: ActionCreator<{ id: InputsModelId; from: number; to: number }>
+  narrowDateRange: UpdateDateRange
 ): StatItemsProps[] => {
   const [statItemsProps, setStatItemsProps] = useState(mappings as StatItemsProps[]);
 
@@ -174,7 +168,7 @@ export const useKpiMatrixStatus = (
           key: `kpi-summary-${stat.key}`,
           from,
           to,
-          setAbsoluteRangeDatePicker,
+          narrowDateRange,
         };
       })
     );
@@ -196,7 +190,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     id,
     index,
     to,
-    setAbsoluteRangeDatePicker,
+    narrowDateRange,
   }) => {
     const [isHover, setIsHover] = useState(false);
     const isBarChartDataAvailable =
@@ -268,11 +262,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                   areaChart={areaChart}
                   configs={areachartConfigs({
                     xTickFormatter: niceTimeFormatter([from, to]),
-                    onBrushEnd: (min: number, max: number) => {
-                      setTimeout(() => {
-                        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                      }, 500);
-                    },
+                    onBrushEnd: narrowDateRange,
                   })}
                 />
               </FlexItem>

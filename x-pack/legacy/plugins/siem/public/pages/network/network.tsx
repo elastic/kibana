@@ -85,7 +85,11 @@ const NetworkComponent = pure<NetworkComponentProps>(
                             loading={loading}
                             from={from}
                             to={to}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                            narrowDateRange={(min: number, max: number) => {
+                              setTimeout(() => {
+                                setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                              }, 500);
+                            }}
                           />
                         )}
                       </KpiNetworkQuery>

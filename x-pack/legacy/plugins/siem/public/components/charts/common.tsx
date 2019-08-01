@@ -28,6 +28,7 @@ const chartDefaultRendering: Rendering = 'canvas';
 const FlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
+export type UpdateDateRange = (min: number, max: number) => void;
 
 export const ChartHolder = () => (
   <FlexGroup justifyContent="center" alignItems="center">
