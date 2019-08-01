@@ -27,7 +27,7 @@ import { useFetcher } from '../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 import { AgentConfigurationListAPIResponse } from '../../../../server/lib/settings/agent_configuration/list_configurations';
 import { AddSettingsFlyout } from './AddSettings/AddSettingFlyout';
-import { APMLink } from '../../shared/Links/APMLink';
+import { APMLink } from '../../shared/Links/apm/APMLink';
 import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
 
 export type Config = AgentConfigurationListAPIResponse[0];
@@ -75,7 +75,7 @@ export function SettingsList() {
       render: (value: string) => value
     },
     {
-      field: 'settings.sample_rate',
+      field: 'settings.transaction_sample_rate',
       name: i18n.translate(
         'xpack.apm.settings.agentConf.configTable.sampleRateColumnLabel',
         {

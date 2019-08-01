@@ -14,20 +14,26 @@ export const ANOMALIES = i18n.translate('xpack.siem.anomaliesTable.table.anomali
   defaultMessage: 'Anomalies',
 });
 
-export const LOADING = i18n.translate('xpack.siem.ml.table.loadingDescription', {
-  defaultMessage: 'Loading…',
+export const UNIT = (totalCount: number) =>
+  i18n.translate('xpack.siem.anomaliesTable.table.unit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {anomaly} other {anomalies}}`,
+  });
+
+export const TOOLTIP = i18n.translate('xpack.siem.anomaliesTable.table.anomaliesTooltip', {
+  defaultMessage: 'The anomalies table is not filterable via the SIEM global KQL search.',
 });
 
 export const SCORE = i18n.translate('xpack.siem.ml.table.scoreTitle', {
-  defaultMessage: 'Anomaly Score',
+  defaultMessage: 'Anomaly score',
 });
 
 export const HOST_NAME = i18n.translate('xpack.siem.ml.table.hostNameTitle', {
-  defaultMessage: 'Host Name',
+  defaultMessage: 'Host name',
 });
 
 export const INFLUENCED_BY = i18n.translate('xpack.siem.ml.table.influencedByTitle', {
-  defaultMessage: 'Influenced By',
+  defaultMessage: 'Influenced by',
 });
 
 export const ENTITY = i18n.translate('xpack.siem.ml.table.entityTitle', {
@@ -35,7 +41,7 @@ export const ENTITY = i18n.translate('xpack.siem.ml.table.entityTitle', {
 });
 
 export const DETECTOR = i18n.translate('xpack.siem.ml.table.detectorTitle', {
-  defaultMessage: 'Job Name',
+  defaultMessage: 'Job name',
 });
 
 export const NETWORK_NAME = i18n.translate('xpack.siem.ml.table.networkNameTitle', {

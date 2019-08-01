@@ -25,12 +25,20 @@ interface LogHighlightsMenuProps {
   onChange: (highlightTerms: string[]) => void;
   isLoading: boolean;
   activeHighlights: boolean;
+  hasPreviousHighlight: boolean;
+  hasNextHighlight: boolean;
+  goToPreviousHighlight: () => void;
+  goToNextHighlight: () => void;
 }
 
 export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
   onChange,
   isLoading,
   activeHighlights,
+  hasPreviousHighlight,
+  goToPreviousHighlight,
+  hasNextHighlight,
+  goToNextHighlight,
 }) => {
   const {
     isVisible: isPopoverOpen,
@@ -62,7 +70,6 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
       {activeHighlights ? <ActiveHighlightsIndicator /> : null}
     </EuiButtonEmpty>
   );
-
   return (
     <EuiPopover
       id="popover"
@@ -85,8 +92,27 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
+              aria-label={goToPreviousHighlightLabel}
+              iconType="arrowUp"
+              onClick={goToPreviousHighlight}
+              title={goToPreviousHighlightLabel}
+              isDisabled={!hasPreviousHighlight}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              aria-label={goToNextHighlightLabel}
+              iconType="arrowDown"
+              onClick={goToNextHighlight}
+              title={goToNextHighlightLabel}
+              isDisabled={!hasNextHighlight}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
               aria-label={clearTermsButtonLabel}
               color="danger"
+              isDisabled={highlightTerm === ''}
               iconType="trash"
               onClick={clearHighlightTerm}
               title={clearTermsButtonLabel}
@@ -106,6 +132,20 @@ const clearTermsButtonLabel = i18n.translate(
   'xpack.infra.logs.highlights.clearHighlightTermsButtonLabel',
   {
     defaultMessage: 'Clear terms to highlight',
+  }
+);
+
+const goToPreviousHighlightLabel = i18n.translate(
+  'xpack.infra.logs.highlights.goToPreviousHighlightButtonLabel',
+  {
+    defaultMessage: 'Jump to previous highlight',
+  }
+);
+
+const goToNextHighlightLabel = i18n.translate(
+  'xpack.infra.logs.highlights.goToNextHighlightButtonLabel',
+  {
+    defaultMessage: 'Jump to next highlight',
   }
 );
 

@@ -45,7 +45,7 @@ describe('DefaultEditorAggParams helpers', () => {
     let agg: AggConfig;
     let editorConfig: EditorConfig;
     const state = {} as VisState;
-    const responseValueAggs = null;
+    const metricAggs: AggConfig[] = [];
     const emptyParams = {
       basic: [],
       advanced: [],
@@ -58,14 +58,14 @@ describe('DefaultEditorAggParams helpers', () => {
         },
         schema: {},
       };
-      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
 
       expect(params).toEqual(emptyParams);
     });
 
     it('should not create any param if there is no agg type', () => {
       agg = {};
-      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
 
       expect(params).toEqual(emptyParams);
     });
@@ -81,7 +81,7 @@ describe('DefaultEditorAggParams helpers', () => {
           hidden: true,
         },
       };
-      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
 
       expect(params).toEqual(emptyParams);
     });
@@ -95,7 +95,7 @@ describe('DefaultEditorAggParams helpers', () => {
           hideCustomLabel: true,
         },
       };
-      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
 
       expect(params).toEqual(emptyParams);
     });
@@ -129,7 +129,7 @@ describe('DefaultEditorAggParams helpers', () => {
           field: 'field',
         },
       };
-      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
 
       expect(params).toEqual({
         basic: [
@@ -139,7 +139,7 @@ describe('DefaultEditorAggParams helpers', () => {
             editorConfig,
             indexedFields: ['indexedFields'],
             paramEditor: agg.type.params[0].editorComponent,
-            responseValueAggs,
+            metricAggs,
             state,
             value: agg.params.field,
           },
@@ -149,7 +149,7 @@ describe('DefaultEditorAggParams helpers', () => {
             editorConfig,
             indexedFields: [],
             paramEditor: agg.type.params[1].editorComponent,
-            responseValueAggs,
+            metricAggs,
             state,
             value: agg.params.orderBy,
           },
@@ -171,12 +171,6 @@ describe('DefaultEditorAggParams helpers', () => {
       const errors = getError({ schema: { title: 'Split series' } }, true);
 
       expect(errors).toEqual(['"Split series" aggs must run before all other buckets!']);
-    });
-
-    it('should push an error if a schema is deprecated', () => {
-      const errors = getError({ schema: { title: 'Split series', deprecate: true } }, false);
-
-      expect(errors).toEqual(['"Split series" has been deprecated.']);
     });
   });
 

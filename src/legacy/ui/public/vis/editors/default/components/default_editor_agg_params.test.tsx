@@ -83,7 +83,6 @@ describe('DefaultEditorAggParams component', () => {
   let onAggTypeChange: jest.Mock;
   let setTouched: jest.Mock;
   let setValidity: jest.Mock;
-  let onAggErrorChanged: jest.Mock;
   let intervalDeserialize: jest.Mock;
   let defaultProps: DefaultEditorAggParamsProps;
 
@@ -92,7 +91,6 @@ describe('DefaultEditorAggParams component', () => {
     onAggTypeChange = jest.fn();
     setTouched = jest.fn();
     setValidity = jest.fn();
-    onAggErrorChanged = jest.fn();
     intervalDeserialize = jest.fn(() => 'deserialized');
 
     defaultProps = {
@@ -105,13 +103,12 @@ describe('DefaultEditorAggParams component', () => {
       groupName: 'metrics',
       formIsTouched: false,
       indexPattern: {} as IndexPattern,
-      responseValueAggs: [],
+      metricAggs: [],
       state: {} as VisState,
       onAggParamsChange,
       onAggTypeChange,
       setTouched,
       setValidity,
-      onAggErrorChanged,
     };
   });
 

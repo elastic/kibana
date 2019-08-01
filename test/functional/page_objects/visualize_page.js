@@ -78,10 +78,17 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       return await this.createVisualizationPromptButton();
     }
 
+    /*
+    This method should use retry loop to delete visualizations from multiple pages until we find the createVisualizationPromptButton.
+    Perhaps it *could* set the page size larger than the default 10, but it might still need to loop anyway.
+    */
     async deleteAllVisualizations() {
-      await this.checkListingSelectAllCheckbox();
-      await this.clickDeleteSelected();
-      await PageObjects.common.clickConfirmOnModal();
+      await retry.try(async () => {
+        await this.checkListingSelectAllCheckbox();
+        await this.clickDeleteSelected();
+        await PageObjects.common.clickConfirmOnModal();
+        await testSubjects.find('createVisualizationPromptButton');
+      });
     }
 
     async createSimpleMarkdownViz(vizName) {
@@ -400,7 +407,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async clickMetricEditor() {
-      await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
+      await find.clickByCssSelector('[group-name="metrics"] .euiAccordion__button');
     }
 
     async clickMetricByIndex(index) {
@@ -443,8 +450,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
       const comboBoxElement = await find.byCssSelector(`
         [group-name="${groupName}"]
-        vis-editor-agg-params:not(.ng-hide)
-        [data-test-subj="visAggEditorParams"]
+        [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
         ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="defaultEditorAggSelect"]
       `);
@@ -472,7 +478,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async toggleOpenEditor(index, toState = 'true') {
       // index, see selectYAxisAggregation
-      const toggle = await find.byCssSelector(`button[aria-controls="visAggEditorParams${index}"]`);
+      const toggle = await find.byCssSelector(`button[aria-controls="visEditorAggAccordion${index}"]`);
       const toggleOpen = await toggle.getAttribute('aria-expanded');
       log.debug(`toggle ${index} expand = ${toggleOpen}`);
       if (toggleOpen !== toState) {
@@ -490,12 +496,10 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
       // select our agg
       const aggSelect = await find
-        .byCssSelector(`[data-test-subj="aggregationEditor${index}"]
-          vis-editor-agg-params:not(.ng-hide) [data-test-subj="defaultEditorAggSelect"]`);
+        .byCssSelector(`#visEditorAggAccordion${index} [data-test-subj="defaultEditorAggSelect"]`);
       await comboBox.setElement(aggSelect, agg);
 
-      const fieldSelect = await find.byCssSelector(`[data-test-subj="aggregationEditor${index}"]
-        vis-editor-agg-params:not(.ng-hide) [data-test-subj="visDefaultEditorField"]`);
+      const fieldSelect = await find.byCssSelector(`#visEditorAggAccordion${index} [data-test-subj="visDefaultEditorField"]`);
       // select our field
       await comboBox.setElement(fieldSelect, field);
       // enter custom label
@@ -546,7 +550,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       log.debug(`selectField ${fieldValue}`);
       const selector = `
         [group-name="${groupName}"]
-        vis-editor-agg-params:not(.ng-hide)
+        [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
         [data-test-subj="visAggEditorParams"]
         ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="visDefaultEditorField"]
@@ -586,26 +590,26 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async setSize(newValue, aggId) {
-      const dataTestSubj = aggId ? `aggregationEditor${aggId} sizeParamEditor` : 'sizeParamEditor';
+      const dataTestSubj = aggId ? `visEditorAggAccordion${aggId} sizeParamEditor` : 'sizeParamEditor';
       await testSubjects.setValue(dataTestSubj, String(newValue));
     }
 
     async toggleDisabledAgg(agg) {
-      await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
+      await testSubjects.click(`visEditorAggAccordion${agg} toggleDisableAggregationBtn`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async toggleAggregationEditor(agg) {
-      await testSubjects.click(`aggregationEditor${agg} toggleEditor`);
+      await find.clickByCssSelector(`[data-test-subj="visEditorAggAccordion${agg}"] .euiAccordion__button`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async toggleOtherBucket(agg = 2) {
-      return await testSubjects.click(`aggregationEditor${agg} otherBucketSwitch`);
+      return await testSubjects.click(`visEditorAggAccordion${agg} otherBucketSwitch`);
     }
 
     async toggleMissingBucket(agg = 2) {
-      return await testSubjects.click(`aggregationEditor${agg} missingBucketSwitch`);
+      return await testSubjects.click(`visEditorAggAccordion${agg} missingBucketSwitch`);
     }
 
     async isApplyEnabled() {
@@ -697,6 +701,11 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async selectYAxisScaleType(axisId, scaleType) {
       const selectElement = await testSubjects.find(`scaleSelectYAxis-${axisId}`);
       const selector = await selectElement.findByCssSelector(`option[label="${scaleType}"]`);
+      await selector.click();
+    }
+
+    async selectYAxisMode(mode) {
+      const selector = await find.byCssSelector(`#valueAxisMode0 > option[label="${mode}"]`);
       await selector.click();
     }
 
@@ -1259,7 +1268,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async removeDimension(agg) {
-      await testSubjects.click(`aggregationEditor${agg} removeDimensionBtn`);
+      await testSubjects.click(`visEditorAggAccordion${agg} removeDimensionBtn`);
     }
   }
 

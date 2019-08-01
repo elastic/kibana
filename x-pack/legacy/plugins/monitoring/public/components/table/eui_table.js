@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { get } from 'lodash';
 import {
   EuiInMemoryTable,
   EuiBadge,
   EuiButtonEmpty,
-  EuiHealth
+  EuiHealth,
+  EuiButton,
+  EuiSpacer
 } from '@elastic/eui';
 import { ELASTICSEARCH_CUSTOM_ID } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
@@ -46,15 +48,37 @@ export class EuiMonitoringTable extends React.PureComponent {
       return column;
     });
 
+    let footerContent = null;
     if (setupMode && setupMode.enabled) {
       columns.push({
         name: i18n.translate('xpack.monitoring.euiTable.setupStatusTitle', {
           defaultMessage: 'Setup Status'
         }),
-        field: uuidField,
-        render: (uuid) => {
+        sortable: product => {
           const list = get(setupMode, 'data.byUuid', {});
-          const status = list[uuid] || {};
+          const status = list[get(product, uuidField)] || {};
+
+          if (status.isInternalCollector) {
+            return 4;
+          }
+
+          if (status.isPartiallyMigrated) {
+            return 3;
+          }
+
+          if (status.isFullyMigrated) {
+            return 2;
+          }
+
+          if (status.isNetNewUser) {
+            return 1;
+          }
+
+          return 0;
+        },
+        render: (product) => {
+          const list = get(setupMode, 'data.byUuid', {});
+          const status = list[get(product, uuidField)] || {};
 
           let statusBadge = null;
           if (status.isInternalCollector) {
@@ -84,6 +108,15 @@ export class EuiMonitoringTable extends React.PureComponent {
               </EuiBadge>
             );
           }
+          else if (status.isNetNewUser) {
+            statusBadge = (
+              <EuiHealth color="danger">
+                {i18n.translate('xpack.monitoring.euiTable.isNetNewUserLabel', {
+                  defaultMessage: 'No monitoring detected'
+                })}
+              </EuiHealth>
+            );
+          }
           else {
             statusBadge = i18n.translate('xpack.monitoring.euiTable.migrationStatusUnknown', {
               defaultMessage: 'N/A'
@@ -98,8 +131,26 @@ export class EuiMonitoringTable extends React.PureComponent {
         name: i18n.translate('xpack.monitoring.euiTable.setupActionTitle', {
           defaultMessage: 'Setup Action'
         }),
-        field: uuidField,
-        render: (uuid, product) => {
+        sortable: product => {
+          const list = get(setupMode, 'data.byUuid', {});
+          const status = list[get(product, uuidField)] || {};
+
+          if (status.isInternalCollector || status.isNetNewUser) {
+            return 1;
+          }
+
+          if (status.isPartiallyMigrated) {
+            if (setupMode.productName === ELASTICSEARCH_CUSTOM_ID) {
+              // See comment for same conditional in render function
+              return 0;
+            }
+            return 1;
+          }
+
+          return 0;
+        },
+        render: (product) => {
+          const uuid = get(product, uuidField);
           const list = get(setupMode, 'data.byUuid', {});
           const status = list[uuid] || {};
           const instance = {
@@ -124,9 +175,28 @@ export class EuiMonitoringTable extends React.PureComponent {
             );
           }
 
+          if (status.isNetNewUser) {
+            return (
+              <EuiButtonEmpty flush="left" size="s" color="primary" onClick={() => setupMode.openFlyout(instance)}>
+                {i18n.translate('xpack.monitoring.euiTable.setupButtonLabel', {
+                  defaultMessage: 'Setup'
+                })}
+              </EuiButtonEmpty>
+            );
+          }
+
           return null;
         }
       });
+
+      footerContent = (
+        <Fragment>
+          <EuiSpacer size="m"/>
+          <EuiButton onClick={() => setupMode.openFlyout({}, true)}>
+            {props.setupNewButtonLabel}
+          </EuiButton>
+        </Fragment>
+      );
     }
 
     return (
@@ -137,6 +207,7 @@ export class EuiMonitoringTable extends React.PureComponent {
           columns={columns}
           {...props}
         />
+        {footerContent}
       </div>
     );
   }

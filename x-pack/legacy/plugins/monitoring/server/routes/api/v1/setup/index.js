@@ -6,3 +6,4 @@
 
 export { clustersSetupStatusRoute } from './clusters_setup_status';
 export { clusterSetupStatusRoute } from './cluster_setup_status';
+export { nodeSetupStatusRoute } from './node_setup_status';

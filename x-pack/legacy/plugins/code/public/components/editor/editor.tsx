@@ -199,6 +199,12 @@ export class EditorComponent extends React.Component<IProps> {
 
   private async loadText(text: string, repo: string, file: string, lang: string, revision: string) {
     if (this.monaco) {
+      try {
+        await monaco.editor.colorize(text, lang, {});
+      } catch (e) {
+        // workaround a upstream issue: https://github.com/microsoft/monaco-editor/issues/134
+        lang = 'text';
+      }
       this.editor = await this.monaco.loadFile(repo, file, text, lang, revision);
       this.registerGutterClickHandler();
     }

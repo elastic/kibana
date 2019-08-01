@@ -18,11 +18,11 @@
  */
 
 import React, { useReducer, useEffect } from 'react';
-import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
+import { EuiForm, EuiAccordion, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { aggTypes, AggType, AggParam } from 'ui/agg_types';
-import { AggConfig, VisState, AggParams } from 'ui/vis';
+import { AggConfig, VisState } from 'ui/vis';
 import { IndexPattern } from 'ui/index_patterns';
 import { DefaultEditorAggSelect } from './default_editor_agg_select';
 import { DefaultEditorAggParam } from './default_editor_agg_param';
@@ -46,6 +46,8 @@ import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/t
 // TODO: Below import is temporary, use `react-use` lib instead.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { useUnmount } from '../../../../../../../plugins/kibana_react/public/util/use_unmount';
+import { AggGroupNames } from '../agg_groups';
+import { OnAggParamsChange } from './default_editor_agg_common_props';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
@@ -54,12 +56,12 @@ type EditorParamConfigType = EditorParamConfig & {
 };
 export interface SubAggParamsProp {
   formIsTouched: boolean;
-  onAggParamsChange: (agg: AggParams, paramName: string, value: unknown) => void;
+  onAggParamsChange: OnAggParamsChange;
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
 }
 export interface DefaultEditorAggParamsProps extends SubAggParamsProp {
   agg: AggConfig;
-  aggError?: string | null;
+  aggError?: string;
   aggIndex?: number;
   aggIsTooLow?: boolean;
   className?: string;
@@ -205,7 +207,7 @@ function DefaultEditorAggParams({
         indexPattern={indexPattern}
         value={agg.type}
         aggTypeOptions={groupedAggTypeOptions}
-        isSubAggregation={aggIndex >= 1 && groupName === 'buckets'}
+        isSubAggregation={aggIndex >= 1 && groupName === AggGroupNames.Buckets}
         showValidation={formIsTouched || aggType.touched}
         setValue={value => {
           onAggTypeChange(agg, value);
@@ -226,7 +228,7 @@ function DefaultEditorAggParams({
       })}
 
       {params.advanced.length ? (
-        <>
+        <EuiFormRow>
           <EuiAccordion
             id="advancedAccordion"
             buttonContent={i18n.translate(
@@ -235,9 +237,8 @@ function DefaultEditorAggParams({
                 defaultMessage: 'Advanced',
               }
             )}
-            paddingSize="none"
           >
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
             {params.advanced.map((param: ParamInstance) => {
               const model = paramsState[param.aggParam.name] || {
                 touched: false,
@@ -246,8 +247,7 @@ function DefaultEditorAggParams({
               return renderParam(param, model);
             })}
           </EuiAccordion>
-          <EuiSpacer size="m" />
-        </>
+        </EuiFormRow>
       ) : null}
     </EuiForm>
   );

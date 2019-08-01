@@ -220,39 +220,41 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
   ];
 };
 
-const timelionFeatures: Feature[] = [
-  {
-    id: 'timelion',
-    name: 'Timelion',
-    icon: 'timelionApp',
-    navLinkId: 'timelion',
-    app: ['timelion', 'kibana'],
-    catalogue: ['timelion'],
-    privileges: {
-      all: {
-        savedObject: {
-          all: ['timelion-sheet'],
-          read: ['index-pattern'],
-        },
-        ui: ['save'],
+const timelionFeature: Feature = {
+  id: 'timelion',
+  name: 'Timelion',
+  icon: 'timelionApp',
+  navLinkId: 'timelion',
+  app: ['timelion', 'kibana'],
+  catalogue: ['timelion'],
+  privileges: {
+    all: {
+      savedObject: {
+        all: ['timelion-sheet'],
+        read: ['index-pattern'],
       },
-      read: {
-        savedObject: {
-          all: [],
-          read: ['index-pattern', 'timelion-sheet'],
-        },
-        ui: [],
+      ui: ['save'],
+    },
+    read: {
+      savedObject: {
+        all: [],
+        read: ['index-pattern', 'timelion-sheet'],
       },
+      ui: [],
     },
   },
-];
+};
 
 export function registerOssFeatures(
   registerFeature: (feature: Feature) => void,
-  savedObjectTypes: string[]
+  savedObjectTypes: string[],
+  includeTimelion: boolean
 ) {
-  const kibanaFeatures = buildKibanaFeatures(savedObjectTypes);
-  for (const feature of [...kibanaFeatures, ...timelionFeatures]) {
+  for (const feature of buildKibanaFeatures(savedObjectTypes)) {
     registerFeature(feature);
+  }
+
+  if (includeTimelion) {
+    registerFeature(timelionFeature);
   }
 }

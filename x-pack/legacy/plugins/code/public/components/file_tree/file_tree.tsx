@@ -11,27 +11,54 @@ import classes from 'classnames';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { FileTree as Tree, FileTreeItemType } from '../../../model';
-import { closeTreePath, openTreePath } from '../../actions';
 import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
 import { encodeRevisionString } from '../../../common/uri_util';
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   node?: Tree;
-  closeTreePath: (paths: string) => void;
-  openTreePath: (paths: string) => void;
-  openedPaths: string[];
   isNotFound: boolean;
 }
 
-export class CodeFileTree extends React.Component<Props> {
+export class CodeFileTree extends React.Component<Props, { openPaths: string[] }> {
   constructor(props: Props) {
     super(props);
     const { path } = props.match.params;
     if (path) {
-      props.openTreePath(path);
+      this.state = {
+        openPaths: CodeFileTree.getOpenPaths(path, []),
+      };
+    } else {
+      this.state = {
+        openPaths: [],
+      };
     }
   }
+
+  static getOpenPaths = (path: string, openPaths: string[]) => {
+    let p = path;
+    const newOpenPaths = [...openPaths];
+    const pathSegs = p.split('/');
+    while (!openPaths.includes(p)) {
+      newOpenPaths.push(p);
+      pathSegs.pop();
+      if (pathSegs.length <= 0) {
+        break;
+      }
+      p = pathSegs.join('/');
+    }
+    return newOpenPaths;
+  };
+
+  openTreePath = (path: string) => {
+    this.setState({ openPaths: CodeFileTree.getOpenPaths(path, this.state.openPaths) });
+  };
+
+  closeTreePath = (path: string) => {
+    const isSubFolder = (p: string) => p.startsWith(path + '/');
+    const newOpenPaths = this.state.openPaths.filter(p => !(p === path || isSubFolder(p)));
+    this.setState({ openPaths: newOpenPaths });
+  };
 
   public onClick = (node: Tree) => {
     const { resource, org, repo, revision, path } = this.props.match.params;
@@ -50,9 +77,9 @@ export class CodeFileTree extends React.Component<Props> {
 
   public toggleTree = (path: string) => {
     if (this.isPathOpen(path)) {
-      this.props.closeTreePath(path);
+      this.closeTreePath(path);
     } else {
-      this.props.openTreePath(path);
+      this.openTreePath(path);
     }
   };
 
@@ -241,24 +268,13 @@ export class CodeFileTree extends React.Component<Props> {
 
   private isPathOpen(path: string) {
     if (this.props.isNotFound) return false;
-    return this.props.openedPaths.includes(path);
+    return this.state.openPaths.includes(path);
   }
 }
 
 const mapStateToProps = (state: RootState) => ({
   node: state.fileTree.tree,
-  openedPaths: state.fileTree.openedPaths,
   isNotFound: state.file.isNotFound,
 });
 
-const mapDispatchToProps = {
-  closeTreePath,
-  openTreePath,
-};
-
-export const FileTree = withRouter(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(CodeFileTree)
-);
+export const FileTree = withRouter(connect(mapStateToProps)(CodeFileTree));
