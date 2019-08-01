@@ -142,7 +142,7 @@ function renderLog(log) {
 }
 
 export function ElasticsearchPanel(props) {
-  const setupMode = prop.setupMode;
+  const setupMode = props.setupMode;
   const clusterStats = props.cluster_stats || {};
   const nodes = clusterStats.nodes;
   const indices = clusterStats.indices;
