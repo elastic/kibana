@@ -15,6 +15,7 @@ import {
   EuiSwitch,
   EuiFormRow,
   EuiFlyoutFooter,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -196,6 +197,9 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
       />
 
       <EuiSpacer />
+
+      {/* TODO: remove once https://github.com/elastic/eui/issues/2071 is fixed */}
+      {isLoading && <EuiLoadingSpinner />}
 
       {!isLoading && (
         <EuiFormRow
