@@ -55,7 +55,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   jobCreator.setTimeRange(from, to);
 
   if (mlJobService.currentJob !== undefined) {
-    const { job, datafeed } = expandCombinedJobConfig(mlJobService.currentJob);
+    const clonedJob = mlJobService.cloneJob(mlJobService.currentJob);
+    const { job, datafeed } = expandCombinedJobConfig(clonedJob);
     jobCreator.cloneFromExistingJob(job, datafeed);
   } else {
     jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
