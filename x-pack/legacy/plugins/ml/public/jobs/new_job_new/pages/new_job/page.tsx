@@ -12,7 +12,7 @@ import {
   jobCreatorFactory,
   isSingleMetricJobCreator,
   isPopulationJobCreator,
-  CombinedJobConfig,
+  prePopulateJob,
 } from '../../common/job_creator';
 import {
   JOB_TYPE,
@@ -27,7 +27,6 @@ import { getTimeFilterRange } from '../../../../components/full_time_range_selec
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 import { newJobDefaults } from '../../../new_job/utils/new_job_defaults';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
-import { ml } from '../../../../services/ml_api_service';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
@@ -45,17 +44,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   }
 
   const jobDefaults = newJobDefaults();
-  const currentJob = mlJobService.currentJob;
-  let existingJobConfig: CombinedJobConfig | undefined;
-  if (currentJob !== undefined) {
-    existingJobConfig = {
-      job: currentJob,
-      datafeed: currentJob.datafeed_config,
-    };
-    delete currentJob.datafeed_config;
-  }
 
-  const jobCreator = jobCreatorFactory(jobType, existingJobConfig)(
+  const jobCreator = jobCreatorFactory(jobType)(
     kibanaContext.currentIndexPattern,
     kibanaContext.currentSavedSearch,
     kibanaContext.combinedQuery
@@ -64,7 +54,9 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const { from, to } = getTimeFilterRange();
   jobCreator.setTimeRange(from, to);
 
-  if (currentJob === undefined) {
+  if (mlJobService.currentJob !== undefined) {
+    prePopulateJob(jobCreator, mlJobService.currentJob);
+  } else {
     jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
 
     if (isPopulationJobCreator(jobCreator) === true) {

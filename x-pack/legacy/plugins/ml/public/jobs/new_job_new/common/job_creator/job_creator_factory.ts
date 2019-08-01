@@ -9,7 +9,7 @@ import { IndexPattern } from 'ui/index_patterns';
 import { SingleMetricJobCreator } from './single_metric_job_creator';
 import { MultiMetricJobCreator } from './multi_metric_job_creator';
 import { PopulationJobCreator } from './population_job_creator';
-import { Job, Datafeed } from './configs';
+import { CombinedJobConfig, expandCombinedJobConfig } from './configs';
 import {
   isSingleMetricJobCreator,
   isMultiMetricJobCreator,
@@ -19,12 +19,7 @@ import { newJobCapsService } from '../../../../services/new_job_capabilities_ser
 
 import { JOB_TYPE } from './util/constants';
 
-export interface CombinedJobConfig {
-  job: Job;
-  datafeed: Datafeed;
-}
-
-export const jobCreatorFactory = (jobType: JOB_TYPE, config?: CombinedJobConfig) => (
+export const jobCreatorFactory = (jobType: JOB_TYPE) => (
   indexPattern: IndexPattern,
   savedSearch: SavedSearch,
   query: object
@@ -44,26 +39,25 @@ export const jobCreatorFactory = (jobType: JOB_TYPE, config?: CombinedJobConfig)
       jc = SingleMetricJobCreator;
       break;
   }
-  const jobCreator = new jc(indexPattern, savedSearch, query);
-  if (config !== undefined) {
-    prePopulateJob(jobCreator, config);
-  }
-  return jobCreator;
+
+  return new jc(indexPattern, savedSearch, query);
 };
 
-function prePopulateJob(
+export function prePopulateJob(
   jobCreator: SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator,
-  config: CombinedJobConfig
+  combinedJob: CombinedJobConfig
 ) {
-  jobCreator.overrideConfigs(config.job, config.datafeed);
+  const { job, datafeed } = expandCombinedJobConfig(combinedJob);
+
+  jobCreator.overrideConfigs(job, datafeed);
 
   jobCreator.jobId = '';
 
-  if (config.job.analysis_config.influencers !== undefined) {
-    config.job.analysis_config.influencers.forEach(i => jobCreator.addInfluencer(i));
+  if (job.analysis_config.influencers !== undefined) {
+    job.analysis_config.influencers.forEach(i => jobCreator.addInfluencer(i));
   }
 
-  const detectors = config.job.analysis_config.detectors.map(d => {
+  const detectors = job.analysis_config.detectors.map(d => {
     return {
       agg: newJobCapsService.getAggById(d.function),
       field: d.field_name !== undefined ? newJobCapsService.getFieldById(d.field_name) : null,
