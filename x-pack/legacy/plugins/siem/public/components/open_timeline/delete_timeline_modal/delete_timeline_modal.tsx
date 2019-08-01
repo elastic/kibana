@@ -28,7 +28,7 @@ export const DeleteTimelineModal = pure<Props>(({ title, toggleShowModal, onDele
       <FormattedMessage
         id="xpack.siem.open.timeline.deleteTimelineModalTitle"
         data-test-subj="title"
-        defaultMessage="Delete `{title}`?"
+        defaultMessage='Delete "{title}"?'
         values={{
           title: title != null && title.trim().length > 0 ? title.trim() : i18n.UNTITLED_TIMELINE,
         }}

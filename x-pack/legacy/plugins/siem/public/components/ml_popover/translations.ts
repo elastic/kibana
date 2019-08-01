@@ -16,7 +16,7 @@ export const ANOMALY_DETECTION = i18n.translate(
 export const ANOMALY_DETECTION_TITLE = i18n.translate(
   'xpack.siem.components.mlPopup.anomalyDetectionTitle',
   {
-    defaultMessage: 'Anomaly Detection Settings',
+    defaultMessage: 'Anomaly detection settings',
   }
 );
 
@@ -33,7 +33,7 @@ export const UPGRADE_DESCRIPTION = i18n.translate(
 );
 
 export const UPGRADE_BUTTON = i18n.translate('xpack.siem.components.mlPopup.upgradeButtonLabel', {
-  defaultMessage: 'Subscription Options',
+  defaultMessage: 'Subscription options',
 });
 
 export const FILTER_PLACEHOLDER = i18n.translate(
@@ -44,31 +44,31 @@ export const FILTER_PLACEHOLDER = i18n.translate(
 );
 
 export const SHOW_ELASTIC_JOBS = i18n.translate('xpack.siem.components.mlPopup.showAllJobsLabel', {
-  defaultMessage: 'Elastic Jobs',
+  defaultMessage: 'Elastic jobs',
 });
 
 export const SHOW_CUSTOM_JOBS = i18n.translate('xpack.siem.components.mlPopup.showSiemJobsLabel', {
-  defaultMessage: 'Custom Jobs',
+  defaultMessage: 'Custom jobs',
 });
 
 export const COLUMN_JOB_NAME = i18n.translate(
   'xpack.siem.components.mlPopup.jobsTable.jobNameColumn',
   {
-    defaultMessage: 'Job Name',
+    defaultMessage: 'Job name',
   }
 );
 
 export const COLUMN_RUN_JOB = i18n.translate(
   'xpack.siem.components.mlPopup.jobsTable.runJobColumn',
   {
-    defaultMessage: 'Run Job',
+    defaultMessage: 'Run job',
   }
 );
 
 export const NO_ITEMS_TEXT = i18n.translate(
   'xpack.siem.components.mlPopup.jobsTable.noItemsDescription',
   {
-    defaultMessage: 'No SIEM Machine Learning Jobs Found',
+    defaultMessage: 'No SIEM Machine Learning jobs found',
   }
 );
 

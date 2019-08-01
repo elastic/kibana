@@ -459,7 +459,15 @@ class FilterEditorUI extends Component<Props, State> {
       const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
       this.props.onSubmit(filter);
     } else if (indexPattern && field && operator) {
-      const filter = buildFilter(indexPattern, field, operator, params, alias, $state.store);
+      const filter = buildFilter(
+        indexPattern,
+        field,
+        operator,
+        this.props.filter.meta.disabled,
+        params,
+        alias,
+        $state.store
+      );
       this.props.onSubmit(filter);
     }
   };
