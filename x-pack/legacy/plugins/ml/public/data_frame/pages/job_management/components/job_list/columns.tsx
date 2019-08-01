@@ -160,7 +160,7 @@ export const getColumns = (
                   {item.state.task_state === DATA_FRAME_TASK_STATE.STARTED && (
                     <EuiProgress color="primary" size="m" />
                   )}
-                  {item.state.task_state !== DATA_FRAME_TASK_STATE.STOPPED && (
+                  {item.state.task_state === DATA_FRAME_TASK_STATE.STOPPED && (
                     <EuiProgress value={0} max={100} color="primary" size="m" />
                   )}
                 </EuiFlexItem>
