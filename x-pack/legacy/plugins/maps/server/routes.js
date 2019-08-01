@@ -6,8 +6,10 @@
 
 
 import {
-  EMS_CATALOGUE_PATH, EMS_FILES_CATALOGUE_PATH,
-  EMS_FILES_DEFAULT_JSON_PATH, EMS_TILES_CATALOGUE_PATH,
+  EMS_CATALOGUE_PATH,
+  EMS_FILES_CATALOGUE_PATH,
+  EMS_FILES_DEFAULT_JSON_PATH,
+  EMS_TILES_CATALOGUE_PATH,
   EMS_TILES_RASTER_TILE_PATH,
   GIS_API_PATH,
   SPRITE_PATH,
@@ -149,7 +151,22 @@ export function initRoutes(server, licenseUid) {
       }
 
       const main =  await emsClient.getMainManifest();
-      return main;
+      const proxiedManifest = {
+        services: []
+      };
+
+      const tileService = main.services.find(service => service.id === 'tiles');
+      const fileService = main.services.find(service => service.id === 'geo_layers');
+      if (tileService) {
+        tileService.manifest = `${ROOT}/${EMS_TILES_CATALOGUE_PATH}`;
+        proxiedManifest.services.push(tileService);
+      }
+
+      if (fileService) {
+        fileService.manifest = `${ROOT}/${EMS_FILES_CATALOGUE_PATH}`;
+        proxiedManifest.services.push(fileService);
+      }
+      return proxiedManifest;
     }
   });
 
@@ -179,6 +196,11 @@ export function initRoutes(server, licenseUid) {
       }
 
       const tiles =  await emsClient.getDefaultTMSManifest();
+
+      //rewrite all the urls
+
+
+
       return tiles;
     }
   });
