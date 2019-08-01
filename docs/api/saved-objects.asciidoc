@@ -21,6 +21,8 @@ NOTE: You cannot access these endpoints via the Console in Kibana.
 * <<saved-objects-api-export>>
 * <<saved-objects-api-import>>
 * <<saved-objects-api-resolve-import-errors>>
+* <<saved-objects-api-copy-to-space>>
+* <<saved-objects-api-resolve-copy-to-space-conflicts>>
 
 include::saved-objects/get.asciidoc[]
 include::saved-objects/bulk_get.asciidoc[]
@@ -33,3 +35,4 @@ include::saved-objects/export.asciidoc[]
 include::saved-objects/import.asciidoc[]
 include::saved-objects/resolve_import_errors.asciidoc[]
 include::saved-objects/copy_to_space.asciidoc[]
+include::saved-objects/copy_to_space_resolve_conflicts.asciidoc[]

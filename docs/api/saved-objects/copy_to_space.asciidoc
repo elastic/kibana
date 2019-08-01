@@ -43,6 +43,7 @@ The request body must be a JSON object which contains the following properties:
 ==== Response body
 
 The response body will have a summary of the copy operation, with a top level property for each source space specified in the request.
+Any conflicts reported can be resolved using the <<saved-objects-api-resolve-copy-to-space-conflicts, Copy to Space Conflict Resolution API>>.
 
 
 ==== Examples

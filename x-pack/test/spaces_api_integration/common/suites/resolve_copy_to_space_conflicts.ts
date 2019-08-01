@@ -235,7 +235,7 @@ export function resolveCopyToSpaceConflictsSuite(
         const destination = getDestinationSpace(spaceId);
 
         return supertestWithoutAuth
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/copySavedObjects/_resolveConflicts`)
+          .post(`${getUrlPrefix(spaceId)}/api/spaces/copySavedObjects/resolveConflicts`)
           .auth(user.username, user.password)
           .send({
             objects: [
@@ -266,7 +266,7 @@ export function resolveCopyToSpaceConflictsSuite(
         const destination = getDestinationSpace(spaceId);
 
         return supertestWithoutAuth
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/copySavedObjects/_resolveConflicts`)
+          .post(`${getUrlPrefix(spaceId)}/api/spaces/copySavedObjects/resolveConflicts`)
           .auth(user.username, user.password)
           .send({
             objects: [
@@ -297,7 +297,7 @@ export function resolveCopyToSpaceConflictsSuite(
         const destination = getDestinationSpace(spaceId);
 
         return supertestWithoutAuth
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/copySavedObjects/_resolveConflicts`)
+          .post(`${getUrlPrefix(spaceId)}/api/spaces/copySavedObjects/resolveConflicts`)
           .auth(user.username, user.password)
           .send({
             objects: [
@@ -328,7 +328,7 @@ export function resolveCopyToSpaceConflictsSuite(
         const destination = getDestinationSpace(spaceId);
 
         return supertestWithoutAuth
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/copySavedObjects/_resolveConflicts`)
+          .post(`${getUrlPrefix(spaceId)}/api/spaces/copySavedObjects/resolveConflicts`)
           .auth(user.username, user.password)
           .send({
             objects: [

@@ -1,0 +1,92 @@
+[role="xpack"]
+[[saved-objects-api-resolve-copy-to-space-conflicts]]
+=== Resolve Copy to Space Conflicts
+
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+
+The copy-to-space conflict resolution saved object API enables you to overwrite specific saved objects that were returned as errors from the <<saved-objects-api-copy-to-space, Copy to Space API>>.
+
+Note: You cannot access this endpoint via the Console in Kibana.
+
+==== Request
+
+`POST /api/spaces/copySavedObjects/resolveConflicts`
+
+`POST /s/<space_id>/api/spaces/copySavedObjects/resolveConflicts`
+
+==== Path Parameters
+`space_id` (optional)::
+(string) Identifies the source space from which saved objects will be copied. If `space_id` is not specified in the URL, the default space is used.
+
+
+==== Request Body
+
+The request body must be a JSON object which contains the following properties:
+
+`objects` (required)::
+  (object array) the saved objects to copy. You must set this to the same value that you used when executing the <<saved-objects-api-copy-to-space, Copy to Space API>>.
+  `type` (required) :::
+    (string) the saved object type
+  `id` (required) :::
+    (string) the saved object id
+
+`includeReferences` (optional)::
+  (boolean, default: `false`) When set to true, all saved objects related to the specified saved objects will also be copied into the target spaces. You must set this to the same value that you used when executing the <<saved-objects-api-copy-to-space, Copy to Space API>>.
+
+`retries` (required)::
+  (object array) Array of retry operations to attempt.
+  `space` (required) :::
+  (string) the space id with the conflict.
+  `retries` (required) :::
+  (array) Array of retry operations for the indicated space.
+    `type` (required) ::::
+    (string) the saved object type
+    `id` (required) ::::
+    (string) the saved object id
+    `overwrite` (required) ::::
+    (boolean) when set to `true`, the saved object from the source space (desigated by the `space_id` path parameter) will overwrite the the conflicting object in the destination space. When `false`, this does nothing.
+
+
+==== Response body
+
+The response body will have a summary of the copy operation, with a top level property for each source space specified in the request.
+
+
+==== Examples
+
+The following example attempts to copy a dashboard with id `my-dashboard`, including all references from the `default` space to the `marketing` and `sales` spaces. The `marketing` space succeeds, while the `sales` space fails due to a conflict on the underlying index pattern:
+
+[source,js]
+--------------------------------------------------
+POST api/spaces/copySavedObjects/resolveConflicts
+{
+  "objects": [{
+    "type": "dashboard",
+    "id": "my-dashboard"
+  }],
+  "includeReferences": true,
+  "retries": [{
+    "space": "marketing",
+    "retries": [{
+      "type": "index-pattern",
+      "id": "my-pattern",
+      "overwrite": true
+    }]
+  }]
+}
+--------------------------------------------------
+// KIBANA
+
+A successful call returns a response code of `200` and a response body
+containing a JSON structure similar to the following example:
+
+[source,js]
+--------------------------------------------------
+{
+  "marketing": {
+    "success": true,
+    "successCount": 1
+  }
+}
+--------------------------------------------------
+

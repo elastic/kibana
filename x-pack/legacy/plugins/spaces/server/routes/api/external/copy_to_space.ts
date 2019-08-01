@@ -90,7 +90,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
 
   http.route({
     method: 'POST',
-    path: '/api/spaces/copySavedObjects/_resolveConflicts',
+    path: '/api/spaces/copySavedObjects/resolveConflicts',
     async handler(request: Legacy.Request, h: Legacy.ResponseToolkit) {
       const spacesClient = await spacesService.scopedClient(request);
 
