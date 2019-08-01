@@ -16,7 +16,8 @@ export default function ({ getService }) {
   const testHistoryIndex = '.task_manager_test_result';
   const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
 
-  describe('scheduling and running tasks', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/42098
+  describe.skip('scheduling and running tasks', () => {
     beforeEach(() => supertest.delete('/api/sample_tasks')
       .set('kbn-xsrf', 'xxx')
       .expect(200));
@@ -106,7 +107,7 @@ export default function ({ getService }) {
         const [scheduledTask] = (await currentTasks()).docs;
         expect(scheduledTask.id).to.eql(task.id);
         expect(scheduledTask.attempts).to.be.greaterThan(0);
-        expect(Date.parse(scheduledTask.runAt)).to.be.greaterThan(Date.parse(task.runAt));
+        expect(Date.parse(scheduledTask.runAt)).to.be.greaterThan(Date.parse(task.runAt) + 5 * 60 * 1000);
       });
     });
 

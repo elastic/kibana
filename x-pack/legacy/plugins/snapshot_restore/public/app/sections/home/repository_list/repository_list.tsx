@@ -37,12 +37,12 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const {
     error,
-    loading,
+    isLoading,
     data: { repositories, managedRepository } = {
       repositories: undefined,
       managedRepository: undefined,
     },
-    request: reload,
+    sendRequest: reload,
   } = useLoadRepositories();
 
   const openRepositoryDetailsUrl = (newRepositoryName: Repository['name']): string => {
@@ -72,7 +72,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   let content;
 
-  if (loading) {
+  if (isLoading) {
     content = (
       <SectionLoading>
         <FormattedMessage

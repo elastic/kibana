@@ -6,7 +6,7 @@
 
 import { Action } from 'redux-actions';
 import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 import { isEqual } from 'lodash';
 import { delay } from 'redux-saga';
 
@@ -138,10 +138,7 @@ function requestStatus(location: FetchFilePayload) {
     ? `/api/code/repo/${uri}/status/${revision}/${path}`
     : `/api/code/repo/${uri}/status/${revision}`;
 
-  return kfetch({
-    pathname,
-    method: 'GET',
-  });
+  return npStart.core.http.get(pathname);
 }
 
 export function* watchStatusChange() {

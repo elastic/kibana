@@ -7,6 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { IndexPattern } from 'ui/index_patterns';
 import { getPivotQuery, KibanaContext } from '../../../../common';
 
 import { SourceIndexPreview } from './source_index_preview';
@@ -19,11 +20,11 @@ jest.mock('react', () => {
 
 describe('Data Frame: <SourceIndexPreview />', () => {
   test('Minimal initialization', () => {
-    const currentIndexPattern = {
+    const currentIndexPattern = ({
       id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
       fields: [],
-    };
+    } as unknown) as IndexPattern;
 
     const props = {
       query: getPivotQuery('the-query'),

@@ -6,7 +6,7 @@
 
 import { DetailSymbolInformation } from '@elastic/lsp-extension';
 
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 import { Location } from 'vscode-languageserver-types';
 import { monaco } from '../monaco';
 import { LspRestClient, TextDocumentMethods } from '../../../common/lsp_client';
@@ -32,7 +32,7 @@ export const definitionProvider: monaco.languages.DefinitionProvider = {
     }
 
     async function handleQname(qname: string): Promise<monaco.languages.Location[]> {
-      const res: any = await kfetch({ pathname: `/api/code/lsp/symbol/${qname}` });
+      const res = await npStart.core.http.get(`/api/code/lsp/symbol/${qname}`);
       if (res.symbols) {
         return res.symbols.map((s: DetailSymbolInformation) =>
           handleLocation(s.symbolInformation.location)

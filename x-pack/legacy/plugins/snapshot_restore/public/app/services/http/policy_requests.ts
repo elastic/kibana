@@ -5,7 +5,13 @@
  */
 import { API_BASE_PATH } from '../../../../common/constants';
 import { SlmPolicy, SlmPolicyPayload } from '../../../../common/types';
-import { UIM_POLICY_CREATE } from '../../constants';
+import {
+  UIM_POLICY_EXECUTE,
+  UIM_POLICY_DELETE,
+  UIM_POLICY_DELETE_MANY,
+  UIM_POLICY_CREATE,
+} from '../../constants';
+import { uiMetricService } from '../ui_metric';
 import { httpService } from './http';
 import { useRequest, sendRequest } from './use_request';
 
@@ -23,11 +29,38 @@ export const useLoadPolicy = (name: SlmPolicy['name']) => {
   });
 };
 
+export const executePolicy = async (name: SlmPolicy['name']) => {
+  const result = sendRequest({
+    path: httpService.addBasePath(`${API_BASE_PATH}policy/${encodeURIComponent(name)}/run`),
+    method: 'post',
+  });
+
+  const { trackUiMetric } = uiMetricService;
+  trackUiMetric(UIM_POLICY_EXECUTE);
+  return result;
+};
+
+export const deletePolicies = async (names: Array<SlmPolicy['name']>) => {
+  const result = sendRequest({
+    path: httpService.addBasePath(
+      `${API_BASE_PATH}policies/${names.map(name => encodeURIComponent(name)).join(',')}`
+    ),
+    method: 'delete',
+  });
+
+  const { trackUiMetric } = uiMetricService;
+  trackUiMetric(names.length > 1 ? UIM_POLICY_DELETE_MANY : UIM_POLICY_DELETE);
+  return result;
+};
+
 export const addPolicy = async (newPolicy: SlmPolicyPayload) => {
-  return sendRequest({
+  const result = sendRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}policies`),
     method: 'put',
     body: newPolicy,
-    uimActionType: UIM_POLICY_CREATE,
   });
+
+  const { trackUiMetric } = uiMetricService;
+  trackUiMetric(UIM_POLICY_CREATE);
+  return result;
 };
