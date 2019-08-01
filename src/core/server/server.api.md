@@ -9,6 +9,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { ConfigOptions } from 'elasticsearch';
 import { Duration } from 'moment';
+import { IncomingHttpHeaders } from 'http';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { Readable } from 'stream';
@@ -16,6 +17,7 @@ import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
 import { Server } from 'hapi';
+import { Stream } from 'stream';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { Url } from 'url';
@@ -385,6 +387,22 @@ export interface PluginsServiceStart {
 export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
     [K in keyof T]: RecursiveReadonly<T[K]>;
 }> : T;
+
+// @public
+export type ResponseError = string | Error | {
+    message: string | Error;
+    meta?: ResponseErrorMeta;
+};
+
+// @public
+export interface ResponseErrorMeta {
+    // (undocumented)
+    data?: Record<string, any>;
+    // (undocumented)
+    docLink?: string;
+    // (undocumented)
+    errorCode?: string;
+}
 
 // @public
 export interface RouteConfigOptions {
