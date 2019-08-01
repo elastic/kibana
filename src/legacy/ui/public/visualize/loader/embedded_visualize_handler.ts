@@ -441,8 +441,6 @@ export class EmbeddedVisualizeHandler {
   };
 
   private fetch = (forceFetch: boolean = false) => {
-    this.cancel();
-
     this.dataLoaderParams.aggs = this.vis.getAggConfig();
     this.dataLoaderParams.forceFetch = forceFetch;
     this.dataLoaderParams.inspectorAdapters = this.inspectorAdapters;
