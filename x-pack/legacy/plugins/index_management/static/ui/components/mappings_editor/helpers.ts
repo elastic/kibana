@@ -6,16 +6,23 @@
 import { DataType } from './config';
 
 export const hasNestedProperties = (selectedDatatype: DataType) =>
-  selectedDatatype === 'object' || selectedDatatype === 'nested';
+  selectedDatatype === 'object' ||
+  selectedDatatype === 'nested' ||
+  selectedDatatype === 'text' ||
+  selectedDatatype === 'keyword';
 
 export const propertiesArrayToObject = (properties?: any[]): any =>
   properties
     ? properties.reduce((acc, property) => {
         const { name, ...rest } = property;
         acc[property.name] = rest;
-        if (hasNestedProperties(rest.type) && rest.properties) {
+        if (hasNestedProperties(rest.type)) {
           // Recursively convert Array to Object
-          rest.properties = propertiesArrayToObject(rest.properties);
+          if (rest.properties) {
+            rest.properties = propertiesArrayToObject(rest.properties);
+          } else if (rest.fields) {
+            rest.fields = propertiesArrayToObject(rest.fields);
+          }
         }
         return acc;
       }, {})
@@ -27,13 +34,21 @@ export const propertiesObjectToArray = (
   } = {}
 ): any[] =>
   Object.entries(properties).map(([name, property]) => {
-    if (hasNestedProperties(property.type) && property.properties) {
+    if (hasNestedProperties(property.type)) {
       // Recursively convert Object to Array
-      return {
-        name,
-        ...property,
-        properties: propertiesObjectToArray(property.properties),
-      };
+      if (property.properties) {
+        return {
+          name,
+          ...property,
+          properties: propertiesObjectToArray(property.properties),
+        };
+      } else if (property.fields) {
+        return {
+          name,
+          ...property,
+          fields: propertiesObjectToArray(property.fields),
+        };
+      }
     }
     return { name, ...property };
   });
