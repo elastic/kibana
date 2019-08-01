@@ -4,19 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { InternalCoreSetup } from 'src/core/server';
 import { withDefaultQueryParamValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getTrace } from '../lib/traces/get_trace';
 import { getTransactionGroupList } from '../lib/transaction_groups';
-
-const ROOT = '/api/apm/traces';
-const defaultErrorHandler = (err: Error) => {
-  // eslint-disable-next-line
-  console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: 400 });
-};
 
 export function initTracesApi(core: InternalCoreSetup) {
   const { server } = core.http;
@@ -24,7 +16,7 @@ export function initTracesApi(core: InternalCoreSetup) {
   // Get trace list
   server.route({
     method: 'GET',
-    path: ROOT,
+    path: '/api/apm/traces',
     options: {
       validate: {
         query: withDefaultQueryParamValidators()
@@ -33,16 +25,14 @@ export function initTracesApi(core: InternalCoreSetup) {
     },
     handler: async req => {
       const setup = await setupRequest(req);
-      return getTransactionGroupList({ type: 'top_traces' }, setup).catch(
-        defaultErrorHandler
-      );
+      return getTransactionGroupList({ type: 'top_traces' }, setup);
     }
   });
 
   // Get individual trace
   server.route({
     method: 'GET',
-    path: `${ROOT}/{traceId}`,
+    path: `/api/apm/traces/{traceId}`,
     options: {
       validate: {
         query: withDefaultQueryParamValidators()
@@ -52,7 +42,7 @@ export function initTracesApi(core: InternalCoreSetup) {
     handler: async req => {
       const { traceId } = req.params;
       const setup = await setupRequest(req);
-      return getTrace(traceId, setup).catch(defaultErrorHandler);
+      return getTrace(traceId, setup);
     }
   });
 }

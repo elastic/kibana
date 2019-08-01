@@ -4,18 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import Joi from 'joi';
 import { InternalCoreSetup } from 'src/core/server';
 import { withDefaultQueryParamValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getEnvironments } from '../lib/ui_filters/get_environments';
-
-const defaultErrorHandler = (err: Error) => {
-  // eslint-disable-next-line
-  console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: 400 });
-};
 
 export function initUIFiltersApi(core: InternalCoreSetup) {
   const { server } = core.http;
@@ -35,7 +28,7 @@ export function initUIFiltersApi(core: InternalCoreSetup) {
       const { serviceName } = req.query as {
         serviceName?: string;
       };
-      return getEnvironments(setup, serviceName).catch(defaultErrorHandler);
+      return getEnvironments(setup, serviceName);
     }
   });
 }

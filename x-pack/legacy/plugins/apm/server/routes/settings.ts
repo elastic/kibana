@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { InternalCoreSetup } from 'src/core/server';
 import Joi from 'joi';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -17,12 +16,6 @@ import { listConfigurations } from '../lib/settings/agent_configuration/list_con
 import { getEnvironments } from '../lib/settings/agent_configuration/get_environments';
 import { deleteConfiguration } from '../lib/settings/agent_configuration/delete_configuration';
 import { createApmAgentConfigurationIndex } from '../lib/settings/agent_configuration/create_agent_config_index';
-
-const defaultErrorHandler = (err: Error) => {
-  // eslint-disable-next-line
-  console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: 400 });
-};
 
 export function initSettingsApi(core: InternalCoreSetup) {
   const { server } = core.http;
@@ -45,7 +38,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
       const setup = await setupRequest(req);
       return await listConfigurations({
         setup
-      }).catch(defaultErrorHandler);
+      });
     }
   });
 
@@ -67,7 +60,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
       return await deleteConfiguration({
         configurationId,
         setup
-      }).catch(defaultErrorHandler);
+      });
     }
   });
 
@@ -87,7 +80,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
       const setup = await setupRequest(req);
       return await getServiceNames({
         setup
-      }).catch(defaultErrorHandler);
+      });
     }
   });
 
@@ -109,7 +102,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
       return await getEnvironments({
         serviceName,
         setup
-      }).catch(defaultErrorHandler);
+      });
     }
   });
 
@@ -147,7 +140,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
       return await createConfiguration({
         configuration,
         setup
-      }).catch(defaultErrorHandler);
+      });
     }
   });
 
@@ -172,7 +165,7 @@ export function initSettingsApi(core: InternalCoreSetup) {
         configurationId,
         configuration,
         setup
-      }).catch(defaultErrorHandler);
+      });
     }
   });
 

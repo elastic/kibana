@@ -4,18 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import Joi from 'joi';
 import { InternalCoreSetup } from 'src/core/server';
 import { withDefaultQueryParamValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getMetricsChartDataByAgent } from '../lib/metrics/get_metrics_chart_data_by_agent';
-
-const defaultErrorHandler = (err: Error) => {
-  // eslint-disable-next-line
-  console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: 400 });
-};
 
 export function initMetricsApi(core: InternalCoreSetup) {
   const { server } = core.http;
@@ -40,7 +33,7 @@ export function initMetricsApi(core: InternalCoreSetup) {
         setup,
         serviceName,
         agentName
-      }).catch(defaultErrorHandler);
+      });
     }
   });
 }

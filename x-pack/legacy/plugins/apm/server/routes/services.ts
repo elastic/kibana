@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { InternalCoreSetup } from 'src/core/server';
 import { AgentName } from '../../typings/es_schemas/ui/fields/Agent';
 import { createApmTelementry, storeApmTelemetry } from '../lib/apm_telemetry';
@@ -14,18 +13,11 @@ import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
 import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
 
-const ROOT = '/api/apm/services';
-const defaultErrorHandler = (err: Error) => {
-  // eslint-disable-next-line
-  console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: 400 });
-};
-
 export function initServicesApi(core: InternalCoreSetup) {
   const { server } = core.http;
   server.route({
     method: 'GET',
-    path: ROOT,
+    path: '/api/apm/services',
     options: {
       validate: {
         query: withDefaultQueryParamValidators()
@@ -34,7 +26,7 @@ export function initServicesApi(core: InternalCoreSetup) {
     },
     handler: async req => {
       const setup = await setupRequest(req);
-      const services = await getServices(setup).catch(defaultErrorHandler);
+      const services = await getServices(setup);
 
       // Store telemetry data derived from services
       const agentNames = services.items.map(
@@ -49,7 +41,7 @@ export function initServicesApi(core: InternalCoreSetup) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/{serviceName}/agent_name`,
+    path: `/api/apm/services/{serviceName}/agent_name`,
     options: {
       validate: {
         query: withDefaultQueryParamValidators()
@@ -59,13 +51,13 @@ export function initServicesApi(core: InternalCoreSetup) {
     handler: async req => {
       const setup = await setupRequest(req);
       const { serviceName } = req.params;
-      return getServiceAgentName(serviceName, setup).catch(defaultErrorHandler);
+      return getServiceAgentName(serviceName, setup);
     }
   });
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/{serviceName}/transaction_types`,
+    path: `/api/apm/services/{serviceName}/transaction_types`,
     options: {
       validate: {
         query: withDefaultQueryParamValidators()
@@ -75,9 +67,7 @@ export function initServicesApi(core: InternalCoreSetup) {
     handler: async req => {
       const setup = await setupRequest(req);
       const { serviceName } = req.params;
-      return getServiceTransactionTypes(serviceName, setup).catch(
-        defaultErrorHandler
-      );
+      return getServiceTransactionTypes(serviceName, setup);
     }
   });
 }
