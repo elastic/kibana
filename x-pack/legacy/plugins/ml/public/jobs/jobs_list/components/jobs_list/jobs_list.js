@@ -17,10 +17,12 @@ import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
+import { getJobIdUrl } from '../utils';
 
 import {
   EuiBasicTable,
   EuiButtonIcon,
+  EuiLink
 } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -75,6 +77,14 @@ class JobsListUI extends Component {
   toggleRow = (item) => {
     this.props.toggleRow(item.id);
   };
+
+  getJobIdLink(id) {
+    return (
+      <EuiLink href={getJobIdUrl(id)}>
+        {id}
+      </EuiLink>
+    );
+  }
 
   getPageOfJobs(index, size, sortField, sortDirection) {
     let list = this.state.jobsSummaryList;
@@ -159,7 +169,8 @@ class JobsListUI extends Component {
         }),
         sortable: true,
         truncateText: false,
-        width: '20%'
+        width: '20%',
+        render: isManagementTable ? (id) => this.getJobIdLink(id) : undefined,
       }, {
         field: 'auditMessage',
         name: '',

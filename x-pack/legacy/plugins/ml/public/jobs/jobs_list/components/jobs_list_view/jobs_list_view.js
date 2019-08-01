@@ -435,15 +435,15 @@ export class JobsListView extends Component {
 
   render() {
     const { isRefreshing, jobsSummaryList } = this.state;
-    const isManagementTable = (this.props.isManagementTable === true);
+    const { isManagementTable } = this.props;
 
     return (
       <React.Fragment>
-        {!isManagementTable &&
+        {isManagementTable === undefined &&
           <JobStatsBar
             jobsSummaryList={jobsSummaryList}
           />}
-        <div className={isManagementTable ? '' : 'job-management'} data-test-subj="ml-jobs-list">
+        <div className={isManagementTable === true ? '' : 'job-management'} data-test-subj="ml-jobs-list">
           <NodeAvailableWarning />
           <UpgradeWarning />
           <header>

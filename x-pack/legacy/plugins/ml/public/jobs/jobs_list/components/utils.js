@@ -7,6 +7,8 @@
 import { each } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
+import rison from 'rison-node';
+import chrome from 'ui/chrome'; // TODO: get from context once walter's PR is merged
 
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -283,5 +285,32 @@ function jobProperty(job, prop) {
     groups: 'groups',
   };
   return job[propMap[prop]];
+}
+
+export function getJobIdUrl(jobId) {
+  // Create url for filtering by job id for kibana management table
+  const settings = {
+    jobId
+  };
+  const encoded = rison.encode(settings);
+  const url = `?mlManagement=${encoded}`;
+
+  return `${chrome.getBasePath()}/app/ml#/jobs${url}`;
+}
+
+function getUrlVars(url) {
+  const vars = {};
+  url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (_, key, value) {
+    vars[key] = value;
+  });
+  return vars;
+}
+
+export function getSelectedJobIdFromUrl(url) {
+  if (typeof (url) === 'string' && url.includes('mlManagement') && url.includes('jobId')) {
+    const urlParams = getUrlVars(url);
+    const decodedJson = rison.decode(urlParams.mlManagement);
+    return decodedJson.jobId;
+  }
 }
 
