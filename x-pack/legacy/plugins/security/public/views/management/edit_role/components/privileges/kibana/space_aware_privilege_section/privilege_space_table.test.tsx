@@ -326,7 +326,7 @@ describe('global base read', () => {
       const actualTable = getTableFromComponent(component);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Read', overridden: false } },
-        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Read', overridden: true } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
       ]);
     });
 

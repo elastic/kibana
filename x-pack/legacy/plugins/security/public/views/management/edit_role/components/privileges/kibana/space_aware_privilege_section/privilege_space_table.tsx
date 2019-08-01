@@ -81,8 +81,6 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
 
     const effectivePrivileges = privilegeCalculator.calculateEffectivePrivileges(false);
 
-    const allowedPrivileges = privilegeCalculator.calculateAllowedPrivileges();
-
     const rows: TableRow[] = spacePrivileges.map((spacePrivs, spacesIndex) => {
       const spaces = spacePrivs.spaces.map(
         spaceId =>
@@ -199,16 +197,12 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
               />
             );
           } else {
-            const hasNonSupersededCustomizations = Object.entries(privileges.feature).some(
-              ([featureId, featurePrivileges]) => {
-                const allowedFeaturePrivileges =
-                  allowedPrivileges[record.spacesIndex].feature[featureId];
+            const hasNonSupersededCustomizations = Object.keys(privileges.feature).some(
+              featureId => {
+                const featureEffectivePrivilege = effectivePrivilege.feature[featureId];
                 return (
-                  allowedFeaturePrivileges &&
-                  allowedFeaturePrivileges.canUnassign &&
-                  allowedFeaturePrivileges.privileges.some(privilege =>
-                    featurePrivileges.includes(privilege)
-                  )
+                  featureEffectivePrivilege &&
+                  featureEffectivePrivilege.directlyAssignedPrivilegeMorePermissiveThanInherited
                 );
               }
             );

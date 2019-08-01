@@ -51,6 +51,8 @@ export class KibanaFeaturePrivilegeCalculator {
             actualPrivilege: featurePrivilege,
             actualPrivilegeSource: scenario.actualPrivilegeSource,
             isDirectlyAssigned: scenario.isDirectlyAssigned,
+            directlyAssignedPrivilegeMorePermissiveThanInherited:
+              scenario.directlyAssignedPrivilegeMorePermissiveThanInherited,
             ...this.buildSupercededFields(
               !scenario.isDirectlyAssigned,
               scenario.supersededPrivilege,
@@ -102,10 +104,17 @@ export class KibanaFeaturePrivilegeCalculator {
     });
 
     if (!isGlobalPrivilege || !ignoreAssigned) {
+      const isDirectlyAssigned = isGlobalPrivilege && hasAssignedFeaturePrivilege;
+      const actions = this.getFeatureActions(featureId, assignedGlobalFeaturePrivilege);
+      const directlyAssignedPrivilegeMorePermissiveThanInherited =
+        isDirectlyAssigned && !areActionsFullyCovered(this.assignedGlobalBaseActions, actions)
+          ? true
+          : undefined;
       scenarios.push({
         actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
-        actions: this.getFeatureActions(featureId, assignedGlobalFeaturePrivilege),
-        isDirectlyAssigned: isGlobalPrivilege && hasAssignedFeaturePrivilege,
+        actions,
+        isDirectlyAssigned,
+        directlyAssignedPrivilegeMorePermissiveThanInherited,
         ...this.buildSupercededFields(
           hasAssignedFeaturePrivilege && !isGlobalPrivilege,
           assignedFeaturePrivilege,
@@ -141,13 +150,21 @@ export class KibanaFeaturePrivilegeCalculator {
     }
 
     if (!ignoreAssigned) {
+      const actions = this.getFeatureActions(
+        featureId,
+        this.getAssignedFeaturePrivilege(privilegeSpec, featureId)
+      );
+      const directlyAssignedPrivilegeMorePermissiveThanInherited = !areActionsFullyCovered(
+        this.assignedGlobalBaseActions,
+        actions
+      )
+        ? true
+        : undefined;
       scenarios.push({
         actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
         isDirectlyAssigned: true,
-        actions: this.getFeatureActions(
-          featureId,
-          this.getAssignedFeaturePrivilege(privilegeSpec, featureId)
-        ),
+        directlyAssignedPrivilegeMorePermissiveThanInherited,
+        actions,
       });
     }
 
