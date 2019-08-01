@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import styled from 'styled-components';
 import { FilterBadgeList } from './FilterBadgeList';
+import { unit, px } from '../../../../style/variables';
 
 const Popover = styled(EuiPopover).attrs({
   anchorClassName: 'anchor'
@@ -31,7 +32,7 @@ const Popover = styled(EuiPopover).attrs({
 `;
 
 const SelectContainer = styled.div`
-  width: 300px;
+  width: ${px(unit * 16)};
 `;
 
 const Counter = styled.div`

@@ -7,11 +7,12 @@
 import React from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiBadge, EuiIcon } from '@elastic/eui';
 import styled from 'styled-components';
+import { unit, px } from '../../../../style/variables';
 
 const BadgeText = styled.div`
    {
     display: inline-block;
-    max-width: 140px;
+    max-width: ${px(unit * 8)};
     overflow: hidden;
     text-overflow: ellipsis;
     vertical-align: middle;
