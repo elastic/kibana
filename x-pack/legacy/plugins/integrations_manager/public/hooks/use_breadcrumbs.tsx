@@ -5,7 +5,7 @@
  */
 
 import { ChromeBreadcrumb } from 'src/core/public';
-import { useCore } from '../hooks';
+import { useCore } from '.';
 
 export function useBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]) {
   const { chrome } = useCore();
