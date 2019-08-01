@@ -5,17 +5,17 @@
  */
 
 import React from 'react';
-import { generatePath, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import { Detail } from './screens/detail';
 import { Home } from './screens/home';
-import { PLUGIN_ID } from '../common/constants';
+import { PLUGIN } from '../common/constants';
 
-export const APP_ROOT = `/app/${PLUGIN_ID}`;
-
-// the `*_VIEW` routes are relative to `APP_ROOT`
-export const LIST_VIEW = '/';
-
-export const DETAIL_VIEW = '/detail/:pkgkey';
+// patterns are used by React Router and are relative to `APP_ROOT`
+export const patterns = {
+  APP_ROOT: `/app/${PLUGIN.ID}`,
+  LIST_VIEW: '/',
+  DETAIL_VIEW: '/detail/:pkgkey',
+};
 
 interface DetailMatch {
   match: {
@@ -25,14 +25,11 @@ interface DetailMatch {
   };
 }
 
-export const linkToDetailView = ({ name, version }: { name: string; version: string }) =>
-  generatePath(DETAIL_VIEW, { pkgkey: `${name}-${version}` });
-
 export const routes = [
-  <Route key="home" path={LIST_VIEW} exact={true} component={Home} />,
+  <Route key="home" path={patterns.LIST_VIEW} exact={true} component={Home} />,
   <Route
     key="detail"
-    path={DETAIL_VIEW}
+    path={patterns.DETAIL_VIEW}
     exact={true}
     render={(props: DetailMatch) => <Detail package={props.match.params.pkgkey} />}
   />,

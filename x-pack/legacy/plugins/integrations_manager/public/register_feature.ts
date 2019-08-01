@@ -8,16 +8,16 @@ import {
   FeatureCatalogueCategory,
   FeatureCatalogueRegistryProvider,
 } from 'ui/registry/feature_catalogue';
-import { PLUGIN_ID } from '../common/constants';
-import { APP_ROOT } from './routes';
+import { PLUGIN } from '../common/constants';
+import { patterns } from './routes';
 
 // This defines what shows up in the registry found at /app/kibana#/home and /app/kibana#/home/feature_directory
 FeatureCatalogueRegistryProvider.register(() => ({
-  id: PLUGIN_ID,
-  title: 'Integrations Manager',
-  description: 'Install and manage your elastic data ingest integrations',
-  icon: 'merge',
-  path: APP_ROOT,
+  id: PLUGIN.ID,
+  title: PLUGIN.TITLE,
+  description: PLUGIN.DESCRIPTION,
+  icon: PLUGIN.ICON,
+  path: patterns.APP_ROOT,
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,
 }));
