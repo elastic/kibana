@@ -25,13 +25,7 @@ When you change views, you see the same data through the perspective of a differ
 === Use the power of Search
 
 Use the Search bar to perform ad hoc or structured searches using {kibana-ref}/kuery-query.html[Kibana Query Language] which features autocomplete and a simple, easy to use syntax.
-For example, enter `host.hostname : "xxxxxxx"`
-It can help you find the information you're looking for, even if the
-other options you have selected would normally filter it out.
-// +++ What does this last sentence mean?
-// +++ Can you enter anything else other than KQL?
-// +++ and what's a good example (complete above)? each thing I try doesn't return the results I expect?
-
+For example, enter `host.hostname : "host1"` to see only the information for `host1`.
 
 [float]
 [[infra-metric]]
@@ -53,19 +47,12 @@ Examples of grouping options include Availability Zone, Machine Type, Project ID
 === Specify the time and date range
 
 Use the time selector to focus on a specific timeframe.
-If you want the metrics to be continuously updated, click *Auto-refresh*.
-
-// +++ how can you specify anything other than the last minute.
-
-// +++ what if you don't auto-refresh (or is that the default?) Is this a separate section (as below) or related to the time and date picker functionality?
-
-// +++ and how does auto-refresh work if you've selected a historic period.
 
 [float]
 [[infra-refresh]]
 === Auto-refresh or pause
 
-Select *Auto-refresh* to keep up-to-date information coming in, or *Stop refreshing* to focus on historical data without new distractions.
+Select *Auto-refresh* to keep up-to-date metrics information coming in, or *Stop refreshing* to focus on historical data without new distractions.
 
 [float]
 [[infra-configure-source]]
@@ -85,18 +72,16 @@ Hover over a component to see more information about that component.
 Click a component to see the other actions for that component that you can carry out from the Infrastructure tab.
 You can select:
 
-* *View Metrics* to {kibana-ref}xpack-view-metrics.html[view detailed metrics for the selected component].
-// +++ Add link
+* *View Metrics* to {kibana-ref}/xpack-view-metrics.html[view detailed metrics for the selected component].
 
-* *View Logs* to view the {kibana-ref}xpack-logs-using.html[corresponding logs for the selected component] in the *Logs* tab.
-// +++ There may be a better link than this, or I may need to explain here that the tab opens with the appropriate component etc pre-selected.
+* *View Logs* to view the {kibana-ref}/xpack-logs-using.html[corresponding logs for the selected component] in the *Logs* tab.
+// +++ I think this is the best link, but I may need to explain here that the tab opens with the appropriate component etc pre-selected.
 
-Depending on the xxx you have installed and configured, you may also be able to select:
-// +++ depending on what?
+Depending on the features you have installed and configured, you may also be able to select:
 
-* *View APM* to {kibana-ref}xpack-apm.html[view APM traces for the selected component] in the *APM* tab.
+* *View APM* to {kibana-ref}/traces.html[view APM traces for the selected component] in the *APM* tab.
 // +++ Comment as for Logs link
 
-* *View Uptime* to {kibana-ref}xpack-uptime.html[view uptime information for the selected component] in the *Uptime* tab.
+* *View Uptime* to {kibana-ref}/uptime-overview.html[view uptime information for the selected component] in the *Uptime* tab.
 // +++ Comment as for logs link
 

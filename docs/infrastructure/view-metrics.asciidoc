@@ -2,11 +2,42 @@
 [[xpack-view-metrics]]
 == Viewing metrics
 
-// +++ To do
+== Viewing infrastructure metrics
 
-here's some dummy content for now. this describes the detailed metrics screen, selected from View metrics.
+When you select *View Metrics* for a component in your infrastructure from the {kibana-ref}/infra-ui.html[Infrastructure tab in Kibana], you can view detailed metrics for that component, and for any related components.
 
-We will have a quick screenshot, a description of the (kind of) things you can see/click, what happens when you do, and, non-intuitively, how to get back to the infrastructure screen.
+[role="screenshot"]
+image::infrastructure/images/infra-view-metrics.png[Infrastructure View Metrics in Kibana]
 
-Why do I sometimes get a Hosts AND Kubernetes view, and sometimes just one? see for example snagit screenshot of 2019-07-25_19_18_25 has both. but sometimes there is only one?
+[float]
+[[infra-view-metrics-date]]
+=== Specify the time and date range
+
+Use the time picker to select the time and date for which to show the metrics, and the time range to include. You can specify your own values, or select from some commonly used
+
+== Refresh the metrics
+
+You can click *Refresh* to manually refresh the metrics. Alternatively, within the time picker, you can select an automatic refresh period, then click *Start* to start automatic refresh
+
+You can also
+
+
+Something about whether it refreshes or not.
+
+// +++ I think there are bugs here
+
+// +++ Next (from last/next) doesn't always seem to work
+
+// ++ It seems to start up at some random time (not particularly asked for) that doesn't match the default settings (see screenshot)
+
+// +++ Could the next/prev time periods be outside the time selector? Or is that a stanbdard control?
+
+// +++ Refresh seems to drop metrics to zero before redrawing
+
+// ++ Is it time selector, or something else? the one in Metrics Explorer is different.
+
+// ++ How does refresh work for historic values? It's meaningless, surely?
+
+// ++ things like next (>) and previous (<) also don't seem to work for preselected time periods, for example "Yesterday"
+
 
