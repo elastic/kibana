@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { TsvbPlugin } from './plugin';
+import { PluginInitializerContext } from '../../../../core/public';
+import { MetricsPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new TsvbPlugin(initializerContext);
+  return new Plugin(initializerContext);
 }

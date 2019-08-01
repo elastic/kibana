@@ -21,21 +21,28 @@ import { resolve } from 'path';
 import { Legacy } from 'kibana';
 import { PluginInitializerContext } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
+
 import { plugin } from './server/';
 import { CustomCoreSetup } from './server/plugin';
 
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
-  return new kibana.Plugin({
+import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy/types';
+
+const metricsPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
+  new Plugin({
     id: 'metrics',
-
-    require: ['kibana', 'elasticsearch', 'visualizations', 'data'],
-
+    require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'data'],
+    publicDir: resolve(__dirname, 'public'),
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      hacks: ['plugins/metrics/legacy'],
+      hacks: [resolve(__dirname, 'public/legacy')],
+      injectDefaultVars: server => ({}),
     },
+    init: (server: Legacy.Server) => {
+      const initializerContext = {} as PluginInitializerContext;
+      const core = { http: { server } } as CoreSetup & CustomCoreSetup;
 
+      plugin(initializerContext).setup(core);
+    },
     config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
@@ -43,12 +50,7 @@ export default function(kibana: any) {
         minimumBucketSize: Joi.number().default(10),
       }).default();
     },
+  } as Legacy.PluginSpecOptions);
 
-    init(server: Legacy.Server) {
-      const initializerContext = {} as PluginInitializerContext;
-      const core = { http: { server } } as CoreSetup & CustomCoreSetup;
-
-      plugin(initializerContext).setup(core);
-    },
-  });
-}
+// eslint-disable-next-line import/no-default-export
+export default metricsPluginInitializer;

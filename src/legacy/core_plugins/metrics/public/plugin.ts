@@ -16,46 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
-import { DataSetup } from '../../data/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
+import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
 import { VisualizationsSetup } from '../../visualizations/public';
-// @ts-ignore
-import { tsvb } from './tsvb_fn';
-// @ts-ignore
-import { MetricsVis } from './kbn_vis_type';
 
-/** @public */
-export type TsvbSetup = void;
-/** @public */
-export type TsvbStart = void;
+import { createMetricsFn } from './metrics_fn';
+import { createMetricsTypeDefinition } from './metrics_type';
 
 /** @internal */
-export interface TsvbSetupPlugins {
-  // TODO: Remove `any` as functionsRegistry is added to the DataSetup.
-  data: DataSetup | any;
+export interface MetricsPluginSetupDependencies {
+  data: ReturnType<DataPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
 }
 
 /** @internal */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TsvbStartPlugins {}
-
-export class TsvbPlugin
-  implements Plugin<TsvbSetup, TsvbStart, TsvbSetupPlugins, TsvbStartPlugins> {
+export class MetricsPlugin implements Plugin<Promise<void>, void> {
   initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: TsvbSetupPlugins): TsvbSetup {
-    plugins.data.expressions.functionsRegistry.register(tsvb);
-    // register the provider with the visTypes registry so that other know it exists
-    plugins.visualizations.types.VisTypesRegistryProvider.register(MetricsVis);
+  public async setup(core: CoreSetup, { data, visualizations }: MetricsPluginSetupDependencies) {
+    data.expressions.registerFunction(createMetricsFn);
+    visualizations.types.VisTypesRegistryProvider.register(createMetricsTypeDefinition);
   }
 
-  public start(core: CoreStart, plugins: TsvbStartPlugins): TsvbStart {}
-
-  public stop() {}
+  public start(core: CoreStart) {
+    // nothing to do here yet
+  }
 }

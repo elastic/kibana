@@ -18,7 +18,8 @@
  */
 
 import { Legacy } from 'kibana';
-import { CoreSetup } from 'src/core/server';
+import { PluginInitializerContext, CoreSetup } from 'kibana/server';
+
 // @ts-ignore
 import { fieldsRoutes } from './routes/fields';
 // @ts-ignore
@@ -33,9 +34,16 @@ export interface CustomCoreSetup {
   };
 }
 
-export class Plugin {
+export class MetricsServerPlugin {
+  public initializerContext: PluginInitializerContext;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.initializerContext = initializerContext;
+  }
+
   public setup(core: CoreSetup & CustomCoreSetup) {
     const { http } = core;
+
     fieldsRoutes(http.server);
     visDataRoutes(http.server);
 

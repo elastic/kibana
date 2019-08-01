@@ -18,15 +18,20 @@
  */
 
 import chrome from 'ui/chrome';
-import { createMetricsRequestHandler } from './request_handler';
 import { i18n } from '@kbn/i18n';
-import { createEditorController } from './editor_controller';
+// @ts-ignore
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
+
 import { visFactory } from '../../visualizations/public';
 
+// @ts-ignore
+import { createMetricsRequestHandler } from './request_handler';
+// @ts-ignore
+import { createEditorController } from './editor_controller';
+// @ts-ignore
 import { PANEL_TYPES } from '../common/panel_types';
 
-export const MetricsVis = () => {
+export const createMetricsTypeDefinition = () => {
   const uiSettings = chrome.getUiSettingsClient();
   const savedObjectsClient = chrome.getSavedObjectsClient();
   const EditorController = createEditorController(uiSettings, savedObjectsClient);

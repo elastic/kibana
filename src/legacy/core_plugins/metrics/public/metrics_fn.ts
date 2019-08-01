@@ -19,12 +19,13 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { createMetricsRequestHandler } from './request_handler';
 import { PersistedState } from 'ui/persisted_state';
-
 import chrome from 'ui/chrome';
 
-export const tsvb = () => ({
+// @ts-ignore
+import { createMetricsRequestHandler } from './request_handler';
+
+export const createMetricsFn = () => ({
   name: 'tsvb',
   type: 'render',
   context: {
@@ -43,7 +44,7 @@ export const tsvb = () => ({
       default: '"{}"',
     },
   },
-  async fn(context, args) {
+  async fn(context: any, args: any) {
     const uiSettings = chrome.getUiSettingsClient();
     const metricsRequestHandler = createMetricsRequestHandler(uiSettings);
     const params = JSON.parse(args.params);
@@ -55,7 +56,7 @@ export const tsvb = () => ({
       query: get(context, 'query', null),
       filters: get(context, 'filters', null),
       visParams: params,
-      uiState: uiState,
+      uiState,
     });
 
     response.visType = 'metrics';
@@ -66,7 +67,7 @@ export const tsvb = () => ({
       value: {
         visType: 'metrics',
         visConfig: params,
-        uiState: uiState,
+        uiState,
         visData: response,
       },
     };

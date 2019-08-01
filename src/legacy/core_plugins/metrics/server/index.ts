@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { Plugin } from './plugin';
+import { PluginInitializerContext } from 'kibana/server';
+import { MetricsServerPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin();
+  return new Plugin(initializerContext);
 }

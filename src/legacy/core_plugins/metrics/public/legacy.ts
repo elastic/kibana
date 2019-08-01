@@ -17,24 +17,19 @@
  * under the License.
  */
 
-// @ts-ignore
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { PluginInitializerContext } from 'kibana/public';
-import { CoreSetup } from 'src/core/public';
+import { npSetup, npStart } from 'ui/new_platform';
+
 import { visualizations } from '../../visualizations/public';
-import { TsvbSetupPlugins } from './plugin';
+import { MetricsPluginSetupDependencies } from './plugin';
 import { plugin } from '.';
 
-export const core = {} as CoreSetup;
-export const plugins = {
-  data: {
-    expressions: {
-      functionsRegistry,
-    },
-  },
+const plugins: Readonly<MetricsPluginSetupDependencies> = {
   visualizations,
-} as TsvbSetupPlugins;
+  data: npSetup.plugins.data,
+};
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-export const setup = pluginInstance.setup(core, plugins);
+export const setup = pluginInstance.setup(npSetup.core, plugins);
+export const start = pluginInstance.start(npStart.core);
