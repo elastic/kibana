@@ -24,9 +24,8 @@ import { Filter } from '@kbn/es-query';
 
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { FilterBar } from '../filter';
-import { ApplyFiltersPopover } from '../filter';
-import { IndexPatterns } from 'src/legacy/core_plugins/data/public'
+import { IndexPatterns } from 'src/legacy/core_plugins/data/public';
+import { FilterBar, ApplyFiltersPopover } from '../filter';
 import template from './apply_filter_directive.html';
 
 // @ts-ignore
