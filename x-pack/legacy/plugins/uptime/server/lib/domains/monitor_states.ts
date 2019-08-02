@@ -4,22 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMMonitorStatesAdapter } from '../adapters/monitor_states';
-import { MonitorSummary, StatesIndexStatus } from '../../../common/graphql/types';
+import { UMMonitorStatesAdapter, GetMonitorStatesResult } from '../adapters/monitor_states';
+import { StatesIndexStatus } from '../../../common/graphql/types';
 
 export class UMMonitorStatesDomain {
   constructor(private readonly adapter: UMMonitorStatesAdapter, libs: {}) {
     this.adapter = adapter;
-  }
-
-  public async getMonitorStates(
-    request: any,
-    pageIndex: number,
-    pageSize: number,
-    sortField?: string,
-    sortDirection?: string
-  ): Promise<MonitorSummary[]> {
-    return this.adapter.getMonitorStates(request, pageIndex, pageSize, sortField, sortDirection);
   }
 
   public async statesIndexExists(request: any): Promise<StatesIndexStatus> {
@@ -30,8 +20,10 @@ export class UMMonitorStatesDomain {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null
-  ): Promise<MonitorSummary[]> {
-    return this.adapter.legacyGetMonitorStates(request, dateRangeStart, dateRangeEnd, filters);
+    filters?: string | null,
+    searchAfter?: string | null
+  ): Promise<GetMonitorStatesResult> {
+    console.log("ADAPTER SA", searchAfter);
+    return this.adapter.legacyGetMonitorStates(request, dateRangeStart, dateRangeEnd, filters, searchAfter);
   }
 }

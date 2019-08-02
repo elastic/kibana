@@ -40,10 +40,16 @@ export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
   queryText?: string;
 }) => void;
 
+export type UptimeSearchAfterChangeHandler = (prevSearchAfter: string, searchAfter: string) => void;
+
 export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
-  const { absoluteStartDate, absoluteEndDate, colors, refreshApp, setHeadingText } = useContext(
-    UptimeSettingsContext
-  );
+  const {
+    absoluteStartDate,
+    absoluteEndDate,
+    colors,
+    refreshApp,
+    setHeadingText,
+  } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrl] = useUrlParams();
   const params = getUrlParams();
   const {
@@ -56,6 +62,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
     // monitorListSortDirection,
     // monitorListSortField,
     search,
+    searchAfter,
   } = params;
 
   useEffect(() => {
@@ -93,6 +100,11 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
 
   const updateQuery: UptimeSearchBarQueryChangeHandler = ({ queryText }) => {
     updateUrl({ search: queryText || '' });
+    refreshApp();
+  };
+
+  const updateSearchAfter: UptimeSearchAfterChangeHandler = (prevSearchAfter, searchAfter) => {
+    updateUrl({ prevSearchAfter, searchAfter });
     refreshApp();
   };
 
@@ -140,6 +152,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           implementsCustomErrorState={true}
           linkParameters={linkParameters}
           successColor={colors.success}
+          updateSearchAfter={updateSearchAfter}
           // TODO: reintegrate pagination in future release
           // pageIndex={monitorListPageIndex}
           // pageSize={monitorListPageSize}
@@ -150,6 +163,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           // onChange={onMonitorListChange}
           variables={{
             ...sharedProps,
+            searchAfter,
             // TODO: reintegrate pagination in future release
             // pageIndex: monitorListPageIndex,
             // pageSize: monitorListPageSize,

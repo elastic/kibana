@@ -20,6 +20,7 @@ export interface UptimeUrlParams {
   // monitorListSortField: string;
   search: string;
   selectedPingStatus: string;
+  searchAfter: string | null;
 }
 
 const {
@@ -77,6 +78,7 @@ export const getSupportedUrlParams = (params: {
     // monitorListSortField,
     search,
     selectedPingStatus,
+    searchAfter,
   } = filteredParams;
 
   return {
@@ -92,5 +94,6 @@ export const getSupportedUrlParams = (params: {
     search: search || SEARCH,
     selectedPingStatus:
       selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,
+    searchAfter: searchAfter || null,
   };
 };

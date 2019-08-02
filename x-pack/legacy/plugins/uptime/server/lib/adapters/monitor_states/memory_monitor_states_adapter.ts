@@ -15,7 +15,8 @@ export class UMMemoryMonitorStatesAdapter implements UMMonitorStatesAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null | undefined
+    filters?: string | null | undefined,
+    searchAfter?: string | null | undefined
   ): Promise<MonitorSummary[]> {
     throw new Error('Method not implemented.');
   }

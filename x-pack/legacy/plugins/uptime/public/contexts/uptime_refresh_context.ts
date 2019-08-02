@@ -10,6 +10,7 @@ import { History } from 'history';
 interface Location {
   pathname: string;
   search: string;
+  searchAfter: string;
 }
 
 interface UMRefreshContext {

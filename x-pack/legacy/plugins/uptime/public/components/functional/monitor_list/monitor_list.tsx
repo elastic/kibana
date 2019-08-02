@@ -4,7 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable, EuiPanel, EuiTitle, EuiButtonIcon, EuiIcon, EuiLink } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiPanel,
+  EuiTitle,
+  EuiButtonIcon,
+  EuiIcon,
+  EuiLink,
+  EuiPagination,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -24,6 +33,7 @@ import { CLIENT_DEFAULTS } from '../../../../common/constants';
 import { MonitorBarSeries } from '../charts';
 import { MonitorPageLink } from '../monitor_page_link';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
+import { UptimeSearchAfterChangeHandler } from '../../../pages/overview';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -35,6 +45,7 @@ interface MonitorListProps {
   dangerColor: string;
   successColor: string;
   linkParameters?: string;
+  updateSearchAfter: UptimeSearchAfterChangeHandler;
   // TODO: reintegrate pagination in a future release
   // pageIndex: number;
   // pageSize: number;
@@ -57,6 +68,7 @@ export const MonitorListComponent = (props: Props) => {
     errors,
     linkParameters,
     loading,
+    updateSearchAfter,
     // TODO: reintroduce for pagination and sorting
     // onChange,
     // TODO: reintegrate pagination in future release
@@ -69,6 +81,7 @@ export const MonitorListComponent = (props: Props) => {
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
   const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
+  const searchAfter = get<string>(data, 'monitorStates.searchAfter');
   // TODO: use with pagination
   // const count = get<number>(data, 'monitorStates.totalSummaryCount.count', 0);
 
@@ -238,6 +251,14 @@ export const MonitorListComponent = (props: Props) => {
             },
           ]}
         />
+        <EuiFlexItem grow={false}>
+          <EuiPagination
+            pageCount={3}
+            activePage={1}
+            onPageClick={(p: number) => {updateSearchAfter("", searchAfter)}}
+            compressed={true}
+          />
+        </EuiFlexItem>
       </EuiPanel>
     </Fragment>
   );

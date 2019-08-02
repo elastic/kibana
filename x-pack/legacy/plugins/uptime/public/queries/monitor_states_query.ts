@@ -7,12 +7,14 @@
 import gql from 'graphql-tag';
 
 export const monitorStatesQueryString = `
-query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $filters: String) {
+query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $filters: String, $searchAfter: String) {
   monitorStates: getMonitorStates(
     dateRangeStart: $dateRangeStart
     dateRangeEnd: $dateRangeEnd
     filters: $filters
+    searchAfter: $searchAfter
   ) {
+    searchAfter
     totalSummaryCount {
       count
     }

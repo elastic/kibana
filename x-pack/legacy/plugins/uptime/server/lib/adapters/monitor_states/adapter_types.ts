@@ -13,14 +13,20 @@ export interface UMMonitorStatesAdapter {
     pageSize: number,
     sortField?: string | null,
     sortDirection?: string | null
-  ): Promise<MonitorSummary[]>;
+  ): Promise<GetMonitorStatesResult>;
   legacyGetMonitorStates(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null
-  ): Promise<MonitorSummary[]>;
+    filters?: string | null,
+    searchAfter?: string | null
+  ): Promise<GetMonitorStatesResult>;
   statesIndexExists(request: any): Promise<StatesIndexStatus>;
+}
+
+export interface GetMonitorStatesResult {
+  searchAfter: string,
+  summaries: MonitorSummary[],
 }
 
 export interface LegacyMonitorStatesQueryResult {

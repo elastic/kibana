@@ -10,6 +10,7 @@ import {
   UMMonitorStatesAdapter,
   LegacyMonitorStatesRecentCheckGroupsQueryResult,
   LegacyMonitorStatesQueryResult,
+  GetMonitorStatesResult,
 } from './adapter_types';
 import {
   MonitorSummary,
@@ -383,21 +384,27 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null
-  ): Promise<MonitorSummary[]> {
+    filters?: string | null,
+    searchAfter?: string | null,
+  ): Promise<GetMonitorStatesResult> {
     const monitors: any[] = [];
-    let searchAfter: any | null = null;
+    let loopSearchAfter: any | null = searchAfter ? JSON.parse(searchAfter) : null;
+    console.log("LOOP START", loopSearchAfter)
     do {
-      const { result, statusFilter, afterKey } = await this.runLegacyMonitorStatesQuery(
+       const queryRes: LegacyMonitorStatesQueryResult = await this.runLegacyMonitorStatesQuery(
         request,
         dateRangeStart,
         dateRangeEnd,
         filters,
-        searchAfter
+        loopSearchAfter
       );
+      const { result, statusFilter } = queryRes;
+      loopSearchAfter = queryRes.afterKey;
+      console.log("LOOP CONT", loopSearchAfter)
+
       monitors.push(...this.getMonitorBuckets(result, statusFilter));
-      searchAfter = afterKey;
-    } while (searchAfter !== null && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
+
+    } while (loopSearchAfter !== null && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
 
     const monitorIds: string[] = [];
     const summaries: MonitorSummary[] = monitors.map((monitor: any) => {
@@ -429,10 +436,15 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       dateRangeEnd,
       monitorIds
     );
-    return summaries.map(summary => ({
-      ...summary,
-      histogram: histogramMap[summary.monitor_id],
-    }));
+
+    console.log("INVOKE legacyGetMonitorStates", searchAfter, loopSearchAfter);
+    return {
+      searchAfter: JSON.stringify(loopSearchAfter),
+      summaries: summaries.map(summary => ({
+        ...summary,
+        histogram: histogramMap[summary.monitor_id],
+      })),
+    };
   }
 
   public async getMonitorStates(
@@ -441,7 +453,8 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     pageSize: number,
     sortField?: string | null,
     sortDirection?: string | null
-  ): Promise<MonitorSummary[]> {
+  ): Promise<GetMonitorStatesResult> {
+    console.log("INVOKE getMonitorStates");
     const params = {
       index: INDEX_NAMES.HEARTBEAT_STATES,
       body: {
@@ -488,10 +501,13 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     });
 
     const histogramMap = await this.getHistogramForMonitors(request, 'now-15m', 'now', monitorIds);
-    return monitorStates.map(monitorState => ({
-      ...monitorState,
-      histogram: histogramMap[monitorState.monitor_id],
-    }));
+    return {
+      searchAfter: 'false',
+      summaries: monitorStates.map(monitorState => ({
+        ...monitorState,
+        histogram: histogramMap[monitorState.monitor_id],
+      })),
+    };
   }
 
   private async getHistogramForMonitors(

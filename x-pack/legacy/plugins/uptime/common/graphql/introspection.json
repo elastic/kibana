@@ -425,6 +425,12 @@
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
+              },
+              {
+                "name": "searchAfter",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
               }
             ],
             "type": { "kind": "OBJECT", "name": "MonitorSummaryResult", "ofType": null },
@@ -2662,6 +2668,14 @@
         "name": "MonitorSummaryResult",
         "description": "The primary object returned for monitor states.",
         "fields": [
+          {
+            "name": "searchAfter",
+            "description": "Key used to go to the next page of results",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "summaries",
             "description": "The objects representing the state of a series of heartbeat monitors.",

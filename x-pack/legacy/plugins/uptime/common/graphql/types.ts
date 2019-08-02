@@ -504,6 +504,8 @@ export interface MonitorPageTitle {
 }
 /** The primary object returned for monitor states. */
 export interface MonitorSummaryResult {
+  /** Key used to go to the next page of results */
+  searchAfter?: string | null;
   /** The objects representing the state of a series of heartbeat monitors. */
   summaries?: MonitorSummary[] | null;
   /** The number of summaries. */
@@ -755,6 +757,8 @@ export interface GetMonitorStatesQueryArgs {
   dateRangeEnd: string;
 
   filters?: string | null;
+
+  searchAfter?: string | null;
 }
 
 // ====================================================
