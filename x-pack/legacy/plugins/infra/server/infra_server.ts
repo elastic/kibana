@@ -16,6 +16,7 @@ import { InfraBackendLibs } from './lib/infra_types';
 import { initLegacyLoggingRoutes } from './logging_legacy';
 import { initMetricExplorerRoute } from './routes/metrics_explorer';
 import { initMetadataRoute } from './routes/metadata';
+import { initApmMetricsRoute } from './routes/apm_metrics';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
@@ -35,4 +36,5 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initIpToHostName(libs);
   initMetricExplorerRoute(libs);
   initMetadataRoute(libs);
+  initApmMetricsRoute(libs);
 };

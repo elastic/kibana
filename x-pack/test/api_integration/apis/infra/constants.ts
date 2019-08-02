@@ -26,5 +26,9 @@ export const DATES = {
       min: 1564083185000,
       max: 1564083493080,
     },
+    metrics_and_apm: {
+      min: new Date('2019-07-29T20:40:01.165Z').getTime(),
+      max: new Date('2019-07-29T20:44:56.273Z').getTime(),
+    },
   },
 };

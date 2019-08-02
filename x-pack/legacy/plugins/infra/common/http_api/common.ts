@@ -3,9 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import * as rt from 'io-ts';
 
-export * from './search_results_api';
-export * from './search_summary_api';
-export * from './metadata_api';
-export * from './timed_api';
-export * from './apm_metrics_api';
+export const InfraNodeTypeRT = rt.keyof({
+  host: null,
+  container: null,
+  pod: null,
+});
+
+export type InfraNodeType = rt.TypeOf<typeof InfraNodeTypeRT>;

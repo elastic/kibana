@@ -18,5 +18,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./metrics_explorer'));
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./ip_to_hostname'));
+    loadTestFile(require.resolve('./apm_metrics'));
   });
 }
