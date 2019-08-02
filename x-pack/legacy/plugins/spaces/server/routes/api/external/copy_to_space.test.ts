@@ -77,12 +77,36 @@ describe('POST /api/spaces/copySavedObjects', () => {
 
     expect(statusCode).toEqual(400);
     expect(JSON.parse(responsePayload)).toMatchInlineSnapshot(`
-                  Object {
-                    "error": "Bad Request",
-                    "message": "Invalid request payload input",
-                    "statusCode": 400,
-                  }
-            `);
+                        Object {
+                          "error": "Bad Request",
+                          "message": "Invalid request payload input",
+                          "statusCode": 400,
+                        }
+                `);
+  });
+
+  test(`requires well-formed space IDS`, async () => {
+    const payload = {
+      spaces: ['a-space', 'a-space-invalid-!@#$%^&*()'],
+      objects: [],
+    };
+
+    const { response } = await request('POST', '/api/spaces/copySavedObjects', {
+      expectSpacesClientCall: false,
+      expectPreCheckLicenseCall: false,
+      payload,
+    });
+
+    const { statusCode, payload: responsePayload } = response;
+
+    expect(statusCode).toEqual(400);
+    expect(JSON.parse(responsePayload)).toMatchInlineSnapshot(`
+                        Object {
+                          "error": "Bad Request",
+                          "message": "Invalid request payload input",
+                          "statusCode": 400,
+                        }
+                `);
   });
 
   test(`requires objects to be unique`, async () => {
@@ -101,12 +125,12 @@ describe('POST /api/spaces/copySavedObjects', () => {
 
     expect(statusCode).toEqual(400);
     expect(JSON.parse(responsePayload)).toMatchInlineSnapshot(`
-                  Object {
-                    "error": "Bad Request",
-                    "message": "Invalid request payload input",
-                    "statusCode": 400,
-                  }
-            `);
+                        Object {
+                          "error": "Bad Request",
+                          "message": "Invalid request payload input",
+                          "statusCode": 400,
+                        }
+                `);
   });
 
   test('does not allow namespace agnostic types to be copied (via "supportedTypes" property)', async () => {
@@ -190,7 +214,7 @@ describe('POST /api/spaces/copySavedObjects/resolveConflicts', () => {
 
   test(`returns result of routePreCheckLicense`, async () => {
     const payload = {
-      retries: [],
+      retries: {},
       objects: [],
     };
 
@@ -210,7 +234,7 @@ describe('POST /api/spaces/copySavedObjects/resolveConflicts', () => {
 
   test(`requires objects to be unique`, async () => {
     const payload = {
-      spaces: ['a-space'],
+      retries: {},
       objects: [{ type: 'foo', id: 'bar' }, { type: 'foo', id: 'bar' }],
     };
 
@@ -224,33 +248,62 @@ describe('POST /api/spaces/copySavedObjects/resolveConflicts', () => {
 
     expect(statusCode).toEqual(400);
     expect(JSON.parse(responsePayload)).toMatchInlineSnapshot(`
-                  Object {
-                    "error": "Bad Request",
-                    "message": "Invalid request payload input",
-                    "statusCode": 400,
-                  }
-            `);
+                        Object {
+                          "error": "Bad Request",
+                          "message": "Invalid request payload input",
+                          "statusCode": 400,
+                        }
+                `);
+  });
+
+  test(`requires well-formed space ids`, async () => {
+    const payload = {
+      retries: {
+        ['invalid-space-id!@#$%^&*()']: [
+          {
+            type: 'foo',
+            id: 'bar',
+            overwrite: true,
+          },
+        ],
+      },
+      objects: [{ type: 'foo', id: 'bar' }],
+    };
+
+    const { response } = await request('POST', '/api/spaces/copySavedObjects/resolveConflicts', {
+      expectSpacesClientCall: false,
+      expectPreCheckLicenseCall: false,
+      payload,
+    });
+
+    const { statusCode, payload: responsePayload } = response;
+
+    expect(statusCode).toEqual(400);
+    expect(JSON.parse(responsePayload)).toMatchInlineSnapshot(`
+      Object {
+        "error": "Bad Request",
+        "message": "Invalid request payload input",
+        "statusCode": 400,
+      }
+    `);
   });
 
   test('does not allow namespace agnostic types to be copied (via "supportedTypes" property)', async () => {
     const payload = {
-      retries: [
-        {
-          space: 'a-space',
-          retries: [
-            {
-              type: 'visualization',
-              id: 'bar',
-              overwrite: true,
-            },
-            {
-              type: 'globalType',
-              id: 'bar',
-              overwrite: true,
-            },
-          ],
-        },
-      ],
+      retries: {
+        ['a-space']: [
+          {
+            type: 'visualization',
+            id: 'bar',
+            overwrite: true,
+          },
+          {
+            type: 'globalType',
+            id: 'bar',
+            overwrite: true,
+          },
+        ],
+      },
       objects: [
         {
           type: 'globalType',
@@ -285,26 +338,22 @@ describe('POST /api/spaces/copySavedObjects/resolveConflicts', () => {
   test('resolves conflicts for multiple spaces', async () => {
     const payload = {
       objects: [{ type: 'visualization', id: 'bar' }],
-      retries: [
-        {
-          space: 'a-space',
-          retries: [
-            {
-              type: 'visualization',
-              id: 'bar',
-            },
-          ],
-        },
-        {
-          space: 'b-space',
-          retries: [
-            {
-              type: 'visualization',
-              id: 'bar',
-            },
-          ],
-        },
-      ],
+      retries: {
+        ['a-space']: [
+          {
+            type: 'visualization',
+            id: 'bar',
+            overwrite: true,
+          },
+        ],
+        ['b-space']: [
+          {
+            type: 'globalType',
+            id: 'bar',
+            overwrite: true,
+          },
+        ],
+      },
     };
 
     const { response, mockSavedObjectsService } = await request(

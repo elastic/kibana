@@ -19,13 +19,13 @@ export default function({ loadTestFile, getService }: TestInvoker) {
       await createUsersAndRoles(es, supertest);
     });
 
-    loadTestFile(require.resolve('./copy_to_space'));
+    // loadTestFile(require.resolve('./copy_to_space'));
     loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
-    loadTestFile(require.resolve('./create'));
-    loadTestFile(require.resolve('./delete'));
-    loadTestFile(require.resolve('./get_all'));
-    loadTestFile(require.resolve('./get'));
-    loadTestFile(require.resolve('./select'));
-    loadTestFile(require.resolve('./update'));
+    // loadTestFile(require.resolve('./create'));
+    // loadTestFile(require.resolve('./delete'));
+    // loadTestFile(require.resolve('./get_all'));
+    // loadTestFile(require.resolve('./get'));
+    // loadTestFile(require.resolve('./select'));
+    // loadTestFile(require.resolve('./update'));
   });
 }

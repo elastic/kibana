@@ -245,18 +245,15 @@ export function resolveCopyToSpaceConflictsSuite(
               },
             ],
             includeReferences: true,
-            retries: [
-              {
-                space: destination,
-                retries: [
-                  {
-                    type: 'visualization',
-                    id: 'cts_vis_3',
-                    overwrite: false,
-                  },
-                ],
-              },
-            ],
+            retries: {
+              [destination]: [
+                {
+                  type: 'visualization',
+                  id: 'cts_vis_3',
+                  overwrite: false,
+                },
+              ],
+            },
           })
           .expect(tests.withReferencesNotOverwriting.statusCode)
           .then(tests.withReferencesNotOverwriting.response);
@@ -276,18 +273,15 @@ export function resolveCopyToSpaceConflictsSuite(
               },
             ],
             includeReferences: true,
-            retries: [
-              {
-                space: destination,
-                retries: [
-                  {
-                    type: 'visualization',
-                    id: 'cts_vis_3',
-                    overwrite: true,
-                  },
-                ],
-              },
-            ],
+            retries: {
+              [destination]: [
+                {
+                  type: 'visualization',
+                  id: 'cts_vis_3',
+                  overwrite: true,
+                },
+              ],
+            },
           })
           .expect(tests.withReferencesOverwriting.statusCode)
           .then(tests.withReferencesOverwriting.response);
@@ -307,18 +301,15 @@ export function resolveCopyToSpaceConflictsSuite(
               },
             ],
             includeReferences: false,
-            retries: [
-              {
-                space: destination,
-                retries: [
-                  {
-                    type: 'dashboard',
-                    id: 'cts_dashboard',
-                    overwrite: true,
-                  },
-                ],
-              },
-            ],
+            retries: {
+              [destination]: [
+                {
+                  type: 'dashboard',
+                  id: 'cts_dashboard',
+                  overwrite: true,
+                },
+              ],
+            },
           })
           .expect(tests.withoutReferencesOverwriting.statusCode)
           .then(tests.withoutReferencesOverwriting.response);
@@ -338,18 +329,15 @@ export function resolveCopyToSpaceConflictsSuite(
               },
             ],
             includeReferences: false,
-            retries: [
-              {
-                space: destination,
-                retries: [
-                  {
-                    type: 'dashboard',
-                    id: 'cts_dashboard',
-                    overwrite: false,
-                  },
-                ],
-              },
-            ],
+            retries: {
+              [destination]: [
+                {
+                  type: 'dashboard',
+                  id: 'cts_dashboard',
+                  overwrite: false,
+                },
+              ],
+            },
           })
           .expect(tests.withoutReferencesNotOverwriting.statusCode)
           .then(tests.withoutReferencesNotOverwriting.response);

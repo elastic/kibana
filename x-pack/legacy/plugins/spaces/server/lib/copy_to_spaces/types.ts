@@ -15,10 +15,9 @@ export interface CopyOptions {
 export interface ResolveConflictsOptions {
   objects: Array<{ type: string; id: string }>;
   includeReferences: boolean;
-  retries: Array<{
-    space: string;
-    retries: Array<{ type: string; id: string; overwrite: boolean }>;
-  }>;
+  retries: {
+    [spaceId: string]: Array<{ type: string; id: string; overwrite: boolean }>;
+  };
 }
 
 export interface SpaceNotFoundError {

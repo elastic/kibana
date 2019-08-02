@@ -121,11 +121,9 @@ the leader index.
   (Optional, boolean) When set to `true`, all saved objects related to the specified saved objects will also be copied into the target spaces. You must set this to the same value that you used when executing the <<saved-objects-api-copy-to-space, Copy to Space API>>. The default value is `false`.
 
 `retries`::
-  (Required, object array) Array of retry operations to attempt.
-  `space` :::
-  (Required, string) The space id with the conflict.
-  `retries` :::
-  (Required, array) Array of retry operations for the indicated space.
+  (Required, object) The retry operations to attempt. Object keys represent the target space ids.
+  `<space_id>` :::
+  (Required, array) The the conflicts to resolve for the indicated `<space_id>`.
     `type` ::::
     (Required, string) The saved object type.
     `id` ::::
@@ -225,7 +223,7 @@ The API returns the following result:
 // TESTRESPONSE
 ////
 
-The following example attempts to copy a dashboard with id `my-dashboard`, including all references from the `default` space to the `marketing` and `sales` spaces. The `marketing` space succeeds, while the `sales` space fails due to a conflict on the underlying index pattern:
+The following example overwrites an index pattern in the marketing space, and a visualization in the sales space.
 
 [source,js]
 ----
@@ -236,14 +234,18 @@ POST api/spaces/copySavedObjects/resolveConflicts
     "id": "my-dashboard"
   }],
   "includeReferences": true,
-  "retries": [{
-    "space": "marketing",
-    "retries": [{
+  "retries": {
+    "marketing": [{
       "type": "index-pattern",
       "id": "my-pattern",
       "overwrite": true
+    }],
+    "sales": [{
+      "type": "visualization",
+      "id": "my-viz",
+      "overwrite": true
     }]
-  }]
+  }
 }
 ----
 // KIBANA
@@ -254,6 +256,10 @@ The API returns the following result:
 ----
 {
   "marketing": {
+    "success": true,
+    "successCount": 1
+  },
+  "sales": {
     "success": true,
     "successCount": 1
   }

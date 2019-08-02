@@ -12,6 +12,7 @@ import {
 } from '../../../lib/copy_to_spaces';
 import { ExternalRouteDeps } from '.';
 import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from '../../../lib/copy_to_spaces/copy_to_spaces';
+import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 
 interface CopyPayload {
   spaces: string[];
@@ -23,14 +24,13 @@ interface CopyPayload {
 interface ResolveConflictsPayload {
   objects: Array<{ type: string; id: string }>;
   includeReferences: boolean;
-  retries: Array<{
-    space: string;
-    retries: Array<{
+  retries: {
+    [spaceId: string]: Array<{
       type: string;
       id: string;
       overwrite: boolean;
     }>;
-  }>;
+  };
 }
 
 export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
@@ -75,7 +75,9 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       validate: {
         payload: {
           spaces: Joi.array()
-            .items(Joi.string())
+            .items(
+              Joi.string().regex(SPACE_ID_REGEX, `lower case, a-z, 0-9, "_", and "-" are allowed`)
+            )
             .unique(),
           objects: Joi.array()
             .items(Joi.object({ type: Joi.string(), id: Joi.string() }))
@@ -126,20 +128,19 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         payload: Joi.object({
           objects: Joi.array()
             .items(Joi.object({ type: Joi.string(), id: Joi.string() }))
+            .required()
             .unique(),
           includeReferences: Joi.bool().default(false),
-          retries: Joi.array()
-            .items(
-              Joi.object({
-                space: Joi.string().required(),
-                retries: Joi.array().items(
-                  Joi.object({
-                    type: Joi.string().required(),
-                    id: Joi.string().required(),
-                    overwrite: Joi.boolean().default(false),
-                  })
-                ),
-              })
+          retries: Joi.object()
+            .pattern(
+              SPACE_ID_REGEX,
+              Joi.array().items(
+                Joi.object({
+                  type: Joi.string().required(),
+                  id: Joi.string().required(),
+                  overwrite: Joi.boolean().default(false),
+                })
+              )
             )
             .required(),
         }).default(),
