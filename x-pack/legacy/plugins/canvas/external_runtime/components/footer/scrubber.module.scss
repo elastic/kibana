@@ -1,4 +1,6 @@
-@import '@elastic/eui/src/theme_light.scss';
+@import '@elastic/eui/src/global_styling/variables/_size.scss';
+@import '@elastic/eui/src/global_styling/variables/_colors.scss';
+@import '@elastic/eui/src/global_styling/mixins/_helpers.scss';
 
 .root {
   background: #fff;
