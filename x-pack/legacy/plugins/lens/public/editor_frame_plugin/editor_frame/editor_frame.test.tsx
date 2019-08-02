@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { DragEvent } from 'react';
+import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EditorFrame } from './editor_frame';
@@ -17,7 +17,7 @@ import {
   DatasourceMock,
 } from '../mocks';
 import { ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
-import { ChildDragDropProvider, DragDrop } from '../../drag_drop';
+import { DragDrop } from '../../drag_drop';
 
 // calling this function will wait for all pending Promises from mock
 // datasources to be processed by its callers.

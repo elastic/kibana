@@ -6,7 +6,7 @@
 
 import { getSuggestions } from './suggestion_helpers';
 import { createMockVisualization, createMockDatasource, DatasourceMock } from '../mocks';
-import { TableSuggestion, DatasourceSuggestion, Datasource } from '../../types';
+import { TableSuggestion, DatasourceSuggestion } from '../../types';
 
 const generateSuggestion = (
   datasourceSuggestionId: number = 0,
