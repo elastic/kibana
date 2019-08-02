@@ -35,7 +35,7 @@ const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
-const { caCertPath, esKeyPath, esCertPath } = require('constants');
+const { caCertPath, esKeyPath, esCertPath } = require('./constants');
 const readFile = util.promisify(fs.readFile);
 
 // listen to data on stream until map returns anything but undefined

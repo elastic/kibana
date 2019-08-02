@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+const path = require('path');
 
-export const caCertPath = resolve(__dirname, '../../../test/dev_certs/ca.crt');
-export const esKeyPath = resolve(__dirname, '../../../test/dev_certs/elasticsearch.key');
-export const esCertPath = resolve(__dirname, '../../../test/dev_certs/elasticsearch.crt');
+exports.caCertPath = path.resolve(__dirname, '../../../test/dev_certs/ca.crt');
+exports.esKeyPath = path.resolve(__dirname, '../../../test/dev_certs/elasticsearch.key');
+exports.esCertPath = path.resolve(__dirname, '../../../test/dev_certs/elasticsearch.crt');
