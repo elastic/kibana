@@ -81,7 +81,7 @@ export function TableHeaderColumn({
     }
   };
 
-  const getAriaLabel = () => {
+  const getSortButtonAriaLabel = () => {
     const sortAscendingMessage = i18n.translate(
       'kbn.docTable.tableHeader.sortByColumnAscendingAriaLabel',
       {
@@ -120,14 +120,11 @@ export function TableHeaderColumn({
     // Sort Button
     {
       active: isSortable && typeof onChangeSortOrder === 'function',
-      ariaLabel: getAriaLabel(),
+      ariaLabel: getSortButtonAriaLabel(),
       className: btnSortClassName,
       onClick: handleChangeSortOrder,
       testSubject: `docTableHeaderFieldSort_${name}`,
-      tooltip: i18n.translate('kbn.docTable.tableHeader.sortByColumnTooltip', {
-        defaultMessage: 'Sort by {columnName}',
-        values: { columnName: name },
-      }),
+      tooltip: getSortButtonAriaLabel(),
     },
     // Remove Button
     {
