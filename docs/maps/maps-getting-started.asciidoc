@@ -15,8 +15,7 @@ image::maps/images/sample_data_web_logs.png[]
 
 [float]
 [[maps-read-only-access]]
-=== Read only access
-If you have insufficient privileges to create or save maps, a read-only icon 
+NOTE: If you have insufficient privileges to create or save maps, a read-only icon 
 appears in the application header. The buttons to create new maps or edit
 existing maps won't be visible. For more information on granting access to
 Kibana see <<xpack-security-authorization>>.
