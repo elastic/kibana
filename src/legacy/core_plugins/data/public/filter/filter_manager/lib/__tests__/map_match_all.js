@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { mapMatchAll } from '../map_match_all';
 
-describe('ui/filter_manager/lib', function () {
+describe('filter_manager/lib', function () {
   describe('mapMatchAll()', function () {
     let filter;
 

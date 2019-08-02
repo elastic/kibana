@@ -6,8 +6,6 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
-import { InspectorView } from 'ui/inspector';
 import { MapDetails } from './map_details';
 import { i18n } from '@kbn/i18n';
 
@@ -38,14 +36,12 @@ class MapViewComponent extends Component {
 
   render() {
     return (
-      <InspectorView>
-        <MapDetails
-          centerLon={this.state.stats.center[0]}
-          centerLat={this.state.stats.center[1]}
-          zoom={this.state.stats.zoom}
-          mapStyle={this.state.mapStyle}
-        />
-      </InspectorView>
+      <MapDetails
+        centerLon={this.state.stats.center[0]}
+        centerLat={this.state.stats.center[1]}
+        zoom={this.state.stats.zoom}
+        mapStyle={this.state.mapStyle}
+      />
     );
   }
 }

@@ -88,7 +88,7 @@ describe('Tls Table Component', () => {
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('SHA1 FingerprintClick to sort in descending order');
+      ).toEqual('SHA1 fingerprintClick to sort in descending order');
     });
   });
 });

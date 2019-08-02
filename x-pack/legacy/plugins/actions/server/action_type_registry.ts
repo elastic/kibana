@@ -8,30 +8,37 @@ import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { ActionType, GetServicesFunction } from './types';
 import { TaskManager, TaskRunCreatorFunction } from '../../task_manager';
-import { getCreateTaskRunnerFunction } from './lib';
+import { getCreateTaskRunnerFunction, ExecutorError } from './lib';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
+import { SpacesPlugin } from '../../spaces';
 
 interface ConstructorOptions {
   taskManager: TaskManager;
   getServices: GetServicesFunction;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
+  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
+  getBasePath: SpacesPlugin['getBasePath'];
 }
 
 export class ActionTypeRegistry {
   private readonly taskRunCreatorFunction: TaskRunCreatorFunction;
-  private readonly getServices: GetServicesFunction;
   private readonly taskManager: TaskManager;
   private readonly actionTypes: Map<string, ActionType> = new Map();
-  private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
 
-  constructor({ getServices, taskManager, encryptedSavedObjectsPlugin }: ConstructorOptions) {
-    this.getServices = getServices;
+  constructor({
+    getServices,
+    taskManager,
+    encryptedSavedObjectsPlugin,
+    spaceIdToNamespace,
+    getBasePath,
+  }: ConstructorOptions) {
     this.taskManager = taskManager;
-    this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
     this.taskRunCreatorFunction = getCreateTaskRunnerFunction({
+      getServices,
       actionTypeRegistry: this,
-      getServices: this.getServices,
-      encryptedSavedObjectsPlugin: this.encryptedSavedObjectsPlugin,
+      encryptedSavedObjectsPlugin,
+      spaceIdToNamespace,
+      getBasePath,
     });
   }
 
@@ -61,6 +68,14 @@ export class ActionTypeRegistry {
       [`actions:${actionType.id}`]: {
         title: actionType.name,
         type: `actions:${actionType.id}`,
+        maxAttempts: actionType.maxAttempts || 1,
+        getRetry(attempts: number, error: any) {
+          if (error instanceof ExecutorError) {
+            return error.retry == null ? false : error.retry;
+          }
+          // Don't retry other kinds of errors
+          return false;
+        },
         createTaskRunner: this.taskRunCreatorFunction,
       },
     });
