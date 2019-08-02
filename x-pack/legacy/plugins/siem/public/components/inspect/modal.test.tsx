@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import React from 'react';
+import { ThemeProvider } from 'styled-components';
 
 import { ModalInspectQuery } from './modal';
 
@@ -15,17 +17,21 @@ const response =
   '{"took": 880,"timed_out": false,"_shards": {"total": 26,"successful": 26,"skipped": 0,"failed": 0},"hits": {"max_score": null,"hits": []},"aggregations": {"hosts": {"value": 541},"hosts_histogram": {"buckets": [{"key_as_string": "2019 - 07 - 05T01: 00: 00.000Z", "key": 1562288400000, "doc_count": 1492321, "count": { "value": 105 }}, {"key_as_string": "2019 - 07 - 05T13: 00: 00.000Z", "key": 1562331600000, "doc_count": 2412761, "count": { "value": 453}},{"key_as_string": "2019 - 07 - 06T01: 00: 00.000Z", "key": 1562374800000, "doc_count": 111658, "count": { "value": 15}}],"interval": "12h"}},"status": 200}';
 
 describe('Modal Inspect', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const closeModal = jest.fn();
+
   describe('rendering', () => {
     test('when isShowing is positive and request and response are not null', () => {
       const wrapper = mount(
-        <ModalInspectQuery
-          closeModal={closeModal}
-          isShowing={true}
-          request={request}
-          response={response}
-          title="My title"
-        />
+        <ThemeProvider theme={theme}>
+          <ModalInspectQuery
+            closeModal={closeModal}
+            isShowing={true}
+            request={request}
+            response={response}
+            title="My title"
+          />
+        </ThemeProvider>
       );
       expect(
         wrapper
@@ -99,13 +105,15 @@ describe('Modal Inspect', () => {
   describe('functionality from tab statistics/request/response', () => {
     test('Click on statistic Tab', () => {
       const wrapper = mount(
-        <ModalInspectQuery
-          closeModal={closeModal}
-          isShowing={true}
-          request={request}
-          response={response}
-          title="My title"
-        />
+        <ThemeProvider theme={theme}>
+          <ModalInspectQuery
+            closeModal={closeModal}
+            isShowing={true}
+            request={request}
+            response={response}
+            title="My title"
+          />
+        </ThemeProvider>
       );
 
       wrapper
@@ -116,7 +124,7 @@ describe('Modal Inspect', () => {
 
       expect(
         wrapper.find('.euiDescriptionList__title span[data-test-subj="index-pattern-title"]').text()
-      ).toBe('Index pattern');
+      ).toBe('Index pattern ');
       expect(
         wrapper
           .find('.euiDescriptionList__description span[data-test-subj="index-pattern-description"]')
@@ -124,7 +132,7 @@ describe('Modal Inspect', () => {
       ).toBe('auditbeat-*, filebeat-*, packetbeat-*, winlogbeat-*');
       expect(
         wrapper.find('.euiDescriptionList__title span[data-test-subj="query-time-title"]').text()
-      ).toBe('Query time');
+      ).toBe('Query time ');
       expect(
         wrapper
           .find('.euiDescriptionList__description span[data-test-subj="query-time-description"]')
@@ -134,18 +142,20 @@ describe('Modal Inspect', () => {
         wrapper
           .find('.euiDescriptionList__title span[data-test-subj="request-timestamp-title"]')
           .text()
-      ).toBe('Request timestamp');
+      ).toBe('Request timestamp ');
     });
 
     test('Click on request Tab', () => {
       const wrapper = mount(
-        <ModalInspectQuery
-          closeModal={closeModal}
-          isShowing={true}
-          request={request}
-          response={response}
-          title="My title"
-        />
+        <ThemeProvider theme={theme}>
+          <ModalInspectQuery
+            closeModal={closeModal}
+            isShowing={true}
+            request={request}
+            response={response}
+            title="My title"
+          />
+        </ThemeProvider>
       );
 
       wrapper
@@ -214,13 +224,15 @@ describe('Modal Inspect', () => {
 
     test('Click on response Tab', () => {
       const wrapper = mount(
-        <ModalInspectQuery
-          closeModal={closeModal}
-          isShowing={true}
-          request={request}
-          response={response}
-          title="My title"
-        />
+        <ThemeProvider theme={theme}>
+          <ModalInspectQuery
+            closeModal={closeModal}
+            isShowing={true}
+            request={request}
+            response={response}
+            title="My title"
+          />
+        </ThemeProvider>
       );
 
       wrapper
@@ -258,13 +270,15 @@ describe('Modal Inspect', () => {
   describe('events', () => {
     test('Make sure that toggle function has been called when you click on the close button', () => {
       const wrapper = mount(
-        <ModalInspectQuery
-          closeModal={closeModal}
-          isShowing={true}
-          request={request}
-          response={response}
-          title="My title"
-        />
+        <ThemeProvider theme={theme}>
+          <ModalInspectQuery
+            closeModal={closeModal}
+            isShowing={true}
+            request={request}
+            response={response}
+            title="My title"
+          />
+        </ThemeProvider>
       );
 
       wrapper.find('button[data-test-subj="modal-inspect-close"]').simulate('click');

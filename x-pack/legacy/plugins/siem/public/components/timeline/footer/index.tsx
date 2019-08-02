@@ -255,8 +255,9 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
               {isLive ? (
                 <EuiText size="s" data-test-subj="is-live-on-message">
                   <b>
-                    {i18n.AUTO_REFRESH_ACTIVE}
+                    {i18n.AUTO_REFRESH_ACTIVE}{' '}
                     <EuiIconTip
+                      color="subdued"
                       content={
                         <FormattedMessage
                           id="xpack.siem.footer.autoRefreshActiveTooltip"
@@ -266,7 +267,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
                           }}
                         />
                       }
-                      position="top"
+                      type="iInCircle"
                     />
                   </b>
                 </EuiText>
