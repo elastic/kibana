@@ -22,7 +22,67 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 
-export const createMetricVisFn = () => ({
+import { ExpressionFunction, KibanaDatatable, Render } from '../../interpreter/types';
+
+// Todo: breaking change. Should contains one value
+type name = 'metric' | 'metricVis';
+
+type Context = KibanaDatatable;
+
+interface Arguments {
+  percentage: boolean;
+  colorScheme: string;
+  colorMode: string;
+  useRanges: boolean;
+  invertColors: boolean;
+  showLabels: boolean;
+  bgFill: string;
+  subText: string;
+  colorRange: any[]; // these aren't typed yet
+  font: any; // these aren't typed yet
+  metric: any[]; // these aren't typed yet
+  bucket: any; // these aren't typed yet
+}
+
+interface VisParams {
+  dimensions: DimensionsVisParam;
+  metric: MetricVisParam;
+}
+
+interface DimensionsVisParam {
+  metrics: any;
+  bucket?: any;
+}
+
+interface MetricVisParam {
+  percentageMode: Arguments['percentage'];
+  useRanges: Arguments['useRanges'];
+  colorSchema: Arguments['colorScheme'];
+  metricColorMode: Arguments['colorMode'];
+  colorsRange: Arguments['colorRange'];
+  labels: {
+    show: Arguments['showLabels'];
+  };
+  invertColors: Arguments['invertColors'];
+  style: {
+    bgFill: Arguments['bgFill'];
+    bgColor: boolean;
+    labelColor: boolean;
+    subText: Arguments['subText'];
+    fontSize: number;
+  };
+}
+
+interface RenderValue {
+  visType: string;
+  visData: Context;
+  visConfig: VisParams;
+  params: any;
+}
+
+type Return = Render<RenderValue>;
+
+export const createMetricVisFn = (): ExpressionFunction<name, Context, Arguments, Return> => ({
   name: 'metricVis',
   type: 'render',
   context: {
@@ -123,10 +183,9 @@ export const createMetricVisFn = () => ({
       }),
     },
   },
-  fn(context: any, args: any) {
-    const dimensions = {
+  fn(context: Context, args: Arguments) {
+    const dimensions: DimensionsVisParam = {
       metrics: args.metric,
-      bucket: undefined,
     };
 
     if (args.bucket) {

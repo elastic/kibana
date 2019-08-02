@@ -10,7 +10,6 @@ Object {
     },
     "visConfig": Object {
       "dimensions": Object {
-        "bucket": undefined,
         "metrics": undefined,
       },
       "metric": Object {
