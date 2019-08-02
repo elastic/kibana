@@ -9,7 +9,7 @@ maps, typically in real-time. Dashboards provide
 at-a-glance insights into your data and enable you to drill down into details. 
 
 To start working with dashboards, click *Dashboard* in the side navigation. 
-You can:
+With *Dashboard*, you can:
 
 * <<dashboard-create-new-dashboard, Create a dashboard>>
 * <<customizing-your-dashboard, Arrange dashboard elements>>
@@ -40,15 +40,12 @@ image::images/dashboard-read-only-badge.png[Example of Dashboard's read only acc
 When you open *Dashhboard*, you're presented an overview of your dashboards. 
 If you don't have any dashboards, you can add 
 <<add-sample-data, sample data sets>>,
-and check out the pre-built dashboards. 
+which include pre-built dashboards. 
 
 Once you open a dashboard, you can filter the data
 by entering a search query, changing the time filter, or clicking 
-in the visualization, search, or map. If a dashboard element has a stored query, 
+in the visualizations, searches, and maps. If a dashboard element has a stored query, 
 both queries are applied.
-
-Actions for using fullscreen mode and sharing, cloning, and editing the dashboard 
-are in the upper left.
 
 --
 
@@ -56,7 +53,7 @@ are in the upper left.
 == Create a dashboard
 
 To create a dashboard, you must have data indexed into {es}, an index pattern 
-to retrieve the data from Elasticsearch, and 
+to retrieve the data from {es}, and 
 visualizations, saved searches, or maps. If these don't exist, you're prompted to 
 add them as you create the dashboard.
 
@@ -68,8 +65,9 @@ For an end-to-end example, see <<tutorial-build-dashboard, Building your own das
 . Use *Add panels* to add elements to the dashboard.
 +
 The visualizations, saved searches, and maps
-are stored in panels that you can move, resize,
-and customize in the dashboard. You can add elements from 
+are stored in panels that you can move and resize. A
+menu in the upper right of the panel has options for customizing
+the panel. You can add elements from 
 multiple indices, and the same element can appear in multiple dashboards.
 +
 [role="screenshot"]
@@ -82,7 +80,7 @@ image:images/Dashboard_add_visualization.png[Example add visualization to dashbo
 [[customizing-your-dashboard]]
 === Arrange dashboard elements
 
-In *Edit* mode, you can move, resize, customize, and delete the panels to suit your needs. 
+In *Edit* mode, you can move, resize, customize, and delete panels to suit your needs. 
 
 [[moving-containers]]
 * To move a panel, click and hold the panel header and drag to the new location.
@@ -116,7 +114,7 @@ TIP: You can create a link to a dashboard by title by doing this: +
 
 TIP: When sharing a link to a dashboard snapshot, use the *Short URL*. Snapshot
 URLs are long and can be problematic for Internet Explorer and other
-tools.  To create a short URL, you must have write access to {kib}.
+tools. To create a short URL, you must have write access to {kib}.
 
 [float]
 [[import-dashboards]]
@@ -130,7 +128,7 @@ see <<managing-saved-objects, Managing saved objects>>.
 === Inspect and edit elements
 
 Many dashboard elements allow you to drill down into the data and requests 
-behind the element. Open the panel menu for the element and select *Inspect*. 
+behind the element. Open the menu in the upper right of the panel and select *Inspect*. 
 The views you see depend on the element that you inspect. 
 
 [role="screenshot"]
