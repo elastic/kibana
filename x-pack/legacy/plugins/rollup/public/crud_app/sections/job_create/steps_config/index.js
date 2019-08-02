@@ -53,7 +53,6 @@ export const stepIdToStepConfigMap = {
       // The best page size boils down to how much memory the user has, e.g. how many buckets should
       // be accumulated at one time. 1000 is probably a safe size without being too small.
       const rollupPageSize = get(overrides, ['json', 'config', 'page_size'], 1000);
-
       const clonedRollupId = overrides.id || undefined;
       const id = overrides.id ? `${overrides.id}-copy` : '';
 
