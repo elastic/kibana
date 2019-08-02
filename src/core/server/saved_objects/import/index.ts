@@ -19,3 +19,14 @@
 
 export { importSavedObjects } from './import_saved_objects';
 export { resolveImportErrors } from './resolve_import_errors';
+export {
+  SavedObjectsImportResponse,
+  SavedObjectsImportError,
+  SavedObjectsImportOptions,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsResolveImportErrorsOptions,
+  SavedObjectsImportRetry,
+} from './types';
