@@ -29,8 +29,7 @@ import uuid from 'uuid';
 import { IconSelect } from './icon_select';
 import { YesNo } from './yes_no';
 import { Storage } from 'ui/storage';
-import { data } from 'plugins/data/setup';
-const { QueryBarInput } = data.query.ui;
+import { QueryBarInput } from 'plugins/data';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 
 import {

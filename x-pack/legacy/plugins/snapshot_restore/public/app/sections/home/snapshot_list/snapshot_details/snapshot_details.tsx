@@ -248,7 +248,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
       data-test-subj="snapshotDetail"
       aria-labelledby="srSnapshotDetailsFlyoutTitle"
       size="m"
-      maxWidth={400}
+      maxWidth={550}
     >
       <EuiFlyoutHeader>
         <EuiFlexGroup direction="column" gutterSize="none">
