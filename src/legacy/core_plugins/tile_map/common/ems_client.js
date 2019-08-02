@@ -98,7 +98,8 @@ export class EMSClient {
     landingPageUrl,
     proxyElasticMapsServiceInMaps,
     proxyElasticMapsServiceInMapsOptions,
-    fetchFunction
+    fetchFunction,
+    proxyPath
   }) {
 
 
@@ -107,6 +108,8 @@ export class EMSClient {
       my_app_name: 'kibana',
       my_app_version: kbnVersion,
     };
+
+    this._proxyPath = typeof proxyPath === 'string' ? proxyPath : '';
 
     this._sanitizer = htmlSanitizer ? htmlSanitizer : x => x;
     this._manifestServiceUrl = manifestServiceUrl;
@@ -117,12 +120,12 @@ export class EMSClient {
 
     this._proxyElasticMapsServiceInMaps = typeof proxyElasticMapsServiceInMaps === 'boolean' ? proxyElasticMapsServiceInMaps : false;
     this._proxyElasticMapsServiceInMapsOptions = proxyElasticMapsServiceInMapsOptions || {};
-    this._fileProxyOptions = this._proxyElasticMapsServiceInMaps ? {
-      fileLayerDefaultJson: this._proxyElasticMapsServiceInMapsOptions.fileLayerDefaultJson
-    } : null;
-    this._tmsProxyOptions = this._proxyElasticMapsServiceInMaps ? {
-      tmsServiceDefaultRaster: this._proxyElasticMapsServiceInMapsOptions.tmsServiceDefaultRaster
-    } : null;
+    // this._fileProxyOptions = this._proxyElasticMapsServiceInMaps ? {
+    //   fileLayerDefaultJson: this._proxyElasticMapsServiceInMapsOptions.fileLayerDefaultJson
+    // } : null;
+    // this._tmsProxyOptions = this._proxyElasticMapsServiceInMaps ? {
+    //   tmsServiceDefaultRaster: this._proxyElasticMapsServiceInMapsOptions.tmsServiceDefaultRaster
+    // } : null;
 
     this._fetchFunction = typeof fetchFunction === 'function' ? fetchFunction : fetch;
 
@@ -210,17 +213,25 @@ export class EMSClient {
   _invalidateSettings() {
 
     this._getMainCatalog = _.once(async () => {
-      const url = this._proxyElasticMapsServiceInMaps ? this._proxyElasticMapsServiceInMapsOptions.catalogue : this._manifestServiceUrl;
+      // const url = this._proxyElasticMapsServiceInMaps ? this._proxyElasticMapsServiceInMapsOptions.catalogue : this._manifestServiceUrl;
+
+      const url = this._manifestServiceUrl;
+      console.log('get main', url);
       return await this._getManifestWithParams(url);
     });
 
     this._getDefaultTMSCatalog = _.once(async () => {
+      console.log('get defulat tms catalog');
       const catalogue = await this._getMainCatalog();
+      console.log('mainc at', catalogue);
       const firstService = catalogue.services.find(service => service.type === 'tms');
       if (!firstService) {
         return [];
       }
-      const url = this._proxyElasticMapsServiceInMaps ? this._proxyElasticMapsServiceInMapsOptions.tilesCatalogue : firstService.manifest;
+      // const url = this._proxyElasticMapsServiceInMaps ? this._proxyElasticMapsServiceInMapsOptions.tilesCatalogue : firstService.manifest;
+
+      const url = this._proxyPath + firstService.manifest;
+      console.log('default tms', url);
       return await this.getManifest(url);
     });
 
@@ -230,19 +241,21 @@ export class EMSClient {
       if (!firstService) {
         return [];
       }
-      const url = this._proxyElasticMapsServiceInMaps ? this._proxyElasticMapsServiceInMapsOptions.filesCatalogue : firstService.manifest;
+      // const url = this._proxyElasticMapsServiceInMaps ? this._proxyElasticMapsServiceInMapsOptions.filesCatalogue : firstService.manifest;
+      const url = this._proxyPath + firstService.manifest;
+      console.log('default file', url);
       return await this.getManifest(url);
     });
 
     //We also want to cache the actual instances of TMSService as these in turn cache sub-manifests like stylefiles etc..
     this._loadTMSServices = _.once(async () => {
       const tmsManifest = await this._getDefaultTMSCatalog();
-      return tmsManifest.services.map(serviceConfig => new TMSService(serviceConfig, this, this._tmsProxyOptions));
+      return tmsManifest.services.map(serviceConfig => new TMSService(serviceConfig, this, this._proxyPath));
     });
 
     this._loadFileLayers = _.once(async () => {
       const fileManifest = await this._getDefaultFileCatalog();
-      return fileManifest.layers.map(layerConfig => new FileLayer(layerConfig, this, this._fileProxyOptions));
+      return fileManifest.layers.map(layerConfig => new FileLayer(layerConfig, this, this._proxyPath));
     });
   }
 

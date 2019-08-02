@@ -155,16 +155,20 @@ export function initRoutes(server, licenseUid) {
         services: []
       };
 
+      //rewrite the urls to the submanifest
       const tileService = main.services.find(service => service.id === 'tiles');
       const fileService = main.services.find(service => service.id === 'geo_layers');
       if (tileService) {
-        tileService.manifest = `${ROOT}/${EMS_TILES_CATALOGUE_PATH}`;
-        proxiedManifest.services.push(tileService);
+        proxiedManifest.services.push({
+          ...tileService,
+          manifest: `${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}`
+        });
       }
-
       if (fileService) {
-        fileService.manifest = `${ROOT}/${EMS_FILES_CATALOGUE_PATH}`;
-        proxiedManifest.services.push(fileService);
+        proxiedManifest.services.push({
+          ...fileService,
+          manifest: `${GIS_API_PATH}/${EMS_FILES_CATALOGUE_PATH}`
+        });
       }
       return proxiedManifest;
     }
@@ -181,7 +185,18 @@ export function initRoutes(server, licenseUid) {
       }
 
       const file = await emsClient.getDefaultFileManifest();
-      return file;
+      const layers = file.layers.map(layer => {
+        const newLayer = { ...layer };
+        const id = encodeURIComponent(layer.layer_id);
+        const newUrl = `${GIS_API_PATH}/${EMS_FILES_DEFAULT_JSON_PATH}?id=${id}`;
+        newLayer.formats = [{
+          ...layer.formats[0],
+          url: newUrl
+        }];
+        return newLayer;
+      });
+      //rewrite
+      return { layers };
     }
   });
 
@@ -196,11 +211,6 @@ export function initRoutes(server, licenseUid) {
       }
 
       const tiles =  await emsClient.getDefaultTMSManifest();
-
-      //rewrite all the urls
-
-
-
       return tiles;
     }
   });

@@ -49,21 +49,26 @@ export function getEMSClient() {
 
       const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
       const proxyOptions = proxyElasticMapsServiceInMaps ? {
-        catalogue: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_CATALOGUE_PATH}`),
-        tilesCatalogue: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_TILES_CATALOGUE_PATH}`),
-        filesCatalogue: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_FILES_CATALOGUE_PATH}`),
-        fileLayerDefaultJson: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_FILES_DEFAULT_JSON_PATH}`),
+        // catalogue: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_CATALOGUE_PATH}`),
+        // tilesCatalogue: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_TILES_CATALOGUE_PATH}`),
+        // filesCatalogue: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_FILES_CATALOGUE_PATH}`),
+        // fileLayerDefaultJson: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_FILES_DEFAULT_JSON_PATH}`),
         tmsServiceDefaultRaster: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_TILES_RASTER_TILE_PATH}`)
       } : null;
+
+      const proxyPath = proxyElasticMapsServiceInMaps ? relativeToAbsolute('..') : '';
+
+      const manifestServiceUrl = proxyElasticMapsServiceInMaps ? relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_CATALOGUE_PATH}`) : chrome.getInjected('emsManifestServiceUrl');
 
       emsClient = new EMSClient({
         language: i18n.getLocale(),
         kbnVersion: chrome.getInjected('kbnPkgVersion'),
-        manifestServiceUrl: chrome.getInjected('emsManifestServiceUrl'),
+        manifestServiceUrl: manifestServiceUrl,
         landingPageUrl: chrome.getInjected('emsLandingPageUrl'),
         proxyElasticMapsServiceInMaps: proxyElasticMapsServiceInMaps,
         proxyElasticMapsServiceInMapsOptions: proxyOptions,
-        fetchFunction: fetchFunction //import this from client-side, so the right instance is returned (bootstrapped from common/* would not work
+        fetchFunction: fetchFunction, //import this from client-side, so the right instance is returned (bootstrapped from common/* would not work
+        proxyPath: proxyPath
       });
     } else {
       //EMS is turned off. Mock API.

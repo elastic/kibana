@@ -23,10 +23,13 @@ import url from 'url';
 
 export class FileLayer {
 
-  constructor(config, emsClient, proxyOptions) {
+  constructor(config, emsClient, proxyPath
+              // , proxyOptions
+  ) {
     this._config = config;
     this._emsClient = emsClient;
-    this._proxyOptions = proxyOptions;
+    // this._proxyOptions = proxyOptions;
+    this._proxyPath = proxyPath;
   }
 
   getAttributions() {
@@ -107,15 +110,15 @@ export class FileLayer {
   }
 
   getDefaultFormatUrl() {
-    let url;
-    if (this._proxyOptions) {
-      const id = encodeURIComponent(this.getId());
-      url = `${this._proxyOptions.fileLayerDefaultJson}?id=${id}`;
-    }else {
+    // let url;
+    // if (this._proxyOptions) {
+    //   const id = encodeURIComponent(this.getId());
+    //   url = `${this._proxyOptions.fileLayerDefaultJson}?id=${id}`;
+    // }else {
       const format = this._getDefaultFormat();
-      url = this._emsClient.extendUrlWithParams(format.url);
-    }
-    return url;
+      const url = this._emsClient.extendUrlWithParams(format.url);
+    // }
+    return this._proxyPath + url;
   }
 
   getCreatedAt() {

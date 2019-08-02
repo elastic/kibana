@@ -22,15 +22,22 @@ import { ORIGIN } from './origin';
 
 export class TMSService {
 
-  _getDefaultStyleJson = _.once(async () => {
-    const url = this._getDefaultStyleUrl();
+  _getRasterStyleJson = _.once(async () => {
+    const rasterUrl = this._getRasterStyleUrl();
+    const url = this._proxyPath + rasterUrl;
+    console.log('get raster json', url);
     return this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
   });
 
-  constructor(config,  emsClient, proxyOptions) {
+  constructor(config,
+    emsClient,
+    // proxyOptions,
+    proxyPath
+  ) {
     this._config = config;
     this._emsClient = emsClient;
-    this._proxyOptions = proxyOptions;
+    // this._proxyOptions = proxyOptions;
+    this._proxyPath = proxyPath;
   }
 
   _getRasterFormats(locale) {
@@ -39,7 +46,7 @@ export class TMSService {
     });
   }
 
-  _getDefaultStyleUrl() {
+  _getRasterStyleUrl() {
     let rasterFormats = this._getRasterFormats(this._emsClient.getLocale());
     if (!rasterFormats.length) {//fallback to default locale
       rasterFormats = this._getRasterFormats(this._emsClient.getDefaultLocale());
@@ -54,15 +61,17 @@ export class TMSService {
   }
 
   async getUrlTemplate() {
+    console.log('gut');
     let url;
-    if (this._proxyOptions) {
-      const serviceId = encodeURIComponent(this.getId());
-      url = `${this._proxyOptions.tmsServiceDefaultRaster}?id=${serviceId}&x={x}&y={y}&z={z}`;
-    } else {
-      const tileJson = await this._getDefaultStyleJson();
-      const directUrl = tileJson.tiles[0];
-      url = this._emsClient.extendUrlWithParams(directUrl);
-    }
+    // if (this._proxyOptions) {
+    //   const serviceId = encodeURIComponent(this.getId());
+    //   url = `${this._proxyOptions.tmsServiceDefaultRaster}?id=${serviceId}&x={x}&y={y}&z={z}`;
+    // } else {
+    const tileJson = await this._getRasterStyleJson();
+    const directUrl = tileJson.tiles[0];
+    url = this._emsClient.extendUrlWithParams(directUrl);
+    console.log('gut', url);
+    // }
     return url;
   }
 
@@ -101,12 +110,12 @@ export class TMSService {
   }
 
   async getMinZoom() {
-    const tileJson = await this._getDefaultStyleJson();
+    const tileJson = await this._getDefaultRasterJsonStyle();
     return tileJson.minzoom;
   }
 
   async getMaxZoom() {
-    const tileJson = await this._getDefaultStyleJson();
+    const tileJson = await this._getDefaultRasterJsonStyle();
     return tileJson.maxzoom;
   }
 
