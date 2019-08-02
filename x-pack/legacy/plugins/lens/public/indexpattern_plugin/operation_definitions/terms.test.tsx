@@ -32,7 +32,7 @@ describe('terms', () => {
               operationType: 'terms',
               params: {
                 orderBy: { type: 'alphabetical' },
-                size: 5,
+                size: 3,
                 orderDirection: 'asc',
               },
               sourceField: 'category',
@@ -64,7 +64,7 @@ describe('terms', () => {
           params: expect.objectContaining({
             orderBy: '_key',
             field: 'category',
-            size: 5,
+            size: 3,
           }),
         })
       );
@@ -108,7 +108,7 @@ describe('terms', () => {
         operationType: 'terms',
         params: {
           orderBy: { type: 'column', columnId: 'col1' },
-          size: 5,
+          size: 3,
           orderDirection: 'asc',
         },
         sourceField: 'category',
@@ -139,7 +139,7 @@ describe('terms', () => {
           operationType: 'terms',
           params: {
             orderBy: { type: 'column', columnId: 'col1' },
-            size: 5,
+            size: 3,
             orderDirection: 'asc',
           },
           sourceField: 'category',
@@ -165,7 +165,7 @@ describe('terms', () => {
           operationType: 'terms',
           params: {
             orderBy: { type: 'column', columnId: 'col1' },
-            size: 5,
+            size: 3,
             orderDirection: 'asc',
           },
           sourceField: 'category',
@@ -344,7 +344,7 @@ describe('terms', () => {
         <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
       );
 
-      expect(instance.find(EuiRange).prop('value')).toEqual(5);
+      expect(instance.find(EuiRange).prop('value')).toEqual(3);
     });
 
     it('should update state with the size value', () => {
