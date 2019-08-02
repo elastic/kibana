@@ -17,4 +17,11 @@
  * under the License.
  */
 
-export { InspectorView } from './inspector_view';
+/* eslint-disable */
+
+/**
+ * Do not use this, use NP `inspector` plugin instead.
+ * 
+ * @deprecated
+ */
+export * from '../../../../../plugins/inspector/public/ui/inspector_panel';

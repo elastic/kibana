@@ -16,14 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ComponentClass } from 'react';
 
-import { Adapters, InspectorViewDescription } from '../types';
+/* eslint-disable */
 
-interface InspectorPanelProps {
-  adapters: Adapters;
-  title?: string;
-  views: InspectorViewDescription[];
-}
-
-export const InspectorPanel: ComponentClass<InspectorPanelProps>;
+/**
+ * Do not use this, use NP `inspector` plugin instead.
+ * 
+ * @deprecated
+ */
+export * from '../../../../../plugins/inspector/public/ui/inspector_view_chooser';

@@ -17,19 +17,14 @@
  * under the License.
  */
 
-import { npSetup } from 'ui/new_platform';
-export { InspectorViewDescription } from './types';
+import { inspectorPluginMock } from '../mocks';
 
-/**
- * Do not use this, instead use `inspector` plugin directly.
- *
- * ```ts
- * import { npSetup } from 'ui/new_platform';
- *
- * npSetup.plugins.inspector.registerView(view);
- * ```
- *
- * @deprecated
- */
-export const viewRegistry =
-  npSetup.plugins.inspector.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.views;
+describe('inspector', () => {
+  describe('open()', () => {
+    it('should throw an error if no views available', async () => {
+      const { doStart } = await inspectorPluginMock.createPlugin();
+      const start = await doStart();
+      expect(() => start.open({})).toThrow();
+    });
+  });
+});
