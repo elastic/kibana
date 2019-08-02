@@ -70,7 +70,7 @@ export interface SearchBarProps {
   onSaved?: (savedQuery: SavedQuery) => void;
   onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
   onClearSavedQuery?: () => void;
-  customSubmitButton?: any;
+  customSubmitButton?: React.ReactNode;
 }
 
 interface State {
@@ -375,7 +375,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           appName={this.props.appName}
           indexPatterns={this.props.indexPatterns}
           store={this.props.store}
-          prepend={this.props.showFilterBar ? savedQueryManager : ''}
+          prepend={this.props.showFilterBar ? savedQueryManager : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}

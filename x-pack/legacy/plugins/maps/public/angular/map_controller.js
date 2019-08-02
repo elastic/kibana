@@ -52,9 +52,6 @@ import {
   MAP_SAVED_OBJECT_TYPE,
   MAP_APP_PATH
 } from '../../common/constants';
-import { data } from 'plugins/data/setup';
-data.search.loadLegacyDirectives();
-const { savedQueryService } = data.search.services;
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
@@ -132,90 +129,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
     store.dispatch(setRefreshConfig($scope.refreshConfig));
   };
 
-  /*
-    START QueryBar replacement with SearchBar
-    Saved Queries required moving the query bar state caching to the search bar. Using the search bar instead of the query bar in Maps requires obscuring the filter functionality within the app.
-    The following is allows us to use the search bar without the filters.
-  */
-  $scope.filters = [];
-  $scope.onFiltersUpdated = function () {
-    return;
-  };
-  $scope.showFilterBar = function () {
-    return $scope.filters.length > 0;
-  };
-  $scope.showQueryBar = function () {
-    return true;
-  };
-  /* END QueryBar replacement with SearchBar */
-
-  /* Saved Queries */
-  $scope.onQuerySaved = savedQuery => {
-    $scope.savedQuery = savedQuery;
-  };
-
-  $scope.onSavedQueryUpdated = savedQuery => {
-    $scope.savedQuery = savedQuery;
-  };
-
-  $scope.onClearSavedQuery = () => {
-    delete $scope.savedQuery;
-    delete $state.savedQuery;
-    $scope.query = {
-      query: '',
-      language: localStorage.get('kibana.userQueryLanguage') || chrome.getUiSettingsClient().get('search:queryLanguage')
-    };
-    syncAppAndGlobalState();
-    store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
-  };
-
-  const updateStateFromSavedQuery = (savedQuery) => {
-    $scope.query = savedQuery.attributes.query;
-    if (savedQuery.attributes.timefilter) {
-      $scope.time = {
-        from: savedQuery.attributes.timefilter.timeFrom,
-        to: savedQuery.attributes.timefilter.timeTo,
-      };
-      if (savedQuery.attributes.timefilter.refreshInterval) {
-        $scope.refreshInterval = savedQuery.attributes.timefilter.refreshInterval;
-      }
-    }
-    syncAppAndGlobalState();
-    store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
-  };
-
-  $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
-    if (!newSavedQuery) return;
-    $state.savedQuery = newSavedQuery.id;
-
-    if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-      updateStateFromSavedQuery(newSavedQuery);
-    }
-  });
-
-  $scope.$watch(() => $state.savedQuery, newSavedQueryId => {
-    if (!newSavedQueryId) {
-      $scope.savedQuery = undefined;
-      return;
-    }
-
-    savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
-      $scope.$evalAsync(() => {
-        $scope.savedQuery = savedQuery;
-        updateStateFromSavedQuery(savedQuery);
-      });
-    });
-  });
-
-  $scope.showSaveQuery = capabilities.get().maps.saveQuery;
-
-  $scope.$watch(() => capabilities.get().maps.saveQuery, (newCapability) => {
-    $scope.showSaveQuery = newCapability;
-  });
-  /* end Saved Queries */
-
   function hasUnsavedChanges() {
-
     const state = store.getState();
     const layerList = getLayerListRaw(state);
     const layerListConfigOnly = copyPersistentState(layerList);

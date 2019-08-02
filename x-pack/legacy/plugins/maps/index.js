@@ -119,15 +119,15 @@ export function maps(kibana) {
         privileges: {
           all: {
             savedObject: {
-              all: ['map', 'query'],
+              all: ['map'],
               read: ['index-pattern']
             },
-            ui: ['save', 'show', 'saveQuery'],
+            ui: ['save', 'show'],
           },
           read: {
             savedObject: {
               all: [],
-              read: ['map', 'index-pattern', 'query']
+              read: ['map', 'index-pattern']
             },
             ui: ['show'],
           },
