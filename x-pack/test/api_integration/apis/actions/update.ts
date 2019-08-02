@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ES_ARCHIVER_ACTION_ID } from './constants';
+import { ES_ARCHIVER_ACTION_ID, SPACE_1_ES_ARCHIVER_ACTION_ID } from './constants';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
@@ -36,6 +36,41 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
             id: ES_ARCHIVER_ACTION_ID,
           });
         });
+    });
+
+    it('should return 200 when updating a document in a space', async () => {
+      await supertest
+        .put(`/s/space_1/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          description: 'My action updated',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            id: SPACE_1_ES_ARCHIVER_ACTION_ID,
+          });
+        });
+    });
+
+    it('should return 404 when updating a document in another space', async () => {
+      await supertest
+        .put(`/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          description: 'My action updated',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(404);
     });
 
     it('should not be able to pass null config', async () => {
