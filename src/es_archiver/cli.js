@@ -33,7 +33,7 @@ import elasticsearch from 'elasticsearch';
 
 import { EsArchiver } from './es_archiver';
 import { ToolingLog } from '@kbn/dev-utils';
-import { readConfigFile } from '../functional_test_runner';
+import { readConfigFile } from '../../packages/kbn-test/target/functional_test_runner';
 
 const cmd = new Command('node scripts/es_archiver');
 
