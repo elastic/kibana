@@ -21,7 +21,4 @@ if [ ! -x "$NODE" ]; then
   exit 1
 fi
 
-BASE_NODE_OPTIONS="--no-warnings"
-PARSED_NODE_OPTIONS="${NODE_OPTIONS:+" $NODE_OPTIONS"}"
-
-NODE_OPTIONS="${BASE_NODE_OPTIONS}${PARSED_NODE_OPTIONS}" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli_plugin" "$@"
+NODE_OPTIONS="--no-warnings ${NODE_OPTIONS}" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli_plugin" "$@"

@@ -14,17 +14,7 @@ If Not Exist "%NODE%" (
   Exit /B 1
 )
 
-set "BASE_NODE_OPTIONS=--no-warnings --max-http-header-size=65536"
-
-set "PARSED_NODE_OPTIONS= %NODE_OPTIONS%"
-
-if "%PARSED_NODE_OPTIONS: =%"=="" (
-  set PARSED_NODE_OPTIONS=
-)
-
-set "NODE_OPTIONS=%BASE_NODE_OPTIONS%%PARSED_NODE_OPTIONS%"
-
-"%NODE%" "%DIR%\src\cli" %*
+set "NODE_OPTIONS=--no-warnings --max-http-header-size=65536 %NODE_OPTIONS%" && "%NODE%" "%DIR%\src\cli" %*
 
 :finally
 
