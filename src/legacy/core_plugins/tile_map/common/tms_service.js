@@ -64,9 +64,7 @@ export class TMSService {
   async getUrlTemplate() {
     const tileJson = await this._getRasterStyleJson();
     const directUrl = this._proxyPath + tileJson.tiles[0];
-    const url = this._emsClient.extendUrlWithParams(directUrl);
-    console.log('gut', url);
-    return url;
+    return this._emsClient.extendUrlWithParams(directUrl);
   }
 
   getDisplayName() {

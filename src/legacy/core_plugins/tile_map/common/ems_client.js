@@ -201,25 +201,16 @@ export class EMSClient {
   _invalidateSettings() {
 
     this._getMainCatalog = _.once(async () => {
-      // const url = this._proxyElasticMapsServiceInMaps ? this._proxyElasticMapsServiceInMapsOptions.catalogue : this._manifestServiceUrl;
-
-      const url = this._manifestServiceUrl;
-      console.log('get main', url);
-      return await this._getManifestWithParams(url);
+      return await this._getManifestWithParams(this._manifestServiceUrl);
     });
 
     this._getDefaultTMSCatalog = _.once(async () => {
-      console.log('get defulat tms catalog');
       const catalogue = await this._getMainCatalog();
-      console.log('mainc at', catalogue);
       const firstService = catalogue.services.find(service => service.type === 'tms');
       if (!firstService) {
         return [];
       }
-      // const url = this._proxyElasticMapsServiceInMaps ? this._proxyElasticMapsServiceInMapsOptions.tilesCatalogue : firstService.manifest;
-
       const url = this._proxyPath + firstService.manifest;
-      console.log('default tms', url);
       return await this.getManifest(url);
     });
 
@@ -231,7 +222,6 @@ export class EMSClient {
       }
       // const url = this._proxyElasticMapsServiceInMaps ? this._proxyElasticMapsServiceInMapsOptions.filesCatalogue : firstService.manifest;
       const url = this._proxyPath + firstService.manifest;
-      console.log('default file', url);
       return await this.getManifest(url);
     });
 

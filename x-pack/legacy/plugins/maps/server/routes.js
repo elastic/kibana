@@ -236,7 +236,6 @@ export function initRoutes(server, licenseUid) {
       const style = await tmsService.getDefaultRasterStyle();
 
       const newUrl = `${GIS_API_PATH}/${EMS_TILES_RASTER_TILE_PATH}?id=${request.query.id}&x={x}&y={y}&z={z}`;
-      console.log(newUrl);
       return {
         ...style,
         tiles: [newUrl]
