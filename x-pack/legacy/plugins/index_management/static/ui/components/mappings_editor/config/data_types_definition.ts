@@ -15,7 +15,12 @@ export type DataType =
   | 'boolean'
   | 'range'
   | 'object'
-  | 'nested';
+  | 'nested'
+  | 'ip'
+  | 'rank_feature'
+  | 'rank_features'
+  | 'dense_vector'
+  | 'sparse_vector';
 
 export type SubType = NumericType | DateType | RangeType;
 
@@ -82,6 +87,10 @@ export const dataTypesDefinition: { [key in DataType]: DataTypeDefinition } = {
     label: 'Binary',
     basicParameters: ['doc_values', 'store'],
   },
+  ip: {
+    label: 'IP',
+    basicParameters: [['store', 'index', 'doc_values'], ['null_value', 'boost']],
+  },
   boolean: {
     label: 'Boolean',
     basicParameters: [['store', 'index', 'doc_values'], ['null_value', 'boost']],
@@ -101,6 +110,18 @@ export const dataTypesDefinition: { [key in DataType]: DataTypeDefinition } = {
   nested: {
     label: 'Nested',
     basicParameters: ['dynamic'],
+  },
+  rank_feature: {
+    label: 'Rank feature',
+  },
+  rank_features: {
+    label: 'Rank features',
+  },
+  dense_vector: {
+    label: 'Dense vector',
+  },
+  sparse_vector: {
+    label: 'Sparse vector',
   },
 };
 
