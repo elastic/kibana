@@ -72,20 +72,21 @@ export function TransactionOverview({
 
   const { data: transactionCharts } = useTransactionCharts();
 
+  const {
+    data: transactionListData,
+    status: transactionListStatus
+  } = useTransactionList(urlParams);
+  const { data: hasMLJob = false } = useFetcher(() => {
+    return serviceName && transactionType
+      ? getHasMLJob({ serviceName, transactionType })
+      : undefined;
+  }, [serviceName, transactionType]);
+
   // TODO: improve urlParams typings.
   // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
   if (!serviceName || !transactionType) {
     return null;
   }
-
-  const {
-    data: transactionListData,
-    status: transactionListStatus
-  } = useTransactionList(urlParams);
-  const { data: hasMLJob = false } = useFetcher(
-    () => getHasMLJob({ serviceName, transactionType }),
-    [serviceName, transactionType]
-  );
 
   return (
     <React.Fragment>
@@ -139,7 +140,6 @@ export function TransactionOverview({
         <TransactionList
           isLoading={transactionListStatus === 'loading'}
           items={transactionListData}
-          serviceName={serviceName}
         />
       </EuiPanel>
     </React.Fragment>

@@ -25,11 +25,10 @@ const TransactionNameLink = styled(TransactionLink)`
 
 interface Props {
   items: ITransactionGroup[];
-  serviceName: string;
   isLoading: boolean;
 }
 
-export function TransactionList({ items, serviceName, isLoading }: Props) {
+export function TransactionList({ items, isLoading }: Props) {
   const columns: Array<ITableColumn<ITransactionGroup>> = [
     {
       field: 'name',
