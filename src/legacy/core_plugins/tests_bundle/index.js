@@ -109,6 +109,17 @@ export default (kibana) => {
                 extensions: ['.karma_mock.js', '.karma_mock.tsx', '.karma_mock.ts']
               }
             }, webpackConfig);
+
+            /**
+             * [..] it removes the commons bundle creation from the webpack
+             * config when we're building the bundle for the browser tests. It
+             * shouldn't be created, and by default isn't, but something is
+             * triggering it in webpack which breaks the tests so if we just
+             * remove the optimization config it will never happen and the tests
+             * will keep working [..]
+             *
+             * TLDR: If you have any questions about this line, ask Spencer.
+             */
             delete mergedConfig.optimization.splitChunks.cacheGroups.commons;
 
             return mergedConfig;
