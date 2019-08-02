@@ -99,6 +99,7 @@ export {
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
+  SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsErrorHelpers,
@@ -111,6 +112,16 @@ export {
   SavedObjectsService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsExportOptions,
+  SavedObjectsImportError,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportOptions,
+  SavedObjectsImportResponse,
+  SavedObjectsImportRetry,
+  SavedObjectsResolveImportErrorsOptions,
 } from './saved_objects';
 
 export { RecursiveReadonly } from '../utils';
@@ -135,7 +146,6 @@ export interface CoreSetup {
     registerAuth: HttpServiceSetup['registerAuth'];
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
     basePath: HttpServiceSetup['basePath'];
-    createNewServer: HttpServiceSetup['createNewServer'];
     isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
   };
 }

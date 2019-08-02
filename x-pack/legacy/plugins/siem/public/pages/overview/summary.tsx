@@ -14,7 +14,7 @@ export const Summary = pure(() => (
   <EuiFlexItem>
     <EuiText>
       <h2>
-        <FormattedMessage id="xpack.siem.overview.startedTitle" defaultMessage="Getting Started" />
+        <FormattedMessage id="xpack.siem.overview.startedTitle" defaultMessage="Getting started" />
       </h2>
 
       <p>
@@ -42,7 +42,7 @@ export const Summary = pure(() => (
               <EuiLink href="https://www.elastic.co/solutions/siem" target="blank">
                 <FormattedMessage
                   id="xpack.siem.overview.startedText.siemSolutionLinkText"
-                  defaultMessage="SIEM Solution"
+                  defaultMessage="SIEM solution"
                 />
               </EuiLink>
             ),
