@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { getTestAlertData } from './utils';
-import { ES_ARCHIVER_ACTION_ID } from './constants';
+import { ES_ARCHIVER_ACTION_ID, SPACE_1_ES_ARCHIVER_ACTION_ID } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function createUpdateTests({ getService }: FtrProviderContext) {
@@ -14,7 +14,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('update', () => {
-    let createdAlert: any;
+    let alertId: string;
+    let space1AlertId: string;
 
     before(async () => {
       await esArchiver.load('actions/basic');
@@ -24,20 +25,62 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .send(getTestAlertData())
         .expect(200)
         .then((resp: any) => {
-          createdAlert = resp.body;
+          alertId = resp.body.id;
+        });
+      await supertest
+        .post('/s/space_1/api/alert')
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(200)
+        .then((resp: any) => {
+          space1AlertId = resp.body.id;
         });
     });
     after(async () => {
       await supertest
-        .delete(`/api/alert/${createdAlert.id}`)
+        .delete(`/api/alert/${alertId}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(204, '');
+      await supertest
+        .delete(`/s/space_1/api/alert/${space1AlertId}`)
         .set('kbn-xsrf', 'foo')
         .expect(204, '');
       await esArchiver.unload('actions/basic');
     });
 
     it('should return 200 when updating an alert', async () => {
+      const alert = {
+        alertTypeParams: {
+          foo: true,
+        },
+        interval: '12s',
+        actions: [
+          {
+            group: 'default',
+            id: ES_ARCHIVER_ACTION_ID,
+            params: {
+              message:
+                'UPDATED: instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
+            },
+          },
+        ],
+      };
       await supertest
-        .put(`/api/alert/${createdAlert.id}`)
+        .put(`/api/alert/${alertId}`)
+        .set('kbn-xsrf', 'foo')
+        .send(alert)
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            ...alert,
+            id: alertId,
+          });
+        });
+    });
+
+    it('should return 404 when updating an alert from another space', async () => {
+      await supertest
+        .put(`/api/alert/${space1AlertId}`)
         .set('kbn-xsrf', 'foo')
         .send({
           alertTypeParams: {
@@ -55,31 +98,42 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             },
           ],
         })
+        .expect(404);
+    });
+
+    it('should return 200 when updating an alert in a space', async () => {
+      const alert = {
+        alertTypeParams: {
+          foo: true,
+        },
+        interval: '12s',
+        actions: [
+          {
+            group: 'default',
+            id: SPACE_1_ES_ARCHIVER_ACTION_ID,
+            params: {
+              message:
+                'UPDATED: instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
+            },
+          },
+        ],
+      };
+      await supertest
+        .put(`/s/space_1/api/alert/${space1AlertId}`)
+        .set('kbn-xsrf', 'foo')
+        .send(alert)
         .expect(200)
         .then((resp: any) => {
           expect(resp.body).to.eql({
-            id: createdAlert.id,
-            alertTypeParams: {
-              foo: true,
-            },
-            interval: '12s',
-            actions: [
-              {
-                group: 'default',
-                id: ES_ARCHIVER_ACTION_ID,
-                params: {
-                  message:
-                    'UPDATED: instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
-                },
-              },
-            ],
+            ...alert,
+            id: space1AlertId,
           });
         });
     });
 
     it('should return 400 when attempting to change alert type', async () => {
       await supertest
-        .put(`/api/alert/${createdAlert.id}`)
+        .put(`/api/alert/${alertId}`)
         .set('kbn-xsrf', 'foo')
         .send({
           alertTypeId: '1',
@@ -114,7 +168,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
     it('should return 400 when payload is empty and invalid', async () => {
       await supertest
-        .put(`/api/alert/${createdAlert.id}`)
+        .put(`/api/alert/${alertId}`)
         .set('kbn-xsrf', 'foo')
         .send({})
         .expect(400)
@@ -166,7 +220,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
     it(`should return 400 when interval is wrong syntax`, async () => {
       const { body: error } = await supertest
-        .put(`/api/alert/${createdAlert.id}`)
+        .put(`/api/alert/${alertId}`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ interval: '10x', enabled: undefined }))
         .expect(400);

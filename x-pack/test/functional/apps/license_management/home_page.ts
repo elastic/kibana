@@ -12,6 +12,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
 
   describe('Home page', function() {
+    this.tags(['skipCloud']);
     before(async () => {
       await pageObjects.common.navigateToApp('licenseManagement');
     });

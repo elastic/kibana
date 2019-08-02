@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ES_ARCHIVER_ACTION_ID } from './constants';
+import { ES_ARCHIVER_ACTION_ID, SPACE_1_ES_ARCHIVER_ACTION_ID } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function updateActionTests({ getService }: FtrProviderContext) {
@@ -21,12 +21,12 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'My action updated',
-            actionTypeConfig: {
-              unencrypted: `This value shouldn't get encrypted`,
-              encrypted: 'This value should be encrypted',
-            },
+          description: 'My action updated',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
           },
         })
         .expect(200)
@@ -37,26 +37,58 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should not be able to pass null to actionTypeConfig', async () => {
+    it('should return 200 when updating a document in a space', async () => {
+      await supertest
+        .put(`/s/space_1/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          description: 'My action updated',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            id: SPACE_1_ES_ARCHIVER_ACTION_ID,
+          });
+        });
+    });
+
+    it('should return 404 when updating a document in another space', async () => {
+      await supertest
+        .put(`/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          description: 'My action updated',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(404);
+    });
+
+    it('should not be able to pass null config', async () => {
       await supertest
         .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'My action updated',
-            actionTypeConfig: null,
-          },
+          description: 'My action updated',
+          config: null,
         })
         .expect(400)
         .then((resp: any) => {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message:
-              'child "attributes" fails because [child "actionTypeConfig" fails because ["actionTypeConfig" must be an object]]',
+            message: 'child "config" fails because ["config" must be an object]',
             validation: {
               source: 'payload',
-              keys: ['attributes.actionTypeConfig'],
+              keys: ['config'],
             },
           });
         });
@@ -67,12 +99,12 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'My action updated',
-            actionTypeConfig: {
-              unencrypted: `This value shouldn't get encrypted`,
-              encrypted: 'This value should be encrypted',
-            },
+          description: 'My action updated',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
           },
         })
         .expect(200);
@@ -84,16 +116,10 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .expect(200);
       expect(fetchedAction).to.eql({
         id: ES_ARCHIVER_ACTION_ID,
-        type: 'action',
-        references: [],
-        version: fetchedAction.version,
-        updated_at: fetchedAction.updated_at,
-        attributes: {
-          actionTypeId: 'test.index-record',
-          description: 'My action updated',
-          actionTypeConfig: {
-            unencrypted: `This value shouldn't get encrypted`,
-          },
+        actionTypeId: 'test.index-record',
+        description: 'My action updated',
+        config: {
+          unencrypted: `This value shouldn't get encrypted`,
         },
       });
     });
@@ -103,12 +129,12 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .put('/api/action/2')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'My action updated',
-            actionTypeConfig: {
-              unencrypted: `This value shouldn't get encrypted`,
-              encrypted: 'This value should be encrypted',
-            },
+          description: 'My action updated',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
           },
         })
         .expect(404)
@@ -131,44 +157,23 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'child "attributes" fails because ["attributes" is required]',
-            validation: { source: 'payload', keys: ['attributes'] },
+            message: 'child "description" fails because ["description" is required]',
+            validation: { source: 'payload', keys: ['description'] },
           });
         });
     });
 
-    it('should return 400 when payload attributes are empty and invalid', async () => {
+    it(`should return 400 when secrets are not valid`, async () => {
       await supertest
         .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {},
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message:
-              'child "attributes" fails because [child "description" fails because ["description" is required], child "actionTypeConfig" fails because ["actionTypeConfig" is required]]',
-            validation: {
-              source: 'payload',
-              keys: ['attributes.description', 'attributes.actionTypeConfig'],
-            },
-          });
-        });
-    });
-
-    it(`should return 400 when actionTypeConfig isn't valid`, async () => {
-      await supertest
-        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          attributes: {
-            description: 'My action updated',
-            actionTypeConfig: {
-              unencrypted: `This value shouldn't get encrypted`,
-            },
+          description: 'My action updated',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 42,
           },
         })
         .expect(400)
@@ -177,7 +182,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'The actionTypeConfig is invalid: [encrypted]: expected value of type [string] but got [undefined]',
+              'error validating action type secrets: [encrypted]: expected value of type [string] but got [number]',
           });
         });
     });
@@ -190,16 +195,16 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'test email action',
-            actionTypeId: '.email',
-            actionTypeConfig: {
-              user: 'email-user',
-              password: 'email-password',
-              from: 'email-from@example.com',
-              host: 'host-is-ignored-here.example.com',
-              port: 666,
-            },
+          description: 'test email action',
+          actionTypeId: '.email',
+          config: {
+            from: 'email-from@example.com',
+            host: 'host-is-ignored-here.example.com',
+            port: 666,
+          },
+          secrets: {
+            user: 'email-user',
+            password: 'email-password',
           },
         })
         .expect(200)
@@ -212,14 +217,14 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .put(`/api/action/${emailActionId}`)
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'a test email action 2',
-            actionTypeConfig: {
-              user: 'email-user',
-              password: 'email-password',
-              from: 'email-from@example.com',
-              service: '__json',
-            },
+          description: 'a test email action 2',
+          config: {
+            from: 'email-from@example.com',
+            service: '__json',
+          },
+          secrets: {
+            user: 'email-user',
+            password: 'email-password',
           },
         })
         .expect(200);

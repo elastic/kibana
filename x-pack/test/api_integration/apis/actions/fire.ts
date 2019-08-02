@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ES_ARCHIVER_ACTION_ID } from './constants';
+import { ES_ARCHIVER_ACTION_ID, SPACE_1_ES_ARCHIVER_ACTION_ID } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
@@ -52,7 +52,7 @@ export default function({ getService }: FtrProviderContext) {
     });
     after(() => es.indices.delete({ index: esTestIndexName }));
 
-    it('decrypts attributes and joins on actionTypeConfig when calling fire API', async () => {
+    it('decrypts attributes when calling fire API', async () => {
       await supertest
         .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_fire`)
         .set('kbn-xsrf', 'foo')
@@ -100,6 +100,8 @@ export default function({ getService }: FtrProviderContext) {
         },
         config: {
           unencrypted: `This value shouldn't get encrypted`,
+        },
+        secrets: {
           encrypted: 'This value should be encrypted',
         },
         reference: 'actions-fire-1',
@@ -107,30 +109,28 @@ export default function({ getService }: FtrProviderContext) {
       });
     });
 
-    it('fire still works with encrypted attributes after updating an action', async () => {
-      const { body: updatedAction } = await supertest
-        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          attributes: {
-            description: 'My action updated',
-            actionTypeConfig: {
-              unencrypted: `This value shouldn't get encrypted`,
-              encrypted: 'This value should be encrypted',
-            },
-          },
-        })
-        .expect(200);
-      expect(updatedAction).to.eql({
-        id: ES_ARCHIVER_ACTION_ID,
-      });
+    it(`can't fire from another space`, async () => {
       await supertest
-        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_fire`)
+        .post(`/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}/_fire`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
             index: esTestIndexName,
             reference: 'actions-fire-2',
+            message: 'Testing 123',
+          },
+        })
+        .expect(404);
+    });
+
+    it('fire works in a space', async () => {
+      await supertest
+        .post(`/s/space_1/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}/_fire`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            index: esTestIndexName,
+            reference: 'actions-fire-3',
             message: 'Testing 123',
           },
         })
@@ -152,7 +152,7 @@ export default function({ getService }: FtrProviderContext) {
                   },
                   {
                     term: {
-                      reference: 'actions-fire-2',
+                      reference: 'actions-fire-3',
                     },
                   },
                 ],
@@ -166,14 +166,89 @@ export default function({ getService }: FtrProviderContext) {
       expect(indexedRecord._source).to.eql({
         params: {
           index: esTestIndexName,
-          reference: 'actions-fire-2',
+          reference: 'actions-fire-3',
           message: 'Testing 123',
         },
         config: {
           unencrypted: `This value shouldn't get encrypted`,
+        },
+        secrets: {
           encrypted: 'This value should be encrypted',
         },
-        reference: 'actions-fire-2',
+        reference: 'actions-fire-3',
+        source: 'action:test.index-record',
+      });
+    });
+
+    it('fire still works with encrypted attributes after updating an action', async () => {
+      const { body: updatedAction } = await supertest
+        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          description: 'My action updated',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(200);
+      expect(updatedAction).to.eql({
+        id: ES_ARCHIVER_ACTION_ID,
+      });
+      await supertest
+        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_fire`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            index: esTestIndexName,
+            reference: 'actions-fire-4',
+            message: 'Testing 123',
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body).to.be.an('object');
+        });
+      const indexedRecord = await retry.tryForTime(15000, async () => {
+        const searchResult = await es.search({
+          index: esTestIndexName,
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      source: 'action:test.index-record',
+                    },
+                  },
+                  {
+                    term: {
+                      reference: 'actions-fire-4',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+        expect(searchResult.hits.total.value).to.eql(1);
+        return searchResult.hits.hits[0];
+      });
+      expect(indexedRecord._source).to.eql({
+        params: {
+          index: esTestIndexName,
+          reference: 'actions-fire-4',
+          message: 'Testing 123',
+        },
+        config: {
+          unencrypted: `This value shouldn't get encrypted`,
+        },
+        secrets: {
+          encrypted: 'This value should be encrypted',
+        },
+        reference: 'actions-fire-4',
         source: 'action:test.index-record',
       });
     });

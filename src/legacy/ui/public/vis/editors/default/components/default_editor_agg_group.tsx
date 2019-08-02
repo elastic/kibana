@@ -40,7 +40,7 @@ import {
 import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './default_editor_agg_group_state';
 import { Schema } from '../schemas';
 
-interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
+export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   schemas: Schema[];
   addSchema: (schems: Schema) => void;
   reorderAggs: (group: AggConfig[]) => void;
