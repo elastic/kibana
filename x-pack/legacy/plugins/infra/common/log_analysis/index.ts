@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './errors';
-export * from './metric_statistics';
-export * from './time_range';
+export * from './log_analysis';
+export * from './job_parameters';

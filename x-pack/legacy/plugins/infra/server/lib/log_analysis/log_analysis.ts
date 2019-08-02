@@ -10,6 +10,8 @@ import { getJobId } from '../../../common/log_analysis';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../adapters/framework';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
 
+const ML_ANOMALY_INDEX_PREFIX = '.ml-anomalies-';
+
 export class InfraLogAnalysis {
   constructor(
     private readonly libs: {
@@ -27,38 +29,120 @@ export class InfraLogAnalysis {
     request: InfraFrameworkRequest,
     sourceId: string,
     startTime: number,
-    endTime: number
+    endTime: number,
+    bucketDuration: number
   ) {
     const logRateJobId = this.getJobIds(request, sourceId).logEntryRate;
 
-    const mlBucketResponse = await this.libs.framework.callWithRequest(request, 'ml.getBuckets', {
-      jobId: logRateJobId,
-      anomaly_score: 0.00001,
-      expand: true,
-      start: startTime,
-      end: endTime,
+    const mlModelPlotResponse = await this.libs.framework.callWithRequest(request, 'search', {
+      allowNoIndices: true,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  timestamp: {
+                    gte: startTime,
+                    lt: endTime,
+                  },
+                },
+              },
+              {
+                terms: {
+                  result_type: ['model_plot', 'record'],
+                },
+              },
+              {
+                term: {
+                  detector_index: {
+                    value: 0,
+                  },
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          timestamp_buckets: {
+            date_histogram: {
+              field: 'timestamp',
+              fixed_interval: `${bucketDuration}ms`,
+            },
+            aggs: {
+              filter_model_plot: {
+                filter: {
+                  term: {
+                    result_type: 'model_plot',
+                  },
+                },
+                aggs: {
+                  stats_model_lower: {
+                    stats: {
+                      field: 'model_lower',
+                    },
+                  },
+                  stats_model_upper: {
+                    stats: {
+                      field: 'model_upper',
+                    },
+                  },
+                  stats_actual: {
+                    stats: {
+                      field: 'actual',
+                    },
+                  },
+                },
+              },
+              filter_records: {
+                filter: {
+                  term: {
+                    result_type: 'record',
+                  },
+                },
+                aggs: {
+                  top_hits_record: {
+                    top_hits: {
+                      _source: Object.keys(logRateMlRecordRT.props),
+                      size: 100,
+                      sort: [
+                        {
+                          timestamp: 'asc',
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      ignoreUnavailable: true,
+      index: `${ML_ANOMALY_INDEX_PREFIX}${logRateJobId}`,
+      size: 0,
+      trackScores: false,
+      trackTotalHits: false,
     });
 
-    const buckets = logRateMlBucketResponseRT
-      .decode(mlBucketResponse)
-      .map(response => response.buckets)
+    const mlModelPlotBuckets = logRateModelPlotResponseRT
+      .decode(mlModelPlotResponse)
+      .map(response => response.aggregations.timestamp_buckets.buckets)
       .getOrElseL(throwErrors(createPlainError));
 
-    return buckets.map(bucket => ({
-      anomalies: bucket.records.map(record => ({
-        actualCount: record.actual[0],
+    return mlModelPlotBuckets.map(bucket => ({
+      anomalies: bucket.filter_records.top_hits_record.hits.hits.map(({ _source: record }) => ({
+        actualLogEntryRate: record.actual[0],
         anomalyScore: record.record_score,
-        timeRange: {
-          startTime: record.timestamp,
-          endTime: record.timestamp + record.bucket_span * 1000,
-        },
-        typicalCount: record.typical[0],
+        duration: record.bucket_span * 1000,
+        startTime: record.timestamp,
+        typicalLogEntryRate: record.typical[0],
       })),
-      anomalyScore: bucket.anomaly_score,
-      timeRange: {
-        startTime: bucket.timestamp,
-        endTime: bucket.timestamp + bucket.bucket_span * 1000,
-      },
+      duration: bucketDuration,
+      logEntryRateStats: bucket.filter_model_plot.stats_actual,
+      modelLowerBoundStats: bucket.filter_model_plot.stats_model_lower,
+      modelUpperBoundStats: bucket.filter_model_plot.stats_model_upper,
+      startTime: bucket.key,
     }));
   }
 }
@@ -71,13 +155,40 @@ const logRateMlRecordRT = rt.type({
   typical: rt.array(rt.number),
 });
 
-const LogRateMlBucketRT = rt.type({
-  anomaly_score: rt.number,
-  bucket_span: rt.number,
-  records: rt.array(logRateMlRecordRT),
-  timestamp: rt.number,
+const logRateStatsAggregationRT = rt.type({
+  avg: rt.number,
+  count: rt.number,
+  max: rt.number,
+  min: rt.number,
+  sum: rt.number,
 });
 
-const logRateMlBucketResponseRT = rt.type({
-  buckets: rt.array(LogRateMlBucketRT),
+const logRateModelPlotResponseRT = rt.type({
+  aggregations: rt.type({
+    timestamp_buckets: rt.type({
+      buckets: rt.array(
+        rt.type({
+          key: rt.number,
+          filter_records: rt.type({
+            doc_count: rt.number,
+            top_hits_record: rt.type({
+              hits: rt.type({
+                hits: rt.array(
+                  rt.type({
+                    _source: logRateMlRecordRT,
+                  })
+                ),
+              }),
+            }),
+          }),
+          filter_model_plot: rt.type({
+            doc_count: rt.number,
+            stats_actual: logRateStatsAggregationRT,
+            stats_model_lower: logRateStatsAggregationRT,
+            stats_model_upper: logRateStatsAggregationRT,
+          }),
+        })
+      ),
+    }),
+  }),
 });

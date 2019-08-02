@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './errors';
-export * from './metric_statistics';
-export * from './time_range';
+import * as rt from 'io-ts';
+
+export const metricStatisticsRT = rt.type({
+  avg: rt.number,
+  count: rt.number,
+  max: rt.number,
+  min: rt.number,
+  sum: rt.number,
+});

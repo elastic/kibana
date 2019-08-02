@@ -19,6 +19,3 @@ export const jobStatusRT = rt.keyof({
 });
 
 export type JobStatus = rt.TypeOf<typeof jobStatusRT>;
-
-export const getJobId = (spaceId: string, sourceId: string, jobType: JobType) =>
-  `kibana-logs-ui-${spaceId}-${sourceId}-${jobType}`;

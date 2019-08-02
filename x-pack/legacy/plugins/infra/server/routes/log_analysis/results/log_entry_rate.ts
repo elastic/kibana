@@ -31,7 +31,8 @@ export const initLogAnalysisGetLogEntryRateRoute = ({
           req,
           payload.data.sourceId,
           payload.data.timeRange.startTime,
-          payload.data.timeRange.endTime
+          payload.data.timeRange.endTime,
+          payload.data.bucketDuration
         )
         .catch(err => {
           throw Boom.boomify(err, { statusCode: ('statusCode' in err && err.statusCode) || 500 });
@@ -39,7 +40,10 @@ export const initLogAnalysisGetLogEntryRateRoute = ({
 
       return res.response(
         getLogEntryRateSuccessReponsePayloadRT.encode({
-          data: { histogramBuckets: logEntryRateBuckets },
+          data: {
+            bucketDuration: payload.data.bucketDuration,
+            histogramBuckets: logEntryRateBuckets,
+          },
         })
       );
     },
