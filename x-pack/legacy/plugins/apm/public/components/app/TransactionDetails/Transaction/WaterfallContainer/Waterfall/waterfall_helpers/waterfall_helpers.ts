@@ -5,15 +5,7 @@
  */
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import {
-  flatten,
-  groupBy,
-  indexBy,
-  isEmpty,
-  sortBy,
-  uniq,
-  zipObject
-} from 'lodash';
+import { flatten, groupBy, indexBy, sortBy, uniq, zipObject } from 'lodash';
 import { idx } from '@kbn/elastic-idx';
 import { TraceAPIResponse } from '../../../../../../../../server/lib/traces/get_trace';
 import { StringMap } from '../../../../../../../../typings/common';
@@ -226,7 +218,7 @@ export function getWaterfall(
   { root: traceRoot, trace, errorsPerTransaction }: TraceAPIResponse,
   entryTransactionId?: Transaction['transaction']['id']
 ): IWaterfall {
-  if (traceRoot === undefined || isEmpty(trace) || !entryTransactionId) {
+  if (traceRoot === undefined || !entryTransactionId) {
     return {
       services: [],
       duration: 0,

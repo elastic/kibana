@@ -5,6 +5,7 @@
  */
 
 import { SearchParams } from 'elasticsearch';
+import { idx } from '@kbn/elastic-idx';
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
@@ -40,9 +41,7 @@ export async function getTraceRoot(traceId: string, setup: Setup) {
   };
 
   const resp = await client.search<Transaction>(params);
-  const root = resp.hits.hits.map(hit => hit._source)[0] as
-    | Transaction
-    | undefined;
+  const root: Transaction | undefined = idx(resp, _ => _.hits.hits[0]._source);
 
   return root;
 }
