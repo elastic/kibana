@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -32,7 +33,7 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h3>
+            <h3 data-test-subj="stepTitle">
               <FormattedMessage
                 id="xpack.idxMgmt.templatesForm.stepSettings.stepTitle"
                 defaultMessage="Index settings (optional)"
@@ -96,12 +97,12 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
           }}
           showGutter={false}
           minLines={6}
-          aria-label={
-            <FormattedMessage
-              id="xpack.idxMgmt.templatesForm.stepSettings.fieldIndexSettingsAriaLabel"
-              defaultMessage="Index settings editor"
-            />
-          }
+          aria-label={i18n.translate(
+            'xpack.idxMgmt.templatesForm.stepSettings.fieldIndexSettingsAriaLabel',
+            {
+              defaultMessage: 'Index settings editor',
+            }
+          )}
           value={settings}
           onChange={(newSettings: string) => {
             updateTemplate({ settings: newSettings });

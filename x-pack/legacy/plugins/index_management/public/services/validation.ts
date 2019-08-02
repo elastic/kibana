@@ -5,8 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { Template } from '../../common/types';
-
-const ILLEGAL_CHARACTERS = ['\\', '/', '?', '"', '<', '>', '|'];
+import { INVALID_CHARACTERS } from '../../common/constants';
 
 const isStringEmpty = (str: string | null): boolean => {
   return str ? !Boolean(str.trim()) : true;
@@ -14,7 +13,7 @@ const isStringEmpty = (str: string | null): boolean => {
 
 const getFieldsWithIllegalCharacters = (fieldsToValidate: string[] = []) => {
   return fieldsToValidate.reduce((fields: any, field) => {
-    const illegalChars = ILLEGAL_CHARACTERS.reduce((chars: any, char: string) => {
+    const illegalChars = INVALID_CHARACTERS.reduce((chars: any, char: string) => {
       if (field.includes(char)) {
         chars.push(char);
       }
@@ -56,8 +55,8 @@ export const validateTemplate = (template: Template): TemplateValidation => {
   // Name validation
   if (name !== undefined && isStringEmpty(name)) {
     validation.errors.name.push(
-      i18n.translate('xpack.idxMgmt.templateValidation.nameRequiredError', {
-        defaultMessage: 'Name is required.',
+      i18n.translate('xpack.idxMgmt.templateValidation.templateNameRequiredError', {
+        defaultMessage: 'Template name is required.',
       })
     );
   }

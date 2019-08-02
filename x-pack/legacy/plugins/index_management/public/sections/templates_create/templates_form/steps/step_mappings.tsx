@@ -26,7 +26,7 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({ children, err
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h3>
+            <h3 data-test-subj="stepTitle">
               <FormattedMessage
                 id="xpack.idxMgmt.templatesForm.stepMappings.stepTitle"
                 defaultMessage="Mappings (optional)"

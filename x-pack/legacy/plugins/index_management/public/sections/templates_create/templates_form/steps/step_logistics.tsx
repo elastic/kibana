@@ -119,6 +119,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
         >
           <EuiFieldText
             value={name}
+            data-test-subj="nameInput"
             onChange={e => {
               updateTemplate({ name: e.target.value });
             }}
@@ -157,7 +158,9 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
           helpText={
             <FormattedMessage
               id="xpack.idxMgmt.templatesForm.stepLogistics.fieldIndexPatternsHelpText"
-              defaultMessage={`Index patterns must match at least one index. Spaces and the characters \ / ? " < > | are not allowed.`}
+              defaultMessage={
+                'Index patterns must match at least one index. Spaces and the characters / ? " < > | are not allowed.'
+              }
             />
           }
           isInvalid={Boolean(indexPatternsError)}
@@ -226,8 +229,9 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
           <EuiFieldNumber
             value={order}
             onChange={e => {
-              updateTemplate({ order: Number(e.target.value) });
+              updateTemplate({ order: e.target.value });
             }}
+            data-test-subj="orderInput"
             fullWidth
           />
         </EuiFormRow>
@@ -265,9 +269,10 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
           <EuiFieldNumber
             value={version}
             onChange={e => {
-              updateTemplate({ version: Number(e.target.value) });
+              updateTemplate({ version: e.target.value });
             }}
             fullWidth
+            data-test-subj="versionInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

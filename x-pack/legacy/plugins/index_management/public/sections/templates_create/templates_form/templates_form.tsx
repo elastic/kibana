@@ -173,6 +173,7 @@ export const TemplatesForm: React.FunctionComponent<Props> = ({
               />
             }
             error={saveError}
+            data-test-subj="saveTemplateError"
           />
           <EuiSpacer size="m" />
         </Fragment>
@@ -190,7 +191,7 @@ export const TemplatesForm: React.FunctionComponent<Props> = ({
         <EuiFlexGroup>
           {currentStep > 1 ? (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="arrowLeft" onClick={onBack}>
+              <EuiButtonEmpty iconType="arrowLeft" onClick={onBack} data-test-subj="backButton">
                 <FormattedMessage
                   id="xpack.idxMgmt.templatesForm.backButtonLabel"
                   defaultMessage="Back"
@@ -201,7 +202,7 @@ export const TemplatesForm: React.FunctionComponent<Props> = ({
 
           {currentStep < lastStep ? (
             <EuiFlexItem grow={false}>
-              <EuiButton fill iconType="arrowRight" onClick={onNext}>
+              <EuiButton fill iconType="arrowRight" onClick={onNext} data-test-subj="nextButton">
                 <FormattedMessage
                   id="xpack.idxMgmt.templatesForm.nextButtonLabel"
                   defaultMessage="Next"
@@ -217,6 +218,7 @@ export const TemplatesForm: React.FunctionComponent<Props> = ({
                 color="secondary"
                 iconType="check"
                 onClick={onSave.bind(null, template)}
+                data-test-subj="submitButton"
                 isLoading={isSaving}
               >
                 {isSaving ? (

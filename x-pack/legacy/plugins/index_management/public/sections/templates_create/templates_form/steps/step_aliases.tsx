@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -32,7 +33,7 @@ export const StepAliases: React.FunctionComponent<StepProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h3>
+            <h3 data-test-subj="stepTitle">
               <FormattedMessage
                 id="xpack.idxMgmt.templatesForm.stepAliases.stepTitle"
                 defaultMessage="Aliases (optional)"
@@ -96,12 +97,12 @@ export const StepAliases: React.FunctionComponent<StepProps> = ({
           }}
           showGutter={false}
           minLines={6}
-          aria-label={
-            <FormattedMessage
-              id="xpack.idxMgmt.templatesForm.stepAliases.fieldAliasesAriaLabel"
-              defaultMessage="Aliases editor"
-            />
-          }
+          aria-label={i18n.translate(
+            'xpack.idxMgmt.templatesForm.stepAliases.fieldAliasesAriaLabel',
+            {
+              defaultMessage: 'Aliases code editor',
+            }
+          )}
           value={aliases}
           onChange={(newAliases: string) => {
             updateTemplate({ aliases: newAliases });

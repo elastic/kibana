@@ -61,7 +61,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
   const hasWildCardIndexPattern = Boolean(indexPatterns.find(pattern => pattern === '*'));
 
   const SummaryTab = () => (
-    <Fragment>
+    <div data-test-subj="summaryTab">
       <EuiSpacer size="m" />
 
       <EuiFlexGroup>
@@ -148,11 +148,11 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
           </EuiDescriptionList>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Fragment>
+    </div>
   );
 
   const JsonTab = () => (
-    <Fragment>
+    <div data-test-subj="jsonTab">
       <EuiSpacer size="m" />
       <EuiCodeEditor
         mode="json"
@@ -168,13 +168,13 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
           />
         }
       />
-    </Fragment>
+    </div>
   );
 
   return (
     <div data-test-subj="stepSummary">
       <EuiTitle>
-        <h3>
+        <h3 data-test-subj="stepTitle">
           <FormattedMessage
             id="xpack.idxMgmt.templatesForm.stepReview.stepTitle"
             defaultMessage="Review details for '{templateName}'"
@@ -196,8 +196,9 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
             }
             color="warning"
             iconType="help"
+            data-test-subj="indexPatternsWarning"
           >
-            <p>
+            <p data-test-subj="indexPatternsWarningDescription">
               <FormattedMessage
                 id="xpack.idxMgmt.templatesForm.stepReview.summaryTab.indexPatternsWarningDescription"
                 defaultMessage="This template contains a wildcard (*) as an index pattern. This will create a catch-all template and apply to all indices."
@@ -216,6 +217,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
       ) : null}
 
       <EuiTabbedContent
+        data-test-subj="summaryTabContent"
         tabs={[
           {
             id: 'summary',

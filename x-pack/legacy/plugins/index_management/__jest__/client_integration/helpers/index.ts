@@ -5,6 +5,7 @@
  */
 
 import { setup as homeSetup } from './home.helpers';
+import { setup as templatesCreateSetup } from './templates_create.helpers';
 
 export { nextTick, getRandomString, findTestSubject, TestBed } from '../../../../../../test_utils';
 
@@ -12,4 +13,5 @@ export { setupEnvironment } from './setup_environment';
 
 export const pageHelpers = {
   home: { setup: homeSetup },
+  templatesCreate: { setup: templatesCreateSetup },
 };

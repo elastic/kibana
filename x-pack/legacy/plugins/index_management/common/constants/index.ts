@@ -6,6 +6,7 @@
 
 export { PLUGIN } from './plugin';
 export { BASE_PATH } from './base_path';
+export { INVALID_CHARACTERS } from './invalid_characters';
 export * from './index_statuses';
 
 export {
