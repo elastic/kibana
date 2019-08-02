@@ -96,8 +96,6 @@ export class EMSClient {
     htmlSanitizer,
     language,
     landingPageUrl,
-    proxyElasticMapsServiceInMaps,
-    proxyElasticMapsServiceInMapsOptions,
     fetchFunction,
     proxyPath
   }) {
@@ -109,8 +107,6 @@ export class EMSClient {
       my_app_version: kbnVersion,
     };
 
-    this._proxyPath = typeof proxyPath === 'string' ? proxyPath : '';
-
     this._sanitizer = htmlSanitizer ? htmlSanitizer : x => x;
     this._manifestServiceUrl = manifestServiceUrl;
     this._loadFileLayers = null;
@@ -118,16 +114,8 @@ export class EMSClient {
     this._emsLandingPageUrl = typeof landingPageUrl === 'string' ? landingPageUrl : '';
     this._language = typeof language === 'string' ? language : DEFAULT_LANGUAGE;
 
-    this._proxyElasticMapsServiceInMaps = typeof proxyElasticMapsServiceInMaps === 'boolean' ? proxyElasticMapsServiceInMaps : false;
-    this._proxyElasticMapsServiceInMapsOptions = proxyElasticMapsServiceInMapsOptions || {};
-    // this._fileProxyOptions = this._proxyElasticMapsServiceInMaps ? {
-    //   fileLayerDefaultJson: this._proxyElasticMapsServiceInMapsOptions.fileLayerDefaultJson
-    // } : null;
-    // this._tmsProxyOptions = this._proxyElasticMapsServiceInMaps ? {
-    //   tmsServiceDefaultRaster: this._proxyElasticMapsServiceInMapsOptions.tmsServiceDefaultRaster
-    // } : null;
-
     this._fetchFunction = typeof fetchFunction === 'function' ? fetchFunction : fetch;
+    this._proxyPath = typeof proxyPath === 'string' ? proxyPath : '';
 
     this._invalidateSettings();
   }

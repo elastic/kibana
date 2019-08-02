@@ -25,18 +25,15 @@ export class TMSService {
   _getRasterStyleJson = _.once(async () => {
     const rasterUrl = this._getRasterStyleUrl();
     const url = this._proxyPath + rasterUrl;
-    console.log('get raster json', url);
     return this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
   });
 
   constructor(config,
     emsClient,
-    // proxyOptions,
     proxyPath
   ) {
     this._config = config;
     this._emsClient = emsClient;
-    // this._proxyOptions = proxyOptions;
     this._proxyPath = proxyPath;
   }
 
@@ -60,18 +57,15 @@ export class TMSService {
     }
   }
 
+  async getDefaultRasterStyle() {
+    return await this._getRasterStyleJson();
+  }
+
   async getUrlTemplate() {
-    console.log('gut');
-    let url;
-    // if (this._proxyOptions) {
-    //   const serviceId = encodeURIComponent(this.getId());
-    //   url = `${this._proxyOptions.tmsServiceDefaultRaster}?id=${serviceId}&x={x}&y={y}&z={z}`;
-    // } else {
     const tileJson = await this._getRasterStyleJson();
-    const directUrl = tileJson.tiles[0];
-    url = this._emsClient.extendUrlWithParams(directUrl);
+    const directUrl = this._proxyPath + tileJson.tiles[0];
+    const url = this._emsClient.extendUrlWithParams(directUrl);
     console.log('gut', url);
-    // }
     return url;
   }
 

@@ -9,7 +9,8 @@ export const EMS_FILES_CATALOGUE_PATH = 'ems/files';
 export const EMS_FILES_DEFAULT_JSON_PATH = 'ems/files/file';
 
 export const EMS_TILES_CATALOGUE_PATH = 'ems/tiles';
-export const EMS_TILES_RASTER_TILE_PATH = 'ems/tiles/raster';
+export const EMS_TILES_RASTER_TILE_PATH = 'ems/tiles/raster/tile';
+export const EMS_TILES_RASTER_STYLE_PATH = 'ems/tiles/raster/style';
 
 
 export const SPRITE_PATH = '/maps/sprite';

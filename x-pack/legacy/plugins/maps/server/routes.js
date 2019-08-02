@@ -10,6 +10,7 @@ import {
   EMS_FILES_CATALOGUE_PATH,
   EMS_FILES_DEFAULT_JSON_PATH,
   EMS_TILES_CATALOGUE_PATH,
+  EMS_TILES_RASTER_STYLE_PATH,
   EMS_TILES_RASTER_TILE_PATH,
   GIS_API_PATH,
   SPRITE_PATH,
@@ -34,8 +35,7 @@ export function initRoutes(server, licenseUid) {
       kbnVersion: serverConfig.get('pkg.version'),
       manifestServiceUrl: mapConfig.manifestServiceUrl,
       landingPageUrl: mapConfig.emsLandingPageUrl,
-      proxyElasticMapsServiceInMaps: false,
-      proxyElasticMapsServiceInMapsOptions: null
+      proxyElasticMapsServiceInMaps: false
     });
     emsClient.addQueryParams({ license: licenseUid });
   } else {
@@ -64,10 +64,7 @@ export function initRoutes(server, licenseUid) {
     path: `${ROOT}/${EMS_FILES_DEFAULT_JSON_PATH}`,
     handler: async (request) => {
 
-      if (!mapConfig.proxyElasticMapsServiceInMaps) {
-        server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
-        throw Boom.notFound();
-      }
+      checkEMSProxyConfig();
 
       if (!request.query.id) {
         server.log('warning', 'Must supply id parameters to retrieve EMS file');
@@ -91,16 +88,12 @@ export function initRoutes(server, licenseUid) {
     }
   });
 
-
   server.route({
     method: 'GET',
     path: `${ROOT}/${EMS_TILES_RASTER_TILE_PATH}`,
     handler: async (request, h) => {
 
-      if (!mapConfig.proxyElasticMapsServiceInMaps) {
-        server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
-        throw Boom.notFound();
-      }
+      checkEMSProxyConfig();
 
       if (!request.query.id ||
         typeof parseInt(request.query.x, 10) !== 'number' ||
@@ -114,8 +107,7 @@ export function initRoutes(server, licenseUid) {
       const tmsServices = await emsClient.getTMSServices();
       const tmsService = tmsServices.find(layer => layer.getId() === request.query.id);
       if (!tmsService) {
-        return null;
-      }
+        return null;}
 
       const urlTemplate = await tmsService.getUrlTemplate();
       const url = urlTemplate
@@ -145,10 +137,7 @@ export function initRoutes(server, licenseUid) {
     path: `${ROOT}/${EMS_CATALOGUE_PATH}`,
     handler: async () => {
 
-      if (!mapConfig.proxyElasticMapsServiceInMaps) {
-        server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
-        throw Boom.notFound();
-      }
+      checkEMSProxyConfig();
 
       const main =  await emsClient.getMainManifest();
       const proxiedManifest = {
@@ -179,10 +168,7 @@ export function initRoutes(server, licenseUid) {
     path: `${ROOT}/${EMS_FILES_CATALOGUE_PATH}`,
     handler: async () => {
 
-      if (!mapConfig.proxyElasticMapsServiceInMaps) {
-        server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
-        throw Boom.notFound();
-      }
+      checkEMSProxyConfig();
 
       const file = await emsClient.getDefaultFileManifest();
       const layers = file.layers.map(layer => {
@@ -205,15 +191,66 @@ export function initRoutes(server, licenseUid) {
     path: `${ROOT}/${EMS_TILES_CATALOGUE_PATH}`,
     handler: async () => {
 
-      if (!mapConfig.proxyElasticMapsServiceInMaps) {
-        server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
-        throw Boom.notFound();
-      }
+      checkEMSProxyConfig();
 
-      const tiles =  await emsClient.getDefaultTMSManifest();
-      return tiles;
+      const tilesManifest =  await emsClient.getDefaultTMSManifest();
+      const newServices = tilesManifest.services.map((service) => {
+        const newService = {
+          ...service
+        };
+        const rasterFormats = service.formats.filter(format => format.format === 'raster');
+        newService.formats = [];
+        if (rasterFormats.length) {
+          const newUrl = `${GIS_API_PATH}/${EMS_TILES_RASTER_STYLE_PATH}?id=${service.id}`;
+          newService.formats.push({
+            ...rasterFormats[0],
+            url: newUrl
+          });
+        }
+        return newService;
+      });
+
+      return {
+        services: newServices
+      };
     }
   });
+
+  server.route({
+    method: 'GET',
+    path: `${ROOT}/${EMS_TILES_RASTER_STYLE_PATH}`,
+    handler: async (request) => {
+
+      checkEMSProxyConfig();
+
+      if (!request.query.id) {
+        server.log('warning', 'Must supply id parameter to retrieve EMS raster style');
+        return null;
+      }
+
+      const tmsServices = await emsClient.getTMSServices();
+      const tmsService = tmsServices.find(layer => layer.getId() === request.query.id);
+      if (!tmsService) {
+        return null;
+      }
+      const style = await tmsService.getDefaultRasterStyle();
+
+      const newUrl = `${GIS_API_PATH}/${EMS_TILES_RASTER_TILE_PATH}?id=${request.query.id}&x={x}&y={y}&z={z}`;
+      console.log(newUrl);
+      return {
+        ...style,
+        tiles: [newUrl]
+      };
+    }
+  });
+
+
+  function checkEMSProxyConfig() {
+    if (!mapConfig.proxyElasticMapsServiceInMaps) {
+      server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
+      throw Boom.notFound();
+    }
+  }
 
   server.route({
     method: 'GET',
@@ -226,7 +263,6 @@ export function initRoutes(server, licenseUid) {
       }
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-
       try {
         const { count } = await callWithRequest(request, 'count', { index: query.index });
         return { count };

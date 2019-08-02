@@ -7,11 +7,7 @@
 
 import {
   GIS_API_PATH,
-  EMS_CATALOGUE_PATH,
-  EMS_TILES_CATALOGUE_PATH,
-  EMS_FILES_CATALOGUE_PATH,
-  EMS_FILES_DEFAULT_JSON_PATH,
-  EMS_TILES_RASTER_TILE_PATH
+  EMS_CATALOGUE_PATH
 } from '../common/constants';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
@@ -48,16 +44,8 @@ export function getEMSClient() {
     if (isEmsEnabled) {
 
       const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
-      const proxyOptions = proxyElasticMapsServiceInMaps ? {
-        // catalogue: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_CATALOGUE_PATH}`),
-        // tilesCatalogue: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_TILES_CATALOGUE_PATH}`),
-        // filesCatalogue: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_FILES_CATALOGUE_PATH}`),
-        // fileLayerDefaultJson: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_FILES_DEFAULT_JSON_PATH}`),
-        tmsServiceDefaultRaster: relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_TILES_RASTER_TILE_PATH}`)
-      } : null;
-
       const proxyPath = proxyElasticMapsServiceInMaps ? relativeToAbsolute('..') : '';
-
+      // eslint-disable-next-line max-len
       const manifestServiceUrl = proxyElasticMapsServiceInMaps ? relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_CATALOGUE_PATH}`) : chrome.getInjected('emsManifestServiceUrl');
 
       emsClient = new EMSClient({
@@ -65,8 +53,6 @@ export function getEMSClient() {
         kbnVersion: chrome.getInjected('kbnPkgVersion'),
         manifestServiceUrl: manifestServiceUrl,
         landingPageUrl: chrome.getInjected('emsLandingPageUrl'),
-        proxyElasticMapsServiceInMaps: proxyElasticMapsServiceInMaps,
-        proxyElasticMapsServiceInMapsOptions: proxyOptions,
         fetchFunction: fetchFunction, //import this from client-side, so the right instance is returned (bootstrapped from common/* would not work
         proxyPath: proxyPath
       });
