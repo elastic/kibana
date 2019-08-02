@@ -30,7 +30,7 @@ export function WmsOptions(serviceSettings) {
       collections: '=',
     },
     link: function ($scope) {
-      $scope.wmsLinkText = i18n.translate('tileMap.wmsOptions.wmsLinkText', { defaultMessage: 'here' });
+      $scope.wmsLinkText = i18n.translate('regionMap.wmsOptions.wmsLinkText', { defaultMessage: 'here' });
 
       new Promise((resolve, reject) => {
         serviceSettings

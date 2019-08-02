@@ -22,7 +22,7 @@ import regionMapVisParamsTemplate from './region_map_vis_params.html';
 import { mapToLayerWithId } from './util';
 
 // TODO: reference to TILE_MAP plugin should be removed
-import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
+import { ORIGIN } from '../../tile_map/common/origin';
 
 export function RegionMapVisParams(serviceSettings, regionmapsConfig) {
   return {
