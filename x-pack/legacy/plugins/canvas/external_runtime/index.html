@@ -1,6 +1,13 @@
 <html>
 
 <head>
+  <link rel="stylesheet" type="text/css"
+    href="https://cdn.jsdelivr.net/npm/@elastic/eui@13.1.1/dist/eui_theme_light.css">
+  <!-- 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@16.8.6/umd/react.development.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@elastic/eui@13.1.1/dist/eui.min.js"></script> 
+-->
   <script src="/canvas_external_runtime.js"></script>
 </head>
 
@@ -8,7 +15,7 @@
   <div id="canvas"></div>
   <script>
     new ElasticCanvas.EmbedFromURL(document.getElementById('canvas'), '/test/austin.json', {
-      height: 400
+      height: 400,
     });
   </script>
 </body>
