@@ -54,11 +54,10 @@ export const stepIdToStepConfigMap = {
       // be accumulated at one time. 1000 is probably a safe size without being too small.
       const rollupPageSize = get(overrides, ['json', 'config', 'page_size'], 1000);
 
-      const clonedRollupIndex = overrides.rollupIndex || undefined;
       const clonedRollupId = overrides.id || undefined;
+      const id = overrides.id ? `${overrides.id}-copy` : '';
 
       const defaults = {
-        id: '',
         indexPattern: '',
         rollupIndex: '',
         // Every week on Saturday, at 00:00:00
@@ -76,9 +75,9 @@ export const stepIdToStepConfigMap = {
       return {
         ...defaults,
         ...pick(overrides, Object.keys(defaults)),
+        id,
         isAdvancedCronVisible,
         rollupPageSize,
-        clonedRollupIndex,
         clonedRollupId,
       };
     },
@@ -90,13 +89,12 @@ export const stepIdToStepConfigMap = {
         rollupCron,
         rollupPageSize,
         rollupDelay,
-        clonedRollupIndex,
         clonedRollupId,
       } = fields;
       return {
         id: validateId(id, clonedRollupId),
         indexPattern: validateIndexPattern(indexPattern, rollupIndex),
-        rollupIndex: validateRollupIndex(rollupIndex, indexPattern, clonedRollupIndex),
+        rollupIndex: validateRollupIndex(rollupIndex, indexPattern),
         rollupCron: validateRollupCron(rollupCron),
         rollupPageSize: validateRollupPageSize(rollupPageSize),
         rollupDelay: validateRollupDelay(rollupDelay),

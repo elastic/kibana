@@ -27,7 +27,7 @@ const {
   jobs: [{ config: jobConfig }],
 } = JOB_TO_CLONE;
 
-describe('Smoke test for starting with job clone', () => {
+describe('Cloning a rollup job through create job wizard', () => {
   let httpRequestsMockHelpers;
   let server;
   let find;
@@ -51,11 +51,8 @@ describe('Smoke test for starting with job clone', () => {
   });
 
   it('should have fields correctly pre-populated', async () => {
-    expect(find('rollupJobName').props().value).toBe(jobConfig.id);
-    expect(form.getErrorsMessages()).toEqual([
-      `Name cannot be the same as cloned name: "t2".`,
-      `Rollup index name cannot be the same as cloned rollup index name: "t2".`,
-    ]);
+    expect(find('rollupJobName').props().value).toBe(jobConfig.id + '-copy');
+    expect(form.getErrorsMessages()).toEqual([]);
     // Advanced cron should automatically show when we are cloning a job
     expect(exists('rollupAdvancedCron')).toBe(true);
 
