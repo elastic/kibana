@@ -62,8 +62,8 @@ describe('GET spaces', () => {
     expect(resultSpaces.map(s => s.id)).toEqual(spaces.map(s => s.id));
   });
 
-  test(`'GET spaces' returns all available spaces with the 'copyToSpace' purpose`, async () => {
-    const { response } = await request('GET', '/api/spaces/space?purpose=copyToSpace');
+  test(`'GET spaces' returns all available spaces with the 'copySavedObjects' purpose`, async () => {
+    const { response } = await request('GET', '/api/spaces/space?purpose=copySavedObjects');
 
     const { statusCode, payload } = response;
 
