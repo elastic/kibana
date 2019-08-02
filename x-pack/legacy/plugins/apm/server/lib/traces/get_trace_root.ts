@@ -10,12 +10,11 @@ import {
   TRACE_ID,
   PARENT_ID
 } from '../../../common/elasticsearch_fieldnames';
-import { Span } from '../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
-export async function getTraceItems(traceId: string, setup: Setup) {
+export async function getTraceRoot(traceId: string, setup: Setup) {
   const { start, end, client, config } = setup;
 
   const params: SearchParams = {
@@ -24,15 +23,15 @@ export async function getTraceItems(traceId: string, setup: Setup) {
       config.get('apm_oss.transactionIndices')
     ],
     body: {
-      size: 1000,
+      size: 1,
       query: {
         bool: {
           filter: [
             { term: { [TRACE_ID]: traceId } },
-            { terms: { [PROCESSOR_EVENT]: ['span', 'transaction'] } },
+            { terms: { [PROCESSOR_EVENT]: ['transaction'] } },
             { range: rangeFilter(start, end) }
           ],
-          must: {
+          must_not: {
             exists: { field: PARENT_ID }
           }
         }
@@ -40,7 +39,10 @@ export async function getTraceItems(traceId: string, setup: Setup) {
     }
   };
 
-  const resp = await client.search<Transaction | Span>(params);
+  const resp = await client.search<Transaction>(params);
+  const root = resp.hits.hits.map(hit => hit._source)[0] as
+    | Transaction
+    | undefined;
 
-  return resp.hits.hits.map(hit => hit._source);
+  return root;
 }

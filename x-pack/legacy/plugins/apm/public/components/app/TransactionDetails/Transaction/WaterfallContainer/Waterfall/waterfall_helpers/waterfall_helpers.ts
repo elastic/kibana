@@ -6,7 +6,6 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import {
-  first,
   flatten,
   groupBy,
   indexBy,
@@ -22,7 +21,7 @@ import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
 
 interface IWaterfallIndex {
-  [key: string]: IWaterfallItem;
+  [key: string]: IWaterfallItem | undefined;
 }
 
 interface IWaterfallGroup {
@@ -178,13 +177,6 @@ export function getOrderedWaterfallItems(
   return getSortedChildren(entryTransactionItem);
 }
 
-function getTraceRoot(childrenByParentId: IWaterfallGroup) {
-  const item = first(childrenByParentId.root);
-  if (item && item.docType === 'transaction') {
-    return item.transaction;
-  }
-}
-
 function getServices(items: IWaterfallItem[]) {
   const serviceNames = items.map(item => item.serviceName);
   return uniq(serviceNames);
@@ -231,10 +223,10 @@ function createGetTransactionById(itemsById: IWaterfallIndex) {
 }
 
 export function getWaterfall(
-  { trace, errorsPerTransaction }: TraceAPIResponse,
+  { root: traceRoot, trace, errorsPerTransaction }: TraceAPIResponse,
   entryTransactionId?: Transaction['transaction']['id']
 ): IWaterfall {
-  if (isEmpty(trace) || !entryTransactionId) {
+  if (traceRoot === undefined || isEmpty(trace) || !entryTransactionId) {
     return {
       services: [],
       duration: 0,
@@ -246,7 +238,7 @@ export function getWaterfall(
     };
   }
 
-  const waterfallItems = trace.map(traceItem => {
+  const waterfallItems = [traceRoot, ...trace].map(traceItem => {
     const docType = traceItem.processor.event;
     switch (docType) {
       case 'span':
@@ -271,9 +263,8 @@ export function getWaterfall(
   const orderedItems = entryTransactionItem
     ? getOrderedWaterfallItems(childrenByParentId, entryTransactionItem)
     : [];
-  const traceRoot = getTraceRoot(childrenByParentId);
   const duration = getDuration(orderedItems);
-  const traceRootDuration = traceRoot && traceRoot.transaction.duration.us;
+  const traceRootDuration = traceRoot.transaction.duration.us;
   const services = getServices(orderedItems);
   const getTransactionById = createGetTransactionById(itemsById);
   const serviceColors = getServiceColors(services);
