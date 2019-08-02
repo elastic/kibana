@@ -80,6 +80,10 @@ export const LogsToolbar = injectI18n(({ intl }) => {
                     })}
                     suggestions={suggestions}
                     value={filterQueryDraft ? filterQueryDraft.expression : ''}
+                    aria-label={intl.formatMessage({
+                      id: 'xpack.infra.logsPage.toolbar.kqlSearchFieldAriaLabel',
+                      defaultMessage: 'Search for log entries',
+                    })}
                   />
                 )}
               </WithLogFilter>
