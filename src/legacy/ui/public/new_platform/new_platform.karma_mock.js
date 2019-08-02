@@ -46,7 +46,10 @@ export const npStart = {
     data: {},
     inspector: {
       isAvailable: () => false,
-      open: () => ({}),
+      open: () => ({
+        onClose: Promise.resolve(undefined),
+        close: () => Promise.resolve(undefined),
+      }),
     },
   },
 };
