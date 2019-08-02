@@ -18,6 +18,7 @@ function exampleState(): State {
   return {
     isHorizontal: false,
     legend: { position: Position.Bottom, isVisible: true },
+    preferredSeriesType: 'bar',
     layers: [
       {
         layerId: 'first',
@@ -67,6 +68,7 @@ describe('xy_visualization', () => {
             "isVisible": true,
             "position": "right",
           },
+          "preferredSeriesType": "bar",
           "title": "Empty XY Chart",
         }
       `);
