@@ -5276,7 +5276,6 @@
     "xpack.infra.sourceConfiguration.noLogColumnsTitle": "列がありません",
     "xpack.infra.sourceConfiguration.podFieldDescription": "Kubernetes ポッドの識別に使用されるフィールドです。推奨値は {defaultValue} です。",
     "xpack.infra.sourceConfiguration.podFieldLabel": "ポッド ID",
-    "xpack.infra.sourceConfiguration.removeLogColumnButtonLabel": "この列を削除",
     "xpack.infra.sourceConfiguration.sourceConfigurationButtonLabel": "構成",
     "xpack.infra.sourceConfiguration.sourceConfigurationIndicesTabTitle": "インデックスとフィールド",
     "xpack.infra.sourceConfiguration.sourceConfigurationLogColumnsTabTitle": "ログ列",
