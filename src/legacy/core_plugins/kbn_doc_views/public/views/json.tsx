@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// @ts-ignore
 import { addDocView } from 'ui/registry/doc_views';
 import { i18n } from '@kbn/i18n';
 import { JsonCodeEditor } from './json_code_editor';

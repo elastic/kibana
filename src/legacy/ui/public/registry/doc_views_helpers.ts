@@ -16,30 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import angular from 'angular';
 import chrome from 'ui/chrome';
-import { AngularScope } from 'ui/registry/doc_views';
+import { DocViewRenderProps, AngularScope, AngularController } from './doc_views_types';
+
 /**
- * compiles the angular markup provided by domElement
- * injects scope with given scopeProps
- * returns a function to cleanup
- * @param domElement
- * @param scopeProps
- * @param controller
+ * compiling and injecting the give angular template into the given dom node
+ * returning a function to cleanup the injected angular element
  */
-export async function compileAngular(
-  domElement: unknown,
-  scopeProps: object,
-  controller?: (scope: AngularScope) => void
+export async function injectAngularElement(
+  domNode: Element,
+  template: string,
+  scopeProps: DocViewRenderProps,
+  controller: AngularController
 ): Promise<() => void> {
   const $injector = await chrome.dangerouslyGetActiveInjector();
   const rootScope: AngularScope = $injector.get('$rootScope');
-  const newScope: AngularScope = Object.assign(rootScope.$new(), scopeProps);
-  if (controller) {
+  const newScope = Object.assign(rootScope.$new(), scopeProps);
+  if (typeof controller === 'function') {
     controller(newScope);
   }
   // @ts-ignore
-  $injector.get('$compile')(domElement)(newScope);
+  const linkFn = $injector.get('$compile')(template)(newScope);
   newScope.$digest();
+  angular
+    .element(domNode)
+    .empty()
+    .append(linkFn);
+
   return () => {
     newScope.$destroy();
   };

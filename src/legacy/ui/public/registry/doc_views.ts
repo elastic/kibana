@@ -16,50 +16,38 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
+import { injectAngularElement } from './doc_views_helpers';
+import {
+  DocView,
+  DocViewInput,
+  ElasticSearchHit,
+  DocViewInputFn,
+  DocViewRenderProps,
+} from './doc_views_types';
 
-export interface AngularDirective {
-  controller: (scope: AngularScope) => void;
-  template: string;
-}
-
-export interface AngularScope {
-  $new: () => AngularScope;
-  $digest: () => void;
-  $destroy: () => void;
-}
-
-export type ElasticSearchHit = Record<string, string | number | Record<string, unknown>>;
-
-export interface DocViewRenderProps {
-  columns: string[];
-  filter: (field: string, value: string | number, operation: string) => void;
-  hit: ElasticSearchHit;
-  indexPattern: IndexPattern;
-  onAddColumn: (columnName: string) => void;
-  onRemoveColumn: (columnName: string) => void;
-}
-export type DocViewRenderFn = (domeNode: unknown, renderProps: DocViewRenderProps) => () => void;
-
-export interface DocViewInput {
-  component?: unknown;
-  directive?: AngularDirective;
-  order: number;
-  render?: DocViewRenderFn;
-  shouldShow?: (hit: ElasticSearchHit) => boolean;
-  title: string;
-}
-
-export interface DocView extends DocViewInput {
-  shouldShow: (hit: ElasticSearchHit) => boolean;
-}
-
-type DocViewInputFn = () => DocViewInput;
+export { DocViewRenderProps, DocView, DocViewRenderFn } from './doc_views_types';
 
 export const docViews: DocView[] = [];
 
 export function addDocView(docViewRaw: DocViewInput) {
   const docView = docViewRaw;
+  const { directive } = docViewRaw;
+  if (directive) {
+    // convert angular directive to render function for backwards compatibilty
+    docViewRaw.render = (domNode: Element, props: DocViewRenderProps) => {
+      const cleanupFnPromise = injectAngularElement(
+        domNode,
+        directive.template,
+        props,
+        directive.controller
+      );
+      return () => {
+        // for cleanup
+        // http://roubenmeschian.com/rubo/?p=51
+        cleanupFnPromise.then(cleanup => cleanup());
+      };
+    };
+  }
   if (typeof docView.shouldShow !== 'function') {
     docView.shouldShow = () => true;
   }
@@ -70,7 +58,7 @@ export function getDocViewsSorted(hit: ElasticSearchHit): DocView[] {
   return docViews.filter(docView => docView.shouldShow(hit)).sort(docView => Number(docView.order));
 }
 /**
- * for compatiblity with 3rd Party plugins
+ * for compatiblity with 3rd Party plugins,
  */
 export const DocViewsRegistryProvider = {
   register: (docViewRaw: DocViewInput | DocViewInputFn) => {

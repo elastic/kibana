@@ -22,45 +22,40 @@ import { addDocView } from 'ui/registry/doc_views';
 import '../filters/trust_as_html';
 import tableHtml from './table.html';
 import { i18n } from '@kbn/i18n';
-import { injectAngularElement } from './table_helper';
-
-function controller($scope) {
-  $scope.mapping = $scope.indexPattern.fields.byName;
-  $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
-  $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
-  $scope.fields = _.keys($scope.flattened).sort();
-
-  $scope.canToggleColumns = function canToggleColumn() {
-    return _.isFunction($scope.onAddColumn) && _.isFunction($scope.onRemoveColumn);
-  };
-
-  $scope.toggleColumn = function toggleColumn(columnName) {
-    if ($scope.columns.includes(columnName)) {
-      $scope.onRemoveColumn(columnName);
-    } else {
-      $scope.onAddColumn(columnName);
-    }
-  };
-
-  $scope.isColumnActive = function isColumnActive(columnName) {
-    return $scope.columns.includes(columnName);
-  };
-
-  $scope.showArrayInObjectsWarning = function (row, field) {
-    const value = $scope.flattened[field];
-    return Array.isArray(value) && typeof value[0] === 'object';
-  };
-}
 
 addDocView({
   title: i18n.translate('kbnDocViews.table.tableTitle', {
     defaultMessage: 'Table',
   }),
   order: 10,
-  render: (domNode, props) => {
-    const cleanupFnPromise = injectAngularElement(domNode, tableHtml, props, controller);
-    return () => {
-      cleanupFnPromise.then(cleanup => cleanup());
-    };
+  directive: {
+    template: tableHtml,
+    controller: $scope => {
+      $scope.mapping = $scope.indexPattern.fields.byName;
+      $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
+      $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
+      $scope.fields = _.keys($scope.flattened).sort();
+
+      $scope.canToggleColumns = function canToggleColumn() {
+        return _.isFunction($scope.onAddColumn) && _.isFunction($scope.onRemoveColumn);
+      };
+
+      $scope.toggleColumn = function toggleColumn(columnName) {
+        if ($scope.columns.includes(columnName)) {
+          $scope.onRemoveColumn(columnName);
+        } else {
+          $scope.onAddColumn(columnName);
+        }
+      };
+
+      $scope.isColumnActive = function isColumnActive(columnName) {
+        return $scope.columns.includes(columnName);
+      };
+
+      $scope.showArrayInObjectsWarning = function showArrayInObjectsWarning(row, field) {
+        const value = $scope.flattened[field];
+        return Array.isArray(value) && typeof value[0] === 'object';
+      };
+    },
   },
 });

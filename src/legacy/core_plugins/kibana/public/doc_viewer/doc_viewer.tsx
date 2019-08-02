@@ -20,7 +20,6 @@ import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
 import { DocViewRenderProps, DocView } from 'ui/registry/doc_views';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
-import { DocViewerAngularTab } from './doc_viewer_angular_tab';
 
 interface Props {
   docViews: DocView[];
@@ -36,8 +35,6 @@ export function DocViewer({ docViews, renderProps }: Props) {
       content = <Component {...renderProps} />;
     } else if (render) {
       content = <DocViewRenderTab render={render} renderProps={renderProps} />;
-    } else if (directive) {
-      content = <DocViewerAngularTab renderProps={renderProps} directive={directive} />;
     } else {
       content = <div>Invalid Doc Viewer properties</div>;
     }
