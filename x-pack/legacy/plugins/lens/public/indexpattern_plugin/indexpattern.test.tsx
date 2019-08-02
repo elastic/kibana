@@ -593,8 +593,6 @@ describe('IndexPattern Data Source', () => {
     describe('suggesting extensions to non-empty tables', () => {
       let initialState: IndexPatternPrivateState;
 
-      // TODO add test to fill most empty layers first
-
       beforeEach(async () => {
         jest.resetAllMocks();
         (generateId as jest.Mock).mockReturnValueOnce('newId');
