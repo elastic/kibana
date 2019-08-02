@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './log_analysis_jobs';
+export * from './log_analysis_results';
