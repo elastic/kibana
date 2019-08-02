@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 
-import { ExpressionFunction, KibanaDatatable, Render } from '../../interpreter/types';
+import { ExpressionFunction, KibanaDatatable, Render, Range, Style } from '../../interpreter/types';
 
 // Todo: breaking change. Should contains one value
 type name = 'metric' | 'metricVis';
@@ -38,8 +38,8 @@ interface Arguments {
   showLabels: boolean;
   bgFill: string;
   subText: string;
-  colorRange: any[]; // these aren't typed yet
-  font: any; // these aren't typed yet
+  colorRange: Range[];
+  font: Style;
   metric: any[]; // these aren't typed yet
   bucket: any; // these aren't typed yet
 }
