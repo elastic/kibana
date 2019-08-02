@@ -7,31 +7,62 @@
 import * as Rx from 'rxjs';
 import { first, tap, mergeMap } from 'rxjs/operators';
 import fs from 'fs';
-import getPort from 'get-port';
 import { promisify } from 'util';
+import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../../../common/constants';
 import { LevelLogger } from '../../../server/lib/level_logger';
-import { i18n } from '@kbn/i18n';
+import { KbnServer, ElementPosition } from '../../../types';
+import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../server/browsers/chromium/driver';
+import { Layout, LayoutInstance } from '../layouts/layout';
+import { HeadlessChromiumDriverFactory } from '../../../server/browsers/chromium/driver_factory';
 
-const fsp = {
-  readFile: promisify(fs.readFile, fs),
-};
+interface TimeRange {
+  from: any;
+  to: any;
+}
 
-export function screenshotsObservableFactory(server) {
+interface AttributesMap {
+  [key: string]: any;
+}
+
+interface ElementsPositionAndAttribute {
+  position: ElementPosition;
+  attributes: AttributesMap;
+}
+
+interface ScreenShotOpts {
+  browser: HeadlessBrowser;
+  elementsPositionAndAttributes: ElementsPositionAndAttribute[];
+}
+
+interface Screenshot {
+  base64EncodedData: string;
+  title: string;
+  description: string;
+}
+
+interface TimeRangeOpts {
+  timeRange: TimeRange;
+}
+
+const fsp = { readFile: promisify(fs.readFile) };
+
+export function screenshotsObservableFactory(server: KbnServer) {
   const config = server.config();
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'screenshots']);
 
-  const browserDriverFactory = server.plugins.reporting.browserDriverFactory;
+  const browserDriverFactory: HeadlessChromiumDriverFactory =
+    server.plugins.reporting.browserDriverFactory;
   const captureConfig = config.get('xpack.reporting.capture');
 
-  const asyncDurationLogger = async (description, promise) => {
-    const start = new Date();
+  const asyncDurationLogger = async (description: string, promise: Promise<any>) => {
+    const start: number = Date.now();
     const result = await promise;
-    logger.debug(`${description} took ${new Date() - start}ms`);
+    logger.debug(`${description} took ${Date.now() - start}ms`);
     return result;
   };
 
-  const openUrl = async (browser, url, conditionalHeaders) => {
+  const openUrl = async (browser: HeadlessBrowser, url: string, conditionalHeaders: any) => {
     const waitForSelector = '.application';
 
     await browser.open(url, {
@@ -40,11 +71,11 @@ export function screenshotsObservableFactory(server) {
     });
   };
 
-  const injectCustomCss = async (browser, layout) => {
+  const injectCustomCss = async (browser: HeadlessBrowser, layout: Layout) => {
     const filePath = layout.getCssOverridesPath();
     const buffer = await fsp.readFile(filePath);
     await browser.evaluate({
-      fn: (css) => {
+      fn: css => {
         const node = document.createElement('style');
         node.type = 'text/css';
         node.innerHTML = css; // eslint-disable-line no-unsanitized/property
@@ -54,7 +85,10 @@ export function screenshotsObservableFactory(server) {
     });
   };
 
-  const waitForElementOrItemsCountAttribute = async (browser, layout) => {
+  const waitForElementOrItemsCountAttribute = async (
+    browser: HeadlessBrowser,
+    layout: LayoutInstance
+  ) => {
     // the dashboard is using the `itemsCountAttribute` attribute to let us
     // know how many items to expect since gridster incrementally adds panels
     // we have to use this hint to wait for all of them
@@ -63,10 +97,10 @@ export function screenshotsObservableFactory(server) {
     );
   };
 
-  const checkForToastMessage = async (browser, layout) => {
+  const checkForToastMessage = async (browser: HeadlessBrowser, layout: LayoutInstance) => {
     await browser.waitForSelector(layout.selectors.toastHeader, { silent: true });
     const toastHeaderText = await browser.evaluate({
-      fn: (selector) => {
+      fn: selector => {
         const nodeList = document.querySelectorAll(selector);
         return nodeList.item(0).innerText;
       },
@@ -83,14 +117,21 @@ export function screenshotsObservableFactory(server) {
     );
   };
 
-  const getNumberOfItems = async (browser, layout) => {
+  const getNumberOfItems = async (
+    browser: HeadlessBrowser,
+    layout: LayoutInstance
+  ): Promise<number> => {
     // returns the value of the `itemsCountAttribute` if it's there, otherwise
     // we just count the number of `itemSelector`
     const itemsCount = await browser.evaluate({
       fn: (selector, countAttribute) => {
         const elementWithCount = document.querySelector(`[${countAttribute}]`);
         if (elementWithCount) {
-          return parseInt(elementWithCount.getAttribute(countAttribute));
+          const count = elementWithCount.getAttribute(countAttribute);
+          // the conditional allows count === "0", not null or undefined
+          if (count != null && count !== '') {
+            return parseInt(count, 10);
+          }
         }
 
         return document.querySelectorAll(selector).length;
@@ -100,9 +141,13 @@ export function screenshotsObservableFactory(server) {
     return itemsCount;
   };
 
-  const waitForElementsToBeInDOM = async (browser, itemsCount, layout) => {
+  const waitForElementsToBeInDOM = async (
+    browser: HeadlessBrowser,
+    itemsCount: number,
+    layout: LayoutInstance
+  ) => {
     await browser.waitFor({
-      fn: (selector) => {
+      fn: selector => {
         return document.querySelectorAll(selector).length;
       },
       args: [layout.selectors.renderComplete],
@@ -110,33 +155,38 @@ export function screenshotsObservableFactory(server) {
     });
   };
 
-  const setViewport = async (browser, itemsCount, layout) => {
+  const setViewport = async (
+    browser: HeadlessBrowser,
+    itemsCount: number,
+    layout: LayoutInstance
+  ) => {
     const viewport = layout.getViewport(itemsCount);
     await browser.setViewport(viewport);
   };
 
-  const positionElements = async (browser, layout) => {
+  const positionElements = async (browser: HeadlessBrowser, layout: LayoutInstance) => {
     if (layout.positionElements) {
+      // print layout
       await layout.positionElements(browser);
     }
   };
 
-  const waitForRenderComplete = async (browser, layout) => {
+  const waitForRenderComplete = async (browser: HeadlessBrowser, layout: LayoutInstance) => {
     await browser.evaluate({
       fn: (selector, visLoadDelay) => {
         // wait for visualizations to finish loading
-        const visualizations = document.querySelectorAll(selector);
+        const visualizations: NodeListOf<Element> = document.querySelectorAll(selector);
         const visCount = visualizations.length;
         const renderedTasks = [];
 
-        function waitForRender(visualization) {
-          return new Promise((resolve) => {
+        function waitForRender(visualization: Element) {
+          return new Promise(resolve => {
             visualization.addEventListener('renderComplete', () => resolve());
           });
         }
 
         function waitForRenderDelay() {
-          return new Promise((resolve) => {
+          return new Promise(resolve => {
             setTimeout(resolve, visLoadDelay);
           });
         }
@@ -163,12 +213,14 @@ export function screenshotsObservableFactory(server) {
         return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
       },
       args: [layout.selectors.renderComplete, captureConfig.loadDelay],
-      awaitPromise: true,
     });
   };
 
-  const getTimeRange = async (browser, layout) => {
-    const timeRange = await browser.evaluate({
+  const getTimeRange = async (
+    browser: HeadlessBrowser,
+    layout: LayoutInstance
+  ): Promise<TimeRange | null> => {
+    const timeRange: TimeRange | null = await browser.evaluate({
       fn: (fromAttribute, toAttribute) => {
         const fromElement = document.querySelector(`[${fromAttribute}]`);
         const toElement = document.querySelector(`[${toAttribute}]`);
@@ -186,20 +238,23 @@ export function screenshotsObservableFactory(server) {
         return { from, to };
       },
       args: [layout.selectors.timefilterFromAttribute, layout.selectors.timefilterToAttribute],
-      returnByValue: true,
     });
     return timeRange;
   };
 
-  const getElementPositionAndAttributes = async (browser, layout) => {
+  const getElementPositionAndAttributes = async (
+    browser: HeadlessBrowser,
+    layout: LayoutInstance
+  ): Promise<ElementsPositionAndAttribute[]> => {
     const elementsPositionAndAttributes = await browser.evaluate({
       fn: (selector, attributes) => {
-        const elements = document.querySelectorAll(selector);
+        const elements: NodeListOf<Element> = document.querySelectorAll(selector);
 
         // NodeList isn't an array, just an iterator, unable to use .map/.forEach
-        const results = [];
-        for (const element of elements) {
-          const boundingClientRect = element.getBoundingClientRect();
+        const results: ElementsPositionAndAttribute[] = [];
+        for (let i = 0; i < elements.length; i++) {
+          const element = elements[i];
+          const boundingClientRect = element.getBoundingClientRect() as DOMRect;
           results.push({
             position: {
               boundingClientRect: {
@@ -214,7 +269,7 @@ export function screenshotsObservableFactory(server) {
                 y: window.scrollY,
               },
             },
-            attributes: Object.keys(attributes).reduce((result, key) => {
+            attributes: Object.keys(attributes).reduce((result: AttributesMap, key) => {
               const attribute = attributes[key];
               result[key] = element.getAttribute(attribute);
               return result;
@@ -224,13 +279,15 @@ export function screenshotsObservableFactory(server) {
         return results;
       },
       args: [layout.selectors.screenshot, { title: 'data-title', description: 'data-description' }],
-      returnByValue: true,
     });
     return elementsPositionAndAttributes;
   };
 
-  const getScreenshots = async ({ browser, elementsPositionAndAttributes }) => {
-    const screenshots = [];
+  const getScreenshots = async ({
+    browser,
+    elementsPositionAndAttributes,
+  }: ScreenShotOpts): Promise<Screenshot[]> => {
+    const screenshots: Screenshot[] = [];
     for (const item of elementsPositionAndAttributes) {
       const base64EncodedData = await asyncDurationLogger(
         'screenshot',
@@ -246,36 +303,41 @@ export function screenshotsObservableFactory(server) {
     return screenshots;
   };
 
-  return function screenshotsObservable(url, conditionalHeaders, layout, browserTimezone) {
-    return Rx.defer(async () => await getPort()).pipe(
-      mergeMap(bridgePort => {
-        logger.debug(`Creating browser driver factory`);
-        return browserDriverFactory.create({
-          bridgePort,
-          viewport: layout.getBrowserViewport(),
-          zoom: layout.getBrowserZoom(),
-          logger,
-          browserTimezone,
-        });
-      }),
-      tap(() => logger.debug('Driver factory created')),
+  return function screenshotsObservable(
+    url: string,
+    conditionalHeaders: any,
+    layout: LayoutInstance,
+    browserTimezone: string
+  ): Rx.Observable<void> {
+    logger.debug(`Creating browser driver factory`);
+
+    const create$ = browserDriverFactory.create({
+      viewport: layout.getBrowserViewport(),
+      browserTimezone,
+    });
+
+    return create$.pipe(
       mergeMap(({ driver$, exit$, message$, consoleMessage$ }) => {
-        message$.subscribe(line => {
+        logger.debug('Driver factory created');
+        message$.subscribe((line: string) => {
           logger.debug(line, ['browser']);
         });
 
-        consoleMessage$.subscribe(line => {
+        consoleMessage$.subscribe((line: string) => {
           logger.debug(line, ['browserConsole']);
         });
 
         const screenshot$ = driver$.pipe(
           tap(() => logger.debug(`opening ${url}`)),
-          mergeMap(browser => openUrl(browser, url, conditionalHeaders), browser => browser),
+          mergeMap(
+            (browser: HeadlessBrowser) => openUrl(browser, url, conditionalHeaders),
+            browser => browser
+          ),
           tap(() =>
             logger.debug('waiting for elements or items count attribute; or not found to interrupt')
           ),
           mergeMap(
-            browser =>
+            (browser: HeadlessBrowser) =>
               Rx.race(
                 Rx.from(waitForElementOrItemsCountAttribute(browser, layout)),
                 Rx.from(checkForToastMessage(browser, layout))
@@ -284,7 +346,7 @@ export function screenshotsObservableFactory(server) {
           ),
           tap(() => logger.debug('determining how many items we have')),
           mergeMap(
-            browser => getNumberOfItems(browser, layout),
+            (browser: HeadlessBrowser) => getNumberOfItems(browser, layout),
             (browser, itemsCount) => ({ browser, itemsCount })
           ),
           tap(() => logger.debug('setting viewport')),
@@ -307,10 +369,13 @@ export function screenshotsObservableFactory(server) {
           tap(() => logger.debug('positioning elements')),
           mergeMap(({ browser }) => positionElements(browser, layout), ({ browser }) => browser),
           tap(() => logger.debug('waiting for rendering to complete')),
-          mergeMap(browser => waitForRenderComplete(browser, layout), browser => browser),
+          mergeMap(
+            (browser: HeadlessBrowser) => waitForRenderComplete(browser, layout),
+            browser => browser
+          ),
           tap(() => logger.debug('rendering is complete')),
           mergeMap(
-            browser => getTimeRange(browser, layout),
+            (browser: HeadlessBrowser) => getTimeRange(browser, layout),
             (browser, timeRange) => ({ browser, timeRange })
           ),
           tap(({ timeRange }) =>
@@ -320,13 +385,16 @@ export function screenshotsObservableFactory(server) {
           ),
           mergeMap(
             ({ browser }) => getElementPositionAndAttributes(browser, layout),
-            ({ browser, timeRange }, elementsPositionAndAttributes) => {
+            (
+              { browser, timeRange }: { browser: HeadlessBrowser; timeRange: any },
+              elementsPositionAndAttributes: ElementsPositionAndAttribute[]
+            ) => {
               return { browser, timeRange, elementsPositionAndAttributes };
             }
           ),
           tap(() => logger.debug(`taking screenshots`)),
           mergeMap(
-            ({ browser, elementsPositionAndAttributes }) =>
+            ({ browser, elementsPositionAndAttributes }: ScreenShotOpts & TimeRangeOpts) =>
               getScreenshots({ browser, elementsPositionAndAttributes }),
             ({ timeRange }, screenshots) => ({ timeRange, screenshots })
           )
