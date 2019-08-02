@@ -8,71 +8,8 @@
 
 import { resolve } from 'path';
 
-import {
-  CanvasPageProvider,
-  SecurityPageProvider,
-  MonitoringPageProvider,
-  LogstashPageProvider,
-  GraphPageProvider,
-  GrokDebuggerPageProvider,
-  WatcherPageProvider,
-  ReportingPageProvider,
-  SpaceSelectorPageProvider,
-  AccountSettingProvider,
-  InfraHomePageProvider,
-  InfraLogsPageProvider,
-  GisPageProvider,
-  StatusPagePageProvider,
-  UpgradeAssistantProvider,
-  CodeHomePageProvider,
-  RollupPageProvider,
-  UptimePageProvider,
-  LicenseManagementPageProvider,
-  IndexManagementPageProvider,
-  IndexLifecycleManagementPageProvider,
-  SnapshotRestorePageProvider,
-  CrossClusterReplicationPageProvider,
-  RemoteClustersPageProvider,
-} from './page_objects';
-
-import {
-  MonitoringNoDataProvider,
-  MonitoringClusterListProvider,
-  MonitoringClusterOverviewProvider,
-  MonitoringClusterAlertsProvider,
-  MonitoringElasticsearchSummaryStatusProvider,
-  MonitoringElasticsearchOverviewProvider,
-  MonitoringElasticsearchNodesProvider,
-  MonitoringElasticsearchNodeDetailProvider,
-  MonitoringElasticsearchIndicesProvider,
-  MonitoringElasticsearchIndexDetailProvider,
-  MonitoringElasticsearchShardsProvider,
-  MonitoringBeatsOverviewProvider,
-  MonitoringBeatsListingProvider,
-  MonitoringBeatDetailProvider,
-  MonitoringBeatsSummaryStatusProvider,
-  MonitoringLogstashPipelinesProvider,
-  MonitoringLogstashSummaryStatusProvider,
-  MonitoringKibanaOverviewProvider,
-  MonitoringKibanaInstancesProvider,
-  MonitoringKibanaInstanceProvider,
-  MonitoringKibanaSummaryStatusProvider,
-  PipelineListProvider,
-  PipelineEditorProvider,
-  RandomProvider,
-  AceEditorProvider,
-  GrokDebuggerProvider,
-  UserMenuProvider,
-  UptimeProvider,
-  InfraSourceConfigurationFlyoutProvider,
-  InfraLogStreamProvider,
-  MachineLearningProvider,
-} from './services';
-
-import {
-  SecurityServiceProvider,
-  SpacesServiceProvider,
-} from '../common/services';
+import { services } from './services';
+import { pageObjects } from './page_objects';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
@@ -82,9 +19,6 @@ export default async function ({ readConfigFile }) {
   );
   const kibanaFunctionalConfig = await readConfigFile(
     require.resolve('../../../test/functional/config.js')
-  );
-  const kibanaAPITestsConfig = await readConfigFile(
-    require.resolve('../../../test/api_integration/config.js')
   );
 
   return {
@@ -125,77 +59,8 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/license_management'),
     ],
 
-    // define the name and providers for services that should be
-    // available to your tests. If you don't specify anything here
-    // only the built-in services will be available
-    services: {
-      ...kibanaFunctionalConfig.get('services'),
-      esSupertest: kibanaAPITestsConfig.get('services.esSupertest'),
-      monitoringNoData: MonitoringNoDataProvider,
-      monitoringClusterList: MonitoringClusterListProvider,
-      monitoringClusterOverview: MonitoringClusterOverviewProvider,
-      monitoringClusterAlerts: MonitoringClusterAlertsProvider,
-      monitoringElasticsearchSummaryStatus: MonitoringElasticsearchSummaryStatusProvider,
-      monitoringElasticsearchOverview: MonitoringElasticsearchOverviewProvider,
-      monitoringElasticsearchNodes: MonitoringElasticsearchNodesProvider,
-      monitoringElasticsearchNodeDetail: MonitoringElasticsearchNodeDetailProvider,
-      monitoringElasticsearchIndices: MonitoringElasticsearchIndicesProvider,
-      monitoringElasticsearchIndexDetail: MonitoringElasticsearchIndexDetailProvider,
-      monitoringElasticsearchShards: MonitoringElasticsearchShardsProvider,
-      monitoringBeatsOverview: MonitoringBeatsOverviewProvider,
-      monitoringBeatsListing: MonitoringBeatsListingProvider,
-      monitoringBeatDetail: MonitoringBeatDetailProvider,
-      monitoringBeatsSummaryStatus: MonitoringBeatsSummaryStatusProvider,
-      monitoringLogstashPipelines: MonitoringLogstashPipelinesProvider,
-      monitoringLogstashSummaryStatus: MonitoringLogstashSummaryStatusProvider,
-      monitoringKibanaOverview: MonitoringKibanaOverviewProvider,
-      monitoringKibanaInstances: MonitoringKibanaInstancesProvider,
-      monitoringKibanaInstance: MonitoringKibanaInstanceProvider,
-      monitoringKibanaSummaryStatus: MonitoringKibanaSummaryStatusProvider,
-      pipelineList: PipelineListProvider,
-      pipelineEditor: PipelineEditorProvider,
-      random: RandomProvider,
-      aceEditor: AceEditorProvider,
-      grokDebugger: GrokDebuggerProvider,
-      security: SecurityServiceProvider,
-      spaces: SpacesServiceProvider,
-      userMenu: UserMenuProvider,
-      uptime: UptimeProvider,
-      rollup: RollupPageProvider,
-      infraSourceConfigurationFlyout: InfraSourceConfigurationFlyoutProvider,
-      infraLogStream: InfraLogStreamProvider,
-      ml: MachineLearningProvider,
-    },
-
-    // just like services, PageObjects are defined as a map of
-    // names to Providers. Merge in Kibana's or pick specific ones
-    pageObjects: {
-      ...kibanaFunctionalConfig.get('pageObjects'),
-      canvas: CanvasPageProvider,
-      security: SecurityPageProvider,
-      accountSetting: AccountSettingProvider,
-      monitoring: MonitoringPageProvider,
-      logstash: LogstashPageProvider,
-      graph: GraphPageProvider,
-      grokDebugger: GrokDebuggerPageProvider,
-      watcher: WatcherPageProvider,
-      reporting: ReportingPageProvider,
-      spaceSelector: SpaceSelectorPageProvider,
-      infraHome: InfraHomePageProvider,
-      infraLogs: InfraLogsPageProvider,
-      maps: GisPageProvider,
-      statusPage: StatusPagePageProvider,
-      upgradeAssistant: UpgradeAssistantProvider,
-      code: CodeHomePageProvider,
-      uptime: UptimePageProvider,
-      rollup: RollupPageProvider,
-      licenseManagement: LicenseManagementPageProvider,
-      indexManagement: IndexManagementPageProvider,
-      indexLifecycleManagement: IndexLifecycleManagementPageProvider,
-      snapshotRestore: SnapshotRestorePageProvider,
-      crossClusterReplication: CrossClusterReplicationPageProvider,
-      remoteClusters: RemoteClustersPageProvider
-    },
+    services,
+    pageObjects,
 
     servers: kibanaFunctionalConfig.get('servers'),
 

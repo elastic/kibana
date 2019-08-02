@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface LogService {
-  debug: (message: string) => void;
-}
+export { services } from '../api_integration/services';
