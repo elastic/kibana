@@ -12,6 +12,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
 
+import { i18n } from '@kbn/i18n';
 import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
@@ -24,9 +25,12 @@ import { NotFoundPage } from '../404';
 import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
+import { PageRoute } from '../../components/page_route/pageroute';
 import { Timelines } from '../timelines';
 import { WithSource } from '../../containers/source';
 import { MlPopover } from '../../components/ml_popover/ml_popover';
+import { MlHostConditionalContainer } from '../../components/ml/conditional_links/ml_host_conditional_container';
+import { MlNetworkConditionalContainer } from '../../components/ml/conditional_links/ml_network_conditional_container';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -101,34 +105,65 @@ export const HomePage = pure(() => (
                         <SiemNavigation />
                       </EuiFlexItem>
 
-                      <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
-                        <EuiFlexItem grow={false}>
-                          <MlPopover />
-                        </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup
+                          alignItems="center"
+                          gutterSize="m"
+                          responsive={false}
+                          wrap={true}
+                        >
+                          <EuiFlexItem grow={false}>
+                            <MlPopover />
+                          </EuiFlexItem>
 
-                        <EuiFlexItem grow={false}>
-                          <EuiButton
-                            data-test-subj="add-data"
-                            href="kibana#home/tutorial_directory/security"
-                            iconType="plusInCircle"
-                          >
-                            <FormattedMessage
-                              id="xpack.siem.global.addData"
-                              defaultMessage="Add data"
-                            />
-                          </EuiButton>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
+                          <EuiFlexItem grow={false}>
+                            <EuiButton
+                              data-test-subj="add-data"
+                              href="kibana#home/tutorial_directory/siem"
+                              iconType="plusInCircle"
+                            >
+                              <FormattedMessage
+                                id="xpack.siem.global.addData"
+                                defaultMessage="Add data"
+                              />
+                            </EuiButton>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
                     </EuiFlexGroup>
                   </NavGlobal>
 
                   <Switch>
                     <Redirect from="/" exact={true} to="/overview" />
-                    <Route path="/overview" component={Overview} />
+                    <Route
+                      path="/overview"
+                      render={props => (
+                        <PageRoute
+                          {...props}
+                          component={Overview}
+                          title={i18n.translate('xpack.siem.pages.home.overviewTitle', {
+                            defaultMessage: 'Overview',
+                          })}
+                        />
+                      )}
+                    />
                     <Route path="/hosts" component={HostsContainer} />
                     <Route path="/network" component={NetworkContainer} />
-                    <Route path="/timelines" component={Timelines} />
+                    <Route
+                      path="/timelines"
+                      render={props => (
+                        <PageRoute
+                          {...props}
+                          component={Timelines}
+                          title={i18n.translate('xpack.siem.pages.home.timelinesTitle', {
+                            defaultMessage: 'Timelines',
+                          })}
+                        />
+                      )}
+                    />
                     <Route path="/link-to" component={LinkToPage} />
+                    <Route path="/ml-hosts" component={MlHostConditionalContainer} />
+                    <Route path="/ml-network" component={MlNetworkConditionalContainer} />
                     <Route component={NotFoundPage} />
                   </Switch>
                 </EuiPageBody>

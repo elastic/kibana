@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import 'ngreact';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -18,26 +17,22 @@ import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { getCalendarManagementBreadcrumbs } from '../../breadcrumbs';
 
 import uiRoutes from 'ui/routes';
-
 import { I18nContext } from 'ui/i18n';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
-  <ml-nav-menu name="settings" />
   <ml-calendars-list />
 `;
 
-uiRoutes
-  .when('/settings/calendars_list', {
-    template,
-    k7Breadcrumbs: getCalendarManagementBreadcrumbs,
-    resolve: {
-      CheckLicense: checkFullLicense,
-      privileges: checkGetJobsPrivilege,
-      mlNodeCount: getMlNodeCount,
-    }
-  });
-
+uiRoutes.when('/settings/calendars_list', {
+  template,
+  k7Breadcrumbs: getCalendarManagementBreadcrumbs,
+  resolve: {
+    CheckLicense: checkFullLicense,
+    privileges: checkGetJobsPrivilege,
+    mlNodeCount: getMlNodeCount,
+  },
+});
 
 import { CalendarsList } from './calendars_list';
 
@@ -54,10 +49,10 @@ module.directive('mlCalendarsList', function () {
 
       ReactDOM.render(
         <I18nContext>
-          {React.createElement(CalendarsList, props)}
+          <CalendarsList {...props} />
         </I18nContext>,
         element[0]
       );
-    }
+    },
   };
 });

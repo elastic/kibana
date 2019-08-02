@@ -13,22 +13,22 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('create server-log action', () => {
+  describe('server-log action', () => {
     after(() => esArchiver.unload('empty_kibana'));
+
+    let serverLogActionId: string;
 
     it('should return 200 when creating a builtin server-log action', async () => {
       const { body: createdAction } = await supertest
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'A server.log action',
-            actionTypeId: '.server-log',
-            actionTypeConfig: {},
-          },
+          description: 'A server.log action',
+          actionTypeId: '.server-log',
         })
         .expect(200);
 
+      serverLogActionId = createdAction.id;
       expect(createdAction).to.eql({
         id: createdAction.id,
       });
@@ -40,17 +40,25 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
         .expect(200);
 
       expect(fetchedAction).to.eql({
-        type: 'action',
         id: fetchedAction.id,
-        attributes: {
-          description: 'A server.log action',
-          actionTypeId: '.server-log',
-          actionTypeConfig: {},
-        },
-        references: [],
-        updated_at: fetchedAction.updated_at,
-        version: fetchedAction.version,
+        description: 'A server.log action',
+        actionTypeId: '.server-log',
+        config: {},
       });
+    });
+
+    it('should handle firing the action', async () => {
+      const { body: result } = await supertest
+        .post(`/api/action/${serverLogActionId}/_fire`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            message: 'message posted by firing an action during a test',
+          },
+        })
+        .expect(200);
+
+      expect(result.status).to.eql('ok');
     });
   });
 }

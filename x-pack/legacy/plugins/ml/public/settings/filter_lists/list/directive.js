@@ -9,8 +9,6 @@ import 'ngreact';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { I18nContext } from 'ui/i18n';
-
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
@@ -21,10 +19,10 @@ import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { FilterLists } from './filter_lists';
 
 import uiRoutes from 'ui/routes';
+import { I18nContext } from 'ui/i18n';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
-  <ml-nav-menu name="settings" />
   <ml-filter-lists />
 `;
 
@@ -52,7 +50,7 @@ module.directive('mlFilterLists', function () {
 
       ReactDOM.render(
         <I18nContext>
-          {React.createElement(FilterLists, props)}
+          <FilterLists {...props} />
         </I18nContext>,
         element[0]
       );

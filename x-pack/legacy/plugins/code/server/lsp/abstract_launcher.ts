@@ -42,7 +42,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
     const port = await this.getPort();
     const log: Logger = this.log;
     let child: ChildProcess;
-    const proxy = new LanguageServerProxy(port, this.targetHost, log, this.options.lsp);
+    const proxy = new LanguageServerProxy(port, this.targetHost, log);
     if (this.options.lsp.detach) {
       log.debug('Detach mode, expected language server launch externally');
       proxy.onConnected(() => {
@@ -173,11 +173,17 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
         // clone form https://github.com/elastic/ml-cpp/blob/4dd90fa93338667b681364657222715f81c9868a/lib/core/CProcessPriority_Linux.cc
         fs.writeFileSync(`/proc/${pid}/oom_score_adj`, `${OOM_SCORE_ADJ}\n`);
         this.log.debug(`wrote oom_score_adj of process ${pid} to ${OOM_SCORE_ADJ}`);
-        fs.writeFileSync(`/proc/${pid}/oom_adj`, `${OOM_ADJ}\n`);
-        this.log.debug(`wrote oom_adj of process ${pid} to ${OOM_ADJ}`);
       } catch (e) {
-        this.log.error('write oom_score_adj failed');
-        this.log.error(e);
+        this.log.warn(e);
+        try {
+          fs.writeFileSync(`/proc/${pid}/oom_adj`, `${OOM_ADJ}\n`);
+          this.log.debug(`wrote oom_adj of process ${pid} to ${OOM_ADJ}`);
+        } catch (err) {
+          this.log.warn(
+            'write oom_score_adj and oom_adj file both failed, reduce priority not working'
+          );
+          this.log.warn(err);
+        }
       }
     }
     return child;

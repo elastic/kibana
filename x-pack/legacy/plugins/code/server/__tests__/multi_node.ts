@@ -6,6 +6,7 @@
 
 import getPort from 'get-port';
 import { resolve } from 'path';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Root } from 'src/core/server/root';
 
 import {
@@ -62,7 +63,6 @@ const xpackOption = {
   },
 };
 
-// Skip because of issue: https://github.com/elastic/code/issues/1387
 describe('code in multiple nodes', () => {
   const codeNodeUuid = 'c4add484-0cba-4e05-86fe-4baa112d9e53';
   const nonodeNodeUuid = '22b75e04-0e50-4647-9643-6b1b1d88beaf';
@@ -88,7 +88,8 @@ describe('code in multiple nodes', () => {
             port: codePort,
           },
           plugins: { paths: [pluginPaths] },
-          xpack: xpackOption,
+          xpack: { ...xpackOption, code: { codeNodeUrl: `http://localhost:${codePort}` } },
+          logging: { silent: false },
         },
       },
     });
@@ -109,6 +110,7 @@ describe('code in multiple nodes', () => {
         ...xpackOption,
         code: { codeNodeUrl: `http://localhost:${codePort}` },
       },
+      logging: { silent: true },
     };
     nonCodeNode = createRootWithCorePlugins(setting);
     await nonCodeNode.setup();
@@ -132,13 +134,23 @@ describe('code in multiple nodes', () => {
     await esServer.stop();
   });
 
+  function delay(ms: number) {
+    return new Promise(resolve1 => {
+      setTimeout(resolve1, ms);
+    });
+  }
+
   it('Code node setup should be ok', async () => {
+    await delay(6000);
     await request.get(kbnRootServer, '/api/code/setup').expect(200);
-  });
+    // @ts-ignore
+  }).timeout(20000);
 
   it('Non-code node setup should be ok', async () => {
+    await delay(1000);
     await request.get(nonCodeNode, '/api/code/setup').expect(200);
-  });
+    // @ts-ignore
+  }).timeout(5000);
 
   it('Non-code node setup should fail if code node is shutdown', async () => {
     await kbn.stop();

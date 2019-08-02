@@ -4,22 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
-import { IncomingWebhook } from '@slack/webhook';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 
-import { ActionType, ActionTypeExecutorOptions, ExecutorType } from '../types';
+import {
+  ActionType,
+  ActionTypeExecutorOptions,
+  ActionTypeExecutorResult,
+  ExecutorType,
+} from '../types';
 
-const CONFIG_SCHEMA = Joi.object()
-  .keys({
-    webhookUrl: Joi.string().required(),
-  })
-  .required();
+// secrets definition
 
-const PARAMS_SCHEMA = Joi.object()
-  .keys({
-    message: Joi.string().required(),
-  })
-  .required();
+export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
+
+const SecretsSchema = schema.object({
+  webhookUrl: schema.string(),
+});
+
+// params definition
+
+export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+
+const ParamsSchema = schema.object({
+  message: schema.string(),
+});
+
+// action type definition
 
 // customizing executor is only used for tests
 export function getActionType({ executor }: { executor?: ExecutorType } = {}): ActionType {
@@ -28,10 +39,9 @@ export function getActionType({ executor }: { executor?: ExecutorType } = {}): A
   return {
     id: '.slack',
     name: 'slack',
-    unencryptedAttributes: [],
     validate: {
-      params: PARAMS_SCHEMA,
-      config: CONFIG_SCHEMA,
+      secrets: SecretsSchema,
+      params: ParamsSchema,
     },
     executor,
   };
@@ -40,15 +50,89 @@ export function getActionType({ executor }: { executor?: ExecutorType } = {}): A
 // the production executor for this action
 export const actionType = getActionType();
 
-async function slackExecutor({
-  config,
-  params,
-  services,
-}: ActionTypeExecutorOptions): Promise<any> {
-  const { webhookUrl } = config;
+// action executor
+
+async function slackExecutor(
+  execOptions: ActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult> {
+  const id = execOptions.id;
+  const secrets = execOptions.secrets as ActionTypeSecretsType;
+  const params = execOptions.params as ActionParamsType;
+
+  let result: IncomingWebhookResult;
+  const { webhookUrl } = secrets;
   const { message } = params;
 
-  const webhook = new IncomingWebhook(webhookUrl);
+  try {
+    const webhook = new IncomingWebhook(webhookUrl);
+    result = await webhook.send(message);
+  } catch (err) {
+    if (err.original == null || err.original.response == null) {
+      return errorResult(id, err.message);
+    }
 
-  return await webhook.send(message);
+    const { status, statusText, headers } = err.original.response;
+
+    // special handling for 5xx
+    if (status >= 500) {
+      return retryResult(id, err.message);
+    }
+
+    // special handling for rate limiting
+    if (status === 429) {
+      const retryAfterString = headers['retry-after'];
+      if (retryAfterString != null) {
+        const retryAfter = parseInt(retryAfterString, 10);
+        if (!isNaN(retryAfter)) {
+          return retryResultSeconds(id, err.message, retryAfter);
+        }
+      }
+    }
+
+    return errorResult(id, `${err.message} - ${statusText}`);
+  }
+
+  if (result == null) {
+    return errorResult(id, `unexpected null response from slack`);
+  }
+
+  if (result.text !== 'ok') {
+    return errorResult(id, `unexpected text response from slack (expecting 'ok')`);
+  }
+
+  return successResult(result);
+}
+
+function successResult(data: any): ActionTypeExecutorResult {
+  return { status: 'ok', data };
+}
+
+function errorResult(id: string, message: string): ActionTypeExecutorResult {
+  return {
+    status: 'error',
+    message: `an error occurred in action ${id} posting a slack message: ${message}`,
+  };
+}
+
+function retryResult(id: string, message: string): ActionTypeExecutorResult {
+  return {
+    status: 'error',
+    message: `an error occurred in action ${id} posting a slack message, retrying later`,
+    retry: true,
+  };
+}
+
+function retryResultSeconds(
+  id: string,
+  message: string,
+  retryAfter: number = 60
+): ActionTypeExecutorResult {
+  const retryEpoch = Date.now() + retryAfter * 1000;
+  const retry = new Date(retryEpoch);
+  const retryString = retry.toISOString();
+  return {
+    status: 'error',
+    message: `an error occurred in action ${id} posting a slack message, retry at ${retryString}: ${message}`,
+    retry,
+  };
 }

@@ -20,18 +20,12 @@ export interface ApplicationSetup {
     registerLegacyApp(app: LegacyApp): void;
 }
 
-// Warning: (ae-missing-release-tag) "ApplicationStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export interface ApplicationStart {
-    // Warning: (ae-forgotten-export) The symbol "CapabilitiesStart" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    availableApps: CapabilitiesStart['availableApps'];
-    // (undocumented)
-    capabilities: CapabilitiesStart['capabilities'];
-    // (undocumented)
-    mount: (mountHandler: Function) => void;
+    availableApps: readonly App[];
+    // @internal
+    availableLegacyApps: readonly LegacyApp[];
+    capabilities: RecursiveReadonly<Capabilities>;
 }
 
 // @public
@@ -95,18 +89,25 @@ export interface ChromeNavControls {
 
 // @public (undocumented)
 export interface ChromeNavLink {
+    // @deprecated
     readonly active?: boolean;
     readonly baseUrl: string;
+    // @deprecated
     readonly disabled?: boolean;
     readonly euiIconType?: string;
     readonly hidden?: boolean;
     readonly icon?: string;
     readonly id: string;
+    // @internal
+    readonly legacy: boolean;
+    // @deprecated
     readonly linkToLastSubUrl?: boolean;
     readonly order: number;
+    // @deprecated
     readonly subUrlBase?: string;
     readonly title: string;
     readonly tooltip?: string;
+    // @deprecated
     readonly url?: string;
 }
 
@@ -166,12 +167,23 @@ export interface ChromeStart {
     setIsVisible(isVisible: boolean): void;
 }
 
+// @public
+export interface ContextSetup {
+    createContextContainer<TContext extends {}, THandlerReturn, THandlerParmaters extends any[] = []>(): IContextContainer<TContext, THandlerReturn, THandlerParmaters>;
+}
+
 // @internal (undocumented)
 export interface CoreContext {
+    // Warning: (ae-forgotten-export) The symbol "CoreId" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    coreId: CoreId;
 }
 
 // @public
 export interface CoreSetup {
+    // (undocumented)
+    context: ContextSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
@@ -330,23 +342,101 @@ export interface FatalErrorsSetup {
 }
 
 // @public (undocumented)
+export type HttpBody = BodyInit | null | any;
+
+// @public (undocumented)
+export interface HttpErrorRequest {
+    // (undocumented)
+    error: Error;
+    // (undocumented)
+    request?: Request;
+}
+
+// @public (undocumented)
+export interface HttpErrorResponse extends HttpResponse {
+    // Warning: (ae-forgotten-export) The symbol "HttpFetchError" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    error: Error | HttpFetchError;
+}
+
+// @public (undocumented)
+export interface HttpFetchOptions extends HttpRequestInit {
+    // (undocumented)
+    headers?: HttpHeadersInit;
+    // (undocumented)
+    prependBasePath?: boolean;
+    // (undocumented)
+    query?: HttpFetchQuery;
+}
+
+// @public (undocumented)
+export interface HttpFetchQuery {
+    // (undocumented)
+    [key: string]: string | number | boolean | undefined;
+}
+
+// @public (undocumented)
+export type HttpHandler = (path: string, options?: HttpFetchOptions) => Promise<HttpBody>;
+
+// @public (undocumented)
+export interface HttpHeadersInit {
+    // (undocumented)
+    [name: string]: any;
+}
+
+// @public (undocumented)
 export interface HttpInterceptor {
     // Warning: (ae-forgotten-export) The symbol "HttpInterceptController" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
     request?(request: Request, controller: HttpInterceptController): Promise<Request> | Request | void;
-    // Warning: (ae-forgotten-export) The symbol "HttpErrorRequest" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     requestError?(httpErrorRequest: HttpErrorRequest, controller: HttpInterceptController): Promise<Request> | Request | void;
-    // Warning: (ae-forgotten-export) The symbol "HttpResponse" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     response?(httpResponse: HttpResponse, controller: HttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
-    // Warning: (ae-forgotten-export) The symbol "HttpErrorResponse" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     responseError?(httpErrorResponse: HttpErrorResponse, controller: HttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
+}
+
+// @public (undocumented)
+export interface HttpRequestInit {
+    // (undocumented)
+    body?: BodyInit | null;
+    // (undocumented)
+    cache?: RequestCache;
+    // (undocumented)
+    credentials?: RequestCredentials;
+    // (undocumented)
+    headers?: HttpHeadersInit;
+    // (undocumented)
+    integrity?: string;
+    // (undocumented)
+    keepalive?: boolean;
+    // (undocumented)
+    method?: string;
+    // (undocumented)
+    mode?: RequestMode;
+    // (undocumented)
+    redirect?: RequestRedirect;
+    // (undocumented)
+    referrer?: string;
+    // (undocumented)
+    referrerPolicy?: ReferrerPolicy;
+    // (undocumented)
+    signal?: AbortSignal | null;
+    // (undocumented)
+    window?: any;
+}
+
+// @public (undocumented)
+export interface HttpResponse {
+    // (undocumented)
+    body?: HttpBody;
+    // (undocumented)
+    request: Request;
+    // (undocumented)
+    response?: Response;
 }
 
 // @public (undocumented)
@@ -361,8 +451,6 @@ export interface HttpServiceBase {
     };
     // (undocumented)
     delete: HttpHandler;
-    // Warning: (ae-forgotten-export) The symbol "HttpHandler" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     fetch: HttpHandler;
     // (undocumented)
@@ -399,6 +487,20 @@ export interface I18nStart {
         children: React.ReactNode;
     }) => JSX.Element;
 }
+
+// @public
+export interface IContextContainer<TContext extends {}, THandlerReturn, THandlerParameters extends any[] = []> {
+    // Warning: (ae-forgotten-export) The symbol "Promisify" needs to be exported by the entry point index.d.ts
+    createHandler(pluginOpaqueId: PluginOpaqueId, handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => Promisify<THandlerReturn>;
+    // Warning: (ae-forgotten-export) The symbol "PluginOpaqueId" needs to be exported by the entry point index.d.ts
+    registerContext<TContextName extends keyof TContext>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<TContext, TContextName, THandlerParameters>): this;
+}
+
+// @public
+export type IContextHandler<TContext extends {}, TReturn, THandlerParameters extends any[] = []> = (context: TContext, ...rest: THandlerParameters) => TReturn;
+
+// @public
+export type IContextProvider<TContext extends Record<string, any>, TContextName extends keyof TContext, TProviderParameters extends any[] = []> = (context: Partial<TContext>, ...rest: TProviderParameters) => Promise<TContext[TContextName]> | TContext[TContextName];
 
 // @internal (undocumented)
 export interface InternalCoreSetup extends CoreSetup {
@@ -469,13 +571,14 @@ export interface OverlayStart {
     }) => OverlayRef;
     // (undocumented)
     openModal: (modalChildren: React.ReactNode, modalProps?: {
+        className?: string;
         closeButtonAriaLabel?: string;
         'data-test-subj'?: string;
     }) => OverlayRef;
 }
 
 // @public
-export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends {} = {}, TPluginsStart extends {} = {}> {
+export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
     setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
     // (undocumented)
@@ -485,10 +588,11 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends {} =
 }
 
 // @public
-export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<string, unknown> = {}, TPluginsStart extends Record<string, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext {
+    readonly opaqueId: PluginOpaqueId;
 }
 
 // Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts

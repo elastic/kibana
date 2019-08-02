@@ -7,12 +7,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { InspectButton } from '../inspect';
 
 const Header = styled.header<{ border?: boolean }>`
-  ${props => `
+  ${props => css`
     margin-bottom: ${props.theme.eui.euiSizeL};
 
     ${props.border &&
@@ -38,25 +38,27 @@ export const HeaderPanel = pure<HeaderPanelProps>(
     <Header border={border}>
       <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiTitle>
-                <h2 data-test-subj="page_headline_title">{title}</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            {tooltip && (
-              <EuiFlexItem grow={false}>
-                <EuiIconTip color="subdued" content={tooltip} position="top" size="l" />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <EuiTitle>
+            <h2 data-test-subj="panel_headline_title">
+              {title}
+              {tooltip && (
+                <>
+                  {' '}
+                  <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
+                </>
+              )}
+            </h2>
+          </EuiTitle>
+
           <EuiText color="subdued" size="s">
             {subtitle}
           </EuiText>
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           {id && <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />}
         </EuiFlexItem>
+
         {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}
       </EuiFlexGroup>
     </Header>

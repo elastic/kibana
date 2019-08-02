@@ -18,7 +18,7 @@ import { NetworkDnsTable } from '.';
 import { mockData } from './mock';
 
 describe('NetworkTopNFlow Table Component', () => {
-  const loadMore = jest.fn();
+  const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
@@ -33,11 +33,15 @@ describe('NetworkTopNFlow Table Component', () => {
         <ReduxStoreProvider store={store}>
           <NetworkDnsTable
             data={mockData.NetworkDns.edges}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkDns.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkDns.pageInfo)}
             id="dns"
             loading={false}
-            loadMore={loadMore}
-            nextCursor={getOr(null, 'endCursor.value', mockData.NetworkDns.pageInfo)}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.NetworkDns.pageInfo
+            )}
             totalCount={mockData.NetworkDns.totalCount}
             type={networkModel.NetworkType.page}
           />
@@ -55,11 +59,15 @@ describe('NetworkTopNFlow Table Component', () => {
           <TestProviders store={store}>
             <NetworkDnsTable
               data={mockData.NetworkDns.edges}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkDns.pageInfo)!}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkDns.pageInfo)}
               id="dns"
               loading={false}
-              loadMore={loadMore}
-              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkDns.pageInfo)}
+              loadPage={loadPage}
+              showMorePagesIndicator={getOr(
+                false,
+                'showMorePagesIndicator',
+                mockData.NetworkDns.pageInfo
+              )}
               totalCount={mockData.NetworkDns.totalCount}
               type={networkModel.NetworkType.page}
             />

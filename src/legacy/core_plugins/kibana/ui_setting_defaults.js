@@ -298,6 +298,19 @@ export function getUiSettingDefaults() {
       }),
       category: ['discover'],
     },
+    'discover:searchOnPageLoad': {
+      name: i18n.translate('kbn.advancedSettings.discover.searchOnPageLoadTitle', {
+        defaultMessage: 'Search on page load',
+      }),
+      value: true,
+      type: 'boolean',
+      description: i18n.translate('kbn.advancedSettings.discover.searchOnPageLoadText', {
+        defaultMessage:
+          'Controls whether a search is executed when Discover first loads. This setting does not ' +
+          'have an effect when loading a saved search.',
+      }),
+      category: ['discover'],
+    },
     'doc_table:highlight': {
       name: i18n.translate('kbn.advancedSettings.docTableHighlightTitle', {
         defaultMessage: 'Highlight results',
@@ -569,6 +582,19 @@ export function getUiSettingDefaults() {
           'The opacity of the chart items that are dimmed when highlighting another element of the chart. ' +
           'The lower this number, the more the highlighted element will stand out. ' +
           'This must be a number between 0 and 1.',
+      }),
+      category: ['visualization'],
+    },
+    'visualization:heatmap:maxBuckets': {
+      name: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsTitle', {
+        defaultMessage: 'Heatmap maximum buckets',
+      }),
+      value: 50,
+      type: 'number',
+      description: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsText', {
+        defaultMessage:
+          'The maximum number of buckets a single datasource can return. ' +
+          'A higher number might have negative impact on browser rendering performance'
       }),
       category: ['visualization'],
     },

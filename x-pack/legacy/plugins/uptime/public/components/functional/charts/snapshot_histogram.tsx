@@ -67,8 +67,8 @@ export const SnapshotHistogramComponent = ({
         <EuiTitle size="xs">
           <h5>
             <FormattedMessage
-              id="xpack.uptime.snapshot.statusOverTimeTitle"
-              defaultMessage="Status over time"
+              id="xpack.uptime.snapshot.pingsOverTimeTitle"
+              defaultMessage="Pings over time"
             />
           </h5>
         </EuiTitle>
@@ -111,8 +111,8 @@ export const SnapshotHistogramComponent = ({
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.uptime.snapshot.statusOverTimeTitle"
-            defaultMessage="Status over time"
+            id="xpack.uptime.snapshot.pingsOverTimeTitle"
+            defaultMessage="Pings over time"
           />
         </h5>
       </EuiTitle>
@@ -138,7 +138,9 @@ export const SnapshotHistogramComponent = ({
             position={Position.Left}
             showOverlappingTicks={true}
             title={i18n.translate('xpack.uptime.snapshotHistogram.yAxis.title', {
-              defaultMessage: 'Monitors',
+              defaultMessage: 'Pings',
+              description:
+                'The label on the y-axis of a chart that displays the number of times Heartbeat has pinged a set of services/websites.',
             })}
           />
           <BarSeries

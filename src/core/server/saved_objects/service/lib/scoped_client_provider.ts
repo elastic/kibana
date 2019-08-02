@@ -19,15 +19,27 @@
 import { PriorityCollection } from './priority_collection';
 import { SavedObjectsClientContract } from '..';
 
+/**
+ * Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance.
+ * @public
+ */
 export interface SavedObjectsClientWrapperOptions<Request = unknown> {
   client: SavedObjectsClientContract;
   request: Request;
 }
 
+/**
+ * Describes the factory used to create instances of Saved Objects Client Wrappers.
+ * @public
+ */
 export type SavedObjectsClientWrapperFactory<Request = unknown> = (
   options: SavedObjectsClientWrapperOptions<Request>
 ) => SavedObjectsClientContract;
 
+/**
+ * Describes the factory used to create instances of the Saved Objects Client.
+ * @public
+ */
 export type SavedObjectsClientFactory<Request = unknown> = ({
   request,
 }: {
@@ -35,12 +47,21 @@ export type SavedObjectsClientFactory<Request = unknown> = ({
 }) => SavedObjectsClientContract;
 
 /**
+ * Options to control the creation of the Saved Objects Client.
+ * @public
+ */
+export interface SavedObjectsClientProviderOptions {
+  excludedWrappers?: string[];
+}
+
+/**
  * Provider for the Scoped Saved Object Client.
  */
 export class ScopedSavedObjectsClientProvider<Request = unknown> {
-  private readonly _wrapperFactories = new PriorityCollection<
-    SavedObjectsClientWrapperFactory<Request>
-  >();
+  private readonly _wrapperFactories = new PriorityCollection<{
+    id: string;
+    factory: SavedObjectsClientWrapperFactory<Request>;
+  }>();
   private _clientFactory: SavedObjectsClientFactory<Request>;
   private readonly _originalClientFactory: SavedObjectsClientFactory<Request>;
 
@@ -54,9 +75,14 @@ export class ScopedSavedObjectsClientProvider<Request = unknown> {
 
   addClientWrapperFactory(
     priority: number,
-    wrapperFactory: SavedObjectsClientWrapperFactory<Request>
+    id: string,
+    factory: SavedObjectsClientWrapperFactory<Request>
   ): void {
-    this._wrapperFactories.add(priority, wrapperFactory);
+    if (this._wrapperFactories.has(entry => entry.id === id)) {
+      throw new Error(`wrapper factory with id ${id} is already defined`);
+    }
+
+    this._wrapperFactories.add(priority, { id, factory });
   }
 
   setClientFactory(customClientFactory: SavedObjectsClientFactory) {
@@ -67,15 +93,24 @@ export class ScopedSavedObjectsClientProvider<Request = unknown> {
     this._clientFactory = customClientFactory;
   }
 
-  getClient(request: Request): SavedObjectsClientContract {
+  getClient(
+    request: Request,
+    options: SavedObjectsClientProviderOptions = {}
+  ): SavedObjectsClientContract {
     const client = this._clientFactory({
       request,
     });
 
+    const excludedWrappers = options.excludedWrappers || [];
+
     return this._wrapperFactories
       .toPrioritizedArray()
-      .reduceRight((clientToWrap, wrapperFactory) => {
-        return wrapperFactory({
+      .reduceRight((clientToWrap, { id, factory }) => {
+        if (excludedWrappers.includes(id)) {
+          return clientToWrap;
+        }
+
+        return factory({
           request,
           client: clientToWrap,
         });

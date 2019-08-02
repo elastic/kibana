@@ -6,6 +6,7 @@
 
 import { HostsType } from '../../store/hosts/model';
 import { NetworkType } from '../../store/network/model';
+import { FlowTarget } from '../../graphql/types';
 
 export interface Influencer {
   influencer_field_name: string;
@@ -39,6 +40,11 @@ export interface Influencer {
   influencer_field_values: string[];
 }
 
+export interface CriteriaFields {
+  fieldName: string;
+  fieldValue: string;
+}
+
 export interface InfluencerInput {
   fieldName: string;
   fieldValue: string;
@@ -48,7 +54,7 @@ export interface Anomaly {
   detectorIndex: number;
   entityName: string;
   entityValue: string;
-  influencers: Array<Record<string, string>>;
+  influencers?: Array<Record<string, string>>;
   jobId: string;
   rowId: string;
   severity: number;
@@ -91,6 +97,7 @@ export type AnomaliesHostTableProps = HostOrNetworkProps & {
 export type AnomaliesNetworkTableProps = HostOrNetworkProps & {
   ip?: string;
   type: NetworkType;
+  flowTarget?: FlowTarget;
 };
 
 export interface MlCapabilities {
@@ -113,11 +120,11 @@ export interface MlCapabilities {
     canCreateFilter: boolean;
     canDeleteFilter: boolean;
     canFindFileStructure: boolean;
-    canGetDataFrameJobs: boolean;
-    canDeleteDataFrameJob: boolean;
-    canPreviewDataFrameJob: boolean;
-    canCreateDataFrameJob: boolean;
-    canStartStopDataFrameJob: boolean;
+    canGetDataFrame: boolean;
+    canDeleteDataFrame: boolean;
+    canPreviewDataFrame: boolean;
+    canCreateDataFrame: boolean;
+    canStartStopDataFrame: boolean;
   };
   isPlatinumOrTrialLicense: boolean;
   mlFeatureEnabledInSpace: boolean;
@@ -128,3 +135,12 @@ const sourceOrDestination = ['source.ip', 'destination.ip'];
 
 export const isDestinationOrSource = (value: string | null): value is DestinationOrSource =>
   value != null && sourceOrDestination.includes(value);
+
+export interface MlError {
+  msg: string;
+  response: string;
+  statusCode: number;
+  path?: string;
+  query?: {};
+  body?: string;
+}

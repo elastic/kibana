@@ -6,6 +6,12 @@
 
 import { StringMap, IndexAsString } from './common';
 
+export interface BoolQuery {
+  must_not: Array<Record<string, any>>;
+  should: Array<Record<string, any>>;
+  filter: Array<Record<string, any>>;
+}
+
 declare module 'elasticsearch' {
   // extending SearchResponse to be able to have typed aggregations
 
@@ -115,7 +121,7 @@ declare module 'elasticsearch' {
 
   export interface ESFilter {
     [key: string]: {
-      [key: string]: string | number | StringMap | ESFilter[];
+      [key: string]: string | string[] | number | StringMap | ESFilter[];
     };
   }
 }

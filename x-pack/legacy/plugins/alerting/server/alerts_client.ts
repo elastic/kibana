@@ -8,14 +8,14 @@ import { omit } from 'lodash';
 import { SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Log } from './types';
 import { TaskManager } from '../../task_manager';
-import { validateAlertTypeParams, parseDuration } from './lib';
+import { validateAlertTypeParams } from './lib';
 
 interface ConstructorOptions {
   log: Log;
   taskManager: TaskManager;
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
-  basePath: string;
+  spaceId?: string;
 }
 
 interface FindOptions {
@@ -32,6 +32,13 @@ interface FindOptions {
     };
     fields?: string[];
   };
+}
+
+interface FindResult {
+  page: number;
+  perPage: number;
+  total: number;
+  data: object[];
 }
 
 interface CreateOptions {
@@ -53,7 +60,7 @@ interface UpdateOptions {
 
 export class AlertsClient {
   private readonly log: Log;
-  private readonly basePath: string;
+  private readonly spaceId?: string;
   private readonly taskManager: TaskManager;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly alertTypeRegistry: AlertTypeRegistry;
@@ -63,10 +70,10 @@ export class AlertsClient {
     savedObjectsClient,
     taskManager,
     log,
-    basePath,
+    spaceId,
   }: ConstructorOptions) {
     this.log = log;
-    this.basePath = basePath;
+    this.spaceId = spaceId;
     this.taskManager = taskManager;
     this.alertTypeRegistry = alertTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
@@ -84,31 +91,37 @@ export class AlertsClient {
       ...options,
       references,
     });
-    let scheduledTask;
-    try {
-      scheduledTask = await this.scheduleAlert(createdAlert.id, rawAlert, this.basePath);
-    } catch (e) {
-      // Cleanup data, something went wrong scheduling the task
+    if (data.enabled) {
+      let scheduledTask;
       try {
-        await this.savedObjectsClient.delete('alert', createdAlert.id);
-      } catch (err) {
-        // Skip the cleanup error and throw the task manager error to avoid confusion
-        this.log(
-          ['alerting', 'error'],
-          `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed. Error: ${err.message}`
+        scheduledTask = await this.scheduleAlert(
+          createdAlert.id,
+          rawAlert.alertTypeId,
+          rawAlert.interval
         );
+      } catch (e) {
+        // Cleanup data, something went wrong scheduling the task
+        try {
+          await this.savedObjectsClient.delete('alert', createdAlert.id);
+        } catch (err) {
+          // Skip the cleanup error and throw the task manager error to avoid confusion
+          this.log(
+            ['alerting', 'error'],
+            `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed. Error: ${err.message}`
+          );
+        }
+        throw e;
       }
-      throw e;
+      await this.savedObjectsClient.update(
+        'alert',
+        createdAlert.id,
+        {
+          scheduledTaskId: scheduledTask.id,
+        },
+        { references }
+      );
+      createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
-    await this.savedObjectsClient.update(
-      'alert',
-      createdAlert.id,
-      {
-        scheduledTaskId: scheduledTask.id,
-      },
-      { references }
-    );
-    createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     return this.getAlertFromRaw(createdAlert.id, createdAlert.attributes, references);
   }
 
@@ -117,20 +130,30 @@ export class AlertsClient {
     return this.getAlertFromRaw(result.id, result.attributes, result.references);
   }
 
-  public async find({ options = {} }: FindOptions = {}) {
+  public async find({ options = {} }: FindOptions = {}): Promise<FindResult> {
     const results = await this.savedObjectsClient.find({
       ...options,
       type: 'alert',
     });
-    return results.saved_objects.map(result =>
+
+    const data = results.saved_objects.map(result =>
       this.getAlertFromRaw(result.id, result.attributes, result.references)
     );
+
+    return {
+      page: results.page,
+      perPage: results.per_page,
+      total: results.total,
+      data,
+    };
   }
 
   public async delete({ id }: { id: string }) {
     const alertSavedObject = await this.savedObjectsClient.get('alert', id);
     const removeResult = await this.savedObjectsClient.delete('alert', id);
-    await this.taskManager.remove(alertSavedObject.attributes.scheduledTaskId);
+    if (alertSavedObject.attributes.scheduledTaskId) {
+      await this.taskManager.remove(alertSavedObject.attributes.scheduledTaskId);
+    }
     return removeResult;
   }
 
@@ -159,18 +182,51 @@ export class AlertsClient {
     return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
   }
 
-  private async scheduleAlert(id: string, alert: RawAlert, basePath: string) {
+  public async enable({ id }: { id: string }) {
+    const existingObject = await this.savedObjectsClient.get('alert', id);
+    if (existingObject.attributes.enabled === false) {
+      const scheduledTask = await this.scheduleAlert(
+        id,
+        existingObject.attributes.alertTypeId,
+        existingObject.attributes.interval
+      );
+      await this.savedObjectsClient.update(
+        'alert',
+        id,
+        {
+          enabled: true,
+          scheduledTaskId: scheduledTask.id,
+        },
+        { references: existingObject.references }
+      );
+    }
+  }
+
+  public async disable({ id }: { id: string }) {
+    const existingObject = await this.savedObjectsClient.get('alert', id);
+    if (existingObject.attributes.enabled === true) {
+      await this.taskManager.remove(existingObject.attributes.scheduledTaskId);
+      await this.savedObjectsClient.update(
+        'alert',
+        id,
+        {
+          enabled: false,
+          scheduledTaskId: null,
+        },
+        { references: existingObject.references }
+      );
+    }
+  }
+
+  private async scheduleAlert(id: string, alertTypeId: string, interval: string) {
     return await this.taskManager.schedule({
-      taskType: `alerting:${alert.alertTypeId}`,
+      taskType: `alerting:${alertTypeId}`,
       params: {
         alertId: id,
-        basePath,
+        spaceId: this.spaceId,
       },
       state: {
-        // This is here because we can't rely on the task manager's internal runAt.
-        // It changes it for timeout, etc when a task is running.
-        scheduledRunAt: new Date(Date.now() + parseDuration(alert.interval)),
-        previousScheduledRunAt: null,
+        previousStartedAt: null,
         alertTypeState: {},
         alertInstances: {},
       },

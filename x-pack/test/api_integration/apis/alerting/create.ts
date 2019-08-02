@@ -16,16 +16,17 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
   const es = getService('es');
 
   describe('create', () => {
-    const createdAlertIds: string[] = [];
+    const createdAlertIds: Array<{ space: string; id: string }> = [];
 
     before(() => esArchiver.load('actions/basic'));
     after(async () => {
       await Promise.all(
-        createdAlertIds.map(id => {
+        createdAlertIds.map(({ space, id }) => {
+          const urlPrefix = space !== 'default' ? `/s/${space}` : '';
           return supertest
-            .delete(`/api/alert/${id}`)
+            .delete(`${urlPrefix}/api/alert/${id}`)
             .set('kbn-xsrf', 'foo')
-            .expect(200);
+            .expect(204, '');
         })
       );
       await esArchiver.unload('actions/basic');
@@ -33,7 +34,7 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
 
     async function getScheduledTask(id: string) {
       return await es.get({
-        id,
+        id: `task:${id}`,
         index: '.kibana_task_manager',
       });
     }
@@ -45,7 +46,7 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
         .send(getTestAlertData())
         .expect(200)
         .then(async (resp: any) => {
-          createdAlertIds.push(resp.body.id);
+          createdAlertIds.push({ space: 'default', id: resp.body.id });
           expect(resp.body).to.eql({
             id: resp.body.id,
             actions: [
@@ -58,6 +59,7 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
                 },
               },
             ],
+            enabled: true,
             alertTypeId: 'test.noop',
             alertTypeParams: {},
             interval: '10s',
@@ -69,9 +71,53 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
           expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
           expect(JSON.parse(taskRecord.task.params)).to.eql({
             alertId: resp.body.id,
-            basePath: '',
+            spaceId: 'default',
           });
         });
+    });
+
+    it('should return 200 when creating an alert in a space', async () => {
+      const { body: createdAlert } = await supertest
+        .post('/s/space_1/api/alert')
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(200);
+      createdAlertIds.push({ space: 'space_1', id: createdAlert.id });
+      expect(createdAlert).to.eql({
+        id: createdAlert.id,
+        actions: [
+          {
+            group: 'default',
+            id: ES_ARCHIVER_ACTION_ID,
+            params: {
+              message:
+                'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
+            },
+          },
+        ],
+        enabled: true,
+        alertTypeId: 'test.noop',
+        alertTypeParams: {},
+        interval: '10s',
+        scheduledTaskId: createdAlert.scheduledTaskId,
+      });
+      expect(typeof createdAlert.scheduledTaskId).to.be('string');
+      const { _source: taskRecord } = await getScheduledTask(createdAlert.scheduledTaskId);
+      expect(taskRecord.type).to.eql('task');
+      expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
+      expect(JSON.parse(taskRecord.task.params)).to.eql({
+        alertId: createdAlert.id,
+        spaceId: 'space_1',
+      });
+    });
+
+    it('should not schedule a task when creating a disabled alert', async () => {
+      const { body: createdAlert } = await supertest
+        .post('/api/alert')
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData({ enabled: false }))
+        .expect(200);
+      expect(createdAlert.scheduledTaskId).to.eql(undefined);
     });
 
     it(`should return 400 when alert type isn't registered`, async () => {
@@ -127,7 +173,8 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'alertTypeParams invalid: child "param1" fails because ["param1" is required]',
+            message:
+              'alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]',
           });
         });
     });

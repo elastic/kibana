@@ -13,6 +13,7 @@ import { resultsServiceProvider } from '../results_service';
 import { CalendarManager } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import { getLatestDataOrBucketTimestamp, isTimeSeriesViewJob } from '../../../common/util/job_utils';
+import { groupsProvider } from './groups';
 import { uniq } from 'lodash';
 
 export function jobsProvider(callWithRequest) {
@@ -142,7 +143,6 @@ export function jobsProvider(callWithRequest) {
 
   async function jobsWithTimerange() {
     const fullJobsList = await createFullJobsList();
-    const latestBucketTimestampsByJob = await getLatestBucketTimestampByJob();
     const jobsMap = {};
 
     const jobs = fullJobsList.map((job) => {
@@ -150,9 +150,12 @@ export function jobsProvider(callWithRequest) {
       const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0);
       const timeRange = {};
 
-      if (job.data_counts !== undefined) {
-        timeRange.to = getLatestDataOrBucketTimestamp(job.data_counts, latestBucketTimestampsByJob[job.job_id]);
-        timeRange.from = job.data_counts.earliest_record_timestamp;
+      const dataCounts = job.data_counts;
+      if (dataCounts !== undefined) {
+        timeRange.to = getLatestDataOrBucketTimestamp(
+          dataCounts.latest_record_timestamp,
+          dataCounts.latest_bucket_timestamp);
+        timeRange.from = dataCounts.earliest_record_timestamp;
       }
 
       const tempJob = {
@@ -198,6 +201,7 @@ export function jobsProvider(callWithRequest) {
           const datafeedStats = results[DATAFEED_STATS].datafeeds.find(ds => (ds.datafeed_id === datafeed.datafeed_id));
           if (datafeedStats) {
             datafeed.state = datafeedStats.state;
+            datafeed.timing_stats = datafeedStats.timing_stats;
           }
         }
         datafeeds[datafeed.job_id] = datafeed;
@@ -339,6 +343,50 @@ export function jobsProvider(callWithRequest) {
     return results;
   }
 
+  async function getAllJobAndGroupIds() {
+    const { getAllGroups } = groupsProvider(callWithRequest);
+    const jobs = await callWithRequest('ml.jobs');
+    const jobIds = jobs.jobs.map(job => job.job_id);
+    const groups = await getAllGroups();
+    const groupIds = groups.map(group => group.id);
+
+    return {
+      jobIds,
+      groupIds,
+    };
+  }
+
+  async function getLookBackProgress(jobId, start, end) {
+    const datafeedId = `datafeed-${jobId}`;
+    const [jobStats, isRunning] = await Promise.all([
+      callWithRequest('ml.jobStats', { jobId: [jobId] }),
+      isDatafeedRunning(datafeedId)
+    ]);
+
+    if (jobStats.jobs.length) {
+      const time = jobStats.jobs[0].data_counts.latest_record_timestamp;
+      const progress = (time - start) / (end - start);
+      return {
+        progress: (progress > 0 ? Math.round(progress * 100) : 0),
+        isRunning
+      };
+    }
+    return { progress: 0, isRunning: false };
+  }
+
+  async function isDatafeedRunning(datafeedId) {
+    const stats = await callWithRequest('ml.datafeedStats', { datafeedId: [datafeedId] });
+    if (stats.datafeeds.length) {
+      const state = stats.datafeeds[0].state;
+      return (
+        state === DATAFEED_STATE.STARTED ||
+        state === DATAFEED_STATE.STARTING ||
+        state === DATAFEED_STATE.STOPPING
+      );
+    }
+    return false;
+  }
+
   return {
     forceDeleteJob,
     deleteJobs,
@@ -348,5 +396,7 @@ export function jobsProvider(callWithRequest) {
     createFullJobsList,
     deletingJobTasks,
     jobsExist,
+    getAllJobAndGroupIds,
+    getLookBackProgress,
   };
 }

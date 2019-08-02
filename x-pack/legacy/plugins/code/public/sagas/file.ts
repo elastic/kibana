@@ -5,8 +5,7 @@
  */
 
 import { Action } from 'redux-actions';
-import chrome from 'ui/chrome';
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 import Url from 'url';
 import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 
@@ -93,10 +92,12 @@ function requestRepoTree({
   if (parents) {
     query.parents = true;
   }
-  return kfetch({
-    pathname: `/api/code/repo/${uri}/tree/${encodeURIComponent(revision)}/${path}`,
-    query,
-  });
+  return npStart.core.http.get(
+    `/api/code/repo/${uri}/tree/${encodeURIComponent(revision)}/${path}`,
+    {
+      query,
+    }
+  );
 }
 
 export function* watchFetchRepoTree() {
@@ -127,9 +128,7 @@ function* handleFetchBranches(action: Action<FetchRepoPayload>) {
 }
 
 function requestBranches({ uri }: FetchRepoPayload) {
-  return kfetch({
-    pathname: `/api/code/repo/${uri}/references`,
-  });
+  return npStart.core.http.get(`/api/code/repo/${uri}/references`);
 }
 
 function* handleFetchCommits(action: Action<FetchRepoPayloadWithRevision>) {
@@ -172,16 +171,19 @@ function requestCommits(
   count?: number
 ) {
   const pathStr = path ? `/${path}` : '';
-  const options: any = {
-    pathname: `/api/code/repo/${uri}/history/${encodeURIComponent(revision)}${pathStr}`,
-  };
+  let query: any = {};
   if (loadMore) {
-    options.query = { after: 1 };
+    query = { after: 1 };
   }
   if (count) {
-    options.count = count;
+    query = { count };
   }
-  return kfetch(options);
+  return npStart.core.http.get(
+    `/api/code/repo/${uri}/history/${encodeURIComponent(revision)}${pathStr}`,
+    {
+      query,
+    }
+  );
 }
 
 export async function requestFile(
@@ -194,7 +196,9 @@ export async function requestFile(
   if (line) {
     query.line = line;
   }
-  const response: Response = await fetch(chrome.addBasePath(Url.format({ pathname: url, query })));
+  const response: Response = await fetch(
+    npStart.core.http.basePath.prepend(Url.format({ pathname: url, query }))
+  );
 
   if (response.status >= 200 && response.status < 300) {
     const contentType = response.headers.get('Content-Type');
@@ -247,7 +251,10 @@ function* handleFetchFile(action: Action<FetchFilePayload>) {
       yield put(setNotFound(true));
       yield put(fetchFileFailed(new Error('file not found')));
     } else {
-      yield put(fetchFileSuccess(results));
+      const path = yield select(currentPathSelector);
+      if (path === action.payload!.path) {
+        yield put(fetchFileSuccess(results));
+      }
     }
   } catch (err) {
     yield put(fetchFileFailed(err));

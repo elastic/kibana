@@ -8,6 +8,7 @@ import * as Rx from 'rxjs';
 import { Server } from 'hapi';
 import { Legacy } from 'kibana';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { httpServiceMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { createOptionalPlugin } from '../../../../../../server/lib/optional_plugin';
 import { SpacesClient } from '../../../lib/spaces_client';

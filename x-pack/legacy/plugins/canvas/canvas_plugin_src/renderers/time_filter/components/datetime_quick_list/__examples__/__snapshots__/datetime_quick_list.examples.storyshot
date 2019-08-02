@@ -1,0 +1,249 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots renderers/TimeFilter/components/DatetimeQuickList with children 1`] = `
+<div
+  style={
+    Object {
+      "alignItems": "center",
+      "display": "grid",
+    }
+  }
+>
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonEmpty__text"
+      >
+        Today
+      </span>
+    </span>
+  </button>
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonEmpty__text"
+      >
+        Last 24 hours
+      </span>
+    </span>
+  </button>
+  <button
+    className="euiButton euiButton--primary euiButton--small euiButton--fill"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButton__content"
+    >
+      <span
+        className="euiButton__text"
+      >
+        Last 7 days
+      </span>
+    </span>
+  </button>
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonEmpty__text"
+      >
+        Last 2 weeks
+      </span>
+    </span>
+  </button>
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonEmpty__text"
+      >
+        Last 30 days
+      </span>
+    </span>
+  </button>
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonEmpty__text"
+      >
+        Last 90 days
+      </span>
+    </span>
+  </button>
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonEmpty__text"
+      >
+        Last 1 year
+      </span>
+    </span>
+  </button>
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary"
+    type="button"
+  >
+    <span
+      className="euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonEmpty__text"
+      >
+        Apply
+      </span>
+    </span>
+  </button>
+</div>
+`;
+
+exports[`Storyshots renderers/TimeFilter/components/DatetimeQuickList with start and end dates 1`] = `
+<div
+  style={
+    Object {
+      "alignItems": "center",
+      "display": "grid",
+    }
+  }
+>
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonEmpty__text"
+      >
+        Today
+      </span>
+    </span>
+  </button>
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonEmpty__text"
+      >
+        Last 24 hours
+      </span>
+    </span>
+  </button>
+  <button
+    className="euiButton euiButton--primary euiButton--small euiButton--fill"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButton__content"
+    >
+      <span
+        className="euiButton__text"
+      >
+        Last 7 days
+      </span>
+    </span>
+  </button>
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonEmpty__text"
+      >
+        Last 2 weeks
+      </span>
+    </span>
+  </button>
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonEmpty__text"
+      >
+        Last 30 days
+      </span>
+    </span>
+  </button>
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonEmpty__text"
+      >
+        Last 90 days
+      </span>
+    </span>
+  </button>
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonEmpty__text"
+      >
+        Last 1 year
+      </span>
+    </span>
+  </button>
+</div>
+`;

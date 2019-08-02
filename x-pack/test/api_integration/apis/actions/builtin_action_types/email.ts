@@ -23,15 +23,15 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'An email action',
-            actionTypeId: '.email',
-            actionTypeConfig: {
-              service: '__json',
-              user: 'bob',
-              password: 'supersecret',
-              from: 'bob@example.com',
-            },
+          description: 'An email action',
+          actionTypeId: '.email',
+          config: {
+            service: '__json',
+            from: 'bob@example.com',
+          },
+          secrets: {
+            user: 'bob',
+            password: 'supersecret',
           },
         })
         .expect(200);
@@ -48,19 +48,16 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
         .expect(200);
 
       expect(fetchedAction).to.eql({
-        type: 'action',
         id: fetchedAction.id,
-        attributes: {
-          description: 'An email action',
-          actionTypeId: '.email',
-          actionTypeConfig: {
-            from: 'bob@example.com',
-            service: '__json',
-          },
+        description: 'An email action',
+        actionTypeId: '.email',
+        config: {
+          from: 'bob@example.com',
+          service: '__json',
+          host: null,
+          port: null,
+          secure: null,
         },
-        references: [],
-        updated_at: fetchedAction.updated_at,
-        version: fetchedAction.version,
       });
     });
 
@@ -77,13 +74,13 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
         })
         .expect(200)
         .then((resp: any) => {
-          expect(resp.body.message.messageId).to.be.a('string');
-          expect(resp.body.messageId).to.be.a('string');
+          expect(resp.body.data.message.messageId).to.be.a('string');
+          expect(resp.body.data.messageId).to.be.a('string');
 
-          delete resp.body.message.messageId;
-          delete resp.body.messageId;
+          delete resp.body.data.message.messageId;
+          delete resp.body.data.messageId;
 
-          expect(resp.body).to.eql({
+          expect(resp.body.data).to.eql({
             envelope: {
               from: 'bob@example.com',
               to: ['kibana-action-test@elastic.co'],
@@ -99,11 +96,32 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
               cc: null,
               bcc: null,
               subject: 'email-subject',
-              html: 'email-message',
+              html: '<p>email-message</p>\n',
               text: 'email-message',
               headers: {},
             },
           });
+        });
+    });
+
+    it('should render html from markdown', async () => {
+      await supertest
+        .post(`/api/action/${createdActionId}/_fire`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: ['kibana-action-test@elastic.co'],
+            subject: 'message with markdown',
+            message: '_italic_ **bold** https://elastic.co link',
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          const { text, html } = resp.body.data.message;
+          expect(text).to.eql('_italic_ **bold** https://elastic.co link');
+          expect(html).to.eql(
+            '<p><em>italic</em> <strong>bold</strong> <a href="https://elastic.co">https://elastic.co</a> link</p>\n'
+          );
         });
     });
 
@@ -112,11 +130,9 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'An email action',
-            actionTypeId: '.email',
-            actionTypeConfig: {},
-          },
+          description: 'An email action',
+          actionTypeId: '.email',
+          config: {},
         })
         .expect(400)
         .then((resp: any) => {
@@ -124,12 +140,9 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'The actionTypeConfig is invalid: [user]: expected value of type [string] but got [undefined]',
+              'error validating action type config: [from]: expected value of type [string] but got [undefined]',
           });
         });
     });
   });
-
-  // TODO: once we have the HTTP API fire action, test that with a webhook url pointing
-  // back to the Kibana server
 }
