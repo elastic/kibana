@@ -53,10 +53,13 @@ export const mockDataLoaderFetch = jest.fn().mockReturnValue({
     params: {},
   },
 });
+export const mockDataLoaderCancel = jest.fn();
+
 const MockDataLoader = class {
   public async fetch(data: any) {
     return await mockDataLoaderFetch(data);
   }
+  public cancel = mockDataLoaderCancel;
 };
 
 jest.mock('./pipeline_data_loader', () => ({

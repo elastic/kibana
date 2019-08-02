@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { mockDataLoaderFetch, timefilter } from './embedded_visualize_handler.test.mocks';
+import {
+  mockDataLoaderFetch,
+  mockDataLoaderCancel,
+  timefilter,
+} from './embedded_visualize_handler.test.mocks';
 
 // @ts-ignore
 import MockState from '../../../../../fixtures/mock_state';
@@ -196,6 +200,11 @@ describe('EmbeddedVisualizeHandler', () => {
       const spy = jest.spyOn(handler.debouncedFetchAndRender, 'cancel');
       handler.destroy();
       expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call cancel on data loader', () => {
+      handler.destroy();
+      expect(mockDataLoaderCancel).toHaveBeenCalled();
     });
   });
 
