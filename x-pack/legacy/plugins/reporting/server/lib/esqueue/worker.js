@@ -21,6 +21,10 @@ function formatJobObject(job) {
   };
 }
 
+const MAX_PARTIAL_ERROR_LENGTH = 1000; // 1000 of beginning, 1000 of end
+const ERROR_PARTIAL_SEPARATOR = '...';
+const MAX_ERROR_LENGTH = (MAX_PARTIAL_ERROR_LENGTH * 2) + ERROR_PARTIAL_SEPARATOR.length;
+
 function getLogger(opts, id, logLevel) {
   return (msg, err) => {
     const logger = opts.logger || function () {};
@@ -29,12 +33,26 @@ function getLogger(opts, id, logLevel) {
     const tags = ['worker', logLevel];
 
     if (err) {
+      // The error message string could be very long if it contains the request
+      // body of a request that was too large for Elasticsearch.
+      // This takes a partial version of the error message without scanning
+      // every character of the string, which would block Node.
       const errString = `${message}: ${err.stack ? err.stack : err}`;
-      logger(errString.substring(0, 1000), tags);
-      logger(
-        `The first 1000 characters of the error message were logged. The entire error message length: ${errString.length} characters.`,
-        tags
-      );
+      const errLength = errString.length;
+      const subStr = String.prototype.substring.bind(errString);
+      if (errLength > MAX_ERROR_LENGTH) {
+        const partialError =
+          subStr(0, MAX_PARTIAL_ERROR_LENGTH) +
+          ERROR_PARTIAL_SEPARATOR +
+          subStr(errLength - MAX_PARTIAL_ERROR_LENGTH);
+
+        logger(partialError, tags);
+        logger(
+          `A partial version of the entire error message was logged. ` +
+          `The entire error message length is: ${errLength} characters.`,
+          tags
+        );
+      }
       return;
     }
 
