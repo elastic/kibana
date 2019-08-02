@@ -19,8 +19,40 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const createTagCloudFn = () => ({
-  name: 'tagcloud',
+import { ExpressionFunction, KibanaDatatable, Render } from '../../interpreter/types';
+
+const name = 'tagcloud';
+
+type Context = KibanaDatatable;
+
+interface Arguments {
+  scale: string;
+  orientation: string;
+  minFontSize: number;
+  maxFontSize: number;
+  showLabel: boolean;
+  metric: any; // these aren't typed yet
+  bucket: any; // these aren't typed yet
+}
+
+type VisParams = Omit<Arguments, 'bucket'>;
+
+interface RenderValue {
+  visType: typeof name;
+  visData: Context;
+  visConfig: VisParams;
+  params: any;
+}
+
+type Return = Render<RenderValue>;
+
+export const createTagCloudFn = (): ExpressionFunction<
+  typeof name,
+  Context,
+  Arguments,
+  Return
+> => ({
+  name,
   type: 'render',
   context: {
     types: ['kibana_datatable'],
@@ -48,14 +80,17 @@ export const createTagCloudFn = () => ({
     minFontSize: {
       types: ['number'],
       default: 18,
+      help: '',
     },
     maxFontSize: {
       types: ['number'],
       default: 72,
+      help: '',
     },
     showLabel: {
       types: ['boolean'],
       default: true,
+      help: '',
     },
     metric: {
       types: ['vis_dimension'],
@@ -71,7 +106,7 @@ export const createTagCloudFn = () => ({
       }),
     },
   },
-  fn(context: any, args: any) {
+  fn(context: Context, args: Arguments) {
     const visConfig = {
       scale: args.scale,
       orientation: args.orientation,
@@ -79,8 +114,7 @@ export const createTagCloudFn = () => ({
       maxFontSize: args.maxFontSize,
       showLabel: args.showLabel,
       metric: args.metric,
-      bucket: undefined,
-    };
+    } as Arguments;
 
     if (args.bucket !== undefined) {
       visConfig.bucket = args.bucket;
@@ -91,7 +125,7 @@ export const createTagCloudFn = () => ({
       as: 'visualization',
       value: {
         visData: context,
-        visType: 'tagcloud',
+        visType: name,
         visConfig,
         params: {
           listenOnChange: true,
