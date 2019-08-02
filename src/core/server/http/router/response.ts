@@ -88,6 +88,92 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 /**
  * Set of helpers used to create `KibanaResponse` to form HTTP response on an incoming request.
  * Should be returned as a result of {@link RequestHandler} execution.
+ *
+ * 1. Successful response. Supported types of response body are:
+ * - `undefined`, no content to send.
+ * - `string`, send text
+ * - `JSON`, send JSON object, HTTP server will throw if given object is not valid (has circular references, for example)
+ * - `Stream` send data stream
+ * - `Buffer` send binary stream
+ * ```js
+ * return response.ok(undefined);
+ * return response.ok('ack');
+ * return response.ok({ id: '1' });
+ * return response.ok(Buffer.from(...););
+ *
+ * const stream = new Stream.PassThrough();
+ * fs.createReadStream('./file').pipe(stream);
+ * return res.ok(stream);
+ * ```
+ * HTTP headers are configurable via response factory parameter `options` {@link HttpResponseOptions}.
+ *
+ * ```js
+ * return response.ok({ id: '1' }, {
+ *   headers: {
+ *     'content-type': 'application/json'
+ *   }
+ * });
+ * ```
+ * 2. Redirection response. Redirection URL is configures via 'Location' header.
+ * ```js
+ * return response.redirected('The document has moved', {
+ *   headers: {
+ *    location: '/new-url',
+ *   },
+ * });
+ * ```
+ * 3. Error response. You may pass an error message to the client, where error message can be:
+ * - `string` send message text
+ * - `Error` send the message text of given Error object.
+ * - `{ message: string | Error, meta: {data: Record<string, any>, ...} }` - send message text and attach additional error metadata.
+ * ```js
+ * return response.unauthorized('User has no access to the requested resource.', {
+ *   headers: {
+ *     'WWW-Authenticate': 'challenge',
+ *   }
+ * })
+ * return response.badRequest();
+ * return response.badRequest('validation error');
+ *
+ * try {
+ *   // ...
+ * } catch(error){
+ *   return response.badRequest(error);
+ * }
+ *
+ * return response.badRequest({
+ *   message: 'validation error',
+ *   meta: {
+ *     data: {
+ *       requestBody: request.body,
+ *       failedFields: validationResult
+ *     },
+ *   }
+ * });
+ *
+ * try {
+ *   // ...
+ * } catch(error) {
+ *   return response.badRequest({
+ *     message: error,
+ *     meta: {
+ *       data: {
+ *         requestBody: request.body,
+ *       },
+ *     }
+ *   });
+ * }
+ *
+ * ```
+ * 4. Custom response. `ResponseFactory` may not cover your use case, so you can use the `custom` function to customize the response.
+ * ```js
+ * return response.custom('ok', {
+ *   statusCode: 201,
+ *   headers: {
+ *     location: '/created-url'
+ *   }
+ * })
+ * ```
  * @public
  */
 export const kibanaResponseFactory = {
