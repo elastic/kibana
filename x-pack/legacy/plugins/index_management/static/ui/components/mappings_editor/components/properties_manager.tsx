@@ -52,7 +52,7 @@ export const PropertiesManager = ({ form, parentType = 'root', path, fieldName =
     <Fragment>
       {items.length > 0 && (
         <Fragment>
-          <ul className="tree" style={parentType === 'root' ? { marginLeft: 0 } : {}}>
+          <ul className="tree">
             {items.map(({ id, path: itemPath, isNew }) => {
               return (
                 <li key={id}>

@@ -17,10 +17,17 @@ import {
   UseField,
   Form,
   FormDataProvider,
+  FieldConfig,
 } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
 import { Field } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
 
-import { parametersDefinition, dataTypesDefinition, DataType, SubType } from '../config';
+import {
+  parametersDefinition,
+  dataTypesDefinition,
+  ParameterName,
+  DataType,
+  SubType,
+} from '../config';
 import { hasNestedProperties } from '../helpers';
 import { PropertyBasicParameters } from './property_basic_parameters';
 import { PropertiesManager } from './properties_manager';
@@ -34,6 +41,12 @@ interface Props {
   isDeletable?: boolean;
   isEditMode?: boolean;
 }
+
+const fieldConfig = (param: ParameterName): FieldConfig =>
+  parametersDefinition[param].fieldConfig || {};
+
+const defaultValueParam = (param: ParameterName): unknown =>
+  typeof fieldConfig(param).defaultValue !== 'undefined' ? fieldConfig(param).defaultValue : '';
 
 export const PropertyEditor = ({
   form,
@@ -94,8 +107,8 @@ export const PropertyEditor = ({
                 <UseField
                   path={`${fieldPathPrefix}name`}
                   form={form}
-                  defaultValue={isEditMode ? undefined : ''} // "undefined" means: look into the "defaultValue" object passed to the form
-                  config={parametersDefinition.name.fieldConfig}
+                  defaultValue={isEditMode ? undefined : defaultValueParam('name')} // "undefined" means: look into the "defaultValue" object passed to the form
+                  config={fieldConfig('name')}
                   component={getComponentForParameter('name')}
                 />
               </EuiFlexItem>
@@ -105,8 +118,8 @@ export const PropertyEditor = ({
                 <UseField
                   path={`${fieldPathPrefix}type`}
                   form={form}
-                  config={parametersDefinition.type.fieldConfig}
-                  defaultValue={isEditMode ? undefined : 'text'}
+                  config={fieldConfig('type')}
+                  defaultValue={isEditMode ? undefined : defaultValueParam('type')}
                 >
                   {field => (
                     <EuiFormRow label={field.label} helpText={field.helpText} fullWidth>
@@ -137,7 +150,7 @@ export const PropertyEditor = ({
                     form={form}
                     defaultValue={isEditMode ? undefined : typeDefinition.subTypes.types[0]}
                     config={{
-                      ...parametersDefinition.type.fieldConfig,
+                      ...fieldConfig('type'),
                       label: typeDefinition.subTypes.label,
                     }}
                     component={Field}
