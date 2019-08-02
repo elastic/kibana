@@ -27,7 +27,7 @@ type CreateSearchItems = () => {
   combinedQuery: any;
 };
 
-import { KibanaConfigTypeFix, KibanaContext } from '../../../contexts/kibana/kibana_context';
+import { KibanaConfigTypeFix, KibanaContext } from '../../../contexts/kibana';
 import { Page } from './page';
 
 module.directive('mlNewDataFrame', ($injector: InjectorService) => {
@@ -38,7 +38,7 @@ module.directive('mlNewDataFrame', ($injector: InjectorService) => {
       const indexPatterns = $injector.get<IndexPatterns>('indexPatterns');
       const kbnBaseUrl = $injector.get<string>('kbnBaseUrl');
       const kibanaConfig = $injector.get<KibanaConfigTypeFix>('config');
-      const Private: IPrivate = $injector.get('Private');
+      const Private = $injector.get<IPrivate>('Private');
 
       timefilter.disableTimeRangeSelector();
       timefilter.disableAutoRefreshSelector();
