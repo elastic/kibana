@@ -13,7 +13,6 @@ import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
   DimensionPriority,
-  DatasourceSuggestion,
   Operation,
   DatasourceLayerPanelProps,
 } from '../types';
@@ -21,10 +20,14 @@ import { Query } from '../../../../../../src/legacy/core_plugins/data/public/que
 import { getIndexPatterns } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
-import { getOperationTypesForField, buildColumn } from './operations';
 import { IndexPatternDatasourcePluginPlugins } from './plugin';
 import { IndexPatternDataPanel } from './datapanel';
-import { generateId } from '../id_generator';
+import {
+  getDatasourceSuggestionsForField,
+  getDatasourceSuggestionsFromCurrentState,
+} from './indexpattern_suggestions';
+
+import { isDraggedField } from './utils';
 import { Datasource, DataType } from '..';
 
 export type OperationType = IndexPatternColumn['operationType'];
@@ -123,6 +126,11 @@ export interface IndexPatternField {
   >;
 }
 
+export interface DraggedField {
+  field: IndexPatternField;
+  indexPatternId: string;
+}
+
 export interface IndexPatternLayer {
   columnOrder: string[];
   columns: Record<string, IndexPatternColumn>;
@@ -189,35 +197,6 @@ function removeProperty<T>(prop: string, object: Record<string, T>): Record<stri
   return result;
 }
 
-function getIndexPatternIdFromField(
-  state: IndexPatternPrivateState,
-  field: IndexPatternField
-): string | null {
-  if (state.currentIndexPatternId && state.indexPatterns[state.currentIndexPatternId]) {
-    const isMatchingActive = state.indexPatterns[state.currentIndexPatternId].fields.findIndex(f =>
-      _.isEqual(f, field)
-    );
-
-    if (isMatchingActive !== -1) {
-      return state.currentIndexPatternId;
-    }
-  }
-
-  const matchingIndexPattern = Object.values(state.indexPatterns).find(indexPattern => {
-    if (indexPattern.id === state.currentIndexPatternId) {
-      return;
-    }
-
-    const hasMatch = indexPattern.fields.findIndex(f => _.isEqual(f, field));
-
-    if (hasMatch !== -1) {
-      return indexPattern.id;
-    }
-  });
-
-  return matchingIndexPattern ? matchingIndexPattern.id : null;
-}
-
 export function getIndexPatternDatasource({
   chrome,
   toastNotifications,
@@ -270,6 +249,7 @@ export function getIndexPatternDatasource({
     removeLayer(state: IndexPatternPrivateState, layerId: string) {
       const newLayers = { ...state.layers };
       delete newLayers[layerId];
+
       return {
         ...state,
         layers: newLayers,
@@ -310,11 +290,9 @@ export function getIndexPatternDatasource({
           return state.layers[layerId].columnOrder.map(colId => ({ columnId: colId }));
         },
         getOperationForColumnId: (columnId: string) => {
-          const layer = Object.values(state.layers).find(l =>
-            l.columnOrder.find(id => id === columnId)
-          );
+          const layer = state.layers[layerId];
 
-          if (layer) {
+          if (layer && layer.columns[columnId]) {
             return columnToOperation(layer.columns[columnId]);
           }
           return null;
@@ -363,192 +341,12 @@ export function getIndexPatternDatasource({
         duplicateColumn: () => [],
       };
     },
-
-    getDatasourceSuggestionsForField(
-      state,
-      item
-    ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
-      const layers = Object.keys(state.layers);
-      const field: IndexPatternField = item as IndexPatternField;
-
-      const currentIndexPattern = state.indexPatterns[state.currentIndexPatternId];
-
-      const indexPatternId = getIndexPatternIdFromField(state, field);
-
-      let layerId;
-      let layer: IndexPatternLayer;
-
-      if (indexPatternId) {
-        layerId = layers.find(id => state.layers[id].indexPatternId === indexPatternId);
-      }
-
-      if (!layerId) {
-        // The field we're suggesting on might not match any existing layer. This will always add
-        // a new layer if possible, but that might not be desirable if the layers are too complicated
-        // already
-        layerId = generateId();
-        layer = {
-          indexPatternId: state.currentIndexPatternId,
-          columnOrder: [],
-          columns: {},
-        };
-      } else {
-        layer = state.layers[layerId];
-        if (layer.columnOrder.length) {
-          // We aren't suggesting ways of using the field to replace the existing user configuration
-          // This is a good place for future extension
-          return [];
-        }
-      }
-
-      const operations = getOperationTypesForField(field);
-      const hasBucket = operations.find(op => op === 'date_histogram' || op === 'terms');
-
-      if (hasBucket) {
-        const countColumn = buildColumn({
-          op: 'count',
-          columns: layer.columns,
-          indexPattern: currentIndexPattern,
-          layerId,
-          suggestedPriority: undefined,
-        });
-
-        // let column know about count column
-        const column = buildColumn({
-          layerId,
-          op: hasBucket,
-          indexPattern: currentIndexPattern,
-          columns: {
-            col2: countColumn,
-          },
-          field,
-          suggestedPriority: undefined,
-        });
-
-        const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
-          state: {
-            ...state,
-            layers: {
-              ...state.layers,
-              [layerId]: {
-                indexPatternId: state.currentIndexPatternId,
-                columns: {
-                  col1: column,
-                  col2: countColumn,
-                },
-                columnOrder: ['col1', 'col2'],
-              },
-            },
-          },
-
-          table: {
-            columns: [
-              {
-                columnId: 'col1',
-                operation: columnToOperation(column),
-              },
-              {
-                columnId: 'col2',
-                operation: columnToOperation(countColumn),
-              },
-            ],
-            isMultiRow: true,
-            datasourceSuggestionId: 0,
-            layerId,
-          },
-        };
-
-        return [suggestion];
-      } else if (state.indexPatterns[state.currentIndexPatternId].timeFieldName) {
-        const dateField = currentIndexPattern.fields.find(
-          f => f.name === currentIndexPattern.timeFieldName
-        )!;
-
-        const column = buildColumn({
-          op: operations[0],
-          columns: layer.columns,
-          suggestedPriority: undefined,
-          field,
-          indexPattern: currentIndexPattern,
-          layerId,
-        });
-
-        const dateColumn = buildColumn({
-          op: 'date_histogram',
-          columns: layer.columns,
-          suggestedPriority: undefined,
-          field: dateField,
-          indexPattern: currentIndexPattern,
-          layerId,
-        });
-
-        const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
-          state: {
-            ...state,
-            layers: {
-              ...state.layers,
-              [layerId]: {
-                ...layer,
-                columns: {
-                  col1: dateColumn,
-                  col2: column,
-                },
-                columnOrder: ['col1', 'col2'],
-              },
-            },
-          },
-
-          table: {
-            columns: [
-              {
-                columnId: 'col1',
-                operation: columnToOperation(column),
-              },
-              {
-                columnId: 'col2',
-                operation: columnToOperation(dateColumn),
-              },
-            ],
-            isMultiRow: true,
-            datasourceSuggestionId: 0,
-            layerId,
-          },
-        };
-
-        return [suggestion];
-      }
-
-      return [];
+    getDatasourceSuggestionsForField(state, draggedField) {
+      return isDraggedField(draggedField)
+        ? getDatasourceSuggestionsForField(state, draggedField.indexPatternId, draggedField.field)
+        : [];
     },
-
-    getDatasourceSuggestionsFromCurrentState(
-      state
-    ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
-      const layers = Object.entries(state.layers);
-
-      return layers
-        .map(([layerId, layer], index) => {
-          if (layer.columnOrder.length === 0) {
-            return;
-          }
-          return {
-            state,
-
-            table: {
-              columns: layer.columnOrder.map(id => ({
-                columnId: id,
-                operation: columnToOperation(layer.columns[id]),
-              })),
-              isMultiRow: true,
-              datasourceSuggestionId: index,
-              layerId,
-            },
-          };
-        })
-        .reduce((prev, current) => (current ? prev.concat([current]) : prev), [] as Array<
-          DatasourceSuggestion<IndexPatternPrivateState>
-        >);
-    },
+    getDatasourceSuggestionsFromCurrentState,
   };
 
   return indexPatternDatasource;

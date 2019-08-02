@@ -58,8 +58,28 @@ describe('editor_frame', () => {
   let expressionRendererMock: ExpressionRenderer;
 
   beforeEach(() => {
-    mockVisualization = createMockVisualization();
-    mockVisualization2 = createMockVisualization();
+    mockVisualization = {
+      ...createMockVisualization(),
+      id: 'testVis',
+      visualizationTypes: [
+        {
+          icon: 'empty',
+          id: 'testVis',
+          label: 'TEST1',
+        },
+      ],
+    };
+    mockVisualization2 = {
+      ...createMockVisualization(),
+      id: 'testVis2',
+      visualizationTypes: [
+        {
+          icon: 'empty',
+          id: 'testVis2',
+          label: 'TEST2',
+        },
+      ],
+    };
 
     mockDatasource = createMockDatasource();
     mockDatasource2 = createMockDatasource();
@@ -231,7 +251,7 @@ describe('editor_frame', () => {
       expect(mockVisualization.initialize).toHaveBeenCalledWith({
         datasourceLayers: {},
         addNewLayer: expect.any(Function),
-        removeLayer: expect.any(Function),
+        removeLayers: expect.any(Function),
         query: { query: '', language: 'lucene' },
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
       });
@@ -263,6 +283,37 @@ describe('editor_frame', () => {
       mockVisualization.initialize.mock.calls[0][0].addNewLayer();
 
       expect(mockDatasource2.insertLayer).toHaveBeenCalledWith(initialState, expect.anything());
+    });
+
+    it('should remove layer on active datasource on frame api call', async () => {
+      const initialState = { datasource2: '' };
+      mockDatasource2.initialize.mockReturnValue(Promise.resolve(initialState));
+      mockDatasource2.getLayers.mockReturnValue(['abc', 'def']);
+      mockDatasource2.removeLayer.mockReturnValue({ removed: true });
+      act(() => {
+        mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+              testDatasource2: mockDatasource2,
+            }}
+            initialDatasourceId="testDatasource2"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
+
+      await waitForPromises();
+
+      mockVisualization.initialize.mock.calls[0][0].removeLayers(['abc', 'def']);
+
+      expect(mockDatasource2.removeLayer).toHaveBeenCalledWith(initialState, 'abc');
+      expect(mockDatasource2.removeLayer).toHaveBeenCalledWith({ removed: true }, 'def');
     });
 
     it('should render data panel after initialization is complete', async () => {
@@ -797,8 +848,27 @@ describe('editor_frame', () => {
   describe('switching', () => {
     let instance: ReactWrapper;
 
+    function switchTo(subType: string) {
+      act(() => {
+        instance
+          .find('[data-test-subj="lnsChartSwitchPopover"]')
+          .last()
+          .simulate('click');
+      });
+
+      instance.update();
+
+      act(() => {
+        instance
+          .find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`)
+          .last()
+          .simulate('click');
+      });
+    }
+
     beforeEach(async () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
+
       instance = mount(
         <EditorFrame
           {...getDefaultProps()}
@@ -864,11 +934,7 @@ describe('editor_frame', () => {
     });
 
     it('should initialize other visualization on switch', async () => {
-      act(() => {
-        instance
-          .find('select[data-test-subj="visualization-switch"]')
-          .simulate('change', { target: { value: 'testVis2' } });
-      });
+      switchTo('testVis2');
       expect(mockVisualization2.initialize).toHaveBeenCalled();
     });
 
@@ -885,11 +951,7 @@ describe('editor_frame', () => {
         },
       ]);
 
-      act(() => {
-        instance
-          .find('select[data-test-subj="visualization-switch"]')
-          .simulate('change', { target: { value: 'testVis2' } });
-      });
+      switchTo('testVis2');
 
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization2.initialize).toHaveBeenCalledWith(expect.anything(), initialState);
@@ -902,11 +964,7 @@ describe('editor_frame', () => {
     it('should fall back when switching visualizations if the visualization has no suggested use', async () => {
       mockVisualization2.initialize.mockReturnValueOnce({ initial: true });
 
-      act(() => {
-        instance
-          .find('select[data-test-subj="visualization-switch"]')
-          .simulate('change', { target: { value: 'testVis2' } });
-      });
+      switchTo('testVis2');
 
       expect(mockDatasource.publicAPIMock.getTableSpec).toHaveBeenCalled();
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();

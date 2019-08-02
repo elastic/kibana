@@ -20,7 +20,7 @@ jest.mock('../id_generator');
 function mockFrame(): FramePublicAPI {
   return {
     addNewLayer: () => 'aaa',
-    removeLayer: () => {},
+    removeLayers: () => {},
     datasourceLayers: {},
     query: { query: '', language: 'lucene' },
     dateRange: {

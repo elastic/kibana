@@ -36,8 +36,8 @@ export class AppPlugin {
     const editorFrame = editorFrameSetup();
 
     editorFrame.registerDatasource('indexpattern', indexPattern);
-    editorFrame.registerVisualization('xy', xyVisualization);
-    editorFrame.registerVisualization('datatable', datatableVisualization);
+    editorFrame.registerVisualization(xyVisualization);
+    editorFrame.registerVisualization(datatableVisualization);
 
     this.chrome = chrome;
     const store = new SavedObjectIndexStore(this.chrome!.getSavedObjectsClient());

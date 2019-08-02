@@ -91,6 +91,29 @@ export const datatableVisualization: Visualization<
   DatatableVisualizationState,
   DatatableVisualizationState
 > = {
+  id: 'lnsDatatable',
+
+  visualizationTypes: [
+    {
+      id: 'lnsDatatable',
+      icon: 'visTable',
+      label: i18n.translate('xpack.lens.datatable.label', {
+        defaultMessage: 'Datatable',
+      }),
+    },
+  ],
+
+  getDescription(state) {
+    return {
+      icon: 'empty',
+      label: i18n.translate('xpack.lens.datatable.label', {
+        defaultMessage: 'Datatable',
+      }),
+    };
+  },
+
+  switchVisualizationType: (_, state) => state,
+
   initialize(frame, state) {
     const layerId = Object.keys(frame.datasourceLayers)[0] || frame.addNewLayer();
     return (
@@ -137,7 +160,7 @@ export const datatableVisualization: Visualization<
       <I18nProvider>
         <EuiForm className="lnsConfigPanel">
           {props.state.layers.map(layer => (
-            <DataTableLayer layer={layer} {...props} />
+            <DataTableLayer key={layer.layerId} layer={layer} {...props} />
           ))}
         </EuiForm>
       </I18nProvider>,

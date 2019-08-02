@@ -5,6 +5,7 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { Query } from 'src/plugins/data/common';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
@@ -35,7 +36,7 @@ export interface EditorFrameSetup {
   createInstance: (options: EditorFrameOptions) => EditorFrameInstance;
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
   registerDatasource: <T, P>(name: string, datasource: Datasource<T, P>) => void;
-  registerVisualization: <T, P>(name: string, visualization: Visualization<T, P>) => void;
+  registerVisualization: <T, P>(visualization: Visualization<T, P>) => void;
 }
 
 // Hints the default nesting to the data source. 0 is the highest priority
@@ -206,10 +207,29 @@ export interface FramePublicAPI {
 
   // Adds a new layer. This has a side effect of updating the datasource state
   addNewLayer: () => string;
-  removeLayer: (layerId: string) => void;
+  removeLayers: (layerIds: string[]) => void;
+}
+
+export interface VisualizationType {
+  id: string;
+  icon?: EuiIconType | string;
+  label: string;
 }
 
 export interface Visualization<T = unknown, P = unknown> {
+  id: string;
+
+  visualizationTypes: VisualizationType[];
+
+  getDescription: (
+    state: T
+  ) => {
+    icon?: EuiIconType | string;
+    label: string;
+  };
+
+  switchVisualizationType?: (visualizationTypeId: string, state: T) => T;
+
   // For initializing from saved object
   initialize: (frame: FramePublicAPI, state?: P) => T;
 
