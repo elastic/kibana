@@ -2,7 +2,13 @@
 
 exports[`Data Frame: Job List Expanded Row <ExpandedRowDetailsPane /> Minimal initialization 1`] = `
 <EuiFlexGroup>
-  <EuiFlexItem>
+  <EuiFlexItem
+    style={
+      Object {
+        "width": "50%",
+      }
+    }
+  >
     <EuiSpacer
       size="s"
     />
@@ -21,7 +27,13 @@ exports[`Data Frame: Job List Expanded Row <ExpandedRowDetailsPane /> Minimal in
       }
     />
   </EuiFlexItem>
-  <EuiFlexItem />
+  <EuiFlexItem
+    style={
+      Object {
+        "width": "50%",
+      }
+    }
+  />
 </EuiFlexGroup>
 `;
 

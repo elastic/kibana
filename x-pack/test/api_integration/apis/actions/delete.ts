@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { ES_ARCHIVER_ACTION_ID } from './constants';
+import { ES_ARCHIVER_ACTION_ID, SPACE_1_ES_ARCHIVER_ACTION_ID } from './constants';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
@@ -18,11 +18,25 @@ export default function deleteActionTests({ getService }: KibanaFunctionalTestDe
     beforeEach(() => esArchiver.load('actions/basic'));
     afterEach(() => esArchiver.unload('actions/basic'));
 
-    it('should return 200 when deleting an action', async () => {
+    it('should return 204 when deleting an action', async () => {
       await supertest
         .delete(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
-        .expect(200, {});
+        .expect(204, '');
+    });
+
+    it('should return 204 when deleting an action in a space', async () => {
+      await supertest
+        .delete(`/s/space_1/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(204, '');
+    });
+
+    it('should return 404 when deleting an action in another space', async () => {
+      await supertest
+        .delete(`/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(404);
     });
 
     it(`should return 404 when action doesn't exist`, async () => {

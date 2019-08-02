@@ -5,17 +5,18 @@
 ```ts
 
 import Boom from 'boom';
-import { ByteSizeValue } from '@kbn/config-schema';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { ConfigOptions } from 'elasticsearch';
 import { Duration } from 'moment';
+import { IncomingHttpHeaders } from 'http';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { Readable } from 'stream';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
-import { Schema } from '@kbn/config-schema';
 import { Server } from 'hapi';
+import { Stream } from 'stream';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { Url } from 'url';
@@ -29,17 +30,18 @@ export type APICaller = (endpoint: string, clientParams: Record<string, any>, op
 export type AuthenticationHandler = (request: KibanaRequest, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
 
 // @public
-export type AuthHeaders = Record<string, string>;
+export type AuthHeaders = Record<string, string | string[]>;
 
 // @public
-export interface AuthResultData {
-    headers: AuthHeaders;
-    state: Record<string, any>;
+export interface AuthResultParams {
+    requestHeaders?: AuthHeaders;
+    responseHeaders?: AuthHeaders;
+    state?: Record<string, any>;
 }
 
 // @public
 export interface AuthToolkit {
-    authenticated: (data?: Partial<AuthResultData>) => AuthResult;
+    authenticated: (data?: AuthResultParams) => AuthResult;
     redirected: (url: string) => AuthResult;
     rejected: (error: Error, options?: {
         statusCode?: number;
@@ -98,7 +100,6 @@ export interface CoreSetup {
         registerAuth: HttpServiceSetup['registerAuth'];
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         basePath: HttpServiceSetup['basePath'];
-        createNewServer: HttpServiceSetup['createNewServer'];
         isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
     };
 }
@@ -168,12 +169,7 @@ export type Headers = Record<string, string | string[] | undefined>;
 // Warning: (ae-forgotten-export) The symbol "HttpServerSetup" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export interface HttpServiceSetup extends HttpServerSetup {
-    // Warning: (ae-forgotten-export) The symbol "HttpConfig" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
-}
+export type HttpServiceSetup = HttpServerSetup;
 
 // @public (undocumented)
 export interface HttpServiceStart {
@@ -386,6 +382,22 @@ export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T ext
 }> : T;
 
 // @public
+export type ResponseError = string | Error | {
+    message: string | Error;
+    meta?: ResponseErrorMeta;
+};
+
+// @public
+export interface ResponseErrorMeta {
+    // (undocumented)
+    data?: Record<string, any>;
+    // (undocumented)
+    docLink?: string;
+    // (undocumented)
+    errorCode?: string;
+}
+
+// @public
 export interface RouteConfigOptions {
     authRequired?: boolean;
     tags?: readonly string[];
@@ -515,14 +527,16 @@ export class SavedObjectsClient {
 // @public
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
-// Warning: (ae-missing-release-tag) "SavedObjectsClientWrapperFactory" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
+export interface SavedObjectsClientProviderOptions {
+    // (undocumented)
+    excludedWrappers?: string[];
+}
+
+// @public
 export type SavedObjectsClientWrapperFactory<Request = unknown> = (options: SavedObjectsClientWrapperOptions<Request>) => SavedObjectsClientContract;
 
-// Warning: (ae-missing-release-tag) "SavedObjectsClientWrapperOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface SavedObjectsClientWrapperOptions<Request = unknown> {
     // (undocumented)
     client: SavedObjectsClientContract;
@@ -590,6 +604,25 @@ export class SavedObjectsErrorHelpers {
     static isSavedObjectsClientError(error: any): error is DecoratedError;
 }
 
+// @public
+export interface SavedObjectsExportOptions {
+    // (undocumented)
+    exportSizeLimit: number;
+    // (undocumented)
+    includeReferencesDeep?: boolean;
+    // (undocumented)
+    namespace?: string;
+    // (undocumented)
+    objects?: Array<{
+        id: string;
+        type: string;
+    }>;
+    // (undocumented)
+    savedObjectsClient: SavedObjectsClientContract;
+    // (undocumented)
+    types?: string[];
+}
+
 // @public (undocumented)
 export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     // (undocumented)
@@ -629,10 +662,160 @@ export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any>
 }
 
 // @public
+export interface SavedObjectsImportConflictError {
+    // (undocumented)
+    type: 'conflict';
+}
+
+// @public
+export interface SavedObjectsImportError {
+    // (undocumented)
+    error: SavedObjectsImportConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    title?: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public
+export interface SavedObjectsImportMissingReferencesError {
+    // (undocumented)
+    blocking: Array<{
+        type: string;
+        id: string;
+    }>;
+    // (undocumented)
+    references: Array<{
+        type: string;
+        id: string;
+    }>;
+    // (undocumented)
+    type: 'missing_references';
+}
+
+// @public
+export interface SavedObjectsImportOptions {
+    // (undocumented)
+    namespace?: string;
+    // (undocumented)
+    objectLimit: number;
+    // (undocumented)
+    overwrite: boolean;
+    // (undocumented)
+    readStream: Readable;
+    // (undocumented)
+    savedObjectsClient: SavedObjectsClientContract;
+    // (undocumented)
+    supportedTypes: string[];
+}
+
+// @public
+export interface SavedObjectsImportResponse {
+    // (undocumented)
+    errors?: SavedObjectsImportError[];
+    // (undocumented)
+    success: boolean;
+    // (undocumented)
+    successCount: number;
+}
+
+// @public
+export interface SavedObjectsImportRetry {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    overwrite: boolean;
+    // (undocumented)
+    replaceReferences: Array<{
+        type: string;
+        from: string;
+        to: string;
+    }>;
+    // (undocumented)
+    type: string;
+}
+
+// @public
+export interface SavedObjectsImportUnknownError {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    statusCode: number;
+    // (undocumented)
+    type: 'unknown';
+}
+
+// @public
+export interface SavedObjectsImportUnsupportedTypeError {
+    // (undocumented)
+    type: 'unsupported_type';
+}
+
+// @public
 export interface SavedObjectsMigrationVersion {
     // (undocumented)
     [pluginName: string]: string;
 }
+
+// Warning: (ae-missing-release-tag) "RawDoc" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public
+export interface SavedObjectsRawDoc {
+    // (undocumented)
+    _id: string;
+    // (undocumented)
+    _primary_term?: number;
+    // (undocumented)
+    _seq_no?: number;
+    // (undocumented)
+    _source: any;
+    // (undocumented)
+    _type?: string;
+}
+
+// @public
+export interface SavedObjectsResolveImportErrorsOptions {
+    // (undocumented)
+    namespace?: string;
+    // (undocumented)
+    objectLimit: number;
+    // (undocumented)
+    readStream: Readable;
+    // (undocumented)
+    retries: SavedObjectsImportRetry[];
+    // (undocumented)
+    savedObjectsClient: SavedObjectsClientContract;
+    // (undocumented)
+    supportedTypes: string[];
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsSchema" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export class SavedObjectsSchema {
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsSchemaDefinition" needs to be exported by the entry point index.d.ts
+    constructor(schemaDefinition?: SavedObjectsSchemaDefinition);
+    // (undocumented)
+    getIndexForType(type: string): string | undefined;
+    // (undocumented)
+    isHiddenType(type: string): boolean;
+    // (undocumented)
+    isNamespaceAgnostic(type: string): boolean;
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsSerializer" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export class SavedObjectsSerializer {
+    constructor(schema: SavedObjectsSchema);
+    generateRawId(namespace: string | undefined, type: string, id?: string): string;
+    isRawSavedObject(rawDoc: SavedObjectsRawDoc): any;
+    // Warning: (ae-forgotten-export) The symbol "SanitizedSavedObjectDoc" needs to be exported by the entry point index.d.ts
+    rawToSavedObject(doc: SavedObjectsRawDoc): SanitizedSavedObjectDoc;
+    savedObjectToRaw(savedObj: SanitizedSavedObjectDoc): SavedObjectsRawDoc;
+    }
 
 // @public (undocumented)
 export interface SavedObjectsService<Request = any> {
@@ -644,10 +827,19 @@ export interface SavedObjectsService<Request = any> {
     getSavedObjectsRepository(...rest: any[]): any;
     // (undocumented)
     getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
+    // (undocumented)
+    importExport: {
+        objectLimit: number;
+        importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+        resolveImportErrors(options: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+        getSortedObjectsForExport(options: SavedObjectsExportOptions): Promise<Readable>;
+    };
     // Warning: (ae-incompatible-release-tags) The symbol "SavedObjectsClient" is marked as @public, but its signature references "SavedObjectsClient" which is marked as @internal
     // 
     // (undocumented)
     SavedObjectsClient: typeof SavedObjectsClient;
+    // (undocumented)
+    schema: SavedObjectsSchema;
     // (undocumented)
     types: string[];
 }

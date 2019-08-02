@@ -8,19 +8,18 @@ import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { initIpToHostName } from './routes/ip_to_hostname';
 import { schemas } from './graphql';
 import { createLogEntriesResolvers } from './graphql/log_entries';
-import { createMetadataResolvers } from './graphql/metadata';
 import { createMetricResolvers } from './graphql/metrics/resolvers';
 import { createSnapshotResolvers } from './graphql/snapshot';
 import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
 import { InfraBackendLibs } from './lib/infra_types';
-import { initMetricExplorerRoute } from './routes/metrics_explorer';
 import { initLogAnalysisGetLogEntryRateRoute } from './routes/log_analysis';
+import { initMetricExplorerRoute } from './routes/metrics_explorer';
+import { initMetadataRoute } from './routes/metadata';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
     resolvers: [
-      createMetadataResolvers(libs) as IResolvers,
       createLogEntriesResolvers(libs) as IResolvers,
       createSnapshotResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
@@ -35,4 +34,5 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initIpToHostName(libs);
   initLogAnalysisGetLogEntryRateRoute(libs);
   initMetricExplorerRoute(libs);
+  initMetadataRoute(libs);
 };
