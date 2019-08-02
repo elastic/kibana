@@ -127,7 +127,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(actualCountMin).to.be('3 hours');
       });
 
-      describe('Dark mode', () => {
+      // --reversed class is not implemented in @elastic\chart
+      describe.skip('Dark mode', () => {
         before(async () => {
           await kibanaServer.uiSettings.update({
             'theme:darkMode': true,
