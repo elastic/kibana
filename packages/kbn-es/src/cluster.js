@@ -269,7 +269,7 @@ exports.Cluster = class Cluster {
       esArgs.push(`xpack.security.http.ssl.certificate_authorities=${caCertPath}`);
     }
 
-    const args = parseSettings(extractConfigFiles(esArgs || [], installPath, { log: this._log }), {
+    const args = parseSettings(extractConfigFiles(esArgs, installPath, { log: this._log }), {
       filter: SettingsFilter.NonSecureOnly,
     }).reduce(
       (acc, [settingName, settingValue]) => acc.concat(['-E', `${settingName}=${settingValue}`]),
