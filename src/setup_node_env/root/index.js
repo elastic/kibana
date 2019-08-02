@@ -16,13 +16,3 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-var force = require('./force')(process.argv);
-
-var uid = process.getuid && process.getuid();
-var isRoot = require('./is_root')(uid);
-
-if (isRoot && !force) {
-  console.error('Kibana should not be run as root.  Use --allow-root to continue.');
-  process.exit(1);
-}
