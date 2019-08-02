@@ -43,7 +43,6 @@ module.directive('jobsPage', function () {
     scope: {},
     restrict: 'E',
     link: (scope, element) => {
-      // pass globalState to JobsPage so it can get jobs selected from management.ml
       ReactDOM.render(
         <I18nContext>
           <JobsPage angularWrapperScope={scope} />

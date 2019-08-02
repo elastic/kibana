@@ -174,6 +174,7 @@ export class JobsListView extends Component {
             job={this.state.fullJobsList[jobId]}
             addYourself={this.addUpdateFunction}
             removeYourself={this.removeUpdateFunction}
+            fullDetails={this.props.isManagementTable !== true}
           />
         );
       } else {
@@ -182,6 +183,7 @@ export class JobsListView extends Component {
             jobId={jobId}
             addYourself={this.addUpdateFunction}
             removeYourself={this.removeUpdateFunction}
+            fullDetails={this.props.isManagementTable !== true}
           />
         );
       }
@@ -203,6 +205,7 @@ export class JobsListView extends Component {
                     job={job}
                     addYourself={this.addUpdateFunction}
                     removeYourself={this.removeUpdateFunction}
+                    fullDetails={this.props.isManagementTable !== true}
                   />
                 );
               }
@@ -439,11 +442,10 @@ export class JobsListView extends Component {
 
     return (
       <React.Fragment>
-        {isManagementTable === undefined &&
-          <JobStatsBar
-            jobsSummaryList={jobsSummaryList}
-          />}
-        <div className={isManagementTable === true ? '' : 'job-management'} data-test-subj="ml-jobs-list">
+        <JobStatsBar
+          jobsSummaryList={jobsSummaryList}
+        />
+        <div className="job-management" data-test-subj="ml-jobs-list">
           <NodeAvailableWarning />
           <UpgradeWarning />
           <header>
@@ -455,7 +457,7 @@ export class JobsListView extends Component {
                     isRefreshing={isRefreshing}
                   />
                 </EuiFlexItem>
-                {isManagementTable === false &&
+                {isManagementTable === undefined &&
                   <EuiFlexItem grow={false}>
                     <NewJobButton />
                   </EuiFlexItem>}

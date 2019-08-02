@@ -20,6 +20,7 @@ import { JobIcon } from '../../../../components/job_message_icon';
 import { getJobIdUrl } from '../utils';
 
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
   EuiLink
@@ -229,6 +230,30 @@ class JobsListUI extends Component {
         width: '8%'
       }, {
         name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.actionsLabel',
+          defaultMessage: 'Actions'
+        }),
+        render: (item) => (
+          <ResultLinks jobs={[item]} />
+        )
+      }
+    ];
+
+    if (isManagementTable === true) {
+      // insert before last column
+      columns.splice(columns.length - 1, 0, {
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.spacesLabel',
+          defaultMessage: 'Spaces'
+        }),
+        render: () => (
+          <EuiBadge color={'hollow'}>{'all'}</EuiBadge>
+        )
+      });
+    } else {
+      // insert before last column
+      columns.splice(columns.length - 1, 0, {
+        name: intl.formatMessage({
           id: 'xpack.ml.jobsList.latestTimestampLabel',
           defaultMessage: 'Latest timestamp'
         }),
@@ -244,18 +269,7 @@ class JobsListUI extends Component {
         ),
         textOnly: true,
         width: '15%'
-      }, {
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.actionsLabel',
-          defaultMessage: 'Actions'
-        }),
-        render: (item) => (
-          <ResultLinks jobs={[item]} />
-        )
-      }
-    ];
-
-    if (isManagementTable === undefined) {
+      });
       columns.push({
         name: '',
         actions: actionsMenuContent(

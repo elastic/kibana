@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import {
@@ -12,6 +12,7 @@ import {
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiSpacer,
   EuiTabbedContent,
   EuiTitle,
 } from '@elastic/eui';
@@ -26,7 +27,12 @@ export const JobsListPage = () => {
       name: i18n.translate('xpack.ml.management.jobsList.anomalyDetectionTab', {
         defaultMessage: 'Anomaly detection',
       }),
-      content: <JobsListView isManagementTable={true} />,
+      content: (
+        <Fragment>
+          <EuiSpacer size="m" />
+          <JobsListView isManagementTable={true} />
+        </Fragment>
+      ),
     },
     {
       id: 'analytics_jobs',
