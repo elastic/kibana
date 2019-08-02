@@ -41,7 +41,7 @@ describe('suggestion helpers', () => {
       {}
     );
     expect(suggestions).toHaveLength(1);
-    expect(suggestions[0].state).toBe(suggestedState);
+    expect(suggestions[0].visualizationState).toBe(suggestedState);
   });
 
   it('should concatenate suggestions from all visualizations', () => {

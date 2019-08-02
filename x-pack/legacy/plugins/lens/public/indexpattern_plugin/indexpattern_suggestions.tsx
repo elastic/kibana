@@ -298,7 +298,7 @@ function createNewLayerWithMetricAggregation(
 export function getDatasourceSuggestionsFromCurrentState(
   state: IndexPatternPrivateState
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
-  const layers = Object.entries(state.layers);
+  const layers = Object.entries(state.layers || {});
 
   return _.flatten(
     layers.map(([layerId, layer], index) => {

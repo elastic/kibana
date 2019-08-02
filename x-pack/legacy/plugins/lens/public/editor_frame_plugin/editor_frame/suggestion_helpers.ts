@@ -5,16 +5,18 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
-import { Visualization, DatasourceSuggestion, TableSuggestion } from '../../types';
+import { Visualization, TableSuggestion, Datasource, FramePublicAPI } from '../../types';
 import { Action } from './state_management';
 
 export interface Suggestion {
   visualizationId: string;
-  // todo include kept layer id and affected data source here
-  datasourceSuggestion: DatasourceSuggestion;
+  datasourceState?: unknown;
+  datasourceId?: string;
+  keptLayerId: string;
+  columns: number;
   score: number;
   title: string;
-  state: unknown;
+  visualizationState: unknown;
   previewExpression?: Ast | string;
   previewIcon: string;
 }
@@ -27,13 +29,43 @@ export interface Suggestion {
  * Each suggestion represents a valid state of the editor and can be applied by creating an
  * action with `toSwitchAction` and dispatching it
  */
-export function getSuggestions(
-  datasourceTableSuggestions: DatasourceSuggestion[],
-  visualizationMap: Record<string, Visualization>,
-  activeVisualizationId: string | null,
-  visualizationState: unknown
-): Suggestion[] {
-  const datasourceTables: TableSuggestion[] = datasourceTableSuggestions.map(({ table }) => table);
+export function getSuggestions({
+  datasourceMap,
+  datasourceStates,
+  visualizationMap,
+  activeVisualizationId,
+  visualizationState,
+}: {
+  datasourceMap: Record<string, Datasource>;
+  datasourceStates: Record<
+    string,
+    {
+      isLoading: boolean;
+      state: unknown;
+    }
+  >;
+  visualizationMap: Record<string, Visualization>;
+  activeVisualizationId: string | null;
+  visualizationState: unknown;
+}): Suggestion[] {
+  const datasourceTableSuggestions = _.flatten(
+    Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
+      if (datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading) {
+        return (
+          datasource
+            .getDatasourceSuggestionsFromCurrentState(datasourceStates[datasourceId])
+            // TODO have the datasource in there by default
+            .map(suggestion => ({ ...suggestion, datasourceId }))
+        );
+      } else {
+        return [];
+      }
+    })
+  ).map((suggestion, index) => ({
+    ...suggestion,
+    table: { ...suggestion.table, datasourceSuggestionId: index },
+  }));
+  const datasourceTables = datasourceTableSuggestions.map(({ table }) => table);
 
   return Object.entries(visualizationMap)
     .map(([visualizationId, visualization]) => {
@@ -42,25 +74,41 @@ export function getSuggestions(
           tables: datasourceTables,
           state: visualizationId === activeVisualizationId ? visualizationState : undefined,
         })
-        .map(({ datasourceSuggestionId, ...suggestion }) => ({
-          ...suggestion,
-          visualizationId,
-          datasourceSuggestion: datasourceTableSuggestions.find(
-            datasourceSuggestion =>
-              datasourceSuggestion.table.datasourceSuggestionId === datasourceSuggestionId
-          )!,
-        }));
+        .map(({ datasourceSuggestionId, state, ...suggestion }) => {
+          const datasourceSuggestion = datasourceTableSuggestions[datasourceSuggestionId];
+          return {
+            ...suggestion,
+            visualizationId,
+            visualizationState: state,
+            keptLayerId: datasourceSuggestion.table.layerId,
+            datasourceState: datasourceSuggestion.state,
+            datasourceId: datasourceSuggestion.datasourceId,
+            columns: datasourceSuggestion.table.columns.length,
+          };
+        });
     })
     .reduce((globalList, currentList) => [...globalList, ...currentList], [])
     .sort(({ score: scoreA }, { score: scoreB }) => scoreB - scoreA);
 }
 
-export function toSwitchAction(suggestion: Suggestion): Action {
-  return {
+export function switchToSuggestion(
+  frame: FramePublicAPI,
+  dispatch: (action: Action) => void,
+  suggestion: Pick<
+    Suggestion,
+    'visualizationId' | 'visualizationState' | 'datasourceState' | 'datasourceId' | 'keptLayerId'
+  >
+) {
+  const action: Action = {
     type: 'SWITCH_VISUALIZATION',
     newVisualizationId: suggestion.visualizationId,
-    initialState: suggestion.state,
-    datasourceState: suggestion.datasourceSuggestion.state,
-    // TODO pass the datasource id here
+    initialState: suggestion.visualizationState,
+    datasourceState: suggestion.datasourceState,
+    datasourceId: suggestion.datasourceId,
   };
+  const layerIds = Object.keys(frame.datasourceLayers).filter(id => {
+    return id !== suggestion.keptLayerId;
+  });
+  frame.removeLayers(layerIds);
+  dispatch(action);
 }

@@ -17,7 +17,7 @@ import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Visualization, FramePublicAPI, Datasource } from '../../types';
 import { Action } from './state_management';
-import { getSuggestions } from './suggestion_helpers';
+import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -43,16 +43,6 @@ interface Props {
       state: unknown;
     }
   >;
-}
-
-function dropUnusedLayers(frame: FramePublicAPI, layerId: string) {
-  // Remove any layers that are not used by the new visualization. If we don't do this,
-  // we get orphaned objects, and weird edge cases such as prompting the user that
-  // layers are going to be dropped, when the user is unaware of any extraneous layers.
-  const layerIds = Object.keys(frame.datasourceLayers).filter(id => {
-    return id !== layerId;
-  });
-  frame.removeLayers(layerIds);
 }
 
 function VisualizationSummary(props: Props) {
@@ -84,16 +74,10 @@ export function ChartSwitch(props: Props) {
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
 
-    if (selection.dataLoss !== 'nothing') {
-      dropUnusedLayers(props.framePublicAPI, selection.keptLayerId);
-    }
-
     if (selection.visualizationId !== props.visualizationId) {
-      props.dispatch({
-        type: 'SWITCH_VISUALIZATION',
-        newVisualizationId: selection.visualizationId,
-        initialState: selection.getVisualizationState(),
-        datasourceState: selection.datasourceState,
+      switchToSuggestion(props.framePublicAPI, props.dispatch, {
+        ...selection,
+        visualizationState: selection.getVisualizationState(),
       });
     } else {
       props.dispatch({
@@ -126,28 +110,13 @@ export function ChartSwitch(props: Props) {
       ([_layerId, datasource]) => datasource.getTableSpec().length > 0
     );
 
-    const datasourceSuggestions = _.flatten(
-      Object.entries(props.datasourceMap).map(([datasourceId, datasource]) => {
-        if (props.datasourceStates[datasourceId] && !props.datasourceStates.isLoading) {
-          return datasource
-            .getDatasourceSuggestionsFromCurrentState(props.datasourceStates[datasourceId])
-            // TODO have the datasource in there by default
-            .map(suggestion => ({ ...suggestion, datasourceId }));
-        } else {
-          return [];
-        }
-      })
-    ).map((suggestion, index) => ({
-      ...suggestion,
-      table: { ...suggestion.table, datasourceSuggestionId: index },
-    }));
-
-    const topSuggestion = getSuggestions(
-      datasourceSuggestions,
-      { [visualizationId]: newVisualization },
-      props.visualizationId,
-      props.visualizationState
-    )[0];
+    const topSuggestion = getSuggestions({
+      datasourceMap: props.datasourceMap,
+      datasourceStates: props.datasourceStates,
+      visualizationMap: { [visualizationId]: newVisualization },
+      activeVisualizationId: props.visualizationId,
+      visualizationState: props.visualizationState,
+    })[0];
 
     let dataLoss: VisualizationSelection['dataLoss'];
 
@@ -157,9 +126,7 @@ export function ChartSwitch(props: Props) {
       dataLoss = 'everything';
     } else if (layers.length > 1) {
       dataLoss = 'layers';
-    } else if (
-      topSuggestion.datasourceSuggestion.table.columns.length !== layers[0][1].getTableSpec().length
-    ) {
+    } else if (topSuggestion.columns !== layers[0][1].getTableSpec().length) {
       dataLoss = 'columns';
     } else {
       dataLoss = 'nothing';
@@ -173,7 +140,7 @@ export function ChartSwitch(props: Props) {
         ? () =>
             switchVisType(
               subVisualizationId,
-              newVisualization.initialize(props.framePublicAPI, topSuggestion.state)
+              newVisualization.initialize(props.framePublicAPI, topSuggestion.visualizationState)
             )
         : () => {
             return switchVisType(
@@ -181,12 +148,9 @@ export function ChartSwitch(props: Props) {
               newVisualization.initialize(props.framePublicAPI)
             );
           },
-      keptLayerId: topSuggestion ? topSuggestion.datasourceSuggestion.table.layerId : '',
-      datasourceState: topSuggestion ? topSuggestion.datasourceSuggestion.state : undefined,
-      datasourceId: topSuggestion
-        ? datasourceSuggestions[topSuggestion.datasourceSuggestion.table.datasourceSuggestionId]
-            .datasourceId
-        : undefined,
+      keptLayerId: topSuggestion ? topSuggestion.keptLayerId : layers[0][0],
+      datasourceState: topSuggestion ? topSuggestion.datasourceState : undefined,
+      datasourceId: topSuggestion ? topSuggestion.datasourceId : undefined,
     };
   }
 

@@ -12,7 +12,7 @@ import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins
 import { Action } from './state_management';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
 import { DragDrop, DragContext } from '../../drag_drop';
-import { getSuggestions, toSwitchAction } from './suggestion_helpers';
+import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 
@@ -53,16 +53,14 @@ export function InnerWorkspacePanel({
     if (!activeDatasourceId) {
       return;
     }
-    const datasourceSuggestions = datasourceMap[
-      activeDatasourceId
-    ].getDatasourceSuggestionsForField(datasourceStates[activeDatasourceId].state, item);
 
-    const suggestions = getSuggestions(
-      datasourceSuggestions,
+    const suggestions = getSuggestions({
+      datasourceMap,
+      datasourceStates,
       visualizationMap,
       activeVisualizationId,
-      visualizationState
-    );
+      visualizationState,
+    });
 
     if (suggestions.length === 0) {
       // TODO specify and implement behavior in case of no valid suggestions
@@ -71,8 +69,7 @@ export function InnerWorkspacePanel({
 
     const suggestion = suggestions[0];
 
-    // TODO heuristically present the suggestions in a modal instead of just picking the first one
-    dispatch(toSwitchAction(suggestion));
+    switchToSuggestion(framePublicAPI, dispatch, suggestion);
   }
 
   function renderEmptyWorkspace() {

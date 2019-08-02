@@ -7,7 +7,7 @@
 import React, { useMemo, useContext, memo } from 'react';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
-import { Visualization, FramePublicAPI } from '../../types';
+import { Visualization, FramePublicAPI, Datasource } from '../../types';
 import { DragContext } from '../../drag_drop';
 import { ChartSwitch } from './chart_switch';
 
@@ -17,6 +17,14 @@ interface ConfigPanelWrapperProps {
   activeVisualizationId: string | null;
   dispatch: (action: Action) => void;
   framePublicAPI: FramePublicAPI;
+  datasourceMap: Record<string, Datasource>;
+  datasourceStates: Record<
+    string,
+    {
+      isLoading: boolean;
+      state: unknown;
+    }
+  >;
 }
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
@@ -38,6 +46,8 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
         visualizationMap={props.visualizationMap}
         visualizationId={props.activeVisualizationId}
         visualizationState={props.visualizationState}
+        datasourceMap={props.datasourceMap}
+        datasourceStates={props.datasourceStates}
         dispatch={props.dispatch}
         framePublicAPI={props.framePublicAPI}
       />
