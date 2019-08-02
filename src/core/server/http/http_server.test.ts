@@ -147,7 +147,7 @@ test('invalid params', async () => {
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({
-        error: '[request params.test]: expected value of type [number] but got [string]',
+        message: '[request params.test]: expected value of type [number] but got [string]',
       });
     });
 });
@@ -210,7 +210,7 @@ test('invalid query', async () => {
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({
-        error: '[request query.bar]: expected value of type [number] but got [string]',
+        message: '[request query.bar]: expected value of type [number] but got [string]',
       });
     });
 });
@@ -278,7 +278,7 @@ test('invalid body', async () => {
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({
-        error: '[request body.bar]: expected value of type [number] but got [string]',
+        message: '[request body.bar]: expected value of type [number] but got [string]',
       });
     });
 });

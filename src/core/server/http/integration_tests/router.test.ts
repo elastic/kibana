@@ -63,7 +63,7 @@ describe('Handler', () => {
       .get('/')
       .expect(500);
 
-    expect(result.body.error).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe('An internal server error occurred.');
     expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
@@ -88,7 +88,7 @@ describe('Handler', () => {
       .get('/')
       .expect(500);
 
-    expect(result.body.error).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe('An internal server error occurred.');
     expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -111,7 +111,7 @@ describe('Handler', () => {
       .get('/')
       .expect(500);
 
-    expect(result.body.error).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe('An internal server error occurred.');
     expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -146,7 +146,7 @@ describe('Handler', () => {
       .expect(400);
 
     expect(result.body).toEqual({
-      error: '[request query.page]: expected value of type [number] but got [string]',
+      message: '[request query.page]: expected value of type [number] but got [string]',
     });
   });
 });
@@ -531,7 +531,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(500);
 
-      expect(result.body.error).toBe('An internal server error occurred.');
+      expect(result.body.message).toBe('An internal server error occurred.');
       expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
@@ -559,7 +559,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(400);
 
-      expect(result.body).toEqual({ error: 'some message' });
+      expect(result.body).toEqual({ message: 'some message' });
     });
 
     it('400 Bad request with default message', async () => {
@@ -577,7 +577,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(400);
 
-      expect(result.body).toEqual({ error: 'Bad Request' });
+      expect(result.body).toEqual({ message: 'Bad Request' });
     });
 
     it('400 Bad request with additional data', async () => {
@@ -596,7 +596,7 @@ describe('Response factory', () => {
         .expect(400);
 
       expect(result.body).toEqual({
-        error: 'some message',
+        message: 'some message',
         meta: {
           data: ['good', 'bad'],
         },
@@ -623,7 +623,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(401);
 
-      expect(result.body.error).toBe('no access');
+      expect(result.body.message).toBe('no access');
       expect(result.header['www-authenticate']).toBe('challenge');
     });
 
@@ -642,7 +642,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(401);
 
-      expect(result.body.error).toBe('Unauthorized');
+      expect(result.body.message).toBe('Unauthorized');
     });
 
     it('403 Forbidden', async () => {
@@ -661,7 +661,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(403);
 
-      expect(result.body.error).toBe('reason');
+      expect(result.body.message).toBe('reason');
     });
 
     it('403 Forbidden with default message', async () => {
@@ -679,7 +679,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(403);
 
-      expect(result.body.error).toBe('Forbidden');
+      expect(result.body.message).toBe('Forbidden');
     });
 
     it('404 Not Found', async () => {
@@ -698,7 +698,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(404);
 
-      expect(result.body.error).toBe('file is not found');
+      expect(result.body.message).toBe('file is not found');
     });
 
     it('404 Not Found with default message', async () => {
@@ -716,7 +716,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(404);
 
-      expect(result.body.error).toBe('Not Found');
+      expect(result.body.message).toBe('Not Found');
     });
 
     it('409 Conflict', async () => {
@@ -735,7 +735,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(409);
 
-      expect(result.body.error).toBe('stale version');
+      expect(result.body.message).toBe('stale version');
     });
 
     it('409 Conflict with default message', async () => {
@@ -753,7 +753,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(409);
 
-      expect(result.body.error).toBe('Conflict');
+      expect(result.body.message).toBe('Conflict');
     });
   });
 
@@ -849,7 +849,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(401);
 
-      expect(result.body.error).toBe('unauthorized');
+      expect(result.body.message).toBe('unauthorized');
     });
 
     it('creates error response with additional data', async () => {
@@ -876,7 +876,7 @@ describe('Response factory', () => {
         .expect(401);
 
       expect(result.body).toEqual({
-        error: 'unauthorized',
+        message: 'unauthorized',
         meta: { errorCode: 'K401' },
       });
     });
@@ -905,7 +905,7 @@ describe('Response factory', () => {
         .expect(401);
 
       expect(result.body).toEqual({
-        error: 'unauthorized',
+        message: 'unauthorized',
         meta: { errorCode: 'K401' },
       });
     });
@@ -928,7 +928,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(401);
 
-      expect(result.body.error).toBe('Unauthorized');
+      expect(result.body.message).toBe('Unauthorized');
     });
 
     it("Doesn't log details of created 500 Server error response", async () => {
@@ -948,7 +948,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(500);
 
-      expect(result.body.error).toBe('reason');
+      expect(result.body.message).toBe('reason');
       expect(loggingServiceMock.collect(logger).error).toHaveLength(0);
     });
 
@@ -972,7 +972,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(500);
 
-      expect(result.body.error).toBe('An internal server error occurred.');
+      expect(result.body.message).toBe('An internal server error occurred.');
       expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
@@ -999,7 +999,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(500);
 
-      expect(result.body.error).toBe('An internal server error occurred.');
+      expect(result.body.message).toBe('An internal server error occurred.');
       expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
@@ -1025,7 +1025,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(500);
 
-      expect(result.body.error).toBe('An internal server error occurred.');
+      expect(result.body.message).toBe('An internal server error occurred.');
       expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
@@ -1051,7 +1051,7 @@ describe('Response factory', () => {
         .get('/')
         .expect(500);
 
-      expect(result.body.error).toBe('An internal server error occurred.');
+      expect(result.body.message).toBe('An internal server error occurred.');
       expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [

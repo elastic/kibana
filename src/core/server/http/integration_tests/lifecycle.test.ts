@@ -180,14 +180,14 @@ describe('OnPreAuth', () => {
       .get('/')
       .expect(500);
 
-    expect(result.body.error).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe('An internal server error occurred.');
     expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
-                  Array [
-                    Array [
-                      [Error: reason],
-                    ],
-                  ]
-            `);
+      Array [
+        Array [
+          [Error: reason],
+        ],
+      ]
+    `);
   });
 
   it('returns internal error if interceptor returns unexpected result', async () => {
@@ -204,14 +204,14 @@ describe('OnPreAuth', () => {
       .get('/')
       .expect(500);
 
-    expect(result.body.error).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe('An internal server error occurred.');
     expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
-                  Array [
-                    Array [
-                      [Error: Unexpected result from OnPreAuth. Expected OnPreAuthResult or KibanaResponse, but given: [object Object].],
-                    ],
-                  ]
-            `);
+      Array [
+        Array [
+          [Error: Unexpected result from OnPreAuth. Expected OnPreAuthResult or KibanaResponse, but given: [object Object].],
+        ],
+      ]
+    `);
   });
   it(`doesn't share request object between interceptors`, async () => {
     const { registerRouter, registerOnPreAuth, server: innerServer } = await server.setup(config);
@@ -332,14 +332,14 @@ describe('OnPostAuth', () => {
       .get('/')
       .expect(500);
 
-    expect(result.body.error).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe('An internal server error occurred.');
     expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
-                  Array [
-                    Array [
-                      [Error: reason],
-                    ],
-                  ]
-            `);
+      Array [
+        Array [
+          [Error: reason],
+        ],
+      ]
+    `);
   });
 
   it('returns internal error if interceptor returns unexpected result', async () => {
@@ -356,14 +356,14 @@ describe('OnPostAuth', () => {
       .get('/')
       .expect(500);
 
-    expect(result.body.error).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe('An internal server error occurred.');
     expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
-                  Array [
-                    Array [
-                      [Error: Unexpected result from OnPostAuth. Expected OnPostAuthResult or KibanaResponse, but given: [object Object].],
-                    ],
-                  ]
-            `);
+      Array [
+        Array [
+          [Error: Unexpected result from OnPostAuth. Expected OnPostAuthResult or KibanaResponse, but given: [object Object].],
+        ],
+      ]
+    `);
   });
   it(`doesn't share request object between interceptors`, async () => {
     const { registerRouter, registerOnPostAuth, server: innerServer } = await server.setup(config);
@@ -532,7 +532,7 @@ describe('Auth', () => {
       .get('/')
       .expect(500);
 
-    expect(result.body.error).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe('An internal server error occurred.');
     expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -859,7 +859,7 @@ describe('Auth', () => {
       .get('/')
       .expect(500);
 
-    expect(result.body.error).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe('An internal server error occurred.');
     expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -883,7 +883,7 @@ describe('Auth', () => {
       .get('/')
       .expect(500);
 
-    expect(result.body.error).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe('An internal server error occurred.');
     expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [

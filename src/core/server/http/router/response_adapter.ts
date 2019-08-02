@@ -41,7 +41,7 @@ const statusHelpers = {
 export class HapiResponseAdapter {
   constructor(private readonly responseToolkit: HapiResponseToolkit) {}
   public toBadRequest(message: string) {
-    return this.responseToolkit.response({ error: message }).code(400);
+    return this.responseToolkit.response({ message }).code(400);
   }
 
   public toInternalError() {
@@ -50,7 +50,7 @@ export class HapiResponseAdapter {
     });
 
     error.output.payload = {
-      error: 'An internal server error occurred.',
+      message: 'An internal server error occurred.',
     } as any; // our error format is not compatible with boom
 
     return error;
@@ -114,7 +114,7 @@ export class HapiResponseAdapter {
     });
 
     error.output.payload = {
-      error: getErrorMessage(payload),
+      message: getErrorMessage(payload),
       meta: getErrorMeta(payload),
     } as any; // our error format is not compatible with boom
 
