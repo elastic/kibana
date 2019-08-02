@@ -604,7 +604,6 @@ describe('TaskManagerRunner', () => {
       maxAttempts: 5,
     };
     const runner = new TaskManagerRunner({
-      kbnServer: sinon.stub(),
       beforeRun: context => Promise.resolve(context),
       logger,
       store,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, SFC, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -38,13 +38,16 @@ import { KqlFilterBar } from '../../../../../components/kql_filter_bar';
 import { SwitchModal } from './switch_modal';
 
 import {
+  useKibanaContext,
+  KibanaContextValue,
+  SavedSearchQuery,
+} from '../../../../../contexts/kibana';
+
+import {
   AggName,
   DropDownLabel,
   getPivotQuery,
   getPreviewRequestBody,
-  isKibanaContext,
-  KibanaContext,
-  KibanaContextValue,
   PivotAggDict,
   PivotAggsConfig,
   PivotAggsConfigDict,
@@ -53,7 +56,6 @@ import {
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
   PIVOT_SUPPORTED_AGGS,
-  SavedSearchQuery,
 } from '../../../../common';
 
 import { getPivotDropdownOptions } from './common';
@@ -197,11 +199,7 @@ interface Props {
 }
 
 export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
-  const kibanaContext = useContext(KibanaContext);
-
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
+  const kibanaContext = useKibanaContext();
 
   const indexPattern = kibanaContext.currentIndexPattern;
 

@@ -10,7 +10,7 @@ import { SearchResponse } from 'elasticsearch';
 
 import { idx } from '@kbn/elastic-idx';
 
-import { IndexPattern } from 'ui/index_patterns';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { ml } from '../../../../../services/ml_api_service';
 
@@ -39,7 +39,7 @@ export interface UseSourceIndexDataReturnType {
 }
 
 export const useSourceIndexData = (
-  indexPattern: IndexPattern,
+  indexPattern: StaticIndexPattern,
   query: PivotQuery,
   selectedFields: EsFieldName[],
   setSelectedFields: React.Dispatch<React.SetStateAction<EsFieldName[]>>
