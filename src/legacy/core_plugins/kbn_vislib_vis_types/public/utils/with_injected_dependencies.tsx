@@ -18,9 +18,11 @@
  */
 
 import React from 'react';
+import { InjectedDependencies, VisOptionsProps } from 'ui/vis/editors/default';
 
-const withServiceSettings = (Component: React.ComponentType, serviceSettings: any) => (
-  props: any
-) => <Component {...props} serviceSettings={serviceSettings} />;
+const withInjectedDependencies = (
+  Component: React.ComponentType<VisOptionsProps & InjectedDependencies>,
+  dependencies: InjectedDependencies
+) => (props: VisOptionsProps) => <Component {...props} {...dependencies} />;
 
-export { withServiceSettings };
+export { withInjectedDependencies };

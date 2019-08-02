@@ -20,8 +20,11 @@
 import { Vis, VisParams } from 'ui/vis';
 
 export type VisOptionsSetValue = (paramName: string, value: unknown) => void;
-export interface VisOptionsProps {
-  serviceSettings?: any;
+
+export interface InjectedDependencies {
+  [key: string]: any;
+}
+export interface VisOptionsProps extends InjectedDependencies {
   stateParams: VisParams;
   vis: Vis;
   setValue: VisOptionsSetValue;
