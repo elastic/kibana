@@ -12,6 +12,7 @@ import {
   createMockDatasource,
   createExpressionRendererMock,
   DatasourceMock,
+  createMockFramePublicAPI,
 } from '../mocks';
 import { ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
 import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
@@ -76,6 +77,7 @@ describe('suggestion_panel', () => {
       visualizationState: {},
       dispatch: dispatchMock,
       ExpressionRenderer: expressionRendererMock,
+      frame: createMockFramePublicAPI(),
     };
   });
 

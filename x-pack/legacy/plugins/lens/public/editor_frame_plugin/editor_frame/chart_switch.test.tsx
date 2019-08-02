@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { createMockVisualization, createMockFramePublicAPI } from '../mocks';
+import { createMockVisualization, createMockFramePublicAPI, createMockDatasource } from '../mocks';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { ChartSwitch } from './chart_switch';
@@ -83,6 +83,33 @@ describe('chart_switch', () => {
     } as FramePublicAPI;
   }
 
+  function mockDatasourceMap() {
+    const datasource = createMockDatasource();
+    datasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+      {
+        state: {},
+        table: {
+          columns: [],
+          datasourceSuggestionId: 0,
+          isMultiRow: true,
+          layerId: 'a',
+        },
+      },
+    ]);
+    return {
+      testDatasource: datasource,
+    };
+  }
+
+  function mockDatasourceStates() {
+    return {
+      testDatasource: {
+        state: {},
+        isLoading: false,
+      },
+    };
+  }
+
   function showFlyout(component: ReactWrapper) {
     component
       .find('[data-test-subj="lnsChartSwitchPopover"]')
@@ -116,6 +143,8 @@ describe('chart_switch', () => {
         visualizationMap={visualizations}
         dispatch={dispatch}
         framePublicAPI={mockFrame(['a'])}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
       />
     );
 
@@ -125,6 +154,8 @@ describe('chart_switch', () => {
       initialState: 'suggestion visB',
       newVisualizationId: 'visB',
       type: 'SWITCH_VISUALIZATION',
+      datasourceId: 'testDatasource',
+      datasourceState: {},
     });
   });
 
@@ -142,6 +173,8 @@ describe('chart_switch', () => {
         visualizationMap={visualizations}
         dispatch={dispatch}
         framePublicAPI={frame}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
       />
     );
 
@@ -166,6 +199,8 @@ describe('chart_switch', () => {
         visualizationMap={visualizations}
         dispatch={dispatch}
         framePublicAPI={frame}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
       />
     );
 
@@ -185,6 +220,8 @@ describe('chart_switch', () => {
         visualizationMap={visualizations}
         dispatch={dispatch}
         framePublicAPI={frame}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
       />
     );
 
@@ -205,6 +242,8 @@ describe('chart_switch', () => {
         visualizationMap={visualizations}
         dispatch={dispatch}
         framePublicAPI={frame}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
       />
     );
 
@@ -230,6 +269,8 @@ describe('chart_switch', () => {
         visualizationMap={visualizations}
         dispatch={dispatch}
         framePublicAPI={frame}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
       />
     );
 
@@ -249,6 +290,8 @@ describe('chart_switch', () => {
         visualizationMap={mockVisualizations()}
         dispatch={jest.fn()}
         framePublicAPI={frame}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
       />
     );
 
@@ -277,6 +320,8 @@ describe('chart_switch', () => {
         visualizationMap={visualizations}
         dispatch={dispatch}
         framePublicAPI={frame}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
       />
     );
 
@@ -305,6 +350,8 @@ describe('chart_switch', () => {
         visualizationMap={visualizations}
         dispatch={dispatch}
         framePublicAPI={mockFrame(['a'])}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
       />
     );
 
@@ -314,6 +361,8 @@ describe('chart_switch', () => {
       initialState: 'suggestion visB subvisB',
       newVisualizationId: 'visB',
       type: 'SWITCH_VISUALIZATION',
+      datasourceId: 'testDatasource',
+      datasourceState: {},
     });
   });
 
@@ -325,6 +374,8 @@ describe('chart_switch', () => {
         visualizationMap={mockVisualizations()}
         dispatch={jest.fn()}
         framePublicAPI={mockFrame(['a', 'b'])}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
       />
     );
 

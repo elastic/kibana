@@ -8,4 +8,4 @@ const actual = jest.requireActual('../suggestion_helpers');
 
 jest.spyOn(actual, 'getSuggestions');
 
-export const { getSuggestions, toSwitchAction } = actual;
+export const { getSuggestions, switchToSuggestion } = actual;

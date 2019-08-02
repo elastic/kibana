@@ -161,7 +161,7 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
       return {
         ...state,
         datasourceStates:
-          'datasourceId' in action
+          'datasourceId' in action && action.datasourceId
             ? {
                 ...state.datasourceStates,
                 [action.datasourceId]: {

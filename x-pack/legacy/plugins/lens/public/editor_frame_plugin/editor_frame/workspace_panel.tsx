@@ -15,6 +15,7 @@ import { DragDrop, DragContext } from '../../drag_drop';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
+import { isDraggedField } from '../../indexpattern_plugin/utils';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -50,16 +51,17 @@ export function InnerWorkspacePanel({
 }: WorkspacePanelProps) {
   const dragDropContext = useContext(DragContext);
   function onDrop(item: unknown) {
-    if (!activeDatasourceId) {
+    if (!activeDatasourceId || !isDraggedField(item)) {
       return;
     }
 
     const suggestions = getSuggestions({
-      datasourceMap,
+      datasourceMap: { [activeDatasourceId]: datasourceMap[activeDatasourceId] },
       datasourceStates,
       visualizationMap,
       activeVisualizationId,
       visualizationState,
+      field: item.field,
     });
 
     if (suggestions.length === 0) {

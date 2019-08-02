@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
-import { Visualization, TableSuggestion, Datasource, FramePublicAPI } from '../../types';
+import { Visualization, Datasource, FramePublicAPI } from '../../types';
 import { Action } from './state_management';
+import { IndexPatternField } from '../../indexpattern_plugin/indexpattern';
 
 export interface Suggestion {
   visualizationId: string;
@@ -35,6 +37,7 @@ export function getSuggestions({
   visualizationMap,
   activeVisualizationId,
   visualizationState,
+  field,
 }: {
   datasourceMap: Record<string, Datasource>;
   datasourceStates: Record<
@@ -47,13 +50,17 @@ export function getSuggestions({
   visualizationMap: Record<string, Visualization>;
   activeVisualizationId: string | null;
   visualizationState: unknown;
+  field?: IndexPatternField;
 }): Suggestion[] {
   const datasourceTableSuggestions = _.flatten(
     Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
       if (datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading) {
+        const datasourceState = datasourceStates[datasourceId];
         return (
-          datasource
-            .getDatasourceSuggestionsFromCurrentState(datasourceStates[datasourceId])
+          (field
+            ? datasource.getDatasourceSuggestionsForField(datasourceState, field)
+            : datasource.getDatasourceSuggestionsFromCurrentState(datasourceState)
+          )
             // TODO have the datasource in there by default
             .map(suggestion => ({ ...suggestion, datasourceId }))
         );

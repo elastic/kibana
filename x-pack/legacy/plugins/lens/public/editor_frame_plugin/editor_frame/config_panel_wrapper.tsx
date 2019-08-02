@@ -51,6 +51,7 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
         dispatch={props.dispatch}
         framePublicAPI={props.framePublicAPI}
       />
+      console.log(props.activeVisualizationId); console.log(props.visualizationState);
       {props.activeVisualizationId && props.visualizationState !== null && (
         <div className="lnsConfigPanelWrapper">
           <NativeRenderer

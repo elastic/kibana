@@ -502,12 +502,7 @@ describe('workspace_panel', () => {
         },
       ]);
 
-      instance.find(DragDrop).prop('onDrop')!({
-        name: '@timestamp',
-        type: 'date',
-        searchable: false,
-        aggregatable: false,
-      });
+      instance.find(DragDrop).prop('onDrop')!({ indexPatternId: '1', field: {} });
 
       expect(mockDatasource.getDatasourceSuggestionsForField).toHaveBeenCalledTimes(1);
       expect(mockVisualization.getSuggestions).toHaveBeenCalledWith(
@@ -520,6 +515,7 @@ describe('workspace_panel', () => {
         newVisualizationId: 'vis',
         initialState: {},
         datasourceState: {},
+        datasourceId: 'mock',
       });
     });
 
@@ -564,10 +560,8 @@ describe('workspace_panel', () => {
       ]);
 
       instance.find(DragDrop).prop('onDrop')!({
-        name: '@timestamp',
-        type: 'date',
-        searchable: false,
-        aggregatable: false,
+        field: { name: '@timestamp', type: 'date', searchable: false, aggregatable: false },
+        indexPatternId: '1',
       });
 
       expect(mockDispatch).toHaveBeenCalledWith({
@@ -577,15 +571,14 @@ describe('workspace_panel', () => {
           isFirst: true,
         },
         datasourceState: {},
+        datasourceId: 'mock',
       });
     });
 
     it("should do nothing when the visualization can't use the suggestions", () => {
       instance.find(DragDrop).prop('onDrop')!({
-        name: '@timestamp',
-        type: 'date',
-        searchable: false,
-        aggregatable: false,
+        field: { name: '@timestamp', type: 'date', searchable: false, aggregatable: false },
+        indexPatternId: '1',
       });
 
       expect(mockDatasource.getDatasourceSuggestionsForField).toHaveBeenCalledTimes(1);
