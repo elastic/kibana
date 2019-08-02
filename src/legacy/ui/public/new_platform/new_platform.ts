@@ -18,13 +18,19 @@
  */
 import { InternalCoreSetup, InternalCoreStart } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
+import {
+  Setup as InspectorSetup,
+  Start as InspectorStart,
+} from '../../../../plugins/inspector/public';
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
+  inspector: InspectorSetup;
 }
 
 export interface PluginsStart {
   data: ReturnType<DataPlugin['start']>;
+  inspector: InspectorStart;
 }
 
 export const npSetup = {
