@@ -114,7 +114,6 @@ function getSuggestion(
         layerId,
         seriesType,
         xAccessor: xValue.columnId,
-        seriesType: splitBy && isDate ? 'line' : 'bar',
         splitAccessor: splitBy ? splitBy.columnId : generateId(),
         accessors: yValues.map(col => col.columnId),
         title: yTitle,
