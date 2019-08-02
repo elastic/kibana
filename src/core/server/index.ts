@@ -93,13 +93,24 @@ export {
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
   SavedObjectsClient,
+  SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
+  SavedObjectsExportOptions,
   SavedObjectsFindResponse,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportOptions,
+  SavedObjectsImportResponse,
+  SavedObjectsImportRetry,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
+  SavedObjectsResolveImportErrorsOptions,
   SavedObjectsSchema,
   SavedObjectsSerializer,
   SavedObjectsService,
@@ -140,7 +151,6 @@ export interface CoreSetup {
     registerAuth: HttpServiceSetup['registerAuth'];
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
     basePath: HttpServiceSetup['basePath'];
-    createNewServer: HttpServiceSetup['createNewServer'];
     isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
   };
 }

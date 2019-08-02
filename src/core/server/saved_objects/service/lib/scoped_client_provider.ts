@@ -19,21 +19,37 @@
 import { PriorityCollection } from './priority_collection';
 import { SavedObjectsClientContract } from '../../types';
 
+/**
+ * Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance.
+ * @public
+ */
 export interface SavedObjectsClientWrapperOptions<Request = unknown> {
   client: SavedObjectsClientContract;
   request: Request;
 }
 
+/**
+ * Describes the factory used to create instances of Saved Objects Client Wrappers.
+ * @public
+ */
 export type SavedObjectsClientWrapperFactory<Request = unknown> = (
   options: SavedObjectsClientWrapperOptions<Request>
 ) => SavedObjectsClientContract;
 
+/**
+ * Describes the factory used to create instances of the Saved Objects Client.
+ * @public
+ */
 export type SavedObjectsClientFactory<Request = unknown> = ({
   request,
 }: {
   request: Request;
 }) => SavedObjectsClientContract;
 
+/**
+ * Options to control the creation of the Saved Objects Client.
+ * @public
+ */
 export interface SavedObjectsClientProviderOptions {
   excludedWrappers?: string[];
 }

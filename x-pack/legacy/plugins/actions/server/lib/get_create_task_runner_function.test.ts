@@ -20,7 +20,6 @@ const mockedEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
 const actionType = {
   id: '1',
   name: '1',
-  unencryptedAttributes: [],
   executor: jest.fn(),
 };
 
@@ -43,7 +42,7 @@ const taskInstanceMock = {
   state: {},
   params: {
     id: '2',
-    actionTypeParams: { baz: true },
+    params: { baz: true },
     namespace: 'test',
   },
   taskType: 'actions:1',

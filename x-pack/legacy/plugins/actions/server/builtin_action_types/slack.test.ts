@@ -8,8 +8,7 @@ import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import { validateActionTypeParams } from '../lib';
-import { validateActionTypeConfig } from '../lib';
+import { validateParams, validateSecrets } from '../lib';
 import { getActionType } from './slack';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 
@@ -76,44 +75,44 @@ describe('action is registered', () => {
 
 describe('validateParams()', () => {
   test('should validate and pass when params is valid', () => {
-    expect(validateActionTypeParams(actionType, { message: 'a message' })).toEqual({
+    expect(validateParams(actionType, { message: 'a message' })).toEqual({
       message: 'a message',
     });
   });
 
   test('should validate and throw error when params is invalid', () => {
     expect(() => {
-      validateActionTypeParams(actionType, {});
+      validateParams(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: [message]: expected value of type [string] but got [undefined]"`
+      `"error validating action params: [message]: expected value of type [string] but got [undefined]"`
     );
 
     expect(() => {
-      validateActionTypeParams(actionType, { message: 1 });
+      validateParams(actionType, { message: 1 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: [message]: expected value of type [string] but got [number]"`
+      `"error validating action params: [message]: expected value of type [string] but got [number]"`
     );
   });
 });
 
-describe('validateActionTypeConfig()', () => {
+describe('validateActionTypeSecrets()', () => {
   test('should validate and pass when config is valid', () => {
-    validateActionTypeConfig(actionType, {
+    validateSecrets(actionType, {
       webhookUrl: 'https://example.com',
     });
   });
 
   test('should validate and throw error when config is invalid', () => {
     expect(() => {
-      validateActionTypeConfig(actionType, {});
+      validateSecrets(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionTypeConfig is invalid: [webhookUrl]: expected value of type [string] but got [undefined]"`
+      `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [undefined]"`
     );
 
     expect(() => {
-      validateActionTypeConfig(actionType, { webhookUrl: 1 });
+      validateSecrets(actionType, { webhookUrl: 1 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionTypeConfig is invalid: [webhookUrl]: expected value of type [string] but got [number]"`
+      `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [number]"`
     );
   });
 });
@@ -123,7 +122,8 @@ describe('execute()', () => {
     const response = await actionType.executor({
       id: 'some-id',
       services,
-      config: { webhookUrl: 'http://example.com' },
+      config: {},
+      secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
     });
     expect(response).toMatchInlineSnapshot(`
@@ -138,7 +138,8 @@ Object {
       actionType.executor({
         id: 'some-id',
         services,
-        config: { webhookUrl: 'http://example.com' },
+        config: {},
+        secrets: { webhookUrl: 'http://example.com' },
         params: { message: 'failure: this invocation should fail' },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(

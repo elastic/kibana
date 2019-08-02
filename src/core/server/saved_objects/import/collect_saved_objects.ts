@@ -26,7 +26,7 @@ import {
 } from '../../../../legacy/utils/streams';
 import { SavedObject } from '../types';
 import { createLimitStream } from './create_limit_stream';
-import { ImportError } from './types';
+import { SavedObjectsImportError } from './types';
 
 interface CollectSavedObjectsOptions {
   readStream: Readable;
@@ -41,7 +41,7 @@ export async function collectSavedObjects({
   filter,
   supportedTypes,
 }: CollectSavedObjectsOptions) {
-  const errors: ImportError[] = [];
+  const errors: SavedObjectsImportError[] = [];
   const collectedObjects: SavedObject[] = await createPromiseFromStreams([
     readStream,
     createLimitStream(objectLimit),

@@ -80,6 +80,9 @@ export const Wizard: FC<Props> = ({
   const [highestStep, setHighestStep] = useState(WIZARD_STEPS.TIME_RANGE);
   const [disableSteps, setDisableSteps] = useState(false);
   const [progress, setProgress] = useState(resultsLoader.progress);
+  const [stringifiedConfigs, setStringifiedConfigs] = useState(
+    stringifyConfigs(jobCreator.jobConfig, jobCreator.datafeedConfig)
+  );
 
   useEffect(() => {
     // IIFE to run the validation. the useEffect callback can't be async
@@ -87,8 +90,14 @@ export const Wizard: FC<Props> = ({
       await jobValidator.validate();
       setJobValidatorUpdate(jobValidatorUpdated);
     })();
+
     // if the job config has changed, reset the highestStep
-    setHighestStep(currentStep);
+    // compare a stringified config to ensure the configs have actually changed
+    const tempConfigs = stringifyConfigs(jobCreator.jobConfig, jobCreator.datafeedConfig);
+    if (tempConfigs !== stringifiedConfigs) {
+      setHighestStep(currentStep);
+      setStringifiedConfigs(tempConfigs);
+    }
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
@@ -228,3 +237,7 @@ const Title: FC = ({ children }) => {
     </Fragment>
   );
 };
+
+function stringifyConfigs(jobConfig: object, datafeedConfig: object) {
+  return JSON.stringify(jobConfig) + JSON.stringify(datafeedConfig);
+}
