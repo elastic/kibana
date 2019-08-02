@@ -31,7 +31,7 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useEffect, useState, Fragment } from 'react';
 import { sortBy } from 'lodash';
 import { SavedQuery } from '../index';
-import { getAllSavedQueries } from '../lib/saved_query_service';
+import { getAllSavedQueries, deleteSavedQuery } from '../lib/saved_query_service';
 import { Query } from '../../../query';
 
 interface Props {
@@ -83,6 +83,16 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
     }
   );
 
+  const onDeleteSavedQuery = (savedQuery: SavedQuery) => {
+    setSavedQueries(savedQueries.filter(currentSavedQuery => currentSavedQuery !== savedQuery));
+
+    if (loadedSavedQuery && loadedSavedQuery.id === savedQuery.id) {
+      onClearSavedQuery();
+    }
+
+    deleteSavedQuery(savedQuery.id);
+  };
+
   const filterTriggerButton = (
     <EuiButtonEmpty
       iconType="arrowDown"
@@ -108,7 +118,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
           {savedQuery.attributes.title}
         </EuiButtonEmpty>
         <EuiButtonEmpty
-          onClick={() => alert(`saved query ${savedQuery.id} to be deleted`)}
+          onClick={() => onDeleteSavedQuery(savedQuery)}
           iconType="trash"
           color="danger"
         />

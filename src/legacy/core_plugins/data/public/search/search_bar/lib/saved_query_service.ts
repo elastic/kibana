@@ -119,6 +119,11 @@ export const getSavedQuery = async (id: string): Promise<SavedQuery> => {
   return parseSavedQueryObject(response);
 };
 
+export const deleteSavedQuery = async (id: string) => {
+  const savedObjectsClient = chrome.getSavedObjectsClient();
+  return await savedObjectsClient.delete('query', id);
+};
+
 const parseSavedQueryObject = (savedQuery: {
   id: string;
   attributes: SerializedSavedQueryAttributes;
