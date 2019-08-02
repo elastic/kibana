@@ -70,7 +70,7 @@ export async function buildTabularInspectorData(table: Table, queryFilter: any) 
       field: `col-${colIndex}-${col.aggConfig.id}`,
       filter:
         isCellContentFilterable &&
-        ((value: { raw: any }) => {
+        ((value: { raw: unknown }) => {
           const rowIndex = rows.findIndex(
             row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
           );
