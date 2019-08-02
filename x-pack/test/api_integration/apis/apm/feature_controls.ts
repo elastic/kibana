@@ -84,7 +84,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/transaction_types?start=${start}&end=${end}`,
+      url: `/api/apm/transaction_types?start=${start}&end=${end}`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
