@@ -208,6 +208,17 @@ export const parametersDefinition: {
       defaultValue: 1.0,
       type: FIELD_TYPES.NUMBER,
       formatters: [toInt],
+      validations: [
+        {
+          validator: ({ value }) => {
+            if ((value as number) < 0) {
+              return {
+                message: 'The value must be greater or equal to 0.',
+              };
+            }
+          },
+        },
+      ],
     },
   },
   dynamic: {
@@ -430,6 +441,17 @@ export const parametersDefinition: {
       defaultValue: 2147483647,
       type: FIELD_TYPES.NUMBER,
       formatters: [toInt],
+      validations: [
+        {
+          validator: ({ value }) => {
+            if ((value as number) < 0) {
+              return {
+                message: 'The value must be greater or equal to 0.',
+              };
+            }
+          },
+        },
+      ],
     },
   },
 };
