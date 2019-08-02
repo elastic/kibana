@@ -29,9 +29,9 @@ fi
 npm config list --json
 #installs dependencies and runs the build
 cd %{name}
-/usr/local/bin/yarn --allow-root
-/usr/local/bin/yarn kbn bootstrap --allow-root
-node scripts/build --rpm --oss --skip-archives --release --verbose --allow-root
+/usr/local/bin/yarn
+/usr/local/bin/yarn kbn bootstrap
+node scripts/build --rpm --oss --skip-archives --release --verbose
 
 %install
 cd %{name}
