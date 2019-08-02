@@ -42,7 +42,6 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
         { dateRangeStart, dateRangeEnd, filters, searchAfter },
         { req }
       ): Promise<MonitorSummaryResult> {
-        console.log("RESOLVER SA", searchAfter);
         const [
           // TODO: rely on new summaries adapter function once continuous data frame is available
           // summaries,
@@ -55,7 +54,7 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           libs.monitorStates.legacyGetMonitorStates(req, dateRangeStart, dateRangeEnd, filters, searchAfter),
         ]);
         return {
-          searchAfter: legacySummaries.searchAfter,
+          afterKey: legacySummaries.afterKey,
           summaries: legacySummaries.summaries,
           totalSummaryCount,
         };

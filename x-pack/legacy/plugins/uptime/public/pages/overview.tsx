@@ -63,6 +63,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
     // monitorListSortField,
     search,
     searchAfter,
+    prevSearchAfter,
   } = params;
 
   useEffect(() => {

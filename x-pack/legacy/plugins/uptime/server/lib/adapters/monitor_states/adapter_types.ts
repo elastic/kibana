@@ -25,7 +25,7 @@ export interface UMMonitorStatesAdapter {
 }
 
 export interface GetMonitorStatesResult {
-  searchAfter: string,
+  afterKey: string | null,
   summaries: MonitorSummary[],
 }
 

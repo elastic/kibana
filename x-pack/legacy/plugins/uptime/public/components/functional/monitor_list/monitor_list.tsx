@@ -80,8 +80,9 @@ export const MonitorListComponent = (props: Props) => {
   } = props;
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
+  console.log("DATA IS", data)
   const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
-  const searchAfter = get<string>(data, 'monitorStates.searchAfter');
+  const afterKey = get<string>(data, 'monitorStates.afterKey');
   // TODO: use with pagination
   // const count = get<number>(data, 'monitorStates.totalSummaryCount.count', 0);
 
@@ -255,7 +256,7 @@ export const MonitorListComponent = (props: Props) => {
           <EuiPagination
             pageCount={3}
             activePage={1}
-            onPageClick={(p: number) => {updateSearchAfter("", searchAfter)}}
+            onPageClick={(p: number) => {updateSearchAfter("", afterKey)}}
             compressed={true}
           />
         </EuiFlexItem>

@@ -2669,7 +2669,7 @@
         "description": "The primary object returned for monitor states.",
         "fields": [
           {
-            "name": "searchAfter",
+            "name": "afterKey",
             "description": "Key used to go to the next page of results",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },

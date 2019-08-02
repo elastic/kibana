@@ -14,7 +14,7 @@ query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $filters: 
     filters: $filters
     searchAfter: $searchAfter
   ) {
-    searchAfter
+    afterKey
     totalSummaryCount {
       count
     }

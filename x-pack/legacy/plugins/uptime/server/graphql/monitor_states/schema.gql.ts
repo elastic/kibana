@@ -139,7 +139,7 @@ export const monitorStatesSchema = gql`
   "The primary object returned for monitor states."
   type MonitorSummaryResult {
     "Key used to go to the next page of results"
-    searchAfter: String
+    afterKey: String
     "The objects representing the state of a series of heartbeat monitors."
     summaries: [MonitorSummary!]
     "The number of summaries."

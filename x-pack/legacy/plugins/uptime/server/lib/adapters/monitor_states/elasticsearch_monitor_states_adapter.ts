@@ -388,26 +388,32 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     searchAfter?: string | null,
   ): Promise<GetMonitorStatesResult> {
     const monitors: any[] = [];
-    let loopSearchAfter: any | null = searchAfter ? JSON.parse(searchAfter) : null;
-    console.log("LOOP START", loopSearchAfter)
+    let afterKey: any | null = searchAfter ? JSON.parse(searchAfter) : null;
     do {
        const queryRes: LegacyMonitorStatesQueryResult = await this.runLegacyMonitorStatesQuery(
         request,
         dateRangeStart,
         dateRangeEnd,
         filters,
-        loopSearchAfter
+        afterKey
       );
       const { result, statusFilter } = queryRes;
-      loopSearchAfter = queryRes.afterKey;
-      console.log("LOOP CONT", loopSearchAfter)
 
       monitors.push(...this.getMonitorBuckets(result, statusFilter));
 
-    } while (loopSearchAfter !== null && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
+    } while (afterKey !== null && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
+
+    if (monitors.length == 0) {
+      return {afterKey: null, summaries: []}
+    }
 
     const monitorIds: string[] = [];
-    const summaries: (MonitorSummary & {lastLocation: string})[] = monitors.map((monitor: any) => {
+
+    // Convert the results to MonitorSummary objects and also include the last location value found
+    // this value will be used later for calculating the correct afterKey. 
+    type SummaryWithLastLocation = (MonitorSummary & {lastLocation: string});
+
+    const summaries: SummaryWithLastLocation[] = monitors.map((monitor: any) => {
       const monitorId = get<string>(monitor, 'key.monitor_id');
       monitorIds.push(monitorId);
       let state = get<any>(monitor, 'state.value');
@@ -426,7 +432,6 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         state.checks = [];
       }
       const lastCheck = state.checks[state.checks.length-1];
-      console.log("CHECKS", JSON.stringify(state.checks, null, 2), lastCheck);
       return {
         monitor_id: monitorId,
         lastLocation: get(lastCheck, 'observer.geo.name'),
@@ -440,77 +445,18 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       monitorIds
     );
 
-    console.log("INVOKE legacyGetMonitorStates", searchAfter, loopSearchAfter);
+    // Here we manually calculate the afterKey we'll be returning to the caller.
+    // We can't use the ES one because it's very likely it will return the wrong results.
+    // Since we trim the actual results returned that after key is after those trimmed results.
+    // Calculating it is easy luckily.
     const lastSummary = summaries[summaries.length-1];
-    loopSearchAfter = lastSummary ? {monitor_id: lastSummary.monitor_id, location: lastSummary.lastLocation} : null
+    afterKey = lastSummary ? {monitor_id: lastSummary.monitor_id, location: lastSummary.lastLocation} : null
+
     return {
-      searchAfter: JSON.stringify(loopSearchAfter),
+      afterKey: JSON.stringify(afterKey),
       summaries: summaries.map(summary => ({
         ...summary,
         histogram: histogramMap[summary.monitor_id],
-      })),
-    };
-  }
-
-  public async getMonitorStates(
-    request: any,
-    pageIndex: number,
-    pageSize: number,
-    sortField?: string | null,
-    sortDirection?: string | null
-  ): Promise<GetMonitorStatesResult> {
-    console.log("INVOKE getMonitorStates");
-    const params = {
-      index: INDEX_NAMES.HEARTBEAT_STATES,
-      body: {
-        from: pageIndex * pageSize,
-        size: pageSize,
-      },
-    };
-
-    if (sortField) {
-      set(params, 'body.sort', [
-        {
-          [sortField]: {
-            order: sortDirection || 'asc',
-          },
-        },
-      ]);
-    }
-
-    const result = await this.database.search(request, params);
-    const hits = get(result, 'hits.hits', []);
-    const monitorIds: string[] = [];
-    const monitorStates = hits.map(({ _source }: any) => {
-      const { monitor_id } = _source;
-      monitorIds.push(monitor_id);
-      const sourceState = get<any>(_source, 'state');
-      const state = {
-        ...sourceState,
-        timestamp: sourceState['@timestamp'],
-      };
-      if (state.checks) {
-        state.checks = sortBy<SortChecks, Check>(state.checks, checksSortBy).map(
-          (check: any): Check => ({
-            ...check,
-            timestamp: check['@timestamp'],
-          })
-        );
-      } else {
-        state.checks = [];
-      }
-      return {
-        monitor_id,
-        state,
-      };
-    });
-
-    const histogramMap = await this.getHistogramForMonitors(request, 'now-15m', 'now', monitorIds);
-    return {
-      searchAfter: 'false',
-      summaries: monitorStates.map(monitorState => ({
-        ...monitorState,
-        histogram: histogramMap[monitorState.monitor_id],
       })),
     };
   }
