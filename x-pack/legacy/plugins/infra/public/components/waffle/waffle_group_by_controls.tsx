@@ -15,8 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import { FieldType } from 'ui/index_patterns';
-import { InfraNodeType, InfraSnapshotGroupbyInput } from '../../graphql/types';
+import { InfraNodeType, InfraSnapshotGroupbyInput, InfraIndexField } from '../../graphql/types';
 import { InfraGroupByOptions } from '../../lib/lib';
 import { CustomFieldPanel } from './custom_field_panel';
 import { fieldToName } from './lib/field_to_display_name';
@@ -27,7 +26,7 @@ interface Props {
   groupBy: InfraSnapshotGroupbyInput[];
   onChange: (groupBy: InfraSnapshotGroupbyInput[]) => void;
   onChangeCustomOptions: (options: InfraGroupByOptions[]) => void;
-  fields: FieldType[];
+  fields: InfraIndexField[];
   intl: InjectedIntl;
   customOptions: InfraGroupByOptions[];
 }
