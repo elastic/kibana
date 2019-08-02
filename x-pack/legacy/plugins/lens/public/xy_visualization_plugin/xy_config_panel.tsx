@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -276,11 +277,15 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           size="s"
           data-test-subj={`lnsXY_layer_add`}
           onClick={() => {
+            const usedSeriesTypes = _.uniq(state.layers.map(layer => layer.seriesType));
             setState({
               ...state,
               layers: [
                 ...state.layers,
-                newLayerState(state.preferredSeriesType, frame.addNewLayer()),
+                newLayerState(
+                  usedSeriesTypes.length === 1 ? usedSeriesTypes[0] : state.preferredSeriesType,
+                  frame.addNewLayer()
+                ),
               ],
             });
           }}
