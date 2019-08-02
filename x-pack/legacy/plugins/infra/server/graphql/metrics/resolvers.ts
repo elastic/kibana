@@ -39,7 +39,7 @@ export const createMetricResolvers = (
 
       UsageCollector.countNode(args.nodeType);
       const options = {
-        nodeId: args.nodeId,
+        nodeIds: args.nodeIds,
         nodeType: args.nodeType,
         timerange: args.timerange,
         metrics: args.metrics,

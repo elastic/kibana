@@ -42,13 +42,13 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     const search = <Aggregation>(searchOptions: object) =>
       this.framework.callWithRequest<{}, Aggregation>(req, 'search', searchOptions);
 
-    const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeId);
+    const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeIds.nodeId);
     if (!validNode) {
       throw new InvalidNodeError(
         i18n.translate('xpack.infra.kibanaMetrics.nodeDoesNotExistErrorMessage', {
           defaultMessage: '{nodeId} does not exist.',
           values: {
-            nodeId: options.nodeId,
+            nodeId: options.nodeIds.nodeId,
           },
         })
       );
@@ -57,8 +57,8 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     const requests = options.metrics.map(metricId => {
       const model = metricModels[metricId](timeField, indexPattern, interval);
       const filters = model.map_field_to
-        ? [{ match: { [model.map_field_to]: options.nodeId } }]
-        : [{ match: { [nodeField]: options.nodeId } }];
+        ? [{ match: { [model.map_field_to]: options.nodeIds.nodeId } }]
+        : [{ match: { [nodeField]: options.nodeIds.nodeId } }];
       return this.framework.makeTSVBRequest(req, model, timerange, filters);
     });
     return Promise.all(requests)

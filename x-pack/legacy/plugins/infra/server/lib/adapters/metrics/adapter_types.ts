@@ -15,7 +15,10 @@ import { InfraSourceConfiguration } from '../../sources';
 import { InfraFrameworkRequest } from '../framework';
 
 export interface InfraMetricsRequestOptions {
-  nodeId: string;
+  nodeIds: {
+    nodeId: string;
+    cloudId?: string | null;
+  };
   nodeType: InfraNodeType;
   sourceConfiguration: InfraSourceConfiguration;
   timerange: InfraTimerangeInput;

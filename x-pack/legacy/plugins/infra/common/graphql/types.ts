@@ -544,6 +544,7 @@ export enum InfraSnapshotMetricType {
 }
 
 export enum InfraMetric {
+  hostAwsCpu = 'hostAwsCpu',
   hostSystemOverview = 'hostSystemOverview',
   hostCpuUsage = 'hostCpuUsage',
   hostFilesystem = 'hostFilesystem',

@@ -2270,6 +2270,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "hostAwsCpu",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "hostSystemOverview",
             "description": "",
             "isDeprecated": false,
