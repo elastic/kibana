@@ -23,7 +23,7 @@ import moment from 'moment-timezone';
 import { SettingSpecProps } from '@elastic/charts/dist/specs/settings';
 
 const chartHeight = 74;
-export const chartDefaultRotation: Rotation = 0;
+const chartDefaultRotation: Rotation = 0;
 const chartDefaultRendering: Rendering = 'canvas';
 const FlexGroup = styled(EuiFlexGroup)`
   height: 100%;
