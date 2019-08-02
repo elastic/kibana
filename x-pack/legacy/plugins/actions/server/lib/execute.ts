@@ -5,13 +5,12 @@
  */
 
 import { Services, ActionTypeRegistryContract, ActionTypeExecutorResult } from '../types';
-import { validateActionTypeConfig } from './validate_action_type_config';
-import { validateActionTypeParams } from './validate_action_type_params';
+import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
 
 interface ExecuteOptions {
   actionId: string;
-  namespace: string;
+  namespace?: string;
   services: Services;
   params: Record<string, any>;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
@@ -31,19 +30,17 @@ export async function execute({
     namespace,
   });
   const actionType = actionTypeRegistry.get(action.attributes.actionTypeId);
-  const mergedActionTypeConfig = {
-    ...(action.attributes.actionTypeConfig || {}),
-    ...(action.attributes.actionTypeConfigSecrets || {}),
-  };
 
-  let validatedConfig;
   let validatedParams;
+  let validatedConfig;
+  let validatedSecrets;
 
   try {
-    validatedConfig = validateActionTypeConfig(actionType, mergedActionTypeConfig);
-    validatedParams = validateActionTypeParams(actionType, params);
+    validatedParams = validateParams(actionType, params);
+    validatedConfig = validateConfig(actionType, action.attributes.config);
+    validatedSecrets = validateSecrets(actionType, action.attributes.secrets);
   } catch (err) {
-    return { status: 'error', message: err.message };
+    return { status: 'error', message: err.message, retry: false };
   }
 
   let result: ActionTypeExecutorResult | null = null;
@@ -55,8 +52,9 @@ export async function execute({
     result = await actionType.executor({
       id: actionId,
       services,
-      config: validatedConfig,
       params: validatedParams,
+      config: validatedConfig,
+      secrets: validatedSecrets,
     });
   } catch (err) {
     services.log(

@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import chrome from 'ui/chrome';
-import 'ui/listen';
+import 'ui/directives/listen';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
