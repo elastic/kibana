@@ -17,6 +17,8 @@
  * under the License.
  */
 
+const fs = require('fs');
+const util = require('util');
 const execa = require('execa');
 const chalk = require('chalk');
 const path = require('path');
@@ -33,6 +35,17 @@ const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
+const readFile = util.promisify(fs.readFile);
+
+const caCertPath = path.resolve(__dirname, '../../../test/dev_certs/elasticsearch/ca/ca.crt');
+const esKeyPath = path.resolve(
+  __dirname,
+  '../../../test/dev_certs/elasticsearch/elasticsearch/elasticsearch.key'
+);
+const esCertPath = path.resolve(
+  __dirname,
+  '../../../test/dev_certs/elasticsearch/elasticsearch/elasticsearch.crt'
+);
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>
@@ -48,8 +61,10 @@ const first = (stream, map) =>
   });
 
 exports.Cluster = class Cluster {
-  constructor(log = defaultLog) {
+  constructor({ log = defaultLog, ssl = false } = {}) {
     this._log = log;
+    this._ssl = ssl;
+    this._caCertPromise = ssl ? readFile(caCertPath) : undefined;
   }
 
   /**
@@ -251,10 +266,18 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
-    const args = parseSettings(
-      extractConfigFiles(options.esArgs || [], installPath, { log: this._log }),
-      { filter: SettingsFilter.NonSecureOnly }
-    ).reduce(
+    // Add to esArgs if ssl is enabled
+    const esArgs = (options.esArgs || []).slice(0);
+    if (this._ssl) {
+      esArgs.push('xpack.security.http.ssl.enabled=true');
+      esArgs.push(`xpack.security.http.ssl.key=${esKeyPath}`);
+      esArgs.push(`xpack.security.http.ssl.certificate=${esCertPath}`);
+      esArgs.push(`xpack.security.http.ssl.certificate_authorities=${caCertPath}`);
+    }
+
+    const args = parseSettings(extractConfigFiles(esArgs || [], installPath, { log: this._log }), {
+      filter: SettingsFilter.NonSecureOnly,
+    }).reduce(
       (acc, [settingName, settingValue]) => acc.concat(['-E', `${settingName}=${settingValue}`]),
       []
     );
@@ -282,7 +305,14 @@ exports.Cluster = class Cluster {
 
     // once the http port is available setup the native realm
     this._nativeRealmSetup = httpPort.then(async port => {
-      const nativeRealm = new NativeRealm(options.password, port, this._log);
+      const caCert = await this._caCertPromise;
+      const nativeRealm = new NativeRealm({
+        port,
+        caCert,
+        log: this._log,
+        elasticPassword: options.password,
+        protocol: this._ssl ? 'https' : 'http',
+      });
       await nativeRealm.setPasswords(options);
     });
 

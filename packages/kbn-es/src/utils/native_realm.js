@@ -23,8 +23,17 @@ const chalk = require('chalk');
 const { log: defaultLog } = require('./log');
 
 exports.NativeRealm = class NativeRealm {
-  constructor(elasticPassword, port, log = defaultLog) {
-    this._client = new Client({ node: `http://elastic:${elasticPassword}@localhost:${port}` });
+  constructor({ elasticPassword, port, log = defaultLog, protocol = 'http', caCert }) {
+    this._client = new Client({
+      node: `${protocol}://elastic:${elasticPassword}@localhost:${port}`,
+      ssl:
+        protocol === 'https'
+          ? {
+              ca: caCert,
+              rejectUnauthorized: true,
+            }
+          : undefined,
+    });
     this._elasticPassword = elasticPassword;
     this._log = log;
   }
