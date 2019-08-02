@@ -42,19 +42,20 @@ export function getSuggestions(
         columns.some(col => col.operation.dataType === 'number') &&
         !columns.some(col => !columnSortOrder.hasOwnProperty(col.operation.dataType))
     )
-    .map(table => getSuggestionForColumns(table, opts.state));
+    .map(table => getSuggestionForColumns(table, opts.state))
+    .filter((suggestion): suggestion is VisualizationSuggestion<State> => suggestion !== undefined);
 }
 
 function getSuggestionForColumns(
   table: TableSuggestion,
   currentState?: State
-): VisualizationSuggestion<State> {
+): VisualizationSuggestion<State> | undefined {
   const [buckets, values] = partition(
     prioritizeColumns(table.columns),
     col => col.operation.isBucketed
   );
 
-  if (buckets.length >= 1) {
+  if (buckets.length === 1 || buckets.length === 2) {
     const [x, splitBy] = buckets;
     return getSuggestion(
       table.datasourceSuggestionId,
@@ -64,7 +65,7 @@ function getSuggestionForColumns(
       splitBy,
       currentState
     );
-  } else {
+  } else if (buckets.length === 0) {
     const [x, ...yValues] = values;
     return getSuggestion(
       table.datasourceSuggestionId,
@@ -110,7 +111,7 @@ function getSuggestion(
         layerId,
         xAccessor: xValue.columnId,
         seriesType: splitBy && isDate ? 'line' : 'bar',
-        splitAccessor: splitBy && isDate ? splitBy.columnId : generateId(),
+        splitAccessor: splitBy ? splitBy.columnId : generateId(),
         accessors: yValues.map(col => col.columnId),
         title: yTitle,
       },
