@@ -17,29 +17,5 @@
  * under the License.
  */
 
-import classNames from 'classnames';
-import PropTypes from 'prop-types';
-import React from 'react';
-
-import { EuiFlyoutBody } from '@elastic/eui';
-
-/**
- * The InspectorView component should be the top most element in every implemented
- * inspector view. It makes sure, that the appropriate stylings are applied to the
- * view.
- */
-const InspectorView: React.SFC<{ useFlex?: boolean }> = ({ useFlex, children }) => {
-  const classes = classNames({
-    'kbnInspectorView--flex': Boolean(useFlex),
-  });
-  return <EuiFlyoutBody className={classes}>{children}</EuiFlyoutBody>;
-};
-
-InspectorView.propTypes = {
-  /**
-   * Set to true if the element should have display: flex set.
-   */
-  useFlex: PropTypes.bool,
-};
-
-export { InspectorView };
+export { DataAdapter, FormattedData } from './data';
+export { RequestAdapter, RequestStatus } from './request';

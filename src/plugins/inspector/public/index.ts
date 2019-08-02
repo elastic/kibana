@@ -17,19 +17,12 @@
  * under the License.
  */
 
-import { npSetup } from 'ui/new_platform';
-export { InspectorViewDescription } from './types';
+import { PluginInitializerContext } from '../../../core/public';
+import { InspectorPublicPlugin } from './plugin';
 
-/**
- * Do not use this, instead use `inspector` plugin directly.
- *
- * ```ts
- * import { npSetup } from 'ui/new_platform';
- *
- * npSetup.plugins.inspector.registerView(view);
- * ```
- *
- * @deprecated
- */
-export const viewRegistry =
-  npSetup.plugins.inspector.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.views;
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new InspectorPublicPlugin(initializerContext);
+}
+
+export { InspectorPublicPlugin as Plugin, Setup, Start } from './plugin';
+export * from './types';

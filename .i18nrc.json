@@ -58,7 +58,8 @@
     "xpack.spaces": "x-pack/legacy/plugins/spaces",
     "xpack.upgradeAssistant": "x-pack/legacy/plugins/upgrade_assistant",
     "xpack.uptime": "x-pack/legacy/plugins/uptime",
-    "xpack.watcher": "x-pack/legacy/plugins/watcher"
+    "xpack.watcher": "x-pack/legacy/plugins/watcher",
+    "inspector": "src/plugins/inspector"
   },
   "exclude": ["src/legacy/ui/ui_render/ui_render_mixin.js"],
   "translations": [
