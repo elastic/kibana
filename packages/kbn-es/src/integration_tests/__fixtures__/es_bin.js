@@ -19,9 +19,11 @@
  * under the License.
  */
 
-const { createServer } = require('http');
+const fs = require('fs');
+const path = require('path');
 const { format: formatUrl } = require('url');
-const { exitCode, start } = JSON.parse(process.argv[2]);
+const { exitCode, start, ssl } = JSON.parse(process.argv[2]);
+const { createServer } = ssl ? require('https') : require('http');
 
 process.exitCode = exitCode;
 
@@ -30,27 +32,47 @@ if (!start) {
 }
 
 let serverUrl;
-const server = createServer((req, res) => {
-  const url = new URL(req.url, serverUrl);
-  const send = (code, body) => {
-    res.writeHead(code, { 'content-type': 'application/json' });
-    res.end(JSON.stringify(body));
-  };
+const server = createServer(
+  {
+    key: ssl
+      ? fs.readFileSync(
+          path.resolve(
+            __dirname,
+            '../../../../../test/dev_certs/elasticsearch/elasticsearch/elasticsearch.key'
+          )
+        )
+      : undefined,
+    cert: ssl
+      ? fs.readFileSync(
+          path.resolve(
+            __dirname,
+            '../../../../../test/dev_certs/elasticsearch/elasticsearch/elasticsearch.crt'
+          )
+        )
+      : undefined,
+  },
+  (req, res) => {
+    const url = new URL(req.url, serverUrl);
+    const send = (code, body) => {
+      res.writeHead(code, { 'content-type': 'application/json' });
+      res.end(JSON.stringify(body));
+    };
 
-  if (url.pathname === '/_xpack') {
-    return send(400, {
+    if (url.pathname === '/_xpack') {
+      return send(400, {
+        error: {
+          reason: 'foo bar',
+        },
+      });
+    }
+
+    return send(404, {
       error: {
-        reason: 'foo bar',
+        reason: 'not found',
       },
     });
   }
-
-  return send(404, {
-    error: {
-      reason: 'not found',
-    },
-  });
-});
+);
 
 // setup server auto close after 1 second of silence
 let serverCloseTimer;
