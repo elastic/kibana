@@ -50,6 +50,18 @@ This table includes information like the most recent status, when the monitor wa
 ID and URL, its IP address, and a dedicated sparkline showing its check status over time.
 
 [float]
+=== Observability integrations
+
+[role="screenshot"]
+image::uptime/images/observability_integrations.png[Observability integrations]
+
+The Monitor list also contains a menu of possible integrations. If Uptime detects Kubernetes or
+Docker related host information, it will provide links to open the Infrastructure UI or Logs UI pre-filtered
+for this host. Additionally, this feature supplies links to simply filter the other views on the host's
+IP address, to help you quickly determine if these other solutions contain data relevant to your current
+interest.
+
+[float]
 === Error list
 
 [role="screenshot"]

@@ -18,19 +18,13 @@
  */
 
 import { Chrome } from 'ui/chrome';
-import { ChromeBadge, ChromeSetup } from '../../../../../core/public';
+import { npStart } from 'ui/new_platform';
+import { ChromeBadge } from '../../../../../core/public';
 export type Badge = ChromeBadge;
 
 export type BadgeApi = ReturnType<typeof createBadgeApi>['badge'];
 
-let newPlatformChrome: ChromeSetup;
-export function __newPlatformSetup__(instance: ChromeSetup) {
-  if (newPlatformChrome) {
-    throw new Error('ui/chrome/api/badge is already initialized');
-  }
-
-  newPlatformChrome = instance;
-}
+const newPlatformChrome = npStart.core.chrome;
 
 function createBadgeApi() {
   return {

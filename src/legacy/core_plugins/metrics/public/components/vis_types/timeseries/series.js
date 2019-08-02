@@ -24,12 +24,20 @@ import { AddDeleteButtons } from '../../add_delete_buttons';
 import { Aggs } from '../../../components/aggs/aggs';
 import { TimeseriesConfig as SeriesConfig } from './config';
 import { SeriesDragHandler } from '../../series_drag_handler';
-import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiTabs,
+  EuiTab,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import { Split } from '../../split';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { PANEL_TYPES } from '../../../../common/panel_types';
 
-const TimeseriesSeriesUI = injectI18n(function (props) {
+const TimeseriesSeriesUI = injectI18n(function(props) {
   const {
     panel,
     fields,
@@ -42,10 +50,13 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
     visible,
     intl,
     name,
-    uiRestrictions
+    uiRestrictions,
   } = props;
 
-  const defaults = { label: '' };
+  const defaults = {
+    label: '',
+    type: PANEL_TYPES.TIMESERIES,
+  };
   const model = { ...defaults, ...props.model };
 
   const handleChange = createTextHandler(onChange);
@@ -84,32 +95,24 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
       seriesBody = (
         <SeriesConfig
           fields={props.fields}
-          model={props.model}
+          model={model}
           onChange={props.onChange}
+          indexPatternForQuery={props.indexPatternForQuery}
         />
       );
     }
     body = (
       <div className="tvbSeries__body">
         <EuiTabs size="s">
-          <EuiTab
-            isSelected={selectedTab === 'metrics'}
-            onClick={() => props.switchTab('metrics')}
-          >
-            <FormattedMessage
-              id="tsvb.timeSeries.tab.metricsLabel"
-              defaultMessage="Metrics"
-            />
+          <EuiTab isSelected={selectedTab === 'metrics'} onClick={() => props.switchTab('metrics')}>
+            <FormattedMessage id="tsvb.timeSeries.tab.metricsLabel" defaultMessage="Metrics" />
           </EuiTab>
           <EuiTab
             data-test-subj="seriesOptions"
             isSelected={selectedTab === 'options'}
             onClick={() => props.switchTab('options')}
           >
-            <FormattedMessage
-              id="tsvb.timeSeries.tab.optionsLabel"
-              defaultMessage="Options"
-            />
+            <FormattedMessage id="tsvb.timeSeries.tab.optionsLabel" defaultMessage="Options" />
           </EuiTab>
         </EuiTabs>
         {seriesBody}
@@ -118,19 +121,11 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
   }
 
   const colorPicker = (
-    <ColorPicker
-      disableTrash={true}
-      onChange={props.onChange}
-      name="color"
-      value={model.color}
-    />
+    <ColorPicker disableTrash={true} onChange={props.onChange} name="color" value={model.color} />
   );
 
   return (
-    <div
-      className={`${props.className}`}
-      style={props.style}
-    >
+    <div className={`${props.className}`} style={props.style}>
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
@@ -139,32 +134,45 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
             onClick={props.toggleVisible}
             aria-label={intl.formatMessage({
               id: 'tsvb.timeSeries.toggleSeriesEditorAriaLabel',
-              defaultMessage: 'Toggle series editor'
+              defaultMessage: 'Toggle series editor',
             })}
             aria-expanded={props.visible}
           />
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          { colorPicker }
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{colorPicker}</EuiFlexItem>
 
         <EuiFlexItem>
           <EuiFieldText
             fullWidth
             onChange={handleChange('label')}
-            placeholder={intl.formatMessage({ id: 'tsvb.timeSeries.labelPlaceholder', defaultMessage: 'Label' })}
+            placeholder={intl.formatMessage({
+              id: 'tsvb.timeSeries.labelPlaceholder',
+              defaultMessage: 'Label',
+            })}
             value={model.label}
           />
         </EuiFlexItem>
 
-        <SeriesDragHandler dragHandleProps={props.dragHandleProps} hideDragHandler={props.disableDelete} />
+        <SeriesDragHandler
+          dragHandleProps={props.dragHandleProps}
+          hideDragHandler={props.disableDelete}
+        />
 
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
-            addTooltip={intl.formatMessage({ id: 'tsvb.timeSeries.addSeriesTooltip', defaultMessage: 'Add Series' })}
-            deleteTooltip={intl.formatMessage({ id: 'tsvb.timeSeries.deleteSeriesTooltip', defaultMessage: 'Delete Series' })}
-            cloneTooltip={intl.formatMessage({ id: 'tsvb.timeSeries.cloneSeriesTooltip', defaultMessage: 'Clone Series' })}
+            addTooltip={intl.formatMessage({
+              id: 'tsvb.timeSeries.addSeriesTooltip',
+              defaultMessage: 'Add Series',
+            })}
+            deleteTooltip={intl.formatMessage({
+              id: 'tsvb.timeSeries.deleteSeriesTooltip',
+              defaultMessage: 'Delete Series',
+            })}
+            cloneTooltip={intl.formatMessage({
+              id: 'tsvb.timeSeries.cloneSeriesTooltip',
+              defaultMessage: 'Clone Series',
+            })}
             onDelete={onDelete}
             onClone={props.onClone}
             togglePanelActivation={props.togglePanelActivation}
@@ -176,10 +184,9 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      { body }
+      {body}
     </div>
   );
-
 });
 
 TimeseriesSeriesUI.propTypes = {
@@ -203,6 +210,7 @@ TimeseriesSeriesUI.propTypes = {
   togglePanelActivation: PropTypes.func,
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
+  indexPatternForQuery: PropTypes.string,
 };
 
 export const TimeseriesSeries = injectI18n(TimeseriesSeriesUI);

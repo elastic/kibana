@@ -26,28 +26,27 @@ import { getActiveSeries } from '../helpers/get_active_series';
 
 export function processBucket(panel) {
   return bucket => {
-    const series = getActiveSeries(panel)
-      .map(series => {
-        const timeseries = get(bucket, `${series.id}.timeseries`);
-        const buckets = get(bucket, `${series.id}.buckets`);
+    const series = getActiveSeries(panel).map(series => {
+      const timeseries = get(bucket, `${series.id}.timeseries`);
+      const buckets = get(bucket, `${series.id}.buckets`);
 
-        if (!timeseries && buckets) {
-          const meta = get(bucket, `${series.id}.meta`);
-          const timeseries = {
-            buckets: get(bucket, `${series.id}.buckets`),
-          };
-          set(bucket, series.id, { meta, timeseries });
-        }
+      if (!timeseries && buckets) {
+        const meta = get(bucket, `${series.id}.meta`);
+        const timeseries = {
+          buckets: get(bucket, `${series.id}.buckets`),
+        };
+        set(bucket, series.id, { meta, timeseries });
+      }
 
-        const processor = buildProcessorFunction(processors, bucket, panel, series);
-        const result = first(processor([]));
-        if (!result) return null;
-        const data = get(result, 'data', []);
-        const linearRegression = regression.linear(data);
-        result.last = getLastValue(data);
-        result.slope = linearRegression.equation[0];
-        return result;
-      });
+      const processor = buildProcessorFunction(processors, bucket, panel, series);
+      const result = first(processor([]));
+      if (!result) return null;
+      const data = get(result, 'data', []);
+      const linearRegression = regression.linear(data);
+      result.last = getLastValue(data);
+      result.slope = linearRegression.equation[0];
+      return result;
+    });
     return { key: bucket.key, series };
   };
 }

@@ -37,7 +37,7 @@ function sortByDirection(data, direction, fn) {
 function sortSeries(visData, model) {
   const series = get(visData, `${model.id}.series`, []);
   return model.series.reduce((acc, item) => {
-    const itemSeries =  series.filter(s => {
+    const itemSeries = series.filter(s => {
       const id = first(s.id.split(/:/));
       return id === item.id;
     });
@@ -50,31 +50,34 @@ function sortSeries(visData, model) {
 export function TopNVisualization(props) {
   const { backgroundColor, model, visData } = props;
 
-  const series = sortSeries(visData, model)
-    .map(item => {
-      const id = first(item.id.split(/:/));
-      const seriesConfig = model.series.find(s => s.id === id);
-      if (seriesConfig) {
-        const formatter = tickFormatter(seriesConfig.formatter, seriesConfig.value_template, props.getConfig);
-        const value = getLastValue(item.data);
-        let color = item.color || seriesConfig.color;
-        if (model.bar_color_rules) {
-          model.bar_color_rules.forEach(rule => {
-            if (rule.operator && rule.value != null && rule.bar_color) {
-              if (OPERATORS[rule.operator](value, rule.value)) {
-                color = rule.bar_color;
-              }
+  const series = sortSeries(visData, model).map(item => {
+    const id = first(item.id.split(/:/));
+    const seriesConfig = model.series.find(s => s.id === id);
+    if (seriesConfig) {
+      const formatter = tickFormatter(
+        seriesConfig.formatter,
+        seriesConfig.value_template,
+        props.getConfig
+      );
+      const value = getLastValue(item.data);
+      let color = item.color || seriesConfig.color;
+      if (model.bar_color_rules) {
+        model.bar_color_rules.forEach(rule => {
+          if (rule.operator && rule.value != null && rule.bar_color) {
+            if (OPERATORS[rule.operator](value, rule.value)) {
+              color = rule.bar_color;
             }
-          });
-        }
-        return {
-          ...item,
-          color,
-          tickFormatter: formatter
-        };
+          }
+        });
       }
-      return item;
-    });
+      return {
+        ...item,
+        color,
+        tickFormatter: formatter,
+      };
+    }
+    return item;
+  });
 
   const panelBackgroundColor = model.background_color || backgroundColor;
   const style = { backgroundColor: panelBackgroundColor };
@@ -85,17 +88,16 @@ export function TopNVisualization(props) {
   };
 
   if (model.drilldown_url) {
-    params.onClick = (item) => {
+    params.onClick = item => {
       window.location = replaceVars(model.drilldown_url, {}, { key: item.label });
     };
   }
 
   return (
     <div className="tvbVis" style={style}>
-      <TopN {...params}/>
+      <TopN {...params} />
     </div>
   );
-
 }
 
 TopNVisualization.propTypes = {
@@ -105,5 +107,5 @@ TopNVisualization.propTypes = {
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
   visData: PropTypes.object,
-  getConfig: PropTypes.func
+  getConfig: PropTypes.func,
 };

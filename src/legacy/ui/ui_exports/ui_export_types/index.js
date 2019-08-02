@@ -46,6 +46,7 @@ export {
   visEditorTypes,
   interpreter,
   savedObjectTypes,
+  embeddableActions,
   embeddableFactories,
   fieldFormats,
   fieldFormatEditors,

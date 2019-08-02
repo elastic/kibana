@@ -14,7 +14,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
 
-  describe('spaces feature controls', () => {
+  describe('spaces feature controls', function() {
+    this.tags(['skipFirefox']);
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
     });

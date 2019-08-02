@@ -23,7 +23,7 @@ function mean(values) {
   return _.sum(values) / values.length;
 }
 
-const extractValue = r => r && r[1] || 0;
+const extractValue = r => (r && r[1]) || 0;
 
 const basic = fnName => targetSeries => {
   const data = [];
@@ -47,7 +47,6 @@ const overall = fnName => targetSeries => {
   return [keys.map(k => [k, fn(values)])];
 };
 
-
 export const SeriesAgg = {
   sum: basic('sum'),
   max: basic('max'),
@@ -61,7 +60,6 @@ export const SeriesAgg = {
     });
     return [data];
   },
-
 
   overall_max: overall('max'),
   overall_min: overall('min'),
@@ -88,5 +86,4 @@ export const SeriesAgg = {
     });
     return [data];
   },
-
 };

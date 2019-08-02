@@ -7,7 +7,7 @@
 import { omit } from 'lodash';
 import expect from '@kbn/expect';
 // eslint-disable-next-line max-len
-import { monitorStatusBarQueryString } from '../../../../../plugins/uptime/public/queries';
+import { monitorStatusBarQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
 import monitorStatus from './fixtures/monitor_status';
 import monitorStatusById from './fixtures/monitor_status_by_id';
 

@@ -18,8 +18,7 @@
  */
 
 import {
-  mockGetAutocompleteProvider,
-  mockGetAutocompleteSuggestions,
+  mockFetchIndexPatterns,
   mockPersistedLog,
   mockPersistedLogFactory,
 } from './query_bar_input.test.mocks';
@@ -29,6 +28,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { QueryBarInput, QueryBarInputUI } from './query_bar_input';
+import { IndexPattern } from '../../../index';
 
 const noop = () => {
   return;
@@ -74,7 +74,7 @@ const mockIndexPattern = {
       searchable: true,
     },
   ],
-};
+} as IndexPattern;
 
 describe('QueryBarInput', () => {
   beforeEach(() => {
@@ -131,6 +131,8 @@ describe('QueryBarInput', () => {
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {
+    mockPersistedLogFactory.mockClear();
+
     mountWithIntl(
       <QueryBarInput.WrappedComponent
         query={kqlQuery}
@@ -223,21 +225,21 @@ describe('QueryBarInput', () => {
     expect(mockPersistedLog.get).toHaveBeenCalled();
   });
 
-  it('Should get suggestions from the autocomplete provider for the current language', () => {
+  it('Should accept index pattern strings and fetch the full object', () => {
+    mockFetchIndexPatterns.mockClear();
+
     mountWithIntl(
       <QueryBarInput.WrappedComponent
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
         screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
+        indexPatterns={['logstash-*']}
         store={createMockStorage()}
         disableAutoFocus={true}
         intl={null as any}
       />
     );
-
-    expect(mockGetAutocompleteProvider).toHaveBeenCalledWith('kuery');
-    expect(mockGetAutocompleteSuggestions).toHaveBeenCalled();
+    expect(mockFetchIndexPatterns).toHaveBeenCalledWith(['logstash-*']);
   });
 });

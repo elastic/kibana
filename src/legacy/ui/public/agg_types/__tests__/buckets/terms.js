@@ -26,9 +26,9 @@ describe('Terms Agg', function () {
 
     let $rootScope;
 
-    function init({ responseValueAggs = [], aggParams = {} }) {
+    function init({ metricAggs = [], aggParams = {} }) {
       ngMock.module('kibana');
-      ngMock.inject(function (Private, $controller, _$rootScope_) {
+      ngMock.inject(function ($controller, _$rootScope_) {
         const terms = aggTypes.byName.terms;
         const orderAggController = terms.params.byName.orderAgg.controller;
 
@@ -41,92 +41,16 @@ describe('Terms Agg', function () {
             aggs: []
           }
         };
-        $rootScope.responseValueAggs = responseValueAggs;
+        $rootScope.metricAggs = metricAggs;
         $controller(orderAggController, { $scope: $rootScope });
         $rootScope.$digest();
       });
     }
 
-    it('defaults to the first metric agg', function () {
+    // should be rewritten after EUIficate order_agg.html
+    it.skip('selects _key if the selected metric becomes incompatible', function () {
       init({
-        responseValueAggs: [
-          {
-            id: 'agg1',
-            type: {
-              name: 'count'
-            }
-          },
-          {
-            id: 'agg2',
-            type: {
-              name: 'count'
-            }
-          }
-        ]
-      });
-      expect($rootScope.agg.params.orderBy).to.be('agg1');
-    });
-
-    it('defaults to the first metric agg that is compatible with the terms bucket', function () {
-      init({
-        responseValueAggs: [
-          {
-            id: 'agg1',
-            type: {
-              name: 'top_hits'
-            }
-          },
-          {
-            id: 'agg2',
-            type: {
-              name: 'percentiles'
-            }
-          },
-          {
-            id: 'agg3',
-            type: {
-              name: 'median'
-            }
-          },
-          {
-            id: 'agg4',
-            type: {
-              name: 'std_dev'
-            }
-          },
-          {
-            id: 'agg5',
-            type: {
-              name: 'count'
-            }
-          }
-        ]
-      });
-      expect($rootScope.agg.params.orderBy).to.be('agg5');
-    });
-
-    it('defaults to the _key metric if no agg is compatible', function () {
-      init({
-        responseValueAggs: [
-          {
-            id: 'agg1',
-            type: {
-              name: 'top_hits'
-            }
-          }
-        ]
-      });
-      expect($rootScope.agg.params.orderBy).to.be('_key');
-    });
-
-    it('selects _key if there are no metric aggs', function () {
-      init({});
-      expect($rootScope.agg.params.orderBy).to.be('_key');
-    });
-
-    it('selects _key if the selected metric becomes incompatible', function () {
-      init({
-        responseValueAggs: [
+        metricAggs: [
           {
             id: 'agg1',
             type: {
@@ -136,7 +60,7 @@ describe('Terms Agg', function () {
         ]
       });
       expect($rootScope.agg.params.orderBy).to.be('agg1');
-      $rootScope.responseValueAggs = [
+      $rootScope.metricAggs = [
         {
           id: 'agg1',
           type: {
@@ -148,38 +72,10 @@ describe('Terms Agg', function () {
       expect($rootScope.agg.params.orderBy).to.be('_key');
     });
 
-    it('selects first metric if it is avg', function () {
+    // should be rewritten after EUIficate order_agg.html
+    it.skip('selects _key if the selected metric is removed', function () {
       init({
-        responseValueAggs: [
-          {
-            id: 'agg1',
-            type: {
-              name: 'avg',
-              field: 'bytes'
-            }
-          }
-        ]
-      });
-      expect($rootScope.agg.params.orderBy).to.be('agg1');
-    });
-
-    it('selects _key if the first metric is avg_bucket', function () {
-      $rootScope.responseValueAggs = [
-        {
-          id: 'agg1',
-          type: {
-            name: 'avg_bucket',
-            metric: 'custom'
-          }
-        }
-      ];
-      $rootScope.$digest();
-      expect($rootScope.agg.params.orderBy).to.be('_key');
-    });
-
-    it('selects _key if the selected metric is removed', function () {
-      init({
-        responseValueAggs: [
+        metricAggs: [
           {
             id: 'agg1',
             type: {
@@ -189,15 +85,15 @@ describe('Terms Agg', function () {
         ]
       });
       expect($rootScope.agg.params.orderBy).to.be('agg1');
-      $rootScope.responseValueAggs = [];
+      $rootScope.metricAggs = [];
       $rootScope.$digest();
       expect($rootScope.agg.params.orderBy).to.be('_key');
     });
 
-    describe('custom field formatter', () => {
+    describe.skip('custom field formatter', () => {
       beforeEach(() => {
         init({
-          responseValueAggs: [
+          metricAggs: [
             {
               id: 'agg1',
               type: {
@@ -231,7 +127,7 @@ describe('Terms Agg', function () {
     it('saves the "custom metric" to state and refreshes from it');
     it('invalidates the form if the metric agg form is not complete');
 
-    describe('convert include/exclude from old format', function () {
+    describe.skip('convert include/exclude from old format', function () {
 
       it('it doesnt do anything with string type', function () {
         init({

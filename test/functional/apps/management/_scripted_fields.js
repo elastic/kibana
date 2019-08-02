@@ -45,7 +45,8 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover', 'timePicker']);
 
-  describe('scripted fields', () => {
+  describe('scripted fields', function () {
+    this.tags(['skipFirefox']);
 
     before(async function () {
       await browser.setWindowSize(1200, 800);

@@ -7,15 +7,18 @@
 ++++
 
 To view the key metrics that indicate the overall health of {kib} itself,
-click **Overview** in the {kib} section of the *Monitoring* page.
+click **Overview** in the {kib} section of the *Stack Monitoring* page.
 
-image::monitoring/images/monitoring-kibana-overview.png["Kibana Overview",link="images/monitoring-kibana-overview.png"]
+[role="screenshot"]
+image::monitoring/images/monitoring-kibana-overview.png["Kibana Overview"]
 
 To view {kib} instance metrics, click **Instances**. The Instances section
 shows the status of each {kib} instance.
 
-image::monitoring/images/monitoring-kibana-instances.png["Kibana Instances",link="images/monitoring-kibana-instances.png"]
+[role="screenshot"]
+image::monitoring/images/monitoring-kibana-instances.png["Kibana Instances"]
 
 Click the name of an instance to view its instance statistics over time.
 
-image::monitoring/images/monitoring-kibana-instance.png["Kibana Instance View",link="images/monitoring-kibana-instance.png"]
+[role="screenshot"]
+image::monitoring/images/monitoring-kibana-instance.png["Kibana Instance View"]

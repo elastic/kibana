@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { modifyUrl } from '../../../../../core/public/utils';
+import { modifyUrl } from '../../../../../core/utils';
 import { toastNotifications } from '../toasts';
 
 const APP_REDIRECT_MESSAGE_PARAM = 'app_redirect_message';

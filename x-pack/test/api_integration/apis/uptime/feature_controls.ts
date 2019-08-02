@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { docCountQueryString } from '../../../../plugins/uptime/public/queries';
+import { docCountQueryString } from '../../../../legacy/plugins/uptime/public/queries';
 import { SecurityService, SpacesService } from '../../../common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { PINGS_DATE_RANGE_END, PINGS_DATE_RANGE_START } from './constants';
@@ -33,7 +33,10 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
     const getDocCountQuery = {
       operationName: null,
       query: docCountQueryString,
-      variables: {},
+      variables: {
+        dateRangeStart: '2019-01-28T17:40:08.078Z',
+        dateRangeEnd: '2019-01-28T19:00:16.078Z',
+      },
     };
 
     return await supertest

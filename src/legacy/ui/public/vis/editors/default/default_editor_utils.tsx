@@ -25,7 +25,7 @@ import { AggType } from 'ui/agg_types';
 // https://github.com/babel/babel/issues/7641
 //
 export type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
-  label: string;
+  label?: string;
   value?: AggType;
   options?: ComboBoxGroupedOption[];
 };
@@ -37,7 +37,7 @@ export type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
  * @param groupBy A field name which aggregations is grouped by.
  * @param labelName A name of a property which value will be displayed.
  *
- * @returns An array of grouped and sorted alphabetically `aggs` that are compatible with EuiComboBox options. If `aggs` is not an array, the function returns an ampry array.
+ * @returns An array of grouped and sorted alphabetically `aggs` that are compatible with EuiComboBox options. If `aggs` is not an array, the function returns an empty array.
  */
 function groupAggregationsBy(
   aggs: AggType[],
@@ -80,7 +80,7 @@ function groupAggregationsBy(
 }
 
 function sortByLabel(a: ComboBoxGroupedOption, b: ComboBoxGroupedOption) {
-  return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
+  return (a.label || '').toLowerCase().localeCompare((b.label || '').toLowerCase());
 }
 
 export { groupAggregationsBy };

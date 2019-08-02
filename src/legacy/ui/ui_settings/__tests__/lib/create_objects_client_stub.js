@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import expect from '@kbn/expect';
-import { SavedObjectsClient } from '../../../../server/saved_objects';
+import { SavedObjectsClient } from '../../../../../core/server';
 
 export const savedObjectsClientErrors = SavedObjectsClient.errors;
 

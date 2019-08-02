@@ -17,20 +17,22 @@
  * under the License.
  */
 
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Query } from 'src/legacy/core_plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { SearchSource } from '../../courier';
-import { QueryFilter } from '../../filter_bar/query_filter';
+import { QueryFilter } from '../../filter_manager/query_filter';
 import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
-import { Filters, Query, TimeRange } from '../../visualize';
-import { AggConfigs } from '../agg_configs';
+import { AggConfig } from '../agg_config';
 import { Vis } from '../vis';
 
 export interface RequestHandlerParams {
   searchSource: SearchSource;
-  aggs: AggConfigs;
+  aggs: AggConfig[];
   timeRange?: TimeRange;
   query?: Query;
-  filters?: Filters;
+  filters?: Filter[];
   forceFetch: boolean;
   queryFilter: QueryFilter;
   uiState?: PersistedState;

@@ -3,51 +3,84 @@
 
 [partintro]
 --
-A Kibana _dashboard_ displays a collection of visualizations, searches, and {kibana-ref}/maps.html[maps].
-You can arrange, resize, and edit the dashboard content and then save the dashboard
-so you can share it.
+
+A {kib} _dashboard_ is a collection of visualizations, searches, and 
+maps, typically in real-time. Dashboards provide 
+at-a-glance insights into your data and enable you to drill down into details. 
+
+To start working with dashboards, click *Dashboard* in the side navigation. 
+With *Dashboard*, you can:
+
+* <<dashboard-create-new-dashboard, Create a dashboard>>
+* <<customizing-your-dashboard, Arrange dashboard elements>>
+* <<sharing-dashboards, Share a dashboard>>
+* <<import-dashboards, Import and export dashboards>>
+* <<viewing-detailed-information, Inspect and edit dashboard elements>>
+
 
 [role="screenshot"]
 image:images/Dashboard_example.png[Example dashboard]
 
+
+[float]
+[[dashboard-read-only-access]]
+=== [xpack]#Read only access#
+If you see
+the read-only icon in the application header,
+then you don't have sufficient privileges to create and save dashboards. The buttons to create and edit
+dashboards are not visible. For more information, see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::images/dashboard-read-only-badge.png[Example of Dashboard's read only access indicator in Kibana's header]
+
+[float]
+[[dashboard-getting-started]]
+=== Interact with dashboards
+
+When you open *Dashhboard*, you're presented an overview of your dashboards. 
+If you don't have any dashboards, you can add 
+<<add-sample-data, sample data sets>>,
+which include pre-built dashboards. 
+
+Once you open a dashboard, you can filter the data
+by entering a search query, changing the time filter, or clicking 
+in the visualizations, searches, and maps. If a dashboard element has a stored query, 
+both queries are applied.
+
 --
 
-[[dashboard-getting-started]]
-== Building a Dashboard
+[[dashboard-create-new-dashboard]]
+== Create a dashboard
 
-If you haven't yet indexed data into {es} or created an index pattern,
-you'll be prompted to do so as you follow the steps for creating a dashboard.
-Or, you can use one of the prebuilt sample data sets, available from the
-Kibana home page.
+To create a dashboard, you must have data indexed into {es}, an index pattern 
+to retrieve the data from {es}, and 
+visualizations, saved searches, or maps. If these don't exist, you're prompted to 
+add them as you create the dashboard.
 
-. In the side navigation, click *Dashboard*.
+For an end-to-end example, see <<tutorial-build-dashboard, Building your own dashboard>>.
+
+. Open *Dashboard.*
 . Click *Create new dashboard.*
 . Click *Add*.
-. [[adding-visualizations-to-a-dashboard]]Use *Add Panels* to add visualizations
-and saved searches to the dashboard. If you have a large number of
-visualizations, you can filter the lists.
+. Use *Add panels* to add elements to the dashboard.
++
+The visualizations, saved searches, and maps
+are stored in panels that you can move and resize. A
+menu in the upper right of the panel has options for customizing
+the panel. You can add elements from 
+multiple indices, and the same element can appear in multiple dashboards.
 +
 [role="screenshot"]
 image:images/Dashboard_add_visualization.png[Example add visualization to dashboard]
 
-. [[saving-dashboards]]When you're finished adding and arranging the panels,
-go to the menu bar and click *Save*.
+. When you're finished adding and arranging the panels,
+*Save* the dashboard.
 
-. In *Save Dashboard*, enter a dashboard title and optionally a description.
-
-. To store the time period specified in the time filter, enable *Store time
-with dashboard*.
-
-. Click *Save*.
-
-[[loading-a-saved-dashboard]]
-To import, export, and delete dashboards, see <<managing-saved-objects>>.
-
+[float]
 [[customizing-your-dashboard]]
-== Arranging Dashboard Elements
+=== Arrange dashboard elements
 
-The visualizations and searches in a dashboard are stored in panels that you can move,
-resize, edit, and delete.  To start editing, click *Edit* in the menu bar.
+In *Edit* mode, you can move, resize, customize, and delete panels to suit your needs. 
 
 [[moving-containers]]
 * To move a panel, click and hold the panel header and drag to the new location.
@@ -56,53 +89,58 @@ resize, edit, and delete.  To start editing, click *Edit* in the menu bar.
 * To resize a panel, click the resize control on the lower right and drag
 to the new dimensions.
 
-[[removing-containers]]
-Additional commands for managing the panel and its contents
-are in the gear menu in the upper right.
+* To toggle the use of margins and panel titles, use the *Options* menu in the upper left.
 
-[role="screenshot"]
-image:images/Dashboard_Resize_Menu.png[Example dashboard]
-
-NOTE: Deleting a panel from a
+* To delete a panel, open the panel menu and select *Delete from dashboard.* Deleting a panel from a
 dashboard does *not* delete the saved visualization or search.
 
-[[viewing-detailed-information]]
-== Inspecting a Visualization from the Dashboard
 
-Many visualizations allow you to inspect the data and requests behind the
-visualization.
-
-In the dashboard, expand the visualization's panel menu (or gear menu if in
-*Edit* mode) and select *Inspect*.
-
-The initial view shows the underlying data for the visualization. To view the
-requests that were made for the visualization, choose *Requests* from the *View*
-menu.
-
-The views you'll see depend on the element that you inspect.
-
-[role="screenshot"]
-image:images/Dashboard_visualization_data.png[Example of visualization data]
-
-
-
+[float]
 [[sharing-dashboards]]
-== Sharing a Dashboard
-
-You can either share a direct link to a Kibana dashboard,
-or embed the dashboard in a web page. Users must have Kibana access
-to view an embedded dashboard.
+=== Share a dashboard
 
 [[embedding-dashboards]]
+When you've finished your dashboard, you can share it with your teammates. 
+From the *Share* menu, you can:
 
-. Open the dashboard you want to share.
-. In the menu bar, click *Share*.
-. Copy the link you want to share or the iframe you want to embed. You can
-share the live dashboard or a static snapshot of the current point in time.
+* Embed the code in a web page. Users must have Kibana access
+to view an embedded dashboard.
+* Share a direct link to a {kib} dashboard
+* Generate a PDF report
+* Generate a PNG report
 
 TIP: You can create a link to a dashboard by title by doing this: +
 `${domain}/${basepath?}/app/kibana#/dashboards?title=${yourdashboardtitle}`
 
 TIP: When sharing a link to a dashboard snapshot, use the *Short URL*. Snapshot
 URLs are long and can be problematic for Internet Explorer and other
-tools.  To create a short URL, you must have write access to {kib}.
+tools. To create a short URL, you must have write access to {kib}.
+
+[float]
+[[import-dashboards]]
+=== Import and export dashboards
+
+To import and export dashboards, go to *Management > Saved Objects*. For details,
+see <<managing-saved-objects, Managing saved objects>>. 
+
+[float]
+[[viewing-detailed-information]]
+=== Inspect and edit elements
+
+Many dashboard elements allow you to drill down into the data and requests 
+behind the element. Open the menu in the upper right of the panel and select *Inspect*. 
+The views you see depend on the element that you inspect. 
+
+[role="screenshot"]
+image:images/Dashboard_inspect.png[Inspect in dashboard]
+
+To open an element for editing, put the dashboard in *Edit* mode, 
+and then select *Edit* from the panel menu. The changes you make appear in
+every dashboard that uses the element. 
+
+
+
+
+
+
+

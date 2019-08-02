@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '../../../../../plugins/cross_cluster_replication/common/constants';
+import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '../../../../../legacy/plugins/cross_cluster_replication/common/constants';
 import { getFollowerIndexPayload } from './fixtures';
 import { registerHelpers as registerElasticSearchHelpers, getRandomString } from './lib';
 import { registerHelpers as registerRemoteClustersHelpers } from './remote_clusters.helpers';
@@ -26,7 +26,9 @@ export default function ({ getService }) {
 
   const { createIndex, deleteAllIndices } = registerElasticSearchHelpers(es);
 
-  describe('follower indices', () => {
+  describe('follower indices', function () {
+    this.tags(['skipCloud']);
+
     before(() => addCluster());
 
     after(() => Promise.all([

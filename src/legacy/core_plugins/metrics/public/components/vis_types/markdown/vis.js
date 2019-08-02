@@ -48,23 +48,26 @@ export function MarkdownVisualization(props) {
       {},
       {
         _all: variables,
-        ...variables
+        ...variables,
       }
     );
 
     if (model.markdown_css) {
-      markdownCss = model.markdown_css
-        .replace(new RegExp(getMarkdownId(model.id), 'g'), markdownElementId);
+      markdownCss = model.markdown_css.replace(
+        new RegExp(getMarkdownId(model.id), 'g'),
+        markdownElementId
+      );
     }
 
     const markdownClasses = classNames('kbnMarkdown__body', {
       'kbnMarkdown__body--reversed': isBackgroundInverted(panelBackgroundColor),
     });
 
-    const contentClasses = classNames('tvbMarkdown__content',
+    const contentClasses = classNames(
+      'tvbMarkdown__content',
       `tvbMarkdown__content--${model.markdown_vertical_align}`,
-      { 'tvbMarkdown__content-isScrolling': model.markdown_scrollbars, },
-      markdownClasses,
+      { 'tvbMarkdown__content-isScrolling': model.markdown_scrollbars },
+      markdownClasses
     );
 
     const markdownError = markdownSource instanceof Error ? markdownSource : null;
@@ -75,7 +78,12 @@ export function MarkdownVisualization(props) {
         <style type="text/css">{markdownCss}</style>
         <div className={contentClasses}>
           <div id={markdownElementId}>
-            { !markdownError && <Markdown markdown={markdownSource} openLinksInNewTab={model.markdown_openLinksInNewTab} /> }
+            {!markdownError && (
+              <Markdown
+                markdown={markdownSource}
+                openLinksInNewTab={model.markdown_openLinksInNewTab}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -96,5 +104,5 @@ MarkdownVisualization.propTypes = {
   onChange: PropTypes.func,
   visData: PropTypes.object,
   dateFormat: PropTypes.string,
-  getConfig: PropTypes.func
+  getConfig: PropTypes.func,
 };

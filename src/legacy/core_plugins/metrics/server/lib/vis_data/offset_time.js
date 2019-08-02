@@ -27,6 +27,6 @@ export function offsetTime(req, by) {
   const offsetUnit = matches[2];
   return {
     from: from.clone().subtract(offsetValue, offsetUnit),
-    to: to.clone().subtract(offsetValue, offsetUnit)
+    to: to.clone().subtract(offsetValue, offsetUnit),
   };
 }

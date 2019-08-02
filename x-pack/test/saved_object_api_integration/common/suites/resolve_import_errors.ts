@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -17,6 +17,7 @@ interface ResolveImportErrorsTest {
 
 interface ResolveImportErrorsTests {
   default: ResolveImportErrorsTest;
+  hiddenType: ResolveImportErrorsTest;
   unknownType: ResolveImportErrorsTest;
 }
 
@@ -57,7 +58,7 @@ export function resolveImportErrorsTestSuiteFactory(
     });
   };
 
-  const expectUnknownType = (resp: { [key: string]: any }) => {
+  const expectUnknownTypeUnsupported = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       success: false,
       successCount: 1,
@@ -66,6 +67,22 @@ export function resolveImportErrorsTestSuiteFactory(
           id: '1',
           type: 'wigwags',
           title: 'Wigwags title',
+          error: {
+            type: 'unsupported_type',
+          },
+        },
+      ],
+    });
+  };
+
+  const expectHiddenTypeUnsupported = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      success: false,
+      successCount: 1,
+      errors: [
+        {
+          id: '1',
+          type: 'hiddentype',
           error: {
             type: 'unsupported_type',
           },
@@ -153,6 +170,43 @@ export function resolveImportErrorsTestSuiteFactory(
             .then(tests.unknownType.response);
         });
       });
+      describe('hidden type', () => {
+        it(`should return ${tests.hiddenType.statusCode}`, async () => {
+          const data = createImportData(spaceId);
+          data.push({
+            type: 'hiddentype',
+            id: '1',
+            attributes: {
+              name: 'My Hidden Type',
+            },
+          });
+          await supertest
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_errors`)
+            .auth(user.username, user.password)
+            .field(
+              'retries',
+              JSON.stringify([
+                {
+                  type: 'hiddentype',
+                  id: '1',
+                  overwrite: true,
+                },
+                {
+                  type: 'dashboard',
+                  id: `${getIdPrefix(spaceId)}a01b2f57-fcfd-4864-b735-09e28f0d815e`,
+                  overwrite: true,
+                },
+              ])
+            )
+            .attach(
+              'file',
+              Buffer.from(data.map(obj => JSON.stringify(obj)).join('\n'), 'utf8'),
+              'export.ndjson'
+            )
+            .expect(tests.hiddenType.statusCode)
+            .then(tests.hiddenType.response);
+        });
+      });
     });
   };
 
@@ -164,6 +218,7 @@ export function resolveImportErrorsTestSuiteFactory(
     resolveImportErrorsTest,
     createExpectResults,
     expectRbacForbidden,
-    expectUnknownType,
+    expectUnknownTypeUnsupported,
+    expectHiddenTypeUnsupported,
   };
 }

@@ -139,7 +139,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
           }
         };
 
-        const { edit: canEdit, delete: canDelete } = uiCapabilities.savedObjectsManagement[service.type];
+        const { edit: canEdit, delete: canDelete } = uiCapabilities.savedObjectsManagement;
         $scope.canEdit = canEdit;
         $scope.canDelete = canDelete;
         $scope.canViewInApp = canViewInApp(uiCapabilities, service.type);

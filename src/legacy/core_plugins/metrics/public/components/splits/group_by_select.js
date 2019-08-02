@@ -19,15 +19,13 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import {
-  EuiComboBox,
-} from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import { isGroupByFieldsEnabled } from '../../lib/check_ui_restrictions';
 
 function GroupBySelectUi(props) {
   const { intl, uiRestrictions } = props;
-  const modeOptions = ([
+  const modeOptions = [
     {
       label: intl.formatMessage({
         id: 'tsvb.splits.groupBySelect.modeOptions.everythingLabel',
@@ -36,7 +34,10 @@ function GroupBySelectUi(props) {
       value: 'everything',
     },
     {
-      label: intl.formatMessage({ id: 'tsvb.splits.groupBySelect.modeOptions.filterLabel', defaultMessage: 'Filter' }),
+      label: intl.formatMessage({
+        id: 'tsvb.splits.groupBySelect.modeOptions.filterLabel',
+        defaultMessage: 'Filter',
+      }),
       value: 'filter',
     },
     {
@@ -47,10 +48,13 @@ function GroupBySelectUi(props) {
       value: 'filters',
     },
     {
-      label: intl.formatMessage({ id: 'tsvb.splits.groupBySelect.modeOptions.termsLabel', defaultMessage: 'Terms' }),
+      label: intl.formatMessage({
+        id: 'tsvb.splits.groupBySelect.modeOptions.termsLabel',
+        defaultMessage: 'Terms',
+      }),
       value: 'terms',
     },
-  ]).map(field => ({
+  ].map(field => ({
     ...field,
     disabled: !isGroupByFieldsEnabled(field.value, uiRestrictions),
   }));

@@ -22,9 +22,8 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'home', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker']);
   const appsMenu = getService('appsMenu');
-  const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const fromTime = '2015-09-19 06:31:44.000';
@@ -34,8 +33,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('makelogs');
-      await kibanaServer.uiSettings.disableToastAutohide();
       await browser.refresh();
+      await PageObjects.header.awaitKibanaChrome();
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/33468

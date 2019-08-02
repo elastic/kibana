@@ -201,7 +201,7 @@ describe('Integration', () => {
     endpoints: {
       _search: {
         methods: ['GET', 'POST'],
-        patterns: ['{indices}/{types}/_search', '{indices}/_search', '_search'],
+        patterns: ['{indices}/_search', '_search'],
         data_autocomplete_rules: {
           query: {
             match_all: {},
@@ -221,19 +221,15 @@ describe('Integration', () => {
 
   const MAPPING = {
     index1: {
-      'type1.1': {
-        properties: {
-          'field1.1.1': { type: 'string' },
-          'field1.1.2': { type: 'string' },
-        },
+      properties: {
+        'field1.1.1': { type: 'string' },
+        'field1.1.2': { type: 'string' },
       },
     },
     index2: {
-      'type2.1': {
-        properties: {
-          'field2.1.1': { type: 'string' },
-          'field2.1.2': { type: 'string' },
-        },
+      properties: {
+        'field2.1.1': { type: 'string' },
+        'field2.1.2': { type: 'string' },
       },
     },
   };
@@ -710,6 +706,9 @@ describe('Integration', () => {
     ]
   );
 
+  // NOTE: This test emits "error while getting completion terms Error: failed to resolve link
+  // [GLOBAL.broken]: Error: failed to resolve global components for  ['broken']". but that's
+  // expected.
   contextTests(
     {
       a: {
@@ -980,6 +979,7 @@ describe('Integration', () => {
     ]
   );
 
+  // NOTE: This test emits "Can't extract a valid url token path", but that's expected.
   contextTests('POST _search\n', MAPPING, SEARCH_KB, null, [
     {
       name: 'initial doc start',
@@ -1014,7 +1014,7 @@ describe('Integration', () => {
   const CLUSTER_KB = {
     endpoints: {
       _search: {
-        patterns: ['_search', '{indices}/{types}/_search', '{indices}/_search'],
+        patterns: ['_search', '{indices}/_search'],
         url_params: {
           search_type: ['count', 'query_then_fetch'],
           scroll: '10m',

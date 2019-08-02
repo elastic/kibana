@@ -43,21 +43,13 @@ export function query(req, panel, annotation, esQueryConfig, indexPattern, capab
     doc.query.bool.must.push(timerange);
 
     if (annotation.query_string) {
-      doc.query.bool.must.push({
-        query_string: {
-          query: annotation.query_string,
-          analyze_wildcard: true,
-        },
-      });
+      doc.query.bool.must.push(
+        buildEsQuery(indexPattern, [annotation.query_string], [], esQueryConfig)
+      );
     }
 
     if (!annotation.ignore_panel_filters && panel.filter) {
-      doc.query.bool.must.push({
-        query_string: {
-          query: panel.filter,
-          analyze_wildcard: true,
-        },
-      });
+      doc.query.bool.must.push(buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
     }
 
     if (annotation.fields) {

@@ -18,7 +18,7 @@ export default function uiCapabilitesTests({
   const featuresService: FeaturesService = getService('features');
 
   describe('ui capabilities', function() {
-    this.tags('ciGroup5');
+    this.tags('ciGroup9');
 
     before(async () => {
       const features = await featuresService.get();
@@ -41,6 +41,5 @@ export default function uiCapabilitesTests({
     loadTestFile(require.resolve('./catalogue'));
     loadTestFile(require.resolve('./foo'));
     loadTestFile(require.resolve('./nav_links'));
-    loadTestFile(require.resolve('./saved_objects_management'));
   });
 }

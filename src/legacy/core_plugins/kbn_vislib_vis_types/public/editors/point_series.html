@@ -64,6 +64,18 @@
       </div>
     </div>
 
+    <div class="visEditorSidebar__formRow" ng-show="vis.type.type === 'histogram'">
+      <label 
+        class="visEditorSidebar__formLabel"
+        for="showLabels"
+        i18n-id="kbnVislibVisTypes.editors.pointSeries.showLabels"
+        i18n-default-message="Show values on chart"
+      ></label>
+      <div class="visEditorSidebar__formControl">
+        <input class="kuiCheckBox" id="showLabels" type="checkbox" ng-model="editorState.params.labels.show">
+      </div>  
+    </div>
+
     <vislib-grid></vislib-grid>
   </div>
 

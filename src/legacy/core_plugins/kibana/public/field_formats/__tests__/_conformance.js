@@ -29,6 +29,7 @@ const config = chrome.getUiSettingsClient();
 const formatIds = [
   'bytes',
   'date',
+  'date_nanos',
   'duration',
   'ip',
   'number',

@@ -18,12 +18,14 @@
  */
 
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'timePicker']);
+  const browser = getService('browser');
 
   describe('dashboard time picker', function describeIndexTests() {
     before(async function () {
@@ -57,6 +59,27 @@ export default function ({ getService, getPageObjects }) {
       // Set to time range with no data
       await PageObjects.timePicker.setAbsoluteRange('2000-01-01 00:00:00.000', '2000-01-01 01:00:00.000');
       await dashboardExpect.docTableFieldCount(0);
+    });
+
+    it('Timepicker start, end, interval values are set by url', async () => {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await dashboardVisualizations.createAndAddSavedSearch({ name: 'saved search', fields: ['bytes', 'agent'] });
+      const currentUrl = await browser.getCurrentUrl();
+      const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
+      const urlQuery = `/dashboard?` +
+        `_g=(refreshInterval:(pause:!t,value:2000),` +
+        `time:(from:'2012-11-17T00:00:00.000Z',mode:absolute,to:'2015-11-17T18:01:36.621Z'))&` +
+        `_a=(description:'',filters:!()` +
+        `)`;
+      await browser.get(`${kibanaBaseUrl}#${urlQuery}`, true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const time = await PageObjects.timePicker.getTimeConfig();
+      const refresh =  await PageObjects.timePicker.getRefreshConfig();
+      expect(time.start).to.be('Nov 17, 2012 @ 00:00:00.000');
+      expect(time.end).to.be('Nov 17, 2015 @ 18:01:36.621');
+      expect(refresh.interval).to.be('2');
+
     });
   });
 }

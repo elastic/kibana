@@ -7,4 +7,5 @@
 if (window.__test_utils__ && window.__test_utils__.isTracking) {
   document.removeEventListener('click', window.__test_utils__.documentClicksHandler);
   window.__test_utils__.isTracking = false;
+  window.__test_utils__.dataTestSubjects = new Set();
 }

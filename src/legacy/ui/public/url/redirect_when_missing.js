@@ -28,7 +28,7 @@ import { uiModules } from '../modules';
 uiModules.get('kibana/url')
   .service('redirectWhenMissing', function (Private) { return Private(RedirectWhenMissingProvider); });
 
-export function RedirectWhenMissingProvider($location, kbnUrl, Promise) {
+export function RedirectWhenMissingProvider(kbnUrl, Promise) {
   /**
    * Creates an error handler that will redirect to a url when a SavedObjectNotFound
    * error is thrown

@@ -43,21 +43,13 @@ export function query(req, panel, series, esQueryConfig, indexPatternObject) {
     doc.query.bool.must.push(timerange);
 
     if (panel.filter) {
-      doc.query.bool.must.push({
-        query_string: {
-          query: panel.filter,
-          analyze_wildcard: true,
-        },
-      });
+      doc.query.bool.must.push(buildEsQuery(indexPatternObject, [panel.filter], [], esQueryConfig));
     }
 
     if (series.filter) {
-      doc.query.bool.must.push({
-        query_string: {
-          query: series.filter,
-          analyze_wildcard: true,
-        },
-      });
+      doc.query.bool.must.push(
+        buildEsQuery(indexPatternObject, [series.filter], [], esQueryConfig)
+      );
     }
 
     return next(doc);

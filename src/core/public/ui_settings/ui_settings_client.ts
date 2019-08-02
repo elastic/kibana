@@ -31,6 +31,12 @@ interface UiSettingsClientParams {
   initialSettings?: UiSettingsState;
 }
 
+/**
+ * {@link UiSettingsClient}
+ * @public
+ */
+export type UiSettingsClientContract = PublicMethodsOf<UiSettingsClient>;
+
 /** @public */
 export class UiSettingsClient {
   private readonly update$ = new Rx.Subject<{ key: string; newValue: any; oldValue: any }>();

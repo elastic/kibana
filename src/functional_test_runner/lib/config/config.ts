@@ -120,4 +120,12 @@ export class Config {
       }
     });
   }
+
+  public getAll() {
+    return cloneDeep(this[$values], v => {
+      if (typeof v === 'function') {
+        return v;
+      }
+    });
+  }
 }

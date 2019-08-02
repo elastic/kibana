@@ -1,0 +1,116 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ElasticsearchMonitorStatesAdapter returns properly formatted objects from raw es documents 1`] = `
+Array [
+  Object {
+    "histogram": undefined,
+    "monitor_id": "auto-http-0X21EE76EAC459873F",
+    "state": Object {
+      "@timestamp": "2019-06-26T13:42:42.535Z",
+      "checks": Array [
+        Object {
+          "@timestamp": 1561556562535,
+          "agent": Object {
+            "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f",
+          },
+          "monitor": Object {
+            "ip": "127.0.0.1",
+            "name": "test-page",
+            "status": "down",
+          },
+          "observer": Object {
+            "geo": Object {
+              "location": Object {
+                "lat": 39.952599965035915,
+                "lon": 75.1651999913156,
+              },
+              "name": "us-east-2",
+            },
+          },
+          "timestamp": 1561556562535,
+        },
+      ],
+      "monitor": Object {
+        "ip": Array [
+          "127.0.0.1",
+        ],
+        "status": "down",
+      },
+      "observer": Object {
+        "geo": Object {
+          "name": Array [
+            "us-east-2",
+          ],
+        },
+      },
+      "summary": Object {
+        "down": 1,
+        "up": 0,
+      },
+      "timestamp": "2019-06-26T13:42:42.535Z",
+      "url": Object {
+        "domain": "localhost",
+        "full": "http://localhost:12349/test-page",
+        "path": "/test-page",
+        "port": 12349,
+        "scheme": "http",
+      },
+    },
+  },
+  Object {
+    "histogram": undefined,
+    "monitor_id": "auto-http-0X2AF1D7DB9C490053",
+    "state": Object {
+      "@timestamp": "2019-06-26T13:42:21.536Z",
+      "checks": Array [
+        Object {
+          "@timestamp": 1561556541536,
+          "agent": Object {
+            "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f",
+          },
+          "monitor": Object {
+            "ip": "35.245.22.113",
+            "name": "prod-site",
+            "status": "down",
+          },
+          "observer": Object {
+            "geo": Object {
+              "location": Object {
+                "lat": 39.952599965035915,
+                "lon": 75.1651999913156,
+              },
+              "name": "us-east-2",
+            },
+          },
+          "timestamp": 1561556541536,
+        },
+      ],
+      "monitor": Object {
+        "ip": Array [
+          "35.245.22.113",
+        ],
+        "status": "down",
+      },
+      "observer": Object {
+        "geo": Object {
+          "name": Array [
+            "us-east-2",
+          ],
+        },
+      },
+      "summary": Object {
+        "down": 1,
+        "up": 0,
+      },
+      "timestamp": "2019-06-26T13:42:21.536Z",
+      "url": Object {
+        "domain": "35.245.22.113",
+        "full": "http://35.245.22.113:12349/",
+        "path": "/",
+        "port": 12349,
+        "scheme": "http",
+      },
+    },
+  },
+]
+`;

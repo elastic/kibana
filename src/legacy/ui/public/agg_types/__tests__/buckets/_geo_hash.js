@@ -94,7 +94,7 @@ describe('Geohash Agg', () => {
 
   describe('precision parameter', () => {
 
-    const PRECISION_PARAM_INDEX = 7;
+    const PRECISION_PARAM_INDEX = 2;
     let precisionParam;
     beforeEach(() => {
       precisionParam = geoHashBucketAgg.params[PRECISION_PARAM_INDEX];

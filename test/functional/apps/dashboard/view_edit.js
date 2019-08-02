@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('shows lose changes warning', async function () {
+    describe('shows lose changes warning', function () {
       describe('and loses changes on confirmation', function () {
         beforeEach(async function () {
           await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
@@ -120,12 +120,14 @@ export default function ({ getService, getPageObjects }) {
           const originalPanelCount = await PageObjects.dashboard.getPanelCount();
 
           await dashboardAddPanel.ensureAddPanelIsShowing();
-          await dashboardAddPanel.clickAddNewEmbeddableLink();
+          await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
           await PageObjects.visualize.clickAreaChart();
           await PageObjects.visualize.clickNewSearch();
           await PageObjects.visualize.saveVisualizationExpectSuccess('new viz panel');
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
+          // for this sleep see https://github.com/elastic/kibana/issues/22299
+          await PageObjects.common.sleep(500);
 
           // confirm lose changes
           await PageObjects.common.clickConfirmOnModal();
@@ -193,7 +195,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('Does not show lose changes warning', async function () {
+    describe('Does not show lose changes warning', function () {
       it('when time changed is not stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });

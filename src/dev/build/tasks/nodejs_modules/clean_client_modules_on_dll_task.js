@@ -68,7 +68,7 @@ export const CleanClientModulesOnDLLTask = {
 
     // Get dll entries filtering out the ones
     // from any whitelisted module
-    const dllEntries = await getDllEntries(dllManifestPath, whiteListedModules);
+    const dllEntries = await getDllEntries(dllManifestPath, whiteListedModules, baseDir);
 
     for (const relativeEntryPath of dllEntries) {
       const entryPath = `${baseDir}/${relativeEntryPath}`;

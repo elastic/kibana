@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Renders CircleIcon with correct styles when isPointOnly 1`] = `
+<CircleIcon
+  style={
+    Object {
+      "fill": "#ff0000",
+      "stroke": "rgb(106,173,213)",
+      "strokeWidth": "1px",
+    }
+  }
+/>
+`;
+
+exports[`Renders LineIcon with correct styles when isLineOnly 1`] = `
+<LineIcon
+  style={
+    Object {
+      "stroke": "rgb(106,173,213)",
+      "strokeWidth": "4px",
+    }
+  }
+/>
+`;
+
+exports[`Renders PolygonIcon with correct styles when not line only or not point only 1`] = `
+<PolygonIcon
+  style={
+    Object {
+      "fill": "#ff0000",
+      "stroke": "rgb(106,173,213)",
+      "strokeWidth": "1px",
+    }
+  }
+/>
+`;
+
+exports[`Renders SymbolIcon with correct styles when isPointOnly and symbolId provided 1`] = `
+<SymbolIcon
+  fill="#ff0000"
+  symbolId="airfield-15"
+/>
+`;

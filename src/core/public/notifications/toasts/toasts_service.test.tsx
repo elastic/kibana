@@ -21,6 +21,8 @@ import { mockReactDomRender, mockReactDomUnmount } from './toasts_service.test.m
 
 import { ToastsService } from './toasts_service';
 import { ToastsApi } from './toasts_api';
+import { overlayServiceMock } from '../../overlays/overlay_service.mock';
+import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
 
 const mockI18n: any = {
   Context: function I18nContext() {
@@ -28,11 +30,15 @@ const mockI18n: any = {
   },
 };
 
+const mockOverlays = overlayServiceMock.createStartContract();
+
 describe('#setup()', () => {
   it('returns a ToastsApi', () => {
     const toasts = new ToastsService();
 
-    expect(toasts.setup()).toBeInstanceOf(ToastsApi);
+    expect(
+      toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() })
+    ).toBeInstanceOf(ToastsApi);
   });
 });
 
@@ -43,8 +49,8 @@ describe('#start()', () => {
     const toasts = new ToastsService();
 
     expect(mockReactDomRender).not.toHaveBeenCalled();
-    toasts.setup();
-    toasts.start({ i18n: mockI18n, targetDomElement });
+    toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
+    toasts.start({ i18n: mockI18n, targetDomElement, overlays: mockOverlays });
     expect(mockReactDomRender.mock.calls).toMatchSnapshot();
   });
 
@@ -52,8 +58,12 @@ describe('#start()', () => {
     const targetDomElement = document.createElement('div');
     const toasts = new ToastsService();
 
-    toasts.setup();
-    expect(toasts.start({ i18n: mockI18n, targetDomElement })).toBeInstanceOf(ToastsApi);
+    expect(
+      toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() })
+    ).toBeInstanceOf(ToastsApi);
+    expect(
+      toasts.start({ i18n: mockI18n, targetDomElement, overlays: mockOverlays })
+    ).toBeInstanceOf(ToastsApi);
   });
 });
 
@@ -63,8 +73,8 @@ describe('#stop()', () => {
     targetDomElement.setAttribute('test', 'target-dom-element');
     const toasts = new ToastsService();
 
-    toasts.setup();
-    toasts.start({ i18n: mockI18n, targetDomElement });
+    toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
+    toasts.start({ i18n: mockI18n, targetDomElement, overlays: mockOverlays });
 
     expect(mockReactDomUnmount).not.toHaveBeenCalled();
     toasts.stop();
@@ -82,8 +92,8 @@ describe('#stop()', () => {
     const targetDomElement = document.createElement('div');
     const toasts = new ToastsService();
 
-    toasts.setup();
-    toasts.start({ i18n: mockI18n, targetDomElement });
+    toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
+    toasts.start({ i18n: mockI18n, targetDomElement, overlays: mockOverlays });
     toasts.stop();
     expect(targetDomElement.childNodes).toHaveLength(0);
   });

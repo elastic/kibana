@@ -19,7 +19,11 @@
 
 import { Server } from '../server/kbn_server';
 import { Capabilities } from '../../core/public';
-import { SavedObjectsSchemaDefinition } from '../server/saved_objects/schema';
+// Disable lint errors for imports from src/core/* until SavedObjects migration is complete
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsSchemaDefinition } from '../../core/server/saved_objects/schema';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsManagementDefinition } from '../../core/server/saved_objects/management';
 
 /**
  * Usage
@@ -64,6 +68,10 @@ export interface LegacyPluginOptions {
     home: string[];
     mappings: any;
     savedObjectSchemas: SavedObjectsSchemaDefinition;
+    savedObjectsManagement: SavedObjectsManagementDefinition;
+    visTypes: string[];
+    embeddableActions?: string[];
+    embeddableFactories?: string[];
   }>;
   uiCapabilities?: Capabilities;
   publicDir: any;

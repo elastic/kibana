@@ -30,7 +30,7 @@ export function stdSibling(resp, panel, series, meta) {
     if (metric.type === 'std_deviation_bucket' && metric.mode === 'band') return next(results);
 
     const decoration = getDefaultDecoration(series);
-    getSplits(resp, panel, series, meta).forEach((split) => {
+    getSplits(resp, panel, series, meta).forEach(split => {
       const data = split.timeseries.buckets.map(bucket => {
         return [bucket.key, getSiblingAggValue(split, metric)];
       });
@@ -39,11 +39,9 @@ export function stdSibling(resp, panel, series, meta) {
         label: split.label,
         color: split.color,
         data,
-        ...decoration
+        ...decoration,
       });
     });
     return next(results);
   };
-
-
 }

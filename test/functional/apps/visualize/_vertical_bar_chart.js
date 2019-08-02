@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       log.debug('Bucket = X-Axis');
-      await PageObjects.visualize.clickBucket('X-Axis');
+      await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       log.debug('Field = @timestamp');
@@ -227,18 +227,29 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('vertical bar with split series', function () {
+    describe('vertical bar in percent mode', async () => {
+      it('should show ticks with percentage values', async function () {
+        const axisId = 'ValueAxis-1';
+        await PageObjects.visualize.clickMetricsAndAxes();
+        await PageObjects.visualize.clickYAxisOptions(axisId);
+        await PageObjects.visualize.selectYAxisMode('percentage');
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        expect(labels[0]).to.eql('0%');
+        expect(labels[labels.length - 1]).to.eql('100%');
+      });
+    });
+
+    describe('vertical bar with Split series', function () {
       before(initBarChart);
 
       it('should show correct series', async function () {
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.clickBucket('Split series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('response.raw');
         await PageObjects.visualize.waitForVisualizationRenderingStabilized();
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = ['200', '404', '503'];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
@@ -271,15 +282,13 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct series', async function () {
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.clickBucket('Split series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('response.raw');
         await PageObjects.visualize.waitForVisualizationRenderingStabilized();
 
         await PageObjects.visualize.toggleOpenEditor(3, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.clickBucket('Split series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('machine.os');
         await PageObjects.visualize.waitForVisualizationRenderingStabilized();
@@ -323,8 +332,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show an error if last bucket aggregation is terms', async () => {
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.clickBucket('Split series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('response.raw');
 

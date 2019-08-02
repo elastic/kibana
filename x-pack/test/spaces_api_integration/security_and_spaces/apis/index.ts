@@ -13,7 +13,7 @@ export default function({ loadTestFile, getService }: TestInvoker) {
   const supertest = getService('supertest');
 
   describe('spaces api with security', function() {
-    this.tags('ciGroup5');
+    this.tags('ciGroup8');
 
     before(async () => {
       await createUsersAndRoles(es, supertest);

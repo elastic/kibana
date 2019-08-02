@@ -27,6 +27,8 @@ import detailsHtml from './table_row/details.html';
 import { uiModules } from 'ui/modules';
 import { disableFilter } from '@kbn/es-query';
 import { dispatchRenderComplete } from 'ui/render_complete';
+import cellTemplateHtml from '../components/table_row/cell.html';
+import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
 
 const module = uiModules.get('app/discover');
 
@@ -44,8 +46,8 @@ const MIN_LINE_LENGTH = 20;
  * ```
  */
 module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl, config) {
-  const cellTemplate = _.template(noWhiteSpace(require('../components/table_row/cell.html')));
-  const truncateByHeightTemplate = _.template(noWhiteSpace(require('../components/table_row/truncate_by_height.html')));
+  const cellTemplate = _.template(noWhiteSpace(cellTemplateHtml));
+  const truncateByHeightTemplate = _.template(noWhiteSpace(truncateByHeightTemplateHtml));
 
   return {
     restrict: 'A',

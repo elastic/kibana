@@ -18,4 +18,9 @@
  */
 import { State } from './state';
 
-export type AppState = State;
+export class AppState extends State {}
+
+export type AppStateClass<
+  TAppState extends AppState = AppState,
+  TDefaults = { [key: string]: any }
+> = new (defaults: TDefaults) => TAppState;

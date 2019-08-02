@@ -20,10 +20,7 @@
 import _ from 'lodash';
 import { newMetricAggFn } from './new_metric_agg_fn';
 import { isBasicAgg } from '../../../common/agg_lookup';
-import {
-  handleAdd,
-  handleChange
-} from './collection_actions';
+import { handleAdd, handleChange } from './collection_actions';
 
 export const seriesChangeHandler = (props, items) => doc => {
   // If we only have one sibling and the user changes to a pipeline

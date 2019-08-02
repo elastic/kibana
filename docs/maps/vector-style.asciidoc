@@ -3,25 +3,7 @@
 === Vector styling
 
 When styling a vector layer, you can customize your data by property, such as size and color.
-For each property, you can specify whether to use a constant or dynamic value for the style.
-
-[float]
-[[maps-vector-style-properties]]
-==== Style properties
-
-You can configure the following properties.
-
-*Fill color*:: The fill color of the vector features.
-+
-NOTE: *LineString* and *MultiLineString* geometries do not have fill and do not use the fill color property.
-Set border color to style line geometries.
-
-*Border color*:: The border color of the vector features.
-
-*Border width*:: The border width of the vector features.
-
-*Symbol size*:: The symbol size of point features.
-
+For each property, you can specify whether to use a constant or data driven value for the style.
 
 [float]
 [[maps-vector-style-static]]
@@ -41,8 +23,18 @@ image::maps/images/vector_style_static.png[]
 
 Use data driven styling to symbolize features from a range of numeric property values.
 To enable data driven styling, click image:maps/images/gs_link_icon.png[] next to the property.
+This button is only available when vector features contain numeric properties.
 
-NOTE: The image:maps/images/gs_link_icon.png[] button is only available for vector features that contain numeric properties.
+When the property value is undefined for a feature:
+
+* *Fill color* and *Border color* are set to transparent and are not visible.
+* *Border width* and *Symbol size* are set to the minimum size.
+* *Symbol orientation* is set to 0.
+
+When the minimum and maximum are the same and there is no range:
+
+* *Fill color* and *Border color* are set to last color in the color ramp.
+* *Border width* and *Symbol size* are set to the maximum size.
 
 The image below shows an example of data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
 The *kibana_sample_data_logs* layer uses data driven styling for fill color and symbol size style properties.

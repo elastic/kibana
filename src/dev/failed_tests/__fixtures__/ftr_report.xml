@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+  <testsuite timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71">
+    <testcase name="maps app  maps loaded from sample data ecommerce &quot;before all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps/sample_data·js" time="154.378">
+      <system-out>
+        <![CDATA[[00:00:00]       │
+[00:07:04]         └-: maps app
+...
+[00:15:02]                   │
+]]>
+      </system-out>
+      <failure>
+        <![CDATA[Error: retry.try timeout: TimeoutError: Waiting for element to be located By(css selector, [data-test-subj~="layerTocActionsPanelToggleButtonRoad_Map_-_Bright"])
+Wait timed out after 10055ms
+    at /var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/node_modules/selenium-webdriver/lib/webdriver.js:834:17
+    at process._tickCallback (internal/process/next_tick.js:68:7)
+    at lastError (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:28:9)
+    at onFailure (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:68:13)]]>
+      </failure>
+    </testcase>
+    <testcase name="maps app &quot;after all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps" time="0.179">
+      <system-out>
+        <![CDATA[[00:00:00]       │
+[00:07:04]         └-: maps app
+...
+]]>
+      </system-out>
+      <failure>
+        <![CDATA[{ NoSuchSessionError: This driver instance does not have a valid session ID (did you call WebDriver.quit()?) and may no longer be used.
+    at promise.finally (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/node_modules/selenium-webdriver/lib/webdriver.js:726:38)
+    at Object.thenFinally [as finally] (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/node_modules/selenium-webdriver/lib/promise.js:124:12)
+    at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }]]>
+      </failure>
+    </testcase>
+    <testcase name="InfraOps app feature controls infrastructure security global infrastructure all privileges shows infrastructure navlink" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/infra/feature_controls/infrastructure_security·ts">
+      <system-out>
+        <![CDATA[[00:00:00]       │
+[00:05:13]         └-: InfraOps app
+...
+]]>
+      </system-out>
+      <skipped/>
+    </testcase>
+  </testsuite>
+</testsuites>

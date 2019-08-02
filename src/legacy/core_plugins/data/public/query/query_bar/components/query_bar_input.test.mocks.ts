@@ -20,6 +20,21 @@
 import { createKfetch } from 'ui/kfetch/kfetch';
 import { setup } from 'test_utils/http_test_setup';
 
+const mockIndexPattern = {
+  id: '1234',
+  title: 'logstash-*',
+  fields: [
+    {
+      name: 'response',
+      type: 'number',
+      esTypes: ['integer'],
+      aggregatable: true,
+      filterable: true,
+      searchable: true,
+    },
+  ],
+};
+
 const mockChromeFactory = jest.fn(() => {
   return {
     getBasePath: () => `foo`,
@@ -27,6 +42,16 @@ const mockChromeFactory = jest.fn(() => {
       return {
         get: (key: string) => {
           switch (key) {
+            case 'timepicker:quickRanges':
+              return [
+                {
+                  from: 'now/d',
+                  to: 'now/d',
+                  display: 'Today',
+                },
+              ];
+            case 'dateFormat':
+              return 'YY';
             case 'history:limit':
               return 10;
             default:
@@ -52,6 +77,10 @@ const mockAutocompleteProvider = jest.fn(() => mockGetAutocompleteSuggestions);
 export const mockGetAutocompleteProvider = jest.fn(() => mockAutocompleteProvider);
 const mockKfetch = jest.fn(() => createKfetch(setup().http));
 
+export const mockFetchIndexPatterns = jest
+  .fn()
+  .mockReturnValue(Promise.resolve([mockIndexPattern]));
+
 jest.mock('ui/chrome', () => mockChromeFactory());
 jest.mock('ui/kfetch', () => ({
   kfetch: () => {},
@@ -59,17 +88,15 @@ jest.mock('ui/kfetch', () => ({
 jest.mock('ui/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,
 }));
-jest.mock('ui/metadata', () => ({
-  metadata: {
-    branch: 'foo',
-  },
-}));
 jest.mock('ui/autocomplete_providers', () => ({
   getAutocompleteProvider: mockGetAutocompleteProvider,
 }));
 jest.mock('ui/kfetch', () => ({
-  __newPlatformSetup__: jest.fn(),
   kfetch: mockKfetch,
+}));
+
+jest.mock('../lib/fetch_index_patterns', () => ({
+  fetchIndexPatterns: mockFetchIndexPatterns,
 }));
 
 import _ from 'lodash';

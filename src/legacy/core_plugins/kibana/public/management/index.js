@@ -28,6 +28,7 @@ import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import appTemplate from './app.html';
 import landingTemplate from './landing.html';
+import { capabilities } from 'ui/capabilities';
 import { management, SidebarNav, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { timefilter } from 'ui/timefilter';
@@ -49,8 +50,11 @@ uiRoutes
     redirectTo: '/management'
   });
 
-require('ui/index_patterns/route_setup/load_default')({
-  whenMissingRedirectTo: '/management/kibana/index_pattern'
+require('./route_setup/load_default')({
+  whenMissingRedirectTo: () => {
+    const canManageIndexPatterns = capabilities.get().management.kibana.index_patterns;
+    return canManageIndexPatterns ? '/management/kibana/index_pattern' : '/home';
+  }
 });
 
 export function updateLandingPage(version) {

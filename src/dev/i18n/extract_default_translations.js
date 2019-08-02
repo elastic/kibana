@@ -62,11 +62,20 @@ See .i18nrc.json for the list of supported namespaces.`)
   }
 }
 
-export async function extractMessagesFromPathToMap(inputPath, targetMap, config, reporter) {
+export async function matchEntriesWithExctractors(inputPath, options = {}) {
+  const {
+    additionalIgnore = [],
+    mark = false,
+    absolute = false,
+  } = options;
+  const ignore = ['**/node_modules/**', '**/__tests__/**', '**/*.test.{js,jsx,ts,tsx}', '**/*.d.ts'].concat(additionalIgnore);
+
   const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html}', {
     cwd: inputPath,
     matchBase: true,
-    ignore: ['**/node_modules/**', '**/__tests__/**', '**/*.test.{js,jsx,ts,tsx}', '**/*.d.ts'],
+    ignore,
+    mark,
+    absolute,
   });
 
   const { htmlEntries, codeEntries, pugEntries } = entries.reduce(
@@ -86,37 +95,43 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, config,
     { htmlEntries: [], codeEntries: [], pugEntries: [] }
   );
 
-  await Promise.all(
-    [
-      [htmlEntries, extractHtmlMessages],
-      [codeEntries, extractCodeMessages],
-      [pugEntries, extractPugMessages],
-    ].map(async ([entries, extractFunction]) => {
-      const files = await Promise.all(
-        filterEntries(entries, config.exclude).map(async entry => {
-          return {
-            name: entry,
-            content: await readFileAsync(entry),
-          };
-        })
-      );
+  return [
+    [htmlEntries, extractHtmlMessages],
+    [codeEntries, extractCodeMessages],
+    [pugEntries, extractPugMessages],
+  ];
+}
 
-      for (const { name, content } of files) {
-        const reporterWithContext = reporter.withContext({ name });
+export async function extractMessagesFromPathToMap(inputPath, targetMap, config, reporter) {
+  const categorizedEntries = await matchEntriesWithExctractors(inputPath);
+  return Promise.all(
+    categorizedEntries
+      .map(async ([entries, extractFunction]) => {
+        const files = await Promise.all(
+          filterEntries(entries, config.exclude).map(async entry => {
+            return {
+              name: entry,
+              content: await readFileAsync(entry),
+            };
+          })
+        );
 
-        try {
-          for (const [id, value] of extractFunction(content, reporterWithContext)) {
-            validateMessageNamespace(id, name, config.paths, reporterWithContext);
-            addMessageToMap(targetMap, id, value, reporterWithContext);
+        for (const { name, content } of files) {
+          const reporterWithContext = reporter.withContext({ name });
+
+          try {
+            for (const [id, value] of extractFunction(content, reporterWithContext)) {
+              validateMessageNamespace(id, name, config.paths, reporterWithContext);
+              addMessageToMap(targetMap, id, value, reporterWithContext);
+            }
+          } catch (error) {
+            if (!isFailError(error)) {
+              throw error;
+            }
+
+            reporterWithContext.report(error);
           }
-        } catch (error) {
-          if (!isFailError(error)) {
-            throw error;
-          }
-
-          reporterWithContext.report(error);
         }
-      }
-    })
+      })
   );
 }

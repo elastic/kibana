@@ -6,14 +6,14 @@
 
 import expect from '@kbn/expect';
 
-import { eventsQuery } from '../../../../plugins/siem/public/containers/events/index.gql_query';
-import { LastEventTimeGqlQuery } from '../../../../plugins/siem/public/containers/events/last_event_time/last_event_time.gql_query';
+import { eventsQuery } from '../../../../legacy/plugins/siem/public/containers/events/index.gql_query';
+import { LastEventTimeGqlQuery } from '../../../../legacy/plugins/siem/public/containers/events/last_event_time/last_event_time.gql_query';
 
 import {
   Direction,
   GetEventsQuery,
   GetLastEventTimeQuery,
-} from '../../../../plugins/siem/public/graphql/types';
+} from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
@@ -23,7 +23,6 @@ const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 const HOST_NAME = 'suricata-sensor-amsterdam';
 const TOTAL_COUNT = 1751;
 const EDGE_LENGTH = 2;
-const CURSOR_ID = '1550608953561';
 
 const eventsTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
@@ -45,22 +44,24 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               pagination: {
-                limit: 2,
-                cursor: null,
-                tiebreaker: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 3,
+                querySize: 2,
               },
               sortField: {
                 sortFieldId: 'timestamp',
                 direction: Direction.desc,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
             const events = resp.data.source.Events;
             expect(events.edges.length).to.be(EDGE_LENGTH);
             expect(events.totalCount).to.be(TOTAL_COUNT);
-            expect(events.pageInfo.endCursor!.value).to.equal(CURSOR_ID);
+            expect(events.pageInfo.fakeTotalCount).to.equal(3);
           });
       });
 
@@ -76,15 +77,17 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               pagination: {
-                limit: 2,
-                cursor: CURSOR_ID,
-                tiebreaker: '193',
+                activePage: 1,
+                cursorStart: 2,
+                fakePossibleCount: 10,
+                querySize: 4,
               },
               sortField: {
                 sortFieldId: 'timestamp',
                 direction: Direction.desc,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -107,15 +110,17 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               pagination: {
-                limit: 2,
-                cursor: CURSOR_ID,
-                tiebreaker: '193',
+                activePage: 1,
+                cursorStart: 2,
+                fakePossibleCount: 10,
+                querySize: 4,
               },
               sortField: {
                 sortFieldId: 'timestamp',
                 direction: Direction.desc,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {

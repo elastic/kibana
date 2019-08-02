@@ -18,6 +18,8 @@
  */
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
+// @ts-ignore not supported yet
+import { scrollIntoViewIfNecessary } from './lib/web_element_wrapper/scroll_into_view_if_necessary';
 
 export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderContext) {
   const config = getService('config');
@@ -52,6 +54,13 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
      */
     public async setElement(comboBoxElement: WebElementWrapper, value: string): Promise<void> {
       log.debug(`comboBox.setElement, value: ${value}`);
+      const isOptionSelected = await this.isOptionSelected(comboBoxElement, value);
+
+      if (isOptionSelected) {
+        return;
+      }
+
+      comboBoxElement.scrollIntoViewIfNecessary();
       await this._filterOptionsList(comboBoxElement, value);
       await this.openOptionsList(comboBoxElement);
 
@@ -219,6 +228,24 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
         );
         await toggleBtn.click();
       }
+    }
+
+    /**
+     * check if option is already selected
+     *
+     * @param comboBoxElement
+     * @param value
+     */
+    public async isOptionSelected(
+      comboBoxElement: WebElementWrapper,
+      value: string
+    ): Promise<boolean> {
+      log.debug(`comboBox.isOptionSelected, value: ${value}`);
+      const selectedOptions = await comboBoxElement.findAllByClassName(
+        'euiComboBoxPill',
+        WAIT_FOR_EXISTS_TIME
+      );
+      return selectedOptions.length === 1 && (await selectedOptions[0].getVisibleText()) === value;
     }
   }
 

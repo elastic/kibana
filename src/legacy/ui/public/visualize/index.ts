@@ -18,4 +18,3 @@
  */
 
 export * from './loader';
-export { Filters, Query, TimeRange } from './loader/types';

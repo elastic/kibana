@@ -22,12 +22,17 @@ import { getBucketSize } from '../../helpers/get_bucket_size';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 
-export function siblingBuckets(req, panel, series, esQueryConfig, indexPatternObject, capabilities) {
+export function siblingBuckets(
+  req,
+  panel,
+  series,
+  esQueryConfig,
+  indexPatternObject,
+  capabilities
+) {
   return next => doc => {
     const { interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
-    const {
-      bucketSize
-    } = getBucketSize(req, interval, capabilities);
+    const { bucketSize } = getBucketSize(req, interval, capabilities);
     series.metrics
       .filter(row => /_bucket$/.test(row.type))
       .forEach(metric => {

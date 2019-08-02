@@ -20,6 +20,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
   }
   className="eui-displayBlock"
   closePopover={[Function]}
+  display="inlineBlock"
   hasArrow={true}
   id="popover"
   isOpen={false}
@@ -50,7 +51,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
             Object {
               "docsLink": <EuiLink
                 color="primary"
-                href="https://www.elastic.co/guide/en/kibana/foo/kuery-query.html"
+                href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html"
                 target="_blank"
                 type="button"
               >
@@ -122,6 +123,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
   }
   className="eui-displayBlock"
   closePopover={[Function]}
+  display="inlineBlock"
   hasArrow={true}
   id="popover"
   isOpen={false}
@@ -152,7 +154,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
             Object {
               "docsLink": <EuiLink
                 color="primary"
-                href="https://www.elastic.co/guide/en/kibana/foo/kuery-query.html"
+                href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html"
                 target="_blank"
                 type="button"
               >

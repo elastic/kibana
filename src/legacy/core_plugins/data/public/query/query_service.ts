@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { once } from 'lodash';
-import { QueryBar, fromUser, toUser, setupDirective as setupQueryBarDirective } from './query_bar';
+import { fromUser, toUser, getQueryLog } from './query_bar';
 
 /**
  * Query Service
@@ -28,13 +27,10 @@ import { QueryBar, fromUser, toUser, setupDirective as setupQueryBarDirective } 
 export class QueryService {
   public setup() {
     return {
-      loadLegacyDirectives: once(setupQueryBarDirective),
       helpers: {
         fromUser,
         toUser,
-      },
-      ui: {
-        QueryBar,
+        getQueryLog,
       },
     };
   }
@@ -46,3 +42,5 @@ export class QueryService {
 
 /** @public */
 export type QuerySetup = ReturnType<QueryService['setup']>;
+
+export { Query, QueryBar, QueryBarInput } from './query_bar';

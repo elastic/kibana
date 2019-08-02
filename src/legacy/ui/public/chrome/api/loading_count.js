@@ -18,15 +18,9 @@
  */
 
 import * as Rx from 'rxjs';
+import { npSetup } from 'ui/new_platform';
 
-let newPlatformHttp;
-
-export function __newPlatformSetup__(instance) {
-  if (newPlatformHttp) {
-    throw new Error('ui/chrome/api/loading_count already initialized with new platform apis');
-  }
-  newPlatformHttp = instance;
-}
+const newPlatformHttp = npSetup.core.http;
 
 export function initLoadingCountApi(chrome) {
   const manualCount$ = new Rx.BehaviorSubject(0);

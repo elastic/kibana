@@ -41,14 +41,14 @@ describe('wrapRouteWithPrep fn', function () {
     const delayUserWork = opts.delayUserWork ? 50 : 0;
 
     return function () {
-      ngMock.module('kibana', 'kibana/notify');
+      ngMock.module('kibana');
       let setupComplete = false;
       let userWorkComplete = false;
       let route;
       let Promise;
       let $injector;
 
-      ngMock.inject(function ($rootScope, _Private_, _Promise_, _$injector_) {
+      ngMock.inject(function (_Promise_, _$injector_) {
         Promise = _Promise_;
         $injector = _$injector_;
       });

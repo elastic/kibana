@@ -18,7 +18,6 @@
  */
 
 import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
-import { IndexPattern } from 'ui/index_patterns';
 
 import classNames from 'classnames';
 import _ from 'lodash';
@@ -37,16 +36,13 @@ import { documentationLinks } from 'ui/documentation_links';
 import { Toast, toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
 import { PersistedLog } from 'ui/persisted_log';
+import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
 
 import { getQueryLog } from '../lib/get_query_log';
+import { Query } from '../index';
 
 const config = chrome.getUiSettingsClient();
-
-interface Query {
-  query: string;
-  language: string;
-}
 
 interface DateRange {
   from: string;
@@ -54,15 +50,16 @@ interface DateRange {
 }
 
 interface Props {
-  query: Query;
-  onSubmit: (payload: { dateRange: DateRange; query: Query }) => void;
+  query?: Query;
+  onSubmit: (payload: { dateRange: DateRange; query?: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;
-  screenTitle: string;
-  indexPatterns: IndexPattern[];
+  screenTitle?: string;
+  indexPatterns?: Array<IndexPattern | string>;
   store: Storage;
   intl: InjectedIntl;
   prepend?: any;
+  showQueryInput?: boolean;
   showDatePicker?: boolean;
   dateRangeFrom?: string;
   dateRangeTo?: string;
@@ -74,7 +71,7 @@ interface Props {
 }
 
 interface State {
-  query: Query;
+  query?: Query;
   inputIsPristine: boolean;
   currentProps?: Props;
   dateRangeFrom: string;
@@ -83,22 +80,30 @@ interface State {
 }
 
 export class QueryBarUI extends Component<Props, State> {
+  public static defaultProps = {
+    showQueryInput: true,
+    showDatePicker: true,
+    showAutoRefreshOnly: false,
+  };
+
   public static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     if (isEqual(prevState.currentProps, nextProps)) {
       return null;
     }
 
     let nextQuery = null;
-    if (nextProps.query.query !== prevState.query.query) {
-      nextQuery = {
-        query: nextProps.query.query,
-        language: nextProps.query.language,
-      };
-    } else if (nextProps.query.language !== prevState.query.language) {
-      nextQuery = {
-        query: '',
-        language: nextProps.query.language,
-      };
+    if (nextProps.query && prevState.query) {
+      if (nextProps.query.query !== prevState.query.query) {
+        nextQuery = {
+          query: nextProps.query.query,
+          language: nextProps.query.language,
+        };
+      } else if (nextProps.query.language !== prevState.query.language) {
+        nextQuery = {
+          query: '',
+          language: nextProps.query.language,
+        };
+      }
     }
 
     let nextDateRange = null;
@@ -138,7 +143,7 @@ export class QueryBarUI extends Component<Props, State> {
     See https://github.com/elastic/kibana/issues/14086
   */
   public state = {
-    query: {
+    query: this.props.query && {
       query: this.props.query.query,
       language: this.props.query.language,
     },
@@ -153,20 +158,26 @@ export class QueryBarUI extends Component<Props, State> {
 
   private persistedLog: PersistedLog | undefined;
 
+  private isQueryDirty = () => {
+    return (
+      !!this.props.query && !!this.state.query && this.state.query.query !== this.props.query.query
+    );
+  };
+
   public isDirty = () => {
     if (!this.props.showDatePicker) {
-      return this.state.query.query !== this.props.query.query;
+      return this.isQueryDirty();
     }
 
     return (
-      this.state.query.query !== this.props.query.query ||
+      this.isQueryDirty() ||
       this.state.dateRangeFrom !== this.props.dateRangeFrom ||
       this.state.dateRangeTo !== this.props.dateRangeTo
     );
   };
 
   public onClickSubmitButton = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (this.persistedLog) {
+    if (this.persistedLog && this.state.query) {
       this.persistedLog.add(this.state.query.query);
     }
     this.onSubmit(() => event.preventDefault());
@@ -213,7 +224,7 @@ export class QueryBarUI extends Component<Props, State> {
     });
 
     this.props.onSubmit({
-      query: {
+      query: this.state.query && {
         query: this.state.query.query,
         language: this.state.query.language,
       },
@@ -231,10 +242,12 @@ export class QueryBarUI extends Component<Props, State> {
   };
 
   public componentDidMount() {
+    if (!this.props.query) return;
     this.persistedLog = getQueryLog(this.props.appName, this.props.query.language);
   }
 
   public componentDidUpdate(prevProps: Props) {
+    if (!this.props.query || !prevProps.query) return;
     if (prevProps.query.language !== this.props.query.language) {
       this.persistedLog = getQueryLog(this.props.appName, this.props.query.language);
     }
@@ -247,23 +260,38 @@ export class QueryBarUI extends Component<Props, State> {
 
     return (
       <EuiFlexGroup className={classes} responsive={!!this.props.showDatePicker} gutterSize="s">
-        <EuiFlexItem>
-          <QueryBarInput
-            appName={this.props.appName}
-            disableAutoFocus={this.props.disableAutoFocus}
-            indexPatterns={this.props.indexPatterns}
-            prepend={this.props.prepend}
-            query={this.state.query}
-            screenTitle={this.props.screenTitle}
-            store={this.props.store}
-            onChange={this.onChange}
-            onSubmit={this.onInputSubmit}
-            persistedLog={this.persistedLog}
-          />
-        </EuiFlexItem>
+        {this.renderQueryInput()}
         <EuiFlexItem grow={false}>{this.renderUpdateButton()}</EuiFlexItem>
       </EuiFlexGroup>
     );
+  }
+
+  private renderQueryInput() {
+    if (!this.shouldRenderQueryInput()) return;
+    return (
+      <EuiFlexItem>
+        <QueryBarInput
+          appName={this.props.appName}
+          disableAutoFocus={this.props.disableAutoFocus}
+          indexPatterns={this.props.indexPatterns!}
+          prepend={this.props.prepend}
+          query={this.state.query!}
+          screenTitle={this.props.screenTitle}
+          store={this.props.store}
+          onChange={this.onChange}
+          onSubmit={this.onInputSubmit}
+          persistedLog={this.persistedLog}
+        />
+      </EuiFlexItem>
+    );
+  }
+
+  private shouldRenderDatePicker() {
+    return this.props.showDatePicker || this.props.showAutoRefreshOnly;
+  }
+
+  private shouldRenderQueryInput() {
+    return this.props.showQueryInput && this.props.indexPatterns && this.props.query;
   }
 
   private renderUpdateButton() {
@@ -278,7 +306,7 @@ export class QueryBarUI extends Component<Props, State> {
       />
     );
 
-    if (!this.props.showDatePicker) {
+    if (!this.shouldRenderDatePicker()) {
       return button;
     }
 
@@ -291,7 +319,7 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   private renderDatePicker() {
-    if (!this.props.showDatePicker) {
+    if (!this.shouldRenderDatePicker()) {
       return null;
     }
 
@@ -334,10 +362,12 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   private handleLuceneSyntaxWarning() {
+    if (!this.state.query) return;
     const { intl, store } = this.props;
     const { query, language } = this.state.query;
     if (
       language === 'kuery' &&
+      typeof query === 'string' &&
       !store.get('kibana.luceneSyntaxWarningOptOut') &&
       doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {

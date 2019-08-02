@@ -1,3 +1,5 @@
+@import '../../../../../core_plugins/kibana/public/discover/mixins';
+
 .table {
   // Nesting
   .table {
@@ -6,6 +8,7 @@
 }
 
 kbn-table, .kbn-table, tbody[kbn-rows] {
+  @include dscDocSourceStyle;
   // sub tables should not have a leading border
   .table .table {
     margin-bottom: 0;
@@ -18,32 +21,6 @@ kbn-table, .kbn-table, tbody[kbn-rows] {
       font-weight: $euiFontWeightBold;
     }
   }
-
-  /**
-   * 1. Use alpha so this will stand out against non-white backgrounds, e.g. the highlighted
-   *    row in the Context Log.
-   */
-  dl.source {
-    margin-bottom: 0;
-    line-height:2em;
-    word-break: break-all;
-    word-break: break-word;
-
-    dt, dd {
-      display: inline;
-    }
-
-    dt {
-      background-color: transparentize(shade($euiColorPrimary, 20%), .9);
-      color: $euiTextColor;
-      padding: ($euiSizeXS / 2) $euiSizeXS;
-      margin-right: $euiSizeXS;
-      font-family: $euiCodeFontFamily;
-      word-break: normal;
-      border-radius: $euiBorderRadius;
-    }
-  }
-
 }
 
 table {
@@ -56,14 +33,14 @@ table {
     button.fa-sort-down,
     i.fa-sort-asc,
     i.fa-sort-down {
-      color: $euiColorLightShade;
+      color: $euiColorPrimary;
     }
 
     button.fa-sort-desc,
     button.fa-sort-up,
     i.fa-sort-desc,
     i.fa-sort-up {
-      color: $euiColorLightShade;
+      color: $euiColorPrimary;
     }
   }
 }

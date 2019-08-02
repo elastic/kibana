@@ -74,10 +74,7 @@ export class MathAgg extends Component {
         <EuiFlexGroup direction="column" gutterSize="l">
           <EuiFlexItem>
             <EuiFormLabel htmlFor={htmlId('aggregation')}>
-              <FormattedMessage
-                id="tsvb.math.aggregationLabel"
-                defaultMessage="Aggregation"
-              />
+              <FormattedMessage id="tsvb.math.aggregationLabel" defaultMessage="Aggregation" />
             </EuiFormLabel>
             <AggSelect
               id={htmlId('aggregation')}
@@ -89,10 +86,7 @@ export class MathAgg extends Component {
 
           <EuiFlexItem>
             <EuiFormLabel htmlFor={htmlId('variables')}>
-              <FormattedMessage
-                id="tsvb.math.variablesLabel"
-                defaultMessage="Variables"
-              />
+              <FormattedMessage id="tsvb.math.variablesLabel" defaultMessage="Variables" />
             </EuiFormLabel>
             <CalculationVars
               id={htmlId('variables')}
@@ -107,38 +101,40 @@ export class MathAgg extends Component {
           <EuiFlexItem>
             <EuiFormRow
               id="mathExpressionInput"
-              label={(<FormattedMessage
-                id="tsvb.math.expressionLabel"
-                defaultMessage="Expression"
-              />)}
+              label={
+                <FormattedMessage id="tsvb.math.expressionLabel" defaultMessage="Expression" />
+              }
               fullWidth
-              helpText={(<FormattedMessage
-                id="tsvb.math.expressionDescription"
-                defaultMessage="This field uses basic math expressions (see {link}) - Variables are keys on the {params} object,
+              helpText={
+                <FormattedMessage
+                  id="tsvb.math.expressionDescription"
+                  defaultMessage="This field uses basic math expressions (see {link}) - Variables are keys on the {params} object,
                 i.e. {paramsName} To access all the data use {paramsValues} for an array of the values and {paramsTimestamps} for
-                an array of the timestamps. {paramsTimestamp} is available for the current bucket&apos;s timestamp,
-                {paramsIndex} is available for the current bucket&apos;s index, and {paramsInterval}s available for
+                an array of the timestamps. {paramsTimestamp} is available for the current bucket's timestamp,
+                {paramsIndex} is available for the current bucket's index, and {paramsInterval}s available for
                 the interval in milliseconds."
-                values={{
-                  link: (
-                    <EuiLink
-                      href="https://github.com/elastic/tinymath/blob/master/docs/functions.md"
-                      target="_blank"
-                    >
-                      <FormattedMessage
-                        id="tsvb.math.expressionDescription.tinyMathLinkText"
-                        defaultMessage="TinyMath"
-                      />
-                    </EuiLink>),
-                  params: (<EuiCode>params</EuiCode>),
-                  paramsName: (<EuiCode>params.&lt;name&gt;</EuiCode>),
-                  paramsValues: (<EuiCode>params._all.&lt;name&gt;.values</EuiCode>),
-                  paramsTimestamps: (<EuiCode>params._all.&lt;name&gt;.timestamps</EuiCode>),
-                  paramsTimestamp: (<EuiCode>params._timestamp</EuiCode>),
-                  paramsIndex: (<EuiCode>params._index</EuiCode>),
-                  paramsInterval: (<EuiCode>params._interval</EuiCode>)
-                }}
-              />)}
+                  values={{
+                    link: (
+                      <EuiLink
+                        href="https://github.com/elastic/tinymath/blob/master/docs/functions.md"
+                        target="_blank"
+                      >
+                        <FormattedMessage
+                          id="tsvb.math.expressionDescription.tinyMathLinkText"
+                          defaultMessage="TinyMath"
+                        />
+                      </EuiLink>
+                    ),
+                    params: <EuiCode>params</EuiCode>,
+                    paramsName: <EuiCode>params.&lt;name&gt;</EuiCode>,
+                    paramsValues: <EuiCode>params._all.&lt;name&gt;.values</EuiCode>,
+                    paramsTimestamps: <EuiCode>params._all.&lt;name&gt;.timestamps</EuiCode>,
+                    paramsTimestamp: <EuiCode>params._timestamp</EuiCode>,
+                    paramsIndex: <EuiCode>params._index</EuiCode>,
+                    paramsInterval: <EuiCode>params._interval</EuiCode>,
+                  }}
+                />
+              }
             >
               <EuiTextArea
                 data-test-subj="mathExpression"

@@ -39,6 +39,7 @@ export const visRequestHandlers = appExtension;
 export const visEditorTypes = appExtension;
 export const autocompleteProviders = appExtension;
 export const savedObjectTypes = appExtension;
+export const embeddableActions = appExtension;
 export const embeddableFactories = appExtension;
 export const contextMenuActions = appExtension;
 export const fieldFormats = appExtension;

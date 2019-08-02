@@ -32,11 +32,11 @@ describe('DefaultSearchStrategy', () => {
         plugins: {
           elasticsearch: {
             getCluster: jest.fn().mockReturnValue({
-              callWithRequest
-            })
-          }
-        }
-      }
+              callWithRequest,
+            }),
+          },
+        },
+      },
     };
     defaultSearchStrategy = new DefaultSearchStrategy(server);
   });

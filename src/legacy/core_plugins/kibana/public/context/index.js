@@ -19,14 +19,15 @@
 
 import _ from 'lodash';
 
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import uiRoutes from 'ui/routes';
 import { i18n } from '@kbn/i18n';
 
 import './app';
 import contextAppRouteTemplate from './index.html';
 import { getRootBreadcrumbs } from '../discover/breadcrumbs';
-import { getNewPlatform } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 
 uiRoutes
   .when('/context/:indexPatternId/:type/:id*', {
@@ -77,7 +78,7 @@ function ContextAppRouteController(
     'contextAppRoute.state.successorCount',
   ], () => this.state.save(true));
 
-  const updateSubsciption = queryFilter.getUpdates$().subscribe({
+  const updateSubsciption = subscribeWithScope($scope, queryFilter.getUpdates$(), {
     next: () => {
       this.filters = _.cloneDeep(queryFilter.getFilters());
     }
@@ -90,7 +91,7 @@ function ContextAppRouteController(
   this.anchorType = $routeParams.type;
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
-  this.discoverUrl = getNewPlatform().start.core.chrome.navLinks.get('kibana:discover').url;
+  this.discoverUrl = npStart.core.chrome.navLinks.get('kibana:discover').url;
   this.filters = _.cloneDeep(queryFilter.getFilters());
 }
 

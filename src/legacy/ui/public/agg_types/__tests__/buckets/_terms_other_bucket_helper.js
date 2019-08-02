@@ -111,6 +111,22 @@ const nestedTermResponse = {
   }, 'status': 200
 };
 
+const nestedTermResponseNoResults = {
+  'took': 10,
+  'timed_out': false,
+  '_shards': {
+    'total': 1, 'successful': 1, 'skipped': 0, 'failed': 0
+  }, 'hits': {
+    'total': 0, 'max_score': null, 'hits': []
+  }, 'aggregations': {
+    '1': {
+      'doc_count_error_upper_bound': 0,
+      'sum_other_doc_count': 0,
+      'buckets': []
+    }
+  }, 'status': 200
+};
+
 const singleOtherResponse = {
   'took': 3,
   'timed_out': false,
@@ -165,20 +181,16 @@ describe('Terms Agg Other bucket helper', () => {
         filters: {
           filters: {
             '': {
-              'bool': {
-                'must': [{
-                  'exists': {
-                    'field': 'machine.os.raw',
-                  }
-                }],
-                'filter': [],
-                'should': [],
-                'must_not': [
-                  { 'match_phrase': { 'machine.os.raw': { 'query': 'ios' } } },
-                  { 'match_phrase': { 'machine.os.raw': { 'query': 'win xp' } } }
+              bool: {
+                must: [],
+                filter: [{ exists: { field: 'machine.os.raw' } }],
+                should: [],
+                must_not: [
+                  { match_phrase: { 'machine.os.raw': { query: 'ios' } } },
+                  { match_phrase: { 'machine.os.raw': { query: 'win xp' } } }
                 ]
               }
-            }
+            },
           }
         }
       };
@@ -192,45 +204,48 @@ describe('Terms Agg Other bucket helper', () => {
       const expectedResponse = {
         'other-filter': {
           aggs: undefined,
-          'filters': {
-            'filters': {
+          filters: {
+            filters: {
               '-IN': {
-                'bool': {
-                  'must': [
-                    { match_phrase: { 'geo.src': { 'query': 'IN' } } },
-                    {
-                      'exists': {
-                        'field': 'machine.os.raw',
-                      }
-                    }
-                  ], 'filter': [],
-                  'should': [],
-                  'must_not': [
-                    { 'match_phrase': { 'machine.os.raw': { 'query': 'ios' } } },
-                    { 'match_phrase': { 'machine.os.raw': { 'query': 'win xp' } } }
+                bool: {
+                  must: [],
+                  filter: [
+                    { match_phrase: { 'geo.src': { query: 'IN' } } },
+                    { exists: { field: 'machine.os.raw' } }
+                  ],
+                  should: [],
+                  must_not: [
+                    { match_phrase: { 'machine.os.raw': { query: 'ios' } } },
+                    { match_phrase: { 'machine.os.raw': { query: 'win xp' } } }
                   ]
                 }
-              }, '-US': {
-                'bool': {
-                  'must': [
-                    { 'match_phrase': { 'geo.src': { 'query': 'US' } } },
-                    {
-                      'exists': {
-                        'field': 'machine.os.raw',
-                      }
-                    }
-                  ], 'filter': [], 'should': [], 'must_not': [
-                    { 'match_phrase': { 'machine.os.raw': { 'query': 'ios' } } },
-                    { 'match_phrase': { 'machine.os.raw': { 'query': 'win xp' } } }
+              },
+              '-US': {
+                bool: {
+                  must: [],
+                  filter: [
+                    { match_phrase: { 'geo.src': { query: 'US' } } },
+                    { exists: { field: 'machine.os.raw' } }
+                  ],
+                  should: [],
+                  must_not: [
+                    { match_phrase: { 'machine.os.raw': { query: 'ios' } } },
+                    { match_phrase: { 'machine.os.raw': { query: 'win xp' } } }
                   ]
                 }
-              }
+              },
             }
           }
         }
       };
 
       expect(agg).to.eql(expectedResponse);
+    });
+
+    it('returns false when nested terms agg has no buckets', () => {
+      init(visConfigNestedTerm);
+      const agg = buildOtherBucketAgg(vis.aggs, vis.aggs[1], nestedTermResponseNoResults);
+      expect(agg).to.eql(false);
     });
   });
 

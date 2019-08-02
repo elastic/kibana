@@ -22,9 +22,12 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 import { extname } from 'path';
 import { Readable } from 'stream';
-import { SavedObjectsClient } from '../';
-import { resolveImportErrors } from '../import';
+import { SavedObjectsClientContract } from 'src/core/server';
+// Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { resolveImportErrors } from '../../../../core/server/saved_objects/import';
 import { Prerequisites } from './types';
+import { createSavedObjectsStreamFromNdJson } from '../lib';
 
 interface HapiReadableStream extends Readable {
   hapi: {
@@ -34,7 +37,7 @@ interface HapiReadableStream extends Readable {
 
 interface ImportRequest extends Hapi.Request {
   pre: {
-    savedObjectsClient: SavedObjectsClient;
+    savedObjectsClient: SavedObjectsClientContract;
   };
   payload: {
     file: HapiReadableStream;
@@ -101,7 +104,7 @@ export const createResolveImportErrorsRoute = (
     return await resolveImportErrors({
       supportedTypes,
       savedObjectsClient,
-      readStream: request.payload.file,
+      readStream: createSavedObjectsStreamFromNdJson(request.payload.file),
       retries: request.payload.retries,
       objectLimit: request.server.config().get('savedObjects.maxImportExportSize'),
     });

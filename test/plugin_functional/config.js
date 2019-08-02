@@ -33,6 +33,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./test_suites/custom_visualizations'),
       require.resolve('./test_suites/embedding_visualizations'),
       require.resolve('./test_suites/panel_actions'),
+      require.resolve('./test_suites/embeddable_explorer'),
       require.resolve('./test_suites/core_plugins'),
     ],
     services: functionalConfig.get('services'),

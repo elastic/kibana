@@ -24,7 +24,8 @@ export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
   const PageObjects = getPageObjects(['dashboard', 'timePicker', 'settings', 'common']);
 
-  describe('dashboard time zones', () => {
+  describe('dashboard time zones', function () {
+    this.tags('smoke');
     before(async () => {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();

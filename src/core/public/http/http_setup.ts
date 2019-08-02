@@ -31,9 +31,11 @@ import { merge } from 'lodash';
 import { format } from 'url';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
-import { modifyUrl } from '../utils';
-import { HttpBody, HttpFetchOptions, HttpServiceBase } from './types';
+import { HttpFetchOptions, HttpServiceBase, HttpInterceptor, HttpResponse } from './types';
+import { HttpInterceptController } from './http_intercept_controller';
 import { HttpFetchError } from './http_fetch_error';
+import { HttpInterceptHaltError } from './http_intercept_halt_error';
+import { BasePath } from './base_path_service';
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
@@ -44,18 +46,21 @@ export const setup = (
 ): HttpServiceBase => {
   const loadingCount$ = new BehaviorSubject(0);
   const stop$ = new Subject();
+  const interceptors = new Set<HttpInterceptor>();
   const kibanaVersion = injectedMetadata.getKibanaVersion();
-  const basePath = injectedMetadata.getBasePath() || '';
+  const basePath = new BasePath(injectedMetadata.getBasePath());
 
-  function prependBasePath(path: string): string {
-    return modifyUrl(path, parts => {
-      if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
-        parts.pathname = `${basePath}${parts.pathname}`;
-      }
-    });
+  function intercept(interceptor: HttpInterceptor) {
+    interceptors.add(interceptor);
+
+    return () => interceptors.delete(interceptor);
   }
 
-  async function fetch(path: string, options?: HttpFetchOptions): Promise<HttpBody> {
+  function removeAllInterceptors() {
+    interceptors.clear();
+  }
+
+  function createRequest(path: string, options?: HttpFetchOptions) {
     const { query, prependBasePath: shouldPrependBasePath, ...fetchOptions } = merge(
       {
         method: 'GET',
@@ -69,7 +74,7 @@ export const setup = (
       options || {}
     );
     const url = format({
-      pathname: shouldPrependBasePath ? prependBasePath(path) : path,
+      pathname: shouldPrependBasePath ? basePath.prepend(path) : path,
       query,
     });
 
@@ -82,11 +87,116 @@ export const setup = (
       delete fetchOptions.headers['Content-Type'];
     }
 
+    return new Request(url, fetchOptions);
+  }
+
+  // Request/response interceptors are called in opposite orders.
+  // Request hooks start from the newest interceptor and end with the oldest.
+  function interceptRequest(
+    request: Request,
+    controller: HttpInterceptController
+  ): Promise<Request> {
+    let next = request;
+
+    return [...interceptors].reduceRight(
+      (promise, interceptor) =>
+        promise.then(
+          async (current: Request) => {
+            if (controller.halted) {
+              throw new HttpInterceptHaltError();
+            }
+
+            if (!interceptor.request) {
+              return current;
+            }
+
+            next = (await interceptor.request(current, controller)) || current;
+
+            return next;
+          },
+          async error => {
+            if (error instanceof HttpInterceptHaltError) {
+              throw error;
+            } else if (controller.halted) {
+              throw new HttpInterceptHaltError();
+            }
+
+            if (!interceptor.requestError) {
+              throw error;
+            }
+
+            const nextRequest = await interceptor.requestError(
+              { error, request: next },
+              controller
+            );
+
+            if (!nextRequest) {
+              throw error;
+            }
+
+            next = nextRequest;
+            return next;
+          }
+        ),
+      Promise.resolve(request)
+    );
+  }
+
+  // Response hooks start from the oldest interceptor and end with the newest.
+  async function interceptResponse(
+    responsePromise: Promise<HttpResponse>,
+    controller: HttpInterceptController
+  ) {
+    let current: HttpResponse;
+
+    const finalHttpResponse = await [...interceptors].reduce(
+      (promise, interceptor) =>
+        promise.then(
+          async httpResponse => {
+            if (controller.halted) {
+              throw new HttpInterceptHaltError();
+            }
+
+            if (!interceptor.response) {
+              return httpResponse;
+            }
+
+            current = (await interceptor.response(httpResponse, controller)) || httpResponse;
+
+            return current;
+          },
+          async error => {
+            if (error instanceof HttpInterceptHaltError) {
+              throw error;
+            } else if (controller.halted) {
+              throw new HttpInterceptHaltError();
+            }
+
+            if (!interceptor.responseError) {
+              throw error;
+            }
+
+            const next = await interceptor.responseError({ ...current, error }, controller);
+
+            if (!next) {
+              throw error;
+            }
+
+            return next;
+          }
+        ),
+      responsePromise
+    );
+
+    return finalHttpResponse.body;
+  }
+
+  async function fetcher(request: Request): Promise<HttpResponse> {
     let response;
     let body = null;
 
     try {
-      response = await window.fetch(url, fetchOptions as RequestInit);
+      response = await window.fetch(request);
     } catch (err) {
       throw new HttpFetchError(err.message);
     }
@@ -115,7 +225,17 @@ export const setup = (
       throw new HttpFetchError(response.statusText, response, body);
     }
 
-    return body;
+    return { response, body, request };
+  }
+
+  function fetch(path: string, options: HttpFetchOptions = {}) {
+    const controller = new HttpInterceptController();
+    const initialRequest = createRequest(path, options);
+
+    return interceptResponse(
+      interceptRequest(initialRequest, controller).then(fetcher),
+      controller
+    );
   }
 
   function shorthand(method: string) {
@@ -125,26 +245,6 @@ export const setup = (
   function stop() {
     stop$.next();
     loadingCount$.complete();
-  }
-
-  function getBasePath() {
-    return basePath;
-  }
-
-  function removeBasePath(path: string): string {
-    if (!basePath) {
-      return path;
-    }
-
-    if (path === basePath) {
-      return '/';
-    }
-
-    if (path.startsWith(`${basePath}/`)) {
-      return path.slice(basePath.length);
-    }
-
-    return path;
   }
 
   function addLoadingCount(count$: Observable<number>) {
@@ -186,9 +286,9 @@ export const setup = (
 
   return {
     stop,
-    getBasePath,
-    prependBasePath,
-    removeBasePath,
+    basePath,
+    intercept,
+    removeAllInterceptors,
     fetch,
     delete: shorthand('DELETE'),
     get: shorthand('GET'),

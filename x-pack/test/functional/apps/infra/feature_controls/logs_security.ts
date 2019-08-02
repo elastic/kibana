@@ -18,7 +18,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
   describe('logs security', () => {
     before(async () => {
-      esArchiver.load('empty_kibana');
+      await esArchiver.load('empty_kibana');
     });
     describe('global logs all privileges', () => {
       before(async () => {

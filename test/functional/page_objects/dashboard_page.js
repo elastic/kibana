@@ -54,7 +54,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         'defaultIndex': defaultIndex,
       });
       await this.selectDefaultIndex(defaultIndex);
-      await kibanaServer.uiSettings.disableToastAutohide();
       await PageObjects.common.navigateToApp('dashboard');
     }
 
@@ -152,7 +151,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getCloneTitle() {
-      return await testSubjects.getProperty('clonedDashboardTitle', 'value');
+      return await testSubjects.getAttribute('clonedDashboardTitle', 'value');
     }
 
     async confirmClone() {
@@ -200,8 +199,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       // wait until the count of dashboard panels equals the count of toggle menu icons
       await retry.waitFor('in edit mode', async () => {
         const [panels, menuIcons] = await Promise.all([
-          testSubjects.findAll('dashboardPanel'),
-          testSubjects.findAll('dashboardPanelToggleMenuIcon'),
+          testSubjects.findAll('embeddablePanel'),
+          testSubjects.findAll('embeddablePanelToggleMenuIcon'),
         ]);
         return panels.length === menuIcons.length;
       });
@@ -218,15 +217,20 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickNewDashboard() {
-      // newItemButton button is only visible when dashboard listing table is displayed
-      // (at least one dashboard).
-      const exists = await testSubjects.exists('newItemButton');
-      if (exists) {
-        return await testSubjects.click('newItemButton');
-      }
+      // One or the other will eventually show up on the landing page, depending on whether there are
+      // dashboards.
+      await retry.try(async () => {
+        const createNewItemButtonExists = await testSubjects.exists('newItemButton');
+        if (createNewItemButtonExists) {
+          return await testSubjects.click('newItemButton');
+        }
+        const createNewItemPromptExists = await this.getCreateDashboardPromptExists();
+        if (createNewItemPromptExists) {
+          return await this.clickCreateDashboardPrompt();
+        }
 
-      // If no dashboards exist, then newItemButton to create a new dashboard.
-      return await this.clickCreateDashboardPrompt();
+        throw new Error('Page is still loading... waiting for create new prompt or button to appear');
+      });
     }
 
     async clickCreateDashboardPrompt() {
@@ -278,8 +282,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async isMarginsOn() {
       log.debug('isMarginsOn');
       await this.openOptions();
-      const marginsCheckbox = await testSubjects.find('dashboardMarginsCheckbox');
-      return await marginsCheckbox.getProperty('checked');
+      return await testSubjects.getAttribute('dashboardMarginsCheckbox', 'checked');
     }
 
     async useMargins(on = true) {
@@ -411,7 +414,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getSearchFilterValue() {
       const searchFilter = await this.getSearchFilter();
-      return await searchFilter.getProperty('value');
+      return await searchFilter.getAttribute('value');
     }
 
     async getSearchFilter() {
@@ -431,6 +434,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
         await searchFilter.type(dashName.replace('-', ' '));
         await PageObjects.common.pressEnterKey();
+        await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 5000);
       });
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -457,9 +461,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.gotoDashboardLandingPage();
 
       await this.searchForDashboardWithName(dashName);
-      await this.selectDashboard(dashName);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
+      await retry.try(async () => {
+        await this.selectDashboard(dashName);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // check Dashboard landing page is not present
+        await testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
+      });
     }
 
     async getPanelTitles() {
@@ -484,7 +491,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getPanelCount() {
       log.debug('getPanelCount');
-      const panels = await testSubjects.findAll('dashboardPanel');
+      const panels = await testSubjects.findAll('embeddablePanel');
       return panels.length;
     }
 
@@ -509,7 +516,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getDashboardPanels() {
-      return await testSubjects.findAll('dashboardPanel');
+      return await testSubjects.findAll('embeddablePanel');
     }
 
     async addVisualizations(visualizations) {
@@ -537,7 +544,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async setSaveAsNewCheckBox(checked) {
       log.debug('saveAsNewCheckbox: ' + checked);
       const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
-      const isAlreadyChecked = await saveAsNewCheckbox.getProperty('checked');
+      const isAlreadyChecked = (await saveAsNewCheckbox.getAttribute('checked') === 'true');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping save as new checkbox');
         await retry.try(() => saveAsNewCheckbox.click());
@@ -547,7 +554,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async setStoreTimeWithDashboard(checked) {
       log.debug('Storing time with dashboard: ' + checked);
       const storeTimeCheckbox = await testSubjects.find('storeTimeWithDashboard');
-      const isAlreadyChecked = await storeTimeCheckbox.getProperty('checked');
+      const isAlreadyChecked = (await storeTimeCheckbox.getAttribute('checked') === 'true');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping store time checkbox');
         await retry.try(() => storeTimeCheckbox.click());
@@ -613,7 +620,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const checkList = [];
       for (const name of vizList) {
         const isPresent = await testSubjects.exists(
-          `dashboardPanelHeading-${name.replace(/\s+/g, '')}`,
+          `embeddablePanelHeading-${name.replace(/\s+/g, '')}`,
           { timeout: 10000 }
         );
         checkList.push({ name, isPresent });

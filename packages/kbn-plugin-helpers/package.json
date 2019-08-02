@@ -9,14 +9,19 @@
   },
   "author": "Spencer Alger <email@spalger.com>",
   "license": "Apache-2.0",
+  "peerDependencies": {
+    "@kbn/babel-preset": "1.0.0"
+  },
   "dependencies": {
+    "@babel/core": "^7.4.4",
     "argv-split": "^2.0.1",
     "commander": "^2.9.0",
-    "del": "^2.2.2",
+    "del": "^4.0.0",
     "execa": "^1.0.0",
-    "gulp-rename": "1.2.2",
     "globby": "^8.0.1",
-    "gulp-zip": "^4.1.0",
+    "gulp-babel": "^8.0.0",
+    "gulp-rename": "1.4.0",
+    "gulp-zip": "4.2.0",
     "inquirer": "^1.2.2",
     "minimatch": "^3.0.4",
     "node-sass": "^4.9.4",

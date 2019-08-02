@@ -57,14 +57,14 @@ afterEach(() => {
 });
 
 describe('#batchSet', () => {
-  it('sends a single change immediately', () => {
+  it('sends a single change immediately', async () => {
     fetchMock.mock('*', {
       body: { settings: {} },
     });
 
     const { uiSettingsApi } = setup();
-    uiSettingsApi.batchSet('foo', 'bar');
-    expect(fetchMock.calls()).toMatchSnapshot('synchronous fetch');
+    await uiSettingsApi.batchSet('foo', 'bar');
+    expect(fetchMock.calls()).toMatchSnapshot('single change');
   });
 
   it('buffers changes while first request is in progress, sends buffered changes after first request completes', async () => {
@@ -77,7 +77,7 @@ describe('#batchSet', () => {
     uiSettingsApi.batchSet('foo', 'bar');
     const finalPromise = uiSettingsApi.batchSet('box', 'bar');
 
-    expect(fetchMock.calls()).toMatchSnapshot('initial, only one request');
+    expect(uiSettingsApi.hasPendingChanges()).toBe(true);
     await finalPromise;
     expect(fetchMock.calls()).toMatchSnapshot('final, includes both requests');
   });

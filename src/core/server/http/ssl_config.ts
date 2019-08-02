@@ -49,6 +49,7 @@ export const sslSchema = schema.object(
       schema.oneOf([schema.literal('TLSv1'), schema.literal('TLSv1.1'), schema.literal('TLSv1.2')]),
       { defaultValue: ['TLSv1.1', 'TLSv1.2'], minSize: 1 }
     ),
+    requestCert: schema.maybe(schema.boolean({ defaultValue: false })),
   },
   {
     validate: ssl => {
@@ -68,6 +69,7 @@ export class SslConfig {
   public certificate: string | undefined;
   public certificateAuthorities: string[] | undefined;
   public keyPassphrase: string | undefined;
+  public requestCert: boolean | undefined;
 
   public cipherSuites: string[];
   public supportedProtocols: string[];
@@ -84,6 +86,7 @@ export class SslConfig {
     this.keyPassphrase = config.keyPassphrase;
     this.cipherSuites = config.cipherSuites;
     this.supportedProtocols = config.supportedProtocols;
+    this.requestCert = config.requestCert;
   }
 
   /**

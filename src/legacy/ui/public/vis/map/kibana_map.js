@@ -462,7 +462,8 @@ export class KibanaMap extends EventEmitter {
           shapeOptions: {
             color: drawColor
           }
-        }
+        },
+        circlemarker: false
       }
     };
     this._leafletDrawControl = new L.Control.Draw(drawOptions);

@@ -1,0 +1,45 @@
+[[code-getting-started]]
+== Getting Started with Code
+
+The easiest way to get started with *Code* is to simply import a real-world repository.
+
+[float]
+==== Before you begin
+You must have a {kib} instance up and running.
+
+If you are in an environment where you have multiple {kib} instances in a cluster, see the <<code-multiple-kibana-instances-config, config instructions for multiple Kibana instances>>.
+
+[float]
+==== Enable Code app
+In beta, Code needs to be turned on by adding the following line to `kibana.yaml`
+[source,yaml]
+----
+xpack.code.ui.enabled: true
+----
+
+[float]
+==== Import your first repository
+. Navigate to the Code app.
+
+. In the *Repository URL* field, paste the following GitHub clone URL:
++
+[source,bash]
+----
+https://github.com/Microsoft/TypeScript-Node-Starter
+----
+
+. Click *Import*.
++
+A new item in the list displays the cloning and indexing progress of the `TypeScript-Node-Starter` repo.
++
+[role="screenshot"]
+image::images/code-import-repo.png[]
+
+. After the indexing is complete, navigate to the repo by clicking its name in the list.
++
+[role="screenshot"]
+image::images/code-starter-root.png[]
++
+Congratulations! You just imported your first repo into *Code*.
+
+include::code-repo-management.asciidoc[]

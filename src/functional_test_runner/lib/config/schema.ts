@@ -124,12 +124,22 @@ export const schema = Joi.object()
         grep: Joi.string(),
         invert: Joi.boolean().default(false),
         slow: Joi.number().default(30000),
-        timeout: Joi.number().default(INSPECTING ? Infinity : 360000),
+        timeout: Joi.number().default(INSPECTING ? 360000 * 100 : 360000),
         ui: Joi.string().default('bdd'),
       })
       .default(),
 
     updateBaselines: Joi.boolean().default(false),
+
+    browser: Joi.object()
+      .keys({
+        type: Joi.string()
+          .valid('chrome', 'firefox')
+          .default('chrome'),
+
+        logPollingMs: Joi.number().default(100),
+      })
+      .default(),
 
     junit: Joi.object()
       .keys({
@@ -166,6 +176,7 @@ export const schema = Joi.object()
         license: Joi.string().default('oss'),
         from: Joi.string().default('snapshot'),
         serverArgs: Joi.array(),
+        serverEnvVars: Joi.object(),
         dataArchive: Joi.string(),
       })
       .default(),

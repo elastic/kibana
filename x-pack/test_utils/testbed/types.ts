@@ -7,7 +7,7 @@
 import { Store } from 'redux';
 import { ReactWrapper } from 'enzyme';
 
-export type SetupFunc<T> = (props?: any) => TestBed<T>;
+export type SetupFunc<T> = (props?: any) => TestBed<T> | Promise<TestBed<T>>;
 
 export interface EuiTableMetaData {
   /** Array of rows of the table. Each row exposes its reactWrapper and its columns */
@@ -23,7 +23,7 @@ export interface EuiTableMetaData {
   tableCellsValues: string[][];
 }
 
-export interface TestBed<T> {
+export interface TestBed<T = string> {
   /** The comonent under test */
   component: ReactWrapper;
   /**
@@ -41,14 +41,14 @@ export interface TestBed<T> {
    *
    * @example
    *
-```ts
-find('nameInput');
-// or more specific,
-// "nameInput" is a child of "myForm"
-find('myForm.nameInput');
-```
+    ```ts
+    find('nameInput');
+    // or more specific,
+    // "nameInput" is a child of "myForm"
+    find('myForm.nameInput');
+    ```
    */
-  find: (testSubject: T) => ReactWrapper;
+  find: (testSubject: T) => ReactWrapper<any>;
   /**
    * Update the props of the mounted component
    *
@@ -102,6 +102,12 @@ find('myForm.nameInput');
   table: {
     getMetaData: (tableTestSubject: T) => EuiTableMetaData;
   };
+  router: {
+    /**
+     * Navigate to another React router <Route />
+     */
+    navigateTo: (url: string) => void;
+  };
 }
 
 export interface TestBedConfig {
@@ -111,6 +117,8 @@ export interface TestBedConfig {
   memoryRouter?: MemoryRouterConfig;
   /** An optional redux store. You can also provide a function that returns a store. */
   store?: (() => Store) | Store | null;
+  /* Mount the component asynchronously. When using "hooked" components with _useEffect()_ calls, you need to set this to "true". */
+  doMountAsync?: boolean;
 }
 
 export interface MemoryRouterConfig {

@@ -15,7 +15,8 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
   const infraSourceConfigurationFlyout = getService('infraSourceConfigurationFlyout');
   const pageObjects = getPageObjects(['infraLogs']);
 
-  describe('Logs Page', () => {
+  describe('Logs Page', function() {
+    this.tags('smoke');
     before(async () => {
       await esArchiver.load('empty_kibana');
     });
@@ -97,6 +98,9 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
         await infraSourceConfigurationFlyout.addTimestampLogColumn();
         await infraSourceConfigurationFlyout.addFieldLogColumn('host.name');
 
+        // TODO: make test more robust
+        // await infraSourceConfigurationFlyout.moveLogColumn(0, 1);
+
         await infraSourceConfigurationFlyout.saveConfiguration();
         await infraSourceConfigurationFlyout.closeFlyout();
       });
@@ -104,6 +108,8 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
       it('renders the changed log columns with their headers', async () => {
         const columnHeaderLabels = await infraLogStream.getColumnHeaderLabels();
 
+        // TODO: make test more robust
+        // expect(columnHeaderLabels).to.eql(['host.name', 'Timestamp', '']);
         expect(columnHeaderLabels).to.eql(['Timestamp', 'host.name', '']);
 
         const logStreamEntries = await infraLogStream.getStreamEntries();

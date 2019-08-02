@@ -16,7 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { convertIntervalToUnit, parseInterval, getSuitableUnit } from '../vis_data/helpers/unit_to_seconds';
+import {
+  convertIntervalToUnit,
+  parseInterval,
+  getSuitableUnit,
+} from '../vis_data/helpers/unit_to_seconds';
+import { RESTRICTIONS_KEYS } from '../../../common/ui_restrictions';
 
 const getTimezoneFromRequest = request => {
   return request.payload.timerange.timezone;
@@ -40,10 +45,15 @@ export class DefaultSearchCapabilities {
     return this.createUiRestriction();
   }
 
+  get whiteListedTimerangeModes() {
+    return this.createUiRestriction();
+  }
+
   get uiRestrictions() {
     return {
-      whiteListedMetrics: this.whiteListedMetrics,
-      whiteListedGroupByFields: this.whiteListedGroupByFields,
+      [RESTRICTIONS_KEYS.WHITE_LISTED_METRICS]: this.whiteListedMetrics,
+      [RESTRICTIONS_KEYS.WHITE_LISTED_GROUP_BY_FIELDS]: this.whiteListedGroupByFields,
+      [RESTRICTIONS_KEYS.WHITE_LISTED_TIMERANGE_MODES]: this.whiteListedTimerangeModes,
     };
   }
 

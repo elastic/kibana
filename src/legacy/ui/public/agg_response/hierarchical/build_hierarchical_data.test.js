@@ -18,7 +18,7 @@
  */
 
 import { buildHierarchicalData } from './build_hierarchical_data';
-import { LegacyResponseHandlerProvider as legacyResponseHandlerProvider } from '../../vis/response_handlers/legacy';
+import { legacyResponseHandlerProvider } from '../../vis/response_handlers/legacy';
 
 jest.mock('../../registry/field_formats', () => ({
   fieldFormats: {

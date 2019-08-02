@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable import/no-duplicates */
+
 import React from 'react';
 
 import { renderToHtml } from '../../services';
@@ -31,23 +33,23 @@ import {
 } from '../../components';
 
 import Popover from './popover';
-const popoverSource = require('!!raw-loader!./popover');
+import popoverSource from '!!raw-loader!./popover';
 const popoverHtml = renderToHtml(Popover);
 
 import TrapFocus from './trap_focus';
-const trapFocusSource = require('!!raw-loader!./trap_focus');
+import trapFocusSource from '!!raw-loader!./trap_focus';
 const trapFocusHtml = renderToHtml(TrapFocus);
 
 import PopoverAnchorPosition from './popover_anchor_position';
-const popoverAnchorPositionSource = require('!!raw-loader!./popover_anchor_position');
+import popoverAnchorPositionSource from '!!raw-loader!./popover_anchor_position';
 const popoverAnchorPositionHtml = renderToHtml(PopoverAnchorPosition);
 
 import PopoverPanelClassName from './popover_panel_class_name';
-const popoverPanelClassNameSource = require('!!raw-loader!./popover_panel_class_name');
+import popoverPanelClassNameSource from '!!raw-loader!./popover_panel_class_name';
 const popoverPanelClassNameHtml = renderToHtml(PopoverPanelClassName);
 
 import PopoverWithTitle from './popover_with_title';
-const popoverWithTitleSource = require('!!raw-loader!./popover_with_title');
+import popoverWithTitleSource from '!!raw-loader!./popover_with_title';
 const popoverWithTitleHtml = renderToHtml(PopoverWithTitle);
 
 export default props => (

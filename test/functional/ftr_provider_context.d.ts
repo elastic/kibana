@@ -19,11 +19,7 @@
 
 import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
 
-import { services as CommonServiceProviders } from '../common/services';
-import { pageObjects as FunctionalPageObjectProviders } from './page_objects';
-import { services as FunctionalServiceProviders } from './services';
+import { pageObjects } from './page_objects';
+import { services } from './services';
 
-type ServiceProviders = typeof CommonServiceProviders & typeof FunctionalServiceProviders;
-type PageObjectProviders = typeof FunctionalPageObjectProviders;
-
-export type FtrProviderContext = GenericFtrProviderContext<ServiceProviders, PageObjectProviders>;
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;

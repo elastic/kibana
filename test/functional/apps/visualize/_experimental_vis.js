@@ -23,7 +23,8 @@ export default ({ getService, getPageObjects }) => {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'visualize']);
 
-  describe('visualize app', () => {
+  describe('visualize app', function () {
+    this.tags('smoke');
 
     describe('experimental visualizations', () => {
 

@@ -29,7 +29,6 @@ import { eventBus } from '../lib/events';
 import reactcss from 'reactcss';
 
 export class Timeseries extends Component {
-
   constructor(props) {
     super(props);
     const values = this.getLastValues(props);
@@ -38,7 +37,7 @@ export class Timeseries extends Component {
       values: values || {},
       show: _.keys(values) || [],
       ignoreLegendUpdates: false,
-      ignoreVisibilityUpdates: false
+      ignoreVisibilityUpdates: false,
     };
     this.toggleFilter = this.toggleFilter.bind(this);
     this.handleHideClick = this.handleHideClick.bind(this);
@@ -69,7 +68,7 @@ export class Timeseries extends Component {
 
   getLastValues(props) {
     const values = {};
-    props.series.forEach((row) => {
+    props.series.forEach(row => {
       // we need a valid identifier
       if (!row.id) row.id = row.label;
       values[row.id] = getLastValue(row.data);
@@ -80,9 +79,13 @@ export class Timeseries extends Component {
   updateLegend(pos, item) {
     const values = {};
     if (pos) {
-      this.props.series.forEach((row) => {
+      this.props.series.forEach(row => {
         if (row.data && Array.isArray(row.data)) {
-          if (item && row.data[item.dataIndex] && row.data[item.dataIndex][0] === item.datapoint[0]) {
+          if (
+            item &&
+            row.data[item.dataIndex] &&
+            row.data[item.dataIndex][0] === item.datapoint[0]
+          ) {
             values[row.id] = row.data[item.dataIndex][1];
           } else {
             let closest;
@@ -90,9 +93,9 @@ export class Timeseries extends Component {
               closest = i;
               if (row.data[i] && pos.x < row.data[i][0]) break;
             }
-            if (!row.data[closest]) return values[row.id] = null;
-            const [ , value ] = row.data[closest];
-            values[row.id] = value != null && value || null;
+            if (!row.data[closest]) return (values[row.id] = null);
+            const [, value] = row.data[closest];
+            values[row.id] = (value != null && value) || null;
           }
         }
       });
@@ -131,13 +134,16 @@ export class Timeseries extends Component {
       'tvbVisTimeSeries--reversed': isBackgroundInverted(this.props.backgroundColor),
     });
 
-    const styles = reactcss({
-      bottomLegend: {
-        content: {
-          flexDirection: 'column'
-        }
-      }
-    }, { bottomLegend: this.props.legendPosition === 'bottom' });
+    const styles = reactcss(
+      {
+        bottomLegend: {
+          content: {
+            flexDirection: 'column',
+          },
+        },
+      },
+      { bottomLegend: this.props.legendPosition === 'bottom' }
+    );
     return (
       <div className={classes} data-test-subj="timeseriesChart">
         <div style={styles.content} className="tvbVisTimeSeries__content">
@@ -173,14 +179,11 @@ export class Timeseries extends Component {
       </div>
     );
   }
-
-
-
 }
 
 Timeseries.defaultProps = {
   legend: true,
-  showGrid: true
+  showGrid: true,
 };
 
 Timeseries.propTypes = {
@@ -194,5 +197,5 @@ Timeseries.propTypes = {
   tickFormatter: PropTypes.func,
   showGrid: PropTypes.bool,
   xaxisLabel: PropTypes.string,
-  dateFormat: PropTypes.string
+  dateFormat: PropTypes.string,
 };

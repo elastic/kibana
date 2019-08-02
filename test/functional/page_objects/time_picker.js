@@ -23,6 +23,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const find = getService('find');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header']);
 
@@ -53,10 +54,28 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('superDatePickerstartDatePopoverButton');
       const panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
-      await testSubjects.setValue('superDatePickerAbsoluteDateInput', startTime);
+      await this.inputValue('superDatePickerAbsoluteDateInput', startTime);
       await testSubjects.click('superDatePickerstartDatePopoverButton');
       await this.waitPanelIsGone(panel);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    }
+
+    /**
+     * @param {String} commonlyUsedOption 'superDatePickerCommonlyUsed_This_week'
+     */
+    async setCommonlyUsedTime(commonlyUsedOption) {
+      await testSubjects.click('superDatePickerToggleQuickMenuButton');
+      await testSubjects.click(commonlyUsedOption);
+    }
+
+    async inputValue(dataTestsubj, value) {
+      if (browser.isFirefox) {
+        const input = await testSubjects.find(dataTestsubj);
+        await input.clearValue();
+        await input.type(value);
+      } else {
+        await testSubjects.setValue(dataTestsubj, value);
+      }
     }
 
     /**
@@ -71,14 +90,15 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('superDatePickerendDatePopoverButton');
       let panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
-      await testSubjects.setValue('superDatePickerAbsoluteDateInput', toTime);
+      await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
+
 
       // set from time
       await testSubjects.click('superDatePickerstartDatePopoverButton');
       await this.waitPanelIsGone(panel);
       panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
-      await testSubjects.setValue('superDatePickerAbsoluteDateInput', fromTime);
+      await this.inputValue('superDatePickerAbsoluteDateInput', fromTime);
 
       const superDatePickerApplyButtonExists = await testSubjects.exists('superDatePickerApplyTimeButton');
       if (superDatePickerApplyButtonExists) {

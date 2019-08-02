@@ -25,22 +25,20 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
   const log = getService('log');
   const config = getService('config');
-  const browserType: Browsers = (process.env.TEST_BROWSER_TYPE as Browsers) || Browsers.Chrome;
-
-  if (browserType !== Browsers.Chrome && browserType !== Browsers.Firefox) {
-    throw new Error(
-      `Unexpected TEST_BROWSER_TYPE "${browserType}", only "chrome" and "firefox" are supported`
-    );
-  }
+  const browserType: Browsers = config.get('browser.type');
 
   const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver(log, browserType);
+  const isW3CEnabled = (driver as any).executor_.w3c;
+
   const caps = await driver.getCapabilities();
-  const browserVersion = caps.get(browserType === Browsers.Chrome ? 'version' : 'browserVersion');
+  const browserVersion = caps.get(isW3CEnabled ? 'browserVersion' : 'version');
 
   log.info(`Remote initialized: ${caps.get('browserName')} ${browserVersion}`);
 
   if (browserType === Browsers.Chrome) {
-    log.info(`Chromedriver version: ${caps.get('chrome').chromedriverVersion}`);
+    log.info(
+      `Chromedriver version: ${caps.get('chrome').chromedriverVersion}, w3c=${isW3CEnabled}`
+    );
   }
 
   lifecycle.on('beforeTests', async () => {

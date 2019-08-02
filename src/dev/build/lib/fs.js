@@ -47,6 +47,17 @@ export function assertAbsolute(path) {
   }
 }
 
+export function isFileAccessible(path) {
+  assertAbsolute(path);
+
+  try {
+    fs.accessSync(path);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 function longInspect(value) {
   return inspect(value, {
     maxArrayLength: Infinity
@@ -188,8 +199,8 @@ export async function untar(source, destination, extractOptions = {}) {
 
 export async function compress(type, options = {}, source, destination) {
   const output = fs.createWriteStream(destination);
-  const archive = archiver(type, options);
-  const name = source.split(sep).slice(-1)[0];
+  const archive = archiver(type, options.archiverOptions);
+  const name = (options.createRootDirectory ? source.split(sep).slice(-1)[0] : false);
 
   archive.pipe(output);
 

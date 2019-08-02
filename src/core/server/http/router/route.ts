@@ -17,8 +17,32 @@
  * under the License.
  */
 
-import { ObjectType, Schema } from '@kbn/config-schema';
-export type RouteMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+import { ObjectType } from '@kbn/config-schema';
+/**
+ * The set of common HTTP methods supported by Kibana routing.
+ * @public
+ * */
+export type RouteMethod = 'get' | 'post' | 'put' | 'delete';
+
+/**
+ * Route specific configuration.
+ * @public
+ * */
+export interface RouteConfigOptions {
+  /**
+   * A flag shows that authentication for a route:
+   * enabled  when true
+   * disabled when false
+   *
+   * Enabled by default.
+   */
+  authRequired?: boolean;
+
+  /**
+   * Additional metadata tag strings to attach to the route.
+   */
+  tags?: readonly string[];
+}
 
 export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {
   /**
@@ -29,19 +53,14 @@ export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B exten
   path: string;
 
   /**
-   * A function that will be called when setting up the route and that returns
-   * a schema that every request will be validated against.
+   * A schema created with `@kbn/config-schema` that every request will be validated against.
    *
    * To opt out of validating the request, specify `false`.
    */
-  validate: RouteValidateFactory<P, Q, B> | false;
-}
+  validate: RouteSchemas<P, Q, B> | false;
 
-export type RouteValidateFactory<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType
-> = (schema: Schema) => RouteSchemas<P, Q, B>;
+  options?: RouteConfigOptions;
+}
 
 /**
  * RouteSchemas contains the schemas for validating the different parts of a

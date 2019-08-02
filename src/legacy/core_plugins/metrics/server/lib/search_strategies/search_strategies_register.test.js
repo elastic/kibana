@@ -26,7 +26,7 @@ class MockSearchStrategy extends AbstractSearchStrategy {
   checkForViability() {
     return {
       isViable: true,
-      capabilities: {}
+      capabilities: {},
     };
   }
 }
@@ -40,13 +40,13 @@ describe('SearchStrategiesRegister', () => {
     server = {
       expose: jest.fn((strategy, func) => {
         server[strategy] = func;
-      })
+      }),
     };
     strategies = [
       ['AbstractSearchStrategy', AbstractSearchStrategy],
       ['AbstractSearchRequest', AbstractSearchRequest],
       ['DefaultSearchCapabilities', DefaultSearchCapabilities],
-      ['addSearchStrategy', expect.any(Function)]
+      ['addSearchStrategy', expect.any(Function)],
     ];
 
     SearchStrategiesRegister.init(server);
@@ -68,7 +68,10 @@ describe('SearchStrategiesRegister', () => {
     const req = {};
     const indexPattern = '*';
 
-    const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
+    const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(
+      req,
+      indexPattern
+    );
 
     expect(searchStrategy instanceof DefaultSearchStrategy).toBe(true);
     expect(capabilities instanceof DefaultSearchCapabilities).toBe(true);
@@ -86,7 +89,10 @@ describe('SearchStrategiesRegister', () => {
     const req = {};
     const indexPattern = '*';
 
-    const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
+    const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(
+      req,
+      indexPattern
+    );
 
     expect(searchStrategy instanceof AbstractSearchStrategy).toBe(true);
     expect(capabilities).toEqual({});

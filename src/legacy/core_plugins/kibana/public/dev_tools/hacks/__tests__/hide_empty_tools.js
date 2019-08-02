@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 
 import { hideEmptyDevTools } from '../hide_empty_tools';
-import { getNewPlatform } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
 describe('hide dev tools', function () {
   let updateNavLink;
@@ -39,7 +39,7 @@ describe('hide dev tools', function () {
   }
 
   beforeEach(function () {
-    const coreNavLinks = getNewPlatform().start.core.chrome.navLinks;
+    const coreNavLinks = npStart.core.chrome.navLinks;
     updateNavLink = sinon.spy(coreNavLinks, 'update');
   });
 

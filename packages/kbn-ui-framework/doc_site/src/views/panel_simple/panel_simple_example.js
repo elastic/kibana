@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable import/no-duplicates */
+
 import React from 'react';
 
 import { Link } from 'react-router';
@@ -33,7 +35,7 @@ import {
 } from '../../components';
 
 import PanelSimple from './panel_simple';
-const panelSimpleSource = require('!!raw-loader!./panel_simple');
+import panelSimpleSource from '!!raw-loader!./panel_simple';
 const panelSimpleHtml = renderToHtml(PanelSimple);
 
 export default props => (

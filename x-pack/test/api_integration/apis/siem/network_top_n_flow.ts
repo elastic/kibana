@@ -5,14 +5,14 @@
  */
 
 import expect from '@kbn/expect';
-import { networkTopNFlowQuery } from '../../../../plugins/siem/public/containers/network_top_n_flow/index.gql_query';
+import { networkTopNFlowQuery } from '../../../../legacy/plugins/siem/public/containers/network_top_n_flow/index.gql_query';
 import {
   Direction,
   FlowDirection,
   FlowTarget,
   GetNetworkTopNFlowQuery,
   NetworkTopNFlowFields,
-} from '../../../../plugins/siem/public/graphql/types';
+} from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const EDGE_LENGTH = 10;
@@ -43,10 +43,13 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
               sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
               flowDirection: FlowDirection.uniDirectional,
               pagination: {
-                limit: 10,
-                cursor: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 50,
+                querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -57,7 +60,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
               '8.250.107.245,10.100.7.198,8.248.211.247,8.253.157.240,151.205.0.21,8.254.254.117,54.239.220.40,151.205.0.23,8.248.223.246,151.205.0.17'
             );
             expect(networkTopNFlow.edges[0].node.destination).to.be(null);
-            expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
+            expect(networkTopNFlow.pageInfo.fakeTotalCount).to.equal(50);
           });
       });
 
@@ -76,10 +79,13 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
               sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.asc },
               flowDirection: FlowDirection.uniDirectional,
               pagination: {
-                limit: 10,
-                cursor: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 50,
+                querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -90,7 +96,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
               '10.100.4.1,54.239.219.220,54.239.219.228,54.239.220.94,54.239.220.138,54.239.220.184,54.239.220.186,54.239.221.253,35.167.45.163,52.5.171.20'
             );
             expect(networkTopNFlow.edges[0].node.destination).to.be(null);
-            expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
+            expect(networkTopNFlow.pageInfo.fakeTotalCount).to.equal(50);
           });
       });
 
@@ -109,10 +115,13 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
               flowTarget: FlowTarget.source,
               flowDirection: FlowDirection.biDirectional,
               pagination: {
-                limit: 10,
-                cursor: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 10,
+                querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -120,7 +129,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
             expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
             expect(networkTopNFlow.totalCount).to.be(10);
             expect(networkTopNFlow.edges[0].node.destination).to.be(null);
-            expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
+            expect(networkTopNFlow.pageInfo.fakeTotalCount).to.equal(10);
           });
       });
 
@@ -139,10 +148,13 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
               flowTarget: FlowTarget.destination,
               flowDirection: FlowDirection.uniDirectional,
               pagination: {
-                limit: 10,
-                cursor: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 50,
+                querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -150,7 +162,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
             expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
             expect(networkTopNFlow.totalCount).to.be(144);
             expect(networkTopNFlow.edges[0].node.source).to.be(null);
-            expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
+            expect(networkTopNFlow.pageInfo.fakeTotalCount).to.equal(50);
           });
       });
 
@@ -169,10 +181,13 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
               flowTarget: FlowTarget.destination,
               flowDirection: FlowDirection.biDirectional,
               pagination: {
-                limit: 10,
-                cursor: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 50,
+                querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -180,7 +195,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
             expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
             expect(networkTopNFlow.totalCount).to.be(89);
             expect(networkTopNFlow.edges[0].node.source).to.be(null);
-            expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
+            expect(networkTopNFlow.pageInfo.fakeTotalCount).to.equal(50);
           });
       });
 
@@ -199,10 +214,13 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
               flowTarget: FlowTarget.source,
               flowDirection: FlowDirection.uniDirectional,
               pagination: {
-                limit: 20,
-                cursor: 10,
+                activePage: 1,
+                cursorStart: 10,
+                fakePossibleCount: 50,
+                querySize: 20,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -237,10 +255,13 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
               flowTarget: FlowTarget.client,
               flowDirection: FlowDirection.biDirectional,
               pagination: {
-                limit: 10,
-                cursor: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 50,
+                querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -248,7 +269,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
             expect(networkTopNFlow.edges.length).to.be(1);
             expect(networkTopNFlow.totalCount).to.be(1);
             expect(networkTopNFlow.edges[0].node.server).to.be(null);
-            expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
+            expect(networkTopNFlow.pageInfo.fakeTotalCount).to.equal(1);
           });
       });
 
@@ -267,10 +288,13 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
               flowTarget: FlowTarget.server,
               flowDirection: FlowDirection.biDirectional,
               pagination: {
-                limit: 10,
-                cursor: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 50,
+                querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -278,7 +302,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
             expect(networkTopNFlow.edges.length).to.be(1);
             expect(networkTopNFlow.totalCount).to.be(1);
             expect(networkTopNFlow.edges[0].node.client).to.be(null);
-            expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
+            expect(networkTopNFlow.pageInfo.fakeTotalCount).to.equal(1);
           });
       });
     });

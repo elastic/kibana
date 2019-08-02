@@ -44,17 +44,13 @@ describe('aggLookup', () => {
     it('returns options for basic', () => {
       const options = createOptions('basic');
       expect(options).to.have.length(15);
-      expect(options.every(opt => isBasicAgg({ type: opt.value }))).to.equal(
-        true
-      );
+      expect(options.every(opt => isBasicAgg({ type: opt.value }))).to.equal(true);
     });
 
     it('returns options for pipeline', () => {
       const options = createOptions('pipeline');
       expect(options).to.have.length(15);
-      expect(options.every(opt => !isBasicAgg({ type: opt.value }))).to.equal(
-        true
-      );
+      expect(options.every(opt => !isBasicAgg({ type: opt.value }))).to.equal(true);
     });
 
     it('returns options for all if given unknown key', () => {

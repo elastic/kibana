@@ -32,7 +32,7 @@ import angular from 'angular';
 import _ from 'lodash';
 
 import { InvalidJSONProperty, SavedObjectNotFound } from '../errors';
-import MappingSetupProvider from '../utils/mapping_setup';
+import { expandShorthand } from '../utils/mapping_setup';
 
 import { SearchSourceProvider } from '../courier/search_source';
 import { findObjectByTitle } from './find_object_by_title';
@@ -69,7 +69,6 @@ function isErrorNonFatal(error) {
 export function SavedObjectProvider(Promise, Private, confirmModalPromise, indexPatterns) {
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   const SearchSource = Private(SearchSourceProvider);
-  const mappingSetup = Private(MappingSetupProvider);
 
   /**
    * The SavedObject class is a base class for saved objects loaded from the server and
@@ -109,7 +108,7 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
     this.defaults = config.defaults || {};
 
     // mapping definition for the fields that this object will expose
-    const mapping = mappingSetup.expandShorthand(config.mapping);
+    const mapping = expandShorthand(config.mapping);
 
     const afterESResp = config.afterESResp || _.noop;
     const customInit = config.init || _.noop;

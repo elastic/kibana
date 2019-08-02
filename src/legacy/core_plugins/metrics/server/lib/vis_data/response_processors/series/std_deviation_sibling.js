@@ -26,25 +26,22 @@ export function stdDeviationSibling(resp, panel, series, meta) {
   return next => results => {
     const metric = getLastMetric(series);
     if (metric.mode === 'band' && metric.type === 'std_deviation_bucket') {
-      getSplits(resp, panel, series, meta).forEach((split) => {
-
-        const mapBucketByMode = (mode) => {
+      getSplits(resp, panel, series, meta).forEach(split => {
+        const mapBucketByMode = mode => {
           return bucket => {
             return [bucket.key, getSiblingAggValue(split, _.assign({}, metric, { mode }))];
           };
         };
 
-        const upperData = split.timeseries.buckets
-          .map(mapBucketByMode('upper'));
-        const lowerData = split.timeseries.buckets
-          .map(mapBucketByMode('lower'));
+        const upperData = split.timeseries.buckets.map(mapBucketByMode('upper'));
+        const lowerData = split.timeseries.buckets.map(mapBucketByMode('lower'));
 
         results.push({
           id: `${split.id}:lower`,
           lines: { show: true, fill: false, lineWidth: 0 },
           points: { show: false },
           color: split.color,
-          data: lowerData
+          data: lowerData,
         });
         results.push({
           id: `${split.id}:upper`,
@@ -53,16 +50,11 @@ export function stdDeviationSibling(resp, panel, series, meta) {
           lines: { show: true, fill: 0.5, lineWidth: 0 },
           points: { show: false },
           fillBetween: `${split.id}:lower`,
-          data: upperData
+          data: upperData,
         });
-
       });
     }
 
     return next(results);
   };
-
-
-
 }
-

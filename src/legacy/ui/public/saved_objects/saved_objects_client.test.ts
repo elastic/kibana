@@ -20,7 +20,7 @@
 jest.mock('ui/kfetch', () => ({}));
 
 import * as sinon from 'sinon';
-import { FindOptions } from '../../../server/saved_objects/service';
+import { SavedObjectsFindOptions } from 'src/core/server';
 import { SavedObjectsClient } from './saved_objects_client';
 import { SimpleSavedObject } from './simple_saved_object';
 
@@ -341,7 +341,7 @@ describe('SavedObjectsClient', () => {
     });
 
     test('accepts pagination params', () => {
-      const options: FindOptions = { perPage: 10, page: 6 };
+      const options: SavedObjectsFindOptions = { perPage: 10, page: 6 };
 
       savedObjectsClient.find(options);
       sinon.assert.calledOnce(kfetchStub);

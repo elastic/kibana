@@ -24,10 +24,12 @@ import { timefilter } from 'ui/timefilter';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
+import { toastNotifications } from 'ui/notify';
 
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
 import { createVisualizeEditUrl, VisualizeConstants } from '../visualize_constants';
+import { visualizations } from 'plugins/visualizations';
 
 import { i18n } from '@kbn/i18n';
 
@@ -36,12 +38,12 @@ app.directive('visualizeListingTable', reactDirective => reactDirective(wrapInI1
 app.directive('newVisModal', reactDirective => reactDirective(wrapInI18nContext(NewVisModal)));
 
 export function VisualizeListingController($injector, createNewVis) {
-  const Notifier = $injector.get('Notifier');
   const Private = $injector.get('Private');
   const config = $injector.get('config');
   const kbnUrl = $injector.get('kbnUrl');
 
   this.visTypeRegistry = Private(VisTypesRegistryProvider);
+  this.visTypeAliases = visualizations.types.visTypeAliasRegistry.get();
 
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
@@ -77,15 +79,12 @@ export function VisualizeListingController($injector, createNewVis) {
   // TODO: Extract this into an external service.
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
   const visualizationService = services.visualizations;
-  const notify = new Notifier({ location: 'Visualize' });
 
   this.fetchItems = (filter) => {
     const isLabsEnabled = config.get('visualize:enableLabs');
     return visualizationService.find(filter, config.get('savedObjects:listingLimit'))
       .then(result => {
         this.totalItems = result.total;
-        this.showLimitError = result.total > config.get('savedObjects:listingLimit');
-        this.listingLimit = config.get('savedObjects:listingLimit');
 
         return {
           total: result.total,
@@ -96,7 +95,13 @@ export function VisualizeListingController($injector, createNewVis) {
 
   this.deleteSelectedItems = function deleteSelectedItems(selectedIds) {
     return visualizationService.delete(selectedIds)
-      .catch(error => notify.error(error));
+      .catch(error => {
+        toastNotifications.addError(error, {
+          title: i18n.translate('kbn.visualize.visualizeListingDeleteErrorTitle', {
+            defaultMessage: 'Error deleting visualization',
+          }),
+        });
+      });
   };
 
   chrome.breadcrumbs.set([{
@@ -104,4 +109,6 @@ export function VisualizeListingController($injector, createNewVis) {
       defaultMessage: 'Visualize',
     })
   }]);
+
+  this.listingLimit = config.get('savedObjects:listingLimit');
 }

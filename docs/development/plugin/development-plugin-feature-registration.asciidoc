@@ -22,7 +22,7 @@ init(server) {
 -----------
 
 ===== Feature details
-Registering a feature consists of the following fields. For more information, consult the {repo}blob/{branch}/x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry.ts[feature registry interface].
+Registering a feature consists of the following fields. For more information, consult the {repo}blob/{branch}/x-pack/legacy/plugins/xpack_main/server/lib/feature_registry/feature_registry.ts[feature registry interface].
 
 
 [cols="1a, 1a, 1a, 1a"]
@@ -45,7 +45,7 @@ Registering a feature consists of the following fields. For more information, co
 |An array of applications this feature enables. Typically, all of your plugin’s apps (from `uiExports`) will be included here.
 
 |`privileges` (required)
-|{repo}blob/{branch}/x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry.ts[`FeatureWithAllOrReadPrivileges`].
+|{repo}blob/{branch}/x-pack/legacy/plugins/xpack_main/server/lib/feature_registry/feature_registry.ts[`FeatureWithAllOrReadPrivileges`].
 |see examples below
 |The set of privileges this feature requires to function.
 
@@ -63,7 +63,7 @@ Registering a feature consists of the following fields. For more information, co
 ===== Privilege definition
 The `privileges` section of feature registration allows plugins to implement read/write and read-only modes for their applications.
 
-For a full explanation of fields and options, consult the {repo}blob/{branch}/x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry.ts[feature registry interface].
+For a full explanation of fields and options, consult the {repo}blob/{branch}/x-pack/legacy/plugins/xpack_main/server/lib/feature_registry/feature_registry.ts[feature registry interface].
 
 ==== Using UI Capabilities
 
@@ -113,7 +113,7 @@ init(server) {
 -----------
 
 This shows how the Canvas application might register itself as a Kibana feature.
-Note that it specifies different `savedObject` access levels for each privilege: 
+Note that it specifies different `savedObject` access levels for each privilege:
 
 - Users with read/write access (`all` privilege) need to be able to read/write `canvas-workpad` saved objects, and they need read-only access to `index-pattern` saved objects.
 - Users with read-only access (`read` privilege) do not need to have read/write access to any saved objects, but instead get read-only access to `index-pattern` and `canvas-workpad` saved objects.

@@ -48,7 +48,8 @@ export const OptimizeBuildTask = {
       cwd: build.resolvePath('.'),
       env: {
         FORCE_DLL_CREATION: 'true',
-        NODE_OPTIONS: '--max-old-space-size=2048'
+        KBN_CACHE_LOADER_WRITABLE: 'true',
+        NODE_OPTIONS: '--max-old-space-size=3072'
       },
     });
 

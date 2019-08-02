@@ -26,6 +26,8 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
   const PageObjects = getPageObjects(['common', 'header']);
 
   describe('runPipeline', function () {
+    this.tags(['skipFirefox']);
+
     before(async () => {
       await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('../functional/fixtures/es_archiver/visualize_embedding');
@@ -38,5 +40,6 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
 
     loadTestFile(require.resolve('./basic'));
     loadTestFile(require.resolve('./tag_cloud'));
+    loadTestFile(require.resolve('./metric'));
   });
 }

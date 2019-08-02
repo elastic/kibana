@@ -35,7 +35,7 @@ export class CidrMask {
     }
     this.initialAddress = new Ipv4Address(splits[0]);
     this.prefixLength = Number(splits[1]);
-    if (this.prefixLength < 1 || this.prefixLength > NUM_BITS) {
+    if (isNaN(this.prefixLength) || this.prefixLength < 1 || this.prefixLength > NUM_BITS) {
       throwError(mask);
     }
   }

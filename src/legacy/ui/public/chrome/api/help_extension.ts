@@ -17,16 +17,10 @@
  * under the License.
  */
 
-import { ChromeHelpExtension, ChromeSetup } from '../../../../../core/public';
+import { npStart } from 'ui/new_platform';
+import { ChromeHelpExtension } from '../../../../../core/public';
 
-let newPlatformChrome: ChromeSetup;
-export function __newPlatformSetup__(instance: ChromeSetup) {
-  if (newPlatformChrome) {
-    throw new Error('ui/chrome/api/help_extension is already initialized');
-  }
-
-  newPlatformChrome = instance;
-}
+const newPlatformChrome = npStart.core.chrome;
 
 export type HelpExtensionApi = ReturnType<typeof createHelpExtensionApi>['helpExtension'];
 export type HelpExtension = ChromeHelpExtension;

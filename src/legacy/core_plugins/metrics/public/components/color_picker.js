@@ -22,53 +22,46 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { EuiIconTip, } from '@elastic/eui';
-import { CustomColorPickerUI as Picker } from './custom_color_picker';
-import { injectI18n } from '@kbn/i18n/react';
+import { EuiIconTip } from '@elastic/eui';
+import { CustomColorPicker } from './custom_color_picker';
+import { i18n } from '@kbn/i18n';
 
-class ColorPickerUI extends Component {
-
+export class ColorPicker extends Component {
   constructor(props) {
     super(props);
     this.state = {
       displayPicker: false,
-      color: {}
+      color: {},
     };
-
-    this.handleClick = this.handleClick.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleClear = this.handleClear.bind(this);
-    this.handleClose = this.handleClose.bind(this);
   }
 
-  handleChange(color) {
+  handleChange = color => {
     const { rgb } = color;
     const part = {};
     part[this.props.name] = `rgba(${rgb.r},${rgb.g},${rgb.b},${rgb.a})`;
     if (this.props.onChange) this.props.onChange(part);
-  }
+  };
 
-  handleClick() {
+  handleClick = () => {
     this.setState({ displayPicker: !this.state.displayColorPicker });
-  }
+  };
 
-  handleClose() {
+  handleClose = () => {
     this.setState({ displayPicker: false });
-  }
+  };
 
-  handleClear() {
+  handleClear = () => {
     const part = {};
     part[this.props.name] = null;
     this.props.onChange(part);
-  }
+  };
 
   renderSwatch() {
     if (!this.props.value) {
       return (
         <button
-          aria-label={this.props.intl.formatMessage({
-            id: 'tsvb.colorPicker.notAccessibleAriaLabel',
-            defaultMessage: 'Color picker, not accessible'
+          aria-label={i18n.translate('tsvb.colorPicker.notAccessibleAriaLabel', {
+            defaultMessage: 'Color picker, not accessible',
           })}
           className="tvbColorPicker__swatch-empty"
           onClick={this.handleClick}
@@ -77,10 +70,9 @@ class ColorPickerUI extends Component {
     }
     return (
       <button
-        aria-label={this.props.intl.formatMessage({
-          id: 'tsvb.colorPicker.notAccessibleWithValueAriaLabel',
-          defaultMessage: 'Color picker ({value}), not accessible' }, {
-          value: this.props.value
+        aria-label={i18n.translate('tsvb.colorPicker.notAccessibleWithValueAriaLabel', {
+          defaultMessage: 'Color picker ({value}), not accessible',
+          values: { value: this.props.value },
         })}
         style={{ backgroundColor: this.props.value }}
         className="tvbColorPicker__swatch"
@@ -100,44 +92,31 @@ class ColorPickerUI extends Component {
             size="s"
             type="cross"
             color="danger"
-            content={this.props.intl.formatMessage({
-              id: 'tsvb.colorPicker.clearIconLabel',
-              defaultMessage: 'Clear'
+            content={i18n.translate('tsvb.colorPicker.clearIconLabel', {
+              defaultMessage: 'Clear',
             })}
           />
         </div>
       );
     }
     return (
-      <div className="tvbColorPicker">
-        { swatch }
-        { clear }
-        {
-          this.state.displayPicker
-            ? (
-              <div className="tvbColorPicker__popover">
-                <div
-                  className="tvbColorPicker__cover"
-                  onClick={this.handleClose}
-                />
-                <Picker
-                  color={value}
-                  onChangeComplete={this.handleChange}
-                />
-              </div>
-            ) : null
-        }
+      <div className="tvbColorPicker" data-test-subj="tvbColorPicker">
+        {swatch}
+        {clear}
+        {this.state.displayPicker ? (
+          <div className="tvbColorPicker__popover">
+            <div className="tvbColorPicker__cover" onClick={this.handleClose} />
+            <CustomColorPicker color={value} onChangeComplete={this.handleChange} />
+          </div>
+        ) : null}
       </div>
     );
   }
-
 }
 
-ColorPickerUI.propTypes = {
+ColorPicker.propTypes = {
   name: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   disableTrash: PropTypes.bool,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
 };
-
-export const ColorPicker = injectI18n(ColorPickerUI);

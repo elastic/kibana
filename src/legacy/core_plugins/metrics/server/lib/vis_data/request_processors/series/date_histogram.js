@@ -17,34 +17,53 @@
  * under the License.
  */
 
+import { set } from 'lodash';
+import { dateHistogramInterval } from '../../../../../../data/common';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { offsetTime } from '../../offset_time';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
-import { set } from 'lodash';
+import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 
 export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObject, capabilities) {
   return next => doc => {
     const { timeField, interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
     const { bucketSize, intervalString } = getBucketSize(req, interval, capabilities);
-    const { from, to }  = offsetTime(req, series.offset_time);
-    const  timezone = capabilities.searchTimezone;
 
-    set(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
-      field: timeField,
-      interval: intervalString,
-      min_doc_count: 0,
-      time_zone: timezone,
-      extended_bounds: {
-        min: from.valueOf(),
-        max: to.valueOf()
-      }
-    });
+    const getDateHistogramForLastBucketMode = () => {
+      const { from, to } = offsetTime(req, series.offset_time);
+      const timezone = capabilities.searchTimezone;
+
+      set(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
+        field: timeField,
+        min_doc_count: 0,
+        time_zone: timezone,
+        extended_bounds: {
+          min: from.valueOf(),
+          max: to.valueOf(),
+        },
+        ...dateHistogramInterval(intervalString),
+      });
+    };
+
+    const getDateHistogramForEntireTimerangeMode = () =>
+      set(doc, `aggs.${series.id}.aggs.timeseries.auto_date_histogram`, {
+        field: timeField,
+        buckets: 1,
+      });
+
+    isLastValueTimerangeMode(panel, series)
+      ? getDateHistogramForLastBucketMode()
+      : getDateHistogramForEntireTimerangeMode();
+
+    // master
+
     set(doc, `aggs.${series.id}.meta`, {
       timeField,
       intervalString,
       bucketSize,
       seriesId: series.id,
     });
+
     return next(doc);
   };
 }

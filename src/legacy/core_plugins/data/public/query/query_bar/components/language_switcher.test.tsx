@@ -17,12 +17,6 @@
  * under the License.
  */
 
-jest.mock('ui/metadata', () => ({
-  metadata: {
-    branch: 'foo',
-  },
-}));
-
 import { shallow } from 'enzyme';
 import React from 'react';
 import { QueryLanguageSwitcher } from './language_switcher';

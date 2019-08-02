@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable import/no-duplicates */
+
 import React from 'react';
 
 import { renderToHtml } from '../../services';
@@ -29,11 +31,11 @@ import {
 } from '../../components';
 
 import Menu from './menu';
-const menuSource = require('!!raw-loader!./menu');
+import menuSource from '!!raw-loader!./menu';
 const menuHtml = renderToHtml(Menu);
 
 import MenuContained from './menu_contained';
-const menuContainedSource = require('!!raw-loader!./menu_contained');
+import menuContainedSource from '!!raw-loader!./menu_contained';
 const menuContainedHtml = renderToHtml(MenuContained);
 
 export default props => (

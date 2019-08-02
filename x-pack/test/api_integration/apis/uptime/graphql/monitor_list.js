@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import monitorList from './fixtures/monitor_list';
-import monitorListDownFiltered from './fixtures/monitor_list_down_filtered';
-import monitorListUpFiltered from './fixtures/monitor_list_up_filtered';
-import { monitorListQueryString } from '../../../../../plugins/uptime/public/queries';
+import { monitorListQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
+import { expectFixtureEql } from './expect_fixture_eql';
 
 export default function ({ getService }) {
   describe('monitorList query', () => {
@@ -29,7 +26,8 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorListQuery });
-      expect(data).to.eql(monitorList);
+
+      expectFixtureEql(data, 'monitor_list');
     });
 
     it('will fetch a filtered list of all down monitors', async () => {
@@ -48,7 +46,8 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorListQuery });
-      expect(data).to.eql(monitorListDownFiltered);
+
+      expectFixtureEql(data, 'monitor_list_down_filtered');
     });
 
     it('will fetch a filtered list of all up monitors', async () => {
@@ -67,7 +66,7 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorListQuery });
-      expect(data).to.eql(monitorListUpFiltered);
+      expectFixtureEql(data, 'monitor_list_up_filtered');
     });
 
     // TODO: add filters for host and port

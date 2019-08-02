@@ -31,7 +31,7 @@ import { EventEmitter } from 'events';
 import _ from 'lodash';
 import { VisTypesRegistryProvider } from '../../registry/vis_types';
 import { PersistedState } from '../../persisted_state';
-import { FilterBarQueryFilterProvider } from '../../filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from '../../filter_manager/query_filter';
 import { timefilter } from 'ui/timefilter';
 
 export function VisProvider(Private, indexPatterns, getAppState) {

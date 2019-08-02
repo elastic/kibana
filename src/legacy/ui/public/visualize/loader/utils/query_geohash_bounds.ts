@@ -22,11 +22,12 @@ import { get } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 
 import { AggConfig } from 'ui/vis';
+import { Filter } from '@kbn/es-query';
+import { Query } from 'src/legacy/core_plugins/data/public';
 import { Vis } from '../../../vis';
-import { Filters, Query } from '../types';
 
 interface QueryGeohashBoundsParams {
-  filters?: Filters;
+  filters?: Filter[];
   query?: Query;
 }
 

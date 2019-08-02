@@ -17,9 +17,11 @@
  * under the License.
  */
 
+import { omit } from 'lodash';
+
 import { DiscoveredPlugin } from '../../server';
 import { CoreContext } from '../core_system';
-import { PluginWrapper } from './plugin';
+import { PluginWrapper, PluginOpaqueId } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 import { CoreSetup, CoreStart } from '../';
 
@@ -28,8 +30,12 @@ import { CoreSetup, CoreStart } from '../';
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginInitializerContext {}
+export interface PluginInitializerContext {
+  /**
+   * A symbol used to identify this plugin in the system. Needed when registering handlers or context providers.
+   */
+  readonly opaqueId: PluginOpaqueId;
+}
 
 /**
  * Provides a plugin-specific context passed to the plugin's construtor. This is currently
@@ -41,9 +47,12 @@ export interface PluginInitializerContext {}
  */
 export function createPluginInitializerContext(
   coreContext: CoreContext,
+  opaqueId: PluginOpaqueId,
   pluginManifest: DiscoveredPlugin
 ): PluginInitializerContext {
-  return {};
+  return {
+    opaqueId,
+  };
 }
 
 /**
@@ -56,16 +65,20 @@ export function createPluginInitializerContext(
  * @param plugin
  * @internal
  */
-export function createPluginSetupContext<TSetup, TStart, TPluginsSetup, TPluginsStart>(
+export function createPluginSetupContext<
+  TSetup,
+  TStart,
+  TPluginsSetup extends object,
+  TPluginsStart extends object
+>(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): CoreSetup {
   return {
-    http: deps.http,
-    chrome: deps.chrome,
+    context: omit(deps.context, 'setCurrentPlugin'),
     fatalErrors: deps.fatalErrors,
-    i18n: deps.i18n,
+    http: deps.http,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
   };
@@ -81,7 +94,12 @@ export function createPluginSetupContext<TSetup, TStart, TPluginsSetup, TPlugins
  * @param plugin
  * @internal
  */
-export function createPluginStartContext<TSetup, TStart, TPluginsSetup, TPluginsStart>(
+export function createPluginStartContext<
+  TSetup,
+  TStart,
+  TPluginsSetup extends object,
+  TPluginsStart extends object
+>(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
@@ -90,10 +108,12 @@ export function createPluginStartContext<TSetup, TStart, TPluginsSetup, TPlugins
     application: {
       capabilities: deps.application.capabilities,
     },
+    docLinks: deps.docLinks,
     http: deps.http,
-    chrome: deps.chrome,
+    chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,
+    uiSettings: deps.uiSettings,
   };
 }

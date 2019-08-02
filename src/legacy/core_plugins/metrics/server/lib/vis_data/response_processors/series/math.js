@@ -52,9 +52,7 @@ export function mathAgg(resp, panel, series, meta) {
             });
           } else {
             const percentileMatch = v.field.match(percentileValueMatch);
-            const m = percentileMatch
-              ? { ...metric, percent: percentileMatch[1] }
-              : { ...metric };
+            const m = percentileMatch ? { ...metric, percent: percentileMatch[1] } : { ...metric };
             acc[v.name] = split.timeseries.buckets.map(mapBucket(m));
           }
           return acc;

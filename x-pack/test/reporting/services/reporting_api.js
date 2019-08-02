@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { indexTimestamp } from '../../../plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
+import { indexTimestamp } from '../../../legacy/plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
 
 function removeWhitespace(str) {
   return str.replace(/\s/g, '');

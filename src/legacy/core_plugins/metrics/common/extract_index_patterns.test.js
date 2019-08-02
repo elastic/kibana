@@ -39,10 +39,7 @@ describe('extractIndexPatterns(vis)', () => {
           series_index_pattern: 'example-2-*',
         },
       ],
-      annotations: [
-        { index_pattern: 'notes-*' },
-        { index_pattern: 'example-1-*' },
-      ],
+      annotations: [{ index_pattern: 'notes-*' }, { index_pattern: 'example-1-*' }],
     };
   });
 

@@ -135,9 +135,17 @@ export default function testWithSecurity({ getService, getPageObjects }: TestInv
             const deleteButton = await testSubjects.findAll('deleteRepositoryButton');
             if (deleteButton.length > 0) {
               await PageObjects.code.clickDeleteRepositoryButton();
+              await retry.try(async () => {
+                expect(await testSubjects.exists('confirmModalConfirmButton')).to.be(true);
+              });
+
+              await testSubjects.click('confirmModalConfirmButton');
             }
           }
-          expect(repositoryItems).to.have.length(0);
+          await retry.try(async () => {
+            const repoItems = await testSubjects.findAll(repositoryListSelector);
+            expect(repoItems).to.have.length(0);
+          });
         });
       }
 

@@ -22,27 +22,27 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 
 describe('query(req, panel, series)', () => {
-
   let panel;
   let series;
   let req;
+
   const config = {
     allowLeadingWildcards: true,
-    queryStringOptions: {},
+    queryStringOptions: { analyze_wildcard: true },
   };
   beforeEach(() => {
     req = {
       payload: {
         timerange: {
           min: '2017-01-01T00:00:00Z',
-          max: '2017-01-01T01:00:00Z'
-        }
-      }
+          max: '2017-01-01T01:00:00Z',
+        },
+      },
     };
     panel = {
       index_pattern: '*',
       time_field: 'timestamp',
-      interval: '10s'
+      interval: '10s',
     };
     series = { id: 'test' };
   });
@@ -67,15 +67,15 @@ describe('query(req, panel, series)', () => {
                 timestamp: {
                   gte: '2017-01-01T00:00:00.000Z',
                   lte: '2017-01-01T01:00:00.000Z',
-                  format: 'strict_date_optional_time'
-                }
-              }
-            }
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
           ],
           must_not: [],
           should: [],
-        }
-      }
+        },
+      },
     });
   });
 
@@ -94,15 +94,15 @@ describe('query(req, panel, series)', () => {
                 timestamp: {
                   gte: '2016-12-31T23:00:00.000Z',
                   lte: '2017-01-01T00:00:00.000Z',
-                  format: 'strict_date_optional_time'
-                }
-              }
-            }
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
           ],
           must_not: [],
           should: [],
-        }
-      }
+        },
+      },
     });
   });
 
@@ -113,12 +113,12 @@ describe('query(req, panel, series)', () => {
           must: [
             {
               term: {
-                host: 'example'
-              }
-            }
-          ]
-        }
-      }
+                host: 'example',
+              },
+            },
+          ],
+        },
+      },
     ];
     const next = doc => doc;
     const doc = query(req, panel, series, config)(next)({});
@@ -126,38 +126,39 @@ describe('query(req, panel, series)', () => {
       size: 0,
       query: {
         bool: {
-          filter: [],
-          must: [
+          filter: [
             {
               bool: {
                 must: [
                   {
                     term: {
-                      host: 'example'
-                    }
-                  }
-                ]
-              }
+                      host: 'example',
+                    },
+                  },
+                ],
+              },
             },
+          ],
+          must: [
             {
               range: {
                 timestamp: {
                   gte: '2017-01-01T00:00:00.000Z',
                   lte: '2017-01-01T01:00:00.000Z',
-                  format: 'strict_date_optional_time'
-                }
-              }
+                  format: 'strict_date_optional_time',
+                },
+              },
             },
           ],
           must_not: [],
           should: [],
-        }
-      }
+        },
+      },
     });
   });
 
   it('returns doc with series filter', () => {
-    series.filter = 'host:web-server';
+    series.filter = { query: 'host:web-server', language: 'lucene' };
     const next = doc => doc;
     const doc = query(req, panel, series, config)(next)({});
     expect(doc).to.eql({
@@ -171,21 +172,30 @@ describe('query(req, panel, series)', () => {
                 timestamp: {
                   gte: '2017-01-01T00:00:00.000Z',
                   lte: '2017-01-01T01:00:00.000Z',
-                  format: 'strict_date_optional_time'
-                }
-              }
+                  format: 'strict_date_optional_time',
+                },
+              },
             },
             {
-              query_string: {
-                query: series.filter,
-                analyze_wildcard: true
-              }
+              bool: {
+                filter: [],
+                must: [
+                  {
+                    query_string: {
+                      analyze_wildcard: true,
+                      query: series.filter.query,
+                    },
+                  },
+                ],
+                must_not: [],
+                should: [],
+              },
             },
           ],
           must_not: [],
           should: [],
-        }
-      }
+        },
+      },
     });
   });
   it('returns doc with panel filter and global', () => {
@@ -195,53 +205,63 @@ describe('query(req, panel, series)', () => {
           must: [
             {
               term: {
-                host: 'example'
-              }
-            }
-          ]
-        }
-      }
+                host: 'example',
+              },
+            },
+          ],
+        },
+      },
     ];
-    panel.filter = 'host:web-server';
+    panel.filter = { query: 'host:web-server', language: 'lucene' };
     const next = doc => doc;
     const doc = query(req, panel, series, config)(next)({});
     expect(doc).to.eql({
       size: 0,
       query: {
         bool: {
-          filter: [],
-          must: [
+          filter: [
             {
               bool: {
                 must: [
                   {
                     term: {
-                      host: 'example'
-                    }
-                  }
-                ]
-              }
+                      host: 'example',
+                    },
+                  },
+                ],
+              },
             },
+          ],
+          must: [
             {
               range: {
                 timestamp: {
                   gte: '2017-01-01T00:00:00.000Z',
                   lte: '2017-01-01T01:00:00.000Z',
-                  format: 'strict_date_optional_time'
-                }
-              }
+                  format: 'strict_date_optional_time',
+                },
+              },
             },
             {
-              query_string: {
-                query: panel.filter,
-                analyze_wildcard: true
-              }
-            }
+              bool: {
+                filter: [],
+                must: [
+                  {
+                    query_string: {
+                      query: panel.filter.query,
+                      analyze_wildcard: true,
+                    },
+                  },
+                ],
+                must_not: [],
+                should: [],
+              },
+            },
           ],
           must_not: [],
           should: [],
-        }
-      }
+        },
+      },
     });
   });
 
@@ -252,14 +272,14 @@ describe('query(req, panel, series)', () => {
           must: [
             {
               term: {
-                host: 'example'
-              }
-            }
-          ]
-        }
-      }
+                host: 'example',
+              },
+            },
+          ],
+        },
+      },
     ];
-    panel.filter = 'host:web-server';
+    panel.filter = { query: 'host:web-server', language: 'lucene' };
     panel.ignore_global_filter = true;
     const next = doc => doc;
     const doc = query(req, panel, series, config)(next)({});
@@ -274,24 +294,30 @@ describe('query(req, panel, series)', () => {
                 timestamp: {
                   gte: '2017-01-01T00:00:00.000Z',
                   lte: '2017-01-01T01:00:00.000Z',
-                  format: 'strict_date_optional_time'
-                }
-              }
+                  format: 'strict_date_optional_time',
+                },
+              },
             },
             {
-              query_string: {
-                query: panel.filter,
-                analyze_wildcard: true
-              }
+              bool: {
+                filter: [],
+                must: [
+                  {
+                    query_string: {
+                      query: panel.filter.query,
+                      analyze_wildcard: true,
+                    },
+                  },
+                ],
+                must_not: [],
+                should: [],
+              },
             },
           ],
           must_not: [],
           should: [],
-        }
-      }
+        },
+      },
     });
   });
-
-
 });
-

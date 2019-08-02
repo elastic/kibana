@@ -7,7 +7,6 @@
 export default function ({ loadTestFile }) {
   describe('xpack_main', () => {
     loadTestFile(require.resolve('./features'));
-    loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./settings'));
   });
 }

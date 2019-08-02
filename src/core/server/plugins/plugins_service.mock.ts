@@ -26,6 +26,14 @@ const createServiceMock = () => {
     start: jest.fn(),
     stop: jest.fn(),
   };
+  mocked.setup.mockResolvedValue({
+    contracts: new Map(),
+    uiPlugins: {
+      public: new Map(),
+      internal: new Map(),
+    },
+  });
+  mocked.start.mockResolvedValue({ contracts: new Map() });
   return mocked;
 };
 

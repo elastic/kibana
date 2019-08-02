@@ -24,44 +24,15 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
-  const retry = getService('retry');
   const inspector = getService('inspector');
-  const kibanaServer = getService('kibanaServer');
-  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker']);
 
   describe('visual builder', function describeIndexTests() {
+    this.tags('smoke');
     beforeEach(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
-    });
-
-    describe('Time Series', () => {
-      beforeEach(async () => {
-        await PageObjects.visualBuilder.resetPage();
-      });
-
-      it('should show the correct count in the legend', async () => {
-        await retry.try(async () => {
-          const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-          expect(actualCount).to.be('156');
-        });
-      });
-
-      it('should show the correct count in the legend with 2h offset', async () => {
-        await PageObjects.visualBuilder.clickSeriesOption();
-        await PageObjects.visualBuilder.enterOffsetSeries('2h');
-        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('293');
-      });
-
-      it('should show the correct count in the legend with -2h offset', async () => {
-        await PageObjects.visualBuilder.clickSeriesOption();
-        await PageObjects.visualBuilder.enterOffsetSeries('-2h');
-        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('53');
-      });
     });
 
     describe('metric', () => {
@@ -122,45 +93,28 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('switch index patterns', () => {
-      before(async () => {
+    describe('switch index patterns', () => {
+      beforeEach(async () => {
         log.debug('Load kibana_sample_data_flights data');
         await esArchiver.loadIfNeeded('kibana_sample_data_flights');
-        await PageObjects.visualBuilder.resetPage(
-          '2015-09-19 06:31:44.000',
-          '2018-10-31 00:0:00.000'
-        );
+        await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
+        await PageObjects.visualBuilder.checkMetricTabIsPresent();
       });
       after(async () => {
         await esArchiver.unload('kibana_sample_data_flights');
       });
       it('should be able to switch between index patterns', async () => {
-        const expectedMetricValue = '156';
         const value = await PageObjects.visualBuilder.getMetricValue();
-        log.debug(`metric value: ${value}`);
-        expect(value).to.eql(expectedMetricValue);
-        await PageObjects.visualBuilder.clickMetricPanelOptions();
+        expect(value).to.eql('156');
+        await PageObjects.visualBuilder.clickPanelOptions('metric');
         const fromTime = '2018-10-22 00:00:00.000';
         const toTime = '2018-10-28 23:59:59.999';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
         await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
         const newValue = await PageObjects.visualBuilder.getMetricValue();
-        log.debug(`metric value: ${newValue}`);
         expect(newValue).to.eql('10');
-      });
-    });
-
-    describe.skip('dark mode', () => {
-      it('uses dark mode flag', async () => {
-        await kibanaServer.uiSettings.update({
-          'theme:darkMode': true,
-        });
-
-        await PageObjects.visualBuilder.resetPage();
-        const classNames = await testSubjects.getAttribute('timeseriesChart', 'class');
-        expect(classNames.includes('reversed')).to.be(true);
       });
     });
   });

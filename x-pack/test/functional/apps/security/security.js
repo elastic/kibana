@@ -9,8 +9,10 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security']);
+  const testSubjects = getService('testSubjects');
 
-  describe('Security', () => {
+  describe('Security', function () {
+    this.tags('smoke');
     describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');
@@ -33,6 +35,14 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.security.loginPage.login('wrong-user', 'wrong-password', { expectSuccess: false });
         const errorMessage = await PageObjects.security.loginPage.getErrorMessage();
         expect(errorMessage).to.be('Invalid username or password. Please try again.');
+      });
+
+      it('displays message acknowledging logout', async () => {
+        await PageObjects.security.login();
+        await PageObjects.security.logout();
+
+        const logoutMessage = await testSubjects.getVisibleText('loginInfoMessage');
+        expect(logoutMessage).to.eql('You have logged out of Kibana.');
       });
     });
   });

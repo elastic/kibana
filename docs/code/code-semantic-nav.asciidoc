@@ -1,0 +1,24 @@
+[[code-semantic-nav]]
+
+== Semantic code navigation
+If the file is one of *Code’s* <<code-install-lang-server, supported languages>> and the corresponding language server is <<code-install-lang-server, properly installed>>, you can navigate the files with semantic code navigation features.
+
+[float]
+==== Goto definition and find reference
+Hovering your cursor over a symbol in a file opens information about the symbol, including its qualified name and documentation, when available.  You can perform two actions:
+
+* *Goto Definition* navigates to the symbol definition. If the definition is defined in another repo, *Code* can find the definition if the definition repo is also imported.
+
+* *Find Reference* opens a panel that lists all the places where the symbol is referenced in the current repo.
+
+[role="screenshot"]
+image::images/code-semantic-nav.png[]
+
+[float]
+==== View symbol table
+From the *Structure* tab, you can open a symbol table that details the structure of the current class. Clicking on a member function or variable jumps to its definition.
+
+[role="screenshot"]
+image::images/code-symbol-table.png[]
+
+include::code-search.asciidoc[]

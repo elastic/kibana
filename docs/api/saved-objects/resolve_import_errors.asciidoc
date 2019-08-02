@@ -33,20 +33,15 @@ The following example retries importing a dashboard.
 
 [source,js]
 --------------------------------------------------
-POST api/saved_objects/_resolve_import_errors
-Content-Type: multipart/form-data; boundary=EXAMPLE
---EXAMPLE
-Content-Disposition: form-data; name="file"; filename="export.ndjson"
-Content-Type: application/ndjson
-
-{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
---EXAMPLE
-Content-Disposition: form-data; name="retries"
-
-[{"type":"dashboard","id":"my-dashboard"}]
---EXAMPLE--
+$ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"dashboard","id":"my-dashboard"}]'
 --------------------------------------------------
-// KIBANA
+
+The `file.ndjson` file would contain the following.
+
+[source,js]
+--------------------------------------------------
+{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
+--------------------------------------------------
 
 A successful call returns a response code of `200` and a response body
 containing a JSON structure similar to the following example:
@@ -63,21 +58,16 @@ The following example resolves errors for a dashboard. This will cause the dashb
 
 [source,js]
 --------------------------------------------------
-POST api/saved_objects/_resolve_import_errors
-Content-Type: multipart/form-data; boundary=EXAMPLE
---EXAMPLE
-Content-Disposition: form-data; name="file"; filename="export.ndjson"
-Content-Type: application/ndjson
+$ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"dashboard","id":"my-dashboard","overwrite":true}]'
+--------------------------------------------------
 
+The `file.ndjson` file would contain the following.
+
+[source,js]
+--------------------------------------------------
 {"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
---EXAMPLE
-Content-Disposition: form-data; name="retries"
-
-[{"type":"dashboard","id":"my-dashboard","overwrite":true}]
---EXAMPLE--
 --------------------------------------------------
-// KIBANA
 
 A successful call returns a response code of `200` and a response body
 containing a JSON structure similar to the following example:
@@ -94,20 +84,15 @@ The following example resolves errors for a visualization by replacing the index
 
 [source,js]
 --------------------------------------------------
-POST api/saved_objects/_resolve_import_errors
-Content-Type: multipart/form-data; boundary=EXAMPLE
---EXAMPLE
-Content-Disposition: form-data; name="file"; filename="export.ndjson"
-Content-Type: application/ndjson
-
-{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"missing"}]}
---EXAMPLE
-Content-Disposition: form-data; name="retries"
-
-[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"missing","to":"existing"}]}]
---EXAMPLE--
+$ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"missing","to":"existing"}]}]'
 --------------------------------------------------
-// KIBANA
+
+The `file.ndjson` file would contain the following.
+
+[source,js]
+--------------------------------------------------
+{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"missing"}]}
+--------------------------------------------------
 
 A successful call returns a response code of `200` and a response body
 containing a JSON structure similar to the following example:
