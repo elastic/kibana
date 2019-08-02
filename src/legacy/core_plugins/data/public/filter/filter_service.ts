@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import { once } from 'lodash';
-import { FilterBar, setupDirective as setupFilterBarDirective } from './filter_bar';
-import { ApplyFiltersPopover, setupDirective as setupApplyFiltersDirective } from './apply_filters';
 import { IndexPatterns } from '../index_patterns';
 import { FilterManager } from './filter_manager';
 /**
@@ -37,14 +34,6 @@ export class FilterService {
 
     return {
       filterManager,
-      ui: {
-        ApplyFiltersPopover,
-        FilterBar,
-      },
-      loadLegacyDirectives: once(() => {
-        setupFilterBarDirective();
-        setupApplyFiltersDirective();
-      }),
     };
   }
 

@@ -53,7 +53,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
     });
     after(() => es.indices.delete({ index: esTestIndexName }));
 
-    it('decrypts attributes and joins on actionTypeConfig when calling fire API', async () => {
+    it('decrypts attributes when calling fire API', async () => {
       await supertest
         .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_fire`)
         .set('kbn-xsrf', 'foo')
@@ -101,6 +101,8 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         },
         config: {
           unencrypted: `This value shouldn't get encrypted`,
+        },
+        secrets: {
           encrypted: 'This value should be encrypted',
         },
         reference: 'actions-fire-1',
@@ -113,12 +115,12 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'My action updated',
-            actionTypeConfig: {
-              unencrypted: `This value shouldn't get encrypted`,
-              encrypted: 'This value should be encrypted',
-            },
+          description: 'My action updated',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
           },
         })
         .expect(200);
@@ -172,6 +174,8 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         },
         config: {
           unencrypted: `This value shouldn't get encrypted`,
+        },
+        secrets: {
           encrypted: 'This value should be encrypted',
         },
         reference: 'actions-fire-2',

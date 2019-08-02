@@ -47,7 +47,7 @@ export function clustersSetupStatusRoute(server) {
       try {
         await verifyMonitoringAuth(req);
         const indexPatterns = getIndexPatterns(server);
-        status = await getCollectionStatus(req, indexPatterns, null, req.query.skipLiveData);
+        status = await getCollectionStatus(req, indexPatterns, null, null, req.query.skipLiveData);
       } catch (err) {
         throw handleError(err, req);
       }
