@@ -44,7 +44,10 @@ export type ParameterName =
   | 'norms'
   | 'term_vector'
   | 'position_increment_gap'
-  | 'similarity';
+  | 'similarity'
+  | 'normalizer'
+  | 'ignore_above'
+  | 'split_queries_on_whitespace';
 
 export interface Parameter {
   fieldConfig?: FieldConfig | Record<string, FieldConfig>;
@@ -259,6 +262,21 @@ export const parametersDefinition: {
       type: FIELD_TYPES.SELECT,
     },
   },
+  normalizer: {
+    fieldConfig: {
+      label: 'Normalizer',
+      defaultValue: '',
+      type: FIELD_TYPES.TEXT,
+      validations: [
+        {
+          validator: containsCharsField({
+            chars: ' ',
+            message: 'Spaces are not allowed.',
+          }),
+        },
+      ],
+    },
+  },
   index_options: {
     fieldConfig: {
       label: 'Index options',
@@ -397,6 +415,21 @@ export const parametersDefinition: {
       label: 'Similarity algorithm',
       defaultValue: 'BM25',
       type: FIELD_TYPES.SELECT,
+    },
+  },
+  split_queries_on_whitespace: {
+    fieldConfig: {
+      label: 'Split queries on whitespace',
+      type: FIELD_TYPES.CHECKBOX,
+      defaultValue: false,
+    },
+  },
+  ignore_above: {
+    fieldConfig: {
+      label: 'Ignore above',
+      defaultValue: 2147483647,
+      type: FIELD_TYPES.NUMBER,
+      formatters: [toInt],
     },
   },
 };
