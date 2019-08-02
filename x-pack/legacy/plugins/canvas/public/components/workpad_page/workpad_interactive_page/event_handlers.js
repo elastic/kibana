@@ -60,20 +60,35 @@ const handleMouseLeave = (commit, { buttons }) => {
   }
 };
 
-const handleMouseDown = (commit, e, canvasOrigin, zoomScale) => {
+const handleMouseDown = (commit, e, canvasOrigin, zoomScale, allowDrag = true) => {
   e.stopPropagation();
   const { clientX, clientY, buttons, altKey, metaKey, shiftKey, ctrlKey } = e;
   if (buttons !== 1 || !commit) {
     resetHandler();
     return; // left-click only
   }
-  setupHandler(commit, canvasOrigin, zoomScale);
+
+  if (allowDrag) {
+    setupHandler(commit, canvasOrigin, zoomScale);
+  }
+
   const { x, y } = localMousePosition(canvasOrigin, clientX, clientY, zoomScale);
   commit('mouseEvent', { event: 'mouseDown', x, y, altKey, metaKey, shiftKey, ctrlKey });
+
+  if (!allowDrag) {
+    commit('mouseEvent', { event: 'mouseUp', x, y, altKey, metaKey, shiftKey, ctrlKey });
+  }
 };
 
 export const eventHandlers = {
-  onMouseDown: props => e => handleMouseDown(props.commit, e, props.canvasOrigin, props.zoomScale),
+  onMouseDown: props => e =>
+    handleMouseDown(
+      props.commit,
+      e,
+      props.canvasOrigin,
+      props.zoomScale,
+      props.canDragElement(e.target)
+    ),
   onMouseMove: props => e => handleMouseMove(props.commit, e, props.canvasOrigin, props.zoomScale),
   onMouseLeave: props => e => handleMouseLeave(props.commit, e),
   onWheel: props => e => handleMouseMove(props.commit, e, props.canvasOrigin),

@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiButtonIcon,
   EuiButton,
+  EuiButtonEmpty,
   EuiOverlayMask,
   EuiModal,
   EuiModalFooter,
@@ -20,6 +21,7 @@ import {
 import { AssetManager } from '../asset_manager';
 import { ElementTypes } from '../element_types';
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
+import { AddEmbeddablePanel } from '../embeddable_flyout';
 import { ControlSettings } from './control_settings';
 import { RefreshControl } from './refresh_control';
 import { FullscreenControl } from './fullscreen_control';
@@ -32,7 +34,7 @@ export class WorkpadHeader extends React.PureComponent {
     toggleWriteable: PropTypes.func,
   };
 
-  state = { isModalVisible: false };
+  state = { isModalVisible: false, isPanelVisible: false };
 
   _fullscreenButton = ({ toggleFullscreen }) => (
     <EuiToolTip
@@ -60,6 +62,9 @@ export class WorkpadHeader extends React.PureComponent {
   _hideElementModal = () => this.setState({ isModalVisible: false });
   _showElementModal = () => this.setState({ isModalVisible: true });
 
+  _hideEmbeddablePanel = () => this.setState({ isPanelVisible: false });
+  _showEmbeddablePanel = () => this.setState({ isPanelVisible: true });
+
   _elementAdd = () => (
     <EuiOverlayMask>
       <EuiModal
@@ -77,6 +82,8 @@ export class WorkpadHeader extends React.PureComponent {
       </EuiModal>
     </EuiOverlayMask>
   );
+
+  _embeddableAdd = () => <AddEmbeddablePanel onClose={this._hideEmbeddablePanel} />;
 
   _getEditToggleToolTip = ({ textOnly } = { textOnly: false }) => {
     if (!this.props.canUserWrite) {
@@ -98,11 +105,12 @@ export class WorkpadHeader extends React.PureComponent {
 
   render() {
     const { isWriteable, canUserWrite, toggleWriteable } = this.props;
-    const { isModalVisible } = this.state;
+    const { isModalVisible, isPanelVisible } = this.state;
 
     return (
       <div>
         {isModalVisible ? this._elementAdd() : null}
+        {isPanelVisible ? this._embeddableAdd() : null}
         <EuiFlexGroup
           gutterSize="s"
           alignItems="center"
@@ -152,6 +160,9 @@ export class WorkpadHeader extends React.PureComponent {
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <AssetManager />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty onClick={this._showEmbeddablePanel}>Embed object</EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton

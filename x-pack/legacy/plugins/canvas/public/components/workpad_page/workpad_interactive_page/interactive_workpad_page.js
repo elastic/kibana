@@ -89,6 +89,7 @@ export class InteractiveWorkpadPage extends PureComponent {
         onAnimationEnd={onAnimationEnd}
         onWheel={onWheel}
       >
+        <InteractionBoundary />
         {shortcuts}
         {elements
           .map(node => {
@@ -127,7 +128,6 @@ export class InteractiveWorkpadPage extends PureComponent {
             }
           })
           .filter(element => !!element)}
-        <InteractionBoundary />
       </div>
     );
   }
