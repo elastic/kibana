@@ -59,7 +59,9 @@ uiModules
           editor.destroy();
         });
 
-        $scope.$watchGroup(['timeRange', 'filters'], debounce($scope.renderFunction, 100));
+        $scope.$watchGroup(['timeRange', 'filters'], debounce(() => {
+          $scope.renderFunction();
+        }, 100));
       }
     };
   });
