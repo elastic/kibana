@@ -29,6 +29,12 @@ export const INDEX_OPTIONS = [
   { value: 'offsets', text: 'Offsets' },
 ];
 
+export const SIMILARITY_ALGORITHM_OPTIONS = [
+  { value: 'BM25', text: 'BM25' },
+  { value: 'classic', text: 'classic' },
+  { value: 'boolean', text: 'boolean' },
+];
+
 export const ERROR_CODES = {
   NAME_CONFLICT: 'ERR_NAME_CONCLICT',
 };

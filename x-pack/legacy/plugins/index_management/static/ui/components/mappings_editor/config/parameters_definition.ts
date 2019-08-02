@@ -35,15 +35,24 @@ export type ParameterName =
   | 'analyzer'
   | 'search_analyzer'
   | 'search_quote_analyzer'
-  | 'index_options';
+  | 'index_options'
+  | 'eager_global_ordinals'
+  | 'index_prefixes'
+  | 'index_phrases'
+  | 'norms'
+  | 'term_vector'
+  | 'position_increment_gap'
+  | 'similarity';
 
 export interface Parameter {
-  fieldConfig?: FieldConfig;
+  fieldConfig?: FieldConfig | Record<string, FieldConfig>;
   paramName?: string;
   docs?: string;
 }
 
-export const parametersDefinition: { [key in ParameterName]: Parameter } = {
+export const parametersDefinition: {
+  [key in ParameterName]: Parameter;
+} = {
   name: {
     fieldConfig: {
       label: 'Field name',
@@ -163,7 +172,7 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
     fieldConfig: {
       label: 'Fielddata',
       type: FIELD_TYPES.CHECKBOX,
-      defaultValue: true,
+      defaultValue: false,
     },
     docs: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/doc-values.html',
   },
@@ -229,21 +238,21 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
   analyzer: {
     fieldConfig: {
       label: 'Analyzer',
-      defaultValue: 'text',
+      defaultValue: 'index_default',
       type: FIELD_TYPES.SELECT,
     },
   },
   search_analyzer: {
     fieldConfig: {
       label: 'Search analyzer',
-      defaultValue: 'text',
+      defaultValue: 'index_default',
       type: FIELD_TYPES.SELECT,
     },
   },
   search_quote_analyzer: {
     fieldConfig: {
       label: 'Search quote analyzer',
-      defaultValue: 'text',
+      defaultValue: 'index_default',
       type: FIELD_TYPES.SELECT,
     },
   },
@@ -251,6 +260,62 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
     fieldConfig: {
       label: 'Index options',
       defaultValue: 'docs',
+      type: FIELD_TYPES.SELECT,
+    },
+  },
+  eager_global_ordinals: {
+    fieldConfig: {
+      label: 'Eager global ordinals',
+      type: FIELD_TYPES.CHECKBOX,
+      defaultValue: false,
+    },
+  },
+  index_phrases: {
+    fieldConfig: {
+      label: 'Index phrases',
+      type: FIELD_TYPES.CHECKBOX,
+      defaultValue: false,
+    },
+  },
+  norms: {
+    fieldConfig: {
+      label: 'Norms',
+      type: FIELD_TYPES.CHECKBOX,
+      defaultValue: true,
+    },
+  },
+  term_vector: {
+    fieldConfig: {
+      label: 'Term vectors',
+      type: FIELD_TYPES.CHECKBOX,
+      defaultValue: false,
+    },
+  },
+  position_increment_gap: {
+    fieldConfig: {
+      label: 'Position increment gap',
+      type: FIELD_TYPES.NUMBER,
+      defaultValue: 100,
+    },
+  },
+  index_prefixes: {
+    fieldConfig: {
+      min: {
+        type: FIELD_TYPES.NUMBER,
+        defaultValue: 2,
+        helpText: 'Min.',
+      },
+      max: {
+        type: FIELD_TYPES.NUMBER,
+        defaultValue: 5,
+        helpText: 'Max.',
+      },
+    },
+  },
+  similarity: {
+    fieldConfig: {
+      label: 'Similarity algorithm',
+      defaultValue: 'BM25',
       type: FIELD_TYPES.SELECT,
     },
   },

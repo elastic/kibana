@@ -24,6 +24,15 @@ interface Props {
 const parametersToRows = (params: ParameterName[] | ParameterName[][]): ParameterName[][] =>
   Array.isArray(params[0]) ? (params as ParameterName[][]) : ([params] as ParameterName[][]);
 
+// If we have 2 or less items to display, we limit the width
+// of the container to limit the size of the <input />.
+const getMaxWidth = (rowIndex: number, totalItems: number) => {
+  if (rowIndex === 0 || totalItems >= 3) {
+    return 'initial';
+  }
+  return totalItems <= 1 ? '300px' : '600px';
+};
+
 export const PropertyBasicParameters = ({
   form,
   typeDefinition,
@@ -36,16 +45,7 @@ export const PropertyBasicParameters = ({
 
   const rows = parametersToRows(typeDefinition.basicParameters);
 
-  // If we have 2 or less items to display, we limit the width
-  // of the container to limit the size of the <input />.
-  const getMaxWidth = (rowIndex: number, totalItems: number) => {
-    if (rowIndex === 0 || totalItems >= 3) {
-      return 'initial';
-    }
-    return totalItems <= 1 ? '300px' : '600px';
-  };
-
-  const getDefaultValue = (parameter: ParameterName): unknown | undefined =>
+  const defaultValueParam = (parameter: ParameterName): unknown | undefined =>
     isEditMode
       ? undefined
       : parametersDefinition[parameter] &&
@@ -63,7 +63,7 @@ export const PropertyBasicParameters = ({
                   <UseField
                     form={form}
                     path={fieldPathPrefix + parameter}
-                    defaultValue={getDefaultValue(parameter)}
+                    defaultValue={defaultValueParam(parameter)}
                     config={
                       parametersDefinition[parameter] && parametersDefinition[parameter].fieldConfig
                     }
