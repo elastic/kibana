@@ -8,7 +8,6 @@
 import { BROWSERS_BY_TYPE } from './browsers';
 // @ts-ignore
 import { ensureBrowserDownloaded } from './download';
-// @ts-ignore
 import { installBrowser } from './install';
 import { LevelLogger } from '../lib/level_logger';
 import { KbnServer } from '../../types';
