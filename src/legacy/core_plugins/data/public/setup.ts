@@ -17,11 +17,7 @@
  * under the License.
  */
 
-import { DataPlugin } from './index';
+import { setup } from './legacy';
 
-/**
- * We export data here so that users importing from 'plugins/data'
- * will automatically receive the response value of the `setup` contract, mimicking
- * the data that will eventually be injected by the new platform.
- */
-export const data = new DataPlugin().setup();
+// for backwards compatibility with 7.3
+export const data = setup;

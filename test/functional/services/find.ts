@@ -32,6 +32,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
   const browserType = webdriver.browserType;
 
   const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
+  const POLLING_TIME = 500;
   const defaultFindTimeout = config.get('timeouts.find');
   const fixedHeaderHeight = config.get('layout.fixedHeaderHeight');
 
@@ -426,7 +427,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = defaultFindTimeout
     ) {
       log.debug(`Find.waitForDeletedByCssSelector('${selector}') with timeout=${timeout}`);
-      await this._withTimeout(1000);
+      await this._withTimeout(POLLING_TIME);
       await driver.wait(
         async () => {
           const found = await driver.findElements(By.css(selector));

@@ -6,16 +6,11 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
+import { FireOptions } from './create_fire_function';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (basePath: string, overwrites?: Partial<Services>) => Services;
 export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
-
-export interface SavedObjectReference {
-  name: string;
-  type: string;
-  id: string;
-}
 
 export interface Services {
   callCluster(path: string, opts: any): Promise<any>;
@@ -26,7 +21,7 @@ export interface Services {
 export interface ActionsPlugin {
   registerType: ActionTypeRegistry['register'];
   listTypes: ActionTypeRegistry['list'];
-  fire(options: { id: string; params: Record<string, any>; basePath: string }): Promise<void>;
+  fire(options: FireOptions): Promise<void>;
 }
 
 // the parameters passed to an action type executor function
@@ -34,7 +29,15 @@ export interface ActionTypeExecutorOptions {
   id: string;
   services: Services;
   config: Record<string, any>;
+  secrets: Record<string, any>;
   params: Record<string, any>;
+}
+
+export interface ActionResult {
+  id: string;
+  actionTypeId: string;
+  description: string;
+  config: Record<string, any>;
 }
 
 // the result returned from an action type executor function
@@ -50,14 +53,18 @@ export type ExecutorType = (
   options: ActionTypeExecutorOptions
 ) => Promise<ActionTypeExecutorResult>;
 
+interface ValidatorType {
+  validate<T>(value: any): any;
+}
+
 export interface ActionType {
   id: string;
   name: string;
-  unencryptedAttributes: string[];
   maxAttempts?: number;
   validate?: {
-    params?: { validate: (object: any) => any };
-    config?: { validate: (object: any) => any };
+    params?: ValidatorType;
+    config?: ValidatorType;
+    secrets?: ValidatorType;
   };
   executor: ExecutorType;
 }

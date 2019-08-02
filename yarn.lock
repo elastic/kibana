@@ -1747,10 +1747,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/node-ctags/-/node-ctags-1.0.2.tgz#447d7694a5598f9413fe2b6f356d56f64f612dfd"
   integrity sha512-EHhJ0NPlCvYy+gbzBMU4/Z/55hftfdwlAG8JwOy7g0ITmH6rFPanEnzg1WL3/L+pp8OlYHyvDLwmyg0+06y8LQ==
 
-"@elastic/nodegit@0.25.0-alpha.22":
-  version "0.25.0-alpha.22"
-  resolved "https://registry.yarnpkg.com/@elastic/nodegit/-/nodegit-0.25.0-alpha.22.tgz#71c112c7f5284eabef91fa3e1acf689ba9cdc875"
-  integrity sha512-V49tzdAO9geWqukc4Xe073kQw9VW5mCh+DYvkZRwJPS3/+o5eMY5R+PMLfkd1BasjnrWkp/PZFl8OQUk+qjByg==
+"@elastic/nodegit@0.25.0-alpha.23":
+  version "0.25.0-alpha.23"
+  resolved "https://registry.yarnpkg.com/@elastic/nodegit/-/nodegit-0.25.0-alpha.23.tgz#34d06497030a45a3b8090c3fcb9504d722b9d0c9"
+  integrity sha512-2zSLGigYW58g+DbcRtbCwwj6boTGNhyCG85IDK8yx/jlycLS6gnmxEbZ6FFfgdS2qKWi911lmKQ/3l0LpUaDRw==
   dependencies:
     fs-extra "^7.0.0"
     json5 "^2.1.0"
@@ -3814,6 +3814,19 @@
     "@types/node" "*"
     "@types/podium" "*"
     "@types/shot" "*"
+
+"@types/hapi__boom@*":
+  version "7.4.0"
+  resolved "https://registry.yarnpkg.com/@types/hapi__boom/-/hapi__boom-7.4.0.tgz#81d58cffb67c54896614560c007a5015a79c30ba"
+  integrity sha512-i4nerd/aJd5zW8OPHxgeuDYiuiuHxHczkqIaALhINUqBCavRgbiwjfndpgrarB43jcb/2LxzrohMOH7akyt3og==
+
+"@types/hapi__wreck@^15.0.1":
+  version "15.0.1"
+  resolved "https://registry.yarnpkg.com/@types/hapi__wreck/-/hapi__wreck-15.0.1.tgz#41df4e122c49316f0057cb5e9c6eb4c00e671e95"
+  integrity sha512-OXhOaFWPFkWkqU5IlFwgTK/Q3yzc3iDhC1/S+3rQ6d2qkl6xvcRZaayJGjDXORf3krnGtDN1l3bIajNcuUl6QA==
+  dependencies:
+    "@types/hapi__boom" "*"
+    "@types/node" "*"
 
 "@types/has-ansi@^3.0.0":
   version "3.0.0"
@@ -7851,6 +7864,11 @@ chardet@^0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/chardet/-/chardet-0.7.0.tgz#90094849f0937f2eedc2425d0d28a9e5f0cbad9e"
   integrity sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==
+
+check-disk-space@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/check-disk-space/-/check-disk-space-2.1.0.tgz#2e77fe62f30d9676dc37a524ea2008f40c780295"
+  integrity sha512-f0nx9oJF/AVF8nhSYlF1EBvMNnO+CXyLwKhPvN1943iOMI9TWhQigLZm80jAf0wzQhwKkzA8XXjyvuVUeGGcVQ==
 
 check-error@^1.0.2:
   version "1.0.2"
@@ -19828,11 +19846,6 @@ no-case@^2.2.0, no-case@^2.3.2:
   integrity sha512-rmTZ9kz+f3rCvK2TD1Ue/oZlns7OGoIWP4fc3llxxRXlOkHKoWPPWJOfFYpITabSow43QJbRIoHQXtt10VldyQ==
   dependencies:
     lower-case "^1.1.1"
-
-no-ui-slider@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/no-ui-slider/-/no-ui-slider-1.2.0.tgz#1f64f5a8b82e6786f3261d82b0cc99b598817e69"
-  integrity sha1-H2T1qLguZ4bzJh2CsMyZtZiBfmk=
 
 nock@10.0.6:
   version "10.0.6"
