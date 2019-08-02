@@ -146,7 +146,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         const spnegoResponse = await supertest
           .get('/api/security/v1/me')
           .set('Authorization', 'Negotiate (:I am malformed:)')
-          .expect(500);
+          .expect(401);
         expect(spnegoResponse.headers['set-cookie']).to.be(undefined);
         expect(spnegoResponse.headers['www-authenticate']).to.be(undefined);
       });

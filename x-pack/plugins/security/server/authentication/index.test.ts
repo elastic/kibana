@@ -32,7 +32,6 @@ import {
 } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigType, createConfig$ } from '../config';
-import { getErrorStatusCode } from '../errors';
 import { LegacyAPI } from '../plugin';
 import { AuthenticationResult } from './authentication_result';
 import { setupAuthentication } from '.';
@@ -222,21 +221,20 @@ describe('setupAuthentication()', () => {
       expect(mockResponse.internalError).toHaveBeenCalledTimes(1);
       const [[error]] = mockResponse.internalError.mock.calls;
       expect(String(error)).toBe('Error: something went wrong');
-      expect(getErrorStatusCode(error)).toBe(500);
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
       expect(mockResponse.redirected).not.toHaveBeenCalled();
     });
 
-    it('rejects with wrapped original error when `authenticate` fails to authenticate user', async () => {
+    it('rejects with original `badRequest` error when `authenticate` fails to authenticate user', async () => {
       const mockResponse = httpServerMock.createLifecycleResponseFactory();
       const esError = Boom.badRequest('some message');
       authenticate.mockResolvedValue(AuthenticationResult.failed(esError));
 
       await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
-      expect(mockResponse.unauthorized).toHaveBeenCalledTimes(1);
-      const [[error]] = mockResponse.unauthorized.mock.calls;
+      expect(mockResponse.badRequest).toHaveBeenCalledTimes(1);
+      const [[error]] = mockResponse.badRequest.mock.calls;
       expect(error).toBe(esError);
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
@@ -278,7 +276,6 @@ describe('setupAuthentication()', () => {
       const [[error]] = mockResponse.unauthorized.mock.calls;
 
       expect(String(error)).toBe('Error: Unauthorized');
-      expect(getErrorStatusCode(error)).toBe(401);
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
       expect(mockResponse.redirected).not.toHaveBeenCalled();

@@ -13,7 +13,7 @@ import {
 } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigType } from '../config';
-import { getErrorStatusCode, wrapError } from '../errors';
+import { getErrorStatusCode } from '../errors';
 import { Authenticator, ProviderSession } from './authenticator';
 import { LegacyAPI } from '../plugin';
 import { createAPIKey, CreateAPIKeyOptions } from './api_keys';
@@ -88,7 +88,7 @@ export async function setupAuthentication({
       authenticationResult = await authenticator.authenticate(request);
     } catch (err) {
       authLogger.error(err);
-      return response.internalError(wrapError(err));
+      return response.internalError(err);
     }
 
     if (authenticationResult.succeeded()) {
@@ -112,18 +112,23 @@ export async function setupAuthentication({
       });
     }
 
-    let error;
     if (authenticationResult.failed()) {
       authLogger.info(`Authentication attempt failed: ${authenticationResult.error!.message}`);
-      error = wrapError(authenticationResult.error);
+      const error = authenticationResult.error;
+      return getErrorStatusCode(error) === 400
+        ? response.badRequest(error, {
+            headers: authenticationResult.authResponseHeaders,
+          })
+        : response.unauthorized(error, {
+            headers: authenticationResult.authResponseHeaders,
+          });
     } else {
       authLogger.info('Could not handle authentication attempt');
-      error = Boom.unauthorized();
+      const error = Boom.unauthorized();
+      return response.unauthorized(error, {
+        headers: authenticationResult.authResponseHeaders,
+      });
     }
-
-    return response.unauthorized(error, {
-      headers: authenticationResult.authResponseHeaders,
-    });
   });
 
   authLogger.debug('Successfully registered core authentication handler.');
