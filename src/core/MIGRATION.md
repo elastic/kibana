@@ -1119,17 +1119,17 @@ class MyPlugin {
 ### Handle HTTP request with New Platform HTTP Service
 Kibana HTTP Service provides own abstraction for work with HTTP stack.
 Plugins don't have direct access to `hapi` server and its primitives anymore. Moreover,
-you shouldn't rely on the fact that HTTP Service uses one or another library under the hood, there are high chances that we can switch to another stack at all. If HTTP Service
-lacks needed functionality we happy to discuss and support your needs.
+plugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood. This gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins. If the HTTP Service
+lacks functionality you need, we are happy to discuss and support your needs.
 
 To handle an incoming request in your plugin you should:
-- create Router instance. Use `plugin id` as a prefix path segment for your routes.
+- create a `Router` instance. Use `plugin-id` as a prefix path segment for your routes.
 ```ts
 import { Router } from 'src/core/server';
 const router = new Router('my-app');
 ```
 
-- use `@kbn/config-schema` package to create a schema to validate `request params`, `query`, `body` if an incoming request used them to pass additional details. Every incoming request will be validated against the created schema. If validation failed, the request is rejected with `400` status and `Bad request` error.
+- use `@kbn/config-schema` package to create a schema to validate the request `params`, `query`, and `body`. Every incoming request will be validated against the created schema. If validation failed, the request is rejected with `400` status and `Bad request` error without calling the route's handler.
 To opt out of validating the request, specify `false`.
 ```ts
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -1143,7 +1143,7 @@ const validate = {
 - declare a function to respond to incoming request.
 The function will receive `request` object containing request details: url, headers, matched route, as well as validated `params`, `query`, `body`.
 And `response` object instructing HTTP server to create HTTP response with information sent back to the client as the response body, headers, and HTTP status.
-Unlike, `hapi` route handler in the Legacy platform, any exception raised during the handler call will generate `500 Server error` response and log error details for further investigation.
+Unlike, `hapi` route handler in the Legacy platform, any exception raised during the handler call will generate `500 Server error` response and log error details for further investigation. See below for returning custom error responses.
 ```ts
   const handler = async (request: KibanaRequest, response: ResponseFactory) => {
     const data = await findObject(request.params.id);
@@ -1264,7 +1264,7 @@ try {
 }
 
 ```
-4. create a custom response. It might happen that `response factory` doesn't cover your use case and you want to specify HTTP response status code as well.
+4. create a custom response. `ResponseFactory` may not cover your use case, so you can use the `custom` function to customize the response.
 ```js
 return response.custom('ok', {
   statusCode: 201,
