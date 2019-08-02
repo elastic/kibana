@@ -88,7 +88,7 @@ export async function setupAuthentication({
       authenticationResult = await authenticator.authenticate(request);
     } catch (err) {
       authLogger.error(err);
-      return response.unauthorized(wrapError(err));
+      return response.internalError(wrapError(err));
     }
 
     if (authenticationResult.succeeded()) {

@@ -141,7 +141,7 @@ describe('setupAuthentication()', () => {
       expect(mockAuthToolkit.authenticated).toHaveBeenCalledTimes(1);
       expect(mockAuthToolkit.authenticated).toHaveBeenCalledWith();
       expect(mockResponse.redirected).not.toHaveBeenCalled();
-      expect(mockResponse.unauthorized).not.toHaveBeenCalled();
+      expect(mockResponse.internalError).not.toHaveBeenCalled();
 
       expect(authenticate).not.toHaveBeenCalled();
     });
@@ -164,7 +164,7 @@ describe('setupAuthentication()', () => {
         requestHeaders: mockAuthHeaders,
       });
       expect(mockResponse.redirected).not.toHaveBeenCalled();
-      expect(mockResponse.unauthorized).not.toHaveBeenCalled();
+      expect(mockResponse.internalError).not.toHaveBeenCalled();
 
       expect(authenticate).toHaveBeenCalledTimes(1);
       expect(authenticate).toHaveBeenCalledWith(mockRequest);
@@ -193,7 +193,7 @@ describe('setupAuthentication()', () => {
         responseHeaders: mockAuthResponseHeaders,
       });
       expect(mockResponse.redirected).not.toHaveBeenCalled();
-      expect(mockResponse.unauthorized).not.toHaveBeenCalled();
+      expect(mockResponse.internalError).not.toHaveBeenCalled();
 
       expect(authenticate).toHaveBeenCalledTimes(1);
       expect(authenticate).toHaveBeenCalledWith(mockRequest);
@@ -210,7 +210,7 @@ describe('setupAuthentication()', () => {
         headers: { location: '/some/url' },
       });
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
-      expect(mockResponse.unauthorized).not.toHaveBeenCalled();
+      expect(mockResponse.internalError).not.toHaveBeenCalled();
     });
 
     it('rejects with `Internal Server Error` when `authenticate` throws unhandled exception', async () => {
@@ -219,8 +219,8 @@ describe('setupAuthentication()', () => {
 
       await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
-      expect(mockResponse.unauthorized).toHaveBeenCalledTimes(1);
-      const [[error]] = mockResponse.unauthorized.mock.calls;
+      expect(mockResponse.internalError).toHaveBeenCalledTimes(1);
+      const [[error]] = mockResponse.internalError.mock.calls;
       expect(String(error)).toBe('Error: something went wrong');
       expect(getErrorStatusCode(error)).toBe(500);
 
