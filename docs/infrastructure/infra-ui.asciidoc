@@ -7,11 +7,13 @@
 Use the Infrastructure UI in {kib} to monitor your infrastructure and identify
 problems in real time. You can explore metrics for hosts, containers and services. You can also drill down to view more detailed metrics, or seamlessly switch to view the corresponding logs, application traces and uptime information for a component.
 
-Initially, the *Inventory* tab shows an overview the hosts in of your infrastructure and the current CPU usage for each host.
+Initially, the *Inventory* tab shows an overview of the hosts in of your infrastructure and the current CPU usage for each host.
 From here, you can drill down into areas of interest.
 
 [role="screenshot"]
 image::infrastructure/images/infra-sysmon.png[Infrastructure Overview in Kibana]
+
+// ++ Change this screenshot to really show hosts! others can come later!
 
 [float]
 [[infra-cat]]
@@ -44,24 +46,32 @@ Examples of grouping options include Availability Zone, Machine Type, Project ID
 
 [float]
 [[infra-date]]
-=== Specify the time and date range
+=== Specify the time and date
 
-Use the time selector to focus on a specific timeframe.
+Click the time selector to choose the timeframe for the metrics.
+// +++ Note this is *NOT* the time filter. Logs has the same as this.
 
 [float]
 [[infra-refresh]]
-=== Auto-refresh or pause
+=== Auto-refresh metrics
 
 Select *Auto-refresh* to keep up-to-date metrics information coming in, or *Stop refreshing* to focus on historical data without new distractions.
 
 [float]
 [[infra-configure-source]]
-=== Adapt to your metric source
+=== Configure the view for your metric sources
 
-Using a custom index pattern to store the metrics, or want to limit the entries
-presented in a space? Use configure source to change the index pattern and
-other settings.
-// +++ more investigation needed here. Include info (currently in dumping ground topic) or add a link.  and what about the related logging features? Are the two configs identical or not?
+If your metrics have custom index patterns, or use non-default fields for things like timestamps or container names, or contain parsed fields which you want to expose as individual columns, click *Configuration* to adjust the configuration. You can also adjust the configuration in the {kibana-ref}/settings.html[Kibana configuration file].
+
+// +++ more investigation needed here. Include info (currently in dumping ground topic) or add a link.
+
+// +++ and what about the related logging features? Are the two configs identical or not?
+
+// +++ The logs section mentions "contain parsed fields which you want to expose as individual columns". Does that apply here too? in fcat does the columns setting do anything for metrics?
+
+// +++ and what about the link to the Kibana settings? Should it be to logs, or to something else more specific?
+
+NOTE: The settings here are shared with logs. Changes you make here also affect the information shown in the *Logs* tab.
 
 [float]
 [[infra-drill-down]]
@@ -69,21 +79,16 @@ other settings.
 
 Hover over a component to see more information about that component.
 
-Click a component to see the other actions for that component that you can carry out from the Infrastructure tab.
+Click a component to see the other actions available for that component.
 You can select:
 
 * *View Metrics* to <<xpack-view-metrics, view detailed metrics for the selected component>>.
 
-// +++ check ^^ link it's broken
-
-* *View Logs* to view the <<xpack-logs-using, corresponding logs for the selected component>> in the *Logs* tab.
-// +++ I think this is the best link, but I may need to explain here that the tab opens with the appropriate component etc pre-selected.
+* *View Logs* to <<xpack-logs-using, view the logs for the selected component>> in the *Logs* tab.
 
 Depending on the features you have installed and configured, you may also be able to select:
 
 * *View APM* to <<traces, view APM traces for the selected component>> in the *APM* tab.
-// +++ Comment as for Logs link
 
 * *View Uptime* to <<uptime-overview, view uptime information for the selected component>> in the *Uptime* tab.
-// +++ Comment as for logs link
 

@@ -16,7 +16,7 @@ Use the time filter to select the time and date for which to show the metrics, a
 
 [float]
 [[infra-view-refresh-metrics-date]]
-== Refresh the metrics
+=== Refresh the metrics
 
 You can click *Refresh* to manually refresh the metrics. Alternatively, within the time picker, you can select an automatic refresh period, then click *Start* to start automatic refresh
 
@@ -39,5 +39,11 @@ Something about whether it refreshes or not.
 // ++ How does refresh work for historic values? It's meaningless, surely?
 
 // ++ things like next (>) and previous (<) also don't seem to work for preselected time periods, for example "Yesterday"
+
+[float]
+[[infra-view-go-to-chart]]
+=== Go to a specific chart
+
+To do. This is the bit where you selectsomething on the left xxxxxxx
 
 
