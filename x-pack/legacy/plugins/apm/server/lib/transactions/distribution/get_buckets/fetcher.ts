@@ -37,17 +37,10 @@ export function bucketFetcher({
   const { start, end, uiFiltersES, client, config } = setup;
   const bucketTargetCount = config.get<number>('xpack.apm.bucketTargetCount');
 
-  const should: Array<Record<string, any>> = [
-    { term: { [TRANSACTION_SAMPLED]: true } }
-  ];
-
-  if (traceId) {
-    should.push({ term: { [TRACE_ID]: traceId } });
-  }
-
-  if (transactionId) {
-    should.push({ term: { [TRANSACTION_ID]: transactionId } });
-  }
+  const traceIdFilter = traceId ? [{ term: { [TRACE_ID]: traceId } }] : [];
+  const transactionIdFilter = transactionId
+    ? [{ term: { [TRANSACTION_ID]: transactionId } }]
+    : [];
 
   const params = {
     index: config.get<string>('apm_oss.transactionIndices'),
@@ -63,7 +56,11 @@ export function bucketFetcher({
             { range: rangeFilter(start, end) },
             ...uiFiltersES
           ],
-          should
+          should: [
+            { term: { [TRANSACTION_SAMPLED]: true } },
+            ...traceIdFilter,
+            ...transactionIdFilter
+          ]
         }
       },
       aggs: {
