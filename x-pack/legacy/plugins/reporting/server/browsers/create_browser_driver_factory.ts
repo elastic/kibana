@@ -5,6 +5,8 @@
  */
 
 // @ts-ignore
+import { BROWSERS_BY_TYPE } from './browsers';
+// @ts-ignore
 import { ensureBrowserDownloaded } from './download';
 // @ts-ignore
 import { installBrowser } from './install';
@@ -27,11 +29,12 @@ export async function createBrowserDriverFactory(server: KbnServer) {
   }
 
   try {
-    const browserDriverFactory = await installBrowser(
+    const browser = BROWSERS_BY_TYPE[BROWSER_TYPE];
+    const { binaryPath } = await installBrowser(logger, browser, DATA_DIR);
+    const browserDriverFactory = browser.createDriverFactory(
+      binaryPath,
       logger,
       BROWSER_CONFIG,
-      BROWSER_TYPE,
-      DATA_DIR,
       REPORTING_TIMEOUT
     );
     logger.debug(`Browser installed at ${browserDriverFactory.binaryPath}`);
