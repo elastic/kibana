@@ -611,6 +611,7 @@ exports[`Flyout should render import step 1`] = `
       >
         <EuiFilePicker
           compressed={false}
+          display="large"
           initialPromptText={
             <FormattedMessage
               defaultMessage="Import"
