@@ -18,7 +18,7 @@ export function installRoute(router: CodeServerRouter, codeServices: CodeService
   const kibanaVersion = router.server.config().get('pkg.version') as string;
   const status = (endpoint: Endpoint, def: LanguageServerDefinition) => ({
     name: def.name,
-    status: lspService.languageServerStatus(endpoint, { lang: def.name }),
+    status: lspService.languageServerStatus(endpoint, { langName: def.name }),
     version: def.version,
     build: def.build,
     languages: def.languages,

@@ -36,7 +36,7 @@ import { isInvalidAggsTouched, isAggRemovable, calcAggIsTooLow } from './agg_gro
 import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
 import { Schema } from '../schemas';
 
-interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
+export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   schemas: Schema[];
   addSchema: (schems: Schema) => void;
   reorderAggs: (group: AggConfig[]) => void;
