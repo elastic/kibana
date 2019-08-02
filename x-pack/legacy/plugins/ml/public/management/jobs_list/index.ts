@@ -21,7 +21,7 @@ import { JobsListPage } from './components';
 import { getJobsListBreadcrumbs } from '../breadcrumbs';
 
 const template = `<kbn-management-app section="ml/jobs-list">
-<div id="jobsListReactRoot" />
+<div id="kibanaManagementMLSection" />
 </kbn-management-app>`;
 
 routes.when(JOBS_LIST_PATH, {
@@ -33,11 +33,11 @@ routes.when(JOBS_LIST_PATH, {
   },
   controller($scope) {
     $scope.$on('$destroy', () => {
-      const elem = document.getElementById('jobsListReactRoot');
+      const elem = document.getElementById('kibanaManagementMLSection');
       if (elem) unmountComponentAtNode(elem);
     });
     $scope.$$postDigest(() => {
-      const element = document.getElementById('jobsListReactRoot');
+      const element = document.getElementById('kibanaManagementMLSection');
       render(JobsListPage(), element);
     });
   },

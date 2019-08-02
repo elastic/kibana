@@ -364,7 +364,7 @@ export class JobsListView extends Component {
   renderManagementJobsListComponents() {
     const { loading } = this.state;
     return (
-      <div>
+      <div className="managementJobsList">
         <div>
           <JobFilterBar setFilters={this.setFilters} />
         </div>
