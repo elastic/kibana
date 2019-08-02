@@ -89,7 +89,7 @@ export class InspectorViewChooser extends Component<Props, State> {
         data-test-subj="inspectorViewChooser"
       >
         <FormattedMessage
-          id="plugins.inspector.view"
+          id="inspector.view"
           defaultMessage="View: {viewName}"
           values={{ viewName: this.props.selectedView.title }}
         />
@@ -101,7 +101,7 @@ export class InspectorViewChooser extends Component<Props, State> {
     return (
       <EuiToolTip position="bottom" content={this.props.selectedView.help}>
         <FormattedMessage
-          id="plugins.inspector.view"
+          id="inspector.view"
           defaultMessage="View: {viewName}"
           values={{ viewName: this.props.selectedView.title }}
         />

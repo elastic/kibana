@@ -31,7 +31,7 @@ function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {
   );
 }
 
-const inspectorTitle = i18n.translate('plugins.inspector.title', {
+const inspectorTitle = i18n.translate('inspector.title', {
   defaultMessage: 'Inspector',
 });
 
