@@ -407,7 +407,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     } while (loopSearchAfter !== null && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
 
     const monitorIds: string[] = [];
-    const summaries: MonitorSummary[] = monitors.map((monitor: any) => {
+    const summaries: (MonitorSummary & {lastLocation: string})[] = monitors.map((monitor: any) => {
       const monitorId = get<string>(monitor, 'key.monitor_id');
       monitorIds.push(monitorId);
       let state = get<any>(monitor, 'state.value');
@@ -425,8 +425,11 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       } else {
         state.checks = [];
       }
+      const lastCheck = state.checks[state.checks.length-1];
+      console.log("CHECKS", JSON.stringify(state.checks, null, 2), lastCheck);
       return {
         monitor_id: monitorId,
+        lastLocation: get(lastCheck, 'observer.geo.name'),
         state,
       };
     });
@@ -438,6 +441,8 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     );
 
     console.log("INVOKE legacyGetMonitorStates", searchAfter, loopSearchAfter);
+    const lastSummary = summaries[summaries.length-1];
+    loopSearchAfter = lastSummary ? {monitor_id: lastSummary.monitor_id, location: lastSummary.lastLocation} : null
     return {
       searchAfter: JSON.stringify(loopSearchAfter),
       summaries: summaries.map(summary => ({
