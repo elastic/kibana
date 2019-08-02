@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore Untyped Library
 import { Fn } from '@kbn/interpreter/common';
 import { functions as browserFns } from '../../canvas_plugin_src/functions/browser';
 import { functions as commonFns } from '../../canvas_plugin_src/functions/common';

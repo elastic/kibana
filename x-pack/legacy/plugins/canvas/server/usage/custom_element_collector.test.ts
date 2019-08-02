@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { summarizeCustomElements } from '../custom_element_collector';
-import { TelemetryCustomElementDocument } from '../../../types';
+import { summarizeCustomElements } from './custom_element_collector';
+import { TelemetryCustomElementDocument } from '../../types';
 
 function mockCustomElement(...nodeExpressions: string[]): TelemetryCustomElementDocument {
   return {
@@ -21,7 +20,7 @@ function mockCustomElement(...nodeExpressions: string[]): TelemetryCustomElement
 describe('custom_element_collector.handleResponse', () => {
   describe('invalid responses', () => {
     it('returns nothing if no valid hits', () => {
-      expect(summarizeCustomElements([])).to.eql({});
+      expect(summarizeCustomElements([])).toEqual({});
     });
 
     it('returns nothing if no valid elements', () => {
@@ -31,7 +30,7 @@ describe('custom_element_collector.handleResponse', () => {
         },
       ];
 
-      expect(summarizeCustomElements(customElements)).to.eql({});
+      expect(summarizeCustomElements(customElements)).toEqual({});
     });
   });
 
@@ -39,10 +38,10 @@ describe('custom_element_collector.handleResponse', () => {
     const elements = [mockCustomElement(''), mockCustomElement('')];
 
     const data = summarizeCustomElements(elements);
-    expect(data.custom_elements).to.not.be(null);
+    expect(data.custom_elements).not.toBe(null);
 
     if (data.custom_elements) {
-      expect(data.custom_elements.count).to.equal(elements.length);
+      expect(data.custom_elements.count).toEqual(elements.length);
     }
   });
 
@@ -54,10 +53,10 @@ describe('custom_element_collector.handleResponse', () => {
     const elements = [mockCustomElement(functions1.join('|')), mockCustomElement(...functions2)];
 
     const data = summarizeCustomElements(elements);
-    expect(data.custom_elements).to.not.be(null);
+    expect(data.custom_elements).not.toBe(null);
 
     if (data.custom_elements) {
-      expect(data.custom_elements.functions_in_use).to.eql(expectedFunctions);
+      expect(data.custom_elements.functions_in_use).toEqual(expectedFunctions);
     }
   });
 
@@ -74,12 +73,12 @@ describe('custom_element_collector.handleResponse', () => {
     ];
 
     const result = summarizeCustomElements(elements);
-    expect(result.custom_elements).to.not.be(null);
+    expect(result.custom_elements).not.toBe(null);
 
     if (result.custom_elements) {
-      expect(result.custom_elements.elements.max).to.equal(functionsMax.length);
-      expect(result.custom_elements.elements.min).to.equal(functionsMin.length);
-      expect(result.custom_elements.elements.avg).to.equal(avgFunctions);
+      expect(result.custom_elements.elements.max).toEqual(functionsMax.length);
+      expect(result.custom_elements.elements.min).toEqual(functionsMin.length);
+      expect(result.custom_elements.elements.avg).toEqual(avgFunctions);
     }
   });
 });
