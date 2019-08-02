@@ -31,6 +31,18 @@ export interface Mappings {
   [key: string]: any;
 }
 
+const sanitizePropParameters = (parameters: Record<string, any>): Record<string, any> =>
+  Object.entries(parameters).reduce(
+    (acc, [param, value]) => {
+      // IF a prop value is "index_default", we remove it
+      if (value !== 'index_default') {
+        acc[param] = value;
+      }
+      return acc;
+    },
+    {} as any
+  );
+
 const serializeProperties = (properties: any[]) =>
   properties.map(prop => {
     // If a subType is present, use it as type for ES
@@ -38,7 +50,8 @@ const serializeProperties = (properties: any[]) =>
       prop.type = prop.subType;
       delete prop.subType;
     }
-    return prop;
+
+    return sanitizePropParameters(prop);
   });
 
 const deSerializeProperties = (properties: { [key: string]: any }) => {
