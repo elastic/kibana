@@ -258,7 +258,10 @@ exports.Cluster = class Cluster {
     this._log.indent(4);
 
     // Add to esArgs if ssl is enabled
-    const esArgs = (options.esArgs || []).slice(0);
+    const esArgs = (typeof options.esArgs === 'string'
+      ? [options.esArgs]
+      : options.esArgs || []
+    ).slice(0);
     if (this._ssl) {
       esArgs.push('xpack.security.http.ssl.enabled=true');
       esArgs.push(`xpack.security.http.ssl.key=${esKeyPath}`);
