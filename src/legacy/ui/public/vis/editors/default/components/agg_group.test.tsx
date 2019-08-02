@@ -20,10 +20,9 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { VisState } from '../../../';
+import { VisState, AggConfig } from '../../../';
 import { Schema } from '../schemas';
 import { AggGroupNames } from '../agg_groups';
-import { AggConfig } from '../../../agg_config';
 import { AggConfigs } from '../../../agg_configs';
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';

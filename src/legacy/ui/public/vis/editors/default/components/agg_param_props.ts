@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { AggParam } from '../../../../agg_types';
+import { AggParam, FieldParamType } from 'ui/agg_types';
 import { AggConfig } from '../../../agg_config';
-import { FieldParamType } from '../../../../agg_types/param_types';
 import { EditorConfig } from '../../config/types';
 import { VisState } from '../../..';
 import { SubAggParamsProp } from './agg_params';
