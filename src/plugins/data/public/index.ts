@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from '../../../core/public';
 import { DataPublicPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
