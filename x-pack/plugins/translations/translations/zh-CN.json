@@ -6137,7 +6137,7 @@
     "xpack.ml.dataframe.stepCreateForm.transformListCardTitle": "数据帧作业",
     "xpack.ml.dataframe.stepCreateForm.progressErrorMessage": "获取进度百分比时出错：{error}",
     "xpack.ml.dataframe.stepCreateForm.progressTitle": "进度",
-    "xpack.ml.dataframe.stepCreateForm.reateIndexPatternSuccessMessage": "Kibana 索引模式 {indexPatternName} 成功创建。",
+    "xpack.ml.dataframe.stepCreateForm.createIndexPatternSuccessMessage": "Kibana 索引模式 {indexPatternName} 成功创建。",
     "xpack.ml.dataframe.stepCreateForm.startDataFrameButton": "开始",
     "xpack.ml.dataframe.stepCreateForm.startDataFrameDescription": "启动数据帧作业。数据帧作业将增加集群的搜索和索引负荷。如果负荷超载，请停止作业。作业启动后，系统将为您提供继续浏览数据帧作业的选项。",
     "xpack.ml.dataframe.stepCreateForm.startTransformErrorMessage": "启动数据帧作业 {transformId} 时发生错误：{error}",
