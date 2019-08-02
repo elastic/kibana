@@ -31,7 +31,7 @@ npm config list --json
 cd %{name}
 /usr/local/bin/yarn --allow-root
 /usr/local/bin/yarn kbn bootstrap --allow-root
-node scripts/build --rpm --oss --skip-archives --release --verbose
+node scripts/build --rpm --oss --skip-archives --release --verbose --allow-root
 
 %install
 cd %{name}
