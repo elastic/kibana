@@ -5995,7 +5995,7 @@
     "xpack.ml.dataframe.stepCreateForm.transformListCardTitle": "データフレームジョブ",
     "xpack.ml.dataframe.stepCreateForm.progressErrorMessage": "進捗パーセンテージの取得中にエラーが発生しました: {error}",
     "xpack.ml.dataframe.stepCreateForm.progressTitle": "進捗",
-    "xpack.ml.dataframe.stepCreateForm.reateIndexPatternSuccessMessage": "Kibana インデックスパターン {indexPatternName} が作成されました",
+    "xpack.ml.dataframe.stepCreateForm.createIndexPatternSuccessMessage": "Kibana インデックスパターン {indexPatternName} が作成されました",
     "xpack.ml.dataframe.stepCreateForm.startDataFrameButton": "開始",
     "xpack.ml.dataframe.stepCreateForm.startDataFrameDescription": "データフレームジョブを開始します。データフレームジョブは、クラスターの検索とインデックスによる負荷を増やします。過剰な負荷が生じた場合はジョブを停止してください。ジョブの開始後、データフレームジョブの閲覧を続けるオプションが提供されます。",
     "xpack.ml.dataframe.stepCreateForm.startTransformErrorMessage": "データフレームジョブ {transformId} の開始中にエラーが発生しました: {error}",
