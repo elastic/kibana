@@ -44,65 +44,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |  |
 |  [FakeRequest](./kibana-plugin-server.fakerequest.md) | Fake request object created manually by Kibana plugins. |
 |  [HttpResponseOptions](./kibana-plugin-server.httpresponseoptions.md) | HTTP response parameters |
-|  [HttpServerSetup](./kibana-plugin-server.httpserversetup.md) | Kibana HTTP Service provides own abstraction for work with HTTP stack. Plugins don't have direct access to <code>hapi</code> server and its primitives anymore. Moreover, plugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood. This gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins. If the HTTP Service lacks functionality you need, we are happy to discuss and support your needs.<!-- -->To handle an incoming request in your plugin you should: - Create a <code>Router</code> instance. Use <code>plugin-id</code> as a prefix path segment for your routes.
-```ts
-import { Router } from 'src/core/server';
-const router = new Router('my-app');
-
-```
-- Use <code>@kbn/config-schema</code> package to create a schema to validate the request <code>params</code>, <code>query</code>, and <code>body</code>. Every incoming request will be validated against the created schema. If validation failed, the request is rejected with <code>400</code> status and <code>Bad request</code> error without calling the route's handler. To opt out of validating the request, specify <code>false</code>.
-```ts
-import { schema, TypeOf } from '@kbn/config-schema';
-const validate = {
-  params: schema.object({
-    id: schema.string(),
-  }),
-};
-
-```
-- Declare a function to respond to incoming request. The function will receive <code>request</code> object containing request details: url, headers, matched route, as well as validated <code>params</code>, <code>query</code>, <code>body</code>. And <code>response</code> object instructing HTTP server to create HTTP response with information sent back to the client as the response body, headers, and HTTP status. Unlike, <code>hapi</code> route handler in the Legacy platform, any exception raised during the handler call will generate <code>500 Server error</code> response and log error details for further investigation. See below for returning custom error responses.
-```ts
-const handler = async (request: KibanaRequest, response: ResponseFactory) => {
-  const data = await findObject(request.params.id);
-  // creates a command to respond with 'not found' error
-  if (!data) return response.notFound();
-  // creates a command to send found data to the client and set response headers
-  return response.ok(data, {
-    headers: {
-      'content-type': 'application/json'
-    }
-  });
-}
-
-```
-- Register route handler for GET request to 'my-app/path/<!-- -->{<!-- -->id<!-- -->}<!-- -->' path
-```ts
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Router } from 'src/core/server';
-const router = new Router('my-app');
-
-const validate = {
-  params: schema.object({
-    id: schema.string(),
-  }),
-};
-
-router.get({
-  path: 'path/{id}',
-  validate
-},
-async (request, response) => {
-  const data = await findObject(request.params.id);
-  if (!data) return response.notFound();
-  return response.ok(data, {
-    headers: {
-      'content-type': 'application/json'
-    }
-  });
-});
-
-```
- |
+|  [HttpServerSetup](./kibana-plugin-server.httpserversetup.md) | Kibana HTTP Service provides own abstraction for work with HTTP stack. Plugins don't have direct access to <code>hapi</code> server and its primitives anymore. Moreover, plugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood. This gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins. If the HTTP Service lacks functionality you need, we are happy to discuss and support your needs. |
 |  [HttpServiceStart](./kibana-plugin-server.httpservicestart.md) |  |
 |  [InternalCoreStart](./kibana-plugin-server.internalcorestart.md) |  |
 |  [KibanaRequestRoute](./kibana-plugin-server.kibanarequestroute.md) | Request specific route information exposed to a handler. |
@@ -154,88 +96,7 @@ async (request, response) => {
 
 |  Variable | Description |
 |  --- | --- |
-|  [kibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) | Set of helpers used to create <code>KibanaResponse</code> to form HTTP response on an incoming request. Should be returned as a result of [RequestHandler](./kibana-plugin-server.requesthandler.md) execution.<!-- -->1. Successful response. Supported types of response body are: - <code>undefined</code>, no content to send. - <code>string</code>, send text - <code>JSON</code>, send JSON object, HTTP server will throw if given object is not valid (has circular references, for example) - <code>Stream</code> send data stream - <code>Buffer</code> send binary stream
-```js
-return response.ok(undefined);
-return response.ok('ack');
-return response.ok({ id: '1' });
-return response.ok(Buffer.from(...););
-
-const stream = new Stream.PassThrough();
-fs.createReadStream('./file').pipe(stream);
-return res.ok(stream);
-
-```
-HTTP headers are configurable via response factory parameter <code>options</code> [HttpResponseOptions](./kibana-plugin-server.httpresponseoptions.md)<!-- -->.
-```js
-return response.ok({ id: '1' }, {
-  headers: {
-    'content-type': 'application/json'
-  }
-});
-
-```
-2. Redirection response. Redirection URL is configures via 'Location' header.
-```js
-return response.redirected('The document has moved', {
-  headers: {
-   location: '/new-url',
-  },
-});
-
-```
-3. Error response. You may pass an error message to the client, where error message can be: - <code>string</code> send message text - <code>Error</code> send the message text of given Error object. - <code>{ message: string &#124; Error, meta: {data: Record&lt;string, any&gt;, ...} }</code> - send message text and attach additional error metadata.
-```js
-return response.unauthorized('User has no access to the requested resource.', {
-  headers: {
-    'WWW-Authenticate': 'challenge',
-  }
-})
-return response.badRequest();
-return response.badRequest('validation error');
-
-try {
-  // ...
-} catch(error){
-  return response.badRequest(error);
-}
-
-return response.badRequest({
-  message: 'validation error',
-  meta: {
-    data: {
-      requestBody: request.body,
-      failedFields: validationResult
-    },
-  }
-});
-
-try {
-  // ...
-} catch(error) {
-  return response.badRequest({
-    message: error,
-    meta: {
-      data: {
-        requestBody: request.body,
-      },
-    }
-  });
-}
-
-
-```
-4. Custom response. <code>ResponseFactory</code> may not cover your use case, so you can use the <code>custom</code> function to customize the response.
-```js
-return response.custom('ok', {
-  statusCode: 201,
-  headers: {
-    location: '/created-url'
-  }
-})
-
-```
- |
+|  [kibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) | Set of helpers used to create <code>KibanaResponse</code> to form HTTP response on an incoming request. Should be returned as a result of [RequestHandler](./kibana-plugin-server.requesthandler.md) execution. |
 
 ## Type Aliases
 

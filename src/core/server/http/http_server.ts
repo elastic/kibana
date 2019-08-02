@@ -42,6 +42,7 @@ import { BasePath } from './base_path_service';
  * This gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins.
  * If the HTTP Service lacks functionality you need, we are happy to discuss and support your needs.
  *
+ * @example
  * To handle an incoming request in your plugin you should:
  * - Create a `Router` instance. Use `plugin-id` as a prefix path segment for your routes.
  * ```ts

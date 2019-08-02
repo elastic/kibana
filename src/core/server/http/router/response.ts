@@ -89,6 +89,7 @@ export type RedirectResponseOptions = HttpResponseOptions & {
  * Set of helpers used to create `KibanaResponse` to form HTTP response on an incoming request.
  * Should be returned as a result of {@link RequestHandler} execution.
  *
+ * @example
  * 1. Successful response. Supported types of response body are:
  * - `undefined`, no content to send.
  * - `string`, send text
