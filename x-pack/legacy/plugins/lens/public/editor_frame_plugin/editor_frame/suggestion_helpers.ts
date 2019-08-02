@@ -8,7 +8,6 @@ import _ from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
 import { Visualization, Datasource, FramePublicAPI } from '../../types';
 import { Action } from './state_management';
-import { IndexPatternField } from '../../indexpattern_plugin/indexpattern';
 
 export interface Suggestion {
   visualizationId: string;
@@ -50,12 +49,12 @@ export function getSuggestions({
   visualizationMap: Record<string, Visualization>;
   activeVisualizationId: string | null;
   visualizationState: unknown;
-  field?: IndexPatternField;
+  field?: unknown;
 }): Suggestion[] {
   const datasourceTableSuggestions = _.flatten(
     Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
       if (datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading) {
-        const datasourceState = datasourceStates[datasourceId];
+        const datasourceState = datasourceStates[datasourceId].state;
         return (
           (field
             ? datasource.getDatasourceSuggestionsForField(datasourceState, field)
