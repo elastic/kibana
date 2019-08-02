@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { injectI18n, InjectedIntl } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import { UICapabilities } from 'ui/capabilities';
@@ -13,40 +13,33 @@ import { DocumentTitle } from '../../../components/document_title';
 import { Header } from '../../../components/header';
 
 interface StreamPageHeaderProps {
-  intl: InjectedIntl;
   uiCapabilities: UICapabilities;
 }
 
-export const StreamPageHeader = injectUICapabilities(
-  injectI18n((props: StreamPageHeaderProps) => {
-    const { intl, uiCapabilities } = props;
-    return (
-      <>
-        <Header
-          breadcrumbs={[
-            {
-              text: intl.formatMessage({
-                id: 'xpack.infra.logs.streamPage.logsBreadcrumbsText',
-                defaultMessage: 'Logs',
-              }),
+export const StreamPageHeader = injectUICapabilities((props: StreamPageHeaderProps) => {
+  const { uiCapabilities } = props;
+  return (
+    <>
+      <Header
+        breadcrumbs={[
+          {
+            text: i18n.translate('xpack.infra.logs.streamPage.logsBreadcrumbsText', {
+              defaultMessage: 'Logs',
+            }),
+          },
+        ]}
+        readOnlyBadge={!uiCapabilities.logs.save}
+      />
+      <DocumentTitle
+        title={(previousTitle: string) =>
+          i18n.translate('xpack.infra.logs.streamPage.documentTitle', {
+            defaultMessage: '{previousTitle} | Stream',
+            values: {
+              previousTitle,
             },
-          ]}
-          readOnlyBadge={!uiCapabilities.logs.save}
-        />
-        <DocumentTitle
-          title={(previousTitle: string) =>
-            intl.formatMessage(
-              {
-                id: 'xpack.infra.logs.streamPage.documentTitle',
-                defaultMessage: '{previousTitle} | Stream',
-              },
-              {
-                previousTitle,
-              }
-            )
-          }
-        />
-      </>
-    );
-  })
-);
+          })
+        }
+      />
+    </>
+  );
+});
