@@ -108,7 +108,7 @@ const createResponseFactoryMock = (): jest.Mocked<ResponseFactory> => ({
   forbidden: jest.fn(),
   notFound: jest.fn(),
   conflict: jest.fn(),
-  internal: jest.fn(),
+  internalError: jest.fn(),
 });
 
 const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFactory> => ({
@@ -118,7 +118,7 @@ const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFact
   forbidden: jest.fn(),
   notFound: jest.fn(),
   conflict: jest.fn(),
-  internal: jest.fn(),
+  internalError: jest.fn(),
 });
 
 export const httpServerMock = {

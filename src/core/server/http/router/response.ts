@@ -193,7 +193,7 @@ const errorResponseFactory = {
    * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
    * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
    */
-  internal: (error: ResponseError = 'Internal Error', options: HttpResponseOptions = {}) =>
+  internalError: (error: ResponseError = 'Internal Error', options: HttpResponseOptions = {}) =>
     new KibanaResponse(500, error, options),
 };
 
