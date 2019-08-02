@@ -22,11 +22,32 @@ import { i18n } from '@kbn/i18n';
 import { PersistedState } from 'ui/persisted_state';
 import chrome from 'ui/chrome';
 
+import { ExpressionFunction, KibanaContext, Render } from '../../interpreter/types';
+
 // @ts-ignore
 import { createMetricsRequestHandler } from './request_handler';
 
-export const createMetricsFn = () => ({
-  name: 'tsvb',
+const name = 'tsvb';
+type Context = KibanaContext | null;
+
+interface Arguments {
+  params: string;
+  uiState: string;
+}
+
+type VisParams = Required<Arguments>;
+
+interface RenderValue {
+  visType: 'metrics';
+  visData: Context;
+  visConfig: VisParams;
+  uiState: any;
+}
+
+type Return = Promise<Render<RenderValue>>;
+
+export const createMetricsFn = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+  name,
   type: 'render',
   context: {
     types: ['kibana_context', 'null'],
@@ -38,13 +59,15 @@ export const createMetricsFn = () => ({
     params: {
       types: ['string'],
       default: '"{}"',
+      help: '',
     },
     uiState: {
       types: ['string'],
       default: '"{}"',
+      help: '',
     },
   },
-  async fn(context: any, args: any) {
+  async fn(context: Context, args: Arguments) {
     const uiSettings = chrome.getUiSettingsClient();
     const metricsRequestHandler = createMetricsRequestHandler(uiSettings);
     const params = JSON.parse(args.params);
@@ -65,9 +88,9 @@ export const createMetricsFn = () => ({
       type: 'render',
       as: 'visualization',
       value: {
+        uiState,
         visType: 'metrics',
         visConfig: params,
-        uiState,
         visData: response,
       },
     };
