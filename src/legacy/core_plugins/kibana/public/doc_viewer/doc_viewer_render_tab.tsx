@@ -25,7 +25,11 @@ interface Props {
 }
 
 export function DocViewRenderTab({ render, renderProps }: Props) {
-  const containerRef = useRef(null);
-  useEffect(() => render(containerRef.current, renderProps), [render, renderProps]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (containerRef && containerRef.current) {
+      return render(containerRef.current, renderProps);
+    }
+  }, [render, renderProps]);
   return <div ref={containerRef} />;
 }

@@ -41,7 +41,10 @@ export interface DocViewRenderProps {
   onAddColumn: (columnName: string) => void;
   onRemoveColumn: (columnName: string) => void;
 }
-export type DocViewRenderFn = (domeNode: Element, renderProps: DocViewRenderProps) => () => void;
+export type DocViewRenderFn = (
+  domeNode: HTMLDivElement,
+  renderProps: DocViewRenderProps
+) => () => void;
 
 export interface DocViewInput {
   component?: unknown;
