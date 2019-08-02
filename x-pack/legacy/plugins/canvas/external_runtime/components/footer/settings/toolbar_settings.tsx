@@ -6,12 +6,16 @@
 
 import React from 'react';
 import { EuiSwitch, EuiFormRow } from '@elastic/eui';
-import { useExternalEmbedState, setToolbarAutohide } from '../../context';
+import { useExternalEmbedState, setToolbarAutohide } from '../../../context';
 
 // @ts-ignore CSS Module
 import css from './settings.module';
 
-export const ToolbarSettings = () => {
+interface Props {
+  onChange?: () => void;
+}
+
+export const ToolbarSettings = ({ onChange = () => {} }: Props) => {
   const [{ settings }, dispatch] = useExternalEmbedState();
 
   const { toolbar } = settings;
@@ -24,7 +28,10 @@ export const ToolbarSettings = () => {
           id="toolbarHide"
           label="Hide Toolbar"
           checked={toolbar.autohide}
-          onClick={() => dispatch(setToolbarAutohide(!toolbar.autohide))}
+          onChange={() => {
+            onChange();
+            dispatch(setToolbarAutohide(!toolbar.autohide));
+          }}
         />
       </EuiFormRow>
     </div>

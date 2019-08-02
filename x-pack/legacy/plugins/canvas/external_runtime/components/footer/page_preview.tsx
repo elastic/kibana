@@ -30,9 +30,12 @@ export const PagePreview = ({ number, page, height }: Props) => {
 
   const onClick = (index: number) => dispatch(setPage(index));
   const style = {
-    transform: `scale3d(${scale}, ${scale}, 1)`,
     height: workpadHeight * scale,
     width: workpadWidth * scale,
+  };
+  const transform = {
+    ...style,
+    transform: `scale3d(${scale}, ${scale}, 1)`,
   };
 
   return (
@@ -42,7 +45,9 @@ export const PagePreview = ({ number, page, height }: Props) => {
       onKeyPress={() => onClick(number)}
       style={style}
     >
-      <Page page={page} />
+      <div className={css.preview} style={transform}>
+        <Page page={page} />
+      </div>
     </div>
   );
 };

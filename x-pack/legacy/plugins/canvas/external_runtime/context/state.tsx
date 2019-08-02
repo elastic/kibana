@@ -48,7 +48,7 @@ export const initialExternalEmbedState: ExternalEmbedState = {
       animate: false,
     },
     toolbar: {
-      autohide: true,
+      autohide: false,
     },
   },
 };

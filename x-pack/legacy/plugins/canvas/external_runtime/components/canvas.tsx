@@ -7,11 +7,13 @@
 import React, { useState } from 'react';
 import { useExternalEmbedState, setPage, setScrubberVisible } from '../context';
 import { Page } from './page';
-import { Footer, FOOTER_HEIGHT } from './footer/footer';
+import { Footer, FOOTER_HEIGHT } from './footer';
 import { getTimeInterval } from '../../public/lib/time_interval';
 
 // @ts-ignore CSS Module
 import css from './canvas.module';
+
+let timeout: number = 0;
 
 export const Canvas = () => {
   const [
@@ -36,7 +38,8 @@ export const Canvas = () => {
   };
 
   if (autoplay.enabled && autoplay.interval) {
-    setTimeout(
+    clearTimeout(timeout);
+    timeout = setTimeout(
       () => dispatch(setPage(page >= workpad.pages.length - 1 ? 0 : page + 1)),
       getTimeInterval(autoplay.interval)
     );
@@ -46,10 +49,12 @@ export const Canvas = () => {
   const rootHeight = containerHeight + (toolbar.autohide ? 0 : FOOTER_HEIGHT);
 
   const hideToolbar = (hidden: boolean) => {
-    if (hidden) {
-      dispatch(setScrubberVisible(false));
+    if (settings.toolbar.autohide) {
+      if (hidden) {
+        dispatch(setScrubberVisible(false));
+      }
+      setToolbarHidden(hidden);
     }
-    setToolbarHidden(hidden);
   };
 
   return (
@@ -64,7 +69,7 @@ export const Canvas = () => {
           <Page page={pages[page]} />
         </div>
       </div>
-      <Footer autohide={toolbar.autohide} hidden={toolbarHidden} />
+      <Footer hidden={toolbarHidden} />
     </div>
   );
 };

@@ -1,9 +1,13 @@
 .root {
-  transform-origin: top left;
   margin: 0 8px;
   cursor: pointer;
 }
 
 .root :global .canvasPage {
   position: relative;
+}
+
+.preview {
+  pointer-events: none;
+  transform-origin: top left;
 }

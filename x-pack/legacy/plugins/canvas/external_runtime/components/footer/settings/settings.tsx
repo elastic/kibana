@@ -6,9 +6,9 @@
 
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
-import { useExternalEmbedState } from '../../context';
+import { useExternalEmbedState } from '../../../context';
 // @ts-ignore Untyped local
-import { CustomInterval } from '../../../public/components/workpad_header/control_settings/custom_interval';
+import { CustomInterval } from '../../../../public/components/workpad_header/control_settings/custom_interval';
 import { ToolbarSettings } from './toolbar_settings';
 import { AutoplaySettings } from './autoplay_settings';
 
@@ -66,7 +66,7 @@ export const Settings = () => {
         panel: {
           id: 2,
           title: 'Toolbar',
-          content: <ToolbarSettings />,
+          content: <ToolbarSettings onChange={() => setPopoverOpen(false)} />,
         },
       },
     ],

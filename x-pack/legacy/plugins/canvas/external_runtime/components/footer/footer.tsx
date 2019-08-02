@@ -18,16 +18,16 @@ import css from './footer.module';
 export const FOOTER_HEIGHT = 48;
 
 interface Props {
-  autohide?: boolean;
   hidden?: boolean;
 }
 
-export const Footer = ({ autohide = false, hidden = false }: Props) => {
-  const [{ workpad }] = useExternalEmbedState();
+export const Footer = ({ hidden = false }: Props) => {
+  const [{ workpad, settings }] = useExternalEmbedState();
   if (!workpad) {
     return null;
   }
 
+  const { autohide } = settings.toolbar;
   if (autohide && hidden) {
     setScrubberVisible(false);
   }
@@ -35,7 +35,7 @@ export const Footer = ({ autohide = false, hidden = false }: Props) => {
   return (
     <div className={css.root} style={{ height: FOOTER_HEIGHT }}>
       <Scrubber />
-      <div className={css.bar} style={{ bottom: hidden && autohide ? -FOOTER_HEIGHT : 0 }}>
+      <div className={css.bar} style={{ bottom: autohide && hidden ? -FOOTER_HEIGHT : 0 }}>
         <EuiFlexGroup>
           <EuiFlexItem>
             <Title />

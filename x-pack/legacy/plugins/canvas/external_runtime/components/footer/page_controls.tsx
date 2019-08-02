@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButtonEmpty, EuiText } from '@elastic/eui';
-import { useExternalEmbedState, setScrubberVisible, setPage } from '../../context';
+import { useExternalEmbedState, setScrubberVisible, setPage, setAutoplay } from '../../context';
 
 export const PageControls = () => {
   const [{ workpad, footer, page }, dispatch] = useExternalEmbedState();
@@ -17,7 +17,10 @@ export const PageControls = () => {
 
   const { isScrubberVisible } = footer;
 
-  const toggleScrubber = () => dispatch(setScrubberVisible(!isScrubberVisible));
+  const toggleScrubber = () => {
+    dispatch(setAutoplay(false));
+    dispatch(setScrubberVisible(!isScrubberVisible));
+  };
   const setPageNumber = (number: number) => dispatch(setPage(number));
   const currentPage = page + 1;
   const totalPages = workpad.pages.length;
