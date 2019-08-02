@@ -79,6 +79,7 @@ exports[`QueryBar Should render the given query 1`] = `
           dateFormat="YY"
           end="now"
           isAutoRefreshOnly={false}
+          isDisabled={false}
           isPaused={true}
           onTimeChange={[Function]}
           recentlyUsedRanges={
