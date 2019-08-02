@@ -181,6 +181,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
               </EuiButton>
             </EuiFlexItem>
           )}
+          <EuiFlexItem />
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={() => onClearSavedQuery()}>
               {loadedSavedQuery &&
