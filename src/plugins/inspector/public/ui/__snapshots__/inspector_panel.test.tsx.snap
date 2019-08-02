@@ -216,7 +216,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                     >
                       <FormattedMessage
                         defaultMessage="View: {viewName}"
-                        id="plugins.inspector.view"
+                        id="inspector.view"
                         values={
                           Object {
                             "viewName": "View 1",
@@ -297,7 +297,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                               >
                                 <FormattedMessage
                                   defaultMessage="View: {viewName}"
-                                  id="plugins.inspector.view"
+                                  id="inspector.view"
                                   values={
                                     Object {
                                       "viewName": "View 1",
@@ -321,20 +321,30 @@ exports[`InspectorPanel should render as expected 1`] = `
       </EuiFlexGroup>
     </div>
   </EuiFlyoutHeader>
-  <component
-    adapters={
-      Object {
-        "bardapter": Object {},
-        "foodapter": Object {
-          "foo": [Function],
-        },
-      }
-    }
-    title="Inspector"
-  >
-    <h1>
-      View 1
-    </h1>
-  </component>
+  <EuiFlyoutBody>
+    <div
+      className="euiFlyoutBody"
+    >
+      <div
+        className="euiFlyoutBody__overflow"
+      >
+        <component
+          adapters={
+            Object {
+              "bardapter": Object {},
+              "foodapter": Object {
+                "foo": [Function],
+              },
+            }
+          }
+          title="Inspector"
+        >
+          <h1>
+            View 1
+          </h1>
+        </component>
+      </div>
+    </div>
+  </EuiFlyoutBody>
 </InspectorPanel>
 `;

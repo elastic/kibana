@@ -53,6 +53,7 @@ export interface Start {
    *    the inspector panel.
    * @param {InspectorOptions} options - Options that configure the inspector. See InspectorOptions type.
    * @return {InspectorSession} The session instance for the opened inspector.
+   * @throws {Error}
    */
   open: (adapters: Adapters, options?: InspectorOptions) => InspectorSession;
 }

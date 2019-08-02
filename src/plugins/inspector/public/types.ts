@@ -46,8 +46,7 @@ export interface InspectorViewProps {
  * @typedef {object} InspectorViewDescription
  * @property {string} title - The title that will be used to present that view.
  * @property {string} icon - An icon name to present this view. Must match an EUI icon.
- * @property {React.ComponentType<InspectorViewProps>} component - The actual React component to render that
- *    that view. It should always return an `InspectorView` element at the toplevel.
+ * @property {React.ComponentType<InspectorViewProps>} component - The actual React component to render that view.
  * @property {number} [order=9000] - An order for this view. Views are ordered from lower
  *    order values to higher order values in the UI.
  * @property {string} [help=''] - An help text for this view, that gives a brief description

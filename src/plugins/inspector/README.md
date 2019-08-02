@@ -46,7 +46,7 @@ inspector view as follows:
 
 ```js
 import React from 'react';
-import { InspectorView, viewRegistry } from 'ui/inspector';
+import { viewRegistry } from 'ui/inspector';
 
 function MyInspectorComponent(props) {
   // props.adapters is the object of all adapters and may vary depending
@@ -54,9 +54,9 @@ function MyInspectorComponent(props) {
   // adapters you need, in the below shouldShow method, before accessing
   // them here.
   return (
-    <InspectorView>
-      { /* Always use InspectorView as the wrapping element! */ }
-    </InspectorView>
+    <>
+      My custom view....
+    </>
   );
 }
 

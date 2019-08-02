@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import { Adapters, InspectorViewDescription } from '../types';
 import { InspectorViewChooser } from './inspector_view_chooser';
 
@@ -122,7 +122,7 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
-        {this.renderSelectedPanel()}
+        <EuiFlyoutBody>{this.renderSelectedPanel()}</EuiFlyoutBody>
       </React.Fragment>
     );
   }
