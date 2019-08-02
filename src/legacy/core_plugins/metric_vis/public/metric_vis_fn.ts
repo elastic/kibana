@@ -21,13 +21,11 @@ import { i18n } from '@kbn/i18n';
 
 // @ts-ignore
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-
 import { ExpressionFunction, KibanaDatatable, Render, Range, Style } from '../../interpreter/types';
 
-// Todo: breaking change. Should contains one value
-type name = 'metric' | 'metricVis';
-
 type Context = KibanaDatatable;
+
+const name = 'metricVis';
 
 interface Arguments {
   percentage: boolean;
@@ -74,7 +72,7 @@ interface MetricVisParam {
 }
 
 interface RenderValue {
-  visType: string;
+  visType: 'metric';
   visData: Context;
   visConfig: VisParams;
   params: any;
@@ -82,8 +80,13 @@ interface RenderValue {
 
 type Return = Render<RenderValue>;
 
-export const createMetricVisFn = (): ExpressionFunction<name, Context, Arguments, Return> => ({
-  name: 'metricVis',
+export const createMetricVisFn = (): ExpressionFunction<
+  typeof name,
+  Context,
+  Arguments,
+  Return
+> => ({
+  name,
   type: 'render',
   context: {
     types: ['kibana_datatable'],
