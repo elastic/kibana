@@ -18,21 +18,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiLink, EuiPanel, EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps, VisOptionsSetValue } from 'ui/vis/editors/default';
 import { SelectOption } from '../../../kbn_vislib_vis_types/public/controls/select';
 import { SwitchOption } from '../../../kbn_vislib_vis_types/public/controls/switch';
-
-interface TmsLayer {
-  id: string;
-  origin: string;
-  minZoom: string;
-  maxZoom: number;
-  attribution: string;
-}
+import { WmsInternalOptions, TmsLayer } from './wms_interna_options';
 
 const mapLayerForOption = ({ id }: TmsLayer) => ({ text: id });
 
@@ -41,12 +34,6 @@ function WmsOptions({ serviceSettings, stateParams, setValue, vis }: VisOptionsP
   const { tmsLayers } = vis.type.editorConfig.collections;
   const [tmsLayerOptions, setTmsLayersOptions] = useState(
     vis.type.editorConfig.collections.tmsLayers.map(mapLayerForOption)
-  );
-
-  const wmsLink = (
-    <EuiLink href="http://www.opengeospatial.org/standards/wms" target="_blank">
-      <FormattedMessage id="tileMap.wmsOptions.wmsLinkText" defaultMessage="here" />
-    </EuiLink>
   );
 
   const setWmsOption: VisOptionsSetValue = (paramName, value) =>
@@ -108,18 +95,7 @@ function WmsOptions({ serviceSettings, stateParams, setValue, vis }: VisOptionsP
         setValue={setWmsOption}
       />
 
-      {wms.enabled && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <FormattedMessage
-              id="tileMap.wmsOptions.wmsDescription"
-              defaultMessage="WMS is an OGC standard for map image services. For more information, go {wmsLink}."
-              values={{ wmsLink }}
-            />
-          </EuiText>
-        </>
-      )}
+      {wms.enabled && <WmsInternalOptions wms={wms} setValue={setWmsOption} />}
     </EuiPanel>
   );
 }
