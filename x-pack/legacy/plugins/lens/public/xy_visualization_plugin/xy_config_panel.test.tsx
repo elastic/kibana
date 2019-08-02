@@ -10,7 +10,7 @@ import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EuiButtonGroupProps } from '@elastic/eui';
 import { XYConfigPanel } from './xy_config_panel';
 import { DatasourceDimensionPanelProps, Operation, FramePublicAPI } from '../types';
-import { State } from './types';
+import { State, XYState } from './types';
 import { Position } from '@elastic/charts';
 import { NativeRendererProps } from '../native_renderer';
 import { generateId } from '../id_generator';
@@ -291,6 +291,108 @@ describe('XYConfigPanel', () => {
             xAccessor: 'accessor',
             accessors: ['accessor'],
             splitAccessor: 'accessor',
+          }),
+        ],
+      });
+    });
+
+    it('should use series type of existing layers if they all have the same', () => {
+      frame.addNewLayer = jest.fn().mockReturnValue('newLayerId');
+      frame.datasourceLayers.second = createMockDatasource().publicAPIMock;
+      (generateId as jest.Mock).mockReturnValue('accessor');
+      const setState = jest.fn();
+      const state: XYState = {
+        ...testState(),
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            seriesType: 'line',
+            layerId: 'first',
+            splitAccessor: 'baz',
+            xAccessor: 'foo',
+            title: 'X',
+            accessors: ['bar'],
+          },
+          {
+            seriesType: 'line',
+            layerId: 'second',
+            splitAccessor: 'baz',
+            xAccessor: 'foo',
+            title: 'Y',
+            accessors: ['bar'],
+          },
+        ],
+      };
+      const component = mount(
+        <XYConfigPanel
+          dragDropContext={dragDropContext}
+          frame={frame}
+          setState={setState}
+          state={state}
+        />
+      );
+
+      component
+        .find('[data-test-subj="lnsXY_layer_add"]')
+        .first()
+        .simulate('click');
+
+      expect(setState.mock.calls[0][0]).toMatchObject({
+        layers: [
+          ...state.layers,
+          expect.objectContaining({
+            seriesType: 'line',
+          }),
+        ],
+      });
+    });
+
+    it('should use preffered series type if there are already various different layers', () => {
+      frame.addNewLayer = jest.fn().mockReturnValue('newLayerId');
+      frame.datasourceLayers.second = createMockDatasource().publicAPIMock;
+      (generateId as jest.Mock).mockReturnValue('accessor');
+      const setState = jest.fn();
+      const state: XYState = {
+        ...testState(),
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            seriesType: 'area',
+            layerId: 'first',
+            splitAccessor: 'baz',
+            xAccessor: 'foo',
+            title: 'X',
+            accessors: ['bar'],
+          },
+          {
+            seriesType: 'line',
+            layerId: 'second',
+            splitAccessor: 'baz',
+            xAccessor: 'foo',
+            title: 'Y',
+            accessors: ['bar'],
+          },
+        ],
+      };
+      const component = mount(
+        <XYConfigPanel
+          dragDropContext={dragDropContext}
+          frame={frame}
+          setState={setState}
+          state={state}
+        />
+      );
+
+      component
+        .find('[data-test-subj="lnsXY_layer_add"]')
+        .first()
+        .simulate('click');
+
+      expect(setState.mock.calls[0][0]).toMatchObject({
+        layers: [
+          ...state.layers,
+          expect.objectContaining({
+            seriesType: 'bar',
           }),
         ],
       });
