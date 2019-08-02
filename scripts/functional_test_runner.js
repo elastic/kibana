@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/functional_test_runner/cli');
+require('../packages/kbn-test/target/functional_test_runner/cli');
