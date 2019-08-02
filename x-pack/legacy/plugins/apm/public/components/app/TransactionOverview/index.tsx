@@ -76,10 +76,11 @@ export function TransactionOverview({
     data: transactionListData,
     status: transactionListStatus
   } = useTransactionList(urlParams);
-  const { data: hasMLJob = false } = useFetcher(
-    () => getHasMLJob({ serviceName, transactionType }),
-    [serviceName, transactionType]
-  );
+  const { data: hasMLJob = false } = useFetcher(() => {
+    return serviceName && transactionType
+      ? getHasMLJob({ serviceName, transactionType })
+      : undefined;
+  }, [serviceName, transactionType]);
 
   // TODO: improve urlParams typings.
   // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed

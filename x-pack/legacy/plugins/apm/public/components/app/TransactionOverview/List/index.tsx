@@ -28,7 +28,7 @@ interface Props {
   isLoading: boolean;
 }
 
-export function TransactionList({ items, serviceName, isLoading }: Props) {
+export function TransactionList({ items, isLoading }: Props) {
   const columns: Array<ITableColumn<ITransactionGroup>> = [
     {
       field: 'name',
