@@ -28,9 +28,12 @@ export function init(server: Legacy.Server) {
   );
 
   // Encrypted attributes
+  // - `secrets` properties will be encrypted
+  // - `config` will be included in AAD
+  // - everything else excluded from AAD
   server.plugins.encrypted_saved_objects!.registerType({
     type: 'action',
-    attributesToEncrypt: new Set(['actionTypeConfigSecrets']),
+    attributesToEncrypt: new Set(['secrets']),
     attributesToExcludeFromAAD: new Set(['description']),
   });
 
