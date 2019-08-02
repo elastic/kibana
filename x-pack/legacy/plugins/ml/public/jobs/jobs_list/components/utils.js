@@ -149,7 +149,11 @@ function showResults(resp, action) {
 export function cloneJob(jobId) {
   loadFullJob(jobId)
     .then((job) => {
-      mlJobService.currentJob = job;
+      if(job.custom_settings && job.custom_settings.created_by) {
+        mlJobService.tempJobCloningObjects.job = job;
+      } else {
+        mlJobService.currentJob = job;
+      }
       window.location.href = `#/jobs/new_job`;
     })
     .catch((error) => {

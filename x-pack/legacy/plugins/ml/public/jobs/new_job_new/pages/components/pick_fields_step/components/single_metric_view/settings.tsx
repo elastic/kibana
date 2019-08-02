@@ -5,8 +5,13 @@
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+
 import { JobCreatorContext } from '../../../job_creator_context';
 import { BucketSpan } from '../bucket_span';
+
+import { CREATED_BY_LABEL } from '../../../../../common/job_creator/util/constants';
+import { mlJobService } from '../../../../../../../services/job_service';
 
 interface Props {
   isActive: boolean;
@@ -27,5 +32,34 @@ export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
     setBucketSpan(jobCreator.bucketSpan);
   }, [jobCreatorUpdated]);
 
-  return <Fragment>{isActive && <BucketSpan />}</Fragment>;
+  const convertToMM = () => {
+    jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
+    mlJobService.tempJobCloningObjects.job = {
+      ...jobCreator.jobConfig,
+      datafeed_config: jobCreator.datafeedConfig,
+    };
+    delete mlJobService.tempJobCloningObjects.job.datafeed_config.aggregations;
+
+    mlJobService.tempJobCloningObjects.skipTimeRangeStep = true;
+    window.location.href = window.location.href.replace('single_metric', 'multi_metric');
+  };
+
+  return (
+    <Fragment>
+      {isActive && (
+        <Fragment>
+          <EuiFlexGroup gutterSize="xl">
+            <EuiFlexItem>
+              <BucketSpan />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={convertToMM}>Convert to multi metric job</EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Fragment>
+      )}
+    </Fragment>
+  );
 };
