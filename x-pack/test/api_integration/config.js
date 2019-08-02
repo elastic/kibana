@@ -12,10 +12,18 @@ import { SLACK_ACTION_SIMULATOR_URI } from './fixtures/plugins/actions';
 export async function getApiIntegrationConfig({ readConfigFile }) {
   const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
+  const servers = {
+    ...xPackFunctionalTestsConfig.get('servers'),
+    elasticsearch: {
+      ...xPackFunctionalTestsConfig.get('servers').elasticsearch,
+      protocol: 'https',
+    },
+  };
+
   return {
     testFiles: [require.resolve('./apis')],
     services,
-    servers: xPackFunctionalTestsConfig.get('servers'),
+    servers,
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
       reportName: 'X-Pack API Integration Tests',
@@ -28,10 +36,13 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
         `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
         `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
         `--server.xsrf.whitelist=${JSON.stringify([SLACK_ACTION_SIMULATOR_URI])}`,
+        `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
+        `--elasticsearch.ssl.certificateAuthorities=${path.resolve(__dirname, '../../../test/dev_certs/ca.crt')}`,
       ],
     },
     esTestCluster: {
       ...xPackFunctionalTestsConfig.get('esTestCluster'),
+      ssl: true,
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
         'node.attr.name=apiIntegrationTestNode'
