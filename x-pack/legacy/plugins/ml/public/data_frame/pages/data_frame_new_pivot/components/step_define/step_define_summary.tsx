@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext } from 'react';
+import React, { Fragment, SFC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -17,11 +17,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { useKibanaContext } from '../../../../../contexts/kibana';
+
 import { AggListSummary } from '../aggregation_list';
 import { GroupByListSummary } from '../group_by_list';
 import { PivotPreview } from './pivot_preview';
 
-import { getPivotQuery, isKibanaContext, KibanaContext } from '../../../../common';
+import { getPivotQuery } from '../../../../common';
 import { StepDefineExposedState } from './step_define_form';
 
 const defaultSearch = '*';
@@ -33,11 +35,7 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
   groupByList,
   aggList,
 }) => {
-  const kibanaContext = useContext(KibanaContext);
-
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
+  const kibanaContext = useKibanaContext();
 
   const pivotQuery = getPivotQuery(searchQuery);
   let useCodeBlock = false;

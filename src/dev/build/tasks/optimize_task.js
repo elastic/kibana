@@ -49,7 +49,7 @@ export const OptimizeBuildTask = {
       env: {
         FORCE_DLL_CREATION: 'true',
         KBN_CACHE_LOADER_WRITABLE: 'true',
-        NODE_OPTIONS: '--max-old-space-size=2048'
+        NODE_OPTIONS: '--max-old-space-size=3072'
       },
     });
 
