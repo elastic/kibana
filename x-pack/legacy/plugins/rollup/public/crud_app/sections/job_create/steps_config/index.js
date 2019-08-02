@@ -136,7 +136,11 @@ export const stepIdToStepConfigMap = {
       return errors;
     },
   },
-  [STEP_REVIEW]: {},
+  [STEP_REVIEW]: {
+    defaultFields: {
+      startJobAfterCreation: false
+    }
+  },
 };
 
 export function getAffectedStepsFields(fields, stepsFields) {

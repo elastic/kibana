@@ -10,16 +10,22 @@ import React from 'react';
 import { KibanaLink } from '../../shared/Links/KibanaLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
+import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { ErrorStatePrompt } from '../../shared/ErrorStatePrompt';
 
 interface Props {
   // any data submitted from APM agents found (not just in the given time range)
   historicalDataFound: boolean;
-  isLoading: boolean;
+  status: FETCH_STATUS | undefined;
 }
 
-export function NoServicesMessage({ historicalDataFound, isLoading }: Props) {
-  if (isLoading) {
+export function NoServicesMessage({ historicalDataFound, status }: Props) {
+  if (status === 'loading') {
     return <LoadingStatePrompt />;
+  }
+
+  if (status === 'failure') {
+    return <ErrorStatePrompt />;
   }
 
   if (historicalDataFound) {

@@ -8,11 +8,18 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { RequestAuth } from 'hapi';
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
+import uuid from 'uuid';
 
 import { SavedObjectsFindOptions } from 'src/core/server';
 
 import { Pick3 } from '../../../common/utility_types';
-import { PageInfoNote, ResponseNote, ResponseNotes, SortNote } from '../../graphql/types';
+import {
+  PageInfoNote,
+  ResponseNote,
+  ResponseNotes,
+  SortNote,
+  NoteResult,
+} from '../../graphql/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../framework';
 import { SavedNote, NoteSavedObjectRuntimeType, NoteSavedObject } from './types';
 import { noteSavedObjectType } from './saved_object_mappings';
@@ -156,6 +163,20 @@ export class Note {
         ),
       };
     } catch (err) {
+      if (getOr(null, 'output.statusCode', err) === 403) {
+        const noteToReturn: NoteResult = {
+          ...note,
+          noteId: uuid.v1(),
+          version: '',
+          timelineId: '',
+          timelineVersion: '',
+        };
+        return {
+          code: 403,
+          message: err.message,
+          note: noteToReturn,
+        };
+      }
       throw err;
     }
   }

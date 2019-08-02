@@ -40,9 +40,15 @@ export const LogsToolbar = injectI18n(({ intl }) => {
 
   const { setSurroundingLogsId } = useContext(LogFlyout.Context);
 
-  const { setHighlightTerms, loadLogEntryHighlightsRequest, highlightTerms } = useContext(
-    LogHighlightsState.Context
-  );
+  const {
+    setHighlightTerms,
+    loadLogEntryHighlightsRequest,
+    highlightTerms,
+    hasPreviousHighlight,
+    hasNextHighlight,
+    goToPreviousHighlight,
+    goToNextHighlight,
+  } = useContext(LogHighlightsState.Context);
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
@@ -74,6 +80,10 @@ export const LogsToolbar = injectI18n(({ intl }) => {
                     })}
                     suggestions={suggestions}
                     value={filterQueryDraft ? filterQueryDraft.expression : ''}
+                    aria-label={intl.formatMessage({
+                      id: 'xpack.infra.logsPage.toolbar.kqlSearchFieldAriaLabel',
+                      defaultMessage: 'Search for log entries',
+                    })}
                   />
                 )}
               </WithLogFilter>
@@ -105,6 +115,10 @@ export const LogsToolbar = injectI18n(({ intl }) => {
             activeHighlights={
               highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length > 0
             }
+            goToPreviousHighlight={goToPreviousHighlight}
+            goToNextHighlight={goToNextHighlight}
+            hasPreviousHighlight={hasPreviousHighlight}
+            hasNextHighlight={hasNextHighlight}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

@@ -21,7 +21,7 @@ const JAVA_LANG_DETACH_PORT = 2090;
 
 export class JavaLauncher extends AbstractLauncher {
   private needModuleArguments: boolean = true;
-  public constructor(
+  constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
     readonly loggerFactory: LoggerFactory
@@ -41,6 +41,13 @@ export class JavaLauncher extends AbstractLauncher {
             'java.import.gradle.enabled': this.options.security.enableGradleImport,
             'java.import.maven.enabled': this.options.security.enableMavenImport,
             'java.autobuild.enabled': false,
+          },
+        },
+        clientCapabilities: {
+          textDocument: {
+            documentSymbol: {
+              hierarchicalDocumentSymbolSupport: true,
+            },
           },
         },
       } as InitializeOptions,
