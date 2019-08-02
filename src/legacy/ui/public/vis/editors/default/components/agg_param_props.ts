@@ -21,7 +21,7 @@ import { AggParam } from '../../../../agg_types';
 import { AggConfig } from '../../../agg_config';
 import { FieldParamType } from '../../../../agg_types/param_types';
 import { EditorConfig } from '../../config/types';
-import { VisState } from '../../../vis';
+import { VisState } from '../../..';
 import { SubAggParamsProp } from './agg_params';
 
 // NOTE: we cannot export the interface with export { InterfaceName }

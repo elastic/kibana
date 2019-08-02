@@ -20,7 +20,7 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { IndexPattern } from 'ui/index_patterns';
-import { VisState } from 'ui/vis';
+import { VisState } from '../../..';
 import { DefaultEditorAggParams, DefaultEditorAggParamsProps } from './agg_params';
 
 const mockEditorConfig = {

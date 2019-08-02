@@ -22,8 +22,8 @@ import { EuiForm, EuiAccordion, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { aggTypes, AggType, AggParam } from 'ui/agg_types';
-import { AggConfig, VisState } from 'ui/vis';
 import { IndexPattern } from 'ui/index_patterns';
+import { AggConfig, VisState } from '../../..';
 import { DefaultEditorAggSelect } from './agg_select';
 import { DefaultEditorAggParam } from './agg_param';
 import {

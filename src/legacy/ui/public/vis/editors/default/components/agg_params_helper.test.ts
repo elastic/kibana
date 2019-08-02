@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AggConfig, VisState } from 'ui/vis';
+import { AggConfig, VisState } from '../../..';
 import { FieldParamType, AggType } from 'ui/agg_types';
 import { IndexPattern } from 'ui/index_patterns';
 import {

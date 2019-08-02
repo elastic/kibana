@@ -19,11 +19,11 @@
 
 import { get, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AggConfig, VisState } from 'ui/vis';
 import { aggTypeFilters } from 'ui/agg_types/filter';
 import { IndexPattern } from 'ui/index_patterns';
 import { aggTypes, AggParam, FieldParamType, AggType } from 'ui/agg_types';
 import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
+import { AggConfig, VisState } from '../../..';
 import { groupAggregationsBy } from '../utils';
 import { EditorConfig } from '../../config/types';
 import { AggTypeState, AggParamsState } from './agg_params_state';
