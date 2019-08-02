@@ -14,6 +14,8 @@ import {
   containsCharsField,
 } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/lib/field_validators';
 
+import { toInt } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/lib';
+
 import { nameConflictError } from '../errors';
 import { ERROR_CODES } from '../constants';
 
@@ -200,8 +202,9 @@ export const parametersDefinition: {
   boost: {
     fieldConfig: {
       label: 'Boost',
-      defaultValue: '',
-      type: FIELD_TYPES.TEXT,
+      defaultValue: 1.0,
+      type: FIELD_TYPES.NUMBER,
+      formatters: [toInt],
     },
   },
   dynamic: {
@@ -296,19 +299,96 @@ export const parametersDefinition: {
       label: 'Position increment gap',
       type: FIELD_TYPES.NUMBER,
       defaultValue: 100,
+      formatters: [toInt],
+      validations: [
+        {
+          validator: emptyField('Set a position increment gap value.'),
+        },
+        {
+          validator: ({ value }) => {
+            if ((value as number) < 0) {
+              return {
+                message: 'The value must be greater or equal to 0.',
+              };
+            }
+          },
+        },
+      ],
     },
   },
   index_prefixes: {
     fieldConfig: {
-      min: {
+      min_chars: {
         type: FIELD_TYPES.NUMBER,
         defaultValue: 2,
-        helpText: 'Min.',
+        helpText: 'Min chars.',
+        formatters: [toInt],
+        validations: [
+          {
+            validator: emptyField('Set a min value.'),
+          },
+          {
+            validator: ({ value }) => {
+              if ((value as number) < 0) {
+                return {
+                  message: 'The value must be greater or equal than zero.',
+                };
+              }
+            },
+          },
+          {
+            validator: ({ value, path, formData }) => {
+              const maxPath = path.replace('.min', '.max');
+              const maxValue = formData[maxPath];
+
+              if ((maxValue as string) === '') {
+                return;
+              }
+
+              if ((value as number) >= (maxValue as number)) {
+                return {
+                  message: 'The value must be smaller than the max value.',
+                };
+              }
+            },
+          },
+        ],
       },
-      max: {
+      max_chars: {
         type: FIELD_TYPES.NUMBER,
         defaultValue: 5,
-        helpText: 'Max.',
+        helpText: 'Max chars.',
+        formatters: [toInt],
+        validations: [
+          {
+            validator: emptyField('Set a max value.'),
+          },
+          {
+            validator: ({ value }) => {
+              if ((value as number) > 20) {
+                return {
+                  message: 'The value must be smaller or equal than 20.',
+                };
+              }
+            },
+          },
+          {
+            validator: ({ value, path, formData }) => {
+              const minPath = path.replace('.max', '.min');
+              const minValue = formData[minPath];
+
+              if ((minValue as string) === '') {
+                return;
+              }
+
+              if ((value as number) <= (minValue as number)) {
+                return {
+                  message: 'The value must be greater than the min value.',
+                };
+              }
+            },
+          },
+        ],
       },
     },
   },

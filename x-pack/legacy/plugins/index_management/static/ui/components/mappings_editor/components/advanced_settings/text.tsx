@@ -147,27 +147,41 @@ export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Prop
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <UseField
-                    path={`${fieldPathPrefix}index_prefixes.min`}
+                    path={`${fieldPathPrefix}index_prefixes.min_chars`}
                     form={form}
                     defaultValue={
                       isEditMode
                         ? undefined
-                        : (parametersDefinition.index_prefixes.fieldConfig! as any).min.defaultValue
+                        : (parametersDefinition.index_prefixes.fieldConfig! as any).min_chars
+                            .defaultValue
                     }
-                    config={(parametersDefinition.index_prefixes.fieldConfig! as any).min}
+                    config={{
+                      ...(parametersDefinition.index_prefixes.fieldConfig! as any).min_chars,
+                      fieldsToValidateOnChange: [
+                        `${fieldPathPrefix}index_prefixes.min_chars`,
+                        `${fieldPathPrefix}index_prefixes.max_chars`,
+                      ],
+                    }}
                     component={Field}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <UseField
-                    path={`${fieldPathPrefix}index_prefixes.max`}
+                    path={`${fieldPathPrefix}index_prefixes.max_chars`}
                     form={form}
                     defaultValue={
                       isEditMode
                         ? undefined
-                        : (parametersDefinition.index_prefixes.fieldConfig! as any).max.defaultValue
+                        : (parametersDefinition.index_prefixes.fieldConfig! as any).max_chars
+                            .defaultValue
                     }
-                    config={(parametersDefinition.index_prefixes.fieldConfig! as any).max}
+                    config={{
+                      ...(parametersDefinition.index_prefixes.fieldConfig! as any).max_chars,
+                      fieldsToValidateOnChange: [
+                        `${fieldPathPrefix}index_prefixes.min_chars`,
+                        `${fieldPathPrefix}index_prefixes.max_chars`,
+                      ],
+                    }}
                     component={Field}
                   />
                 </EuiFlexItem>
@@ -191,7 +205,9 @@ export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Prop
               config={fieldConfig('similarity')}
               component={Field}
               componentProps={{
-                fieldProps: { options: SIMILARITY_ALGORITHM_OPTIONS },
+                fieldProps: {
+                  options: SIMILARITY_ALGORITHM_OPTIONS,
+                },
               }}
             />
           </EuiFlexItem>
