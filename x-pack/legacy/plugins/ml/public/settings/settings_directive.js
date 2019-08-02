@@ -15,14 +15,11 @@ const module = uiModules.get('apps/ml', ['react']);
 import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../privilege/check_privilege';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
-import { NavigationMenuContext } from '../util/context_utils';
 import { getSettingsBreadcrumbs } from './breadcrumbs';
 
 import { I18nContext } from 'ui/i18n';
-import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
 import { timefilter } from 'ui/timefilter';
-import { timeHistory } from 'ui/timefilter/time_history';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
@@ -58,9 +55,7 @@ module.directive('mlSettings', function () {
 
       ReactDOM.render(
         <I18nContext>
-          <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }} >
-            <Settings canGetCalendars={canGetCalendars} canGetFilters={canGetFilters} />
-          </NavigationMenuContext.Provider>
+          <Settings canGetCalendars={canGetCalendars} canGetFilters={canGetFilters} />
         </I18nContext>,
         element[0]
       );
