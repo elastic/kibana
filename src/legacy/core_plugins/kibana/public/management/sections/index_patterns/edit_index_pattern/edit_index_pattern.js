@@ -206,7 +206,9 @@ uiModules.get('apps/management')
     $scope.migrate = async function () {
       $scope.migration.isMigrating = true;
       await $scope.indexPattern.migrate($scope.migration.newTitle);
-      $scope.migration.isMigrating = false;
+      $scope.$evalAsync(() => {
+        $scope.migration.isMigrating = false;
+      });
     };
 
     $scope.refreshFilters = function () {
