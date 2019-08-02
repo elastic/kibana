@@ -18,7 +18,7 @@
  */
 
 import { SavedQueryAttributes } from '../index';
-import { saveQuery } from './saved_query_service';
+import { saveQuery, findSavedQueries, getSavedQuery } from './saved_query_service';
 import { FilterStateStore } from '@kbn/es-query';
 
 const savedQueryAttributes: SavedQueryAttributes = {
@@ -56,6 +56,8 @@ const savedQueryAttributesWithFilters: SavedQueryAttributes = {
 const mockSavedObjectsClient = {
   create: jest.fn(),
   error: jest.fn(),
+  find: jest.fn(),
+  get: jest.fn(),
 };
 
 jest.mock('ui/chrome', () => {
@@ -69,6 +71,8 @@ jest.mock('ui/chrome', () => {
 describe('saved query service', () => {
   afterEach(() => {
     mockSavedObjectsClient.create.mockReset();
+    mockSavedObjectsClient.find.mockReset();
+    mockSavedObjectsClient.get.mockReset();
   });
 
   describe('saveQuery', function() {
@@ -134,9 +138,74 @@ describe('saved query service', () => {
       }
       expect(error).not.toBe(null);
     });
+  });
+  describe('findSavedQueries', function() {
+    it('should find and return saved queries without search text', async () => {
+      mockSavedObjectsClient.find.mockReturnValue({
+        savedObjects: [{ id: '1234', attributes: savedQueryAttributes }],
+      });
 
-    it('should test all the other service methods', () => {
-      throw new Error('implement me');
+      const response = await findSavedQueries();
+      expect(response).toEqual([{ id: '1234', attributes: savedQueryAttributes }]);
+    });
+
+    it('should find and return saved queries with search text matching the title field', async () => {
+      mockSavedObjectsClient.find.mockReturnValue({
+        savedObjects: [{ id: '1234', attributes: savedQueryAttributes }],
+      });
+      const response = await findSavedQueries('foo');
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        search: 'foo',
+        searchFields: ['title^5', 'description'],
+        sortField: '_score',
+        type: 'query',
+      });
+      expect(response).toEqual([{ id: '1234', attributes: savedQueryAttributes }]);
+    });
+    it('should find and return parsed filters and timefilters items', async () => {
+      const serializedSavedQueryAttributesWithFilters = {
+        ...savedQueryAttributesWithFilters,
+        filters: JSON.stringify(savedQueryAttributesWithFilters.filters),
+        timefilter: JSON.stringify(savedQueryAttributesWithFilters.timefilter),
+      };
+      mockSavedObjectsClient.find.mockReturnValue({
+        savedObjects: [{ id: '1234', attributes: serializedSavedQueryAttributesWithFilters }],
+      });
+      const response = await findSavedQueries('bar');
+      expect(response).toEqual([{ id: '1234', attributes: savedQueryAttributesWithFilters }]);
+    });
+    it('should return an array of saved queries', async () => {
+      mockSavedObjectsClient.find.mockReturnValue({
+        savedObjects: [{ id: '1234', attributes: savedQueryAttributes }],
+      });
+      const response = await findSavedQueries();
+      expect(response).toEqual(
+        expect.objectContaining([
+          {
+            attributes: {
+              description: 'bar',
+              query: { language: 'kuery', query: 'response:200' },
+              title: 'foo',
+            },
+            id: '1234',
+          },
+        ])
+      );
+    });
+  });
+
+  describe('getSavedQuery', function() {
+    it('should retrieve a saved query by id', async () => {
+      mockSavedObjectsClient.get.mockReturnValue({ id: '1234', attributes: savedQueryAttributes });
+
+      const response = await getSavedQuery('1234');
+      expect(response).toEqual({ id: '1234', attributes: savedQueryAttributes });
+    });
+    it('should only return saved queries', async () => {
+      mockSavedObjectsClient.get.mockReturnValue({ id: '1234', attributes: savedQueryAttributes });
+
+      await getSavedQuery('1234');
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('query', '1234');
     });
   });
 });
