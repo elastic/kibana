@@ -291,6 +291,9 @@ function discoverController(
             title={savedSearch.title}
             showCopyOnSave={savedSearch.id ? true : false}
             objectType="search"
+            description={i18n.translate('kbn.discover.localMenu.saveSaveSearchDescription', {
+              defaultMessage: 'Save your Discover search so you can use it in visualizations and dashboards',
+            })}
           />);
         showSaveModal(saveModal);
       }
