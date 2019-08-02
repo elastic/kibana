@@ -13,6 +13,7 @@ import {
   getLogEntryRateSuccessReponsePayloadRT,
 } from '../../../../common/http_api/log_analysis';
 import { throwErrors } from '../../../../common/runtime_types';
+import { NoLogRateResultsIndexError } from '../../../lib/log_analysis';
 
 export const initLogAnalysisGetLogEntryRateRoute = ({
   framework,
@@ -35,6 +36,10 @@ export const initLogAnalysisGetLogEntryRateRoute = ({
           payload.data.bucketDuration
         )
         .catch(err => {
+          if (err instanceof NoLogRateResultsIndexError) {
+            throw Boom.boomify(err, { statusCode: 404 });
+          }
+
           throw Boom.boomify(err, { statusCode: ('statusCode' in err && err.statusCode) || 500 });
         });
 

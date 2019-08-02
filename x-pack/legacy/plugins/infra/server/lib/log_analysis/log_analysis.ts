@@ -7,8 +7,9 @@
 import * as rt from 'io-ts';
 
 import { getJobId } from '../../../common/log_analysis';
-import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../adapters/framework';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
+import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../adapters/framework';
+import { NoLogRateResultsIndexError } from './errors';
 
 const ML_ANOMALY_INDEX_PREFIX = '.ml-anomalies-';
 
@@ -124,6 +125,12 @@ export class InfraLogAnalysis {
       trackScores: false,
       trackTotalHits: false,
     });
+
+    if (mlModelPlotResponse._shards.total === 0) {
+      throw new NoLogRateResultsIndexError(
+        `Failed to find ml result index for job ${logRateJobId}.`
+      );
+    }
 
     const mlModelPlotBuckets = logRateModelPlotResponseRT
       .decode(mlModelPlotResponse)
