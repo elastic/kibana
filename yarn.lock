@@ -1748,7 +1748,7 @@
 
 "@elastic/maki@github:nickpeihl/maki#sdf-icons":
   version "6.1.0"
-  resolved "https://codeload.github.com/nickpeihl/maki/tar.gz/11441cf3332c64762c0b6097d55c068bafb75156"
+  resolved "https://codeload.github.com/nickpeihl/maki/tar.gz/8e06ad2370aa0646bca9bd31b647edfc742bf0aa"
 
 "@elastic/node-crypto@^0.1.2":
   version "0.1.2"
