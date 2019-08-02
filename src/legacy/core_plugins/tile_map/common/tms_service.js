@@ -28,10 +28,7 @@ export class TMSService {
     return this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
   });
 
-  constructor(config,
-    emsClient,
-    proxyPath
-  ) {
+  constructor(config, emsClient, proxyPath) {
     this._config = config;
     this._emsClient = emsClient;
     this._proxyPath = proxyPath;

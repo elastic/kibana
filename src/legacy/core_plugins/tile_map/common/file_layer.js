@@ -23,17 +23,14 @@ import url from 'url';
 
 export class FileLayer {
 
-  constructor(config, emsClient, proxyPath
-              // , proxyOptions
-  ) {
+  constructor(config, emsClient, proxyPath) {
     this._config = config;
     this._emsClient = emsClient;
-    // this._proxyOptions = proxyOptions;
     this._proxyPath = proxyPath;
   }
 
   getAttributions() {
-    const attributions = this._config.attribution.map(attribution => {
+    return this._config.attribution.map(attribution => {
       const url = this._emsClient.getValueInLanguage(attribution.url);
       const label = this._emsClient.getValueInLanguage(attribution.label);
       return {
@@ -41,7 +38,6 @@ export class FileLayer {
         label: label
       };
     });
-    return attributions;
   }
 
   getHTMLAttribution() {
@@ -110,14 +106,8 @@ export class FileLayer {
   }
 
   getDefaultFormatUrl() {
-    // let url;
-    // if (this._proxyOptions) {
-    //   const id = encodeURIComponent(this.getId());
-    //   url = `${this._proxyOptions.fileLayerDefaultJson}?id=${id}`;
-    // }else {
-      const format = this._getDefaultFormat();
-      const url = this._emsClient.extendUrlWithParams(format.url);
-    // }
+    const format = this._getDefaultFormat();
+    const url = this._emsClient.extendUrlWithParams(format.url);
     return this._proxyPath + url;
   }
 
