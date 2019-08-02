@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiListGroup,
   EuiListGroupItem,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { summarizeCopyResult } from 'plugins/spaces/lib/copy_to_space';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -46,7 +47,7 @@ export const ProcessingCopyToSpace = (props: Props) => {
 
   return (
     <Fragment>
-      <EuiListGroup className="spcCopyToSpaceOptionsView">
+      <EuiListGroup className="spcCopyToSpaceOptionsView" flush>
         <EuiListGroupItem
           iconType={props.includeRelated ? 'check' : 'cross'}
           label={
@@ -80,7 +81,11 @@ export const ProcessingCopyToSpace = (props: Props) => {
           }
         />
       </EuiListGroup>
-      <EuiSpacer />
+      <EuiHorizontalRule margin="m" />
+      <EuiText size="s">
+        <h5>Copy results</h5>
+      </EuiText>
+      <EuiSpacer size="m" />
       {props.selectedSpaceIds.map(id => {
         const space = props.spaces.find(s => s.id === id) as Space;
         const result = props.copyResult[space.id];

@@ -59,9 +59,15 @@ export const CopyResultDetails = (props: Props) => {
           !showOverwriteButton && objectOverwritePending && !props.conflictResolutionInProgress;
 
         return (
-          <EuiFlexGroup responsive={false} key={index} alignItems="center" gutterSize="s">
+          <EuiFlexGroup
+            responsive={false}
+            key={index}
+            alignItems="center"
+            gutterSize="s"
+            className="spcCopyToSpaceResultDetails__row"
+          >
             <EuiFlexItem grow={5} className="spcCopyToSpaceResultDetails__savedObjectName">
-              <EuiText>
+              <EuiText size="s">
                 <p className="eui-textTruncate" title={object.name || object.id}>
                   {object.type}: {object.name || object.id}
                 </p>
@@ -69,7 +75,7 @@ export const CopyResultDetails = (props: Props) => {
             </EuiFlexItem>
             {showOverwriteButton && (
               <EuiFlexItem grow={1}>
-                <EuiText>
+                <EuiText size="s">
                   <EuiButtonEmpty onClick={() => onOverwriteClick(object)} size="xs">
                     <FormattedMessage
                       id="xpack.spaces.management.copyToSpace.copyDetail.overwriteButton"
@@ -81,7 +87,7 @@ export const CopyResultDetails = (props: Props) => {
             )}
             {showSkipButton && (
               <EuiFlexItem grow={1}>
-                <EuiText>
+                <EuiText size="s">
                   <EuiButtonEmpty onClick={() => onOverwriteClick(object)} size="xs">
                     <FormattedMessage
                       id="xpack.spaces.management.copyToSpace.copyDetail.skipOverwriteButton"

@@ -16,6 +16,9 @@ import {
   EuiFormRow,
   EuiFlyoutFooter,
   EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -169,7 +172,6 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
 
   const form = (
     <Fragment>
-      <EuiSpacer />
       <EuiSwitch
         label={
           <FormattedMessage
@@ -196,7 +198,7 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
         disabled={copyInProgress}
       />
 
-      <EuiSpacer />
+      <EuiHorizontalRule margin="m" />
 
       {/* TODO: remove once https://github.com/elastic/eui/issues/2071 is fixed */}
       {isLoading && <EuiLoadingSpinner />}
@@ -209,6 +211,7 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
               defaultMessage="Select spaces to copy into"
             />
           }
+          fullWidth
         >
           <SelectableSpacesControl
             spaces={spaces}
@@ -224,22 +227,34 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
   return (
     <EuiFlyout onClose={onClose} maxWidth={600}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>
+        <EuiFlexGroup alignItems="center" gutterSize="m">
+          <EuiFlexItem grow={false}>
             <EuiIcon size="m" type="spacesApp" />
-            &nbsp; &nbsp;
-            <FormattedMessage
-              id="xpack.spaces.management.copyToSpaceFlyoutHeader"
-              defaultMessage="Copy saved object to space"
-            />
-          </h2>
-        </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="m">
+              <h2>
+                <FormattedMessage
+                  id="xpack.spaces.management.copyToSpaceFlyoutHeader"
+                  defaultMessage="Copy saved object to space"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiText>
-          <EuiIcon type={savedObject.meta.icon || 'apps'} /> {savedObject.meta.title}
-        </EuiText>
-
+        <EuiFlexGroup alignItems="center" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={savedObject.meta.icon || 'apps'} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <p>{savedObject.meta.title}</p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiHorizontalRule margin="m" />
         {copyInProgress && (
           <ProcessingCopyToSpace
             savedObject={savedObject}

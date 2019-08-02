@@ -7,7 +7,14 @@
 import React, { Fragment } from 'react';
 import { ProcessedImportResponse } from 'ui/management/saved_objects_management';
 import { SavedObjectsImportRetry } from 'src/core/server';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiStat } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiStat,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
@@ -109,15 +116,14 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
             titleSize="s"
             titleColor={initialCopyFinished ? 'secondary' : 'subdued'}
             isLoading={!initialCopyFinished}
+            textAlign="center"
             description={
               <FormattedMessage
                 id="xpack.spaces.management.copyToSpaceFlyoutFooter.successCount"
-                defaultMessage="copied"
+                defaultMessage="Copied"
               />
             }
-          >
-            <EuiIcon type="empty" />
-          </EuiStat>
+          />
         </EuiFlexItem>
         {summarizedResults.overwriteConflictCount > 0 && (
           <EuiFlexItem>
@@ -126,15 +132,14 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
               titleSize="s"
               titleColor={summarizedResults.overwriteConflictCount > 0 ? 'primary' : 'subdued'}
               isLoading={!initialCopyFinished}
+              textAlign="center"
               description={
                 <FormattedMessage
                   id="xpack.spaces.management.copyToSpaceFlyoutFooter.conflictCount"
-                  defaultMessage="pending"
+                  defaultMessage="Pending"
                 />
               }
-            >
-              <EuiIcon type="empty" />
-            </EuiStat>
+            />
           </EuiFlexItem>
         )}
         <EuiFlexItem>
@@ -143,15 +148,14 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
             titleSize="s"
             titleColor={summarizedResults.conflictCount > 0 ? 'primary' : 'subdued'}
             isLoading={!initialCopyFinished}
+            textAlign="center"
             description={
               <FormattedMessage
                 id="xpack.spaces.management.copyToSpaceFlyoutFooter.conflictCount"
-                defaultMessage="skipped"
+                defaultMessage="Skipped"
               />
             }
-          >
-            <EuiIcon type="empty" />
-          </EuiStat>
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiStat
@@ -159,17 +163,17 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
             titleSize="s"
             titleColor={summarizedResults.unresolvableErrorCount > 0 ? 'danger' : 'subdued'}
             isLoading={!initialCopyFinished}
+            textAlign="center"
             description={
               <FormattedMessage
                 id="xpack.spaces.management.copyToSpaceFlyoutFooter.errorCount"
-                defaultMessage="errors"
+                defaultMessage="Errors"
               />
             }
-          >
-            <EuiIcon type="empty" />
-          </EuiStat>
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiHorizontalRule />
       {getButton()}
     </Fragment>
   );
