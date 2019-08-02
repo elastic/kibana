@@ -17,12 +17,12 @@
  * under the License.
  */
 
-const path = require('path');
 const { ToolingLog } = require('@kbn/dev-utils');
 const execa = require('execa');
 const { Cluster } = require('../cluster');
 const { installSource, installSnapshot, installArchive } = require('../install');
 const { extractConfigFiles } = require('../utils/extract_config_files');
+const { caCertPath, esKeyPath, esCertPath } = require('../constants');
 
 jest.mock('../install', () => ({
   installSource: jest.fn(),
@@ -253,24 +253,9 @@ describe('#start(installPath)', () => {
 
     const config = extractConfigFiles.mock.calls[0][0];
     expect(config).toContain('xpack.security.http.ssl.enabled=true');
-    expect(config).toContain(
-      `xpack.security.http.ssl.key=${path.resolve(
-        __dirname,
-        '../../../../test/dev_certs/elasticsearch/elasticsearch/elasticsearch.key'
-      )}`
-    );
-    expect(config).toContain(
-      `xpack.security.http.ssl.certificate=${path.resolve(
-        __dirname,
-        '../../../../test/dev_certs/elasticsearch/elasticsearch/elasticsearch.crt'
-      )}`
-    );
-    expect(config).toContain(
-      `xpack.security.http.ssl.certificate_authorities=${path.resolve(
-        __dirname,
-        '../../../../test/dev_certs/elasticsearch/ca/ca.crt'
-      )}`
-    );
+    expect(config).toContain(`xpack.security.http.ssl.key=${esKeyPath}`);
+    expect(config).toContain(`xpack.security.http.ssl.certificate=${esCertPath}`);
+    expect(config).toContain(`xpack.security.http.ssl.certificate_authorities=${caCertPath}`);
   });
 
   it(`doesn't setup SSL when disabled`, async () => {
@@ -335,24 +320,9 @@ describe('#run()', () => {
 
     const config = extractConfigFiles.mock.calls[0][0];
     expect(config).toContain('xpack.security.http.ssl.enabled=true');
-    expect(config).toContain(
-      `xpack.security.http.ssl.key=${path.resolve(
-        __dirname,
-        '../../../../test/dev_certs/elasticsearch/elasticsearch/elasticsearch.key'
-      )}`
-    );
-    expect(config).toContain(
-      `xpack.security.http.ssl.certificate=${path.resolve(
-        __dirname,
-        '../../../../test/dev_certs/elasticsearch/elasticsearch/elasticsearch.crt'
-      )}`
-    );
-    expect(config).toContain(
-      `xpack.security.http.ssl.certificate_authorities=${path.resolve(
-        __dirname,
-        '../../../../test/dev_certs/elasticsearch/ca/ca.crt'
-      )}`
-    );
+    expect(config).toContain(`xpack.security.http.ssl.key=${esKeyPath}`);
+    expect(config).toContain(`xpack.security.http.ssl.certificate=${esCertPath}`);
+    expect(config).toContain(`xpack.security.http.ssl.certificate_authorities=${caCertPath}`);
   });
 
   it(`doesn't setup SSL when disabled`, async () => {

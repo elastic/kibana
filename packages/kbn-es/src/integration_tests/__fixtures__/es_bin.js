@@ -20,10 +20,10 @@
  */
 
 const fs = require('fs');
-const path = require('path');
 const { format: formatUrl } = require('url');
 const { exitCode, start, ssl } = JSON.parse(process.argv[2]);
 const { createServer } = ssl ? require('https') : require('http');
+const { esKeyPath, esCertPath } = require('../../constants');
 
 process.exitCode = exitCode;
 
@@ -34,22 +34,8 @@ if (!start) {
 let serverUrl;
 const server = createServer(
   {
-    key: ssl
-      ? fs.readFileSync(
-          path.resolve(
-            __dirname,
-            '../../../../../test/dev_certs/elasticsearch/elasticsearch/elasticsearch.key'
-          )
-        )
-      : undefined,
-    cert: ssl
-      ? fs.readFileSync(
-          path.resolve(
-            __dirname,
-            '../../../../../test/dev_certs/elasticsearch/elasticsearch/elasticsearch.crt'
-          )
-        )
-      : undefined,
+    key: ssl ? fs.readFileSync(esKeyPath) : undefined,
+    cert: ssl ? fs.readFileSync(esCertPath) : undefined,
   },
   (req, res) => {
     const url = new URL(req.url, serverUrl);

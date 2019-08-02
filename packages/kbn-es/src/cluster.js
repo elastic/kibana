@@ -35,17 +35,8 @@ const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
+const { caCertPath, esKeyPath, esCertPath } = require('constants');
 const readFile = util.promisify(fs.readFile);
-
-const caCertPath = path.resolve(__dirname, '../../../test/dev_certs/elasticsearch/ca/ca.crt');
-const esKeyPath = path.resolve(
-  __dirname,
-  '../../../test/dev_certs/elasticsearch/elasticsearch/elasticsearch.key'
-);
-const esCertPath = path.resolve(
-  __dirname,
-  '../../../test/dev_certs/elasticsearch/elasticsearch/elasticsearch.crt'
-);
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>
