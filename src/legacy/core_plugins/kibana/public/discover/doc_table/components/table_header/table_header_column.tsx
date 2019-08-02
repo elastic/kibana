@@ -69,9 +69,9 @@ export function TableHeaderColumn({
 
     // Cycle goes Unsorted -> Asc -> Desc -> Unsorted
     if (currentColumnSort === undefined) {
-      onChangeSortOrder([[name, 'asc'], ...currentSortWithoutColumn]);
+      onChangeSortOrder([...currentSortWithoutColumn, [name, 'asc']]);
     } else if (currentColumnSortDirection === 'asc') {
-      onChangeSortOrder([[name, 'desc'], ...currentSortWithoutColumn]);
+      onChangeSortOrder([...currentSortWithoutColumn, [name, 'desc']]);
     } else if (currentColumnSortDirection === 'desc' && currentSortWithoutColumn.length === 0) {
       // If we're at the end of the cycle and this is the only existing sort, we switch
       // back to ascending sort instead of removing it.
