@@ -18,7 +18,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
@@ -26,6 +26,7 @@ import { SelectOption } from '../../../kbn_vislib_vis_types/public/controls/sele
 import { RangeOption } from '../../../kbn_vislib_vis_types/public/controls/range';
 import { BasicOptions } from '../../../kbn_vislib_vis_types/public/controls/basic_options';
 import { SwitchOption } from '../../../kbn_vislib_vis_types/public/controls/switch';
+import { WmsOptions } from './wms_options';
 
 function TileMapOptions(props: VisOptionsProps) {
   const { stateParams, setValue, vis } = props;
@@ -37,57 +38,63 @@ function TileMapOptions(props: VisOptionsProps) {
   }, []);
 
   return (
-    <EuiPanel paddingSize="s">
-      <SelectOption
-        label={i18n.translate('tileMap.visParams.mapTypeLabel', {
-          defaultMessage: 'Map type',
-        })}
-        options={vis.type.editorConfig.collections.mapTypes}
-        paramName="mapType"
-        value={stateParams.mapType}
-        setValue={setValue}
-      />
-
-      <SelectOption
-        label={i18n.translate('tileMap.visParams.colorSchemaLabel', {
-          defaultMessage: 'Color schema',
-        })}
-        options={vis.type.editorConfig.collections.colorSchemas}
-        paramName="colorSchema"
-        value={stateParams.colorSchema}
-        setValue={setValue}
-      />
-
-      {stateParams.mapType === 'Heatmap' && (
-        <RangeOption
-          label={i18n.translate('tileMap.visParams.clusterSizeLabel', {
-            defaultMessage: 'Cluster size',
+    <>
+      <EuiPanel paddingSize="s">
+        <SelectOption
+          label={i18n.translate('tileMap.visParams.mapTypeLabel', {
+            defaultMessage: 'Map type',
           })}
-          max={3}
-          min={1}
-          paramName="heatClusterSize"
-          step={0.1}
-          value={stateParams.heatClusterSize}
+          options={vis.type.editorConfig.collections.mapTypes}
+          paramName="mapType"
+          value={stateParams.mapType}
           setValue={setValue}
         />
-      )}
 
-      <BasicOptions {...props} />
+        <SelectOption
+          label={i18n.translate('tileMap.visParams.colorSchemaLabel', {
+            defaultMessage: 'Color schema',
+          })}
+          options={vis.type.editorConfig.collections.colorSchemas}
+          paramName="colorSchema"
+          value={stateParams.colorSchema}
+          setValue={setValue}
+        />
 
-      <SwitchOption
-        disabled={!vis.type.visConfig.canDesaturate}
-        label={i18n.translate('tileMap.visParams.desaturateTilesLabel', {
-          defaultMessage: 'Desaturate tiles',
-        })}
-        tooltip={i18n.translate('tileMap.visParams.reduceVibrancyOfTileColorsTip', {
-          defaultMessage:
-            'Reduce the vibrancy of tile colors. This does not work in any version of Internet Explorer.',
-        })}
-        paramName="isDesaturated"
-        value={stateParams.isDesaturated}
-        setValue={setValue}
-      />
-    </EuiPanel>
+        {stateParams.mapType === 'Heatmap' && (
+          <RangeOption
+            label={i18n.translate('tileMap.visParams.clusterSizeLabel', {
+              defaultMessage: 'Cluster size',
+            })}
+            max={3}
+            min={1}
+            paramName="heatClusterSize"
+            step={0.1}
+            value={stateParams.heatClusterSize}
+            setValue={setValue}
+          />
+        )}
+
+        <BasicOptions {...props} />
+
+        <SwitchOption
+          disabled={!vis.type.visConfig.canDesaturate}
+          label={i18n.translate('tileMap.visParams.desaturateTilesLabel', {
+            defaultMessage: 'Desaturate tiles',
+          })}
+          tooltip={i18n.translate('tileMap.visParams.reduceVibrancyOfTileColorsTip', {
+            defaultMessage:
+              'Reduce the vibrancy of tile colors. This does not work in any version of Internet Explorer.',
+          })}
+          paramName="isDesaturated"
+          value={stateParams.isDesaturated}
+          setValue={setValue}
+        />
+      </EuiPanel>
+
+      <EuiSpacer size="s" />
+
+      <WmsOptions {...props} />
+    </>
   );
 }
 

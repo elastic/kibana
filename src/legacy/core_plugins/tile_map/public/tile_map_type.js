@@ -28,10 +28,11 @@ import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 import { createTileMapVisualization } from './tile_map_visualization';
 import { visFactory } from '../../visualizations/public';
 import { TileMapOptions } from './components/tile_map_options';
+import { withServiceSettings } from '../../kbn_vislib_vis_types/public/utils/with_service_settings';
 
 export function createTileMapTypeDefinition(dependencies) {
   const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
-  const { uiSettings } = dependencies;
+  const { uiSettings, serviceSettings } = dependencies;
 
   return visFactory.createBaseVisualization({
     name: 'tile_map',
@@ -112,7 +113,7 @@ export function createTileMapTypeDefinition(dependencies) {
         ],
         tmsLayers: [],
       },
-      optionsTemplate: TileMapOptions,
+      optionsTemplate: withServiceSettings(TileMapOptions, serviceSettings),
       schemas: new Schemas([
         {
           group: 'metrics',

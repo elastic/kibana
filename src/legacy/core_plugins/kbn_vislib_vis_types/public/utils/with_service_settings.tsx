@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { Vis, VisParams } from 'ui/vis';
+import React from 'react';
 
-export type VisOptionsSetValue = (paramName: string, value: unknown) => void;
-export interface VisOptionsProps {
-  serviceSettings?: any;
-  stateParams: VisParams;
-  vis: Vis;
-  setValue: VisOptionsSetValue;
-}
+const withServiceSettings = (Component: React.ComponentType, serviceSettings: any) => (
+  props: any
+) => <Component {...props} serviceSettings={serviceSettings} />;
+
+export { withServiceSettings };
