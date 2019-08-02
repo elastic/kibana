@@ -14,6 +14,8 @@ import {
   Position,
   ScaleType,
   Settings,
+  AreaSeriesStyle,
+  RecursivePartial,
 } from '@elastic/charts';
 import { getOr, get } from 'lodash/fp';
 import {
@@ -28,33 +30,23 @@ import {
 import { AutoSizer } from '../auto_sizer';
 
 // custom series styles: https://ela.st/areachart-styling
-const getSeriesLineStyle = (color: string | undefined) => {
-  return color
-    ? {
-        area: {
-          fill: color,
-          opacity: 0.04,
-          visible: true,
-        },
-        line: {
-          stroke: color,
-          strokeWidth: 1,
-          visible: true,
-        },
-        border: {
-          visible: false,
-          strokeWidth: 1,
-          stroke: color,
-        },
-        point: {
-          visible: false,
-          radius: 0.2,
-          stroke: color,
-          strokeWidth: 1,
-          opacity: 1,
-        },
-      }
-    : undefined;
+const getSeriesLineStyle = (): RecursivePartial<AreaSeriesStyle> => {
+  return {
+    area: {
+      opacity: 0.04,
+      visible: true,
+    },
+    line: {
+      strokeWidth: 1,
+      visible: true,
+    },
+    point: {
+      visible: false,
+      radius: 0.2,
+      strokeWidth: 1,
+      opacity: 1,
+    },
+  };
 };
 
 // https://ela.st/multi-areaseries
@@ -87,7 +79,7 @@ export const AreaChartBaseComponent = React.memo<{
               timeZone={browserTimezone}
               xAccessor="x"
               yAccessors={['y']}
-              areaSeriesStyle={getSeriesLineStyle(series.color)}
+              areaSeriesStyle={getSeriesLineStyle()}
               customSeriesColors={getSeriesStyle(seriesKey, series.color)}
             />
           ) : null;
