@@ -22,6 +22,7 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { toastNotifications } from 'ui/notify';
 import { VisOptionsProps, VisOptionsSetValue } from 'ui/vis/editors/default';
 import { SelectOption } from '../../../kbn_vislib_vis_types/public/controls/select';
 import { SwitchOption } from '../../../kbn_vislib_vis_types/public/controls/switch';
@@ -57,7 +58,7 @@ function WmsOptions({ serviceSettings, stateParams, setValue, vis }: VisOptionsP
           setWmsOption('selectedTmsLayer', newBaseLayers[0]);
         }
       })
-      .catch(() => {});
+      .catch((error: Error) => toastNotifications.addWarning(error.message));
   }, []);
 
   return (
