@@ -51,7 +51,10 @@ interface Table {
  * This function builds tabular data from the response and attaches it to the
  * inspector. It will only be called when the data view in the inspector is opened.
  */
-export async function buildTabularInspectorData(table: Table, queryFilter: any) {
+export async function buildTabularInspectorData(
+  table: Table,
+  queryFilter: { addFilters: (filter: any) => void }
+) {
   const aggConfigs = table.columns.map(column => column.aggConfig);
   const rows = table.rows.map(row => {
     return table.columns.reduce<Record<string, FormattedData>>((prev, cur, colIndex) => {
@@ -70,7 +73,7 @@ export async function buildTabularInspectorData(table: Table, queryFilter: any) 
       field: `col-${colIndex}-${col.aggConfig.id}`,
       filter:
         isCellContentFilterable &&
-        ((value: { raw: any }) => {
+        ((value: { raw: unknown }) => {
           const rowIndex = rows.findIndex(
             row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
           );
@@ -79,7 +82,7 @@ export async function buildTabularInspectorData(table: Table, queryFilter: any) 
         }),
       filterOut:
         isCellContentFilterable &&
-        ((value: { raw: any }) => {
+        ((value: { raw: unknown }) => {
           const rowIndex = rows.findIndex(
             row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
           );
