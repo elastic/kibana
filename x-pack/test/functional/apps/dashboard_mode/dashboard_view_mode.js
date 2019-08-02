@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace({
         'defaultIndex': 'logstash-*'
       });
-      browser.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.dashboard.setTimepickerInHistoricalDataRange();

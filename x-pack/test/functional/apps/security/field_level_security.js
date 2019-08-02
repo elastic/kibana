@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }) {
     before('initialize tests', async () => {
       await esArchiver.loadIfNeeded('security/flstest/data'); //( data)
       await esArchiver.load('security/flstest/kibana'); //(savedobject)
-      browser.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
     });
 
     it('should add new role a_viewssnrole', async function () {
