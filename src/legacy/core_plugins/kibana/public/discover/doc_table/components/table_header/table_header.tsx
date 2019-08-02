@@ -28,10 +28,10 @@ interface Props {
   hideTimeColumn: boolean;
   indexPattern: IndexPatternEnhanced;
   isShortDots: boolean;
-  onChangeSortOrder?: (name: string, direction: 'asc' | 'desc') => void;
+  onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
   onMoveColumn?: (name: string, index: number) => void;
   onRemoveColumn?: (name: string) => void;
-  sortOrder: SortOrder;
+  sortOrder: SortOrder[];
 }
 
 export function TableHeader({
@@ -45,7 +45,6 @@ export function TableHeader({
   sortOrder,
 }: Props) {
   const displayedColumns = getDisplayedColumns(columns, indexPattern, hideTimeColumn, isShortDots);
-  const [currColumnName, currDirection = 'asc'] = sortOrder;
 
   return (
     <tr data-test-subj="docTableHeader" className="kbnDocTableHeader">
@@ -55,7 +54,7 @@ export function TableHeader({
           <TableHeaderColumn
             key={col.name}
             {...col}
-            sortDirection={col.name === currColumnName ? currDirection : ''}
+            sortOrder={sortOrder}
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}
             onChangeSortOrder={onChangeSortOrder}
