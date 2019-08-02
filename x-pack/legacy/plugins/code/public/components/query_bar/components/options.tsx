@@ -20,6 +20,8 @@ import {
   EuiNotificationBadge,
 } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { unique } from 'lodash';
 import React, { Component } from 'react';
 import { SearchOptions as ISearchOptions, Repository } from '../../../../model';
@@ -114,6 +116,14 @@ export class SearchOptions extends Component<Props, State> {
         );
       });
 
+      const repoCandidates = this.state.query
+        ? this.props.repoSearchResults.map(repo => ({
+            label: repo.name,
+          }))
+        : this.props.defaultRepoOptions.map(repo => ({
+            label: repo.name,
+          }));
+
       optionsFlyout = (
         <EuiFlyout
           onClose={this.closeOptionsFlyout}
@@ -128,30 +138,38 @@ export class SearchOptions extends Component<Props, State> {
                   {repoScope.length}
                 </EuiNotificationBadge>
                 <EuiTextColor color="secondary" className="code-flyout-title">
-                  {' '}
-                  Search Filters{' '}
+                  <FormattedMessage
+                    id="xpack.code.searchBar.searchFilterTitle"
+                    defaultMessage=" {filterCount, plural, one {Search Filter} other {Search Filters}} "
+                    values={{ filterCount: repoScope.length }}
+                  />
                 </EuiTextColor>
               </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <EuiTitle size="xs">
-              <h3>Repo Scope</h3>
+              <h3>
+                <FormattedMessage
+                  id="xpack.code.searchBar.searchScopeTitle"
+                  defaultMessage="Search Scope"
+                />
+              </h3>
             </EuiTitle>
-            <EuiText size="xs">Add indexed repos to your search scope</EuiText>
+            <EuiText size="xs">
+              <FormattedMessage
+                id="xpack.code.searchBar.addToScopeDescription"
+                defaultMessage="Add indexed repos to your search scope"
+              />
+            </EuiText>
             <EuiSpacer size="m" />
             <EuiComboBox
-              placeholder="Search to add repos"
+              noSuggestions={repoCandidates.length === 0}
+              placeholder={i18n.translate('xpack.code.searchBar.addRepoPlaceholder', {
+                defaultMessage: 'Search to add repos',
+              })}
               async={true}
-              options={
-                this.state.query
-                  ? this.props.repoSearchResults.map(repo => ({
-                      label: repo.name,
-                    }))
-                  : this.props.defaultRepoOptions.map(repo => ({
-                      label: repo.name,
-                    }))
-              }
+              options={repoCandidates}
               selectedOptions={[]}
               isLoading={this.props.searchLoading}
               onChange={this.onRepoChange}
@@ -163,7 +181,10 @@ export class SearchOptions extends Component<Props, State> {
             <EuiSpacer size="s" />
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
               <EuiButton onClick={this.applyAndClose} fill={true} iconSide="right">
-                Apply and Close
+                <FormattedMessage
+                  id="xpack.code.searchBar.applyAndCloseButtonLabel"
+                  defaultMessage="Apply and Close"
+                />
               </EuiButton>
             </EuiFlexGroup>
           </EuiFlyoutBody>
@@ -178,7 +199,13 @@ export class SearchOptions extends Component<Props, State> {
             <EuiNotificationBadge size="m" className="code-notification-badge">
               {repoScope.length}
             </EuiNotificationBadge>
-            <EuiTextColor color="secondary"> Search Filters </EuiTextColor>
+            <EuiTextColor color="secondary">
+              <FormattedMessage
+                id="xpack.code.searchBar.searchFilterTitle"
+                defaultMessage=" {filterCount, plural, one {Search Filter} other {Search Filters}} "
+                values={{ filterCount: repoScope.length }}
+              />
+            </EuiTextColor>
           </EuiButtonEmpty>
         </div>
         {optionsFlyout}

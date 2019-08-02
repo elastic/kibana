@@ -17,4 +17,4 @@
  * under the License.
  */
 
-module.exports = require('moment/min/moment.min.js');
+module.exports = require('moment/min/moment-with-locales.min.js');

@@ -12,6 +12,7 @@ declare module '@elastic/eui' {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment';
+import { get } from 'lodash';
 import React, { Component } from 'react';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
@@ -381,19 +382,13 @@ class ReportListingUi extends Component<Props, State> {
 
   private onTableChange = ({ page }: { page: { index: number } }) => {
     const { index: pageIndex } = page;
-
-    this.setState(
-      {
-        page: pageIndex,
-      },
-      this.fetchJobs
-    );
+    this.setState(() => ({ page: pageIndex }), this.fetchJobs);
   };
 
   private fetchJobs = async () => {
     // avoid page flicker when poller is updating table - only display loading screen on first load
     if (this.isInitialJobsFetch) {
-      this.setState({ isLoading: true });
+      this.setState(() => ({ isLoading: true }));
     }
 
     let jobs: JobQueueEntry[];
@@ -419,35 +414,37 @@ class ReportListingUi extends Component<Props, State> {
         );
       }
       if (this.mounted) {
-        this.setState({ isLoading: false, jobs: [], total: 0 });
+        this.setState(() => ({ isLoading: false, jobs: [], total: 0 }));
       }
       return;
     }
 
     if (this.mounted) {
-      this.setState({
+      this.setState(() => ({
         isLoading: false,
         total,
         jobs: jobs.map(
-          (job: JobQueueEntry): Job => ({
-            id: job._id,
-            type: job._source.jobtype,
-            object_type: job._source.payload.type,
-            object_title: job._source.payload.title,
-            created_by: job._source.created_by,
-            created_at: job._source.created_at,
-            started_at: job._source.started_at,
-            completed_at: job._source.completed_at,
-            status: job._source.status,
-            statusLabel:
-              jobStatusLabelsMap.get(job._source.status as JobStatuses) || job._source.status,
-            max_size_reached: job._source.output ? job._source.output.max_size_reached : false,
-            attempts: job._source.attempts,
-            max_attempts: job._source.max_attempts,
-            csv_contains_formulas: job._source.output.csv_contains_formulas,
-          })
+          (job: JobQueueEntry): Job => {
+            const { _source: source } = job;
+            return {
+              id: job._id,
+              type: source.jobtype,
+              object_type: source.payload.type,
+              object_title: source.payload.title,
+              created_by: source.created_by,
+              created_at: source.created_at,
+              started_at: source.started_at,
+              completed_at: source.completed_at,
+              status: source.status,
+              statusLabel: jobStatusLabelsMap.get(source.status as JobStatuses) || source.status,
+              max_size_reached: source.output ? source.output.max_size_reached : false,
+              attempts: source.attempts,
+              max_attempts: source.max_attempts,
+              csv_contains_formulas: get(source, 'output.csv_contains_formulas'),
+            };
+          }
         ),
-      });
+      }));
     }
   };
 

@@ -9,6 +9,7 @@ import { parse as parseQuery } from 'querystring';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { QueryString } from 'ui/utils/query_string';
+import { i18n } from '@kbn/i18n';
 import { MainRouteParams } from '../../common/types';
 import { FileTree } from '../file_tree/file_tree';
 import { Shortcut } from '../shortcuts';
@@ -56,28 +57,44 @@ class CodeSideTabs extends React.PureComponent<Props> {
   public get tabs() {
     const { languageServerInitializing, loadingFileTree, loadingStructureTree } = this.props;
     const fileTabContent = loadingFileTree ? (
-      this.renderLoadingSpinner('Loading file tree')
+      this.renderLoadingSpinner(
+        i18n.translate('xpack.code.mainPage.sideTab.loadingFileTreeText', {
+          defaultMessage: 'Loading file tree',
+        })
+      )
     ) : (
       <div className="codeFileTree__container">{<FileTree />}</div>
     );
     let structureTabContent: React.ReactNode;
     if (languageServerInitializing) {
-      structureTabContent = this.renderLoadingSpinner('Language server is initializing');
+      structureTabContent = this.renderLoadingSpinner(
+        i18n.translate('xpack.code.mainPage.sideTab.languageServerInitializingText', {
+          defaultMessage: 'Language server is initializing',
+        })
+      );
     } else if (loadingStructureTree) {
-      structureTabContent = this.renderLoadingSpinner('Loading structure tree');
+      structureTabContent = this.renderLoadingSpinner(
+        i18n.translate('xpack.code.mainPage.sideTab.loadingStructureTreeText', {
+          defaultMessage: 'Loading structure tree',
+        })
+      );
     } else {
       structureTabContent = <SymbolTree />;
     }
     return [
       {
         id: Tabs.file,
-        name: 'Files',
+        name: i18n.translate('xpack.code.mainPage.sideTab.fileTabLabel', {
+          defaultMessage: 'Files',
+        }),
         content: fileTabContent,
         'data-test-subj': `codeFileTreeTab${this.sideTab === Tabs.file ? 'Active' : ''}`,
       },
       {
         id: Tabs.structure,
-        name: 'Structure',
+        name: i18n.translate('xpack.code.mainPage.sideTab.structureTabLabel', {
+          defaultMessage: 'Structure',
+        }),
         content: structureTabContent,
         disabled:
           !(this.props.currentTree && this.props.currentTree.type === FileTreeItemType.File) ||
