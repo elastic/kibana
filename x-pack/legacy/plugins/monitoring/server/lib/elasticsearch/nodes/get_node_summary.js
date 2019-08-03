@@ -44,6 +44,7 @@ export function handleResponse(clusterState, shardStats, nodeUuid) {
         documents: get(sourceStats, 'indices.docs.count'),
         dataSize: get(sourceStats, 'indices.store.size_in_bytes'),
         freeSpace: get(sourceStats, 'fs.total.available_in_bytes'),
+        totalSpace: get(sourceStats, 'fs.total.total_in_bytes'),
         usedHeap: get(sourceStats, 'jvm.mem.heap_used_percent'),
         status: i18n.translate('xpack.monitoring.es.nodes.onlineStatusLabel', {
           defaultMessage: 'Online' }),
