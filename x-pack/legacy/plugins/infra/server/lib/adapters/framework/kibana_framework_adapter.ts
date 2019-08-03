@@ -24,7 +24,6 @@ import {
   HapiGraphiQLPluginOptions,
   HapiGraphQLPluginOptions,
 } from './apollo_server_hapi';
-import { elasticsearchMlPlugin } from './elasticsearch_ml_plugin';
 
 interface CallWithRequestParams extends GenericParams {
   max_concurrent_shard_requests?: number;
@@ -32,13 +31,9 @@ interface CallWithRequestParams extends GenericParams {
 
 export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFrameworkAdapter {
   public version: string;
-  private dataCluster: Legacy.Plugins.elasticsearch.Cluster;
 
   constructor(private server: Legacy.Server) {
     this.version = server.config().get('pkg.version');
-    this.dataCluster = server.plugins.elasticsearch.createCluster('infra-logs-ui', {
-      plugins: [elasticsearchMlPlugin],
-    });
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {
@@ -105,7 +100,8 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     ...rest: any[]
   ) {
     const internalRequest = req[internalInfraFrameworkRequest];
-    const { callWithRequest } = this.dataCluster;
+    const { elasticsearch } = internalRequest.server.plugins;
+    const { callWithRequest } = elasticsearch.getCluster('data');
     const includeFrozen = await internalRequest.getUiSettingsService().get('search:includeFrozen');
     if (endpoint === 'msearch') {
       const maxConcurrentShardRequests = await internalRequest
