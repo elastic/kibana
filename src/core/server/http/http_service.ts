@@ -135,7 +135,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     const httpServer = new HttpServer(this.logger, 'NotReady');
     const { server } = await httpServer.setup(config);
     this.notReadyServer = server;
-    // use hapi server while Kibana ResponseFactory doesn't allow specifying custom headers
+    // use hapi server while KibanaResponseFactory doesn't allow specifying custom headers
     // https://github.com/elastic/kibana/issues/33779
     this.notReadyServer.route({
       path: '/{p*}',

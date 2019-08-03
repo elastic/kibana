@@ -13,12 +13,15 @@ import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from './validate_alert_type_params';
+import { SpacesPlugin } from '../../../spaces';
 
 interface CreateTaskRunnerFunctionOptions {
   getServices: (basePath: string) => Services;
   alertType: AlertType;
   fireAction: ActionsPlugin['fire'];
   internalSavedObjectsRepository: SavedObjectsClientContract;
+  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
+  getBasePath: SpacesPlugin['getBasePath'];
 }
 
 interface TaskRunnerOptions {
@@ -30,13 +33,17 @@ export function getCreateTaskRunnerFunction({
   alertType,
   fireAction,
   internalSavedObjectsRepository,
+  spaceIdToNamespace,
+  getBasePath,
 }: CreateTaskRunnerFunctionOptions) {
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
       run: async () => {
+        const namespace = spaceIdToNamespace(taskInstance.params.spaceId);
         const alertSavedObject = await internalSavedObjectsRepository.get(
           'alert',
-          taskInstance.params.alertId
+          taskInstance.params.alertId,
+          { namespace }
         );
 
         // Validate
@@ -48,7 +55,7 @@ export function getCreateTaskRunnerFunction({
         const fireHandler = createFireHandler({
           alertSavedObject,
           fireAction,
-          basePath: taskInstance.params.basePath,
+          spaceId: taskInstance.params.spaceId,
         });
         const alertInstances: Record<string, AlertInstance> = {};
         const alertInstancesData = taskInstance.state.alertInstances || {};

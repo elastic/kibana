@@ -14,7 +14,7 @@ import {
   GetEventsQuery,
   GetLastEventTimeQuery,
 } from '../../../../legacy/plugins/siem/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
 const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
@@ -24,7 +24,7 @@ const HOST_NAME = 'suricata-sensor-amsterdam';
 const TOTAL_COUNT = 1751;
 const EDGE_LENGTH = 2;
 
-const eventsTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('events API', () => {
@@ -344,7 +344,4 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default eventsTests;
+}

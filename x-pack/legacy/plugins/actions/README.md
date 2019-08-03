@@ -145,8 +145,7 @@ The following table describes the properties of the `options` object.
 |---|---|---|
 |id|The id of the action you want to fire.|string|
 |params|The `params` value to give the action type executor.|object|
-|namespace|The saved object namespace the action exists within.|string|
-|basePath|This is a temporary parameter, but we need to capture and track the value of `request.getBasePath()` until future changes are made.<br><br>In most cases this can be `undefined` unless you need cross spaces support.|string|
+|spaceId|The space id the action is within.|string|
 
 ### Example
 
@@ -155,14 +154,13 @@ This example makes action `3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5` fire an email. 
 ```
 server.plugins.actions.fire({
   id: '3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5',
+  spaceId: 'default', // The spaceId of the action
   params: {
     from: 'example@elastic.co',
     to: ['destination@elastic.co'],
     subject: 'My email subject',
     body: 'My email body',
   },
-  namespace: undefined, // The namespace the action exists within
-  basePath: undefined, // Usually `request.getBasePath();` or `undefined`
 });
 ```
 
