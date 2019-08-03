@@ -11,12 +11,15 @@ import { AlertType, Services } from './types';
 import { TaskManager } from '../../task_manager';
 import { getCreateTaskRunnerFunction } from './lib';
 import { ActionsPlugin } from '../../actions';
+import { SpacesPlugin } from '../../spaces';
 
 interface ConstructorOptions {
   getServices: (basePath: string) => Services;
   taskManager: TaskManager;
   fireAction: ActionsPlugin['fire'];
   internalSavedObjectsRepository: SavedObjectsClientContract;
+  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
+  getBasePath: SpacesPlugin['getBasePath'];
 }
 
 export class AlertTypeRegistry {
@@ -25,17 +28,23 @@ export class AlertTypeRegistry {
   private readonly fireAction: ActionsPlugin['fire'];
   private readonly alertTypes: Map<string, AlertType> = new Map();
   private readonly internalSavedObjectsRepository: SavedObjectsClientContract;
+  private readonly spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
+  private readonly getBasePath: SpacesPlugin['getBasePath'];
 
   constructor({
     internalSavedObjectsRepository,
     fireAction,
     taskManager,
     getServices,
+    spaceIdToNamespace,
+    getBasePath,
   }: ConstructorOptions) {
     this.taskManager = taskManager;
     this.fireAction = fireAction;
     this.internalSavedObjectsRepository = internalSavedObjectsRepository;
     this.getServices = getServices;
+    this.getBasePath = getBasePath;
+    this.spaceIdToNamespace = spaceIdToNamespace;
   }
 
   public has(id: string) {
@@ -63,6 +72,8 @@ export class AlertTypeRegistry {
           getServices: this.getServices,
           fireAction: this.fireAction,
           internalSavedObjectsRepository: this.internalSavedObjectsRepository,
+          getBasePath: this.getBasePath,
+          spaceIdToNamespace: this.spaceIdToNamespace,
         }),
       },
     });
