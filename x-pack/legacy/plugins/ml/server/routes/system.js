@@ -98,8 +98,12 @@ export function systemRoutes({
     async handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       try {
-        const { isMlEnabled } = spacesUtilsProvider(spacesPlugin, request, config);
-        const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPlugin, isMlEnabled);
+        const spacesFeature = xpackMainPlugin.info.feature('spaces');
+        const { isMlEnabledInSpace } = spacesFeature.isEnabled() ?
+          spacesUtilsProvider(spacesPlugin, request, config) :
+          { isMlEnabledInSpace: async () => true }; // if spaces are disabled force mlFeatureEnabledInSpace to be true
+
+        const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPlugin, isMlEnabledInSpace);
         return await getPrivileges();
       } catch (error) {
         return wrapError(error);
