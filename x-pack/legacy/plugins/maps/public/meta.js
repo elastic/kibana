@@ -67,7 +67,8 @@ export async function getEmsVectorFilesMeta() {
 
 export async function getEmsTMSServices() {
   const dataSource = await getEMSDataSources();
-  return _.get(dataSource, 'ems.tms', []);
+  const tmsServices = _.get(dataSource, 'ems.tms', []);
+  return [...tmsServices];
 }
 
 export function getKibanaRegionList() {
