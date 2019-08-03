@@ -6,10 +6,9 @@
 
 import expect from '@kbn/expect';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function emailTest({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function emailTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -23,15 +22,15 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'An email action',
-            actionTypeId: '.email',
-            actionTypeConfig: {
-              service: '__json',
-              user: 'bob',
-              password: 'supersecret',
-              from: 'bob@example.com',
-            },
+          description: 'An email action',
+          actionTypeId: '.email',
+          config: {
+            service: '__json',
+            from: 'bob@example.com',
+          },
+          secrets: {
+            user: 'bob',
+            password: 'supersecret',
           },
         })
         .expect(200);
@@ -48,22 +47,16 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
         .expect(200);
 
       expect(fetchedAction).to.eql({
-        type: 'action',
         id: fetchedAction.id,
-        attributes: {
-          description: 'An email action',
-          actionTypeId: '.email',
-          actionTypeConfig: {
-            from: 'bob@example.com',
-            service: '__json',
-            host: null,
-            port: null,
-            secure: null,
-          },
+        description: 'An email action',
+        actionTypeId: '.email',
+        config: {
+          from: 'bob@example.com',
+          service: '__json',
+          host: null,
+          port: null,
+          secure: null,
         },
-        references: [],
-        updated_at: fetchedAction.updated_at,
-        version: fetchedAction.version,
       });
     });
 
@@ -136,11 +129,9 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'An email action',
-            actionTypeId: '.email',
-            actionTypeConfig: {},
-          },
+          description: 'An email action',
+          actionTypeId: '.email',
+          config: {},
         })
         .expect(400)
         .then((resp: any) => {
@@ -148,7 +139,7 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'The actionTypeConfig is invalid: [user]: expected value of type [string] but got [undefined]',
+              'error validating action type config: [from]: expected value of type [string] but got [undefined]',
           });
         });
     });

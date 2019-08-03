@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
-export function InfraSourceConfigurationFlyoutProvider({
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
+export function InfraSourceConfigurationFlyoutProvider({ getService }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
