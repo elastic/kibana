@@ -16,18 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { KbnError } from 'ui/errors';
+/* eslint-disable */
+// @ts-ignore
+import { KbnError } from '../errors';
 
 /**
  * when a mapping already exists for a field the user is attempting to add
  * @param {String} name - the field name
  */
 export class IndexPatternAlreadyExists extends KbnError {
-  constructor(name) {
-    super(
-      `An index pattern of "${name}" already exists`,
-      IndexPatternAlreadyExists);
+  constructor(name: string) {
+    super(`An index pattern of "${name}" already exists`, IndexPatternAlreadyExists);
   }
 }
 
@@ -35,12 +34,13 @@ export class IndexPatternAlreadyExists extends KbnError {
  * Tried to call a method that relies on SearchSource having an indexPattern assigned
  */
 export class IndexPatternMissingIndices extends KbnError {
-  constructor(message) {
-    const defaultMessage = 'IndexPattern\'s configured pattern does not match any indices';
+  constructor(message: string) {
+    const defaultMessage = "IndexPattern's configured pattern does not match any indices";
 
     super(
-      (message && message.length) ? `No matching indices found: ${message}` : defaultMessage,
-      IndexPatternMissingIndices);
+      message && message.length ? `No matching indices found: ${message}` : defaultMessage,
+      IndexPatternMissingIndices
+    );
   }
 }
 
@@ -49,9 +49,7 @@ export class IndexPatternMissingIndices extends KbnError {
  */
 export class NoDefinedIndexPatterns extends KbnError {
   constructor() {
-    super(
-      'Define at least one index pattern to continue',
-      NoDefinedIndexPatterns);
+    super('Define at least one index pattern to continue', NoDefinedIndexPatterns);
   }
 }
 
@@ -60,8 +58,6 @@ export class NoDefinedIndexPatterns extends KbnError {
  */
 export class NoDefaultIndexPattern extends KbnError {
   constructor() {
-    super(
-      'Please specify a default index pattern',
-      NoDefaultIndexPattern);
+    super('Please specify a default index pattern', NoDefaultIndexPattern);
   }
 }

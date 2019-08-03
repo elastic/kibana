@@ -17,35 +17,14 @@
  * under the License.
  */
 
-export function createIndexPatternCache() {
+export { IndexPatternSelect } from './components/index_pattern_select';
+export { Field, FieldType } from './_field';
+export { IndexPattern, StaticIndexPattern } from './_index_pattern';
+export { IndexPatterns, IndexPatternsProvider } from './index_patterns';
 
-  const vals = {};
-  const cache = {};
+export {
+  INDEX_PATTERN_ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
+} from './constants';
 
-  const validId = function (id) {
-    return typeof id !== 'object';
-  };
-
-  cache.get = function (id) {
-    if (validId(id)) return vals[id];
-  };
-
-  cache.set = function (id, prom) {
-    if (validId(id)) vals[id] = prom;
-    return prom;
-  };
-
-  cache.clear = cache.delete = function (id) {
-    if (validId(id)) delete vals[id];
-  };
-
-  cache.clearAll = function () {
-    for (const id in vals) {
-      if (vals.hasOwnProperty(id)) {
-        delete vals[id];
-      }
-    }
-  };
-
-  return cache;
-}
+export { validateIndexPattern, CONTAINS_SPACES, ILLEGAL_CHARACTERS } from './validate';

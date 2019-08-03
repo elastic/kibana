@@ -17,17 +17,35 @@
  * under the License.
  */
 
-import { IndexedArray } from 'ui/indexed_array';
-import { Field } from './_field';
+import { IndexPattern } from './index';
 
-export class FieldList extends IndexedArray {
-  constructor(indexPattern, specs) {
-    super({
-      index: ['name'],
-      group: ['type'],
-      initialSet: specs.map(function (field) {
-        return new Field(indexPattern, field);
-      })
-    });
-  }
+export interface PatternCache {
+  get: (id: string) => IndexPattern;
+  set: (id: string, value: Promise<IndexPattern>) => Promise<IndexPattern>;
+  clear: (id: string) => void;
+  clearAll: () => void;
+}
+
+export function createIndexPatternCache(): PatternCache {
+  const vals: Record<string, any> = {};
+  const cache: PatternCache = {
+    get: (id: string) => {
+      return vals[id];
+    },
+    set: (id: string, prom: any) => {
+      vals[id] = prom;
+      return prom;
+    },
+    clear: (id: string) => {
+      delete vals[id];
+    },
+    clearAll: () => {
+      for (const id in vals) {
+        if (vals.hasOwnProperty(id)) {
+          delete vals[id];
+        }
+      }
+    },
+  };
+  return cache;
 }
