@@ -101,7 +101,7 @@ export function systemRoutes({
         const spacesFeature = xpackMainPlugin.info.feature('spaces');
         const { isMlEnabledInSpace } = spacesFeature.isEnabled() ?
           spacesUtilsProvider(spacesPlugin, request, config) :
-          { isMlEnabledInSpace: async () => true }; // if spaces are disabled force mlFeatureEnabledInSpace to be true
+          { isMlEnabledInSpace: async () => true }; // if spaces is disabled force mlFeatureEnabledInSpace to be true
 
         const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPlugin, isMlEnabledInSpace);
         return await getPrivileges();
