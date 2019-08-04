@@ -100,6 +100,12 @@ export default function PointSeriesVisType(Private) {
         addTimeMarker: false,
         labels: {
           show: false,
+        },
+        thresholdLine: {
+          show: false,
+          value: 10,
+          width: 1,
+          style: 'Full'
         }
       },
     },
