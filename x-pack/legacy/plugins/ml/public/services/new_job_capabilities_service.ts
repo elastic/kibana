@@ -83,6 +83,16 @@ class NewJobCapsService {
       console.error('Unable to load new job capabilities', error); // eslint-disable-line no-console
     }
   }
+
+  public getFieldById(id: string): Field | null {
+    const field = this._fields.find(f => f.id === id);
+    return field === undefined ? null : field;
+  }
+
+  public getAggById(id: string): Aggregation | null {
+    const agg = this._aggs.find(f => f.id === id);
+    return agg === undefined ? null : agg;
+  }
 }
 
 // using the response from the endpoint, create the field and aggs objects
