@@ -35,7 +35,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { documentationLinks } from 'ui/documentation_links';
 import { Toast, toastNotifications } from 'ui/notify';
 import { PersistedLog } from 'ui/persisted_log';
-import { UiSettingsClientContract } from 'kibana/public';
+import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
 

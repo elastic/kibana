@@ -22,7 +22,7 @@ import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { coreMock } from '../../../../../../../core/public/mocks';
+import { coreMock } from '../../../../../core/public/mocks';
 const setupMock = coreMock.createSetup();
 
 jest.mock('../../../../core_plugins/data/public', () => {

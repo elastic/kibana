@@ -35,7 +35,7 @@ import { isFilterable, getFromSavedObject } from 'ui/index_patterns/static_utils
 import * as types from 'ui/index_patterns';
 import { SavedObjectsClient } from 'ui/saved_objects';
 
-import { UiSettingsClientContract } from 'kibana/public';
+import { UiSettingsClientContract } from 'src/core/public';
 
 export interface IndexPatternDependencies {
   uiSettings: UiSettingsClientContract;

@@ -32,7 +32,7 @@ import { debounce, compact, isEqual, omit } from 'lodash';
 import { PersistedLog } from 'ui/persisted_log';
 import { kfetch } from 'ui/kfetch';
 import { Storage } from 'ui/storage';
-import { UiSettingsClientContract } from 'kibana/public';
+import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
 import { Query } from '../index';
 import { fromUser, matchPairs, toUser } from '../lib';

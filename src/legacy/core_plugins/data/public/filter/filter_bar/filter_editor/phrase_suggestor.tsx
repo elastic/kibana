@@ -19,7 +19,7 @@
 
 import { Component } from 'react';
 import { getSuggestions } from 'ui/value_suggestions';
-import { UiSettingsClientContract } from 'kibana/public';
+import { UiSettingsClientContract } from 'src/core/public';
 import { Field, IndexPattern } from '../../../index_patterns';
 
 export interface PhraseSuggestorProps {

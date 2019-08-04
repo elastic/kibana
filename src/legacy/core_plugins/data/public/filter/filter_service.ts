@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiSettingsClientContract } from 'kibana/public';
+import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPatterns } from '../index_patterns';
 import { FilterManager } from './filter_manager';
 /**

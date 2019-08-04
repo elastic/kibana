@@ -22,7 +22,7 @@ import { Filter, isFilterPinned, FilterStateStore } from '@kbn/es-query';
 import _ from 'lodash';
 import { Subject } from 'rxjs';
 
-import { UiSettingsClientContract } from 'kibana/public';
+import { UiSettingsClientContract } from 'src/core/public';
 // @ts-ignore
 import { compareFilters } from './lib/compare_filters';
 // @ts-ignore

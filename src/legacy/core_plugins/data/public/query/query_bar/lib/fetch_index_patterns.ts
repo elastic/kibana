@@ -19,7 +19,7 @@
 
 import chrome from 'ui/chrome';
 import { isEmpty } from 'lodash';
-import { UiSettingsClientContract } from 'kibana/public';
+import { UiSettingsClientContract } from 'src/core/public';
 import { utils as indexPatternUtils } from '../../../index_patterns';
 
 export async function fetchIndexPatterns(

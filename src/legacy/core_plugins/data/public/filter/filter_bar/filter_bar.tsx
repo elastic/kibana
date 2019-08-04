@@ -31,7 +31,7 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import { UiSettingsClientContract } from 'kibana/public';
+import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
@@ -102,6 +102,7 @@ class FilterBarUI extends Component<Props, State> {
           onUpdate={newFilter => this.onUpdate(i, newFilter)}
           onRemove={() => this.onRemove(i)}
           indexPatterns={this.props.indexPatterns}
+          uiSettings={this.props.uiSettings}
         />
       </EuiFlexItem>
     ));

@@ -18,7 +18,7 @@
  */
 
 import { PersistedLog } from 'ui/persisted_log';
-import { UiSettingsClientContract } from 'kibana/public';
+import { UiSettingsClientContract } from 'src/core/public';
 
 export function getQueryLog(
   uiSettings: UiSettingsClientContract,
