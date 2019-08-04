@@ -4,7 +4,7 @@
 
 ## Router.get() method
 
-Register a `GET` request with the router
+Register a route handler for `GET` request.
 
 <b>Signature:</b>
 
