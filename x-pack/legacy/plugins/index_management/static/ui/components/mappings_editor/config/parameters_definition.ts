@@ -213,7 +213,7 @@ export const parametersDefinition: {
           validator: ({ value }) => {
             if ((value as number) < 0) {
               return {
-                message: 'The value must be greater or equal to 0.',
+                message: 'The value must be greater or equal than 0.',
               };
             }
           },
@@ -337,7 +337,7 @@ export const parametersDefinition: {
           validator: ({ value }) => {
             if ((value as number) < 0) {
               return {
-                message: 'The value must be greater or equal to 0.',
+                message: 'The value must be greater or equal than 0.',
               };
             }
           },
@@ -446,7 +446,7 @@ export const parametersDefinition: {
           validator: ({ value }) => {
             if ((value as number) < 0) {
               return {
-                message: 'The value must be greater or equal to 0.',
+                message: 'The value must be greater or equal than 0.',
               };
             }
           },
