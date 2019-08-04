@@ -223,6 +223,7 @@ class CodeContent extends React.PureComponent<Props> {
       return (
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
           <EuiButtonGroup
+            className="codeButtonGroup"
             buttonSize="s"
             color="primary"
             options={[
