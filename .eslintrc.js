@@ -156,6 +156,21 @@ module.exports = {
                 ],
                 allowSameFolder: true,
               },
+              {
+                from: ['src/legacy/ui/**/*', 'ui/**/*'],
+                target: [
+                  'src/legacy/core_plugins/**/public/np_ready/**/*',
+                  'src/legacy/core_plugins/**/server/np_ready/**/*',
+                  'x-pack/legacy/plugins/**/public/np_ready/**/*',
+                  'x-pack/legacy/plugins/**/server/np_ready/**/*',
+                ],
+                allowSameFolder: true,
+                errorMessage:
+                  'NP-ready code should not import from /src/legacy/ui/** folder. ' +
+                  'Instead of importing from /src/legacy/ui/** deeply within a np_ready folder, ' +
+                  'import those things once at the top level of your plugin and pass those down, just ' +
+                  'like you pass down `core` and `plugins` objects.',
+              },
             ],
           },
         ],
@@ -171,8 +186,10 @@ module.exports = {
         'x-pack/legacy/plugins/apm/**/*.js',
         'test/*/config.ts',
         'test/visual_regression/tests/**/*',
-        'x-pack/test/visual_regression/tests/**/*',
-        'x-pack/test/*/config.ts',
+        'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
+        'x-pack/test/*/*config.*ts',
+        'x-pack/test/saved_object_api_integration/*/apis/**/*',
+        'x-pack/test/ui_capabilities/*/tests/**/*',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -362,6 +379,16 @@ module.exports = {
     },
 
     /**
+     * Jest specific rules
+     */
+    {
+      files: ['**/*.test.{js,ts,tsx}'],
+      rules: {
+        'jest/valid-describe': 'error',
+      },
+    },
+
+    /**
      * APM overrides
      */
     {
@@ -369,6 +396,14 @@ module.exports = {
       rules: {
         'no-unused-vars': ['error', { ignoreRestSiblings: true }],
         'no-console': ['warn', { allow: ['error'] }],
+      },
+    },
+    {
+      plugins: ['react-hooks'],
+      files: ['x-pack/legacy/plugins/apm/**/*.{ts,tsx}'],
+      rules: {
+        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
+        'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
       },
     },
 

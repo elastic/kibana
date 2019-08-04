@@ -25,6 +25,7 @@ import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
 import testSubjSelector from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/dev-utils';
+import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { Browsers } from '../../remote/browsers';
@@ -202,6 +203,18 @@ export class WebElementWrapper {
     await this.retryCall(async function click(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
       await wrapper._webElement.click();
+    });
+  }
+
+  /**
+   * Focuses this element.
+   *
+   * @return {Promise<void>}
+   */
+  public async focus() {
+    await this.retryCall(async function focus(wrapper) {
+      await wrapper.scrollIntoViewIfNecessary();
+      await wrapper.driver.executeScript(`arguments[0].focus()`, wrapper._webElement);
     });
   }
 
@@ -638,24 +651,28 @@ export class WebElementWrapper {
    * Gets element innerHTML and wrap it up with cheerio
    *
    * @nonstandard
-   * @return {Promise<void>}
+   * @return {Promise<CustomCheerioStatic>}
    */
-  public async parseDomContent(): Promise<any> {
+  public async parseDomContent(): Promise<CustomCheerioStatic> {
     const htmlContent: any = await this.getAttribute('innerHTML');
     const $: any = cheerio.load(htmlContent, {
       normalizeWhitespace: true,
       xmlMode: true,
     });
 
-    $.findTestSubjects = function testSubjects(selector: string) {
+    $.findTestSubjects = function findTestSubjects(this: CustomCheerioStatic, selector: string) {
       return this(testSubjSelector(selector));
     };
 
-    $.fn.findTestSubjects = function testSubjects(selector: string) {
+    $.fn.findTestSubjects = function findTestSubjects(this: CustomCheerio, selector: string) {
       return this.find(testSubjSelector(selector));
     };
 
-    $.findTestSubject = $.fn.findTestSubject = function testSubjects(selector: string) {
+    $.findTestSubject = function findTestSubject(this: CustomCheerioStatic, selector: string) {
+      return this.findTestSubjects(selector).first();
+    };
+
+    $.fn.findTestSubject = function findTestSubject(this: CustomCheerio, selector: string) {
       return this.findTestSubjects(selector).first();
     };
 

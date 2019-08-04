@@ -31,7 +31,7 @@ import { getSort } from '../doc_table/lib/get_sort';
 import * as columnActions from '../doc_table/actions/columns';
 import * as filterActions from '../doc_table/actions/filter';
 
-import 'ui/listen';
+import 'ui/directives/listen';
 import 'ui/visualize';
 import 'ui/fixed_scroll';
 import 'ui/index_patterns';
@@ -71,9 +71,6 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
 
-import { data } from 'plugins/data/setup';
-data.search.loadLegacyDirectives();
-
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
   LOADING: 'loading',
@@ -81,7 +78,6 @@ const fetchStatuses = {
 };
 
 const app = uiModules.get('apps/discover', [
-  'kibana/notify',
   'kibana/courier',
   'kibana/url',
   'kibana/index_patterns'
@@ -239,7 +235,7 @@ function discoverController(
 
   const getTopNavLinks = () => {
     const newSearch = {
-      key: 'new',
+      id: 'new',
       label: i18n.translate('kbn.discover.localMenu.localMenu.newSearchTitle', {
         defaultMessage: 'New',
       }),
@@ -251,7 +247,7 @@ function discoverController(
     };
 
     const saveSearch = {
-      key: 'save',
+      id: 'save',
       label: i18n.translate('kbn.discover.localMenu.saveTitle', {
         defaultMessage: 'Save',
       }),
@@ -291,7 +287,7 @@ function discoverController(
     };
 
     const openSearch = {
-      key: 'open',
+      id: 'open',
       label: i18n.translate('kbn.discover.localMenu.openTitle', {
         defaultMessage: 'Open',
       }),
@@ -309,7 +305,7 @@ function discoverController(
     };
 
     const shareSearch = {
-      key: 'share',
+      id: 'share',
       label: i18n.translate('kbn.discover.localMenu.shareTitle', {
         defaultMessage: 'Share',
       }),
@@ -317,7 +313,7 @@ function discoverController(
         defaultMessage: 'Share Search',
       }),
       testId: 'shareTopNavButton',
-      run: async (menuItem, navController, anchorElement) => { // eslint-disable-line no-unused-vars
+      run: async (anchorElement) => {
         const sharingData = await this.getSharingData();
         showShareContextMenu({
           anchorElement,
@@ -337,7 +333,7 @@ function discoverController(
     };
 
     const inspectSearch = {
-      key: 'inspect',
+      id: 'inspect',
       label: i18n.translate('kbn.discover.localMenu.inspectTitle', {
         defaultMessage: 'Inspect',
       }),
@@ -534,6 +530,14 @@ function discoverController(
     indexPatternList: $route.current.locals.ip.list,
   };
 
+  const shouldSearchOnPageLoad = () => {
+    // A saved search is created on every page load, so we check the ID to see if we're loading a
+    // previously saved search or if it is just transient
+    return config.get('discover:searchOnPageLoad')
+      || savedSearch.id !== undefined
+      || _.get($scope, 'refreshInterval.pause') === false;
+  };
+
   const init = _.once(function () {
     stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
     stateMonitor.onChange((status) => {
@@ -550,8 +554,8 @@ function discoverController(
         $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;
 
-          // get the current sort from {key: val} to ["key", "val"];
-          const currentSort = _.pairs($scope.searchSource.getField('sort')).pop();
+          // get the current sort from searchSource as array of arrays
+          const currentSort = getSort.array($scope.searchSource.getField('sort'), $scope.indexPattern);
 
           // if the searchSource doesn't know, tell it so
           if (!angular.equals(sort, currentSort)) $scope.fetch();
@@ -581,8 +585,10 @@ function discoverController(
           $scope.enableTimeRangeSelector = !!timefield;
         });
 
-        $scope.$watch('state.interval', function () {
-          $scope.fetch();
+        $scope.$watch('state.interval', function (newInterval, oldInterval) {
+          if (newInterval !== oldInterval) {
+            $scope.fetch();
+          }
         });
 
         $scope.$watch('vis.aggs', function () {
@@ -596,9 +602,11 @@ function discoverController(
           }
         });
 
-        $scope.$watch('state.query', (newQuery) => {
-          const query = migrateLegacyQuery(newQuery);
-          $scope.updateQueryAndFetch({ query });
+        $scope.$watch('state.query', (newQuery, oldQuery) => {
+          if (!_.isEqual(newQuery, oldQuery)) {
+            const query = migrateLegacyQuery(newQuery);
+            $scope.updateQueryAndFetch({ query });
+          }
         });
 
         $scope.$watchMulti([
@@ -607,19 +615,25 @@ function discoverController(
         ], (function updateResultState() {
           let prev = {};
           const status = {
+            UNINITIALIZED: 'uninitialized',
             LOADING: 'loading', // initial data load
             READY: 'ready', // results came back
             NO_RESULTS: 'none' // no results came back
           };
 
           function pick(rows, oldRows, fetchStatus) {
-            // initial state, pretend we are loading
-            if (rows == null && oldRows == null) return status.LOADING;
+            // initial state, pretend we're already loading if we're about to execute a search so
+            // that the uninitilized message doesn't flash on screen
+            if (rows == null && oldRows == null && shouldSearchOnPageLoad()) {
+              return status.LOADING;
+            }
+
+            if (fetchStatus === fetchStatuses.UNINITIALIZED) {
+              return status.UNINITIALIZED;
+            }
 
             const rowsEmpty = _.isEmpty(rows);
-            const preparingForFetch = fetchStatus === fetchStatuses.UNINITIALIZED;
-            if (preparingForFetch) return status.LOADING;
-            else if (rowsEmpty && fetchStatus === fetchStatuses.LOADING) return status.LOADING;
+            if (rowsEmpty && fetchStatus === fetchStatuses.LOADING) return status.LOADING;
             else if (!rowsEmpty) return status.READY;
             else return status.NO_RESULTS;
           }
@@ -648,6 +662,10 @@ function discoverController(
 
         init.complete = true;
         $state.replace();
+
+        if (shouldSearchOnPageLoad()) {
+          $scope.fetch();
+        }
       });
   });
 
@@ -811,7 +829,14 @@ function discoverController(
   };
 
   $scope.updateRefreshInterval = function () {
-    $scope.refreshInterval = timefilter.getRefreshInterval();
+    const newInterval = timefilter.getRefreshInterval();
+    const shouldFetch = _.get($scope, 'refreshInterval.pause') === true && newInterval.pause === false;
+
+    $scope.refreshInterval = newInterval;
+
+    if (shouldFetch) {
+      $scope.fetch();
+    }
   };
 
   $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
@@ -837,8 +862,8 @@ function discoverController(
       .setField('filter', queryFilter.getFilters());
   });
 
-  $scope.setSortOrder = function setSortOrder(columnName, direction) {
-    $scope.state.sort = [columnName, direction];
+  $scope.setSortOrder = function setSortOrder(sortPair) {
+    $scope.state.sort = sortPair;
   };
 
   // TODO: On array fields, negating does not negate the combination, rather all terms

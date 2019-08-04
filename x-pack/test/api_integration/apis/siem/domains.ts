@@ -13,13 +13,13 @@ import {
   FlowTarget,
   GetDomainsQuery,
 } from '../../../../legacy/plugins/siem/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
 const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 const IP = '10.100.7.196';
 
-const domainsTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('Domains', () => {
@@ -43,8 +43,10 @@ const domainsTests: KbnTestProvider = ({ getService }) => {
               flowTarget: FlowTarget.source,
               sort: { field: DomainsFields.bytes, direction: Direction.desc },
               pagination: {
-                limit: 10,
-                cursor: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 30,
+                querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               inspect: false,
@@ -78,8 +80,10 @@ const domainsTests: KbnTestProvider = ({ getService }) => {
               flowTarget: FlowTarget.source,
               sort: { field: DomainsFields.bytes, direction: Direction.desc },
               pagination: {
-                limit: 10,
-                cursor: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 30,
+                querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               inspect: false,
@@ -113,8 +117,10 @@ const domainsTests: KbnTestProvider = ({ getService }) => {
               flowTarget: FlowTarget.destination,
               sort: { field: DomainsFields.bytes, direction: Direction.desc },
               pagination: {
-                limit: 10,
-                cursor: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 30,
+                querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               inspect: false,
@@ -127,12 +133,9 @@ const domainsTests: KbnTestProvider = ({ getService }) => {
             expect(domains.edges.map(i => i.node.destination!.domainName).join(',')).to.be(
               'samsungtv-kitchen.iot.sr.local.crowbird.com,12s3.lvlt.dash.row.aiv-cdn.net,151.205.0.17,151.205.0.19,151.205.0.21,151.205.0.23,15s3.lvlt.dash.row.aiv-cdn.net,api-global.netflix.com,d25xi40x97liuc.cloudfront.net,d2lkq7nlcrdi7q.cloudfront.net'
             );
-            expect(domains.pageInfo.endCursor!.value).to.equal('10');
+            expect(domains.pageInfo.fakeTotalCount).to.equal(12);
           });
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default domainsTests;
+}

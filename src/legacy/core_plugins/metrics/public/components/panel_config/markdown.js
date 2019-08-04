@@ -45,9 +45,9 @@ import {
 const lessC = less(window, { env: 'production' });
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
-import { data } from 'plugins/data/setup';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-const { QueryBarInput } = data.query.ui;
+import { VisDataContext } from './../../contexts/vis_data_context';
+import { QueryBarInput } from 'plugins/data';
 const localStorage = new Storage(window.localStorage);
 
 class MarkdownPanelConfigUi extends Component {
@@ -112,7 +112,11 @@ class MarkdownPanelConfigUi extends Component {
     });
     let view;
     if (selectedTab === 'markdown') {
-      view = <MarkdownEditor {...this.props} />;
+      view = (
+        <VisDataContext.Consumer>
+          {visData => <MarkdownEditor visData={visData} {...this.props} />}
+        </VisDataContext.Consumer>
+      );
     } else if (selectedTab === 'data') {
       view = (
         <SeriesEditor
@@ -120,7 +124,6 @@ class MarkdownPanelConfigUi extends Component {
           fields={this.props.fields}
           model={this.props.model}
           name={this.props.name}
-          visData$={this.props.visData$}
           onChange={this.props.onChange}
         />
       );
@@ -327,7 +330,6 @@ MarkdownPanelConfigUi.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   dateFormat: PropTypes.string,
-  visData$: PropTypes.object,
 };
 
 export const MarkdownPanelConfig = injectI18n(MarkdownPanelConfigUi);

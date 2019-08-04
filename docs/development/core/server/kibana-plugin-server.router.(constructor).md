@@ -16,5 +16,5 @@ constructor(path: string);
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  path | <code>string</code> |  |
+|  path | <code>string</code> | a router path, set as the very first path segment for all registered routes. |
 

@@ -18,12 +18,10 @@ import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { getCreateCalendarBreadcrumbs, getEditCalendarBreadcrumbs } from '../../breadcrumbs';
 
 import uiRoutes from 'ui/routes';
-
 import { I18nContext } from 'ui/i18n';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
-  <ml-nav-menu name="settings" />
   <ml-new-calendar />
 `;
 
@@ -63,7 +61,7 @@ module.directive('mlNewCalendar', function ($route) {
 
       ReactDOM.render(
         <I18nContext>
-          {React.createElement(NewCalendar, props)}
+          <NewCalendar {...props} />
         </I18nContext>,
         element[0]
       );

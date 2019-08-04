@@ -47,19 +47,21 @@ export class AddLayerPanel extends Component {
     return panelDescription;
   }
 
-  _viewLayer = async source => {
+  _viewLayer = async (source, options = {}) => {
     if (!source) {
       this.setState({ layer: null });
       this.props.removeTransientLayer();
       return;
     }
-
-    const layerOptions = this.state.layer
-      ? { style: this.state.layer.getCurrentStyle().getDescriptor() }
-      : {};
-    const newLayer = source.createDefaultLayer(layerOptions, this.props.mapColors);
-    this.setState({ layer: newLayer }, () =>
-      this.props.viewLayer(this.state.layer));
+    const layerInitProps = {
+      ...options,
+      ...(this.state.layer && { style: this.state.layer.getCurrentStyle().getDescriptor() })
+    };
+    const newLayer = source.createDefaultLayer(layerInitProps, this.props.mapColors);
+    this.setState(
+      { layer: newLayer },
+      () => this.props.viewLayer(this.state.layer)
+    );
   };
 
   _clearLayerData = ({ keepSourceType = false }) => {

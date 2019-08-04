@@ -9,7 +9,7 @@ import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
-import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import { MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER, SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../reducers/util';
 import { i18n } from '@kbn/i18n';
@@ -73,6 +73,10 @@ export class AbstractLayer {
     return clonedDescriptor;
   }
 
+  makeMbLayerId(layerNameSuffix) {
+    return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}${layerNameSuffix}`;
+  }
+
   isJoinable() {
     return this._source.isJoinable();
   }
@@ -118,6 +122,7 @@ export class AbstractLayer {
   getIconAndTooltipContent(zoomLevel) {
     let icon;
     let tooltipContent = null;
+    let areResultsTrimmed = false;
     if (this.hasErrors()) {
       icon = (
         <EuiIcon
@@ -157,12 +162,14 @@ export class AbstractLayer {
       if (customIconAndTooltipContent) {
         icon = customIconAndTooltipContent.icon;
         tooltipContent = customIconAndTooltipContent.tooltipContent;
+        areResultsTrimmed = customIconAndTooltipContent.areResultsTrimmed;
       }
     }
 
     return {
       icon,
-      tooltipContent
+      tooltipContent,
+      areResultsTrimmed
     };
   }
 
@@ -261,12 +268,20 @@ export class AbstractLayer {
     throw new Error('Should implement AbstractLayer#getMbLayerIds');
   }
 
+  ownsMbLayerId() {
+    throw new Error('Should implement AbstractLayer#ownsMbLayerId');
+  }
+
+  ownsMbSourceId() {
+    throw new Error('Should implement AbstractLayer#ownsMbSourceId');
+  }
+
   canShowTooltip() {
     return false;
   }
 
-  syncLayerWithMb() {
-    //no-op by default
+  syncLayerWithMB() {
+    throw new Error('Should implement AbstractLayer#syncLayerWithMB');
   }
 
   updateDueToExtent(source, prevMeta = {}, nextMeta = {}) {

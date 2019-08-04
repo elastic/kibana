@@ -19,7 +19,12 @@ module.directive('mlDataFramePage', () => {
     scope: {},
     restrict: 'E',
     link: (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
-      ReactDOM.render(<I18nContext>{React.createElement(Page)}</I18nContext>, element[0]);
+      ReactDOM.render(
+        <I18nContext>
+          <Page />
+        </I18nContext>,
+        element[0]
+      );
 
       element.on('$destroy', () => {
         ReactDOM.unmountComponentAtNode(element[0]);

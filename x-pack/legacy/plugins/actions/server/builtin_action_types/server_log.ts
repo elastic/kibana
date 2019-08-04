@@ -10,12 +10,6 @@ import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from 
 
 const DEFAULT_TAGS = ['info', 'alerting'];
 
-// config definition
-
-const unencryptedConfigProperties: string[] = [];
-
-const ConfigSchema = schema.object({});
-
 // params definition
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
@@ -30,9 +24,7 @@ const ParamsSchema = schema.object({
 export const actionType: ActionType = {
   id: '.server-log',
   name: 'server-log',
-  unencryptedAttributes: unencryptedConfigProperties,
   validate: {
-    config: ConfigSchema,
     params: ParamsSchema,
   },
   executor,
@@ -41,6 +33,7 @@ export const actionType: ActionType = {
 // action executor
 
 async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
+  const id = execOptions.id;
   const params = execOptions.params as ActionParamsType;
   const services = execOptions.services;
 
@@ -49,7 +42,7 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   } catch (err) {
     return {
       status: 'error',
-      message: `error logging message: ${err.message}`,
+      message: `error in action ${id} logging message: ${err.message}`,
     };
   }
 
