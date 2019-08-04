@@ -26,7 +26,7 @@ async function fetch(server) {
         bool: {
           filter: {
             term: {
-              _id: TASK_ID
+              _id: `task:${TASK_ID}`
             }
           }
         }

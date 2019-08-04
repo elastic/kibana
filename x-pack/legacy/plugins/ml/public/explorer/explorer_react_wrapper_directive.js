@@ -17,12 +17,8 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 import { I18nContext } from 'ui/i18n';
-import chrome from 'ui/chrome';
-import { timefilter } from 'ui/timefilter';
-import { timeHistory } from 'ui/timefilter/time_history';
 
 import { jobSelectServiceFactory } from '../components/job_selector/job_select_service_utils';
-import { NavigationMenuContext } from '../util/context_utils';
 
 import { Explorer } from './explorer';
 import { EXPLORER_ACTION } from './explorer_constants';
@@ -37,17 +33,15 @@ module.directive('mlExplorerReactWrapper', function (config, globalState) {
 
     ReactDOM.render(
       <I18nContext>
-        <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-          <Explorer {...{
-            appStateHandler: scope.appStateHandler,
-            config,
-            dateFormatTz,
-            globalState,
-            jobSelectService,
-            MlTimeBuckets: scope.MlTimeBuckets,
-          }}
-          />
-        </NavigationMenuContext.Provider>
+        <Explorer {...{
+          appStateHandler: scope.appStateHandler,
+          config,
+          dateFormatTz,
+          globalState,
+          jobSelectService,
+          MlTimeBuckets: scope.MlTimeBuckets,
+        }}
+        />
       </I18nContext>,
       element[0]
     );

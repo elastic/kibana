@@ -10,16 +10,14 @@ import { ActionTypeRegistry } from './action_type_registry';
 import { ActionsClient } from './actions_client';
 import { ExecutorType } from './types';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
-import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/plugin.mock';
 
 const savedObjectsClient = SavedObjectsClientMock.create();
 
 const mockTaskManager = taskManagerMock.create();
 
-const mockEncryptedSavedObjectsPlugin = {
-  getDecryptedAsInternalUser: jest.fn() as EncryptedSavedObjectsPlugin['getDecryptedAsInternalUser'],
-} as EncryptedSavedObjectsPlugin;
+const mockEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
 
 function getServices() {
   return {
@@ -33,6 +31,8 @@ const actionTypeRegistryParams = {
   getServices,
   taskManager: mockTaskManager,
   encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
+  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+  getBasePath: jest.fn().mockReturnValue(undefined),
 };
 
 const executor: ExecutorType = async options => {
@@ -246,7 +246,11 @@ describe('find()', () => {
         {
           id: '1',
           type: 'type',
-          attributes: {},
+          attributes: {
+            config: {
+              foo: 'bar',
+            },
+          },
           references: [],
         },
       ],
@@ -258,7 +262,19 @@ describe('find()', () => {
     });
     savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.find({});
-    expect(result).toEqual(expectedResult);
+    expect(result).toEqual({
+      total: 1,
+      perPage: 10,
+      page: 1,
+      data: [
+        {
+          id: '1',
+          config: {
+            foo: 'bar',
+          },
+        },
+      ],
+    });
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [

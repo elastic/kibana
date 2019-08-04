@@ -25,7 +25,7 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { coreMock } from '../../../../../../../core/public/mocks';
 const setupMock = coreMock.createSetup();
 
-jest.mock('../search_bar', () => {
+jest.mock('../../../../core_plugins/data/public', () => {
   return {
     SearchBar: () => <div className="searchBar"></div>,
     SearchBarProps: {},

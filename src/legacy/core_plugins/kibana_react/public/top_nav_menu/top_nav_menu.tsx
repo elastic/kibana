@@ -24,7 +24,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { UiSettingsClientContract } from 'kibana/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import { SearchBar, SearchBarProps } from '../search_bar';
+import { SearchBar, SearchBarProps } from '../../../../core_plugins/data/public';
 
 type Props = Partial<SearchBarProps> & {
   name: string;

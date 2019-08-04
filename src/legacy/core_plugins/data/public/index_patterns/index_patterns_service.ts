@@ -56,7 +56,7 @@ export interface IndexPatternDependencies {
 export class IndexPatternsService {
   public setup({ uiSettings, savedObjectsClient }: IndexPatternDependencies) {
     return {
-      indexPatterns: new IndexPatterns({ uiSettings, savedObjectsClient }),
+      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient),
     };
   }
 
