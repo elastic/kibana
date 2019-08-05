@@ -70,7 +70,8 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
   const savedQueryDescriptionText = i18n.translate(
     'data.search.searchBar.savedQueryDescriptionText',
     {
-      defaultMessage: 'Saved queries allow you to store sets of queries, filters and time filters.',
+      defaultMessage:
+        'Saved queries allow you to save common search snippets and filters for later use.',
     }
   );
 
@@ -135,78 +136,85 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
       }}
       anchorPosition="downLeft"
     >
-      <EuiPopoverTitle>{savedQueryPopoverTitleText}</EuiPopoverTitle>
-      {savedQueries.length > 0 ? (
-        <Fragment>
-          <EuiFlexGroup wrap>
-            <EuiFlexItem>{savedQueryDescriptionText}</EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <ul>{savedQueryRows}</ul>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Fragment>
-      ) : (
-        <EuiText grow={false}>
-          <p>
-            There are no saved queries. You can save search snippets and filters for later use.{' '}
-            this, enter a query and click 'Save query for reuse'.
-          </p>
-        </EuiText>
-      )}
-      {query.query !== '' ? (
-        <EuiFlexGroup direction="rowReverse" alignItems="center" justifyContent="flexEnd">
-          {showSaveQuery && loadedSavedQuery && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiButton onClick={() => onSaveAsNew()}>
-                    {i18n.translate('data.search.searchBar.savedQueryPopoverSaveAsNewButtonText', {
-                      defaultMessage: 'Save As New',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
+      <div style={{ width: '400px' }}>
+        <EuiPopoverTitle>{savedQueryPopoverTitleText}</EuiPopoverTitle>
+        {savedQueries.length > 0 ? (
+          <Fragment>
+            <EuiFlexGroup wrap>
+              <EuiFlexItem>
+                <EuiText>{savedQueryDescriptionText}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <ul>{savedQueryRows}</ul>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </Fragment>
+        ) : (
+          <EuiText grow={false}>
+            <p>
+              There are no saved queries. You can save search snippets and filters for later use.{' '}
+              this, enter a query and click 'Save query for reuse'.
+            </p>
+          </EuiText>
+        )}
+        {query.query !== '' ? (
+          <EuiFlexGroup direction="rowReverse" alignItems="center" justifyContent="flexEnd">
+            {showSaveQuery && loadedSavedQuery && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton onClick={() => onSaveAsNew()}>
+                      {i18n.translate(
+                        'data.search.searchBar.savedQueryPopoverSaveAsNewButtonText',
+                        {
+                          defaultMessage: 'Save As New',
+                        }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
 
-                <EuiFlexItem>
-                  <EuiButton
-                    fill
-                    onClick={() => onSave()}
-                    disabled={query.query === loadedSavedQuery.attributes.query.query}
-                  >
-                    {i18n.translate(
-                      'data.search.searchBar.savedQueryPopoverSaveChangesButtonText',
-                      {
-                        defaultMessage: 'Save changes',
-                      }
-                    )}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-          {showSaveQuery && !loadedSavedQuery && (
+                  <EuiFlexItem>
+                    <EuiButton
+                      fill
+                      onClick={() => onSave()}
+                      disabled={query.query === loadedSavedQuery.attributes.query.query}
+                    >
+                      {i18n.translate(
+                        'data.search.searchBar.savedQueryPopoverSaveChangesButtonText',
+                        {
+                          defaultMessage: 'Save changes',
+                        }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+            {showSaveQuery && !loadedSavedQuery && (
+              <EuiFlexItem grow={false}>
+                <EuiButton fill onClick={() => onSave()}>
+                  {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
+                    defaultMessage: 'Save',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem />
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={() => onSave()}>
-                {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
-                  defaultMessage: 'Save',
-                })}
-              </EuiButton>
+              <EuiButtonEmpty onClick={() => onClearSavedQuery()}>
+                {loadedSavedQuery &&
+                  i18n.translate('data.search.searchBar.savedQueryPopoverClearButtonText', {
+                    defaultMessage: 'Clear',
+                  })}
+              </EuiButtonEmpty>
             </EuiFlexItem>
-          )}
-          <EuiFlexItem />
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => onClearSavedQuery()}>
-              {loadedSavedQuery &&
-                i18n.translate('data.search.searchBar.savedQueryPopoverClearButtonText', {
-                  defaultMessage: 'Clear',
-                })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        ''
-      )}
+          </EuiFlexGroup>
+        ) : (
+          ''
+        )}
+      </div>
     </EuiPopover>
   );
 };

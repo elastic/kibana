@@ -32,6 +32,8 @@ import {
   EuiFieldText,
   EuiSwitch,
 } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { SavedQueryAttributes } from '../index';
 
 interface Props {
@@ -64,9 +66,19 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
   const [shouldIncludeTimefilter, setIncludeTimefilter] = useState(
     !!(savedQuery && savedQuery.timefilter)
   );
+  const savedQueryDescriptionText = i18n.translate(
+    'data.search.searchBar.savedQueryDescriptionText',
+    {
+      defaultMessage:
+        'Saved queries allow you to save common search snippets and filters for later use.',
+    }
+  );
 
   const saveQueryForm = (
     <EuiForm>
+      <EuiFormRow>
+        <EuiText color="subdued">{savedQueryDescriptionText}</EuiText>
+      </EuiFormRow>
       <EuiFormRow label="Name">
         <EuiFieldText
           value={title}
