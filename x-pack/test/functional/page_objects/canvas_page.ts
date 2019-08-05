@@ -6,9 +6,9 @@
 
 import expect from '@kbn/expect';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function CanvasPageProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
+export function CanvasPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
 
