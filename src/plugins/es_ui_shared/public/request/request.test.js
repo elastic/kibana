@@ -98,7 +98,7 @@ describe('request lib', () => {
       describe('path, method, body', () => {
         it('is used to send the request', async () => {
           initUseRequest({ ...successRequest });
-          await wait(10);
+          await wait(50);
           expect(hook.data).toBe(successResponse.data);
         });
       });
@@ -131,14 +131,14 @@ describe('request lib', () => {
           initUseRequest({ ...successRequest, deserializer });
           sinon.assert.notCalled(deserializer);
 
-          await wait(5);
+          await wait(50);
           sinon.assert.calledOnce(deserializer);
           sinon.assert.calledWith(deserializer, successResponse.data);
         });
 
         it('processes data', async () => {
           initUseRequest({ ...successRequest, deserializer: () => 'intercepted' });
-          await wait(5);
+          await wait(50);
           expect(hook.data).toBe('intercepted');
         });
       });
@@ -151,7 +151,7 @@ describe('request lib', () => {
           expect(hook.isInitialRequest).toBe(true);
 
           hook.sendRequest();
-          await wait(5);
+          await wait(50);
           expect(hook.isInitialRequest).toBe(false);
         });
       });
@@ -161,7 +161,7 @@ describe('request lib', () => {
           initUseRequest({ ...successRequest });
           expect(hook.isLoading).toBe(true);
 
-          await wait(5);
+          await wait(50);
           expect(hook.isLoading).toBe(false);
         });
       });
@@ -169,14 +169,13 @@ describe('request lib', () => {
       describe('error', () => {
         it('surfaces errors from requests', async () => {
           initUseRequest({ ...errorRequest });
-          await wait(10);
+          await wait(50);
           expect(hook.error).toBe(errorResponse);
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/42563
-        it.skip('persists while a request is in-flight', async () => {
+        it('persists while a request is in-flight', async () => {
           initUseRequest({ ...errorRequest });
-          await wait(5);
+          await wait(50);
           hook.sendRequest();
           expect(hook.isLoading).toBe(true);
           expect(hook.error).toBe(errorResponse);
@@ -184,7 +183,7 @@ describe('request lib', () => {
 
         it('is undefined when the request is successful', async () => {
           initUseRequest({ ...successRequest });
-          await wait(10);
+          await wait(50);
           expect(hook.isLoading).toBe(false);
           expect(hook.error).toBeUndefined();
         });
@@ -193,22 +192,21 @@ describe('request lib', () => {
       describe('data', () => {
         it('surfaces payloads from requests', async () => {
           initUseRequest({ ...successRequest });
-          await wait(10);
+          await wait(50);
           expect(hook.data).toBe(successResponse.data);
         });
 
         it('persists while a request is in-flight', async () => {
           initUseRequest({ ...successRequest });
-          await wait(5);
+          await wait(50);
           hook.sendRequest();
           expect(hook.isLoading).toBe(true);
           expect(hook.data).toBe(successResponse.data);
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/42562
-        it.skip('is undefined when the request fails', async () => {
+        it('is undefined when the request fails', async () => {
           initUseRequest({ ...errorRequest });
-          await wait(10);
+          await wait(50);
           expect(hook.isLoading).toBe(false);
           expect(hook.data).toBeUndefined();
         });
