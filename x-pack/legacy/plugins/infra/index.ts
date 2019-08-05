@@ -12,6 +12,9 @@ import { getConfigSchema, initServerWithKibana } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 
 const APP_ID = 'infra';
+const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
+  defaultMessage: 'Logs',
+});
 
 export function infra(kibana: any) {
   return new kibana.Plugin({
@@ -72,7 +75,7 @@ export function infra(kibana: any) {
       server.addAppLinksToSampleDataset('logs', [
         {
           path: `/app/${APP_ID}#/logs`,
-          label: 'Logs',
+          label: logsSampleDataLinkLabel,
           icon: 'loggingApp',
         },
       ]);
