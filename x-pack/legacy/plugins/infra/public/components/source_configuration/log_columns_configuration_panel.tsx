@@ -245,6 +245,7 @@ const RemoveLogColumnButton: React.FunctionComponent<{
       iconType="trash"
       onClick={onClick}
       title={removeColumnLabel}
+      aria-label={removeColumnLabel}
     />
   );
 };
