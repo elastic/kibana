@@ -26,6 +26,7 @@ export class PointSeries {
     this.chartEl = seriesEl;
     this.chartData = seriesData;
     this.seriesConfig = seriesConfig;
+    this.thresholdLineOptions = handler.visConfig._values.thresholdLine;
   }
 
   getGroupedCount() {
@@ -79,5 +80,34 @@ export class PointSeries {
     }
     const click = events.addClickEvent();
     return element.call(click);
+  }
+
+  addThresholdLine(svgElem) {
+    const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
+    const yScale = this.getValueAxis().getScale();
+    const svgParentWidth = svgElem[0][0].attributes.width.value;
+    const svgParentHeight = svgElem[0][0].attributes.height.value;
+
+    const thresholdLineWidth = this.thresholdLineOptions.width;
+    let thresholdLineStyle = '0';
+    if (this.thresholdLineOptions.style === 'Dashed') {
+      thresholdLineStyle = '10,5';
+    } else if (this.thresholdLineOptions.style === 'Dot dashed') {
+      thresholdLineStyle = '20,5,5,5';
+    }
+    const thresholdValue = this.thresholdLineOptions.value;
+
+    function y(y) {
+      return yScale(y);
+    }
+    svgElem
+      .append('line')
+      .attr('x1', isHorizontal ? 0 : y(thresholdValue))
+      .attr('y1', isHorizontal ? y(thresholdValue) : 0)
+      .attr('x2', isHorizontal ? svgParentWidth : y(thresholdValue))
+      .attr('y2', isHorizontal ? y(thresholdValue) : svgParentHeight)
+      .attr('stroke-width', thresholdLineWidth)
+      .attr('stroke-dasharray', thresholdLineStyle)
+      .attr('stroke', '#ff0000');
   }
 }

@@ -96,6 +96,12 @@ export default function PointSeriesVisType(Private) {
         legendPosition: 'right',
         times: [],
         addTimeMarker: false,
+        thresholdLine: {
+          show: false,
+          value: 10,
+          width: 1,
+          style: 'Full'
+        }
       },
     },
     editorConfig: {

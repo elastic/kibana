@@ -27,8 +27,7 @@ const defaults = {
   showTooltip: true,
   color: undefined,
   fillColor: undefined,
-  showLabel: true,
-  showThreshold: false
+  showLabel: true
 };
 
 /**
@@ -62,7 +61,6 @@ export class ColumnChart extends PointSeries {
     super(handler, chartEl, chartData, seriesConfigArgs);
     this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
     this.labelOptions = _.defaults(handler.visConfig.get('labels', {}), defaults.showLabel);
-    this.thresholdLineOptions = handler.visConfig._values.thresholdLine;
   }
 
   addBars(svg, data) {
@@ -92,9 +90,6 @@ export class ColumnChart extends PointSeries {
       .attr('stroke', () => color(data.label));
 
     self.updateBars(bars);
-    if (this.thresholdLineOptions.show) {
-      self.addThresholdLine(bars, data);
-    }
 
     // Add tooltip
     if (isTooltip) {
@@ -355,89 +350,6 @@ export class ColumnChart extends PointSeries {
     return bars;
   }
 
-  addThresholdLine(bars, data) {
-    const color = this.handler.data.getColorFunc();
-    const xScale = this.getCategoryAxis().getScale();
-    const yScale = this.getValueAxis().getScale();
-    const chartData = this.chartData;
-    const groupCount = this.getGroupedCount();
-    const groupNum = this.getGroupedNum(this.chartData);
-    const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
-    const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
-    const isLogScale = this.getValueAxis().axisConfig.isLogScale();
-    const gutterSpacingPercentage = 0.15;
-    let barWidth;
-    let gutterWidth;
-
-    if (isTimeScale) {
-      const { min, interval } = this.handler.data.get('ordered');
-      let intervalWidth = xScale(min + interval) - xScale(min);
-      intervalWidth = Math.abs(intervalWidth);
-
-      gutterWidth = intervalWidth * gutterSpacingPercentage;
-      barWidth = (intervalWidth - gutterWidth) / groupCount;
-    }
-
-    function x(d, i) {
-      if (isTimeScale) {
-        return xScale(d.x) + datumWidth(barWidth, d, bars.data()[i + 1], xScale, gutterWidth, groupCount) * groupNum;
-      }
-      return xScale(d.x) + xScale.rangeBand() / groupCount * groupNum;
-    }
-
-    function y(d) {
-      if ((isHorizontal && d.y < 0) || (!isHorizontal && d.y > 0)) {
-        return yScale(0);
-      }
-      return yScale(d.y);
-    }
-
-    function widthFunc(d, i) {
-      if (isTimeScale) {
-        return datumWidth(barWidth, d, bars.data()[i + 1], xScale, gutterWidth, groupCount);
-      }
-      return xScale.rangeBand() / groupCount;
-    }
-
-    function heightFunc(d) {
-      const baseValue = isLogScale ? 1 : 0;
-      return Math.abs(yScale(baseValue) - yScale(d.y));
-    }
-
-    const layer = d3.select(bars[0].parentNode);
-
-    const indexOfLastEntry = chartData.values.length - 1;
-    const thresholdLineLength = chartData.values[indexOfLastEntry].x;
-
-    const thresholdLineBeginObj = {
-      x: 0,
-      y: this.thresholdLineOptions.value
-    };
-    const thresholdLineEndObj = {
-      x: thresholdLineLength,
-      y: this.thresholdLineOptions.value
-    };
-    const thresholdLineWidth = this.thresholdLineOptions.width;
-    let thresholdLineStyle = '0';
-    if (this.thresholdLineOptions.style === 'Dashed') {
-      thresholdLineStyle = '10,5';
-    } else if (this.thresholdLineOptions.style === 'Dot dashed') {
-      thresholdLineStyle = '20,5,5,5';
-    }
-    layer
-      .append('line')
-      .attr('x1', isHorizontal ? x(thresholdLineBeginObj, 0) : heightFunc(thresholdLineBeginObj))
-      .attr('y1', isHorizontal ? y(thresholdLineBeginObj) : x(thresholdLineBeginObj, 0))
-      .attr('x2', isHorizontal ? x(thresholdLineEndObj, indexOfLastEntry) + widthFunc(thresholdLineEndObj, indexOfLastEntry) :
-        heightFunc(thresholdLineEndObj))
-      .attr('y2', isHorizontal ? y(thresholdLineEndObj) :
-        x(thresholdLineEndObj, indexOfLastEntry) + widthFunc(thresholdLineEndObj, indexOfLastEntry))
-      .attr('stroke-width', thresholdLineWidth)
-      .attr('stroke-dasharray', thresholdLineStyle)
-      .attr('stroke', () => color(data.label));
-
-  }
-
   /**
    * Renders d3 visualization
    *
@@ -454,6 +366,10 @@ export class ColumnChart extends PointSeries {
 
         const bars = self.addBars(svg, self.chartData);
         self.addCircleEvents(bars);
+
+        if (self.thresholdLineOptions.show) {
+          self.addThresholdLine(self.chartEl);
+        }
 
         self.events.emit('rendered', {
           chart: self.chartData
