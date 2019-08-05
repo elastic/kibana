@@ -10,6 +10,7 @@ export function MachineLearningNavigationProvider({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
@@ -18,34 +19,37 @@ export function MachineLearningNavigationProvider({
       return await PageObjects.common.navigateToApp('ml');
     },
 
+    async navigateToArea(linkSubject: string, pageSubject: string) {
+      await retry.try(async () => {
+        if ((await testSubjects.exists(pageSubject)) === false) {
+          await testSubjects.click(linkSubject);
+          await testSubjects.existOrFail(pageSubject);
+        }
+      });
+    },
+
     async navigateToJobManagement() {
-      await testSubjects.click('mlTabJobManagement');
-      await testSubjects.existOrFail('mlPageJobManagement');
+      await this.navigateToArea('mlTabJobManagement', 'mlPageJobManagement');
     },
 
     async navigateToAnomalyExplorert() {
-      await testSubjects.click('mlTabAnomalyExplorer');
-      await testSubjects.existOrFail('mlPageAnomalyExplorer');
+      await this.navigateToArea('mlTabAnomalyExplorer', 'mlPageAnomalyExplorer');
     },
 
     async navigateToSingleMetricViewer() {
-      await testSubjects.click('mlTabSingleMetricViewer');
-      await testSubjects.existOrFail('mlPageSingleMetricViewer');
+      await this.navigateToArea('mlTabSingleMetricViewer', 'mlPageSingleMetricViewer');
     },
 
     async navigateToDataFrames() {
-      await testSubjects.click('mlTabDataFrames');
-      await testSubjects.existOrFail('mlPageDataFrame');
+      await this.navigateToArea('mlTabDataFrames', 'mlPageDataFrame');
     },
 
     async navigateToDataVisualizer() {
-      await testSubjects.click('mlTabDataVisualizer');
-      await testSubjects.existOrFail('mlPageDataVisualizerSelector');
+      await this.navigateToArea('mlTabDataVisualizer', 'mlPageDataVisualizerSelector');
     },
 
     async navigateToSettings() {
-      await testSubjects.click('mlTabSettings');
-      await testSubjects.existOrFail('mlPageSettings');
+      await this.navigateToArea('mlTabSettings', 'mlPageSettings');
     },
   };
 }
