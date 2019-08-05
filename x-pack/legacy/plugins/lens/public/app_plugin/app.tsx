@@ -27,7 +27,7 @@ interface State {
     toDate: string;
   };
   query: Query;
-  indexPatterns: string[];
+  indexPatternTitles: string[];
   lastKnownDoc?: Document;
   persistedDoc?: Document;
 }
@@ -60,7 +60,7 @@ export function App({
       fromDate: timeDefaults.from,
       toDate: timeDefaults.to,
     },
-    indexPatterns: [],
+    indexPatternTitles: [],
   });
 
   useEffect(() => {
@@ -74,7 +74,9 @@ export function App({
             isLoading: false,
             persistedDoc: doc,
             query: doc.state.query,
-            indexPatterns: doc.state.datasourceMetaData.filterableIndexPatterns,
+            indexPatternTitles: doc.state.datasourceMetaData.filterableIndexPatterns.map(
+              ({ title }) => title
+            ),
           });
         })
         .catch(() => {
@@ -166,7 +168,7 @@ export function App({
               });
             }}
             appName={'lens'}
-            indexPatterns={state.indexPatterns}
+            indexPatterns={state.indexPatternTitles}
             store={store}
             showDatePicker={true}
             showQueryInput={true}
@@ -185,10 +187,10 @@ export function App({
               query: state.query,
               doc: state.persistedDoc,
               onError,
-              onChange: ({ indexPatterns, doc }) => {
+              onChange: ({ indexPatternTitles, doc }) => {
                 setState({
                   ...state,
-                  indexPatterns,
+                  indexPatternTitles,
                   lastKnownDoc: doc,
                 });
               },

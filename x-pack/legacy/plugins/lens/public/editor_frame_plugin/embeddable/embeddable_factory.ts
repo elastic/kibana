@@ -73,9 +73,9 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
     const savedVis = await store.load(savedObjectId);
 
     const promises = savedVis.state.datasourceMetaData.filterableIndexPatterns.map(
-      async indexPatternId => {
+      async ({ id }) => {
         try {
-          return await this.indexPatternService.get(indexPatternId);
+          return await this.indexPatternService.get(id);
         } catch (error) {
           // Unable to load index pattern, ignore error as the index patterns are only used to
           // configure the filter and query bar - there is still a good chance to get the visualization

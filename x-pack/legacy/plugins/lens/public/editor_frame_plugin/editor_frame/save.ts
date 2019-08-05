@@ -40,7 +40,7 @@ export function getSavedObjectFormat({
     datasourceStates[id] = datasource.getPersistableState(state.datasourceStates[id].state);
   });
 
-  const filterableIndexPatterns: string[] = [];
+  const filterableIndexPatterns: Array<{ id: string; title: string }> = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
     filterableIndexPatterns.push(
       ...datasource.getMetaData(state.datasourceStates[id].state).filterableIndexPatterns
@@ -57,7 +57,7 @@ export function getSavedObjectFormat({
     state: {
       datasourceStates,
       datasourceMetaData: {
-        filterableIndexPatterns: _.uniq(filterableIndexPatterns),
+        filterableIndexPatterns: _.uniq(filterableIndexPatterns, 'id'),
       },
       visualization: visualization.getPersistableState(state.visualization.state),
       query: framePublicAPI.query,

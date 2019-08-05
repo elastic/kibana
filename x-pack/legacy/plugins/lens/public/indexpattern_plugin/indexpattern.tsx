@@ -266,7 +266,10 @@ export function getIndexPatternDatasource({
         filterableIndexPatterns: _.uniq(
           Object.values(state.layers)
             .map(layer => layer.indexPatternId)
-            .map(indexPatternId => state.indexPatterns[indexPatternId].title)
+            .map(indexPatternId => ({
+              id: indexPatternId,
+              title: state.indexPatterns[indexPatternId].title,
+            }))
         ),
       };
     },

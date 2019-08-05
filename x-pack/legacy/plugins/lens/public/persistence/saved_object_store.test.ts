@@ -29,7 +29,9 @@ describe('LensStore', () => {
         expression: '',
         activeDatasourceId: 'indexpattern',
         state: {
-          datasourceMetaData: { filterableIndexPatterns: [] },
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
           datasourceStates: {
             indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
           },
@@ -46,7 +48,9 @@ describe('LensStore', () => {
         expression: '',
         activeDatasourceId: 'indexpattern',
         state: {
-          datasourceMetaData: { filterableIndexPatterns: [] },
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
           datasourceStates: {
             indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
           },
@@ -85,9 +89,7 @@ describe('LensStore', () => {
         activeDatasourceId: 'indexpattern',
         state: {
           datasourceMetaData: { filterableIndexPatterns: [] },
-          datasourceStates: {
-            indexpattern: { type: 'index_pattern', indexPattern: 'lotr' },
-          },
+          datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
           visualization: { gear: ['staff', 'pointy hat'] },
           query: { query: '', language: 'lucene' },
           filters: [],
@@ -102,9 +104,7 @@ describe('LensStore', () => {
         activeDatasourceId: 'indexpattern',
         state: {
           datasourceMetaData: { filterableIndexPatterns: [] },
-          datasourceStates: {
-            indexpattern: { type: 'index_pattern', indexPattern: 'lotr' },
-          },
+          datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
           visualization: { gear: ['staff', 'pointy hat'] },
           query: { query: '', language: 'lucene' },
           filters: [],
@@ -119,9 +119,7 @@ describe('LensStore', () => {
         activeDatasourceId: 'indexpattern',
         state: JSON.stringify({
           datasourceMetaData: { filterableIndexPatterns: [] },
-          datasourceStates: {
-            indexpattern: { type: 'index_pattern', indexPattern: 'lotr' },
-          },
+          datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
           visualization: { gear: ['staff', 'pointy hat'] },
           query: { query: '', language: 'lucene' },
           filters: [],

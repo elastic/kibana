@@ -35,7 +35,7 @@ export interface EditorFrameProps {
     toDate: string;
   };
   query: Query;
-  onChange: (arg: { indexPatterns: string[]; doc: Document }) => void;
+  onChange: (arg: { indexPatternTitles: string[]; doc: Document }) => void;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -170,7 +170,7 @@ export function EditorFrame(props: EditorFrameProps) {
       return;
     }
 
-    const filterableIndexPatterns: string[] = [];
+    const indexPatternTitles: string[] = [];
     Object.entries(props.datasourceMap)
       .filter(([id, datasource]) => {
         const stateWrapper = state.datasourceStates[id];
@@ -181,8 +181,10 @@ export function EditorFrame(props: EditorFrameProps) {
         );
       })
       .forEach(([id, datasource]) => {
-        filterableIndexPatterns.push(
-          ...datasource.getMetaData(state.datasourceStates[id].state).filterableIndexPatterns
+        indexPatternTitles.push(
+          ...datasource
+            .getMetaData(state.datasourceStates[id].state)
+            .filterableIndexPatterns.map(pattern => pattern.title)
         );
       });
 
@@ -200,10 +202,7 @@ export function EditorFrame(props: EditorFrameProps) {
       framePublicAPI,
     });
 
-    props.onChange({
-      indexPatterns: filterableIndexPatterns,
-      doc,
-    });
+    props.onChange({ indexPatternTitles, doc });
   }, [state.datasourceStates, state.visualization, props.query, props.dateRange, state.title]);
 
   return (

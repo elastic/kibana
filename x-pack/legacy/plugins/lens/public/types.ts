@@ -25,7 +25,7 @@ export interface EditorFrameProps {
   query: Query;
 
   // Frame loader (app or embeddable) is expected to call this when it loads and updates
-  onChange: (newState: { indexPatterns: string[]; doc: Document }) => void;
+  onChange: (newState: { indexPatternTitles: string[]; doc: Document }) => void;
 }
 export interface EditorFrameInstance {
   mount: (element: Element, props: EditorFrameProps) => void;
@@ -60,7 +60,7 @@ export interface DatasourceSuggestion<T = unknown> {
 }
 
 export interface DatasourceMetaData {
-  filterableIndexPatterns: string[];
+  filterableIndexPatterns: Array<{ id: string; title: string }>;
 }
 
 /**

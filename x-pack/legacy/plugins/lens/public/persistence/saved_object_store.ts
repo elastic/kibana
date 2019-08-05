@@ -7,7 +7,6 @@
 import { SavedObjectAttributes } from 'target/types/server';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/common';
-import { DatasourceMetaData } from '../types';
 
 export interface Document {
   id?: string;
@@ -17,7 +16,9 @@ export interface Document {
   activeDatasourceId: string;
   expression: string;
   state: {
-    datasourceMetaData: DatasourceMetaData;
+    datasourceMetaData: {
+      filterableIndexPatterns: Array<{ id: string; title: string }>;
+    };
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
     query: Query;

@@ -1296,7 +1296,9 @@ describe('editor_frame', () => {
         })
       );
       mockDatasource.getLayers.mockReturnValue(['first']);
-      mockDatasource.getMetaData.mockReturnValue({ filterableIndexPatterns: [] });
+      mockDatasource.getMetaData.mockReturnValue({
+        filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
+      });
       mockVisualization.initialize.mockReturnValue({ initialState: true });
 
       act(() => {
@@ -1319,21 +1321,19 @@ describe('editor_frame', () => {
 
       expect(onChange).toHaveBeenCalledTimes(0);
 
-      mockDatasource.getMetaData.mockReturnValue({ filterableIndexPatterns: ['resolved'] });
-      resolver({ loadedDatasource: '' });
-
+      resolver({});
       await waitForPromises();
 
       expect(onChange).toHaveBeenCalledTimes(2);
       expect(onChange).toHaveBeenNthCalledWith(1, {
-        indexPatterns: ['resolved'],
+        indexPatternTitles: ['resolved'],
         doc: {
           activeDatasourceId: 'testDatasource',
           expression: '',
           id: undefined,
           state: {
             visualization: null, // Not yet loaded
-            datasourceMetaData: { filterableIndexPatterns: ['resolved'] },
+            datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'resolved' }] },
             datasourceStates: { testDatasource: undefined },
             query: { query: '', language: 'lucene' },
             filters: [],
@@ -1344,14 +1344,16 @@ describe('editor_frame', () => {
         },
       });
       expect(onChange).toHaveBeenLastCalledWith({
-        indexPatterns: ['resolved'],
+        indexPatternTitles: ['resolved'],
         doc: {
           activeDatasourceId: 'testDatasource',
           expression: '',
           id: undefined,
           state: {
             visualization: { initialState: true }, // Now loaded
-            datasourceMetaData: { filterableIndexPatterns: ['resolved'] },
+            datasourceMetaData: {
+              filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
+            },
             datasourceStates: { testDatasource: undefined },
             query: { query: '', language: 'lucene' },
             filters: [],
@@ -1402,7 +1404,7 @@ describe('editor_frame', () => {
       await waitForPromises();
       expect(onChange).toHaveBeenCalledTimes(3);
       expect(onChange).toHaveBeenNthCalledWith(3, {
-        indexPatterns: [],
+        indexPatternTitles: [],
         doc: {
           activeDatasourceId: 'testDatasource',
           expression: expect.stringContaining('vis "expression"'),

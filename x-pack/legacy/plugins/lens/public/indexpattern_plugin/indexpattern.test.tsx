@@ -1085,7 +1085,16 @@ describe('IndexPattern Data Source', () => {
           currentIndexPatternId: '1',
         })
       ).toEqual({
-        filterableIndexPatterns: ['my-fake-index-pattern', 'my-fake-restricted-pattern'],
+        filterableIndexPatterns: [
+          {
+            id: '1',
+            title: 'my-fake-index-pattern',
+          },
+          {
+            id: '2',
+            title: 'my-fake-restricted-pattern',
+          },
+        ],
       });
     });
   });

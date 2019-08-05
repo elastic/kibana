@@ -122,7 +122,10 @@ describe('Lens App', () => {
       args.editorFrame = frame;
       (args.docStorage.load as jest.Mock).mockResolvedValue({
         id: '1234',
-        state: { query: 'fake query', datasourceMetaData: { filterableIndexPatterns: ['saved'] } },
+        state: {
+          query: 'fake query',
+          datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
+        },
       });
 
       const instance = mount(<App {...args} />);
@@ -147,7 +150,7 @@ describe('Lens App', () => {
             id: '1234',
             state: {
               query: 'fake query',
-              datasourceMetaData: { filterableIndexPatterns: ['saved'] },
+              datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
             },
           },
         })
@@ -204,7 +207,7 @@ describe('Lens App', () => {
         ).toEqual(true);
 
         const onChange = frame.mount.mock.calls[0][1].onChange;
-        onChange({ indexPatterns: [], doc: ('will save this' as unknown) as Document });
+        onChange({ indexPatternTitles: [], doc: ('will save this' as unknown) as Document });
 
         instance.update();
 
@@ -226,7 +229,7 @@ describe('Lens App', () => {
         expect(frame.mount).toHaveBeenCalledTimes(1);
 
         const onChange = frame.mount.mock.calls[0][1].onChange;
-        onChange({ indexPatterns: [], doc: ({ id: undefined } as unknown) as Document });
+        onChange({ indexPatternTitles: [], doc: ({ id: undefined } as unknown) as Document });
 
         instance.update();
 
@@ -268,7 +271,7 @@ describe('Lens App', () => {
         const instance = mount(<App {...args} />);
 
         const onChange = frame.mount.mock.calls[0][1].onChange;
-        onChange({ indexPatterns: [], doc: ({ id: undefined } as unknown) as Document });
+        onChange({ indexPatternTitles: [], doc: ({ id: undefined } as unknown) as Document });
 
         instance.update();
 
@@ -333,7 +336,10 @@ describe('Lens App', () => {
       );
 
       const onChange = frame.mount.mock.calls[0][1].onChange;
-      onChange({ indexPatterns: ['newIndex'], doc: ({ id: undefined } as unknown) as Document });
+      onChange({
+        indexPatternTitles: ['newIndex'],
+        doc: ({ id: undefined } as unknown) as Document,
+      });
 
       instance.update();
 
