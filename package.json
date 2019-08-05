@@ -60,7 +60,6 @@
     "lint:es": "node scripts/eslint",
     "lint:sass": "node scripts/sasslint",
     "makelogs": "node scripts/makelogs",
-    "mocha": "node scripts/mocha",
     "uiFramework:start": "cd packages/kbn-ui-framework && yarn docSiteStart",
     "uiFramework:build": "cd packages/kbn-ui-framework && yarn docSiteBuild",
     "uiFramework:createComponent": "cd packages/kbn-ui-framework && yarn createComponent",
