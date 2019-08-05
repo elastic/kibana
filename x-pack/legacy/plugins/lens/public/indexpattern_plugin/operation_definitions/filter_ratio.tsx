@@ -65,10 +65,17 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
     // TODO parse the KQL tree and check whether this would work out
     return false;
   },
-  paramEditor: ({ state, setState, columnId: currentColumnId, dataPlugin, storage, layerId }) => {
+  paramEditor: ({
+    state,
+    setState,
+    columnId: currentColumnId,
+    dataPluginDependencies: pluginDependencies,
+    storage,
+    layerId,
+  }) => {
     const [hasDenominator, setDenominator] = useState(false);
 
-    const { QueryBarInput } = dataPlugin!.query.ui;
+    const { QueryBarInput } = pluginDependencies.components;
 
     return (
       <div>

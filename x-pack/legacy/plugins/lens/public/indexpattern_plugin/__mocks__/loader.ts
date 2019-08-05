@@ -19,13 +19,31 @@ export function getIndexPatterns() {
             searchable: true,
           },
           {
+            name: 'start_date',
+            type: 'date',
+            aggregatable: true,
+            searchable: true,
+          },
+          {
             name: 'bytes',
             type: 'number',
             aggregatable: true,
             searchable: true,
           },
           {
+            name: 'memory',
+            type: 'number',
+            aggregatable: true,
+            searchable: true,
+          },
+          {
             name: 'source',
+            type: 'string',
+            aggregatable: true,
+            searchable: true,
+          },
+          {
+            name: 'dest',
             type: 'string',
             aggregatable: true,
             searchable: true,
