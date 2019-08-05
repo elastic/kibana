@@ -99,12 +99,12 @@ export class TMSService {
   }
 
   async getMinZoom() {
-    const tileJson = await this._getDefaultRasterJsonStyle();
+    const tileJson = await this._getRasterStyleJson();
     return tileJson.minzoom;
   }
 
   async getMaxZoom() {
-    const tileJson = await this._getDefaultRasterJsonStyle();
+    const tileJson = await this._getRasterStyleJson();
     return tileJson.maxzoom;
   }
 
