@@ -10,7 +10,7 @@ import {
   CLOSE_DETAIL_PANEL,
 } from '../action_types';
 
-export const openDetailPanel = ({ panelType, jobId, isEditMode = false }) => (dispatch) => {
+export const openDetailPanel = ({ panelType, jobId }) => (dispatch) => {
   const { history } = getRouter();
   const search = history.location.search;
   const { job: deepLinkedJobId } = extractQueryParams(search);
@@ -24,7 +24,7 @@ export const openDetailPanel = ({ panelType, jobId, isEditMode = false }) => (di
 
   dispatch({
     type: OPEN_DETAIL_PANEL,
-    payload: { panelType, jobId, isEditMode },
+    payload: { panelType, jobId },
   });
 };
 

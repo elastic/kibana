@@ -62,7 +62,6 @@ describe('Cloning an existing rollup job from job list', () => {
     expect(exists('jobActionMenuButton')).toBe(true);
 
     find('jobActionMenuButton').simulate('click');
-    find('jobActionMenuButton').simulate('click');
     find('jobCloneActionContextMenu').simulate('click');
   });
 });
