@@ -1126,8 +1126,22 @@ import { configServiceMock } from 'src/core/server/mocks';
 const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(config$);
 …
-const plugin = new MyPlugin({ configService }, …)
+const plugin = new MyPlugin({ configService }, …);
 ```
+
+Or if you need to get the whole core `setup` or `start` contracts:
+```typescript
+// my_plugin/public/plugin.test.ts
+import { coreMock } from 'src/core/public/mocks';
+
+const coreSetup = coreMock.createSetup();
+coreSetup.uiSettings.get.mockImplementation((key: string) => {
+  …
+});
+…
+const plugin = new MyPlugin(coreSetup, ...);
+```
+
 
 Although it isn't mandatory, we strongly recommended you export your plugin mocks as well, in order for dependent plugins to use them in tests. Your plugin mocks should be exported from the root `/server` and `/public` directories in your plugin:
 ```typescript
@@ -1143,7 +1157,7 @@ const createSetupContractMock = () => {
 
 export const myPluginMocks = {
   createSetup: createSetupContractMock,
-  createStart: ...
+  createStart: …
 }
 ```
 Plugin mocks should consist of mocks for *public APIs only*: setup/start/stop contracts. Mocks aren't necessary for pure functions as other plugins can call the original implementation in tests.
@@ -1159,12 +1173,14 @@ If you are using this approach, the easiest way to mock core and new platform-re
 jest.mock('ui/new_platform');
 ```
 
-This will automatically mock the services in `ui/new_platform` thanks to the [helpers that have been added](https://github.com/streamich/kibana/blob/master/src/legacy/ui/public/new_platform/__mocks__/helpers.ts) to that module.
+This will automatically mock the services in `ui/new_platform` thanks to the [helpers that have been added](https://github.com/elastic/kibana/blob/master/src/legacy/ui/public/new_platform/__mocks__/helpers.ts) to that module.
 
 If others are consuming your plugin's new platform contracts via the `ui/new_platform` module, you'll want to update the helpers as well to ensure your contracts are properly mocked.
 
+> Note: The `ui/new_platform` mock is only designed for use by old Jest tests. If you are writing new tests, you should structure your code and tests such that you don't need this mock. Instead, you should import the `core` mock directly and instantiate it.
+
 #### What about karma tests?
-While our plan is to only provide first-class mocks for jest tests, there are many legacy karma tests that cannot be quickly or easily converted to jest -- particularly those which are still relying on mocking Angular services via `ngMock`.
+While our plan is to only provide first-class mocks for Jest tests, there are many legacy karma tests that cannot be quickly or easily converted to Jest -- particularly those which are still relying on mocking Angular services via `ngMock`.
 
 For these tests, we are maintaining a separate set of mocks. Files with a `.karma_mock.{js|ts|tsx}` extension will be loaded _globally_ before karma tests are run.
 
