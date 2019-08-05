@@ -1222,6 +1222,8 @@ Default: `{font size=14 family="'Open Sans', Helvetica, Arial, sans-serif" color
 Default: `{font size=48 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center lHeight=48}`.
 
 |`metricFormat`
+
+Alias: `format`
 |`string`
 |A NumeralJS format string. For example, `"0.0a"` or `"0%"`. See http://numeraljs.com/#format.
 |===

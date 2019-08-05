@@ -5,6 +5,7 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
+import { AdvancedSettings } from '../../../public/lib/kibana_advanced_settings';
 
 export const metric = () => ({
   name: 'metric',
@@ -38,7 +39,7 @@ export const metric = () => ({
       displayName: 'Metric Format',
       help: 'Enter a valid NumeralJS format',
       argType: 'numberFormat',
-      default: '""',
+      default: `"${AdvancedSettings.get('format:number:defaultPattern')}"`,
     },
   ],
 });
