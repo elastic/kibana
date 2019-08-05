@@ -55,7 +55,7 @@ export class HeadlessChromiumDriver {
     this.page.on('request', (interceptedRequest: any) => {
       let isData = false;
       if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedRequest.url())) {
-        // this.logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
+        this.logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
         interceptedRequest.continue({
           headers: {
             ...interceptedRequest.headers(),
@@ -71,7 +71,7 @@ export class HeadlessChromiumDriver {
           isData = true;
         }
 
-        // this.logger.debug(`No custom headers for ${interceptedUrl}`);
+        this.logger.debug(`No custom headers for ${interceptedUrl}`);
         interceptedRequest.continue();
       }
       interceptedCount = interceptedCount + (isData ? 0 : 1);
@@ -113,7 +113,7 @@ export class HeadlessChromiumDriver {
 
   public async waitForSelector(selector: string, opts: WaitForSelectorOpts = {}) {
     const { silent = false } = opts;
-    // this.logger.debug(`waitForSelector ${selector}`);
+    this.logger.debug(`waitForSelector ${selector}`);
 
     let resp;
     try {
@@ -132,7 +132,7 @@ export class HeadlessChromiumDriver {
       throw err;
     }
 
-    // this.logger.debug(`waitForSelector ${selector} resolved`);
+    this.logger.debug(`waitForSelector ${selector} resolved`);
     return resp;
   }
 
