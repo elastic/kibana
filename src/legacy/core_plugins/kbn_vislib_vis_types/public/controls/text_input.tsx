@@ -18,32 +18,26 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiFieldText, EuiIconTip } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { VisOptionsSetValue } from 'ui/vis/editors/default';
 
 interface TextInputOptionProps {
+  helpText?: React.ReactNode;
   label?: React.ReactNode;
-  tip?: React.ReactNode;
   paramName: string;
   value?: string;
   setValue: VisOptionsSetValue;
 }
 
-function TextInputOption({ label, tip, paramName, value = '', setValue }: TextInputOptionProps) {
-  const formLabel = (
-    <>
-      {label}
-      {tip && (
-        <>
-          {' '}
-          <EuiIconTip position="right" content={tip} type="questionInCircle" />
-        </>
-      )}
-    </>
-  );
-
+function TextInputOption({
+  helpText,
+  label,
+  paramName,
+  value = '',
+  setValue,
+}: TextInputOptionProps) {
   return (
-    <EuiFormRow label={formLabel} fullWidth compressed>
+    <EuiFormRow helpText={helpText} label={label} fullWidth compressed>
       <EuiFieldText fullWidth value={value} onChange={ev => setValue(paramName, ev.target.value)} />
     </EuiFormRow>
   );

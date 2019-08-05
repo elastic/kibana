@@ -26,7 +26,7 @@ import { toastNotifications } from 'ui/notify';
 import { VisOptionsProps, VisOptionsSetValue } from 'ui/vis/editors/default';
 import { SelectOption } from '../../../kbn_vislib_vis_types/public/controls/select';
 import { SwitchOption } from '../../../kbn_vislib_vis_types/public/controls/switch';
-import { WmsInternalOptions, TmsLayer } from './wms_interna_options';
+import { WmsInternalOptions, TmsLayer } from './wms_internal_options';
 
 const mapLayerForOption = ({ id }: TmsLayer) => ({ text: id });
 
