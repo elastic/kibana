@@ -40,7 +40,7 @@ export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
   queryText?: string;
 }) => void;
 
-export type UptimeSearchAfterChangeHandler = (prevSearchAfter: string, searchAfter: string) => void;
+export type UptimeSearchAfterChangeHandler = (prevSearchAfter: string | null, searchAfter: string | null) => void;
 
 export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
   const {
@@ -55,12 +55,6 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
   const {
     dateRangeStart,
     dateRangeEnd,
-    // TODO: reintegrate pagination in future release
-    // monitorListPageIndex,
-    // monitorListPageSize,
-    // TODO: reintegrate sorting in future release
-    // monitorListSortDirection,
-    // monitorListSortField,
     search,
     searchAfter,
     prevSearchAfter,
@@ -105,7 +99,13 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
   };
 
   const updateSearchAfter: UptimeSearchAfterChangeHandler = (prevSearchAfter, searchAfter) => {
-    updateUrl({ prevSearchAfter, searchAfter });
+    if (prevSearchAfter) {
+      updateUrl({ prevSearchAfter });
+    }
+    if (searchAfter) {
+      updateUrl({ searchAfter });
+    }
+
     refreshApp();
   };
 
@@ -154,6 +154,8 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           linkParameters={linkParameters}
           successColor={colors.success}
           updateSearchAfter={updateSearchAfter}
+          prevSearchAfter={prevSearchAfter}
+          curSearchAfter={searchAfter}
           // TODO: reintegrate pagination in future release
           // pageIndex={monitorListPageIndex}
           // pageSize={monitorListPageSize}

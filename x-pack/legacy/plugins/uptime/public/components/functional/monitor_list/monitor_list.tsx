@@ -46,14 +46,8 @@ interface MonitorListProps {
   successColor: string;
   linkParameters?: string;
   updateSearchAfter: UptimeSearchAfterChangeHandler;
-  // TODO: reintegrate pagination in a future release
-  // pageIndex: number;
-  // pageSize: number;
-  // TODO: reintroduce for pagination and sorting
-  // onChange: (criteria: Criteria) => void;
-  // TODO: reintegrate sorting in a future release
-  // sortField: string;
-  // sortDirection: string;
+  prevSearchAfter: string | null;
+  curSearchAfter: string | null;
 }
 
 type Props = UptimeGraphQLQueryProps<MonitorListQueryResult> & MonitorListProps;
@@ -69,6 +63,8 @@ export const MonitorListComponent = (props: Props) => {
     linkParameters,
     loading,
     updateSearchAfter,
+    prevSearchAfter,
+    curSearchAfter,
     // TODO: reintroduce for pagination and sorting
     // onChange,
     // TODO: reintegrate pagination in future release
@@ -80,9 +76,8 @@ export const MonitorListComponent = (props: Props) => {
   } = props;
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
-  console.log("DATA IS", data)
   const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
-  const afterKey = get<string>(data, 'monitorStates.afterKey');
+  const nextSearchAfter = get<string>(data, 'monitorStates.afterKey');
   // TODO: use with pagination
   // const count = get<number>(data, 'monitorStates.totalSummaryCount.count', 0);
 
@@ -254,9 +249,9 @@ export const MonitorListComponent = (props: Props) => {
         />
         <EuiFlexItem grow={false}>
           <EuiPagination
-            pageCount={3}
-            activePage={1}
-            onPageClick={(p: number) => {updateSearchAfter("", afterKey)}}
+            pageCount={4}
+            activePage={2}
+            onPageClick={(p: number) => {updateSearchAfter(prevSearchAfter, nextSearchAfter)}}
             compressed={true}
           />
         </EuiFlexItem>

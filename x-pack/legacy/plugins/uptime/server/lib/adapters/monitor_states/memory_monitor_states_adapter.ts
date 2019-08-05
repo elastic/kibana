@@ -11,7 +11,7 @@ import { MonitorSummary, StatesIndexStatus } from '../../../../common/graphql/ty
  * This class will be implemented for server-side tests.
  */
 export class UMMemoryMonitorStatesAdapter implements UMMonitorStatesAdapter {
-  public async legacyGetMonitorStates(
+  public async getMonitorStates(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,

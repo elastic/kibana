@@ -51,7 +51,7 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           // TODO: rely on new summaries adapter function once continuous data frame is available
           // libs.monitorStates.getMonitorStates(req, pageIndex, pageSize, sortField, sortDirection),
           libs.pings.getDocCount(req),
-          libs.monitorStates.legacyGetMonitorStates(req, dateRangeStart, dateRangeEnd, filters, searchAfter),
+          libs.monitorStates.getMonitorStates(req, dateRangeStart, dateRangeEnd, filters, searchAfter),
         ]);
         return {
           afterKey: legacySummaries.afterKey,

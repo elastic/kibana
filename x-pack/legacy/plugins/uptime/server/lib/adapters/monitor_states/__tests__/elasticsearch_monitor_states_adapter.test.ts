@@ -22,7 +22,7 @@ describe('ElasticsearchMonitorStatesAdapter', () => {
     expect.assertions(1);
     database.search = jest.fn(async (request: any, params: any): Promise<any> => monitorState);
     const adapter = new ElasticsearchMonitorStatesAdapter(database);
-    const result = await adapter.legacyGetMonitorStates({}, 'now-15m', 'now');
+    const result = await adapter.getMonitorStates({}, 'now-15m', 'now');
     expect(result).toMatchSnapshot();
   });
 });

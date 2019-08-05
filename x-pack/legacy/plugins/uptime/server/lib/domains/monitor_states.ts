@@ -16,7 +16,7 @@ export class UMMonitorStatesDomain {
     return this.adapter.statesIndexExists(request);
   }
 
-  public async legacyGetMonitorStates(
+  public async getMonitorStates(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
@@ -24,6 +24,6 @@ export class UMMonitorStatesDomain {
     searchAfter?: string | null
   ): Promise<GetMonitorStatesResult> {
     console.log("ADAPTER SA", searchAfter);
-    return this.adapter.legacyGetMonitorStates(request, dateRangeStart, dateRangeEnd, filters, searchAfter);
+    return this.adapter.getMonitorStates(request, dateRangeStart, dateRangeEnd, filters, searchAfter);
   }
 }

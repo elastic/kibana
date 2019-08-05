@@ -8,7 +8,7 @@ import { get, flatten, set, sortBy } from 'lodash';
 import { DatabaseAdapter } from '../database';
 import {
   UMMonitorStatesAdapter,
-  LegacyMonitorStatesRecentCheckGroupsQueryResult,
+  MonitorStatesCheckGroupsResult,
   LegacyMonitorStatesQueryResult,
   GetMonitorStatesResult,
 } from './adapter_types';
@@ -32,17 +32,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     this.database = database;
   }
 
-  // This query returns the most recent check groups for a given
-  // monitor ID.
-  private async runLegacyMonitorStatesRecentCheckGroupsQuery(
-    request: any,
-    query: any,
-    searchAfter?: any,
-    size: number = 50
-  ): Promise<LegacyMonitorStatesRecentCheckGroupsQueryResult> {
-    const checkGroupsById = new Map<string, string[]>();
-    let afterKey: any = searchAfter;
-
+  private checkGroupsBody(subQuery: any, size: number, searchAfter: any): any {
     const body = {
       query: {
         bool: {
@@ -55,7 +45,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                 field: 'summary.up',
               },
             },
-            query,
+            subQuery,
           ],
         },
       },
@@ -115,16 +105,37 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         },
       },
     };
-    if (afterKey) {
-      set(body, 'aggs.monitors.composite.after', afterKey);
+    if (searchAfter) {
+      set(body, 'aggs.monitors.composite.after', searchAfter);
+    }
+    return body
+ }
+
+ private async execCheckGroupsQuery(request: any, query: any, size: number, searchAfter?: any) {
+    const body = this.checkGroupsBody(query, size, searchAfter);
+    if (searchAfter) {
+      set(body, 'aggs.monitors.composite.after', searchAfter);
     }
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body,
     };
+    return await this.database.search(request, params);
+ }
 
-    const result = await this.database.search(request, params);
-    afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
+  // This query returns the most recent check groups for a given
+  // monitor ID.
+  private async queryCheckGroupsPage(
+    request: any,
+    query: any,
+    searchAfter?: any,
+    size: number = 50
+  ): Promise<MonitorStatesCheckGroupsResult> {
+    const checkGroupsById = new Map<string, string[]>();
+
+    const result = this.execCheckGroupsQuery(request, query, size, searchAfter)
+
+    searchAfter = get<any | null>(result, 'aggregations.monitors.after_key', null);
     get<any>(result, 'aggregations.monitors.buckets', []).forEach((bucket: any) => {
       const id = get<string>(bucket, 'key.monitor_id');
       const checkGroup = get<string>(bucket, 'top.hits.hits[0]._source.monitor.check_group');
@@ -137,11 +148,11 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     });
     return {
       checkGroups: flatten(Array.from(checkGroupsById.values())),
-      afterKey,
+      searchAfter,
     };
   }
 
-  private async runLegacyMonitorStatesQuery(
+  private async enrichAndCollapsePage(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
@@ -162,7 +173,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     // over large numbers of documents.
     // It only really needs to run over the latest complete check group for each
     // agent.
-    const { checkGroups, afterKey } = await this.runLegacyMonitorStatesRecentCheckGroupsQuery(
+    const { checkGroups, afterKey } = await this.queryCheckGroupsPage(
       request,
       query,
       searchAfter,
@@ -380,17 +391,28 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     return monitors;
   }
 
-  public async legacyGetMonitorStates(
+  private async enrichAndCollapsaae(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
     filters?: string | null,
     searchAfter?: string | null,
+    searchBefore?: string | null,
+  )
+
+  public async getMonitorStates(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null,
+    searchAfter?: string | null,
+    searchBefore?: string | null,
   ): Promise<GetMonitorStatesResult> {
     const monitors: any[] = [];
     let afterKey: any | null = searchAfter ? JSON.parse(searchAfter) : null;
+
     do {
-       const queryRes: LegacyMonitorStatesQueryResult = await this.runLegacyMonitorStatesQuery(
+       const queryRes: LegacyMonitorStatesQueryResult = await this.enrichAndCollapsePage(
         request,
         dateRangeStart,
         dateRangeEnd,

@@ -9,13 +9,6 @@ import { MonitorSummary, StatesIndexStatus } from '../../../../common/graphql/ty
 export interface UMMonitorStatesAdapter {
   getMonitorStates(
     request: any,
-    pageIndex: number,
-    pageSize: number,
-    sortField?: string | null,
-    sortDirection?: string | null
-  ): Promise<GetMonitorStatesResult>;
-  legacyGetMonitorStates(
-    request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
     filters?: string | null,
@@ -35,7 +28,7 @@ export interface LegacyMonitorStatesQueryResult {
   afterKey: any | null;
 }
 
-export interface LegacyMonitorStatesRecentCheckGroupsQueryResult {
+export interface MonitorStatesCheckGroupsResult {
   checkGroups: string[];
-  afterKey: any | null;
+  searchAfter: any | null;
 }
