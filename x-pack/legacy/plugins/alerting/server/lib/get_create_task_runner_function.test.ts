@@ -54,6 +54,8 @@ const getCreateTaskRunnerFunctionParams = {
   },
   fireAction: jest.fn(),
   internalSavedObjectsRepository: savedObjectsClient,
+  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+  getBasePath: jest.fn().mockReturnValue(undefined),
 };
 
 const mockedAlertTypeSavedObject = {
@@ -93,22 +95,22 @@ test('successfully executes the task', async () => {
   const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
   const runnerResult = await runner.run();
   expect(runnerResult).toMatchInlineSnapshot(`
-    Object {
-      "runAt": 1970-01-01T00:00:10.000Z,
-      "state": Object {
-        "alertInstances": Object {},
-        "alertTypeState": undefined,
-        "previousStartedAt": 1970-01-01T00:00:00.000Z,
-      },
-    }
-  `);
+        Object {
+          "runAt": 1970-01-01T00:00:10.000Z,
+          "state": Object {
+            "alertInstances": Object {},
+            "alertTypeState": undefined,
+            "previousStartedAt": 1970-01-01T00:00:00.000Z,
+          },
+        }
+    `);
   expect(getCreateTaskRunnerFunctionParams.alertType.executor).toHaveBeenCalledTimes(1);
   const call = getCreateTaskRunnerFunctionParams.alertType.executor.mock.calls[0][0];
   expect(call.params).toMatchInlineSnapshot(`
-        Object {
-          "bar": true,
-        }
-    `);
+            Object {
+              "bar": true,
+            }
+      `);
   expect(call.startedAt).toMatchInlineSnapshot(`1970-01-01T00:00:00.000Z`);
   expect(call.state).toMatchInlineSnapshot(`Object {}`);
   expect(call.services.alertInstanceFactory).toBeTruthy();
@@ -128,16 +130,16 @@ test('fireAction is called per alert instance that fired', async () => {
   await runner.run();
   expect(getCreateTaskRunnerFunctionParams.fireAction).toHaveBeenCalledTimes(1);
   expect(getCreateTaskRunnerFunctionParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "basePath": undefined,
-            "id": "1",
-            "params": Object {
-              "foo": true,
-            },
-          },
-        ]
-    `);
+    Array [
+      Object {
+        "id": "1",
+        "params": Object {
+          "foo": true,
+        },
+        "spaceId": undefined,
+      },
+    ]
+  `);
 });
 
 test('persists alertInstances passed in from state, only if they fire', async () => {
@@ -162,17 +164,17 @@ test('persists alertInstances passed in from state, only if they fire', async ()
   });
   const runnerResult = await runner.run();
   expect(runnerResult.state.alertInstances).toMatchInlineSnapshot(`
-    Object {
-      "1": Object {
-        "meta": Object {
-          "lastFired": 0,
-        },
-        "state": Object {
-          "bar": false,
-        },
-      },
-    }
-  `);
+        Object {
+          "1": Object {
+            "meta": Object {
+              "lastFired": 0,
+            },
+            "state": Object {
+              "bar": false,
+            },
+          },
+        }
+    `);
 });
 
 test('validates params before executing the alert type', async () => {

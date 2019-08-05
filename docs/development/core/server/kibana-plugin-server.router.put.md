@@ -4,7 +4,7 @@
 
 ## Router.put() method
 
-Register a `PUT` request with the router
+Register a route handler for `PUT` request.
 
 <b>Signature:</b>
 

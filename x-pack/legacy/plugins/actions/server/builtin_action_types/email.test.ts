@@ -43,6 +43,8 @@ beforeAll(() => {
     getServices,
     taskManager: taskManagerMock.create(),
     encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
+    spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+    getBasePath: jest.fn().mockReturnValue(undefined),
   });
 
   registerBuiltInActionTypes(actionTypeRegistry);
