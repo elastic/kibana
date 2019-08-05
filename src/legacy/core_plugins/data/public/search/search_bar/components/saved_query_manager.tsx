@@ -37,7 +37,6 @@ import { Query } from '../../../query';
 interface Props {
   showSaveQuery?: boolean;
   loadedSavedQuery?: SavedQuery;
-  isDirty: boolean;
   onSave: () => void;
   onSaveAsNew: () => void;
   onLoad: (savedQuery: SavedQuery) => void;
@@ -48,7 +47,6 @@ interface Props {
 export const SavedQueryManager: FunctionComponent<Props> = ({
   showSaveQuery,
   loadedSavedQuery,
-  isDirty,
   onSave,
   onSaveAsNew,
   onLoad,
@@ -159,7 +157,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
       )}
       {query.query !== '' ? (
         <EuiFlexGroup direction="rowReverse" alignItems="center" justifyContent="flexEnd">
-          {showSaveQuery && isDirty && loadedSavedQuery && (
+          {showSaveQuery && loadedSavedQuery && (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
@@ -171,7 +169,11 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
                 </EuiFlexItem>
 
                 <EuiFlexItem>
-                  <EuiButton fill onClick={() => onSave()}>
+                  <EuiButton
+                    fill
+                    onClick={() => onSave()}
+                    disabled={query.query === loadedSavedQuery.attributes.query.query}
+                  >
                     {i18n.translate(
                       'data.search.searchBar.savedQueryPopoverSaveChangesButtonText',
                       {
@@ -183,7 +185,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
               </EuiFlexGroup>
             </EuiFlexItem>
           )}
-          {showSaveQuery && !isDirty && (
+          {showSaveQuery && !loadedSavedQuery && (
             <EuiFlexItem grow={false}>
               <EuiButton fill onClick={() => onSave()}>
                 {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
