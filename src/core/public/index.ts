@@ -76,7 +76,7 @@ export {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
   SavedObjectsCreateOptions,
-  SavedObjectsFindResponse,
+  SavedObjectsFindResponsePublic,
   SavedObjectsUpdateOptions,
   SavedObject,
   SavedObjectAttribute,

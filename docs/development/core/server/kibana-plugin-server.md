@@ -73,7 +73,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsCreateOptions](./kibana-plugin-server.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsExportOptions](./kibana-plugin-server.savedobjectsexportoptions.md) | Options controlling the export operation. |
 |  [SavedObjectsFindOptions](./kibana-plugin-server.savedobjectsfindoptions.md) |  |
-|  [SavedObjectsFindResponse](./kibana-plugin-server.savedobjectsfindresponse.md) |  |
+|  [SavedObjectsFindResponse](./kibana-plugin-server.savedobjectsfindresponse.md) | Return type of the Saved Objects <code>find()</code> method.<!-- -->\*Note\*: this type is different between the Public and Server Saved Objects clients. |
 |  [SavedObjectsImportConflictError](./kibana-plugin-server.savedobjectsimportconflicterror.md) | Represents a failure to import due to a conflict. |
 |  [SavedObjectsImportError](./kibana-plugin-server.savedobjectsimporterror.md) | Represents a failure to import. |
 |  [SavedObjectsImportMissingReferencesError](./kibana-plugin-server.savedobjectsimportmissingreferenceserror.md) | Represents a failure to import due to missing references. |

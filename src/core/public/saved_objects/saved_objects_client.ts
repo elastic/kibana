@@ -88,9 +88,17 @@ export interface SavedObjectsBatchResponse<
   savedObjects: Array<SimpleSavedObject<T>>;
 }
 
-/** @public */
-export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = SavedObjectAttributes>
-  extends SavedObjectsBatchResponse<T> {
+/**
+ * Return type of the Saved Objects `find()` method.
+ *
+ * *Note*: this type is different between the Public and Server Saved Objects
+ * clients.
+ *
+ * @public
+ */
+export interface SavedObjectsFindResponsePublic<
+  T extends SavedObjectAttributes = SavedObjectAttributes
+> extends SavedObjectsBatchResponse<T> {
   total: number;
   perPage: number;
   page: number;
@@ -277,7 +285,7 @@ export class SavedObjectsClient {
    */
   public find = <T extends SavedObjectAttributes>(
     options: SavedObjectsFindOptions = {}
-  ): Promise<SavedObjectsFindResponse<T>> => {
+  ): Promise<SavedObjectsFindResponsePublic<T>> => {
     const path = this.getPath(['_find']);
     const renameMap = {
       defaultSearchOperator: 'default_search_operator',
@@ -300,7 +308,10 @@ export class SavedObjectsClient {
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return renameKeys<PromiseType<ReturnType<SavedObjectsApi['find']>>, SavedObjectsFindResponse>(
+      return renameKeys<
+        PromiseType<ReturnType<SavedObjectsApi['find']>>,
+        SavedObjectsFindResponsePublic
+      >(
         {
           saved_objects: 'savedObjects',
           total: 'total',
@@ -308,7 +319,7 @@ export class SavedObjectsClient {
           page: 'page',
         },
         resp
-      ) as SavedObjectsFindResponse<T>;
+      ) as SavedObjectsFindResponsePublic<T>;
     });
   };
 

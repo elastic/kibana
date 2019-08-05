@@ -741,7 +741,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     type?: string | string[];
 }
 
-// @public (undocumented)
+// @public
 export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any> {
     // (undocumented)
     page: number;

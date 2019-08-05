@@ -24,7 +24,7 @@ export {
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
-  SavedObjectsFindResponse,
+  SavedObjectsFindResponsePublic,
   SavedObjectsUpdateOptions,
 } from './saved_objects_client';
 export { SimpleSavedObject } from './simple_saved_object';
