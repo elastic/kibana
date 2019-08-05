@@ -1,22 +1,28 @@
 [role="xpack"]
 [[canvas-elements]]
-== Bring your workpad to life with elements
+=== Customize your workpad with elements
 
 Elements are the core building blocks of your workpad.
 
 [float]
 [[add-canvas-element]]
-=== Add a Canvas element
+=== Add an element to your workpad
 
 . Click *Add Element*, then select the best element to show off your data. 
 +
 image::images/canvas-element-select.gif[]
++
+Elements come preconfigured with demo data so that you can familiarize yourself with the element. Play around with the default settings and see what the element can do. 
 
 . To move the element, click and drag it across your workpad.
++
+As you move the element, notice the alignment lines that appear to help you place the element exactly where you want it.
 
-. To resize the element, select the sizing icons, then drag to the size you want.
+. To resize the element, click a corner, then drag to the size you want.
 
-. Elements come preselected with default styles and demo data so that you can familiarize yourself with the element. Play around with the default settings and see what the element can do. 
+. Something about nudging...
+
+. Something about distributing items...
 
 [float]
 [[connect-element-data]]
@@ -28,32 +34,95 @@ To connect the element to your own data, use the panel on the right.
 
 . Click *Change your data source*.
 
-. Choose one of the following data sources:
+[float]
+[[elasticsearch-sql-data-source]]
+==== Connect the element to Elasticsearch SQL
 
-* *Elasticsearch SQL* — Uses Elasticsearch SQL to generate a data table.
+Use Elasticsearch SQL to generate a data table.
 
-* *Elasticsearch raw documents* — Uses the Lucene query syntax to pull back raw documentation from Elasticsearch.
+Unfamiliar with writing Elasticsearch SQL queries? Go to {ref}/sql-spec.html[SQL language] for more information.
 
-* *Timelion* — Uses Timelion syntax to retrieve time series data.
+. Click *Elasticsearch SQL*.
 
-* *Demo data* — Uses mock data sets.
+. In the *Elasticearch SQL query* box, enter your query, then click *Preview*.
 
-. Specify your data source preferences, then click *Preview*.
+. If your query looks correct, click *Save*. 
++ 
+The element appears as a warning. 
 
-. If the element looks correct, click *Save*.
+. Click *Display*
+
+. Change the data points to display in your element. 
+
+. In the *Label* field, enter a name for the data.
 
 . To specify the auto-refresh interval for the element, click the *Control settings* icon in the top left corner, then click the interval you want to use.
 +
 To manually refresh the data, click the *Refresh data* icon. 
 
 [float]
-[[elasticsearch-sql-data-source]]
-==== Connect the element to Elasticsearch SQL
+[[elasticsearch-raw-doc-data-source]]
+==== Connect the element to Elasticsearch raw documents
 
-. Make sure that the element is selected, then select *Data*.
+Use the Lucene query syntax to pull back raw documentation from Elasticsearch.
 
-. Click *Change your data source*.
+. Click *Elasticsearch raw documents*.
 
+.. From the *Index* dropdown, select the index data that you want to display. 
+
+.. From the *Fields* dropdown, select the associated fields you want to display.
+
+.. To sort the data, select an option from the *Sort Field* and *Sort Order* dropdowns.
+
+.. For more targeted queries, enter a *Query* using the Lucene query string syntax. 
++
+For for more information about the Lucene query string sytax, refer to <<lucene-query,Lucene Query Syntax>>.
+
+. Click *Preview. 
+
+. If your query looks correct, click *Save*. 
++ 
+The element appears as a warning. 
+
+. Click *Display*
+
+.. Change the data points to display in your element. 
+
+.. In the *Label* field, enter a name for the data.
+
+. To specify the auto-refresh interval for the element, click the *Control settings* icon in the top left corner, then click the interval you want to use.
++
+To manually refresh the data, click the *Refresh data* icon. 
+
+[float]
+[[timelion-data-source]]
+==== Connect the element to Timelion
+
+Use Timelion queries to pull back time series data in a tabular format. 
+
+For more information about Timelion, refer to <<timelion,Timelion>>.
+
+. Click *Timelion*.
+
+Enter a *Query* using the Lucene query string syntax. 
++
+For for more information about the Lucene query string syntax, refer to <<lucene-query,Lucene Query Syntax>>.
+
+. Enter the *Interval*, then click *Preview*.
+
+. If your query looks correct, click *Save*. 
++ 
+The element appears as a warning. 
+
+. Click *Display*
+
+. Change the data points to display in your element. 
+
+. In the *Label* field, enter a name for the data.
+
+. To specify the auto-refresh interval for the element, click the *Control settings* icon in the top left corner, then click the interval you want to use.
++
+To manually refresh the data, click the *Refresh data* icon. 
 
 [float]
 [[element-display-options]]
@@ -73,29 +142,13 @@ Choose how you want the element to appear on your workpad. For each element type
 
 . To change the order of the element, use the icons next to *Selected element*.
 
-//TIP: For more advanced customization options, create Canvas plugins.
+//For more advanced customization options, create Canvas plugins.
 
-[float]
-[[canvas-expression-editor]]
-=== Customize your element with the expression editor
-
-Further define the appearance and behavior of the element with the expression editor.
-
-. In the lower right corner, click *Expression editor*.
-
-. Edit the parts of the element expression that you want to change. 
-
-. Click *Run*.
-
-. If you like what you see, click *Close*.
-
-For information about the Canvas expression language, see <<canvas-function-reference,Canvas function reference>>.
-
-//Insert expression video.
+//To further define the appearance and behavior of the element, use the <<canvas-expression-editor,expression editor>>.
 
 [float]
 [[element-save]]
-=== Save the element
+=== Save an element
 
 After you have made changes to the element, save it so that you can use it in future workpads.
 
@@ -108,9 +161,20 @@ After you have made changes to the element, save it so that you can use it in fu
 To access the element, click *Add element*, then select *My elements*.
 
 [float]
-== Add more pages
+[[workpad-display-options]]
+=== Change the workpad display options
 
-Add more pages to your workpad, then select the page transition.
+For a better view of the elements on your workpad, change the display options.
+
+* To view your workpad in fullscreen mode, click the *Enter fullscreen mode* icon in the upper left corner.
+
+* To zoom in or out on the workpad, click the *Zoom controls* icon in the upper left corder, then select one of the options.
+
+[float]
+[[add-more-pages]]
+=== Add more pages to the workpad
+
+When you have run out of room on your workpad, you can add more pages.
 
 . Click *Page 1*, then click the *+* icon.
 
@@ -118,13 +182,8 @@ Add more pages to your workpad, then select the page transition.
 
 //TODO insert image
 
-Once you're ready to show off what you've created, use the presentation options in the upper left corner. These options control things such as data refresh intervals, display modes, and sharing capabilities.
+[float]
+[[filter-groups]]
+=== Filter groups
 
-In the top menu area, just above the page, there are a number of controls. On the left side of the top menu, you will find presentation-related features that control things such as data refresh intervals, display modes, and sharing capabilities. These will come in handy once you’re ready to show off your creation!
-
-We'll talk more about how to import and export workpads in Sharing workpads, but keep in mind that you can import workpad JSON files by dragging them onto the Canvas home page. Maybe your data-loving friends have some that they care share!
-
-
-TIP: To view your workpad in fullscreen mode, click the *Enter fullscreen mode* icon in the upper left corner.
-
-No need to worry about cluttering up your space with too many workpads. The bulk editing actions allow you to clean up whenever you need.
+To dynamically change the scope of data on your workpad, apply dropdown and time filter elements. By default, filters apply to all elements. To add filter to specific elements, apply filter groups.
