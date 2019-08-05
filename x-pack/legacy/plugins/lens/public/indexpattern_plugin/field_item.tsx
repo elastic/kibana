@@ -4,16 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import {
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiPopover,
+  EuiButtonIcon,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { IndexPatternField, DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
 import { FieldIcon } from './field_icon';
+import { DataVisResults } from './datapanel';
 import { DataType } from '..';
 
 export interface FieldItemProps {
   field: IndexPatternField;
   indexPatternId: string;
   highlight?: string;
+  metaData?: DataVisResults;
+  exists: boolean;
+  howManyDocs?: number;
+  count?: number;
+  sampleCount?: number;
+  cardinality?: number;
 }
 
 function wrapOnDot(str?: string) {
@@ -23,7 +39,19 @@ function wrapOnDot(str?: string) {
   return str ? str.replace(/\./g, '.\u200B') : undefined;
 }
 
-export function FieldItem({ field, indexPatternId, highlight }: FieldItemProps) {
+export function FieldItem({
+  field,
+  indexPatternId,
+  highlight,
+  metaData,
+  exists,
+  howManyDocs,
+  count,
+  sampleCount,
+  cardinality,
+}: FieldItemProps) {
+  const [infoIsOpen, setOpen] = useState(false);
+
   const wrappableName = wrapOnDot(field.name)!;
   const wrappableHighlight = wrapOnDot(highlight);
   const highlightIndex = wrappableHighlight
@@ -44,12 +72,79 @@ export function FieldItem({ field, indexPatternId, highlight }: FieldItemProps) 
     <DragDrop
       value={{ field, indexPatternId } as DraggedField}
       draggable
-      className={`lnsFieldListPanel__field lnsFieldListPanel__field-btn-${field.type}`}
+      className={`lnsFieldListPanel__field lnsFieldListPanel__field-btn-${
+        field.type
+      } lnsFieldListPanel__field-${exists ? 'exists' : 'missing'}`}
     >
-      <FieldIcon type={field.type as DataType} />
-      <span className="lnsFieldListPanel__fieldName" title={field.name}>
-        {wrappableHighlightableFieldName}
-      </span>
+      <div className="lnsFieldListPanel__fieldInfo">
+        <FieldIcon type={field.type as DataType} />
+
+        <span className="lnsFieldListPanel__fieldName" title={field.name}>
+          {wrappableHighlightableFieldName}
+        </span>
+
+        {exists && (
+          <EuiPopover
+            id="lnsFieldListPanel__field"
+            button={<EuiButtonIcon iconType="magnifyWithPlus" onClick={() => setOpen(true)} />}
+            isOpen={infoIsOpen}
+            closePopover={() => setOpen(false)}
+            anchorPosition="rightUp"
+          >
+            <div>
+              {count && (
+                <div>
+                  {i18n.translate('xpack.lens.indexPattern.fieldCountLabel', {
+                    defaultMessage: 'Count: {count} ({percent}%)',
+                    values: {
+                      count,
+                      percent: (howManyDocs ? (count / howManyDocs) * 100 : 100).toFixed(1),
+                    },
+                  })}
+                </div>
+              )}
+
+              {cardinality && (
+                <div>
+                  {i18n.translate('xpack.lens.indexPattern.fieldCardinalityLabel', {
+                    defaultMessage: '{cardinality} distinct values',
+                    values: { cardinality },
+                  })}
+                </div>
+              )}
+
+              {sampleCount && (
+                <div>
+                  {i18n.translate('xpack.lens.indexPattern.fieldSampleCountLabel', {
+                    defaultMessage: 'Sampled from: {sampleCount}',
+                    values: { sampleCount },
+                  })}
+                </div>
+              )}
+
+              {metaData && (
+                <div>
+                  {metaData.topValues && count && (
+                    <div>
+                      {metaData.topValues.map(topValue => (
+                        <EuiFlexGroup>
+                          <EuiFlexItem>{topValue.key}</EuiFlexItem>
+                          <EuiFlexItem grow={1}>
+                            <EuiProgress value={topValue.doc_count / count} max={1} size={'m'} />
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            {((topValue.doc_count / count) * 100).toFixed(1)}%
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </EuiPopover>
+        )}
+      </div>
     </DragDrop>
   );
 }

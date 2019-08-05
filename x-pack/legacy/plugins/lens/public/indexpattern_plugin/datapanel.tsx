@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { kfetch } from 'ui/kfetch';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { IndexPatternPrivateState, IndexPatternField, IndexPattern } from './indexpattern';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
@@ -81,6 +82,52 @@ export function IndexPatternDataPanel({
   );
 }
 
+export interface DataVisResults {
+  fieldName: string;
+  count?: number;
+  examples?: number | string;
+  earliest?: number;
+  latest?: number;
+  min?: number;
+  max?: number;
+  avg?: number;
+  isTopValuesSampled?: boolean;
+  topValues?: Array<{ key: number; doc_count: number }>;
+  topValuesSampleSize?: number;
+  topValuesSamplerShardSize?: number;
+  median?: number;
+  distribution?: {
+    minPercentile: number;
+    maxPercentile: number;
+    percentiles: Array<{ percent: number; minValue: number; maxValue: number }>;
+  };
+}
+
+export interface DataVisOverallField {
+  fieldName: string;
+  existsInDocs: boolean;
+  stats: {
+    sampleCount: number;
+    count: number;
+    cardinality: number;
+  };
+}
+export interface DataVisOverall {
+  totalCount: number;
+  aggregatableExistsFields: DataVisOverallField[];
+  aggregatableNotExistsFields: DataVisOverallField[];
+  nonAggregatableExistsFields: DataVisOverallField[];
+  nonAggregatableNotExistsFields: DataVisOverallField[];
+}
+
+interface DataPanelState {
+  nameFilter: string;
+  typeFilter: DataType[];
+  isTypeFilterOpen: boolean;
+  fieldMetadata?: DataVisResults[];
+  overallStats?: DataVisOverall;
+}
+
 export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   currentIndexPatternId,
   indexPatterns,
@@ -96,9 +143,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   setShowIndexPatternSwitcher: (show: boolean) => void;
   onChangeIndexPattern?: (newId: string) => void;
 }) {
-  const [state, setState] = useState({
+  const [state, setState] = useState<DataPanelState>({
     nameFilter: '',
-    typeFilter: [] as DataType[],
+    typeFilter: [],
     isTypeFilterOpen: false,
   });
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
@@ -159,6 +206,64 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const availableFilteredTypes = state.typeFilter.filter(type =>
     availableFieldTypes.includes(type)
   );
+
+  useEffect(() => {
+    kfetch({
+      method: 'POST',
+      pathname: `/api/ml/data_visualizer/get_overall_stats/${indexPatterns[currentIndexPatternId].title}`,
+      body: JSON.stringify({
+        query: { match_all: {} },
+        aggregatableFields: filteredFields
+          .filter(field => field.aggregatable)
+          .map(field => field.name),
+        nonAggregatableFields: filteredFields
+          .filter(field => !field.aggregatable)
+          .map(field => field.name),
+        samplerShardSize: 5000,
+        timeFieldName: indexPatterns[currentIndexPatternId].timeFieldName,
+        earliest: 'now-7d',
+        latest: 'now',
+        interval: '1d',
+        maxExamples: 5,
+      }),
+    }).then((overall: DataVisOverall) => {
+      // setState({ ...state, overallStats: overall });
+
+      kfetch({
+        method: 'POST',
+        pathname: `/api/ml/data_visualizer/get_field_stats/${indexPatterns[currentIndexPatternId].title}`,
+        body: JSON.stringify({
+          query: { match_all: {} },
+          fields: filteredFields.map(field => {
+            const matchingField = overall.aggregatableExistsFields.find(
+              f => f.fieldName === field.name
+            );
+            const fieldType =
+              field.type === 'string' && field.esTypes ? field.esTypes[0] : field.type;
+            if (matchingField && matchingField.stats) {
+              return {
+                fieldName: field.name,
+                type: fieldType,
+                cardinality: matchingField.stats.cardinality,
+              };
+            }
+            return {
+              fieldName: field.name,
+              type: fieldType,
+            };
+          }),
+          samplerShardSize: 5000,
+          timeFieldName: indexPatterns[currentIndexPatternId].timeFieldName,
+          earliest: 'now-7d',
+          latest: 'now',
+          interval: '1d',
+          maxExamples: 5,
+        }),
+      }).then((results: DataVisResults[]) => {
+        setState({ ...state, overallStats: overall, fieldMetadata: results });
+      });
+    });
+  }, [currentIndexPatternId, filteredFields.length]);
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
@@ -317,14 +422,33 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     state.typeFilter.includes(field.type as DataType)
                 )
                 .sort(sortFields)
-                .map(field => (
-                  <FieldItem
-                    indexPatternId={currentIndexPatternId}
-                    key={field.name}
-                    field={field}
-                    highlight={state.nameFilter.toLowerCase()}
-                  />
-                ))}
+                .map(field => {
+                  const overallField =
+                    state.overallStats &&
+                    (state.overallStats.aggregatableExistsFields.find(
+                      ({ fieldName }) => fieldName === field.name
+                    ) ||
+                      state.overallStats.nonAggregatableExistsFields.find(
+                        ({ fieldName }) => fieldName === field.name
+                      ));
+                  return (
+                    <FieldItem
+                      indexPatternId={currentIndexPatternId}
+                      key={field.name}
+                      field={field}
+                      highlight={state.nameFilter.toLowerCase()}
+                      exists={!!overallField}
+                      howManyDocs={state.overallStats && state.overallStats.totalCount}
+                      count={overallField && overallField.stats.count}
+                      sampleCount={overallField && overallField.stats.sampleCount}
+                      cardinality={overallField && overallField.stats.cardinality}
+                      metaData={
+                        state.fieldMetadata &&
+                        state.fieldMetadata.find(({ fieldName }) => fieldName === field.name)
+                      }
+                    />
+                  );
+                })}
             </div>
           </div>
         </EuiFlexItem>

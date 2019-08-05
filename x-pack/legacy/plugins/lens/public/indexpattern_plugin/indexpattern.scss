@@ -52,10 +52,9 @@
   background: $euiColorEmptyShade;
   border-radius: $euiBorderRadius;
   padding: $euiSizeS;
-  display: flex;
-  align-items: center;
+  // display: flex;
+  // align-items: center;
   margin-bottom: $euiSizeXS;
-  font-weight: $euiFontWeightMedium;
   transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance;
 
   &:hover {
@@ -65,6 +64,14 @@
   }
 }
 
+.lnsFieldListPanel__field-missing {
+  background: $euiColorLightestShade;
+}
+
 .lnsFieldListPanel__fieldName {
   margin-left: $euiSizeXS;
+}
+
+.lnsFieldListPanel__fieldInfo {
+  font-weight: $euiFontWeightMedium;
 }
