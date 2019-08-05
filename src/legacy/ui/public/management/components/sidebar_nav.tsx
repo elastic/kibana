@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiIcon, EuiSideNav, IconType } from '@elastic/eui';
+import { EuiSideNav, IconType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { IndexedArray } from 'ui/indexed_array';
@@ -35,10 +35,10 @@ interface Section extends Subsection {
 }
 
 const sectionVisible = (section: Subsection) => !section.disabled && section.visible;
-const sectionToNav = (selectedId: string) => ({ display, id, url, icon }: Subsection) => ({
+const sectionToNav = (selectedId: string) => ({ display, id, url }: Subsection) => ({
   id,
   name: display,
-  icon: icon ? <EuiIcon type={icon} /> : null,
+  icon: null,
   isSelected: selectedId === id,
   href: url,
   'data-test-subj': id,

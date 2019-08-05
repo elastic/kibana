@@ -98,13 +98,13 @@ export class DashboardListing extends React.Component {
               <p>
                 <FormattedMessage
                   id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                  defaultMessage="You can combine data views from any NetMon-UI app into one dashboard and see everything in one place."
                 />
               </p>
               <p>
                 <FormattedMessage
                   id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                  defaultMessage="New to NetMon-UI? {sampleDataInstallLink} to take a test drive."
                   values={{
                     sampleDataInstallLink: (
                       <EuiLink href="#/home/tutorial_directory/sampleData">

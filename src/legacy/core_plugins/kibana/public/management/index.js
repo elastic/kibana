@@ -80,7 +80,7 @@ export function updateLandingPage(version) {
               <h1>
                 <FormattedMessage
                   id="kbn.management.landing.header"
-                  defaultMessage="Kibana {version} management"
+                  defaultMessage="NetMon-UI management"
                   values={{ version }}
                 />
               </h1>
@@ -88,7 +88,7 @@ export function updateLandingPage(version) {
             <EuiText>
               <FormattedMessage
                 id="kbn.management.landing.subhead"
-                defaultMessage="Manage your indices, index patterns, saved objects, Kibana settings, and more."
+                defaultMessage="Manage your indices, index patterns, saved objects, NetMon-UI settings, and more."
               />
             </EuiText>
           </div>

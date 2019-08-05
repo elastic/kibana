@@ -37,7 +37,7 @@ import {
 class SavedObjectsInstallerUi extends React.Component {
   DEFAULT_BUTTON_LABEL = this.props.intl.formatMessage({
     id: 'kbn.home.tutorial.savedObject.defaultButtonLabel',
-    defaultMessage: 'Load Kibana objects',
+    defaultMessage: 'Load NetMon-UI objects',
   });
 
   state = {
@@ -204,7 +204,7 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
     return {
       title: this.props.intl.formatMessage({
         id: 'kbn.home.tutorial.savedObject.loadTitle',
-        defaultMessage: 'Load Kibana objects',
+        defaultMessage: 'Load NetMon-UI objects',
       }),
       status: this.state.isInstalled ? 'complete' : 'incomplete',
       children: installStep,

@@ -104,7 +104,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
           href="#/home/feature_directory"
         >
           <FormattedMessage
-            defaultMessage="View full directory of Kibana plugins"
+            defaultMessage="View full directory of NetMon-UI plugins"
             id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
@@ -232,7 +232,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
           href="#/home/feature_directory"
         >
           <FormattedMessage
-            defaultMessage="View full directory of Kibana plugins"
+            defaultMessage="View full directory of NetMon-UI plugins"
             id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
@@ -360,7 +360,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           href="#/home/feature_directory"
         >
           <FormattedMessage
-            defaultMessage="View full directory of Kibana plugins"
+            defaultMessage="View full directory of NetMon-UI plugins"
             id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
@@ -475,7 +475,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           href="#/home/feature_directory"
         >
           <FormattedMessage
-            defaultMessage="View full directory of Kibana plugins"
+            defaultMessage="View full directory of NetMon-UI plugins"
             id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
@@ -590,7 +590,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           href="#/home/feature_directory"
         >
           <FormattedMessage
-            defaultMessage="View full directory of Kibana plugins"
+            defaultMessage="View full directory of NetMon-UI plugins"
             id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
@@ -705,7 +705,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           href="#/home/feature_directory"
         >
           <FormattedMessage
-            defaultMessage="View full directory of Kibana plugins"
+            defaultMessage="View full directory of NetMon-UI plugins"
             id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
@@ -820,7 +820,7 @@ exports[`home should render home component 1`] = `
           href="#/home/feature_directory"
         >
           <FormattedMessage
-            defaultMessage="View full directory of Kibana plugins"
+            defaultMessage="View full directory of NetMon-UI plugins"
             id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
@@ -935,7 +935,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           href="#/home/feature_directory"
         >
           <FormattedMessage
-            defaultMessage="View full directory of Kibana plugins"
+            defaultMessage="View full directory of NetMon-UI plugins"
             id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
@@ -1050,7 +1050,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           href="#/home/feature_directory"
         >
           <FormattedMessage
-            defaultMessage="View full directory of Kibana plugins"
+            defaultMessage="View full directory of NetMon-UI plugins"
             id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
@@ -1173,7 +1173,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           href="#/home/feature_directory"
         >
           <FormattedMessage
-            defaultMessage="View full directory of Kibana plugins"
+            defaultMessage="View full directory of NetMon-UI plugins"
             id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />

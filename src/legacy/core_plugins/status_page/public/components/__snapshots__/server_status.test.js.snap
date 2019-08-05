@@ -16,7 +16,7 @@ exports[`render 1`] = `
     <EuiTitle>
       <h2>
         <FormattedMessage
-          defaultMessage="Kibana status is {kibanaStatus}"
+          defaultMessage="NetMon-UI status is {kibanaStatus}"
           id="statusPage.serverStatus.statusTitle"
           values={
             Object {

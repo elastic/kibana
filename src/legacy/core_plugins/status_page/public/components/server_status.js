@@ -30,7 +30,7 @@ const ServerState = ({ name, serverState }) => (
         <h2>
           <FormattedMessage
             id="statusPage.serverStatus.statusTitle"
-            defaultMessage="Kibana status is {kibanaStatus}"
+            defaultMessage="NetMon-UI status is {kibanaStatus}"
             values={{
               kibanaStatus: <EuiBadge color={serverState.uiColor}>{serverState.title}</EuiBadge>,
             }}

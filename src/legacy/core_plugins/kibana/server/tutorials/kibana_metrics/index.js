@@ -30,16 +30,15 @@ export function kibanaMetricsSpecProvider(server, context) {
   return {
     id: 'kibanaMetrics',
     name: i18n.translate('kbn.server.tutorials.kibanaMetrics.nameTitle', {
-      defaultMessage: 'Kibana metrics',
+      defaultMessage: 'NetMon-UI metrics',
     }),
     isBeta: false,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.kibanaMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from Kibana.',
+      defaultMessage: 'Fetch internal metrics from NetMon-UI.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.kibanaMetrics.longDescription', {
-      defaultMessage:
-        'The `kibana` Metricbeat module fetches internal metrics from Kibana. \
+      defaultMessage: 'The `kibana` Metricbeat module fetches internal metrics from NetMon-UI. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kibana.html',

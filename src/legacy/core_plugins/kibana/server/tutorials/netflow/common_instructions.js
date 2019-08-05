@@ -263,7 +263,7 @@ export function createCommonNetflowInstructions() {
           textPost: i18n.translate('kbn.server.tutorials.netflow.common.setup.osxTextPost', {
             defaultMessage:
               'The {setupOption} option creates a {netflowPrefix} index pattern in Elasticsearch and imports \
-  Kibana dashboards and visualizations. Omit this option for subsequent runs to avoid overwriting existing dashboards.',
+              NetMon dashboards and visualizations. Omit this option for subsequent runs to avoid overwriting existing dashboards.',
             values: {
               setupOption: '`--setup`',
               netflowPrefix: '`netflow-*`',
@@ -283,7 +283,7 @@ export function createCommonNetflowInstructions() {
           textPost: i18n.translate('kbn.server.tutorials.netflow.common.setup.windowsTextPost', {
             defaultMessage:
               'The {setupOption} option creates a {netflowPrefix} index pattern in Elasticsearch and imports \
-  Kibana dashboards and visualizations. Omit this option for subsequent runs to avoid overwriting existing dashboards.',
+              NetMon dashboards and visualizations. Omit this option for subsequent runs to avoid overwriting existing dashboards.',
             values: {
               setupOption: '`--setup`',
               netflowPrefix: '`netflow-*`',

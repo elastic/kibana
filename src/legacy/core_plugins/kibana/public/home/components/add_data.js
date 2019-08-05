@@ -203,7 +203,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
             <h2>
               <FormattedMessage
                 id="kbn.home.addData.addDataToKibanaTitle"
-                defaultMessage="Add Data to Kibana"
+                defaultMessage="Add Data to NetMon"
               />
             </h2>
           </EuiTitle>
@@ -239,7 +239,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
             >
               <FormattedMessage
                 id="kbn.home.addData.sampleDataLink"
-                defaultMessage="Load a data set and a Kibana dashboard"
+                defaultMessage="Load a data set and a NetMon dashboard"
               />
             </EuiLink>
           </EuiText>

@@ -1957,15 +1957,15 @@
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@logrhythm/lucene-parser/-/@logrhythm/lucene-parser-3.4.0.tgz#19274929b73c83713c3597febe71a0c62ff2a5e9"
   integrity sha1-GSdJKbc8g3E8NZf+vnGgxi/ypek=
 
-"@logrhythm/nm-web-shared@^1.2.2":
-  version "1.2.2"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@logrhythm/nm-web-shared/-/@logrhythm/nm-web-shared-1.2.2.tgz#35feb93685162f217c6c5b24baaced32ae074c8e"
-  integrity sha1-Nf65NoUWLyF8bFskuqztMq4HTI4=
+"@logrhythm/nm-web-shared@^1.4.0":
+  version "1.4.0"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@logrhythm/nm-web-shared/-/@logrhythm/nm-web-shared-1.4.0.tgz#605d3136bef8879b14ac1e6c9479043ef77490ae"
+  integrity sha1-YF0xNr74h5sUrB5slHkEPvd0kK4=
 
-"@logrhythm/webui@^5.9.13":
-  version "5.9.13"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@logrhythm/webui/-/@logrhythm/webui-5.9.13.tgz#c802b01c2efd2cfbe7154ff503c04aa4366bf0ad"
-  integrity sha1-yAKwHC79LPvnFU/1A8BKpDZr8K0=
+"@logrhythm/webui@^5.9.15":
+  version "5.9.15"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@logrhythm/webui/-/@logrhythm/webui-5.9.15.tgz#d28a54bce2539673a3e87d9fce3d8546694cf79f"
+  integrity sha1-0opUvOJTlnOj6H2fzj2FRmlM958=
   dependencies:
     "@logrhythm/icons" "1.18.0"
     "@logrhythm/lodash-fp" "1.10.2"
@@ -1976,7 +1976,7 @@
     cypress-pipe "1.3.3"
     eventemitter3 "2.0.3"
     fastdom "^1.0.6"
-    lodash "^4.17.4"
+    lodash "^4.17.15"
     lr-style "^6.10.2"
     moment "^2.18.1"
     prop-types "15.6.2"

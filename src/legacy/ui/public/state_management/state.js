@@ -302,7 +302,7 @@ export function StateProvider(
       'common.ui.stateManagement.unableToStoreHistoryInSessionErrorMessage',
       {
         defaultMessage:
-          'Kibana is unable to store history items in your session ' +
+          'NetMon-UI is unable to store history items in your session ' +
           `because it is full and there don't seem to be items any items safe ` +
           'to delete.\n\n' +
           'This can usually be fixed by moving to a fresh tab, but could ' +

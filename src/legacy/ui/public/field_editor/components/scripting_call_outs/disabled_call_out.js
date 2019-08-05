@@ -41,7 +41,7 @@ export const ScriptingDisabledCallOut = ({ isVisible = false }) => {
           <FormattedMessage
             id="common.ui.fieldEditor.disabledCallOutLabel"
             defaultMessage="All inline scripting has been disabled in Elasticsearch. You must enable inline scripting for at least one
-            language in order to use scripted fields in Kibana."
+            language in order to use scripted fields in NetMon-UI."
           />
         </p>
       </EuiCallOut>

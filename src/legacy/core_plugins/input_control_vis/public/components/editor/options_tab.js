@@ -45,7 +45,7 @@ export class OptionsTab extends Component {
             label={
               <FormattedMessage
                 id="inputControl.editor.optionsTab.updateFilterLabel"
-                defaultMessage="Update Kibana filters on each change"
+                defaultMessage="Update NetMon-UI filters on each change"
               />
             }
             checked={this.props.stateParams.updateFiltersOnChange}
