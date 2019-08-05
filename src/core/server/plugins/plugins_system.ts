@@ -41,7 +41,11 @@ export class PluginsSystem {
     this.plugins.set(plugin.name, plugin);
   }
 
-  public getOpaqueIds(): ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]> {
+  /**
+   * @returns a ReadonlyMap of each plugin and an Array of its available dependencies
+   * @internal
+   */
+  public getPluginDependencies(): ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]> {
     // Return dependency map of opaque ids
     return new Map(
       [...this.plugins].map(([name, plugin]) => [

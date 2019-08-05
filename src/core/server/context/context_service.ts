@@ -21,30 +21,26 @@ import { PluginOpaqueId } from '../../server';
 import { IContextContainer, ContextContainer } from '../../utils/context';
 import { CoreContext } from '../core_context';
 
+interface SetupDeps {
+  pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;
+}
+
 /** @internal */
 export class ContextService {
-  private pluginDependencies?: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;
-
   constructor(private readonly core: CoreContext) {}
 
-  public setup(): ContextSetup {
+  public setup({ pluginDependencies }: SetupDeps): ContextSetup {
     return {
       createContextContainer: <
         TContext extends {},
         THandlerReturn,
         THandlerParameters extends any[] = []
       >() => {
-        if (!this.pluginDependencies) {
-          throw new Error(`ContextStart#setPluginDependencies() must be called before #setup()`);
-        }
-
         return new ContextContainer<TContext, THandlerReturn, THandlerParameters>(
-          this.pluginDependencies!,
+          pluginDependencies,
           this.core.coreId
         );
       },
-      setPluginDependencies: (deps: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>) =>
-        (this.pluginDependencies = deps),
     };
   }
 }
@@ -119,9 +115,4 @@ export interface ContextSetup {
     THandlerReturn,
     THandlerParmaters extends any[] = []
   >(): IContextContainer<TContext, THandlerReturn, THandlerParmaters>;
-
-  /**
-   * @internal
-   */
-  setPluginDependencies(deps: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>): void;
 }

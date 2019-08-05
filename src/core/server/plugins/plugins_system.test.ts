@@ -91,14 +91,14 @@ test('can be setup even without plugins', async () => {
   expect(pluginsSetup.size).toBe(0);
 });
 
-test('getOpaqueIds returns dependency tree of symbols', () => {
+test('getPluginDependencies returns dependency tree of symbols', () => {
   pluginsSystem.addPlugin(createPlugin('plugin-a', { required: ['no-dep'] }));
   pluginsSystem.addPlugin(
     createPlugin('plugin-b', { required: ['plugin-a'], optional: ['no-dep', 'other'] })
   );
   pluginsSystem.addPlugin(createPlugin('no-dep'));
 
-  expect(pluginsSystem.getOpaqueIds()).toMatchInlineSnapshot(`
+  expect(pluginsSystem.getPluginDependencies()).toMatchInlineSnapshot(`
     Map {
       Symbol(plugin-a) => Array [
         Symbol(no-dep),

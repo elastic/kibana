@@ -29,8 +29,7 @@ describe('ContextService', () => {
     test('createContextContainer returns a new container configured with pluginDependencies', () => {
       const coreId = Symbol();
       const service = new ContextService({ coreId } as CoreContext);
-      const setup = service.setup();
-      setup.setPluginDependencies(pluginDependencies);
+      const setup = service.setup({ pluginDependencies });
       expect(setup.createContextContainer()).toBeDefined();
       expect(MockContextConstructor).toHaveBeenCalledWith(pluginDependencies, coreId);
     });

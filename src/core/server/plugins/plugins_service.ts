@@ -69,14 +69,23 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       .pipe(map(rawConfig => new PluginsConfig(rawConfig, coreContext.env)));
   }
 
-  public async setup(deps: PluginsServiceSetupDeps) {
-    this.log.debug('Setting up plugins service');
+  public async discover() {
+    this.log.debug('Discovering plugins');
 
     const config = await this.config$.pipe(first()).toPromise();
 
     const { error$, plugin$ } = discover(config, this.coreContext);
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);
+
+    // Return dependency tree
+    return this.pluginsSystem.getPluginDependencies();
+  }
+
+  public async setup(deps: PluginsServiceSetupDeps) {
+    this.log.debug('Setting up plugins service');
+
+    const config = await this.config$.pipe(first()).toPromise();
 
     if (!config.initialize || this.coreContext.env.isDevClusterMaster) {
       this.log.info('Plugin initialization disabled.');
@@ -85,9 +94,6 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         uiPlugins: this.pluginsSystem.uiPlugins(),
       };
     }
-
-    // Configure context service with dependency tree
-    deps.context.setPluginDependencies(this.pluginsSystem.getOpaqueIds());
 
     return {
       contracts: await this.pluginsSystem.setupPlugins(deps),

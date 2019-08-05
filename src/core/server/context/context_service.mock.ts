@@ -23,7 +23,6 @@ import { contextMock } from '../../utils/context.mock';
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<ContextSetup> = {
     createContextContainer: jest.fn().mockImplementation(() => contextMock.create()),
-    setPluginDependencies: jest.fn(),
   };
   return setupContract;
 };

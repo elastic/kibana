@@ -61,10 +61,13 @@ export class Server {
   public async setup() {
     this.log.debug('setting up server');
 
+    // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
+    const pluginDependencies = await this.plugins.discover();
+
     const httpSetup = await this.http.setup();
     this.registerDefaultRoute(httpSetup);
 
-    const contextServiceSetup = this.context.setup();
+    const contextServiceSetup = this.context.setup({ pluginDependencies });
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
     });
