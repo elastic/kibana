@@ -56,9 +56,11 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     const requests = options.metrics.map(metricId => {
       const model = metricModels[metricId](timeField, indexPattern, interval);
+      const id =
+        model.id_type === 'cloud' ? (options.nodeIds.cloudId as string) : options.nodeIds.nodeId;
       const filters = model.map_field_to
-        ? [{ match: { [model.map_field_to]: options.nodeIds.nodeId } }]
-        : [{ match: { [nodeField]: options.nodeIds.nodeId } }];
+        ? [{ match: { [model.map_field_to]: id } }]
+        : [{ match: { [nodeField]: id } }];
       return this.framework.makeTSVBRequest(req, model, timerange, filters);
     });
     return Promise.all(requests)

@@ -59,6 +59,7 @@ export interface InfraMetricModel {
   series: InfraMetricModelSeries[];
   filter?: string;
   map_field_to?: string;
+  id_type?: 'cloud' | 'node';
 }
 
 export interface InfraMetricModelSeries {

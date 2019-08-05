@@ -19,6 +19,7 @@ export const hostAwsCpu: InfraMetricModelCreator = (
   id: InfraMetric.hostAwsCpu,
   requires: ['system.cpu'],
   map_field_to: 'cloud.instance.id',
+  id_type: 'cloud',
   index_pattern: indexPattern,
   interval,
   time_field: timeField,
