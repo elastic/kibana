@@ -14,13 +14,13 @@ import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks'
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { ExecutorError } from './executor_error';
 
+const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockedEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
 
 const actionType = {
   id: '1',
   name: '1',
-  unencryptedAttributes: [],
   executor: jest.fn(),
 };
 
@@ -35,7 +35,9 @@ const getCreateTaskRunnerFunctionParams = {
     };
   },
   actionTypeRegistry,
+  spaceIdToNamespace,
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
+  getBasePath: jest.fn().mockReturnValue(undefined),
 };
 
 const taskInstanceMock = {
@@ -43,8 +45,8 @@ const taskInstanceMock = {
   state: {},
   params: {
     id: '2',
-    actionTypeParams: { baz: true },
-    namespace: 'test',
+    params: { baz: true },
+    spaceId: 'test',
   },
   taskType: 'actions:1',
 };
@@ -57,12 +59,14 @@ test('executes the task by calling the executor with proper parameters', async (
   const runner = createTaskRunner({ taskInstance: taskInstanceMock });
 
   mockExecute.mockResolvedValueOnce({ status: 'ok' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
 
   const runnerResult = await runner.run();
 
   expect(runnerResult).toBeUndefined();
+  expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
   expect(mockExecute).toHaveBeenCalledWith({
-    namespace: 'test',
+    namespace: 'namespace-test',
     actionId: '2',
     actionTypeRegistry,
     encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,

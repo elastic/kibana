@@ -6,10 +6,9 @@
 
 import expect from '@kbn/expect';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function serverLogTest({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function serverLogTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -23,11 +22,8 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'A server.log action',
-            actionTypeId: '.server-log',
-            actionTypeConfig: {},
-          },
+          description: 'A server.log action',
+          actionTypeId: '.server-log',
         })
         .expect(200);
 
@@ -43,16 +39,10 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
         .expect(200);
 
       expect(fetchedAction).to.eql({
-        type: 'action',
         id: fetchedAction.id,
-        attributes: {
-          description: 'A server.log action',
-          actionTypeId: '.server-log',
-          actionTypeConfig: {},
-        },
-        references: [],
-        updated_at: fetchedAction.updated_at,
-        version: fetchedAction.version,
+        description: 'A server.log action',
+        actionTypeId: '.server-log',
+        config: {},
       });
     });
 
