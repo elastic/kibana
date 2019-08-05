@@ -17,8 +17,10 @@ export const awsNetworkBytes: InfraMetricModelCreator = (
   interval
 ): InfraMetricModel => ({
   id: InfraMetric.awsNetworkBytes,
-  requires: ['system.network'],
+  requires: ['aws.ec2'],
   index_pattern: indexPattern,
+  map_field_to: 'cloud.instance.id',
+  id_type: 'cloud',
   interval: '>=5m',
   time_field: timeField,
   type: 'timeseries',
@@ -36,6 +38,23 @@ export const awsNetworkBytes: InfraMetricModelCreator = (
           type: InfraMetricModelMetricType.calculation,
           variables: [{ id: 'var-max', name: 'max', field: 'max-net-out' }],
           script: 'params.max / 300',
+        },
+      ],
+      split_mode: 'everything',
+    },
+    {
+      id: 'rx',
+      metrics: [
+        {
+          field: 'aws.ec2.network.in.bytes',
+          id: 'max-net-in',
+          type: InfraMetricModelMetricType.max,
+        },
+        {
+          id: 'inverted-by-second-max-net-in',
+          type: InfraMetricModelMetricType.calculation,
+          variables: [{ id: 'var-max', name: 'max', field: 'max-net-in' }],
+          script: 'params.max / -300',
         },
       ],
       split_mode: 'everything',

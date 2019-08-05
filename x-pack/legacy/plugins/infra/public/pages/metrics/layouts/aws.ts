@@ -33,7 +33,51 @@ export const awsLayoutCreator: InfraMetricLayoutCreator = theme => [
           type: InfraMetricLayoutVisualizationType.area,
           formatter: InfraFormatterType.number,
           seriesOverrides: {
-            'cpu-util': { color: theme.eui.euiColorVis1 },
+            'cpu-util': {
+              color: theme.eui.euiColorVis1,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.awsMetricsLayout.cpuUtilSection.cpuUtilPercentSeriesLabel',
+                {
+                  defaultMessage: 'percent',
+                }
+              ),
+            },
+          },
+        },
+      },
+      {
+        id: InfraMetric.awsNetworkBytes,
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.awsMetricsLayout.networkBytesSection.sectionLabel',
+          {
+            defaultMessage: 'Network Traffic',
+          }
+        ),
+        requires: ['aws.ec2'],
+        type: InfraMetricLayoutSectionType.chart,
+        visConfig: {
+          type: InfraMetricLayoutVisualizationType.area,
+          formatter: InfraFormatterType.bits,
+          formatterTemplate: '{{value}}/s',
+          seriesOverrides: {
+            tx: {
+              color: theme.eui.euiColorVis1,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.awsMetricsLayout.networkBytesSection.networkTxSeriesLabel',
+                {
+                  defaultMessage: 'out',
+                }
+              ),
+            },
+            rx: {
+              color: theme.eui.euiColorVis2,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.awsMetricsLayout.networkBytesSection.networkRxSeriesLabel',
+                {
+                  defaultMessage: 'in',
+                }
+              ),
+            },
           },
         },
       },
