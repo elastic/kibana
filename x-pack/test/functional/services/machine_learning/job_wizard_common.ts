@@ -56,7 +56,10 @@ export function MachineLearningJobWizardCommonProvider({
     },
 
     async assertBucketSpanValue(expectedValue: string) {
-      const actualBucketSpan = await testSubjects.getVisibleText('mlJobWizardInputBucketSpan');
+      const actualBucketSpan = await testSubjects.getAttribute(
+        'mlJobWizardInputBucketSpan',
+        'value'
+      );
       expect(actualBucketSpan).to.eql(expectedValue);
     },
 
@@ -65,7 +68,7 @@ export function MachineLearningJobWizardCommonProvider({
     },
 
     async assertJobIdValue(expectedValue: string) {
-      const actualJobId = await testSubjects.getVisibleText('mlJobWizardInputJobId');
+      const actualJobId = await testSubjects.getAttribute('mlJobWizardInputJobId', 'value');
       expect(actualJobId).to.eql(expectedValue);
     },
 
@@ -92,21 +95,25 @@ export function MachineLearningJobWizardCommonProvider({
       expect(comboBoxSelectedOptions).to.eql(jobGroups);
     },
 
-    async assertAdvancedSectionExists() {
-      await testSubjects.existOrFail('mlJobWizardAdvancedSection');
-    },
-
     async assertModelPlotSwitchExists() {
-      await testSubjects.existOrFail('mlJobWizardSwitchModelPlot');
+      await this.ensureAdvancedSectionOpen();
+      await testSubjects.existOrFail('mlJobWizardAdvancedSection mlJobWizardSwitchModelPlot', {
+        allowHidden: true,
+      });
     },
 
     async assertDedicatedIndexSwitchExists() {
-      await testSubjects.existOrFail('mlJobWizardSwitchUseDedicatedIndex');
+      await this.ensureAdvancedSectionOpen();
+      await testSubjects.existOrFail(
+        'mlJobWizardAdvancedSection mlJobWizardSwitchUseDedicatedIndex',
+        { allowHidden: true }
+      );
     },
 
     async assertDedicatedIndexSwitchCheckedState(expectedValue: boolean) {
-      const actualJobDescription = this.getDedicatedIndexSwitchCheckedState();
-      expect(actualJobDescription).to.eql(expectedValue);
+      await this.ensureAdvancedSectionOpen();
+      const actualCheckedState = await this.getDedicatedIndexSwitchCheckedState();
+      expect(actualCheckedState).to.eql(expectedValue);
     },
 
     async assertCreateJobButtonExists() {
@@ -114,16 +121,22 @@ export function MachineLearningJobWizardCommonProvider({
     },
 
     async getDedicatedIndexSwitchCheckedState() {
-      return await testSubjects.getAttribute('mlJobWizardSwitchUseDedicatedIndex', 'checked');
+      await this.ensureAdvancedSectionOpen();
+      return await testSubjects.isSelected(
+        'mlJobWizardAdvancedSection mlJobWizardSwitchUseDedicatedIndex'
+      );
     },
 
     async assertModelMemortyLimitInputExists() {
-      await testSubjects.existOrFail('mlJobWizardInputModelMemoryLimit');
+      await this.ensureAdvancedSectionOpen();
+      await testSubjects.existOrFail('mlJobWizardAdvancedSection mlJobWizardInputModelMemoryLimit');
     },
 
     async assertModelMemoryLimitValue(expectedValue: string) {
-      const actualModelMemoryLimit = await testSubjects.getVisibleText(
-        'mlJobWizardInputModelMemoryLimit'
+      await this.ensureAdvancedSectionOpen();
+      const actualModelMemoryLimit = await testSubjects.getAttribute(
+        'mlJobWizardAdvancedSection mlJobWizardInputModelMemoryLimit',
+        'value'
       );
       expect(actualModelMemoryLimit).to.eql(expectedValue);
     },
@@ -160,10 +173,13 @@ export function MachineLearningJobWizardCommonProvider({
       await comboBox.setCustom('mlJobWizardComboboxJobGroups comboBoxInput', jobGroup);
     },
 
-    async openAdvancedSection() {
-      if ((await testSubjects.exists('mlJobWizardAdvancedSection')) === false) {
-        await testSubjects.clickWhenNotDisabled('mlJobWizardToggleAdvancedSection');
-      }
+    async ensureAdvancedSectionOpen() {
+      await retry.try(async () => {
+        if ((await testSubjects.exists('mlJobWizardAdvancedSection')) === false) {
+          await testSubjects.click('mlJobWizardToggleAdvancedSection');
+          await testSubjects.existOrFail('mlJobWizardAdvancedSection');
+        }
+      });
     },
 
     async activateDedicatedIndexSwitch() {

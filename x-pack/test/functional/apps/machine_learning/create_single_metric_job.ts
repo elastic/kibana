@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import expect from '@kbn/expect';
 
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
@@ -14,6 +15,8 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
   const mlJobSourceSelection = getService('mlJobSourceSelection');
   const mlJobTypeSelection = getService('mlJobTypeSelection');
   const mlJobWizardCommon = getService('mlJobWizardCommon');
+
+  const jobId = `fq_single_1_${Date.now()}`;
 
   // eslint-disable-next-line ban/ban
   describe.only('single metric job creation', function() {
@@ -77,7 +80,6 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
     });
 
     it('inputs the job id', async () => {
-      const jobId = 'fq_single_1';
       await mlJobWizardCommon.assertJobIdInputExists();
       await mlJobWizardCommon.setJobId(jobId);
       await mlJobWizardCommon.assertJobIdValue(jobId);
@@ -101,8 +103,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
     });
 
     it('opens the advanced section', async () => {
-      await mlJobWizardCommon.openAdvancedSection();
-      await mlJobWizardCommon.assertAdvancedSectionExists();
+      await mlJobWizardCommon.ensureAdvancedSectionOpen();
     });
 
     it('displays the model plot switch', async () => {
@@ -112,7 +113,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
     it('enables the dedicated index switch', async () => {
       await mlJobWizardCommon.assertDedicatedIndexSwitchExists();
       await mlJobWizardCommon.activateDedicatedIndexSwitch();
-      await mlJobWizardCommon.assertJobDescriptionValue(true);
+      await mlJobWizardCommon.assertDedicatedIndexSwitchCheckedState(true);
     });
 
     it('inputs the model memory limit', async () => {
@@ -137,15 +138,15 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       await mlJobWizardCommon.createJobAndWaitForCompletion();
     });
 
-    // TODO: validate job creation in job list
-
-    /*
-    it('filters the job list', async () => {
-      await mlJobManagement.filterJobsTable('ec1_high_sum_total_sales');
-      const jobRow = await mlJobManagement.getJobRowByJobId('ec1_high_sum_total_sales');
-      const jobRowId = await mlJobManagement.getJobRowId(jobRow);
-      log.debug(`jobRowId: '${jobRowId}'`);
+    it('loads the job management page', async () => {
+      await mlNavigation.navigateToMl();
+      await mlNavigation.navigateToJobManagement();
     });
-    */
+
+    it('displays the created job in the job list', async () => {
+      await mlJobManagement.filterJobsTable(jobId);
+      const jobRow = await mlJobManagement.getJobRowByJobId(jobId);
+      expect(jobRow).to.not.be(null);
+    });
   });
 }

@@ -12,8 +12,6 @@ export function MachineLearningJobManagementProvider({
 }: KibanaFunctionalTestDefaultProviders) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  // const find = getService('find');
-  // const log = getService('log');
 
   return {
     async getJobsTable(): Promise<WebElementWrapper> {
@@ -36,10 +34,6 @@ export function MachineLearningJobManagementProvider({
     async navigateToNewJobSourceSelection() {
       await testSubjects.clickWhenNotDisabled('mlCreateNewJobButton');
       await testSubjects.existOrFail('mlPageSourceSelection');
-    },
-
-    async getJobsTableSearchBar() {
-      return await testSubjects.find('mlJobListSearchBar');
     },
 
     async assertJobTableExists() {
@@ -68,7 +62,7 @@ export function MachineLearningJobManagementProvider({
 
     async filterJobsTable(jobId: string) {
       await this.waitForJobsTableToLoad();
-      const searchBar = await this.getJobsTableSearchBar();
+      const searchBar = await testSubjects.find('mlJobListSearchBar');
       const searchBarInput = await searchBar.findByTagName('input');
       await searchBarInput.clearValueWithKeyboard();
       await searchBarInput.type(jobId);
@@ -76,12 +70,7 @@ export function MachineLearningJobManagementProvider({
 
     async getJobRowByJobId(jobId: string): Promise<WebElementWrapper> {
       const table = await this.getJobsTable();
-      return await table.findByXpath(`./tbody/tr[.//*[@data-row-id="${jobId}"]]`);
-    },
-
-    async getJobRowId(jobRow: WebElementWrapper) {
-      const idCell = await jobRow.findByXpath('./td[3]');
-      return idCell.getVisibleText();
+      return await table.findByCssSelector(`[data-row-id=${jobId}]`);
     },
   };
 }
