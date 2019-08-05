@@ -16,17 +16,17 @@ async function main() {
   let response;
 
   response = await httpPost('api/action', {
-    attributes: {
-      actionTypeId: '.email',
-      description: 'an email action',
-      actionTypeConfig: {
-        user: 'elastic',
-        password: 'changeme',
-        from: 'patrick.mueller@elastic.co',
-        host: 'localhost',
-        port: 80,
-        secure: false,
-      }
+    actionTypeId: '.email',
+    description: 'an email action',
+    config: {
+      from: 'patrick.mueller@elastic.co',
+      host: 'localhost',
+      port: 80,
+      secure: false,
+    },
+    secrets: {
+      user: 'elastic',
+      password: 'changeme',
     }
   });
   console.log(`result of create: ${JSON.stringify(response, null, 4)}`);
@@ -37,15 +37,15 @@ async function main() {
   console.log(`action after create: ${JSON.stringify(response, null, 4)}`);
 
   response = await httpPut(`api/action/${actionId}`, {
-    attributes: {
-      description: 'an email action',
-      actionTypeConfig: {
-        user: 'elastic',
-        password: 'changeme',
-        from: 'patrick.mueller@elastic.co',
-        service: '__json',
-      }
-    }
+    description: 'an email action',
+    config: {
+      from: 'patrick.mueller@elastic.co',
+      service: '__json',
+    },
+    secrets: {
+      user: 'elastic',
+      password: 'changeme',
+    },
   });
 
   console.log(`response from update: ${JSON.stringify(response, null, 4)}`);

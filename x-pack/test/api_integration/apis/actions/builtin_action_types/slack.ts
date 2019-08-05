@@ -6,12 +6,11 @@
 
 import expect from '@kbn/expect';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { SLACK_ACTION_SIMULATOR_URI } from '../../../fixtures/plugins/actions';
 
-// eslint-disable-next-line import/no-default-export
-export default function slackTest({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -33,12 +32,10 @@ export default function slackTest({ getService }: KibanaFunctionalTestDefaultPro
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'A slack action',
-            actionTypeId: '.slack',
-            actionTypeConfig: {
-              webhookUrl: 'http://example.com',
-            },
+          description: 'A slack action',
+          actionTypeId: '.slack',
+          secrets: {
+            webhookUrl: 'http://example.com',
           },
         })
         .expect(200);
@@ -54,16 +51,10 @@ export default function slackTest({ getService }: KibanaFunctionalTestDefaultPro
         .expect(200);
 
       expect(fetchedAction).to.eql({
-        type: 'action',
         id: fetchedAction.id,
-        attributes: {
-          description: 'A slack action',
-          actionTypeId: '.slack',
-          actionTypeConfig: {},
-        },
-        references: [],
-        updated_at: fetchedAction.updated_at,
-        version: fetchedAction.version,
+        description: 'A slack action',
+        actionTypeId: '.slack',
+        config: {},
       });
     });
 
@@ -72,11 +63,9 @@ export default function slackTest({ getService }: KibanaFunctionalTestDefaultPro
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'A slack action',
-            actionTypeId: '.slack',
-            actionTypeConfig: {},
-          },
+          description: 'A slack action',
+          actionTypeId: '.slack',
+          secrets: {},
         })
         .expect(400)
         .then((resp: any) => {
@@ -84,7 +73,7 @@ export default function slackTest({ getService }: KibanaFunctionalTestDefaultPro
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'The actionTypeConfig is invalid: [webhookUrl]: expected value of type [string] but got [undefined]',
+              'error validating action type secrets: [webhookUrl]: expected value of type [string] but got [undefined]',
           });
         });
     });
@@ -94,12 +83,10 @@ export default function slackTest({ getService }: KibanaFunctionalTestDefaultPro
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'A slack simulator',
-            actionTypeId: '.slack',
-            actionTypeConfig: {
-              webhookUrl: slackSimulatorURL,
-            },
+          description: 'A slack simulator',
+          actionTypeId: '.slack',
+          secrets: {
+            webhookUrl: slackSimulatorURL,
           },
         })
         .expect(200);

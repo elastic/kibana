@@ -6,3 +6,5 @@
 
 export * from './search_results_api';
 export * from './search_summary_api';
+export * from './metadata_api';
+export * from './timed_api';
