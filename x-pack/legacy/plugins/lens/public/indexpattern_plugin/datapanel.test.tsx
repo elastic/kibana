@@ -36,7 +36,6 @@ const initialState: IndexPatternPrivateState = {
               type: 'alphabetical',
             },
           },
-          indexPatternId: '1',
         },
         col2: {
           label: 'My Op',

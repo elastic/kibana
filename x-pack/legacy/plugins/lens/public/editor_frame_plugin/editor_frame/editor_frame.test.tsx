@@ -1250,6 +1250,11 @@ describe('editor_frame', () => {
               ...mockDatasource,
               getDatasourceSuggestionsForField: () => [generateSuggestion()],
               getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
+              renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
+                if (dragging !== 'draggedField') {
+                  setDragging('draggedField');
+                }
+              },
             },
           }}
           initialDatasourceId="testDatasource"

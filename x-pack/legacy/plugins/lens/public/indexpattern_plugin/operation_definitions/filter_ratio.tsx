@@ -27,7 +27,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       },
     ];
   },
-  buildColumn({ suggestedPriority, indexPatternId }) {
+  buildColumn({ suggestedPriority }) {
     return {
       label: i18n.translate('xpack.lens.indexPattern.filterRatio', {
         defaultMessage: 'Filter Ratio',
@@ -36,7 +36,6 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       operationType: 'filter_ratio',
       suggestedPriority,
       isBucketed: false,
-      indexPatternId,
       params: {
         numerator: { language: 'kuery', query: '' },
         denominator: { language: 'kuery', query: '' },
