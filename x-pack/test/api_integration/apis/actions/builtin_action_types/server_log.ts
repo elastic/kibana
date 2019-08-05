@@ -6,10 +6,9 @@
 
 import expect from '@kbn/expect';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function serverLogTest({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function serverLogTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -31,6 +30,9 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
       serverLogActionId = createdAction.id;
       expect(createdAction).to.eql({
         id: createdAction.id,
+        description: 'A server.log action',
+        actionTypeId: '.server-log',
+        config: {},
       });
 
       expect(typeof createdAction.id).to.be('string');

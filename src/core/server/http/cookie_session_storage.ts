@@ -24,10 +24,26 @@ import { KibanaRequest, ensureRawRequest } from './router';
 import { SessionStorageFactory, SessionStorage } from './session_storage';
 import { Logger } from '..';
 
+/**
+ * Configuration used to create HTTP session storage based on top of cookie mechanism.
+ * @public
+ */
 export interface SessionStorageCookieOptions<T> {
+  /**
+   * Name of the session cookie.
+   */
   name: string;
+  /**
+   * A key used to encrypt a cookie value. Should be at least 32 characters long.
+   */
   encryptionKey: string;
+  /**
+   * Function called to validate a cookie content.
+   */
   validate: (sessionValue: T) => boolean | Promise<boolean>;
+  /**
+   * Flag indicating whether the cookie should be sent only via a secure connection.
+   */
   isSecure: boolean;
 }
 

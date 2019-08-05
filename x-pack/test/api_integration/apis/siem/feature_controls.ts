@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import gql from 'graphql-tag';
 import { SecurityService, SpacesService } from '../../../common/services';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const introspectionQuery = gql`
   query Schema {
@@ -19,7 +19,7 @@ const introspectionQuery = gql`
   }
 `;
 
-const featureControlsTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const security: SecurityService = getService('security');
   const spaces: SpacesService = getService('spaces');
@@ -237,7 +237,4 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default featureControlsTests;
+}
