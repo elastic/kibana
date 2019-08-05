@@ -27,6 +27,7 @@ import {
   GetEmbeddableFactory,
   GetEmbeddableFactories,
 } from '../../types';
+import { Start as InspectorStartContract } from '../../../../../../../../../plugins/inspector/public';
 
 interface Props {
   container: IContainer;
@@ -35,6 +36,7 @@ interface Props {
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
+  inspector: InspectorStartContract;
 }
 
 interface State {
@@ -112,6 +114,7 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
             getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
             overlays={this.props.overlays}
             notifications={this.props.notifications}
+            inspector={this.props.inspector}
           />
         </EuiFlexItem>
       );

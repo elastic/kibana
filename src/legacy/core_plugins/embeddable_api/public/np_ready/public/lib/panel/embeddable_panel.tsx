@@ -39,6 +39,7 @@ import { PanelHeader } from './panel_header/panel_header';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
 import { EditPanelAction, Action, ActionContext } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
+import { Start as InspectorStartContract } from '../../../../../../../../plugins/inspector/public';
 
 interface Props {
   embeddable: IEmbeddable<any, any>;
@@ -47,6 +48,7 @@ interface Props {
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
+  inspector: InspectorStartContract;
 }
 
 interface State {
@@ -196,7 +198,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         this.props.overlays,
         this.props.notifications
       ),
-      new InspectPanelAction(),
+      new InspectPanelAction(this.props.inspector),
       new RemovePanelAction(),
       new EditPanelAction(this.props.getEmbeddableFactory),
     ];

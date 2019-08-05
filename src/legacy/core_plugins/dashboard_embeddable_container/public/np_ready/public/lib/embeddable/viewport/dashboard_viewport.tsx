@@ -28,6 +28,7 @@ import { CoreStart } from 'src/core/public';
 import { PanelState } from '../../embeddable_api';
 import { DashboardContainer } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
+import { Start as InspectorStartContract } from '../../../../../../../../../plugins/inspector/public';
 
 // TODO: Adapt this for NP, this used to be `import { ExitFullScreenButton } from 'ui/exit_full_screen';`.
 const ExitFullScreenButton: React.FC<any> = props => (
@@ -47,6 +48,7 @@ export interface DashboardViewportProps {
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
+  inspector: InspectorStartContract;
 }
 
 interface State {
@@ -122,6 +124,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           getEmbeddableFactory={this.props.getEmbeddableFactory}
           notifications={this.props.notifications}
           overlays={this.props.overlays}
+          inspector={this.props.inspector}
         />
       </div>
     );

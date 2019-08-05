@@ -42,6 +42,7 @@ function getProps(props?: Partial<DashboardViewportProps>): DashboardViewportPro
     getEmbeddableFactory: undefined as any,
     notifications: {} as any,
     overlays: {} as any,
+    inspector: {} as any,
   };
 
   const __embeddableFactories = new Map<string, EmbeddableFactory>();
@@ -71,6 +72,7 @@ function getProps(props?: Partial<DashboardViewportProps>): DashboardViewportPro
   const defaultTestProps: DashboardViewportProps = {
     container: dashboardContainer,
     ...viewportProps,
+    inspector: {} as any,
   };
   return Object.assign(defaultTestProps, props);
 }

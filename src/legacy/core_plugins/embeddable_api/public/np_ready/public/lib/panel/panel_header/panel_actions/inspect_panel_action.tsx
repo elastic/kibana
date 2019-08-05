@@ -19,17 +19,16 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-
 import { i18n } from '@kbn/i18n';
-// TODO: Remove this.
-import { Inspector } from 'ui/inspector';
 import { Action, ActionContext } from '../../../actions';
+import { Start as InspectorStartContract } from '../../../../../../../../../../plugins/inspector/public';
 
 export const INSPECT_PANEL_ACTION_ID = 'openInspector';
 
 export class InspectPanelAction extends Action {
   public readonly type = INSPECT_PANEL_ACTION_ID;
-  constructor() {
+
+  constructor(private readonly inspector: InspectorStartContract) {
     super(INSPECT_PANEL_ACTION_ID);
     this.order = 20;
   }
@@ -45,7 +44,7 @@ export class InspectPanelAction extends Action {
   }
 
   public async isCompatible({ embeddable }: ActionContext) {
-    return Inspector.isAvailable(embeddable.getInspectorAdapters());
+    return this.inspector.isAvailable(embeddable.getInspectorAdapters());
   }
 
   public async execute({ embeddable }: ActionContext) {
@@ -55,7 +54,7 @@ export class InspectPanelAction extends Action {
       throw new Error('Action not compatible with context');
     }
 
-    const session = Inspector.open(adapters, {
+    const session = this.inspector.open(adapters, {
       title: embeddable.getTitle(),
     });
     // Overwrite the embeddables.destroy() function to close the inspector

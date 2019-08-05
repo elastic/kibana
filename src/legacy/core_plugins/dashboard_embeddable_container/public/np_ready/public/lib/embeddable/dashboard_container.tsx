@@ -42,6 +42,7 @@ import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import { Query } from '../../../../../../data/public';
+import { Start as InspectorStartContract } from '../../../../../../../../plugins/inspector/public';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
@@ -79,6 +80,7 @@ export interface ViewportProps {
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
+  inspector: InspectorStartContract;
 }
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {

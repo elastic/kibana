@@ -67,6 +67,7 @@ function getProps(props?: Partial<DashboardGridProps>): DashboardGridProps {
     getEmbeddableFactory: (() => {}) as any,
     notifications: {} as any,
     overlays: {} as any,
+    inspector: {} as any,
   };
   return Object.assign(defaultTestProps, props);
 }

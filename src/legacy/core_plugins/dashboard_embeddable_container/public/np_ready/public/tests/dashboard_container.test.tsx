@@ -37,8 +37,11 @@ import {
 } from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
 import { embeddablePluginMock } from '../../../../../embeddable_api/public/np_ready/public/mocks';
 import { EditModeAction } from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples/actions/edit_mode_action';
+// eslint-disable-next-line
+import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
 
 test('DashboardContainer in edit mode shows edit mode actions', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
   const { setup, doStart } = embeddablePluginMock.createInstance();
 
   const editModeAction = new EditModeAction();
@@ -72,6 +75,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
         getEmbeddableFactory={(() => null) as any}
         notifications={{} as any}
         overlays={{} as any}
+        inspector={inspector}
       />
     </I18nProvider>
   );

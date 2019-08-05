@@ -40,6 +40,8 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
 } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
+// eslint-disable-next-line
+import { inspectorPluginMock } from '../../../../../../../../plugins/inspector/public/mocks';
 
 const __actionRegistry = new Map<string, Action>();
 const __triggerRegistry = new Map<string, Trigger>();
@@ -136,6 +138,8 @@ test('Container view mode change propagates to children', async () => {
 });
 
 test('HelloWorldContainer in view mode hides edit mode actions', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+
   const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
     getEmbeddableFactory,
   } as any);
@@ -157,6 +161,7 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
         getEmbeddableFactory={(() => undefined) as any}
         notifications={{} as any}
         overlays={{} as any}
+        inspector={inspector}
       />
     </I18nProvider>
   );
@@ -169,6 +174,8 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
 });
 
 test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+
   const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
     getEmbeddableFactory,
   } as any);
@@ -190,6 +197,7 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
         getEmbeddableFactory={(() => undefined) as any}
         notifications={{} as any}
         overlays={{} as any}
+        inspector={inspector}
       />
     </I18nProvider>
   );
@@ -225,6 +233,8 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
 });
 
 test('Updates when hidePanelTitles is toggled', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+
   const container = new HelloWorldContainer(
     { id: '123', panels: {}, viewMode: ViewMode.VIEW, hidePanelTitles: false },
     { getEmbeddableFactory } as any
@@ -248,6 +258,7 @@ test('Updates when hidePanelTitles is toggled', async () => {
         getEmbeddableFactory={(() => undefined) as any}
         notifications={{} as any}
         overlays={{} as any}
+        inspector={inspector}
       />
     </I18nProvider>
   );

@@ -39,6 +39,7 @@ const viewportProps: ViewportProps = {
   getEmbeddableFactory: undefined as any,
   notifications: {} as any,
   overlays: {} as any,
+  inspector: {} as any,
 };
 
 beforeEach(() => {

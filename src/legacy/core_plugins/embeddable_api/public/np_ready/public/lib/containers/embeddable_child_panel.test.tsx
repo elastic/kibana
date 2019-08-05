@@ -30,8 +30,12 @@ import {
   ContactCardEmbeddableOutput,
   ContactCardEmbeddable,
 } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
+// eslint-disable-next-line
+import { inspectorPluginMock } from '../../../../../../../../plugins/inspector/public/mocks';
 
 test('EmbeddableChildPanel renders an embeddable when it is done loading', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+
   const __embeddableFactories = new Map<string, EmbeddableFactory>();
   __embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
@@ -64,6 +68,7 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
       getEmbeddableFactory={(() => undefined) as any}
       notifications={{} as any}
       overlays={{} as any}
+      inspector={inspector}
     />
   );
 
@@ -81,6 +86,7 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
 });
 
 test(`EmbeddableChildPanel renders an error message if the factory doesn't exist`, async () => {
+  const inspector = inspectorPluginMock.createStartContract();
   const getEmbeddableFactory: GetEmbeddableFactory = () => undefined;
   const container = new HelloWorldContainer(
     {
@@ -100,6 +106,7 @@ test(`EmbeddableChildPanel renders an error message if the factory doesn't exist
       getEmbeddableFactory={(() => undefined) as any}
       notifications={{} as any}
       overlays={{} as any}
+      inspector={inspector}
     />
   );
 

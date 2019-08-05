@@ -21,6 +21,7 @@ import { Action, ActionContext } from './actions';
 import { IEmbeddable } from './embeddables';
 import { IContainer } from './containers';
 import { EmbeddableFactory } from './embeddables/embeddable_factory';
+import { Adapters } from '../../../../../../../plugins/inspector/public';
 
 export interface Trigger {
   id: string;
@@ -42,13 +43,7 @@ export enum ViewMode {
   VIEW = 'view',
 }
 
-// import { Adapters } from 'ui/inspector';
-// Inlining `Adapters` here as in NP platform we don't want to import from `src/legacy`.
-// TODO: Figure out how to do this import in New Platform, maybe we don't need to
-// TODO: import it at all as the type is too general.
-export interface Adapters {
-  [key: string]: any;
-}
+export { Adapters };
 
 // import { SavedObjectMetaData } from 'ui/saved_objects/components/saved_object_finder';
 // TODO: Figure out how to do this import in New Platform.

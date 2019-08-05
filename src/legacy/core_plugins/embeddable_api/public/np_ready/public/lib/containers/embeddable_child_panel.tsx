@@ -32,6 +32,7 @@ import {
   GetEmbeddableFactory,
   GetEmbeddableFactories,
 } from '../types';
+import { Start as InspectorStartContract } from '../../../../../../../../plugins/inspector/public';
 
 export interface EmbeddableChildPanelUiProps {
   intl: InjectedIntl;
@@ -43,6 +44,7 @@ export interface EmbeddableChildPanelUiProps {
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
+  inspector: InspectorStartContract;
 }
 
 interface State {
@@ -103,6 +105,7 @@ class EmbeddableChildPanelUi extends React.Component<EmbeddableChildPanelUiProps
             getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
             overlays={this.props.overlays}
             notifications={this.props.notifications}
+            inspector={this.props.inspector}
           />
         )}
       </div>

@@ -42,6 +42,7 @@ import {
 } from '../dashboard_constants';
 import { DashboardContainer } from '../dashboard_container';
 import { DashboardPanelState, GridData } from '../types';
+import { Start as InspectorStartContract } from '../../../../../../../../../plugins/inspector/public';
 
 let lastValidGridSize = 0;
 
@@ -126,6 +127,7 @@ export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
+  inspector: InspectorStartContract;
 }
 
 interface State {
@@ -284,6 +286,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
             getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
             overlays={this.props.overlays}
             notifications={this.props.notifications}
+            inspector={this.props.inspector}
           />
         </div>
       );
