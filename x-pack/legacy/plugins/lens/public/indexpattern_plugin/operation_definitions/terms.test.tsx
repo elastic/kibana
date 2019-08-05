@@ -9,6 +9,7 @@ import { termsOperation } from './terms';
 import { shallow } from 'enzyme';
 import { IndexPatternPrivateState, TermsIndexPatternColumn } from '../indexpattern';
 import { EuiRange, EuiSelect } from '@elastic/eui';
+import { DataPluginDependencies } from '..';
 
 describe('terms', () => {
   let state: IndexPatternPrivateState;
@@ -36,7 +37,6 @@ describe('terms', () => {
                 orderDirection: 'asc',
               },
               sourceField: 'category',
-              indexPatternId: '1',
             },
             col2: {
               label: 'Count',
@@ -45,7 +45,6 @@ describe('terms', () => {
 
               // Private
               operationType: 'count',
-              indexPatternId: '1',
             },
           },
         },
@@ -75,7 +74,6 @@ describe('terms', () => {
     it('should use existing metric column as order column', () => {
       const termsColumn = termsOperation.buildColumn({
         layerId: 'first',
-        indexPatternId: '1',
         suggestedPriority: undefined,
         columns: {
           col1: {
@@ -85,7 +83,6 @@ describe('terms', () => {
 
             // Private
             operationType: 'count',
-            indexPatternId: '1',
           },
         },
       });
@@ -112,7 +109,6 @@ describe('terms', () => {
           orderDirection: 'asc',
         },
         sourceField: 'category',
-        indexPatternId: '1',
       };
       const updatedColumn = termsOperation.onOtherColumnChanged!(initialColumn, {
         col1: {
@@ -122,7 +118,6 @@ describe('terms', () => {
 
           // Private
           operationType: 'count',
-          indexPatternId: '1',
         },
       });
       expect(updatedColumn).toBe(initialColumn);
@@ -143,7 +138,6 @@ describe('terms', () => {
             orderDirection: 'asc',
           },
           sourceField: 'category',
-          indexPatternId: '1',
         },
         {}
       );
@@ -169,7 +163,6 @@ describe('terms', () => {
             orderDirection: 'asc',
           },
           sourceField: 'category',
-          indexPatternId: '1',
         },
         {
           col1: {
@@ -183,7 +176,6 @@ describe('terms', () => {
               interval: 'w',
             },
             sourceField: 'timestamp',
-            indexPatternId: '1',
           },
         }
       );
@@ -199,7 +191,13 @@ describe('terms', () => {
     it('should render current order by value and options', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       const select = instance.find('[data-test-subj="indexPattern-terms-orderBy"]').find(EuiSelect);
@@ -234,7 +232,6 @@ describe('terms', () => {
                       numerator: { query: '', language: 'kuery' },
                       denominator: { query: '', language: 'kuery' },
                     },
-                    indexPatternId: '1',
                   },
                 },
               },
@@ -243,6 +240,7 @@ describe('terms', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
         />
       );
 
@@ -254,7 +252,13 @@ describe('terms', () => {
     it('should update state with the order by value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       instance
@@ -292,7 +296,13 @@ describe('terms', () => {
     it('should render current order direction value and options', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       const select = instance
@@ -306,7 +316,13 @@ describe('terms', () => {
     it('should update state with the order direction value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       instance
@@ -341,7 +357,13 @@ describe('terms', () => {
     it('should render current size value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       expect(instance.find(EuiRange).prop('value')).toEqual(3);
@@ -350,7 +372,13 @@ describe('terms', () => {
     it('should update state with the size value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       instance.find(EuiRange).prop('onChange')!({

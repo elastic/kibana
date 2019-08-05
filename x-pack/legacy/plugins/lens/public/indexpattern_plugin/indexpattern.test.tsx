@@ -17,6 +17,7 @@ import {
 } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { generateId } from '../id_generator';
+import { DataPluginDependencies } from './plugin';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -141,7 +142,7 @@ describe('IndexPattern Data Source', () => {
       storage: storageMock,
       interpreter: { functionsRegistry },
       toastNotifications: notificationsMock,
-      data: dataMock,
+      data: dataMock as DataPluginDependencies,
     });
 
     persistedState = {
@@ -164,7 +165,6 @@ describe('IndexPattern Data Source', () => {
                 orderBy: { type: 'alphabetical' },
                 orderDirection: 'asc',
               },
-              indexPatternId: '1',
             },
           },
         },
@@ -220,7 +220,6 @@ describe('IndexPattern Data Source', () => {
 
                 // Private
                 operationType: 'count',
-                indexPatternId: '1',
               },
               col2: {
                 label: 'Date',
@@ -233,7 +232,6 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   interval: '1d',
                 },
-                indexPatternId: '1',
               },
             },
           },
@@ -609,7 +607,6 @@ describe('IndexPattern Data Source', () => {
               columns: {
                 col1: {
                   dataType: 'string',
-                  indexPatternId: '1',
                   isBucketed: true,
                   sourceField: 'source',
                   label: 'values of source',
@@ -622,7 +619,6 @@ describe('IndexPattern Data Source', () => {
                 },
                 col2: {
                   dataType: 'number',
-                  indexPatternId: '1',
                   isBucketed: false,
                   sourceField: 'bytes',
                   label: 'Min of bytes',
@@ -646,7 +642,6 @@ describe('IndexPattern Data Source', () => {
                 columns: {
                   col1: {
                     dataType: 'date',
-                    indexPatternId: '1',
                     isBucketed: true,
                     sourceField: 'timestamp',
                     label: 'date histogram of timestamp',
@@ -657,7 +652,6 @@ describe('IndexPattern Data Source', () => {
                   },
                   col2: {
                     dataType: 'number',
-                    indexPatternId: '1',
                     isBucketed: false,
                     sourceField: 'bytes',
                     label: 'Min of bytes',
@@ -1125,7 +1119,6 @@ describe('IndexPattern Data Source', () => {
           operationType: 'max',
           sourceField: 'baz',
           suggestedPriority: 0,
-          indexPatternId: '1',
         };
         const columns: Record<string, IndexPatternColumn> = {
           a: {

@@ -49,30 +49,38 @@ export function InnerWorkspacePanel({
   ExpressionRenderer: ExpressionRendererComponent,
 }: WorkspacePanelProps) {
   const dragDropContext = useContext(DragContext);
-  function onDrop(item: unknown) {
-    if (!activeDatasourceId) {
+
+  const suggestionForDraggedField = useMemo(() => {
+    if (!dragDropContext.dragging || !activeDatasourceId) {
       return;
     }
     const datasourceSuggestions = datasourceMap[
       activeDatasourceId
-    ].getDatasourceSuggestionsForField(datasourceStates[activeDatasourceId].state, item);
+    ].getDatasourceSuggestionsForField(
+      datasourceStates[activeDatasourceId].state,
+      dragDropContext.dragging
+    );
+
+    const hasData = Object.values(framePublicAPI.datasourceLayers).some(
+      datasource => datasource.getTableSpec().length > 0
+    );
 
     const suggestions = getSuggestions(
       datasourceSuggestions,
-      visualizationMap,
+      hasData && activeVisualizationId
+        ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
+        : visualizationMap,
       activeVisualizationId,
       visualizationState
     );
 
-    if (suggestions.length === 0) {
-      // TODO specify and implement behavior in case of no valid suggestions
-      return;
+    return suggestions[0];
+  }, [dragDropContext.dragging]);
+
+  function onDrop() {
+    if (suggestionForDraggedField) {
+      dispatch(toSwitchAction(suggestionForDraggedField));
     }
-
-    const suggestion = suggestions[0];
-
-    // TODO heuristically present the suggestions in a modal instead of just picking the first one
-    dispatch(toSwitchAction(suggestion));
   }
 
   function renderEmptyWorkspace() {
@@ -158,7 +166,7 @@ export function InnerWorkspacePanel({
   }
 
   return (
-    <DragDrop draggable={false} droppable={Boolean(dragDropContext.dragging)} onDrop={onDrop}>
+    <DragDrop draggable={false} droppable={Boolean(suggestionForDraggedField)} onDrop={onDrop}>
       {renderVisualization()}
     </DragDrop>
   );

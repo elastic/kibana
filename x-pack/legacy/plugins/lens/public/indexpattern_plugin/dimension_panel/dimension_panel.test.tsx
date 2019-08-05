@@ -8,7 +8,6 @@ import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox, EuiSideNav, EuiPopover } from '@elastic/eui';
-import { data } from '../../../../../../../src/legacy/core_plugins/data/public/setup';
 import { localStorage } from 'ui/storage/storage_service';
 import { IndexPatternPrivateState } from '../indexpattern';
 import { changeColumn } from '../state_helpers';
@@ -16,6 +15,7 @@ import { IndexPatternDimensionPanel, IndexPatternDimensionPanelProps } from './d
 import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
+import { DataPluginDependencies } from '..';
 
 jest.mock('../loader');
 jest.mock('../state_helpers');
@@ -96,7 +96,6 @@ describe('IndexPatternDimensionPanel', () => {
                 interval: '1d',
               },
               sourceField: 'timestamp',
-              indexPatternId: '1',
             },
           },
         },
@@ -114,8 +113,8 @@ describe('IndexPatternDimensionPanel', () => {
       columnId: 'col1',
       layerId: 'first',
       filterOperations: () => true,
-      dataPlugin: data,
       storage: localStorage,
+      dataPluginDependencies: (undefined as unknown) as DataPluginDependencies,
     };
 
     jest.clearAllMocks();
@@ -207,7 +206,6 @@ describe('IndexPatternDimensionPanel', () => {
                   // Private
                   operationType: 'max',
                   sourceField: 'bytes',
-                  indexPatternId: '1',
                 },
               },
             },
@@ -249,7 +247,6 @@ describe('IndexPatternDimensionPanel', () => {
                   // Private
                   operationType: 'max',
                   sourceField: 'bytes',
-                  indexPatternId: '1',
                 },
               },
             },
@@ -288,7 +285,6 @@ describe('IndexPatternDimensionPanel', () => {
               // Private
               operationType: 'max',
               sourceField: 'bytes',
-              indexPatternId: '1',
             },
           },
         },
@@ -373,7 +369,6 @@ describe('IndexPatternDimensionPanel', () => {
                   // Private
                   operationType: 'max',
                   sourceField: 'bytes',
-                  indexPatternId: '1',
                 },
               },
             },
@@ -713,7 +708,6 @@ describe('IndexPatternDimensionPanel', () => {
               // Private
               operationType: 'max',
               sourceField: 'bytes',
-              indexPatternId: '1',
             },
           },
         },
@@ -819,7 +813,6 @@ describe('IndexPatternDimensionPanel', () => {
                   interval: '1d',
                 },
                 sourceField: 'timestamp',
-                indexPatternId: 'foo',
               },
             },
           },

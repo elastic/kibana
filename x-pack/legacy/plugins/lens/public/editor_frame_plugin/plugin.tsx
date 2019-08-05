@@ -14,11 +14,8 @@ import {
   EmbeddablePlugin,
   embeddablePlugin,
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public';
-import {
-  DataSetup,
-  ExpressionRenderer,
-} from '../../../../../../src/legacy/core_plugins/data/public';
-import { data } from '../../../../../../src/legacy/core_plugins/data/public/setup';
+import { ExpressionRenderer } from '../../../../../../src/legacy/core_plugins/data/public';
+import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
 import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
@@ -27,7 +24,7 @@ import { mergeTables } from './merge_tables';
 import { EmbeddableFactory } from './embeddable/embeddable_factory';
 
 export interface EditorFrameSetupPlugins {
-  data: DataSetup;
+  data: typeof data;
   chrome: Chrome;
   embeddables: EmbeddablePlugin;
   interpreter: InterpreterSetup;
@@ -89,7 +86,11 @@ export class EditorFramePlugin {
 
     this.ExpressionRenderer = plugins.data.expressions.ExpressionRenderer;
     plugins.embeddables.addEmbeddableFactory(
-      new EmbeddableFactory(plugins.chrome, this.ExpressionRenderer, plugins.data.indexPatterns)
+      new EmbeddableFactory(
+        plugins.chrome,
+        this.ExpressionRenderer,
+        plugins.data.indexPatterns.indexPatterns
+      )
     );
 
     return {

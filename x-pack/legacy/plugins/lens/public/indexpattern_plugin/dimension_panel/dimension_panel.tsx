@@ -9,7 +9,6 @@ import React, { memo, useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
-import { DataSetup } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { DatasourceDimensionPanelProps } from '../../types';
 import {
   IndexPatternColumn,
@@ -23,12 +22,13 @@ import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
 import { isDraggedField } from '../utils';
+import { DataPluginDependencies } from '..';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
   setState: (newState: IndexPatternPrivateState) => void;
   dragDropContext: DragContextState;
-  dataPlugin: DataSetup;
+  dataPluginDependencies: DataPluginDependencies;
   storage: Storage;
   layerId: string;
 };

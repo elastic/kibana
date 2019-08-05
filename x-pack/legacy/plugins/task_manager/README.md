@@ -80,7 +80,7 @@ taskManager.registerTaskDefinitions({
     numWorkers: 2,
 
     // The createTaskRunner function / method returns an object that is responsible for
-    // performing the work of the task. context: { taskInstance, kbnServer }, is documented below.
+    // performing the work of the task. context: { taskInstance }, is documented below.
     createTaskRunner(context) {
       return {
         // Perform the work of the task. The return value should fit the TaskResult interface, documented
@@ -106,9 +106,6 @@ When Kibana attempts to claim and run a task instance, it looks its definition u
 
 ```js
 {
-  // An instance of the Kibana server object.
-  kbnServer,
-
   // The data associated with this instance of the task, with two properties being most notable:
   //
   // params:

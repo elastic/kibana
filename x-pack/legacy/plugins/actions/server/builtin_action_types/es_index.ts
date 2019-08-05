@@ -11,8 +11,6 @@ import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from 
 
 // config definition
 
-const unencryptedConfigProperties: string[] = ['index'];
-
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 const ConfigSchema = schema.object({
@@ -38,7 +36,6 @@ const ParamsSchema = schema.object({
 export const actionType: ActionType = {
   id: '.index',
   name: 'index',
-  unencryptedAttributes: unencryptedConfigProperties,
   validate: {
     config: ConfigSchema,
     params: ParamsSchema,

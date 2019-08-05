@@ -27,7 +27,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       },
     ];
   },
-  buildColumn({ suggestedPriority, indexPatternId }) {
+  buildColumn({ suggestedPriority }) {
     return {
       label: i18n.translate('xpack.lens.indexPattern.filterRatio', {
         defaultMessage: 'Filter Ratio',
@@ -36,7 +36,6 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       operationType: 'filter_ratio',
       suggestedPriority,
       isBucketed: false,
-      indexPatternId,
       params: {
         numerator: { language: 'kuery', query: '' },
         denominator: { language: 'kuery', query: '' },
@@ -61,10 +60,17 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       ],
     },
   }),
-  paramEditor: ({ state, setState, columnId: currentColumnId, dataPlugin, storage, layerId }) => {
+  paramEditor: ({
+    state,
+    setState,
+    columnId: currentColumnId,
+    dataPluginDependencies: pluginDependencies,
+    storage,
+    layerId,
+  }) => {
     const [hasDenominator, setDenominator] = useState(false);
 
-    const { QueryBarInput } = dataPlugin!.query.ui;
+    const { QueryBarInput } = pluginDependencies.components;
 
     return (
       <div>

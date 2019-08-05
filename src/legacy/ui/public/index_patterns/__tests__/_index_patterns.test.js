@@ -36,13 +36,6 @@ jest.mock('../../notify', () => ({
   }
 }));
 
-
-jest.mock('../_get', () => ({
-  indexPatternsGetProvider: jest.fn().mockImplementation(() => {
-    return () => {};
-  })
-}));
-
 jest.mock('../_index_pattern', () => {
   class IndexPattern {
     init = async () => {

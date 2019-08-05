@@ -20,7 +20,7 @@ import { Query } from '../../../../../../src/legacy/core_plugins/data/public/que
 import { getIndexPatterns } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
-import { IndexPatternDatasourcePluginPlugins } from './plugin';
+import { IndexPatternDatasourcePluginPlugins, DataPluginDependencies } from './plugin';
 import { IndexPatternDataPanel } from './datapanel';
 import {
   getDatasourceSuggestionsForField,
@@ -50,7 +50,6 @@ export interface BaseIndexPatternColumn {
   // Private
   operationType: OperationType;
   suggestedPriority?: DimensionPriority;
-  indexPatternId: string;
 }
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
@@ -202,7 +201,7 @@ export function getIndexPatternDatasource({
   toastNotifications,
   data,
   storage,
-}: IndexPatternDatasourcePluginPlugins) {
+}: Omit<IndexPatternDatasourcePluginPlugins, 'data'> & { data: DataPluginDependencies }) {
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
     async initialize(state?: IndexPatternPersistedState) {
@@ -303,7 +302,7 @@ export function getIndexPatternDatasource({
               <IndexPatternDimensionPanel
                 state={state}
                 setState={newState => setState(newState)}
-                dataPlugin={data}
+                dataPluginDependencies={data}
                 storage={storage}
                 layerId={props.layerId}
                 {...props}
