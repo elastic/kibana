@@ -7,9 +7,9 @@
 import * as rt from 'io-ts';
 
 export const metricStatisticsRT = rt.type({
-  avg: rt.number,
+  avg: rt.union([rt.number, rt.null]),
   count: rt.number,
-  max: rt.number,
-  min: rt.number,
+  max: rt.union([rt.number, rt.null]),
+  min: rt.union([rt.number, rt.null]),
   sum: rt.number,
 });
