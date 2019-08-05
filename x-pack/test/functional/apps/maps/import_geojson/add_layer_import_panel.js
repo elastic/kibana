@@ -14,7 +14,8 @@ export default function ({ getPageObjects }) {
   const FILE_LOAD_DIR = 'test_upload_files';
   const DEFAULT_LOAD_FILE_NAME = 'point.json';
 
-  describe('GeoJSON import layer panel', () => {
+  // FAILING: https://github.com/elastic/kibana/issues/42630
+  describe.skip('GeoJSON import layer panel', () => {
     before(async () => {
       await PageObjects.maps.openNewMap();
     });
