@@ -102,7 +102,11 @@ describe('waterfall_helpers', () => {
         myTransactionId2: 3
       };
       const waterfall = getWaterfall(
-        { root, trace: hits, errorsPerTransaction },
+        {
+          root,
+          trace: { items: hits, exceedsMax: false },
+          errorsPerTransaction
+        },
         entryTransactionId
       );
       expect(waterfall.orderedItems.length).toBe(6);
@@ -117,7 +121,11 @@ describe('waterfall_helpers', () => {
         myTransactionId2: 3
       };
       const waterfall = getWaterfall(
-        { root, trace: hits, errorsPerTransaction },
+        {
+          root,
+          trace: { items: hits, exceedsMax: false },
+          errorsPerTransaction
+        },
         entryTransactionId
       );
       expect(waterfall.orderedItems.length).toBe(4);
@@ -132,7 +140,11 @@ describe('waterfall_helpers', () => {
         myTransactionId2: 3
       };
       const waterfall = getWaterfall(
-        { root, trace: hits, errorsPerTransaction },
+        {
+          root,
+          trace: { items: hits, exceedsMax: false },
+          errorsPerTransaction
+        },
         entryTransactionId
       );
       const transaction = waterfall.getTransactionById('myTransactionId2');

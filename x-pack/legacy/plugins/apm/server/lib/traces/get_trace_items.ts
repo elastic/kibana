@@ -8,12 +8,16 @@ import { SearchParams } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
-  PARENT_ID
+  PARENT_ID,
+  TRANSACTION_DURATION,
+  SPAN_DURATION
 } from '../../../common/elasticsearch_fieldnames';
 import { Span } from '../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
+
+const MAX_ITEMS_RETURNED = 1000;
 
 export async function getTraceItems(traceId: string, setup: Setup) {
   const { start, end, client, config } = setup;
@@ -24,7 +28,7 @@ export async function getTraceItems(traceId: string, setup: Setup) {
       config.get('apm_oss.transactionIndices')
     ],
     body: {
-      size: 1000,
+      size: MAX_ITEMS_RETURNED,
       query: {
         bool: {
           filter: [
@@ -36,11 +40,20 @@ export async function getTraceItems(traceId: string, setup: Setup) {
             exists: { field: PARENT_ID }
           }
         }
-      }
+      },
+      sort: [
+        { _score: { order: 'desc' } },
+        { [TRANSACTION_DURATION]: { order: 'desc' } },
+        { [SPAN_DURATION]: { order: 'desc' } }
+      ]
     }
   };
 
   const resp = await client.search<Transaction | Span>(params);
 
-  return resp.hits.hits.map(hit => hit._source);
+  // return resp.hits.hits.map(hit => hit._source);
+  return {
+    items: resp.hits.hits.map(hit => hit._source),
+    exceedsMax: resp.hits.total > MAX_ITEMS_RETURNED
+  };
 }

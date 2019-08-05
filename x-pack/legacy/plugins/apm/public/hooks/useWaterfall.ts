@@ -10,7 +10,11 @@ import { loadTrace } from '../services/rest/apm/traces';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 
-const INITIAL_DATA = { root: undefined, trace: [], errorsPerTransaction: {} };
+const INITIAL_DATA = {
+  root: undefined,
+  trace: { items: [], exceedsMax: false },
+  errorsPerTransaction: {}
+};
 
 export function useWaterfall(urlParams: IUrlParams) {
   const { traceId, start, end, transactionId } = urlParams;
@@ -25,5 +29,5 @@ export function useWaterfall(urlParams: IUrlParams) {
     transactionId
   ]);
 
-  return { data: waterfall, status, error };
+  return { data: waterfall, status, error, exceedsMax: data.trace.exceedsMax };
 }
