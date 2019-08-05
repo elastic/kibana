@@ -75,7 +75,6 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   buildColumn: (arg: {
     suggestedPriority: DimensionPriority | undefined;
     layerId: string;
-    indexPatternId: string;
     columns: Partial<Record<string, IndexPatternColumn>>;
     field?: IndexPatternField;
   }) => C;
@@ -189,6 +188,5 @@ export function buildColumn({
     suggestedPriority,
     field,
     layerId,
-    indexPatternId: indexPattern.id,
   });
 }

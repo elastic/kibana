@@ -96,7 +96,6 @@ describe('IndexPatternDimensionPanel', () => {
                 interval: '1d',
               },
               sourceField: 'timestamp',
-              indexPatternId: '1',
             },
           },
         },
@@ -207,7 +206,6 @@ describe('IndexPatternDimensionPanel', () => {
                   // Private
                   operationType: 'max',
                   sourceField: 'bytes',
-                  indexPatternId: '1',
                 },
               },
             },
@@ -249,7 +247,6 @@ describe('IndexPatternDimensionPanel', () => {
                   // Private
                   operationType: 'max',
                   sourceField: 'bytes',
-                  indexPatternId: '1',
                 },
               },
             },
@@ -288,7 +285,6 @@ describe('IndexPatternDimensionPanel', () => {
               // Private
               operationType: 'max',
               sourceField: 'bytes',
-              indexPatternId: '1',
             },
           },
         },
@@ -373,7 +369,6 @@ describe('IndexPatternDimensionPanel', () => {
                   // Private
                   operationType: 'max',
                   sourceField: 'bytes',
-                  indexPatternId: '1',
                 },
               },
             },
@@ -713,7 +708,6 @@ describe('IndexPatternDimensionPanel', () => {
               // Private
               operationType: 'max',
               sourceField: 'bytes',
-              indexPatternId: '1',
             },
           },
         },
@@ -819,7 +813,6 @@ describe('IndexPatternDimensionPanel', () => {
                   interval: '1d',
                 },
                 sourceField: 'timestamp',
-                indexPatternId: 'foo',
               },
             },
           },
