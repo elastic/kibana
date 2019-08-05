@@ -17,13 +17,15 @@
  * under the License.
  */
 
+import { createMetricVisFn } from './metric_vis_fn';
+
+// @ts-ignore
 import { functionWrapper } from '../../interpreter/test_helpers';
-import { metric } from './metric_vis_fn';
 
 jest.mock('ui/new_platform');
 
 describe('interpreter/functions#metric', () => {
-  const fn = functionWrapper(metric);
+  const fn = functionWrapper(createMetricVisFn);
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],
@@ -38,7 +40,7 @@ describe('interpreter/functions#metric', () => {
       {
         from: 0,
         to: 10000,
-      }
+      },
     ],
     labels: {
       show: true,
@@ -56,16 +58,17 @@ describe('interpreter/functions#metric', () => {
       {
         accessor: 0,
         format: {
-          id: 'number'
+          id: 'number',
         },
         params: {},
         aggType: 'count',
-      }
-    ]
+      },
+    ],
   };
 
   it('returns an object with the correct structure', () => {
     const actual = fn(context, args);
+
     expect(actual).toMatchSnapshot();
   });
 });

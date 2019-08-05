@@ -17,30 +17,25 @@
  * under the License.
  */
 
-import './metric_vis_params';
 import { i18n } from '@kbn/i18n';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+
+// @ts-ignore
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+// @ts-ignore
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-import { MetricVisComponent } from './metric_vis_controller';
-// we need to load the css ourselves
+// @ts-ignore
+import { MetricVisComponent } from './components/metric_vis_controller';
 
-// we also need to load the controller and used by the template
+import { visFactory } from '../../visualizations/public';
 
-// register the provider with the visTypes registry
-VisTypesRegistryProvider.register(MetricVisProvider);
-
-function MetricVisProvider(Private) {
-  const VisFactory = Private(VisFactoryProvider);
-
-  // return the visType object, which kibana will use to display and configure new
-  // Vis object of this type.
-  return VisFactory.createReactVisualization({
+export const createMetricVisTypeDefinition = () => {
+  return visFactory.createReactVisualization({
     name: 'metric',
     title: i18n.translate('metricVis.metricTitle', { defaultMessage: 'Metric' }),
     icon: 'visMetric',
-    description: i18n.translate('metricVis.metricDescription', { defaultMessage: 'Display a calculation as a single number' }),
+    description: i18n.translate('metricVis.metricDescription', {
+      defaultMessage: 'Display a calculation as a single number',
+    }),
     visConfig: {
       component: MetricVisComponent,
       defaults: {
@@ -52,11 +47,9 @@ function MetricVisProvider(Private) {
           useRanges: false,
           colorSchema: 'Green to Red',
           metricColorMode: 'None',
-          colorsRange: [
-            { from: 0, to: 10000 }
-          ],
+          colorsRange: [{ from: 0, to: 10000 }],
           labels: {
-            show: true
+            show: true,
           },
           invertColors: false,
           style: {
@@ -65,27 +58,36 @@ function MetricVisProvider(Private) {
             labelColor: false,
             subText: '',
             fontSize: 60,
-          }
-        }
-      }
+          },
+        },
+      },
     },
     editorConfig: {
       collections: {
         metricColorMode: [
           {
             id: 'None',
-            label: i18n.translate('metricVis.colorModes.noneOptionLabel', { defaultMessage: 'None' })
+            label: i18n.translate('metricVis.colorModes.noneOptionLabel', {
+              defaultMessage: 'None',
+            }),
           },
           {
             id: 'Labels',
-            label: i18n.translate('metricVis.colorModes.labelsOptionLabel', { defaultMessage: 'Labels' })
+            label: i18n.translate('metricVis.colorModes.labelsOptionLabel', {
+              defaultMessage: 'Labels',
+            }),
           },
           {
             id: 'Background',
-            label: i18n.translate('metricVis.colorModes.backgroundOptionLabel', { defaultMessage: 'Background' })
-          }
+            label: i18n.translate('metricVis.colorModes.backgroundOptionLabel', {
+              defaultMessage: 'Background',
+            }),
+          },
         ],
-        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
+        colorSchemas: Object.values(vislibColorMaps).map((value: any) => ({
+          id: value.id,
+          label: value.label,
+        })),
       },
       optionsTemplate: '<metric-vis-params></metric-vis-params>',
       schemas: new Schemas([
@@ -95,28 +97,37 @@ function MetricVisProvider(Private) {
           title: i18n.translate('metricVis.schemas.metricTitle', { defaultMessage: 'Metric' }),
           min: 1,
           aggFilter: [
-            '!std_dev', '!geo_centroid',
-            '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum', '!geo_bounds'],
+            '!std_dev',
+            '!geo_centroid',
+            '!derivative',
+            '!serial_diff',
+            '!moving_avg',
+            '!cumulative_sum',
+            '!geo_bounds',
+          ],
           aggSettings: {
             top_hits: {
-              allowStrings: true
+              allowStrings: true,
             },
           },
           defaults: [
-            { type: 'count', schema: 'metric' }
-          ]
-        }, {
+            {
+              type: 'count',
+              schema: 'metric',
+            },
+          ],
+        },
+        {
           group: 'buckets',
           name: 'group',
-          title: i18n.translate('metricVis.schemas.splitGroupTitle', { defaultMessage: 'Split group' }),
+          title: i18n.translate('metricVis.schemas.splitGroupTitle', {
+            defaultMessage: 'Split group',
+          }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-        }
-      ])
-    }
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        },
+      ]),
+    },
   });
-}
-
-// export the provider so that the visType can be required with Private()
-export default MetricVisProvider;
+};

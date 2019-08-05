@@ -23,9 +23,11 @@ import expect from '@kbn/expect';
 
 import { VisProvider } from 'ui/vis';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import MetricVisProvider from '../metric_vis';
 
-describe('metric vis', () => {
+import { visualizations } from '../../../visualizations/public';
+import { createMetricVisTypeDefinition } from '../metric_vis_type';
+
+describe('metric_vis - createMetricVisTypeDefinition', () => {
   let setup = null;
   let vis;
 
@@ -33,7 +35,12 @@ describe('metric vis', () => {
   beforeEach(ngMock.inject((Private) => {
     setup = () => {
       const Vis = Private(VisProvider);
-      const metricVisType = Private(MetricVisProvider);
+      const metricVisType = createMetricVisTypeDefinition();
+
+      visualizations.types.VisTypesRegistryProvider.register(() =>
+        metricVisType
+      );
+
       const indexPattern = Private(LogstashIndexPatternStubProvider);
 
       indexPattern.stubSetFieldFormat('ip', 'url', {
