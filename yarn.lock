@@ -1584,10 +1584,10 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@elastic/charts@^8.1.4":
-  version "8.1.4"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-8.1.4.tgz#61e368bea6c4e562bce7683e0b3ac010bcca6b15"
-  integrity sha512-T++Z+m52vclyyPWjqbytr0CEWKcn6D8RU80K/it+Qwc2cbeg/wfirMUV6AFHj3C9E4HADZOWC4ryH2gc6n6TVg==
+"@elastic/charts@^8.1.6":
+  version "8.1.6"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-8.1.6.tgz#d8d0d2c16f21126293dd35979f6405de2ba2d95f"
+  integrity sha512-1Kd3GlIlwK39tbkgZe+Wtk4FWJjMBV5cnlClgmUfgzTUxF6we8syTLh6vqZQJ8eyGKZamfyLr23wtdt9MCx1HA==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     "@types/luxon" "^1.11.1"
