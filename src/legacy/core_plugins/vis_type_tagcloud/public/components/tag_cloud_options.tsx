@@ -31,14 +31,14 @@ function TagCloudOptions({ stateParams, setValue, vis }: VisOptionsProps) {
     setValue('minFontSize', minFontSize);
     setValue('maxFontSize', maxFontSize);
   };
-  const fontSizeRangeLabel = i18n.translate('tagCloud.visParams.fontSizeLabel', {
+  const fontSizeRangeLabel = i18n.translate('visTypeTagCloud.visParams.fontSizeLabel', {
     defaultMessage: 'Font size range in pixels',
   });
 
   return (
     <EuiPanel paddingSize="s">
       <SelectOption
-        label={i18n.translate('tagCloud.visParams.textScaleLabel', {
+        label={i18n.translate('visTypeTagCloud.visParams.textScaleLabel', {
           defaultMessage: 'Text scale',
         })}
         options={vis.type.editorConfig.collections.scales}
@@ -48,7 +48,7 @@ function TagCloudOptions({ stateParams, setValue, vis }: VisOptionsProps) {
       />
 
       <SelectOption
-        label={i18n.translate('tagCloud.visParams.orientationsLabel', {
+        label={i18n.translate('visTypeTagCloud.visParams.orientationsLabel', {
           defaultMessage: 'Orientations',
         })}
         options={vis.type.editorConfig.collections.orientations}
@@ -71,7 +71,7 @@ function TagCloudOptions({ stateParams, setValue, vis }: VisOptionsProps) {
       />
 
       <SwitchOption
-        label={i18n.translate('tagCloud.visParams.showLabelToggleLabel', {
+        label={i18n.translate('visTypeTagCloud.visParams.showLabelToggleLabel', {
           defaultMessage: 'Show label',
         })}
         paramName="showLabel"

@@ -22,7 +22,7 @@
     "statusPage": "src/legacy/core_plugins/status_page",
     "tileMap": "src/legacy/core_plugins/tile_map",
     "timelion": "src/legacy/core_plugins/timelion",
-    "tagCloud": "src/legacy/core_plugins/tagcloud",
+    "visTypeTagCloud": "src/legacy/core_plugins/vis_type_tagcloud",
     "tsvb": "src/legacy/core_plugins/metrics",
     "kbnESQuery": "packages/kbn-es-query",
     "inspector": "src/plugins/inspector"

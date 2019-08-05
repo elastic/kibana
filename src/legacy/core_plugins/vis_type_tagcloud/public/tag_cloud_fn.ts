@@ -57,7 +57,7 @@ export const createTagCloudFn = (): ExpressionFunction<
   context: {
     types: ['kibana_datatable'],
   },
-  help: i18n.translate('tagCloud.function.help', {
+  help: i18n.translate('visTypeTagCloud.function.help', {
     defaultMessage: 'Tagcloud visualization',
   }),
   args: {
@@ -65,7 +65,7 @@ export const createTagCloudFn = (): ExpressionFunction<
       types: ['string'],
       default: 'linear',
       options: ['linear', 'log', 'square root'],
-      help: i18n.translate('tagCloud.function.scale.help', {
+      help: i18n.translate('visTypeTagCloud.function.scale.help', {
         defaultMessage: 'Scale to determine font size of a word',
       }),
     },
@@ -73,7 +73,7 @@ export const createTagCloudFn = (): ExpressionFunction<
       types: ['string'],
       default: 'single',
       options: ['single', 'right angled', 'multiple'],
-      help: i18n.translate('tagCloud.function.orientation.help', {
+      help: i18n.translate('visTypeTagCloud.function.orientation.help', {
         defaultMessage: 'Orientation of words inside tagcloud',
       }),
     },
@@ -94,19 +94,19 @@ export const createTagCloudFn = (): ExpressionFunction<
     },
     metric: {
       types: ['vis_dimension'],
-      help: i18n.translate('tagCloud.function.metric.help', {
+      help: i18n.translate('visTypeTagCloud.function.metric.help', {
         defaultMessage: 'metric dimension configuration',
       }),
       required: true,
     },
     bucket: {
       types: ['vis_dimension'],
-      help: i18n.translate('tagCloud.function.bucket.help', {
+      help: i18n.translate('visTypeTagCloud.function.bucket.help', {
         defaultMessage: 'bucket dimension configuration',
       }),
     },
   },
-  fn(context: Context, args: Arguments) {
+  fn(context, args) {
     const visConfig = {
       scale: args.scale,
       orientation: args.orientation,
