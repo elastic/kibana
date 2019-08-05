@@ -28,7 +28,7 @@ export function clustersRoute(server) {
             min: Joi.date().required(),
             max: Joi.date().required()
           }).required(),
-          codePaths: Joi.array().items(Joi.string()).required()
+          codePaths: Joi.array().items(Joi.string().required()).required()
         })
       }
     },

@@ -173,7 +173,13 @@ export const APM_CUSTOM_ID = 'apm';
  */
 export const INFRA_SOURCE_ID = 'internal-stack-monitoring';
 
-/* TODO */
+/*
+* These constants represent code paths within `getClustersFromRequest`
+* that an api call wants to invoke. This is meant as an optimization to
+* avoid unnecessary ES queries (looking at you logstash) when the data
+* is not used. In the long term, it'd be nice to have separate api calls
+* instead of this path logic.
+*/
 export const CODE_PATH_ALL = 'all';
 export const CODE_PATH_ALERTS = 'alerts';
 export const CODE_PATH_KIBANA = 'kibana';

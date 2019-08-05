@@ -89,7 +89,7 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
     // add ml jobs and alerts data
     const mlJobs = isInCodePath(codePaths, [CODE_PATH_ML])
       ? await getMlJobsForCluster(req, esIndexPattern, cluster)
-      : [];
+      : null;
     if (mlJobs !== null) {
       cluster.ml = { jobs: mlJobs };
     }
@@ -99,7 +99,7 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
         end,
         size: CLUSTER_ALERTS_SEARCH_SIZE
       })
-      : [];
+      : null;
     if (alerts) {
       cluster.alerts = alerts;
     }
