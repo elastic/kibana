@@ -12,8 +12,11 @@ import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { toastNotifications } from 'ui/notify';
 import { Chrome } from 'ui/chrome';
+import {
+  Query,
+  QueryBar as QueryBarType,
+} from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { Document, SavedObjectStore } from '../persistence';
-import { QuerySetup, Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 
@@ -43,7 +46,7 @@ export function App({
   store: Storage;
   docId?: string;
   docStorage: SavedObjectStore;
-  QueryBar: QuerySetup['ui']['QueryBar'];
+  QueryBar: typeof QueryBarType;
   redirectTo: (id?: string) => void;
 }) {
   const uiSettings = chrome.getUiSettingsClient();

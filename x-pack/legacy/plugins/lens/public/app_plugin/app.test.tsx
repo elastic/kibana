@@ -11,7 +11,7 @@ import { EditorFrameInstance } from '../types';
 import { Chrome } from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { Storage } from 'ui/storage';
-import { QuerySetup } from '../../../../../../src/legacy/core_plugins/data/public/query';
+import { QueryBar as QueryBarType } from 'src/legacy/core_plugins/data/public/query';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
 
@@ -33,7 +33,7 @@ function makeDefaultArgs(): jest.Mocked<{
   store: Storage;
   docId?: string;
   docStorage: SavedObjectStore;
-  QueryBar: QuerySetup['ui']['QueryBar'];
+  QueryBar: typeof QueryBarType;
   redirectTo: (id?: string) => void;
 }> {
   return ({
@@ -66,7 +66,7 @@ function makeDefaultArgs(): jest.Mocked<{
     store: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
-    QueryBar: QuerySetup['ui']['QueryBar'];
+    QueryBar: typeof QueryBarType;
     redirectTo: (id?: string) => void;
   }>;
 }

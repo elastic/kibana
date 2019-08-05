@@ -316,8 +316,9 @@ describe('workspace_panel', () => {
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
 
-    framePublicAPI.dateRange = { fromDate: 'now-90d', toDate: 'now-30d' };
-    instance.setProps({ visualizationState: {} });
+    instance.setProps({
+      framePublicAPI: { ...framePublicAPI, dateRange: { fromDate: 'now-90d', toDate: 'now-30d' } },
+    });
 
     await waitForPromises();
     instance.update();

@@ -9,7 +9,7 @@ import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
 import chrome, { Chrome } from 'ui/chrome';
 import { localStorage } from 'ui/storage/storage_service';
-import { data as dataSetup } from '../../../../../../src/legacy/core_plugins/data/public/setup';
+import { QueryBar } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { editorFrameSetup, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
 import { SavedObjectIndexStore } from '../persistence';
@@ -48,7 +48,7 @@ export class AppPlugin {
       return (
         <App
           editorFrame={this.instance!}
-          QueryBar={dataSetup.query.ui.QueryBar}
+          QueryBar={QueryBar}
           chrome={chrome}
           store={localStorage}
           docId={routeProps.match.params.id}
