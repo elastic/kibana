@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import { Vis, VisParams } from 'ui/vis';
+export interface TmsLayer {
+  id: string;
+  origin: string;
+  minZoom: string;
+  maxZoom: number;
+  attribution: string;
+}
 
-export type VisOptionsSetValue = (paramName: string, value: unknown) => void;
-
-export interface VisOptionsProps {
-  stateParams: VisParams;
-  vis: Vis;
-  setValue: VisOptionsSetValue;
+export interface ServiceSettings {
+  getTMSServices(): Promise<TmsLayer[]>;
 }

@@ -21,14 +21,14 @@ import React, { useEffect } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { VisOptionsProps } from 'ui/vis/editors/default';
+import { ExtendedVisOptionsProps } from '../../../kbn_vislib_vis_types/public/utils/with_injected_dependencies';
 import { SelectOption } from '../../../kbn_vislib_vis_types/public/controls/select';
 import { RangeOption } from '../../../kbn_vislib_vis_types/public/controls/range';
 import { BasicOptions } from '../../../kbn_vislib_vis_types/public/controls/basic_options';
 import { SwitchOption } from '../../../kbn_vislib_vis_types/public/controls/switch';
 import { WmsOptions } from './wms_options';
 
-function TileMapOptions(props: VisOptionsProps) {
+function TileMapOptions(props: ExtendedVisOptionsProps) {
   const { stateParams, setValue, vis } = props;
 
   useEffect(() => {

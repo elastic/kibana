@@ -2786,8 +2786,6 @@
     "tileMap.wmsOptions.useWMSCompliantMapTileServerTip": "WMS 対応のマップタイルサーバーを使用します。上級者向けです。",
     "tileMap.wmsOptions.versionOfWMSserverSupportsTip": "サーバーがサポートする WMS のバージョンです",
     "tileMap.wmsOptions.wmsAttributionLabel": "WMS 属性",
-    "tileMap.wmsOptions.wmsDescription": "WMS は、マップイメージサービスの OGC 基準です。詳細は {wmsLink} をご覧ください。",
-    "tileMap.wmsOptions.wmsLinkText": "こちら",
     "tileMap.wmsOptions.wmsMapServerLabel": "WMS マップサーバー",
     "tileMap.wmsOptions.wmsServerSupportedStylesListTip": "WMS サーバーがサポートしている使用スタイルのコンマ区切りのリストです。大抵は空白のままです。",
     "timelion.badge.readOnly.text": "読み込み専用",

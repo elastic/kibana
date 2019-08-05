@@ -22,15 +22,8 @@ import { EuiLink, EuiSpacer, EuiText, EuiScreenReaderOnly } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsSetValue } from 'ui/vis/editors/default';
+import { TmsLayer } from 'ui/vis/map/service_settings';
 import { TextInputOption } from '../../../kbn_vislib_vis_types/public/controls/text_input';
-
-export interface TmsLayer {
-  id: string;
-  origin: string;
-  minZoom: string;
-  maxZoom: number;
-  attribution: string;
-}
 
 interface WmsOptions {
   enabled: boolean;
@@ -53,7 +46,7 @@ interface WmsInternalOptions {
 function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
   const wmsLink = (
     <EuiLink href="http://www.opengeospatial.org/standards/wms" target="_blank">
-      <FormattedMessage id="tileMap.wmsOptions.wmsLinkText" defaultMessage="here" />
+      <FormattedMessage id="tileMap.wmsOptions.wmsLinkText" defaultMessage="OGC standard" />
     </EuiLink>
   );
   const footnoteText = (
@@ -83,7 +76,7 @@ function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
       <EuiText size="xs">
         <FormattedMessage
           id="tileMap.wmsOptions.wmsDescription"
-          defaultMessage="WMS is an OGC standard for map image services. For more information, go {wmsLink}."
+          defaultMessage="WMS is an {wmsLink} for map image services."
           values={{ wmsLink }}
         />
       </EuiText>
@@ -100,7 +93,7 @@ function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
           <>
             <FormattedMessage
               id="tileMap.wmsOptions.urlOfWMSWebServiceTip"
-              defaultMessage="The URL of the WMS web service"
+              defaultMessage="The URL of the WMS web service."
             />
             {footnote}
           </>
@@ -121,7 +114,7 @@ function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
           <>
             <FormattedMessage
               id="tileMap.wmsOptions.listOfLayersToUseTip"
-              defaultMessage="A comma separated list of layers to use"
+              defaultMessage="A comma separated list of layers to use."
             />
             {footnote}
           </>
@@ -145,7 +138,7 @@ function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
           <>
             <FormattedMessage
               id="tileMap.wmsOptions.versionOfWMSserverSupportsTip"
-              defaultMessage="The version of WMS the server supports"
+              defaultMessage="The version of WMS the server supports."
             />
             {footnote}
           </>
@@ -186,7 +179,7 @@ function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
         helpText={
           <FormattedMessage
             id="tileMap.wmsOptions.attributionStringTip"
-            defaultMessage="Attribution string for the lower right corner"
+            defaultMessage="Attribution string for the lower right corner."
           />
         }
         paramName="attribution"
