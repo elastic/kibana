@@ -15,19 +15,19 @@ import {
 
 export const awsLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
-    id: 'awsOverview',
+    id: 'aws',
     label: 'AWS',
-    requires: ['system'],
+    requires: ['aws'],
     sections: [
       {
-        id: InfraMetric.hostAwsCpu,
+        id: InfraMetric.awsCpuUtilization,
         label: i18n.translate(
           'xpack.infra.metricDetailPage.awsMetricsLayout.cpuUtilSection.sectionLabel',
           {
             defaultMessage: 'CPU Utilization',
           }
         ),
-        requires: ['system.cpu'],
+        requires: ['aws.ec2'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           type: InfraMetricLayoutVisualizationType.area,
