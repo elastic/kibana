@@ -314,30 +314,28 @@ app.controller('graphuiPlugin', function (
   };
 
   $scope.clickVertexFieldIcon = function (field, $event) {
-    $scope.$evalAsync(() => {
-      // Shift click is a fast way to toggle if the field is active or not.
-      if ($event && field) {
-        if ($event.shiftKey) {
-          if (field.hopSize === 0) {
-            field.hopSize = field.lastValidHopSize ? field.lastValidHopSize : 5;
-          }else {
-            field.lastValidHopSize = field.hopSize;
-            field.hopSize = 0;
-          }
-          $scope.updateLiveResponseFields();
-          return;
+    // Shift click is a fast way to toggle if the field is active or not.
+    if ($event && field) {
+      if ($event.shiftKey) {
+        if (field.hopSize === 0) {
+          field.hopSize = field.lastValidHopSize ? field.lastValidHopSize : 5;
+        }else {
+          field.lastValidHopSize = field.hopSize;
+          field.hopSize = 0;
         }
-      }
-
-      // Check if user is toggling off an already-open config panel for the current field
-      if ($scope.currentlyDisplayedKey === 'fieldConfig' && field === $scope.selectedFieldConfig) {
-        $scope.hideAllConfigPanels();
+        $scope.updateLiveResponseFields();
         return;
       }
+    }
+
+    // Check if user is toggling off an already-open config panel for the current field
+    if ($scope.currentlyDisplayedKey === 'fieldConfig' && field === $scope.selectedFieldConfig) {
       $scope.hideAllConfigPanels();
-      $scope.selectedFieldConfig = field;
-      $scope.currentlyDisplayedKey = 'fieldConfig';
-    });
+      return;
+    }
+    $scope.hideAllConfigPanels();
+    $scope.selectedFieldConfig = field;
+    $scope.currentlyDisplayedKey = 'fieldConfig';
   };
 
   function canWipeWorkspace(yesFn, noFn) {
@@ -504,22 +502,20 @@ app.controller('graphuiPlugin', function (
   };
 
   $scope.toggleShowAdvancedFieldsConfig = function () {
-    $scope.$evalAsync(() => {
-      if ($scope.currentlyDisplayedKey !== 'fields') {
-        $scope.closeMenus();
-        $scope.currentlyDisplayedKey = 'fields';
-        //Default the selected field
-        $scope.selectedField = null;
-        $scope.filteredFields = $scope.allFields.filter(function (fieldDef) {
-          return !fieldDef.selected;
-        });
-        if ($scope.filteredFields.length > 0) {
-          $scope.selectedField = $scope.filteredFields[0];
-        }
-      } else {
-        $scope.hideAllConfigPanels();
+    if ($scope.currentlyDisplayedKey !== 'fields') {
+      $scope.closeMenus();
+      $scope.currentlyDisplayedKey = 'fields';
+      //Default the selected field
+      $scope.selectedField = null;
+      $scope.filteredFields = $scope.allFields.filter(function (fieldDef) {
+        return !fieldDef.selected;
+      });
+      if ($scope.filteredFields.length > 0) {
+        $scope.selectedField = $scope.filteredFields[0];
       }
-    });
+    } else {
+      $scope.hideAllConfigPanels();
+    }
   };
 
   $scope.removeVertexFieldSelection = function () {
