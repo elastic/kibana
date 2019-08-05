@@ -4,7 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiTitle, EuiLink } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiTitle,
+  EuiLink,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiPageContentBody,
+  EuiProgress,
+  EuiButtonGroupOption,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -47,6 +61,7 @@ import { TopBar } from './top_bar';
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   isNotFound: boolean;
+  fileLoading: boolean;
   repoStatus?: RepoStatus;
   tree: FileTree;
   file: FetchFileResponse | undefined;
@@ -72,7 +87,34 @@ enum ButtonOption {
   Folder = 'Directory',
 }
 
-class CodeContent extends React.PureComponent<Props> {
+interface State {
+  fileLoading: boolean;
+}
+
+class CodeContent extends React.PureComponent<Props, State> {
+  static getDerivedStateFromProps(props: Props, state: State) {
+    if (!props.fileLoading) {
+      return { fileLoading: props.fileLoading };
+    }
+  }
+  state = {
+    fileLoading: this.props.fileLoading,
+  };
+
+  componentDidUpdate(prevProps: Props) {
+    // after this amount of time, show file loading indicator if necessary
+    const TIME_DELAY_MS: number = 500;
+    if (!prevProps.fileLoading && this.props.fileLoading && !this.state.fileLoading) {
+      setTimeout(
+        () =>
+          this.setState({
+            fileLoading: this.props.fileLoading,
+          }),
+        TIME_DELAY_MS
+      );
+    }
+  }
+
   public findNode = (pathSegments: string[], node: FileTree): FileTree | undefined => {
     if (!node) {
       return undefined;
@@ -128,6 +170,26 @@ class CodeContent extends React.PureComponent<Props> {
     );
   };
 
+  renderFileLoadingIndicator = () => {
+    const fileName = (this.props.match.params.path || '').split('/').slice(-1)[0];
+    return (
+      <EuiPage restrictWidth>
+        <EuiPageBody>
+          <EuiPageContent verticalPosition="center" horizontalPosition="center">
+            <EuiPageContentHeader>
+              <EuiPageContentHeaderSection>
+                <h2>{fileName} is loading...</h2>
+              </EuiPageContentHeaderSection>
+            </EuiPageContentHeader>
+            <EuiPageContentBody>
+              <EuiProgress size="s" color="primary" />
+            </EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    );
+  };
+
   public renderButtons = () => {
     let buttonId: string | undefined;
     switch (this.props.match.params.pathType) {
@@ -148,14 +210,31 @@ class CodeContent extends React.PureComponent<Props> {
     }
     const currentTree = this.props.currentTree;
     if (
-      this.props.file &&
       currentTree &&
       (currentTree.type === FileTreeItemType.File || currentTree.type === FileTreeItemType.Link)
     ) {
-      const { isUnsupported, isOversize, isImage, lang } = this.props.file;
-      const isMarkdown = lang === LANG_MD;
-      const isText = !isUnsupported && !isOversize && !isImage;
+      let isText = true;
+      let isMarkdown = false;
+      let blameDisabled = false;
 
+      if (this.props.file) {
+        const { isUnsupported, isOversize, isImage, lang } = this.props.file;
+        isMarkdown = lang === LANG_MD;
+        isText = !isUnsupported && !isOversize && !isImage;
+        blameDisabled = !!(isUnsupported || isOversize || isImage);
+      }
+      const rawButtonOptions: EuiButtonGroupOption[] = [
+        {
+          id: 'Raw',
+          label: isText
+            ? i18n.translate('xpack.code.mainPage.content.buttons.rawButtonLabel', {
+                defaultMessage: 'Raw',
+              })
+            : i18n.translate('xpack.code.mainPage.content.buttons.downloadButtonLabel', {
+                defaultMessage: 'Download',
+              }),
+        },
+      ];
       const buttonOptions = [
         {
           id: ButtonOption.Code,
@@ -173,25 +252,13 @@ class CodeContent extends React.PureComponent<Props> {
           label: i18n.translate('xpack.code.mainPage.content.buttons.blameButtonLabel', {
             defaultMessage: 'Blame',
           }),
-          isDisabled: isUnsupported || isImage || isOversize,
+          isDisabled: blameDisabled,
         },
         {
           id: ButtonOption.History,
           label: i18n.translate('xpack.code.mainPage.content.buttons.historyButtonLabel', {
             defaultMessage: 'History',
           }),
-        },
-      ];
-      const rawButtonOptions = [
-        {
-          id: 'Raw',
-          label: isText
-            ? i18n.translate('xpack.code.mainPage.content.buttons.rawButtonLabel', {
-                defaultMessage: 'Raw',
-              })
-            : i18n.translate('xpack.code.mainPage.content.buttons.downloadButtonLabel', {
-                defaultMessage: 'Download',
-              }),
         },
       ];
 
@@ -341,71 +408,85 @@ class CodeContent extends React.PureComponent<Props> {
             />
           </div>
         );
-      case PathTypes.blob:
+      case PathTypes.blob: {
+        const { fileLoading } = this.state;
         if (!file) {
-          return null;
-        }
-        const {
-          lang: fileLanguage,
-          content: fileContent,
-          isUnsupported,
-          isOversize,
-          isImage,
-        } = file;
-        if (isUnsupported) {
           return (
-            <ErrorPanel
-              title={<h2>Unsupported File</h2>}
-              content="Unfortunately that’s an unsupported file type and we’re unable to render it here."
-            />
+            fileLoading && (
+              <EuiFlexGroup direction="row" className="codeContainer__blame" gutterSize="none">
+                {fileLoading && this.renderFileLoadingIndicator()}
+                <Editor showBlame={false} hidden={fileLoading} />
+              </EuiFlexGroup>
+            )
           );
-        }
-        if (isOversize) {
-          return (
-            <ErrorPanel
-              title={<h2>File is too big</h2>}
-              content="Sorry about that, but we can’t show files that are this big right now."
-            />
-          );
-        }
-        if (fileLanguage === LANG_MD) {
-          const markdownRenderers = {
-            link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
-              <EuiLink href={href} target="_blank">
-                {children}
-              </EuiLink>
-            ),
-          };
-
-          return (
-            <div className="markdown-body code-markdown-container kbnMarkdown__body">
-              <ReactMarkdown
-                source={fileContent}
-                escapeHtml={true}
-                skipHtml={true}
-                renderers={markdownRenderers}
+        } else {
+          const {
+            lang: fileLanguage,
+            content: fileContent,
+            isUnsupported,
+            isOversize,
+            isImage,
+          } = file;
+          if (isUnsupported) {
+            return (
+              <ErrorPanel
+                title={<h2>Unsupported File</h2>}
+                content="Unfortunately that’s an unsupported file type and we’re unable to render it here."
               />
-            </div>
-          );
-        } else if (isImage) {
-          const rawUrl = npStart.core.http.basePath.prepend(
-            `/app/code/repo/${repoUri}/raw/${revision}/${path}`
-          );
-          return (
-            <div className="code-auto-margin">
-              <img src={rawUrl} alt={rawUrl} />
-            </div>
-          );
+            );
+          }
+          if (isOversize) {
+            return (
+              <ErrorPanel
+                title={<h2>File is too big</h2>}
+                content="Sorry about that, but we can’t show files that are this big right now."
+              />
+            );
+          }
+          if (fileLanguage === LANG_MD) {
+            const markdownRenderers = {
+              link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
+                <EuiLink href={href} target="_blank">
+                  {children}
+                </EuiLink>
+              ),
+            };
+
+            return (
+              <div className="markdown-body code-markdown-container kbnMarkdown__body">
+                <ReactMarkdown
+                  source={fileContent}
+                  escapeHtml={true}
+                  skipHtml={true}
+                  renderers={markdownRenderers}
+                />
+              </div>
+            );
+          } else if (isImage) {
+            const rawUrl = npStart.core.http.basePath.prepend(
+              `/app/code/repo/${repoUri}/raw/${revision}/${path}`
+            );
+            return (
+              <div className="code-auto-margin">
+                <img src={rawUrl} alt={rawUrl} />
+              </div>
+            );
+          } else {
+            return (
+              <EuiFlexGroup direction="row" className="codeContainer__blame" gutterSize="none">
+                {fileLoading && this.renderFileLoadingIndicator()}
+                <Editor showBlame={false} hidden={fileLoading} />
+              </EuiFlexGroup>
+            );
+          }
         }
-        return (
-          <EuiFlexGroup direction="row" className="codeContainer__blame" gutterSize="none">
-            <Editor showBlame={false} />
-          </EuiFlexGroup>
-        );
+      }
       case PathTypes.blame:
+        const { fileLoading } = this.state;
         return (
           <EuiFlexGroup direction="row" className="codeContainer__blame" gutterSize="none">
-            <Editor showBlame={true} />
+            {fileLoading && this.renderFileLoadingIndicator()}
+            <Editor showBlame={true} hidden={fileLoading} />
           </EuiFlexGroup>
         );
       case PathTypes.commits:
@@ -445,6 +526,7 @@ const mapStateToProps = (state: RootState) => ({
   searchOptions: state.search.searchOptions,
   query: state.search.query,
   currentRepository: state.repository.repository,
+  fileLoading: state.file.loading,
 });
 
 const mapDispatchToProps = {
