@@ -6,12 +6,11 @@
 
 import expect from '@kbn/expect';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const ES_TEST_INDEX_NAME = 'functional-test-actions-index';
 
-// eslint-disable-next-line import/no-default-export
-export default function indexTest({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function indexTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
