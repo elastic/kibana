@@ -15,10 +15,68 @@ import {
 
 export const awsLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
-    id: 'aws',
+    id: 'awsOverview',
     label: 'AWS',
     requires: ['aws'],
     sections: [
+      {
+        id: InfraMetric.awsOverview,
+        linkToId: 'awsOverview',
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.awsMetricsLayout.overviewSection.sectionLabel',
+          {
+            defaultMessage: 'Overview',
+          }
+        ),
+        requires: ['aws.ec2'],
+        type: InfraMetricLayoutSectionType.gauges,
+        visConfig: {
+          seriesOverrides: {
+            'cpu-util': {
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.awsMetricsLayout.overviewSection.cpuUtilizationSeriesLabel',
+                {
+                  defaultMessage: 'CPU Utilization',
+                }
+              ),
+              color: theme.eui.euiColorFullShade,
+              formatter: InfraFormatterType.percent,
+              gaugeMax: 1,
+            },
+            'status-check-failed': {
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.awsMetricsLayout.overviewSection.statusCheckFailedLabel',
+                {
+                  defaultMessage: 'Status check failed',
+                }
+              ),
+              color: theme.eui.euiColorFullShade,
+            },
+            rx: {
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.awsMetricsLayout.overviewSection.inboundRXSeriesLabel',
+                {
+                  defaultMessage: 'Inbound (RX)',
+                }
+              ),
+              color: theme.eui.euiColorFullShade,
+              formatter: InfraFormatterType.bits,
+              formatterTemplate: '{{value}}/s',
+            },
+            tx: {
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.awsMetricsLayout.overviewSection.outboundTXSeriesLabel',
+                {
+                  defaultMessage: 'Outbound (TX)',
+                }
+              ),
+              color: theme.eui.euiColorFullShade,
+              formatter: InfraFormatterType.bits,
+              formatterTemplate: '{{value}}/s',
+            },
+          },
+        },
+      },
       {
         id: InfraMetric.awsCpuUtilization,
         label: i18n.translate(

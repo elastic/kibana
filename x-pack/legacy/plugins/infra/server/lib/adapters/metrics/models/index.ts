@@ -19,9 +19,6 @@ import { hostMemoryUsage } from './host/host_memory_usage';
 import { hostNetworkTraffic } from './host/host_network_traffic';
 import { hostSystemOverview } from './host/host_system_overview';
 
-import { awsCpuUtilization } from './aws/aws_cpu_utilization';
-import { awsNetworkBytes } from './aws/aws_network_bytes';
-
 import { podCpuUsage } from './pod/pod_cpu_usage';
 import { podLogUsage } from './pod/pod_log_usage';
 import { podMemoryUsage } from './pod/pod_memory_usage';
@@ -39,6 +36,10 @@ import { nginxActiveConnections } from './nginx/nginx_active_connections';
 import { nginxHits } from './nginx/nginx_hits';
 import { nginxRequestRate } from './nginx/nginx_request_rate';
 import { nginxRequestsPerConnection } from './nginx/nginx_requests_per_connection';
+
+import { awsOverview } from './aws/aws_overview';
+import { awsCpuUtilization } from './aws/aws_cpu_utilization';
+import { awsNetworkBytes } from './aws/aws_network_bytes';
 
 interface InfraMetricModels {
   [key: string]: InfraMetricModelCreator;
@@ -75,6 +76,7 @@ export const metricModels: InfraMetricModels = {
   [InfraMetric.nginxActiveConnections]: nginxActiveConnections,
   [InfraMetric.nginxRequestsPerConnection]: nginxRequestsPerConnection,
 
+  [InfraMetric.awsOverview]: awsOverview,
   [InfraMetric.awsCpuUtilization]: awsCpuUtilization,
   [InfraMetric.awsNetworkBytes]: awsNetworkBytes,
 };

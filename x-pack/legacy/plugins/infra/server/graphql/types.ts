@@ -578,6 +578,7 @@ export enum InfraMetric {
   nginxRequestRate = 'nginxRequestRate',
   nginxActiveConnections = 'nginxActiveConnections',
   nginxRequestsPerConnection = 'nginxRequestsPerConnection',
+  awsOverview = 'awsOverview',
   awsCpuUtilization = 'awsCpuUtilization',
   awsNetworkBytes = 'awsNetworkBytes',
   custom = 'custom',

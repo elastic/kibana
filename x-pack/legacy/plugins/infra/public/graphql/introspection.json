@@ -2309,6 +2309,12 @@
             "deprecationReason": null
           },
           {
+            "name": "awsOverview",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "awsCpuUtilization",
             "description": "",
             "isDeprecated": false,
