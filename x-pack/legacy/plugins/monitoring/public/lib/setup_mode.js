@@ -52,6 +52,9 @@ export const fetchCollectionData = async (uuid, fetchWithoutClusterUuid = false)
   else if (!fetchWithoutClusterUuid && clusterUuid) {
     url += `/cluster/${clusterUuid}`;
   }
+  else {
+    url += '/cluster';
+  }
 
   try {
     const response = await http.post(url, { ccs });
