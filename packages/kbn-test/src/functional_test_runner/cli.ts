@@ -18,7 +18,6 @@
  */
 
 import { resolve } from 'path';
-
 import { run } from '../../../../src/dev/run';
 import { FunctionalTestRunner } from './functional_test_runner';
 
