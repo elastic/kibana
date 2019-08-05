@@ -329,13 +329,13 @@ app.controller('graphuiPlugin', function (
     }
 
     // Check if user is toggling off an already-open config panel for the current field
-    if ($scope.kbnTopNav.currentKey === 'fieldConfig' && field === $scope.selectedFieldConfig) {
+    if ($scope.currentKey === 'fieldConfig' && field === $scope.selectedFieldConfig) {
       $scope.hideAllConfigPanels();
       return;
     }
     $scope.hideAllConfigPanels();
     $scope.selectedFieldConfig = field;
-    $scope.kbnTopNav.currentKey = 'fieldConfig';
+    $scope.currentKey = 'fieldConfig';
   };
 
   function canWipeWorkspace(yesFn, noFn) {
@@ -504,9 +504,9 @@ app.controller('graphuiPlugin', function (
   };
 
   $scope.toggleShowAdvancedFieldsConfig = function () {
-    if ($scope.kbnTopNav.currentKey !== 'fields') {
+    if ($scope.currentKey !== 'fields') {
       $scope.kbnTopNav.close();
-      $scope.kbnTopNav.currentKey = 'fields';
+      $scope.currentKey = 'fields';
       //Default the selected field
       $scope.selectedField = null;
       $scope.filteredFields = $scope.allFields.filter(function (fieldDef) {
