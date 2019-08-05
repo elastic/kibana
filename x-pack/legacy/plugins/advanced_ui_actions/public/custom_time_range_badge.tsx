@@ -79,19 +79,7 @@ export class CustomTimeRangeBadge extends Action {
   }
 
   public async isCompatible({ embeddable }: ActionContext) {
-    const isInputControl =
-      isVisualizeEmbeddable(embeddable) &&
-      embeddable.getOutput().visTypeName === 'input_control_vis';
-
-    return Boolean(
-      embeddable &&
-        hasTimeRange(embeddable) &&
-        // Saved searches don't listen to the time range from the container that is passed down to them so it
-        // won't work without a fix.  For now, just leave them out.
-        embeddable.type !== SEARCH_EMBEDDABLE_TYPE &&
-        !isInputControl &&
-        !doesInheritTimeRange(embeddable)
-    );
+    return Boolean(embeddable && hasTimeRange(embeddable) && !doesInheritTimeRange(embeddable));
   }
 
   public execute({ embeddable }: ActionContext) {
