@@ -17,14 +17,19 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../interpreter/test_helpers';
 import { createTableVisFn } from './table_vis_fn';
+
+// @ts-ignore
+import { functionWrapper } from '../../interpreter/test_helpers';
 
 jest.mock('ui/new_platform');
 
-const mockResponseHandler = jest.fn().mockReturnValue(Promise.resolve({
-  tables: [{ columns: [], rows: [] }],
-}));
+const mockResponseHandler = jest.fn().mockReturnValue(
+  Promise.resolve({
+    tables: [{ columns: [], rows: [] }],
+  })
+);
+
 jest.mock('ui/vis/response_handlers/legacy', () => ({
   legacyResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
 }));
@@ -42,7 +47,7 @@ describe('interpreter/functions#table', () => {
     showMetricsAtAllLevels: false,
     sort: {
       columnIndex: null,
-      direction: null
+      direction: null,
     },
     showTotal: false,
     totalFunc: 'sum',
@@ -51,14 +56,14 @@ describe('interpreter/functions#table', () => {
         {
           accessor: 0,
           format: {
-            id: 'number'
+            id: 'number',
           },
           params: {},
-          aggType: 'count'
-        }
+          aggType: 'count',
+        },
       ],
-      buckets: []
-    }
+      buckets: [],
+    },
   };
 
   beforeEach(() => {

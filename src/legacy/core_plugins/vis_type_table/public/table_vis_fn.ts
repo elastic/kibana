@@ -20,26 +20,53 @@
 import { i18n } from '@kbn/i18n';
 import { createTableVisResponseHandler } from './table_vis_request_handler';
 
-export const createTableVisFn  = (dependencies) => ({
-  name: 'kibana_table',
+import { ExpressionFunction, KibanaDatatable, Render } from '../../interpreter/types';
+
+const name = 'kibana_table';
+
+type Context = KibanaDatatable;
+
+interface Arguments {
+  visConfig: string | null;
+}
+
+type VisParams = Required<Arguments>;
+
+interface RenderValue {
+  visData: Context;
+  visType: 'table';
+  visConfig: VisParams;
+  params: {
+    listenOnChange: boolean;
+  };
+}
+
+type Return = Promise<Render<RenderValue>>;
+
+export const createTableVisFn = (): ExpressionFunction<
+  typeof name,
+  Context,
+  Arguments,
+  Return
+> => ({
+  name,
   type: 'render',
   context: {
-    types: [
-      'kibana_datatable'
-    ],
+    types: ['kibana_datatable'],
   },
   help: i18n.translate('visTypeTable.function.help', {
-    defaultMessage: 'Table visualization'
+    defaultMessage: 'Table visualization',
   }),
   args: {
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
+      help: '',
     },
   },
   async fn(context, args) {
-    const visConfig = JSON.parse(args.visConfig);
-    const responseHandler = createTableVisResponseHandler(dependencies);
+    const visConfig = args.visConfig && JSON.parse(args.visConfig);
+    const responseHandler = createTableVisResponseHandler();
     const convertedData = await responseHandler(context, visConfig.dimensions);
 
     return {
@@ -51,7 +78,7 @@ export const createTableVisFn  = (dependencies) => ({
         visConfig,
         params: {
           listenOnChange: true,
-        }
+        },
       },
     };
   },
