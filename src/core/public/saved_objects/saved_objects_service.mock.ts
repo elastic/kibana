@@ -35,7 +35,7 @@ const createStartContractMock = () => {
 };
 
 const createMock = () => {
-  const mocked: jest.Mocked<typeof SavedObjectsService> = {
+  const mocked: jest.Mocked<SavedObjectsService> = {
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),

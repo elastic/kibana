@@ -18,6 +18,7 @@
  */
 
 import { CoreService } from 'src/core/types';
+import { CoreStart } from 'src/core/public';
 import { SavedObjectsClient, SavedObjectsClientContract } from './saved_objects_client';
 
 /**
@@ -28,10 +29,10 @@ export interface SavedObjectsStart {
   client: SavedObjectsClientContract;
 }
 
-export const SavedObjectsService: CoreService<void, SavedObjectsStart> = {
-  setup: async function setup() {},
-  start: async function start({ http }) {
+export class SavedObjectsService implements CoreService<void, SavedObjectsStart> {
+  public async setup() {}
+  public async start({ http }: { http: CoreStart['http'] }): Promise<SavedObjectsStart> {
     return { client: new SavedObjectsClient(http) };
-  },
-  stop: async function stop() {},
-};
+  }
+  public async stop() {}
+}

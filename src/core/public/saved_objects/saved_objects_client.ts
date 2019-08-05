@@ -35,7 +35,7 @@ import {
   showAutoCreateIndexErrorPage,
 } from '../../../legacy/ui/public/error_auto_create_index/error_auto_create_index';
 import { SimpleSavedObject } from './simple_saved_object';
-import { HttpSetup, HttpFetchOptions } from '../http';
+import { HttpFetchOptions, HttpServiceBase } from '../http';
 
 type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
 
@@ -133,7 +133,7 @@ export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
  * @public
  */
 export class SavedObjectsClient {
-  private http: HttpSetup;
+  private http: HttpServiceBase;
   private batchQueue: BatchQueueEntry[];
 
   /**
@@ -168,7 +168,8 @@ export class SavedObjectsClient {
     { leading: false }
   );
 
-  constructor(http: HttpSetup) {
+  /** @internal */
+  constructor(http: HttpServiceBase) {
     this.http = http;
     this.batchQueue = [];
   }

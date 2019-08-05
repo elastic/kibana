@@ -665,7 +665,8 @@ export interface SavedObjectsBulkCreateOptions {
 
 // @public
 export class SavedObjectsClient {
-    constructor(http: HttpSetup);
+    // @internal
+    constructor(http: HttpServiceBase);
     bulkCreate: (objects?: SavedObjectsBulkCreateObject<SavedObjectAttributes>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
     bulkGet: (objects?: {
         id: string;
