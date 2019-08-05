@@ -4,7 +4,7 @@
     <label
       class="visEditorSidebar__formLabel"
       for="percentageMode"
-      i18n-id="metricVis.params.percentageModeLabel"
+      i18n-id="visTypeMetric.params.percentageModeLabel"
       i18n-default-message="Percentage Mode"
     >
     </label>
@@ -17,7 +17,7 @@
     <label
       class="visEditorSidebar__formLabel"
       for="showLabels"
-      i18n-id="metricVis.params.showLabelsLabel"
+      i18n-id="visTypeMetric.params.showLabelsLabel"
       i18n-default-message="Show Labels"
     >
     </label>
@@ -32,7 +32,7 @@
         kbn-accessible-click
         aria-expanded="{{!!showColorRange}}"
         aria-controls="metricOptionsRanges"
-        aria-label="{{::'metricVis.params.ranges.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle range options' } }}"
+        aria-label="{{::'visTypeMetric.params.ranges.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle range options' } }}"
         class="visEditorSidebar__collapsibleTitleLabel"
         ng-click="showColorRange = !showColorRange"
       >
@@ -41,7 +41,7 @@
 
         <span
           class="visEditorSidebar__collapsibleTitleText"
-          i18n-id="metricVis.params.rangesTitle"
+          i18n-id="visTypeMetric.params.rangesTitle"
           i18n-default-message="Ranges"
         >
       </span>
@@ -55,7 +55,7 @@
           <th scope="col">
             <label
               id="metricOptionsCustomRangeFrom"
-              i18n-id="metricVis.params.ranges.fromLabel"
+              i18n-id="visTypeMetric.params.ranges.fromLabel"
               i18n-default-message="From"
             >
             </label>
@@ -63,7 +63,7 @@
           <th scope="col" colspan="2">
             <label
               id="metricOptionsCustomRangeTo"
-              i18n-id="metricVis.params.ranges.toLabel"
+              i18n-id="visTypeMetric.params.ranges.toLabel"
               i18n-default-message="To"
             >
             </label>
@@ -109,7 +109,7 @@
         <p>
           <i class="fa fa-danger text-danger"></i>
           <span
-            i18n-id="metricVis.params.ranges.warning.specifyRangeDescription"
+            i18n-id="visTypeMetric.params.ranges.warning.specifyRangeDescription"
             i18n-default-message="{requiredDescription} You must specify at least one range."
             i18n-values="{ html_requiredDescription: '<strong>' + editorState.requiredDescription + '</strong>' }"
           >
@@ -120,7 +120,7 @@
       <div
         ng-click="addRange()"
         class="kuiButton kuiButton--primary kuiButton--fullWidth"
-        i18n-id="metricVis.params.ranges.addRangeButtonLabel"
+        i18n-id="visTypeMetric.params.ranges.addRangeButtonLabel"
         i18n-default-message="Add Range"
       >
       </div>
@@ -134,7 +134,7 @@
         kbn-accessible-click
         aria-expanded="{{!!showColorOptions}}"
         aria-controls="metricOptionsColors"
-        aria-label="{{::'metricVis.params.color.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle color options' } }}"
+        aria-label="{{::'visTypeMetric.params.color.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle color options' } }}"
         class="visEditorSidebar__collapsibleTitleLabel"
         ng-click="showColorOptions = !showColorOptions"
       >
@@ -143,7 +143,7 @@
 
         <span
           class="visEditorSidebar__collapsibleTitleText"
-          i18n-id="metricVis.params.color.colorOptionsTitle"
+          i18n-id="visTypeMetric.params.color.colorOptionsTitle"
           i18n-default-message="Color Options"
         >
       </span>
@@ -155,7 +155,7 @@
         <label
           class="visEditorSidebar__formLabel"
           for="metricColorMode"
-          i18n-id="metricVis.params.color.useForLabel"
+          i18n-id="visTypeMetric.params.color.useForLabel"
           i18n-default-message="Use Color For"
         >
         </label>
@@ -172,7 +172,7 @@
         <label
           class="visEditorSidebar__formLabel"
           for="colorSchema"
-          i18n-id="metricVis.params.color.schemaLabel"
+          i18n-id="visTypeMetric.params.color.schemaLabel"
           i18n-default-message="Color Schema"
         >
         </label>
@@ -185,7 +185,7 @@
           ></select>
         </div>
         <div class="text-info text-center" ng-show="customColors" ng-click="resetColors()"
-          i18n-id="metricVis.params.color.resetColorDescription"
+          i18n-id="visTypeMetric.params.color.resetColorDescription"
           i18n-default-message="reset colors"
         >
         </div>
@@ -195,7 +195,7 @@
         <label
           class="visEditorSidebar__formLabel"
           for="invertColors"
-          i18n-id="metricVis.params.color.reverseSchemaLabel"
+          i18n-id="visTypeMetric.params.color.reverseSchemaLabel"
           i18n-default-message="Reverse Color Schema"
         >
         </label>
@@ -213,7 +213,7 @@
         kbn-accessible-click
         aria-expanded="{{!!showStyle}}"
         aria-controls="metricOptionsStyle"
-        aria-label="{{::'metricVis.params.style.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle style options' } }}"
+        aria-label="{{::'visTypeMetric.params.style.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle style options' } }}"
         class="visEditorSidebar__collapsibleTitleLabel"
         ng-click="showStyle = !showStyle"
       >
@@ -221,7 +221,7 @@
         <icon color="'primary'" aria-hidden="true" ng-if="!showStyle" type="'arrowRight'" size="'s'"></icon>
         <span
           class="visEditorSidebar__collapsibleTitleText"
-          i18n-id="metricVis.params.style.styleTitle"
+          i18n-id="visTypeMetric.params.style.styleTitle"
           i18n-default-message="Style"
         >
         </span>
@@ -233,7 +233,7 @@
       <div class="visEditorSidebar__formRow">
         <label class="visEditorSidebar__formLabel" for="metricFontSize">
           <span
-            i18n-id="metricVis.params.style.fontSizeLabel"
+            i18n-id="visTypeMetric.params.style.fontSizeLabel"
             i18n-default-message="Font Size ({fontSize}pt)"
             i18n-values="{ fontSize: editorState.params.metric.style.fontSize }"
           >

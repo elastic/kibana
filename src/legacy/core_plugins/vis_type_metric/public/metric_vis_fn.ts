@@ -91,14 +91,14 @@ export const createMetricVisFn = (): ExpressionFunction<
   context: {
     types: ['kibana_datatable'],
   },
-  help: i18n.translate('metricVis.function.help', {
+  help: i18n.translate('visTypeMetric.function.help', {
     defaultMessage: 'Metric visualization',
   }),
   args: {
     percentage: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('metricVis.function.percentage.help', {
+      help: i18n.translate('visTypeMetric.function.percentage.help', {
         defaultMessage: 'Shows metric in percentage mode. Requires colorRange to be set.',
       }),
     },
@@ -106,7 +106,7 @@ export const createMetricVisFn = (): ExpressionFunction<
       types: ['string'],
       default: '"Green to Red"',
       options: Object.values(vislibColorMaps).map((value: any) => value.id),
-      help: i18n.translate('metricVis.function.colorScheme.help', {
+      help: i18n.translate('visTypeMetric.function.colorScheme.help', {
         defaultMessage: 'Color scheme to use',
       }),
     },
@@ -114,14 +114,14 @@ export const createMetricVisFn = (): ExpressionFunction<
       types: ['string'],
       default: '"None"',
       options: ['None', 'Label', 'Background'],
-      help: i18n.translate('metricVis.function.colorMode.help', {
+      help: i18n.translate('visTypeMetric.function.colorMode.help', {
         defaultMessage: 'Which part of metric to color',
       }),
     },
     colorRange: {
       types: ['range'],
       multi: true,
-      help: i18n.translate('metricVis.function.colorRange.help', {
+      help: i18n.translate('visTypeMetric.function.colorRange.help', {
         defaultMessage:
           'A range object specifying groups of values to which different colors should be applied.',
       }),
@@ -129,21 +129,21 @@ export const createMetricVisFn = (): ExpressionFunction<
     useRanges: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('metricVis.function.useRanges.help', {
+      help: i18n.translate('visTypeMetric.function.useRanges.help', {
         defaultMessage: 'Enabled color ranges.',
       }),
     },
     invertColors: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('metricVis.function.invertColors.help', {
+      help: i18n.translate('visTypeMetric.function.invertColors.help', {
         defaultMessage: 'Inverts the color ranges',
       }),
     },
     showLabels: {
       types: ['boolean'],
       default: true,
-      help: i18n.translate('metricVis.function.showLabels.help', {
+      help: i18n.translate('visTypeMetric.function.showLabels.help', {
         defaultMessage: 'Shows labels under the metric values.',
       }),
     },
@@ -151,14 +151,14 @@ export const createMetricVisFn = (): ExpressionFunction<
       types: ['string'],
       default: '"#000"',
       aliases: ['backgroundFill', 'bgColor', 'backgroundColor'],
-      help: i18n.translate('metricVis.function.bgFill.help', {
+      help: i18n.translate('visTypeMetric.function.bgFill.help', {
         defaultMessage:
           'Color as html hex code (#123456), html color (red, blue) or rgba value (rgba(255,255,255,1)).',
       }),
     },
     font: {
       types: ['style'],
-      help: i18n.translate('metricVis.function.font.help', {
+      help: i18n.translate('visTypeMetric.function.font.help', {
         defaultMessage: 'Font settings.',
       }),
       default: '{font size=60}',
@@ -167,13 +167,13 @@ export const createMetricVisFn = (): ExpressionFunction<
       types: ['string'],
       aliases: ['label', 'text', 'description'],
       default: '""',
-      help: i18n.translate('metricVis.function.subText.help', {
+      help: i18n.translate('visTypeMetric.function.subText.help', {
         defaultMessage: 'Custom text to show under the metric',
       }),
     },
     metric: {
       types: ['vis_dimension'],
-      help: i18n.translate('metricVis.function.metric.help', {
+      help: i18n.translate('visTypeMetric.function.metric.help', {
         defaultMessage: 'metric dimension configuration',
       }),
       required: true,
@@ -181,7 +181,7 @@ export const createMetricVisFn = (): ExpressionFunction<
     },
     bucket: {
       types: ['vis_dimension'],
-      help: i18n.translate('metricVis.function.bucket.help', {
+      help: i18n.translate('visTypeMetric.function.bucket.help', {
         defaultMessage: 'bucket dimension configuration',
       }),
     },
