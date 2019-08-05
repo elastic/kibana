@@ -160,8 +160,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     showSavedQueryPopover: false,
     currentProps: this.props,
     query: this.props.query ? { ...this.props.query } : undefined,
-    dateRangeFrom: _.get(this.props, 'dateRangeFrom', 'now-15m'),
-    dateRangeTo: _.get(this.props, 'dateRangeTo', 'now'),
+    dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
+    dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
   };
 
   public isDirty = () => {
