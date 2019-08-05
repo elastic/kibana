@@ -17,85 +17,149 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 
-export const metric = () => ({
-  name: 'metricVis',
+// @ts-ignore
+import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { ExpressionFunction, KibanaDatatable, Render, Range, Style } from '../../interpreter/types';
+
+type Context = KibanaDatatable;
+
+const name = 'metricVis';
+
+interface Arguments {
+  percentage: boolean;
+  colorScheme: string;
+  colorMode: string;
+  useRanges: boolean;
+  invertColors: boolean;
+  showLabels: boolean;
+  bgFill: string;
+  subText: string;
+  colorRange: Range[];
+  font: Style;
+  metric: any[]; // these aren't typed yet
+  bucket: any; // these aren't typed yet
+}
+
+interface VisParams {
+  dimensions: DimensionsVisParam;
+  metric: MetricVisParam;
+}
+
+interface DimensionsVisParam {
+  metrics: any;
+  bucket?: any;
+}
+
+interface MetricVisParam {
+  percentageMode: Arguments['percentage'];
+  useRanges: Arguments['useRanges'];
+  colorSchema: Arguments['colorScheme'];
+  metricColorMode: Arguments['colorMode'];
+  colorsRange: Arguments['colorRange'];
+  labels: {
+    show: Arguments['showLabels'];
+  };
+  invertColors: Arguments['invertColors'];
+  style: {
+    bgFill: Arguments['bgFill'];
+    bgColor: boolean;
+    labelColor: boolean;
+    subText: Arguments['subText'];
+    fontSize: number;
+  };
+}
+
+interface RenderValue {
+  visType: 'metric';
+  visData: Context;
+  visConfig: VisParams;
+  params: any;
+}
+
+type Return = Render<RenderValue>;
+
+export const createMetricVisFn = (): ExpressionFunction<
+  typeof name,
+  Context,
+  Arguments,
+  Return
+> => ({
+  name,
   type: 'render',
   context: {
-    types: [
-      'kibana_datatable'
-    ],
+    types: ['kibana_datatable'],
   },
   help: i18n.translate('metricVis.function.help', {
-    defaultMessage: 'Metric visualization'
+    defaultMessage: 'Metric visualization',
   }),
   args: {
     percentage: {
       types: ['boolean'],
       default: false,
       help: i18n.translate('metricVis.function.percentage.help', {
-        defaultMessage: 'Shows metric in percentage mode. Requires colorRange to be set.'
-      })
+        defaultMessage: 'Shows metric in percentage mode. Requires colorRange to be set.',
+      }),
     },
     colorScheme: {
       types: ['string'],
       default: '"Green to Red"',
-      options: Object.values(vislibColorMaps).map(value => value.id),
+      options: Object.values(vislibColorMaps).map((value: any) => value.id),
       help: i18n.translate('metricVis.function.colorScheme.help', {
-        defaultMessage: 'Color scheme to use'
-      })
+        defaultMessage: 'Color scheme to use',
+      }),
     },
     colorMode: {
       types: ['string'],
       default: '"None"',
       options: ['None', 'Label', 'Background'],
       help: i18n.translate('metricVis.function.colorMode.help', {
-        defaultMessage: 'Which part of metric to color'
-      })
+        defaultMessage: 'Which part of metric to color',
+      }),
     },
     colorRange: {
       types: ['range'],
       multi: true,
       help: i18n.translate('metricVis.function.colorRange.help', {
-        defaultMessage: 'A range object specifying groups of values to which different colors should be applied.'
-      })
+        defaultMessage:
+          'A range object specifying groups of values to which different colors should be applied.',
+      }),
     },
     useRanges: {
       types: ['boolean'],
       default: false,
       help: i18n.translate('metricVis.function.useRanges.help', {
-        defaultMessage: 'Enabled color ranges.'
-      })
+        defaultMessage: 'Enabled color ranges.',
+      }),
     },
     invertColors: {
       types: ['boolean'],
       default: false,
       help: i18n.translate('metricVis.function.invertColors.help', {
-        defaultMessage: 'Inverts the color ranges'
-      })
+        defaultMessage: 'Inverts the color ranges',
+      }),
     },
     showLabels: {
       types: ['boolean'],
       default: true,
       help: i18n.translate('metricVis.function.showLabels.help', {
-        defaultMessage: 'Shows labels under the metric values.'
-      })
+        defaultMessage: 'Shows labels under the metric values.',
+      }),
     },
     bgFill: {
       types: ['string'],
       default: '"#000"',
       aliases: ['backgroundFill', 'bgColor', 'backgroundColor'],
       help: i18n.translate('metricVis.function.bgFill.help', {
-        defaultMessage: 'Color as html hex code (#123456), html color (red, blue) or rgba value (rgba(255,255,255,1)).'
-      })
+        defaultMessage:
+          'Color as html hex code (#123456), html color (red, blue) or rgba value (rgba(255,255,255,1)).',
+      }),
     },
     font: {
       types: ['style'],
       help: i18n.translate('metricVis.function.font.help', {
-        defaultMessage: 'Font settings.'
+        defaultMessage: 'Font settings.',
       }),
       default: '{font size=60}',
     },
@@ -104,13 +168,13 @@ export const metric = () => ({
       aliases: ['label', 'text', 'description'],
       default: '""',
       help: i18n.translate('metricVis.function.subText.help', {
-        defaultMessage: 'Custom text to show under the metric'
-      })
+        defaultMessage: 'Custom text to show under the metric',
+      }),
     },
     metric: {
       types: ['vis_dimension'],
       help: i18n.translate('metricVis.function.metric.help', {
-        defaultMessage: 'metric dimension configuration'
+        defaultMessage: 'metric dimension configuration',
       }),
       required: true,
       multi: true,
@@ -118,13 +182,12 @@ export const metric = () => ({
     bucket: {
       types: ['vis_dimension'],
       help: i18n.translate('metricVis.function.bucket.help', {
-        defaultMessage: 'bucket dimension configuration'
+        defaultMessage: 'bucket dimension configuration',
       }),
     },
   },
-  fn(context, args) {
-
-    const dimensions = {
+  fn(context: Context, args: Arguments) {
+    const dimensions: DimensionsVisParam = {
       metrics: args.metric,
     };
 
@@ -133,10 +196,10 @@ export const metric = () => ({
     }
 
     if (args.percentage && (!args.colorRange || args.colorRange.length === 0)) {
-      throw new Error ('colorRange must be provided when using percentage');
+      throw new Error('colorRange must be provided when using percentage');
     }
 
-    const fontSize = parseInt(args.font.spec.fontSize);
+    const fontSize = Number.parseInt(args.font.spec.fontSize, 10);
 
     return {
       type: 'render',
@@ -161,16 +224,14 @@ export const metric = () => ({
               labelColor: args.colorMode === 'Labels',
               subText: args.subText,
               fontSize,
-            }
+            },
           },
           dimensions,
         },
         params: {
           listenOnChange: true,
-        }
+        },
       },
     };
   },
 });
-
-functionsRegistry.register(metric);
