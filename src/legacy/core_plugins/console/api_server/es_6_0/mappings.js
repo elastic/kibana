@@ -99,7 +99,7 @@ export default function (api) {
           },
           boost: 1.0,
           null_value: '',
-
+          doc_values: BOOLEAN,
           norms: BOOLEAN,
 
           index_options: {
