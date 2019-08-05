@@ -17,15 +17,9 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { PluginInitializerContext } from '../../../../core/public';
+import { MetricsPlugin as Plugin } from './plugin';
 
-export default function (kibana) {
-
-  return new kibana.Plugin({
-    uiExports: {
-      visTypes: ['plugins/tagcloud/tag_cloud_vis'],
-      interpreter: ['plugins/tagcloud/tag_cloud_fn'],
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    }
-  });
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
 }
