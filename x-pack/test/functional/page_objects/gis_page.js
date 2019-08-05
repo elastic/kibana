@@ -351,6 +351,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
      */
     async isLayerAddPanelOpen() {
       log.debug(`Is layer add panel open`);
+      await PageObjects.common.sleep(1000);
       return await testSubjects.exists('layerAddForm');
     }
 
