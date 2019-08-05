@@ -331,7 +331,6 @@ app.controller('graphuiPlugin', function (
 
       // Check if user is toggling off an already-open config panel for the current field
       if ($scope.currentlyDisplayedKey === 'fieldConfig' && field === $scope.selectedFieldConfig) {
-        $scope.currentlyDisplayedKey = undefined;
         $scope.hideAllConfigPanels();
         return;
       }
