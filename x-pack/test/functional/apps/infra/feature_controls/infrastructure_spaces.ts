@@ -5,13 +5,12 @@
  */
 import expect from '@kbn/expect';
 import { SpacesService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { DATES } from '../constants';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService: SpacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'infraHome', 'security', 'spaceSelector']);
