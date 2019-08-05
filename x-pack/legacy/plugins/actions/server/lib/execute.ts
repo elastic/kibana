@@ -61,10 +61,23 @@ export async function execute({
       ['warning', 'x-pack', 'actions'],
       `action executed unsuccessfully: ${actionLabel} - ${err.message}`
     );
+    services.auditLog.log({
+      actionTypeId,
+      id: actionId,
+      operation: 'fire',
+      status: 'error',
+      message: err.message,
+    });
     throw err;
   }
 
   services.log(['debug', 'x-pack', 'actions'], `action executed successfully: ${actionLabel}`);
+  services.auditLog.log({
+    actionTypeId,
+    id: actionId,
+    operation: 'fire',
+    status: 'success',
+  });
 
   // return basic response if none provided
   if (result == null) return { status: 'ok' };

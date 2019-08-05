@@ -12,6 +12,7 @@ import { validateParams } from '../lib';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 
 import { registerBuiltInActionTypes } from './index';
+import { getMockAuditLog } from '../audit_log.mock';
 
 const ACTION_TYPE_ID = '.server-log';
 const NO_OP_FN = () => {};
@@ -20,6 +21,7 @@ const services: Services = {
   log: NO_OP_FN,
   callCluster: async (path: string, opts: any) => {},
   savedObjectsClient: SavedObjectsClientMock.create(),
+  auditLog: getMockAuditLog(),
 };
 
 function getServices(): Services {
@@ -123,6 +125,7 @@ describe('execute()', () => {
         log: mockLog,
         callCluster: async (path: string, opts: any) => {},
         savedObjectsClient: SavedObjectsClientMock.create(),
+        auditLog: getMockAuditLog(),
       },
       params: { message: 'message text here', tags: ['tag1', 'tag2'] },
       config: {},

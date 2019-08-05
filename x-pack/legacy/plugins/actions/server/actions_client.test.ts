@@ -12,6 +12,7 @@ import { ExecutorType } from './types';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/plugin.mock';
+import { getMockAuditLog } from './audit_log.mock';
 
 const savedObjectsClient = SavedObjectsClientMock.create();
 
@@ -24,6 +25,7 @@ function getServices() {
     log: jest.fn(),
     callCluster: jest.fn(),
     savedObjectsClient: SavedObjectsClientMock.create(),
+    auditLog: getMockAuditLog(),
   };
 }
 
@@ -62,6 +64,7 @@ describe('create()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      auditLog: getMockAuditLog(),
     });
     savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
     const result = await actionsClient.create({
@@ -97,6 +100,7 @@ describe('create()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      auditLog: getMockAuditLog(),
     });
     actionTypeRegistry.register({
       id: 'my-action-type',
@@ -127,6 +131,7 @@ describe('create()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      auditLog: getMockAuditLog(),
     });
     await expect(
       actionsClient.create({
@@ -152,6 +157,7 @@ describe('create()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      auditLog: getMockAuditLog(),
     });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -215,6 +221,7 @@ describe('get()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      auditLog: getMockAuditLog(),
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -259,6 +266,7 @@ describe('find()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      auditLog: getMockAuditLog(),
     });
     savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.find({});
@@ -293,6 +301,13 @@ describe('delete()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      auditLog: getMockAuditLog(),
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'action',
+      references: [],
+      attributes: { actionTypeId: 'my-action-type' },
     });
     savedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.delete({ id: '1' });
@@ -318,6 +333,7 @@ describe('update()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      auditLog: getMockAuditLog(),
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -379,6 +395,7 @@ describe('update()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      auditLog: getMockAuditLog(),
     });
     actionTypeRegistry.register({
       id: 'my-action-type',
@@ -422,6 +439,7 @@ describe('update()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      auditLog: getMockAuditLog(),
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: 'my-action',

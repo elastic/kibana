@@ -17,6 +17,7 @@ import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks'
 import { registerBuiltInActionTypes } from './index';
 import { sendEmail } from './lib/send_email';
 import { ActionParamsType, ActionTypeConfigType, ActionTypeSecretsType } from './email';
+import { getMockAuditLog } from '../audit_log.mock';
 
 const sendEmailMock = sendEmail as jest.Mock;
 
@@ -27,6 +28,7 @@ const services = {
   log: NO_OP_FN,
   callCluster: async (path: string, opts: any) => {},
   savedObjectsClient: SavedObjectsClientMock.create(),
+  auditLog: getMockAuditLog(),
 };
 
 function getServices() {

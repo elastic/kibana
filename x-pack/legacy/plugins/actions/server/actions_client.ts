@@ -8,6 +8,7 @@ import { SavedObjectsClientContract, SavedObjectAttributes, SavedObject } from '
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets } from './lib';
 import { ActionResult } from './types';
+import { IAuditLog } from '../../../../plugins/audit_log/server/types';
 
 interface ActionUpdate extends SavedObjectAttributes {
   description: string;
@@ -49,6 +50,7 @@ interface FindResult {
 interface ConstructorOptions {
   actionTypeRegistry: ActionTypeRegistry;
   savedObjectsClient: SavedObjectsClientContract;
+  auditLog: IAuditLog;
 }
 
 interface UpdateOptions {
@@ -59,10 +61,12 @@ interface UpdateOptions {
 export class ActionsClient {
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
+  private readonly auditLog: IAuditLog;
 
-  constructor({ actionTypeRegistry, savedObjectsClient }: ConstructorOptions) {
+  constructor({ actionTypeRegistry, savedObjectsClient, auditLog }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
+    this.auditLog = auditLog;
   }
 
   /**
@@ -79,6 +83,13 @@ export class ActionsClient {
       description,
       config: validatedActionTypeConfig as SavedObjectAttributes,
       secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+    });
+
+    this.auditLog.log({
+      actionTypeId,
+      id: result.id,
+      operation: 'create',
+      status: 'success',
     });
 
     return {
@@ -105,6 +116,13 @@ export class ActionsClient {
       description,
       config: validatedActionTypeConfig as SavedObjectAttributes,
       secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+    });
+
+    this.auditLog.log({
+      actionTypeId,
+      id: result.id,
+      operation: 'update',
+      status: 'success',
     });
 
     return {
@@ -150,7 +168,17 @@ export class ActionsClient {
    * Delete action
    */
   public async delete({ id }: { id: string }) {
-    return await this.savedObjectsClient.delete('action', id);
+    const action = await this.savedObjectsClient.get('action', id);
+    const result = await this.savedObjectsClient.delete('action', id);
+
+    this.auditLog.log({
+      actionTypeId: action.attributes.actionTypeId,
+      id,
+      operation: 'delete',
+      status: 'success',
+    });
+
+    return result;
   }
 }
 

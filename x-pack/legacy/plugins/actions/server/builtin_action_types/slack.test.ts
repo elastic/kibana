@@ -11,6 +11,7 @@ import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks'
 import { validateParams, validateSecrets } from '../lib';
 import { getActionType } from './slack';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
+import { getMockAuditLog } from '../audit_log.mock';
 
 const ACTION_TYPE_ID = '.slack';
 
@@ -20,6 +21,7 @@ const services: Services = {
   log: NO_OP_FN,
   callCluster: async (path: string, opts: any) => {},
   savedObjectsClient: SavedObjectsClientMock.create(),
+  auditLog: getMockAuditLog(),
 };
 
 function getServices(): Services {

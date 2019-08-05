@@ -7,6 +7,7 @@
 import { SavedObjectsClientContract } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 import { FireOptions } from './create_fire_function';
+import { IAuditLog } from '../../../../plugins/audit_log/server/types';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (basePath: string, overwrites?: Partial<Services>) => Services;
@@ -16,6 +17,7 @@ export interface Services {
   callCluster(path: string, opts: any): Promise<any>;
   savedObjectsClient: SavedObjectsClientContract;
   log: (tags: string | string[], data?: string | object | (() => any), timestamp?: number) => void;
+  auditLog: IAuditLog;
 }
 
 export interface ActionsPlugin {

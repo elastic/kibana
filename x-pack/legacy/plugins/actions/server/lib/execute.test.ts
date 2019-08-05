@@ -9,6 +9,7 @@ import { execute } from './execute';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
+import { getMockAuditLog } from '../audit_log.mock';
 
 const savedObjectsClient = SavedObjectsClientMock.create();
 
@@ -17,6 +18,7 @@ function getServices() {
     savedObjectsClient,
     log: jest.fn(),
     callCluster: jest.fn(),
+    auditLog: getMockAuditLog(),
   };
 }
 const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();

@@ -16,6 +16,7 @@ import { validateConfig, validateParams } from '../lib';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { registerBuiltInActionTypes } from './index';
 import { ActionParamsType, ActionTypeConfigType } from './es_index';
+import { getMockAuditLog } from '../audit_log.mock';
 
 const ACTION_TYPE_ID = '.index';
 const NO_OP_FN = () => {};
@@ -24,6 +25,7 @@ const services = {
   log: NO_OP_FN,
   callCluster: jest.fn(),
   savedObjectsClient: SavedObjectsClientMock.create(),
+  auditLog: getMockAuditLog(),
 };
 
 function getServices() {

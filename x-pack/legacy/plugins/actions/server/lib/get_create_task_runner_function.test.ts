@@ -13,6 +13,7 @@ import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { ExecutorError } from './executor_error';
+import { getMockAuditLog } from '../audit_log.mock';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -32,6 +33,7 @@ const getCreateTaskRunnerFunctionParams = {
       log: jest.fn(),
       callCluster: jest.fn(),
       savedObjectsClient: SavedObjectsClientMock.create(),
+      auditLog: getMockAuditLog(),
     };
   },
   actionTypeRegistry,

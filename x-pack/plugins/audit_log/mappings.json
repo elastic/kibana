@@ -1,0 +1,16 @@
+{
+  "action": {
+    "properties": {
+      "auditLogTypeId": {
+        "type": "keyword"
+      },
+      "@timestamp": {
+        "type": "date"
+      },
+      "data": {
+        "enabled": false,
+        "type": "object"
+      }
+    }
+  }
+}

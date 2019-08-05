@@ -5,6 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
+import { AuditRecordSchema } from './audit_record';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { createFireFunction } from './create_fire_function';
@@ -21,6 +22,7 @@ import {
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { SpacesPlugin } from '../../spaces';
 import { createOptionalPlugin } from '../../../server/lib/optional_plugin';
+import { IAuditLog, IAuditLogPluginAPI } from '../../../../plugins/audit_log/server/types';
 
 export function init(server: Legacy.Server) {
   const config = server.config();
@@ -30,6 +32,11 @@ export function init(server: Legacy.Server) {
     server.plugins,
     'spaces'
   );
+
+  const newServer = server as any;
+  const auditLogAPI = newServer.newPlatform.start.plugins.audit_log as IAuditLogPluginAPI;
+  auditLogAPI.registerAuditLog({ id: 'actions', recordSchema: AuditRecordSchema });
+  const auditLog: IAuditLog = auditLogAPI.getAuditLog({ id: 'actions' });
 
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
@@ -58,6 +65,7 @@ export function init(server: Legacy.Server) {
       log: server.log.bind(server),
       callCluster: callWithInternalUser,
       savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(fakeRequest),
+      auditLog,
       ...overwrites,
     };
   }
@@ -107,6 +115,7 @@ export function init(server: Legacy.Server) {
     const actionsClient = new ActionsClient({
       savedObjectsClient,
       actionTypeRegistry,
+      auditLog,
     });
     return actionsClient;
   });
