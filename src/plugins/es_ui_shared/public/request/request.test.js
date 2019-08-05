@@ -103,15 +103,14 @@ describe('request lib', () => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/42561
-      describe.skip('pollIntervalMs', () => {
+      describe('pollIntervalMs', () => {
         it('sends another request after the specified time has elapsed', async () => {
-          initUseRequest({ ...successRequest, pollIntervalMs: 30 });
-          await wait(5);
-          sinon.assert.calledOnce(sendPost);
-
-          await wait(40);
-          sinon.assert.calledTwice(sendPost);
+          initUseRequest({ ...successRequest, pollIntervalMs: 10 });
+          await wait(50);
+          // We just care that multiple requests have been sent out. We don't check the specific
+          // timing because that risks introducing flakiness into the tests, and it's unlikely
+          // we could break the implementation by getting the exact timing wrong.
+          expect(sendPost.callCount).toBeGreaterThan(1);
 
           // We have to manually clean up or else the interval will continue to fire requests,
           // interfering with other tests.
