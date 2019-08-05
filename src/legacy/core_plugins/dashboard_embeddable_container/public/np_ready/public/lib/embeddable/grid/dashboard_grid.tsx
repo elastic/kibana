@@ -172,7 +172,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       console.error(error); // eslint-disable-line no-console
 
       isLayoutInvalid = true;
-      alert({
+      this.props.notifications.toasts.addDanger({
         title: this.props.intl.formatMessage({
           id: 'dashboardEmbeddableContainer.dashboardGrid.toast.unableToLoadDashboardDangerMessage',
           defaultMessage: 'Unable to load dashboard.',
