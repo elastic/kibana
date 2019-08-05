@@ -63,8 +63,6 @@ function DefaultEditorAgg({
   setValidity,
 }: DefaultEditorAggProps) {
   const [isEditorOpen, setIsEditorOpen] = useState(agg.brandNew);
-  // A description of the aggregation, for displaying in the collapsed agg header
-  const [aggDescription, setAggDescription] = useState('');
   const [validState, setValidState] = useState(true);
   const showDescription = !isEditorOpen && validState;
   const showError = !isEditorOpen && !validState;
@@ -88,6 +86,19 @@ function DefaultEditorAgg({
     }
   }
 
+  // A description of the aggregation, for displaying in the collapsed agg header
+  let aggDescription = '';
+
+  if (agg.type && agg.type.makeLabel) {
+    try {
+      aggDescription = agg.type.makeLabel(agg);
+    } catch (e) {
+      // Date Histogram's `makeLabel` implementation invokes 'write' method for each param, including FieldParamType's 'write',
+      // which throws an error when field isn't defined.
+      aggDescription = '';
+    }
+  }
+
   useEffect(() => {
     if (isLastBucketAgg && ['date_histogram', 'histogram'].includes(agg.type.name)) {
       onAggParamsChange(
@@ -103,7 +114,6 @@ function DefaultEditorAgg({
   const onToggle = (isOpen: boolean) => {
     setIsEditorOpen(isOpen);
     if (!isOpen) {
-      setAggDescription(agg.type && agg.type.makeLabel ? agg.type.makeLabel(agg) : '');
       setTouched(true);
     }
   };
