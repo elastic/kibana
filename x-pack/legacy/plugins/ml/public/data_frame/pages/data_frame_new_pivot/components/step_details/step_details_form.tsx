@@ -118,7 +118,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       }
 
       try {
-        setIndexPatternTitles((await kibanaContext.indexPatterns.getTitles(false)) as string[]);
+        setIndexPatternTitles((await kibanaContext.indexPatterns.getTitles()) as string[]);
       } catch (e) {
         toastNotifications.addDanger(
           i18n.translate('xpack.ml.dataframe.stepDetailsForm.errorGettingIndexPatternTitles', {

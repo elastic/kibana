@@ -49,7 +49,7 @@ export class IndexPatterns {
     })).savedObjects;
   }
 
-  getIds = async (refresh: boolean) => {
+  getIds = async (refresh: boolean = false) => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
@@ -58,7 +58,7 @@ export class IndexPatterns {
     }
   };
 
-  getTitles = async (refresh: boolean) => {
+  getTitles = async (refresh: boolean = false) => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
@@ -67,7 +67,7 @@ export class IndexPatterns {
     }
   };
 
-  getFields = async (fields: string[], refresh: boolean) => {
+  getFields = async (fields: string[], refresh: boolean = false) => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
