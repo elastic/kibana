@@ -120,7 +120,7 @@ life-cycle of a PR looks like the following:
 There are always exceptions to the rule, so seeking guidance about any of the
 steps is highly recommended.
 
-[Kibana's contribution procedures]: ../../../CONTRIBUTING.md
+[Kibana's contribution procedures]: ../../../../CONTRIBUTING.md
 [Infrastructure forum]: https://discuss.elastic.co/c/infrastructure
 [Logs forum]: https://discuss.elastic.co/c/logs
 [ECS]: https://github.com/elastic/ecs/
