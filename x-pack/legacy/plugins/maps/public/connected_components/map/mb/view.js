@@ -537,12 +537,6 @@ export class MBMapContainer extends React.Component {
 
   };
 
-  _getLayerById(layerId) {
-    return this.props.layerList.find((layer) => {
-      return layer.getId() === layerId;
-    });
-  }
-
   _getLayerByMbLayerId(mbLayerId) {
     return this.props.layerList.find((layer) => {
       const mbLayerIds = layer.getMbLayerIds();
@@ -556,7 +550,13 @@ export class MBMapContainer extends React.Component {
       return;
     }
 
+    //todo: layer removal is buggy in the
+
+    //before sync: this
+    console.log('before', this._mbMap.getStyle().layers.slice(), this.props.layerList.slice());
     removeOrphanedSourcesAndLayers(this._mbMap, this.props.layerList);
+    console.log('after', this._mbMap.getStyle().layers.slice(), this.props.layerList.slice());
+
     this.props.layerList.forEach(layer => {
       layer.syncLayerWithMB(this._mbMap);
     });

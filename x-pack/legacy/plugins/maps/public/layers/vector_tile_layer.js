@@ -66,10 +66,7 @@ export class VectorTileLayer extends TileLayer {
     if (!vectorStyle) {
       return [];
     }
-    const mbLayerIds = vectorStyle.layers.map(layer => {
-      return this._generateMbId(layer.id);
-    });
-    console.log(mbLayerIds);
+    const mbLayerIds = vectorStyle.layers.map(layer => this._generateMbId(layer.id));
     return mbLayerIds;
   }
 
@@ -80,7 +77,6 @@ export class VectorTileLayer extends TileLayer {
     }
     const sourceIds = Object.keys(vectorStyle.sources);
     const  mbSourceIds = sourceIds.map(sourceId => this._generateMbId(sourceId));
-    console.log(mbSourceIds);
     return mbSourceIds;
   }
 
@@ -105,13 +101,10 @@ export class VectorTileLayer extends TileLayer {
     sourceIds.forEach(sourceId => {
       const mbSourceId = this._generateMbId(sourceId);
       const mbSource = mbMap.getSource(mbSourceId);
-      console.log('gs', mbSourceId, mbSource);
       if (mbSource) {
-        console.log('skip adding', mbSourceId);
         return;
       }
 
-      console.log('add source', mbSourceId);
       mbMap.addSource(mbSourceId, {
         type: 'vector',
         url: vectorStyle.sources[sourceId].url
@@ -121,9 +114,7 @@ export class VectorTileLayer extends TileLayer {
     vectorStyle.layers.forEach(layer => {
       const mbLayerId = this._generateMbId(layer.id);
       const mbLayer = mbMap.getLayer(mbLayerId);
-      console.log('gl', mbLayerId, mbLayer);
       if (mbLayer) {
-        console.log('skip adding', mbLayerId);
         return;
       }
       const newLayerObject = {
@@ -131,11 +122,57 @@ export class VectorTileLayer extends TileLayer {
         source: this._generateMbId(layer.source),
         id: mbLayerId
       };
-
-      console.log('add layer', newLayerObject);
       mbMap.addLayer(newLayerObject);
     });
+
+    this._setTileLayerProperties(mbMap);
   }
 
+  _setOpacityForType(mbMap, mbLayer, mbLayerId) {
+
+    const opacityProps = MB_STYLE_TYPE_TO_OPACITY[mbLayer.type];
+    if (!opacityProps) {
+      return;
+    }
+
+    opacityProps.forEach(opacityProp => {
+      if (mbLayer.paint && typeof mbLayer.paint[opacityProp] === 'number') {
+        const newOpacity = (mbLayer.paint[opacityProp] / 1) * this.getAlpha();
+        mbMap.setPaintProperty(mbLayerId, opacityProp, newOpacity);
+      } else {
+        mbMap.setPaintProperty(mbLayerId, opacityProp, this.getAlpha());
+      }
+    });
+
+  }
+
+  _setTileLayerProperties(mbMap) {
+
+    const vectorStyle = this._getVectorStyle();
+    if (!vectorStyle) {
+      return;
+    }
+
+    vectorStyle.layers.forEach(mbLayer => {
+
+      const mbLayerId = this._generateMbId(mbLayer.id);
+
+      mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+
+      let minZoom = this._descriptor.minZoom;
+      if (typeof mbLayer.minzoom === 'number') {
+        minZoom = Math.max(minZoom, mbLayer.minzoom);
+      }
+      let maxZoom = this._descriptor.maxZoom;
+      if (typeof mbLayer.maxzoom === 'number') {
+        maxZoom = Math.min(maxZoom, mbLayer.maxzoom);
+      }
+      mbMap.setLayerZoomRange(mbLayerId, minZoom, maxZoom);
+
+      this._setOpacityForType(mbMap, mbLayer, mbLayerId);
+
+    });
+
+  }
 
 }

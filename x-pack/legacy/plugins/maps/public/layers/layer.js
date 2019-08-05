@@ -340,6 +340,9 @@ export class AbstractLayer {
   }
 
   renderStyleEditor({ onStyleDescriptorChange }) {
+    if (!this._style) {
+      return null;
+    }
     return this._style.renderEditor({ layer: this, onStyleDescriptorChange });
   }
 
