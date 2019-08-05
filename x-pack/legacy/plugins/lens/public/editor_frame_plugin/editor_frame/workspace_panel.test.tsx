@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { ExpressionRendererProps } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { Visualization } from '../../types';
+import { Visualization, FramePublicAPI } from '../../types';
 import {
   createMockVisualization,
   createMockDatasource,
@@ -18,13 +18,14 @@ import {
 import { InnerWorkspacePanel, WorkspacePanelProps } from './workspace_panel';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
-import { DragDrop } from '../../drag_drop';
+import { DragDrop, ChildDragDropProvider } from '../../drag_drop';
 import { Ast } from '@kbn/interpreter/common';
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
 describe('workspace_panel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
+  let mockVisualization2: jest.Mocked<Visualization>;
   let mockDatasource: DatasourceMock;
 
   let expressionRendererMock: jest.Mock<React.ReactElement, [ExpressionRendererProps]>;
@@ -33,6 +34,7 @@ describe('workspace_panel', () => {
 
   beforeEach(() => {
     mockVisualization = createMockVisualization();
+    mockVisualization2 = createMockVisualization();
 
     mockDatasource = createMockDatasource();
 
@@ -452,32 +454,42 @@ describe('workspace_panel', () => {
 
   describe('suggestions from dropping in workspace panel', () => {
     let mockDispatch: jest.Mock;
+    let frame: jest.Mocked<FramePublicAPI>;
+
+    const draggedField: unknown = {};
 
     beforeEach(() => {
+      frame = createMockFramePublicAPI();
       mockDispatch = jest.fn();
-      instance = mount(
-        <InnerWorkspacePanel
-          activeDatasourceId={'mock'}
-          datasourceStates={{
-            mock: {
-              state: {},
-              isLoading: false,
-            },
-          }}
-          datasourceMap={{
-            mock: mockDatasource,
-          }}
-          framePublicAPI={createMockFramePublicAPI()}
-          activeVisualizationId={null}
-          visualizationMap={{
-            vis: mockVisualization,
-          }}
-          visualizationState={{}}
-          dispatch={mockDispatch}
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
     });
+
+    function initComponent(draggingContext: unknown = draggedField) {
+      instance = mount(
+        <ChildDragDropProvider dragging={draggingContext} setDragging={() => {}}>
+          <InnerWorkspacePanel
+            activeDatasourceId={'mock'}
+            datasourceStates={{
+              mock: {
+                state: {},
+                isLoading: false,
+              },
+            }}
+            datasourceMap={{
+              mock: mockDatasource,
+            }}
+            framePublicAPI={frame}
+            activeVisualizationId={'vis'}
+            visualizationMap={{
+              vis: mockVisualization,
+              vis2: mockVisualization2,
+            }}
+            visualizationState={{}}
+            dispatch={mockDispatch}
+            ExpressionRenderer={expressionRendererMock}
+          />
+        </ChildDragDropProvider>
+      );
+    }
 
     it('should immediately transition if exactly one suggestion is returned', () => {
       const expectedTable = {
@@ -501,13 +513,9 @@ describe('workspace_panel', () => {
           previewIcon: 'empty',
         },
       ]);
+      initComponent();
 
-      instance.find(DragDrop).prop('onDrop')!({
-        name: '@timestamp',
-        type: 'date',
-        searchable: false,
-        aggregatable: false,
-      });
+      instance.find(DragDrop).prop('onDrop')!(draggedField);
 
       expect(mockDatasource.getDatasourceSuggestionsForField).toHaveBeenCalledTimes(1);
       expect(mockVisualization.getSuggestions).toHaveBeenCalledWith(
@@ -521,6 +529,90 @@ describe('workspace_panel', () => {
         initialState: {},
         datasourceState: {},
       });
+    });
+
+    it('should allow to drop if there are suggestions', () => {
+      mockDatasource.getDatasourceSuggestionsForField.mockReturnValueOnce([
+        {
+          state: {},
+          table: {
+            datasourceSuggestionId: 0,
+            isMultiRow: true,
+            layerId: '1',
+            columns: [],
+          },
+        },
+      ]);
+      mockVisualization.getSuggestions.mockReturnValueOnce([
+        {
+          score: 0.5,
+          title: 'my title',
+          state: {},
+          datasourceSuggestionId: 0,
+          previewIcon: 'empty',
+        },
+      ]);
+      initComponent();
+      expect(instance.find(DragDrop).prop('droppable')).toBeTruthy();
+    });
+
+    it('should refuse to drop if there only suggestions from other visualizations if there are data tables', () => {
+      frame.datasourceLayers.a = mockDatasource.publicAPIMock;
+      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'a' }]);
+      mockDatasource.getDatasourceSuggestionsForField.mockReturnValueOnce([
+        {
+          state: {},
+          table: {
+            datasourceSuggestionId: 0,
+            isMultiRow: true,
+            layerId: '1',
+            columns: [],
+          },
+        },
+      ]);
+      mockVisualization2.getSuggestions.mockReturnValueOnce([
+        {
+          score: 0.5,
+          title: 'my title',
+          state: {},
+          datasourceSuggestionId: 0,
+          previewIcon: 'empty',
+        },
+      ]);
+      initComponent();
+      expect(instance.find(DragDrop).prop('droppable')).toBeFalsy();
+    });
+
+    it('should allow to drop if there are suggestions from active visualization even if there are data tables', () => {
+      frame.datasourceLayers.a = mockDatasource.publicAPIMock;
+      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'a' }]);
+      mockDatasource.getDatasourceSuggestionsForField.mockReturnValueOnce([
+        {
+          state: {},
+          table: {
+            datasourceSuggestionId: 0,
+            isMultiRow: true,
+            layerId: '1',
+            columns: [],
+          },
+        },
+      ]);
+      mockVisualization.getSuggestions.mockReturnValueOnce([
+        {
+          score: 0.5,
+          title: 'my title',
+          state: {},
+          datasourceSuggestionId: 0,
+          previewIcon: 'empty',
+        },
+      ]);
+      initComponent();
+      expect(instance.find(DragDrop).prop('droppable')).toBeTruthy();
+    });
+
+    it('should refuse to drop if there are no suggestions', () => {
+      initComponent();
+      expect(instance.find(DragDrop).prop('droppable')).toBeFalsy();
     });
 
     it('should immediately transition to the first suggestion if there are multiple', () => {
@@ -563,12 +655,8 @@ describe('workspace_panel', () => {
         },
       ]);
 
-      instance.find(DragDrop).prop('onDrop')!({
-        name: '@timestamp',
-        type: 'date',
-        searchable: false,
-        aggregatable: false,
-      });
+      initComponent();
+      instance.find(DragDrop).prop('onDrop')!(draggedField);
 
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SWITCH_VISUALIZATION',
@@ -578,19 +666,6 @@ describe('workspace_panel', () => {
         },
         datasourceState: {},
       });
-    });
-
-    it("should do nothing when the visualization can't use the suggestions", () => {
-      instance.find(DragDrop).prop('onDrop')!({
-        name: '@timestamp',
-        type: 'date',
-        searchable: false,
-        aggregatable: false,
-      });
-
-      expect(mockDatasource.getDatasourceSuggestionsForField).toHaveBeenCalledTimes(1);
-      expect(mockVisualization.getSuggestions).toHaveBeenCalledTimes(1);
-      expect(mockDispatch).not.toHaveBeenCalled();
     });
   });
 });
