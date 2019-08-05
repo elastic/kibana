@@ -20,7 +20,6 @@ import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../drag_drop';
 import { Ast } from '@kbn/interpreter/common';
-import { IndexPatternField } from '../../indexpattern_plugin/indexpattern';
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
@@ -457,12 +456,7 @@ describe('workspace_panel', () => {
     let mockDispatch: jest.Mock;
     let frame: jest.Mocked<FramePublicAPI>;
 
-    const draggedField: IndexPatternField = {
-      name: '@timestamp',
-      type: 'date',
-      searchable: false,
-      aggregatable: false,
-    };
+    const draggedField: unknown = {};
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();
