@@ -19,16 +19,35 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+
+import { ExpressionFunction, KibanaContext, Render } from '../../interpreter/types';
+import { VegaVisualizationDependencies } from './plugin';
 import { createVegaRequestHandler } from './vega_request_handler';
 
-export const createVegaFn = (dependencies) => ({
-  name: 'vega',
+const name = 'vega';
+type Context = KibanaContext | null;
+
+interface Arguments {
+  spec: string;
+}
+
+type VisParams = Required<Arguments>;
+
+interface RenderValue {
+  visData: Context;
+  visType: typeof name;
+  visConfig: VisParams;
+}
+
+type Return = Promise<Render<RenderValue>>;
+
+export const createVegaFn = (
+  dependencies: VegaVisualizationDependencies
+): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+  name,
   type: 'render',
   context: {
-    types: [
-      'kibana_context',
-      'null',
-    ],
+    types: ['kibana_context', 'null'],
   },
   help: i18n.translate('visTypeVega.function.help', {
     defaultMessage: 'Vega visualization',
@@ -37,6 +56,7 @@ export const createVegaFn = (dependencies) => ({
     spec: {
       types: ['string'],
       default: '',
+      help: '',
     },
   },
   async fn(context, args) {
@@ -55,7 +75,7 @@ export const createVegaFn = (dependencies) => ({
       as: 'visualization',
       value: {
         visData: response,
-        visType: 'vega',
+        visType: name,
         visConfig: {
           spec: args.spec,
         },
