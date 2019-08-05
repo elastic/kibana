@@ -35,7 +35,7 @@ describe('save editor frame state', () => {
     activeDatasourceId: 'indexpattern',
     framePublicAPI: {
       addNewLayer: jest.fn(),
-      removeLayer: jest.fn(),
+      removeLayers: jest.fn(),
       datasourceLayers: {
         first: mockDatasource.publicAPIMock,
       },

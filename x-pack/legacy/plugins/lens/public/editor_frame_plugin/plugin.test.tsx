@@ -21,7 +21,7 @@ jest.mock('ui/chrome', () => ({
 
 // mock away actual dependencies to prevent all of it being loaded
 jest.mock('../../../../../../src/legacy/core_plugins/interpreter/public/registries', () => {});
-jest.mock('../../../../../../src/legacy/core_plugins/data/public/setup', () => {});
+jest.mock('../../../../../../src/legacy/core_plugins/data/public/legacy', () => {});
 jest.mock('../../../../../../src/legacy/core_plugins/embeddable_api/public', () => {});
 jest.mock('./embeddable/embeddable_factory', () => ({ EmbeddableFactory: class Mock {} }));
 
