@@ -45,10 +45,9 @@ import {
 const lessC = less(window, { env: 'production' });
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
-import { data } from 'plugins/data/setup';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from './../../contexts/vis_data_context';
-const { QueryBarInput } = data.query.ui;
+import { QueryBarInput } from 'plugins/data';
 const localStorage = new Storage(window.localStorage);
 
 class MarkdownPanelConfigUi extends Component {
