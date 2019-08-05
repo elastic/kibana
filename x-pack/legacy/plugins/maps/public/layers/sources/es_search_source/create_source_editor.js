@@ -71,7 +71,7 @@ export class CreateSourceEditor extends Component {
       }
     });
     return count;
-  }
+  };
 
   debouncedLoad = _.debounce(async (indexPatternId) => {
     if (!indexPatternId || indexPatternId.length === 0) {
@@ -143,11 +143,11 @@ export class CreateSourceEditor extends Component {
       ? { indexPatternId, geoField, filterByMapBounds }
       : null;
     this.props.onSourceConfigChange(sourceConfig);
-  }
+  };
 
   _onNoIndexPatterns = () => {
     this.setState({ noGeoIndexPatternsExist: true });
-  }
+  };
 
   _renderGeoSelect() {
     if (!this.state.indexPattern) {
