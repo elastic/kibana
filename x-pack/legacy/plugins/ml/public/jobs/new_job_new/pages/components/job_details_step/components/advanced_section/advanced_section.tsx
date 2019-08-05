@@ -24,9 +24,14 @@ export const AdvancedSection: FC<Props> = ({ advancedExpanded, setAdvancedExpand
       buttonContent={ButtonContent}
       onToggle={setAdvancedExpanded}
       initialIsOpen={advancedExpanded}
+      data-test-subj="mlJobWizardToggleAdvancedSection"
     >
       <EuiSpacer />
-      <EuiFlexGroup gutterSize="xl" style={{ marginLeft: '0px', marginRight: '0px' }}>
+      <EuiFlexGroup
+        gutterSize="xl"
+        style={{ marginLeft: '0px', marginRight: '0px' }}
+        data-test-subj="mlJobWizardAdvancedSection"
+      >
         <EuiFlexItem>
           <ModelPlotSwitch />
           <ModelMemoryLimitInput />

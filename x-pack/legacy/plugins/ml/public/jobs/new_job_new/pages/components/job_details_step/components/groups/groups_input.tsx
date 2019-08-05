@@ -77,6 +77,7 @@ export const GroupsInput: FC = () => {
         onCreateOption={onCreateGroup}
         isClearable={true}
         isInvalid={validation.valid === false}
+        data-test-subj="mlJobWizardComboboxJobGroups"
       />
     </Description>
   );

@@ -33,6 +33,7 @@ export const ModelMemoryLimitInput: FC = () => {
         value={modelMemoryLimit}
         onChange={e => setModelMemoryLimit(e.target.value)}
         isInvalid={validation.valid === false}
+        data-test-subj="mlJobWizardInputModelMemoryLimit"
       />
     </Description>
   );

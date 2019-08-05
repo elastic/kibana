@@ -44,7 +44,7 @@ export const AnomalyChart: FC<Props> = ({
 
   const xDomain = getXRange(data);
   return (
-    <div style={{ width, height }}>
+    <div style={{ width, height }} data-test-subj="mlAnomalyChart">
       <Chart>
         <Settings xDomain={xDomain} tooltip={TooltipType.None} />
         <Axes chartData={data} />

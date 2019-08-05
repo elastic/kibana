@@ -64,7 +64,11 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   }, [jobValidatorUpdated]);
 
   return (
-    <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
+    <EuiFormRow
+      error={validation.message}
+      isInvalid={validation.valid === false}
+      data-test-subj="mlJobWizardAggSelection"
+    >
       <EuiComboBox
         singleSelection={{ asPlainText: true }}
         options={options}

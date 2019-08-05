@@ -20,6 +20,7 @@ export const BucketSpanInput: FC<Props> = ({ bucketSpan, setBucketSpan, isInvali
       value={bucketSpan}
       onChange={e => setBucketSpan(e.target.value)}
       isInvalid={isInvalid}
+      data-test-subj="mlJobWizardInputBucketSpan"
     />
   );
 };
