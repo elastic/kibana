@@ -13,6 +13,7 @@ import {
   EuiIcon,
   EuiPage,
   EuiPageBody,
+  EuiPageWidthProps,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -45,27 +46,28 @@ export function Detail(props: { package: string }) {
   // don't have designs for loading/empty states
   if (!info) return null;
 
-  return <DetailLayout {...info} />;
+  return <DetailLayout restrictWidth={1200} {...info} />;
 }
 
-function DetailLayout(props: IntegrationInfoWIP) {
-  const { name, title } = props;
+type LayoutProps = IntegrationInfoWIP & EuiPageWidthProps;
+function DetailLayout(props: LayoutProps) {
+  const { name, restrictWidth, title } = props;
   const { toListView } = useLinks();
   const iconType = ICON_TYPES.find(key => key.toLowerCase() === `logo${name}`);
   useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }, { text: title }]);
 
   return (
     <>
-      <EuiPage restrictWidth={1200} style={{ padding: '16px 16px 0 0' }}>
+      <EuiPage restrictWidth={restrictWidth} style={{ padding: '16px 16px 0 0' }}>
         <NavButtonBack />
       </EuiPage>
       <EuiPage style={{ borderBottom: '1px solid #D3DAE6', paddingBottom: '32px' }}>
-        <EuiPageBody restrictWidth={1200}>
+        <EuiPageBody restrictWidth={restrictWidth}>
           <Header iconType={iconType} {...props} />
         </EuiPageBody>
       </EuiPage>
       <EuiPage style={{ backgroundColor: 'white' }}>
-        <EuiPageBody restrictWidth={1200}>
+        <EuiPageBody restrictWidth={restrictWidth}>
           <Content hasLogoPanel={!!iconType} {...props} />
         </EuiPageBody>
       </EuiPage>
@@ -116,9 +118,14 @@ function Content(props: ContentProps) {
   const { description, hasLogoPanel } = props;
   const marginTop = ICON_HEIGHT_PANEL / 2 + ICON_HEIGHT_NATURAL / 2;
   const leftStyles = hasLogoPanel ? { marginTop: `${marginTop}px` } : {};
+  const headerGlobalNav = 49;
+  const pageTopNav = /* line-height */ 24 + /* padding-top */ 16;
+  const header = /* line-height */ 48 + /* padding-top */ 16 + /* padding-bottom */ 32;
+  const unknown = 8;
+  const topBarsTotal = headerGlobalNav + pageTopNav + header + unknown;
 
   return (
-    <EuiFlexGroup style={{ height: '90vh' }}>
+    <EuiFlexGroup style={{ height: `calc(100vh - ${topBarsTotal}px)` }}>
       <LeftColumn style={leftStyles}>
         <EuiTitle>
           <span>Vertical Tabs</span>
