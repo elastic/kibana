@@ -523,7 +523,6 @@ export enum InfraSnapshotMetricType {
 }
 
 export enum InfraMetric {
-  hostAwsCpu = 'hostAwsCpu',
   hostSystemOverview = 'hostSystemOverview',
   hostCpuUsage = 'hostCpuUsage',
   hostFilesystem = 'hostFilesystem',
@@ -551,6 +550,8 @@ export enum InfraMetric {
   nginxRequestRate = 'nginxRequestRate',
   nginxActiveConnections = 'nginxActiveConnections',
   nginxRequestsPerConnection = 'nginxRequestsPerConnection',
+  awsCpuUtilization = 'awsCpuUtilization',
+  awsNetworkBytes = 'awsNetworkBytes',
   custom = 'custom',
 }
 

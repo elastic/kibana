@@ -11,27 +11,31 @@ import {
 } from '../../adapter_types';
 import { InfraMetric } from '../../../../../graphql/types';
 
-export const hostAwsCpu: InfraMetricModelCreator = (
+export const awsNetworkBytes: InfraMetricModelCreator = (
   timeField,
   indexPattern,
   interval
 ): InfraMetricModel => ({
-  id: InfraMetric.hostAwsCpu,
-  requires: ['system.cpu'],
-  map_field_to: 'cloud.instance.id',
-  id_type: 'cloud',
+  id: InfraMetric.awsNetworkBytes,
+  requires: ['system.network'],
   index_pattern: indexPattern,
-  interval,
+  interval: '>=5m',
   time_field: timeField,
   type: 'timeseries',
   series: [
     {
-      id: 'cpu-util',
+      id: 'tx',
       metrics: [
         {
-          field: 'aws.ec2.cpu.total.pct',
-          id: 'avg-cpu-util',
-          type: InfraMetricModelMetricType.avg,
+          field: 'aws.ec2.network.out.bytes',
+          id: 'max-net-out',
+          type: InfraMetricModelMetricType.max,
+        },
+        {
+          id: 'by-second-max-net-out',
+          type: InfraMetricModelMetricType.calculation,
+          variables: [{ id: 'var-max', name: 'max', field: 'max-net-out' }],
+          script: 'params.max / 300',
         },
       ],
       split_mode: 'everything',

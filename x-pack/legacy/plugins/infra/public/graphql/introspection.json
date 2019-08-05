@@ -2147,12 +2147,6 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "hostAwsCpu",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "hostSystemOverview",
             "description": "",
             "isDeprecated": false,
@@ -2310,6 +2304,18 @@
           },
           {
             "name": "nginxRequestsPerConnection",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "awsCpuUtilization",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "awsNetworkBytes",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null

@@ -8,7 +8,6 @@ import gql from 'graphql-tag';
 
 export const metricsSchema: any = gql`
   enum InfraMetric {
-    hostAwsCpu
     hostSystemOverview
     hostCpuUsage
     hostFilesystem
@@ -36,6 +35,8 @@ export const metricsSchema: any = gql`
     nginxRequestRate
     nginxActiveConnections
     nginxRequestsPerConnection
+    awsCpuUtilization
+    awsNetworkBytes
     custom
   }
 
