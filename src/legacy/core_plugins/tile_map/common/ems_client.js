@@ -220,12 +220,11 @@ export class EMSClient {
       if (!firstService) {
         return [];
       }
-      // const url = this._proxyElasticMapsServiceInMaps ? this._proxyElasticMapsServiceInMapsOptions.filesCatalogue : firstService.manifest;
       const url = this._proxyPath + firstService.manifest;
       return await this.getManifest(url);
     });
 
-    //We also want to cache the actual instances of TMSService as these in turn cache sub-manifests like stylefiles etc..
+    //Cache the actual instances of TMSService as these in turn cache sub-manifests for the style-files
     this._loadTMSServices = _.once(async () => {
       const tmsManifest = await this._getDefaultTMSCatalog();
       return tmsManifest.services.map(serviceConfig => new TMSService(serviceConfig, this, this._proxyPath));
