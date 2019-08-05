@@ -27,6 +27,10 @@ import EMS_STYLE_ROAD_MAP_BRIGHT from './ems_mocks/sample_style_bright';
 import EMS_STYLE_ROAD_MAP_DESATURATED from './ems_mocks/sample_style_desaturated';
 import EMS_STYLE_DARK_MAP from './ems_mocks/sample_style_dark';
 
+import EMS_CATALOGUE_PROXIED from './ems_mocks/sample_manifest_proxied.json';
+import EMS_FILES_PROXIED from './ems_mocks/sample_files_proxied.json';
+import EMS_TILES_PROXIED from './ems_mocks/sample_tiles_proxied.json';
+
 export function getEMSClient(options = {}) {
 
   const emsClient = new EMSClient({
@@ -54,6 +58,12 @@ export function getEMSClient(options = {}) {
       } else if (url.includes('dark-matter')) {
         return EMS_STYLE_DARK_MAP;
       }
+    } else if (url.startsWith('http://proxy.com/foobar/manifest')) {
+      return EMS_CATALOGUE_PROXIED;
+    } else if (url.startsWith('http://proxy.com/foobar/files')) {
+      return EMS_FILES_PROXIED;
+    } else if (url.startsWith('http://proxy.com/foobar/tiles')) {
+      return EMS_TILES_PROXIED;
     }
   };
   return emsClient;

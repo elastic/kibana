@@ -33,6 +33,11 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .then((resp: any) => {
           expect(resp.body).to.eql({
             id: ES_ARCHIVER_ACTION_ID,
+            actionTypeId: 'test.index-record',
+            description: 'My action updated',
+            config: {
+              unencrypted: `This value shouldn't get encrypted`,
+            },
           });
         });
     });
@@ -54,6 +59,11 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .then((resp: any) => {
           expect(resp.body).to.eql({
             id: SPACE_1_ES_ARCHIVER_ACTION_ID,
+            actionTypeId: 'test.index-record',
+            description: 'My action updated',
+            config: {
+              unencrypted: `This value shouldn't get encrypted`,
+            },
           });
         });
     });
@@ -110,6 +120,11 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .expect(200);
       expect(updatedAction).to.eql({
         id: ES_ARCHIVER_ACTION_ID,
+        actionTypeId: 'test.index-record',
+        description: 'My action updated',
+        config: {
+          unencrypted: `This value shouldn't get encrypted`,
+        },
       });
       const { body: fetchedAction } = await supertest
         .get(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
