@@ -95,6 +95,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
 
   const filterTriggerButton = (
     <EuiButtonEmpty
+      className="euiFormControlLayout__prepend"
       iconType="arrowDown"
       iconSide="right"
       onClick={() => {
