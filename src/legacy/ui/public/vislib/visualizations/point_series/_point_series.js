@@ -83,6 +83,7 @@ export class PointSeries {
   }
 
   addThresholdLine(svgElem) {
+    const chartData = this.chartData;
     const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
     const yScale = this.getValueAxis().getScale();
     const svgParentWidth = svgElem[0][0].attributes.width.value;
@@ -90,12 +91,14 @@ export class PointSeries {
 
     const thresholdLineWidth = this.thresholdLineOptions.width;
     let thresholdLineStyle = '0';
-    if (this.thresholdLineOptions.style === 'Dashed') {
+    if (this.thresholdLineOptions.style === 'dashed') {
       thresholdLineStyle = '10,5';
-    } else if (this.thresholdLineOptions.style === 'Dot dashed') {
+    } else if (this.thresholdLineOptions.style === 'dot-dashed') {
       thresholdLineStyle = '20,5,5,5';
     }
     const thresholdValue = this.thresholdLineOptions.value;
+
+    const labelColor = this.handler.data.getColorFunc()(chartData.label);
 
     function y(y) {
       return yScale(y);
@@ -108,6 +111,6 @@ export class PointSeries {
       .attr('y2', isHorizontal ? y(thresholdValue) : svgParentHeight)
       .attr('stroke-width', thresholdLineWidth)
       .attr('stroke-dasharray', thresholdLineStyle)
-      .attr('stroke', '#ff0000');
+      .attr('stroke', labelColor);
   }
 }

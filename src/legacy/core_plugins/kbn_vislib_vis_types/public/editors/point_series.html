@@ -76,74 +76,102 @@
       </div>
     </div>
 
-    <div class="visEditorSidebar__formRow">
-      <label
-        class="visEditorSidebar__formLabel"
-        for="showThresholdLine"
-        i18n-id="kbnVislibVisTypes.editors.pointSeries.thresholdLine.show"
-        i18n-default-message="Show threshold line"
-      ></label>
-      <div class="visEditorSidebar__formControl">
-        <input class="kuiCheckBox" id="showThresholdLine" type="checkbox"
-               ng-model="editorState.params.thresholdLine.show">
-      </div>
-    </div>
+    <div class="visEditorSidebar__collapsible--margin">
 
-    <div ng-if="editorState.params.thresholdLine.show">
-      <div class="visEditorSidebar__formRow">
-        <label
-          class="visEditorSidebar__formLabel"
-          i18n-id="kbnVislibVisTypes.editors.pointSeries.thresholdLine.valueLabel"
-          i18n-default-message="Threshold value"
-        ></label>
-        <div class="visEditorSidebar__formControl">
-          <input
-            name="thresholdLineValue"
-            class="kuiInput visEditorSidebar__input"
-            type="number"
-            step="0.1"
-            ng-model="editorState.params.thresholdLine.value">
+      <div class="visEditorSidebar__collapsibleTitle">
+        <div
+          class="visEditorSidebar__collapsibleTitleLabel"
+          ng-click="isThresholdSettingsOpen = !isThresholdSettingsOpen"
+          kbn-accessible-click
+          aria-expanded="{{!!isThresholdSettingsOpen}}"
+          aria-controls="thresholdLineOptions"
+          aria-label="Toggle threshold line options"
+        >
+          <icon color="'primary'"aria-hidden="true"ng-if="isThresholdSettingsOpen"type="'arrowDown'"size="'s'"></icon>
+          <icon color="'primary'"aria-hidden="true"ng-if="!isThresholdSettingsOpen"type="'arrowRight'"size="'s'"></icon>
+
+          <span
+            class="visEditorSidebar__collapsibleTitleText"
+            i18n-id="kbnVislibVisTypes.controls.pointSeries.thresholdLine.settingsHeader"
+            i18n-default-message="Threshold Line"
+          ></span>
         </div>
       </div>
-    </div>
 
-    <div ng-if="editorState.params.thresholdLine.show">
-      <div class="visEditorSidebar__formRow">
-        <label
-          class="visEditorSidebar__formLabel"
-          i18n-id="kbnVislibVisTypes.editors.pointSeries.thresholdLine.widthLabel"
-          i18n-default-message="Line width"
-        ></label>
-        <div class="visEditorSidebar__formControl">
-          <input
-            name="thresholdLineWidth"
-            class="kuiInput visEditorSidebar__input"
-            type="number"
-            greater-or-equal-than="1"
-            value="1"
-            step="1"
-            ng-model="editorState.params.thresholdLine.width">
-        </div>
-      </div>
-    </div>
+      <div id="visGridOptions" ng-show="isThresholdSettingsOpen">
 
-    <div ng-if="editorState.params.thresholdLine.show">
-      <div class="visEditorSidebar__formRow">
-        <label
-          class="visEditorSidebar__formLabel"
-          for="thresholdLineStyle"
-          i18n-id="kbnVislibVisTypes.editors.pointSeries.thresholdLine.style"
-          i18n-default-message="Line style"
-        ></label>
-        <div class="visEditorSidebar__formControl">
-          <select
-            id="thresholdLineStyle"
-            class="kuiSelect visEditorSidebar__select"
-            ng-model="editorState.params.thresholdLine.style"
-            ng-options="x for x in ['Full', 'Dashed', 'Dot dashed']"
-          ></select>
+        <div class="visEditorSidebar__formRow">
+          <label
+            class="visEditorSidebar__formLabel"
+            for="showThresholdLine"
+            i18n-id="kbnVislibVisTypes.editors.pointSeries.thresholdLine.show"
+            i18n-default-message="Show threshold line"
+          ></label>
+          <div class="visEditorSidebar__formControl">
+            <input class="kuiCheckBox" id="showThresholdLine" type="checkbox"
+                   ng-model="editorState.params.thresholdLine.show">
+          </div>
         </div>
+
+        <div ng-if="editorState.params.thresholdLine.show">
+          <div class="visEditorSidebar__formRow">
+            <label
+              class="visEditorSidebar__formLabel"
+              i18n-id="kbnVislibVisTypes.editors.pointSeries.thresholdLine.valueLabel"
+              i18n-default-message="Threshold value"
+            ></label>
+            <div class="visEditorSidebar__formControl">
+              <input
+                name="thresholdLineValue"
+                class="kuiInput visEditorSidebar__input"
+                type="number"
+                step="0.1"
+                ng-model="editorState.params.thresholdLine.value">
+            </div>
+          </div>
+        </div>
+
+        <div ng-if="editorState.params.thresholdLine.show">
+          <div class="visEditorSidebar__formRow">
+            <label
+              class="visEditorSidebar__formLabel"
+              i18n-id="kbnVislibVisTypes.editors.pointSeries.thresholdLine.widthLabel"
+              i18n-default-message="Line width"
+            ></label>
+            <div class="visEditorSidebar__formControl">
+              <input
+                name="thresholdLineWidth"
+                class="kuiInput visEditorSidebar__input"
+                type="number"
+                greater-or-equal-than="1"
+                value="1"
+                step="1"
+                ng-model="editorState.params.thresholdLine.width">
+            </div>
+          </div>
+        </div>
+
+        <div ng-if="editorState.params.thresholdLine.show">
+          <div class="visEditorSidebar__formRow">
+            <label
+              class="visEditorSidebar__formLabel"
+              for="thresholdLineStyle"
+              i18n-id="kbnVislibVisTypes.editors.pointSeries.thresholdLine.style"
+              i18n-default-message="Line style"
+            ></label>
+            <div class="visEditorSidebar__formControl">
+              <select
+                id="thresholdLineStyle"
+                class="kuiSelect visEditorSidebar__select"
+                ng-model="editorState.params.thresholdLine.style"
+                ng-options="style for style in ['full', 'dashed', 'dot-dashed']"
+              ></select>
+            </div>
+          </div>
+        </div>
+
       </div>
+
     </div>
 
     <vislib-grid></vislib-grid>
