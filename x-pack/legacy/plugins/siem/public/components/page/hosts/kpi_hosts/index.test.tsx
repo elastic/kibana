@@ -17,17 +17,32 @@ describe('kpiHostsComponent', () => {
   const ID = 'kpiHost';
   const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
   const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
+  const narrowDateRange = () => {};
   describe('render', () => {
     test('it should render spinner if it is loading', () => {
       const wrapper: ShallowWrapper = shallow(
-        <KpiHostsComponent data={mockKpiHostsData} from={from} id={ID} loading={true} to={to} />
+        <KpiHostsComponent
+          data={mockKpiHostsData}
+          from={from}
+          id={ID}
+          loading={true}
+          to={to}
+          narrowDateRange={narrowDateRange}
+        />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
     test('it should render KpiHostsData', () => {
       const wrapper: ShallowWrapper = shallow(
-        <KpiHostsComponent data={mockKpiHostsData} from={from} id={ID} loading={false} to={to} />
+        <KpiHostsComponent
+          data={mockKpiHostsData}
+          from={from}
+          id={ID}
+          loading={false}
+          to={to}
+          narrowDateRange={narrowDateRange}
+        />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
@@ -40,6 +55,7 @@ describe('kpiHostsComponent', () => {
           id={ID}
           loading={false}
           to={to}
+          narrowDateRange={narrowDateRange}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -56,7 +72,16 @@ describe('kpiHostsComponent', () => {
     });
 
     beforeEach(() => {
-      shallow(<KpiHostsComponent data={data} from={from} id={ID} loading={false} to={to} />);
+      shallow(
+        <KpiHostsComponent
+          data={data}
+          from={from}
+          id={ID}
+          loading={false}
+          to={to}
+          narrowDateRange={narrowDateRange}
+        />
+      );
     });
 
     afterEach(() => {
@@ -68,7 +93,7 @@ describe('kpiHostsComponent', () => {
     });
 
     test(`it should apply correct mapping by given data type`, () => {
-      expect(mockUseKpiMatrixStatus).toBeCalledWith(mapping, data, ID, from, to);
+      expect(mockUseKpiMatrixStatus).toBeCalledWith(mapping, data, ID, from, to, narrowDateRange);
     });
   });
 });

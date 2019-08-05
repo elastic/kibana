@@ -5,13 +5,16 @@
  */
 
 import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiTitle, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import 'github-markdown-css/github-markdown.css';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
-import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import {
@@ -69,13 +72,6 @@ enum ButtonOption {
   Folder = 'Directory',
 }
 
-enum ButtonLabel {
-  Code = 'Code',
-  Content = 'Content',
-  Download = 'Download',
-  Raw = 'Raw',
-}
-
 class CodeContent extends React.PureComponent<Props> {
   public findNode = (pathSegments: string[], node: FileTree): FileTree | undefined => {
     if (!node) {
@@ -126,7 +122,9 @@ class CodeContent extends React.PureComponent<Props> {
     const { path, resource, org, repo, revision } = this.props.match.params;
     const repoUri = `${resource}/${org}/${repo}`;
     window.open(
-      chrome.addBasePath(`/app/code/repo/${repoUri}/raw/${encodeRevisionString(revision)}/${path}`)
+      npStart.core.http.basePath.prepend(
+        `/app/code/repo/${repoUri}/raw/${encodeRevisionString(revision)}/${path}`
+      )
     );
   };
 
@@ -161,20 +159,40 @@ class CodeContent extends React.PureComponent<Props> {
       const buttonOptions = [
         {
           id: ButtonOption.Code,
-          label: isText && !isMarkdown ? ButtonLabel.Code : ButtonLabel.Content,
+          label:
+            isText && !isMarkdown
+              ? i18n.translate('xpack.code.mainPage.content.buttons.codeButtonLabel', {
+                  defaultMessage: 'Code',
+                })
+              : i18n.translate('xpack.code.mainPage.content.buttons.contentButtonLabel', {
+                  defaultMessage: 'content',
+                }),
         },
         {
           id: ButtonOption.Blame,
-          label: ButtonOption.Blame,
+          label: i18n.translate('xpack.code.mainPage.content.buttons.blameButtonLabel', {
+            defaultMessage: 'Blame',
+          }),
           isDisabled: isUnsupported || isImage || isOversize,
         },
         {
           id: ButtonOption.History,
-          label: ButtonOption.History,
+          label: i18n.translate('xpack.code.mainPage.content.buttons.historyButtonLabel', {
+            defaultMessage: 'History',
+          }),
         },
       ];
       const rawButtonOptions = [
-        { id: 'Raw', label: isText ? ButtonLabel.Raw : ButtonLabel.Download },
+        {
+          id: 'Raw',
+          label: isText
+            ? i18n.translate('xpack.code.mainPage.content.buttons.rawButtonLabel', {
+                defaultMessage: 'Raw',
+              })
+            : i18n.translate('xpack.code.mainPage.content.buttons.downloadButtonLabel', {
+                defaultMessage: 'Download',
+              }),
+        },
       ];
 
       return (
@@ -205,16 +223,21 @@ class CodeContent extends React.PureComponent<Props> {
       return (
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
           <EuiButtonGroup
+            className="codeButtonGroup"
             buttonSize="s"
             color="primary"
             options={[
               {
                 id: ButtonOption.Folder,
-                label: ButtonOption.Folder,
+                label: i18n.translate('xpack.code.mainPage.content.buttons.folderButtonLabel', {
+                  defaultMessage: 'Directory',
+                }),
               },
               {
                 id: ButtonOption.History,
-                label: ButtonOption.History,
+                label: i18n.translate('xpack.code.mainPage.content.buttons.historyButtonLabel', {
+                  defaultMessage: 'History',
+                }),
               },
             ]}
             type="single"
@@ -296,7 +319,12 @@ class CodeContent extends React.PureComponent<Props> {
               header={
                 <React.Fragment>
                   <EuiTitle size="s" className="codeMargin__title">
-                    <h3>Recent Commits</h3>
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.code.mainPage.directory.recentCommitsTitle"
+                        defaultMessage="Recent Commits"
+                      />
+                    </h3>
                   </EuiTitle>
                   <EuiButton
                     size="s"
@@ -304,7 +332,10 @@ class CodeContent extends React.PureComponent<Props> {
                       revision
                     )}/${path || ''}`}
                   >
-                    View All
+                    <FormattedMessage
+                      id="xpack.code.mainPage.directory.viewAllCommitsButtonLabel"
+                      defaultMessage="View All"
+                    />
                   </EuiButton>
                 </React.Fragment>
               }
@@ -358,7 +389,9 @@ class CodeContent extends React.PureComponent<Props> {
             </div>
           );
         } else if (isImage) {
-          const rawUrl = chrome.addBasePath(`/app/code/repo/${repoUri}/raw/${revision}/${path}`);
+          const rawUrl = npStart.core.http.basePath.prepend(
+            `/app/code/repo/${repoUri}/raw/${revision}/${path}`
+          );
           return (
             <div className="code-auto-margin">
               <img src={rawUrl} alt={rawUrl} />
@@ -383,7 +416,12 @@ class CodeContent extends React.PureComponent<Props> {
               repoUri={repoUri}
               header={
                 <EuiTitle className="codeMargin__title">
-                  <h3>Commit History</h3>
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.code.mainPage.history.commitHistoryTitle"
+                      defaultMessage="Commit History"
+                    />
+                  </h3>
                 </EuiTitle>
               }
               showPagination={true}

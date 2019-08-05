@@ -20,6 +20,7 @@ import {
 import { KpiNetworkData } from '../../../../graphql/types';
 
 import * as i18n from './translations';
+import { UpdateDateRange } from '../../../charts/common';
 
 const kipsPerRow = 2;
 const kpiWidgetHeight = 228;
@@ -34,6 +35,7 @@ interface KpiNetworkProps {
   id: string;
   loading: boolean;
   to: number;
+  narrowDateRange: UpdateDateRange;
 }
 
 export const fieldTitleChartMapping: Readonly<StatItems[]> = [
@@ -44,16 +46,16 @@ export const fieldTitleChartMapping: Readonly<StatItems[]> = [
       {
         key: 'uniqueSourcePrivateIps',
         value: null,
-        name: i18n.SOURCE_NAME,
-        description: i18n.SOURCE,
+        name: i18n.SOURCE_CHART_LABEL,
+        description: i18n.SOURCE_UNIT_LABEL,
         color: euiColorVis2,
         icon: 'visMapCoordinate',
       },
       {
         key: 'uniqueDestinationPrivateIps',
         value: null,
-        name: i18n.DESTINATION_NAME,
-        description: i18n.DESTINATION,
+        name: i18n.DESTINATION_CHART_LABEL,
+        description: i18n.DESTINATION_UNIT_LABEL,
         color: euiColorVis3,
         icon: 'visMapCoordinate',
       },
@@ -124,14 +126,23 @@ export const KpiNetworkBaseComponent = ({
   id,
   from,
   to,
+  narrowDateRange,
 }: {
   fieldsMapping: Readonly<StatItems[]>;
   data: KpiNetworkData;
   id: string;
   from: number;
   to: number;
+  narrowDateRange: UpdateDateRange;
 }) => {
-  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(fieldsMapping, data, id, from, to);
+  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
+    fieldsMapping,
+    data,
+    id,
+    from,
+    to,
+    narrowDateRange
+  );
 
   return (
     <EuiFlexGroup wrap>
@@ -143,7 +154,7 @@ export const KpiNetworkBaseComponent = ({
 };
 
 export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
-  ({ data, from, id, loading, to }) => {
+  ({ data, from, id, loading, to, narrowDateRange }) => {
     return loading ? (
       <FlexGroup justifyContent="center" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -162,6 +173,7 @@ export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
                 fieldsMapping={mappingsPerLine}
                 from={from}
                 to={to}
+                narrowDateRange={narrowDateRange}
               />
             </React.Fragment>
           ))}
@@ -173,6 +185,7 @@ export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
             fieldsMapping={fieldTitleChartMapping}
             from={from}
             to={to}
+            narrowDateRange={narrowDateRange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

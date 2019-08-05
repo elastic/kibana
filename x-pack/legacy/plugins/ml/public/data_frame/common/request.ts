@@ -9,6 +9,7 @@ import { DefaultOperator } from 'elasticsearch';
 import { IndexPattern } from 'ui/index_patterns';
 
 import { dictionaryToArray } from '../../../common/types/common';
+import { SavedSearchQuery } from '../../contexts/kibana';
 
 import { StepDefineExposedState } from '../pages/data_frame_new_pivot/components/step_define/step_define_form';
 import { StepDetailsExposedState } from '../pages/data_frame_new_pivot/components/step_details/step_details_form';
@@ -24,7 +25,6 @@ import {
 
 import { PivotAggsConfig } from './pivot_aggs';
 import { DateHistogramAgg, HistogramAgg, TermsAgg } from './pivot_group_by';
-import { SavedSearchQuery } from './kibana_context';
 import { PreviewRequestBody, CreateRequestBody } from './transform';
 
 export interface SimpleQuery {
@@ -123,7 +123,7 @@ export function getCreateRequestBody(
   const request: CreateRequestBody = {
     ...getPreviewRequestBody(
       indexPatternTitle,
-      getPivotQuery(pivotState.search),
+      getPivotQuery(pivotState.searchQuery),
       dictionaryToArray(pivotState.groupByList),
       dictionaryToArray(pivotState.aggList)
     ),
