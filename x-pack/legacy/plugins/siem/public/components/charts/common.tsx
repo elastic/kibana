@@ -15,9 +15,9 @@ import {
   LIGHT_THEME,
   DARK_THEME,
   ScaleType,
+  TickFormatter,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { TickFormatter } from '@elastic/charts/dist/lib/series/specs';
 import chrome from 'ui/chrome';
 import moment from 'moment-timezone';
 
