@@ -36,13 +36,13 @@ export async function getTraceItems(traceId: string, setup: Setup) {
             { terms: { [PROCESSOR_EVENT]: ['span', 'transaction'] } },
             { range: rangeFilter(start, end) }
           ],
-          must: {
+          should: {
             exists: { field: PARENT_ID }
           }
         }
       },
       sort: [
-        { _score: { order: 'desc' } },
+        { _score: { order: 'asc' } },
         { [TRANSACTION_DURATION]: { order: 'desc' } },
         { [SPAN_DURATION]: { order: 'desc' } }
       ]
@@ -51,7 +51,6 @@ export async function getTraceItems(traceId: string, setup: Setup) {
 
   const resp = await client.search<Transaction | Span>(params);
 
-  // return resp.hits.hits.map(hit => hit._source);
   return {
     items: resp.hits.hits.map(hit => hit._source),
     exceedsMax: resp.hits.total > MAX_ITEMS_RETURNED

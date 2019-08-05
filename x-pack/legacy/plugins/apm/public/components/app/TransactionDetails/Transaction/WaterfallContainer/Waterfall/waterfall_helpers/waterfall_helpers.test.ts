@@ -16,19 +16,18 @@ import {
 
 describe('waterfall_helpers', () => {
   describe('getWaterfall', () => {
-    const root = {
-      processor: { event: 'transaction' },
-      trace: { id: 'myTraceId' },
-      service: { name: 'opbeans-node' },
-      transaction: {
-        duration: { us: 49660 },
-        name: 'GET /api',
-        id: 'myTransactionId1'
-      },
-      timestamp: { us: 1549324795784006 }
-    } as Transaction;
-
     const hits = [
+      {
+        processor: { event: 'transaction' },
+        trace: { id: 'myTraceId' },
+        service: { name: 'opbeans-node' },
+        transaction: {
+          duration: { us: 49660 },
+          name: 'GET /api',
+          id: 'myTransactionId1'
+        },
+        timestamp: { us: 1549324795784006 }
+      } as Transaction,
       {
         parent: { id: 'mySpanIdA' },
         processor: { event: 'span' },
@@ -103,7 +102,6 @@ describe('waterfall_helpers', () => {
       };
       const waterfall = getWaterfall(
         {
-          root,
           trace: { items: hits, exceedsMax: false },
           errorsPerTransaction
         },
@@ -122,7 +120,6 @@ describe('waterfall_helpers', () => {
       };
       const waterfall = getWaterfall(
         {
-          root,
           trace: { items: hits, exceedsMax: false },
           errorsPerTransaction
         },
@@ -141,7 +138,6 @@ describe('waterfall_helpers', () => {
       };
       const waterfall = getWaterfall(
         {
-          root,
           trace: { items: hits, exceedsMax: false },
           errorsPerTransaction
         },
