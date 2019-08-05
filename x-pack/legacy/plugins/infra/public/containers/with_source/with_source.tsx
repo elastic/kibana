@@ -15,7 +15,7 @@ interface WithSourceProps {
   children: RendererFunction<{
     configuration?: SourceQuery.Query['source']['configuration'];
     create: (sourceProperties: UpdateSourceInput) => Promise<any> | undefined;
-    derivedIndexPattern: StaticIndexPattern;
+    createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => StaticIndexPattern;
     exists?: boolean;
     hasFailed: boolean;
     isLoading: boolean;
@@ -33,7 +33,7 @@ interface WithSourceProps {
 export const WithSource: React.FunctionComponent<WithSourceProps> = ({ children }) => {
   const {
     createSourceConfiguration,
-    derivedIndexPattern,
+    createDerivedIndexPattern,
     source,
     sourceExists,
     sourceId,
@@ -50,7 +50,7 @@ export const WithSource: React.FunctionComponent<WithSourceProps> = ({ children 
   return children({
     create: createSourceConfiguration,
     configuration: source && source.configuration,
-    derivedIndexPattern,
+    createDerivedIndexPattern,
     exists: sourceExists,
     hasFailed: hasFailedLoadingSource,
     isLoading,

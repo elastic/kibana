@@ -7,10 +7,9 @@
 import expect from '@kbn/expect';
 import { getTestAlertData } from './utils';
 import { ES_ARCHIVER_ACTION_ID } from './constants';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function createAlertTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function createAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
