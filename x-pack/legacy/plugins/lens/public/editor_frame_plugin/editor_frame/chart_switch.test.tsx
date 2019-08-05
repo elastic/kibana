@@ -11,6 +11,7 @@ import { ReactWrapper } from 'enzyme';
 import { ChartSwitch } from './chart_switch';
 import { Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import { EuiKeyPadMenuItemButton } from '@elastic/eui';
+import { Action } from './state_management';
 
 describe('chart_switch', () => {
   function generateVisualization(id: string): jest.Mocked<Visualization> {
@@ -187,6 +188,61 @@ describe('chart_switch', () => {
     });
   });
 
+  it('should indicate data loss if not all columns will be used', () => {
+    const dispatch = jest.fn();
+    const visualizations = mockVisualizations();
+    const frame = mockFrame(['a']);
+
+    const datasourceMap = mockDatasourceMap();
+    datasourceMap.testDatasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+      {
+        state: {},
+        table: {
+          columns: [
+            {
+              columnId: 'col1',
+              operation: {
+                label: '',
+                dataType: 'string',
+                isBucketed: true,
+              },
+            },
+            {
+              columnId: 'col2',
+              operation: {
+                label: '',
+                dataType: 'number',
+                isBucketed: false,
+              },
+            },
+          ],
+          datasourceSuggestionId: 0,
+          layerId: 'first',
+          isMultiRow: true,
+        },
+      },
+    ]);
+    datasourceMap.testDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+      { columnId: 'col1' },
+      { columnId: 'col2' },
+      { columnId: 'col3' },
+    ]);
+
+    const component = mount(
+      <ChartSwitch
+        visualizationId="visA"
+        visualizationState={{}}
+        visualizationMap={visualizations}
+        dispatch={dispatch}
+        framePublicAPI={frame}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
+      />
+    );
+
+    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toEqual('bolt');
+  });
+
   it('should indicate data loss if not all layers will be used', () => {
     const dispatch = jest.fn();
     const visualizations = mockVisualizations();
@@ -332,6 +388,64 @@ describe('chart_switch', () => {
       type: 'UPDATE_VISUALIZATION_STATE',
       newState: 'therebedragons',
     });
+  });
+
+  it('should switch to the updated datasource state', () => {
+    const dispatch = jest.fn();
+    const visualizations = mockVisualizations();
+    const frame = mockFrame(['a', 'b']);
+
+    const datasourceMap = mockDatasourceMap();
+    datasourceMap.testDatasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+      {
+        state: 'testDatasource suggestion',
+        table: {
+          columns: [
+            {
+              columnId: 'col1',
+              operation: {
+                label: '',
+                dataType: 'string',
+                isBucketed: true,
+              },
+            },
+            {
+              columnId: 'col2',
+              operation: {
+                label: '',
+                dataType: 'number',
+                isBucketed: false,
+              },
+            },
+          ],
+          datasourceSuggestionId: 0,
+          layerId: 'a',
+          isMultiRow: true,
+        },
+      },
+    ]);
+
+    const component = mount(
+      <ChartSwitch
+        visualizationId="visA"
+        visualizationState={{}}
+        visualizationMap={visualizations}
+        dispatch={dispatch}
+        framePublicAPI={frame}
+        datasourceMap={datasourceMap}
+        datasourceStates={mockDatasourceStates()}
+      />
+    );
+
+    switchTo('subvisB', component);
+
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'SWITCH_VISUALIZATION',
+      newVisualizationId: 'visB',
+      datasourceId: 'testDatasource',
+      datasourceState: 'testDatasource suggestion',
+      initialState: 'suggestion visB',
+    } as Action);
   });
 
   it('should ensure the new visualization has the proper subtype', () => {

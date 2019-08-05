@@ -118,6 +118,63 @@ describe('suggestion helpers', () => {
     expect(suggestions).toHaveLength(3);
   });
 
+  it('should call getDatasourceSuggestionsForField when a field is passed', () => {
+    datasourceMap.mock.getDatasourceSuggestionsForField.mockReturnValue([generateSuggestion()]);
+    const droppedField = {};
+    getSuggestions({
+      visualizationMap: {
+        vis1: createMockVisualization(),
+      },
+      activeVisualizationId: 'vis1',
+      visualizationState: {},
+      datasourceMap,
+      datasourceStates,
+      field: droppedField,
+    });
+    expect(datasourceMap.mock.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
+      datasourceStates.mock.state,
+      droppedField
+    );
+  });
+
+  it('should call getDatasourceSuggestionsForField from all datasources with a state', () => {
+    const multiDatasourceStates = {
+      mock: {
+        isLoading: false,
+        state: {},
+      },
+      mock2: {
+        isLoading: false,
+        state: {},
+      },
+    };
+    const multiDatasourceMap = {
+      mock: createMockDatasource(),
+      mock2: createMockDatasource(),
+      mock3: createMockDatasource(),
+    };
+    const droppedField = {};
+    getSuggestions({
+      visualizationMap: {
+        vis1: createMockVisualization(),
+      },
+      activeVisualizationId: 'vis1',
+      visualizationState: {},
+      datasourceMap: multiDatasourceMap,
+      datasourceStates: multiDatasourceStates,
+      field: droppedField,
+    });
+    expect(multiDatasourceMap.mock.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
+      multiDatasourceStates.mock.state,
+      droppedField
+    );
+    expect(multiDatasourceMap.mock2.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
+      multiDatasourceStates.mock2.state,
+      droppedField
+    );
+    expect(multiDatasourceMap.mock3.getDatasourceSuggestionsForField).not.toHaveBeenCalled();
+  });
+
   it('should rank the visualizations by score', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
@@ -203,7 +260,7 @@ describe('suggestion helpers', () => {
     expect(mockVisualization2.getSuggestions.mock.calls[0][0].tables[1]).toEqual(table2);
   });
 
-  it('should map the suggestion ids back to the correct datasource states', () => {
+  it('should map the suggestion ids back to the correct datasource ids and states', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
     const tableState1 = {};
@@ -252,8 +309,11 @@ describe('suggestion helpers', () => {
       datasourceStates,
     });
     expect(suggestions[0].datasourceState).toBe(tableState1);
+    expect(suggestions[0].datasourceId).toBe('mock');
     expect(suggestions[1].datasourceState).toBe(tableState2);
+    expect(suggestions[1].datasourceId).toBe('mock');
     expect(suggestions[2].datasourceState).toBe(tableState2);
+    expect(suggestions[2].datasourceId).toBe('mock');
   });
 
   it('should pass the state of the currently active visualization to getSuggestions', () => {

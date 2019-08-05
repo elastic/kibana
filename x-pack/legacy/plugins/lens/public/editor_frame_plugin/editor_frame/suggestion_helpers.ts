@@ -115,6 +115,8 @@ export function switchToSuggestion(
   const layerIds = Object.keys(frame.datasourceLayers).filter(id => {
     return id !== suggestion.keptLayerId;
   });
-  frame.removeLayers(layerIds);
+  if (layerIds.length > 0) {
+    frame.removeLayers(layerIds);
+  }
   dispatch(action);
 }
