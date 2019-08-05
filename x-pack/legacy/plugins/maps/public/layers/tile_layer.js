@@ -6,7 +6,6 @@
 
 import { AbstractLayer } from './layer';
 import _ from 'lodash';
-import { TileStyle } from '../layers/styles/tile_style';
 import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 
 export class TileLayer extends AbstractLayer {
@@ -15,17 +14,12 @@ export class TileLayer extends AbstractLayer {
 
   constructor({ layerDescriptor, source, style }) {
     super({ layerDescriptor, source, style });
-    if (!style) {
-      this._style = new TileStyle();
-    }
   }
 
   static createDescriptor(options) {
     const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = TileLayer.type;
     tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
-    tileLayerDescriptor.style =
-      TileStyle.createDescriptor(tileLayerDescriptor.style.properties);
     return tileLayerDescriptor;
   }
 

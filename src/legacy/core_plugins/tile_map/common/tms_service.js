@@ -28,6 +28,12 @@ export class TMSService {
     return this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
   });
 
+  _getMbVectorStyleJson = _.once(async () => {
+    const vectorUrl = this._getVectorStyleUrl();
+    const url = this._proxyPath + vectorUrl;
+    return this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
+  });
+
   constructor(config, emsClient, proxyPath) {
     this._config = config;
     this._emsClient = emsClient;
@@ -39,6 +45,27 @@ export class TMSService {
       return format.locale === locale && format.format === 'raster';
     });
   }
+
+  _getVectorFormats(locale) {
+    return this._config.formats.filter(format => {
+      return format.locale === locale && format.format === 'vector';
+    });
+  }
+
+  _getVectorStyleUrl() {
+    let vectorFormats = this._getVectorFormats(this._emsClient.getLocale());
+    if (!vectorFormats.length) {//fallback to default locale
+      vectorFormats = this._getVectorFormats(this._emsClient.getDefaultLocale());
+    }
+    if (!vectorFormats.length) {
+      throw new Error(`Cannot find vector tile layer for locale ${this._emsClient.getLocale()} or ${this._emsClient.getDefaultLocale()}`);
+    }
+    const defaultStyle = vectorFormats[0];
+    if (defaultStyle && defaultStyle.hasOwnProperty('url')) {
+      return defaultStyle.url;
+    }
+  }
+
 
   _getRasterStyleUrl() {
     let rasterFormats = this._getRasterFormats(this._emsClient.getLocale());
@@ -62,6 +89,12 @@ export class TMSService {
     const tileJson = await this._getRasterStyleJson();
     const directUrl = this._proxyPath + tileJson.tiles[0];
     return this._emsClient.extendUrlWithParams(directUrl);
+  }
+
+  async _getMbVectorStyleJson() {
+    const tileJson = await this._getRasterStyleJson();
+    console.log('vector json', tileJson);
+    return tileJson;
   }
 
   getDisplayName() {

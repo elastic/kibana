@@ -135,6 +135,11 @@ export class EMSTMSSource extends AbstractTMSSource {
     return await emsTMSService.getUrlTemplate();
   }
 
+  async getMbVectorTileStyleSheet() {
+    const emsTMSService = await this._getEMSTMSService();
+    return await emsTMSService.getMbVectorTileStyleSheet();
+  }
+
   _getEmsTileLayerId() {
     if (!this._descriptor.isAutoSelect) {
       return this._descriptor.id;
