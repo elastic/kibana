@@ -16,8 +16,10 @@ import {
   EuiPageContent,
   EuiPageContentBody,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n, InjectedIntl } from '@kbn/i18n/react';
 import React, { useCallback, useContext, useMemo } from 'react';
+import { Prompt } from 'react-router-dom';
 
 import { Source } from '../../containers/source';
 import { FieldsConfigurationPanel } from './fields_configuration_panel';
@@ -94,6 +96,12 @@ export const SourceConfigurationSettings = injectI18n(
               data-test-subj="sourceConfigurationContent"
             >
               <EuiPageContentBody>
+                <Prompt
+                  when={isFormDirty}
+                  message={i18n.translate('xpack.infra.sourceConfiguration.unsavedFormPrompt', {
+                    defaultMessage: 'Are you sure you want to leave? Changes will be lost',
+                  })}
+                />
                 <EuiPanel paddingSize="l">
                   <NameConfigurationPanel
                     isLoading={isLoading}
