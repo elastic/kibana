@@ -17,11 +17,17 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ClusterClient](./kibana-plugin-server.clusterclient.md) | Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>). |
 |  [ElasticsearchErrorHelpers](./kibana-plugin-server.elasticsearcherrorhelpers.md) | Helpers for working with errors returned from the Elasticsearch service.Since the internal data of errors are subject to change, consumers of the Elasticsearch service should always use these helpers to classify errors instead of checking error internals such as <code>body.error.header[WWW-Authenticate]</code> |
 |  [KibanaRequest](./kibana-plugin-server.kibanarequest.md) | Kibana specific abstraction for an incoming request. |
-|  [Router](./kibana-plugin-server.router.md) |  |
+|  [Router](./kibana-plugin-server.router.md) | Provides ability to declare a handler function for a particular path and HTTP request method. Each route can have only one handler functions, which is executed when the route is matched. |
 |  [SavedObjectsErrorHelpers](./kibana-plugin-server.savedobjectserrorhelpers.md) |  |
 |  [SavedObjectsSchema](./kibana-plugin-server.savedobjectsschema.md) |  |
 |  [SavedObjectsSerializer](./kibana-plugin-server.savedobjectsserializer.md) |  |
 |  [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API |
+
+## Enumerations
+
+|  Enumeration | Description |
+|  --- | --- |
+|  [AuthStatus](./kibana-plugin-server.authstatus.md) | Status indicating an outcome of the authentication. |
 
 ## Interfaces
 
@@ -32,13 +38,17 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CallAPIOptions](./kibana-plugin-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |
 |  [CoreSetup](./kibana-plugin-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
+|  [CustomHttpResponseOptions](./kibana-plugin-server.customhttpresponseoptions.md) | HTTP response parameters for a response with adjustable status code. |
 |  [DiscoveredPlugin](./kibana-plugin-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
 |  [ElasticsearchError](./kibana-plugin-server.elasticsearcherror.md) |  |
 |  [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |  |
 |  [FakeRequest](./kibana-plugin-server.fakerequest.md) | Fake request object created manually by Kibana plugins. |
+|  [HttpResponseOptions](./kibana-plugin-server.httpresponseoptions.md) | HTTP response parameters |
+|  [HttpServerSetup](./kibana-plugin-server.httpserversetup.md) | Kibana HTTP Service provides own abstraction for work with HTTP stack. Plugins don't have direct access to <code>hapi</code> server and its primitives anymore. Moreover, plugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood. This gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins. If the HTTP Service lacks functionality you need, we are happy to discuss and support your needs. |
 |  [HttpServiceStart](./kibana-plugin-server.httpservicestart.md) |  |
 |  [InternalCoreStart](./kibana-plugin-server.internalcorestart.md) |  |
 |  [KibanaRequestRoute](./kibana-plugin-server.kibanarequestroute.md) | Request specific route information exposed to a handler. |
+|  [LegacyRequest](./kibana-plugin-server.legacyrequest.md) |  |
 |  [Logger](./kibana-plugin-server.logger.md) | Logger exposes all the necessary methods to log any type of information and this is the interface used by the logging consumers including plugins. |
 |  [LoggerFactory](./kibana-plugin-server.loggerfactory.md) | The single purpose of <code>LoggerFactory</code> interface is to define a way to retrieve a context-based logger instance. |
 |  [LogMeta](./kibana-plugin-server.logmeta.md) | Contextual metadata |
@@ -49,7 +59,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginsServiceSetup](./kibana-plugin-server.pluginsservicesetup.md) |  |
 |  [PluginsServiceStart](./kibana-plugin-server.pluginsservicestart.md) |  |
 |  [ResponseErrorMeta](./kibana-plugin-server.responseerrormeta.md) | Additional metadata to enhance error output or provide error details. |
-|  [RouteConfigOptions](./kibana-plugin-server.routeconfigoptions.md) | Route specific configuration. |
+|  [RouteConfig](./kibana-plugin-server.routeconfig.md) | Route specific configuration. |
+|  [RouteConfigOptions](./kibana-plugin-server.routeconfigoptions.md) | Additional route options. |
 |  [SavedObject](./kibana-plugin-server.savedobject.md) |  |
 |  [SavedObjectAttributes](./kibana-plugin-server.savedobjectattributes.md) | The data for a Saved Object is stored in the <code>attributes</code> key as either an object or an array of objects. |
 |  [SavedObjectReference](./kibana-plugin-server.savedobjectreference.md) | A reference to another saved object. |
@@ -79,7 +90,14 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsUpdateOptions](./kibana-plugin-server.savedobjectsupdateoptions.md) |  |
 |  [SavedObjectsUpdateResponse](./kibana-plugin-server.savedobjectsupdateresponse.md) |  |
 |  [SessionStorage](./kibana-plugin-server.sessionstorage.md) | Provides an interface to store and retrieve data across requests. |
+|  [SessionStorageCookieOptions](./kibana-plugin-server.sessionstoragecookieoptions.md) | Configuration used to create HTTP session storage based on top of cookie mechanism. |
 |  [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |
+
+## Variables
+
+|  Variable | Description |
+|  --- | --- |
+|  [kibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) | Set of helpers used to create <code>KibanaResponse</code> to form HTTP response on an incoming request. Should be returned as a result of [RequestHandler](./kibana-plugin-server.requesthandler.md) execution. |
 
 ## Type Aliases
 
@@ -90,14 +108,20 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthHeaders](./kibana-plugin-server.authheaders.md) | Auth Headers map |
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
-|  [Headers](./kibana-plugin-server.headers.md) |  |
+|  [GetAuthState](./kibana-plugin-server.getauthstate.md) | Get authentication state for a request. Returned by <code>auth</code> interceptor. |
+|  [Headers](./kibana-plugin-server.headers.md) | Http request headers to read. |
+|  [HttpResponsePayload](./kibana-plugin-server.httpresponsepayload.md) | Data send to the client as a response payload. |
 |  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |  |
-|  [LegacyRequest](./kibana-plugin-server.legacyrequest.md) | Support Legacy platform request for the period of migration. |
+|  [IsAuthenticated](./kibana-plugin-server.isauthenticated.md) | Return authentication status for a request. |
+|  [KibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) | Creates an object containing request response payload, HTTP headers, error details, and other data transmitted to the client. |
+|  [KnownHeaders](./kibana-plugin-server.knownheaders.md) | Set of well-known HTTP headers. |
 |  [OnPostAuthHandler](./kibana-plugin-server.onpostauthhandler.md) |  |
 |  [OnPreAuthHandler](./kibana-plugin-server.onpreauthhandler.md) |  |
 |  [PluginInitializer](./kibana-plugin-server.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>server</code> directory should conform to this interface. |
 |  [PluginName](./kibana-plugin-server.pluginname.md) | Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays that use it as a key or value more obvious. |
 |  [RecursiveReadonly](./kibana-plugin-server.recursivereadonly.md) |  |
+|  [RedirectResponseOptions](./kibana-plugin-server.redirectresponseoptions.md) | HTTP response parameters for redirection response |
+|  [RequestHandler](./kibana-plugin-server.requesthandler.md) | A function executed when route path matched requested resource path. Request handler is expected to return a result of one of [KibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) functions. |
 |  [ResponseError](./kibana-plugin-server.responseerror.md) | Error message and optional data send to the client in case of error. |
 |  [RouteMethod](./kibana-plugin-server.routemethod.md) | The set of common HTTP methods supported by Kibana routing. |
 |  [SavedObjectAttribute](./kibana-plugin-server.savedobjectattribute.md) |  |

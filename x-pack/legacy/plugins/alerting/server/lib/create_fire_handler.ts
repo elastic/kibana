@@ -12,13 +12,13 @@ import { transformActionParams } from './transform_action_params';
 interface CreateFireHandlerOptions {
   fireAction: ActionsPlugin['fire'];
   alertSavedObject: SavedObject;
-  basePath: string;
+  spaceId: string;
 }
 
 export function createFireHandler({
   fireAction,
   alertSavedObject,
-  basePath,
+  spaceId,
 }: CreateFireHandlerOptions) {
   return async (actionGroup: string, context: Context, state: State) => {
     const alertActions: RawAlertAction[] = alertSavedObject.attributes.actions;
@@ -43,7 +43,7 @@ export function createFireHandler({
       await fireAction({
         id: action.id,
         params: action.params,
-        basePath,
+        spaceId,
       });
     }
   };
