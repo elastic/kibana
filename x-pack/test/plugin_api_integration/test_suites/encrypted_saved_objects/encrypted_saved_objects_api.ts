@@ -6,10 +6,9 @@
 
 import expect from '@kbn/expect';
 import { SavedObject } from 'src/core/server';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getService }: FtrProviderContext) {
   const es = getService('es');
   const chance = getService('chance');
   const supertest = getService('supertest');

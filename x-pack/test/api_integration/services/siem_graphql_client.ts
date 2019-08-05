@@ -10,22 +10,32 @@ import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemo
 import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
 
+import { FtrProviderContext } from '../ftr_provider_context';
 import introspectionQueryResultData from '../../../legacy/plugins/siem/public/graphql/introspection.json';
 
-export function SiemGraphQLClientProvider({ getService }) {
-  return new SiemGraphQLClientFactoryProvider({ getService })();
+interface SiemGraphQLClientFactoryOptions {
+  username?: string;
+  password?: string;
+  basePath?: string;
 }
 
-export function SiemGraphQLClientFactoryProvider({ getService }) {
-  const config = getService('config');
-  const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
+export function SiemGraphQLClientProvider(context: FtrProviderContext) {
+  return SiemGraphQLClientFactoryProvider(context)();
+}
 
-  return function ({ username = superUsername, password = superPassword, basePath = null } = {}) {
+export function SiemGraphQLClientFactoryProvider({ getService }: FtrProviderContext) {
+  const config = getService('config');
+  const superAuth: string = config.get('servers.elasticsearch.auth');
+  const [superUsername, superPassword] = superAuth.split(':');
+
+  return function(options?: SiemGraphQLClientFactoryOptions) {
+    const { username = superUsername, password = superPassword, basePath = null } = options || {};
+
     const kbnURLWithoutAuth = formatUrl({ ...config.get('servers.kibana'), auth: false });
 
     const httpLink = new HttpLink({
       credentials: 'same-origin',
-      fetch,
+      fetch: fetch as any,
       headers: {
         'kbn-xsrf': 'xxx',
         authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,

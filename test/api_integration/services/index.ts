@@ -17,5 +17,19 @@
  * under the License.
  */
 
-export { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
-export { ChanceProvider } from './chance';
+import { services as commonServices } from '../../common/services';
+
+// @ts-ignore not TS yet
+import { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
+
+// @ts-ignore not TS yet
+import { ChanceProvider } from './chance';
+
+export const services = {
+  es: commonServices.es,
+  esArchiver: commonServices.esArchiver,
+  retry: commonServices.retry,
+  supertest: KibanaSupertestProvider,
+  esSupertest: ElasticsearchSupertestProvider,
+  chance: ChanceProvider,
+};

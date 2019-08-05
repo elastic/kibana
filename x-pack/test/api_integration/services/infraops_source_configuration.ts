@@ -6,6 +6,12 @@
 
 import gql from 'graphql-tag';
 
+import { FtrProviderContext } from '../ftr_provider_context';
+import {
+  UpdateSourceInput,
+  UpdateSourceResult,
+} from '../../../legacy/plugins/infra/public/graphql/types';
+
 const createSourceMutation = gql`
   mutation createSource($sourceId: ID!, $sourceProperties: UpdateSourceInput!) {
     createSource(id: $sourceId, sourceProperties: $sourceProperties) {
@@ -38,13 +44,18 @@ const createSourceMutation = gql`
   }
 `;
 
-export function InfraOpsSourceConfigurationProvider({ getService }) {
+export function InfraOpsSourceConfigurationProvider({ getService }: FtrProviderContext) {
   const client = getService('infraOpsGraphQLClient');
   const log = getService('log');
 
   return {
-    async createConfiguration(sourceId, sourceProperties) {
-      log.debug(`Creating Infra UI source configuration "${sourceId}" with properties ${JSON.stringify(sourceProperties)}`);
+    async createConfiguration(sourceId: string, sourceProperties: UpdateSourceInput) {
+      log.debug(
+        `Creating Infra UI source configuration "${sourceId}" with properties ${JSON.stringify(
+          sourceProperties
+        )}`
+      );
+
       const response = await client.mutate({
         mutation: createSourceMutation,
         variables: {
@@ -53,7 +64,8 @@ export function InfraOpsSourceConfigurationProvider({ getService }) {
         },
       });
 
-      return response.data.createSource.source.version;
+      const result: UpdateSourceResult = response.data!.createSource;
+      return result.source.version;
     },
   };
 }
