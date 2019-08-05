@@ -18,7 +18,7 @@ function executeJobFn(server) {
   const generateCsv = createGenerateCsv(logger);
   const serverBasePath = config.get('server.basePath');
 
-  return async function executeJob(job, cancellationToken) {
+  return async function executeJob(jobId, job, cancellationToken) {
     const {
       searchRequest,
       fields,

@@ -15,10 +15,12 @@ export const openUrl = async (
   conditionalHeaders: ConditionalHeaders,
   logger: Logger
 ): Promise<void> => {
-  logger.debug(`opening ${url}`);
-
-  await browser.open(url, {
-    conditionalHeaders,
-    waitForSelector: WAITFOR_SELECTOR,
-  });
+  await browser.open(
+    url,
+    {
+      conditionalHeaders,
+      waitForSelector: WAITFOR_SELECTOR,
+    },
+    logger
+  );
 };

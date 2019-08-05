@@ -7,7 +7,8 @@
 import * as Rx from 'rxjs';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { oncePerServer } from '../../../../server/lib/once_per_server';
+import { PLUGIN_ID, PDF_JOB_TYPE } from '../../../../common/constants';
+import { LevelLogger as Logger, oncePerServer } from '../../../../server/lib';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { compatibilityShimFactory } from './compatibility_shim';
 import {
@@ -21,8 +22,10 @@ import {
 function executeJobFn(server) {
   const generatePdfObservable = generatePdfObservableFactory(server);
   const compatibilityShim = compatibilityShimFactory(server);
+  const logger = Logger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'execute']);
 
-  return compatibilityShim(function executeJob(jobToExecute, cancellationToken) {
+  return compatibilityShim(function executeJob(jobId, jobToExecute, cancellationToken) {
+    const jobLogger = logger.clone([jobId]);
     const process$ = Rx.of({ job: jobToExecute, server }).pipe(
       mergeMap(decryptJobHeaders),
       catchError(err =>
@@ -43,6 +46,7 @@ function executeJobFn(server) {
       mergeMap(addForceNowQuerystring),
       mergeMap(({ job, conditionalHeaders, logo, urls }) => {
         return generatePdfObservable(
+          jobLogger,
           job.title,
           urls,
           job.browserTimezone,

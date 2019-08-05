@@ -6,8 +6,9 @@
 
 import * as Rx from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { PLUGIN_ID, PNG_JOB_TYPE } from '../../../../common/constants';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
-import { oncePerServer } from '../../../../server/lib/once_per_server';
+import { LevelLogger as Logger, oncePerServer } from '../../../../server/lib';
 import { generatePngObservableFactory } from '../lib/generate_png';
 import {
   decryptJobHeaders,
@@ -18,8 +19,10 @@ import {
 
 function executeJobFn(server) {
   const generatePngObservable = generatePngObservableFactory(server);
+  const logger = Logger.createForServer(server, [PLUGIN_ID, PNG_JOB_TYPE, 'execute']);
 
-  return function executeJob(jobToExecute, cancellationToken) {
+  return function executeJob(jobId, jobToExecute, cancellationToken) {
+    const jobLogger = logger.clone([jobId]);
     const process$ = Rx.of({ job: jobToExecute, server }).pipe(
       mergeMap(decryptJobHeaders),
       catchError(err =>
@@ -39,7 +42,13 @@ function executeJobFn(server) {
       mergeMap(addForceNowQuerystring),
       mergeMap(({ job, conditionalHeaders, urls }) => {
         const hashUrl = urls[0];
-        return generatePngObservable(hashUrl, job.browserTimezone, conditionalHeaders, job.layout);
+        return generatePngObservable(
+          jobLogger,
+          hashUrl,
+          job.browserTimezone,
+          conditionalHeaders,
+          job.layout
+        );
       }),
       map(buffer => ({
         content_type: 'image/png',

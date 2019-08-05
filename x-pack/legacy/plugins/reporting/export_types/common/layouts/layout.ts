@@ -5,12 +5,7 @@
  */
 
 import { HeadlessChromiumDriver } from '../../../server/browsers/chromium/driver';
-
-export interface ViewZoomWidthHeight {
-  zoom: number;
-  width: number;
-  height: number;
-}
+import { LevelLogger as Logger } from '../../../server/lib';
 
 export interface PageSizeParams {
   pageMarginTop: number;
@@ -62,6 +57,12 @@ export interface Size {
   height: number;
 }
 
+export interface ViewZoomWidthHeight {
+  zoom: number;
+  width: number;
+  height: number;
+}
+
 export interface LayoutParams {
   id: string;
   dimensions: Size;
@@ -71,5 +72,5 @@ export type LayoutInstance = Layout & {
   // Fields that are not part of Layout: the instances
   // independently implement these fields on their own
   selectors: LayoutSelectorDictionary;
-  positionElements?: (browser: HeadlessChromiumDriver) => Promise<void>;
+  positionElements?: (browser: HeadlessChromiumDriver, logger: Logger) => Promise<void>;
 };

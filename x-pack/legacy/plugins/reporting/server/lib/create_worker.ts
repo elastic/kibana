@@ -43,7 +43,7 @@ function createWorkerFn(server: KbnServer) {
       if (!jobExecutor) {
         throw new Error(`Unable to find a job executor for the claimed job: [${job._id}]`);
       }
-      return jobExecutor(jobdoc, cancellationToken);
+      return jobExecutor(job._id, jobdoc, cancellationToken);
     };
     const workerOptions = {
       kibanaName,

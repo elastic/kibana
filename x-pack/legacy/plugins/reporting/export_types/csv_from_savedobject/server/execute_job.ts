@@ -22,7 +22,11 @@ interface FakeRequest {
   server: KbnServer;
 }
 
-type ExecuteJobFn = (job: JobDocPayload, realRequest?: Request) => Promise<JobDocOutputExecuted>;
+type ExecuteJobFn = (
+  jobId: string,
+  job: JobDocPayload,
+  realRequest?: Request
+) => Promise<JobDocOutputExecuted>;
 
 function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
   const crypto = cryptoFactory(server);
@@ -36,6 +40,7 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
   const generateCsv = createGenerateCsv(logger);
 
   return async function executeJob(
+    jobId: string,
     job: JobDocPayload,
     realRequest?: Request
   ): Promise<JobDocOutputExecuted> {

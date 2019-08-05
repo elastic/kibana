@@ -5,14 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { LevelLogger as Logger } from '../../../../server/lib';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import { LayoutInstance } from '../../layouts/layout';
 
 export const checkForToastMessage = async (
   browser: HeadlessBrowser,
-  layout: LayoutInstance
+  layout: LayoutInstance,
+  logger: Logger
 ): Promise<void> => {
-  await browser.waitForSelector(layout.selectors.toastHeader, { silent: true });
+  await browser.waitForSelector(layout.selectors.toastHeader, { silent: true }, logger);
   const toastHeaderText = await browser.evaluate({
     fn: selector => {
       const nodeList = document.querySelectorAll(selector);

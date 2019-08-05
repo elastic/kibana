@@ -53,6 +53,7 @@ export class HeadlessChromiumDriverFactory {
     { viewport, browserTimezone }: { viewport: IArgOptions['viewport']; browserTimezone: string },
     logger: Logger
   ) {
+    const testLogger = logger.clone(['self-test']);
     const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
     const chromiumArgs = args({
       userDataDir,
@@ -73,10 +74,12 @@ export class HeadlessChromiumDriverFactory {
         },
       })
       .catch((error: Error) => {
-        logger.warning(
+        testLogger.warning(
           `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports: [${error}]`
         );
-        logger.warning(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
+        testLogger.warning(
+          `See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`
+        );
         return null;
       });
   }
@@ -175,10 +178,7 @@ export class HeadlessChromiumDriverFactory {
       )(stderr$);
 
       const driver$ = Rx.of(
-        new HeadlessChromiumDriver(page, {
-          logger: this.logger,
-          inspect: this.browserConfig.inspect,
-        })
+        new HeadlessChromiumDriver(page, { inspect: this.browserConfig.inspect })
       );
 
       const processError$ = Rx.fromEvent(page, 'error').pipe(

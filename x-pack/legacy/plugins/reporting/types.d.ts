@@ -32,20 +32,6 @@ export interface KbnServer {
   }) => UiSettings;
 }
 
-export interface ExportTypeDefinition {
-  id: string;
-  name: string;
-  jobType: string;
-  jobContentExtension: string;
-  createJobFactory: () => any;
-  executeJobFactory: () => any;
-  validLicenses: string[];
-}
-
-export interface ExportTypesRegistry {
-  register: (exportTypeDefinition: ExportTypeDefinition) => void;
-}
-
 export interface ConfigObject {
   get: (path?: string) => any;
 }
@@ -175,12 +161,16 @@ export interface ESQueueWorker {
   on: (event: string, handler: any) => void;
 }
 
-export type ESQueueWorkerExecuteFn = (job: JobDoc, cancellationToken: any) => void;
+export type ESQueueWorkerExecuteFn = (jobId: string, job: JobDoc, cancellationToken: any) => void;
 
 export interface ExportType {
+  id: string;
+  name: string;
   jobType: string;
-  createJobFactory: any;
+  jobContentExtension: string;
+  createJobFactory: () => any;
   executeJobFactory: (server: KbnServer) => ESQueueWorkerExecuteFn;
+  validLicenses: string[];
 }
 
 export interface ESQueueWorkerOptions {
@@ -196,6 +186,10 @@ export interface ESQueueInstance {
     workerFn: any,
     workerOptions: ESQueueWorkerOptions
   ) => ESQueueWorker;
+}
+
+export interface ExportTypesRegistry {
+  register: (exportTypeDefinition: ExportType) => void;
 }
 
 export { LevelLogger as Logger } from './server/lib/level_logger';

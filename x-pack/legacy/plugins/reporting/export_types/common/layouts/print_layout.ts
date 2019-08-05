@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import path from 'path';
+import { LevelLogger as Logger } from '../../../server/lib';
 import { HeadlessChromiumDriver } from '../../../server/browsers/chromium/driver';
 import { EvaluateOptions, KbnServer } from '../../../types';
 import { LayoutTypes } from '../constants';
@@ -49,7 +50,9 @@ export class PrintLayout extends Layout {
     };
   }
 
-  public async positionElements(browser: HeadlessChromiumDriver): Promise<void> {
+  public async positionElements(browser: HeadlessChromiumDriver, logger: Logger): Promise<void> {
+    logger.debug('positioning elements');
+
     const elementSize: Size = {
       width: this.captureConfig.viewport.width / this.captureConfig.zoom,
       height: this.captureConfig.viewport.height / this.captureConfig.zoom,
