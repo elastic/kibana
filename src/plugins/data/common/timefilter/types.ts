@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { DataPublicPlugin } from './plugin';
-
-export * from './types';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DataPublicPlugin(initializerContext);
+export interface RefreshInterval {
+  pause: boolean;
+  value: number;
 }
 
-export { DataPublicPlugin as Plugin };
+export interface TimeRange {
+  from: string;
+  to: string;
+}

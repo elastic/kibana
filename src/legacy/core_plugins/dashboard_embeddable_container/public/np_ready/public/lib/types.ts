@@ -28,16 +28,6 @@ export interface DashboardCapabilities {
   createNew: boolean;
 }
 
-export interface RefreshInterval {
-  pause: boolean;
-  value: number;
-}
-
-export interface TimeRange {
-  from: string;
-  to: string;
-}
-
 // TODO: Replace Saved object interfaces by the ones Core will provide when it is ready.
 export type SavedObjectAttribute =
   | string

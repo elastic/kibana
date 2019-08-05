@@ -17,13 +17,4 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { DataPublicPlugin } from './plugin';
-
-export * from './types';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DataPublicPlugin(initializerContext);
-}
-
-export { DataPublicPlugin as Plugin };
+export * from './timefilter/types';

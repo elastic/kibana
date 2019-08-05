@@ -19,13 +19,9 @@
 
 import { Filter } from '@kbn/es-query';
 import { Query } from '../../query/types';
+import { TimeRange } from '../../timefilter/types';
 
 const name = 'kibana_context';
-
-interface TimeRange {
-  from: string;
-  to: string;
-}
 
 export interface KibanaContext {
   type: typeof name;

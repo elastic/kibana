@@ -22,7 +22,7 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Filter } from '@kbn/es-query';
 import { CoreStart } from '../../../../../../../../core/public';
-import { RefreshInterval, TimeRange } from '../types';
+import { RefreshInterval, TimeRange } from '../../../../../../../../plugins/data/public';
 
 import {
   Container,
