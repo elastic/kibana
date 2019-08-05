@@ -31,5 +31,5 @@ else
   export PERCY_TOKEN
 
   # remove vault related secrets
-  unset VAULT_ROLE_ID VAULT_SECRET_ID VAULT_TOKEN
+  unset VAULT_ROLE_ID VAULT_SECRET_ID VAULT_TOKEN VAULT_ADDR
 fi
