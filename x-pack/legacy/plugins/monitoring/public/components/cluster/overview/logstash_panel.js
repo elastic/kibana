@@ -50,10 +50,11 @@ export function LogstashPanel(props) {
       totalUniqueFullyMigratedCount,
       totalUniquePartiallyMigratedCount
     } = setupModeLogstashData;
+    const hasInstances = totalUniqueInstanceCount > 0 || get(setupModeLogstashData, 'detected.mightExist', false);
     const allMonitoredByMetricbeat = totalUniqueInstanceCount > 0 &&
       (totalUniqueFullyMigratedCount === totalUniqueInstanceCount || totalUniquePartiallyMigratedCount === totalUniqueInstanceCount);
     const internalCollectionOn = totalUniquePartiallyMigratedCount > 0;
-    if (!allMonitoredByMetricbeat || internalCollectionOn) {
+    if (hasInstances && (!allMonitoredByMetricbeat || internalCollectionOn)) {
       let tooltipText = null;
 
       if (!allMonitoredByMetricbeat) {

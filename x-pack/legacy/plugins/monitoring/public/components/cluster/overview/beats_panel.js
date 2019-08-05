@@ -44,10 +44,11 @@ export function BeatsPanel(props) {
       totalUniqueFullyMigratedCount,
       totalUniquePartiallyMigratedCount
     } = setupModeBeatsData;
+    const hasInstances = totalUniqueInstanceCount > 0 || get(setupModeBeatsData, 'detected.mightExist', false);
     const allMonitoredByMetricbeat = totalUniqueInstanceCount > 0 &&
       (totalUniqueFullyMigratedCount === totalUniqueInstanceCount || totalUniquePartiallyMigratedCount === totalUniqueInstanceCount);
     const internalCollectionOn = totalUniquePartiallyMigratedCount > 0;
-    if (!allMonitoredByMetricbeat || internalCollectionOn) {
+    if (hasInstances && (!allMonitoredByMetricbeat || internalCollectionOn)) {
       let tooltipText = null;
 
       if (!allMonitoredByMetricbeat) {
