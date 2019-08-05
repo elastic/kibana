@@ -17,6 +17,7 @@ import {
 } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { generateId } from '../id_generator';
+import { DataPluginDependencies } from './plugin';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -141,7 +142,7 @@ describe('IndexPattern Data Source', () => {
       storage: storageMock,
       interpreter: { functionsRegistry },
       toastNotifications: notificationsMock,
-      data: dataMock,
+      data: dataMock as DataPluginDependencies,
     });
 
     persistedState = {

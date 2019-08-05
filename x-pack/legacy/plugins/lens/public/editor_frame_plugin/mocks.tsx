@@ -5,9 +5,12 @@
  */
 
 import React from 'react';
-import { DataSetup, ExpressionRendererProps } from 'src/legacy/core_plugins/data/public';
+import { ExpressionRendererProps } from 'src/legacy/core_plugins/data/public';
+import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { DatasourcePublicAPI, FramePublicAPI, Visualization, Datasource } from '../types';
 import { EditorFrameSetupPlugins } from './plugin';
+
+type DataSetup = typeof data;
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
@@ -92,6 +95,9 @@ export function createMockDependencies() {
       expressions: {
         ExpressionRenderer: createExpressionRendererMock(),
         run: jest.fn(_ => Promise.resolve({ type: 'render', as: 'test', value: undefined })),
+      },
+      indexPatterns: {
+        indexPatterns: {},
       },
     },
     embeddables: {

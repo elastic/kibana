@@ -310,7 +310,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     setState={setState}
                     columnId={columnId}
                     storage={props.storage}
-                    dataPlugin={props.dataPlugin}
+                    dataPluginDependencies={props.dataPluginDependencies}
                     layerId={layerId}
                   />
                 )}
