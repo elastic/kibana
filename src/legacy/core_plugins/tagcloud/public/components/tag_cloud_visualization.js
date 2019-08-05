@@ -17,15 +17,16 @@
  * under the License.
  */
 
-import TagCloud from './tag_cloud';
+import React from 'react';
 import * as Rx from 'rxjs';
 import { take } from 'rxjs/operators';
 import { render, unmountComponentAtNode } from 'react-dom';
-import React from 'react';
-import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 
+import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { I18nContext } from 'ui/i18n';
+
 import { Label } from './label';
+import { TagCloud } from './tag_cloud';
 import { FeedbackMessage } from './feedback_message';
 
 const MAX_TAG_COUNT = 200;
@@ -58,7 +59,6 @@ export class TagCloudVisualization {
     });
     this._renderComplete$ = Rx.fromEvent(this._tagCloud, 'renderComplete');
 
-
     this._feedbackNode = document.createElement('div');
     this._containerNode.appendChild(this._feedbackNode);
     this._feedbackMessage = React.createRef();
@@ -78,7 +78,6 @@ export class TagCloudVisualization {
       this._updateParams(visParams);
       this._updateData(data);
     }
-
 
     if (status.resize) {
       this._resize();
@@ -103,7 +102,6 @@ export class TagCloudVisualization {
       shouldShowIncomplete: this._tagCloud.getStatus() === TagCloud.STATUS.INCOMPLETE
     });
   }
-
 
   destroy() {
     this._tagCloud.destroy();
@@ -136,7 +134,6 @@ export class TagCloudVisualization {
       };
     });
 
-
     if (tags.length > MAX_TAG_COUNT) {
       tags.length = MAX_TAG_COUNT;
       this._truncated = true;
@@ -145,7 +142,6 @@ export class TagCloudVisualization {
     }
 
     this._tagCloud.setData(tags);
-
   }
 
   _updateParams(visParams) {
@@ -156,5 +152,4 @@ export class TagCloudVisualization {
   _resize() {
     this._tagCloud.resize();
   }
-
 }

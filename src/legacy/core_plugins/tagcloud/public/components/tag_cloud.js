@@ -37,7 +37,7 @@ const D3_SCALING_FUNCTIONS = {
   'square root': () => d3.scale.sqrt()
 };
 
-class TagCloud extends EventEmitter {
+export class TagCloud extends EventEmitter {
 
   constructor(domNode) {
 
@@ -424,5 +424,3 @@ function hashWithinRange(str, max) {
   }
   return Math.abs(hash) % max;
 }
-
-export default TagCloud;

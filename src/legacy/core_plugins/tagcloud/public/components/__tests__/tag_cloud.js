@@ -19,8 +19,9 @@
 
 import expect from '@kbn/expect';
 import _ from 'lodash';
-import TagCloud from '../tag_cloud';
 import d3 from 'd3';
+
+import { TagCloud } from '../tag_cloud';
 import { fromNode, delay } from 'bluebird';
 import { ImageComparator } from 'test_utils/image_comparator';
 import simpleloadPng from './simpleload.png';
