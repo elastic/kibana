@@ -38,6 +38,7 @@ export const metricsSchema: any = gql`
     awsOverview
     awsCpuUtilization
     awsNetworkBytes
+    awsNetworkPackets
     custom
   }
 

@@ -40,6 +40,7 @@ import { nginxRequestsPerConnection } from './nginx/nginx_requests_per_connectio
 import { awsOverview } from './aws/aws_overview';
 import { awsCpuUtilization } from './aws/aws_cpu_utilization';
 import { awsNetworkBytes } from './aws/aws_network_bytes';
+import { awsNetworkPackets } from './aws/aws_network_packets';
 
 interface InfraMetricModels {
   [key: string]: InfraMetricModelCreator;
@@ -79,4 +80,5 @@ export const metricModels: InfraMetricModels = {
   [InfraMetric.awsOverview]: awsOverview,
   [InfraMetric.awsCpuUtilization]: awsCpuUtilization,
   [InfraMetric.awsNetworkBytes]: awsNetworkBytes,
+  [InfraMetric.awsNetworkPackets]: awsNetworkPackets,
 };

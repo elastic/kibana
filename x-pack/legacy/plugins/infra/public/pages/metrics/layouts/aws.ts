@@ -54,7 +54,7 @@ export const awsLayoutCreator: InfraMetricLayoutCreator = theme => [
             },
             rx: {
               name: i18n.translate(
-                'xpack.infra.metricDetailPage.awsMetricsLayout.overviewSection.inboundRXSeriesLabel',
+                'xpack.infra.metricDetailPage.awsMetricsLayout.overviewSection.networkRxSeriesLabel',
                 {
                   defaultMessage: 'Inbound (RX)',
                 }
@@ -65,7 +65,7 @@ export const awsLayoutCreator: InfraMetricLayoutCreator = theme => [
             },
             tx: {
               name: i18n.translate(
-                'xpack.infra.metricDetailPage.awsMetricsLayout.overviewSection.outboundTXSeriesLabel',
+                'xpack.infra.metricDetailPage.awsMetricsLayout.overviewSection.networkTxSeriesLabel',
                 {
                   defaultMessage: 'Outbound (TX)',
                 }
@@ -94,7 +94,7 @@ export const awsLayoutCreator: InfraMetricLayoutCreator = theme => [
             'cpu-util': {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
-                'xpack.infra.metricDetailPage.awsMetricsLayout.cpuUtilSection.cpuUtilPercentSeriesLabel',
+                'xpack.infra.metricDetailPage.awsMetricsLayout.cpuUtilSection.percentSeriesLabel',
                 {
                   defaultMessage: 'percent',
                 }
@@ -121,7 +121,7 @@ export const awsLayoutCreator: InfraMetricLayoutCreator = theme => [
             tx: {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
-                'xpack.infra.metricDetailPage.awsMetricsLayout.networkBytesSection.networkTxSeriesLabel',
+                'xpack.infra.metricDetailPage.awsMetricsLayout.networkBytesSection.txSeriesLabel',
                 {
                   defaultMessage: 'out',
                 }
@@ -130,7 +130,42 @@ export const awsLayoutCreator: InfraMetricLayoutCreator = theme => [
             rx: {
               color: theme.eui.euiColorVis2,
               name: i18n.translate(
-                'xpack.infra.metricDetailPage.awsMetricsLayout.networkBytesSection.networkRxSeriesLabel',
+                'xpack.infra.metricDetailPage.awsMetricsLayout.networkBytesSection.rxSeriesLabel',
+                {
+                  defaultMessage: 'in',
+                }
+              ),
+            },
+          },
+        },
+      },
+      {
+        id: InfraMetric.awsNetworkPackets,
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.awsMetricsLayout.networkPacketsSection.sectionLabel',
+          {
+            defaultMessage: 'Network Packets (Average)',
+          }
+        ),
+        requires: ['aws.ec2'],
+        type: InfraMetricLayoutSectionType.chart,
+        visConfig: {
+          type: InfraMetricLayoutVisualizationType.area,
+          formatter: InfraFormatterType.number,
+          seriesOverrides: {
+            'packets-out': {
+              color: theme.eui.euiColorVis1,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.awsMetricsLayout.networkPacketsSection.packetsOutSeriesLabel',
+                {
+                  defaultMessage: 'out',
+                }
+              ),
+            },
+            'packets-in': {
+              color: theme.eui.euiColorVis2,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.awsMetricsLayout.networkPacketsSection.packetsInSeriesLabel',
                 {
                   defaultMessage: 'in',
                 }

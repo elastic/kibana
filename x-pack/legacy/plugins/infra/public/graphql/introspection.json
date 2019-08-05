@@ -2326,6 +2326,12 @@
             "isDeprecated": false,
             "deprecationReason": null
           },
+          {
+            "name": "awsNetworkPackets",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           { "name": "custom", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null

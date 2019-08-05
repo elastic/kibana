@@ -553,6 +553,7 @@ export enum InfraMetric {
   awsOverview = 'awsOverview',
   awsCpuUtilization = 'awsCpuUtilization',
   awsNetworkBytes = 'awsNetworkBytes',
+  awsNetworkPackets = 'awsNetworkPackets',
   custom = 'custom',
 }
 
