@@ -131,7 +131,7 @@ interface State {
   focusedPanelIndex?: string;
   isLayoutInvalid: boolean;
   layout?: GridData[];
-  panels: { [key: string]: any }; // DashboardPanelState };
+  panels: { [key: string]: DashboardPanelState };
   viewMode: ViewMode;
   useMargins: boolean;
   expandedPanelId?: string;
