@@ -24,9 +24,18 @@ import {
   FilterableContainerInput,
   FILTERABLE_CONTAINER,
 } from './filterable_container';
+import { GetEmbeddableFactory } from '../../types';
+import { EmbeddableFactoryOptions } from '../../embeddables/embeddable_factory';
 
 export class FilterableContainerFactory extends EmbeddableFactory<FilterableContainerInput> {
   public readonly type = FILTERABLE_CONTAINER;
+
+  constructor(
+    private readonly getFactory: GetEmbeddableFactory,
+    options: EmbeddableFactoryOptions<any> = {}
+  ) {
+    super(options);
+  }
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.samples.filterableContainer.displayName', {
@@ -39,6 +48,6 @@ export class FilterableContainerFactory extends EmbeddableFactory<FilterableCont
   }
 
   public async create(initialInput: FilterableContainerInput, parent?: Container) {
-    return new FilterableContainer(initialInput, () => undefined as any, parent);
+    return new FilterableContainer(initialInput, this.getFactory, parent);
   }
 }

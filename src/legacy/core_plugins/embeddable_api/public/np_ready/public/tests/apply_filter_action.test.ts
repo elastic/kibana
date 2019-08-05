@@ -17,17 +17,38 @@
  * under the License.
  */
 
-// TODO: Adapt these tests for NP.
+import { testPlugin } from './test_plugin';
+import { ApplyFilterAction, EmbeddableOutput, isErrorEmbeddable } from '../lib';
+import {
+  FilterableContainer,
+  FilterableContainerInput,
+  FILTERABLE_CONTAINER,
+  FilterableEmbeddableFactory,
+  HelloWorldContainer,
+  FILTERABLE_EMBEDDABLE,
+  FilterableEmbeddable,
+  FilterableContainerFactory,
+  FilterableEmbeddableInput,
+} from '../lib/test_samples';
+// eslint-disable-next-line
+import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
+import { FilterStateStore } from '@kbn/es-query';
 
-test('ApplyFilterAction applies the filter to the root of the container tree', async () => {});
-
-/*
 test('ApplyFilterAction applies the filter to the root of the container tree', async () => {
+  const { doStart } = testPlugin();
+  const api = doStart();
+
+  const factory1 = new FilterableContainerFactory(api.getEmbeddableFactory);
+  const factory2 = new FilterableEmbeddableFactory();
+
+  api.registerEmbeddableFactory(factory1.type, factory1);
+  api.registerEmbeddableFactory(factory2.type, factory2);
+
   const applyFilterAction = new ApplyFilterAction();
 
   const root = new FilterableContainer(
     { id: 'root', panels: {}, filters: [] },
-    embeddableFactories
+    api.getEmbeddableFactory
   );
 
   const node1 = await root.addNewEmbeddable<
@@ -42,9 +63,7 @@ test('ApplyFilterAction applies the filter to the root of the container tree', a
     FilterableContainer
   >(FILTERABLE_CONTAINER, { panels: {}, id: 'Node2' });
 
-  if (isErrorEmbeddable(node2) || isErrorEmbeddable(node1)) {
-    throw new Error();
-  }
+  if (isErrorEmbeddable(node1) || isErrorEmbeddable(node2)) throw new Error();
 
   const embeddable = await node2.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -56,7 +75,7 @@ test('ApplyFilterAction applies the filter to the root of the container tree', a
     throw new Error();
   }
 
-  const filter: Filter = {
+  const filter: any = {
     $state: { store: FilterStateStore.APP_STATE },
     meta: {
       disabled: false,
@@ -74,8 +93,25 @@ test('ApplyFilterAction applies the filter to the root of the container tree', a
 });
 
 test('ApplyFilterAction is incompatible if the root container does not accept a filter as input', async () => {
+  const { doStart, coreStart } = testPlugin();
+  const api = doStart();
+  const inspector = inspectorPluginMock.createStartContract();
+
   const applyFilterAction = new ApplyFilterAction();
-  const parent = new HelloWorldContainer({ id: 'root', panels: {} }, embeddableFactories);
+  const parent = new HelloWorldContainer(
+    { id: 'root', panels: {} },
+    {
+      getActions: api.getTriggerCompatibleActions,
+      getEmbeddableFactory: api.getEmbeddableFactory,
+      getAllEmbeddableFactories: api.getEmbeddableFactories,
+      overlays: coreStart.overlays,
+      notifications: coreStart.notifications,
+      inspector,
+    }
+  );
+
+  const factory = new FilterableEmbeddableFactory();
+  api.registerEmbeddableFactory(factory.type, factory);
 
   const embeddable = await parent.addNewEmbeddable<
     FilterableContainerInput,
@@ -91,8 +127,25 @@ test('ApplyFilterAction is incompatible if the root container does not accept a 
 });
 
 test('trying to execute on incompatible context throws an error ', async () => {
+  const { doStart, coreStart } = testPlugin();
+  const api = doStart();
+  const inspector = inspectorPluginMock.createStartContract();
+
+  const factory = new FilterableEmbeddableFactory();
+  api.registerEmbeddableFactory(factory.type, factory);
+
   const applyFilterAction = new ApplyFilterAction();
-  const parent = new HelloWorldContainer({ id: 'root', panels: {} }, embeddableFactories);
+  const parent = new HelloWorldContainer(
+    { id: 'root', panels: {} },
+    {
+      getActions: api.getTriggerCompatibleActions,
+      getEmbeddableFactory: api.getEmbeddableFactory,
+      getAllEmbeddableFactories: api.getEmbeddableFactories,
+      overlays: coreStart.overlays,
+      notifications: coreStart.notifications,
+      inspector,
+    }
+  );
 
   const embeddable = await parent.addNewEmbeddable<
     FilterableContainerInput,
@@ -114,4 +167,3 @@ test('gets title', async () => {
   const applyFilterAction = new ApplyFilterAction();
   expect(applyFilterAction.getDisplayName()).toBeDefined();
 });
-*/
