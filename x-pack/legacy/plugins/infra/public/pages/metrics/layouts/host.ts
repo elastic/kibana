@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { InfraMetric } from '../../../graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 import { nginxLayoutCreator } from './nginx';
+import { awsLayoutCreator } from './aws';
 import {
   InfraMetricLayoutCreator,
   InfraMetricLayoutSectionType,
@@ -364,4 +365,5 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
     ],
   },
   ...nginxLayoutCreator(theme),
+  ...awsLayoutCreator(theme),
 ];
