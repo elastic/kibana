@@ -19,7 +19,7 @@ import { Setup } from '../helpers/setup_request';
 
 export async function getTraceItems(traceId: string, setup: Setup) {
   const { start, end, client, config } = setup;
-  const maxTraceItems = config.get<number>('apm_oss.maxTraceItems');
+  const maxTraceItems = config.get<number>('xpack.apm.ui.maxTraceItems');
 
   const params: SearchParams = {
     index: [

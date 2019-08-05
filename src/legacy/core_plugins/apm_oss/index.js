@@ -39,9 +39,6 @@ export default function apmOss(kibana) {
         metricsIndices: Joi.string().default('apm-*'),
         onboardingIndices: Joi.string().default('apm-*'),
         apmAgentConfigurationIndex: Joi.string().default('.apm-agent-configuration'),
-
-        // UI settings
-        maxTraceItems: Joi.number().default(1000)
       }).default();
     },
 
@@ -53,7 +50,6 @@ export default function apmOss(kibana) {
         'spanIndices',
         'metricsIndices',
         'onboardingIndices',
-        'maxTraceItems'
       ].map(type => server.config().get(`apm_oss.${type}`))));
     }
   });

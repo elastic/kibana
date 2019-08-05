@@ -246,7 +246,7 @@ export function getWaterfall(
     };
   }
 
-  const waterfallItems = [...trace.items].map(traceItem => {
+  const waterfallItems = trace.items.map(traceItem => {
     const docType = traceItem.processor.event;
     switch (docType) {
       case 'span':
