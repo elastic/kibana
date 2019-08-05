@@ -805,7 +805,6 @@
     "embeddableApi.addPanel.createNew": "新規 {factoryName} を作成",
     "embeddableApi.addPanel.createNewDefaultOption": "新規作成...",
     "embeddableApi.addPanel.displayName": "パネルの追加",
-    "embeddableApi.addPanel.noMatchingObjectsMessage": "一致するオブジェクトが見つかりません。",
     "embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle": "{savedObjectName} が追加されました",
     "embeddableApi.addPanel.Title": "パネルの追加",
     "embeddableApi.customizePanel.action.displayName": "パネルをカスタマイズ",

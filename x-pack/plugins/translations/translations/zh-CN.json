@@ -805,7 +805,6 @@
     "embeddableApi.addPanel.createNew": "创建新的{factoryName}",
     "embeddableApi.addPanel.createNewDefaultOption": "创建新的......",
     "embeddableApi.addPanel.displayName": "添加面板",
-    "embeddableApi.addPanel.noMatchingObjectsMessage": "未找到任何匹配对象。",
     "embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle": "{savedObjectName} 已添加",
     "embeddableApi.addPanel.Title": "添加面板",
     "embeddableApi.customizePanel.action.displayName": "定制面板",
