@@ -60,6 +60,7 @@ beforeEach(async () => {
       getAllEmbeddableFactories: api.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      inspector: {} as any,
     }
   );
   const contactCardEmbeddable = await container.addNewEmbeddable<

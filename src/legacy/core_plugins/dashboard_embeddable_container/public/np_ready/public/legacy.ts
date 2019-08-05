@@ -17,8 +17,10 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+/* eslint-disable @kbn/eslint/no-restricted-paths */
 import { npSetup, npStart } from 'ui/new_platform';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
+
 import { plugin } from '.';
 import {
   setup as embeddableSetup,
@@ -33,4 +35,5 @@ export const setup = pluginInstance.setup(npSetup.core, {
 
 export const start = pluginInstance.start(npStart.core, {
   embeddable: embeddableStart,
+  inspector: npStart.plugins.inspector,
 });

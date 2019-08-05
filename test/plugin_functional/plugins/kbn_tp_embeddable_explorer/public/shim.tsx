@@ -23,6 +23,7 @@ import 'uiExports/embeddableActions';
 
 import { Plugin } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { embeddablePluginMock } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/mocks';
+import { npStart } from 'src/legacy/ui/public/new_platform';
 
 import uiRoutes from 'ui/routes';
 
@@ -34,7 +35,10 @@ export interface PluginShim {
   embeddable: ReturnType<Plugin['setup']>;
 }
 
+const { inspector } = npStart.plugins;
+
 export interface CoreShim {
+  inspector: typeof inspector;
   onRenderComplete: (listener: () => void) => void;
 }
 
@@ -46,6 +50,7 @@ const plugins: PluginShim = {
 let rendered = false;
 const onRenderCompleteListeners: Array<() => void> = [];
 const coreShim: CoreShim = {
+  inspector,
   onRenderComplete: (renderCompleteListener: () => void) => {
     if (rendered) {
       renderCompleteListener();

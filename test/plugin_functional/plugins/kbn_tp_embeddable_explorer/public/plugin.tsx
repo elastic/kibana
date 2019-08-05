@@ -36,6 +36,7 @@ export class Plugin {
           getEmbeddableFactory={start.getEmbeddableFactory}
           notifications={npStart.core.notifications}
           overlays={npStart.core.overlays}
+          inspector={core.inspector}
         />,
         root
       );

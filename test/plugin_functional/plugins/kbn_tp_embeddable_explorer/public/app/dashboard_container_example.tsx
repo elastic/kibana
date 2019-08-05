@@ -36,6 +36,7 @@ import {
 
 import { CoreStart } from 'src/core/public';
 import { dashboardInput } from './dashboard_input';
+import { Start as InspectorStartContract } from '../../../../../../src/plugins/inspector/public';
 
 interface Props {
   getActions: GetActionsCompatibleWithTrigger;
@@ -43,6 +44,7 @@ interface Props {
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
+  inspector: InspectorStartContract;
 }
 
 interface State {
@@ -111,6 +113,7 @@ export class DashboardContainerExample extends React.Component<Props, State> {
             getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
             overlays={this.props.overlays}
             notifications={this.props.notifications}
+            inspector={this.props.inspector}
           />
         )}
       </div>

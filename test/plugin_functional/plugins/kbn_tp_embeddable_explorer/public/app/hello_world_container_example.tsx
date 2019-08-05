@@ -30,6 +30,7 @@ import { Subscription } from 'rxjs';
 import { HelloWorldContainer } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/hello_world_container';
 import { CONTACT_CARD_EMBEDDABLE } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { HELLO_WORLD_EMBEDDABLE_TYPE } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/hello_world/hello_world_embeddable';
+import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 
 interface Props {
   getActions: GetActionsCompatibleWithTrigger;
@@ -37,6 +38,7 @@ interface Props {
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
+  inspector: InspectorStartContract;
 }
 
 export class HelloWorldContainerExample extends React.Component<Props, { lastName?: string }> {
@@ -74,6 +76,7 @@ export class HelloWorldContainerExample extends React.Component<Props, { lastNam
         getAllEmbeddableFactories: this.props.getAllEmbeddableFactories,
         overlays: this.props.overlays,
         notifications: this.props.notifications,
+        inspector: this.props.inspector,
       }
     );
     this.state = {
@@ -120,6 +123,7 @@ export class HelloWorldContainerExample extends React.Component<Props, { lastNam
           getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
           overlays={this.props.overlays}
           notifications={this.props.notifications}
+          inspector={this.props.inspector}
         />
       </div>
     );

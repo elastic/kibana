@@ -32,7 +32,8 @@ export const testPlugin = (
   coreSetup: CoreSetup = {} as CoreSetup,
   coreStart: CoreStart = {} as CoreStart
 ): TestPluginReturn => {
-  const plugin = new EmbeddablePublicPlugin({});
+  const initializerContext = {} as any;
+  const plugin = new EmbeddablePublicPlugin(initializerContext);
   const setup = plugin.setup(coreSetup);
 
   return {

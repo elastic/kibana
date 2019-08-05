@@ -72,6 +72,7 @@ async function creatHelloWorldContainerAndEmbeddable(
     getAllEmbeddableFactories: start.getEmbeddableFactories,
     overlays: coreStart.overlays,
     notifications: coreStart.notifications,
+    inspector: {} as any,
   });
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -143,6 +144,7 @@ test('Container.removeEmbeddable removes and cleans up', async done => {
       getAllEmbeddableFactories: start.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      inspector: {} as any,
     }
   );
   const embeddable = await container.addNewEmbeddable<
@@ -315,6 +317,7 @@ test(`Container updates its state when a child's input is updated`, async done =
           getEmbeddableFactory: start.getEmbeddableFactory,
           notifications: coreStart.notifications,
           overlays: coreStart.overlays,
+          inspector: {} as any,
         });
         const cloneSubscription = Rx.merge(
           containerClone.getOutput$(),
@@ -397,7 +400,7 @@ test('Test nested reactions', async done => {
 
   expect(isErrorEmbeddable(embeddable)).toBe(false);
 
-  const containerSubscription = container.getInput$().subscribe(input => {
+  const containerSubscription = container.getInput$().subscribe((input: any) => {
     const embeddableNameTitle = embeddable.getInput().nameTitle;
     const viewMode = input.viewMode;
     const nameTitleFromContainer = container.getInputForChild<ContactCardEmbeddableInput>(
@@ -563,6 +566,7 @@ test('Container changes made directly after adding a new embeddable are propagat
       getAllEmbeddableFactories: start.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      inspector: {} as any,
     }
   );
 
@@ -690,6 +694,7 @@ test('untilEmbeddableLoaded() throws an error if there is no such child panel in
       getAllEmbeddableFactories: start.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      inspector: {} as any,
     }
   );
 
@@ -719,6 +724,7 @@ test('untilEmbeddableLoaded() resolves if child is loaded in the container', asy
       getAllEmbeddableFactories: start.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      inspector: {} as any,
     }
   );
 
@@ -752,6 +758,7 @@ test('untilEmbeddableLoaded rejects with an error if child is subsequently remov
       getAllEmbeddableFactories: start.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      inspector: {} as any,
     }
   );
 
@@ -787,6 +794,7 @@ test('adding a panel then subsequently removing it before its loaded removes the
       getAllEmbeddableFactories: start.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      inspector: {} as any,
     }
   );
 

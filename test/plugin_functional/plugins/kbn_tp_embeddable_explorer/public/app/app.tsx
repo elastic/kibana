@@ -28,6 +28,7 @@ import {
 import { ContactCardEmbeddableExample } from './hello_world_embeddable_example';
 import { HelloWorldContainerExample } from './hello_world_container_example';
 import { DashboardContainerExample } from './dashboard_container_example';
+import { Start as InspectorStartContract } from '../../../../../../src/plugins/inspector/public';
 
 export interface AppProps {
   getActions: GetActionsCompatibleWithTrigger;
@@ -35,6 +36,7 @@ export interface AppProps {
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
+  inspector: InspectorStartContract;
 }
 
 export class App extends Component<AppProps, { selectedTabId: string }> {
@@ -101,6 +103,7 @@ export class App extends Component<AppProps, { selectedTabId: string }> {
             getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
             overlays={this.props.overlays}
             notifications={this.props.notifications}
+            inspector={this.props.inspector}
           />
         );
       }
@@ -112,6 +115,7 @@ export class App extends Component<AppProps, { selectedTabId: string }> {
             getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
             overlays={this.props.overlays}
             notifications={this.props.notifications}
+            inspector={this.props.inspector}
           />
         );
       }
@@ -123,6 +127,7 @@ export class App extends Component<AppProps, { selectedTabId: string }> {
             getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
             overlays={this.props.overlays}
             notifications={this.props.notifications}
+            inspector={this.props.inspector}
           />
         );
       }

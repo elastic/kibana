@@ -20,6 +20,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { CONTEXT_MENU_TRIGGER, Plugin as EmbeddablePlugin } from './lib/embeddable_api';
 import { ExpandPanelAction, DashboardContainerFactory, DashboardCapabilities } from './lib';
+import { Start as InspectorStartContract } from '../../../../../../plugins/inspector/public';
 
 interface SetupDependencies {
   embeddable: ReturnType<EmbeddablePlugin['setup']>;
@@ -27,6 +28,7 @@ interface SetupDependencies {
 
 interface StartDependencies {
   embeddable: ReturnType<EmbeddablePlugin['start']>;
+  inspector: InspectorStartContract;
 }
 
 export class DashboardEmbeddableContainerPublicPlugin
@@ -41,7 +43,7 @@ export class DashboardEmbeddableContainerPublicPlugin
 
   public start(
     { application, notifications, overlays }: CoreStart,
-    { embeddable }: StartDependencies
+    { embeddable, inspector }: StartDependencies
   ) {
     const dashboardOptions = {
       capabilities: (application.capabilities.dashboard as unknown) as DashboardCapabilities,
@@ -53,6 +55,7 @@ export class DashboardEmbeddableContainerPublicPlugin
       getEmbeddableFactory: embeddable.getEmbeddableFactory,
       notifications,
       overlays,
+      inspector,
     });
     embeddable.registerEmbeddableFactory(factory.type, factory);
   }

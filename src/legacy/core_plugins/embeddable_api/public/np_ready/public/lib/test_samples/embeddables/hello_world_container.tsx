@@ -27,6 +27,7 @@ import {
   GetActionsCompatibleWithTrigger,
   GetEmbeddableFactories,
 } from '../../types';
+import { Start as InspectorStartContract } from '../../../../../../../../../plugins/inspector/public';
 
 export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
 
@@ -53,6 +54,7 @@ interface HelloWorldContainerOptions {
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
+  inspector: InspectorStartContract;
 }
 
 export class HelloWorldContainer extends Container<InheritedInput, HelloWorldContainerInput> {
@@ -84,6 +86,7 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
           getEmbeddableFactory={this.options.getEmbeddableFactory}
           overlays={this.options.overlays}
           notifications={this.options.notifications}
+          inspector={this.options.inspector}
         />
       </I18nProvider>,
       node
