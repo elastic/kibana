@@ -152,7 +152,7 @@ export const DataFrameTransformList: SFC = () => {
         // filter other clauses, i.e. the mode and status filters
         if (Array.isArray(c.value)) {
           // the status value is an array of string(s) e.g. ['failed', 'stopped']
-          ts = transforms.filter(transform => c.value.includes(transform.state.task_state));
+          ts = transforms.filter(transform => c.value.includes(transform.stats.task_state));
         } else {
           ts = transforms.filter(transform => transform.config.mode === c.value);
         }

@@ -17,16 +17,20 @@
  * under the License.
  */
 
+/* eslint-disable @kbn/eslint/no-restricted-paths */
 import { coreMock } from '../../../../../core/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
+import { inspectorPluginMock } from '../../../../../plugins/inspector/public/mocks';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export const pluginsMock = {
   createSetup: () => ({
     data: dataPluginMock.createSetupContract(),
+    inspector: inspectorPluginMock.createSetupContract(),
   }),
   createStart: () => ({
     data: dataPluginMock.createStartContract(),
+    inspector: inspectorPluginMock.createStartContract(),
   }),
 };
 

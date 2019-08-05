@@ -26,7 +26,6 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
-import { InspectorView } from 'ui/inspector';
 import { RequestStatus } from 'ui/inspector/adapters';
 
 import { RequestSelector } from './request_selector';
@@ -68,36 +67,34 @@ class RequestsViewComponent extends Component {
 
   renderEmptyRequests() {
     return (
-      <InspectorView useFlex={true}>
-        <EuiEmptyPrompt
-          data-test-subj="inspectorNoRequestsMessage"
-          title={
-            <h2>
+      <EuiEmptyPrompt
+        data-test-subj="inspectorNoRequestsMessage"
+        title={
+          <h2>
+            <FormattedMessage
+              id="inspectorViews.requests.noRequestsLoggedTitle"
+              defaultMessage="No requests logged"
+            />
+          </h2>
+        }
+        body={
+          <React.Fragment>
+            <p>
               <FormattedMessage
-                id="inspectorViews.requests.noRequestsLoggedTitle"
-                defaultMessage="No requests logged"
+                id="inspectorViews.requests.noRequestsLoggedDescription.elementHasNotLoggedAnyRequestsText"
+                defaultMessage="The element hasn't logged any requests (yet)."
               />
-            </h2>
-          }
-          body={
-            <React.Fragment>
-              <p>
-                <FormattedMessage
-                  id="inspectorViews.requests.noRequestsLoggedDescription.elementHasNotLoggedAnyRequestsText"
-                  defaultMessage="The element hasn't logged any requests (yet)."
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  id="inspectorViews.requests.noRequestsLoggedDescription.whatDoesItUsuallyMeanText"
-                  defaultMessage="This usually means that there was no need to fetch any data or
-                    that the element has not yet started fetching data."
-                />
-              </p>
-            </React.Fragment>
-          }
-        />
-      </InspectorView>
+            </p>
+            <p>
+              <FormattedMessage
+                id="inspectorViews.requests.noRequestsLoggedDescription.whatDoesItUsuallyMeanText"
+                defaultMessage="This usually means that there was no need to fetch any data or
+                  that the element has not yet started fetching data."
+              />
+            </p>
+          </React.Fragment>
+        }
+      />
     );
   }
 
@@ -111,7 +108,7 @@ class RequestsViewComponent extends Component {
     ).length;
 
     return (
-      <InspectorView>
+      <>
         <EuiText size="xs">
           <p role="status" aria-live="polite" aria-atomic="true">
             <FormattedMessage
@@ -152,7 +149,7 @@ class RequestsViewComponent extends Component {
             request={this.state.request}
           />
         }
-      </InspectorView>
+      </>
     );
   }
 }
