@@ -48,7 +48,7 @@ export class DashboardContainerFactory extends EmbeddableFactory<
   public readonly type = DASHBOARD_CONTAINER_TYPE;
   private allowEditing: boolean;
 
-  constructor(options: DashboardOptions, private readonly viewportProps: ViewportProps) {
+  constructor(options: DashboardOptions, private readonly containerOptions: ViewportProps) {
     super({ savedObjectMetaData: options.savedObjectMetaData });
     this.allowEditing = options.capabilities.createNew && options.capabilities.showWriteControls;
   }
@@ -75,6 +75,6 @@ export class DashboardContainerFactory extends EmbeddableFactory<
     initialInput: DashboardContainerInput,
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> {
-    return new DashboardContainer(initialInput, this.viewportProps, parent);
+    return new DashboardContainer(initialInput, this.containerOptions, parent);
   }
 }
