@@ -191,6 +191,7 @@ export interface InternalCoreStart {
 }
 
 export {
+  ContextSetup,
   HttpServiceSetup,
   HttpServiceStart,
   ElasticsearchServiceSetup,

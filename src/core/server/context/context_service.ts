@@ -65,8 +65,10 @@ export class ContextService {
  * class VizRenderingPlugin {
  *   private readonly vizRenderers = new Map<string, ((domElement: HTMLElement) => () => void)>();
  *
+ *   constructor(private readonly initContext: PluginInitializerContext) {}
+ *
  *   setup(core) {
- *     this.contextContainer = core.createContextContainer<
+ *     this.contextContainer = core.context.createContextContainer<
  *       VizRenderContext,
  *       ReturnType<VizRenderer>,
  *       [HTMLElement]
@@ -80,8 +82,8 @@ export class ContextService {
  *   }
  *
  *   start(core) {
- *     // Register the core context available to all renderers. Use the VizRendererContext's pluginId as the first arg.
- *     this.contextContainer.registerContext('viz_rendering', 'core', () => ({
+ *     // Register the core context available to all renderers. Use the VizRendererContext's opaqueId as the first arg.
+ *     this.contextContainer.registerContext(this.initContext.opaqueId, 'core', () => ({
  *       i18n: core.i18n,
  *       uiSettings: core.uiSettings
  *     }));
