@@ -18,8 +18,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
 
   const jobId = `fq_single_1_${Date.now()}`;
 
-  // eslint-disable-next-line ban/ban
-  describe.only('single metric job creation', function() {
+  describe('single metric job creation', function() {
     this.tags('smoke');
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
