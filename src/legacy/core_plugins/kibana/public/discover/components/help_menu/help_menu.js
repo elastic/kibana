@@ -34,7 +34,7 @@ export class HelpMenu extends PureComponent {
           href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/discover.html`}
           target="_blank"
         >
-          <FormattedMessage id="kbn.dashboard.helpMenu.docLabel" defaultMessage="Discover documentation" />
+          <FormattedMessage id="kbn.discover.helpMenu.docLabel" defaultMessage="Discover documentation" />
         </EuiButton>
       </Fragment>
     );
