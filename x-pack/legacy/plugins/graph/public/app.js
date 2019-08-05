@@ -994,7 +994,7 @@ app.controller('graphuiPlugin', function (
     showSettings: false,
   };
 
-  $scope.closeMenus = (closeKey) => {
+  $scope.closeMenus = () => {
     _.forOwn($scope.menus, function (_, key) {
       $scope.menus[key] = false;
     });
