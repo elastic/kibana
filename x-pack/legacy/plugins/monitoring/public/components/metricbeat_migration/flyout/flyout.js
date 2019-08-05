@@ -27,7 +27,6 @@ import {
 import { getInstructionSteps } from '../instruction_steps';
 import { Storage } from 'ui/storage';
 import { STORAGE_KEY, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
-import { ensureMinimumTime } from '../../../lib/ensure_minimum_time';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
@@ -42,7 +41,6 @@ import { setNewlyDiscoveredClusterUuid } from '../../../lib/setup_mode';
 
 const storage = new Storage(window.localStorage);
 const ES_MONITORING_URL_KEY = `${STORAGE_KEY}.mb_migration.esMonitoringUrl`;
-const AUTO_CHECK_INTERVAL_IN_MS = 5000;
 const DEFAULT_ES_MONITORING_URL = 'http://localhost:9200';
 
 export class Flyout extends Component {
@@ -67,56 +65,9 @@ export class Flyout extends Component {
       checkedStatusByStep: {
         [INSTRUCTION_STEP_ENABLE_METRICBEAT]: false,
         [INSTRUCTION_STEP_DISABLE_INTERNAL]: false,
+        userAcknowledgedNoClusterUuidPrompt: false
       },
-      checkingMigrationStatus: false,
-      userAcknowledgedNoClusterUuidPrompt: false
     };
-  }
-
-  componentWillUpdate(_nextProps, nextState) {
-    // We attempt to provide a better UX for the user by automatically rechecking
-    // the status of their current step, once they have initiated a check manually.
-    // The logic here aims to remove the recheck one they have moved on from the
-    // step
-
-    const thisActiveStep = this.state.activeStep;
-    const nextActiveStep = nextState.activeStep;
-    const nextEnableMbStatus = nextState.checkedStatusByStep[INSTRUCTION_STEP_ENABLE_METRICBEAT];
-    const nowEnableMbStatus = this.state.checkedStatusByStep[INSTRUCTION_STEP_ENABLE_METRICBEAT];
-    const nextDisableInternalStatus = nextState.checkedStatusByStep[INSTRUCTION_STEP_DISABLE_INTERNAL];
-    const nowDisableInternalStatus = this.state.checkedStatusByStep[INSTRUCTION_STEP_DISABLE_INTERNAL];
-
-    const setupInterval = (nextEnableMbStatus && !nowEnableMbStatus) || (nextDisableInternalStatus && !nowDisableInternalStatus);
-    const removeInterval = thisActiveStep !== nextActiveStep;
-    if (removeInterval) {
-      clearInterval(this.checkInterval);
-      this.clearInterval = null;
-    }
-
-    if (setupInterval) {
-      this.checkInterval = setInterval(async () => {
-        await this.checkForMigrationStatus();
-      }, AUTO_CHECK_INTERVAL_IN_MS);
-    }
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.checkInterval);
-  }
-
-  checkForMigrationStatus = async () => {
-    this.setState({ checkingMigrationStatus: true });
-    await ensureMinimumTime(
-      this.props.updateProduct(this.props.instance.uuid, true), 1000
-    );
-    this.setState(state => ({
-      ...state,
-      checkingMigrationStatus: false,
-      checkedStatusByStep: {
-        ...state.checkedStatusByStep,
-        [this.state.activeStep]: true,
-      }
-    }));
   }
 
   setEsMonitoringUrl = esMonitoringUrl => {
@@ -136,7 +87,6 @@ export class Flyout extends Component {
       activeStep,
       esMonitoringUrl,
       checkedStatusByStep,
-      checkingMigrationStatus,
     } = this.state;
 
     switch (activeStep) {
@@ -166,10 +116,7 @@ export class Flyout extends Component {
         const instructionSteps = getInstructionSteps(productName, product, activeStep, meta, {
           doneWithMigration: onClose,
           esMonitoringUrl,
-          checkForMigrationStatus: this.checkForMigrationStatus,
-          checkingMigrationStatus,
           hasCheckedStatus: checkedStatusByStep[activeStep],
-          autoCheckIntervalInMs: AUTO_CHECK_INTERVAL_IN_MS,
         });
 
         return (

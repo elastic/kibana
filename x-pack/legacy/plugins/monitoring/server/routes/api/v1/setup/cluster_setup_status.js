@@ -9,7 +9,7 @@ import { handleError } from '../../../../lib/errors';
 import { getCollectionStatus } from '../../../../lib/setup/collection';
 import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 
-export function setupStatusRoute(server) {
+export function clusterSetupStatusRoute(server) {
   /*
    * Monitoring Home
    * Route Init (for checking license and compatibility for multi-cluster monitoring
