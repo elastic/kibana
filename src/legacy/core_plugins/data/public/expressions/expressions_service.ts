@@ -23,7 +23,7 @@ import { Ast } from '@kbn/interpreter/common';
 // this type import and the types below them should be switched to the types of
 // the interpreter plugin itself once they are ready
 import { Registry } from '@kbn/interpreter/common';
-import { Adapters } from 'ui/inspector';
+import { Adapters } from 'src/plugins/inspector/public';
 import { TimeRange } from 'ui/timefilter/time_history';
 import { Filter } from '@kbn/es-query';
 import { createRenderer } from './expression_renderer';
