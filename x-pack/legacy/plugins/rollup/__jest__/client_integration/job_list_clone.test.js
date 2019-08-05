@@ -24,7 +24,7 @@ jest.mock('lodash/function/debounce', () => fn => fn);
 
 const { setup } = pageHelpers.jobList;
 
-describe('Cloning an existing rollup job from job list', () => {
+describe('Smoke test cloning an existing rollup job from job list', () => {
   let server;
   let httpRequestsMockHelpers;
   let table;
