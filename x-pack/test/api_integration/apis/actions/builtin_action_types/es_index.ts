@@ -6,12 +6,11 @@
 
 import expect from '@kbn/expect';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const ES_TEST_INDEX_NAME = 'functional-test-actions-index';
 
-// eslint-disable-next-line import/no-default-export
-export default function indexTest({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function indexTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -36,7 +35,14 @@ export default function indexTest({ getService }: KibanaFunctionalTestDefaultPro
         })
         .expect(200);
 
-      expect(createdAction).to.eql({ id: createdAction.id });
+      expect(createdAction).to.eql({
+        id: createdAction.id,
+        description: 'An index action',
+        actionTypeId: '.index',
+        config: {
+          index: null,
+        },
+      });
       createdActionID = createdAction.id;
       expect(typeof createdActionID).to.be('string');
 
@@ -64,7 +70,14 @@ export default function indexTest({ getService }: KibanaFunctionalTestDefaultPro
         })
         .expect(200);
 
-      expect(createdActionWithIndex).to.eql({ id: createdActionWithIndex.id });
+      expect(createdActionWithIndex).to.eql({
+        id: createdActionWithIndex.id,
+        description: 'An index action with index config',
+        actionTypeId: '.index',
+        config: {
+          index: ES_TEST_INDEX_NAME,
+        },
+      });
       createdActionIDWithIndex = createdActionWithIndex.id;
       expect(typeof createdActionIDWithIndex).to.be('string');
 

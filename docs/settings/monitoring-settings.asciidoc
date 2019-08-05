@@ -129,6 +129,3 @@ For {es} clusters that are running in containers, this setting changes the
 statistics. It also adds the calculated Cgroup CPU utilization to the
 *Node Overview* page instead of the overall operating system's CPU
 utilization. Defaults to `false`.
-+
-[role="screenshot"]
-image::images/monitoring-containers.png[Elasticsearch Inside a Container]

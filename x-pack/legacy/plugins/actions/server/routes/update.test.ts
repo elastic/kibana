@@ -35,7 +35,12 @@ it('calls the update function with proper parameters', async () => {
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
-  expect(response).toEqual({ id: '1' });
+  expect(response).toEqual({
+    id: '1',
+    actionTypeId: 'my-action-type-id',
+    description: 'My description',
+    config: { foo: true },
+  });
   expect(actionsClient.update).toHaveBeenCalledTimes(1);
   expect(actionsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
