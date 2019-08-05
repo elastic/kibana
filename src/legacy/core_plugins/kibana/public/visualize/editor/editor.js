@@ -449,8 +449,8 @@ function VisEditor(
       (dateRange && !_.isEqual(dateRange, $scope.timeRange))
     );
 
-    if (query && !_.isEqual(query, $state.query)) $state.query = query;
-    if (dateRange && !_.isEqual(dateRange, $scope.timeRange)) timefilter.setTime(dateRange);
+    $state.query = query;
+    timefilter.setTime(dateRange);
 
     // If nothing has changed, trigger the fetch manually, otherwise it will happen as a result of the changes
     if (!isUpdate) $scope.fetch();
