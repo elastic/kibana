@@ -33,7 +33,7 @@ import { validateIndexPattern } from 'ui/index_patterns/index';
 
 import { isFilterable, getFromSavedObject } from 'ui/index_patterns/static_utils';
 
-// IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field
+// IndexPattern, StaticIndexPattern, Field
 import * as types from 'ui/index_patterns';
 
 const config = chrome.getUiSettingsClient();
@@ -94,7 +94,7 @@ export type IndexPattern = types.IndexPattern;
 export type StaticIndexPattern = types.StaticIndexPattern;
 
 /** @public */
-export type StaticIndexPatternField = types.StaticIndexPatternField;
+export type Field = types.Field;
 
 /** @public */
-export type Field = types.Field;
+export type FieldType = types.FieldType;
