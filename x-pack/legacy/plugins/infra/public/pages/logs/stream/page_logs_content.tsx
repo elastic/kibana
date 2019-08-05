@@ -31,7 +31,7 @@ import { LogsToolbar } from './page_toolbar';
 import { LogHighlightsBridge } from '../../../containers/logs/log_highlights';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
-  const { derivedIndexPattern, source, sourceId, version } = useContext(Source.Context);
+  const { createDerivedIndexPattern, source, sourceId, version } = useContext(Source.Context);
   const { intervalSize, textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
     setFlyoutVisibility,
@@ -42,6 +42,8 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     flyoutItem,
     isLoading,
   } = useContext(LogFlyoutState.Context);
+
+  const derivedIndexPattern = createDerivedIndexPattern('logs');
 
   return (
     <>

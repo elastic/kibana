@@ -24,3 +24,5 @@ jest.doMock('ui/capabilities', () => ({
     },
   },
 }));
+
+jest.mock('ui/new_platform');

@@ -6,9 +6,9 @@
 
 import testSubjSelector from '@kbn/test-subj-selector';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function InfraHomePageProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
+export function InfraHomePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');

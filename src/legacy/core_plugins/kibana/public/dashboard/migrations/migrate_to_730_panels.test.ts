@@ -34,6 +34,8 @@ jest.mock(
   { virtual: true }
 );
 
+jest.mock('ui/new_platform');
+
 import { migratePanelsTo730 } from './migrate_to_730_panels';
 import { SavedDashboardPanelTo60, SavedDashboardPanel730ToLatest } from '../types';
 import {

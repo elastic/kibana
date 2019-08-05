@@ -9,8 +9,12 @@ import React from 'react';
 import { MetricsTimeContainer } from '../../containers/metrics/with_metrics_time';
 import { Source } from '../../containers/source';
 
-export const MetricDetailPageProviders: React.FunctionComponent = ({ children }) => (
+export const withMetricPageProviders = <T extends object>(Component: React.ComponentType<T>) => (
+  props: T
+) => (
   <Source.Provider sourceId="default">
-    <MetricsTimeContainer.Provider>{children}</MetricsTimeContainer.Provider>
+    <MetricsTimeContainer.Provider>
+      <Component {...props} />
+    </MetricsTimeContainer.Provider>
   </Source.Provider>
 );

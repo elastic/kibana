@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 
-// eslint-disable-next-line import/no-default-export
-export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const pageObjects = getPageObjects(['common', 'infraHome']);

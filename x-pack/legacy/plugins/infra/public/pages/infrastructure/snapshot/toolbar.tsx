@@ -25,10 +25,10 @@ export const SnapshotToolbar = injectI18n(({ intl }) => (
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
       <EuiFlexItem>
         <WithSource>
-          {({ derivedIndexPattern }) => (
-            <WithKueryAutocompletion indexPattern={derivedIndexPattern}>
+          {({ createDerivedIndexPattern }) => (
+            <WithKueryAutocompletion indexPattern={createDerivedIndexPattern('metrics')}>
               {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-                <WithWaffleFilter indexPattern={derivedIndexPattern}>
+                <WithWaffleFilter indexPattern={createDerivedIndexPattern('metrics')}>
                   {({
                     applyFilterQueryFromKueryExpression,
                     filterQueryDraft,
@@ -72,7 +72,7 @@ export const SnapshotToolbar = injectI18n(({ intl }) => (
     </EuiFlexGroup>
     <EuiFlexGroup alignItems="center" gutterSize="m">
       <WithSource>
-        {({ derivedIndexPattern }) => (
+        {({ createDerivedIndexPattern }) => (
           <WithWaffleOptions>
             {({
               changeMetric,
@@ -105,7 +105,7 @@ export const SnapshotToolbar = injectI18n(({ intl }) => (
                     groupBy={groupBy}
                     nodeType={nodeType}
                     onChange={changeGroupBy}
-                    fields={derivedIndexPattern.fields}
+                    fields={createDerivedIndexPattern('metrics').fields}
                     onChangeCustomOptions={changeCustomOptions}
                     customOptions={customOptions}
                   />

@@ -6,10 +6,9 @@
 
 import expect from '@kbn/expect';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const infraLogStream = getService('infraLogStream');
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
