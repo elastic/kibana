@@ -39,7 +39,8 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/infra'),
       resolve(__dirname, './apps/machine_learning'),
       resolve(__dirname, './apps/rollup_job'),
-      resolve(__dirname, './apps/maps'),
+      // FAILING/FLAKY: https://github.com/elastic/kibana/pull/42638
+      // resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/timelion'),
       resolve(__dirname, './apps/upgrade_assistant'),
