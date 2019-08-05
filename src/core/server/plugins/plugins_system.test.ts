@@ -45,9 +45,9 @@ function createPlugin(
     server = true,
   }: { required?: string[]; optional?: string[]; server?: boolean } = {}
 ) {
-  return new PluginWrapper(
-    'some-path',
-    {
+  return new PluginWrapper({
+    path: 'some-path',
+    manifest: {
       id,
       version: 'some-version',
       configPath: 'path',
@@ -57,9 +57,9 @@ function createPlugin(
       server,
       ui: true,
     },
-    Symbol(id),
-    { logger } as any
-  );
+    opaqueId: Symbol(id),
+    initializerContext: { logger } as any,
+  });
 }
 
 let pluginsSystem: PluginsSystem;

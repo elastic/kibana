@@ -128,9 +128,9 @@ test('`discover` throws if discovered plugins with conflicting names', async () 
   mockDiscover.mockReturnValue({
     error$: from([]),
     plugin$: from([
-      new PluginWrapper(
-        'path-4',
-        {
+      new PluginWrapper({
+        path: 'path-4',
+        manifest: {
           id: 'conflicting-id',
           version: 'some-version',
           configPath: 'path',
@@ -140,12 +140,12 @@ test('`discover` throws if discovered plugins with conflicting names', async () 
           server: true,
           ui: true,
         },
-        Symbol(),
-        { logger } as any
-      ),
-      new PluginWrapper(
-        'path-5',
-        {
+        opaqueId: Symbol(),
+        initializerContext: { logger } as any,
+      }),
+      new PluginWrapper({
+        path: 'path-5',
+        manifest: {
           id: 'conflicting-id',
           version: 'some-other-version',
           configPath: ['plugin', 'path'],
@@ -155,9 +155,9 @@ test('`discover` throws if discovered plugins with conflicting names', async () 
           server: true,
           ui: false,
         },
-        Symbol(),
-        { logger } as any
-      ),
+        opaqueId: Symbol(),
+        initializerContext: { logger } as any,
+      }),
     ]),
   });
 
@@ -180,9 +180,9 @@ test('`discover` properly detects plugins that should be disabled.', async () =>
   mockDiscover.mockReturnValue({
     error$: from([]),
     plugin$: from([
-      new PluginWrapper(
-        'path-1',
-        {
+      new PluginWrapper({
+        path: 'path-1',
+        manifest: {
           id: 'explicitly-disabled-plugin',
           version: 'some-version',
           configPath: 'path-1-disabled',
@@ -192,12 +192,12 @@ test('`discover` properly detects plugins that should be disabled.', async () =>
           server: true,
           ui: true,
         },
-        Symbol(),
-        { logger } as any
-      ),
-      new PluginWrapper(
-        'path-2',
-        {
+        opaqueId: Symbol(),
+        initializerContext: { logger } as any,
+      }),
+      new PluginWrapper({
+        path: 'path-2',
+        manifest: {
           id: 'plugin-with-missing-required-deps',
           version: 'some-version',
           configPath: 'path-2',
@@ -207,12 +207,12 @@ test('`discover` properly detects plugins that should be disabled.', async () =>
           server: true,
           ui: true,
         },
-        Symbol(),
-        { logger } as any
-      ),
-      new PluginWrapper(
-        'path-3',
-        {
+        opaqueId: Symbol(),
+        initializerContext: { logger } as any,
+      }),
+      new PluginWrapper({
+        path: 'path-3',
+        manifest: {
           id: 'plugin-with-disabled-transitive-dep',
           version: 'some-version',
           configPath: 'path-3',
@@ -222,12 +222,12 @@ test('`discover` properly detects plugins that should be disabled.', async () =>
           server: true,
           ui: true,
         },
-        Symbol(),
-        { logger } as any
-      ),
-      new PluginWrapper(
-        'path-4',
-        {
+        opaqueId: Symbol(),
+        initializerContext: { logger } as any,
+      }),
+      new PluginWrapper({
+        path: 'path-4',
+        manifest: {
           id: 'another-explicitly-disabled-plugin',
           version: 'some-version',
           configPath: 'path-4-disabled',
@@ -237,9 +237,9 @@ test('`discover` properly detects plugins that should be disabled.', async () =>
           server: true,
           ui: true,
         },
-        Symbol(),
-        { logger } as any
-      ),
+        opaqueId: Symbol(),
+        initializerContext: { logger } as any,
+      }),
     ]),
   });
 
@@ -272,9 +272,9 @@ Array [
 });
 
 test('`discover` properly invokes plugin discovery and ignores non-critical errors.', async () => {
-  const firstPlugin = new PluginWrapper(
-    'path-1',
-    {
+  const firstPlugin = new PluginWrapper({
+    path: 'path-1',
+    manifest: {
       id: 'some-id',
       version: 'some-version',
       configPath: 'path',
@@ -284,13 +284,13 @@ test('`discover` properly invokes plugin discovery and ignores non-critical erro
       server: true,
       ui: true,
     },
-    Symbol(),
-    { logger } as any
-  );
+    opaqueId: Symbol(),
+    initializerContext: { logger } as anyy,
+  });
 
-  const secondPlugin = new PluginWrapper(
-    'path-2',
-    {
+  const secondPlugin = new PluginWrapper({
+    path: 'path-2',
+    manifest: {
       id: 'some-other-id',
       version: 'some-other-version',
       configPath: ['plugin', 'path'],
@@ -300,9 +300,9 @@ test('`discover` properly invokes plugin discovery and ignores non-critical erro
       server: true,
       ui: false,
     },
-    Symbol(),
-    { logger } as any
-  );
+    opaqueId: Symbol(),
+    initializerContext: { logger } as any,
+  });
 
   mockDiscover.mockReturnValue({
     error$: from([
@@ -314,7 +314,6 @@ test('`discover` properly invokes plugin discovery and ignores non-critical erro
   });
 
   await pluginsService.discover();
-
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);
@@ -361,9 +360,9 @@ test('`discover` registers plugin config schema in config service', async () => 
   mockDiscover.mockReturnValue({
     error$: from([]),
     plugin$: from([
-      new PluginWrapper(
-        'path-with-schema',
-        {
+      new PluginWrapper({
+        path: 'path-with-schema',
+        manifest: {
           id: 'some-id',
           version: 'some-version',
           configPath: 'path',
@@ -373,9 +372,9 @@ test('`discover` registers plugin config schema in config service', async () => 
           server: true,
           ui: true,
         },
-        Symbol(),
-        { logger } as any
-      ),
+        opaqueId: Symbol(),
+        initializerContext: { logger } as any,
+      }),
     ]),
   });
   await pluginsService.discover();

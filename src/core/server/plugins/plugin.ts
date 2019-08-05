@@ -45,6 +45,9 @@ export class PluginWrapper<
   TPluginsSetup extends object = object,
   TPluginsStart extends object = object
 > {
+  public readonly path: string;
+  public readonly manifest: PluginManifest;
+  public readonly opaqueId: PluginOpaqueId;
   public readonly name: PluginManifest['id'];
   public readonly configPath: PluginManifest['configPath'];
   public readonly requiredPlugins: PluginManifest['requiredPlugins'];
@@ -53,22 +56,29 @@ export class PluginWrapper<
   public readonly includesUiPlugin: PluginManifest['ui'];
 
   private readonly log: Logger;
+  private readonly initializerContext: PluginInitializerContext;
 
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   constructor(
-    public readonly path: string,
-    public readonly manifest: PluginManifest,
-    public readonly opaqueId: PluginOpaqueId,
-    private readonly initializerContext: PluginInitializerContext
+    readonly params: {
+      readonly path: string;
+      readonly manifest: PluginManifest;
+      readonly opaqueId: PluginOpaqueId;
+      readonly initializerContext: PluginInitializerContext;
+    }
   ) {
-    this.log = initializerContext.logger.get();
-    this.name = manifest.id;
-    this.configPath = manifest.configPath;
-    this.requiredPlugins = manifest.requiredPlugins;
-    this.optionalPlugins = manifest.optionalPlugins;
-    this.includesServerPlugin = manifest.server;
-    this.includesUiPlugin = manifest.ui;
+    this.path = params.path;
+    this.manifest = params.manifest;
+    this.opaqueId = params.opaqueId;
+    this.initializerContext = params.initializerContext;
+    this.log = params.initializerContext.logger.get();
+    this.name = params.manifest.id;
+    this.configPath = params.manifest.configPath;
+    this.requiredPlugins = params.manifest.requiredPlugins;
+    this.optionalPlugins = params.manifest.optionalPlugins;
+    this.includesServerPlugin = params.manifest.server;
+    this.includesUiPlugin = params.manifest.ui;
   }
 
   /**

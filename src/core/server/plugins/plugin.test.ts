@@ -87,12 +87,12 @@ afterEach(() => {
 test('`constructor` correctly initializes plugin instance', () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
-  const plugin = new PluginWrapper(
-    'some-plugin-path',
+  const plugin = new PluginWrapper({
+    path: 'some-plugin-path',
     manifest,
     opaqueId,
-    createPluginInitializerContext(coreContext, opaqueId, manifest)
-  );
+    initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+  });
 
   expect(plugin.name).toBe('some-plugin-id');
   expect(plugin.configPath).toBe('path');
@@ -104,12 +104,12 @@ test('`constructor` correctly initializes plugin instance', () => {
 test('`setup` fails if `plugin` initializer is not exported', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
-  const plugin = new PluginWrapper(
-    'plugin-without-initializer-path',
+  const plugin = new PluginWrapper({
+    path: 'plugin-without-initializer-path',
     manifest,
     opaqueId,
-    createPluginInitializerContext(coreContext, opaqueId, manifest)
-  );
+    initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+  });
 
   await expect(
     plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
@@ -121,12 +121,12 @@ test('`setup` fails if `plugin` initializer is not exported', async () => {
 test('`setup` fails if plugin initializer is not a function', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
-  const plugin = new PluginWrapper(
-    'plugin-with-wrong-initializer-path',
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-wrong-initializer-path',
     manifest,
     opaqueId,
-    createPluginInitializerContext(coreContext, opaqueId, manifest)
-  );
+    initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+  });
 
   await expect(
     plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
@@ -138,12 +138,12 @@ test('`setup` fails if plugin initializer is not a function', async () => {
 test('`setup` fails if initializer does not return object', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
-  const plugin = new PluginWrapper(
-    'plugin-with-initializer-path',
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
     manifest,
     opaqueId,
-    createPluginInitializerContext(coreContext, opaqueId, manifest)
-  );
+    initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+  });
 
   mockPluginInitializer.mockReturnValue(null);
 
@@ -157,12 +157,12 @@ test('`setup` fails if initializer does not return object', async () => {
 test('`setup` fails if object returned from initializer does not define `setup` function', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
-  const plugin = new PluginWrapper(
-    'plugin-with-initializer-path',
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
     manifest,
     opaqueId,
-    createPluginInitializerContext(coreContext, opaqueId, manifest)
-  );
+    initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+  });
 
   const mockPluginInstance = { run: jest.fn() };
   mockPluginInitializer.mockReturnValue(mockPluginInstance);
@@ -178,12 +178,12 @@ test('`setup` initializes plugin and calls appropriate lifecycle hook', async ()
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
   const initializerContext = createPluginInitializerContext(coreContext, opaqueId, manifest);
-  const plugin = new PluginWrapper(
-    'plugin-with-initializer-path',
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
     manifest,
     opaqueId,
-    initializerContext
-  );
+    initializerContext,
+  });
 
   const mockPluginInstance = { setup: jest.fn().mockResolvedValue({ contract: 'yes' }) };
   mockPluginInitializer.mockReturnValue(mockPluginInstance);
@@ -202,12 +202,12 @@ test('`setup` initializes plugin and calls appropriate lifecycle hook', async ()
 test('`start` fails if setup is not called first', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
-  const plugin = new PluginWrapper(
-    'some-plugin-path',
+  const plugin = new PluginWrapper({
+    path: 'some-plugin-path',
     manifest,
     opaqueId,
-    createPluginInitializerContext(coreContext, opaqueId, manifest)
-  );
+    initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+  });
 
   await expect(plugin.start({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
     `"Plugin \\"some-plugin-id\\" can't be started since it isn't set up."`
@@ -217,12 +217,12 @@ test('`start` fails if setup is not called first', async () => {
 test('`start` calls plugin.start with context and dependencies', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
-  const plugin = new PluginWrapper(
-    'plugin-with-initializer-path',
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
     manifest,
     opaqueId,
-    createPluginInitializerContext(coreContext, opaqueId, manifest)
-  );
+    initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+  });
   const context = { any: 'thing' } as any;
   const deps = { otherDep: 'value' };
 
@@ -244,12 +244,12 @@ test('`start` calls plugin.start with context and dependencies', async () => {
 test('`stop` fails if plugin is not set up', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
-  const plugin = new PluginWrapper(
-    'plugin-with-initializer-path',
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
     manifest,
     opaqueId,
-    createPluginInitializerContext(coreContext, opaqueId, manifest)
-  );
+    initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+  });
 
   const mockPluginInstance = { setup: jest.fn(), stop: jest.fn() };
   mockPluginInitializer.mockReturnValue(mockPluginInstance);
@@ -263,12 +263,12 @@ test('`stop` fails if plugin is not set up', async () => {
 test('`stop` does nothing if plugin does not define `stop` function', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
-  const plugin = new PluginWrapper(
-    'plugin-with-initializer-path',
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
     manifest,
     opaqueId,
-    createPluginInitializerContext(coreContext, opaqueId, manifest)
-  );
+    initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+  });
 
   mockPluginInitializer.mockReturnValue({ setup: jest.fn() });
   await plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {});
@@ -279,12 +279,12 @@ test('`stop` does nothing if plugin does not define `stop` function', async () =
 test('`stop` calls `stop` defined by the plugin instance', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
-  const plugin = new PluginWrapper(
-    'plugin-with-initializer-path',
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
     manifest,
     opaqueId,
-    createPluginInitializerContext(coreContext, opaqueId, manifest)
-  );
+    initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+  });
 
   const mockPluginInstance = { setup: jest.fn(), stop: jest.fn() };
   mockPluginInitializer.mockReturnValue(mockPluginInstance);
@@ -308,12 +308,12 @@ describe('#getConfigSchema()', () => {
     );
     const manifest = createPluginManifest();
     const opaqueId = Symbol();
-    const plugin = new PluginWrapper(
-      'plugin-with-schema',
+    const plugin = new PluginWrapper({
+      path: 'plugin-with-schema',
       manifest,
       opaqueId,
-      createPluginInitializerContext(coreContext, opaqueId, manifest)
-    );
+      initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+    });
 
     expect(plugin.getConfigSchema()).toBe(pluginSchema);
   });
@@ -322,24 +322,24 @@ describe('#getConfigSchema()', () => {
     jest.doMock('plugin-with-no-definition/server', () => ({}), { virtual: true });
     const manifest = createPluginManifest();
     const opaqueId = Symbol();
-    const plugin = new PluginWrapper(
-      'plugin-with-no-definition',
+    const plugin = new PluginWrapper({
+      path: 'plugin-with-no-definition',
       manifest,
       opaqueId,
-      createPluginInitializerContext(coreContext, opaqueId, manifest)
-    );
+      initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+    });
     expect(plugin.getConfigSchema()).toBe(null);
   });
 
   it('returns null for plugins without a server part', () => {
     const manifest = createPluginManifest({ server: false });
     const opaqueId = Symbol();
-    const plugin = new PluginWrapper(
-      'plugin-with-no-definition',
+    const plugin = new PluginWrapper({
+      path: 'plugin-with-no-definition',
       manifest,
       opaqueId,
-      createPluginInitializerContext(coreContext, opaqueId, manifest)
-    );
+      initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+    });
     expect(plugin.getConfigSchema()).toBe(null);
   });
 
@@ -357,12 +357,12 @@ describe('#getConfigSchema()', () => {
     );
     const manifest = createPluginManifest();
     const opaqueId = Symbol();
-    const plugin = new PluginWrapper(
-      'plugin-invalid-schema',
+    const plugin = new PluginWrapper({
+      path: 'plugin-invalid-schema',
       manifest,
       opaqueId,
-      createPluginInitializerContext(coreContext, opaqueId, manifest)
-    );
+      initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+    });
     expect(() => plugin.getConfigSchema()).toThrowErrorMatchingInlineSnapshot(
       `"Configuration schema expected to be an instance of Type"`
     );

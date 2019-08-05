@@ -116,12 +116,12 @@ function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
     map(manifest => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
       const opaqueId = Symbol(manifest.id);
-      return new PluginWrapper(
+      return new PluginWrapper({
         path,
         manifest,
         opaqueId,
-        createPluginInitializerContext(coreContext, opaqueId, manifest)
-      );
+        initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+      });
     }),
     catchError(err => [err])
   );
