@@ -18,23 +18,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { Schemas } from 'ui/vis/editors/default/schemas';
-import { TagCloudVisualization } from './tag_cloud_visualization';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { Status } from 'ui/vis/update_status';
+// @ts-ignore
+import { Schemas } from 'ui/vis/editors/default/schemas';
+
 import { TagCloudOptions } from './components/tag_cloud_options';
+import { visFactory } from '../../visualizations/public';
 
-VisTypesRegistryProvider.register(function (Private) {
+// @ts-ignore
+import { TagCloudVisualization } from './components/tag_cloud_visualization';
 
-  const VisFactory = Private(VisFactoryProvider);
-
-  return VisFactory.createBaseVisualization({
+export const createTagCloudTypeDefinition = () => {
+  return visFactory.createBaseVisualization({
     name: 'tagcloud',
     title: i18n.translate('tagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag Cloud' }),
     icon: 'visTagCloud',
     description: i18n.translate('tagCloud.vis.tagCloudDescription', {
-      defaultMessage: 'A group of words, sized according to their importance'
+      defaultMessage: 'A group of words, sized according to their importance',
     }),
     visConfig: {
       defaults: {
@@ -42,8 +42,8 @@ VisTypesRegistryProvider.register(function (Private) {
         orientation: 'single',
         minFontSize: 18,
         maxFontSize: 72,
-        showLabel: true
-      }
+        showLabel: true,
+      },
     },
     requiresUpdateStatus: [Status.PARAMS, Status.RESIZE, Status.DATA],
     visualization: TagCloudVisualization,
@@ -52,41 +52,41 @@ VisTypesRegistryProvider.register(function (Private) {
         scales: [
           {
             text: i18n.translate('tagCloud.vis.editorConfig.scales.linearText', {
-              defaultMessage: 'Linear'
+              defaultMessage: 'Linear',
             }),
-            value: 'linear'
+            value: 'linear',
           },
           {
             text: i18n.translate('tagCloud.vis.editorConfig.scales.logText', {
-              defaultMessage: 'Log'
+              defaultMessage: 'Log',
             }),
-            value: 'log'
+            value: 'log',
           },
           {
             text: i18n.translate('tagCloud.vis.editorConfig.scales.squareRootText', {
-              defaultMessage: 'Square root'
+              defaultMessage: 'Square root',
             }),
-            value: 'square root'
+            value: 'square root',
           },
         ],
         orientations: [
           {
             text: i18n.translate('tagCloud.vis.editorConfig.orientations.singleText', {
-              defaultMessage: 'Single'
+              defaultMessage: 'Single',
             }),
-            value: 'single'
+            value: 'single',
           },
           {
             text: i18n.translate('tagCloud.vis.editorConfig.orientations.rightAngledText', {
-              defaultMessage: 'Right angled'
+              defaultMessage: 'Right angled',
             }),
-            value: 'right angled'
+            value: 'right angled',
           },
           {
             text: i18n.translate('tagCloud.vis.editorConfig.orientations.multipleText', {
-              defaultMessage: 'Multiple'
+              defaultMessage: 'Multiple',
             }),
-            value: 'multiple'
+            value: 'multiple',
           },
         ],
       },
@@ -98,10 +98,15 @@ VisTypesRegistryProvider.register(function (Private) {
           title: i18n.translate('tagCloud.vis.schemas.metricTitle', { defaultMessage: 'Tag size' }),
           min: 1,
           max: 1,
-          aggFilter: ['!std_dev', '!percentiles', '!percentile_ranks', '!derivative', '!geo_bounds', '!geo_centroid'],
-          defaults: [
-            { schema: 'metric', type: 'count' }
-          ]
+          aggFilter: [
+            '!std_dev',
+            '!percentiles',
+            '!percentile_ranks',
+            '!derivative',
+            '!geo_bounds',
+            '!geo_centroid',
+          ],
+          defaults: [{ schema: 'metric', type: 'count' }],
         },
         {
           group: 'buckets',
@@ -109,10 +114,10 @@ VisTypesRegistryProvider.register(function (Private) {
           title: i18n.translate('tagCloud.vis.schemas.segmentTitle', { defaultMessage: 'Tags' }),
           min: 1,
           max: 1,
-          aggFilter: ['terms', 'significant_terms']
-        }
-      ])
+          aggFilter: ['terms', 'significant_terms'],
+        },
+      ]),
     },
-    useCustomNoDataScreen: true
+    useCustomNoDataScreen: true,
   });
-});
+};
