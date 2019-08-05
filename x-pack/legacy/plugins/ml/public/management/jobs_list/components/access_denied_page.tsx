@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment } from 'react';
+import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -21,7 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-export const AccessDeniedPage: FC = () => (
+export const AccessDeniedPage = () => (
   <Fragment>
     <EuiPage>
       <EuiPageBody>
