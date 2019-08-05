@@ -183,33 +183,3 @@ export function updateLayerIndexPattern(
     columnOrder: newColumnOrder,
   };
 }
-
-export function updateLayerIndexPatterns(
-  layers: IndexPatternPrivateState['layers'],
-  newIndexPattern: IndexPattern
-) {
-  const currentlyUsedIndexPatterns = _.uniq(
-    Object.values(layers).map(layer => layer.indexPatternId)
-  );
-  if (
-    currentlyUsedIndexPatterns.length === 1 &&
-    currentlyUsedIndexPatterns[0] !== newIndexPattern.id
-  ) {
-    const isTransferable = Object.values(layers).every(layer =>
-      isLayerTransferable(layer, newIndexPattern)
-    );
-
-    if (isTransferable) {
-      return _.mapValues(layers, layer => ({
-        ...layer,
-        indexPatternId: newIndexPattern.id,
-        columns: _.mapValues(layer.columns, column => ({
-          ...column,
-          indexPatternId: newIndexPattern.id,
-        })),
-      }));
-    }
-  }
-
-  return layers;
-}

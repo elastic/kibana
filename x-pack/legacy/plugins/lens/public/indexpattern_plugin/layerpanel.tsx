@@ -5,14 +5,16 @@
  */
 
 import _ from 'lodash';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiComboBox,
   // @ts-ignore
   EuiHighlight,
   EuiButtonEmpty,
   EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { DatasourceLayerPanelProps } from '../types';
 import { IndexPatternPrivateState } from './indexpattern';
@@ -25,17 +27,23 @@ export interface IndexPatternLayerPanelProps extends DatasourceLayerPanelProps {
 
 export function LayerPanel({ state, setState, layerId }: IndexPatternLayerPanelProps) {
   const [isChooserOpen, setChooserOpen] = useState(false);
-  const indexPatterns = Object.values(state.indexPatterns).map(indexPattern => ({
-    ...indexPattern,
-    isTransferable: isLayerTransferable(state.layers[layerId], indexPattern),
-  }));
+  const indexPatterns = useMemo(
+    () =>
+      Object.values(state.indexPatterns)
+        .filter(indexPattern => indexPattern.id !== state.layers[layerId].indexPatternId)
+        .map(indexPattern => ({
+          ...indexPattern,
+          isTransferable: isLayerTransferable(state.layers[layerId], indexPattern),
+        })),
+    [state.indexPatterns, layerId]
+  );
   const currentIndexPatternId = state.layers[layerId].indexPatternId;
 
   return (
     <I18nProvider>
       {isChooserOpen ? (
         <EuiComboBox
-          data-test-subj="indexPattern-switcher"
+          data-test-subj="layerIndexPatternSwitcher"
           options={indexPatterns.map(indexPattern => ({
             label: indexPattern.title,
             value: indexPattern,
@@ -71,14 +79,31 @@ export function LayerPanel({ state, setState, layerId }: IndexPatternLayerPanelP
             const { label, value } = option;
             return (
               <span className={contentClassName}>
-                <EuiIcon type={value && value.isTransferable ? 'empty' : 'bolt'} />
+                {value && value.isTransferable ? (
+                  <EuiIcon type="empty" />
+                ) : (
+                  <EuiIconTip
+                    type="bolt"
+                    content={i18n.translate(
+                      'xpack.lens.indexPattern.lossyIndexPatternSwitchDescription',
+                      {
+                        defaultMessage:
+                          'Not all operations are compatible with this index pattern and will be removed on switching.',
+                      }
+                    )}
+                  />
+                )}
                 <EuiHighlight search={searchValue}>{label}</EuiHighlight>
               </span>
             );
           }}
         />
       ) : (
-        <EuiButtonEmpty size="s" onClick={() => setChooserOpen(true)}>
+        <EuiButtonEmpty
+          size="s"
+          onClick={() => setChooserOpen(true)}
+          data-test-subj="layerIndexPatternLabel"
+        >
           {state.indexPatterns[state.layers[layerId].indexPatternId].title}
         </EuiButtonEmpty>
       )}

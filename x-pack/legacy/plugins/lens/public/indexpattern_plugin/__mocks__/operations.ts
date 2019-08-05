@@ -17,4 +17,5 @@ export const {
   getOperationTypesForField,
   getOperationResultType,
   operationDefinitionMap,
+  isColumnTransferable,
 } = actual;

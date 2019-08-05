@@ -30,7 +30,6 @@ import { IndexPatternPrivateState, IndexPatternField, IndexPattern } from './ind
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
 import { FieldIcon } from './field_icon';
-import { updateLayerIndexPatterns } from './state_helpers';
 
 // TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
 const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.FunctionComponent<
@@ -64,7 +63,6 @@ export function IndexPatternDataPanel({
       setState({
         ...state,
         currentIndexPatternId: newIndexPattern,
-        layers: updateLayerIndexPatterns(state.layers, indexPatterns[newIndexPattern]),
       });
     },
     [state, setState]
