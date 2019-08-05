@@ -59,6 +59,11 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .then((resp: any) => {
           expect(resp.body).to.eql({
             id: SPACE_1_ES_ARCHIVER_ACTION_ID,
+            actionTypeId: 'test.index-record',
+            description: 'My action updated',
+            config: {
+              unencrypted: `This value shouldn't get encrypted`,
+            },
           });
         });
     });

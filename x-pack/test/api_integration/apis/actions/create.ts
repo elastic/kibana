@@ -59,6 +59,11 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         .expect(200);
       expect(createdAction).to.eql({
         id: createdAction.id,
+        description: 'My action',
+        actionTypeId: 'test.index-record',
+        config: {
+          unencrypted: `This value shouldn't get encrypted`,
+        },
       });
       expect(typeof createdAction.id).to.be('string');
       await supertest.get(`/s/space_1/api/action/${createdAction.id}`).expect(200);
