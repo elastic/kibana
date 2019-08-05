@@ -239,7 +239,7 @@ export class SavedObjectsClient {
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return pickAndRenameKeys<
+      return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkCreate']>>,
         SavedObjectsBatchResponse
       >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
@@ -279,20 +279,20 @@ export class SavedObjectsClient {
     options: SavedObjectsFindOptions = {}
   ): Promise<SavedObjectsFindResponse<T>> => {
     const path = this.getPath(['_find']);
-    const query = pickAndRenameKeys<SavedObjectsFindOptions, any>(
-      {
-        defaultSearchOperator: 'default_search_operator',
-        fields: 'fields',
-        hasReference: 'has_reference',
-        page: 'page',
-        perPage: 'per_page',
-        search: 'search',
-        searchFields: 'search_fields',
-        sortField: 'sort_field',
-        type: 'type',
-      },
-      options
-    );
+    const renameMap = {
+      defaultSearchOperator: 'default_search_operator',
+      fields: 'fields',
+      hasReference: 'has_reference',
+      page: 'page',
+      perPage: 'per_page',
+      search: 'search',
+      searchFields: 'search_fields',
+      sortField: 'sort_field',
+      type: 'type',
+    };
+
+    const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);
+    const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]);
 
     const request: ReturnType<SavedObjectsApi['find']> = this.savedObjectsFetch(path, {
       method: 'GET',
@@ -300,10 +300,7 @@ export class SavedObjectsClient {
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return pickAndRenameKeys<
-        PromiseType<ReturnType<SavedObjectsApi['find']>>,
-        SavedObjectsFindResponse
-      >(
+      return renameKeys<PromiseType<ReturnType<SavedObjectsApi['find']>>, SavedObjectsFindResponse>(
         {
           saved_objects: 'savedObjects',
           total: 'total',
@@ -358,7 +355,7 @@ export class SavedObjectsClient {
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return pickAndRenameKeys<
+      return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkGet']>>,
         SavedObjectsBatchResponse
       >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
@@ -429,20 +426,16 @@ export class SavedObjectsClient {
  * Returns a new object with the own properties of `obj`, but the
  * keys renamed according to the `keysMap`.
  *
- * If a key is not found in `keysMap` it is omitted from the result.
- *
  * @param keysMap - a map of the form `{oldKey: newKey}`
  * @param obj - the object whose own properties will be renamed
  */
-const pickAndRenameKeys = <T extends Record<string, any>, U extends Record<string, any>>(
+const renameKeys = <T extends Record<string, any>, U extends Record<string, any>>(
   keysMap: Record<keyof T, keyof U>,
   obj: Record<string, any>
 ) =>
   Object.keys(obj).reduce((acc, key) => {
-    return typeof keysMap[key] === 'undefined'
-      ? acc
-      : {
-          ...acc,
-          ...{ [keysMap[key]]: obj[key] },
-        };
+    return {
+      ...acc,
+      ...{ [keysMap[key] || key]: obj[key] },
+    };
   }, {});
