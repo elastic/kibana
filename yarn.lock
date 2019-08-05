@@ -1659,10 +1659,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@13.0.0":
-  version "13.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-13.0.0.tgz#bead6830cff58a2cc617e9e9f1d344768bdd7004"
-  integrity sha512-nU/kgp6c4cH5IdcgD3XXEh0Gkbzf4byacJN62oYr1UGTWC0RT8N09FAQzDFIEGz+lDWTSLhap9RWPH3Kgy+O/A==
+"@elastic/eui@13.1.1":
+  version "13.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-13.1.1.tgz#35ff2bdb4f38b12a2a82108d9b10ba5949eef3a9"
+  integrity sha512-yPqxQYWSIEO4nhgWDHY48Ty9eUD1xLYogKUPXzla3OESOj8vqYLD/fCYX4M3s32NZgLzjvy8AaFiCNsZ3SF6yw==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -1761,10 +1761,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/node-ctags/-/node-ctags-1.0.2.tgz#447d7694a5598f9413fe2b6f356d56f64f612dfd"
   integrity sha512-EHhJ0NPlCvYy+gbzBMU4/Z/55hftfdwlAG8JwOy7g0ITmH6rFPanEnzg1WL3/L+pp8OlYHyvDLwmyg0+06y8LQ==
 
-"@elastic/nodegit@0.25.0-alpha.22":
-  version "0.25.0-alpha.22"
-  resolved "https://registry.yarnpkg.com/@elastic/nodegit/-/nodegit-0.25.0-alpha.22.tgz#71c112c7f5284eabef91fa3e1acf689ba9cdc875"
-  integrity sha512-V49tzdAO9geWqukc4Xe073kQw9VW5mCh+DYvkZRwJPS3/+o5eMY5R+PMLfkd1BasjnrWkp/PZFl8OQUk+qjByg==
+"@elastic/nodegit@0.25.0-alpha.23":
+  version "0.25.0-alpha.23"
+  resolved "https://registry.yarnpkg.com/@elastic/nodegit/-/nodegit-0.25.0-alpha.23.tgz#34d06497030a45a3b8090c3fcb9504d722b9d0c9"
+  integrity sha512-2zSLGigYW58g+DbcRtbCwwj6boTGNhyCG85IDK8yx/jlycLS6gnmxEbZ6FFfgdS2qKWi911lmKQ/3l0LpUaDRw==
   dependencies:
     fs-extra "^7.0.0"
     json5 "^2.1.0"
@@ -3849,6 +3849,19 @@
     "@types/node" "*"
     "@types/podium" "*"
     "@types/shot" "*"
+
+"@types/hapi__boom@*":
+  version "7.4.0"
+  resolved "https://registry.yarnpkg.com/@types/hapi__boom/-/hapi__boom-7.4.0.tgz#81d58cffb67c54896614560c007a5015a79c30ba"
+  integrity sha512-i4nerd/aJd5zW8OPHxgeuDYiuiuHxHczkqIaALhINUqBCavRgbiwjfndpgrarB43jcb/2LxzrohMOH7akyt3og==
+
+"@types/hapi__wreck@^15.0.1":
+  version "15.0.1"
+  resolved "https://registry.yarnpkg.com/@types/hapi__wreck/-/hapi__wreck-15.0.1.tgz#41df4e122c49316f0057cb5e9c6eb4c00e671e95"
+  integrity sha512-OXhOaFWPFkWkqU5IlFwgTK/Q3yzc3iDhC1/S+3rQ6d2qkl6xvcRZaayJGjDXORf3krnGtDN1l3bIajNcuUl6QA==
+  dependencies:
+    "@types/hapi__boom" "*"
+    "@types/node" "*"
 
 "@types/has-ansi@^3.0.0":
   version "3.0.0"
@@ -6072,11 +6085,6 @@ asynckit@^0.4.0:
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha1-x57Zf380y48robyXkLzDZkdLS3k=
 
-atoa@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/atoa/-/atoa-1.0.0.tgz#0cc0e91a480e738f923ebc103676471779b34a49"
-  integrity sha1-DMDpGkgOc4+SPrwQNnZHF3mzSkk=
-
 atob-lite@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/atob-lite/-/atob-lite-2.0.0.tgz#0fef5ad46f1bd7a8502c65727f0367d5ee43d696"
@@ -7888,6 +7896,11 @@ chardet@^0.7.0:
   resolved "https://registry.yarnpkg.com/chardet/-/chardet-0.7.0.tgz#90094849f0937f2eedc2425d0d28a9e5f0cbad9e"
   integrity sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==
 
+check-disk-space@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/check-disk-space/-/check-disk-space-2.1.0.tgz#2e77fe62f30d9676dc37a524ea2008f40c780295"
+  integrity sha512-f0nx9oJF/AVF8nhSYlF1EBvMNnO+CXyLwKhPvN1943iOMI9TWhQigLZm80jAf0wzQhwKkzA8XXjyvuVUeGGcVQ==
+
 check-error@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/check-error/-/check-error-1.0.2.tgz#574d312edd88bb5dd8912e9286dd6c0aed4aac82"
@@ -8853,14 +8866,6 @@ contour_plot@^0.0.1:
   resolved "https://registry.yarnpkg.com/contour_plot/-/contour_plot-0.0.1.tgz#475870f032b8e338412aa5fc507880f0bf495c77"
   integrity sha1-R1hw8DK44zhBKqX8UHiA8L9JXHc=
 
-contra@1.9.4:
-  version "1.9.4"
-  resolved "https://registry.yarnpkg.com/contra/-/contra-1.9.4.tgz#f53bde42d7e5b5985cae4d99a8d610526de8f28d"
-  integrity sha1-9TveQtfltZhcrk2ZqNYQUm3o8o0=
-  dependencies:
-    atoa "1.0.0"
-    ticky "1.0.1"
-
 convert-source-map@1.X, convert-source-map@^1.1.0, convert-source-map@^1.4.0, convert-source-map@^1.5.0:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-1.5.1.tgz#b8278097b9bc229365de5c62cf5fcaed8b5599e5"
@@ -9234,13 +9239,6 @@ cross-spawn@^5.0.1, cross-spawn@^5.1.0:
     shebang-command "^1.2.0"
     which "^1.2.9"
 
-crossvent@1.5.4:
-  version "1.5.4"
-  resolved "https://registry.yarnpkg.com/crossvent/-/crossvent-1.5.4.tgz#da2c4f8f40c94782517bf2beec1044148194ab92"
-  integrity sha1-2ixPj0DJR4JRe/K+7BBEFIGUq5I=
-  dependencies:
-    custom-event "1.0.0"
-
 cryptiles@2.x.x:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/cryptiles/-/cryptiles-2.0.5.tgz#3bdfecdc608147c1c67202fa291e7dca59eaa3b8"
@@ -9486,11 +9484,6 @@ custom-event-polyfill@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/custom-event-polyfill/-/custom-event-polyfill-0.3.0.tgz#99807839be62edb446b645832e0d80ead6fa1888"
   integrity sha1-mYB4Ob5i7bRGtkWDLg2A6tb6GIg=
-
-custom-event@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/custom-event/-/custom-event-1.0.0.tgz#2e4628be19dc4b214b5c02630c5971e811618062"
-  integrity sha1-LkYovhncSyFLXAJjDFlx6BFhgGI=
 
 custom-event@~1.0.0:
   version "1.0.1"
@@ -10710,14 +10703,6 @@ dragselect@1.8.1:
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/dragselect/-/dragselect-1.8.1.tgz#63f71a6f980f710c87e28b328e175b7afc9e162b"
   integrity sha512-4YbJCcS6zwK8vMX2GiIX3tUrXFSo9a6xmV2z66EIJ8nj+iMHP1o4j0PeFdf5zjfhqVZJi+6zuVKPZInnrTLMbw==
-
-dragula@3.7.2:
-  version "3.7.2"
-  resolved "https://registry.yarnpkg.com/dragula/-/dragula-3.7.2.tgz#4a35c9d3981ffac1a949c29ca7285058e87393ce"
-  integrity sha1-SjXJ05gf+sGpScKcpyhQWOhzk84=
-  dependencies:
-    contra "1.9.4"
-    crossvent "1.5.4"
 
 duplexer2@0.0.2, duplexer2@~0.0.2:
   version "0.0.2"
@@ -19973,11 +19958,6 @@ no-case@^2.2.0, no-case@^2.3.2:
   dependencies:
     lower-case "^1.1.1"
 
-no-ui-slider@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/no-ui-slider/-/no-ui-slider-1.2.0.tgz#1f64f5a8b82e6786f3261d82b0cc99b598817e69"
-  integrity sha1-H2T1qLguZ4bzJh2CsMyZtZiBfmk=
-
 nock@10.0.6:
   version "10.0.6"
   resolved "https://registry.yarnpkg.com/nock/-/nock-10.0.6.tgz#e6d90ee7a68b8cfc2ab7f6127e7d99aa7d13d111"
@@ -26957,11 +26937,6 @@ thunky@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/thunky/-/thunky-1.0.2.tgz#a862e018e3fb1ea2ec3fce5d55605cf57f247371"
   integrity sha1-qGLgGOP7HqLsP85dVWBc9X8kc3E=
-
-ticky@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/ticky/-/ticky-1.0.1.tgz#b7cfa71e768f1c9000c497b9151b30947c50e46d"
-  integrity sha1-t8+nHnaPHJAAxJe5FRswlHxQ5G0=
 
 tildify@^1.0.0, tildify@^1.2.0:
   version "1.2.0"

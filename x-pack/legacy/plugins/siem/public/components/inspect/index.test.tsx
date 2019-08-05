@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import * as React from 'react';
+import { ThemeProvider } from 'styled-components';
 
 import {
   TestProviderWithoutDragAndDrop,
@@ -19,6 +21,7 @@ import { InspectButton } from '.';
 import { cloneDeep } from 'lodash/fp';
 
 describe('Inspect Button', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const refetch = jest.fn();
   const state: State = mockGlobalState;
   const newQuery: UpdateQueryParams = {
@@ -98,9 +101,11 @@ describe('Inspect Button', () => {
     });
     test('Open Inspect Modal', () => {
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop store={store}>
-          <InspectButton queryId={newQuery.id} show={true} title="My title" />
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop store={store}>
+            <InspectButton queryId={newQuery.id} show={true} title="My title" />
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
       wrapper
         .find('button[data-test-subj="inspect-icon-button"]')
@@ -120,9 +125,11 @@ describe('Inspect Button', () => {
 
     test('Close Inspect Modal', () => {
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop store={store}>
-          <InspectButton queryId={newQuery.id} show={true} title="My title" />
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop store={store}>
+            <InspectButton queryId={newQuery.id} show={true} title="My title" />
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
       wrapper
         .find('button[data-test-subj="inspect-icon-button"]')

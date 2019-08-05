@@ -7,14 +7,15 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { KibanaContext } from '../../../../../contexts/kibana';
+import { kibanaContextValueMock } from '../../../../../contexts/kibana/__mocks__/kibana_context_value';
+
 import {
-  KibanaContext,
   PivotAggsConfig,
   PivotGroupByConfig,
   PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
-
 import { StepDefineExposedState } from './step_define_form';
 import { StepDefineSummary } from './step_define_summary';
 
@@ -26,12 +27,6 @@ jest.mock('react', () => {
 
 describe('Data Frame: <DefinePivotSummary />', () => {
   test('Minimal initialization', () => {
-    const currentIndexPattern = {
-      id: 'the-index-pattern-id',
-      title: 'the-index-pattern-title',
-      fields: [],
-    };
-
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
@@ -47,7 +42,9 @@ describe('Data Frame: <DefinePivotSummary />', () => {
     const props: StepDefineExposedState = {
       aggList: { 'the-agg-name': agg },
       groupByList: { 'the-group-by-name': groupBy },
-      isAdvancedEditorEnabled: false,
+      isAdvancedPivotEditorEnabled: false,
+      isAdvancedSourceEditorEnabled: false,
+      sourceConfigUpdated: false,
       searchString: 'the-query',
       searchQuery: 'the-search-query',
       valid: true,
@@ -57,16 +54,7 @@ describe('Data Frame: <DefinePivotSummary />', () => {
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <KibanaContext.Provider
-          value={{
-            combinedQuery: {},
-            currentIndexPattern,
-            currentSavedSearch: {},
-            indexPatterns: {},
-            kbnBaseUrl: 'url',
-            kibanaConfig: {},
-          }}
-        >
+        <KibanaContext.Provider value={kibanaContextValueMock}>
           <StepDefineSummary {...props} />
         </KibanaContext.Provider>
       </div>

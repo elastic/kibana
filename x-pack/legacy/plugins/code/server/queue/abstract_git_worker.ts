@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import {
   CloneProgress,
   CloneWorkerProgress,
   CloneWorkerResult,
   WorkerReservedProgress,
+  WorkerResult,
 } from '../../model';
+import { DiskWatermarkService } from '../disk_watermark';
 import { GitOperations } from '../git_operations';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -27,10 +31,32 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly serverOptions: ServerOptions,
-    protected readonly gitOps: GitOperations
+    protected readonly gitOps: GitOperations,
+    protected readonly watermarkService: DiskWatermarkService
   ) {
     super(queue, log);
     this.objectClient = new RepositoryObjectClient(client);
+  }
+
+  public async executeJob(_: Job): Promise<WorkerResult> {
+    const { thresholdEnabled, watermarkLowMb } = this.serverOptions.disk;
+    if (thresholdEnabled) {
+      const isLowWatermark = await this.watermarkService.isLowWatermark();
+      if (isLowWatermark) {
+        const msg = i18n.translate('xpack.code.git.diskWatermarkLowMessage', {
+          defaultMessage: `Disk watermark level lower than {watermarkLowMb} MB`,
+          values: {
+            watermarkLowMb,
+          },
+        });
+        this.log.error(msg);
+        throw new Error(msg);
+      }
+    }
+
+    return new Promise<WorkerResult>((resolve, reject) => {
+      resolve();
+    });
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
