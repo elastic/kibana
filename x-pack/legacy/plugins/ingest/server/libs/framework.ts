@@ -15,6 +15,9 @@ export class BackendFrameworkLib {
     type: this.adapter.info ? this.adapter.info.license.type : 'unknown',
     expired: this.adapter.info ? this.adapter.info.license.expired : null,
   };
+  public get version() {
+    return this.adapter.info ? this.adapter.info.kibana.version : null;
+  }
   public securityIsEnabled = this.adapter.info ? this.adapter.info.security.enabled : false;
   public log = this.adapter.log;
   public on = this.adapter.on.bind(this.adapter);
