@@ -103,7 +103,8 @@ describe('request lib', () => {
         });
       });
 
-      describe('pollIntervalMs', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/42561
+      describe.skip('pollIntervalMs', () => {
         it('sends another request after the specified time has elapsed', async () => {
           initUseRequest({ ...successRequest, pollIntervalMs: 30 });
           await wait(5);
@@ -173,7 +174,8 @@ describe('request lib', () => {
           expect(hook.error).toBe(errorResponse);
         });
 
-        it('persists while a request is in-flight', async () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/42563
+        it.skip('persists while a request is in-flight', async () => {
           initUseRequest({ ...errorRequest });
           await wait(5);
           hook.sendRequest();
@@ -204,7 +206,8 @@ describe('request lib', () => {
           expect(hook.data).toBe(successResponse.data);
         });
 
-        it('is undefined when the request fails', async () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/42562
+        it.skip('is undefined when the request fails', async () => {
           initUseRequest({ ...errorRequest });
           await wait(10);
           expect(hook.isLoading).toBe(false);
