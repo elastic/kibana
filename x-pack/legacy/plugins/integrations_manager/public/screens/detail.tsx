@@ -14,20 +14,21 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPanel,
-  EuiSpacer,
   EuiText,
   EuiTitle,
   ICON_TYPES,
   IconType,
 } from '@elastic/eui';
 
+const ICON_HEIGHT_PANEL = 164;
+const ICON_HEIGHT_NATURAL = 32;
+
 import { PLUGIN } from '../../common/constants';
 import { IntegrationInfo } from '../../common/types';
 import { getIntegrationInfoByKey } from '../data';
 import { useBreadcrumbs, useLinks } from '../hooks';
 
-const ICON_HEIGHT_PX = 164;
-
+// Add stuff here as needed to help determine what the API should return
 type IntegrationInfoWIP = IntegrationInfo & { title: string };
 export function Detail(props: { package: string }) {
   const [info, setInfo] = useState<IntegrationInfoWIP | null>(null);
@@ -44,12 +45,13 @@ export function Detail(props: { package: string }) {
   // don't have designs for loading/empty states
   if (!info) return null;
 
-  return <InfoPanel {...info} />;
+  return <DetailLayout {...info} />;
 }
 
-function InfoPanel(props: IntegrationInfoWIP) {
-  const { title } = props;
+function DetailLayout(props: IntegrationInfoWIP) {
+  const { name, title } = props;
   const { toListView } = useLinks();
+  const iconType = ICON_TYPES.find(key => key.toLowerCase() === `logo${name}`);
   useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }, { text: title }]);
 
   return (
@@ -59,26 +61,30 @@ function InfoPanel(props: IntegrationInfoWIP) {
       </EuiPage>
       <EuiPage style={{ borderBottom: '1px solid #D3DAE6', paddingBottom: '32px' }}>
         <EuiPageBody restrictWidth={1200}>
-          <Header {...props} />
+          <Header iconType={iconType} {...props} />
         </EuiPageBody>
       </EuiPage>
       <EuiPage style={{ backgroundColor: 'white' }}>
         <EuiPageBody restrictWidth={1200}>
-          <Content {...props} />
+          <Content hasLogoPanel={!!iconType} {...props} />
         </EuiPageBody>
       </EuiPage>
     </>
   );
 }
 
-function Header(props: IntegrationInfoWIP) {
-  const { name, title, version } = props;
+type HeaderProps = IntegrationInfoWIP & { iconType?: IconType };
+function Header(props: HeaderProps) {
+  const { iconType, title, version } = props;
   const [isInstalled, setInstalled] = useState(false);
-  const iconType = ICON_TYPES.find(key => key.toLowerCase() === `logo${name}`);
 
   return (
     <EuiFlexGroup>
-      <LeftColumn>{iconType ? <IconPanel iconType={iconType} /> : ''}</LeftColumn>
+      {iconType ? (
+        <LeftColumn>
+          <IconPanel iconType={iconType} />
+        </LeftColumn>
+      ) : null}
       <CenterColumn>
         <EuiTitle size="l">
           <h1>
@@ -105,13 +111,17 @@ function Header(props: IntegrationInfoWIP) {
   );
 }
 
-function Content(props: IntegrationInfoWIP) {
-  const { description } = props;
+type ContentProps = IntegrationInfoWIP & { hasLogoPanel: boolean };
+function Content(props: ContentProps) {
+  const { description, hasLogoPanel } = props;
+  const marginTop = ICON_HEIGHT_PANEL / 2 + ICON_HEIGHT_NATURAL / 2;
+  const leftStyles = hasLogoPanel ? { marginTop: `${marginTop}px` } : {};
+
   return (
     <EuiFlexGroup style={{ height: '90vh' }}>
-      <LeftColumn style={{ marginTop: '98px' }}>
+      <LeftColumn style={leftStyles}>
         <EuiTitle>
-          <span>Section title</span>
+          <span>Vertical Tabs</span>
         </EuiTitle>
       </LeftColumn>
       <CenterColumn>
@@ -151,16 +161,15 @@ const RightColumn: FunctionComponent<ColumnProps> = ({ children }) => {
 };
 
 function IconPanel({ iconType }: { iconType: IconType }) {
-  const naturalHeight = 32;
   // use padding to push the icon to the center of the box before `scale()`ing up
-  const padding = ICON_HEIGHT_PX / 2 - naturalHeight / 2;
+  const padding = ICON_HEIGHT_PANEL / 2 - ICON_HEIGHT_NATURAL / 2;
 
   return (
     <EuiPanel
       style={{
         position: 'absolute',
-        width: `${ICON_HEIGHT_PX}px`,
-        height: `${ICON_HEIGHT_PX}px`,
+        width: `${ICON_HEIGHT_PANEL}px`,
+        height: `${ICON_HEIGHT_PANEL}px`,
         padding: `${padding}px`,
         textAlign: 'center',
         verticalAlign: 'middle',
