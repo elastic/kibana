@@ -34,18 +34,18 @@ export const JobsListPage = () => {
         </Fragment>
       ),
     },
-    {
-      id: 'analytics_jobs',
-      name: i18n.translate('xpack.ml.management.jobsList.analyticsTab', {
-        defaultMessage: 'Analytics',
-      }),
-      content: renderAnalyticsJobs(),
-    },
+    // {
+    //   id: 'analytics_jobs',
+    //   name: i18n.translate('xpack.ml.management.jobsList.analyticsTab', {
+    //     defaultMessage: 'Analytics',
+    //   }),
+    //   content: renderAnalyticsJobs(),
+    // },
   ];
 
-  function renderAnalyticsJobs() {
-    return <div>Analytics job placeholder</div>;
-  }
+  // function renderAnalyticsJobs() {
+  //   return <div>Analytics job placeholder</div>;
+  // }
 
   function renderTabs() {
     return <EuiTabbedContent size="s" tabs={tabs} initialSelectedTab={tabs[0]} />;

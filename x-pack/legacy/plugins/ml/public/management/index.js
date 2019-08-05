@@ -16,8 +16,8 @@ import { i18n } from '@kbn/i18n';
 import { JOBS_LIST_PATH } from './management_urls';
 import 'plugins/ml/management/jobs_list';
 
-// TODO: Do we need to check xpackInfo.get('features.ml.isAvailable', false)?
-if (xpackInfo.get('features.ml.showLinks', false) === true) {
+
+if (xpackInfo.get('features.ml.showLinks', false)) {
   management.register('ml', {
     display: i18n.translate(
       'xpack.ml.management.mlTitle', {
