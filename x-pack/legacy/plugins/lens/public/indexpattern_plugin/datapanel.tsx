@@ -26,16 +26,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DatasourceDataPanelProps, DataType } from '../types';
-import {
-  IndexPatternPrivateState,
-  IndexPatternField,
-  IndexPattern,
-  IndexPatternLayer,
-} from './indexpattern';
+import { IndexPatternPrivateState, IndexPatternField, IndexPattern } from './indexpattern';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
 import { FieldIcon } from './field_icon';
-import { isColumnTransferable } from './operations';
+import { updateLayerIndexPatterns } from './state_helpers';
 
 // TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
 const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.FunctionComponent<
@@ -55,42 +50,6 @@ const fieldTypeNames: Record<DataType, string> = {
   boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'boolean' }),
   date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
 };
-
-function isLayerTransferable(layer: IndexPatternLayer, newIndexPattern: IndexPattern) {
-  return Object.values(layer.columns).every(column =>
-    isColumnTransferable(column, newIndexPattern)
-  );
-}
-
-function updateLayerIndexPatterns(
-  layers: IndexPatternPrivateState['layers'],
-  newIndexPattern: IndexPattern
-) {
-  const currentlyUsedIndexPatterns = _.uniq(
-    Object.values(layers).map(layer => layer.indexPatternId)
-  );
-  if (
-    currentlyUsedIndexPatterns.length === 1 &&
-    currentlyUsedIndexPatterns[0] !== newIndexPattern.id
-  ) {
-    const isTransferable = Object.values(layers).every(layer =>
-      isLayerTransferable(layer, newIndexPattern)
-    );
-
-    if (isTransferable) {
-      return _.mapValues(layers, layer => ({
-        ...layer,
-        indexPatternId: newIndexPattern.id,
-        columns: _.mapValues(layer.columns, column => ({
-          ...column,
-          indexPatternId: newIndexPattern.id,
-        })),
-      }));
-    }
-  }
-
-  return layers;
-}
 
 export function IndexPatternDataPanel({
   setState,
