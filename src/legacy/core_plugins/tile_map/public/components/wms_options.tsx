@@ -74,17 +74,6 @@ function WmsOptions({ serviceSettings, stateParams, setValue, vis }: ExtendedVis
         </div>
       </EuiTitle>
       <EuiSpacer size="s" />
-      {!wms.enabled && (
-        <SelectOption
-          label={i18n.translate('tileMap.wmsOptions.layersLabel', {
-            defaultMessage: 'Layers',
-          })}
-          options={tmsLayerOptions}
-          paramName="selectedTmsLayer"
-          value={wms.selectedTmsLayer && wms.selectedTmsLayer.id}
-          setValue={setWmsOption}
-        />
-      )}
 
       <SwitchOption
         label={i18n.translate('tileMap.wmsOptions.wmsMapServerLabel', {
@@ -97,6 +86,21 @@ function WmsOptions({ serviceSettings, stateParams, setValue, vis }: ExtendedVis
         value={wms.enabled}
         setValue={setWmsOption}
       />
+
+      {!wms.enabled && (
+        <>
+          <EuiSpacer size="s" />
+          <SelectOption
+            label={i18n.translate('tileMap.wmsOptions.layersLabel', {
+              defaultMessage: 'Layers',
+            })}
+            options={tmsLayerOptions}
+            paramName="selectedTmsLayer"
+            value={wms.selectedTmsLayer && wms.selectedTmsLayer.id}
+            setValue={setWmsOption}
+          />
+        </>
+      )}
 
       {wms.enabled && <WmsInternalOptions wms={wms} setValue={setWmsOption} />}
     </EuiPanel>
