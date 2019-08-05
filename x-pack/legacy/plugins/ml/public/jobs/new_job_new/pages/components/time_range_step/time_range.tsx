@@ -12,7 +12,7 @@ import moment from 'moment';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';
+import { useKibanaContext } from '../../../../../contexts/kibana';
 import { FullTimeRangeSelector } from '../../../../../components/full_time_range_selector';
 import { EventRateChart } from '../charts/event_rate_chart';
 import { LineChartPoint } from '../../../common/chart_loader';
@@ -26,10 +26,7 @@ export interface TimeRange {
   end: number;
 }
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
-  const kibanaContext = useContext(KibanaContext);
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
+  const kibanaContext = useKibanaContext();
 
   const {
     jobCreator,
