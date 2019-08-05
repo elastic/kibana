@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import JoiNamespace from 'joi';
 import { resolve } from 'path';
 
-import { getConfigSchema, initServerWithKibana, KbnServer } from './server/kibana.index';
+import { getConfigSchema, initServerWithKibana } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 
 const APP_ID = 'infra';
@@ -67,8 +67,15 @@ export function infra(kibana: any) {
     config(Joi: typeof JoiNamespace) {
       return getConfigSchema(Joi);
     },
-    init(server: KbnServer) {
+    init(server: any) {
       initServerWithKibana(server);
+      server.addAppLinksToSampleDataset('logs', [
+        {
+          path: `/app/${APP_ID}#/logs`,
+          label: 'Logs',
+          icon: 'loggingApp',
+        },
+      ]);
     },
   });
 }
