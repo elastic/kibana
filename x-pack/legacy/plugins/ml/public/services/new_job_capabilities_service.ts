@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
+import { SavedSearchLoader } from 'src/legacy/core_plugins/kibana/public/discover/types';
+
 import {
   Field,
   Aggregation,
@@ -19,17 +21,30 @@ import { ml } from './ml_api_service';
 
 // called in the angular routing resolve block to initialize the
 // newJobCapsService with the currently selected index pattern
-export function loadNewJobCapabilities(indexPatterns: any, $route: Record<string, any>) {
-  return new Promise(resolve => {
-    indexPatterns
-      .get($route.current.params.index)
-      .then(async (indexPattern: IndexPattern) => {
-        await newJobCapsService.initializeFromIndexPattern(indexPattern);
-        resolve(newJobCapsService.newJobCaps);
-      })
-      .catch((error: any) => {
-        resolve(error);
-      });
+export function loadNewJobCapabilities(
+  indexPatterns: IndexPatterns,
+  savedSearches: SavedSearchLoader,
+  $route: Record<string, any>
+) {
+  return new Promise(async (resolve, reject) => {
+    // get the index pattern id or saved search id from the url params
+    const { index: indexPatternId, savedSearchId } = $route.current.params;
+
+    if (indexPatternId !== undefined) {
+      // index pattern is being used
+      const indexPattern: IndexPattern = await indexPatterns.get(indexPatternId);
+      await newJobCapsService.initializeFromIndexPattern(indexPattern);
+      resolve(newJobCapsService.newJobCaps);
+    } else if (savedSearchId !== undefined) {
+      // saved search is being used
+      // load the index pattern from the saved search
+      const savedSearch = await savedSearches.get(savedSearchId);
+      const indexPattern = savedSearch.searchSource.getField('index');
+      await newJobCapsService.initializeFromIndexPattern(indexPattern);
+      resolve(newJobCapsService.newJobCaps);
+    } else {
+      reject();
+    }
   });
 }
 
