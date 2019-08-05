@@ -213,8 +213,7 @@ describe('request lib', () => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/42225
-    describe.skip('callbacks', () => {
+    describe('callbacks', () => {
       describe('sendRequest', () => {
         it('sends the request', () => {
           initUseRequest({ ...successRequest });
@@ -224,19 +223,26 @@ describe('request lib', () => {
         });
 
         it('resets the pollIntervalMs', async () => {
-          initUseRequest({ ...successRequest, pollIntervalMs: 30 });
-          await wait(5);
-          sinon.assert.calledOnce(sendPost);
+          initUseRequest({ ...successRequest, pollIntervalMs: 800 });
+          await wait(200); // 200ms
+          hook.sendRequest();
+          expect(sendPost.callCount).toBe(2);
 
-          await wait(20);
+          await wait(200); // 400ms
           hook.sendRequest();
 
-          // If the request didn't reset the interval, there would have been three requests sent by now.
-          await wait(20);
-          sinon.assert.calledTwice(sendPost);
+          await wait(200); // 600ms
+          hook.sendRequest();
 
-          await wait(20);
-          sinon.assert.calledThrice(sendPost);
+          await wait(200); // 800ms
+          hook.sendRequest();
+
+          await wait(200); // 1000ms
+          hook.sendRequest();
+
+          // If sendRequest didn't reset the interval, the interval would have triggered another
+          // request by now, and the callCount would be 7.
+          expect(sendPost.callCount).toBe(6);
 
           // We have to manually clean up or else the interval will continue to fire requests,
           // interfering with other tests.
