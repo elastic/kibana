@@ -16,21 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { once } from 'lodash';
 
-import { resolve } from 'path';
+// @ts-ignore
+import { uiModules } from 'ui/modules';
+// @ts-ignore
+import 'ui/directives/inequality';
+// @ts-ignore
+import { MetricVisParams } from '../components/metric_vis_params';
 
-export default function (kibana) {
-
-  return new kibana.Plugin({
-
-    uiExports: {
-      visTypes: [
-        'plugins/metric_vis/metric_vis'
-      ],
-      interpreter: ['plugins/metric_vis/metric_vis_fn'],
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    }
-
-  });
-
-}
+/** @internal */
+export const initMetricVisLegacyModule = once((): void => {
+  uiModules.get('kibana/metric_vis', ['kibana']).directive('metricVisParams', MetricVisParams);
+});
