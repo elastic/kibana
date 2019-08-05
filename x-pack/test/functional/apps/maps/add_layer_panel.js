@@ -16,7 +16,11 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('visibility', () => {
-      it('should open on clicking "Add layer"', async () => {
+
+
+      //skip for now
+      //cf. https://github.com/elastic/kibana/issues/42626
+      it.skip('should open on clicking "Add layer"', async () => {
         await PageObjects.maps.clickAddLayer();
         const panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
         expect(panelOpen).to.be(true);
