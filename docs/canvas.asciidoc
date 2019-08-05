@@ -32,6 +32,10 @@ include::canvas/canvas-getting-started.asciidoc[]
 
 include::canvas/canvas-workpad.asciidoc[]
 
+include::canvas/canvas-elements.asciidoc[]
+
+//include::canvas/canvas-expressions.asciidoc[]
+
 include::canvas/canvas-function-reference.asciidoc[]
 
 include::canvas/canvas-tinymath-functions.asciidoc[]
