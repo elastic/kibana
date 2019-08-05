@@ -54,31 +54,34 @@ export class IndexPatterns {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
-    if (this.savedObjectsCache) {
-      return this.savedObjectsCache.map(obj => idx(obj, _ => _.id));
+    if (!this.savedObjectsCache) {
+      return [];
     }
+    return this.savedObjectsCache.map(obj => idx(obj, _ => _.id));
   };
 
-  getTitles = async (refresh: boolean = false) => {
+  getTitles = async (refresh: boolean = false): Promise<string[]> => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
-    if (this.savedObjectsCache) {
-      return this.savedObjectsCache.map(obj => idx(obj, _ => _.attributes.title));
+    if (!this.savedObjectsCache) {
+      return [];
     }
+    return this.savedObjectsCache.map(obj => idx(obj, _ => _.attributes.title));
   };
 
   getFields = async (fields: string[], refresh: boolean = false) => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
-    if (this.savedObjectsCache) {
-      return this.savedObjectsCache.map((obj: Record<string, any>) => {
-        const result: Record<string, any> = {};
-        fields.forEach((f: string) => (result[f] = obj[f] || idx(obj, _ => _.attributes[f])));
-        return result;
-      });
+    if (!this.savedObjectsCache) {
+      return [];
     }
+    return this.savedObjectsCache.map((obj: Record<string, any>) => {
+      const result: Record<string, any> = {};
+      fields.forEach((f: string) => (result[f] = obj[f] || idx(obj, _ => _.attributes[f])));
+      return result;
+    });
   };
 
   clearCache = (id?: string) => {
