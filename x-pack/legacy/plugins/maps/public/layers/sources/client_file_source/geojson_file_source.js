@@ -53,6 +53,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
     return (indexResponses = {}) => {
       const { indexDataResp, indexPatternResp } = indexResponses;
       if (!(indexDataResp && indexDataResp.success) ||
+        indexDataResp.failures.length === indexDataResp.docCount ||
         !(indexPatternResp && indexPatternResp.success)) {
         importErrorHandler(indexResponses);
         return;
