@@ -25,8 +25,6 @@ if [ $? -ne 0 ]; then
 fi
 
 %build
-
-npm config list --json
 #installs dependencies and runs the build
 cd %{name}
 /usr/local/bin/yarn
