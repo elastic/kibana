@@ -62,7 +62,6 @@ describe('date_histogram', () => {
                 interval: 'w',
               },
               sourceField: 'timestamp',
-              indexPatternId: '1',
             },
           },
         },
@@ -81,7 +80,6 @@ describe('date_histogram', () => {
                 interval: 'd',
               },
               sourceField: 'other_timestamp',
-              indexPatternId: '2',
             },
           },
         },
@@ -95,7 +93,6 @@ describe('date_histogram', () => {
         columns: {},
         suggestedPriority: 0,
         layerId: 'first',
-        indexPatternId: '1',
         field: {
           name: 'timestamp',
           type: 'date',
@@ -112,7 +109,6 @@ describe('date_histogram', () => {
         columns: {},
         suggestedPriority: 0,
         layerId: 'first',
-        indexPatternId: '1',
         field: {
           name: 'timestamp',
           type: 'date',

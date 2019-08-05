@@ -54,7 +54,6 @@ describe('filter_ratio', () => {
                 numerator: { query: '', language: 'kuery' },
                 denominator: { query: '', language: 'kuery' },
               },
-              indexPatternId: '1',
             },
           },
         },
@@ -70,7 +69,6 @@ describe('filter_ratio', () => {
   describe('buildColumn', () => {
     it('should create column object with default params', () => {
       const column = filterRatioOperation.buildColumn({
-        indexPatternId: '1',
         layerId: 'first',
         columns: {},
         suggestedPriority: undefined,

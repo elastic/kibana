@@ -51,11 +51,9 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
   },
   buildColumn({
     suggestedPriority,
-    indexPatternId,
     field,
   }: {
     suggestedPriority: DimensionPriority | undefined;
-    indexPatternId: string;
     field?: IndexPatternField;
   }): DateHistogramIndexPatternColumn {
     if (!field) {
@@ -69,7 +67,6 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       timeZone = field.aggregationRestrictions.date_histogram.time_zone;
     }
     return {
-      indexPatternId,
       label: ofName(field.name),
       dataType: 'date',
       operationType: 'date_histogram',

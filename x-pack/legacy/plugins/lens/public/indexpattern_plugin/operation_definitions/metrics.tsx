@@ -34,7 +34,7 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
       }
       return [];
     },
-    buildColumn({ suggestedPriority, field, indexPatternId }): T {
+    buildColumn({ suggestedPriority, field }): T {
       if (!field) {
         throw new Error(`Invariant: A ${type} operation can only be built with a field`);
       }
@@ -45,7 +45,6 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
         suggestedPriority,
         sourceField: field ? field.name : '',
         isBucketed: false,
-        indexPatternId,
       } as T;
     },
     toEsAggsConfig: (column, columnId) => ({

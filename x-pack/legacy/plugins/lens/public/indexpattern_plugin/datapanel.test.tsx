@@ -35,7 +35,6 @@ const initialState: IndexPatternPrivateState = {
               type: 'alphabetical',
             },
           },
-          indexPatternId: '1',
         },
       },
     },

@@ -37,7 +37,6 @@ describe('terms', () => {
                 orderDirection: 'asc',
               },
               sourceField: 'category',
-              indexPatternId: '1',
             },
             col2: {
               label: 'Count',
@@ -46,7 +45,6 @@ describe('terms', () => {
 
               // Private
               operationType: 'count',
-              indexPatternId: '1',
             },
           },
         },
@@ -76,7 +74,6 @@ describe('terms', () => {
     it('should use existing metric column as order column', () => {
       const termsColumn = termsOperation.buildColumn({
         layerId: 'first',
-        indexPatternId: '1',
         suggestedPriority: undefined,
         columns: {
           col1: {
@@ -86,7 +83,6 @@ describe('terms', () => {
 
             // Private
             operationType: 'count',
-            indexPatternId: '1',
           },
         },
       });
@@ -113,7 +109,6 @@ describe('terms', () => {
           orderDirection: 'asc',
         },
         sourceField: 'category',
-        indexPatternId: '1',
       };
       const updatedColumn = termsOperation.onOtherColumnChanged!(initialColumn, {
         col1: {
@@ -123,7 +118,6 @@ describe('terms', () => {
 
           // Private
           operationType: 'count',
-          indexPatternId: '1',
         },
       });
       expect(updatedColumn).toBe(initialColumn);
@@ -144,7 +138,6 @@ describe('terms', () => {
             orderDirection: 'asc',
           },
           sourceField: 'category',
-          indexPatternId: '1',
         },
         {}
       );
@@ -170,7 +163,6 @@ describe('terms', () => {
             orderDirection: 'asc',
           },
           sourceField: 'category',
-          indexPatternId: '1',
         },
         {
           col1: {
@@ -184,7 +176,6 @@ describe('terms', () => {
               interval: 'w',
             },
             sourceField: 'timestamp',
-            indexPatternId: '1',
           },
         }
       );
@@ -241,7 +232,6 @@ describe('terms', () => {
                       numerator: { query: '', language: 'kuery' },
                       denominator: { query: '', language: 'kuery' },
                     },
-                    indexPatternId: '1',
                   },
                 },
               },
