@@ -7,17 +7,11 @@
 import Joi from 'joi';
 import Hapi from 'hapi';
 
-import { SavedObjectReference } from '../types';
-
 interface UpdateRequest extends Hapi.Request {
   payload: {
-    attributes: {
-      description: string;
-      actionTypeId: string;
-      actionTypeConfig: Record<string, any>;
-    };
-    version?: string;
-    references: SavedObjectReference[];
+    description: string;
+    config: Record<string, any>;
+    secrets: Record<string, any>;
   };
 }
 
@@ -37,36 +31,18 @@ export function updateRoute(server: Hapi.Server) {
           .required(),
         payload: Joi.object()
           .keys({
-            attributes: Joi.object()
-              .keys({
-                description: Joi.string().required(),
-                actionTypeConfig: Joi.object().required(),
-              })
-              .required(),
-            version: Joi.string(),
-            references: Joi.array()
-              .items(
-                Joi.object().keys({
-                  name: Joi.string().required(),
-                  type: Joi.string().required(),
-                  id: Joi.string().required(),
-                })
-              )
-              .default([]),
+            description: Joi.string().required(),
+            config: Joi.object().default({}),
+            secrets: Joi.object().default({}),
           })
           .required(),
       },
     },
     async handler(request: UpdateRequest) {
       const { id } = request.params;
-      const { attributes, version, references } = request.payload;
-      const options = { version, references };
+      const { description, config, secrets } = request.payload;
       const actionsClient = request.getActionsClient!();
-      await actionsClient.update({
-        id,
-        attributes,
-        options,
-      });
+      await actionsClient.update({ id, action: { description, config, secrets } });
       return { id };
     },
   });
