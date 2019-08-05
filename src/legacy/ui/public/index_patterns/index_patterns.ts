@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { idx } from '@kbn/elastic-idx';
 // @ts-ignore
 import { fieldFormats } from '../registry/field_formats';
 
@@ -34,7 +35,7 @@ export class IndexPatterns {
 
   private config: UiSettingsClient;
   private savedObjectsClient: SavedObjectsClient;
-  private savedObjectsCache?: Array<SimpleSavedObject<{}>> | null;
+  private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
 
   constructor(config: UiSettingsClient, savedObjectsClient: SavedObjectsClient) {
     this.config = config;
@@ -54,7 +55,7 @@ export class IndexPatterns {
       await this.refreshSavedObjectsCache();
     }
     if (this.savedObjectsCache) {
-      return this.savedObjectsCache.map(obj => _.get(obj, 'id'));
+      return this.savedObjectsCache.map(obj => idx(obj, _ => _.id));
     }
   };
 
@@ -63,7 +64,7 @@ export class IndexPatterns {
       await this.refreshSavedObjectsCache();
     }
     if (this.savedObjectsCache) {
-      return this.savedObjectsCache.map(obj => _.get(obj, 'attributes.title'));
+      return this.savedObjectsCache.map(obj => idx(obj, _ => _.attributes.title));
     }
   };
 
@@ -72,9 +73,9 @@ export class IndexPatterns {
       await this.refreshSavedObjectsCache();
     }
     if (this.savedObjectsCache) {
-      return this.savedObjectsCache.map(obj => {
+      return this.savedObjectsCache.map((obj: Record<string, any>) => {
         const result: Record<string, any> = {};
-        fields.forEach(f => (result[f] = _.get(obj, f) || _.get(obj, `attributes.${f}`)));
+        fields.forEach((f: string) => (result[f] = obj[f] || idx(obj, _ => _.attributes[f])));
         return result;
       });
     }
