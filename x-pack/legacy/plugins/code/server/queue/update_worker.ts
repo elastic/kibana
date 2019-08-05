@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CloneWorkerResult, Repository } from '../../model';
+import { CloneWorkerResult, Repository, WorkerReservedProgress } from '../../model';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { DiskWatermarkService } from '../disk_watermark';
 import { GitOperations } from '../git_operations';
@@ -76,5 +76,20 @@ export class UpdateWorker extends AbstractGitWorker {
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
     this.log.info(`Update job done for ${job.payload.uri}`);
     return await super.onJobCompleted(job, res);
+  }
+
+  public async onJobExecutionError(res: any) {
+    return await this.overrideUpdateErrorProgress(res);
+  }
+
+  public async onJobTimeOut(res: any) {
+    return await this.overrideUpdateErrorProgress(res);
+  }
+
+  private async overrideUpdateErrorProgress(res: any) {
+    this.log.warn(`Update job error`);
+    this.log.warn(res.error);
+    // Do not persist update errors assuming the next update trial is scheduling soon.
+    return await this.updateProgress(res.job, WorkerReservedProgress.COMPLETED);
   }
 }

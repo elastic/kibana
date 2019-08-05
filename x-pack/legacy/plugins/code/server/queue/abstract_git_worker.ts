@@ -112,6 +112,7 @@ export abstract class AbstractGitWorker extends AbstractWorker {
       errorMessage: error ? error.message : undefined,
     };
     try {
+      console.log('update the status');
       return await this.objectClient.updateRepositoryGitStatus(uri, p);
     } catch (err) {
       // Do nothing here since it's not blocking anything.
