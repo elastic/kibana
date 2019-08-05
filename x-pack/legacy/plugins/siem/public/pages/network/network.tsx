@@ -85,6 +85,11 @@ const NetworkComponent = pure<NetworkComponentProps>(
                             loading={loading}
                             from={from}
                             to={to}
+                            narrowDateRange={(min: number, max: number) => {
+                              setTimeout(() => {
+                                setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                              }, 500);
+                            }}
                           />
                         )}
                       </KpiNetworkQuery>
@@ -104,22 +109,26 @@ const NetworkComponent = pure<NetworkComponentProps>(
                           loading,
                           networkTopNFlow,
                           pageInfo,
-                          loadMore,
+                          loadPage,
                           id,
                           inspect,
                           refetch,
                         }) => (
                           <NetworkTopNFlowTableManage
                             data={networkTopNFlow}
-                            indexPattern={indexPattern}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                             id={id}
+                            indexPattern={indexPattern}
                             inspect={inspect}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                             loading={loading}
-                            loadMore={loadMore}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                            loadPage={loadPage}
                             refetch={refetch}
                             setQuery={setQuery}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
                             totalCount={totalCount}
                             type={networkModel.NetworkType.page}
                           />
@@ -141,21 +150,25 @@ const NetworkComponent = pure<NetworkComponentProps>(
                           loading,
                           networkDns,
                           pageInfo,
-                          loadMore,
+                          loadPage,
                           id,
                           inspect,
                           refetch,
                         }) => (
                           <NetworkDnsTableManage
                             data={networkDns}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                             id={id}
                             inspect={inspect}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                             loading={loading}
-                            loadMore={loadMore}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                            loadPage={loadPage}
                             refetch={refetch}
                             setQuery={setQuery}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
                             totalCount={totalCount}
                             type={networkModel.NetworkType.page}
                           />

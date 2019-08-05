@@ -22,7 +22,7 @@ import {
 import { inspectStringifyObject } from '../../utils/build_query';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
-
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import {
   DomainsRequestOptions,
   IpOverviewRequestOptions,
@@ -76,6 +76,9 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     request: FrameworkRequest,
     options: DomainsRequestOptions
   ): Promise<DomainsData> {
+    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+    }
     const dsl = buildDomainsQuery(options);
     const response = await this.framework.callWithRequest<DomainsData, TermAggregation>(
       request,
@@ -83,32 +86,32 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
       dsl
     );
 
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.domain_count.value', response);
     const domainsEdges: DomainsEdges[] = getDomainsEdges(response, options);
-    const hasNextPage = domainsEdges.length > limit;
-    const beginning = cursor != null ? parseInt(cursor, 10) : 0;
-    const edges = domainsEdges.splice(beginning, limit - beginning);
+    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+    const edges = domainsEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
-
+    const showMorePagesIndicator = totalCount > fakeTotalCount;
     return {
       edges,
       inspect,
       pageInfo: {
-        hasNextPage,
-        endCursor: {
-          value: String(limit),
-          tiebreaker: null,
-        },
+        activePage: activePage ? activePage : 0,
+        fakeTotalCount,
+        showMorePagesIndicator,
       },
       totalCount,
     };
   }
 
   public async getTls(request: FrameworkRequest, options: TlsRequestOptions): Promise<TlsData> {
+    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+    }
     const dsl = buildTlsQuery(options);
     const response = await this.framework.callWithRequest<TlsData, TermAggregation>(
       request,
@@ -116,26 +119,23 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
       dsl
     );
 
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.count.value', response);
     const tlsEdges: TlsEdges[] = getTlsEdges(response, options);
-    const hasNextPage = tlsEdges.length > limit;
-    const beginning = cursor != null ? parseInt(cursor, 10) : 0;
-    const edges = tlsEdges.splice(beginning, limit - beginning);
+    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+    const edges = tlsEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
-
+    const showMorePagesIndicator = totalCount > fakeTotalCount;
     return {
       edges,
       inspect,
       pageInfo: {
-        hasNextPage,
-        endCursor: {
-          value: String(limit),
-          tiebreaker: null,
-        },
+        activePage: activePage ? activePage : 0,
+        fakeTotalCount,
+        showMorePagesIndicator,
       },
       totalCount,
     };
@@ -145,6 +145,9 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     request: FrameworkRequest,
     options: UsersRequestOptions
   ): Promise<UsersData> {
+    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+    }
     const dsl = buildUsersQuery(options);
     const response = await this.framework.callWithRequest<UsersData, TermAggregation>(
       request,
@@ -152,26 +155,23 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
       dsl
     );
 
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.user_count.value', response);
     const usersEdges = getUsersEdges(response);
-    const hasNextPage = usersEdges.length > limit;
-    const beginning = cursor != null ? parseInt(cursor, 10) : 0;
-    const edges = usersEdges.splice(beginning, limit - beginning);
+    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+    const edges = usersEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
-
+    const showMorePagesIndicator = totalCount > fakeTotalCount;
     return {
       edges,
       inspect,
       pageInfo: {
-        endCursor: {
-          value: String(limit),
-          tiebreaker: null,
-        },
-        hasNextPage,
+        activePage: activePage ? activePage : 0,
+        fakeTotalCount,
+        showMorePagesIndicator,
       },
       totalCount,
     };

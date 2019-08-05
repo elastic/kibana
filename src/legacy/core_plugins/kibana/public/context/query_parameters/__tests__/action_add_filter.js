@@ -71,7 +71,6 @@ describe('context app', function () {
 function createQueryFilterStub() {
   return {
     addFilters: sinon.stub(),
-    invertFilter: sinon.stub(),
     getAppFilters: sinon.stub(),
   };
 }

@@ -28,8 +28,6 @@ export interface InfraSource {
   configuration: InfraSourceConfiguration;
   /** The status of the source */
   status: InfraSourceStatus;
-  /** A hierarchy of metadata entries by node */
-  metadataByNode: InfraNodeMetadata;
   /** A consecutive span of log entries surrounding a point in time */
   logEntriesAround: InfraLogEntryInterval;
   /** A consecutive span of log entries within an interval */
@@ -131,20 +129,6 @@ export interface InfraIndexField {
   searchable: boolean;
   /** Whether the field's values can be aggregated */
   aggregatable: boolean;
-}
-/** One metadata entry for a node. */
-export interface InfraNodeMetadata {
-  id: string;
-
-  name: string;
-
-  features: InfraNodeFeature[];
-}
-
-export interface InfraNodeFeature {
-  name: string;
-
-  source: string;
 }
 /** A consecutive sequence of log entries */
 export interface InfraLogEntryInterval {
@@ -334,9 +318,14 @@ export interface InfraTimeKeyInput {
 
   tiebreaker: number;
 }
-
+/** A highlighting definition */
 export interface InfraLogEntryHighlightInput {
+  /** The query to highlight by */
   query: string;
+  /** The number of highlighted documents to include beyond the beginning of the interval */
+  countBefore: number;
+  /** The number of highlighted documents to include beyond the end of the interval */
+  countAfter: number;
 }
 
 export interface InfraTimerangeInput {
@@ -418,11 +407,6 @@ export interface UpdateSourceTimestampLogColumnInput {
 export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
-}
-export interface MetadataByNodeInfraSourceArgs {
-  nodeId: string;
-
-  nodeType: InfraNodeType;
 }
 export interface LogEntriesAroundInfraSourceArgs {
   /** The sort key that corresponds to the point in time */
@@ -714,44 +698,6 @@ export namespace LogSummary {
     end: number;
 
     entriesCount: number;
-  };
-}
-
-export namespace MetadataQuery {
-  export type Variables = {
-    sourceId: string;
-    nodeId: string;
-    nodeType: InfraNodeType;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'InfraSource';
-
-    id: string;
-
-    metadataByNode: MetadataByNode;
-  };
-
-  export type MetadataByNode = {
-    __typename?: 'InfraNodeMetadata';
-
-    name: string;
-
-    features: Features[];
-  };
-
-  export type Features = {
-    __typename?: 'InfraNodeFeature';
-
-    name: string;
-
-    source: string;
   };
 }
 

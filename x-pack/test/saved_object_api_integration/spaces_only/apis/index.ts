@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TestInvoker } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ loadTestFile }: TestInvoker) {
+export default function({ loadTestFile }: FtrProviderContext) {
   describe('saved objects spaces only enabled', function() {
     this.tags('ciGroup5');
 
