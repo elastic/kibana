@@ -29,7 +29,8 @@ export function clusterRoute(server) {
           timeRange: Joi.object({
             min: Joi.date().required(),
             max: Joi.date().required()
-          }).required()
+          }).required(),
+          codePaths: Joi.array().items(Joi.string()).required()
         })
       }
     },
@@ -39,6 +40,7 @@ export function clusterRoute(server) {
         clusterUuid: req.params.clusterUuid,
         start: req.payload.timeRange.min,
         end: req.payload.timeRange.max,
+        codePaths: req.payload.codePaths
       };
 
       return getClustersFromRequest(req, indexPatterns, options)

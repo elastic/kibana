@@ -18,6 +18,7 @@ import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
 import { MonitoringViewBaseEuiTableController } from '../..';
+import { CODE_PATH_LOGSTASH } from '../../../../common/constants';
 
 /*
  * Logstash Pipelines Listing page
@@ -61,7 +62,7 @@ uiRoutes
     resolve: {
       clusters(Private) {
         const routeInit = Private(routeInitProvider);
-        return routeInit();
+        return routeInit({ codePaths: [CODE_PATH_LOGSTASH] });
       },
       pageData: getPageData
     },

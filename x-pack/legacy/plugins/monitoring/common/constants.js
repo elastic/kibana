@@ -172,3 +172,15 @@ export const APM_CUSTOM_ID = 'apm';
  * The id of the infra source owned by the monitoring plugin.
  */
 export const INFRA_SOURCE_ID = 'internal-stack-monitoring';
+
+/* TODO */
+export const CODE_PATH_ALL = 'all';
+export const CODE_PATH_ALERTS = 'alerts';
+export const CODE_PATH_KIBANA = 'kibana';
+export const CODE_PATH_ELASTICSEARCH = 'elasticsearch';
+export const CODE_PATH_ML = 'ml';
+export const CODE_PATH_BEATS = 'beats';
+export const CODE_PATH_LOGSTASH = 'logstash';
+export const CODE_PATH_APM = 'apm';
+export const CODE_PATH_LICENSE = 'license';
+export const CODE_PATH_LOGS = 'logs';

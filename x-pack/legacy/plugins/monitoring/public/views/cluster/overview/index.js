@@ -12,6 +12,9 @@ import { MonitoringViewBaseController } from '../../';
 import { Overview } from 'plugins/monitoring/components/cluster/overview';
 import { I18nContext } from 'ui/i18n';
 import { SetupModeRenderer } from '../../../components/renderers';
+import { CODE_PATH_ALL } from '../../../../common/constants';
+
+const CODE_PATHS = [CODE_PATH_ALL];
 
 uiRoutes.when('/overview', {
   template,
@@ -19,7 +22,7 @@ uiRoutes.when('/overview', {
     clusters(Private) {
       // checks license info of all monitored clusters for multi-cluster monitoring usage and capability
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: CODE_PATHS });
     }
   },
   controller: class extends MonitoringViewBaseController {
@@ -34,7 +37,7 @@ uiRoutes.when('/overview', {
         }),
         defaultData: {},
         getPageData: async () => {
-          const clusters = await monitoringClusters(globalState.cluster_uuid, globalState.ccs);
+          const clusters = await monitoringClusters(globalState.cluster_uuid, globalState.ccs, CODE_PATHS);
           return clusters[0];
         },
         reactNodeId: 'monitoringClusterOverviewApp',

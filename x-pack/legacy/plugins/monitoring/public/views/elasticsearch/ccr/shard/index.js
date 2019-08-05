@@ -14,13 +14,14 @@ import template from './index.html';
 import { MonitoringViewBaseController } from '../../../base_controller';
 import { CcrShard } from '../../../../components/elasticsearch/ccr_shard';
 import { I18nContext } from 'ui/i18n';
+import { CODE_PATH_ELASTICSEARCH } from '../../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
   template,
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
     },
     pageData: getPageData,
   },

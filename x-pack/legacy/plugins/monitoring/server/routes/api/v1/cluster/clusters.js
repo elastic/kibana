@@ -27,7 +27,8 @@ export function clustersRoute(server) {
           timeRange: Joi.object({
             min: Joi.date().required(),
             max: Joi.date().required()
-          }).required()
+          }).required(),
+          codePaths: Joi.array().items(Joi.string()).required()
         })
       }
     },
@@ -40,7 +41,9 @@ export function clustersRoute(server) {
       try {
         await verifyMonitoringAuth(req);
         const indexPatterns = getIndexPatterns(server, { filebeatIndexPattern: INDEX_PATTERN_FILEBEAT });
-        clusters = await getClustersFromRequest(req, indexPatterns);
+        clusters = await getClustersFromRequest(req, indexPatterns, {
+          codePaths: req.payload.codePaths
+        });
       } catch (err) {
         throw handleError(err, req);
       }

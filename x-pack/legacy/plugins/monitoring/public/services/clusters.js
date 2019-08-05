@@ -22,7 +22,7 @@ function formatCluster(cluster) {
 
 const uiModule = uiModules.get('monitoring/clusters');
 uiModule.service('monitoringClusters', ($injector) => {
-  return (clusterUuid, ccs) => {
+  return (clusterUuid, ccs, codePaths) => {
     const { min, max } = timefilter.getBounds();
 
     // append clusterUuid if the parameter is given
@@ -37,7 +37,8 @@ uiModule.service('monitoringClusters', ($injector) => {
       timeRange: {
         min: min.toISOString(),
         max: max.toISOString()
-      }
+      },
+      codePaths
     })
       .then(response => response.data)
       .then(data => {
