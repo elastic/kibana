@@ -13,11 +13,15 @@
  * 1. Calculated px values come from the open/closed state of the global nav sidebar
  */
 
+
+ #graphBasic {
+   height: 100%;
+ }
+
 .gphGraph__container {
   background: $euiColorEmptyShade;
-  position: fixed;
+  position: relative;
   height: 100%;
-  width: calc(100% - #{$kbnGlobalNavClosedWidth}); /* 1 */
 }
 
 .kbnGlobalNav.kbnGlobalNav-isOpen + .app-wrapper .gphGraph__container {

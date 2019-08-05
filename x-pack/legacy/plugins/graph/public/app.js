@@ -999,13 +999,9 @@ app.controller('graphuiPlugin', function (
   };
 
   $scope.closeMenus = (closeKey) => {
-    if (closeKey) {
-      $scope.menus[closeKey] = false;
-    } else {
-      _.forOwn($scope.menus, function (_, key) {
-        $scope.menus[key] = false;
-      });
-    }
+    _.forOwn($scope.menus, function (_, key) {
+      $scope.menus[key] = false;
+    });
   };
 
   // Deal with situation of request to open saved workspace
@@ -1251,7 +1247,7 @@ app.controller('graphuiPlugin', function (
 
 
     $scope.savedWorkspace.save().then(function (id) {
-      $scope.closeMenus('save');
+      $scope.closeMenus();
       $scope.userHasConfirmedSaveWorkspaceData = false; //reset flag
       if (id) {
         const title = i18n.translate('xpack.graph.saveWorkspace.successNotificationTitle', {
