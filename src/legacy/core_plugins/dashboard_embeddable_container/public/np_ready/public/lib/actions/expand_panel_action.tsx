@@ -89,6 +89,6 @@ export class ExpandPanelAction extends Action {
     const newValue = isExpanded(embeddable) ? undefined : embeddable.id;
     embeddable.parent.updateInput({
       expandedPanelId: newValue,
-    } as any);
+    });
   }
 }

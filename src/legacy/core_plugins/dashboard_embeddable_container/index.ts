@@ -23,8 +23,7 @@ import { resolve } from 'path';
 export default function(kibana: any) {
   return new kibana.Plugin({
     uiExports: {
-      hacks: 'plugins/dashboard_embeddable_container/np_ready/public/legacy',
-      styleSheetPaths: resolve(__dirname, 'public/css/index.scss'),
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
   });
 }
