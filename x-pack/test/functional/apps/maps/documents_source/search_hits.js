@@ -107,8 +107,7 @@ export default function ({ getPageObjects, getService }) {
         expect(hits).to.equal('2');
       });
 
-      // Disabling pending fix for issue preventing shapes from showing
-      it.skip('should handle geo_shape filtering with extents that cross antimeridian', async () => {
+      it('should handle geo_shape filtering with extents that cross antimeridian', async () => {
         await PageObjects.maps.loadSavedMap('antimeridian shapes example');
         const hits = await PageObjects.maps.getHits();
         expect(hits).to.equal('2');
