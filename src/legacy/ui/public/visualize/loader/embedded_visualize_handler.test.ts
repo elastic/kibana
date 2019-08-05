@@ -157,7 +157,7 @@ describe('EmbeddedVisualizeHandler', () => {
     });
 
     it('should call dataLoader.render with updated filters', () => {
-      const params = { filters: [{ foo: 'bar' }] };
+      const params = { filters: [{ meta: { disabled: false } }] };
       handler.update(params);
       jest.runAllTimers();
       expect(mockDataLoaderFetch).toHaveBeenCalledWith({ ...dataLoaderParams, ...params });
