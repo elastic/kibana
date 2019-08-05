@@ -427,12 +427,6 @@ describe('SavedObjectsClient', () => {
           "status": 409,
           "statusText": "Conflict",
         },
-        "response": Object {
-          "ok": false,
-          "redirected": false,
-          "status": 409,
-          "statusText": "Conflict",
-        },
       }
     `);
   });
