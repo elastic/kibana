@@ -209,21 +209,21 @@ describe('docViews', function () {
         const last = collapseBtns.last()[0];
 
         first.click();
-        expect(first.parentElement.parentElement.lastElementChild.classList.contains('truncate-by-height'))
+        expect(first.parentElement.lastElementChild.classList.contains('truncate-by-height'))
           .to.equal(false);
-        expect(last.parentElement.parentElement.lastElementChild.classList.contains('truncate-by-height'))
+        expect(last.parentElement.lastElementChild.classList.contains('truncate-by-height'))
           .to.equal(true);
 
         first.click();
-        expect(first.parentElement.parentElement.lastElementChild.classList.contains('truncate-by-height'))
+        expect(first.parentElement.lastElementChild.classList.contains('truncate-by-height'))
           .to.equal(true);
-        expect(last.parentElement.parentElement.lastElementChild.classList.contains('truncate-by-height'))
+        expect(last.parentElement.lastElementChild.classList.contains('truncate-by-height'))
           .to.equal(true);
       });
 
       it('should collapse an overflowed field details by default', function () {
         const collapseBtn = $elem.find('.discover-table-open-button').first()[0];
-        expect(collapseBtn.parentElement.parentElement.lastElementChild
+        expect(collapseBtn.parentElement.lastElementChild
           .classList.contains('truncate-by-height')).to.equal(true);
       });
 
@@ -238,10 +238,10 @@ describe('docViews', function () {
         spy.restore();
 
         collapseBtn.click();
-        expect(collapseBtn.parentElement.parentElement.lastElementChild.classList.contains('truncate-by-height'))
+        expect(collapseBtn.parentElement.lastElementChild.classList.contains('truncate-by-height'))
           .to.equal(false);
         collapseBtn.click();
-        expect(collapseBtn.parentElement.parentElement.lastElementChild.classList.contains('truncate-by-height'))
+        expect(collapseBtn.parentElement.lastElementChild.classList.contains('truncate-by-height'))
           .to.equal(true);
       });
 
@@ -267,12 +267,6 @@ describe('docViews', function () {
         expect(row.find('.kbnDocViewer__objectArray').length).to.be(0);
       });
 
-      it('displays a warning about objects in arrays', function () {
-        const row = $elem.find('[data-test-subj="tableDocViewRow-objectArray"]');
-        expect(row.find('.kbnDocViewer__underscore').length).to.be(0);
-        expect(row.find('.kbnDocViewer__noMapping').length).to.be(0);
-        expect(row.find('.kbnDocViewer__objectArray').length).to.be(1);
-      });
     });
   });
 });
