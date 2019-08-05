@@ -62,7 +62,7 @@ export function getBeatsInstructionsForDisablingInternalCollection(product, meta
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.beatsInstructions.disableInternalCollection.note"
-              defaultMessage="You'll need to restart {beatType} after making this change"
+              defaultMessage="You'll need to restart {beatType} after making this change."
               values={{
                 beatType: beatType || UNDETECTED_BEAT_TYPE
               }}

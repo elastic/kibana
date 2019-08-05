@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
 import { inspect } from 'util';
 import { Logger as VsLogger } from 'vscode-jsonrpc';
 
+import { ServerFacade } from '..';
+
 export class Logger implements VsLogger {
   private readonly verbose: boolean = false;
-  constructor(private server: Hapi.Server, private baseTags: string[] = ['code']) {
+  constructor(private server: ServerFacade, private baseTags: string[] = ['code']) {
     if (server) {
       this.verbose = this.server.config().get('xpack.code.verbose');
     }

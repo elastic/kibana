@@ -6,10 +6,9 @@
 
 import expect from '@kbn/expect';
 import { SecurityService, SpacesService } from '../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function featureControlsTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const security: SecurityService = getService('security');
   const spaces: SpacesService = getService('spaces');
@@ -80,7 +79,12 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo?start=${start}&end=${end}`,
+      url: `/api/apm/services/foo/agent_name?start=${start}&end=${end}`,
+      expectForbidden: expect404,
+      expectResponse: expect200,
+    },
+    {
+      url: `/api/apm/services/foo/transaction_types?start=${start}&end=${end}`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },

@@ -223,7 +223,7 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
             size="s"
             color="warning"
             title={i18n.translate('xpack.monitoring.metricbeatMigration.beatsInstructions.isInternalCollectorStatusTitle', {
-              defaultMessage: `We have not detected any monitoring data coming from Metricbeat for this Beats.
+              defaultMessage: `We have not detected any monitoring data coming from Metricbeat for this Beat.
               We will continuously check every {timePeriod} seconds in the background.`,
               values: {
                 timePeriod: autoCheckIntervalInMs / 1000,

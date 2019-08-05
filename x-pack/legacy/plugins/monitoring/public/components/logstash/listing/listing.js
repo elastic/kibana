@@ -137,7 +137,7 @@ export class Listing extends PureComponent {
           >
             <p>
               {i18n.translate('xpack.monitoring.logstash.nodes.metribeatMigration.netNewUserDescription', {
-                defaultMessage: `Based on your indices, we think you might have a logstash node. Click the 'Setup monitoring'
+                defaultMessage: `Based on your indices, we think you might have a Logstash node. Click the 'Setup monitoring'
                 button below to start monitoring this node.`
               })}
             </p>

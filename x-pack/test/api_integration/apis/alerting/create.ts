@@ -7,23 +7,23 @@
 import expect from '@kbn/expect';
 import { getTestAlertData } from './utils';
 import { ES_ARCHIVER_ACTION_ID } from './constants';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function createAlertTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function createAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
   describe('create', () => {
-    const createdAlertIds: string[] = [];
+    const createdAlertIds: Array<{ space: string; id: string }> = [];
 
     before(() => esArchiver.load('actions/basic'));
     after(async () => {
       await Promise.all(
-        createdAlertIds.map(id => {
+        createdAlertIds.map(({ space, id }) => {
+          const urlPrefix = space !== 'default' ? `/s/${space}` : '';
           return supertest
-            .delete(`/api/alert/${id}`)
+            .delete(`${urlPrefix}/api/alert/${id}`)
             .set('kbn-xsrf', 'foo')
             .expect(204, '');
         })
@@ -45,7 +45,7 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
         .send(getTestAlertData())
         .expect(200)
         .then(async (resp: any) => {
-          createdAlertIds.push(resp.body.id);
+          createdAlertIds.push({ space: 'default', id: resp.body.id });
           expect(resp.body).to.eql({
             id: resp.body.id,
             actions: [
@@ -70,9 +70,44 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
           expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
           expect(JSON.parse(taskRecord.task.params)).to.eql({
             alertId: resp.body.id,
-            basePath: '',
+            spaceId: 'default',
           });
         });
+    });
+
+    it('should return 200 when creating an alert in a space', async () => {
+      const { body: createdAlert } = await supertest
+        .post('/s/space_1/api/alert')
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(200);
+      createdAlertIds.push({ space: 'space_1', id: createdAlert.id });
+      expect(createdAlert).to.eql({
+        id: createdAlert.id,
+        actions: [
+          {
+            group: 'default',
+            id: ES_ARCHIVER_ACTION_ID,
+            params: {
+              message:
+                'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
+            },
+          },
+        ],
+        enabled: true,
+        alertTypeId: 'test.noop',
+        alertTypeParams: {},
+        interval: '10s',
+        scheduledTaskId: createdAlert.scheduledTaskId,
+      });
+      expect(typeof createdAlert.scheduledTaskId).to.be('string');
+      const { _source: taskRecord } = await getScheduledTask(createdAlert.scheduledTaskId);
+      expect(taskRecord.type).to.eql('task');
+      expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
+      expect(JSON.parse(taskRecord.task.params)).to.eql({
+        alertId: createdAlert.id,
+        spaceId: 'space_1',
+      });
     });
 
     it('should not schedule a task when creating a disabled alert', async () => {

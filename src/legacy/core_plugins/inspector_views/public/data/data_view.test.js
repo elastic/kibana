@@ -22,6 +22,7 @@ import { DataView } from './data_view';
 import { DataAdapter } from 'ui/inspector/adapters';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
+jest.mock('ui/new_platform');
 jest.mock('./lib/export_csv', () => ({
   exportAsCsv: jest.fn(),
 }));

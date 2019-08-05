@@ -15,6 +15,7 @@ import {
   Embeddable,
   executeTriggerActions
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/index';
+import { onlyDisabledFiltersChanged } from '../../../../../../src/legacy/core_plugins/data/public';
 import { I18nContext } from 'ui/i18n';
 
 import { GisMap } from '../connected_components/gis_map';
@@ -65,7 +66,7 @@ export class MapEmbeddable extends Embeddable {
   onContainerStateChanged(containerState) {
     if (!_.isEqual(containerState.timeRange, this._prevTimeRange) ||
         !_.isEqual(containerState.query, this._prevQuery) ||
-        !_.isEqual(containerState.filters, this._prevFilters)) {
+        !onlyDisabledFiltersChanged(containerState.filters, this._prevFilters)) {
       this._dispatchSetQuery(containerState);
     }
 

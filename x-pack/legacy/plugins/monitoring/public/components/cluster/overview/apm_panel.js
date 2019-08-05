@@ -57,8 +57,8 @@ export function ApmPanel(props) {
         <EuiToolTip
           position="top"
           content={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.setupModeNodesTooltip', {
-            defaultMessage: `These numbers indicate how many detected monitored apm versus how many ` +
-            `detected total apm. If there are more detected apm than monitored apm, click the Nodes ` +
+            defaultMessage: `These numbers indicate how many detected monitored APM servers versus how many ` +
+            `detected total APM servers. If there are more detected APM servers than monitored APM servers, click the Nodes ` +
             `link and you will be guided in how to setup monitoring for the missing node.`
           })}
         >
@@ -137,7 +137,7 @@ export function ApmPanel(props) {
                       aria-label={i18n.translate(
                         'xpack.monitoring.cluster.overview.apmPanel.instancesTotalLinkAriaLabel',
                         {
-                          defaultMessage: 'Apm Instances: {apmsTotal}',
+                          defaultMessage: 'APM Instances: {apmsTotal}',
                           values: { apmsTotal }
                         }
                       )}

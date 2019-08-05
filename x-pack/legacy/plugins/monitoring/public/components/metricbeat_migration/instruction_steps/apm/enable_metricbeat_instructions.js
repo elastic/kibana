@@ -83,7 +83,7 @@ export function getApmInstructionsForEnablingMetricbeat(product, _meta, {
 
   const enableMetricbeatModuleStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.apmInstructions.enableMetricbeatModuleTitle', {
-      defaultMessage: 'Enable and configure the beat x-pack module in Metricbeat'
+      defaultMessage: 'Enable and configure the Beat x-pack module in Metricbeat'
     }),
     children: (
       <Fragment>
@@ -183,7 +183,7 @@ export function getApmInstructionsForEnablingMetricbeat(product, _meta, {
             size="s"
             color="warning"
             title={i18n.translate('xpack.monitoring.metricbeatMigration.apmInstructions.isInternalCollectorStatusTitle', {
-              defaultMessage: `We have not detected any monitoring data coming from Metricbeat for this Apm.
+              defaultMessage: `We have not detected any monitoring data coming from Metricbeat for this APM server.
               We will continuously check every {timePeriod} seconds in the background.`,
               values: {
                 timePeriod: autoCheckIntervalInMs / 1000,

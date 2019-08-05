@@ -6,3 +6,4 @@
 
 export { setupStatusRoute } from './setup_status';
 export { disableElasticsearchInternalCollectionRoute } from './disable_elasticsearch_internal_collection';
+export { nodeSetupStatusRoute } from './node_setup_status';
