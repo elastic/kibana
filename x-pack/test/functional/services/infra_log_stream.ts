@@ -19,10 +19,6 @@ export function InfraLogStreamProvider({ getService }: FtrProviderContext) {
       return await Promise.all(columnHeaderElements.map(element => element.getVisibleText()));
     },
 
-    async getStream(): Promise<WebElementWrapper[]> {
-      return await testSubjects.find('logStream');
-    },
-
     async getStreamEntries(minimumItems = 1): Promise<WebElementWrapper[]> {
       await retry.try(async () => {
         const elements = await testSubjects.findAll('streamEntry');
