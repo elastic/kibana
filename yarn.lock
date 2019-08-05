@@ -1659,10 +1659,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@13.0.0":
-  version "13.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-13.0.0.tgz#bead6830cff58a2cc617e9e9f1d344768bdd7004"
-  integrity sha512-nU/kgp6c4cH5IdcgD3XXEh0Gkbzf4byacJN62oYr1UGTWC0RT8N09FAQzDFIEGz+lDWTSLhap9RWPH3Kgy+O/A==
+"@elastic/eui@13.1.1":
+  version "13.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-13.1.1.tgz#35ff2bdb4f38b12a2a82108d9b10ba5949eef3a9"
+  integrity sha512-yPqxQYWSIEO4nhgWDHY48Ty9eUD1xLYogKUPXzla3OESOj8vqYLD/fCYX4M3s32NZgLzjvy8AaFiCNsZ3SF6yw==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -7895,6 +7895,11 @@ chardet@^0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/chardet/-/chardet-0.7.0.tgz#90094849f0937f2eedc2425d0d28a9e5f0cbad9e"
   integrity sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==
+
+check-disk-space@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/check-disk-space/-/check-disk-space-2.1.0.tgz#2e77fe62f30d9676dc37a524ea2008f40c780295"
+  integrity sha512-f0nx9oJF/AVF8nhSYlF1EBvMNnO+CXyLwKhPvN1943iOMI9TWhQigLZm80jAf0wzQhwKkzA8XXjyvuVUeGGcVQ==
 
 check-error@^1.0.2:
   version "1.0.2"

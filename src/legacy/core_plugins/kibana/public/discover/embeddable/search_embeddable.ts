@@ -46,11 +46,11 @@ import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 interface SearchScope extends ng.IScope {
   columns?: string[];
   description?: string;
-  sort?: string[];
+  sort?: string[] | string[][];
   searchSource?: SearchSource;
   sharedItemTitle?: string;
   inspectorAdapters?: Adapters;
-  setSortOrder?: (column: string, columnDirection: string) => void;
+  setSortOrder?: (sortPair: [string, string]) => void;
   removeColumn?: (column: string) => void;
   addColumn?: (column: string) => void;
   moveColumn?: (column: string, index: number) => void;
@@ -200,8 +200,8 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
 
     this.pushContainerStateParamsToScope(searchScope);
 
-    searchScope.setSortOrder = (columnName, direction) => {
-      searchScope.sort = [columnName, direction];
+    searchScope.setSortOrder = sortPair => {
+      searchScope.sort = sortPair;
       this.updateInput({ sort: searchScope.sort });
     };
 
@@ -262,6 +262,9 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     // been overridden in a dashboard.
     searchScope.columns = this.input.columns || this.savedSearch.columns;
     searchScope.sort = this.input.sort || this.savedSearch.sort;
+    if (searchScope.sort.length && !Array.isArray(searchScope.sort[0])) {
+      searchScope.sort = [searchScope.sort];
+    }
     searchScope.sharedItemTitle = this.panelTitle;
 
     if (
