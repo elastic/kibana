@@ -117,6 +117,10 @@ export abstract class Container<
     this.updateInput({ panels } as Partial<TContainerInput>);
   }
 
+  public getChildIds(): string[] {
+    return Object.keys(this.children);
+  }
+
   public getChild<E extends IEmbeddable>(id: string): E {
     return this.children[id] as E;
   }

@@ -21,6 +21,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import angular from 'angular';
+import { uniq } from 'lodash';
 
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
@@ -152,7 +153,17 @@ export class DashboardAppController {
       if (!container || isErrorEmbeddable(container)) {
         return;
       }
-      const panelIndexPatterns = container.getPanelIndexPatterns();
+
+      let panelIndexPatterns: IndexPattern[] = [];
+      Object.values(container.getChildIds()).forEach(id => {
+        const embeddable = container.getChild(id);
+        if (isErrorEmbeddable(embeddable)) return;
+        const embeddableIndexPatterns = (embeddable.getOutput() as any).indexPatterns;
+        if (!embeddableIndexPatterns) return;
+        panelIndexPatterns.push(...embeddableIndexPatterns);
+      });
+      panelIndexPatterns = uniq(panelIndexPatterns, 'id');
+
       if (panelIndexPatterns && panelIndexPatterns.length > 0) {
         $scope.$evalAsync(() => {
           $scope.indexPatterns = panelIndexPatterns;

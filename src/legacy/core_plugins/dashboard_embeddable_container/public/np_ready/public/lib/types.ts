@@ -38,7 +38,7 @@ export interface TimeRange {
   to: string;
 }
 
-// TODO: Replace Saved object interfaces by the once Core will provide when it is ready.
+// TODO: Replace Saved object interfaces by the ones Core will provide when it is ready.
 export type SavedObjectAttribute =
   | string
   | number
@@ -71,7 +71,6 @@ export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
   showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
 }
 
-// TODO: Replace `IndexPattern` by correct NP import when it is available.
 export interface Field {
   name: string;
   type: string;
@@ -83,11 +82,4 @@ export interface Field {
   searchable: boolean;
   parent?: string;
   subType?: string;
-}
-
-export interface IndexPattern {
-  id: string;
-  fields: Field[];
-  title: string;
-  timeFieldName?: string;
 }

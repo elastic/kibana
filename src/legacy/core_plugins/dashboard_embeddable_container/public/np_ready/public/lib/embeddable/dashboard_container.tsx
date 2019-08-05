@@ -19,18 +19,16 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { uniq } from 'lodash';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Filter } from '@kbn/es-query';
 import { CoreStart } from '../../../../../../../../core/public';
-import { IndexPattern, RefreshInterval, TimeRange } from '../types';
+import { RefreshInterval, TimeRange } from '../types';
 
 import {
   Container,
   ContainerInput,
   EmbeddableInput,
   ViewMode,
-  isErrorEmbeddable,
   EmbeddableFactory,
   IEmbeddable,
   GetEmbeddableFactory,
@@ -124,19 +122,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       </I18nProvider>,
       dom
     );
-  }
-
-  public getPanelIndexPatterns() {
-    const indexPatterns: IndexPattern[] = [];
-    Object.values(this.children).forEach(embeddable => {
-      if (!isErrorEmbeddable(embeddable)) {
-        const embeddableIndexPatterns = embeddable.getOutput().indexPatterns;
-        if (embeddableIndexPatterns) {
-          indexPatterns.push(...embeddableIndexPatterns);
-        }
-      }
-    });
-    return uniq(indexPatterns, 'id');
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {
