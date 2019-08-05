@@ -17,16 +17,37 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { MetricsRequestHandlerProvider } from './kbn_vis_types/request_handler';
 import { PersistedState } from 'ui/persisted_state';
-
 import chrome from 'ui/chrome';
 
-export const tsvb = () => ({
-  name: 'tsvb',
+import { ExpressionFunction, KibanaContext, Render } from '../../interpreter/types';
+
+// @ts-ignore
+import { createMetricsRequestHandler } from './request_handler';
+
+const name = 'tsvb';
+type Context = KibanaContext | null;
+
+interface Arguments {
+  params: string;
+  uiState: string;
+}
+
+type VisParams = Required<Arguments>;
+
+interface RenderValue {
+  visType: 'metrics';
+  visData: Context;
+  visConfig: VisParams;
+  uiState: any;
+}
+
+type Return = Promise<Render<RenderValue>>;
+
+export const createMetricsFn = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+  name,
   type: 'render',
   context: {
     types: ['kibana_context', 'null'],
@@ -38,17 +59,17 @@ export const tsvb = () => ({
     params: {
       types: ['string'],
       default: '"{}"',
+      help: '',
     },
     uiState: {
       types: ['string'],
       default: '"{}"',
+      help: '',
     },
   },
-  async fn(context, args) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
-    const metricsRequestHandler = Private(MetricsRequestHandlerProvider).handler;
-
+  async fn(context: Context, args: Arguments) {
+    const uiSettings = chrome.getUiSettingsClient();
+    const metricsRequestHandler = createMetricsRequestHandler(uiSettings);
     const params = JSON.parse(args.params);
     const uiStateParams = JSON.parse(args.uiState);
     const uiState = new PersistedState(uiStateParams);
@@ -58,7 +79,7 @@ export const tsvb = () => ({
       query: get(context, 'query', null),
       filters: get(context, 'filters', null),
       visParams: params,
-      uiState: uiState,
+      uiState,
     });
 
     response.visType = 'metrics';
@@ -67,13 +88,11 @@ export const tsvb = () => ({
       type: 'render',
       as: 'visualization',
       value: {
+        uiState,
         visType: 'metrics',
         visConfig: params,
-        uiState: uiState,
         visData: response,
       },
     };
   },
 });
-
-functionsRegistry.register(tsvb);

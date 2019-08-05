@@ -17,10 +17,29 @@
  * under the License.
  */
 
-import { dirname } from 'path';
+import { createTagCloudFn } from './tag_cloud_fn';
 
-export const REPO_ROOT = dirname(require.resolve('../../package.json'));
+// @ts-ignore
+import { functionWrapper } from '../../interpreter/test_helpers';
 
-// Files in directories of this name will be treated as Jest integration tests with instances of
-// Elasticsearch and the Kibana server.
-export const RESERVED_DIR_JEST_INTEGRATION_TESTS = 'integration_tests';
+describe('interpreter/functions#tagcloud', () => {
+  const fn = functionWrapper(createTagCloudFn);
+  const context = {
+    type: 'kibana_datatable',
+    rows: [{ 'col-0-1': 0 }],
+    columns: [{ id: 'col-0-1', name: 'Count' }],
+  };
+  const visConfig = {
+    scale: 'linear',
+    orientation: 'single',
+    minFontSize: 18,
+    maxFontSize: 72,
+    showLabel: true,
+    metric: { accessor: 0, format: { id: 'number' } },
+  };
+
+  it('returns an object with the correct structure', () => {
+    const actual = fn(context, visConfig);
+    expect(actual).toMatchSnapshot();
+  });
+});

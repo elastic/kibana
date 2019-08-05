@@ -17,24 +17,27 @@
  * under the License.
  */
 
-import { MetricsRequestHandlerProvider } from './request_handler';
+import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
-import { ReactEditorControllerProvider } from './editor_controller';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+// @ts-ignore
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 
-import { PANEL_TYPES } from '../../common/panel_types';
+import { visFactory } from '../../visualizations/public';
 
-// register the provider with the visTypes registry so that other know it exists
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-VisTypesRegistryProvider.register(MetricsVisProvider);
+// @ts-ignore
+import { createMetricsRequestHandler } from './request_handler';
+// @ts-ignore
+import { createEditorController } from './editor_controller';
+// @ts-ignore
+import { PANEL_TYPES } from '../common/panel_types';
 
-export function MetricsVisProvider(Private) {
-  const VisFactory = Private(VisFactoryProvider);
-  const ReactEditorController = Private(ReactEditorControllerProvider).handler;
-  const metricsRequestHandler = Private(MetricsRequestHandlerProvider).handler;
+export const createMetricsTypeDefinition = () => {
+  const uiSettings = chrome.getUiSettingsClient();
+  const savedObjectsClient = chrome.getSavedObjectsClient();
+  const EditorController = createEditorController(uiSettings, savedObjectsClient);
+  const metricsRequestHandler = createMetricsRequestHandler(uiSettings);
 
-  return VisFactory.createReactVisualization({
+  return visFactory.createReactVisualization({
     name: 'metrics',
     title: i18n.translate('tsvb.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
     description: i18n.translate('tsvb.kbnVisTypes.metricsDescription', {
@@ -76,11 +79,11 @@ export function MetricsVisProvider(Private) {
         show_legend: 1,
         show_grid: 1,
       },
-      component: require('../components/vis_editor').VisEditor,
+      component: require('./components/vis_editor').VisEditor,
     },
-    editor: ReactEditorController,
+    editor: EditorController,
     editorConfig: {
-      component: require('../components/vis_editor').VisEditor,
+      component: require('./components/vis_editor').VisEditor,
     },
     options: {
       showQueryBar: false,
@@ -90,4 +93,4 @@ export function MetricsVisProvider(Private) {
     requestHandler: metricsRequestHandler,
     responseHandler: 'none',
   });
-}
+};

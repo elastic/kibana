@@ -16,11 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { once } from 'lodash';
 
-import { dirname } from 'path';
+// @ts-ignore
+import { uiModules } from 'ui/modules';
+// @ts-ignore
+import 'ui/directives/inequality';
+// @ts-ignore
+import { MetricVisParams } from '../components/metric_vis_params';
 
-export const REPO_ROOT = dirname(require.resolve('../../package.json'));
-
-// Files in directories of this name will be treated as Jest integration tests with instances of
-// Elasticsearch and the Kibana server.
-export const RESERVED_DIR_JEST_INTEGRATION_TESTS = 'integration_tests';
+/** @internal */
+export const initMetricVisLegacyModule = once((): void => {
+  uiModules.get('kibana/metric_vis', ['kibana']).directive('metricVisParams', MetricVisParams);
+});

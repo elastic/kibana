@@ -18,34 +18,39 @@
  */
 
 import { resolve } from 'path';
+import { Legacy } from 'kibana';
+import { PluginInitializerContext } from 'src/core/server';
+import { CoreSetup } from 'src/core/server';
 
-import { fieldsRoutes } from './server/routes/fields';
-import { visDataRoutes } from './server/routes/vis';
-import { SearchStrategiesRegister } from './server/lib/search_strategies/search_strategies_register';
+import { plugin } from './server/';
+import { CustomCoreSetup } from './server/plugin';
 
-export default function(kibana) {
-  return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch'],
+import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy/types';
 
+const metricsPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
+  new Plugin({
+    id: 'metrics',
+    require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'data'],
+    publicDir: resolve(__dirname, 'public'),
     uiExports: {
-      visTypes: ['plugins/metrics/kbn_vis_types'],
-      interpreter: ['plugins/metrics/tsvb_fn'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      hacks: [resolve(__dirname, 'public/legacy')],
+      injectDefaultVars: server => ({}),
     },
+    init: (server: Legacy.Server) => {
+      const initializerContext = {} as PluginInitializerContext;
+      const core = { http: { server } } as CoreSetup & CustomCoreSetup;
 
-    config(Joi) {
+      plugin(initializerContext).setup(core);
+    },
+    config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         chartResolution: Joi.number().default(150),
         minimumBucketSize: Joi.number().default(10),
       }).default();
     },
+  } as Legacy.PluginSpecOptions);
 
-    init(server) {
-      fieldsRoutes(server);
-      visDataRoutes(server);
-
-      SearchStrategiesRegister.init(server);
-    },
-  });
-}
+// eslint-disable-next-line import/no-default-export
+export default metricsPluginInitializer;

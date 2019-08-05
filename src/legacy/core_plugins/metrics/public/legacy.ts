@@ -17,10 +17,19 @@
  * under the License.
  */
 
-import { dirname } from 'path';
+import { PluginInitializerContext } from 'kibana/public';
+import { npSetup, npStart } from 'ui/new_platform';
 
-export const REPO_ROOT = dirname(require.resolve('../../package.json'));
+import { visualizations } from '../../visualizations/public';
+import { MetricsPluginSetupDependencies } from './plugin';
+import { plugin } from '.';
 
-// Files in directories of this name will be treated as Jest integration tests with instances of
-// Elasticsearch and the Kibana server.
-export const RESERVED_DIR_JEST_INTEGRATION_TESTS = 'integration_tests';
+const plugins: Readonly<MetricsPluginSetupDependencies> = {
+  visualizations,
+  data: npSetup.plugins.data,
+};
+
+const pluginInstance = plugin({} as PluginInitializerContext);
+
+export const setup = pluginInstance.setup(npSetup.core, plugins);
+export const start = pluginInstance.start(npStart.core);

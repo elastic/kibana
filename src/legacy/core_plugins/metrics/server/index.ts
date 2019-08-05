@@ -17,20 +17,9 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { PluginInitializerContext } from 'kibana/server';
+import { MetricsServerPlugin as Plugin } from './plugin';
 
-export default function (kibana) {
-
-  return new kibana.Plugin({
-
-    uiExports: {
-      visTypes: [
-        'plugins/metric_vis/metric_vis'
-      ],
-      interpreter: ['plugins/metric_vis/metric_vis_fn'],
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    }
-
-  });
-
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
 }

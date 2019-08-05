@@ -16,11 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { CoreStart, Plugin } from 'kibana/public';
+import { initMetricVisLegacyModule } from './metric_vis_legacy_module';
 
-import { dirname } from 'path';
+export class LegacyDependenciesPlugin implements Plugin<void, void> {
+  public setup() {
+    // Init kibana/metric_vis AngularJS module.
+    initMetricVisLegacyModule();
+  }
 
-export const REPO_ROOT = dirname(require.resolve('../../package.json'));
-
-// Files in directories of this name will be treated as Jest integration tests with instances of
-// Elasticsearch and the Kibana server.
-export const RESERVED_DIR_JEST_INTEGRATION_TESTS = 'integration_tests';
+  public start(core: CoreStart) {
+    // nothing to do here yet
+  }
+}

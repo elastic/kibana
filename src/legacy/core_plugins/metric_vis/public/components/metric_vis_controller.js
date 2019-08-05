@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { last, findIndex, isNaN } from 'lodash';
 import React, { Component } from 'react';
+import { isColorDark } from '@elastic/eui';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
 import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-import { isColorDark } from '@elastic/eui';
 
-import { MetricVisValue } from './components/metric_vis_value';
+import { MetricVisValue } from './metric_vis_value';
 
 export class MetricVisComponent extends Component {
 
@@ -31,7 +31,7 @@ export class MetricVisComponent extends Component {
     const config = this.props.visParams.metric;
     const isPercentageMode = config.percentageMode;
     const colorsRange = config.colorsRange;
-    const max = _.last(colorsRange).to;
+    const max = last(colorsRange).to;
     const labels = [];
     colorsRange.forEach(range => {
       const from = isPercentageMode ? Math.round(100 * range.from / max) : range.from;
@@ -59,7 +59,7 @@ export class MetricVisComponent extends Component {
 
   _getBucket(val) {
     const config = this.props.visParams.metric;
-    let bucket = _.findIndex(config.colorsRange, range => {
+    let bucket = findIndex(config.colorsRange, range => {
       return range.from <= val && range.to > val;
     });
 
@@ -86,7 +86,7 @@ export class MetricVisComponent extends Component {
   }
 
   _getFormattedValue = (fieldFormatter, value, format = 'text') => {
-    if (_.isNaN(value)) return '-';
+    if (isNaN(value)) return '-';
     return fieldFormatter.convert(value, format);
   };
 
@@ -95,7 +95,7 @@ export class MetricVisComponent extends Component {
     const dimensions = this.props.visParams.dimensions;
     const isPercentageMode = config.percentageMode;
     const min = config.colorsRange[0].from;
-    const max = _.last(config.colorsRange).to;
+    const max = last(config.colorsRange).to;
     const colors = this._getColors();
     const labels = this._getLabels();
     const metrics = [];
