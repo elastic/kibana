@@ -78,13 +78,17 @@ export class CustomTimeRangeAction extends Action {
       isVisualizeEmbeddable(embeddable) &&
       embeddable.getOutput().visTypeName === 'input_control_vis';
 
+    const isMarkdown =
+      isVisualizeEmbeddable(embeddable) && embeddable.getOutput().visTypeName === 'markdown';
+
     return Boolean(
       embeddable &&
         hasTimeRange(embeddable) &&
         // Saved searches don't listen to the time range from the container that is passed down to them so it
         // won't work without a fix.  For now, just leave them out.
         embeddable.type !== SEARCH_EMBEDDABLE_TYPE &&
-        !isInputControl
+        !isInputControl &&
+        !isMarkdown
     );
   }
 
