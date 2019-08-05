@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -e
 
 if [ -z "$VAULT_SECRET_ID" ]; then
   echo ""
