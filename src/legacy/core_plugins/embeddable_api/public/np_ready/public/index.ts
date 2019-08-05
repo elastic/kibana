@@ -20,7 +20,49 @@
 import { PluginInitializerContext } from 'src/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
-export * from './lib';
+export {
+  ADD_PANEL_ACTION_ID,
+  APPLY_FILTER_ACTION,
+  APPLY_FILTER_TRIGGER,
+  Action,
+  ActionContext,
+  Adapters,
+  AddPanelAction,
+  ApplyFilterAction,
+  CONTEXT_MENU_TRIGGER,
+  Container,
+  ContainerInput,
+  ContainerOutput,
+  EDIT_PANEL_ACTION_ID,
+  EditPanelAction,
+  Embeddable,
+  EmbeddableChildPanel,
+  EmbeddableChildPanelUiProps,
+  EmbeddableFactory,
+  EmbeddableFactoryNotFoundError,
+  EmbeddableInput,
+  EmbeddableInstanceConfiguration,
+  EmbeddableOutput,
+  EmbeddablePanel,
+  ErrorEmbeddable,
+  ExecuteTriggerActions,
+  GetActionsCompatibleWithTrigger,
+  GetEmbeddableFactories,
+  GetEmbeddableFactory,
+  IContainer,
+  IEmbeddable,
+  IncompatibleActionError,
+  OutputSpec,
+  PanelNotFoundError,
+  PanelState,
+  PropertySpec,
+  SavedObjectMetaData,
+  Trigger,
+  TriggerContext,
+  ViewMode,
+  isErrorEmbeddable,
+  openAddPanelFlyout,
+} from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);

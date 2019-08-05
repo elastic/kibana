@@ -66,7 +66,7 @@ async function creatHelloWorldContainerAndEmbeddable(
   setup.registerEmbeddableFactory(slowContactCardFactory.type, slowContactCardFactory);
   setup.registerEmbeddableFactory(helloWorldFactory.type, helloWorldFactory);
 
-  const container = new HelloWorldContainer(containerInput as any, {
+  const container = new HelloWorldContainer(containerInput, {
     getActions: start.getTriggerCompatibleActions,
     getEmbeddableFactory: start.getEmbeddableFactory,
     getAllEmbeddableFactories: start.getEmbeddableFactories,
