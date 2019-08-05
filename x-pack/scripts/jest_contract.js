@@ -22,6 +22,8 @@ process.argv.push('--runInBand');
 
 process.env.CONTRACT_ONLINE = 'true';
 process.env.SLAPSHOT_ONLINE = 'true';
+process.env.SLAPSHOT_RERUN_MESSAGE =
+  'run "node scripts/jest_contract.js --updateSnapshot" in the x-pack directory';
 
 require('../../src/setup_node_env');
 require('../../src/dev/jest/cli');
