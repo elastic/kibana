@@ -29,16 +29,14 @@ describe('readConfigFile()', () => {
   it('reads config from a file, returns an instance of Config class', async () => {
     const config = await readConfigFile(log, require.resolve('./fixtures/config.1'));
     expect(config).to.be.a(Config);
-    expect(config.get('testFiles')).to.eql([
-      'config.1'
-    ]);
+    expect(config.get('testFiles')).to.eql(['config.1']);
   });
 
   it('merges setting overrides into log', async () => {
     const config = await readConfigFile(log, require.resolve('./fixtures/config.1'), {
       screenshots: {
-        directory: 'foo.bar'
-      }
+        directory: 'foo.bar',
+      },
     });
 
     expect(config.get('screenshots.directory')).to.be('foo.bar');
@@ -46,10 +44,7 @@ describe('readConfigFile()', () => {
 
   it('supports loading config files from within config files', async () => {
     const config = await readConfigFile(log, require.resolve('./fixtures/config.2'));
-    expect(config.get('testFiles')).to.eql([
-      'config.1',
-      'config.2',
-    ]);
+    expect(config.get('testFiles')).to.eql(['config.1', 'config.2']);
   });
 
   it('throws if settings are invalid', async () => {

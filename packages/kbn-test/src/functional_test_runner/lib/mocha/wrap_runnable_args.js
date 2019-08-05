@@ -36,7 +36,7 @@ export function wrapRunnableArgsWithErrorHandler(fn, handler) {
           argumentsList[i] = wrapRunnableError(argumentsList[i], handler);
         }
       }
-    }
+    },
   });
 }
 
@@ -45,6 +45,6 @@ function wrapRunnableError(runnable, handler) {
     async handleError(target, thisArg, argumentsList, err) {
       await handler(err, thisArg.test);
       throw err;
-    }
+    },
   });
 }

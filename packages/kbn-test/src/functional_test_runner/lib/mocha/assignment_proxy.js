@@ -31,7 +31,7 @@ export function createAssignmentProxy(object, interceptor) {
 
     get(target, property) {
       if (property === 'revertProxiedAssignments') {
-        return function () {
+        return function() {
           for (const [property, value] of originalValues) {
             object[property] = value;
           }
@@ -39,6 +39,6 @@ export function createAssignmentProxy(object, interceptor) {
       }
 
       return Reflect.get(target, property);
-    }
+    },
   });
 }

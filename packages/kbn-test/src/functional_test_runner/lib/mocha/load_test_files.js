@@ -31,10 +31,18 @@ import { decorateMochaUi } from './decorate_mocha_ui';
  *  @param  {String} path
  *  @return {undefined} - mutates mocha, no return value
  */
-export const loadTestFiles = ({ mocha, log, lifecycle, providers, paths, excludePaths, updateBaselines }) => {
+export const loadTestFiles = ({
+  mocha,
+  log,
+  lifecycle,
+  providers,
+  paths,
+  excludePaths,
+  updateBaselines,
+}) => {
   const pendingExcludes = new Set(excludePaths.slice(0));
 
-  const innerLoadTestFile = (path) => {
+  const innerLoadTestFile = path => {
     if (typeof path !== 'string' || !isAbsolute(path)) {
       throw new TypeError('loadTestFile() only accepts absolute paths');
     }
@@ -49,9 +57,7 @@ export const loadTestFiles = ({ mocha, log, lifecycle, providers, paths, exclude
       log.verbose('Loading test file %s', path);
 
       const testModule = require(path); // eslint-disable-line import/no-dynamic-require
-      const testProvider = testModule.__esModule
-        ? testModule.default
-        : testModule;
+      const testProvider = testModule.__esModule ? testModule.default : testModule;
 
       runTestProvider(testProvider, path); // eslint-disable-line
     });
@@ -90,6 +96,11 @@ export const loadTestFiles = ({ mocha, log, lifecycle, providers, paths, exclude
   paths.forEach(innerLoadTestFile);
 
   if (pendingExcludes.size) {
-    throw new Error(`After loading all test files some exclude paths were not consumed:${['', ...pendingExcludes].join('\n  -')}`);
+    throw new Error(
+      `After loading all test files some exclude paths were not consumed:${[
+        '',
+        ...pendingExcludes,
+      ].join('\n  -')}`
+    );
   }
 };

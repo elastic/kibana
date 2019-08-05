@@ -25,26 +25,16 @@ export function writeEpilogue(log, stats) {
   log.write();
 
   // passes
-  log.write(
-    `${colors.pass('%d passing')} (%s)`,
-    stats.passes || 0,
-    ms(stats.duration)
-  );
+  log.write(`${colors.pass('%d passing')} (%s)`, stats.passes || 0, ms(stats.duration));
 
   // pending
   if (stats.pending) {
-    log.write(
-      colors.pending('%d pending'),
-      stats.pending
-    );
+    log.write(colors.pending('%d pending'), stats.pending);
   }
 
   // failures
   if (stats.failures) {
-    log.write(
-      '%d failing',
-      stats.failures
-    );
+    log.write('%d failing', stats.failures);
   }
 
   // footer

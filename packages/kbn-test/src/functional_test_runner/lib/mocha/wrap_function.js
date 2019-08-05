@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 /**
  *  Get handler that will intercept calls to `toString`
  *  on the function, since Function.prototype.toString()
@@ -59,7 +58,7 @@ export function wrapFunction(fn, hooks = {}) {
           hooks.after(target, thisArg, argumentsList);
         }
       }
-    }
+    },
   });
 }
 
@@ -94,6 +93,6 @@ export function wrapAsyncFunction(fn, hooks = {}) {
           await hooks.after(target, thisArg, argumentsList);
         }
       }
-    }
+    },
   });
 }
