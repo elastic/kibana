@@ -8,7 +8,7 @@ import turf from 'turf';
 import React from 'react';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
-import { LeftInnerJoin } from './joins/left_inner_join';
+import { InnerJoin } from './joins/inner_join';
 import {
   GEO_JSON_TYPE,
   FEATURE_ID_PROPERTY_NAME,
@@ -88,7 +88,7 @@ export class VectorLayer extends AbstractLayer {
     this._joins = [];
     if (options.layerDescriptor.joins) {
       options.layerDescriptor.joins.forEach((joinDescriptor) => {
-        this._joins.push(new LeftInnerJoin(joinDescriptor, this._source.getInspectorAdapters()));
+        this._joins.push(new InnerJoin(joinDescriptor, this._source.getInspectorAdapters()));
       });
     }
   }
@@ -159,9 +159,13 @@ export class VectorLayer extends AbstractLayer {
         })
       };
     }
+
+
+    const { tooltipContent, areResultsTrimmed } = this._source.getSourceTooltipContent(sourceDataRequest);
     return {
       icon: this._style.getIcon(),
-      tooltipContent: this._source.getSourceTooltipContent(sourceDataRequest)
+      tooltipContent: tooltipContent,
+      areResultsTrimmed: areResultsTrimmed
     };
 
   }
@@ -192,7 +196,12 @@ export class VectorLayer extends AbstractLayer {
     if (!featureCollection) {
       return null;
     }
-    const bbox = turf.bbox(featureCollection);
+
+    const visibleFeatures = featureCollection.features.filter(feature => feature.properties[FEATURE_VISIBLE_PROPERTY_NAME]);
+    const bbox = turf.bbox({
+      type: 'FeatureCollection',
+      features: visibleFeatures
+    });
     return {
       min_lon: bbox[0],
       min_lat: bbox[1],
@@ -202,11 +211,14 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async getBounds(dataFilters) {
-    if (this._source.isBoundsAware()) {
-      const searchFilters = this._getSearchFilters(dataFilters);
-      return await this._source.getBoundsForFilters(searchFilters);
+
+    const isStaticLayer = !this._source.isBoundsAware() || !this._source.isFilterByMapBounds();
+    if (isStaticLayer) {
+      return this._getBoundsBasedOnData();
     }
-    return this._getBoundsBasedOnData();
+
+    const searchFilters = this._getSearchFilters(dataFilters);
+    return await this._source.getBoundsForFilters(searchFilters);
   }
 
   async getLeftJoinFields() {
@@ -426,9 +438,9 @@ export class VectorLayer extends AbstractLayer {
       let isFeatureVisible = true;
       for (let j = 0; j < joinStates.length; j++) {
         const joinState = joinStates[j];
-        const leftInnerJoin = joinState.join;
-        const rightMetricFields = leftInnerJoin.getRightMetricFields();
-        const canJoinOnCurrent = leftInnerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap, rightMetricFields);
+        const InnerJoin = joinState.join;
+        const rightMetricFields = InnerJoin.getRightMetricFields();
+        const canJoinOnCurrent = InnerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap, rightMetricFields);
         isFeatureVisible = isFeatureVisible && canJoinOnCurrent;
       }
 
@@ -672,23 +684,34 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _getMbPointLayerId() {
-    return this.getId() + '_circle';
+    return this.makeMbLayerId('circle');
   }
 
   _getMbSymbolLayerId() {
-    return this.getId() + '_symbol';
+    return this.makeMbLayerId('symbol');
   }
 
   _getMbLineLayerId() {
-    return this.getId() + '_line';
+    return this.makeMbLayerId('line');
   }
 
   _getMbPolygonLayerId() {
-    return this.getId() + '_fill';
+    return this.makeMbLayerId('fill');
   }
 
   getMbLayerIds() {
     return [this._getMbPointLayerId(), this._getMbSymbolLayerId(), this._getMbLineLayerId(), this._getMbPolygonLayerId()];
+  }
+
+  ownsMbLayerId(mbLayerId) {
+    return this._getMbPointLayerId() === mbLayerId ||
+      this._getMbLineLayerId() === mbLayerId ||
+      this._getMbPolygonLayerId() === mbLayerId ||
+      this._getMbSymbolLayerId() === mbLayerId;
+  }
+
+  ownsMbSourceId(mbSourceId) {
+    return this.getId() === mbSourceId;
   }
 
   _addJoinsToSourceTooltips(tooltipsFromSource) {

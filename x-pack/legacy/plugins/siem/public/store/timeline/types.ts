@@ -22,4 +22,5 @@ export const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 export interface TimelineState {
   timelineById: TimelineById;
   autoSavedWarningMsg: AutoSavedWarningMsg;
+  showCallOutUnauthorizedMsg: boolean;
 }

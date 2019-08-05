@@ -5,16 +5,20 @@
  */
 
 import * as Boom from 'boom';
-import { Request } from 'hapi';
-import { enabledLanguageServers, LanguageServerDefinition } from '../lsp/language_servers';
-import { LspService } from '../lsp/lsp_service';
-import { CodeServerRouter } from '../security';
 
-export function installRoute(server: CodeServerRouter, lspService: LspService) {
-  const kibanaVersion = server.server.config().get('pkg.version') as string;
-  const status = (def: LanguageServerDefinition) => ({
+import { RequestFacade } from '../..';
+import { enabledLanguageServers, LanguageServerDefinition } from '../lsp/language_servers';
+import { CodeServerRouter } from '../security';
+import { CodeServices } from '../distributed/code_services';
+import { LspServiceDefinition } from '../distributed/apis';
+import { Endpoint } from '../distributed/resource_locator';
+
+export function installRoute(router: CodeServerRouter, codeServices: CodeServices) {
+  const lspService = codeServices.serviceFor(LspServiceDefinition);
+  const kibanaVersion = router.server.config().get('pkg.version') as string;
+  const status = (endpoint: Endpoint, def: LanguageServerDefinition) => ({
     name: def.name,
-    status: lspService.languageServerStatus(def.name),
+    status: lspService.languageServerStatus(endpoint, { langName: def.name }),
     version: def.version,
     build: def.build,
     languages: def.languages,
@@ -24,21 +28,23 @@ export function installRoute(server: CodeServerRouter, lspService: LspService) {
     pluginName: def.installationPluginName,
   });
 
-  server.route({
+  router.route({
     path: '/api/code/install',
-    handler() {
-      return enabledLanguageServers(server.server).map(status);
+    async handler(req: RequestFacade) {
+      const endpoint = await codeServices.locate(req, '');
+      return enabledLanguageServers(router.server).map(def => status(endpoint, def));
     },
     method: 'GET',
   });
 
-  server.route({
+  router.route({
     path: '/api/code/install/{name}',
-    handler(req: Request) {
+    async handler(req: RequestFacade) {
       const name = req.params.name;
-      const def = enabledLanguageServers(server.server).find(d => d.name === name);
+      const def = enabledLanguageServers(router.server).find(d => d.name === name);
+      const endpoint = await codeServices.locate(req, '');
       if (def) {
-        return status(def);
+        return status(endpoint, def);
       } else {
         return Boom.notFound(`language server ${name} not found.`);
       }

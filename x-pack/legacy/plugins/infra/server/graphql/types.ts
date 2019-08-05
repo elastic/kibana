@@ -1,6 +1,7 @@
 /* tslint:disable */
 import { InfraContext } from '../lib/infra_types';
 import { GraphQLResolveInfo } from 'graphql';
+import { FieldType } from 'ui/index_patterns';
 
 export type Resolver<Result, Parent = any, Context = any, Args = never> = (
   parent: Parent,
@@ -150,16 +151,8 @@ export interface InfraSourceStatus {
   indexFields: InfraIndexField[];
 }
 /** A descriptor of a field in an index */
-export interface InfraIndexField {
-  /** The name of the field */
-  name: string;
-  /** The type of the field's values as recognized by Kibana */
-  type: string;
-  /** Whether the field's values can be efficiently searched for */
-  searchable: boolean;
-  /** Whether the field's values can be aggregated */
-  aggregatable: boolean;
-}
+export interface InfraIndexField extends FieldType {}
+
 /** One metadata entry for a node. */
 export interface InfraNodeMetadata {
   id: string;
@@ -362,9 +355,14 @@ export interface InfraTimeKeyInput {
 
   tiebreaker: number;
 }
-
+/** A highlighting definition */
 export interface InfraLogEntryHighlightInput {
+  /** The query to highlight by */
   query: string;
+  /** The number of highlighted documents to include beyond the beginning of the interval */
+  countBefore: number;
+  /** The number of highlighted documents to include beyond the end of the interval */
+  countAfter: number;
 }
 
 export interface InfraTimerangeInput {
@@ -588,6 +586,7 @@ export enum InfraMetric {
   nginxRequestRate = 'nginxRequestRate',
   nginxActiveConnections = 'nginxActiveConnections',
   nginxRequestsPerConnection = 'nginxRequestsPerConnection',
+  custom = 'custom',
 }
 
 // ====================================================

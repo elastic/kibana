@@ -61,7 +61,7 @@ export {
 export {
   AuthenticationHandler,
   AuthHeaders,
-  AuthResultData,
+  AuthResultParams,
   AuthToolkit,
   GetAuthHeaders,
   KibanaRequest,
@@ -70,6 +70,8 @@ export {
   OnPreAuthToolkit,
   OnPostAuthHandler,
   OnPostAuthToolkit,
+  ResponseError,
+  ResponseErrorMeta,
   Router,
   RouteMethod,
   RouteConfigOptions,
@@ -103,6 +105,9 @@ export {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
   SavedObjectsMigrationVersion,
+  SavedObjectsRawDoc,
+  SavedObjectsSchema,
+  SavedObjectsSerializer,
   SavedObjectsService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
@@ -130,7 +135,6 @@ export interface CoreSetup {
     registerAuth: HttpServiceSetup['registerAuth'];
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
     basePath: HttpServiceSetup['basePath'];
-    createNewServer: HttpServiceSetup['createNewServer'];
     isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
   };
 }
