@@ -5,11 +5,10 @@
  */
 
 import expect from '@kbn/expect';
-import { ES_ARCHIVER_ACTION_ID } from './constants';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { ES_ARCHIVER_ACTION_ID, SPACE_1_ES_ARCHIVER_ACTION_ID } from './constants';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function findActionTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function findActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -31,6 +30,27 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
             data: [
               {
                 id: ES_ARCHIVER_ACTION_ID,
+                description: 'My action',
+              },
+            ],
+          });
+        });
+    });
+
+    it('should return 200 with individual responses in a space', async () => {
+      await supertest
+        .get(
+          '/s/space_1/api/action/_find?search=test.index-record&search_fields=actionTypeId&fields=description'
+        )
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            page: 1,
+            perPage: 20,
+            total: 1,
+            data: [
+              {
+                id: SPACE_1_ES_ARCHIVER_ACTION_ID,
                 description: 'My action',
               },
             ],

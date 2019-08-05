@@ -65,6 +65,16 @@ export function FieldNameIcon({ type }: Props) {
         ></span>
       );
 
+    case 'geo_shape':
+      return (
+        <span
+          aria-label={i18n.translate('common.ui.directives.fieldNameIcons.geoShapeFieldAriaLabel', {
+            defaultMessage: 'Geo Shape',
+          })}
+          className="dscField__icon kuiIcon fa-globe"
+        ></span>
+      );
+
     case 'ip':
       return (
         <span
