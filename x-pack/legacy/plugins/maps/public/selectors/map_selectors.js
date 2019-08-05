@@ -7,6 +7,7 @@
 import { createSelector } from 'reselect';
 import _ from 'lodash';
 import { TileLayer } from '../layers/tile_layer';
+import { VectorTileLayer } from '../layers/vector_tile_layer';
 import { VectorLayer } from '../layers/vector_layer';
 import { HeatmapLayer } from '../layers/heatmap_layer';
 import { ALL_SOURCES } from '../layers/sources/all_sources';
@@ -24,6 +25,8 @@ function createLayerInstance(layerDescriptor, inspectorAdapters) {
       return new TileLayer({ layerDescriptor, source, style });
     case VectorLayer.type:
       return new VectorLayer({ layerDescriptor, source, style });
+    case VectorTileLayer.type:
+      return new VectorTileLayer({ layerDescriptor, source, style });
     case HeatmapLayer.type:
       return new HeatmapLayer({ layerDescriptor, source, style });
     default:

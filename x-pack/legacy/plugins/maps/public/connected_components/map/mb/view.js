@@ -360,7 +360,9 @@ export class MBMapContainer extends React.Component {
           version: 8,
           sources: {},
           layers: [],
-          sprite: makiUrl
+          sprite: makiUrl,
+          //todo. ship with kibana
+          glyphs: "https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf"
         },
         scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false)
@@ -387,6 +389,7 @@ export class MBMapContainer extends React.Component {
   async _initializeMap() {
     try {
       this._mbMap = await this._createMbMapInstance();
+      window._mbMap = this._mbMap;
     } catch(error) {
       this.props.setMapInitError(error.message);
       return;

@@ -28,7 +28,7 @@ export class TMSService {
     return this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
   });
 
-  _getMbVectorStyleJson = _.once(async () => {
+  _getVectorStyleJson = _.once(async () => {
     const vectorUrl = this._getVectorStyleUrl();
     const url = this._proxyPath + vectorUrl;
     return this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
@@ -91,8 +91,8 @@ export class TMSService {
     return this._emsClient.extendUrlWithParams(directUrl);
   }
 
-  async _getMbVectorStyleJson() {
-    const tileJson = await this._getRasterStyleJson();
+  async getVectorStyleSheet() {
+    const tileJson = await this._getVectorStyleJson();
     console.log('vector json', tileJson);
     return tileJson;
   }

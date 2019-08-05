@@ -8,7 +8,7 @@ import _ from 'lodash';
 import chrome from 'ui/chrome';
 import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
-import { TileLayer } from '../../tile_layer';
+import { VectorTileLayer } from '../../vector_tile_layer';
 
 import { getEMSClient } from '../../../meta';
 import { EMSTMSCreateSourceEditor } from './create_source_editor';
@@ -89,14 +89,14 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   _createDefaultLayerDescriptor(options) {
-    return TileLayer.createDescriptor({
+    return VectorTileLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
       ...options
     });
   }
 
   createDefaultLayer(options) {
-    return new TileLayer({
+    return new VectorTileLayer({
       layerDescriptor: this._createDefaultLayerDescriptor(options),
       source: this
     });
@@ -135,9 +135,9 @@ export class EMSTMSSource extends AbstractTMSSource {
     return await emsTMSService.getUrlTemplate();
   }
 
-  async getMbVectorTileStyleSheet() {
+  async getVectorStyleSheet() {
     const emsTMSService = await this._getEMSTMSService();
-    return await emsTMSService.getMbVectorTileStyleSheet();
+    return await emsTMSService.getVectorStyleSheet();
   }
 
   _getEmsTileLayerId() {

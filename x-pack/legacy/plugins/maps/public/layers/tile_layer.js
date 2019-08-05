@@ -27,7 +27,7 @@ export class TileLayer extends AbstractLayer {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
-    const sourceDataRequest = this.getSourceDataRequest();
+    const sourceDataRequest = this.getVectorStyleSheet();
     if (sourceDataRequest) {//data is immmutable
       return;
     }
