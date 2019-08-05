@@ -8,7 +8,6 @@ import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox, EuiSideNav, EuiPopover } from '@elastic/eui';
-import { data } from '../../../../../../../src/legacy/core_plugins/data/public/setup';
 import { localStorage } from 'ui/storage/storage_service';
 import { IndexPatternPrivateState } from '../indexpattern';
 import { changeColumn } from '../state_helpers';
@@ -16,6 +15,7 @@ import { IndexPatternDimensionPanel, IndexPatternDimensionPanelProps } from './d
 import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
+import { DataPluginDependencies } from '..';
 
 jest.mock('../loader');
 jest.mock('../state_helpers');
@@ -113,8 +113,8 @@ describe('IndexPatternDimensionPanel', () => {
       columnId: 'col1',
       layerId: 'first',
       filterOperations: () => true,
-      dataPlugin: data,
       storage: localStorage,
+      dataPluginDependencies: (undefined as unknown) as DataPluginDependencies,
     };
 
     jest.clearAllMocks();
@@ -833,7 +833,7 @@ describe('IndexPatternDimensionPanel', () => {
       ).toBeFalsy();
     });
 
-    it('is not droppable if the dragged item has no type', () => {
+    it('is not droppable if the dragged item has no field', () => {
       wrapper = shallow(
         <IndexPatternDimensionPanel
           {...defaultProps}
@@ -860,7 +860,7 @@ describe('IndexPatternDimensionPanel', () => {
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
-            dragging: { type: 'number', name: 'bar' },
+            dragging: { indexPatternId: 'foo', field: { type: 'number', name: 'bar' } },
           }}
           state={dragDropState()}
           filterOperations={() => false}
@@ -882,7 +882,7 @@ describe('IndexPatternDimensionPanel', () => {
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
-            dragging: { type: 'number', name: 'bar' },
+            dragging: { field: { type: 'number', name: 'bar' }, indexPatternId: 'foo' },
           }}
           state={dragDropState()}
           filterOperations={op => op.dataType === 'number'}
@@ -898,8 +898,30 @@ describe('IndexPatternDimensionPanel', () => {
       ).toBeTruthy();
     });
 
+    it('is notdroppable if the field belongs to another index pattern', () => {
+      wrapper = shallow(
+        <IndexPatternDimensionPanel
+          {...defaultProps}
+          dragDropContext={{
+            ...dragDropContext,
+            dragging: { field: { type: 'number', name: 'bar' }, indexPatternId: 'foo2' },
+          }}
+          state={dragDropState()}
+          filterOperations={op => op.dataType === 'number'}
+          layerId="myLayer"
+        />
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="indexPattern-dropTarget"]')
+          .first()
+          .prop('droppable')
+      ).toBeFalsy();
+    });
+
     it('appends the dropped column when a field is dropped', () => {
-      const dragging = { type: 'number', name: 'bar' };
+      const dragging = { field: { type: 'number', name: 'bar' }, indexPatternId: 'foo' };
       const testState = dragDropState();
       wrapper = shallow(
         <IndexPatternDimensionPanel
@@ -944,7 +966,7 @@ describe('IndexPatternDimensionPanel', () => {
     });
 
     it('updates a column when a field is dropped', () => {
-      const dragging = { type: 'number', name: 'bar' };
+      const dragging = { field: { type: 'number', name: 'bar' }, indexPatternId: 'foo' };
       const testState = dragDropState();
       wrapper = shallow(
         <IndexPatternDimensionPanel
@@ -982,34 +1004,6 @@ describe('IndexPatternDimensionPanel', () => {
           }),
         },
       });
-    });
-
-    it('ignores drops of incompatible fields', () => {
-      const dragging = { type: 'number', name: 'baz' };
-      const testState = dragDropState();
-      wrapper = shallow(
-        <IndexPatternDimensionPanel
-          {...defaultProps}
-          dragDropContext={{
-            ...dragDropContext,
-            dragging,
-          }}
-          state={testState}
-          filterOperations={op => op.dataType === 'number'}
-          layerId="myLayer"
-        />
-      );
-
-      act(() => {
-        const onDrop = wrapper
-          .find('[data-test-subj="indexPattern-dropTarget"]')
-          .first()
-          .prop('onDrop') as DropHandler;
-
-        onDrop(dragging);
-      });
-
-      expect(setState).not.toBeCalled();
     });
   });
 });

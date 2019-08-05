@@ -6,6 +6,7 @@
 
 import { CloneWorkerResult, Repository } from '../../model';
 import { EsClient, Esqueue } from '../lib/esqueue';
+import { DiskWatermarkService } from '../disk_watermark';
 import { GitOperations } from '../git_operations';
 import { Logger } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
@@ -18,18 +19,21 @@ export class UpdateWorker extends AbstractGitWorker {
   public id: string = 'update';
 
   constructor(
-    queue: Esqueue,
+    protected readonly queue: Esqueue,
     protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly serverOptions: ServerOptions,
     protected readonly gitOps: GitOperations,
     protected readonly repoServiceFactory: RepositoryServiceFactory,
-    private readonly cancellationService: CancellationSerivce
+    private readonly cancellationService: CancellationSerivce,
+    protected readonly watermarkService: DiskWatermarkService
   ) {
-    super(queue, log, client, serverOptions, gitOps);
+    super(queue, log, client, serverOptions, gitOps, watermarkService);
   }
 
   public async executeJob(job: Job) {
+    await super.executeJob(job);
+
     const { payload, cancellationToken } = job;
     const repo: Repository = payload;
     this.log.info(`Execute update job for ${repo.uri}`);

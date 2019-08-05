@@ -10,12 +10,12 @@ import { act } from 'react-dom/test-utils';
 import { filterRatioOperation } from './filter_ratio';
 import { FilterRatioIndexPatternColumn, IndexPatternPrivateState } from '../indexpattern';
 import { Storage } from 'ui/storage';
-import { DataSetup } from '../../../../../../../src/legacy/core_plugins/data/public';
+import { DataPluginDependencies } from '../plugin';
 
 describe('filter_ratio', () => {
   let state: IndexPatternPrivateState;
   let storageMock: Storage;
-  let dataMock: DataSetup;
+  let mockedDependencies: DataPluginDependencies;
   const InlineOptions = filterRatioOperation.paramEditor!;
 
   class MockQueryBarInput {
@@ -61,9 +61,9 @@ describe('filter_ratio', () => {
     };
 
     storageMock = {} as Storage;
-    dataMock = ({
-      query: { ui: { QueryBarInput: MockQueryBarInput } },
-    } as unknown) as DataSetup;
+    mockedDependencies = ({
+      components: { QueryBarInput: MockQueryBarInput },
+    } as unknown) as DataPluginDependencies;
   });
 
   describe('buildColumn', () => {
@@ -113,7 +113,7 @@ describe('filter_ratio', () => {
             setState={jest.fn()}
             columnId="col1"
             storage={storageMock}
-            dataPlugin={dataMock}
+            dataPluginDependencies={mockedDependencies}
           />
         );
       }).not.toThrow();
@@ -127,7 +127,7 @@ describe('filter_ratio', () => {
           setState={jest.fn()}
           columnId="col1"
           storage={storageMock}
-          dataPlugin={dataMock}
+          dataPluginDependencies={mockedDependencies}
         />
       );
 
@@ -144,7 +144,7 @@ describe('filter_ratio', () => {
           setState={setState}
           columnId="col1"
           storage={storageMock}
-          dataPlugin={dataMock}
+          dataPluginDependencies={mockedDependencies}
         />
       );
 
@@ -182,7 +182,7 @@ describe('filter_ratio', () => {
           setState={setState}
           columnId="col1"
           storage={storageMock}
-          dataPlugin={dataMock}
+          dataPluginDependencies={mockedDependencies}
         />
       );
 

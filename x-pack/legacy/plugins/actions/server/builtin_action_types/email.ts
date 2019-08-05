@@ -15,14 +15,10 @@ const PORT_MAX = 256 * 256 - 1;
 
 // config definition
 
-const unencryptedConfigProperties = ['service', 'host', 'port', 'secure', 'from'];
-
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 const ConfigSchema = schema.object(
   {
-    user: schema.string(),
-    password: schema.string(),
     service: nullableType(schema.string()),
     host: nullableType(schema.string()),
     port: nullableType(schema.number({ min: 1, max: PORT_MAX })),
@@ -60,6 +56,15 @@ function validateConfig(configObject: any): string | void {
   }
 }
 
+// secrets definition
+
+export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
+
+const SecretsSchema = schema.object({
+  user: schema.string(),
+  password: schema.string(),
+});
+
 // params definition
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
@@ -94,9 +99,9 @@ function validateParams(paramsObject: any): string | void {
 export const actionType: ActionType = {
   id: '.email',
   name: 'email',
-  unencryptedAttributes: unencryptedConfigProperties,
   validate: {
     config: ConfigSchema,
+    secrets: SecretsSchema,
     params: ParamsSchema,
   },
   executor,
@@ -107,12 +112,13 @@ export const actionType: ActionType = {
 async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
   const id = execOptions.id;
   const config = execOptions.config as ActionTypeConfigType;
+  const secrets = execOptions.secrets as ActionTypeSecretsType;
   const params = execOptions.params as ActionParamsType;
   const services = execOptions.services;
 
   const transport: any = {
-    user: config.user,
-    password: config.password,
+    user: secrets.user,
+    password: secrets.password,
   };
 
   if (config.service !== null) {

@@ -90,32 +90,32 @@ export function EditorFrame(props: EditorFrameProps) {
 
   const framePublicAPI: FramePublicAPI = {
     datasourceLayers,
-    addNewLayer: () => {
+
+    addNewLayer() {
       const newLayerId = generateId();
 
-      const newState = props.datasourceMap[state.activeDatasourceId!].insertLayer(
-        state.datasourceStates[state.activeDatasourceId!].state,
-        newLayerId
-      );
-
       dispatch({
-        type: 'UPDATE_DATASOURCE_STATE',
+        type: 'UPDATE_LAYER',
         datasourceId: state.activeDatasourceId!,
-        newState,
+        layerId: newLayerId,
+        updater: props.datasourceMap[state.activeDatasourceId!].insertLayer,
       });
 
       return newLayerId;
     },
-    removeLayer: (layerId: string) => {
-      const newState = props.datasourceMap[state.activeDatasourceId!].removeLayer(
-        state.datasourceStates[state.activeDatasourceId!].state,
-        layerId
-      );
-
-      dispatch({
-        type: 'UPDATE_DATASOURCE_STATE',
-        datasourceId: state.activeDatasourceId!,
-        newState,
+    removeLayers: (layerIds: string[]) => {
+      layerIds.forEach(layerId => {
+        const layerDatasourceId = Object.entries(props.datasourceMap).find(
+          ([datasourceId, datasource]) =>
+            state.datasourceStates[datasourceId] &&
+            datasource.getLayers(state.datasourceStates[datasourceId].state).includes(layerId)
+        )![0];
+        dispatch({
+          type: 'UPDATE_LAYER',
+          layerId,
+          datasourceId: layerDatasourceId,
+          updater: props.datasourceMap[layerDatasourceId].removeLayer,
+        });
       });
     },
   };

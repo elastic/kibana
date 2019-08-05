@@ -9,6 +9,7 @@ import { dateHistogramOperation } from './date_histogram';
 import { shallow } from 'enzyme';
 import { DateHistogramIndexPatternColumn, IndexPatternPrivateState } from '../indexpattern';
 import { EuiRange } from '@elastic/eui';
+import { DataPluginDependencies } from '..';
 
 describe('date_histogram', () => {
   let state: IndexPatternPrivateState;
@@ -149,7 +150,13 @@ describe('date_histogram', () => {
     it('should render current value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       expect(instance.find(EuiRange).prop('value')).toEqual(1);
@@ -158,7 +165,13 @@ describe('date_histogram', () => {
     it('should render current value for other index pattern', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col2" layerId="second" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col2"
+          layerId="second"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       expect(instance.find(EuiRange).prop('value')).toEqual(2);
@@ -167,7 +180,13 @@ describe('date_histogram', () => {
     it('should update state with the interval value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       instance.find(EuiRange).prop('onChange')!({
@@ -222,6 +241,7 @@ describe('date_histogram', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
         />
       );
 

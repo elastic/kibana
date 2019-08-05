@@ -29,8 +29,8 @@ export class AppPlugin {
     const editorFrame = editorFrameSetup();
 
     editorFrame.registerDatasource('indexpattern', indexPattern);
-    editorFrame.registerVisualization('xy', xyVisualization);
-    editorFrame.registerVisualization('datatable', datatableVisualization);
+    editorFrame.registerVisualization(xyVisualization);
+    editorFrame.registerVisualization(datatableVisualization);
 
     this.instance = editorFrame.createInstance({});
 

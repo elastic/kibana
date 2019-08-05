@@ -60,10 +60,17 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       ],
     },
   }),
-  paramEditor: ({ state, setState, columnId: currentColumnId, dataPlugin, storage, layerId }) => {
+  paramEditor: ({
+    state,
+    setState,
+    columnId: currentColumnId,
+    dataPluginDependencies: pluginDependencies,
+    storage,
+    layerId,
+  }) => {
     const [hasDenominator, setDenominator] = useState(false);
 
-    const { QueryBarInput } = dataPlugin!.query.ui;
+    const { QueryBarInput } = pluginDependencies.components;
 
     return (
       <div>

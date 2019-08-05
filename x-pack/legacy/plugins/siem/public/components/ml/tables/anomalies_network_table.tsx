@@ -63,9 +63,9 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
       return (
         <Panel loading={{ loading }}>
           <HeaderPanel
-            subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${
-              i18n.ANOMALIES
-            }`}
+            subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
+              pagination.totalItemCount
+            )}`}
             title={i18n.ANOMALIES}
             tooltip={i18n.TOOLTIP}
           />

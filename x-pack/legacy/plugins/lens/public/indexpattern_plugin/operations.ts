@@ -6,7 +6,6 @@
 
 import _ from 'lodash';
 import { Storage } from 'ui/storage';
-import { DataSetup } from '../../../../../../src/legacy/core_plugins/data/public';
 import { DimensionPriority, OperationMetadata } from '../types';
 import {
   IndexPatternColumn,
@@ -26,6 +25,7 @@ import {
 import { dateHistogramOperation } from './operation_definitions/date_histogram';
 import { countOperation } from './operation_definitions/count';
 import { filterRatioOperation } from './operation_definitions/filter_ratio';
+import { DataPluginDependencies } from './plugin';
 
 type PossibleOperationDefinition<
   U extends IndexPatternColumn = IndexPatternColumn
@@ -63,7 +63,7 @@ export interface ParamEditorProps {
   setState: (newState: IndexPatternPrivateState) => void;
   columnId: string;
   layerId: string;
-  dataPlugin?: DataSetup;
+  dataPluginDependencies: DataPluginDependencies;
   storage?: Storage;
 }
 

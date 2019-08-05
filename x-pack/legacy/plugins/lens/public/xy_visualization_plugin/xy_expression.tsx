@@ -22,9 +22,8 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, IconType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LensMultiTable } from '../types';
-import { XYArgs, SeriesType } from './types';
+import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { RenderFunction } from '../interpreter_types';
-import { chartTypeIcons } from './xy_config_panel';
 
 export interface XYChartProps {
   data: LensMultiTable;
@@ -97,7 +96,7 @@ export const xyChartRenderer: RenderFunction<XYChartProps> = {
 };
 
 function getIconForSeriesType(seriesType: SeriesType): IconType {
-  return chartTypeIcons.find(chartTypeIcon => chartTypeIcon.id === seriesType)!.iconType;
+  return visualizationTypes.find(c => c.id === seriesType)!.icon || 'empty';
 }
 
 export function XYChart({ data, args }: XYChartProps) {
