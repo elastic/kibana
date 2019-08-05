@@ -423,15 +423,11 @@ export class SavedObjectsClient {
   /**
    * To ensure we don't break backwards compatibility, savedObjectsFetch keeps
    * the old kfetch error format of `{res: {status: number}}` whereas `http.fetch`
-   * uses `{response: {status: number}}`.
-   *
-   * TODO: Introduce error helper functions to make it easier to change
-   * the internal shape of errors.
+   * uses `{response: {status: number}}`
    */
   private savedObjectsFetch(path: string, { method, query, body }: HttpFetchOptions) {
     return this.http.fetch(path, { method, query, body }).catch(err => {
       const kfetchError = Object.assign(err, { res: err.response });
-      delete kfetchError.response;
       return Promise.reject(kfetchError);
     });
   }
