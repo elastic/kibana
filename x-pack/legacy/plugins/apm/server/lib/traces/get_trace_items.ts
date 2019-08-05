@@ -17,10 +17,9 @@ import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
-const MAX_ITEMS_RETURNED = 1000;
-
 export async function getTraceItems(traceId: string, setup: Setup) {
   const { start, end, client, config } = setup;
+  const maxTraceItems = config.get<number>('apm_oss.maxTraceItems');
 
   const params: SearchParams = {
     index: [
@@ -28,7 +27,7 @@ export async function getTraceItems(traceId: string, setup: Setup) {
       config.get('apm_oss.transactionIndices')
     ],
     body: {
-      size: MAX_ITEMS_RETURNED,
+      size: maxTraceItems,
       query: {
         bool: {
           filter: [
@@ -53,6 +52,6 @@ export async function getTraceItems(traceId: string, setup: Setup) {
 
   return {
     items: resp.hits.hits.map(hit => hit._source),
-    exceedsMax: resp.hits.total > MAX_ITEMS_RETURNED
+    exceedsMax: resp.hits.total > maxTraceItems
   };
 }
