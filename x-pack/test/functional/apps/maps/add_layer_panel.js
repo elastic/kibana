@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
         expect(panelOpen).to.be(true);
       });
 
-      it('should close on clicking "Cancel"', async () => {
+      it.skip('should close on clicking "Cancel"', async () => {
         await PageObjects.maps.cancelLayerAdd();
         const panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
         expect(panelOpen).to.be(false);
