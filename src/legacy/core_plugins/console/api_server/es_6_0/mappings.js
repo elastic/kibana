@@ -100,7 +100,12 @@ export default function (api) {
           boost: 1.0,
           null_value: '',
           doc_values: BOOLEAN,
+          eager_global_ordinals: BOOLEAN,
           norms: BOOLEAN,
+
+          // Not actually available in V6 of ES. Add when updating the autocompletion system.
+          // index_phrases: BOOLEAN,
+          // index_prefixes: { min_chars, max_chars },
 
           index_options: {
             __one_of: ['docs', 'freqs', 'positions'],
