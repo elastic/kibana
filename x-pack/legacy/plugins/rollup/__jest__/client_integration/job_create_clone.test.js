@@ -51,6 +51,8 @@ describe('Cloning a rollup job through create job wizard', () => {
   });
 
   it('should have fields correctly pre-populated', async () => {
+    // Step 1: Logistics
+
     expect(find('rollupJobName').props().value).toBe(jobConfig.id + '-copy');
     expect(form.getErrorsMessages()).toEqual([]);
     // Advanced cron should automatically show when we are cloning a job
@@ -68,11 +70,15 @@ describe('Cloning a rollup job through create job wizard', () => {
 
     await actions.clickNextStep();
 
+    // Step 2: Date histogram
+
     expect(find('rollupJobCreateDateFieldSelect').props().value).toBe(dateHistogram.field);
     expect(find('rollupJobInterval').props().value).toBe(dateHistogram.calendar_interval);
     expect(find('rollupJobCreateTimeZoneSelect').props().value).toBe(dateHistogram.time_zone);
 
     await actions.clickNextStep();
+
+    // Step 3: Terms
 
     const { tableCellsValues: tableCellValuesTerms } = table.getMetaData('rollupJobTermsFieldList');
     const {
@@ -87,6 +93,8 @@ describe('Cloning a rollup job through create job wizard', () => {
     }
 
     await actions.clickNextStep();
+
+    // Step 4: Histogram
 
     const { tableCellsValues: tableCellValuesHisto } = table.getMetaData(
       'rollupJobHistogramFieldList'
@@ -104,6 +112,8 @@ describe('Cloning a rollup job through create job wizard', () => {
     }
 
     await actions.clickNextStep();
+
+    // Step 5: Metrics
 
     const { metrics } = jobConfig;
     const { rows: metricsRows } = table.getMetaData('rollupJobMetricsFieldList');
