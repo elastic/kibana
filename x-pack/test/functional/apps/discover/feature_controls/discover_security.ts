@@ -5,10 +5,9 @@
  */
 import expect from '@kbn/expect';
 import { SecurityService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security: SecurityService = getService('security');
   const globalNav = getService('globalNav');
@@ -92,7 +91,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it('shows save button', async () => {
         await PageObjects.common.navigateToApp('discover');
-        await testSubjects.existOrFail('discoverSaveButton', 20000);
+        await testSubjects.existOrFail('discoverSaveButton', { timeout: 20000 });
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -170,7 +169,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it(`doesn't show save button`, async () => {
         await PageObjects.common.navigateToApp('discover');
-        await testSubjects.existOrFail('discoverNewButton', 10000);
+        await testSubjects.existOrFail('discoverNewButton', { timeout: 10000 });
         await testSubjects.missingOrFail('discoverSaveButton');
       });
 
@@ -294,7 +293,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToUrl('discover', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
     });
   });

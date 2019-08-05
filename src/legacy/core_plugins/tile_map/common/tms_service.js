@@ -21,12 +21,17 @@ import _ from 'lodash';
 import { ORIGIN } from './origin';
 
 export class TMSService {
-  _getTileJson = _.once(
-    async url => this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url)));
 
-  constructor(config,  emsClient) {
+  _getRasterStyleJson = _.once(async () => {
+    const rasterUrl = this._getRasterStyleUrl();
+    const url = this._proxyPath + rasterUrl;
+    return this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
+  });
+
+  constructor(config, emsClient, proxyPath) {
     this._config = config;
     this._emsClient = emsClient;
+    this._proxyPath = proxyPath;
   }
 
   _getRasterFormats(locale) {
@@ -35,7 +40,7 @@ export class TMSService {
     });
   }
 
-  _getDefaultStyleUrl() {
+  _getRasterStyleUrl() {
     let rasterFormats = this._getRasterFormats(this._emsClient.getLocale());
     if (!rasterFormats.length) {//fallback to default locale
       rasterFormats = this._getRasterFormats(this._emsClient.getDefaultLocale());
@@ -49,10 +54,14 @@ export class TMSService {
     }
   }
 
+  async getDefaultRasterStyle() {
+    return await this._getRasterStyleJson();
+  }
+
   async getUrlTemplate() {
-    const defaultStyle = this._getDefaultStyleUrl();
-    const tileJson = await this._getTileJson(defaultStyle);
-    return this._emsClient.extendUrlWithParams(tileJson.tiles[0]);
+    const tileJson = await this._getRasterStyleJson();
+    const directUrl = this._proxyPath + tileJson.tiles[0];
+    return this._emsClient.extendUrlWithParams(directUrl);
   }
 
   getDisplayName() {
@@ -84,19 +93,18 @@ export class TMSService {
     const attributions = this._config.attribution.map(attribution => {
       const url = this._emsClient.getValueInLanguage(attribution.url);
       const label = this._emsClient.getValueInLanguage(attribution.label);
-      const markdown = `[${label}](${url})`;
-      return markdown;
+      return `[${label}](${url})`;
     });
     return attributions.join('|');
   }
 
   async getMinZoom() {
-    const tileJson = await this._getTileJson(this._getDefaultStyleUrl());
+    const tileJson = await this._getRasterStyleJson();
     return tileJson.minzoom;
   }
 
   async getMaxZoom() {
-    const tileJson = await this._getTileJson(this._getDefaultStyleUrl());
+    const tileJson = await this._getRasterStyleJson();
     return tileJson.maxzoom;
   }
 
@@ -111,5 +119,4 @@ export class TMSService {
   getOrigin() {
     return ORIGIN.EMS;
   }
-
 }

@@ -7,6 +7,8 @@
 import { KpiNetworkData } from '../../../../graphql/types';
 import { StatItems } from '../../../stat_items';
 
+export const mockNarrowDateRange = jest.fn();
+
 export const mockData: { KpiNetwork: KpiNetworkData } = {
   KpiNetwork: {
     networkEvents: 16,
@@ -216,4 +218,5 @@ export const mockEnableChartsData = {
   id: 'statItem',
   index: 4,
   to: 1560837600000,
+  narrowDateRange: mockNarrowDateRange,
 };

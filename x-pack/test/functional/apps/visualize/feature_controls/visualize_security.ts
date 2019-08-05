@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects([
@@ -82,7 +81,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await testSubjects.existOrFail('visualizeLandingPage', 10000);
+        await testSubjects.existOrFail('visualizeLandingPage', { timeout: 10000 });
         await testSubjects.existOrFail('newItemButton');
       });
 
@@ -95,7 +94,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('visualizationLoader', 10000);
+        await testSubjects.existOrFail('visualizationLoader', { timeout: 10000 });
       });
 
       it('can save existing Visualization', async () => {
@@ -103,7 +102,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('visualizeSaveButton', 10000);
+        await testSubjects.existOrFail('visualizeSaveButton', { timeout: 10000 });
       });
 
       it('Embed code shows create short-url button', async () => {
@@ -183,7 +182,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await testSubjects.existOrFail('visualizeLandingPage', 10000);
+        await testSubjects.existOrFail('visualizeLandingPage', { timeout: 10000 });
         await testSubjects.existOrFail('newItemButton');
       });
 
@@ -196,7 +195,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('visualizationLoader', 10000);
+        await testSubjects.existOrFail('visualizationLoader', { timeout: 10000 });
       });
 
       it(`can't save existing Visualization`, async () => {
@@ -204,8 +203,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('shareTopNavButton', 10000);
-        await testSubjects.missingOrFail('visualizeSaveButton', 10000);
+        await testSubjects.existOrFail('shareTopNavButton', { timeout: 10000 });
+        await testSubjects.missingOrFail('visualizeSaveButton', { timeout: 10000 });
       });
 
       it(`Embed Code doesn't show create short-url button`, async () => {
@@ -280,7 +279,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
 
       it(`edit page redirects to home page`, async () => {
@@ -288,7 +287,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
     });
   });

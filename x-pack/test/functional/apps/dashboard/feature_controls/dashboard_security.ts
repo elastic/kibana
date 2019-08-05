@@ -10,10 +10,9 @@ import {
   DashboardConstants,
 } from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
 import { SecurityService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security: SecurityService = getService('security');
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector', 'share']);
@@ -92,7 +91,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('dashboardLandingPage', 10000);
+        await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
         await testSubjects.existOrFail('newItemButton');
       });
 
@@ -109,7 +108,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('emptyDashboardAddPanelButton', 10000);
+        await testSubjects.existOrFail('emptyDashboardAddPanelButton', { timeout: 10000 });
       });
 
       it(`can view existing Dashboard`, async () => {
@@ -117,7 +116,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('embeddablePanelHeading-APie', 10000);
+        await testSubjects.existOrFail('embeddablePanelHeading-APie', { timeout: 10000 });
       });
 
       it(`does not allow a visualization to be edited`, async () => {
@@ -263,7 +262,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('dashboardLandingPage', 10000);
+        await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
         await testSubjects.missingOrFail('newItemButton');
       });
 
@@ -280,7 +279,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', 20000);
+        await testSubjects.existOrFail('homeApp', { timeout: 20000 });
       });
 
       it(`can view existing Dashboard`, async () => {
@@ -288,7 +287,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('embeddablePanelHeading-APie', 10000);
+        await testSubjects.existOrFail('embeddablePanelHeading-APie', { timeout: 10000 });
       });
 
       it(`Permalinks doesn't show create short-url button`, async () => {
@@ -367,7 +366,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
 
       it(`create new dashboard redirects to the home page`, async () => {
@@ -379,7 +378,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', 20000);
+        await testSubjects.existOrFail('homeApp', { timeout: 20000 });
       });
 
       it(`edit dashboard for object which doesn't exist redirects to the home page`, async () => {
@@ -391,7 +390,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
 
       it(`edit dashboard for object which exists redirects to the home page`, async () => {
@@ -399,7 +398,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
     });
   });

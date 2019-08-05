@@ -24,6 +24,7 @@ import {
   getTheme,
   ChartSeriesConfigs,
   browserTimezone,
+  chartDefaultSettings,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
@@ -68,11 +69,14 @@ export const AreaChartBaseComponent = React.memo<{
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const xAxisId = getAxisId(`group-${data[0].key}-x`);
   const yAxisId = getAxisId(`group-${data[0].key}-y`);
-
+  const settings = {
+    ...chartDefaultSettings,
+    ...get('configs.settings', chartConfigs),
+  };
   return chartConfigs.width && chartConfigs.height ? (
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
       <Chart>
-        <Settings theme={getTheme()} />
+        <Settings {...settings} theme={getTheme()} />
         {data.map(series => {
           const seriesKey = series.key;
           const seriesSpecId = getSpecId(seriesKey);
