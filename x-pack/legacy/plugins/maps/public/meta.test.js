@@ -5,7 +5,7 @@
  */
 
 import {
-  getEMSDataSources
+  getEMSClient
 } from './meta';
 
 
@@ -55,10 +55,18 @@ describe('default use without proxy', () => {
 
   it('should return absolute urls', async () => {
 
+    const emsClient = getEMSClient();
+    const tmsServices = await emsClient.getTMSServices();
 
-    const resources = await getEMSDataSources();
-    expect(resources.ems.tms[0].url.startsWith('https://raster-style.foobar')).toBe(true);
-    expect(resources.ems.file[0].url.startsWith('https://vector-staging.maps.elastic.co/files')).toBe(true);
-    expect(resources.ems.file[1].url.startsWith('https://vector-staging.maps.elastic.co/files')).toBe(true);
+    const rasterUrl = await tmsServices[0].getUrlTemplate();
+    expect(rasterUrl.startsWith('https://raster-style.foobar')).toBe(true);
+
+    const fileLayers = await emsClient.getFileLayers();
+    const file1Url = fileLayers[0].getDefaultFormatUrl();
+
+    expect(file1Url.startsWith('https://vector-staging.maps.elastic.co/files')).toBe(true);
+
+    const file2Url = fileLayers[1].getDefaultFormatUrl();
+    expect(file2Url.startsWith('https://vector-staging.maps.elastic.co/files')).toBe(true);
   });
 });

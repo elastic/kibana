@@ -6,10 +6,9 @@
 
 import expect from '@kbn/expect';
 import { ES_ARCHIVER_ACTION_ID, SPACE_1_ES_ARCHIVER_ACTION_ID } from './constants';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function updateActionTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function updateActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -34,6 +33,11 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .then((resp: any) => {
           expect(resp.body).to.eql({
             id: ES_ARCHIVER_ACTION_ID,
+            actionTypeId: 'test.index-record',
+            description: 'My action updated',
+            config: {
+              unencrypted: `This value shouldn't get encrypted`,
+            },
           });
         });
     });
@@ -55,6 +59,11 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .then((resp: any) => {
           expect(resp.body).to.eql({
             id: SPACE_1_ES_ARCHIVER_ACTION_ID,
+            actionTypeId: 'test.index-record',
+            description: 'My action updated',
+            config: {
+              unencrypted: `This value shouldn't get encrypted`,
+            },
           });
         });
     });
@@ -111,6 +120,11 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .expect(200);
       expect(updatedAction).to.eql({
         id: ES_ARCHIVER_ACTION_ID,
+        actionTypeId: 'test.index-record',
+        description: 'My action updated',
+        config: {
+          unencrypted: `This value shouldn't get encrypted`,
+        },
       });
       const { body: fetchedAction } = await supertest
         .get(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
