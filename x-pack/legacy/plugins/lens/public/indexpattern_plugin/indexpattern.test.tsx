@@ -607,7 +607,6 @@ describe('IndexPattern Data Source', () => {
               columns: {
                 col1: {
                   dataType: 'string',
-                  indexPatternId: '1',
                   isBucketed: true,
                   sourceField: 'source',
                   label: 'values of source',
@@ -620,7 +619,6 @@ describe('IndexPattern Data Source', () => {
                 },
                 col2: {
                   dataType: 'number',
-                  indexPatternId: '1',
                   isBucketed: false,
                   sourceField: 'bytes',
                   label: 'Min of bytes',
@@ -644,7 +642,6 @@ describe('IndexPattern Data Source', () => {
                 columns: {
                   col1: {
                     dataType: 'date',
-                    indexPatternId: '1',
                     isBucketed: true,
                     sourceField: 'timestamp',
                     label: 'date histogram of timestamp',
@@ -655,7 +652,6 @@ describe('IndexPattern Data Source', () => {
                   },
                   col2: {
                     dataType: 'number',
-                    indexPatternId: '1',
                     isBucketed: false,
                     sourceField: 'bytes',
                     label: 'Min of bytes',
