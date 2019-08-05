@@ -6,7 +6,7 @@
 
 import queryString from 'querystring';
 import { Action } from 'redux-actions';
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 import { TextDocumentPositionParams } from 'vscode-languageserver';
 import Url from 'url';
 import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
@@ -56,9 +56,7 @@ function* handleReferences(action: Action<TextDocumentPositionParams>) {
 }
 
 function requestFindReferences(params: TextDocumentPositionParams) {
-  return kfetch({
-    pathname: `/api/code/lsp/findReferences`,
-    method: 'POST',
+  return npStart.core.http.post(`/api/code/lsp/findReferences`, {
     body: JSON.stringify(params),
   });
 }
@@ -130,7 +128,7 @@ function* handleFile(repoUri: string, file: string, revision: string) {
 }
 
 function fetchRepo(repoUri: string) {
-  return kfetch({ pathname: `/api/code/repo/${repoUri}` });
+  return npStart.core.http.get(`/api/code/repo/${repoUri}`);
 }
 
 function* loadRepoSaga(action: any) {
