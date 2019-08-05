@@ -289,7 +289,7 @@ app.controller('graphuiPlugin', function (
 
   $scope.hideAllConfigPanels = function () {
     $scope.selectedFieldConfig = null;
-    $scope.kbnTopNav.close();
+    $scope.closeMenus();
   };
 
   $scope.setAllFieldStatesToDefault = function () {
@@ -330,10 +330,9 @@ app.controller('graphuiPlugin', function (
 
     // Check if user is toggling off an already-open config panel for the current field
     if ($scope.currentKey === 'fieldConfig' && field === $scope.selectedFieldConfig) {
-      $scope.hideAllConfigPanels();
+      $scope.selectedFieldConfig = undefined;
       return;
     }
-    $scope.hideAllConfigPanels();
     $scope.selectedFieldConfig = field;
     $scope.currentKey = 'fieldConfig';
   };
@@ -498,14 +497,10 @@ app.controller('graphuiPlugin', function (
   $scope.clearWorkspace = function () {
     $scope.workspace = null;
     $scope.detail = null;
-    if ($scope.kbnTopNav) {
-      $scope.kbnTopNav.close();
-    }
   };
 
   $scope.toggleShowAdvancedFieldsConfig = function () {
     if ($scope.currentKey !== 'fields') {
-      $scope.kbnTopNav.close();
       $scope.currentKey = 'fields';
       //Default the selected field
       $scope.selectedField = null;
@@ -516,7 +511,7 @@ app.controller('graphuiPlugin', function (
         $scope.selectedField = $scope.filteredFields[0];
       }
     } else {
-      $scope.hideAllConfigPanels();
+      $scope.currentKey = undefined;
     }
   };
 
@@ -1242,7 +1237,7 @@ app.controller('graphuiPlugin', function (
 
 
     $scope.savedWorkspace.save().then(function (id) {
-      $scope.kbnTopNav.close('save');
+      $scope.closeMenus();
       $scope.userHasConfirmedSaveWorkspaceData = false; //reset flag
       if (id) {
         const title = i18n.translate('xpack.graph.saveWorkspace.successNotificationTitle', {
