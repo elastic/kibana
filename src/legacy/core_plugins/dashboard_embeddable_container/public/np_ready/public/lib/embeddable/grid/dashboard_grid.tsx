@@ -35,11 +35,7 @@ import {
 } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { CoreStart } from 'src/core/public';
 import { ViewMode, EmbeddableChildPanel } from '../../embeddable_api';
-import {
-  DASHBOARD_GRID_COLUMN_COUNT,
-  DASHBOARD_GRID_HEIGHT,
-  DashboardConstants,
-} from '../dashboard_constants';
+import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
 import { DashboardContainer } from '../dashboard_container';
 import { DashboardPanelState, GridData } from '../types';
 import { Start as InspectorStartContract } from '../../../../../../../../../plugins/inspector/public';
@@ -128,6 +124,7 @@ export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
+  landingPagePath: string;
 }
 
 interface State {
@@ -182,7 +179,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         }),
         text: error.message,
       });
-      window.location.hash = DashboardConstants.LANDING_PAGE_PATH;
+      window.location.hash = this.props.landingPagePath;
     }
     this.setState({
       layout,

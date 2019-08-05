@@ -39,7 +39,7 @@ function isExpanded(embeddable: IEmbeddable) {
     throw new IncompatibleActionError();
   }
 
-  return embeddable.id === (embeddable.parent.getInput() as any).expandedPanelId;
+  return embeddable.id === embeddable.parent.getInput().expandedPanelId;
 }
 
 export class ExpandPanelAction extends Action {

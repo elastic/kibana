@@ -40,6 +40,7 @@ const viewportProps: ViewportProps = {
   notifications: {} as any,
   overlays: {} as any,
   inspector: {} as any,
+  landingPagePath: '/dashboard',
 };
 
 beforeEach(() => {

@@ -81,6 +81,7 @@ export interface ViewportProps {
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
+  landingPagePath: string;
 }
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {

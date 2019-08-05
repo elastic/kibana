@@ -68,6 +68,7 @@ function getProps(props?: Partial<DashboardGridProps>): DashboardGridProps {
     notifications: {} as any,
     overlays: {} as any,
     inspector: {} as any,
+    landingPagePath: '/dashboard',
   };
   return Object.assign(defaultTestProps, props);
 }

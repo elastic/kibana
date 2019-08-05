@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export const DASHBOARD_GRID_COLUMN_COUNT = 48;
-export const DASHBOARD_GRID_HEIGHT = 20;
-export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
-export const DEFAULT_PANEL_HEIGHT = 15;
+import { DashboardConstants } from './dashboard_constants';
+import { start } from '../../../dashboard_embeddable_container/public/np_ready/public/legacy';
+
+start.registerDashboardContainerFactory({
+  landingPagePath: DashboardConstants.LANDING_PAGE_PATH,
+});

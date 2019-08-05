@@ -31,33 +31,51 @@ interface StartDependencies {
   inspector: InspectorStartContract;
 }
 
+export type Setup = void;
+
+export interface Start {
+  registerDashboardContainerFactory: (options: { landingPagePath: string }) => string;
+}
+
 export class DashboardEmbeddableContainerPublicPlugin
-  implements Plugin<any, any, SetupDependencies, StartDependencies> {
+  implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { embeddable }: SetupDependencies) {
+  public setup(core: CoreSetup, { embeddable }: SetupDependencies): Setup {
     const expandPanelAction = new ExpandPanelAction();
     embeddable.registerAction(expandPanelAction);
     embeddable.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
   }
 
-  public start(
-    { application, notifications, overlays }: CoreStart,
-    { embeddable, inspector }: StartDependencies
-  ) {
-    const dashboardOptions = {
-      capabilities: (application.capabilities.dashboard as unknown) as DashboardCapabilities,
-      getFactory: embeddable.getEmbeddableFactory,
+  public start(core: CoreStart, plugins: StartDependencies): Start {
+    const { application, notifications, overlays } = core;
+    const { embeddable, inspector } = plugins;
+
+    const registerDashboardContainerFactory: Start['registerDashboardContainerFactory'] = ({
+      landingPagePath,
+    }) => {
+      const dashboardOptions = {
+        capabilities: (application.capabilities.dashboard as unknown) as DashboardCapabilities,
+        getFactory: embeddable.getEmbeddableFactory,
+      };
+      const factory = new DashboardContainerFactory(dashboardOptions, {
+        getActions: embeddable.getTriggerCompatibleActions,
+        getAllEmbeddableFactories: embeddable.getEmbeddableFactories,
+        getEmbeddableFactory: embeddable.getEmbeddableFactory,
+        notifications,
+        overlays,
+        inspector,
+        landingPagePath,
+      });
+
+      embeddable.registerEmbeddableFactory(factory.type, factory);
+
+      return factory.type;
     };
-    const factory = new DashboardContainerFactory(dashboardOptions, {
-      getActions: embeddable.getTriggerCompatibleActions,
-      getAllEmbeddableFactories: embeddable.getEmbeddableFactories,
-      getEmbeddableFactory: embeddable.getEmbeddableFactory,
-      notifications,
-      overlays,
-      inspector,
-    });
-    embeddable.registerEmbeddableFactory(factory.type, factory);
+
+    return {
+      registerDashboardContainerFactory,
+    };
   }
 
   public stop() {}
