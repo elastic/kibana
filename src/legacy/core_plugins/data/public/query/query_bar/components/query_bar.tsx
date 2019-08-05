@@ -39,7 +39,6 @@ import { QueryBarInput } from './query_bar_input';
 
 import { getQueryLog } from '../lib/get_query_log';
 import { Query } from '../index';
-import { SavedQuery, SavedQueryAttributes } from '../../../search/search_bar';
 
 const config = chrome.getUiSettingsClient();
 
@@ -50,7 +49,6 @@ interface DateRange {
 
 interface Props {
   query?: Query;
-  savedQuery?: SavedQueryAttributes;
   onSubmit: (payload: { dateRange: DateRange; query?: Query }) => void;
   onChange: (payload: { dateRange: DateRange; query?: Query }) => void;
   disableAutoFocus?: boolean;
@@ -67,14 +65,9 @@ interface Props {
   isRefreshPaused?: boolean;
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
-  showSaveQuery?: boolean;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   customSubmitButton?: any;
-  onSave?: () => void;
-  onSaveNew?: () => void;
-  onLoadSavedQuery?: (savedQuery: SavedQuery) => void;
   isDirty: boolean;
-  onClearSavedQuery?: () => void;
 }
 
 interface State {
@@ -205,13 +198,6 @@ export class QueryBarUI extends Component<Props, State> {
           onChange={this.onQueryChange}
           onSubmit={this.onInputSubmit}
           persistedLog={this.persistedLog}
-          savedQuery={this.props.savedQuery}
-          showSaveQuery={this.props.showSaveQuery}
-          onSave={this.props.onSave}
-          onSaveNew={this.props.onSaveNew}
-          onLoadSavedQuery={this.props.onLoadSavedQuery}
-          isDirty={this.props.isDirty}
-          onClearSavedQuery={this.props.onClearSavedQuery}
         />
       </EuiFlexItem>
     );

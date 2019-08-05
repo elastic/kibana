@@ -369,7 +369,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       queryBar = (
         <QueryBar
           query={this.state.query}
-          savedQuery={this.props.savedQuery ? this.props.savedQuery.attributes : undefined}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
           appName={this.props.appName}
@@ -382,18 +381,13 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           isRefreshPaused={this.props.isRefreshPaused}
           refreshInterval={this.props.refreshInterval}
           showAutoRefreshOnly={this.props.showAutoRefreshOnly}
-          showSaveQuery={this.props.showSaveQuery}
           showQueryInput={this.props.showQueryInput}
           onRefreshChange={this.props.onRefreshChange}
-          onSave={this.onInitiateSave}
-          onSaveNew={this.onInitiateSaveNew}
           onChange={this.onQueryBarChange}
-          onLoadSavedQuery={this.onLoadSavedQuery}
           isDirty={this.isDirty()}
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
-          onClearSavedQuery={this.props.onClearSavedQuery}
         />
       );
     }

@@ -41,15 +41,11 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
-import { SavedQueryRow } from './saved_query_row';
-import { SavedQueryAttributes, SavedQuery } from '../../../search/search_bar';
-import { findSavedQueries } from '../../../search/search_bar/lib/saved_query_service';
 
 interface Props {
   indexPatterns: Array<IndexPattern | string>;
   intl: InjectedIntl;
   query: Query;
-  savedQuery?: SavedQueryAttributes;
   appName: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -58,14 +54,8 @@ interface Props {
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
-  showSaveQuery?: boolean;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
-  onLoadSavedQuery?: (savedQuery: SavedQuery) => void;
-  onSave?: () => void;
-  onSaveNew?: () => void;
-  isDirty?: boolean;
-  onClearSavedQuery?: () => void;
 }
 
 interface State {
@@ -92,7 +82,6 @@ const KEY_CODES = {
 
 const config = chrome.getUiSettingsClient();
 const recentSearchType: AutocompleteSuggestionType = 'recentSearch';
-const savedQueryType: AutocompleteSuggestionType = 'savedQuery';
 
 export class QueryBarInputUI extends Component<Props, State> {
   public state: State = {
@@ -138,7 +127,6 @@ export class QueryBarInputUI extends Component<Props, State> {
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
-    const savedQuerySuggestions = await this.getSavedQueriesSuggestions(queryString);
 
     const autocompleteProvider = getAutocompleteProvider(language);
     if (
@@ -146,7 +134,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       !Array.isArray(this.state.indexPatterns) ||
       compact(this.state.indexPatterns).length === 0
     ) {
-      return [...recentSearchSuggestions, ...savedQuerySuggestions];
+      return recentSearchSuggestions;
     }
 
     const indexPatterns = this.state.indexPatterns;
@@ -162,8 +150,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       selectionStart,
       selectionEnd,
     });
-
-    return [...suggestions, ...recentSearchSuggestions, ...savedQuerySuggestions];
+    return [...suggestions, ...recentSearchSuggestions];
   };
 
   private getRecentSearchSuggestions = (query: string) => {
@@ -183,17 +170,6 @@ export class QueryBarInputUI extends Component<Props, State> {
     });
   };
 
-  private getSavedQueriesSuggestions = async (searchText: string) => {
-    const savedQueries = await findSavedQueries(searchText);
-    return savedQueries.map((savedQuery: SavedQuery) => {
-      const text = toUser(savedQuery.attributes.title);
-      const start = 0;
-      const end = searchText.length;
-      const description = savedQuery.attributes.description;
-      return { type: savedQueryType, text, start, end, description, savedQuery };
-    });
-  };
-
   private updateSuggestions = debounce(async () => {
     const suggestions = (await this.getSuggestions()) || [];
     if (!this.componentIsUnmounting) {
@@ -208,14 +184,6 @@ export class QueryBarInputUI extends Component<Props, State> {
       }
 
       this.props.onSubmit({ query: fromUser(query.query), language: query.language });
-    }
-  };
-
-  private onLoadSavedQuery = (savedQuery: SavedQuery) => {
-    this.updateSuggestions();
-
-    if (this.props.onLoadSavedQuery) {
-      this.props.onLoadSavedQuery(savedQuery);
     }
   };
 
@@ -329,31 +297,23 @@ export class QueryBarInputUI extends Component<Props, State> {
     text,
     start,
     end,
-    savedQuery,
   }: {
     type: AutocompleteSuggestionType;
     text: string;
     start: number;
     end: number;
-    savedQuery?: SavedQuery;
   }) => {
     if (!this.inputRef) {
       return;
     }
 
-    if (savedQuery) {
-      this.setState({ isSuggestionsVisible: false, index: null });
-      this.onLoadSavedQuery(savedQuery);
-      return;
-    }
-
-    const queryString = this.getQueryString();
+    const query = this.getQueryString();
     const { selectionStart, selectionEnd } = this.inputRef;
     if (selectionStart === null || selectionEnd === null) {
       return;
     }
 
-    const value = queryString.substr(0, selectionStart) + queryString.substr(selectionEnd);
+    const value = query.substr(0, selectionStart) + query.substr(selectionEnd);
     const newQueryString = value.substr(0, start) + text + value.substr(end);
 
     this.onQueryStringChange(newQueryString);
@@ -468,7 +428,6 @@ export class QueryBarInputUI extends Component<Props, State> {
       'indexPatterns',
       'intl',
       'query',
-      'savedQuery',
       'appName',
       'disableAutoFocus',
       'screenTitle',
@@ -479,29 +438,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       'languageSwitcherPopoverAnchorPosition',
       'onChange',
       'onSubmit',
-      'onSave',
-      'onSaveNew',
-      'onLoadSavedQuery',
-      'isDirty',
-      'onClearSavedQuery',
-      'showSaveQuery',
     ]);
-
-    const savedQueryRow =
-      this.props.onSave &&
-      this.props.onSaveNew &&
-      this.props.onClearSavedQuery &&
-      this.props.isDirty !== undefined ? (
-        <SavedQueryRow
-          query={this.props.query}
-          savedQuery={this.props.savedQuery}
-          showSaveQuery={this.props.showSaveQuery}
-          onSave={this.props.onSave}
-          onSaveNew={this.props.onSaveNew}
-          isDirty={this.props.isDirty}
-          onClearSavedQuery={this.props.onClearSavedQuery}
-        />
-      ) : null;
 
     return (
       <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
@@ -571,16 +508,12 @@ export class QueryBarInputUI extends Component<Props, State> {
           </div>
 
           <SuggestionsComponent
-            show={
-              this.state.isSuggestionsVisible &&
-              (savedQueryRow !== null || this.state.suggestions.length > 0)
-            }
+            show={this.state.isSuggestionsVisible}
             suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
             index={this.state.index}
             onClick={this.onClickSuggestion}
             onMouseEnter={this.onMouseEnterSuggestion}
             loadMore={this.increaseLimit}
-            append={savedQueryRow}
           />
         </div>
       </EuiOutsideClickDetector>

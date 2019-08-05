@@ -104,7 +104,6 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
     mapStateJSON: savedMap.mapStateJSON,
     globalState: globalState,
   });
-
   $scope.refreshConfig = getInitialRefreshConfig({
     mapStateJSON: savedMap.mapStateJSON,
     globalState: globalState,
@@ -129,7 +128,9 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
     store.dispatch(setRefreshConfig($scope.refreshConfig));
   };
 
+
   function hasUnsavedChanges() {
+
     const state = store.getState();
     const layerList = getLayerListRaw(state);
     const layerListConfigOnly = copyPersistentState(layerList);

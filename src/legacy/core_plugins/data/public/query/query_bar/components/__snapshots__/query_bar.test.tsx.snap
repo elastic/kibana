@@ -29,12 +29,7 @@ exports[`QueryBar Should render the given query 1`] = `
           },
         ]
       }
-      isDirty={false}
       onChange={[Function]}
-      onClearSavedQuery={[Function]}
-      onLoadSavedQuery={[Function]}
-      onSave={[Function]}
-      onSaveNew={[Function]}
       onSubmit={[Function]}
       query={
         Object {
@@ -107,7 +102,7 @@ exports[`QueryBar Should render the given query 1`] = `
           data-test-subj="querySubmitButton"
           isDisabled={false}
           isLoading={false}
-          needsUpdate={true}
+          needsUpdate={false}
           onClick={[Function]}
         />
       </EuiFlexItem>

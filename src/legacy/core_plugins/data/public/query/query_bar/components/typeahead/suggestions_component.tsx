@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 import { SuggestionComponent } from './suggestion_component';
@@ -28,7 +29,6 @@ interface Props {
   show: boolean;
   suggestions: AutocompleteSuggestion[];
   loadMore: () => void;
-  append?: React.ReactNode;
 }
 
 export class SuggestionsComponent extends Component<Props> {
@@ -36,7 +36,7 @@ export class SuggestionsComponent extends Component<Props> {
   private parentNode: HTMLDivElement | null = null;
 
   public render() {
-    if (!this.props.show) {
+    if (!this.props.show || isEmpty(this.props.suggestions)) {
       return null;
     }
 
@@ -49,11 +49,7 @@ export class SuggestionsComponent extends Component<Props> {
           onClick={this.props.onClick}
           onMouseEnter={() => this.props.onMouseEnter(index)}
           ariaId={'suggestion-' + index}
-          key={
-            suggestion.savedQuery
-              ? suggestion.savedQuery.id
-              : `${suggestion.type} - ${suggestion.text}`
-          }
+          key={`${suggestion.type} - ${suggestion.text}`}
         />
       );
     });
@@ -71,7 +67,6 @@ export class SuggestionsComponent extends Component<Props> {
             >
               {suggestions}
             </div>
-            {this.props.append}
           </div>
         </div>
       </div>

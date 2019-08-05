@@ -84,11 +84,7 @@ describe('QueryBar', () => {
         store={createMockStorage()}
         intl={null as any}
         onChange={noop}
-        onSave={noop}
-        onSaveNew={noop}
-        onLoadSavedQuery={noop}
         isDirty={false}
-        onClearSavedQuery={noop}
       />
     );
 
@@ -107,11 +103,7 @@ describe('QueryBar', () => {
         disableAutoFocus={true}
         intl={null as any}
         onChange={noop}
-        onSave={noop}
-        onSaveNew={noop}
-        onLoadSavedQuery={noop}
         isDirty={false}
-        onClearSavedQuery={noop}
       />
     );
 

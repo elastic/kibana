@@ -337,7 +337,6 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
         </div>
       </div>
       <SuggestionsComponent
-        append={null}
         index={null}
         loadMore={[Function]}
         onClick={[Function]}
@@ -686,7 +685,6 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
         </div>
       </div>
       <SuggestionsComponent
-        append={null}
         index={null}
         loadMore={[Function]}
         onClick={[Function]}
@@ -1035,7 +1033,6 @@ exports[`QueryBarInput Should render the given query 1`] = `
         </div>
       </div>
       <SuggestionsComponent
-        append={null}
         index={null}
         loadMore={[Function]}
         onClick={[Function]}

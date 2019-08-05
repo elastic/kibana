@@ -34,8 +34,6 @@ function getEuiIconType(type: string) {
       return 'kqlSelector';
     case 'operator':
       return 'kqlOperand';
-    case 'savedQuery':
-      return 'save';
     default:
       throw new Error(`Unknown type: ${type}`);
   }
