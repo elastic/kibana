@@ -263,6 +263,8 @@ export class JobCreateUi extends Component {
         sortFields
       );
 
+      indexPatternDateFields.sort();
+
       this.setState({
         indexPatternAsyncErrors,
         indexPatternDateFields,

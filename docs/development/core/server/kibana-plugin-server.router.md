@@ -4,6 +4,7 @@
 
 ## Router class
 
+Provides ability to declare a handler function for a particular path and HTTP request method. Each route can have only one handler functions, which is executed when the route is matched.
 
 <b>Signature:</b>
 
@@ -28,9 +29,18 @@ export declare class Router
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [delete(route, handler)](./kibana-plugin-server.router.delete.md) |  | Register a <code>DELETE</code> request with the router |
-|  [get(route, handler)](./kibana-plugin-server.router.get.md) |  | Register a <code>GET</code> request with the router |
-|  [getRoutes()](./kibana-plugin-server.router.getroutes.md) |  | Returns all routes registered with the this router. |
-|  [post(route, handler)](./kibana-plugin-server.router.post.md) |  | Register a <code>POST</code> request with the router |
-|  [put(route, handler)](./kibana-plugin-server.router.put.md) |  | Register a <code>PUT</code> request with the router |
+|  [delete(route, handler)](./kibana-plugin-server.router.delete.md) |  | Register a route handler for <code>DELETE</code> request. |
+|  [get(route, handler)](./kibana-plugin-server.router.get.md) |  | Register a route handler for <code>GET</code> request. |
+|  [post(route, handler)](./kibana-plugin-server.router.post.md) |  | Register a route handler for <code>POST</code> request. |
+|  [put(route, handler)](./kibana-plugin-server.router.put.md) |  | Register a route handler for <code>PUT</code> request. |
+
+## Example
+
+
+```ts
+const router = new Router('my-app');
+// handler is called when 'my-app/path' resource is requested with `GET` method
+router.get({ path: '/path', validate: false }, (req, res) => res.ok({ content: 'ok' }));
+
+```
 
