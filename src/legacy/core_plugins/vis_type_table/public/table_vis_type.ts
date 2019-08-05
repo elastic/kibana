@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Vis } from 'ui/vis';
 
 // @ts-ignore
 import { Schemas } from 'ui/vis/editors/default/schemas';
@@ -93,7 +94,7 @@ export const createTableVisTypeDefinition = (dependencies: TableVisualizationDep
       ]),
     },
     responseHandler,
-    hierarchicalData: (vis: any) => {
+    hierarchicalData: (vis: Vis) => {
       return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
     },
   });
