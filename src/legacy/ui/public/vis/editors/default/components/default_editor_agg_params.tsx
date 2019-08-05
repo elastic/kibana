@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, useEffect, useMemo } from 'react';
 import { EuiForm, EuiAccordion, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -94,10 +94,9 @@ function DefaultEditorAggParams({
   const groupedAggTypeOptions = getAggTypeOptions(agg, indexPattern, groupName);
   const errors = getError(agg, aggIsTooLow);
 
-  const editorConfig = editorConfigProviders.getConfigForAgg(
-    aggTypes.byType[groupName],
-    indexPattern,
-    agg
+  const editorConfig = useMemo(
+    () => editorConfigProviders.getConfigForAgg(aggTypes.byType[groupName], indexPattern, agg),
+    [groupName, agg]
   );
   const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
   const allParams = [...params.basic, ...params.advanced];
@@ -119,39 +118,35 @@ function DefaultEditorAggParams({
   // reset validity before component destroyed
   useUnmount(() => setValidity(true));
 
-  const hasConfig = !!Object.keys(editorConfig).length;
-
   useEffect(() => {
-    if (hasConfig) {
-      Object.entries(editorConfig).forEach(([param, paramConfig]) => {
-        const paramOptions = agg.type.params.find(
-          (paramOption: AggParam) => paramOption.name === param
-        );
+    Object.entries(editorConfig).forEach(([param, paramConfig]) => {
+      const paramOptions = agg.type.params.find(
+        (paramOption: AggParam) => paramOption.name === param
+      );
 
-        const hasFixedValue = paramConfig.hasOwnProperty(FIXED_VALUE_PROP);
-        const hasDefault = paramConfig.hasOwnProperty(DEFAULT_PROP);
-        // If the parameter has a fixed value in the config, set this value.
-        // Also for all supported configs we should freeze the editor for this param.
-        if (hasFixedValue || hasDefault) {
-          let newValue;
-          let property = FIXED_VALUE_PROP;
-          let typedParamConfig: EditorParamConfigType = paramConfig as FixedParam;
+      const hasFixedValue = paramConfig.hasOwnProperty(FIXED_VALUE_PROP);
+      const hasDefault = paramConfig.hasOwnProperty(DEFAULT_PROP);
+      // If the parameter has a fixed value in the config, set this value.
+      // Also for all supported configs we should freeze the editor for this param.
+      if (hasFixedValue || hasDefault) {
+        let newValue;
+        let property = FIXED_VALUE_PROP;
+        let typedParamConfig: EditorParamConfigType = paramConfig as FixedParam;
 
-          if (hasDefault) {
-            property = DEFAULT_PROP;
-            typedParamConfig = paramConfig as TimeIntervalParam;
-          }
-
-          if (paramOptions && paramOptions.deserialize) {
-            newValue = paramOptions.deserialize(typedParamConfig[property]);
-          } else {
-            newValue = typedParamConfig[property];
-          }
-          onAggParamsChange(agg.params, param, newValue);
+        if (hasDefault) {
+          property = DEFAULT_PROP;
+          typedParamConfig = paramConfig as TimeIntervalParam;
         }
-      });
-    }
-  }, [agg.type, hasConfig]);
+
+        if (paramOptions && paramOptions.deserialize) {
+          newValue = paramOptions.deserialize(typedParamConfig[property]);
+        } else {
+          newValue = typedParamConfig[property];
+        }
+        onAggParamsChange(agg.params, param, newValue);
+      }
+    });
+  }, [agg.type, editorConfig]);
 
   useEffect(() => {
     setTouched(false);
