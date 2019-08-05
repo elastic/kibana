@@ -51,11 +51,14 @@ import {
   MachineLearningDataFramesProvider,
   MachineLearningDataVisualizerProvider,
   MachineLearningJobManagementProvider,
+  MachineLearningJobSourceSelectionProvider,
+  MachineLearningJobTypeSelectionProvider,
+  MachineLearningJobWizardCommonProvider,
   MachineLearningNavigationProvider,
   MachineLearningSettingsProvider,
   MachineLearningSingleMetricViewerProvider,
   // @ts-ignore not ts yet
-} from './ml';
+} from './machine_learning';
 
 import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/services';
 
@@ -101,6 +104,9 @@ export const services = {
   mlDataFrames: MachineLearningDataFramesProvider,
   mlDataVisualizer: MachineLearningDataVisualizerProvider,
   mlJobManagement: MachineLearningJobManagementProvider,
+  mlJobSourceSelection: MachineLearningJobSourceSelectionProvider,
+  mlJobTypeSelection: MachineLearningJobTypeSelectionProvider,
+  mlJobWizardCommon: MachineLearningJobWizardCommonProvider,
   mlNavigation: MachineLearningNavigationProvider,
   mlSettings: MachineLearningSettingsProvider,
   mlSingleMetricViewer: MachineLearningSingleMetricViewerProvider,

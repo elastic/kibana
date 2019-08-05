@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningJobSourceSelectionProvider({
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
+export function MachineLearningJobSourceSelectionProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {

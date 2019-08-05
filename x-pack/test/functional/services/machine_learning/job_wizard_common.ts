@@ -5,11 +5,9 @@
  */
 import expect from '@kbn/expect';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningJobWizardCommonProvider({
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
+export function MachineLearningJobWizardCommonProvider({ getService }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');

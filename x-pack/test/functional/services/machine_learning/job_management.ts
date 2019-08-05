@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
-export function MachineLearningJobManagementProvider({
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
+export function MachineLearningJobManagementProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 

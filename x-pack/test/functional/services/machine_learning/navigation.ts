@@ -6,7 +6,10 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningProvider({ getService, getPageObjects }: FtrProviderContext) {
+export function MachineLearningNavigationProvider({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
