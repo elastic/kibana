@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 // @ts-ignore undeclared module
-import { JobsListView } from '../../../jobs/jobs_list/components/jobs_list_view';
+import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view';
 
 export const JobsListPage = () => {
   const tabs = [

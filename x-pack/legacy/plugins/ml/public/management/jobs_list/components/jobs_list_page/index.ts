@@ -5,4 +5,3 @@
  */
 
 export { JobsListPage } from './jobs_list_page';
-export { AccessDeniedPage } from './access_denied_page';

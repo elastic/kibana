@@ -1,0 +1,69 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { FC, Fragment } from 'react';
+
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
+import {
+  EuiCallOut,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContentBody,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+
+export const AccessDeniedPage: FC = () => (
+  <Fragment>
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPageContentHeader>
+          <EuiPageContentHeaderSection>
+            <EuiTitle>
+              <h1>
+                <FormattedMessage
+                  id="xpack.ml.management.jobsList.accessDeniedTitle"
+                  defaultMessage="Access denied"
+                />
+              </h1>
+            </EuiTitle>
+          </EuiPageContentHeaderSection>
+        </EuiPageContentHeader>
+        <EuiPageContentBody>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            title={i18n.translate('xpack.ml.management.jobsList.noPermissionToAccessLabel', {
+              defaultMessage: 'You need permission to access ML jobs',
+            })}
+            color="danger"
+            iconType="cross"
+          >
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.management.jobsList.noGrantedPrivilegesDescription"
+                  defaultMessage="You must have a trial or platinum license.{br}You must have the privileges granted in the {kibanaUserParam} and {machineLearningUserParam} roles.{br}Your system admin can set these roles on the Management User page."
+                  values={{
+                    kibanaUserParam: <span className="text-monospace">kibana_user</span>,
+                    machineLearningUserParam: (
+                      <span className="text-monospace">machine_learning_user</span>
+                    ),
+                    br: <br />,
+                  }}
+                />
+              </p>
+            </EuiText>
+          </EuiCallOut>
+        </EuiPageContentBody>
+      </EuiPageBody>
+    </EuiPage>
+  </Fragment>
+);

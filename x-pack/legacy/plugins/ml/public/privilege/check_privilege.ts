@@ -11,8 +11,24 @@ import { hasLicenseExpired } from '../license/check_license';
 
 import { Privileges, getDefaultPrivileges } from '../../common/types/privileges';
 import { getPrivileges } from './get_privileges';
+import { ACCESS_DENIED_PATH } from '../management/management_urls';
 
 let privileges: Privileges = getDefaultPrivileges();
+
+// TODO: needs to resolve regardless of space
+export function canGetManagementMlJobs(kbnUrl: any) {
+  return new Promise((resolve, reject) => {
+    getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
+      privileges = capabilities;
+      if (privileges.canGetJobs || isPlatinumOrTrialLicense === false) {
+        return resolve();
+      } else {
+        kbnUrl.redirect(ACCESS_DENIED_PATH);
+        return reject();
+      }
+    });
+  });
+}
 
 export function checkGetJobsPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {

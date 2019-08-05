@@ -17,7 +17,7 @@ import { JOBS_LIST_PATH } from './management_urls';
 import 'plugins/ml/management/jobs_list';
 
 
-if (xpackInfo.get('features.ml.showLinks', false)) {
+if (xpackInfo.get('features.ml.showLinks', false) === true) {
   management.register('ml', {
     display: i18n.translate(
       'xpack.ml.management.mlTitle', {

@@ -13,12 +13,12 @@
 // @ts-ignore no declaration module
 import { ReactDOM, render, unmountComponentAtNode } from 'react-dom';
 import routes from 'ui/routes';
-import { checkGetJobsPrivilege } from '../../privilege/check_privilege';
-// @ts-ignore no declaration file
-import { checkFullLicense } from '../../license/check_license';
+import { canGetManagementMlJobs } from '../../privilege/check_privilege';
 import { JOBS_LIST_PATH } from '../management_urls';
 import { JobsListPage } from './components';
+import { AccessDeniedPage } from './components';
 import { getJobsListBreadcrumbs } from '../breadcrumbs';
+import { ACCESS_DENIED_PATH } from '../management_urls';
 
 const template = `<kbn-management-app section="ml/jobs-list">
 <div id="kibanaManagementMLSection" />
@@ -28,8 +28,7 @@ routes.when(JOBS_LIST_PATH, {
   template,
   k7Breadcrumbs: getJobsListBreadcrumbs,
   resolve: {
-    CheckLicense: checkFullLicense,
-    privileges: checkGetJobsPrivilege,
+    checkPrivilege: canGetManagementMlJobs,
   },
   controller($scope) {
     $scope.$on('$destroy', () => {
@@ -39,6 +38,21 @@ routes.when(JOBS_LIST_PATH, {
     $scope.$$postDigest(() => {
       const element = document.getElementById('kibanaManagementMLSection');
       render(JobsListPage(), element);
+    });
+  },
+});
+
+routes.when(ACCESS_DENIED_PATH, {
+  template,
+  k7Breadcrumbs: getJobsListBreadcrumbs,
+  controller($scope) {
+    $scope.$on('$destroy', () => {
+      const elem = document.getElementById('kibanaManagementMLSection');
+      if (elem) unmountComponentAtNode(elem);
+    });
+    $scope.$$postDigest(() => {
+      const element = document.getElementById('kibanaManagementMLSection');
+      render(AccessDeniedPage(), element);
     });
   },
 });
