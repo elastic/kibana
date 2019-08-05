@@ -44,11 +44,13 @@ export class ConfigAdapter {
     }
   }
 
-  public async list(): Promise<ConfigurationFile[]> {
+  public async list(page: number = 1, perPage: number = 25): Promise<ConfigurationFile[]> {
     const configs = await this.so.find<any>({
       type: 'configurations',
       search: '*',
       searchFields: ['shared_id'],
+      page,
+      perPage,
     });
     const uniqConfigurationFile = configs.saved_objects
       .map<ConfigurationFile>(config => {
@@ -73,15 +75,22 @@ export class ConfigAdapter {
     return [...uniqConfigurationFile.values()];
   }
 
-  public async listVersions(sharedID: string, activeOnly = true): Promise<ConfigurationFile[]> {
+  public async listVersions(
+    sharedID: string,
+    activeOnly = true,
+    page: number = 1,
+    perPage: number = 25
+  ): Promise<ConfigurationFile[]> {
     const configs = (await this.so.find<any>({
       type: 'configurations',
       search: sharedID,
       searchFields: ['shared_id'],
+      page,
+      perPage,
     })).saved_objects;
 
     if (!activeOnly) {
-      const backupConfigs = await this.so.find<any>({
+      const backupConfigs = await this.so.find<BackupConfigurationFile>({
         type: 'backup_configurations',
         search: sharedID,
         searchFields: ['shared_id'],
