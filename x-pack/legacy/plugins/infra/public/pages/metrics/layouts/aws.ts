@@ -52,27 +52,25 @@ export const awsLayoutCreator: InfraMetricLayoutCreator = theme => [
               ),
               color: theme.eui.euiColorFullShade,
             },
-            rx: {
+            'packets-in': {
               name: i18n.translate(
-                'xpack.infra.metricDetailPage.awsMetricsLayout.overviewSection.networkRxSeriesLabel',
+                'xpack.infra.metricDetailPage.awsMetricsLayout.overviewSection.networkPacketsInLabel',
                 {
-                  defaultMessage: 'Inbound (RX)',
+                  defaultMessage: 'Packets (in)',
                 }
               ),
               color: theme.eui.euiColorFullShade,
-              formatter: InfraFormatterType.bits,
-              formatterTemplate: '{{value}}/s',
+              formatter: InfraFormatterType.number,
             },
-            tx: {
+            'packets-out': {
               name: i18n.translate(
-                'xpack.infra.metricDetailPage.awsMetricsLayout.overviewSection.networkTxSeriesLabel',
+                'xpack.infra.metricDetailPage.awsMetricsLayout.overviewSection.networkPacketsOutLabel',
                 {
-                  defaultMessage: 'Outbound (TX)',
+                  defaultMessage: 'Packets (out)',
                 }
               ),
               color: theme.eui.euiColorFullShade,
-              formatter: InfraFormatterType.bits,
-              formatterTemplate: '{{value}}/s',
+              formatter: InfraFormatterType.number,
             },
           },
         },

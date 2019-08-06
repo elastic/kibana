@@ -48,7 +48,7 @@ export const awsNetworkPackets: InfraMetricModelCreator = (
           id: 'inverted-avg-net-in',
           type: InfraMetricModelMetricType.calculation,
           variables: [{ id: 'var-avg', name: 'avg', field: 'avg-net-in' }],
-          script: 'params.max * -1',
+          script: 'params.avg * -1',
         },
       ],
       split_mode: 'everything',

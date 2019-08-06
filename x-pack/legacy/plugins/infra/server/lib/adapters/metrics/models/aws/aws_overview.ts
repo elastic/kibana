@@ -48,48 +48,24 @@ export const awsOverview: InfraMetricModelCreator = (
       ],
     },
     {
-      id: 'tx',
+      id: 'packets-out',
       split_mode: 'everything',
       metrics: [
         {
-          field: 'aws.ec2.network.out.bytes',
-          id: 'network-out-bytes',
-          type: InfraMetricModelMetricType.max,
-        },
-        {
-          id: 'network-out-bytes-per-second',
-          script: 'params.max / 300',
-          type: InfraMetricModelMetricType.calculation,
-          variables: [
-            {
-              field: 'network-out-bytes',
-              id: 'var-max',
-              name: 'max',
-            },
-          ],
+          field: 'aws.ec2.network.out.packets',
+          id: 'network-out-packets',
+          type: InfraMetricModelMetricType.avg,
         },
       ],
     },
     {
-      id: 'rx',
+      id: 'packets-in',
       split_mode: 'everything',
       metrics: [
         {
-          field: 'aws.ec2.network.in.bytes',
-          id: 'network-in-bytes',
-          type: InfraMetricModelMetricType.max,
-        },
-        {
-          id: 'network-in-bytes-per-second',
-          script: 'params.max / 300',
-          type: InfraMetricModelMetricType.calculation,
-          variables: [
-            {
-              field: 'network-in-bytes',
-              id: 'var-max',
-              name: 'max',
-            },
-          ],
+          field: 'aws.ec2.network.in.packets',
+          id: 'network-in-packets',
+          type: InfraMetricModelMetricType.avg,
         },
       ],
     },
