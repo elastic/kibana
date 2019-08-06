@@ -19,6 +19,7 @@
 
 import './core.css';
 
+import { CoreId } from '../server';
 import { InternalCoreSetup, InternalCoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
@@ -44,9 +45,6 @@ interface Params {
   requireLegacyFiles: LegacyPlatformParams['requireLegacyFiles'];
   useLegacyTestHarness?: LegacyPlatformParams['useLegacyTestHarness'];
 }
-
-/** @internal */
-export type CoreId = symbol;
 
 /** @internal */
 export interface CoreContext {

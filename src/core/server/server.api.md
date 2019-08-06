@@ -92,8 +92,24 @@ export class ConfigService {
     setSchema(path: ConfigPath, schema: Type<unknown>): Promise<void>;
     }
 
+// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "kibana" does not have an export "IContextContainer"
+// 
+// @public (undocumented)
+export interface ContextSetup {
+    // Warning: (ae-forgotten-export) The symbol "IContextContainer" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "IContextContainer"
+    createContextContainer<TContext extends {}, THandlerReturn, THandlerParmaters extends any[] = []>(): IContextContainer<TContext, THandlerReturn, THandlerParmaters>;
+}
+
+// @internal (undocumented)
+export type CoreId = symbol;
+
 // @public
 export interface CoreSetup {
+    // (undocumented)
+    context: {
+        createContextContainer: ContextSetup['createContextContainer'];
+    };
     // (undocumented)
     elasticsearch: {
         adminClient$: Observable<ClusterClient>;
@@ -438,10 +454,15 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     };
     // (undocumented)
     logger: LoggerFactory;
+    // (undocumented)
+    opaqueId: PluginOpaqueId;
 }
 
 // @public
 export type PluginName = string;
+
+// @public (undocumented)
+export type PluginOpaqueId = symbol;
 
 // @public (undocumented)
 export interface PluginsServiceSetup {
@@ -900,7 +921,9 @@ export class SavedObjectsSchema {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsSchemaDefinition" needs to be exported by the entry point index.d.ts
     constructor(schemaDefinition?: SavedObjectsSchemaDefinition);
     // (undocumented)
-    getIndexForType(type: string): string | undefined;
+    getConvertToAliasScript(type: string): string | undefined;
+    // (undocumented)
+    getIndexForType(config: Config, type: string): string | undefined;
     // (undocumented)
     isHiddenType(type: string): boolean;
     // (undocumented)
@@ -993,7 +1016,7 @@ export interface SessionStorageFactory<T> {
 // Warnings were encountered during analysis:
 // 
 // src/core/server/http/router/response.ts:188:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugin_context.ts:34:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:37:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:39:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:156:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 
 ```
