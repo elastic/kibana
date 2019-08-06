@@ -61,7 +61,7 @@ import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { savedObjectsMock } from '../saved_objects/saved_objects_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 
-const applicationSetup = applicationServiceMock.createSetupContract();
+const applicationSetup = applicationServiceMock.createInternalSetupContract();
 const contextSetup = contextServiceMock.createSetupContract();
 const fatalErrorsSetup = fatalErrorsServiceMock.createSetupContract();
 const httpSetup = httpServiceMock.createSetupContract();
@@ -88,7 +88,7 @@ const defaultSetupDeps = {
   plugins: {},
 };
 
-const applicationStart = applicationServiceMock.createStartContract();
+const applicationStart = applicationServiceMock.createInternalStartContract();
 const docLinksStart = docLinksServiceMock.createStartContract();
 const httpStart = httpServiceMock.createStartContract();
 const chromeStart = chromeServiceMock.createStartContract();
@@ -134,7 +134,7 @@ describe('#setup()', () => {
       legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockUiNewPlatformSetup).toHaveBeenCalledTimes(1);
-      expect(mockUiNewPlatformSetup).toHaveBeenCalledWith(defaultSetupDeps.core, {});
+      expect(mockUiNewPlatformSetup).toHaveBeenCalledWith(expect.any(Object), {});
     });
   });
 });
@@ -166,7 +166,7 @@ describe('#start()', () => {
     legacyPlatform.start(defaultStartDeps);
 
     expect(mockUiNewPlatformStart).toHaveBeenCalledTimes(1);
-    expect(mockUiNewPlatformStart).toHaveBeenCalledWith(defaultStartDeps.core, {});
+    expect(mockUiNewPlatformStart).toHaveBeenCalledWith(expect.any(Object), {});
   });
 
   describe('useLegacyTestHarness = false', () => {

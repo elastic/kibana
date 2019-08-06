@@ -20,12 +20,17 @@
 import './core.css';
 
 import { CoreId } from '../server';
-import { InternalCoreSetup, InternalCoreStart } from '.';
+import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
 import { I18nService } from './i18n';
-import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
+import {
+  InjectedMetadataParams,
+  InjectedMetadataService,
+  InjectedMetadataSetup,
+  InjectedMetadataStart,
+} from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
@@ -37,6 +42,7 @@ import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects/saved_objects_service';
 import { ContextService } from './context';
+import { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -49,6 +55,18 @@ interface Params {
 /** @internal */
 export interface CoreContext {
   coreId: CoreId;
+}
+
+/** @internal */
+export interface InternalCoreSetup extends Omit<CoreSetup, 'application'> {
+  application: InternalApplicationSetup;
+  injectedMetadata: InjectedMetadataSetup;
+}
+
+/** @internal */
+export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
+  application: InternalApplicationStart;
+  injectedMetadata: InjectedMetadataStart;
 }
 
 /**

@@ -5,10 +5,10 @@
  */
 
 import React, { createContext } from 'react';
-import { InternalCoreStart } from 'src/core/public';
+import { LegacyCoreStart } from 'src/core/public';
 
-const CoreContext = createContext<InternalCoreStart>({} as InternalCoreStart);
-const CoreProvider: React.SFC<{ core: InternalCoreStart }> = props => {
+const CoreContext = createContext<LegacyCoreStart>({} as LegacyCoreStart);
+const CoreProvider: React.SFC<{ core: LegacyCoreStart }> = props => {
   const { core, ...restProps } = props;
   return <CoreContext.Provider value={core} {...restProps} />;
 };

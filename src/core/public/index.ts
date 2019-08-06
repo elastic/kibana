@@ -68,7 +68,6 @@ import { ApplicationSetup, Capabilities, ApplicationStart } from './application'
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
-import { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
@@ -142,7 +141,7 @@ export interface CoreSetup {
  */
 export interface CoreStart {
   /** {@link ApplicationStart} */
-  application: Pick<ApplicationStart, 'capabilities' | 'navigateToApp' | 'registerMountContext'>;
+  application: ApplicationStart;
   /** {@link ChromeStart} */
   chrome: ChromeStart;
   /** {@link DocLinksStart} */
@@ -161,15 +160,34 @@ export interface CoreStart {
   uiSettings: UiSettingsClientContract;
 }
 
-/** @internal */
-export interface InternalCoreSetup extends Omit<CoreSetup, 'application'> {
-  application: InternalApplicationSetup;
+/**
+ * Setup interface exposed to the legacy platform via the `ui/new_platform` module.
+ *
+ * @remarks
+ * Some methods are not supported in the legacy platform and while present to make this type compatibile with
+ * {@link CoreSetup}, unsupported methods will throw exceptions when called.
+ *
+ * @public
+ * @deprecated
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface LegacyCoreSetup extends CoreSetup {
+  /** @deprecated */
   injectedMetadata: InjectedMetadataSetup;
 }
 
-/** @internal */
-export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
-  application: InternalApplicationStart;
+/**
+ * Start interface exposed to the legacy platform via the `ui/new_platform` module.
+ *
+ * @remarks
+ * Some methods are not supported in the legacy platform and while present to make this type compatibile with
+ * {@link CoreStart}, unsupported methods will throw exceptions when called.
+ *
+ * @public
+ * @deprecated
+ */
+export interface LegacyCoreStart extends CoreStart {
+  /** @deprecated */
   injectedMetadata: InjectedMetadataStart;
 }
 

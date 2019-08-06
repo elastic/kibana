@@ -7,7 +7,7 @@
 import { Location } from 'history';
 import { last } from 'lodash';
 import React from 'react';
-import { InternalCoreStart } from 'src/core/public';
+import { LegacyCoreStart } from 'src/core/public';
 import { useCore } from '../../../hooks/useCore';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import { Breadcrumb, ProvideBreadcrumbs } from './ProvideBreadcrumbs';
@@ -16,7 +16,7 @@ import { routes } from './route_config';
 interface Props {
   location: Location;
   breadcrumbs: Breadcrumb[];
-  core: InternalCoreStart;
+  core: LegacyCoreStart;
 }
 
 class UpdateBreadcrumbsComponent extends React.Component<Props> {

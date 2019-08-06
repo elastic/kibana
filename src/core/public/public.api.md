@@ -8,7 +8,6 @@ import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { Subject } from 'rxjs';
 import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 
 // @public
@@ -238,7 +237,7 @@ export interface CoreSetup {
 // @public
 export interface CoreStart {
     // (undocumented)
-    application: Pick<ApplicationStart, 'capabilities' | 'navigateToApp' | 'registerMountContext'>;
+    application: ApplicationStart;
     // (undocumented)
     chrome: ChromeStart;
     // (undocumented)
@@ -543,27 +542,19 @@ export type IContextHandler<TContext extends {}, TReturn, THandlerParameters ext
 // @public
 export type IContextProvider<TContext extends Record<string, any>, TContextName extends keyof TContext, TProviderParameters extends any[] = []> = (context: Partial<TContext>, ...rest: TProviderParameters) => Promise<TContext[TContextName]> | TContext[TContextName];
 
-// @internal (undocumented)
-export interface InternalCoreSetup extends Omit<CoreSetup, 'application'> {
-    // Warning: (ae-forgotten-export) The symbol "InternalApplicationSetup" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    application: InternalApplicationSetup;
+// @public @deprecated
+export interface LegacyCoreSetup extends CoreSetup {
     // Warning: (ae-forgotten-export) The symbol "InjectedMetadataSetup" needs to be exported by the entry point index.d.ts
     // 
-    // (undocumented)
+    // @deprecated (undocumented)
     injectedMetadata: InjectedMetadataSetup;
 }
 
-// @internal (undocumented)
-export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
-    // Warning: (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    application: InternalApplicationStart;
+// @public @deprecated
+export interface LegacyCoreStart extends CoreStart {
     // Warning: (ae-forgotten-export) The symbol "InjectedMetadataStart" needs to be exported by the entry point index.d.ts
     // 
-    // (undocumented)
+    // @deprecated (undocumented)
     injectedMetadata: InjectedMetadataStart;
 }
 

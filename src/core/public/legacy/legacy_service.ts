@@ -18,7 +18,8 @@
  */
 
 import angular from 'angular';
-import { InternalCoreSetup, InternalCoreStart } from '../';
+import { InternalCoreSetup, InternalCoreStart } from '../core_system';
+import { LegacyCoreSetup, LegacyCoreStart } from '../';
 
 /** @internal */
 export interface LegacyPlatformParams {
@@ -70,10 +71,18 @@ export class LegacyPlatformService {
       })
     );
 
+    const legacyCore: LegacyCoreSetup = {
+      ...core,
+      application: {
+        register: notSupported(`core.application.register()`),
+        registerMountContext: notSupported(`core.application.registerMountContext()`),
+      },
+    };
+
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
     if (core.injectedMetadata.getLegacyMode()) {
-      require('ui/new_platform').__setup__(core, plugins);
+      require('ui/new_platform').__setup__(legacyCore, plugins);
     }
   }
 
@@ -99,9 +108,18 @@ export class LegacyPlatformService {
       return;
     }
 
+    const legacyCore: LegacyCoreStart = {
+      ...core,
+      application: {
+        capabilities: core.application.capabilities,
+        navigateToApp: core.application.navigateToApp,
+        registerMountContext: notSupported(`core.application.registerMountContext()`),
+      },
+    };
+
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
-    require('ui/new_platform').__start__(core, plugins);
+    require('ui/new_platform').__start__(legacyCore, plugins);
 
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first
@@ -155,3 +173,7 @@ export class LegacyPlatformService {
     return require('ui/chrome');
   }
 }
+
+const notSupported = (methodName: string) => (...args: any[]) => {
+  throw new Error(`${methodName} is not supported in the legacy platform.`);
+};

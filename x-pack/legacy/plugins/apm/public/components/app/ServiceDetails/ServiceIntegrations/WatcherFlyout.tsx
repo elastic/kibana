@@ -31,7 +31,7 @@ import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { toastNotifications } from 'ui/notify';
-import { InternalCoreStart } from 'src/core/public';
+import { LegacyCoreStart } from 'src/core/public';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
@@ -40,7 +40,7 @@ import { CoreContext } from '../../../../context/CoreContext';
 
 type ScheduleKey = keyof Schedule;
 
-const getUserTimezone = memoize((core: InternalCoreStart): string => {
+const getUserTimezone = memoize((core: LegacyCoreStart): string => {
   return core.uiSettings.get('dateFormat:tz') === 'Browser'
     ? moment.tz.guess()
     : core.uiSettings.get('dateFormat:tz');
@@ -156,7 +156,7 @@ export class WatcherFlyout extends Component<
   };
 
   public createWatch = () => {
-    const core: InternalCoreStart = this.context;
+    const core: LegacyCoreStart = this.context;
     const { serviceName } = this.props.urlParams;
 
     if (!serviceName) {
@@ -278,7 +278,7 @@ export class WatcherFlyout extends Component<
       return null;
     }
 
-    const core: InternalCoreStart = this.context;
+    const core: LegacyCoreStart = this.context;
     const userTimezoneSetting = getUserTimezone(core);
     const dailyTime = this.state.daily;
     const inputTime = `${dailyTime}Z`; // Add tz to make into UTC
