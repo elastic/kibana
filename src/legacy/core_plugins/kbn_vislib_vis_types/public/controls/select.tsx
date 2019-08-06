@@ -19,23 +19,28 @@
 
 import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import { VisOptionsSetValue } from 'ui/vis/editors/default';
 
-interface SelectOptionProps {
+interface SelectOptionProps<ParamName extends string, ValidParamValues extends string> {
   label: string;
-  options: Array<{ value: string; text: string }>;
-  paramName: string;
-  value: string;
-  setValue: VisOptionsSetValue;
+  options: Array<{ value: ValidParamValues; text: string }>;
+  paramName: ParamName;
+  value: ValidParamValues;
+  setValue: (paramName: ParamName, value: ValidParamValues) => void;
 }
 
-function SelectOption({ label, options, paramName, value, setValue }: SelectOptionProps) {
+function SelectOption<ParamName extends string, ValidParamValues extends string>({
+  label,
+  options,
+  paramName,
+  value,
+  setValue,
+}: SelectOptionProps<ParamName, ValidParamValues>) {
   return (
     <EuiFormRow label={label} fullWidth={true} compressed>
       <EuiSelect
         options={options}
         value={value}
-        onChange={ev => setValue(paramName, ev.target.value)}
+        onChange={ev => setValue(paramName, ev.target.value as ValidParamValues)}
         fullWidth={true}
       />
     </EuiFormRow>
