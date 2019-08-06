@@ -370,7 +370,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const cancelExists = await testSubjects.exists('layerAddCancelButton');
       if (cancelExists) {
         await testSubjects.click('layerAddCancelButton');
-        await PageObjects.maps.waitForLayerAddPanelClosed();
+        await this.waitForLayerAddPanelClosed();
         if (layerName) {
           await this.waitForLayerDeleted(layerName);
         }
