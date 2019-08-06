@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ServerFacade } from '../..';
 import { InstallationType } from '../../common/installation';
-import { LanguageServer } from '../../common/language_server';
+import { CTAGS_SUPPORT_LANGS, LanguageServer } from '../../common/language_server';
 import { CtagsLauncher } from './ctags_launcher';
 import { GoServerLauncher } from './go_launcher';
 import { JavaLauncher } from './java_launcher';
 import { LauncherConstructor } from './language_server_launcher';
 import { TypescriptServerLauncher } from './ts_launcher';
-import { CTAGS_SUPPORT_LANGS } from '../../common/language_server';
-import { ServerFacade } from '../..';
 
 export interface LanguageServerDefinition extends LanguageServer {
   builtinWorkspaceFolders: boolean;
@@ -53,8 +52,13 @@ export const GO: LanguageServerDefinition = {
   languages: ['go'],
   launcher: GoServerLauncher,
   installationType: InstallationType.Plugin,
-  installationPluginName: 'goLanguageServer',
+  installationPluginName: 'go-langserver',
   priority: 2,
+  installationFolderName: 'golsp',
+  downloadUrl: (version: string, devMode?: boolean) =>
+    devMode!
+      ? `https://snapshots.elastic.co/downloads/go-langserver-plugins/go-langserver/go-langserver-${version}-SNAPSHOT-$OS.zip`
+      : `https://artifacts.elastic.co/downloads/go-langserver-plugins/go-langserver/go-langserver-${version}-$OS.zip`,
 };
 export const CTAGS: LanguageServerDefinition = {
   name: 'Ctags',
