@@ -5,7 +5,7 @@
  */
 
 import puppeteer from 'puppeteer';
-// @ts-ignore lacking typedefs
+// @ts-ignore lacking typedefs which this module fixes
 import puppeteerCore from 'puppeteer-core';
 
 // We export a set of types and other methods since we use puppeteer-core, which has an outdated @types package.

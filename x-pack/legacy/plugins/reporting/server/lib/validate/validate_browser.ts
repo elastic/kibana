@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // @ts-ignore no module definition
-import * as puppeteer from 'puppeteer-core';
+import { Browser } from '../../browsers/chromium/puppeteer';
 import { KbnServer, Logger } from '../../../types';
 import { CHROMIUM } from '../../browsers/browser_types';
 
@@ -21,7 +21,7 @@ export const validateBrowser = async (server: KbnServer, browserFactory: any, lo
         },
         logger
       )
-      .then((browser: puppeteer.Browser | null) => {
+      .then((browser: Browser | null) => {
         if (browser && browser.close) {
           browser.close();
         } else {

@@ -11,7 +11,7 @@ import * as Rx from 'rxjs';
 import { map, share, mergeMap, filter, partition } from 'rxjs/operators';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 
-import { launch, Browser, Page } from './puppeteer';
+import { launch, Browser, Page } from '../puppeteer';
 import { HeadlessChromiumDriver } from '../driver';
 import { args, IArgOptions } from './args';
 import { safeChildProcess } from '../../safe_child_process';
