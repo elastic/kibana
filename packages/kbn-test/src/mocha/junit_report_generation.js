@@ -25,7 +25,7 @@ import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
-import { escapeCdata } from '../xml';
+import { escapeCdata } from '../../../../src/dev/xml';
 
 const dateNow = Date.now.bind(Date);
 
@@ -38,17 +38,13 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   const stats = {};
   const results = [];
 
-  const getDuration = (node) => (
-    node.startTime && node.endTime
-      ? ((node.endTime - node.startTime) / 1000).toFixed(3)
-      : null
-  );
+  const getDuration = node =>
+    node.startTime && node.endTime ? ((node.endTime - node.startTime) / 1000).toFixed(3) : null;
 
-  const findAllTests = (suite) => (
-    suite.suites.reduce((acc, suite) => acc.concat(findAllTests(suite)), suite.tests)
-  );
+  const findAllTests = suite =>
+    suite.suites.reduce((acc, suite) => acc.concat(findAllTests(suite)), suite.tests);
 
-  const setStartTime = (node) => {
+  const setStartTime = node => {
     node.startTime = dateNow();
   };
 
@@ -78,7 +74,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   runner.on('hook', setStartTime);
   runner.on('hook end', setEndTime);
   runner.on('test', setStartTime);
-  runner.on('pass', (node) => results.push({ node }));
+  runner.on('pass', node => results.push({ node }));
   runner.on('pass', setEndTime);
   runner.on('fail', (node, error) => results.push({ failed: true, error, node }));
   runner.on('fail', setEndTime);
@@ -128,9 +124,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
 
     [...results, ...skippedResults].forEach(result => {
       const el = addTestcaseEl(result.node);
-      el.ele('system-out').dat(
-        escapeCdata(getSnapshotOfRunnableLogs(result.node) || '')
-      );
+      el.ele('system-out').dat(escapeCdata(getSnapshotOfRunnableLogs(result.node) || ''));
 
       if (result.failed) {
         el.ele('failure').dat(escapeCdata(inspect(result.error)));
@@ -147,7 +141,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       pretty: true,
       indent: '  ',
       newline: '\n',
-      spacebeforeslash: ''
+      spacebeforeslash: '',
     });
 
     mkdirp.sync(dirname(reportPath));

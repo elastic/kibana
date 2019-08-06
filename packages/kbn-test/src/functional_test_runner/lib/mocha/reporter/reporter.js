@@ -28,7 +28,7 @@ import * as colors from './colors';
 import * as symbols from './symbols';
 import { ms } from './ms';
 import { writeEpilogue } from './write_epilogue';
-import { recordLog, snapshotLogsForRunnable } from '../../../../../../../src/dev/mocha/log_cache';
+import { recordLog, snapshotLogsForRunnable } from '../../../../mocha/log_cache';
 
 export function MochaReporterProvider({ getService }) {
   const log = getService('log');
