@@ -18,16 +18,12 @@
  */
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
-import { DocViewRenderProps, DocView } from 'ui/registry/doc_views';
+import { getDocViewsSorted, DocViewRenderProps } from 'ui/registry/doc_views';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 
-interface Props {
-  docViews: DocView[];
-  renderProps: DocViewRenderProps;
-}
-
-export function DocViewer({ docViews, renderProps }: Props) {
-  const tabs = docViews.map(({ title, render, directive, component }) => {
+export function DocViewer(renderProps: DocViewRenderProps) {
+  const docViews = getDocViewsSorted(renderProps.hit);
+  const tabs = docViews.map(({ title, render, component }) => {
     let content;
     if (component) {
       const Component = component;

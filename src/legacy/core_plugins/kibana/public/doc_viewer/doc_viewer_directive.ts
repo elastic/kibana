@@ -16,15 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import ReactDOM from 'react-dom';
+
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { getDocViewsSorted, DocViewRenderProps } from 'ui/registry/doc_views';
 import { DocViewer } from './doc_viewer';
 
-uiModules.get('apps/discover').directive('docViewer', () => {
-  return {
+uiModules.get('apps/discover').directive('docViewer', (reactDirective: any) => {
+  return reactDirective(DocViewer, undefined, {
     restrict: 'E',
     scope: {
       hit: '=',
@@ -34,18 +32,5 @@ uiModules.get('apps/discover').directive('docViewer', () => {
       onAddColumn: '=?',
       onRemoveColumn: '=?',
     },
-
-    link: (scope: DocViewRenderProps, element: Element[]) => {
-      const props = {
-        columns: scope.columns,
-        filter: scope.filter,
-        indexPattern: scope.indexPattern,
-        onAddColumn: scope.onAddColumn,
-        onRemoveColumn: scope.onRemoveColumn,
-        hit: scope.hit,
-      };
-      const docViews = getDocViewsSorted(scope.hit);
-      ReactDOM.render(<DocViewer renderProps={props} docViews={docViews} />, element[0]);
-    },
-  };
+  });
 });
