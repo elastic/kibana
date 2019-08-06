@@ -17,11 +17,14 @@
  * under the License.
  */
 
-import tileMapTemplate from './tile_map_vis_params.html';
+export interface TmsLayer {
+  id: string;
+  origin: string;
+  minZoom: string;
+  maxZoom: number;
+  attribution: string;
+}
 
-export function TileMapVisParams() {
-  return {
-    restrict: 'E',
-    template: tileMapTemplate,
-  };
+export interface ServiceSettings {
+  getTMSServices(): Promise<TmsLayer[]>;
 }
