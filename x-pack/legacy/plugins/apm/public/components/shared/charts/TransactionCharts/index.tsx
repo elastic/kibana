@@ -22,7 +22,11 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { asInteger, asMillis, tpmUnit } from '../../../../utils/formatters';
+import {
+  asInteger,
+  tpmUnit,
+  TimeFormatter
+} from '../../../../utils/formatters';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { TransactionLineChart } from './TransactionLineChart';
