@@ -19,6 +19,7 @@
 
 import expect from '@kbn/expect';
 import { getEMSClient } from './ems_client_util';
+import EMS_STYLE_BRIGHT_PROXIED  from './ems_mocks/sample_style_bright_proxied.json';
 
 describe('ems_client', () => {
 
@@ -29,7 +30,6 @@ describe('ems_client', () => {
     const tiles = await emsClient.getTMSServices();
 
     expect(tiles.length).to.be(3);
-
 
     const tileService = tiles[0];
     expect(await tileService.getUrlTemplate()).to.be('https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x');
@@ -182,6 +182,32 @@ describe('ems_client', () => {
     const emsClient = getEMSClient();
     const tmsService = await emsClient.findTMSServiceById('road_map');
     expect(tmsService.getId()).to.be('road_map');
+
+  });
+
+
+  it('should prepend proxypath', async () => {
+
+
+    const emsClient = getEMSClient({
+      proxyPath: 'http://proxy.com/foobar',
+      manifestServiceUrl: 'http://proxy.com/foobar/manifest'
+    });
+
+    //should prepend the proxypath to all urls, for tiles and files
+    const tmsServices = await emsClient.getTMSServices();
+    expect(tmsServices.length).to.be(1);
+    const tmsService = tmsServices[0];
+    tmsService._getRasterStyleJson = () => {
+      return EMS_STYLE_BRIGHT_PROXIED;
+    };
+    const urlTemplate = await tmsServices[0].getUrlTemplate();
+    expect(urlTemplate).to.be('http://proxy.com/foobar/tiles/raster/osm_bright/{x}/{y}/{z}/.jpg?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x');
+
+    const fileLayers = await emsClient.getFileLayers();
+    expect(fileLayers.length).to.be(1);
+    const fileLayer = fileLayers[0];
+    expect(fileLayer.getDefaultFormatUrl()).to.be('http://proxy.com/foobar/files/world_countries.json?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x');
 
   });
 

@@ -42,6 +42,9 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
+        description: 'A slack action',
+        actionTypeId: '.slack',
+        config: {},
       });
 
       expect(typeof createdAction.id).to.be('string');
