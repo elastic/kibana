@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import {
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
   getLogEntryRateRequestPayloadRT,
@@ -16,6 +15,7 @@ import {
   createPlainError,
   throwErrors,
 } from '../../../../legacy/plugins/infra/common/runtime_types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const TIME_BEFORE_START = 1564315100000;
 const TIME_AFTER_END = 1565040700000;
@@ -24,7 +24,7 @@ const COMMON_HEADERS = {
 };
 
 // eslint-disable-next-line import/no-default-export
-export default ({ getService }: KibanaFunctionalTestDefaultProviders) => {
+export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
