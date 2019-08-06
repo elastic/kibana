@@ -8,9 +8,9 @@ import expect from '@kbn/expect';
 import { ascending, pairs } from 'd3-array';
 import gql from 'graphql-tag';
 
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { sharedFragments } from '../../../../legacy/plugins/infra/common/graphql/shared';
 import { InfraTimeKey } from '../../../../legacy/plugins/infra/public/graphql/types';
-import { KbnTestProvider } from './types';
 
 const KEY_BEFORE_START = {
   time: new Date('2000-01-01T00:00:00.000Z').valueOf(),
@@ -29,7 +29,7 @@ const KEY_AFTER_END = {
   tiebreaker: 0,
 };
 
-const logEntryHighlightsTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
@@ -238,7 +238,7 @@ const logEntryHighlightsTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
+}
 
 const logEntryHighlightsQuery = gql`
   query LogEntryHighlightsQuery(
@@ -272,9 +272,6 @@ const logEntryHighlightsQuery = gql`
   ${sharedFragments.InfraTimeKey}
   ${sharedFragments.InfraLogEntryHighlightFields}
 `;
-
-// eslint-disable-next-line import/no-default-export
-export default logEntryHighlightsTests;
 
 const isSorted = <Value>(comparator: (first: Value, second: Value) => number) => (
   values: Value[]

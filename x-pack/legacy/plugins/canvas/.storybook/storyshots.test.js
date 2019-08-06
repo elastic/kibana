@@ -15,6 +15,10 @@ import { addSerializer } from 'jest-specific-snapshot';
 // Set our default timezone to UTC for tests so we can generate predictable snapshots
 moment.tz.setDefault('UTC');
 
+// Freeze time for the tests for predictable snapshots
+const testTime = new Date(Date.UTC(2019, 5, 1)); // June 1 2019
+Date.now = jest.fn(() => testTime);
+
 // Mock EUI generated ids to be consistently predictable for snapshots.
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 
@@ -30,16 +34,6 @@ jest.mock('../canvas_plugin_src/renderers/shape/shapes', () => ({
     </svg>`,
   },
 }));
-
-// Mock datetime parsing so we can get stable results for tests (even while using the `now` format)
-jest.mock('@elastic/datemath', () => {
-  return {
-    parse: (d, opts) => {
-      const dateMath = jest.requireActual('@elastic/datemath');
-      return dateMath.parse(d, { ...opts, forceNow: new Date(Date.UTC(2019, 5, 1)) }); // June 1 2019
-    },
-  };
-});
 
 // Mock react-datepicker dep used by eui to avoid rendering the entire large component
 jest.mock('@elastic/eui/packages/react-datepicker', () => {

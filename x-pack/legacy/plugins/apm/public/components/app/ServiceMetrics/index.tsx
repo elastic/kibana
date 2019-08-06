@@ -21,18 +21,18 @@ export function ServiceMetrics({ agentName }: ServiceMetricsProps) {
   const { start, end } = urlParams;
   return (
     <React.Fragment>
-      <EuiFlexGrid columns={2} gutterSize="s">
-        {data.charts.map(chart => (
-          <EuiFlexItem key={chart.key}>
-            <EuiPanel>
-              <ChartsSyncContextProvider>
+      <ChartsSyncContextProvider>
+        <EuiFlexGrid columns={2} gutterSize="s">
+          {data.charts.map(chart => (
+            <EuiFlexItem key={chart.key}>
+              <EuiPanel>
                 <MetricsChart start={start} end={end} chart={chart} />
-              </ChartsSyncContextProvider>
-            </EuiPanel>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
-      <EuiSpacer size="xxl" />
+              </EuiPanel>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+        <EuiSpacer size="xxl" />
+      </ChartsSyncContextProvider>
     </React.Fragment>
   );
 }

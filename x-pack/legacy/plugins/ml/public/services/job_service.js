@@ -740,6 +740,16 @@ class JobService {
   }
 
 
+  async getJobAndGroupIds() {
+    try {
+      return await ml.jobs.getAllJobAndGroupIds();
+    } catch (error) {
+      return {
+        jobIds: [],
+        groupIds: [],
+      };
+    }
+  }
 }
 
 // private function used to check the job saving response

@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import path from 'path';
+import { HeadlessChromiumDriver } from '../../../server/browsers/chromium/driver';
 import { EvaluateOptions, KbnServer, Size } from '../../../types';
 import { LayoutTypes } from '../constants';
-import { Layout } from './layout';
+import { Layout, LayoutSelectorDictionary } from './layout';
 import { CaptureConfig } from './types';
 
-interface BrowserClient {
-  evaluate: (evaluateOptions: EvaluateOptions) => void;
-}
-
 export class PrintLayout extends Layout {
-  public readonly selectors = {
+  public readonly selectors: LayoutSelectorDictionary = {
     screenshot: '[data-shared-item]',
     renderComplete: '[data-shared-item]',
     itemsCountAttribute: 'data-shared-items-count',
@@ -52,7 +49,7 @@ export class PrintLayout extends Layout {
     };
   }
 
-  public async positionElements(browser: BrowserClient): Promise<void> {
+  public async positionElements(browser: HeadlessChromiumDriver): Promise<void> {
     const elementSize: Size = {
       width: this.captureConfig.viewport.width / this.captureConfig.zoom,
       height: this.captureConfig.viewport.height / this.captureConfig.zoom,

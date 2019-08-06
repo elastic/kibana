@@ -16,9 +16,9 @@ export function registerTasks(server: HapiServer) {
       title: 'X-Pack telemetry calculator for Visualizations',
       type: VIS_TELEMETRY_TASK,
       numWorkers: VIS_TELEMETRY_TASK_NUM_WORKERS, // by default it's 100% their workers
-      createTaskRunner({ taskInstance, kbnServer }: { kbnServer: any; taskInstance: any }) {
+      createTaskRunner({ taskInstance }: { taskInstance: any }) {
         return {
-          run: visualizationsTaskRunner(taskInstance, kbnServer),
+          run: visualizationsTaskRunner(taskInstance, server),
         };
       },
     },

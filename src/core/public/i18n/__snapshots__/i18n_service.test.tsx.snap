@@ -46,7 +46,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiSelectable.loadingOptions": "Loading options",
           "euiSelectable.noAvailableOptions": "There aren't any options available",
           "euiSelectable.noMatchingOptions": [Function],
-          "euiStat.loadingText": [Function],
+          "euiStat.loadingText": "Statistic is loading",
           "euiStep.completeStep": "Step",
           "euiStep.incompleteStep": "Incomplete Step",
           "euiStepHorizontal.buttonTitle": [Function],

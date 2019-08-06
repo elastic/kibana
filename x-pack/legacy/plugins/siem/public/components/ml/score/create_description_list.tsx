@@ -88,7 +88,7 @@ export const createDescriptionList = (
       title: i18n.INFLUENCED_BY,
       description: (
         <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-          {createInfluencers(score)}
+          {createInfluencers(score.influencers)}
         </EuiFlexGroup>
       ),
     },
