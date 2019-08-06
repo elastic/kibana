@@ -38,6 +38,7 @@ PUT /api/security/role/my_kibana_role
 
 
 ==== Feature privileges
+[[kibana-feature-privileges]]
 Assigning a feature privilege grants access to a specific feature.
 
 `all`:: Grants full read-write access.

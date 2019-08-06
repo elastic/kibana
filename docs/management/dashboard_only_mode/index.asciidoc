@@ -2,6 +2,8 @@
 [[xpack-dashboard-only-mode]]
 == Kibana Dashboard Only Mode
 
+deprecated[7.4.0, Using the `kibana_dashboard_only_user` role is deprecated. We recommend using <<kibana-feature-privileges,feature privileges>> instead.]
+
 If {security} is enabled, you can use the `kibana_dashboard_only_user` built-in role to limit 
 what users see when they log in to {kib}. The `kibana_dashboard_only_user` role is 
 preconfigured with read-only permissions to {kib}.
