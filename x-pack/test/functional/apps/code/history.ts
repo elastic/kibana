@@ -23,7 +23,7 @@ export default function manageRepositoriesFunctionalTests({
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
   describe('History', function() {
-    this.tags('skipFirefox');
+    this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
     describe('browser history can go back while exploring code app', () => {
