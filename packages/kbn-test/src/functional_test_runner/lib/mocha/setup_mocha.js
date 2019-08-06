@@ -36,14 +36,11 @@ export async function setupMocha(lifecycle, log, config, providers) {
   // configure mocha
   const mocha = new Mocha({
     ...config.get('mochaOpts'),
-    reporter: await providers.loadExternalService(
-      'mocha reporter',
-      MochaReporterProvider
-    )
+    reporter: await providers.loadExternalService('mocha reporter', MochaReporterProvider),
   });
 
   // global beforeEach hook in root suite triggers before all others
-  mocha.suite.beforeEach('global before each', async function () {
+  mocha.suite.beforeEach('global before each', async function() {
     await lifecycle.trigger('beforeEachTest', this.currentTest);
   });
 
