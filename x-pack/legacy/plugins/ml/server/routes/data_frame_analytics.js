@@ -101,10 +101,6 @@ export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugi
         analyticsId: request.params.analyticsId
       };
 
-      if (request.query.force !== undefined) {
-        options.force = request.query.force;
-      }
-
       return callWithRequest('ml.startDataFrameAnalytics', options)
         .catch(resp => wrapError(resp));
     },

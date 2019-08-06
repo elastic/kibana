@@ -6,14 +6,9 @@
 
 import { DataFrameAnalyticsId, DataFrameAnalyticsOutlierConfig } from '../../../../common';
 
-export enum DATA_FRAME_INDEXER_STATE {
-  FAILED = 'failed',
-  STARTED = 'started',
-  STOPPED = 'stopped',
-}
-
 export enum DATA_FRAME_TASK_STATE {
   FAILED = 'failed',
+  REINDEXING = 'reindexing',
   STARTED = 'started',
   STOPPED = 'stopped',
 }
@@ -38,7 +33,16 @@ export interface Query {
 }
 
 export interface DataFrameAnalyticsStats {
+  assignment_explanation?: string;
   id: DataFrameAnalyticsId;
+  node?: {
+    attributes: Record<string, any>;
+    ephemeral_id: string;
+    id: string;
+    name: string;
+    transport_address: string;
+  };
+  progress_percent?: number;
   reason?: string;
   state: DATA_FRAME_TASK_STATE;
 }
@@ -71,5 +75,5 @@ export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
 export function isCompletedBatchAnalytics(item: DataFrameAnalyticsListRow) {
   // For now all analytics jobs are batch jobs.
-  return true;
+  return false;
 }

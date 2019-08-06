@@ -177,13 +177,10 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.startDataFrameAnalytics = ca({
     urls: [
       {
-        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>/_start?&force=<%=force%>',
+        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>/_start',
         req: {
           analyticsId: {
             type: 'string'
-          },
-          force: {
-            type: 'boolean'
           }
         }
       }

@@ -46,9 +46,9 @@ export const dataFrameAnalytics = {
       method: 'DELETE',
     });
   },
-  startDataFrameAnalytics(analyticsId, force = false) {
+  startDataFrameAnalytics(analyticsId) {
     return http({
-      url: `${basePath}/data_frame/analytics/${analyticsId}/_start?force=${force}`,
+      url: `${basePath}/data_frame/analytics/${analyticsId}/_start`,
       method: 'POST',
     });
   },

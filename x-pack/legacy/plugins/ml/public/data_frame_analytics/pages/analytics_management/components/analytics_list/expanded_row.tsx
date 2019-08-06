@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { DataFrameAnalyticsListRow } from './common';
 import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
-import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
+// import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 
 function getItemDescription(value: any) {
   if (typeof value === 'object') {
@@ -68,6 +68,8 @@ export const ExpandedRow: SFC<Props> = ({ item }) => {
       name: 'JSON',
       content: <ExpandedRowJsonPane json={item.config} />,
     },
+    // Audit messages are not yet supported by the analytics API.
+    /*
     {
       id: 'analytics-messages',
       name: i18n.translate(
@@ -78,6 +80,7 @@ export const ExpandedRow: SFC<Props> = ({ item }) => {
       ),
       content: <ExpandedRowMessagesPane analyticsId={item.id} />,
     },
+    */
   ];
   return (
     <EuiTabbedContent

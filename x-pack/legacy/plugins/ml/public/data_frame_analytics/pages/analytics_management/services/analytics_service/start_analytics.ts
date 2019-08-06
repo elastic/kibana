@@ -10,17 +10,11 @@ import { ml } from '../../../../../services/ml_api_service';
 
 import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
 
-import {
-  DATA_FRAME_TASK_STATE,
-  DataFrameAnalyticsListRow,
-} from '../../components/analytics_list/common';
+import { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';
 
 export const startAnalytics = async (d: DataFrameAnalyticsListRow) => {
   try {
-    await ml.dataFrameAnalytics.startDataFrameAnalytics(
-      d.config.id,
-      d.stats.state === DATA_FRAME_TASK_STATE.FAILED
-    );
+    await ml.dataFrameAnalytics.startDataFrameAnalytics(d.config.id);
     toastNotifications.addSuccess(
       i18n.translate('xpack.ml.dataframe.analyticsList.startAnalyticsSuccessMessage', {
         defaultMessage: 'Data frame analytics {analyticsId} started successfully.',

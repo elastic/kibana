@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -28,6 +29,7 @@ import { getActions } from './actions';
 
 enum TASK_STATE_COLOR {
   failed = 'danger',
+  reindexing = 'primary',
   started = 'primary',
   stopped = 'hollow',
 }
@@ -132,6 +134,8 @@ export const getColumns = (
       },
       width: '100px',
     },
+    // For now there is batch mode only so we hide this column for now.
+    /*
     {
       name: i18n.translate('xpack.ml.dataframe.mode', { defaultMessage: 'Mode' }),
       sortable: (item: DataFrameAnalyticsListRow) => item.config.mode,
@@ -143,13 +147,19 @@ export const getColumns = (
       },
       width: '100px',
     },
+    */
     {
       name: i18n.translate('xpack.ml.dataframe.progress', { defaultMessage: 'Progress' }),
-      sortable: (item: DataFrameAnalyticsListRow) => 0,
+      sortable: (item: DataFrameAnalyticsListRow) => idx(item, _ => _.stats.progress_percent) || 0,
       truncateText: true,
       render(item: DataFrameAnalyticsListRow) {
-        const progress = Math.round(0);
+        if (item.stats.progress_percent === undefined) {
+          return null;
+        }
 
+        const progress = Math.round(item.stats.progress_percent);
+
+        // For now all analytics jobs are batch jobs.
         const isBatchTransform = true;
 
         return (
