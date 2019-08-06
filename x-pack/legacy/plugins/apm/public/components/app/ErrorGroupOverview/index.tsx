@@ -13,7 +13,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { useFetcher } from '../../../hooks/useFetcher';
 import {
   loadErrorDistribution,
@@ -61,21 +60,17 @@ const ErrorGroupOverview: React.SFC = () => {
   });
   useTrackPageview({ app: 'apm', path: 'error_group_overview', delay: 15000 });
 
-  const localUIFiltersConfig = useMemo(
-    () => ({
-      filterNames: [
-        'transactionResult',
-        'host',
-        'containerId',
-        'podId'
-      ] as LocalUIFilterName[],
+  const localUIFiltersConfig = useMemo(() => {
+    const config: React.ComponentProps<typeof LocalUIFilters> = {
+      filterNames: ['transactionResult', 'host', 'containerId', 'podId'],
       params: {
         serviceName
       },
       projection: PROJECTION.ERROR_GROUPS
-    }),
-    [serviceName]
-  );
+    };
+
+    return config;
+  }, [serviceName]);
 
   if (!errorDistributionData || !errorGroupListData) {
     return null;

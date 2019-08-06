@@ -12,7 +12,7 @@ import React, {
   useState
 } from 'react';
 import { withRouter } from 'react-router-dom';
-import { uniqueId, mapValues, pick } from 'lodash';
+import { uniqueId, mapValues } from 'lodash';
 import { IUrlParams } from './types';
 import { getParsedDate } from './helpers';
 import { resolveUrlParams } from './resolveUrlParams';
@@ -21,6 +21,7 @@ import {
   localUIFilterNames,
   LocalUIFilterName
 } from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { pickKeys } from '../../utils/pickKeys';
 
 interface TimeRange {
   rangeFrom: string;
@@ -33,12 +34,9 @@ function useUiFilters(
   return useMemo(() => {
     const { kuery, environment, ...localUIFilters } = params;
     const mappedLocalFilters = mapValues(
-      pick(localUIFilters, localUIFilterNames) as Record<
-        LocalUIFilterName,
-        IUrlParams[LocalUIFilterName]
-      >,
+      pickKeys(localUIFilters, ...localUIFilterNames),
       val => (val ? val.split(',') : [])
-    );
+    ) as Partial<Record<LocalUIFilterName, string[]>>;
 
     return { kuery, environment, ...mappedLocalFilters };
   }, [params]);

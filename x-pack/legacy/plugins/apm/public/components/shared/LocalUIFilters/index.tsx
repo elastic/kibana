@@ -23,6 +23,7 @@ interface Props {
   filterNames: LocalUIFilterName[];
   params?: Record<string, string | number | boolean | undefined>;
   showCount?: boolean;
+  children?: React.ReactNode;
 }
 
 const ButtonWrapper = styled.div`
@@ -31,9 +32,13 @@ const ButtonWrapper = styled.div`
   }
 `;
 
-const LocalUIFilters: React.FC<Props> = props => {
-  const { projection, params, filterNames, children, showCount = true } = props;
-
+const LocalUIFilters = ({
+  projection,
+  params,
+  filterNames,
+  children,
+  showCount = true
+}: Props) => {
   const { data: filters, values, setValues } = useLocalUIFilters({
     filterNames,
     projection,

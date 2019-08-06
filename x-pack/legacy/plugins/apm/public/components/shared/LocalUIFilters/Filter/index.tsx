@@ -7,7 +7,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   EuiTitle,
-  EuiButtonEmpty,
   EuiPopover,
   EuiSelectable,
   EuiSpacer,
@@ -22,6 +21,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import styled from 'styled-components';
 import { FilterBadgeList } from './FilterBadgeList';
 import { unit, px } from '../../../../style/variables';
+import { FilterTitleButton } from './FilterTitleButton';
 
 const Popover = styled(EuiPopover).attrs({
   anchorClassName: 'anchor'
@@ -57,46 +57,35 @@ interface Props {
   showCount: boolean;
 }
 
-const Filter: React.FC<Props> = props => {
-  const { name, title, options, onChange, value, showCount } = props;
+type Option = EuiSelectable['props']['options'][0];
 
+const Filter = ({
+  name,
+  title,
+  options,
+  onChange,
+  value,
+  showCount
+}: Props) => {
   const [showPopover, setShowPopover] = useState(false);
 
-  const toggleShowPopover = () => setShowPopover(!showPopover);
+  const toggleShowPopover = () => setShowPopover(show => !show);
 
   const button = (
-    <EuiButtonEmpty
-      flush="left"
-      color="text"
-      onClick={toggleShowPopover}
-      style={{ display: 'block' }}
-    >
-      <EuiTitle size="xxxs" textTransform="uppercase">
-        <h4>{title}</h4>
-      </EuiTitle>
-    </EuiButtonEmpty>
+    <FilterTitleButton onClick={toggleShowPopover}>{title}</FilterTitleButton>
   );
 
-  const items = useMemo(
+  const items: Option[] = useMemo(
     () =>
-      options.map(
-        option =>
-          ({
-            label: option.name,
-            append: showCount ? (
-              <Counter>
-                <EuiText size="xs">{option.count}</EuiText>
-              </Counter>
-            ) : null,
-            ...(value.includes(option.name)
-              ? { checked: 'on' as 'on' | 'off' | 'undefined' }
-              : {})
-          } as {
-            label: string;
-            append?: React.ReactNode;
-            checked?: 'on' | 'off' | undefined;
-          })
-      ),
+      options.map(option => ({
+        label: option.name,
+        append: showCount ? (
+          <Counter>
+            <EuiText size="xs">{option.count}</EuiText>
+          </Counter>
+        ) : null,
+        ...(value.includes(option.name) ? { checked: 'on' } : {})
+      })),
     [value, options, showCount]
   );
 

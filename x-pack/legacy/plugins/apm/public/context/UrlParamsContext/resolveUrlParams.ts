@@ -5,7 +5,6 @@
  */
 
 import { Location } from 'history';
-import { pick } from 'lodash';
 import { IUrlParams } from './types';
 import {
   getPathParams,
@@ -18,10 +17,8 @@ import {
 } from './helpers';
 import { toQuery } from '../../components/shared/Links/url_helpers';
 import { TIMEPICKER_DEFAULTS } from './constants';
-import {
-  localUIFilterNames,
-  LocalUIFilterName
-} from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { localUIFilterNames } from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { pickKeys } from '../../utils/pickKeys';
 
 type TimeUrlParams = Pick<
   IUrlParams,
@@ -56,9 +53,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     environment
   } = query;
 
-  const localUIFilters = pick(query, localUIFilterNames) as Partial<
-    Pick<IUrlParams, LocalUIFilterName>
-  >;
+  const localUIFilters = pickKeys(query, ...localUIFilterNames);
 
   return removeUndefinedProps({
     // date params

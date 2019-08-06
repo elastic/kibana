@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useMemo, useCallback } from 'react';
-import { pick, omit, mapValues } from 'lodash';
+import { omit, mapValues } from 'lodash';
 import { useFetcher } from './useFetcher';
 import { callApi } from '../services/rest/callApi';
 import { LocalUIFiltersAPIResponse } from '../../server/lib/ui_filters/local_ui_filters';
@@ -15,7 +14,7 @@ import { history } from '../utils/history';
 import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { removeUndefinedProps } from '../context/UrlParamsContext/helpers';
 import { PROJECTION } from '../projections/typings';
-import { UIFilters } from '../../typings/ui-filters';
+import { pickKeys } from '../utils/pickKeys';
 
 const initialData = [] as LocalUIFiltersAPIResponse;
 
@@ -30,28 +29,23 @@ export const useLocalUIFilters = ({
 }) => {
   const { uiFilters, urlParams } = useUrlParams();
 
-  const values = useMemo(() => {
-    return pick(uiFilters, filterNames) as Pick<UIFilters, LocalUIFilterName>;
-  }, [uiFilters, filterNames]);
+  const values = pickKeys(uiFilters, ...filterNames);
 
-  const setValues = useCallback(
-    (vals: typeof values) => {
-      const search = omit(toQuery(history.location.search), filterNames);
+  const setValues = (vals: typeof values) => {
+    const search = omit(toQuery(history.location.search), filterNames);
 
-      history.push({
-        ...history.location,
-        search: fromQuery(
-          removeUndefinedProps({
-            ...search,
-            ...mapValues(vals, val =>
-              val && val.length ? val.join(',') : undefined
-            )
-          })
-        )
-      });
-    },
-    [filterNames, values]
-  );
+    history.push({
+      ...history.location,
+      search: fromQuery(
+        removeUndefinedProps({
+          ...search,
+          ...mapValues(vals, val =>
+            val && val.length ? val.join(',') : undefined
+          )
+        })
+      )
+    });
+  };
 
   const { data = initialData, status } = useFetcher(async () => {
     const foo = await callApi<LocalUIFiltersAPIResponse>({
@@ -68,13 +62,10 @@ export const useLocalUIFilters = ({
     return foo;
   }, [uiFilters, urlParams, params, filterNames, projection]);
 
-  return useMemo(
-    () => ({
-      data,
-      status,
-      values,
-      setValues
-    }),
-    [data, status, values, setValues]
-  );
+  return {
+    data,
+    status,
+    values,
+    setValues
+  };
 };

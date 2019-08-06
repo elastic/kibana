@@ -6,7 +6,6 @@
 
 import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { loadTraceList } from '../../../services/rest/apm/traces';
 import { TraceList } from './TraceList';
@@ -27,18 +26,14 @@ export function TraceOverview() {
   useTrackPageview({ app: 'apm', path: 'traces_overview' });
   useTrackPageview({ app: 'apm', path: 'traces_overview', delay: 15000 });
 
-  const localUIFiltersConfig = useMemo(
-    () => ({
-      filterNames: [
-        'transactionResult',
-        'host',
-        'containerId',
-        'podId'
-      ] as LocalUIFilterName[],
+  const localUIFiltersConfig = useMemo(() => {
+    const config: React.ComponentProps<typeof LocalUIFilters> = {
+      filterNames: ['transactionResult', 'host', 'containerId', 'podId'],
       projection: PROJECTION.TRACES
-    }),
-    []
-  );
+    };
+
+    return config;
+  }, []);
 
   return (
     <EuiFlexGroup>

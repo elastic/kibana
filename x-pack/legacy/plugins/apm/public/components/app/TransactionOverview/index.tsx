@@ -9,7 +9,8 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiFlexGroup,
-  EuiFlexItem
+  EuiFlexItem,
+  EuiHorizontalRule
 } from '@elastic/eui';
 import { Location } from 'history';
 import { first } from 'lodash';
@@ -119,6 +120,8 @@ export function TransactionOverview() {
       <EuiFlexItem grow={1}>
         <LocalUIFilters {...localFiltersConfig}>
           <TransactionTypeFilter transactionTypes={serviceTransactionTypes} />
+          <EuiSpacer size="xl" />
+          <EuiHorizontalRule margin="none" />
         </LocalUIFilters>
       </EuiFlexItem>
       <EuiFlexItem grow={7}>

@@ -20,7 +20,7 @@ interface Props {
   transactionTypes: string[];
 }
 
-const TransactionTypeFilter: React.FC<Props> = ({ transactionTypes }) => {
+const TransactionTypeFilter = ({ transactionTypes }: Props) => {
   const {
     urlParams: { transactionType }
   } = useUrlParams();
@@ -56,8 +56,6 @@ const TransactionTypeFilter: React.FC<Props> = ({ transactionTypes }) => {
           history.push(newLocation);
         }}
       />
-      <EuiSpacer size="s" />
-      <EuiHorizontalRule margin="none" />
     </>
   );
 };

@@ -10,13 +10,11 @@ import styled from 'styled-components';
 import { unit, px } from '../../../../style/variables';
 
 const BadgeText = styled.div`
-   {
-    display: inline-block;
-    max-width: ${px(unit * 8)};
-    overflow: hidden;
-    text-overflow: ellipsis;
-    vertical-align: middle;
-  }
+  display: inline-block;
+  max-width: ${px(unit * 8)};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
 `;
 
 interface Props {
@@ -24,7 +22,7 @@ interface Props {
   onChange: (value: string[]) => void;
 }
 
-const FilterBadgeList: React.FC<Props> = ({ onChange, value }: Props) => (
+const FilterBadgeList = ({ onChange, value }: Props) => (
   <EuiFlexGrid gutterSize="s">
     {value.map(val => (
       <EuiFlexItem key={val} grow={false}>
