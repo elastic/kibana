@@ -285,7 +285,7 @@ test('`discover` properly invokes plugin discovery and ignores non-critical erro
       ui: true,
     },
     opaqueId: Symbol(),
-    initializerContext: { logger } as anyy,
+    initializerContext: { logger } as any,
   });
 
   const secondPlugin = new PluginWrapper({
