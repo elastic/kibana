@@ -24,7 +24,7 @@ import { createSelectHandler } from '../../lib/create_select_handler';
 import { YesNo } from '../../yes_no';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
-import { data } from 'plugins/data/setup';
+import { QueryBarInput } from 'plugins/data';
 import { Storage } from 'ui/storage';
 import {
   htmlIdGenerator,
@@ -44,7 +44,6 @@ import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
 
-const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
 
 export const TimeseriesConfig = injectI18n(function(props) {

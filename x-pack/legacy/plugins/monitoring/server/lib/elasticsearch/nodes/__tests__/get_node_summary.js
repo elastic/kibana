@@ -59,6 +59,7 @@ describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {
         documents: undefined,
         dataSize: undefined,
         freeSpace: undefined,
+        totalSpace: undefined,
         usedHeap: undefined,
         nodeTypeLabel: 'Node',
         nodeTypeClass: 'fa-server',
@@ -108,7 +109,8 @@ describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {
                   },
                   fs: {
                     total: {
-                      available_in_bytes: 8700
+                      available_in_bytes: 8700,
+                      total_in_bytes: 10000
                     }
                   },
                   jvm: {
@@ -135,6 +137,7 @@ describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {
         documents: 11000,
         dataSize: 35000,
         freeSpace: 8700,
+        totalSpace: 10000,
         usedHeap: 33,
         nodeTypeLabel: 'Master Node',
         nodeTypeClass: 'fa-star',

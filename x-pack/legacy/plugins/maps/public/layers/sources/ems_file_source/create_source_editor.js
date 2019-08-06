@@ -11,7 +11,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { getEmsVectorFilesMeta } from '../../../meta';
+import { getEMSClient } from '../../../meta';
 import { getEmsUnavailableMessage } from '../ems_unavailable_message';
 import { i18n } from '@kbn/i18n';
 
@@ -23,7 +23,14 @@ export class EMSFileCreateSourceEditor extends React.Component {
   };
 
   _loadFileOptions = async () => {
-    const options = await getEmsVectorFilesMeta();
+    const emsClient = getEMSClient();
+    const fileLayers = await emsClient.getFileLayers();
+    const options = fileLayers.map(fileLayer => {
+      return {
+        id: fileLayer.getId(),
+        name: fileLayer.getDisplayName()
+      };
+    });
     if (this._isMounted) {
       this.setState({
         emsFileOptionsRaw: options

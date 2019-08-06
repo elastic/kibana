@@ -167,6 +167,7 @@ export const METRICBEAT_INDEX_NAME_UNIQUE_TOKEN = '-mb-';
 
 // We use this for metricbeat migration to identify specific products that we do not have constants for
 export const ELASTICSEARCH_CUSTOM_ID = 'elasticsearch';
+export const APM_CUSTOM_ID = 'apm';
 /**
  * The id of the infra source owned by the monitoring plugin.
  */

@@ -68,6 +68,7 @@ export class TaskManager {
       serializer: opts.serializer,
       savedObjectsRepository: opts.savedObjectsRepository,
       callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
+      index: opts.config.get('xpack.task_manager.index'),
       maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
       definitions: this.definitions,
     });
@@ -78,7 +79,6 @@ export class TaskManager {
     const createRunner = (instance: ConcreteTaskInstance) =>
       new TaskManagerRunner({
         logger,
-        kbnServer: opts.kbnServer,
         instance,
         store,
         definitions: this.definitions,

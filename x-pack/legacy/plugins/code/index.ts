@@ -32,7 +32,7 @@ export const code = (kibana: any) =>
     uiExports: {
       app: {
         title: APP_TITLE,
-        main: 'plugins/code/app',
+        main: 'plugins/code/index',
         euiIconType: 'codeApp',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
@@ -101,6 +101,10 @@ export const code = (kibana: any) =>
             .items(Joi.string())
             .default(['https', 'git', 'ssh']),
           enableGitCertCheck: Joi.boolean().default(true),
+        }).default(),
+        disk: Joi.object({
+          thresholdEnabled: Joi.bool().default(true),
+          watermarkLowMb: Joi.number().default(2048),
         }).default(),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now

@@ -17,7 +17,7 @@ export const CATEGORIES = i18n.translate('xpack.siem.fieldBrowser.categoriesTitl
 export const CATEGORIES_COUNT = (totalCount: number) =>
   i18n.translate('xpack.siem.fieldBrowser.categoriesCountTitle', {
     values: { totalCount },
-    defaultMessage: '{totalCount} {totalCount, plural, =1 {Category} other {Categories}}',
+    defaultMessage: '{totalCount} {totalCount, plural, =1 {category} other {categories}}',
   });
 
 export const COPY_TO_CLIPBOARD = i18n.translate('xpack.siem.fieldBrowser.copyToClipboard', {
@@ -43,7 +43,7 @@ export const FIELDS = i18n.translate('xpack.siem.fieldBrowser.fieldsTitle', {
 export const FIELDS_COUNT = (totalCount: number) =>
   i18n.translate('xpack.siem.fieldBrowser.fieldsCountTitle', {
     values: { totalCount },
-    defaultMessage: '{totalCount} {totalCount, plural, =1 {Field} other {Fields}}',
+    defaultMessage: '{totalCount} {totalCount, plural, =1 {field} other {fields}}',
   });
 
 export const FILTER_PLACEHOLDER = i18n.translate('xpack.siem.fieldBrowser.filterPlaceholder', {

@@ -17,7 +17,7 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/kerberos_api_integration/anonymous_access.config'),
   require.resolve('../test/saml_api_integration/config.js'),
   require.resolve('../test/token_api_integration/config.js'),
-  // require.resolve('../test/oidc_api_integration/config.js'),
+  require.resolve('../test/oidc_api_integration/config.js'),
   require.resolve('../test/spaces_api_integration/spaces_only/config'),
   require.resolve('../test/spaces_api_integration/security_and_spaces/config_trial'),
   require.resolve('../test/spaces_api_integration/security_and_spaces/config_basic'),

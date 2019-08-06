@@ -87,7 +87,12 @@ export class HeadlessChromiumDriverFactory {
   }: {
     viewport: IArgOptions['viewport'];
     browserTimezone: string;
-  }): Rx.Observable<any> {
+  }): Rx.Observable<{
+    driver$: Rx.Observable<HeadlessChromiumDriver>;
+    consoleMessage$: Rx.Observable<string>;
+    message$: Rx.Observable<string>;
+    exit$: Rx.Observable<never>;
+  }> {
     return Rx.Observable.create(async (observer: InnerSubscriber<any, any>) => {
       const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
       const chromiumArgs = args({
