@@ -36,7 +36,6 @@ import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
-import { IFilterBarContext, FilterBarContextProvider } from './filter_bar_context';
 
 interface Props {
   filters: Filter[];
@@ -59,44 +58,38 @@ class FilterBarUI extends Component<Props, State> {
   public render() {
     const classes = classNames('globalFilterBar', this.props.className);
 
-    const filterBarContext: IFilterBarContext = {
-      uiSettings: this.props.uiSettings,
-    };
-
     return (
-      <FilterBarContextProvider value={filterBarContext}>
-        <EuiFlexGroup
-          className="globalFilterGroup"
-          gutterSize="none"
-          alignItems="flexStart"
-          responsive={false}
-        >
-          <EuiFlexItem className="globalFilterGroup__branch" grow={false}>
-            <FilterOptions
-              onEnableAll={this.onEnableAll}
-              onDisableAll={this.onDisableAll}
-              onPinAll={this.onPinAll}
-              onUnpinAll={this.onUnpinAll}
-              onToggleAllNegated={this.onToggleAllNegated}
-              onToggleAllDisabled={this.onToggleAllDisabled}
-              onRemoveAll={this.onRemoveAll}
-            />
-          </EuiFlexItem>
+      <EuiFlexGroup
+        className="globalFilterGroup"
+        gutterSize="none"
+        alignItems="flexStart"
+        responsive={false}
+      >
+        <EuiFlexItem className="globalFilterGroup__branch" grow={false}>
+          <FilterOptions
+            onEnableAll={this.onEnableAll}
+            onDisableAll={this.onDisableAll}
+            onPinAll={this.onPinAll}
+            onUnpinAll={this.onUnpinAll}
+            onToggleAllNegated={this.onToggleAllNegated}
+            onToggleAllDisabled={this.onToggleAllDisabled}
+            onRemoveAll={this.onRemoveAll}
+          />
+        </EuiFlexItem>
 
-          <EuiFlexItem>
-            <EuiFlexGroup
-              className={classes}
-              wrap={true}
-              responsive={false}
-              gutterSize="xs"
-              alignItems="center"
-            >
-              {this.renderItems()}
-              {this.renderAddFilter()}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </FilterBarContextProvider>
+        <EuiFlexItem>
+          <EuiFlexGroup
+            className={classes}
+            wrap={true}
+            responsive={false}
+            gutterSize="xs"
+            alignItems="center"
+          >
+            {this.renderItems()}
+            {this.renderAddFilter()}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -109,6 +102,7 @@ class FilterBarUI extends Component<Props, State> {
           onUpdate={newFilter => this.onUpdate(i, newFilter)}
           onRemove={() => this.onRemove(i)}
           indexPatterns={this.props.indexPatterns}
+          uiSettings={this.props.uiSettings}
         />
       </EuiFlexItem>
     ));
@@ -150,6 +144,7 @@ class FilterBarUI extends Component<Props, State> {
                 onSubmit={this.onAdd}
                 onCancel={this.onCloseAddFilterPopover}
                 key={JSON.stringify(newFilter)}
+                uiSettings={this.props.uiSettings}
               />
             </div>
           </EuiFlexItem>
