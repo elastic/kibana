@@ -273,7 +273,7 @@ export function getWaterfall(
     : [];
   const traceRoot = getTraceRoot(childrenByParentId);
   const duration = getDuration(orderedItems);
-  const traceRootDuration = traceRoot ? traceRoot.transaction.duration.us : 0;
+  const traceRootDuration = traceRoot && traceRoot.transaction.duration.us;
   const services = getServices(orderedItems);
   const getTransactionById = createGetTransactionById(itemsById);
   const serviceColors = getServiceColors(services);
