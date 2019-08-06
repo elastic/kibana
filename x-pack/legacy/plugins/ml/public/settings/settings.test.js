@@ -5,27 +5,18 @@
  */
 
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import PropTypes from 'prop-types';
 import React from 'react';
 
-import * as ContextUtils from '../util/context_utils';
 import { Settings } from './settings';
 
-const navigationMenuMock = ContextUtils.navigationMenuMock;
-const mountOptions = {
-  context: { NavigationMenuContext: navigationMenuMock },
-  childContextTypes: { NavigationMenuContext: PropTypes.object }
-};
-
+jest.mock('../contexts/ui/use_ui_chrome_context');
 jest.mock('../components/navigation_menu/navigation_menu', () => ({
-  NavigationMenu: () => <div id="mockNavigationMenu" />
+  NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
-jest.spyOn(ContextUtils, 'useNavigationMenuContext').mockImplementation(() => navigationMenuMock);
-
 
 describe('Settings', () => {
   test('Renders settings page with all buttons enabled.', () => {
-    const wrapper = mountWithIntl(<Settings canGetFilters={true} canGetCalendars={true} />, mountOptions);
+    const wrapper = mountWithIntl(<Settings canGetFilters={true} canGetCalendars={true} />);
 
     const filterButton = wrapper
       .find('[data-test-subj="ml_filter_lists_button"]')
@@ -39,7 +30,7 @@ describe('Settings', () => {
   });
 
   test('Filter Lists button disabled if canGetFilters is false', () => {
-    const wrapper = mountWithIntl(<Settings canGetFilters={false} canGetCalendars={true} />, mountOptions);
+    const wrapper = mountWithIntl(<Settings canGetFilters={false} canGetCalendars={true} />);
 
     const filterButton = wrapper
       .find('[data-test-subj="ml_filter_lists_button"]')
@@ -53,7 +44,7 @@ describe('Settings', () => {
   });
 
   test('Calendar management button disabled if canGetCalendars is false', () => {
-    const wrapper = mountWithIntl(<Settings canGetFilters={true} canGetCalendars={false} />, mountOptions);
+    const wrapper = mountWithIntl(<Settings canGetFilters={true} canGetCalendars={false} />);
 
     const filterButton = wrapper
       .find('[data-test-subj="ml_filter_lists_button"]')

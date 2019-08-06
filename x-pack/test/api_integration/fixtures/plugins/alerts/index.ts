@@ -18,7 +18,6 @@ export default function(kibana: any) {
       const indexRecordActionType: ActionType = {
         id: 'test.index-record',
         name: 'Test: Index Record',
-        unencryptedAttributes: ['unencrypted'],
         validate: {
           params: schema.object({
             index: schema.string(),
@@ -26,17 +25,20 @@ export default function(kibana: any) {
             message: schema.string(),
           }),
           config: schema.object({
-            encrypted: schema.string(),
             unencrypted: schema.string(),
           }),
+          secrets: schema.object({
+            encrypted: schema.string(),
+          }),
         },
-        async executor({ config, params, services }: ActionTypeExecutorOptions) {
+        async executor({ config, secrets, params, services }: ActionTypeExecutorOptions) {
           return await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
               params,
               config,
+              secrets,
               reference: params.reference,
               source: 'action:test.index-record',
             },
@@ -46,20 +48,20 @@ export default function(kibana: any) {
       const failingActionType: ActionType = {
         id: 'test.failing',
         name: 'Test: Failing',
-        unencryptedAttributes: [],
         validate: {
           params: schema.object({
             index: schema.string(),
             reference: schema.string(),
           }),
         },
-        async executor({ config, params, services }: ActionTypeExecutorOptions) {
+        async executor({ config, secrets, params, services }: ActionTypeExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
               params,
               config,
+              secrets,
               reference: params.reference,
               source: 'action:test.failing',
             },
@@ -70,7 +72,6 @@ export default function(kibana: any) {
       const rateLimitedActionType: ActionType = {
         id: 'test.rate-limit',
         name: 'Test: Rate Limit',
-        unencryptedAttributes: [],
         maxAttempts: 2,
         validate: {
           params: schema.object({

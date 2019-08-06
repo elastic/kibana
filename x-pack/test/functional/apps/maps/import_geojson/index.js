@@ -7,6 +7,7 @@
 export default function ({ loadTestFile }) {
   describe('import_geojson', function () {
     loadTestFile(require.resolve('./add_layer_import_panel'));
-    loadTestFile(require.resolve('./file_indexing_panel'));
+    // FAILING/FLAKY: https://github.com/elastic/kibana/pull/42638
+    //loadTestFile(require.resolve('./file_indexing_panel'));
   });
 }

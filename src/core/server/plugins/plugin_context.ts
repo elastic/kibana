@@ -123,7 +123,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerAuth: deps.http.registerAuth,
       registerOnPostAuth: deps.http.registerOnPostAuth,
       basePath: deps.http.basePath,
-      createNewServer: deps.http.createNewServer,
       isTlsEnabled: deps.http.isTlsEnabled,
     },
   };
