@@ -983,7 +983,6 @@ export interface SessionStorageFactory<T> {
 
 // Warnings were encountered during analysis:
 // 
-// src/core/server/http/router/response.ts:284:3 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "CustomResponseOptions"
 // src/core/server/plugins/plugin_context.ts:34:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:37:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 

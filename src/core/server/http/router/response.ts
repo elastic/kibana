@@ -279,7 +279,7 @@ export const kibanaResponseFactory = {
   /**
    * Creates a response with defined status code and payload.
    * @param payload - {@link HttpResponsePayload} payload to send to the client
-   * @param options - {@link CustomResponseOptions} configures HTTP response parameters.
+   * @param options - {@link CustomHttpResponseOptions} configures HTTP response parameters.
    */
   custom: (payload: HttpResponsePayload | ResponseError, options: CustomHttpResponseOptions) => {
     if (!options || !options.statusCode) {
