@@ -80,7 +80,7 @@ export function MetricVisParams() {
       });
 
       $scope.editorState.requiredDescription = i18n.translate(
-        'metricVis.params.ranges.warning.requiredDescription', { defaultMessage: 'Required:' });
+        'visTypeMetric.params.ranges.warning.requiredDescription', { defaultMessage: 'Required:' });
     },
   };
 }
