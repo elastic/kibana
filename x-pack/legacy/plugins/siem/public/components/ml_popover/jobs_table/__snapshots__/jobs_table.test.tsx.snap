@@ -5,12 +5,12 @@ exports[`JobsTable renders correctly against snapshot 1`] = `
   columns={
     Array [
       Object {
-        "name": "Job Name",
+        "name": "Job name",
         "render": [Function],
       },
       Object {
         "align": "center",
-        "name": "Run Job",
+        "name": "Run job",
         "render": [Function],
         "width": "80px",
       },
