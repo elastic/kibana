@@ -27,11 +27,14 @@ export interface TileMapVisParams {
   mapZoom: number;
   mapCenter: [number, number];
   wms: {
+    selectedTmsLayer?: {
+      id: string;
+    };
     enabled: boolean;
     url?: string;
     options: {
       version?: string;
-      layers: unknown;
+      layers?: string;
       format: string;
       transparent: boolean;
       attribution?: string;

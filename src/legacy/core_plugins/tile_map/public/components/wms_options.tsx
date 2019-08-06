@@ -23,23 +23,25 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { toastNotifications } from 'ui/notify';
-import { VisOptionsSetValue } from 'ui/vis/editors/default';
-import { TmsLayer } from 'ui/vis/map/service_settings';
-import { ExtendedVisOptionsProps } from '../../../kbn_vislib_vis_types/public/utils/with_injected_dependencies';
+import { TmsLayer, ServiceSettings } from 'ui/vis/map/service_settings';
+import { VisOptionsProps } from 'ui/vis/editors/default';
 import { SelectOption } from '../../../kbn_vislib_vis_types/public/controls/select';
 import { SwitchOption } from '../../../kbn_vislib_vis_types/public/controls/switch';
 import { WmsInternalOptions } from './wms_internal_options';
+import { TileMapVisParams } from '../types';
 
 const mapLayerForOption = ({ id }: TmsLayer) => ({ text: id });
 
-function WmsOptions({ serviceSettings, stateParams, setValue, vis }: ExtendedVisOptionsProps) {
+type TileMapOptionsProps = { serviceSettings: ServiceSettings } & VisOptionsProps<TileMapVisParams>;
+
+function WmsOptions({ serviceSettings, stateParams, setValue, vis }: TileMapOptionsProps) {
   const { wms } = stateParams;
   const { tmsLayers } = vis.type.editorConfig.collections;
   const [tmsLayerOptions, setTmsLayersOptions] = useState(
     vis.type.editorConfig.collections.tmsLayers.map(mapLayerForOption)
   );
 
-  const setWmsOption: VisOptionsSetValue = (paramName, value) =>
+  const setWmsOption = (paramName: string, value: unknown) =>
     setValue('wms', {
       ...wms,
       [paramName]: value,

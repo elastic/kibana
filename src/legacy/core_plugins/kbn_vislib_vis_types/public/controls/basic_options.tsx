@@ -25,7 +25,16 @@ import { SwitchOption } from './switch';
 import { SelectOption } from './select';
 import { CommonVislibParams } from '../types';
 
-function BasicOptions({ stateParams, setValue, vis }: VisOptionsProps<CommonVislibParams>) {
+export interface BasicOptionsParams {
+  addTooltip: boolean;
+  legendPosition: string;
+}
+
+function BasicOptions<VisParams extends BasicOptionsParams = CommonVislibParams>({
+  stateParams,
+  setValue,
+  vis,
+}: VisOptionsProps<VisParams>) {
   return (
     <>
       <SelectOption

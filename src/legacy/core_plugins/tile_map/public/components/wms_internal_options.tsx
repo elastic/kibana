@@ -21,26 +21,15 @@ import React from 'react';
 import { EuiLink, EuiSpacer, EuiText, EuiScreenReaderOnly } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsSetValue } from 'ui/vis/editors/default';
-import { TmsLayer } from 'ui/vis/map/service_settings';
 import { TextInputOption } from '../../../kbn_vislib_vis_types/public/controls/text_input';
-
-interface WmsOptions {
-  enabled: boolean;
-  url: string;
-  selectedTmsLayer: TmsLayer;
-  options: {
-    attribution: string;
-    format: string;
-    layers: string;
-    styles: string;
-    version: string;
-  };
-}
+import { TileMapVisParams } from '../types';
 
 interface WmsInternalOptions {
-  wms: WmsOptions;
-  setValue: VisOptionsSetValue;
+  wms: TileMapVisParams['wms'];
+  setValue: <T extends keyof TileMapVisParams['wms']>(
+    paramName: T,
+    value: TileMapVisParams['wms'][T]
+  ) => void;
 }
 
 function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
@@ -64,7 +53,7 @@ function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
     </EuiScreenReaderOnly>
   );
 
-  const setOptions: VisOptionsSetValue = (paramName, value) =>
+  const setOptions = (paramName: string, value: unknown) =>
     setValue('options', {
       ...wms.options,
       [paramName]: value,

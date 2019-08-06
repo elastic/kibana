@@ -24,7 +24,7 @@ interface SelectOptionProps<ParamName extends string, ValidParamValues extends s
   label: string;
   options: Array<{ value: ValidParamValues; text: string }>;
   paramName: ParamName;
-  value: ValidParamValues;
+  value?: ValidParamValues;
   setValue: (paramName: ParamName, value: ValidParamValues) => void;
 }
 
