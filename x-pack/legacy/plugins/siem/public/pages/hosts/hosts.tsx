@@ -96,6 +96,11 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                             refetch={refetch}
                             setQuery={setQuery}
                             to={to}
+                            narrowDateRange={(min: number, max: number) => {
+                              setTimeout(() => {
+                                setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                              }, 500);
+                            }}
                           />
                         )}
                       </KpiHostsQuery>

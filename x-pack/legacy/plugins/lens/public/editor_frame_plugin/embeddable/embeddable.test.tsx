@@ -11,6 +11,11 @@ import { Filter } from '@kbn/es-query';
 import { Document } from '../../persistence';
 import { act } from 'react-dom/test-utils';
 
+jest.mock('../../../../../../../src/legacy/ui/public/inspector', () => ({
+  isAvailable: false,
+  open: false,
+}));
+
 const savedVis: Document = {
   activeDatasourceId: '',
   expression: 'my | expression',
@@ -20,6 +25,8 @@ const savedVis: Document = {
     datasourceMetaData: {
       filterableIndexPatterns: [],
     },
+    query: { query: '', language: 'lucene' },
+    filters: [],
   },
   title: 'My title',
   visualizationType: '',

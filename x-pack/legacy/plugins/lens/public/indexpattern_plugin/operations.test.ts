@@ -169,7 +169,6 @@ describe('getOperationTypesForField', () => {
                 interval: '1d',
               },
               sourceField: 'timestamp',
-              indexPatternId: '1',
             },
           },
         },

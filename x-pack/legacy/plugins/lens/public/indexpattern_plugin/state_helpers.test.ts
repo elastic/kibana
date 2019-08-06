@@ -31,7 +31,6 @@ describe('state_helpers', () => {
           orderDirection: 'asc',
           size: 5,
         },
-        indexPatternId: '',
       };
 
       const state: IndexPatternPrivateState = {
@@ -50,7 +49,6 @@ describe('state_helpers', () => {
 
                 // Private
                 operationType: 'count',
-                indexPatternId: '1',
               },
             },
           },
@@ -78,7 +76,6 @@ describe('state_helpers', () => {
           orderDirection: 'asc',
           size: 5,
         },
-        indexPatternId: '',
       };
 
       const state: IndexPatternPrivateState = {
@@ -97,7 +94,6 @@ describe('state_helpers', () => {
 
                 // Private
                 operationType: 'count',
-                indexPatternId: '1',
               },
             },
           },
@@ -129,7 +125,6 @@ describe('state_helpers', () => {
           interval: '1d',
         },
         sourceField: 'timestamp',
-        indexPatternId: '1',
       };
 
       const state: IndexPatternPrivateState = {
@@ -173,7 +168,6 @@ describe('state_helpers', () => {
                 // Private
                 operationType: 'avg',
                 sourceField: 'bytes',
-                indexPatternId: '1',
               },
               col2: {
                 label: 'Max of bytes',
@@ -183,7 +177,6 @@ describe('state_helpers', () => {
                 // Private
                 operationType: 'max',
                 sourceField: 'bytes',
-                indexPatternId: '1',
               },
             },
           },
@@ -205,7 +198,6 @@ describe('state_helpers', () => {
               interval: '1d',
             },
             sourceField: 'timestamp',
-            indexPatternId: '1',
           },
         })
       ).toEqual({
@@ -238,7 +230,6 @@ describe('state_helpers', () => {
                 params: {
                   interval: 'h',
                 },
-                indexPatternId: '1',
               },
             },
           },
@@ -260,7 +251,6 @@ describe('state_helpers', () => {
             params: {
               interval: 'w',
             },
-            indexPatternId: '1',
           },
         }).layers.first.columns.col1
       ).toEqual(
@@ -284,7 +274,6 @@ describe('state_helpers', () => {
           orderDirection: 'asc',
           size: 5,
         },
-        indexPatternId: '1',
       };
 
       const newColumn: AvgIndexPatternColumn = {
@@ -295,7 +284,6 @@ describe('state_helpers', () => {
         // Private
         operationType: 'avg',
         sourceField: 'bytes',
-        indexPatternId: '1',
       };
 
       const state: IndexPatternPrivateState = {
@@ -314,7 +302,6 @@ describe('state_helpers', () => {
 
                 // Private
                 operationType: 'count',
-                indexPatternId: '1',
               },
             },
           },
@@ -354,7 +341,6 @@ describe('state_helpers', () => {
             params: {
               interval: 'h',
             },
-            indexPatternId: '1',
           },
         })
       ).toEqual(['col1']);
@@ -378,7 +364,6 @@ describe('state_helpers', () => {
               },
               orderDirection: 'asc',
             },
-            indexPatternId: '1',
           },
           col2: {
             label: 'Average of bytes',
@@ -388,7 +373,6 @@ describe('state_helpers', () => {
             // Private
             operationType: 'avg',
             sourceField: 'bytes',
-            indexPatternId: '1',
           },
           col3: {
             label: 'Date Histogram of timestamp',
@@ -401,7 +385,6 @@ describe('state_helpers', () => {
             params: {
               interval: '1d',
             },
-            indexPatternId: '1',
           },
         })
       ).toEqual(['col1', 'col3', 'col2']);
@@ -426,7 +409,6 @@ describe('state_helpers', () => {
               orderDirection: 'asc',
             },
             suggestedPriority: 2,
-            indexPatternId: '1',
           },
           col2: {
             label: 'Average of bytes',
@@ -437,7 +419,6 @@ describe('state_helpers', () => {
             operationType: 'avg',
             sourceField: 'bytes',
             suggestedPriority: 0,
-            indexPatternId: '1',
           },
           col3: {
             label: 'Date Histogram of timestamp',
@@ -451,7 +432,6 @@ describe('state_helpers', () => {
             params: {
               interval: '1d',
             },
-            indexPatternId: '1',
           },
         })
       ).toEqual(['col3', 'col1', 'col2']);

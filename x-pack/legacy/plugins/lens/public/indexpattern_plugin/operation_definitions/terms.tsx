@@ -53,7 +53,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     }
     return [];
   },
-  buildColumn({ suggestedPriority, columns, field, indexPatternId }) {
+  buildColumn({ suggestedPriority, columns, field }) {
     const existingMetricColumn = Object.entries(columns)
       .filter(([_columnId, column]) => column && isSortableByColumn(column))
       .map(([id]) => id)[0];
@@ -65,7 +65,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       suggestedPriority,
       sourceField: field ? field.name : '',
       isBucketed: true,
-      indexPatternId,
       params: {
         size: DEFAULT_SIZE,
         orderBy: existingMetricColumn

@@ -24,13 +24,27 @@ const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
 function generateSuggestion(datasourceSuggestionId = 1, state = {}): DatasourceSuggestion {
   return {
-    state: {},
+    state,
     table: {
       columns: [],
-      datasourceSuggestionId: 1,
+      datasourceSuggestionId,
       isMultiRow: true,
       layerId: 'first',
     },
+  };
+}
+
+function getDefaultProps() {
+  return {
+    store: {
+      save: jest.fn(),
+      load: jest.fn(),
+    },
+    redirectTo: jest.fn(),
+    onError: jest.fn(),
+    onChange: jest.fn(),
+    dateRange: { fromDate: '', toDate: '' },
+    query: { query: '', language: 'lucene' },
   };
 }
 
@@ -42,15 +56,6 @@ describe('editor_frame', () => {
   let mockDatasource2: DatasourceMock;
 
   let expressionRendererMock: ExpressionRenderer;
-
-  const defaultProps = {
-    store: {
-      save: jest.fn(),
-      load: jest.fn(),
-    },
-    redirectTo: jest.fn(),
-    onError: jest.fn(),
-  };
 
   beforeEach(() => {
     mockVisualization = {
@@ -87,7 +92,7 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
-            {...defaultProps}
+            {...getDefaultProps()}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -108,7 +113,7 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
-            {...defaultProps}
+            {...getDefaultProps()}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -134,7 +139,7 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
-            {...defaultProps}
+            {...getDefaultProps()}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -160,6 +165,8 @@ describe('editor_frame', () => {
                 datasourceMetaData: {
                   filterableIndexPatterns: [],
                 },
+                query: { query: '', language: 'lucene' },
+                filters: [],
               },
             }}
           />
@@ -175,7 +182,7 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
-            {...defaultProps}
+            {...getDefaultProps()}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -197,7 +204,7 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
-            {...defaultProps}
+            {...getDefaultProps()}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -222,7 +229,7 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
-            {...defaultProps}
+            {...getDefaultProps()}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -232,6 +239,7 @@ describe('editor_frame', () => {
             initialDatasourceId="testDatasource"
             initialVisualizationId="testVis"
             ExpressionRenderer={expressionRendererMock}
+            dateRange={{ fromDate: 'now-7d', toDate: 'now' }}
           />
         );
       });
@@ -244,6 +252,8 @@ describe('editor_frame', () => {
         datasourceLayers: {},
         addNewLayer: expect.any(Function),
         removeLayers: expect.any(Function),
+        query: { query: '', language: 'lucene' },
+        dateRange: { fromDate: 'now-7d', toDate: 'now' },
       });
     });
 
@@ -253,7 +263,7 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
-            {...defaultProps}
+            {...getDefaultProps()}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -283,7 +293,7 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
-            {...defaultProps}
+            {...getDefaultProps()}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -313,7 +323,7 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
-            {...defaultProps}
+            {...getDefaultProps()}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -347,7 +357,7 @@ describe('editor_frame', () => {
 
       mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: { ...mockVisualization, initialize: () => initialState },
           }}
@@ -375,7 +385,7 @@ describe('editor_frame', () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
       const instance = mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'vis' },
           }}
@@ -396,63 +406,69 @@ describe('editor_frame', () => {
       instance.update();
 
       expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-        Object {
-          "chain": Array [
-            Object {
-              "arguments": Object {},
-              "function": "kibana",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {
-                "filters": Array [],
-                "query": Array [],
-                "timeRange": Array [],
-              },
-              "function": "kibana_context",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {
-                "layerIds": Array [
-                  "first",
-                ],
-                "tables": Array [
-                  Object {
-                    "chain": Array [
-                      Object {
-                        "arguments": Object {},
-                        "function": "datasource",
-                        "type": "function",
+                Object {
+                  "chain": Array [
+                    Object {
+                      "arguments": Object {},
+                      "function": "kibana",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Object {
+                        "filters": Array [],
+                        "query": Array [
+                          "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
+                        ],
+                        "timeRange": Array [
+                          "{\\"from\\":\\"\\",\\"to\\":\\"\\"}",
+                        ],
                       },
-                    ],
-                    "type": "expression",
-                  },
-                ],
-              },
-              "function": "lens_merge_tables",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {},
-              "function": "vis",
-              "type": "function",
-            },
-          ],
-          "type": "expression",
-        }
-      `);
+                      "function": "kibana_context",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Object {
+                        "layerIds": Array [
+                          "first",
+                        ],
+                        "tables": Array [
+                          Object {
+                            "chain": Array [
+                              Object {
+                                "arguments": Object {},
+                                "function": "datasource",
+                                "type": "function",
+                              },
+                            ],
+                            "type": "expression",
+                          },
+                        ],
+                      },
+                      "function": "lens_merge_tables",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Object {},
+                      "function": "vis",
+                      "type": "function",
+                    },
+                  ],
+                  "type": "expression",
+                }
+            `);
     });
 
     it('should render individual expression for each given layer', async () => {
       mockDatasource.toExpression.mockReturnValue('datasource');
-      mockDatasource2.toExpression.mockReturnValueOnce('datasource2_1');
-      mockDatasource2.toExpression.mockReturnValueOnce('datasource2_2');
+      mockDatasource2.toExpression.mockImplementation((_state, layerId) => `datasource_${layerId}`);
+      mockDatasource.initialize.mockImplementation(initialState => Promise.resolve(initialState));
       mockDatasource.getLayers.mockReturnValue(['first']);
+      mockDatasource2.initialize.mockImplementation(initialState => Promise.resolve(initialState));
       mockDatasource2.getLayers.mockReturnValue(['second', 'third']);
+
       const instance = mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'vis' },
           }}
@@ -477,15 +493,26 @@ describe('editor_frame', () => {
               datasourceMetaData: {
                 filterableIndexPatterns: [],
               },
+              query: { query: '', language: 'lucene' },
+              filters: [],
             },
           }}
         />
       );
 
       await waitForPromises();
+      await waitForPromises();
 
       instance.update();
 
+      expect(instance.find(expressionRendererMock).prop('expression')).toEqual({
+        type: 'expression',
+        chain: expect.arrayContaining([
+          expect.objectContaining({
+            arguments: expect.objectContaining({ layerIds: ['first', 'second', 'third'] }),
+          }),
+        ]),
+      });
       expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
@@ -497,8 +524,12 @@ describe('editor_frame', () => {
             Object {
               "arguments": Object {
                 "filters": Array [],
-                "query": Array [],
-                "timeRange": Array [],
+                "query": Array [
+                  "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
+                ],
+                "timeRange": Array [
+                  "{\\"from\\":\\"\\",\\"to\\":\\"\\"}",
+                ],
               },
               "function": "kibana_context",
               "type": "function",
@@ -525,7 +556,7 @@ describe('editor_frame', () => {
                     "chain": Array [
                       Object {
                         "arguments": Object {},
-                        "function": "datasource2_1",
+                        "function": "datasource_second",
                         "type": "function",
                       },
                     ],
@@ -535,7 +566,7 @@ describe('editor_frame', () => {
                     "chain": Array [
                       Object {
                         "arguments": Object {},
-                        "function": "datasource2_2",
+                        "function": "datasource_third",
                         "type": "function",
                       },
                     ],
@@ -562,7 +593,7 @@ describe('editor_frame', () => {
     it('should re-render config panel after state update', async () => {
       mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -596,7 +627,7 @@ describe('editor_frame', () => {
     it('should re-render data panel after state update', async () => {
       mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -633,7 +664,7 @@ describe('editor_frame', () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
       mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -680,7 +711,7 @@ describe('editor_frame', () => {
 
       mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -705,6 +736,8 @@ describe('editor_frame', () => {
               datasourceMetaData: {
                 filterableIndexPatterns: [],
               },
+              query: { query: '', language: 'lucene' },
+              filters: [],
             },
           }}
         />
@@ -732,7 +765,7 @@ describe('editor_frame', () => {
 
       mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -757,6 +790,8 @@ describe('editor_frame', () => {
               datasourceMetaData: {
                 filterableIndexPatterns: [],
               },
+              query: { query: '', language: 'lucene' },
+              filters: [],
             },
           }}
         />
@@ -788,7 +823,7 @@ describe('editor_frame', () => {
 
       mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -814,7 +849,7 @@ describe('editor_frame', () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
       mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -869,7 +904,7 @@ describe('editor_frame', () => {
 
       instance = mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: mockVisualization,
             testVis2: mockVisualization2,
@@ -980,7 +1015,7 @@ describe('editor_frame', () => {
     it('should fetch suggestions of currently active datasource', async () => {
       mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -1003,7 +1038,7 @@ describe('editor_frame', () => {
     it('should fetch suggestions of all visualizations', async () => {
       mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: mockVisualization,
             testVis2: mockVisualization2,
@@ -1027,7 +1062,7 @@ describe('editor_frame', () => {
     it('should display suggestions in descending order', async () => {
       const instance = mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: {
               ...mockVisualization,
@@ -1098,7 +1133,7 @@ describe('editor_frame', () => {
       const suggestionVisState = {};
       const instance = mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: {
               ...mockVisualization,
@@ -1154,7 +1189,7 @@ describe('editor_frame', () => {
       const suggestionVisState = {};
       const instance = mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: {
               ...mockVisualization,
@@ -1211,7 +1246,7 @@ describe('editor_frame', () => {
       const suggestionVisState = {};
       const instance = mount(
         <EditorFrame
-          {...defaultProps}
+          {...getDefaultProps()}
           visualizationMap={{
             testVis: {
               ...mockVisualization,
@@ -1250,6 +1285,11 @@ describe('editor_frame', () => {
               ...mockDatasource,
               getDatasourceSuggestionsForField: () => [generateSuggestion()],
               getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
+              renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
+                if (dragging !== 'draggedField') {
+                  setDragging('draggedField');
+                }
+              },
             },
           }}
           initialDatasourceId="testDatasource"
@@ -1273,6 +1313,147 @@ describe('editor_frame', () => {
           state: suggestionVisState,
         })
       );
+    });
+  });
+
+  describe('passing state back to the caller', () => {
+    let resolver: (value: unknown) => void;
+    let instance: ReactWrapper;
+
+    it('should call onChange only when the active datasource is finished loading', async () => {
+      const onChange = jest.fn();
+
+      mockDatasource.initialize.mockReturnValue(
+        new Promise(resolve => {
+          resolver = resolve;
+        })
+      );
+      mockDatasource.getLayers.mockReturnValue(['first']);
+      mockDatasource.getMetaData.mockReturnValue({
+        filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
+      });
+      mockVisualization.initialize.mockReturnValue({ initialState: true });
+
+      act(() => {
+        instance = mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+            onChange={onChange}
+          />
+        );
+      });
+
+      expect(onChange).toHaveBeenCalledTimes(0);
+
+      resolver({});
+      await waitForPromises();
+
+      expect(onChange).toHaveBeenCalledTimes(2);
+      expect(onChange).toHaveBeenNthCalledWith(1, {
+        indexPatternTitles: ['resolved'],
+        doc: {
+          activeDatasourceId: 'testDatasource',
+          expression: '',
+          id: undefined,
+          state: {
+            visualization: null, // Not yet loaded
+            datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'resolved' }] },
+            datasourceStates: { testDatasource: undefined },
+            query: { query: '', language: 'lucene' },
+            filters: [],
+          },
+          title: 'New visualization',
+          type: 'lens',
+          visualizationType: 'testVis',
+        },
+      });
+      expect(onChange).toHaveBeenLastCalledWith({
+        indexPatternTitles: ['resolved'],
+        doc: {
+          activeDatasourceId: 'testDatasource',
+          expression: '',
+          id: undefined,
+          state: {
+            visualization: { initialState: true }, // Now loaded
+            datasourceMetaData: {
+              filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
+            },
+            datasourceStates: { testDatasource: undefined },
+            query: { query: '', language: 'lucene' },
+            filters: [],
+          },
+          title: 'New visualization',
+          type: 'lens',
+          visualizationType: 'testVis',
+        },
+      });
+    });
+
+    it('should send back a persistable document when the state changes', async () => {
+      const onChange = jest.fn();
+
+      const initialState = { datasource: '' };
+
+      mockDatasource.initialize.mockResolvedValue(initialState);
+      mockDatasource.getLayers.mockReturnValue(['first']);
+      mockVisualization.initialize.mockReturnValue({ initialState: true });
+
+      act(() => {
+        instance = mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+            onChange={onChange}
+          />
+        );
+      });
+
+      await waitForPromises();
+
+      expect(onChange).toHaveBeenCalledTimes(2);
+
+      mockDatasource.toExpression.mockReturnValue('data expression');
+      mockVisualization.toExpression.mockReturnValue('vis expression');
+      instance.setProps({ query: { query: 'new query', language: 'lucene' } });
+      instance.update();
+
+      await waitForPromises();
+      expect(onChange).toHaveBeenCalledTimes(3);
+      expect(onChange).toHaveBeenNthCalledWith(3, {
+        indexPatternTitles: [],
+        doc: {
+          activeDatasourceId: 'testDatasource',
+          expression: expect.stringContaining('vis "expression"'),
+          id: undefined,
+          state: {
+            datasourceMetaData: { filterableIndexPatterns: [] },
+            datasourceStates: { testDatasource: undefined },
+            visualization: { initialState: true },
+            query: { query: 'new query', language: 'lucene' },
+            filters: [],
+          },
+          title: 'New visualization',
+          type: 'lens',
+          visualizationType: 'testVis',
+        },
+      });
     });
   });
 });

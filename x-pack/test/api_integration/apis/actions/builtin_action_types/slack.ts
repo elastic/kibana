@@ -6,12 +6,11 @@
 
 import expect from '@kbn/expect';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { SLACK_ACTION_SIMULATOR_URI } from '../../../fixtures/plugins/actions';
 
-// eslint-disable-next-line import/no-default-export
-export default function slackTest({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

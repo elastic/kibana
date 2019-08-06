@@ -26,7 +26,8 @@ import { Source } from '../../containers/source';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 
 export const LogsToolbar = injectI18n(({ intl }) => {
-  const { derivedIndexPattern } = useContext(Source.Context);
+  const { createDerivedIndexPattern } = useContext(Source.Context);
+  const derivedIndexPattern = createDerivedIndexPattern('logs');
   const {
     availableIntervalSizes,
     availableTextScales,
