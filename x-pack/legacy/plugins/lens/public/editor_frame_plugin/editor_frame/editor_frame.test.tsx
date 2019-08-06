@@ -406,64 +406,66 @@ describe('editor_frame', () => {
       instance.update();
 
       expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-        Object {
-          "chain": Array [
-            Object {
-              "arguments": Object {},
-              "function": "kibana",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {
-                "filters": Array [],
-                "query": Array [
-                  "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
-                ],
-                "timeRange": Array [
-                  "{\\"from\\":\\"\\",\\"to\\":\\"\\"}",
-                ],
-              },
-              "function": "kibana_context",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {
-                "layerIds": Array [
-                  "first",
-                ],
-                "tables": Array [
-                  Object {
-                    "chain": Array [
-                      Object {
-                        "arguments": Object {},
-                        "function": "datasource",
-                        "type": "function",
+                Object {
+                  "chain": Array [
+                    Object {
+                      "arguments": Object {},
+                      "function": "kibana",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Object {
+                        "filters": Array [],
+                        "query": Array [
+                          "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
+                        ],
+                        "timeRange": Array [
+                          "{\\"from\\":\\"\\",\\"to\\":\\"\\"}",
+                        ],
                       },
-                    ],
-                    "type": "expression",
-                  },
-                ],
-              },
-              "function": "lens_merge_tables",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {},
-              "function": "vis",
-              "type": "function",
-            },
-          ],
-          "type": "expression",
-        }
-      `);
+                      "function": "kibana_context",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Object {
+                        "layerIds": Array [
+                          "first",
+                        ],
+                        "tables": Array [
+                          Object {
+                            "chain": Array [
+                              Object {
+                                "arguments": Object {},
+                                "function": "datasource",
+                                "type": "function",
+                              },
+                            ],
+                            "type": "expression",
+                          },
+                        ],
+                      },
+                      "function": "lens_merge_tables",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Object {},
+                      "function": "vis",
+                      "type": "function",
+                    },
+                  ],
+                  "type": "expression",
+                }
+            `);
     });
 
     it('should render individual expression for each given layer', async () => {
       mockDatasource.toExpression.mockReturnValue('datasource');
-      mockDatasource2.toExpression.mockReturnValueOnce('datasource2_1');
-      mockDatasource2.toExpression.mockReturnValueOnce('datasource2_2');
+      mockDatasource2.toExpression.mockImplementation((_state, layerId) => `datasource_${layerId}`);
+      mockDatasource.initialize.mockImplementation(initialState => Promise.resolve(initialState));
       mockDatasource.getLayers.mockReturnValue(['first']);
+      mockDatasource2.initialize.mockImplementation(initialState => Promise.resolve(initialState));
       mockDatasource2.getLayers.mockReturnValue(['second', 'third']);
+
       const instance = mount(
         <EditorFrame
           {...getDefaultProps()}
@@ -499,9 +501,18 @@ describe('editor_frame', () => {
       );
 
       await waitForPromises();
+      await waitForPromises();
 
       instance.update();
 
+      expect(instance.find(expressionRendererMock).prop('expression')).toEqual({
+        type: 'expression',
+        chain: expect.arrayContaining([
+          expect.objectContaining({
+            arguments: expect.objectContaining({ layerIds: ['first', 'second', 'third'] }),
+          }),
+        ]),
+      });
       expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
@@ -527,6 +538,8 @@ describe('editor_frame', () => {
               "arguments": Object {
                 "layerIds": Array [
                   "first",
+                  "second",
+                  "third",
                 ],
                 "tables": Array [
                   Object {
@@ -534,6 +547,26 @@ describe('editor_frame', () => {
                       Object {
                         "arguments": Object {},
                         "function": "datasource",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {},
+                        "function": "datasource_second",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {},
+                        "function": "datasource_third",
                         "type": "function",
                       },
                     ],

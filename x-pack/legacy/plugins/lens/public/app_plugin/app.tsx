@@ -22,6 +22,7 @@ import { NativeRenderer } from '../native_renderer';
 
 interface State {
   isLoading: boolean;
+  isDirty: boolean;
   dateRange: {
     fromDate: string;
     toDate: string;
@@ -54,6 +55,7 @@ export function App({
 
   const [state, setState] = useState<State>({
     isLoading: !!docId,
+    isDirty: false,
     query: { query: '', language },
     dateRange: {
       fromDate: timeDefaults.from,
@@ -61,8 +63,6 @@ export function App({
     },
     indexPatternTitles: [],
   });
-
-  const [isDirty, setDirty] = useState(false);
 
   const lastKnownDocRef = useRef<Document | undefined>(undefined);
 
@@ -99,10 +99,7 @@ export function App({
   // Can save if the frame has told us what it has, and there is either:
   // a) No saved doc
   // b) A saved doc that differs from the frame state
-  const isSaveable = isDirty;
-    // state.lastKnownDoc &&
-    // (!state.persistedDoc ||
-    //   (state.persistedDoc && !_.isEqual(state.lastKnownDoc, state.persistedDoc)));
+  const isSaveable = state.isDirty;
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -127,12 +124,12 @@ export function App({
                         .save(lastKnownDocRef.current)
                         .then(({ id }) => {
                           // Prevents unnecessary network request and disables save button
-                          const newDoc = { ...(lastKnownDocRef.current!), id };
+                          const newDoc = { ...lastKnownDocRef.current!, id };
                           setState({
                             ...state,
+                            isDirty: false,
                             persistedDoc: newDoc,
                           });
-                          setDirty(false);
                           if (docId !== id) {
                             redirectTo(id);
                           }
@@ -191,15 +188,14 @@ export function App({
               doc: state.persistedDoc,
               onError,
               onChange: ({ indexPatternTitles, doc }) => {
-                if (!_.isEqual(state.indexPatternTitles, indexPatternTitles)) {
+                const indexPatternChange = !_.isEqual(state.indexPatternTitles, indexPatternTitles);
+                const docChange = !_.isEqual(state.persistedDoc, doc);
+                if (indexPatternChange || docChange) {
                   setState({
                     ...state,
                     indexPatternTitles,
+                    isDirty: docChange,
                   });
-                }
-                const docChanged = !_.isEqual(doc, state.persistedDoc);
-                if (docChanged !== isDirty) {
-                  setDirty(docChanged);
                 }
                 lastKnownDocRef.current = doc;
               },
