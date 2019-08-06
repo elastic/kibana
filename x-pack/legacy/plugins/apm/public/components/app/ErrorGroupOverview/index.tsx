@@ -29,32 +29,23 @@ import { LocalUIFilters } from '../../shared/LocalUIFilters';
 const ErrorGroupOverview: React.SFC = () => {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const {
-    serviceName,
-    start,
-    end,
-    sortField,
-    sortDirection,
-    transactionType
-  } = urlParams;
+  const { serviceName, start, end, sortField, sortDirection } = urlParams;
 
   const { data: errorDistributionData } = useFetcher(() => {
     if (serviceName && start && end) {
       return loadErrorDistribution({
         serviceName,
-        transactionType,
         start,
         end,
         uiFilters
       });
     }
-  }, [serviceName, start, end, uiFilters, transactionType]);
+  }, [serviceName, start, end, uiFilters]);
 
   const { data: errorGroupListData } = useFetcher(() => {
     if (serviceName && start && end) {
       return loadErrorGroupList({
         serviceName,
-        transactionType,
         start,
         end,
         sortField,
@@ -62,15 +53,7 @@ const ErrorGroupOverview: React.SFC = () => {
         uiFilters
       });
     }
-  }, [
-    serviceName,
-    start,
-    end,
-    sortField,
-    sortDirection,
-    uiFilters,
-    transactionType
-  ]);
+  }, [serviceName, start, end, sortField, sortDirection, uiFilters]);
 
   useTrackPageview({
     app: 'apm',
@@ -87,12 +70,11 @@ const ErrorGroupOverview: React.SFC = () => {
         'podId'
       ] as LocalUIFilterName[],
       params: {
-        serviceName,
-        transactionType
+        serviceName
       },
       projection: PROJECTION.ERROR_GROUPS
     }),
-    [serviceName, transactionType]
+    [serviceName]
   );
 
   if (!errorDistributionData || !errorGroupListData) {

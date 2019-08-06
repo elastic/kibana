@@ -8,15 +8,9 @@ import { PARENT_ID } from '../../common/elasticsearch_fieldnames';
 import { getBaseTransactionGroupsProjection } from './base_transaction_groups';
 import { mergeProjection } from './util/merge_projection';
 
-export function getTracesProjection({
-  setup,
-  transactionType
-}: {
-  setup: Setup;
-  transactionType?: string;
-}) {
+export function getTracesProjection({ setup }: { setup: Setup }) {
   const projection = mergeProjection(
-    getBaseTransactionGroupsProjection({ setup, transactionType }),
+    getBaseTransactionGroupsProjection({ setup }),
     {
       body: {
         query: {

@@ -123,14 +123,7 @@ export function initUIFiltersApi(core: InternalCoreSetup) {
   createLocalFiltersEndpoint({
     name: PROJECTION.TRACES,
     getProjection: ({ setup, query }) => {
-      const { transactionType } = query as {
-        transactionType?: string;
-      };
-
-      return getTracesProjection({ setup, transactionType });
-    },
-    validators: {
-      transactionType: Joi.string()
+      return getTracesProjection({ setup });
     }
   });
 
@@ -175,19 +168,16 @@ export function initUIFiltersApi(core: InternalCoreSetup) {
   createLocalFiltersEndpoint({
     name: PROJECTION.ERROR_GROUPS,
     getProjection: ({ setup, query }) => {
-      const { serviceName, transactionType } = query as {
+      const { serviceName } = query as {
         serviceName: string;
-        transactionType?: string;
       };
       return getErrorGroupsProjection({
         setup,
-        serviceName,
-        transactionType
+        serviceName
       });
     },
     validators: {
-      serviceName: Joi.string().required(),
-      transactionType: Joi.string()
+      serviceName: Joi.string().required()
     }
   });
 }

@@ -70,11 +70,6 @@ Array [
               },
               Object {
                 "term": Object {
-                  "transaction.type": "foo",
-                },
-              },
-              Object {
-                "term": Object {
                   "service.environment": "test",
                 },
               },
@@ -173,17 +168,17 @@ Array [
               },
               Object {
                 "term": Object {
-                  "transaction.type": "request",
-                },
-              },
-              Object {
-                "term": Object {
                   "service.environment": "test",
                 },
               },
               Object {
                 "term": Object {
                   "service.name": "opbeans-node",
+                },
+              },
+              Object {
+                "term": Object {
+                  "transaction.type": "request",
                 },
               },
             ],

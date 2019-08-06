@@ -30,12 +30,10 @@ export async function loadTrace({
 export async function loadTraceList({
   start,
   end,
-  transactionType,
   uiFilters
 }: {
   start: string;
   end: string;
-  transactionType?: string;
   uiFilters: UIFilters;
 }) {
   return callApi<TransactionGroupListAPIResponse>({
@@ -43,7 +41,6 @@ export async function loadTraceList({
     query: {
       start,
       end,
-      transactionType,
       uiFilters: JSON.stringify(uiFilters)
     }
   });

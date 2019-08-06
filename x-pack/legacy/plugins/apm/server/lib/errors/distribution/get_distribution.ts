@@ -20,19 +20,16 @@ export type ErrorDistributionAPIResponse = PromiseReturnType<
 export async function getErrorDistribution({
   serviceName,
   groupId,
-  transactionType,
   setup
 }: {
   serviceName: string;
   groupId?: string;
-  transactionType?: string;
   setup: Setup;
 }) {
   const bucketSize = getBucketSize(setup);
   const { buckets, totalHits } = await getBuckets({
     serviceName,
     groupId,
-    transactionType,
     bucketSize,
     setup
   });

@@ -39,16 +39,4 @@ describe('error distribution queries', () => {
 
     expect(mock.params).toMatchSnapshot();
   });
-
-  it('fetches an error distribution with a transaction type', async () => {
-    mock = await inspectSearchParams(setup =>
-      getErrorDistribution({
-        serviceName: 'serviceName',
-        transactionType: 'foo',
-        setup
-      })
-    );
-
-    expect(mock.params).toMatchSnapshot();
-  });
 });

@@ -17,12 +17,12 @@ import { PROJECTION } from '../../../projections/typings';
 
 export function TraceOverview() {
   const { urlParams, uiFilters } = useUrlParams();
-  const { start, end, transactionType } = urlParams;
+  const { start, end } = urlParams;
   const { status, data = [] } = useFetcher(() => {
     if (start && end) {
-      return loadTraceList({ start, end, uiFilters, transactionType });
+      return loadTraceList({ start, end, uiFilters });
     }
-  }, [start, end, uiFilters, transactionType]);
+  }, [start, end, uiFilters]);
 
   useTrackPageview({ app: 'apm', path: 'traces_overview' });
   useTrackPageview({ app: 'apm', path: 'traces_overview', delay: 15000 });

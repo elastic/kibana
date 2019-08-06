@@ -19,7 +19,6 @@ interface TopTransactionOptions {
 
 interface TopTraceOptions {
   type: 'top_traces';
-  transactionType?: string;
 }
 
 export type Options = TopTransactionOptions | TopTraceOptions;
@@ -30,7 +29,7 @@ export function transactionGroupsFetcher(options: Options, setup: Setup) {
 
   const projection =
     options.type === 'top_traces'
-      ? getTracesProjection({ setup, transactionType: options.transactionType })
+      ? getTracesProjection({ setup })
       : getTransactionGroupsProjection({
           setup,
           serviceName: options.serviceName,
