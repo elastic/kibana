@@ -549,31 +549,25 @@ export class Router {
 
 // @public (undocumented)
 export interface SavedObject<T extends SavedObjectAttributes = any> {
-    // (undocumented)
     attributes: T;
     // (undocumented)
     error?: {
         message: string;
         statusCode: number;
     };
-    // (undocumented)
     id: string;
-    // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
-    // (undocumented)
     references: SavedObjectReference[];
-    // (undocumented)
     type: string;
-    // (undocumented)
     updated_at?: string;
-    // (undocumented)
     version?: string;
 }
 
 // @public (undocumented)
+export type SavedObjectAttribute = string | number | boolean | null | undefined | SavedObjectAttributes | SavedObjectAttributes[];
+
+// @public
 export interface SavedObjectAttributes {
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectAttribute" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     [key: string]: SavedObjectAttribute | SavedObjectAttribute[];
 }
@@ -599,7 +593,6 @@ export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = 
     attributes: T;
     // (undocumented)
     id?: string;
-    // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
     // (undocumented)
     references?: SavedObjectReference[];
@@ -670,7 +663,6 @@ export interface SavedObjectsClientWrapperOptions<Request = unknown> {
 // @public (undocumented)
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     id?: string;
-    // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
     overwrite?: boolean;
     // (undocumented)
@@ -750,7 +742,6 @@ export interface SavedObjectsExportOptions {
 export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
-    // (undocumented)
     fields?: string[];
     // (undocumented)
     hasReference?: {
@@ -761,7 +752,6 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     page?: number;
     // (undocumented)
     perPage?: number;
-    // (undocumented)
     search?: string;
     searchFields?: string[];
     // (undocumented)
@@ -772,7 +762,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     type?: string | string[];
 }
 
-// @public (undocumented)
+// @public
 export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any> {
     // (undocumented)
     page: number;
@@ -874,6 +864,16 @@ export interface SavedObjectsImportUnknownError {
 export interface SavedObjectsImportUnsupportedTypeError {
     // (undocumented)
     type: 'unsupported_type';
+}
+
+// @public (undocumented)
+export interface SavedObjectsMigrationLogger {
+    // (undocumented)
+    debug: (msg: string) => void;
+    // (undocumented)
+    info: (msg: string) => void;
+    // (undocumented)
+    warning: (msg: string) => void;
 }
 
 // @public

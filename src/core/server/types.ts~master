@@ -17,12 +17,6 @@
  * under the License.
  */
 
-import { SavedObjectsClient } from '../../saved_objects';
+/** This module is intended for consumption by public to avoid import issues with server-side code */
 
-export function initSavedObjectClient(chrome) {
-  const savedObjectClient = new SavedObjectsClient();
-
-  chrome.getSavedObjectsClient = function () {
-    return savedObjectClient;
-  };
-}
+export { PluginOpaqueId } from './plugins/types';

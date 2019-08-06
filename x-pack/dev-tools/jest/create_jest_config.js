@@ -35,6 +35,7 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
     testMatch: ['**/*.test.{js,ts,tsx}'],
     transform: {
       '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
+      '^.+\\.html?$': 'jest-raw-loader',
     },
     transformIgnorePatterns: [
       // ignore all node_modules except @elastic/eui which requires babel transforms to handle dynamic import()

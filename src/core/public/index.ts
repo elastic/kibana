@@ -66,11 +66,31 @@ import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } f
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
+import { SavedObjectsStart } from './saved_objects';
 import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
 
 /** @interal */
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
+export {
+  SavedObjectsBatchResponse,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkCreateOptions,
+  SavedObjectsCreateOptions,
+  SavedObjectsFindResponsePublic,
+  SavedObjectsUpdateOptions,
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectReference,
+  SavedObjectsBaseOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsMigrationVersion,
+  SavedObjectsClientContract,
+  SavedObjectsClient,
+  SimpleSavedObject,
+} from './saved_objects';
+
 export {
   HttpServiceBase,
   HttpHeadersInit,
@@ -125,6 +145,8 @@ export interface CoreStart {
   docLinks: DocLinksStart;
   /** {@link HttpStart} */
   http: HttpStart;
+  /** {@link SavedObjectsStart} */
+  savedObjects: SavedObjectsStart;
   /** {@link I18nStart} */
   i18n: I18nStart;
   /** {@link NotificationsStart} */
@@ -182,6 +204,7 @@ export {
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
+  SavedObjectsStart,
   PluginOpaqueId,
   Toast,
   ToastInput,
