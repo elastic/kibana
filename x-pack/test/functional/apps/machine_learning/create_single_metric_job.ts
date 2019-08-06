@@ -10,12 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const mlNavigation = getService('mlNavigation');
-  const mlJobManagement = getService('mlJobManagement');
-  const mlJobSourceSelection = getService('mlJobSourceSelection');
-  const mlJobTypeSelection = getService('mlJobTypeSelection');
-  const mlJobWizardCommon = getService('mlJobWizardCommon');
-  const mlAPI = getService('mlAPI');
+  const ml = getService('ml');
 
   const jobId = `fq_single_1_${Date.now()}`;
 
@@ -27,124 +22,124 @@ export default function({ getService }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('ml/farequote');
-      await mlAPI.cleanMlIndices();
-      await mlAPI.cleanDataframeIndices();
+      await ml.api.cleanMlIndices();
+      await ml.api.cleanDataframeIndices();
     });
 
     it('loads the job management page', async () => {
-      await mlNavigation.navigateToMl();
-      await mlNavigation.navigateToJobManagement();
+      await ml.navigation.navigateToMl();
+      await ml.navigation.navigateToJobManagement();
     });
 
     it('loads the new job source selection page', async () => {
-      await mlJobManagement.navigateToNewJobSourceSelection();
+      await ml.jobManagement.navigateToNewJobSourceSelection();
     });
 
     it('loads the job type selection page', async () => {
-      await mlJobSourceSelection.selectSourceIndexPattern('farequote');
+      await ml.jobSourceSelection.selectSourceIndexPattern('farequote');
     });
 
     it('loads the single metric job wizard page', async () => {
-      await mlJobTypeSelection.selectSingleMetricJob();
+      await ml.jobTypeSelection.selectSingleMetricJob();
     });
 
     it('displays the time range step', async () => {
-      await mlJobWizardCommon.assertTimeRangeSectionExists();
+      await ml.jobWizardCommon.assertTimeRangeSectionExists();
     });
 
     it('displays the event rate chart', async () => {
-      await mlJobWizardCommon.clickUseFullDataButton();
-      await mlJobWizardCommon.assertEventRateChartExists();
+      await ml.jobWizardCommon.clickUseFullDataButton();
+      await ml.jobWizardCommon.assertEventRateChartExists();
     });
 
     it('displays the pick fields step', async () => {
-      await mlJobWizardCommon.clickNextButton();
-      await mlJobWizardCommon.assertPickFieldsSectionExists();
+      await ml.jobWizardCommon.clickNextButton();
+      await ml.jobWizardCommon.assertPickFieldsSectionExists();
     });
 
     it('selects field and aggregation', async () => {
       const identifier = 'Mean(responsetime)';
-      await mlJobWizardCommon.assertAggAndFieldInputExists();
-      await mlJobWizardCommon.selectAggAndField(identifier);
-      await mlJobWizardCommon.assertAggAndFieldSelection(identifier);
+      await ml.jobWizardCommon.assertAggAndFieldInputExists();
+      await ml.jobWizardCommon.selectAggAndField(identifier);
+      await ml.jobWizardCommon.assertAggAndFieldSelection(identifier);
     });
 
     it('inputs the bucket span', async () => {
       const bucketSpan = '30m';
-      await mlJobWizardCommon.assertBucketSpanInputExists();
-      await mlJobWizardCommon.setBucketSpan(bucketSpan);
-      await mlJobWizardCommon.assertBucketSpanValue(bucketSpan);
+      await ml.jobWizardCommon.assertBucketSpanInputExists();
+      await ml.jobWizardCommon.setBucketSpan(bucketSpan);
+      await ml.jobWizardCommon.assertBucketSpanValue(bucketSpan);
     });
 
     it('displays the job details step', async () => {
-      await mlJobWizardCommon.clickNextButton();
-      await mlJobWizardCommon.assertJobDetailsSectionExists();
+      await ml.jobWizardCommon.clickNextButton();
+      await ml.jobWizardCommon.assertJobDetailsSectionExists();
     });
 
     it('inputs the job id', async () => {
-      await mlJobWizardCommon.assertJobIdInputExists();
-      await mlJobWizardCommon.setJobId(jobId);
-      await mlJobWizardCommon.assertJobIdValue(jobId);
+      await ml.jobWizardCommon.assertJobIdInputExists();
+      await ml.jobWizardCommon.setJobId(jobId);
+      await ml.jobWizardCommon.assertJobIdValue(jobId);
     });
 
     it('inputs the job description', async () => {
       const jobDescription =
         'Create single metric job based on the farequote dataset with 30m bucketspan and mean(responsetime)';
-      await mlJobWizardCommon.assertJobDescriptionInputExists();
-      await mlJobWizardCommon.setJobDescription(jobDescription);
-      await mlJobWizardCommon.assertJobDescriptionValue(jobDescription);
+      await ml.jobWizardCommon.assertJobDescriptionInputExists();
+      await ml.jobWizardCommon.setJobDescription(jobDescription);
+      await ml.jobWizardCommon.assertJobDescriptionValue(jobDescription);
     });
 
     it('inputs job groups', async () => {
       const jobGroups = ['automated', 'farequote', 'single-metric'];
-      await mlJobWizardCommon.assertJobGroupInputExists();
+      await ml.jobWizardCommon.assertJobGroupInputExists();
       for (const jobGroup of jobGroups) {
-        await mlJobWizardCommon.addJobGroup(jobGroup);
+        await ml.jobWizardCommon.addJobGroup(jobGroup);
       }
-      await mlJobWizardCommon.assertJobGroupSelection(jobGroups);
+      await ml.jobWizardCommon.assertJobGroupSelection(jobGroups);
     });
 
     it('opens the advanced section', async () => {
-      await mlJobWizardCommon.ensureAdvancedSectionOpen();
+      await ml.jobWizardCommon.ensureAdvancedSectionOpen();
     });
 
     it('displays the model plot switch', async () => {
-      await mlJobWizardCommon.assertModelPlotSwitchExists();
+      await ml.jobWizardCommon.assertModelPlotSwitchExists();
     });
 
     it('enables the dedicated index switch', async () => {
-      await mlJobWizardCommon.assertDedicatedIndexSwitchExists();
-      await mlJobWizardCommon.activateDedicatedIndexSwitch();
-      await mlJobWizardCommon.assertDedicatedIndexSwitchCheckedState(true);
+      await ml.jobWizardCommon.assertDedicatedIndexSwitchExists();
+      await ml.jobWizardCommon.activateDedicatedIndexSwitch();
+      await ml.jobWizardCommon.assertDedicatedIndexSwitchCheckedState(true);
     });
 
     it('inputs the model memory limit', async () => {
       const memoryLimit = '15MB';
-      await mlJobWizardCommon.assertModelMemoryLimitInputExists();
-      await mlJobWizardCommon.setModelMemoryLimit(memoryLimit);
-      await mlJobWizardCommon.assertModelMemoryLimitValue(memoryLimit);
+      await ml.jobWizardCommon.assertModelMemoryLimitInputExists();
+      await ml.jobWizardCommon.setModelMemoryLimit(memoryLimit);
+      await ml.jobWizardCommon.assertModelMemoryLimitValue(memoryLimit);
     });
 
     it('displays the validation step', async () => {
-      await mlJobWizardCommon.clickNextButton();
-      await mlJobWizardCommon.assertValidationSectionExists();
+      await ml.jobWizardCommon.clickNextButton();
+      await ml.jobWizardCommon.assertValidationSectionExists();
     });
 
     it('displays the summary step', async () => {
-      await mlJobWizardCommon.clickNextButton();
-      await mlJobWizardCommon.assertSummarySectionExists();
+      await ml.jobWizardCommon.clickNextButton();
+      await ml.jobWizardCommon.assertSummarySectionExists();
     });
 
     it('creates the job and finishes processing', async () => {
-      await mlJobWizardCommon.assertCreateJobButtonExists();
-      await mlJobWizardCommon.createJobAndWaitForCompletion();
+      await ml.jobWizardCommon.assertCreateJobButtonExists();
+      await ml.jobWizardCommon.createJobAndWaitForCompletion();
     });
 
     it('displays the created job in the job list', async () => {
-      await mlNavigation.navigateToMl();
-      await mlNavigation.navigateToJobManagement();
-      await mlJobManagement.filterJobsTable(jobId);
-      const jobRow = await mlJobManagement.getJobRowByJobId(jobId);
+      await ml.navigation.navigateToMl();
+      await ml.navigation.navigateToJobManagement();
+      await ml.jobManagement.filterJobsTable(jobId);
+      const jobRow = await ml.jobManagement.getJobRowByJobId(jobId);
       expect(jobRow).to.not.be(null);
     });
   });

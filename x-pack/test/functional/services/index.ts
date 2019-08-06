@@ -46,20 +46,7 @@ import { UserMenuProvider } from './user_menu';
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
 import { InfraLogStreamProvider } from './infra_log_stream';
-import {
-  MachineLearningAnomalyExplorerProvider,
-  MachineLearningAPIProvider,
-  MachineLearningDataFramesProvider,
-  MachineLearningDataVisualizerProvider,
-  MachineLearningJobManagementProvider,
-  MachineLearningJobSourceSelectionProvider,
-  MachineLearningJobTypeSelectionProvider,
-  MachineLearningJobWizardCommonProvider,
-  MachineLearningNavigationProvider,
-  MachineLearningSettingsProvider,
-  MachineLearningSingleMetricViewerProvider,
-  // @ts-ignore not ts yet
-} from './machine_learning';
+import { MachineLearningProvider } from './ml';
 
 import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/services';
 
@@ -101,15 +88,5 @@ export const services = {
   uptime: UptimeProvider,
   infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
   infraLogStream: InfraLogStreamProvider,
-  mlAnomalyExplorer: MachineLearningAnomalyExplorerProvider,
-  mlAPI: MachineLearningAPIProvider,
-  mlDataFrames: MachineLearningDataFramesProvider,
-  mlDataVisualizer: MachineLearningDataVisualizerProvider,
-  mlJobManagement: MachineLearningJobManagementProvider,
-  mlJobSourceSelection: MachineLearningJobSourceSelectionProvider,
-  mlJobTypeSelection: MachineLearningJobTypeSelectionProvider,
-  mlJobWizardCommon: MachineLearningJobWizardCommonProvider,
-  mlNavigation: MachineLearningNavigationProvider,
-  mlSettings: MachineLearningSettingsProvider,
-  mlSingleMetricViewer: MachineLearningSingleMetricViewerProvider,
+  ml: MachineLearningProvider,
 };

@@ -8,13 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const mlAnomalyExplorer = getService('mlAnomalyExplorer');
-  const mlDataFrames = getService('mlDataFrames');
-  const mlDataVisualizer = getService('mlDataVisualizer');
-  const mlJobManagement = getService('mlJobManagement');
-  const mlNavigation = getService('mlNavigation');
-  const mlSettings = getService('mlSettings');
-  const mlSingleMetricViewer = getService('mlSingleMetricViewer');
+  const ml = getService('ml');
 
   describe('page navigation', function() {
     this.tags('smoke');
@@ -27,41 +21,41 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('loads the home page', async () => {
-      await mlNavigation.navigateToMl();
+      await ml.navigation.navigateToMl();
     });
 
     it('loads the job management page', async () => {
-      await mlNavigation.navigateToJobManagement();
-      await mlJobManagement.assertJobStatsBarExists();
-      await mlJobManagement.assertJobTableExists();
-      await mlJobManagement.assertCreateNewJobButtonExists();
+      await ml.navigation.navigateToJobManagement();
+      await ml.jobManagement.assertJobStatsBarExists();
+      await ml.jobManagement.assertJobTableExists();
+      await ml.jobManagement.assertCreateNewJobButtonExists();
     });
 
     it('loads the anomaly explorer page', async () => {
-      await mlNavigation.navigateToAnomalyExplorert();
-      await mlAnomalyExplorer.assertAnomalyExplorerEmptyListMessageExists();
+      await ml.navigation.navigateToAnomalyExplorert();
+      await ml.anomalyExplorer.assertAnomalyExplorerEmptyListMessageExists();
     });
 
     it('loads the single metric viewer page', async () => {
-      await mlNavigation.navigateToSingleMetricViewer();
-      await mlSingleMetricViewer.assertSingleMetricViewerEmptyListMessageExsist();
+      await ml.navigation.navigateToSingleMetricViewer();
+      await ml.singleMetricViewer.assertSingleMetricViewerEmptyListMessageExsist();
     });
 
     it('loads the data frame page', async () => {
-      await mlNavigation.navigateToDataFrames();
-      await mlDataFrames.assertDataFrameEmptyListMessageExists();
+      await ml.navigation.navigateToDataFrames();
+      await ml.dataFrames.assertDataFrameEmptyListMessageExists();
     });
 
     it('loads the data visualizer page', async () => {
-      await mlNavigation.navigateToDataVisualizer();
-      await mlDataVisualizer.assertDataVisualizerImportDataCardExists();
-      await mlDataVisualizer.assertDataVisualizerIndexDataCardExists();
+      await ml.navigation.navigateToDataVisualizer();
+      await ml.dataVisualizer.assertDataVisualizerImportDataCardExists();
+      await ml.dataVisualizer.assertDataVisualizerIndexDataCardExists();
     });
 
     it('loads the settings page', async () => {
-      await mlNavigation.navigateToSettings();
-      await mlSettings.assertSettingsCalendarLinkExists();
-      await mlSettings.assertSettingsFilterlistLinkExists();
+      await ml.navigation.navigateToSettings();
+      await ml.settings.assertSettingsCalendarLinkExists();
+      await ml.settings.assertSettingsFilterlistLinkExists();
     });
   });
 }
