@@ -90,7 +90,7 @@ Find the Chromium revision (run in kibana's working directory):
 
 - `cat node_modules/puppeteer-core/package.json | grep chromium_revision`
 - Take the revision number from that, and tack it to the end of this URL: https://crrev.com
-  - (For example: https://crrev.com/637110)
+  - (For example: https://crrev.com/672088)
 - Grab the SHA from there
   - (For example, rev 637110 has sha 312d84c8ce62810976feda0d3457108a6dfff9e6)
 
