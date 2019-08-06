@@ -15,13 +15,16 @@
 
 
  #graphBasic {
-   height: 100%;
+   display: flex;
+   flex-direction: column;
+   flex: 1;
+   overflow: hidden;
  }
 
 .gphGraph__container {
   background: $euiColorEmptyShade;
   position: relative;
-  height: 100%;
+  flex: 1;
 }
 
 .kbnGlobalNav.kbnGlobalNav-isOpen + .app-wrapper .gphGraph__container {
@@ -76,7 +79,7 @@
 }
 
 .gphGraph__menus, .gphGraph__bar {
-  margin: $euiSizeM;
+  margin: $euiSizeM $euiSizeM 0 $euiSizeM;
 }
 
 .gphGraph__flexGroup {

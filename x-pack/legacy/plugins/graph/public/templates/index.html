@@ -3,7 +3,7 @@
   <kbn-top-nav-v2 name="workspacesTopNav" config="topNavMenu">
   </kbn-top-nav-v2>
 
-  <div class="gphGraph__menus">
+  <div class="gphGraph__menus" ng-show="menus.showLoad || menus.showSave || menus.showSettings">
     <graph-load ng-show="menus.showLoad"></graph-load>
     <graph-save ng-show="menus.showSave"></graph-save>
     <graph-settings ng-show="menus.showSettings"></graph-settings>

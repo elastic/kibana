@@ -514,6 +514,7 @@ app.controller('graphuiPlugin', function (
         $scope.selectedField = $scope.filteredFields[0];
       }
     } else {
+      $scope.currentlyDisplayedKey = undefined;
       $scope.hideAllConfigPanels();
     }
   };
