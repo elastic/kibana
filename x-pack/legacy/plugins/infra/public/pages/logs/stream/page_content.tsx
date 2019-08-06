@@ -6,13 +6,13 @@
 
 import React, { useContext } from 'react';
 
-import { SourceErrorPage } from '../../components/source_error_page';
-import { SourceLoadingPage } from '../../components/source_loading_page';
-import { Source } from '../../containers/source';
+import { SourceErrorPage } from '../../../components/source_error_page';
+import { SourceLoadingPage } from '../../../components/source_loading_page';
+import { Source } from '../../../containers/source';
 import { LogsPageLogsContent } from './page_logs_content';
 import { LogsPageNoIndicesContent } from './page_no_indices_content';
 
-export const LogsPageContent: React.FunctionComponent = () => {
+export const StreamPageContent: React.FunctionComponent = () => {
   const {
     hasFailedLoadingSource,
     isLoadingSource,

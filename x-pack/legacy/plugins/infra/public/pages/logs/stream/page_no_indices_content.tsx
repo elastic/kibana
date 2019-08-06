@@ -6,13 +6,16 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n, InjectedIntl } from '@kbn/i18n/react';
-import React, { useContext } from 'react';
+import React from 'react';
 
 import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
-import { NoIndices } from '../../components/empty_states/no_indices';
-import { SourceConfigurationFlyoutState } from '../../components/source_configuration';
-import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
+import { NoIndices } from '../../../components/empty_states/no_indices';
+import { WithKibanaChrome } from '../../../containers/with_kibana_chrome';
+import {
+  ViewSourceConfigurationButton,
+  ViewSourceConfigurationButtonHrefBase,
+} from '../../../components/source_configuration';
 
 interface LogsPageNoIndicesContentProps {
   intl: InjectedIntl;
@@ -22,7 +25,6 @@ interface LogsPageNoIndicesContentProps {
 export const LogsPageNoIndicesContent = injectUICapabilities(
   injectI18n((props: LogsPageNoIndicesContentProps) => {
     const { intl, uiCapabilities } = props;
-    const { showIndicesConfiguration } = useContext(SourceConfigurationFlyoutState.Context);
 
     return (
       <WithKibanaChrome>
@@ -54,16 +56,15 @@ export const LogsPageNoIndicesContent = injectUICapabilities(
                 </EuiFlexItem>
                 {uiCapabilities.logs.configureSource ? (
                   <EuiFlexItem>
-                    <EuiButton
+                    <ViewSourceConfigurationButton
                       data-test-subj="configureSourceButton"
-                      color="primary"
-                      onClick={showIndicesConfiguration}
+                      hrefBase={ViewSourceConfigurationButtonHrefBase.logs}
                     >
                       {intl.formatMessage({
                         id: 'xpack.infra.configureSourceActionLabel',
                         defaultMessage: 'Change source configuration',
                       })}
-                    </EuiButton>
+                    </ViewSourceConfigurationButton>
                   </EuiFlexItem>
                 ) : null}
               </EuiFlexGroup>
