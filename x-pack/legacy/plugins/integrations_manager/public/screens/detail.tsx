@@ -33,10 +33,7 @@ export function Detail(props: { package: string }) {
   const [info, setInfo] = useState<IntegrationInfo | null>(null);
   useEffect(() => {
     getIntegrationInfoByKey(props.package).then(response => {
-      const { description } = response;
-      // TODO: Need title or something which uses correct capitalization (e.g. PostgreSQL)
-      // Add to API
-      const title = description.split(' ')[0];
+      const { title } = response;
       setInfo({ ...response, title });
     });
   }, [props.package]);
