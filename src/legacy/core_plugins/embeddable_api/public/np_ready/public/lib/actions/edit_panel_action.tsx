@@ -41,8 +41,7 @@ export class EditPanelAction extends Action {
     return i18n.translate('embeddableApi.panel.editPanel.displayName', {
       defaultMessage: 'Edit {value}',
       values: {
-        // TODO: Did embeddable factories ever have `.getDisplayName()`?
-        value: 'factory.getDisplayName()',
+        value: factory.getDisplayName(),
       },
     });
   }
