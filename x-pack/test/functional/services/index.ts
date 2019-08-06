@@ -48,6 +48,7 @@ import { InfraSourceConfigurationFlyoutProvider } from './infra_source_configura
 import { InfraLogStreamProvider } from './infra_log_stream';
 import {
   MachineLearningAnomalyExplorerProvider,
+  MachineLearningAPIProvider,
   MachineLearningDataFramesProvider,
   MachineLearningDataVisualizerProvider,
   MachineLearningJobManagementProvider,
@@ -101,6 +102,7 @@ export const services = {
   infraSourceConfigurationFlyout: InfraSourceConfigurationFlyoutProvider,
   infraLogStream: InfraLogStreamProvider,
   mlAnomalyExplorer: MachineLearningAnomalyExplorerProvider,
+  mlAPI: MachineLearningAPIProvider,
   mlDataFrames: MachineLearningDataFramesProvider,
   mlDataVisualizer: MachineLearningDataVisualizerProvider,
   mlJobManagement: MachineLearningJobManagementProvider,

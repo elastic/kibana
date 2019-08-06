@@ -15,6 +15,7 @@ export default function({ getService }: FtrProviderContext) {
   const mlJobSourceSelection = getService('mlJobSourceSelection');
   const mlJobTypeSelection = getService('mlJobTypeSelection');
   const mlJobWizardCommon = getService('mlJobWizardCommon');
+  const mlAPI = getService('mlAPI');
 
   const jobId = `fq_single_1_${Date.now()}`;
 
@@ -26,6 +27,8 @@ export default function({ getService }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('ml/farequote');
+      await mlAPI.cleanMlIndices();
+      await mlAPI.cleanDataframeIndices();
     });
 
     it('loads the job management page', async () => {
@@ -132,17 +135,14 @@ export default function({ getService }: FtrProviderContext) {
       await mlJobWizardCommon.assertSummarySectionExists();
     });
 
-    it('creates and finishes the job', async () => {
+    it('creates the job and finishes processing', async () => {
       await mlJobWizardCommon.assertCreateJobButtonExists();
       await mlJobWizardCommon.createJobAndWaitForCompletion();
     });
 
-    it('loads the job management page', async () => {
+    it('displays the created job in the job list', async () => {
       await mlNavigation.navigateToMl();
       await mlNavigation.navigateToJobManagement();
-    });
-
-    it('displays the created job in the job list', async () => {
       await mlJobManagement.filterJobsTable(jobId);
       const jobRow = await mlJobManagement.getJobRowByJobId(jobId);
       expect(jobRow).to.not.be(null);

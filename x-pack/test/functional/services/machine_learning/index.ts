@@ -5,6 +5,7 @@
  */
 
 export { MachineLearningAnomalyExplorerProvider } from './anomaly_explorer';
+export { MachineLearningAPIProvider } from './api';
 export { MachineLearningDataFramesProvider } from './data_frames';
 export { MachineLearningDataVisualizerProvider } from './data_visualizer';
 export { MachineLearningJobManagementProvider } from './job_management';
