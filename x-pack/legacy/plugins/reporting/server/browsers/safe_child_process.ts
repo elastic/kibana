@@ -7,6 +7,7 @@
 import * as Rx from 'rxjs';
 import { take, share, mapTo, delay, tap, ignoreElements } from 'rxjs/operators';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
+import { Logger } from '../../types';
 
 interface IChild {
   kill: (signal: string) => Promise<any>;
@@ -14,7 +15,11 @@ interface IChild {
 
 // Our process can get sent various signals, and when these occur we wish to
 // kill the subprocess and then kill our process as long as the observer isn't cancelled
-export function safeChildProcess(childProcess: IChild, observer: InnerSubscriber<any, any>) {
+export function safeChildProcess(
+  logger: Logger,
+  childProcess: IChild,
+  observer: InnerSubscriber<any, any>
+): void {
   const ownTerminateSignal$ = Rx.merge(
     Rx.fromEvent(process as NodeJS.EventEmitter, 'SIGTERM').pipe(mapTo('SIGTERM')),
     Rx.fromEvent(process as NodeJS.EventEmitter, 'SIGINT').pipe(mapTo('SIGINT')),
@@ -50,17 +55,9 @@ export function safeChildProcess(childProcess: IChild, observer: InnerSubscriber
   // this is adding unsubscribe logic to our observer
   // so that if our observer unsubscribes, we terminate our child-process
   observer.add(() => {
+    logger.debug(`The browser process observer has unsubscribed. Closing the browser...`);
     childProcess.kill('SIGKILL');
   });
 
   observer.add(terminate$.pipe(ignoreElements()).subscribe(observer));
-}
-
-// If a process exits ungracefully, we can try to help the user make sense of why
-// by giving them a suggestion based on the code.
-export function exitCodeSuggestion(code: number | null) {
-  if (code === null) {
-    return 'Your report may be too large. Try removing some visualizations or increasing the RAM available to Kibana.';
-  }
-  return '';
 }

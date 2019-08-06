@@ -19,6 +19,7 @@
 
 import './core.css';
 
+import { CoreId } from '../server';
 import { InternalCoreSetup, InternalCoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
@@ -34,6 +35,7 @@ import { ApplicationService } from './application';
 import { mapToObject } from '../utils/';
 import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
+import { ContextService } from './context';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -44,8 +46,9 @@ interface Params {
 }
 
 /** @internal */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CoreContext {}
+export interface CoreContext {
+  coreId: CoreId;
+}
 
 /**
  * The CoreSystem is the root of the new platform, and setups all parts
@@ -69,6 +72,7 @@ export class CoreSystem {
   private readonly application: ApplicationService;
   private readonly docLinks: DocLinksService;
   private readonly rendering: RenderingService;
+  private readonly context: ContextService;
 
   private readonly rootDomElement: HTMLElement;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
@@ -104,8 +108,9 @@ export class CoreSystem {
     this.docLinks = new DocLinksService();
     this.rendering = new RenderingService();
 
-    const core: CoreContext = {};
-    this.plugins = new PluginsService(core);
+    const core: CoreContext = { coreId: Symbol('core') };
+    this.context = new ContextService(core);
+    this.plugins = new PluginsService(core, injectedMetadata.uiPlugins);
 
     this.legacyPlatform = new LegacyPlatformService({
       requireLegacyFiles,
@@ -127,8 +132,12 @@ export class CoreSystem {
       const notifications = this.notifications.setup({ uiSettings });
       const application = this.application.setup();
 
+      const pluginDependencies = this.plugins.getOpaqueIds();
+      const context = this.context.setup({ pluginDependencies });
+
       const core: InternalCoreSetup = {
         application,
+        context,
         fatalErrors: this.fatalErrorsSetup,
         http,
         injectedMetadata,

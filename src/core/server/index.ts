@@ -42,10 +42,12 @@ import {
   ElasticsearchServiceSetup,
 } from './elasticsearch';
 import { HttpServiceSetup, HttpServiceStart } from './http';
-import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
+import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
+import { ContextSetup } from './context';
 
 export { bootstrap } from './bootstrap';
 export { ConfigService } from './config';
+export { CoreId } from './core_context';
 export {
   CallAPIOptions,
   ClusterClient,
@@ -56,25 +58,41 @@ export {
   ElasticsearchErrorHelpers,
   APICaller,
   FakeRequest,
-  LegacyRequest,
 } from './elasticsearch';
 export {
   AuthenticationHandler,
   AuthHeaders,
   AuthResultParams,
+  AuthStatus,
   AuthToolkit,
+  CustomHttpResponseOptions,
   GetAuthHeaders,
+  GetAuthState,
+  HttpResponseOptions,
+  HttpResponsePayload,
+  HttpServerSetup,
+  IsAuthenticated,
   KibanaRequest,
   KibanaRequestRoute,
+  KnownHeaders,
+  LegacyRequest,
   OnPreAuthHandler,
   OnPreAuthToolkit,
   OnPostAuthHandler,
   OnPostAuthToolkit,
+  RedirectResponseOptions,
+  RequestHandler,
+  ResponseError,
+  ResponseErrorMeta,
+  kibanaResponseFactory,
+  KibanaResponseFactory,
+  RouteConfig,
   Router,
   RouteMethod,
   RouteConfigOptions,
-  SessionStorageFactory,
   SessionStorage,
+  SessionStorageCookieOptions,
+  SessionStorageFactory,
 } from './http';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
@@ -97,6 +115,7 @@ export {
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
+  SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsErrorHelpers,
@@ -109,6 +128,16 @@ export {
   SavedObjectsService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsExportOptions,
+  SavedObjectsImportError,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportOptions,
+  SavedObjectsImportResponse,
+  SavedObjectsImportRetry,
+  SavedObjectsResolveImportErrorsOptions,
 } from './saved_objects';
 
 export { RecursiveReadonly } from '../utils';
@@ -119,6 +148,9 @@ export { RecursiveReadonly } from '../utils';
  * @public
  */
 export interface CoreSetup {
+  context: {
+    createContextContainer: ContextSetup['createContextContainer'];
+  };
   elasticsearch: {
     adminClient$: Observable<ClusterClient>;
     dataClient$: Observable<ClusterClient>;
@@ -133,7 +165,6 @@ export interface CoreSetup {
     registerAuth: HttpServiceSetup['registerAuth'];
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
     basePath: HttpServiceSetup['basePath'];
-    createNewServer: HttpServiceSetup['createNewServer'];
     isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
   };
 }
@@ -160,9 +191,11 @@ export interface InternalCoreStart {
 }
 
 export {
+  ContextSetup,
   HttpServiceSetup,
   HttpServiceStart,
   ElasticsearchServiceSetup,
   PluginsServiceSetup,
   PluginsServiceStart,
+  PluginOpaqueId,
 };

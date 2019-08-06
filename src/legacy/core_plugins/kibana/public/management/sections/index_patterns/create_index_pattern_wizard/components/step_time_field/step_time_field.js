@@ -81,12 +81,15 @@ export class StepTimeFieldComponent extends Component {
   }
 
   fetchTimeFields = async () => {
-    const { indexPatternsService, indexPattern } = this.props;
+    const { indexPatternsService, indexPattern: pattern } = this.props;
     const { getFetchForWildcardOptions } = this.props.indexPatternCreationType;
+
+    const indexPattern = await indexPatternsService.make();
+    indexPattern.title = pattern;
 
     this.setState({ isFetchingTimeFields: true });
     const fields = await ensureMinimumTime(
-      indexPatternsService.fieldsFetcher.fetchForWildcard(indexPattern, getFetchForWildcardOptions())
+      indexPattern.fieldsFetcher.fetch(getFetchForWildcardOptions())
     );
     const timeFields = extractTimeFields(fields);
 

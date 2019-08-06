@@ -5,6 +5,7 @@
  */
 
 import { EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import querystring from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -166,7 +167,11 @@ class SearchPage extends React.PureComponent<Props, State> {
       const statsComp = (
         <EuiTitle size="m">
           <h1>
-            Showing {total > 0 ? from : 0} - {to} of {total} results.
+            <FormattedMessage
+              id="xpack.code.searchPage.showingResultsTitle"
+              defaultMessage="Showing {from} - {to} of {total} results."
+              values={{ from, to, total }}
+            />
           </h1>
         </EuiTitle>
       );
@@ -186,7 +191,11 @@ class SearchPage extends React.PureComponent<Props, State> {
         const statsComp = (
           <EuiTitle size="m">
             <h1>
-              Showing {total > 0 ? from : 0} - {to} of {total} results.
+              <FormattedMessage
+                id="xpack.code.searchPage.showingResultsTitle"
+                defaultMessage="Showing {from} - {to} of {total} results."
+                values={{ from, to, total }}
+              />
             </h1>
           </EuiTitle>
         );

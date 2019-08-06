@@ -45,14 +45,14 @@ interface Props {
 }
 
 export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) => {
-  const { loading, error, data: privilegesData } = useRequest({
+  const { isLoading, error, data: privilegesData } = useRequest({
     path: privilegesEndpoint,
     method: 'get',
   });
 
   const value = {
-    isLoading: loading,
-    privileges: loading ? { hasAllPrivileges: true, missingPrivileges: {} } : privilegesData,
+    isLoading,
+    privileges: isLoading ? { hasAllPrivileges: true, missingPrivileges: {} } : privilegesData,
     apiError: error ? error : null,
   };
 
