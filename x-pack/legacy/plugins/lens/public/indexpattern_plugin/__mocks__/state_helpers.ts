@@ -7,6 +7,7 @@
 const actual = jest.requireActual('../state_helpers');
 
 jest.spyOn(actual, 'changeColumn');
+jest.spyOn(actual, 'updateLayerIndexPattern');
 
 export const {
   getColumnOrder,
@@ -15,4 +16,6 @@ export const {
   updateColumnParam,
   sortByField,
   hasField,
+  updateLayerIndexPattern,
+  isLayerTransferable,
 } = actual;

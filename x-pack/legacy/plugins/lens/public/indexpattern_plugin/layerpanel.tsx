@@ -35,7 +35,7 @@ export function LayerPanel({ state, setState, layerId }: IndexPatternLayerPanelP
           ...indexPattern,
           isTransferable: isLayerTransferable(state.layers[layerId], indexPattern),
         })),
-    [state.indexPatterns, layerId]
+    [state.indexPatterns, layerId, state.layers[layerId]]
   );
   const currentIndexPatternId = state.layers[layerId].indexPatternId;
 
