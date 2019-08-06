@@ -759,7 +759,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     // (undocumented)
     sortOrder?: string;
     // (undocumented)
-    type?: string | string[];
+    type: string | string[];
 }
 
 // @public
