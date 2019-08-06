@@ -68,7 +68,9 @@ export const saveQuery = async (attributes: SavedQueryAttributes, id?: string) =
 
   let rawQueryResponse;
   if (id === undefined) {
-    rawQueryResponse = await savedObjectsClient.create('query', queryObject);
+    rawQueryResponse = await savedObjectsClient.create('query', queryObject, {
+      id: attributes.title,
+    });
   } else {
     rawQueryResponse = await savedObjectsClient.create('query', queryObject, {
       id,

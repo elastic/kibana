@@ -79,8 +79,14 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
       <EuiFormRow>
         <EuiText color="subdued">{savedQueryDescriptionText}</EuiText>
       </EuiFormRow>
-      <EuiFormRow label="Name">
+      <EuiFormRow
+        label="Name"
+        helpText={i18n.translate('data.search.searchBar.savedQueryNameHelpText', {
+          defaultMessage: 'Must be unique.',
+        })}
+      >
         <EuiFieldText
+          disabled={!!savedQuery}
           value={title}
           name="title"
           onChange={event => {
