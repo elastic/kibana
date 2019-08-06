@@ -8,7 +8,7 @@ import produce from 'immer';
 import _ from 'lodash';
 import { Action, handleActions } from 'redux-actions';
 
-import { SymbolInformation } from 'vscode-languageserver-types/lib/esm/main';
+import { DocumentSymbol } from 'vscode-languageserver-types';
 import {
   closeSymbolPath,
   loadStructure,
@@ -22,7 +22,7 @@ import { languageServerInitializing } from '../actions/language_server';
 import { routePathChange, repoChange, revisionChange, filePathChange } from '../actions/route';
 
 export interface SymbolState {
-  symbols: { [key: string]: SymbolInformation[] };
+  symbols: { [key: string]: DocumentSymbol[] };
   structureTree: { [key: string]: SymbolWithMembers[] };
   error?: Error;
   loading: boolean;
