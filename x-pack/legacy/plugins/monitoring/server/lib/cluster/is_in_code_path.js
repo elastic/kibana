@@ -11,10 +11,11 @@ export function isInCodePath(codePaths, codePathsToTest) {
     return true;
   }
 
-  for (const codePath in codePathsToTest) {
+  for (const codePath of codePathsToTest) {
     if (codePaths.includes(codePath)) {
       return true;
     }
   }
+
   return false;
 }
