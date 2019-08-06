@@ -13,7 +13,7 @@ export interface Suggestion {
   visualizationId: string;
   datasourceState?: unknown;
   datasourceId?: string;
-  keptLayerId: string;
+  keptLayerIds: string[];
   columns: number;
   score: number;
   title: string;
@@ -51,6 +51,16 @@ export function getSuggestions({
   visualizationState: unknown;
   field?: unknown;
 }): Suggestion[] {
+  const allLayerIds = _.flatten(
+    Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
+      if (datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading) {
+        return datasource.getLayers(datasourceStates[datasourceId].state);
+      } else {
+        return [];
+      }
+    })
+  );
+
   const datasourceTableSuggestions = _.flatten(
     Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
       if (datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading) {
@@ -86,7 +96,10 @@ export function getSuggestions({
             ...suggestion,
             visualizationId,
             visualizationState: state,
-            keptLayerId: datasourceSuggestion.table.layerId,
+            keptLayerIds:
+              visualizationId !== activeVisualizationId
+                ? [datasourceSuggestion.table.layerId]
+                : allLayerIds,
             datasourceState: datasourceSuggestion.state,
             datasourceId: datasourceSuggestion.datasourceId,
             columns: datasourceSuggestion.table.columns.length,
@@ -102,7 +115,7 @@ export function switchToSuggestion(
   dispatch: (action: Action) => void,
   suggestion: Pick<
     Suggestion,
-    'visualizationId' | 'visualizationState' | 'datasourceState' | 'datasourceId' | 'keptLayerId'
+    'visualizationId' | 'visualizationState' | 'datasourceState' | 'datasourceId' | 'keptLayerIds'
   >
 ) {
   const action: Action = {
@@ -112,11 +125,11 @@ export function switchToSuggestion(
     datasourceState: suggestion.datasourceState,
     datasourceId: suggestion.datasourceId,
   };
+  dispatch(action);
   const layerIds = Object.keys(frame.datasourceLayers).filter(id => {
-    return id !== suggestion.keptLayerId;
+    return !suggestion.keptLayerIds.includes(id);
   });
   if (layerIds.length > 0) {
     frame.removeLayers(layerIds);
   }
-  dispatch(action);
 }

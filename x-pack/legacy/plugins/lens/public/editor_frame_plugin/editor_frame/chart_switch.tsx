@@ -23,7 +23,7 @@ interface VisualizationSelection {
   visualizationId: string;
   subVisualizationId: string;
   getVisualizationState: () => unknown;
-  keptLayerId: string;
+  keptLayerIds: string[];
   dataLoss: 'nothing' | 'layers' | 'everything' | 'columns';
   datasourceId?: string;
   datasourceState?: unknown;
@@ -74,17 +74,10 @@ export function ChartSwitch(props: Props) {
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
 
-    if (selection.visualizationId !== props.visualizationId) {
-      switchToSuggestion(props.framePublicAPI, props.dispatch, {
-        ...selection,
-        visualizationState: selection.getVisualizationState(),
-      });
-    } else {
-      props.dispatch({
-        type: 'UPDATE_VISUALIZATION_STATE',
-        newState: selection.getVisualizationState(),
-      });
-    }
+    switchToSuggestion(props.framePublicAPI, props.dispatch, {
+      ...selection,
+      visualizationState: selection.getVisualizationState(),
+    });
   };
 
   function getSelection(
@@ -100,7 +93,7 @@ export function ChartSwitch(props: Props) {
         visualizationId,
         subVisualizationId,
         dataLoss: 'nothing',
-        keptLayerId: '',
+        keptLayerIds: Object.keys(props.framePublicAPI.datasourceLayers),
         getVisualizationState: () => switchVisType(subVisualizationId, props.visualizationState),
       };
     }
@@ -148,7 +141,7 @@ export function ChartSwitch(props: Props) {
               newVisualization.initialize(props.framePublicAPI)
             );
           },
-      keptLayerId: topSuggestion ? topSuggestion.keptLayerId : layers[0][0],
+      keptLayerIds: topSuggestion ? topSuggestion.keptLayerIds : [],
       datasourceState: topSuggestion ? topSuggestion.datasourceState : undefined,
       datasourceId: topSuggestion ? topSuggestion.datasourceId : undefined,
     };

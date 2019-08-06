@@ -48,7 +48,7 @@ describe('suggestion_panel', () => {
         visualizationState: suggestion1State,
         visualizationId: 'vis',
         title: 'Suggestion1',
-        keptLayerId: 'a',
+        keptLayerIds: ['a'],
       },
       {
         datasourceState: {},
@@ -57,7 +57,7 @@ describe('suggestion_panel', () => {
         visualizationState: suggestion2State,
         visualizationId: 'vis',
         title: 'Suggestion2',
-        keptLayerId: 'a',
+        keptLayerIds: ['a'],
       },
     ] as Suggestion[]);
 
@@ -111,7 +111,7 @@ describe('suggestion_panel', () => {
   it('should remove unused layers if suggestion is clicked', () => {
     defaultProps.frame.datasourceLayers.a = mockDatasource.publicAPIMock;
     defaultProps.frame.datasourceLayers.b = mockDatasource.publicAPIMock;
-    const wrapper = mount(<SuggestionPanel {...defaultProps} />);
+    const wrapper = mount(<SuggestionPanel {...defaultProps} activeVisualizationId="vis2" />);
 
     wrapper
       .find('[data-test-subj="suggestion-title"]')

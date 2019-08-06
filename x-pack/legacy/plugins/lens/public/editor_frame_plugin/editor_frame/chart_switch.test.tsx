@@ -357,6 +357,30 @@ describe('chart_switch', () => {
     expect(removeLayers).toHaveBeenCalledWith(['b', 'c']);
   });
 
+  it('should remove all layers if there is no suggestion', () => {
+    const dispatch = jest.fn();
+    const visualizations = mockVisualizations();
+    visualizations.visB.getSuggestions.mockReturnValueOnce([]);
+    const frame = mockFrame(['a', 'b', 'c']);
+
+    const component = mount(
+      <ChartSwitch
+        visualizationId="visA"
+        visualizationState={{}}
+        visualizationMap={visualizations}
+        dispatch={dispatch}
+        framePublicAPI={frame}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
+      />
+    );
+
+    switchTo('subvisB', component);
+
+    expect(frame.removeLayers).toHaveBeenCalledTimes(1);
+    expect(frame.removeLayers).toHaveBeenCalledWith(['a', 'b', 'c']);
+  });
+
   it('should not remove layers if the visualization is not changing', () => {
     const dispatch = jest.fn();
     const removeLayers = jest.fn();
@@ -384,10 +408,12 @@ describe('chart_switch', () => {
     switchTo('subvisC2', component);
     expect(removeLayers).not.toHaveBeenCalled();
     expect(switchVisualizationType).toHaveBeenCalledWith('subvisC2', 'therebegriffins');
-    expect(dispatch).toHaveBeenCalledWith({
-      type: 'UPDATE_VISUALIZATION_STATE',
-      newState: 'therebedragons',
-    });
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'SWITCH_VISUALIZATION',
+        initialState: 'therebedragons',
+      })
+    );
   });
 
   it('should switch to the updated datasource state', () => {
