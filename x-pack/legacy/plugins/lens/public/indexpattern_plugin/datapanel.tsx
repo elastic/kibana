@@ -82,27 +82,6 @@ export function IndexPatternDataPanel({
   );
 }
 
-export interface DataVisResults {
-  fieldName: string;
-  count?: number;
-  examples?: number | string;
-  earliest?: number;
-  latest?: number;
-  min?: number;
-  max?: number;
-  avg?: number;
-  isTopValuesSampled?: boolean;
-  topValues?: Array<{ key: number; doc_count: number }>;
-  topValuesSampleSize?: number;
-  topValuesSamplerShardSize?: number;
-  median?: number;
-  distribution?: {
-    minPercentile: number;
-    maxPercentile: number;
-    percentiles: Array<{ percent: number; minValue: number; maxValue: number }>;
-  };
-}
-
 export interface DataVisOverallField {
   fieldName: string;
   existsInDocs: boolean;
@@ -124,7 +103,8 @@ interface DataPanelState {
   nameFilter: string;
   typeFilter: DataType[];
   isTypeFilterOpen: boolean;
-  fieldMetadata?: DataVisResults[];
+
+  fieldsWithFetchedStats: string[];
   overallStats?: DataVisOverall;
 }
 
@@ -147,8 +127,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     nameFilter: '',
     typeFilter: [],
     isTypeFilterOpen: false,
+    fieldsWithFetchedStats: [],
   });
-  const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
+  const [lastIndex, setLastIndex] = useState(PAGINATION_SIZE);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
   const lazyScroll = () => {
     if (scrollContainer) {
@@ -156,7 +137,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         scrollContainer.scrollTop + scrollContainer.clientHeight >
         scrollContainer.scrollHeight * 0.9;
       if (nearBottom) {
-        setPageSize(Math.min(pageSize * 1.5, allFields.length));
+        setLastIndex(lastIndex + PAGINATION_SIZE);
       }
     }
   };
@@ -164,7 +145,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   useEffect(() => {
     if (scrollContainer) {
       scrollContainer.scrollTop = 0;
-      setPageSize(PAGINATION_SIZE);
+      setLastIndex(PAGINATION_SIZE);
       lazyScroll();
     }
   }, [state.nameFilter, state.typeFilter, currentIndexPatternId]);
@@ -200,7 +181,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         field.name.toLowerCase().includes(state.nameFilter.toLowerCase()) &&
         supportedFieldTypes.includes(field.type)
     )
-    .slice(0, pageSize);
+    .slice(0, lastIndex);
 
   const availableFieldTypes = _.uniq(filteredFields.map(({ type }) => type));
   const availableFilteredTypes = state.typeFilter.filter(type =>
@@ -208,60 +189,60 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   );
 
   useEffect(() => {
+    const shouldFetchFields = filteredFields.filter(field => {
+      return !state.fieldsWithFetchedStats.includes(field.name);
+    });
+
+    if (shouldFetchFields.length === 0) {
+      return;
+    }
+
+    setState(s => ({
+      ...s,
+      fieldsWithFetchedStats: s.fieldsWithFetchedStats.concat(
+        shouldFetchFields.map(field => field.name)
+      ),
+    }));
+
     kfetch({
       method: 'POST',
       pathname: `/api/ml/data_visualizer/get_overall_stats/${indexPatterns[currentIndexPatternId].title}`,
       body: JSON.stringify({
         query: { match_all: {} },
-        aggregatableFields: filteredFields
+        aggregatableFields: shouldFetchFields
           .filter(field => field.aggregatable)
           .map(field => field.name),
-        nonAggregatableFields: filteredFields
+        nonAggregatableFields: shouldFetchFields
           .filter(field => !field.aggregatable)
           .map(field => field.name),
-        samplerShardSize: 5000,
+        samplerShardSize: 1000,
         timeFieldName: indexPatterns[currentIndexPatternId].timeFieldName,
-        earliest: 'now-7d',
+        earliest: 'now-14d',
         latest: 'now',
         interval: '1d',
         maxExamples: 5,
       }),
     }).then((overall: DataVisOverall) => {
-      // setState({ ...state, overallStats: overall });
-
-      kfetch({
-        method: 'POST',
-        pathname: `/api/ml/data_visualizer/get_field_stats/${indexPatterns[currentIndexPatternId].title}`,
-        body: JSON.stringify({
-          query: { match_all: {} },
-          fields: filteredFields.map(field => {
-            const matchingField = overall.aggregatableExistsFields.find(
-              f => f.fieldName === field.name
-            );
-            const fieldType =
-              field.type === 'string' && field.esTypes ? field.esTypes[0] : field.type;
-            if (matchingField && matchingField.stats) {
-              return {
-                fieldName: field.name,
-                type: fieldType,
-                cardinality: matchingField.stats.cardinality,
-              };
+      setState(s => ({
+        ...s,
+        overallStats: s.overallStats
+          ? {
+              totalCount: overall.totalCount,
+              aggregatableExistsFields: s.overallStats.aggregatableExistsFields.concat(
+                overall.aggregatableExistsFields
+              ),
+              aggregatableNotExistsFields: s.overallStats.aggregatableNotExistsFields.concat(
+                overall.aggregatableNotExistsFields
+              ),
+              nonAggregatableExistsFields: s.overallStats.nonAggregatableExistsFields.concat(
+                overall.nonAggregatableExistsFields
+              ),
+              nonAggregatableNotExistsFields: s.overallStats.nonAggregatableNotExistsFields.concat(
+                overall.nonAggregatableNotExistsFields
+              ),
             }
-            return {
-              fieldName: field.name,
-              type: fieldType,
-            };
-          }),
-          samplerShardSize: 5000,
-          timeFieldName: indexPatterns[currentIndexPatternId].timeFieldName,
-          earliest: 'now-7d',
-          latest: 'now',
-          interval: '1d',
-          maxExamples: 5,
-        }),
-      }).then((results: DataVisResults[]) => {
-        setState({ ...state, overallStats: overall, fieldMetadata: results });
-      });
+          : overall,
+      }));
     });
   }, [currentIndexPatternId, filteredFields.length]);
 
@@ -324,11 +305,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 onChange={choices => {
                   onChangeIndexPattern!(choices[0].value as string);
 
-                  setState({
-                    ...state,
+                  setState(s => ({
+                    ...s,
                     nameFilter: '',
                     typeFilter: [],
-                  });
+                  }));
 
                   setShowIndexPatternSwitcher(false);
                 }}
@@ -361,11 +342,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   panelClassName="euiFilterGroup__popoverPanel"
                   panelPaddingSize="none"
                   isOpen={state.isTypeFilterOpen}
-                  closePopover={() => setState({ ...state, isTypeFilterOpen: false })}
+                  closePopover={() => setState(s => ({ ...state, isTypeFilterOpen: false }))}
                   button={
                     <EuiFilterButton
                       onClick={() =>
-                        setState({ ...state, isTypeFilterOpen: !state.isTypeFilterOpen })
+                        setState(s => ({ ...s, isTypeFilterOpen: !state.isTypeFilterOpen }))
                       }
                       iconType="arrowDown"
                       data-test-subj="indexPatternTypeFilterButton"
@@ -388,12 +369,12 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                         icon={state.typeFilter.includes(type) ? 'check' : 'empty'}
                         data-test-subj={`typeFilter-${type}`}
                         onClick={() =>
-                          setState({
-                            ...state,
+                          setState(s => ({
+                            ...s,
                             typeFilter: state.typeFilter.includes(type)
                               ? state.typeFilter.filter(t => t !== type)
                               : [...state.typeFilter, type],
-                          })
+                          }))
                         }
                       >
                         <FieldIcon type={type} /> {fieldTypeNames[type]}
@@ -433,7 +414,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                       ));
                   return (
                     <FieldItem
-                      indexPatternId={currentIndexPatternId}
+                      indexPattern={indexPatterns[currentIndexPatternId]}
                       key={field.name}
                       field={field}
                       highlight={state.nameFilter.toLowerCase()}
@@ -442,10 +423,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                       count={overallField && overallField.stats.count}
                       sampleCount={overallField && overallField.stats.sampleCount}
                       cardinality={overallField && overallField.stats.cardinality}
-                      metaData={
-                        state.fieldMetadata &&
-                        state.fieldMetadata.find(({ fieldName }) => fieldName === field.name)
-                      }
                     />
                   );
                 })}
