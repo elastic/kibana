@@ -56,12 +56,12 @@ export function decorateMochaUi(lifecycle, context) {
           throw new Error(`Unexpected arguments to ${name}(${argumentsList.join(', ')})`);
         }
 
-        argumentsList[1] = function () {
+        argumentsList[1] = function() {
           before(async () => {
             await lifecycle.trigger('beforeTestSuite', this);
           });
 
-          this.tags = (tags) => {
+          this.tags = tags => {
             this._tags = [].concat(this._tags || [], tags);
           };
 
@@ -77,7 +77,7 @@ export function decorateMochaUi(lifecycle, context) {
       },
       after() {
         suiteLevel -= 1;
-      }
+      },
     });
   }
 
@@ -91,9 +91,12 @@ export function decorateMochaUi(lifecycle, context) {
    *  @return {Function}
    */
   function wrapTestFunction(name, fn) {
-    return wrapNonSuiteFunction(name, wrapRunnableArgsWithErrorHandler(fn, async (err, test) => {
-      await lifecycle.trigger('testFailure', err, test);
-    }));
+    return wrapNonSuiteFunction(
+      name,
+      wrapRunnableArgsWithErrorHandler(fn, async (err, test) => {
+        await lifecycle.trigger('testFailure', err, test);
+      })
+    );
   }
 
   /**
@@ -106,9 +109,12 @@ export function decorateMochaUi(lifecycle, context) {
    *  @return {Function}
    */
   function wrapTestHookFunction(name, fn) {
-    return wrapNonSuiteFunction(name, wrapRunnableArgsWithErrorHandler(fn, async (err, test) => {
-      await lifecycle.trigger('testHookFailure', err, test);
-    }));
+    return wrapNonSuiteFunction(
+      name,
+      wrapRunnableArgsWithErrorHandler(fn, async (err, test) => {
+        await lifecycle.trigger('testHookFailure', err, test);
+      })
+    );
   }
 
   /**
@@ -127,7 +133,7 @@ export function decorateMochaUi(lifecycle, context) {
             All ${name}() calls in test files must be within a describe() call.
           `);
         }
-      }
+      },
     });
   }
 

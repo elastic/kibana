@@ -26,7 +26,7 @@ import expect from '@kbn/expect';
 const SCRIPT = resolve(__dirname, '../../../../scripts/functional_test_runner.js');
 const FAILURE_HOOKS_CONFIG = resolve(__dirname, '../fixtures/failure_hooks/config.js');
 
-describe('failure hooks', function () {
+describe('failure hooks', function() {
   this.timeout(60 * 1000);
 
   it('runs and prints expected output', () => {
@@ -37,8 +37,10 @@ describe('failure hooks', function () {
         flag: '$FAILING_BEFORE_HOOK$',
         assert(lines) {
           expect(lines.shift()).to.match(/info\s+testHookFailure\s+\$FAILING_BEFORE_ERROR\$/);
-          expect(lines.shift()).to.match(/info\s+testHookFailureAfterDelay\s+\$FAILING_BEFORE_ERROR\$/);
-        }
+          expect(lines.shift()).to.match(
+            /info\s+testHookFailureAfterDelay\s+\$FAILING_BEFORE_ERROR\$/
+          );
+        },
       },
       {
         flag: '$FAILING_TEST$',
@@ -46,14 +48,16 @@ describe('failure hooks', function () {
           expect(lines.shift()).to.match(/global before each/);
           expect(lines.shift()).to.match(/info\s+testFailure\s+\$FAILING_TEST_ERROR\$/);
           expect(lines.shift()).to.match(/info\s+testFailureAfterDelay\s+\$FAILING_TEST_ERROR\$/);
-        }
+        },
       },
       {
         flag: '$FAILING_AFTER_HOOK$',
         assert(lines) {
           expect(lines.shift()).to.match(/info\s+testHookFailure\s+\$FAILING_AFTER_ERROR\$/);
-          expect(lines.shift()).to.match(/info\s+testHookFailureAfterDelay\s+\$FAILING_AFTER_ERROR\$/);
-        }
+          expect(lines.shift()).to.match(
+            /info\s+testHookFailureAfterDelay\s+\$FAILING_AFTER_ERROR\$/
+          );
+        },
       },
     ];
 
