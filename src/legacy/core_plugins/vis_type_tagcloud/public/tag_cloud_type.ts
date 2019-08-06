@@ -31,9 +31,9 @@ import { TagCloudVisualization } from './components/tag_cloud_visualization';
 export const createTagCloudTypeDefinition = () => {
   return visFactory.createBaseVisualization({
     name: 'tagcloud',
-    title: i18n.translate('tagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag Cloud' }),
+    title: i18n.translate('visTypeTagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag Cloud' }),
     icon: 'visTagCloud',
-    description: i18n.translate('tagCloud.vis.tagCloudDescription', {
+    description: i18n.translate('visTypeTagCloud.vis.tagCloudDescription', {
       defaultMessage: 'A group of words, sized according to their importance',
     }),
     visConfig: {
@@ -51,19 +51,19 @@ export const createTagCloudTypeDefinition = () => {
       collections: {
         scales: [
           {
-            text: i18n.translate('tagCloud.vis.editorConfig.scales.linearText', {
+            text: i18n.translate('visTypeTagCloud.vis.editorConfig.scales.linearText', {
               defaultMessage: 'Linear',
             }),
             value: 'linear',
           },
           {
-            text: i18n.translate('tagCloud.vis.editorConfig.scales.logText', {
+            text: i18n.translate('visTypeTagCloud.vis.editorConfig.scales.logText', {
               defaultMessage: 'Log',
             }),
             value: 'log',
           },
           {
-            text: i18n.translate('tagCloud.vis.editorConfig.scales.squareRootText', {
+            text: i18n.translate('visTypeTagCloud.vis.editorConfig.scales.squareRootText', {
               defaultMessage: 'Square root',
             }),
             value: 'square root',
@@ -71,19 +71,19 @@ export const createTagCloudTypeDefinition = () => {
         ],
         orientations: [
           {
-            text: i18n.translate('tagCloud.vis.editorConfig.orientations.singleText', {
+            text: i18n.translate('visTypeTagCloud.vis.editorConfig.orientations.singleText', {
               defaultMessage: 'Single',
             }),
             value: 'single',
           },
           {
-            text: i18n.translate('tagCloud.vis.editorConfig.orientations.rightAngledText', {
+            text: i18n.translate('visTypeTagCloud.vis.editorConfig.orientations.rightAngledText', {
               defaultMessage: 'Right angled',
             }),
             value: 'right angled',
           },
           {
-            text: i18n.translate('tagCloud.vis.editorConfig.orientations.multipleText', {
+            text: i18n.translate('visTypeTagCloud.vis.editorConfig.orientations.multipleText', {
               defaultMessage: 'Multiple',
             }),
             value: 'multiple',
@@ -95,7 +95,9 @@ export const createTagCloudTypeDefinition = () => {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n.translate('tagCloud.vis.schemas.metricTitle', { defaultMessage: 'Tag size' }),
+          title: i18n.translate('visTypeTagCloud.vis.schemas.metricTitle', {
+            defaultMessage: 'Tag size',
+          }),
           min: 1,
           max: 1,
           aggFilter: [
@@ -111,7 +113,9 @@ export const createTagCloudTypeDefinition = () => {
         {
           group: 'buckets',
           name: 'segment',
-          title: i18n.translate('tagCloud.vis.schemas.segmentTitle', { defaultMessage: 'Tags' }),
+          title: i18n.translate('visTypeTagCloud.vis.schemas.segmentTitle', {
+            defaultMessage: 'Tags',
+          }),
           min: 1,
           max: 1,
           aggFilter: ['terms', 'significant_terms'],
