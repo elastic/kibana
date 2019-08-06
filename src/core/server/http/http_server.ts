@@ -45,10 +45,9 @@ import { BasePath } from './base_path_service';
  *
  * @example
  * To handle an incoming request in your plugin you should:
- * - Create a `Router` instance. Use `plugin-id` as a prefix path segment for your routes.
+ * - Create a `Router` instance. Router is already configured to use `plugin-id` to prefix path segment for your routes.
  * ```ts
- * import { Router } from 'src/core/server';
- * const router = new Router('my-app');
+ * const router = httpSetup.createRouter();
  * ```
  *
  * - Use `@kbn/config-schema` package to create a schema to validate the request `params`, `query`, and `body`. Every incoming request will be validated against the created schema. If validation failed, the request is rejected with `400` status and `Bad request` error without calling the route's handler.
@@ -83,8 +82,7 @@ import { BasePath } from './base_path_service';
  * - Register route handler for GET request to 'my-app/path/{id}' path
  * ```ts
  * import { schema, TypeOf } from '@kbn/config-schema';
- * import { Router } from 'src/core/server';
- * const router = new Router('my-app');
+ * const router = httpSetup.createRouter();
  *
  * const validate = {
  *   params: schema.object({

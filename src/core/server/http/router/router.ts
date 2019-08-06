@@ -276,7 +276,7 @@ type RequestHandlerEnhanced<
  *
  * @example
  * ```ts
- * const router = new Router('my-app');
+ * const router = httpSetup.createRouter();
  * // creates a route handler for GET request on 'my-app/path/{id}' path
  * router.get(
  *   {
