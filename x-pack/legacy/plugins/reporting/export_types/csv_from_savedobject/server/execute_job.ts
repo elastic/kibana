@@ -7,7 +7,7 @@
 import { Request } from 'hapi';
 import { i18n } from '@kbn/i18n';
 
-import { cryptoFactory, LevelLogger, oncePerServer } from '../../../server/lib';
+import { cryptoFactory, LevelLogger as Logger, oncePerServer } from '../../../server/lib';
 import { JobDocOutputExecuted, JobDocPayload, KbnServer } from '../../../types';
 import {
   CONTENT_TYPE_CSV,
@@ -23,7 +23,7 @@ interface FakeRequest {
 }
 
 type ExecuteJobFn = (
-  jobId: string,
+  jobId: string | null,
   job: JobDocPayload,
   realRequest?: Request
 ) => Promise<JobDocOutputExecuted>;
@@ -32,7 +32,7 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
   const crypto = cryptoFactory(server);
   const config = server.config();
   const serverBasePath = config.get('server.basePath');
-  const logger = LevelLogger.createForServer(server, [
+  const logger = Logger.createForServer(server, [
     PLUGIN_ID,
     CSV_FROM_SAVEDOBJECT_JOB_TYPE,
     'execute-job',
@@ -40,14 +40,17 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
   const generateCsv = createGenerateCsv(logger);
 
   return async function executeJob(
-    jobId: string,
+    jobId: string | null,
     job: JobDocPayload,
     realRequest?: Request
   ): Promise<JobDocOutputExecuted> {
+    // if job is immediate, there will not be a jobId
+    const jobLogger = jobId == null ? logger : logger.clone([jobId]);
+
     const { basePath, jobParams } = job;
     const { isImmediate, panel, visType } = jobParams;
 
-    logger.debug(`Execute job generating [${visType}] csv`);
+    jobLogger.debug(`Execute job generating [${visType}] csv`);
 
     let requestObject: Request | FakeRequest;
     if (isImmediate && realRequest) {
@@ -60,6 +63,7 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
       try {
         decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
       } catch (err) {
+        jobLogger.error(err);
         throw new Error(
           i18n.translate(
             'xpack.reporting.exportTypes.csv_from_savedobject.executeJob.failedToDecryptReportJobDataErrorMessage',
@@ -95,12 +99,12 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
         result: { content, maxSizeReached, size },
       } = generateResults);
     } catch (err) {
-      logger.error(`Generate CSV Error! ${err}`);
+      jobLogger.error(`Generate CSV Error! ${err}`);
       throw err;
     }
 
     if (maxSizeReached) {
-      logger.warn(`Max size reached: CSV output truncated to ${size} bytes`);
+      jobLogger.warn(`Max size reached: CSV output truncated to ${size} bytes`);
     }
 
     return {

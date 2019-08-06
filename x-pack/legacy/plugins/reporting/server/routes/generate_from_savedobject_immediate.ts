@@ -52,7 +52,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         content_type: jobOutputContentType,
         content: jobOutputContent,
         size: jobOutputSize,
-      }: JobDocOutputExecuted = await executeJobFn(jobDocPayload, request);
+      }: JobDocOutputExecuted = await executeJobFn(null, jobDocPayload, request);
 
       logger.info(`Job output size: ${jobOutputSize} bytes`);
 

@@ -25,8 +25,9 @@ function executeJobFn(server) {
     const jobLogger = logger.clone([jobId]);
     const process$ = Rx.of({ job: jobToExecute, server }).pipe(
       mergeMap(decryptJobHeaders),
-      catchError(err =>
-        Rx.throwError(
+      catchError(err => {
+        jobLogger.error(err);
+        return Rx.throwError(
           i18n.translate(
             'xpack.reporting.exportTypes.png.compShim.failedToDecryptReportJobDataErrorMessage',
             {
@@ -35,8 +36,8 @@ function executeJobFn(server) {
               values: { encryptionKey: 'xpack.reporting.encryptionKey', err: err.toString() },
             }
           )
-        )
-      ),
+        );
+      }),
       map(omitBlacklistedHeaders),
       map(getConditionalHeaders),
       mergeMap(addForceNowQuerystring),

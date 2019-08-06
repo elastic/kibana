@@ -20,7 +20,7 @@ function createQueueFn(server) {
     timeout: queueConfig.timeout,
     dateSeparator: '.',
     client: server.plugins.elasticsearch.getCluster('admin'),
-    logger: createTaggedLogger(server, [PLUGIN_ID, 'esqueue']),
+    logger: createTaggedLogger(server, [PLUGIN_ID, 'esqueue', 'queue-worker']),
   };
 
   const queue = new Esqueue(index, queueOptions);

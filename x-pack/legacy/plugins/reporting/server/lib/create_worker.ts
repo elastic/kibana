@@ -25,7 +25,7 @@ function createWorkerFn(server: KbnServer) {
   const kibanaName = config.get('server.name');
   const kibanaId = config.get('server.uuid');
   const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'queue', 'create-worker']);
+  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'queue-worker']);
 
   // Once more document types are added, this will need to be passed in
   return function createWorker(queue: ESQueueInstance) {

@@ -19,6 +19,8 @@ function executeJobFn(server) {
   const serverBasePath = config.get('server.basePath');
 
   return async function executeJob(jobId, job, cancellationToken) {
+    const jobLogger = logger.clone([jobId]);
+
     const {
       searchRequest,
       fields,
@@ -33,6 +35,7 @@ function executeJobFn(server) {
     try {
       decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
     } catch (err) {
+      jobLogger.error(err);
       throw new Error(
         i18n.translate(
           'xpack.reporting.exportTypes.csv.executeJob.failedToDecryptReportJobDataErrorMessage',
@@ -75,7 +78,7 @@ function executeJobFn(server) {
         ]);
 
         if (timezone === 'Browser') {
-          logger.warn(
+          jobLogger.warn(
             `Kibana Advanced Setting "dateFormat:tz" is set to "Browser". Dates will be formatted as UTC to avoid ambiguity.`
           );
         }
