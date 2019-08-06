@@ -146,7 +146,7 @@ app.controller('timelion', function (
 
   $timeout(function () {
     if (config.get('timelion:showTutorial', true)) {
-      $scope.kbnTopNav.open('help');
+      $scope.menus.showHelp = true;
     }
   }, 0);
 
@@ -321,7 +321,7 @@ app.controller('timelion', function (
       dontShowHelp: function () {
         config.set('timelion:showTutorial', false);
         $scope.setPage(0);
-        $scope.kbnTopNav.close('help');
+        $scope.menus.showHelp = false;
       }
     };
 
