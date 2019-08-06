@@ -20,4 +20,4 @@
 export { withProcRunner } from './proc_runner';
 export { ToolingLog, ToolingLogTextWriter, pickLevelFromFlags } from './tooling_log';
 export { createAbsolutePathSerializer } from './serializers';
-export { caCertPath, esKeyPath, esCertPath } from './certs';
+export { CA_CERT_PATH, ES_KEY_PATH, ES_CERT_PATH } from './certs';

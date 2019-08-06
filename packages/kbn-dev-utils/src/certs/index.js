@@ -19,6 +19,6 @@
 
 import { resolve } from 'path';
 
-export const caCertPath = resolve(__dirname, 'ca.crt');
-export const esKeyPath = resolve(__dirname, 'elasticsearch.key');
-export const esCertPath = resolve(__dirname, 'elasticsearch.crt');
+export const CA_CERT_PATH = resolve(__dirname, 'ca.crt');
+export const ES_KEY_PATH = resolve(__dirname, 'elasticsearch.key');
+export const ES_CERT_PATH = resolve(__dirname, 'elasticsearch.crt');

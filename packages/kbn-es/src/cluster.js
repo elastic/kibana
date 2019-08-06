@@ -35,7 +35,7 @@ const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
-const { caCertPath, esKeyPath, esCertPath } = require('@kbn/dev-utils');
+const { CA_CERT_PATH, ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
 const readFile = util.promisify(fs.readFile);
 
 // listen to data on stream until map returns anything but undefined
@@ -55,7 +55,7 @@ exports.Cluster = class Cluster {
   constructor({ log = defaultLog, ssl = false } = {}) {
     this._log = log;
     this._ssl = ssl;
-    this._caCertPromise = ssl ? readFile(caCertPath) : undefined;
+    this._caCertPromise = ssl ? readFile(CA_CERT_PATH) : undefined;
   }
 
   /**
@@ -261,9 +261,9 @@ exports.Cluster = class Cluster {
     const esArgs = [].concat(options.esArgs || []);
     if (this._ssl) {
       esArgs.push('xpack.security.http.ssl.enabled=true');
-      esArgs.push(`xpack.security.http.ssl.key=${esKeyPath}`);
-      esArgs.push(`xpack.security.http.ssl.certificate=${esCertPath}`);
-      esArgs.push(`xpack.security.http.ssl.certificate_authorities=${caCertPath}`);
+      esArgs.push(`xpack.security.http.ssl.key=${ES_KEY_PATH}`);
+      esArgs.push(`xpack.security.http.ssl.certificate=${ES_CERT_PATH}`);
+      esArgs.push(`xpack.security.http.ssl.certificate_authorities=${CA_CERT_PATH}`);
     }
 
     const args = parseSettings(extractConfigFiles(esArgs, installPath, { log: this._log }), {

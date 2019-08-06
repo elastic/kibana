@@ -23,7 +23,7 @@ const fs = require('fs');
 const { format: formatUrl } = require('url');
 const { exitCode, start, ssl } = JSON.parse(process.argv[2]);
 const { createServer } = ssl ? require('https') : require('http');
-const { esKeyPath, esCertPath } = require('@kbn/dev-utils');
+const { ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
 
 process.exitCode = exitCode;
 
@@ -34,8 +34,8 @@ if (!start) {
 let serverUrl;
 const server = createServer(
   {
-    key: ssl ? fs.readFileSync(esKeyPath) : undefined,
-    cert: ssl ? fs.readFileSync(esCertPath) : undefined,
+    key: ssl ? fs.readFileSync(ES_KEY_PATH) : undefined,
+    cert: ssl ? fs.readFileSync(ES_CERT_PATH) : undefined,
   },
   (req, res) => {
     const url = new URL(req.url, serverUrl);

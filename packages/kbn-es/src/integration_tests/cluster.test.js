@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const { ToolingLog, caCertPath, esKeyPath, esCertPath } = require('@kbn/dev-utils');
+const { ToolingLog, CA_CERT_PATH, ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
 const execa = require('execa');
 const { Cluster } = require('../cluster');
 const { installSource, installSnapshot, installArchive } = require('../install');
@@ -252,9 +252,9 @@ describe('#start(installPath)', () => {
 
     const config = extractConfigFiles.mock.calls[0][0];
     expect(config).toContain('xpack.security.http.ssl.enabled=true');
-    expect(config).toContain(`xpack.security.http.ssl.key=${esKeyPath}`);
-    expect(config).toContain(`xpack.security.http.ssl.certificate=${esCertPath}`);
-    expect(config).toContain(`xpack.security.http.ssl.certificate_authorities=${caCertPath}`);
+    expect(config).toContain(`xpack.security.http.ssl.key=${ES_KEY_PATH}`);
+    expect(config).toContain(`xpack.security.http.ssl.certificate=${ES_CERT_PATH}`);
+    expect(config).toContain(`xpack.security.http.ssl.certificate_authorities=${CA_CERT_PATH}`);
   });
 
   it(`doesn't setup SSL when disabled`, async () => {
@@ -319,9 +319,9 @@ describe('#run()', () => {
 
     const config = extractConfigFiles.mock.calls[0][0];
     expect(config).toContain('xpack.security.http.ssl.enabled=true');
-    expect(config).toContain(`xpack.security.http.ssl.key=${esKeyPath}`);
-    expect(config).toContain(`xpack.security.http.ssl.certificate=${esCertPath}`);
-    expect(config).toContain(`xpack.security.http.ssl.certificate_authorities=${caCertPath}`);
+    expect(config).toContain(`xpack.security.http.ssl.key=${ES_KEY_PATH}`);
+    expect(config).toContain(`xpack.security.http.ssl.certificate=${ES_CERT_PATH}`);
+    expect(config).toContain(`xpack.security.http.ssl.certificate_authorities=${CA_CERT_PATH}`);
   });
 
   it(`doesn't setup SSL when disabled`, async () => {
