@@ -17,12 +17,11 @@
  * under the License.
  */
 
-const { ToolingLog } = require('@kbn/dev-utils');
+const { ToolingLog, caCertPath, esKeyPath, esCertPath } = require('@kbn/dev-utils');
 const execa = require('execa');
 const { Cluster } = require('../cluster');
 const { installSource, installSnapshot, installArchive } = require('../install');
 const { extractConfigFiles } = require('../utils/extract_config_files');
-const { caCertPath, esKeyPath, esCertPath } = require('../constants');
 
 jest.mock('../install', () => ({
   installSource: jest.fn(),

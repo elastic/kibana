@@ -35,7 +35,7 @@ const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
-const { caCertPath, esKeyPath, esCertPath } = require('./constants');
+const { caCertPath, esKeyPath, esCertPath } = require('@kbn/dev-utils');
 const readFile = util.promisify(fs.readFile);
 
 // listen to data on stream until map returns anything but undefined
@@ -258,10 +258,7 @@ exports.Cluster = class Cluster {
     this._log.indent(4);
 
     // Add to esArgs if ssl is enabled
-    const esArgs = (typeof options.esArgs === 'string'
-      ? [options.esArgs]
-      : options.esArgs || []
-    ).slice(0);
+    const esArgs = [].concat(options.esArgs || []);
     if (this._ssl) {
       esArgs.push('xpack.security.http.ssl.enabled=true');
       esArgs.push(`xpack.security.http.ssl.key=${esKeyPath}`);
@@ -305,7 +302,7 @@ exports.Cluster = class Cluster {
         caCert,
         log: this._log,
         elasticPassword: options.password,
-        protocol: this._ssl ? 'https' : 'http',
+        ssl: this._ssl,
       });
       await nativeRealm.setPasswords(options);
     });

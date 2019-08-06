@@ -23,7 +23,7 @@ const fs = require('fs');
 const { format: formatUrl } = require('url');
 const { exitCode, start, ssl } = JSON.parse(process.argv[2]);
 const { createServer } = ssl ? require('https') : require('http');
-const { esKeyPath, esCertPath } = require('../../constants');
+const { esKeyPath, esCertPath } = require('@kbn/dev-utils');
 
 process.exitCode = exitCode;
 
