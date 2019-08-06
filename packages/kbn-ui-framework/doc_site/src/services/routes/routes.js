@@ -75,11 +75,6 @@ const components = [
     hasReact: true,
   },
   {
-    name: 'CollapseButton',
-    component: CollapseButtonExample,
-    hasReact: true,
-  },
-  {
     name: 'EmptyTablePrompt',
     component: EmptyTablePromptExample,
     hasReact: true,
