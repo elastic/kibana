@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { IndexPattern } from 'ui/index_patterns';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
-import { SavedSearchQuery } from '../../../data_frame/common/kibana_context';
+import { SavedSearchQuery } from '../../../contexts/kibana';
 
 // @ts-ignore
 import { KqlFilterBar } from '../../../components/kql_filter_bar';

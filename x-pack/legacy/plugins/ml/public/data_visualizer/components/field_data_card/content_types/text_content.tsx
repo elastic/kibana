@@ -5,7 +5,7 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
