@@ -56,6 +56,18 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     const requests = options.metrics.map(metricId => {
       const model = metricModels[metricId](timeField, indexPattern, interval);
+      if (model.id_type === 'cloud' && !options.nodeIds.cloudId) {
+        throw new InvalidNodeError(
+          i18n.translate('xpack.infra.kibanaMetrics.cloudIdMissingErrorMessage', {
+            defaultMessage:
+              'Model for {metricId} requires a cloudId, but none was given for {nodeId}.',
+            values: {
+              metricId,
+              nodeId: options.nodeIds.nodeId,
+            },
+          })
+        );
+      }
       const id =
         model.id_type === 'cloud' ? (options.nodeIds.cloudId as string) : options.nodeIds.nodeId;
       const filters = model.map_field_to
