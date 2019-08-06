@@ -98,7 +98,7 @@ export const createResolveImportErrorsRoute = (
     const fileExtension = extname(filename).toLowerCase();
 
     if (fileExtension !== '.ndjson') {
-      return Boom.badRequest(`Invalid file extension ${fileExtension}`);
+      return Boom.badRequest(`Invalid file extension ${fileExtension}.`);
     }
 
     return await resolveImportErrors({

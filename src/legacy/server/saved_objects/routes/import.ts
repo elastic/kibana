@@ -77,7 +77,7 @@ export const createImportRoute = (
     const { filename } = request.payload.file.hapi;
     const fileExtension = extname(filename).toLowerCase();
     if (fileExtension !== '.ndjson') {
-      return Boom.badRequest(`Invalid file extension ${fileExtension}`);
+      return Boom.badRequest(`Invalid file extension ${fileExtension}.`);
     }
 
     return await importSavedObjects({

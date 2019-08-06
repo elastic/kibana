@@ -26,7 +26,7 @@ export function createLimitStream(limit: number) {
     objectMode: true,
     async transform(obj, enc, done) {
       if (counter >= limit) {
-        return done(Boom.badRequest(`Can't import more than ${limit} objects`));
+        return done(Boom.badRequest(`Can't import more than ${limit} objects.`));
       }
       counter++;
       done(undefined, obj);

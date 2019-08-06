@@ -140,7 +140,9 @@ class FlyoutUI extends Component {
         status: 'error',
         error: intl.formatMessage({
           id: 'kbn.management.objects.objectsTable.flyout.importFileErrorMessage',
-          defaultMessage: 'The file could not be processed.',
+          defaultMessage: 'The file could not be processed. Error: {errorMessage}',
+        }, {
+          errorMessage: e.body && e.body.message || e.message
         }),
       });
       return;
@@ -206,8 +208,10 @@ class FlyoutUI extends Component {
       this.setState({
         status: 'error',
         error: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.flyout.resolveImportErrorsFileErrorMessage',
-          defaultMessage: 'The file could not be processed.',
+          id: 'kbn.management.objects.objectsTable.flyout.importFileErrorMessage',
+          defaultMessage: 'The file could not be processed. Error: {errorMessage}',
+        }, {
+          errorMessage: e.body && e.body.message || e.message
         }),
       });
     }
@@ -229,8 +233,10 @@ class FlyoutUI extends Component {
       this.setState({
         status: 'error',
         error: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.flyout.importLegacyFileErrorMessage',
-          defaultMessage: 'The file could not be processed.',
+          id: 'kbn.management.objects.objectsTable.flyout.importFileErrorMessage',
+          defaultMessage: 'The file could not be processed. Error: {errorMessage}',
+        }, {
+          errorMessage: e.body && e.body.message || e.message
         }),
       });
       return;
