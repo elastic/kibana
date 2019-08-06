@@ -17,23 +17,38 @@ export const InfraApmMetricsRequestRT = rt.type({
   sourceId: rt.string,
 });
 
+export const InfraApmMetricsTransactionTypeRT = rt.keyof({
+  request: null,
+  job: null,
+});
+
 export const InfraApmMetricsDataPointRT = rt.type({
   timestamp: rt.number,
   value: rt.union([rt.number, rt.null]),
 });
 
-export const InfraApmMetricsDataBucketRT = rt.type({
-  name: rt.string,
+export const InfraApmMetricsSeriesRT = rt.type({
+  id: rt.string,
   data: rt.array(InfraApmMetricsDataPointRT),
 });
 
+export const InfraApmMetricsDataSetRT = rt.type({
+  id: rt.string,
+  type: InfraApmMetricsTransactionTypeRT,
+  series: rt.array(InfraApmMetricsSeriesRT),
+});
+
 export const InfraApmMetricsServiceRT = rt.type({
-  name: rt.string,
-  transactionsPerMinute: rt.array(InfraApmMetricsDataBucketRT),
-  responseTimes: rt.array(InfraApmMetricsDataBucketRT),
+  id: rt.string,
+  dataSets: rt.array(InfraApmMetricsDataSetRT),
+  agentName: rt.string,
+  avgResponseTime: rt.number,
+  errorsPerMinute: rt.number,
+  transactionsPerMinute: rt.number,
 });
 
 export const InfraApmMetricsRT = rt.type({
+  id: rt.literal('apmMetrics'),
   services: rt.array(InfraApmMetricsServiceRT),
 });
 
@@ -58,7 +73,7 @@ export const APMChartResponseRT = rt.type({
       tpmBuckets: rt.array(APMTpmBucketsRT),
     }),
     rt.partial({
-      overallAvgDuration: rt.number,
+      overallAvgDuration: rt.union([rt.number, rt.null]),
     }),
   ]),
 });
@@ -86,9 +101,13 @@ export type InfraApmMetrics = rt.TypeOf<typeof InfraApmMetricsRT>;
 
 export type InfraApmMetricsService = rt.TypeOf<typeof InfraApmMetricsServiceRT>;
 
-export type InfraApmMetricsDataBucket = rt.TypeOf<typeof InfraApmMetricsDataBucketRT>;
+export type InfraApmMetricsSeries = rt.TypeOf<typeof InfraApmMetricsSeriesRT>;
 
 export type InfraApmMetricsDataPoint = rt.TypeOf<typeof InfraApmMetricsDataPointRT>;
+
+export type InfraApmMetricsTransactionType = rt.TypeOf<typeof InfraApmMetricsTransactionTypeRT>;
+
+export type InfraApmMetricsDataSet = rt.TypeOf<typeof InfraApmMetricsDataSetRT>;
 
 export type APMDataPoint = rt.TypeOf<typeof APMDataPointRT>;
 

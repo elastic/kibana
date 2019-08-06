@@ -8,7 +8,7 @@ import moment from 'moment';
 import Boom from 'boom';
 import { Legacy } from 'kibana';
 import { throwErrors } from '../../../../common/runtime_types';
-import { APMServiceResponseRT } from '../../../../common/http_api';
+import { APMServiceResponseRT, InfraApmMetricsService } from '../../../../common/http_api';
 import { InfraNodeType } from '../../../../common/http_api/common';
 import { getIdFieldName } from '../../metadata/lib/get_id_field_name';
 import {
@@ -24,8 +24,9 @@ export const getApmServices = async (
   nodeId: string,
   nodeType: InfraNodeType,
   timeRange: { min: number; max: number }
-) => {
-  const nodeField = getIdFieldName(sourceConfiguration, nodeType);
+): Promise<InfraApmMetricsService[]> => {
+  const nodeField =
+    nodeType === 'host' ? 'host.hostname' : getIdFieldName(sourceConfiguration, nodeType);
   const params = new URLSearchParams({
     start: moment(timeRange.min).toISOString(),
     end: moment(timeRange.max).toISOString(),
@@ -42,5 +43,12 @@ export const getApmServices = async (
   const result = APMServiceResponseRT.decode(res.result).getOrElseL(
     throwErrors(message => Boom.badImplementation(`Request to APM Failed: ${message}`))
   );
-  return result.items.map(item => item.serviceName);
+  return result.items.map(item => ({
+    id: item.serviceName,
+    dataSets: [],
+    avgResponseTime: item.avgResponseTime,
+    agentName: item.agentName,
+    errorsPerMinute: item.errorsPerMinute,
+    transactionsPerMinute: item.transactionsPerMinute,
+  }));
 };

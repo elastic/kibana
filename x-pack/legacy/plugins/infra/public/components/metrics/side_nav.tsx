@@ -9,10 +9,16 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
-import { InfraMetricLayout, InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
+import {
+  InfraMetricLayout,
+  InfraMetricLayoutSection,
+  InfraMetricSideNav,
+} from '../../pages/metrics/layouts/types';
+import { InfraMetricCombinedData } from '../../containers/metrics/with_metrics';
 
 interface Props {
   layouts: InfraMetricLayout[];
+  metrics: InfraMetricCombinedData[];
   loading: boolean;
   nodeName: string;
   handleClick: (section: InfraMetricLayoutSection) => () => void;
@@ -30,18 +36,26 @@ export const MetricsSideNav = injectI18n(
     public render() {
       let content;
       let mobileContent;
+      const DEFAULT_MAP_NAV_ITEMS = (item: InfraMetricLayout) => {
+        return {
+          name: item.label,
+          id: item.id,
+          items: item.sections.map(section => ({
+            id: section.id,
+            name: section.label,
+            onClick: this.props.handleClick(section),
+          })),
+        };
+      };
       if (!this.props.loading) {
-        const entries = this.props.layouts.map(item => {
-          return {
-            name: item.label,
-            id: item.id,
-            items: item.sections.map(section => ({
-              id: section.id,
-              name: section.label,
-              onClick: this.props.handleClick(section),
-            })),
-          };
-        });
+        const entries = this.props.layouts
+          .map(item => {
+            if (item.mapNavItem) {
+              return item.mapNavItem(item, this.props.metrics);
+            }
+            return DEFAULT_MAP_NAV_ITEMS(item);
+          })
+          .filter(e => e) as InfraMetricSideNav[];
         content = <EuiSideNav items={entries} />;
         mobileContent = (
           <EuiSideNav

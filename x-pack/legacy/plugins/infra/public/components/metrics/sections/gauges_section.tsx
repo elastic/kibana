@@ -17,14 +17,21 @@ import { get, last, max } from 'lodash';
 import React, { ReactText } from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
-import { InfraMetricData } from '../../../graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 import { InfraMetricLayoutSection } from '../../../pages/metrics/layouts/types';
 import { createFormatter } from '../../../utils/formatters';
+import { isInfraMetricData } from '../../../utils/is_infra_apm_metrics';
+import { InfraMetricCombinedData } from '../../../containers/metrics/with_metrics';
+import { InfraNodeType, InfraTimerangeInput } from '../../../graphql/types';
+import { SourceConfiguration } from '../../../utils/source_configuration';
 
 interface Props {
   section: InfraMetricLayoutSection;
-  metric: InfraMetricData;
+  metric: InfraMetricCombinedData;
+  nodeId: string;
+  nodeType: InfraNodeType;
+  sourceConfiguration: SourceConfiguration;
+  timeRange: InfraTimerangeInput;
 }
 
 const getFormatter = (section: InfraMetricLayoutSection, seriesId: string) => (val: ReactText) => {
@@ -49,6 +56,9 @@ const getFormatter = (section: InfraMetricLayoutSection, seriesId: string) => (v
 export class GaugesSection extends React.PureComponent<Props> {
   public render() {
     const { metric, section } = this.props;
+    if (!isInfraMetricData(metric)) {
+      throw new Error('ChartSection only accepts InfraMetricData');
+    }
     return (
       <EuiPageContentBody>
         <EuiSpacer size="m" />

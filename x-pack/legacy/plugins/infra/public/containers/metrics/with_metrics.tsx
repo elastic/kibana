@@ -15,10 +15,13 @@ import {
 } from '../../graphql/types';
 import { InfraMetricLayout } from '../../pages/metrics/layouts/types';
 import { metricsQuery } from './metrics.gql_query';
+import { useApmMetrics } from './use_apm_metrics';
+import { InfraApmMetrics } from '../../../common/http_api';
+import { KFetchError } from '../../../../../../../src/legacy/ui/public/kfetch/kfetch_error';
 
 interface WithMetricsArgs {
-  metrics: InfraMetricData[];
-  error?: ApolloError | undefined;
+  metrics: InfraMetricCombinedData[];
+  error?: KFetchError | ApolloError | undefined;
   loading: boolean;
   refetch: () => void;
 }
@@ -32,6 +35,8 @@ interface WithMetricsProps {
   timerange: InfraTimerangeInput;
 }
 
+export type InfraMetricCombinedData = InfraMetricData | InfraApmMetrics;
+
 export const WithMetrics = ({
   children,
   layouts,
@@ -42,10 +47,12 @@ export const WithMetrics = ({
 }: WithMetricsProps) => {
   const metrics = layouts.reduce(
     (acc, item) => {
-      return acc.concat(item.sections.map(s => s.id));
+      return acc.concat(item.sections.map(s => s.id).filter(s => s !== 'apmMetrics'));
     },
     [] as InfraMetric[]
   );
+
+  const apmMetrics = useApmMetrics(sourceId, nodeId, nodeType, timerange);
 
   return (
     <Query<MetricsQuery.Query, MetricsQuery.Variables>
@@ -62,10 +69,16 @@ export const WithMetrics = ({
     >
       {({ data, error, loading, refetch }) => {
         return children({
-          metrics: filterOnlyInfraMetricData(data && data.source && data.source.metrics),
-          error,
-          loading,
-          refetch,
+          metrics: [
+            ...filterOnlyInfraMetricData(data && data.source && data.source.metrics),
+            ...(apmMetrics.metrics ? [apmMetrics.metrics] : []),
+          ],
+          error: error || apmMetrics.error,
+          loading: loading && apmMetrics.loading,
+          refetch: () => {
+            refetch();
+            apmMetrics.makeRequest();
+          },
         });
       }}
     </Query>

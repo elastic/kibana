@@ -5,26 +5,31 @@
  */
 
 import { EuiPageContentBody, EuiTitle } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
-import { InfraMetricData, InfraTimerangeInput } from '../../graphql/types';
+import { InfraTimerangeInput, InfraNodeType } from '../../graphql/types';
 import { InfraMetricLayout, InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
 import { NoData } from '../empty_states';
 import { InfraLoadingPanel } from '../loading';
 import { Section } from './section';
+import { InfraMetricCombinedData } from '../../containers/metrics/with_metrics';
+import { SourceConfiguration } from '../../utils/source_configuration';
 
 interface Props {
-  metrics: InfraMetricData[];
+  metrics: InfraMetricCombinedData[];
   layouts: InfraMetricLayout[];
   loading: boolean;
   refetch: () => void;
-  nodeId: string;
   label: string;
   onChangeRangeTime?: (time: InfraTimerangeInput) => void;
   isLiveStreaming?: boolean;
   stopLiveStreaming?: () => void;
   intl: InjectedIntl;
+  nodeId: string;
+  nodeType: InfraNodeType;
+  sourceConfiguration: SourceConfiguration;
+  timeRange: InfraTimerangeInput;
 }
 
 interface State {
@@ -85,15 +90,7 @@ export const Metrics = injectI18n(
         <React.Fragment key={layout.id}>
           <EuiPageContentBody>
             <EuiTitle size="m">
-              <h2 id={layout.id}>
-                <FormattedMessage
-                  id="xpack.infra.metrics.layoutLabelOverviewTitle"
-                  defaultMessage="{layoutLabel} Overview"
-                  values={{
-                    layoutLabel: layout.label,
-                  }}
-                />
-              </h2>
+              <h2 id={layout.id}>{layout.label}</h2>
             </EuiTitle>
           </EuiPageContentBody>
           {layout.sections.map(this.renderSection(layout))}
@@ -103,7 +100,7 @@ export const Metrics = injectI18n(
 
     private renderSection = (layout: InfraMetricLayout) => (section: InfraMetricLayoutSection) => {
       let sectionProps = {};
-      if (section.type === 'chart') {
+      if (['apm', 'chart'].includes(section.type)) {
         const { onChangeRangeTime, isLiveStreaming, stopLiveStreaming } = this.props;
         sectionProps = {
           onChangeRangeTime,
@@ -118,6 +115,10 @@ export const Metrics = injectI18n(
           section={section}
           metrics={this.props.metrics}
           key={`${layout.id}-${section.id}`}
+          nodeId={this.props.nodeId}
+          nodeType={this.props.nodeType}
+          sourceConfiguration={this.props.sourceConfiguration}
+          timeRange={this.props.timeRange}
           {...sectionProps}
         />
       );

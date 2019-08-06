@@ -19,10 +19,11 @@ import { InfraDataSeries } from '../../../graphql/types';
 interface Props {
   id: string;
   name: string;
-  color: string;
+  color?: string | undefined;
   series: InfraDataSeries;
   type: InfraMetricLayoutVisualizationType;
-  stack: boolean | undefined;
+  stack?: boolean | undefined;
+  ignoreGaps?: boolean | undefined;
 }
 
 export const SeriesChart = (props: Props) => {
@@ -32,27 +33,27 @@ export const SeriesChart = (props: Props) => {
   return <AreaChart {...props} />;
 };
 
-export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
+export const AreaChart = ({ id, color, series, name, type, stack, ignoreGaps }: Props) => {
   const style = {
     area: {
-      fill: color,
+      fill: color || '',
       opacity: 1,
       visible: InfraMetricLayoutVisualizationType.area === type,
     },
     line: {
-      stroke: color,
+      stroke: color || '',
       strokeWidth: InfraMetricLayoutVisualizationType.area === type ? 1 : 2,
       visible: true,
     },
     border: {
       visible: false,
       strokeWidth: 2,
-      stroke: color,
+      stroke: color || '',
     },
     point: {
       visible: false,
       radius: 0.2,
-      stroke: color,
+      stroke: color || '',
       strokeWidth: 2,
       opacity: 1,
     },
@@ -62,7 +63,8 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
     specId: getSpecId(id),
   };
   const customColors: CustomSeriesColorsMap = new Map();
-  customColors.set(colors, color);
+  customColors.set(colors, color || '');
+  const data = ignoreGaps ? series.data.filter(d => d.value) : series.data;
   return (
     <AreaSeries
       id={getSpecId(id)}
@@ -71,28 +73,28 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
       yScaleType={ScaleType.Linear}
       xAccessor="timestamp"
       yAccessors={['value']}
-      data={series.data}
+      data={data}
       areaSeriesStyle={style}
-      customSeriesColors={customColors}
+      customSeriesColors={color ? customColors : void 0}
       stackAccessors={stack ? ['timestamp'] : void 0}
     />
   );
 };
 
-export const BarChart = ({ id, color, series, name, type, stack }: Props) => {
+export const BarChart = ({ id, color, series, name, stack, ignoreGaps }: Props) => {
   const style = {
     rectBorder: {
-      stroke: color,
+      stroke: color || '',
       strokeWidth: 1,
       visible: true,
     },
     border: {
       visible: false,
       strokeWidth: 2,
-      stroke: color,
+      stroke: color || '',
     },
     rect: {
-      fill: color,
+      fill: color || '',
       opacity: 1,
     },
   };
@@ -101,7 +103,8 @@ export const BarChart = ({ id, color, series, name, type, stack }: Props) => {
     specId: getSpecId(id),
   };
   const customColors: CustomSeriesColorsMap = new Map();
-  customColors.set(colors, color);
+  customColors.set(colors, color || '');
+  const data = ignoreGaps ? series.data.filter(d => d.value) : series.data;
   return (
     <BarSeries
       id={getSpecId(id)}
@@ -110,9 +113,9 @@ export const BarChart = ({ id, color, series, name, type, stack }: Props) => {
       yScaleType={ScaleType.Linear}
       xAccessor="timestamp"
       yAccessors={['value']}
-      data={series.data}
+      data={data}
       barSeriesStyle={style}
-      customSeriesColors={customColors}
+      customSeriesColors={color ? customColors : void 0}
       stackAccessors={stack ? ['timestamp'] : void 0}
     />
   );

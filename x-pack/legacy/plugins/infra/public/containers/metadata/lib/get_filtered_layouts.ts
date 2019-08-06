@@ -15,7 +15,7 @@ export const getFilteredLayouts = (
   }
 
   const metricMetadata: Array<string | null> = metadata
-    .filter(data => data && data.source === 'metrics')
+    .filter(data => data && ['apm', 'metrics'].includes(data.source))
     .map(data => data && data.name);
 
   // After filtering out sections that can't be displayed, a layout may end up empty and can be removed.

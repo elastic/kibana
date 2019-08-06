@@ -9,11 +9,23 @@ import Color from 'color';
 import { get, first, last, min, max } from 'lodash';
 import { InfraFormatterType } from '../../../../lib/lib';
 import { createFormatter } from '../../../../utils/formatters';
-import { InfraDataSeries, InfraMetricData } from '../../../../graphql/types';
 import {
   InfraMetricLayoutVisualizationType,
   InfraMetricLayoutSection,
 } from '../../../../pages/metrics/layouts/types';
+
+interface DataPoint {
+  timestamp: number;
+  value?: number | null;
+}
+
+interface Series {
+  data: DataPoint[];
+}
+
+interface ItemWithSeries {
+  series: Series[];
+}
 
 /**
  * Returns a formatter
@@ -24,21 +36,21 @@ export const getFormatter = (formatter: InfraFormatterType, template: string) =>
 /**
  * Does a series have more then two points?
  */
-export const seriesHasLessThen2DataPoints = (series: InfraDataSeries): boolean => {
+export const seriesHasLessThen2DataPoints = (series: Series): boolean => {
   return series.data.length < 2;
 };
 
 /**
  * Returns the minimum and maximum timestamp for a metric
  */
-export const getMaxMinTimestamp = (metric: InfraMetricData): [number, number] => {
-  if (metric.series.some(seriesHasLessThen2DataPoints)) {
+export const getMaxMinTimestamp = (item: ItemWithSeries): [number, number] => {
+  if (item.series.some(seriesHasLessThen2DataPoints)) {
     return [0, 0];
   }
-  const values = metric.series.reduce(
-    (acc, item) => {
-      const firstRow = first(item.data);
-      const lastRow = last(item.data);
+  const values = item.series.reduce(
+    (acc, series) => {
+      const firstRow = first(series.data);
+      const lastRow = last(series.data);
       return acc.concat([
         (firstRow && firstRow.timestamp) || 0,
         (lastRow && lastRow.timestamp) || 0,

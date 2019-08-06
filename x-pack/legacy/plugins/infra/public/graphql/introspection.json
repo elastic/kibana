@@ -2281,6 +2281,12 @@
             "isDeprecated": false,
             "deprecationReason": null
           },
+          {
+            "name": "apmMetrics",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           { "name": "custom", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null

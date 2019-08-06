@@ -18,7 +18,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'containerOverview',
     label: i18n.translate('xpack.infra.metricDetailPage.containerMetricsLayout.layoutLabel', {
-      defaultMessage: 'Container',
+      defaultMessage: 'Container Overview',
     }),
     sections: [
       {
@@ -229,4 +229,5 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
     ],
   },
   ...nginxLayoutCreator(theme),
+  ...apmLayoutCreator(theme),
 ];

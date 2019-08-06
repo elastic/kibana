@@ -5,11 +5,12 @@
  */
 
 import { InfraMetricLayoutSectionType } from '../../../pages/metrics/layouts/types';
-// import { ChartSection } from './chart_section';
 import { GaugesSection } from './gauges_section';
 import { ChartSection } from './chart_section';
+import { ApmSection } from './apm_section';
 
 export const sections = {
   [InfraMetricLayoutSectionType.chart]: ChartSection,
   [InfraMetricLayoutSectionType.gauges]: GaugesSection,
+  [InfraMetricLayoutSectionType.apm]: ApmSection,
 };

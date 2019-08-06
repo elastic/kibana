@@ -18,6 +18,7 @@ import { GraphQLFormattedError } from 'graphql';
 import React, { useCallback, useContext } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
+import { ApolloError } from 'apollo-client';
 import euiStyled, { EuiTheme, withTheme } from '../../../../../common/eui_styled_components';
 import { InfraMetricsErrorCodes } from '../../../common/errors';
 import { AutoSizer } from '../../components/auto_sizer';
@@ -41,6 +42,10 @@ import { InfraMetricLayoutSection } from './layouts/types';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from '../../containers/metadata/use_metadata';
 import { Source } from '../../containers/source';
+
+const isApolloError = (subject: any): subject is ApolloError => {
+  return subject.graphQLErrors != null;
+};
 
 const DetailPageContent = euiStyled(PageContent)`
   overflow: auto;
@@ -85,7 +90,7 @@ export const MetricDetail = withMetricPageProviders(
             />
           );
         }
-        const { sourceId } = useContext(Source.Context);
+        const { sourceId, source } = useContext(Source.Context);
         const layouts = layoutCreator(theme);
         const { name, filteredLayouts, loading: metadataLoading } = useMetadata(
           nodeId,
@@ -114,6 +119,11 @@ export const MetricDetail = withMetricPageProviders(
           },
           []
         );
+
+        // Can't do anything without source
+        if (!source) {
+          return null;
+        }
 
         return (
           <WithMetricsTime>
@@ -155,10 +165,12 @@ export const MetricDetail = withMetricPageProviders(
                   >
                     {({ metrics, error, loading, refetch }) => {
                       if (error) {
-                        const invalidNodeError = error.graphQLErrors.some(
-                          (err: GraphQLFormattedError) =>
-                            err.code === InfraMetricsErrorCodes.invalid_node
-                        );
+                        const invalidNodeError =
+                          isApolloError(error) &&
+                          error.graphQLErrors.some(
+                            (err: GraphQLFormattedError) =>
+                              err.code === InfraMetricsErrorCodes.invalid_node
+                          );
 
                         return (
                           <>
@@ -190,6 +202,7 @@ export const MetricDetail = withMetricPageProviders(
                             loading={metadataLoading}
                             nodeName={name}
                             handleClick={handleClick}
+                            metrics={metrics}
                           />
                           <AutoSizer content={false} bounds detectAnyWindowResize>
                             {({ measureRef, bounds: { width = 0 } }) => {
@@ -219,8 +232,11 @@ export const MetricDetail = withMetricPageProviders(
                                     <EuiPageContentWithRelative>
                                       <Metrics
                                         label={name}
-                                        nodeId={nodeId}
                                         layouts={filteredLayouts}
+                                        sourceConfiguration={source.configuration}
+                                        nodeId={nodeId}
+                                        nodeType={nodeType}
+                                        timeRange={timeRange}
                                         metrics={metrics}
                                         loading={
                                           metrics.length > 0 && isAutoReloading ? false : loading

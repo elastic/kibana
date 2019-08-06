@@ -28,7 +28,7 @@ export const initApmMetricsRoute = (libs: InfraBackendLibs) => {
           req.payload
         ).getOrElseL(throwErrors(Boom.badRequest));
         const { configuration } = await sources.getSourceConfiguration(req, sourceId);
-        const serviceNames = await getApmServices(
+        const services = await getApmServices(
           framework,
           req,
           configuration,
@@ -36,14 +36,15 @@ export const initApmMetricsRoute = (libs: InfraBackendLibs) => {
           nodeType,
           timeRange
         );
-        const services = await Promise.all(
-          serviceNames.map(name =>
-            getApmServiceData(framework, req, configuration, name, nodeId, nodeType, timeRange)
+        const servicesWithData = await Promise.all(
+          services.map(service =>
+            getApmServiceData(framework, req, configuration, service, nodeId, nodeType, timeRange)
           )
         );
-        return InfraApmMetricsRT.decode({ services }).getOrElseL(
-          throwErrors(Boom.badImplementation)
-        );
+        return InfraApmMetricsRT.decode({
+          id: 'apmMetrics',
+          services: servicesWithData,
+        }).getOrElseL(throwErrors(Boom.badImplementation));
       } catch (error) {
         throw Boom.boomify(error);
       }

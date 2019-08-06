@@ -18,7 +18,7 @@ import {
 } from '@elastic/charts';
 import { EuiPageContentBody, EuiTitle } from '@elastic/eui';
 import { InfraMetricLayoutSection } from '../../../pages/metrics/layouts/types';
-import { InfraMetricData, InfraTimerangeInput } from '../../../graphql/types';
+import { InfraTimerangeInput, InfraNodeType } from '../../../graphql/types';
 import { getChartTheme } from '../../metrics_explorer/helpers/get_chart_theme';
 import { InfraFormatterType } from '../../../lib/lib';
 import { SeriesChart } from './series_chart';
@@ -32,18 +32,28 @@ import {
 } from './helpers';
 import { ErrorMessage } from './error_message';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
+import { InfraMetricCombinedData } from '../../../containers/metrics/with_metrics';
+import { isInfraMetricData } from '../../../utils/is_infra_apm_metrics';
+import { SourceConfiguration } from '../../../utils/source_configuration';
 
 interface Props {
   section: InfraMetricLayoutSection;
-  metric: InfraMetricData;
+  metric: InfraMetricCombinedData;
   onChangeRangeTime?: (time: InfraTimerangeInput) => void;
   isLiveStreaming?: boolean;
   stopLiveStreaming?: () => void;
   intl: InjectedIntl;
+  nodeId: string;
+  nodeType: InfraNodeType;
+  sourceConfiguration: SourceConfiguration;
+  timeRange: InfraTimerangeInput;
 }
 
 export const ChartSection = injectI18n(
   ({ onChangeRangeTime, section, metric, intl, stopLiveStreaming, isLiveStreaming }: Props) => {
+    if (!isInfraMetricData(metric)) {
+      throw new Error('ChartSection only accepts InfraMetricData');
+    }
     const { visConfig } = section;
     const [dateFormat] = useKibanaUiSetting('dateFormat');
     const formatter = get(visConfig, 'formatter', InfraFormatterType.number);

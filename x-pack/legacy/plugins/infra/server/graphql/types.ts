@@ -572,6 +572,7 @@ export enum InfraMetric {
   nginxRequestRate = 'nginxRequestRate',
   nginxActiveConnections = 'nginxActiveConnections',
   nginxRequestsPerConnection = 'nginxRequestsPerConnection',
+  apmMetrics = 'apmMetrics',
   custom = 'custom',
 }
 

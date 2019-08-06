@@ -5,18 +5,24 @@
  */
 
 import React from 'react';
-import { InfraMetricData, InfraTimerangeInput } from '../../graphql/types';
+import { InfraTimerangeInput, InfraNodeType } from '../../graphql/types';
 import { InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
 import { sections } from './sections';
+import { InfraMetricCombinedData } from '../../containers/metrics/with_metrics';
+import { SourceConfiguration } from '../../utils/source_configuration';
 
 interface Props {
   section: InfraMetricLayoutSection;
-  metrics: InfraMetricData[];
+  metrics: InfraMetricCombinedData[];
   onChangeRangeTime?: (time: InfraTimerangeInput) => void;
   crosshairValue?: number;
   onCrosshairUpdate?: (crosshairValue: number) => void;
   isLiveStreaming?: boolean;
   stopLiveStreaming?: () => void;
+  nodeId: string;
+  nodeType: InfraNodeType;
+  sourceConfiguration: SourceConfiguration;
+  timeRange: InfraTimerangeInput;
 }
 
 export class Section extends React.PureComponent<Props> {
@@ -26,7 +32,7 @@ export class Section extends React.PureComponent<Props> {
       return null;
     }
     let sectionProps = {};
-    if (this.props.section.type === 'chart') {
+    if (['apm', 'chart'].includes(this.props.section.type)) {
       sectionProps = {
         onChangeRangeTime: this.props.onChangeRangeTime,
         crosshairValue: this.props.crosshairValue,
@@ -36,6 +42,16 @@ export class Section extends React.PureComponent<Props> {
       };
     }
     const Component = sections[this.props.section.type];
-    return <Component section={this.props.section} metric={metric} {...sectionProps} />;
+    return (
+      <Component
+        nodeId={this.props.nodeId}
+        nodeType={this.props.nodeType}
+        sourceConfiguration={this.props.sourceConfiguration}
+        timeRange={this.props.timeRange}
+        section={this.props.section}
+        metric={metric}
+        {...sectionProps}
+      />
+    );
   }
 }

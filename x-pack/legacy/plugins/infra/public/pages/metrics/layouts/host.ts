@@ -18,7 +18,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'hostOverview',
     label: i18n.translate('xpack.infra.metricDetailPage.hostMetricsLayout.layoutLabel', {
-      defaultMessage: 'Host',
+      defaultMessage: 'Host Overview',
     }),
     sections: [
       {
@@ -364,4 +364,5 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
     ],
   },
   ...nginxLayoutCreator(theme),
+  ...apmLayoutCreator(theme),
 ];

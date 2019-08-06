@@ -7,6 +7,7 @@
 import { EuiTheme } from '../../../../../../common/eui_styled_components';
 import { InfraMetric } from '../../../graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
+import { InfraMetricCombinedData } from '../../../containers/metrics/with_metrics';
 
 export enum InfraMetricLayoutVisualizationType {
   line = 'line',
@@ -17,6 +18,7 @@ export enum InfraMetricLayoutVisualizationType {
 export enum InfraMetricLayoutSectionType {
   chart = 'chart',
   gauges = 'gauges',
+  apm = 'apm',
 }
 
 interface SeriesOverrides {
@@ -25,6 +27,7 @@ interface SeriesOverrides {
   name?: string;
   formatter?: InfraFormatterType;
   formatterTemplate?: string;
+  gaugeMax?: number;
 }
 
 interface SeriesOverrideObject {
@@ -48,9 +51,19 @@ export interface InfraMetricLayoutSection {
   type: InfraMetricLayoutSectionType;
 }
 
+export interface InfraMetricSideNav {
+  name: string;
+  id: string;
+  items: Array<{ id: string; name: string; onClick: () => void }>;
+}
+
 export interface InfraMetricLayout {
   id: string;
   label: string;
+  mapNavItem: (
+    item: InfraMetricLayout,
+    metrics: InfraMetricCombinedData[]
+  ) => InfraMetricSideNav | undefined;
   sections: InfraMetricLayoutSection[];
 }
 

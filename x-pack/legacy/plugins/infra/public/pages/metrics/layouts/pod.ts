@@ -13,12 +13,13 @@ import {
   InfraMetricLayoutSectionType,
   InfraMetricLayoutVisualizationType,
 } from './types';
+import { apmLayoutCreator } from './apm';
 
 export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'podOverview',
     label: i18n.translate('xpack.infra.metricDetailPage.podMetricsLayout.layoutLabel', {
-      defaultMessage: 'Pod',
+      defaultMessage: 'Pod Overview',
     }),
     sections: [
       {
@@ -156,4 +157,5 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
     ],
   },
   ...nginxLayoutCreator(theme),
+  ...apmLayoutCreator(theme),
 ];
