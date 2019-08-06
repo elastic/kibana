@@ -60,13 +60,15 @@ export interface RegistryPackage {
 // Managers public HTTP response types
 // from API_LIST_PATTERN
 export type IntegrationList = IntegrationListItem[];
-export type IntegrationListItem = Installable<RegistryListItem>;
+// add title here until it's a part of registry response
+export type IntegrationListItem = Installable<RegistryListItem & { title: string }>;
 export type IntegrationsGroupedByStatus = {
   [key in InstallationStatus]: IntegrationList;
 };
 
 // from API_INFO_PATTERN
-export type IntegrationInfo = Installable<RegistryPackage>;
+// add title here until it's a part of registry response
+export type IntegrationInfo = Installable<RegistryPackage & { title: string }>;
 
 // from API_INSTALL_PATTERN
 // returns Installation

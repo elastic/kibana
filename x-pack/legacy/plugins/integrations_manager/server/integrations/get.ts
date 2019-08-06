@@ -12,7 +12,9 @@ import { createInstallableFrom } from './index';
 
 export async function getIntegrations(options: { savedObjectsClient: SavedObjectsClientContract }) {
   const { savedObjectsClient } = options;
-  const registryItems = await Registry.fetchList();
+  const registryItems = await Registry.fetchList().then(items =>
+    items.map(item => Object.assign({}, item, { title: item.description.split(' ')[0] }))
+  );
   const searchObjects = registryItems.map(({ name, version }) => ({
     type: SAVED_OBJECT_TYPE,
     id: `${name}-${version}`,
@@ -36,7 +38,9 @@ export async function getIntegrationInfo(options: {
 }) {
   const { savedObjectsClient, pkgkey } = options;
   const [item, savedObject] = await Promise.all([
-    Registry.fetchInfo(pkgkey),
+    Registry.fetchInfo(pkgkey).then(info =>
+      Object.assign({}, info, { title: info.description.split(' ')[0] })
+    ),
     getInstallationObject({ savedObjectsClient, pkgkey }),
   ]);
   const installation = createInstallableFrom(item, savedObject);

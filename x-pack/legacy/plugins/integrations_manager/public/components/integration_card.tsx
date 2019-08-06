@@ -13,14 +13,12 @@ type IntegrationCardProps = IntegrationListItem | IntegrationInfo;
 export function IntegrationCard({
   description,
   name,
+  title,
   version,
   icon: iconUrl,
 }: IntegrationCardProps) {
   const { toDetailView } = useLinks();
   const url = toDetailView({ name, version });
-
-  // TODO: Need title or something which uses correct capitalization (e.g. PostgreSQL)
-  const title = description.split(' ')[0];
 
   // try to find a logo in EUI
   const iconType = ICON_TYPES.find(key => key.toLowerCase() === `logo${name}`);

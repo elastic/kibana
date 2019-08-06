@@ -29,10 +29,8 @@ import { IntegrationInfo } from '../../common/types';
 import { getIntegrationInfoByKey } from '../data';
 import { useBreadcrumbs, useLinks } from '../hooks';
 
-// Add stuff here as needed to help determine what the API should return
-type IntegrationInfoWIP = IntegrationInfo & { title: string };
 export function Detail(props: { package: string }) {
-  const [info, setInfo] = useState<IntegrationInfoWIP | null>(null);
+  const [info, setInfo] = useState<IntegrationInfo | null>(null);
   useEffect(() => {
     getIntegrationInfoByKey(props.package).then(response => {
       const { description } = response;
@@ -49,7 +47,7 @@ export function Detail(props: { package: string }) {
   return <DetailLayout restrictWidth={1200} {...info} />;
 }
 
-type LayoutProps = IntegrationInfoWIP & EuiPageWidthProps;
+type LayoutProps = IntegrationInfo & EuiPageWidthProps;
 function DetailLayout(props: LayoutProps) {
   const { name, restrictWidth, title } = props;
   const { toListView } = useLinks();
@@ -75,7 +73,7 @@ function DetailLayout(props: LayoutProps) {
   );
 }
 
-type HeaderProps = IntegrationInfoWIP & { iconType?: IconType };
+type HeaderProps = IntegrationInfo & { iconType?: IconType };
 function Header(props: HeaderProps) {
   const { iconType, title, version } = props;
   const [isInstalled, setInstalled] = useState(false);
@@ -113,7 +111,7 @@ function Header(props: HeaderProps) {
   );
 }
 
-type ContentProps = IntegrationInfoWIP & { hasLogoPanel: boolean };
+type ContentProps = IntegrationInfo & { hasLogoPanel: boolean };
 function Content(props: ContentProps) {
   const { description, hasLogoPanel } = props;
   const marginTop = ICON_HEIGHT_PANEL / 2 + ICON_HEIGHT_NATURAL / 2;
