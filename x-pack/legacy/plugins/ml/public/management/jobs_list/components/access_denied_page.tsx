@@ -50,14 +50,7 @@ export const AccessDeniedPage = () => (
               <p>
                 <FormattedMessage
                   id="xpack.ml.management.jobsList.noGrantedPrivilegesDescription"
-                  defaultMessage="You must have a trial or platinum license.{br}You must have the privileges granted in the {kibanaUserParam} and {machineLearningUserParam} roles.{br}Your system admin can set these roles on the Management User page."
-                  values={{
-                    kibanaUserParam: <span className="text-monospace">kibana_user</span>,
-                    machineLearningUserParam: (
-                      <span className="text-monospace">machine_learning_user</span>
-                    ),
-                    br: <br />,
-                  }}
+                  defaultMessage="You don’t have permission to manage ML jobs"
                 />
               </p>
             </EuiText>
