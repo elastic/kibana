@@ -209,6 +209,41 @@ export const awsLayoutCreator: InfraMetricLayoutCreator = theme => [
           },
         },
       },
+      {
+        id: InfraMetric.awsDiskioBytes,
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.awsMetricsLayout.diskioBytesSection.sectionLabel',
+          {
+            defaultMessage: 'Disk I/O Bytes',
+          }
+        ),
+        requires: ['aws.ec2'],
+        type: InfraMetricLayoutSectionType.chart,
+        visConfig: {
+          type: InfraMetricLayoutVisualizationType.area,
+          formatter: InfraFormatterType.number,
+          seriesOverrides: {
+            writes: {
+              color: theme.eui.euiColorVis1,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.awsMetricsLayout.diskioBytesSection.writesSeriesLabel',
+                {
+                  defaultMessage: 'writes',
+                }
+              ),
+            },
+            reads: {
+              color: theme.eui.euiColorVis2,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.awsMetricsLayout.diskioBytesSection.readsSeriesLabel',
+                {
+                  defaultMessage: 'reads',
+                }
+              ),
+            },
+          },
+        },
+      },
     ],
   },
 ];

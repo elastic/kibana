@@ -2333,6 +2333,12 @@
             "deprecationReason": null
           },
           {
+            "name": "awsDiskioBytes",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "awsDiskioOps",
             "description": "",
             "isDeprecated": false,

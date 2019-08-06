@@ -41,6 +41,7 @@ import { awsOverview } from './aws/aws_overview';
 import { awsCpuUtilization } from './aws/aws_cpu_utilization';
 import { awsNetworkBytes } from './aws/aws_network_bytes';
 import { awsNetworkPackets } from './aws/aws_network_packets';
+import { awsDiskioBytes } from './aws/aws_diskio_bytes';
 import { awsDiskioOps } from './aws/aws_diskio_ops';
 
 interface InfraMetricModels {
@@ -82,5 +83,6 @@ export const metricModels: InfraMetricModels = {
   [InfraMetric.awsCpuUtilization]: awsCpuUtilization,
   [InfraMetric.awsNetworkBytes]: awsNetworkBytes,
   [InfraMetric.awsNetworkPackets]: awsNetworkPackets,
+  [InfraMetric.awsDiskioBytes]: awsDiskioBytes,
   [InfraMetric.awsDiskioOps]: awsDiskioOps,
 };
