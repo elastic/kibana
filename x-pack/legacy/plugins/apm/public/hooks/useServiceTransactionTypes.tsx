@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loadTransactionTypes } from '../services/rest/apm/transaction_types';
+import { loadServiceTransactionTypes } from '../services/rest/apm/services';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 
-export function useTransactionTypes(urlParams: IUrlParams) {
+export function useServiceTransactionTypes(urlParams: IUrlParams) {
   const { serviceName, start, end } = urlParams;
   const { data: transactionTypes = [] } = useFetcher(() => {
-    if (start && end) {
-      return loadTransactionTypes({ serviceName, start, end });
+    if (serviceName && start && end) {
+      return loadServiceTransactionTypes({ serviceName, start, end });
     }
   }, [serviceName, start, end]);
 

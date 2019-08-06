@@ -32,7 +32,7 @@ import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { PROJECTION } from '../../../projections/typings';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useTransactionTypes } from '../../../hooks/useTransactionTypes';
+import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 
 function getRedirectLocation({
   urlParams,
@@ -63,7 +63,7 @@ export function TransactionOverview() {
   const { serviceName, transactionType } = urlParams;
 
   // TODO: fetching of transaction types should perhaps be lifted since it is needed in several places. Context?
-  const serviceTransactionTypes = useTransactionTypes(urlParams);
+  const serviceTransactionTypes = useServiceTransactionTypes(urlParams);
 
   // redirect to first transaction type
   useRedirect(

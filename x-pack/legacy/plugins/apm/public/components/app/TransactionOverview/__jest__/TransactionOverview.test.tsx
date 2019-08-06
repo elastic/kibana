@@ -18,7 +18,7 @@ import { omit } from 'lodash';
 import { history } from '../../../../utils/history';
 import { TransactionOverview } from '..';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import * as useTransactionTypesHook from '../../../../hooks/useTransactionTypes';
+import * as useServiceTransactionTypesHook from '../../../../hooks/useServiceTransactionTypes';
 import { fromQuery } from '../../../shared/Links/url_helpers';
 import { Router } from 'react-router-dom';
 import { UrlParamsProvider } from '../../../../context/UrlParamsContext';
@@ -55,7 +55,7 @@ function setup({
   });
 
   jest
-    .spyOn(useTransactionTypesHook, 'useTransactionTypes')
+    .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypes')
     .mockReturnValue(serviceTransactionTypes);
 
   return render(

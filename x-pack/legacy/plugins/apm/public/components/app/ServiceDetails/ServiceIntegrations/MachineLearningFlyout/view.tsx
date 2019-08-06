@@ -29,7 +29,7 @@ import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLi
 import { MLLink } from '../../../../shared/Links/MachineLearningLinks/MLLink';
 import { TransactionSelect } from './TransactionSelect';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
-import { useTransactionTypes } from '../../../../../hooks/useTransactionTypes';
+import { useServiceTransactionTypes } from '../../../../../hooks/useServiceTransactionTypes';
 
 interface Props {
   hasIndexPattern: boolean;
@@ -47,7 +47,7 @@ export function MachineLearningFlyoutView({
   urlParams
 }: Props) {
   const { serviceName } = urlParams;
-  const transactionTypes = useTransactionTypes(urlParams);
+  const transactionTypes = useServiceTransactionTypes(urlParams);
 
   const [selectedTransactionType, setSelectedTransactionType] = useState<
     string | undefined

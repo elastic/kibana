@@ -15,7 +15,6 @@ import { initTransactionGroupsApi } from '../routes/transaction_groups';
 import { initUIFiltersApi } from '../routes/ui_filters';
 import { initIndexPatternApi } from '../routes/index_pattern';
 import { initSettingsApi } from '../routes/settings';
-import { initTransactionTypesApi } from '../routes/transaction_types';
 
 export class Plugin {
   public setup(core: InternalCoreSetup) {
@@ -27,7 +26,6 @@ export class Plugin {
     initErrorsApi(core);
     initMetricsApi(core);
     initIndexPatternApi(core);
-    initTransactionTypesApi(core);
     makeApmUsageCollector(core as CoreSetupWithUsageCollector);
   }
 }

@@ -13,21 +13,14 @@ import { PromiseReturnType } from '../../../typings/common';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
-export type TransactionTypesAPIResponse = PromiseReturnType<
-  typeof getTransactionTypes
+export type ServiceTransactionTypesAPIResponse = PromiseReturnType<
+  typeof getServiceTransactionTypes
 >;
-export async function getTransactionTypes({
-  setup,
-  serviceName
-}: {
-  setup: Setup;
-  serviceName?: string;
-}) {
+export async function getServiceTransactionTypes(
+  serviceName: string,
+  setup: Setup
+) {
   const { start, end, client, config } = setup;
-
-  const serviceNameFilter = serviceName
-    ? [{ term: { [SERVICE_NAME]: serviceName } }]
-    : [];
 
   const params = {
     index: [config.get<string>('apm_oss.transactionIndices')],
@@ -36,7 +29,7 @@ export async function getTransactionTypes({
       query: {
         bool: {
           filter: [
-            ...serviceNameFilter,
+            { term: { [SERVICE_NAME]: serviceName } },
             { terms: { [PROCESSOR_EVENT]: ['transaction'] } },
             { range: rangeFilter(start, end) }
           ]

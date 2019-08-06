@@ -25,7 +25,6 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
 import { PROJECTION } from '../../../projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { useTransactionTypes } from '../../../hooks/useTransactionTypes';
 
 const ErrorGroupOverview: React.SFC = () => {
   const { urlParams, uiFilters } = useUrlParams();
@@ -73,8 +72,6 @@ const ErrorGroupOverview: React.SFC = () => {
     transactionType
   ]);
 
-  const transactionTypes = useTransactionTypes(urlParams);
-
   useTrackPageview({
     app: 'apm',
     path: 'error_group_overview'
@@ -109,7 +106,6 @@ const ErrorGroupOverview: React.SFC = () => {
           {...localUIFiltersConfig}
           showTransactionTypeFilter={true}
           allowEmptyTransactionType
-          transactionTypes={transactionTypes}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={7}>

@@ -14,11 +14,9 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { PROJECTION } from '../../../projections/typings';
-import { useTransactionTypes } from '../../../hooks/useTransactionTypes';
 
 export function TraceOverview() {
   const { urlParams, uiFilters } = useUrlParams();
-  const transactionTypes = useTransactionTypes(urlParams);
   const { start, end, transactionType } = urlParams;
   const { status, data = [] } = useFetcher(() => {
     if (start && end) {
@@ -49,7 +47,6 @@ export function TraceOverview() {
           {...localUIFiltersConfig}
           showTransactionTypeFilter={true}
           allowEmptyTransactionType={true}
-          transactionTypes={transactionTypes}
         ></LocalUIFilters>
       </EuiFlexItem>
       <EuiFlexItem grow={7}>
