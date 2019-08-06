@@ -33,6 +33,6 @@ export const NumberFormatArgInput = compose<ComponentProps, null>(withProps({ nu
 export const numberFormat = () => ({
   name: 'numberFormat',
   displayName: 'Number Format',
-  help: 'Select from the number formats',
+  help: 'Select or enter a valid NumeralJS format',
   simpleTemplate: templateFromReactComponent(NumberFormatArgInput),
 });
