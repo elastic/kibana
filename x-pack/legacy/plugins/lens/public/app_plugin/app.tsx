@@ -62,6 +62,8 @@ export function App({
     indexPatternTitles: [],
   });
 
+  const [isDirty, setDirty] = useState(false);
+
   const lastKnownDocRef = useRef<Document | undefined>(undefined);
 
   useEffect(() => {
@@ -97,7 +99,7 @@ export function App({
   // Can save if the frame has told us what it has, and there is either:
   // a) No saved doc
   // b) A saved doc that differs from the frame state
-  const isSaveable = true;
+  const isSaveable = isDirty;
     // state.lastKnownDoc &&
     // (!state.persistedDoc ||
     //   (state.persistedDoc && !_.isEqual(state.lastKnownDoc, state.persistedDoc)));
@@ -130,6 +132,7 @@ export function App({
                             ...state,
                             persistedDoc: newDoc,
                           });
+                          setDirty(false);
                           if (docId !== id) {
                             redirectTo(id);
                           }
@@ -193,6 +196,10 @@ export function App({
                     ...state,
                     indexPatternTitles,
                   });
+                }
+                const docChanged = !_.isEqual(doc, state.persistedDoc);
+                if (docChanged !== isDirty) {
+                  setDirty(docChanged);
                 }
                 lastKnownDocRef.current = doc;
               },
