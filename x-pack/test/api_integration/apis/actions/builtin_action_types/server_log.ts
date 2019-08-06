@@ -30,6 +30,9 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
       serverLogActionId = createdAction.id;
       expect(createdAction).to.eql({
         id: createdAction.id,
+        description: 'A server.log action',
+        actionTypeId: '.server-log',
+        config: {},
       });
 
       expect(typeof createdAction.id).to.be('string');
