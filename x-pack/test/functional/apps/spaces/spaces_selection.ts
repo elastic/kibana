@@ -3,13 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function spaceSelectorFunctonalTests({
   getService,
   getPageObjects,
-}: KibanaFunctionalTestDefaultProviders) {
+}: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects([
     'common',

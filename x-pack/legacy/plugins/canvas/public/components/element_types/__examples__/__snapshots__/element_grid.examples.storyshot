@@ -61,7 +61,6 @@ exports[`Storyshots components/Elements/ElementGrid with controls 1`] = `
             onMouseOver={[Function]}
           >
             <button
-              aria-describedby="generated-id"
               aria-label="Edit element"
               className="euiButtonIcon euiButtonIcon--primary"
               onBlur={[Function]}
@@ -91,7 +90,6 @@ exports[`Storyshots components/Elements/ElementGrid with controls 1`] = `
             onMouseOver={[Function]}
           >
             <button
-              aria-describedby="generated-id"
               aria-label="Delete element"
               className="euiButtonIcon euiButtonIcon--danger"
               onBlur={[Function]}
@@ -164,7 +162,6 @@ exports[`Storyshots components/Elements/ElementGrid with controls 1`] = `
             onMouseOver={[Function]}
           >
             <button
-              aria-describedby="generated-id"
               aria-label="Edit element"
               className="euiButtonIcon euiButtonIcon--primary"
               onBlur={[Function]}
@@ -194,7 +191,6 @@ exports[`Storyshots components/Elements/ElementGrid with controls 1`] = `
             onMouseOver={[Function]}
           >
             <button
-              aria-describedby="generated-id"
               aria-label="Delete element"
               className="euiButtonIcon euiButtonIcon--danger"
               onBlur={[Function]}
@@ -267,7 +263,6 @@ exports[`Storyshots components/Elements/ElementGrid with controls 1`] = `
             onMouseOver={[Function]}
           >
             <button
-              aria-describedby="generated-id"
               aria-label="Edit element"
               className="euiButtonIcon euiButtonIcon--primary"
               onBlur={[Function]}
@@ -297,7 +292,6 @@ exports[`Storyshots components/Elements/ElementGrid with controls 1`] = `
             onMouseOver={[Function]}
           >
             <button
-              aria-describedby="generated-id"
               aria-label="Delete element"
               className="euiButtonIcon euiButtonIcon--danger"
               onBlur={[Function]}
@@ -385,7 +379,6 @@ exports[`Storyshots components/Elements/ElementGrid with controls and filter 1`]
             onMouseOver={[Function]}
           >
             <button
-              aria-describedby="generated-id"
               aria-label="Edit element"
               className="euiButtonIcon euiButtonIcon--primary"
               onBlur={[Function]}
@@ -415,7 +408,6 @@ exports[`Storyshots components/Elements/ElementGrid with controls and filter 1`]
             onMouseOver={[Function]}
           >
             <button
-              aria-describedby="generated-id"
               aria-label="Delete element"
               className="euiButtonIcon euiButtonIcon--danger"
               onBlur={[Function]}

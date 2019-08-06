@@ -38,7 +38,7 @@ export const SnapshotPage = injectUICapabilities(
     const { intl, uiCapabilities } = props;
     const { showIndicesConfiguration } = useContext(SourceConfigurationFlyoutState.Context);
     const {
-      derivedIndexPattern,
+      createDerivedIndexPattern,
       hasFailedLoadingSource,
       isLoading,
       loadSourceFailureMessage,
@@ -84,7 +84,7 @@ export const SnapshotPage = injectUICapabilities(
         ) : metricIndicesExist ? (
           <>
             <WithWaffleTimeUrlState />
-            <WithWaffleFilterUrlState indexPattern={derivedIndexPattern} />
+            <WithWaffleFilterUrlState indexPattern={createDerivedIndexPattern('metrics')} />
             <WithWaffleOptionsUrlState />
             <SnapshotToolbar />
             <SnapshotPageContent />

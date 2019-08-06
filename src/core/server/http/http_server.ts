@@ -25,21 +25,98 @@ import { createServer, getListenerOptions, getServerOptions } from './http_tools
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
-import { Router, KibanaRequest, ResponseHeaders } from './router';
+import { KibanaRequest, LegacyRequest, ResponseHeaders, Router } from './router';
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
 } from './cookie_session_storage';
 import { SessionStorageFactory } from './session_storage';
-import { AuthStateStorage } from './auth_state_storage';
-import { AuthHeadersStorage } from './auth_headers_storage';
+import { AuthStateStorage, GetAuthState, IsAuthenticated } from './auth_state_storage';
+import { AuthHeadersStorage, GetAuthHeaders } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 
+/**
+ * Kibana HTTP Service provides own abstraction for work with HTTP stack.
+ * Plugins don't have direct access to `hapi` server and its primitives anymore. Moreover,
+ * plugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood.
+ * This gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins.
+ * If the HTTP Service lacks functionality you need, we are happy to discuss and support your needs.
+ *
+ * @example
+ * To handle an incoming request in your plugin you should:
+ * - Create a `Router` instance. Use `plugin-id` as a prefix path segment for your routes.
+ * ```ts
+ * import { Router } from 'src/core/server';
+ * const router = new Router('my-app');
+ * ```
+ *
+ * - Use `@kbn/config-schema` package to create a schema to validate the request `params`, `query`, and `body`. Every incoming request will be validated against the created schema. If validation failed, the request is rejected with `400` status and `Bad request` error without calling the route's handler.
+ * To opt out of validating the request, specify `false`.
+ * ```ts
+ * import { schema, TypeOf } from '@kbn/config-schema';
+ * const validate = {
+ *   params: schema.object({
+ *     id: schema.string(),
+ *   }),
+ * };
+ * ```
+ *
+ * - Declare a function to respond to incoming request.
+ * The function will receive `request` object containing request details: url, headers, matched route, as well as validated `params`, `query`, `body`.
+ * And `response` object instructing HTTP server to create HTTP response with information sent back to the client as the response body, headers, and HTTP status.
+ * Unlike, `hapi` route handler in the Legacy platform, any exception raised during the handler call will generate `500 Server error` response and log error details for further investigation. See below for returning custom error responses.
+ * ```ts
+ * const handler = async (request: KibanaRequest, response: ResponseFactory) => {
+ *   const data = await findObject(request.params.id);
+ *   // creates a command to respond with 'not found' error
+ *   if (!data) return response.notFound();
+ *   // creates a command to send found data to the client and set response headers
+ *   return response.ok(data, {
+ *     headers: {
+ *       'content-type': 'application/json'
+ *     }
+ *   });
+ * }
+ * ```
+ *
+ * - Register route handler for GET request to 'my-app/path/{id}' path
+ * ```ts
+ * import { schema, TypeOf } from '@kbn/config-schema';
+ * import { Router } from 'src/core/server';
+ * const router = new Router('my-app');
+ *
+ * const validate = {
+ *   params: schema.object({
+ *     id: schema.string(),
+ *   }),
+ * };
+ *
+ * router.get({
+ *   path: 'path/{id}',
+ *   validate
+ * },
+ * async (request, response) => {
+ *   const data = await findObject(request.params.id);
+ *   if (!data) return response.notFound();
+ *   return response.ok(data, {
+ *     headers: {
+ *       'content-type': 'application/json'
+ *     }
+ *   });
+ * });
+ * ```
+ * @public
+ */
 export interface HttpServerSetup {
   server: Server;
+  /**
+   * Add all the routes registered with `router` to HTTP server request listeners.
+   * @param router {@link Router} - a router with registered route handlers.
+   */
   registerRouter: (router: Router) => void;
   /**
    * Creates cookie based session storage factory {@link SessionStorageFactory}
+   * @param cookieOptions {@link SessionStorageCookieOptions} - options to configure created cookie session storage.
    */
   createCookieSessionStorageFactory: <T>(
     cookieOptions: SessionStorageCookieOptions<T>
@@ -49,35 +126,53 @@ export interface HttpServerSetup {
    * A handler should return a state to associate with the incoming request.
    * The state can be retrieved later via http.auth.get(..)
    * Only one AuthenticationHandler can be registered.
+   * @param handler {@link AuthenticationHandler} - function to perform authentication.
    */
   registerAuth: (handler: AuthenticationHandler) => void;
   /**
    * To define custom logic to perform for incoming requests. Runs the handler before Auth
-   * hook performs a check that user has access to requested resources, so it's the only
+   * interceptor performs a check that user has access to requested resources, so it's the only
    * place when you can forward a request to another URL right on the server.
    * Can register any number of registerOnPostAuth, which are called in sequence
    * (from the first registered to the last).
+   * @param handler {@link OnPreAuthHandler} - function to call.
    */
   registerOnPreAuth: (handler: OnPreAuthHandler) => void;
   /**
-   * To define custom logic to perform for incoming requests. Runs the handler after Auth hook
+   * To define custom logic to perform for incoming requests. Runs the handler after Auth interceptor
    * did make sure a user has access to the requested resource.
    * The auth state is available at stage via http.auth.get(..)
    * Can register any number of registerOnPreAuth, which are called in sequence
    * (from the first registered to the last).
+   * @param handler {@link OnPostAuthHandler} - function to call.
    */
   registerOnPostAuth: (handler: OnPostAuthHandler) => void;
   basePath: {
-    get: (request: KibanaRequest | Request) => string;
-    set: (request: KibanaRequest | Request, basePath: string) => void;
+    /**
+     * returns `basePath` value, specific for an incoming request.
+     */
+    get: (request: KibanaRequest | LegacyRequest) => string;
+    /**
+     * sets `basePath` value, specific for an incoming request.
+     */
+    set: (request: KibanaRequest | LegacyRequest, basePath: string) => void;
+    /**
+     * returns a new `basePath` value, prefixed with passed `url`.
+     */
     prepend: (url: string) => string;
+    /**
+     * returns a new `basePath` value, cleaned up from passed `url`.
+     */
     remove: (url: string) => string;
   };
   auth: {
-    get: AuthStateStorage['get'];
-    isAuthenticated: AuthStateStorage['isAuthenticated'];
-    getAuthHeaders: AuthHeadersStorage['get'];
+    get: GetAuthState;
+    isAuthenticated: IsAuthenticated;
+    getAuthHeaders: GetAuthHeaders;
   };
+  /**
+   * Flag showing whether a server was configured to use TLS connection.
+   */
   isTlsEnabled: boolean;
 }
 
