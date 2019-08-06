@@ -5,20 +5,20 @@
  */
 
 import { SPACES } from '../../common/lib/spaces';
-import { TestInvoker } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { importTestSuiteFactory } from '../../common/suites/import';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: TestInvoker) {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  const { importTest, createExpectResults, expectUnknownType } = importTestSuiteFactory(
-    es,
-    esArchiver,
-    supertest
-  );
+  const {
+    importTest,
+    createExpectResults,
+    expectUnknownTypeUnsupported,
+    expectHiddenTypeUnsupported,
+  } = importTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_import', () => {
     importTest('in the current space (space_1)', {
@@ -28,9 +28,13 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(SPACES.SPACE_1.spaceId),
         },
+        hiddenType: {
+          statusCode: 200,
+          response: expectHiddenTypeUnsupported,
+        },
         unknownType: {
           statusCode: 200,
-          response: expectUnknownType,
+          response: expectUnknownTypeUnsupported,
         },
       },
     });
@@ -42,9 +46,13 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(SPACES.DEFAULT.spaceId),
         },
+        hiddenType: {
+          statusCode: 200,
+          response: expectHiddenTypeUnsupported,
+        },
         unknownType: {
           statusCode: 200,
-          response: expectUnknownType,
+          response: expectUnknownTypeUnsupported,
         },
       },
     });

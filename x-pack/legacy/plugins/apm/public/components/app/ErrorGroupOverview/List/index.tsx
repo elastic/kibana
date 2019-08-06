@@ -19,7 +19,7 @@ import {
   truncate,
   unit
 } from '../../../../style/variables';
-import { APMLink } from '../../../shared/Links/APMLink';
+import { APMLink } from '../../../shared/Links/apm/APMLink';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ManagedTable } from '../../../shared/ManagedTable';
 

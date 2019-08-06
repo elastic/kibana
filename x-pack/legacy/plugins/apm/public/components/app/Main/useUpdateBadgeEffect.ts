@@ -11,6 +11,7 @@ import { useCore } from '../../../hooks/useCore';
 
 export const useUpdateBadgeEffect = () => {
   const { chrome } = useCore();
+
   useEffect(() => {
     const uiCapabilities = capabilities.get();
     chrome.setBadge(
@@ -26,5 +27,5 @@ export const useUpdateBadgeEffect = () => {
           }
         : undefined
     );
-  }, []);
+  }, [chrome]);
 };

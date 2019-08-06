@@ -55,14 +55,6 @@ export interface Size {
   height: number;
 }
 
-export interface Logger {
-  debug: (message: string) => void;
-  error: (message: string) => void;
-  warning: (message: string) => void;
-  clone?: (tags: string[]) => Logger;
-  isVerbose?: boolean;
-}
-
 export interface ViewZoomWidthHeight {
   zoom: number;
   width: number;
@@ -126,7 +118,7 @@ type PostPayloadState = Partial<{
 }>;
 
 // retain POST payload data, needed for async
-interface JobParamPostPayload extends PostPayloadState {
+export interface JobParamPostPayload extends PostPayloadState {
   timerange: TimeRangeParams;
 }
 
@@ -216,3 +208,5 @@ export interface ESQueueInstance {
     workerOptions: ESQueueWorkerOptions
   ) => ESQueueWorker;
 }
+
+export { LevelLogger as Logger } from './server/lib/level_logger';

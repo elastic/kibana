@@ -78,7 +78,6 @@ export class TaskManager {
     const createRunner = (instance: ConcreteTaskInstance) =>
       new TaskManagerRunner({
         logger,
-        kbnServer: opts.kbnServer,
         instance,
         store,
         definitions: this.definitions,

@@ -1,4 +1,4 @@
-The values of `id` and `actionTypeConfigSecrets` in the `basic/data.json` file
+The values of `id` and `secrets` in the `basic/data.json` file
 may change over time, and to get the current "correct" value to replace it with,
 you can do the following:
 
@@ -9,13 +9,13 @@ you can do the following:
 
 - figure out what data got put in ES via
 
-      curl http://elastic:changeme@localhost:9220/_search -v | json
+      curl -v 'http://elastic:changeme@localhost:9220/_search?q=type:action' | json
 
-- there should be a new `id` and `actionTypeConfigSecrets`
+- there should be a new `id` and `secrets`
 
 - update the following files:
 
-    - `id` and `actionTypeConfigSecrets`
+    - `id` and `secrets`
 
       `x-pack/test/functional/es_archives/actions/basic/data.json`
 

@@ -5,53 +5,17 @@
  */
 
 import path from 'path';
-import {
-  EsProvider,
-  EsSupertestWithoutAuthProvider,
-  SupertestWithoutAuthProvider,
-  UsageAPIProvider,
-  InfraOpsGraphQLClientProvider,
-  InfraOpsGraphQLClientFactoryProvider,
-  SiemGraphQLClientProvider,
-  SiemGraphQLClientFactoryProvider,
-  InfraOpsSourceConfigurationProvider,
-} from './services';
-
-import {
-  SecurityServiceProvider,
-  SpacesServiceProvider,
-} from '../common/services';
+import { services } from './services';
 
 import { SLACK_ACTION_SIMULATOR_URI } from './fixtures/plugins/actions';
 
 export async function getApiIntegrationConfig({ readConfigFile }) {
-
-  const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
   const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
-  const kibanaCommonConfig = await readConfigFile(require.resolve('../../../test/common/config.js'));
 
   return {
     testFiles: [require.resolve('./apis')],
+    services,
     servers: xPackFunctionalTestsConfig.get('servers'),
-    services: {
-      supertest: kibanaAPITestsConfig.get('services.supertest'),
-      esSupertest: kibanaAPITestsConfig.get('services.esSupertest'),
-      supertestWithoutAuth: SupertestWithoutAuthProvider,
-      esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
-      infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
-      infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
-      siemGraphQLClientFactory: SiemGraphQLClientFactoryProvider,
-      siemGraphQLClient: SiemGraphQLClientProvider,
-      infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
-      es: EsProvider,
-      esArchiver: kibanaCommonConfig.get('services.esArchiver'),
-      usageAPI: UsageAPIProvider,
-      kibanaServer: kibanaCommonConfig.get('services.kibanaServer'),
-      chance: kibanaAPITestsConfig.get('services.chance'),
-      security: SecurityServiceProvider,
-      spaces: SpacesServiceProvider,
-      retry: xPackFunctionalTestsConfig.get('services.retry'),
-    },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
       reportName: 'X-Pack API Integration Tests',

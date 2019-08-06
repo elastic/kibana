@@ -18,15 +18,15 @@ import {
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
-import { APMLink } from '../../../shared/Links/APMLink';
 import { StickyProperties } from '../../../shared/StickyProperties';
+import { TransactionLink } from '../../../shared/Links/apm/TransactionLink';
 
 interface Props {
   error: APMError;
   transaction: Transaction | undefined;
 }
 
-function TransactionLink({
+function TransactionLinkWrapper({
   transaction
 }: {
   transaction: Transaction | undefined;
@@ -41,17 +41,9 @@ function TransactionLink({
   }
 
   return (
-    <APMLink
-      path={`/services/${transaction.service.name}/transactions/view`}
-      query={{
-        transactionId: transaction.transaction.id,
-        traceId: transaction.trace.id,
-        transactionName: transaction.transaction.name,
-        transactionType: transaction.transaction.type
-      }}
-    >
+    <TransactionLink transaction={transaction}>
       {transaction.transaction.id}
-    </APMLink>
+    </TransactionLink>
   );
 }
 
@@ -100,7 +92,7 @@ export function StickyErrorProperties({ error, transaction }: Props) {
           defaultMessage: 'Transaction sample ID'
         }
       ),
-      val: <TransactionLink transaction={transaction} />,
+      val: <TransactionLinkWrapper transaction={transaction} />,
       width: '25%'
     },
     {

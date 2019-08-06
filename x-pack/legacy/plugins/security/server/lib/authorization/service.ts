@@ -7,7 +7,7 @@
 import { Server } from 'hapi';
 
 import { getClient } from '../../../../../server/lib/get_client_shield';
-import { SpacesPlugin } from '../../../../spaces/types';
+import { SpacesPlugin } from '../../../../spaces';
 import { XPackFeature, XPackMainPlugin } from '../../../../xpack_main/xpack_main';
 import { APPLICATION_PREFIX } from '../../../common/constants';
 import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
