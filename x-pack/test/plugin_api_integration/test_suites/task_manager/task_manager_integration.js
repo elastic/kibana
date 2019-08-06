@@ -22,12 +22,16 @@ export default function ({ getService }) {
       .set('kbn-xsrf', 'xxx')
       .expect(200));
 
-    beforeEach(async () =>
-      (await es.indices.exists({ index: testHistoryIndex })) && es.deleteByQuery({
-        index: testHistoryIndex,
-        q: 'type:task',
-        refresh: true,
-      }));
+    beforeEach(async () => {
+      const exists = await es.indices.exists({ index: testHistoryIndex });
+      if (exists) {
+        await es.deleteByQuery({
+          index: testHistoryIndex,
+          q: 'type:task',
+          refresh: true,
+        });
+      }
+    });
 
     function currentTasks() {
       return supertest.get('/api/sample_tasks')
