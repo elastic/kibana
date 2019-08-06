@@ -120,7 +120,7 @@ export default function({ getService }: FtrProviderContext) {
 
     it('inputs the model memory limit', async () => {
       const memoryLimit = '15MB';
-      await mlJobWizardCommon.assertModelMemortyLimitInputExists();
+      await mlJobWizardCommon.assertModelMemoryLimitInputExists();
       await mlJobWizardCommon.setModelMemoryLimit(memoryLimit);
       await mlJobWizardCommon.assertModelMemoryLimitValue(memoryLimit);
     });

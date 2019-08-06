@@ -82,12 +82,12 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async assertJobGroupInputExists() {
-      await testSubjects.existOrFail('mlJobWizardComboboxJobGroups comboBoxInput');
+      await testSubjects.existOrFail('mlJobWizardComboBoxJobGroups comboBoxInput');
     },
 
     async assertJobGroupSelection(jobGroups: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'mlJobWizardComboboxJobGroups comboBoxInput'
+        'mlJobWizardComboBoxJobGroups comboBoxInput'
       );
       expect(comboBoxSelectedOptions.length).to.eql(jobGroups.length);
       expect(comboBoxSelectedOptions).to.eql(jobGroups);
@@ -125,7 +125,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       );
     },
 
-    async assertModelMemortyLimitInputExists() {
+    async assertModelMemoryLimitInputExists() {
       await this.ensureAdvancedSectionOpen();
       await testSubjects.existOrFail('mlJobWizardAdvancedSection mlJobWizardInputModelMemoryLimit');
     },
@@ -168,7 +168,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async addJobGroup(jobGroup: string) {
-      await comboBox.setCustom('mlJobWizardComboboxJobGroups comboBoxInput', jobGroup);
+      await comboBox.setCustom('mlJobWizardComboBoxJobGroups comboBoxInput', jobGroup);
     },
 
     async ensureAdvancedSectionOpen() {
