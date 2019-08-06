@@ -11,7 +11,7 @@ export interface SlmPolicyPayload {
   snapshotName: string;
   schedule: string;
   repository: string;
-  config: SnapshotConfig;
+  config?: SnapshotConfig;
 }
 
 export interface SlmPolicy extends SlmPolicyPayload {
@@ -41,7 +41,7 @@ export interface SlmPolicyEs {
     name: string;
     schedule: string;
     repository: string;
-    config: SnapshotConfigEs;
+    config?: SnapshotConfigEs;
   };
   next_execution: string;
   next_execution_millis: number;

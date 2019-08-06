@@ -113,3 +113,4 @@ export const UIM_POLICY_EXECUTE = 'policy_execute';
 export const UIM_POLICY_DELETE = 'policy_delete';
 export const UIM_POLICY_DELETE_MANY = 'policy_delete_many';
 export const UIM_POLICY_CREATE = 'policy_create';
+export const UIM_POLICY_UPDATE = 'policy_update';

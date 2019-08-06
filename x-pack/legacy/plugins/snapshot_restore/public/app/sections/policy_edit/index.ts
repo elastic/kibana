@@ -3,4 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { PolicyForm } from './policy_form';
+
+export { PolicyEdit } from './policy_edit';

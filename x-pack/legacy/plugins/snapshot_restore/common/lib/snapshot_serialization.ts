@@ -6,12 +6,7 @@
 
 import { sortBy } from 'lodash';
 
-import {
-  SnapshotDetails,
-  SnapshotDetailsEs,
-  SnapshotConfig,
-  SnapshotConfigEs,
-} from '../../common/types';
+import { SnapshotDetails, SnapshotDetailsEs, SnapshotConfig, SnapshotConfigEs } from '../types';
 
 export function deserializeSnapshotDetails(
   repository: string,
@@ -108,6 +103,25 @@ export function deserializeSnapshotConfig(snapshotConfigEs: SnapshotConfigEs): S
   };
 
   return Object.entries(snapshotConfig).reduce((config: any, [key, value]) => {
+    if (value !== undefined) {
+      config[key] = value;
+    }
+    return config;
+  }, {});
+}
+
+export function serializeSnapshotConfig(snapshotConfig: SnapshotConfig): SnapshotConfigEs {
+  const { indices, ignoreUnavailable, includeGlobalState, partial, metadata } = snapshotConfig;
+
+  const snapshotConfigEs: SnapshotConfigEs = {
+    indices,
+    ignore_unavailable: ignoreUnavailable,
+    include_global_state: includeGlobalState,
+    partial,
+    metadata,
+  };
+
+  return Object.entries(snapshotConfigEs).reduce((config: any, [key, value]) => {
     if (value !== undefined) {
       config[key] = value;
     }

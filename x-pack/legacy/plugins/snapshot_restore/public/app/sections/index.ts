@@ -9,3 +9,4 @@ export { RepositoryAdd } from './repository_add';
 export { RepositoryEdit } from './repository_edit';
 export { RestoreSnapshot } from './restore_snapshot';
 export { PolicyAdd } from './policy_add';
+export { PolicyEdit } from './policy_edit';

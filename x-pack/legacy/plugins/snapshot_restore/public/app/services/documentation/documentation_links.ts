@@ -67,6 +67,10 @@ class DocumentationLinksService {
     return `${this.esDocBasePath}/date-math-index-names.html`;
   }
 
+  public getSlmUrl() {
+    return `${this.esDocBasePath}/slm-api-put.html`;
+  }
+
   public getCronUrl() {
     return `${this.esStackOverviewDocBasePath}/trigger-schedule.html#schedule-cron`;
   }

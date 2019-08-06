@@ -16,6 +16,7 @@ import {
   RestoreSnapshot,
   SnapshotRestoreHome,
   PolicyAdd,
+  PolicyEdit,
 } from './sections';
 import { useAppDependencies } from './index';
 import { AuthorizationContext, WithPrivileges, NotAuthorizedSection } from './lib/authorization';
@@ -76,6 +77,7 @@ export const App: React.FunctionComponent = () => {
                 component={RestoreSnapshot}
               />
               <Route exact path={`${BASE_PATH}/add_policy`} component={PolicyAdd} />
+              <Route exact path={`${BASE_PATH}/edit_policy/:name*`} component={PolicyEdit} />
               <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
             </Switch>
           </div>

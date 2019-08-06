@@ -42,7 +42,7 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
     if (error) {
       setSaveError(error);
     } else {
-      history.push(`${BASE_PATH}/policy/${name}`);
+      history.push(`${BASE_PATH}/policies/${encodeURIComponent(name)}`);
     }
   };
 

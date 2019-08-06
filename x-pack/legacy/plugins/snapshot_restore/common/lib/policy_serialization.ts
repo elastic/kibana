@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SlmPolicy, SlmPolicyEs } from '../../common/types';
-import { deserializeSnapshotConfig } from './';
+import { SlmPolicy, SlmPolicyEs, SlmPolicyPayload } from '../types';
+import { deserializeSnapshotConfig, serializeSnapshotConfig } from './';
 
 export const deserializePolicy = (name: string, esPolicy: SlmPolicyEs): SlmPolicy => {
   const {
@@ -26,10 +26,13 @@ export const deserializePolicy = (name: string, esPolicy: SlmPolicyEs): SlmPolic
     snapshotName,
     schedule,
     repository,
-    config: deserializeSnapshotConfig(config),
     nextExecution,
     nextExecutionMillis,
   };
+
+  if (config) {
+    policy.config = deserializeSnapshotConfig(config);
+  }
 
   if (lastFailure) {
     const {
@@ -71,4 +74,19 @@ export const deserializePolicy = (name: string, esPolicy: SlmPolicyEs): SlmPolic
   }
 
   return policy;
+};
+
+export const serializePolicy = (policy: SlmPolicyPayload): SlmPolicyEs['policy'] => {
+  const { snapshotName: name, schedule, repository, config } = policy;
+  const policyEs: SlmPolicyEs['policy'] = {
+    name,
+    schedule,
+    repository,
+  };
+
+  if (config) {
+    policyEs.config = serializeSnapshotConfig(config);
+  }
+
+  return policyEs;
 };

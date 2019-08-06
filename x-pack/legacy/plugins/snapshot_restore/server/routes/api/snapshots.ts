@@ -9,8 +9,9 @@ import {
   wrapCustomError,
 } from '../../../../../server/lib/create_router/error_wrappers';
 import { SnapshotDetails, SnapshotDetailsEs } from '../../../common/types';
+import { deserializeSnapshotDetails } from '../../../common/lib';
 import { Plugins } from '../../../shim';
-import { deserializeSnapshotDetails, getManagedRepositoryName } from '../../lib';
+import { getManagedRepositoryName } from '../../lib';
 
 let callWithInternalUser: any;
 

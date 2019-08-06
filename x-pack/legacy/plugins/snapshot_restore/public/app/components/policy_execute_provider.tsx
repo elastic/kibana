@@ -87,7 +87,7 @@ export const PolicyExecuteProvider: React.FunctionComponent<Props> = ({ children
           title={
             <FormattedMessage
               id="xpack.snapshotRestore.executePolicy.confirmModal.executePolicyTitle"
-              defaultMessage="Run policy '{name}'?"
+              defaultMessage="Run '{name}' immediately?"
               values={{ name: policyName }}
             />
           }

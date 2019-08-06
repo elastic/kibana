@@ -10,6 +10,7 @@ import {
   UIM_POLICY_DELETE,
   UIM_POLICY_DELETE_MANY,
   UIM_POLICY_CREATE,
+  UIM_POLICY_UPDATE,
 } from '../../constants';
 import { uiMetricService } from '../ui_metric';
 import { httpService } from './http';
@@ -62,5 +63,19 @@ export const addPolicy = async (newPolicy: SlmPolicyPayload) => {
 
   const { trackUiMetric } = uiMetricService;
   trackUiMetric(UIM_POLICY_CREATE);
+  return result;
+};
+
+export const editPolicy = async (editedPolicy: SlmPolicyPayload) => {
+  const result = await sendRequest({
+    path: httpService.addBasePath(
+      `${API_BASE_PATH}policies/${encodeURIComponent(editedPolicy.name)}`
+    ),
+    method: 'put',
+    body: editedPolicy,
+  });
+
+  const { trackUiMetric } = uiMetricService;
+  trackUiMetric(UIM_POLICY_UPDATE);
   return result;
 };
