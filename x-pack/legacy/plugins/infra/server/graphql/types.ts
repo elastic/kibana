@@ -582,6 +582,7 @@ export enum InfraMetric {
   awsCpuUtilization = 'awsCpuUtilization',
   awsNetworkBytes = 'awsNetworkBytes',
   awsNetworkPackets = 'awsNetworkPackets',
+  awsDiskioOps = 'awsDiskioOps',
   custom = 'custom',
 }
 
