@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.tryForTime(120000, async function () {
         // This test can fail after 60000ms defined as mochaOpts.timeout in
-        // kibana/src/functional_test_runner/lib/config/schema.js
+        // kibana/packages/kbn-test/src/functional_test_runner/lib/config/schema.js
         log.debug('build the same graph until we can click the line with stroke-width:2.0042343137225673px');
         await PageObjects.graph.newGraph();
         await buildGraph();
