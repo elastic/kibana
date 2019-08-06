@@ -37,7 +37,6 @@ export const metric = () => ({
     {
       name: 'metricFormat',
       displayName: 'Metric Format',
-      help: 'Select or enter a valid NumeralJS format',
       argType: 'numberFormat',
       default: `"${AdvancedSettings.get('format:number:defaultPattern')}"`,
     },
