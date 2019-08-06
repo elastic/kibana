@@ -120,7 +120,6 @@ export class HeadlessChromiumDriverFactory {
         // which can cause the job to fail even if we bump timeouts in
         // the config. Help alleviate errors like
         // "TimeoutError: waiting for selector ".application" failed: timeout 30000ms exceeded"
-        // @ts-ignore outdated typedefs for puppteer
         page.setDefaultTimeout(this.queueTimeout);
       } catch (err) {
         observer.error(new Error(`Error spawning Chromium browser: [${err}]`));
