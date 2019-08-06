@@ -1,3 +1,4 @@
+[role="xpack"]
 [[creating-df-kib]]
 == Creating {dataframe-transforms}
 

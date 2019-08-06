@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { cryptoFactory, LevelLogger, oncePerServer } from '../../../server/lib';
 import { JobDocOutputExecuted, JobDocPayload, KbnServer } from '../../../types';
-import { CONTENT_TYPE_CSV } from '../../../common/constants';
+import { CONTENT_TYPE_CSV, PLUGIN_ID } from '../../../common/constants';
 import { CsvResultFromSearch, createGenerateCsv } from './lib';
 
 interface FakeRequest {
@@ -24,7 +24,7 @@ function executeJobFn(server: KbnServer): ExecuteJobFn {
   const crypto = cryptoFactory(server);
   const config = server.config();
   const serverBasePath = config.get('server.basePath');
-  const logger = LevelLogger.createForServer(server, ['reporting', 'savedobject-csv']);
+  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'savedobject-csv']);
   const generateCsv = createGenerateCsv(logger);
 
   return async function executeJob(

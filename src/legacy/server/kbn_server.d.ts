@@ -19,6 +19,7 @@
 
 import { ResponseObject, Server } from 'hapi';
 
+import { SavedObjectsClientProviderOptions } from 'src/core/server';
 import {
   ConfigService,
   ElasticsearchServiceSetup,
@@ -74,7 +75,7 @@ declare module 'hapi' {
   }
 
   interface Request {
-    getSavedObjectsClient(): SavedObjectsClientContract;
+    getSavedObjectsClient(options?: SavedObjectsClientProviderOptions): SavedObjectsClientContract;
     getBasePath(): string;
     getUiSettingsService(): any;
     getCapabilities(): Promise<Capabilities>;

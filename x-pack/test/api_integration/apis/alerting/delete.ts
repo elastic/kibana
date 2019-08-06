@@ -6,10 +6,9 @@
 
 import expect from '@kbn/expect';
 import { getTestAlertData } from './utils';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function createDeleteTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function createDeleteTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
@@ -17,6 +16,8 @@ export default function createDeleteTests({ getService }: KibanaFunctionalTestDe
   describe('delete', () => {
     let alertId: string;
     let scheduledTaskId: string;
+    let space1AlertId: string;
+    let space1ScheduledTaskId: string;
 
     before(async () => {
       await esArchiver.load('actions/basic');
@@ -28,6 +29,15 @@ export default function createDeleteTests({ getService }: KibanaFunctionalTestDe
         .then((resp: any) => {
           alertId = resp.body.id;
           scheduledTaskId = resp.body.scheduledTaskId;
+        });
+      await supertest
+        .post('/s/space_1/api/alert')
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(200)
+        .then((resp: any) => {
+          space1AlertId = resp.body.id;
+          space1ScheduledTaskId = resp.body.scheduledTaskId;
         });
     });
     after(() => esArchiver.unload('actions/basic'));
@@ -47,6 +57,28 @@ export default function createDeleteTests({ getService }: KibanaFunctionalTestDe
       let hasThrownError = false;
       try {
         await getScheduledTask(scheduledTaskId);
+      } catch (e) {
+        hasThrownError = true;
+        expect(e.status).to.eql(404);
+      }
+      expect(hasThrownError).to.eql(true);
+    });
+
+    it('should return 404 when deleting an alert from another space', async () => {
+      await supertest
+        .delete(`/api/alert/${space1AlertId}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(404);
+    });
+
+    it('should return 204 when deleting an alert in a space', async () => {
+      await supertest
+        .delete(`/s/space_1/api/alert/${space1AlertId}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(204, '');
+      let hasThrownError = false;
+      try {
+        await getScheduledTask(space1ScheduledTaskId);
       } catch (e) {
         hasThrownError = true;
         expect(e.status).to.eql(404);

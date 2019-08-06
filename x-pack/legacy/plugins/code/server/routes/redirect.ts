@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import hapi from 'hapi';
+import { RequestFacade, ServerFacade } from '../../';
 import { Logger } from '../log';
 
-export function redirectRoute(server: hapi.Server, redirectUrl: string, log: Logger) {
+export function redirectRoute(server: ServerFacade, redirectUrl: string, log: Logger) {
   const proxyHandler = {
     proxy: {
       passThrough: true,
-      async mapUri(request: hapi.Request) {
+      async mapUri(request: RequestFacade) {
         let uri;
         uri = `${redirectUrl}${request.path}`;
         if (request.url.search) {

@@ -94,6 +94,16 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
       const dateFieldSelectOptionsValues = find('rollupJobCreateDateFieldSelect').find('option').map(option => option.text());
       expect(dateFieldSelectOptionsValues).toEqual(dateFields);
     });
+
+    it('should sort the options in ascending order', async () => {
+      const dateFields = ['field3', 'field2', 'field1'];
+      httpRequestsMockHelpers.setIndexPatternValidityResponse({ dateFields });
+
+      await goToStep(2);
+
+      const dateFieldSelectOptionsValues = find('rollupJobCreateDateFieldSelect').find('option').map(option => option.text());
+      expect(dateFieldSelectOptionsValues).toEqual(dateFields.sort());
+    });
   });
 
   describe('time zone', () => {
