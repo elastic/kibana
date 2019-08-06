@@ -1,7 +1,6 @@
 /* tslint:disable */
 import { InfraContext } from '../lib/infra_types';
 import { GraphQLResolveInfo } from 'graphql';
-import { FieldType } from 'ui/index_patterns';
 
 export type Resolver<Result, Parent = any, Context = any, Args = never> = (
   parent: Parent,
@@ -57,8 +56,6 @@ export interface InfraSource {
   configuration: InfraSourceConfiguration;
   /** The status of the source */
   status: InfraSourceStatus;
-  /** A hierarchy of metadata entries by node */
-  metadataByNode: InfraNodeMetadata;
   /** A consecutive span of log entries surrounding a point in time */
   logEntriesAround: InfraLogEntryInterval;
   /** A consecutive span of log entries within an interval */
@@ -151,21 +148,15 @@ export interface InfraSourceStatus {
   indexFields: InfraIndexField[];
 }
 /** A descriptor of a field in an index */
-export interface InfraIndexField extends FieldType {}
-
-/** One metadata entry for a node. */
-export interface InfraNodeMetadata {
-  id: string;
-
+export interface InfraIndexField {
+  /** The name of the field */
   name: string;
-
-  features: InfraNodeFeature[];
-}
-
-export interface InfraNodeFeature {
-  name: string;
-
-  source: string;
+  /** The type of the field's values as recognized by Kibana */
+  type: string;
+  /** Whether the field's values can be efficiently searched for */
+  searchable: boolean;
+  /** Whether the field's values can be aggregated */
+  aggregatable: boolean;
 }
 /** A consecutive sequence of log entries */
 export interface InfraLogEntryInterval {
@@ -445,11 +436,6 @@ export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
 }
-export interface MetadataByNodeInfraSourceArgs {
-  nodeId: string;
-
-  nodeType: InfraNodeType;
-}
 export interface LogEntriesAroundInfraSourceArgs {
   /** The sort key that corresponds to the point in time */
   key: InfraTimeKeyInput;
@@ -656,8 +642,6 @@ export namespace InfraSourceResolvers {
     configuration?: ConfigurationResolver<InfraSourceConfiguration, TypeParent, Context>;
     /** The status of the source */
     status?: StatusResolver<InfraSourceStatus, TypeParent, Context>;
-    /** A hierarchy of metadata entries by node */
-    metadataByNode?: MetadataByNodeResolver<InfraNodeMetadata, TypeParent, Context>;
     /** A consecutive span of log entries surrounding a point in time */
     logEntriesAround?: LogEntriesAroundResolver<InfraLogEntryInterval, TypeParent, Context>;
     /** A consecutive span of log entries within an interval */
@@ -704,17 +688,6 @@ export namespace InfraSourceResolvers {
     Parent = InfraSource,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
-  export type MetadataByNodeResolver<
-    R = InfraNodeMetadata,
-    Parent = InfraSource,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context, MetadataByNodeArgs>;
-  export interface MetadataByNodeArgs {
-    nodeId: string;
-
-    nodeType: InfraNodeType;
-  }
-
   export type LogEntriesAroundResolver<
     R = InfraLogEntryInterval,
     Parent = InfraSource,
@@ -1096,51 +1069,6 @@ export namespace InfraIndexFieldResolvers {
   export type AggregatableResolver<
     R = boolean,
     Parent = InfraIndexField,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-/** One metadata entry for a node. */
-export namespace InfraNodeMetadataResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeMetadata> {
-    id?: IdResolver<string, TypeParent, Context>;
-
-    name?: NameResolver<string, TypeParent, Context>;
-
-    features?: FeaturesResolver<InfraNodeFeature[], TypeParent, Context>;
-  }
-
-  export type IdResolver<R = string, Parent = InfraNodeMetadata, Context = InfraContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type NameResolver<
-    R = string,
-    Parent = InfraNodeMetadata,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type FeaturesResolver<
-    R = InfraNodeFeature[],
-    Parent = InfraNodeMetadata,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace InfraNodeFeatureResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeFeature> {
-    name?: NameResolver<string, TypeParent, Context>;
-
-    source?: SourceResolver<string, TypeParent, Context>;
-  }
-
-  export type NameResolver<
-    R = string,
-    Parent = InfraNodeFeature,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type SourceResolver<
-    R = string,
-    Parent = InfraNodeFeature,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }
