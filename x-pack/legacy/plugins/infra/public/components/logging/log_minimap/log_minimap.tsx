@@ -168,16 +168,15 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
       intervalSize,
     } = this.props;
     const { timeCursorY, drag, target } = this.state;
-    const [minTime, maxTime] = this.getYScale().domain();
-    const minimapTransform = !drag || !drag.currentY ? null : drag.currentY - drag.startY;
     const overscanHeight = Math.round(window.screen.availHeight * 2.5) || height * 3;
-    const [overscanMinTime, overscanMaxTime] = calculateYScale(
+    const [minTime, maxTime] = calculateYScale(
       target,
       overscanHeight,
-      intervalSize
+      intervalSize * (overscanHeight / height)
     ).domain();
     const tickCount = height ? Math.round((overscanHeight / height) * 12) : 12;
     const overscanTranslate = height ? -(overscanHeight - height) / 2 : 0;
+    const dragTransform = !drag || !drag.currentY ? 0 : drag.currentY - drag.startY;
     return (
       <MinimapWrapper
         className={className}
@@ -187,19 +186,25 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
         width={width}
         onMouseDown={this.handleMouseDown}
         onMouseMove={this.updateTimeCursor}
+        showOverscanBoundaries={Boolean(height)}
       >
-        <g transform={minimapTransform ? `translate(0, ${minimapTransform})` : undefined}>
-          <MinimapBackground x={width / 2} y="0" width={width / 2} height={height} />
+        <g transform={`translate(0, ${dragTransform + overscanTranslate})`}>
           <DensityChart
             buckets={summaryBuckets}
             start={minTime}
             end={maxTime}
             width={width}
-            height={height}
+            height={overscanHeight}
           />
 
-          <MinimapBorder x1={width / 2} y1={0} x2={width / 2} y2={height} />
-          <TimeRuler start={minTime} end={maxTime} width={width} height={height} tickCount={12} />
+          <MinimapBorder x1={width / 2} y1={0} x2={width / 2} y2={overscanHeight} />
+          <TimeRuler
+            start={minTime}
+            end={maxTime}
+            width={width}
+            height={overscanHeight}
+            tickCount={tickCount}
+          />
         </g>
         {highlightedInterval ? (
           <HighlightedInterval
@@ -225,10 +230,6 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
   }
 }
 
-const MinimapBackground = euiStyled.rect`
-  fill: ${props => props.theme.eui.euiColorLightestShade};
-`;
-
 const MinimapBorder = euiStyled.line`
   stroke: ${props => props.theme.eui.euiColorMediumShade};
   stroke-width: 1px;
@@ -243,6 +244,17 @@ const TimeCursor = euiStyled.line`
 `;
 
 const MinimapWrapper = euiStyled.svg`
+  cursor: move;
+  background: ${props =>
+    props.showOverscanBoundaries
+      ? `repeating-linear-gradient(
+    45deg,
+    ${props.theme.eui.euiColorLightShade},
+    ${props.theme.eui.euiColorLightShade} 5px,
+    transparent 5px,
+    transparent 10px
+  )`
+      : 'transparent'};
   & ${TimeCursor} {
     visibility: hidden;
   }
