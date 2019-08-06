@@ -4,5 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const matchContainerName = (containerName: string, symbolName: string) =>
-  new RegExp(`^${containerName}([<(].*[>)])?$`).test(symbolName);
+import { _stopSharedServer } from './servers';
+
+// eslint-disable-next-line import/no-default-export
+export default async function globalTeardown() {
+  if (process.env.CONTRACT_ONLINE === 'true') {
+    await _stopSharedServer();
+  }
+}

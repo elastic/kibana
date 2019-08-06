@@ -42,7 +42,7 @@ export class FeedbackMessage extends Component {
             {this.state.shouldShowTruncate &&
               <p>
                 <FormattedMessage
-                  id="tagCloud.feedbackMessage.truncatedTagsDescription"
+                  id="visTypeTagCloud.feedbackMessage.truncatedTagsDescription"
                   defaultMessage="The number of tags has been truncated to avoid long draw times."
                 />
               </p>
@@ -50,7 +50,7 @@ export class FeedbackMessage extends Component {
             {this.state.shouldShowIncomplete &&
               <p>
                 <FormattedMessage
-                  id="tagCloud.feedbackMessage.tooSmallContainerDescription"
+                  id="visTypeTagCloud.feedbackMessage.tooSmallContainerDescription"
                   defaultMessage="The container is too small to display the entire cloud. Tags might be cropped or omitted."
                 />
               </p>
