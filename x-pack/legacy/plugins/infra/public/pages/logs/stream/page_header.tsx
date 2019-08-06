@@ -7,29 +7,11 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-import { UICapabilities } from 'ui/capabilities';
-import { injectUICapabilities } from 'ui/capabilities/react';
 import { DocumentTitle } from '../../../components/document_title';
-import { Header } from '../../../components/header';
 
-interface StreamPageHeaderProps {
-  uiCapabilities: UICapabilities;
-}
-
-export const StreamPageHeader = injectUICapabilities((props: StreamPageHeaderProps) => {
-  const { uiCapabilities } = props;
+export const StreamPageHeader = () => {
   return (
     <>
-      <Header
-        breadcrumbs={[
-          {
-            text: i18n.translate('xpack.infra.logs.streamPage.logsBreadcrumbsText', {
-              defaultMessage: 'Logs',
-            }),
-          },
-        ]}
-        readOnlyBadge={!uiCapabilities.logs.save}
-      />
       <DocumentTitle
         title={(previousTitle: string) =>
           i18n.translate('xpack.infra.logs.streamPage.documentTitle', {
@@ -42,4 +24,4 @@ export const StreamPageHeader = injectUICapabilities((props: StreamPageHeaderPro
       />
     </>
   );
-});
+};
