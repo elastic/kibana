@@ -215,14 +215,6 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return links.length;
     }
 
-    /*
-     * Layer TOC (table to contents) utility functions
-     */
-    async clickAddLayer() {
-      log.debug('Click add layer');
-      await testSubjects.click('addLayerButton');
-    }
-
     async openSetViewPopover() {
       const isOpen = await testSubjects.exists('mapSetViewForm');
       if (!isOpen) {
@@ -362,11 +354,23 @@ export function GisPageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async clickAddLayer() {
+      log.debug('Click add layer');
+      await retry.try(async () => {
+        await testSubjects.click('addLayerButton');
+        const isOpen = await this.isLayerAddPanelOpen();
+        if (!isOpen) {
+          throw new Error('Add layer panel still not open, trying again.');
+        }
+      });
+    }
+
     async cancelLayerAdd(layerName) {
       log.debug(`Cancel layer add`);
       const cancelExists = await testSubjects.exists('layerAddCancelButton');
       if (cancelExists) {
         await testSubjects.click('layerAddCancelButton');
+        await PageObjects.maps.waitForLayerAddPanelClosed();
         if (layerName) {
           await this.waitForLayerDeleted(layerName);
         }
