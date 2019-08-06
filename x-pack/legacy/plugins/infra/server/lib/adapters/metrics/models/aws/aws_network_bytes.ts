@@ -37,7 +37,7 @@ export const awsNetworkBytes: InfraMetricModelCreator = (
           id: 'by-second-max-net-out',
           type: InfraMetricModelMetricType.calculation,
           variables: [{ id: 'var-max', name: 'max', field: 'max-net-out' }],
-          script: 'params.max / 300',
+          script: 'params.max / 300', // TODO: https://github.com/elastic/kibana/issues/42687
         },
       ],
       split_mode: 'everything',
@@ -54,7 +54,7 @@ export const awsNetworkBytes: InfraMetricModelCreator = (
           id: 'inverted-by-second-max-net-in',
           type: InfraMetricModelMetricType.calculation,
           variables: [{ id: 'var-max', name: 'max', field: 'max-net-in' }],
-          script: 'params.max / -300',
+          script: 'params.max / -300', // TODO: https://github.com/elastic/kibana/issues/42687
         },
       ],
       split_mode: 'everything',
