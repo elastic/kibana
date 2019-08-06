@@ -11,13 +11,13 @@ import supertestAsPromised from 'supertest-as-promised';
 
 export default function ({ getService }) {
   const es = getService('es');
+  const log = getService('log');
   const retry = getService('retry');
   const config = getService('config');
   const testHistoryIndex = '.task_manager_test_result';
   const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
 
-  // FLAKY: https://github.com/elastic/kibana/issues/42098
-  describe.skip('scheduling and running tasks', () => {
+  describe('scheduling and running tasks', () => {
     beforeEach(() => supertest.delete('/api/sample_tasks')
       .set('kbn-xsrf', 'xxx')
       .expect(200));
@@ -53,18 +53,22 @@ export default function ({ getService }) {
     it('should support middleware', async () => {
       const historyItem = _.random(1, 100);
 
-      await scheduleTask({
+      const scheduledTask = await scheduleTask({
         taskType: 'sampleTask',
         interval: '30m',
         params: { historyItem },
       });
+      log.debug(`Task created: ${scheduledTask.id}`);
 
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
 
         const [task] = (await currentTasks()).docs;
+        log.debug(`Task found: ${task.id}`);
+        log.debug(`Task status: ${task.status}`);
+        log.debug(`Task state: ${JSON.stringify(task.state, null, 2)}`);
+        log.debug(`Task params: ${JSON.stringify(task.params, null, 2)}`);
 
-        expect(task.attempts).to.eql(0);
         expect(task.state.count).to.eql(1);
 
         expect(task.params).to.eql({
