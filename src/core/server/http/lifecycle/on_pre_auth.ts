@@ -50,16 +50,11 @@ const preAuthResult = {
   rewriteUrl(url: string): OnPreAuthResult {
     return { type: ResultType.rewriteUrl, url };
   },
-  isValid(candidate: any): candidate is OnPreAuthResult {
-    return (
-      candidate && (candidate.type === ResultType.next || candidate.type === ResultType.rewriteUrl)
-    );
-  },
   isNext(result: OnPreAuthResult): result is Next {
-    return result.type === ResultType.next;
+    return result && result.type === ResultType.next;
   },
   isRewriteUrl(result: OnPreAuthResult): result is RewriteUrl {
-    return result.type === ResultType.rewriteUrl;
+    return result && result.type === ResultType.rewriteUrl;
   },
 };
 
@@ -105,18 +100,16 @@ export function adoptToHapiOnPreAuthFormat(fn: OnPreAuthHandler, log: Logger) {
         return hapiResponseAdapter.handle(result);
       }
 
-      if (preAuthResult.isValid(result)) {
-        if (preAuthResult.isNext(result)) {
-          return responseToolkit.continue;
-        }
+      if (preAuthResult.isNext(result)) {
+        return responseToolkit.continue;
+      }
 
-        if (preAuthResult.isRewriteUrl(result)) {
-          const { url } = result;
-          request.setUrl(url);
-          // We should update raw request as well since it can be proxied to the old platform
-          request.raw.req.url = url;
-          return responseToolkit.continue;
-        }
+      if (preAuthResult.isRewriteUrl(result)) {
+        const { url } = result;
+        request.setUrl(url);
+        // We should update raw request as well since it can be proxied to the old platform
+        request.raw.req.url = url;
+        return responseToolkit.continue;
       }
       throw new Error(
         `Unexpected result from OnPreAuth. Expected OnPreAuthResult or KibanaResponse, but given: ${result}.`

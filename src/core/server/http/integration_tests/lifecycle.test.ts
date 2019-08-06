@@ -213,6 +213,7 @@ describe('OnPreAuth', () => {
       ]
     `);
   });
+
   it(`doesn't share request object between interceptors`, async () => {
     const { registerRouter, registerOnPreAuth, server: innerServer } = await server.setup(config);
     registerOnPreAuth((req, res, t) => {
@@ -365,6 +366,7 @@ describe('OnPostAuth', () => {
       ]
     `);
   });
+
   it(`doesn't share request object between interceptors`, async () => {
     const { registerRouter, registerOnPostAuth, server: innerServer } = await server.setup(config);
     registerOnPostAuth((req, res, t) => {

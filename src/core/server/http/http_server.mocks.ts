@@ -23,7 +23,12 @@ import querystring from 'querystring';
 
 import { schema } from '@kbn/config-schema';
 
-import { KibanaRequest, LifecycleResponseFactory, RouteMethod, ResponseFactory } from './router';
+import {
+  KibanaRequest,
+  LifecycleResponseFactory,
+  RouteMethod,
+  KibanaResponseFactory,
+} from './router';
 
 interface RequestFixtureOptions {
   headers?: Record<string, string>;
@@ -97,7 +102,7 @@ function createRawRequestMock(customization: DeepPartial<Request> = {}) {
   ) as Request;
 }
 
-const createResponseFactoryMock = (): jest.Mocked<ResponseFactory> => ({
+const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
   ok: jest.fn(),
   accepted: jest.fn(),
   noContent: jest.fn(),

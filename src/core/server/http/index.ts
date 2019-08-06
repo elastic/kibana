@@ -19,15 +19,26 @@
 
 export { config, HttpConfig, HttpConfigType } from './http_config';
 export { HttpService, HttpServiceSetup, HttpServiceStart } from './http_service';
+export { HttpServerSetup } from './http_server';
 export { GetAuthHeaders } from './auth_headers_storage';
+export { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_storage';
 export {
+  CustomHttpResponseOptions,
   isRealRequest,
+  HttpResponseOptions,
+  HttpResponsePayload,
   KibanaRequest,
   KibanaRequestRoute,
+  KnownHeaders,
+  LegacyRequest,
   LifecycleResponseFactory,
+  RedirectResponseOptions,
+  RequestHandler,
   ResponseError,
   ResponseErrorMeta,
-  ResponseFactory,
+  kibanaResponseFactory,
+  KibanaResponseFactory,
+  RouteConfig,
   Router,
   RouteMethod,
   RouteConfigOptions,
@@ -42,3 +53,4 @@ export {
 } from './lifecycle/auth';
 export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
 export { SessionStorageFactory, SessionStorage } from './session_storage';
+export { SessionStorageCookieOptions } from './cookie_session_storage';

@@ -56,29 +56,42 @@ export {
   ElasticsearchErrorHelpers,
   APICaller,
   FakeRequest,
-  LegacyRequest,
 } from './elasticsearch';
 export {
   AuthenticationHandler,
   AuthHeaders,
   AuthResultParams,
+  AuthStatus,
   AuthToolkit,
+  CustomHttpResponseOptions,
   GetAuthHeaders,
+  GetAuthState,
+  HttpResponseOptions,
+  HttpResponsePayload,
+  HttpServerSetup,
+  IsAuthenticated,
   KibanaRequest,
   KibanaRequestRoute,
   LifecycleResponseFactory,
+  KnownHeaders,
+  LegacyRequest,
   OnPreAuthHandler,
   OnPreAuthToolkit,
   OnPostAuthHandler,
   OnPostAuthToolkit,
+  RedirectResponseOptions,
+  RequestHandler,
   ResponseError,
   ResponseErrorMeta,
-  ResponseFactory,
+  kibanaResponseFactory,
+  KibanaResponseFactory,
+  RouteConfig,
   Router,
   RouteMethod,
   RouteConfigOptions,
-  SessionStorageFactory,
   SessionStorage,
+  SessionStorageCookieOptions,
+  SessionStorageFactory,
 } from './http';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
@@ -101,6 +114,7 @@ export {
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
+  SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsErrorHelpers,
@@ -113,6 +127,16 @@ export {
   SavedObjectsService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsExportOptions,
+  SavedObjectsImportError,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportOptions,
+  SavedObjectsImportResponse,
+  SavedObjectsImportRetry,
+  SavedObjectsResolveImportErrorsOptions,
 } from './saved_objects';
 
 export { RecursiveReadonly } from '../utils';
@@ -137,7 +161,6 @@ export interface CoreSetup {
     registerAuth: HttpServiceSetup['registerAuth'];
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
     basePath: HttpServiceSetup['basePath'];
-    createNewServer: HttpServiceSetup['createNewServer'];
     isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
   };
 }

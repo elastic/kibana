@@ -899,6 +899,7 @@ exports[`Field for image setting should render as read only if saving is disable
           compressed={false}
           data-test-subj="advancedSetting-editField-image:test:setting"
           disabled={true}
+          display="large"
           initialPromptText="Select or drag and drop a file"
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -1069,6 +1070,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
           compressed={false}
           data-test-subj="advancedSetting-editField-image:test:setting"
           disabled={false}
+          display="large"
           initialPromptText="Select or drag and drop a file"
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -1133,6 +1135,7 @@ exports[`Field for image setting should render default value if there is no user
           compressed={false}
           data-test-subj="advancedSetting-editField-image:test:setting"
           disabled={false}
+          display="large"
           initialPromptText="Select or drag and drop a file"
           onChange={[Function]}
           onKeyDown={[Function]}

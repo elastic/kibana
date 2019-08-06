@@ -95,14 +95,14 @@ const toolkit: AuthToolkit = {
 export type AuthenticationHandler = (
   request: KibanaRequest,
   response: LifecycleResponseFactory,
-  t: AuthToolkit
+  toolkit: AuthToolkit
 ) => AuthResult | KibanaResponse | Promise<AuthResult | KibanaResponse>;
 
 /** @public */
 export function adoptToHapiAuthFormat(
   fn: AuthenticationHandler,
   log: Logger,
-  onSuccess: (req: Request, data: AuthResultParams) => void = () => void 0
+  onSuccess: (req: Request, data: AuthResultParams) => void = () => undefined
 ) {
   return async function interceptAuth(
     request: Request,
