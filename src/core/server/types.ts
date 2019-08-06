@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export { ContextService, ContextSetup } from './context_service';
-export { IContextContainer, IContextProvider, IContextHandler } from '../../utils/context';
+/** This module is intended for consumption by public to avoid import issues with server-side code */
+
+export { PluginOpaqueId } from './plugins/types';

@@ -62,7 +62,7 @@ import {
   ToastsApi,
 } from './notifications';
 import { OverlayRef, OverlayStart } from './overlays';
-import { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
+import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
@@ -182,6 +182,7 @@ export {
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
+  PluginOpaqueId,
   Toast,
   ToastInput,
   ToastsApi,

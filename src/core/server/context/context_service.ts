@@ -19,9 +19,9 @@
 
 import { PluginOpaqueId } from '../../server';
 import { IContextContainer, ContextContainer } from '../../utils/context';
-import { CoreContext } from '../core_system';
+import { CoreContext } from '../core_context';
 
-interface StartDeps {
+interface SetupDeps {
   pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;
 }
 
@@ -29,17 +29,18 @@ interface StartDeps {
 export class ContextService {
   constructor(private readonly core: CoreContext) {}
 
-  public setup({ pluginDependencies }: StartDeps): ContextSetup {
+  public setup({ pluginDependencies }: SetupDeps): ContextSetup {
     return {
       createContextContainer: <
         TContext extends {},
         THandlerReturn,
         THandlerParameters extends any[] = []
-      >() =>
-        new ContextContainer<TContext, THandlerReturn, THandlerParameters>(
+      >() => {
+        return new ContextContainer<TContext, THandlerReturn, THandlerParameters>(
           pluginDependencies,
           this.core.coreId
-        ),
+        );
+      },
     };
   }
 }
