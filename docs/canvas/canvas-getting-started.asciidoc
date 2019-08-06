@@ -38,8 +38,6 @@ image::images/canvas-image-element.png[]
 
 You'll notice that the image is tagged as an asset, which allows you to reuse the image from *Manage assets*.
 
-TIP: Want to delete an element? Select the element, then press the delete button on your keyboard.
-
 [float]
 === Customize your data with metrics
 
