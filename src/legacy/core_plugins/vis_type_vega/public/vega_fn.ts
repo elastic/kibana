@@ -31,7 +31,7 @@ interface Arguments {
   spec: string;
 }
 
-type VisParams = Required<Arguments>;
+export type VisParams = Required<Arguments>;
 
 interface RenderValue {
   visData: Context;
@@ -63,11 +63,10 @@ export const createVegaFn = (
     const vegaRequestHandler = createVegaRequestHandler(dependencies);
 
     const response = await vegaRequestHandler({
-      timeRange: get(context, 'timeRange', null),
-      query: get(context, 'query', null),
-      filters: get(context, 'filters', null),
+      timeRange: get(context, 'timeRange'),
+      query: get(context, 'query'),
+      filters: get(context, 'filters'),
       visParams: { spec: args.spec },
-      forceFetch: true,
     });
 
     return {
