@@ -31,9 +31,9 @@ import { visFactory } from '../../visualizations/public';
 export const createMetricVisTypeDefinition = () => {
   return visFactory.createReactVisualization({
     name: 'metric',
-    title: i18n.translate('metricVis.metricTitle', { defaultMessage: 'Metric' }),
+    title: i18n.translate('visTypeMetric.metricTitle', { defaultMessage: 'Metric' }),
     icon: 'visMetric',
-    description: i18n.translate('metricVis.metricDescription', {
+    description: i18n.translate('visTypeMetric.metricDescription', {
       defaultMessage: 'Display a calculation as a single number',
     }),
     visConfig: {
@@ -67,19 +67,19 @@ export const createMetricVisTypeDefinition = () => {
         metricColorMode: [
           {
             id: 'None',
-            label: i18n.translate('metricVis.colorModes.noneOptionLabel', {
+            label: i18n.translate('visTypeMetric.colorModes.noneOptionLabel', {
               defaultMessage: 'None',
             }),
           },
           {
             id: 'Labels',
-            label: i18n.translate('metricVis.colorModes.labelsOptionLabel', {
+            label: i18n.translate('visTypeMetric.colorModes.labelsOptionLabel', {
               defaultMessage: 'Labels',
             }),
           },
           {
             id: 'Background',
-            label: i18n.translate('metricVis.colorModes.backgroundOptionLabel', {
+            label: i18n.translate('visTypeMetric.colorModes.backgroundOptionLabel', {
               defaultMessage: 'Background',
             }),
           },
@@ -94,7 +94,7 @@ export const createMetricVisTypeDefinition = () => {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n.translate('metricVis.schemas.metricTitle', { defaultMessage: 'Metric' }),
+          title: i18n.translate('visTypeMetric.schemas.metricTitle', { defaultMessage: 'Metric' }),
           min: 1,
           aggFilter: [
             '!std_dev',
@@ -120,7 +120,7 @@ export const createMetricVisTypeDefinition = () => {
         {
           group: 'buckets',
           name: 'group',
-          title: i18n.translate('metricVis.schemas.splitGroupTitle', {
+          title: i18n.translate('visTypeMetric.schemas.splitGroupTitle', {
             defaultMessage: 'Split group',
           }),
           min: 0,
