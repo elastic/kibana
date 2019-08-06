@@ -18,9 +18,8 @@
  */
 
 import { flatten } from 'lodash';
-import { pick } from '../../utils';
-import { CoreId } from '../core_system';
-import { PluginOpaqueId } from '../plugins';
+import { pick } from '.';
+import { CoreId, PluginOpaqueId } from '../server';
 
 /**
  * A function that returns a context value for a specific key of given context type.

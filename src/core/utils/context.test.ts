@@ -18,7 +18,7 @@
  */
 
 import { ContextContainer } from './context';
-import { PluginOpaqueId } from '../plugins';
+import { PluginOpaqueId } from '../server';
 
 const pluginA = Symbol('pluginA');
 const pluginB = Symbol('pluginB');
