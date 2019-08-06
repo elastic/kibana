@@ -517,6 +517,77 @@ describe('IndexPatternDimensionPanel', () => {
       ).not.toContain('incompatible');
     });
 
+    it('should indicate document compatibility with selected field operation', () => {
+      const initialState: IndexPatternPrivateState = {
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col2: {
+                dataType: 'number',
+                isBucketed: false,
+                label: '',
+                operationType: 'avg',
+                sourceField: 'bytes',
+              },
+            },
+          },
+        },
+      };
+      wrapper = mount(
+        <IndexPatternDimensionPanel {...defaultProps} state={initialState} columnId="col2" />
+      );
+
+      openPopover();
+
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
+
+      const options = wrapper.find(EuiComboBox).prop('options');
+
+      expect(options![0].className).not.toContain('incompatible');
+      options![1].options!.map(({ className }) => expect(className).toContain('incompatible'));
+    });
+
+    it('should indicate document and field compatibility with selected document operation', () => {
+      const initialState: IndexPatternPrivateState = {
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col2: {
+                dataType: 'number',
+                isBucketed: false,
+                label: '',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      };
+      wrapper = mount(
+        <IndexPatternDimensionPanel {...defaultProps} state={initialState} columnId="col2" />
+      );
+
+      openPopover();
+
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+
+      const options = wrapper.find(EuiComboBox).prop('options');
+
+      expect(options![0].className).toContain('incompatible');
+
+      expect(
+        options![1].options!.filter(({ label }) => label === 'timestamp')[0].className
+      ).toContain('incompatible');
+      expect(
+        options![1].options!.filter(({ label }) => label === 'source')[0].className
+      ).not.toContain('incompatible');
+    });
+
     it('should set datasource state if compatible field is selected for operation', () => {
       wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} />);
 
@@ -622,6 +693,31 @@ describe('IndexPatternDimensionPanel', () => {
     });
   });
 
+  it('should select operation directly if only document is possible', () => {
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
+
+    openPopover();
+
+    wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col2: expect.objectContaining({
+              operationType: 'count',
+              // Other parts of this don't matter for this test
+            }),
+          },
+          columnOrder: ['col1', 'col2'],
+        },
+      },
+    });
+  });
+
   it('should indicate compatible fields when selecting the operation first', () => {
     wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
 
@@ -642,6 +738,37 @@ describe('IndexPatternDimensionPanel', () => {
     expect(
       options![1].options!.filter(({ label }) => label === 'memory')[0].className
     ).not.toContain('incompatible');
+  });
+
+  it('should indicate document compatibility when document operation is selected', () => {
+    const initialState: IndexPatternPrivateState = {
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col2: {
+              dataType: 'number',
+              isBucketed: false,
+              label: '',
+              operationType: 'count',
+            },
+          },
+        },
+      },
+    };
+    wrapper = mount(
+      <IndexPatternDimensionPanel {...defaultProps} state={initialState} columnId={'col2'} />
+    );
+
+    openPopover();
+
+    const options = wrapper.find(EuiComboBox).prop('options');
+
+    expect(options![0].className).not.toContain('incompatible');
+
+    options![1].options!.map(({ className }) => expect(className).toContain('incompatible'));
   });
 
   it('should show all operations that are not filtered out', () => {
