@@ -28,12 +28,7 @@ export function IntegrationCard({
     optionalIcon = <EuiIcon type={iconType} size="l" />;
   } else if (iconUrl) {
     // skipping b/c images from registry are Not Good
-    // no consistency re: sizing / format
-    // most are placeholders of broken/missing image used in browsers
-    // also, EuiCard doesn't treat <img> the same as svg
-    // and matted (extra whitespace around sides) so they look very bad next to icons
-    // TODO: Open issue/discussion in registry repo re: above items
-    // and possibly supporting EUI icon types
+    // https://github.com/elastic/integrations-registry/issues/45
     // optionalIcon = (
     //   <img
     //     width="24"
