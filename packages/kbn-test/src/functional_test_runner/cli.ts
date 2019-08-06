@@ -21,75 +21,76 @@ import { resolve } from 'path';
 import { run } from '../../../../src/dev/run';
 import { FunctionalTestRunner } from './functional_test_runner';
 
-run(
-  async ({ flags, log }) => {
-    const resolveConfigPath = (v: string) => resolve(process.cwd(), v);
-    const toArray = (v: string | string[]) => ([] as string[]).concat(v || []);
+export function runFtrCli() {
+  run(
+    async ({ flags, log }) => {
+      const resolveConfigPath = (v: string) => resolve(process.cwd(), v);
+      const toArray = (v: string | string[]) => ([] as string[]).concat(v || []);
 
-    const functionalTestRunner = new FunctionalTestRunner(
-      log,
-      resolveConfigPath(flags.config as string),
-      {
-        mochaOpts: {
-          bail: flags.bail,
-          grep: flags.grep || undefined,
-          invert: flags.invert,
-        },
-        suiteTags: {
-          include: toArray(flags['include-tag'] as string | string[]),
-          exclude: toArray(flags['exclude-tag'] as string | string[]),
-        },
-        updateBaselines: flags.updateBaselines,
-        excludeTestFiles: flags.exclude || undefined,
-      }
-    );
+      const functionalTestRunner = new FunctionalTestRunner(
+        log,
+        resolveConfigPath(flags.config as string),
+        {
+          mochaOpts: {
+            bail: flags.bail,
+            grep: flags.grep || undefined,
+            invert: flags.invert,
+          },
+          suiteTags: {
+            include: toArray(flags['include-tag'] as string | string[]),
+            exclude: toArray(flags['exclude-tag'] as string | string[]),
+          },
+          updateBaselines: flags.updateBaselines,
+          excludeTestFiles: flags.exclude || undefined,
+        }
+      );
 
-    let teardownRun = false;
-    const teardown = async (err?: Error) => {
-      if (teardownRun) return;
+      let teardownRun = false;
+      const teardown = async (err?: Error) => {
+        if (teardownRun) return;
 
-      teardownRun = true;
-      if (err) {
-        log.indent(-log.indent());
-        log.error(err);
-        process.exitCode = 1;
-      }
+        teardownRun = true;
+        if (err) {
+          log.indent(-log.indent());
+          log.error(err);
+          process.exitCode = 1;
+        }
+
+        try {
+          await functionalTestRunner.close();
+        } finally {
+          process.exit();
+        }
+      };
+
+      process.on('unhandledRejection', err => teardown(err));
+      process.on('SIGTERM', () => teardown());
+      process.on('SIGINT', () => teardown());
 
       try {
-        await functionalTestRunner.close();
+        if (flags['test-stats']) {
+          process.stderr.write(
+            JSON.stringify(await functionalTestRunner.getTestStats(), null, 2) + '\n'
+          );
+        } else {
+          const failureCount = await functionalTestRunner.run();
+          process.exitCode = failureCount ? 1 : 0;
+        }
+      } catch (err) {
+        await teardown(err);
       } finally {
-        process.exit();
+        await teardown();
       }
-    };
-
-    process.on('unhandledRejection', err => teardown(err));
-    process.on('SIGTERM', () => teardown());
-    process.on('SIGINT', () => teardown());
-
-    try {
-      if (flags['test-stats']) {
-        process.stderr.write(
-          JSON.stringify(await functionalTestRunner.getTestStats(), null, 2) + '\n'
-        );
-      } else {
-        const failureCount = await functionalTestRunner.run();
-        process.exitCode = failureCount ? 1 : 0;
-      }
-    } catch (err) {
-      await teardown(err);
-    } finally {
-      await teardown();
-    }
-  },
-  {
-    flags: {
-      string: ['config', 'grep', 'exclude', 'include-tag', 'exclude-tag'],
-      boolean: ['bail', 'invert', 'test-stats', 'updateBaselines'],
-      default: {
-        config: 'test/functional/config.js',
-        debug: true,
-      },
-      help: `
+    },
+    {
+      flags: {
+        string: ['config', 'grep', 'exclude', 'include-tag', 'exclude-tag'],
+        boolean: ['bail', 'invert', 'test-stats', 'updateBaselines'],
+        default: {
+          config: 'test/functional/config.js',
+          debug: true,
+        },
+        help: `
         --config=path      path to a config file
         --bail             stop tests after the first failure
         --grep <pattern>   pattern used to select which tests to run
@@ -100,6 +101,7 @@ run(
         --test-stats       print the number of tests (included and excluded) to STDERR
         --updateBaselines  replace baseline screenshots with whatever is generated from the test
       `,
-    },
-  }
-);
+      },
+    }
+  );
+}
