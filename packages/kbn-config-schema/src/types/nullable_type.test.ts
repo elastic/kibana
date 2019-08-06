@@ -20,43 +20,44 @@
 import { schema } from '..';
 
 test('returns value if specified', () => {
-  const type = schema.maybe(schema.string());
+  const type = schema.nullable(schema.string());
   expect(type.validate('test')).toEqual('test');
 });
 
-test('returns undefined if undefined', () => {
-  const type = schema.maybe(schema.string());
-  expect(type.validate(undefined)).toEqual(undefined);
+test('returns null if null', () => {
+  const type = schema.nullable(schema.string());
+  expect(type.validate(null)).toEqual(null);
 });
 
-test('returns undefined even if contained type has a default value', () => {
-  const type = schema.maybe(
+test('returns null if undefined', () => {
+  const type = schema.nullable(schema.string());
+  expect(type.validate(undefined)).toEqual(null);
+});
+
+test('returns null even if contained type has a default value', () => {
+  const type = schema.nullable(
     schema.string({
       defaultValue: 'abc',
     })
   );
 
-  expect(type.validate(undefined)).toEqual(undefined);
+  expect(type.validate(undefined)).toEqual(null);
 });
 
 test('validates contained type', () => {
-  const type = schema.maybe(schema.string({ maxLength: 1 }));
+  const type = schema.nullable(schema.string({ maxLength: 1 }));
 
   expect(() => type.validate('foo')).toThrowErrorMatchingSnapshot();
 });
 
 test('validates basic type', () => {
-  const type = schema.maybe(schema.string());
+  const type = schema.nullable(schema.string());
 
   expect(() => type.validate(666)).toThrowErrorMatchingSnapshot();
 });
 
-test('fails if null', () => {
-  const type = schema.maybe(schema.string());
-  expect(() => type.validate(null)).toThrowErrorMatchingSnapshot();
-});
-
 test('includes namespace in failure', () => {
-  const type = schema.maybe(schema.string());
-  expect(() => type.validate(null, {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
+  const type = schema.nullable(schema.string({ maxLength: 1 }));
+
+  expect(() => type.validate('foo', {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
 });
