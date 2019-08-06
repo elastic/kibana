@@ -23,7 +23,7 @@ exports[`FilterGroup renders correctly against snapshot 1`] = `
     target="_blank"
     type="button"
   >
-    Subscription Options
+    Subscription options
   </EuiButton>
 </styled.div>
 `;

@@ -226,36 +226,34 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
 
             {hasNextPage && (
               <FooterAction>
-                <EuiFlexGroup alignItems="flexStart">
-                  <EuiFlexItem>
-                    {!isEmpty(itemsPerRow) && (
-                      <EuiPopover
-                        id="customizablePagination"
-                        data-test-subj="loadingMoreSizeRowPopover"
-                        button={button}
-                        isOpen={this.state.isPopoverOpen}
-                        closePopover={this.closePopover}
-                        panelPaddingSize="none"
-                      >
-                        <EuiContextMenuPanel
-                          items={rowItems}
-                          data-test-subj="loadingMorePickSizeRow"
-                        />
-                      </EuiPopover>
-                    )}
-                  </EuiFlexItem>
-
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="loadingMoreButton"
-                      isLoading={loading}
-                      onClick={this.props.loadMore}
-                      size="s"
+                <EuiFlexItem>
+                  {!isEmpty(itemsPerRow) && (
+                    <EuiPopover
+                      id="customizablePagination"
+                      data-test-subj="loadingMoreSizeRowPopover"
+                      button={button}
+                      isOpen={this.state.isPopoverOpen}
+                      closePopover={this.closePopover}
+                      panelPaddingSize="none"
                     >
-                      {loading ? `${i18n.LOADING}` : i18n.LOAD_MORE}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                      <EuiContextMenuPanel
+                        items={rowItems}
+                        data-test-subj="loadingMorePickSizeRow"
+                      />
+                    </EuiPopover>
+                  )}
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="loadingMoreButton"
+                    isLoading={loading}
+                    onClick={this.props.loadMore}
+                    size="s"
+                  >
+                    {loading ? `${i18n.LOADING}` : i18n.LOAD_MORE}
+                  </EuiButton>
+                </EuiFlexItem>
               </FooterAction>
             )}
 
@@ -314,6 +312,9 @@ const BasicTable = styled(EuiBasicTable)`
   }
 `;
 
-const FooterAction = styled.div`
-  margin-top: ${props => props.theme.eui.euiSize};
+const FooterAction = styled(EuiFlexGroup).attrs({
+  alignItems: 'center',
+  responsive: false,
+})`
+  margin-top: ${props => props.theme.eui.euiSizeXS};
 `;

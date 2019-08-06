@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useContext, useEffect, Fragment } from 'react';
+import React, { FC, useEffect, Fragment } from 'react';
 
 import { EuiPage, EuiPageBody, EuiPageContentBody } from '@elastic/eui';
 import { Wizard } from './wizard';
@@ -21,11 +21,12 @@ import {
 import { ChartLoader } from '../../common/chart_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
-import { KibanaContext, isKibanaContext } from '../../../../data_frame/common/kibana_context';
+import { useKibanaContext } from '../../../../contexts/kibana';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 import { newJobDefaults } from '../../../new_job/utils/new_job_defaults';
-import { ExistingJobsAndGroups } from '../../../../services/job_service';
+import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
+import { expandCombinedJobConfig } from '../../common/job_creator/configs';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
@@ -37,10 +38,7 @@ export interface PageProps {
 }
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
-  const kibanaContext = useContext(KibanaContext);
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
+  const kibanaContext = useKibanaContext();
 
   const jobDefaults = newJobDefaults();
 
@@ -53,18 +51,24 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const { from, to } = getTimeFilterRange();
   jobCreator.setTimeRange(from, to);
 
-  jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
-
-  if (isPopulationJobCreator(jobCreator) === true) {
-    // for population jobs use the default mml (1GB)
-    jobCreator.modelMemoryLimit = jobDefaults.anomaly_detectors.model_memory_limit;
+  if (mlJobService.currentJob !== undefined) {
+    const clonedJob = mlJobService.cloneJob(mlJobService.currentJob);
+    const { job, datafeed } = expandCombinedJobConfig(clonedJob);
+    jobCreator.cloneFromExistingJob(job, datafeed);
   } else {
-    // for all other jobs, use 10MB
-    jobCreator.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
-  }
+    jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
 
-  if (isSingleMetricJobCreator(jobCreator) === true) {
-    jobCreator.modelPlot = true;
+    if (isPopulationJobCreator(jobCreator) === true) {
+      // for population jobs use the default mml (1GB)
+      jobCreator.modelMemoryLimit = jobDefaults.anomaly_detectors.model_memory_limit;
+    } else {
+      // for all other jobs, use 10MB
+      jobCreator.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+    }
+
+    if (isSingleMetricJobCreator(jobCreator) === true) {
+      jobCreator.modelPlot = true;
+    }
   }
 
   const chartInterval = new MlTimeBuckets();
@@ -85,6 +89,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   useEffect(() => {
     return () => {
       jobCreator.forceStopRefreshPolls();
+      mlJobService.currentJob = undefined;
     };
   });
 
