@@ -17,23 +17,28 @@
  * under the License.
  */
 
-import { spawnSync } from 'child_process';
-import { resolve } from 'path';
+export function createAssignmentProxy(object, interceptor) {
+  const originalValues = new Map();
 
-import expect from '@kbn/expect';
+  return new Proxy(object, {
+    set(target, property, value) {
+      if (!originalValues.has(property)) {
+        originalValues.set(property, object[property]);
+      }
 
-const SCRIPT = resolve(__dirname, '../../../../scripts/functional_test_runner.js');
-const BASIC_CONFIG = resolve(__dirname, '../fixtures/simple_project/config.js');
+      return Reflect.set(target, property, interceptor(property, value));
+    },
 
-describe('basic config file with a single app and test', function () {
-  this.timeout(60 * 1000);
+    get(target, property) {
+      if (property === 'revertProxiedAssignments') {
+        return function() {
+          for (const [property, value] of originalValues) {
+            object[property] = value;
+          }
+        };
+      }
 
-  it('runs and prints expected output', () => {
-    const proc = spawnSync(process.execPath, [SCRIPT, '--config', BASIC_CONFIG]);
-    const stdout = proc.stdout.toString('utf8');
-    expect(stdout).to.contain('$BEFORE$');
-    expect(stdout).to.contain('$TESTNAME$');
-    expect(stdout).to.contain('$INTEST$');
-    expect(stdout).to.contain('$AFTER$');
+      return Reflect.get(target, property);
+    },
   });
-});
+}
