@@ -55,6 +55,14 @@ export function createEncryptedSavedObjectsServiceMock(
   mock.stripEncryptedAttributes.mockImplementation((type, attrs) =>
     processAttributes({ type }, attrs, (clonedAttrs, attrName) => delete clonedAttrs[attrName])
   );
+  mock.allowPredefinedID.mockImplementation(type => {
+    const registration = registrations.find(r => r.type === type);
+    if (!registration) {
+      return true;
+    }
+
+    return registration.allowPredefinedID === true;
+  });
 
   return mock;
 }

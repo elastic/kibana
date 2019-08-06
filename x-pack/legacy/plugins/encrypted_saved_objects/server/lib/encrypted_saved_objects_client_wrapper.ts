@@ -50,15 +50,13 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     }
 
     // Saved objects with encrypted attributes should have IDs that are hard to guess especially
-    // since IDs are part of the AAD used during encryption, that's why we control them within this
-    // wrapper and don't allow consumers to specify their own IDs directly.
-    if (options.id) {
-      throw new Error(
-        'Predefined IDs are not allowed for saved objects with encrypted attributes.'
-      );
+    // since IDs are part of the AAD used during encryption. Types can opt-out of this restriction,
+    // when necessary, but it's much safer for this wrapper to generate them.
+    if (!this.options.service.allowPredefinedID(type) && options.id) {
+      throw new Error(`Predefined IDs are not allowed for the "${type}" type.`);
     }
 
-    const id = generateID();
+    const id = options.id || generateID();
     return this.stripEncryptedAttributesFromResponse(
       await this.options.baseClient.create(
         type,
@@ -85,12 +83,10 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
         }
 
         // Saved objects with encrypted attributes should have IDs that are hard to guess especially
-        // since IDs are part of the AAD used during encryption, that's why we control them within this
-        // wrapper and don't allow consumers to specify their own IDs directly.
-        if (object.id) {
-          throw new Error(
-            'Predefined IDs are not allowed for saved objects with encrypted attributes.'
-          );
+        // since IDs are part of the AAD used during encryption. Types can opt-out of this restriction,
+        // when necessary, but it's much safer for this wrapper to generate them.
+        if (!this.options.service.allowPredefinedID(object.type) && object.id) {
+          throw new Error(`Predefined IDs are not allowed for the "${object.type}" type.`);
         }
 
         const id = generateID();

@@ -20,6 +20,7 @@ export interface EncryptedSavedObjectTypeRegistration {
   readonly type: string;
   readonly attributesToEncrypt: ReadonlySet<string>;
   readonly attributesToExcludeFromAAD?: ReadonlySet<string>;
+  readonly allowPredefinedID?: boolean;
 }
 
 /**
@@ -105,6 +106,15 @@ export class EncryptedSavedObjectsService {
    */
   public isRegistered(type: string) {
     return this.typeRegistrations.has(type);
+  }
+
+  public allowPredefinedID(type: string) {
+    const typeRegistration = this.typeRegistrations.get(type);
+    if (typeRegistration === undefined) {
+      return true;
+    }
+
+    return typeRegistration.allowPredefinedID === true;
   }
 
   /**

@@ -22,6 +22,11 @@ beforeEach(() => {
       type: 'known-type',
       attributesToEncrypt: new Set(['attrSecret']),
     },
+    {
+      type: 'known-type-predefined-id',
+      attributesToEncrypt: new Set(['attrSecret']),
+      allowPredefinedID: true,
+    },
   ]);
 
   wrapper = new EncryptedSavedObjectsClientWrapper({
@@ -49,14 +54,34 @@ describe('#create', () => {
     expect(mockBaseClient.create).toHaveBeenCalledWith('unknown-type', attributes, options);
   });
 
-  it('fails if type is registered and ID is specified', async () => {
+  it('fails if type is registered without allowPredefinedID and ID is specified', async () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
 
     await expect(wrapper.create('known-type', attributes, { id: 'some-id' })).rejects.toThrowError(
-      'Predefined IDs are not allowed for saved objects with encrypted attributes.'
+      'Predefined IDs are not allowed for the "known-type" type.'
     );
 
     expect(mockBaseClient.create).not.toHaveBeenCalled();
+  });
+
+  it('succeeds if type is registered with allowPredefinedID and ID is specified', async () => {
+    const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
+    const mockedResponse = {
+      id: 'some-id',
+      type: 'known-type-predefined-id',
+      attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
+      references: [],
+    };
+
+    mockBaseClient.create.mockResolvedValue(mockedResponse);
+    await expect(
+      wrapper.create('known-type-predefined-id', attributes, { id: 'some-id' })
+    ).resolves.toEqual({
+      ...mockedResponse,
+      attributes: { attrOne: 'one', attrThree: 'three' },
+    });
+
+    expect(mockBaseClient.create).toHaveBeenCalled();
   });
 
   it('generates ID, encrypts attributes and strips them from response', async () => {
@@ -187,7 +212,7 @@ describe('#bulkCreate', () => {
     );
   });
 
-  it('fails if ID is specified for registered type', async () => {
+  it('fails if ID is specified for registered type without allowPredefinedID', async () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
     const options = { namespace: 'some-namespace' };
 
@@ -197,10 +222,46 @@ describe('#bulkCreate', () => {
     ];
 
     await expect(wrapper.bulkCreate(bulkCreateParams, options)).rejects.toThrowError(
-      'Predefined IDs are not allowed for saved objects with encrypted attributes.'
+      'Predefined IDs are not allowed for the "known-type" type.'
     );
 
     expect(mockBaseClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('succeeds if ID is specified for registered type with allowPredefinedID', async () => {
+    const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
+    const options = { namespace: 'some-namespace' };
+    const mockedResponse = {
+      saved_objects: [
+        {
+          id: 'some-id',
+          type: 'known-type-predefined-id',
+          attributes,
+          references: [],
+        },
+        {
+          id: 'some-id',
+          type: 'unknown-type',
+          attributes,
+          references: [],
+        },
+      ],
+    };
+    mockBaseClient.bulkCreate.mockResolvedValue(mockedResponse);
+
+    const bulkCreateParams = [
+      { id: 'some-id', type: 'known-type-predefined-id', attributes },
+      { type: 'unknown-type', attributes },
+    ];
+
+    await expect(wrapper.bulkCreate(bulkCreateParams, options)).resolves.toEqual({
+      saved_objects: [
+        { ...mockedResponse.saved_objects[0], attributes: { attrOne: 'one', attrThree: 'three' } },
+        mockedResponse.saved_objects[1],
+      ],
+    });
+
+    expect(mockBaseClient.bulkCreate).toHaveBeenCalled();
   });
 
   it('generates ID, encrypts attributes and strips them from response', async () => {
