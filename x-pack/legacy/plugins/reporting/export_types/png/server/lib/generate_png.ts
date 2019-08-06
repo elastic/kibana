@@ -6,45 +6,60 @@
 
 import * as Rx from 'rxjs';
 import { toArray, mergeMap } from 'rxjs/operators';
+import { KbnServer } from '../../../../types';
+// @ts-ignore
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { PreserveLayout } from '../../../common/layouts/preserve_layout';
 
-function generatePngObservableFn(server) {
+interface ScreenshotData {
+  base64EncodedData: string;
+}
+
+interface UrlScreenshot {
+  screenshots: ScreenshotData[];
+}
+
+function generatePngObservableFn(server: KbnServer) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const captureConcurrency = 1;
-
-  const urlScreenshotsObservable = (url, conditionalHeaders, layout, browserTimezone) => {
-    return Rx.of(url).pipe(
-      mergeMap(url => screenshotsObservable({ url, conditionalHeaders, layout, browserTimezone }),
-        (outer, inner) => inner,
-        captureConcurrency
-      )
-    );
-  };
-
-  const createPngWithScreenshots = async ({ urlScreenshots }) => {
-
+  const createPngWithScreenshots = async ({
+    urlScreenshots,
+  }: {
+    urlScreenshots: UrlScreenshot[];
+  }) => {
     if (urlScreenshots.length !== 1) {
-      throw new Error(`Expected there to be 1 URL screenshot, but there are ${urlScreenshots.length}`);
+      throw new Error(
+        `Expected there to be 1 URL screenshot, but there are ${urlScreenshots.length}`
+      );
     }
     if (urlScreenshots[0].screenshots.length !== 1) {
-      throw new Error(`Expected there to be 1 screenshot, but there are ${urlScreenshots[0].screenshots.length}`);
+      throw new Error(
+        `Expected there to be 1 screenshot, but there are ${urlScreenshots[0].screenshots.length}`
+      );
     }
 
     return urlScreenshots[0].screenshots[0].base64EncodedData;
-
   };
 
-  return function generatePngObservable(url, browserTimezone, conditionalHeaders, layoutParams) {
-
+  return function generatePngObservable(
+    url: string,
+    browserTimezone: string,
+    conditionalHeaders: any,
+    layoutParams: any
+  ) {
     if (!layoutParams || !layoutParams.dimensions) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
     }
 
     const layout = new PreserveLayout(layoutParams.dimensions);
-
-    const screenshots$ = urlScreenshotsObservable(url, conditionalHeaders, layout, browserTimezone);
+    const screenshots$ = Rx.of(url).pipe(
+      mergeMap(
+        iUrl => screenshotsObservable({ url: iUrl, conditionalHeaders, layout, browserTimezone }),
+        (jUrl: string, screenshot: UrlScreenshot) => screenshot,
+        captureConcurrency
+      )
+    );
 
     return screenshots$.pipe(
       toArray(),
