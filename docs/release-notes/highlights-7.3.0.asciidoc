@@ -21,6 +21,8 @@ release notes>> for a list of bug fixes and other changes.
 * <<KQL-7.3, KQL + autocomplete in filter aggregations>>
 * <<bar-charts-7.3, Values inside bar charts>>
 * <<visual-builder-7.3, Visual Builder: even better under a new name>>
+* <<kibana-observability-7.3, Observability enhancements>>
+
 
 [float]
 [[maps-7.3]]
@@ -28,7 +30,9 @@ release notes>> for a list of bug fixes and other changes.
 
 Maps is production ready for 7.3, and includes many improvements, including
 a new GeoJson upload and improved layer styling, aggregations, and tooltips.
-To find out what’s in Maps and how to use it, go to the <<maps, Maps documentation>>.
+To find out more about what’s in Maps and how to use it, check out the 
+https://www.elastic.co/blog/elastic-maps-7-3-0-released[Maps 7.3.0 release blog] and 
+<<maps, documentation>>.
 
 [role="screenshot"]
 image::release-notes/images/7.3-maps.png[Maps is production ready]
@@ -165,6 +169,17 @@ image::release-notes/images/7.3-bar-charts.png[Canvas summary template]
 Time Series Visual Builder is now simply referred to as TSVB. When you open 
 TSVB, you’ll also notice several enhancements
 and bug fixes. 
+
+[float]
+[[kibana-observability-7.3]]
+=== Observability enhancements
+
+Check out these release blogs:
+
+* https://www.elastic.co/blog/elastic-apm-7-3-0-released[APM]
+* https://www.elastic.co/blog/elastic-infrastructure-7-3-0-released[Infrastructure]
+* https://www.elastic.co/blog/elastic-logs-7-3-0-released[Logs]
+* https://www.elastic.co/blog/elastic-uptime-monitoring-7-3-0-released[Uptime]
 
 [float]
 === Give us your feedback
