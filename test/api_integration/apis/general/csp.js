@@ -27,11 +27,6 @@ export default function ({ getService }) {
       const response = await supertest.get('/app/kibana');
 
       expect(response.headers).to.have.property('content-security-policy');
-    });
-
-    it('csp header does not allow all inline scripts', async () => {
-      const response = await supertest.get('/app/kibana');
-
       const header = response.headers['content-security-policy'];
       const parsed = new Map(header.split(';').map(rule => {
         const parts = rule.trim().split(' ');
@@ -39,9 +34,20 @@ export default function ({ getService }) {
         return [key, parts];
       }));
 
+      // ensure script-src uses a nonce, and remove it so we can .eql everything else
       const scriptSrc = parsed.get('script-src');
       expect(scriptSrc).to.be.an(Array);
-      expect(scriptSrc).not.to.contain('unsafe-inline');
+      const nonceIndex = scriptSrc.findIndex(value => value.startsWith(`'nonce-`));
+      expect(nonceIndex).greaterThan(-1);
+      scriptSrc.splice(nonceIndex, 1);
+
+      const entries = Array.from(parsed.entries());
+      expect(entries).to.eql([
+        [ 'script-src', [ '\'unsafe-eval\'' ] ],
+        [ 'worker-src', [ 'blob:' ] ],
+        [ 'child-src', [ 'blob:' ] ],
+        [ 'style-src', [ '\'unsafe-inline\'', '\'self\'' ] ]
+      ]);
     });
   });
 }
