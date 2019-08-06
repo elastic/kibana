@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 import React, { ChangeEvent, ReactElement } from 'react';
 import { EuiComboBox, EuiFieldSearch, EuiContextMenuPanel } from '@elastic/eui';
 import { IndexPatternPrivateState } from './indexpattern';
 import { createMockedDragDropContext } from './mocks';
-import { InnerIndexPatternDataPanel, IndexPatternDataPanel } from './datapanel';
+import { InnerIndexPatternDataPanel } from './datapanel';
 import { FieldItem } from './field_item';
 import { act } from 'react-dom/test-utils';
-import { DatasourceDataPanelProps } from '..';
 
 jest.mock('./loader');
 
