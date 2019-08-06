@@ -33,7 +33,7 @@ import { extractIndexPatterns } from '../../common/extract_index_patterns';
 
 import { npSetup } from 'ui/new_platform';
 import { Storage } from 'ui/storage';
-import { CoreSetupContext } from '../contexts/query_input_bar_context';
+import { CoreSetupContextProvider } from '../contexts/query_input_bar_context';
 const localStorage = new Storage(window.localStorage);
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
@@ -181,7 +181,7 @@ export class VisEditor extends Component {
             onDataChange={this.onDataChange}
           />
           <div className="tvbEditor--hideForReporting">
-            <CoreSetupContext.Provider value={coreContext}>
+            <CoreSetupContextProvider value={coreContext}>
               <PanelConfig
                 fields={this.state.visFields}
                 model={model}
@@ -190,7 +190,7 @@ export class VisEditor extends Component {
                 onChange={this.handleChange}
                 getConfig={this.getConfig}
               />
-            </CoreSetupContext.Provider>
+            </CoreSetupContextProvider>
           </div>
         </div>
       );

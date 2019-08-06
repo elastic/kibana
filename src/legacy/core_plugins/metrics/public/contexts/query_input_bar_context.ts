@@ -18,5 +18,15 @@
  */
 
 import React from 'react';
+import { Storage } from 'ui/storage';
+import { UiSettingsClientContract } from 'src/core/public';
 
-export const CoreSetupContext = React.createContext({});
+export interface ICoreSetupContext {
+  appName: string;
+  uiSettings: UiSettingsClientContract;
+  store: Storage;
+}
+
+export const CoreSetupContext = React.createContext<ICoreSetupContext | null>(null);
+
+export const CoreSetupContextProvider = CoreSetupContext.Provider;

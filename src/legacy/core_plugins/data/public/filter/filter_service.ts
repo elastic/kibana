@@ -32,10 +32,8 @@ export interface FilterServiceDependencies {
 
 export class FilterService {
   public setup({ indexPatterns, uiSettings }: FilterServiceDependencies) {
-    const filterManager = new FilterManager(indexPatterns, uiSettings);
-
     return {
-      filterManager,
+      filterManager: new FilterManager(indexPatterns, uiSettings),
     };
   }
 
