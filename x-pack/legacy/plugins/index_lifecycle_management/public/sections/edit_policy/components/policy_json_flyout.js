@@ -13,7 +13,7 @@ import copy from 'copy-to-clipboard';
 
 import {
   EuiButton,
-  EuiCodeBlock,
+  EuiCodeEditor,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyout,
@@ -27,13 +27,15 @@ export class PolicyJsonFlyout extends PureComponent {
     close: PropTypes.func.isRequired,
     lifecycle: PropTypes.object.isRequired,
   };
+
   getEsJson({ phases }) {
     return JSON.stringify({
       policy: {
         phases
       }
-    }, null, 4);
+    }, null, 2);
   }
+
   copyToClipboard(lifecycle) {
     copy(this.getEsJson(lifecycle));
     toastNotifications.add(i18n.translate(
@@ -43,12 +45,15 @@ export class PolicyJsonFlyout extends PureComponent {
       }
     ));
   }
+
   render() {
     const { lifecycle, close, policyName } = this.props;
+    const endpoint = policyName ? `PUT _ilm/policy/${policyName}\n` : '';
+    const jsonString = `${endpoint}${this.getEsJson(lifecycle)}`;
 
     return (
       <EuiPortal>
-        <EuiFlyout maxWidth={400} ownFocus onClose={close}>
+        <EuiFlyout maxWidth={480} onClose={close}>
           <EuiFlyoutHeader>
             <EuiTitle>
               <h2>
@@ -62,11 +67,16 @@ export class PolicyJsonFlyout extends PureComponent {
           </EuiFlyoutHeader>
 
           <EuiFlyoutBody>
-            <EuiCodeBlock
-              language="json"
-            >
-              {this.getEsJson(lifecycle)}
-            </EuiCodeBlock>
+            <EuiCodeEditor
+              mode="json"
+              theme="textmate"
+              isReadOnly
+              setOptions={{ maxLines: Infinity, useWorker: false }}
+              value={jsonString}
+              editorProps={{
+                $blockScrolling: Infinity
+              }}
+            />
           </EuiFlyoutBody>
 
           <EuiFlyoutFooter>
