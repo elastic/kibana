@@ -12,7 +12,7 @@ import {
   convertMapExtentToPolygon,
 } from './elasticsearch_geo_utils';
 
-import { flattenHitWrapper } from 'ui/index_patterns/_flatten_hit';
+import { flattenHitWrapper } from 'ui/index_patterns';
 
 const geoFieldName = 'location';
 const mapExtent = {
