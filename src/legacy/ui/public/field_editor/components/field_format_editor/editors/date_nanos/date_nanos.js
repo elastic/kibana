@@ -18,7 +18,6 @@
  */
 
 import React, { Fragment } from 'react';
-import moment from 'moment';
 
 import {
   EuiCode,
@@ -44,9 +43,9 @@ export class DateNanosFormatEditor extends DefaultFormatEditor {
   constructor(props) {
     super(props);
     this.state.sampleInputs = [
-      Date.now(),
-      moment().startOf('year').valueOf(),
-      moment().endOf('year').valueOf()
+      '2015-01-01T12:10:30.123456789Z',
+      '2019-05-08T06:55:21.567891234Z',
+      '2019-08-06T17:22:30.987654321Z'
     ];
   }
 
