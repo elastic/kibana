@@ -6,6 +6,8 @@
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
+import { getRouter } from '../../public/crud_app/services/routing';
+import { CRUD_APP_BASE_PATH } from '../../public/crud_app/constants';
 
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual(
@@ -51,6 +53,7 @@ describe('Smoke test cloning an existing rollup job from job list', () => {
   });
 
   it('should navigate to create view with default values set', async () => {
+    const router = getRouter();
     const { rows } = table.getMetaData('rollupJobsListTable');
     const button = rows[0].columns[1].reactWrapper.find('button');
 
@@ -62,6 +65,9 @@ describe('Smoke test cloning an existing rollup job from job list', () => {
     expect(exists('jobActionMenuButton')).toBe(true);
 
     find('jobActionMenuButton').simulate('click');
+
+    expect(router.history.location.pathname).not.toBe(`${CRUD_APP_BASE_PATH}/create`);
     find('jobCloneActionContextMenu').simulate('click');
+    expect(router.history.location.pathname).toBe(`${CRUD_APP_BASE_PATH}/create`);
   });
 });
