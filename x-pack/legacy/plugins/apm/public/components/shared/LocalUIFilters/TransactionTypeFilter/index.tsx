@@ -39,6 +39,7 @@ const TransactionTypeFilter = ({ transactionTypes }: Props) => {
           })}
         </h4>
       </EuiTitle>
+      <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" />
       <EuiSpacer size="s" />
       <EuiSelect

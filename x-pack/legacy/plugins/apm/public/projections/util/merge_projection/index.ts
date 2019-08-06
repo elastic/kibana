@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { merge, cloneDeep, isPlainObject } from 'lodash';
-import { Projection } from '../typings';
+import { merge, isPlainObject } from 'lodash';
+import { Projection } from '../../typings';
 
 type PlainObject = Record<string | number | symbol, any>;
 
@@ -23,7 +23,7 @@ export function mergeProjection<T extends Projection, U>(
   target: T,
   source: U
 ): DeepMerge<T, U> {
-  return merge(cloneDeep(target), source, (a, b) => {
+  return merge({}, target, source, (a, b) => {
     if (isPlainObject(a) && isPlainObject(b)) {
       return undefined;
     }
