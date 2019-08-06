@@ -17,6 +17,7 @@
  * under the License.
  */
 import { Logger } from 'target/types/server/saved_objects/migrations/core/migration_logger';
+import { inspect } from 'util';
 import { DashboardDoc730ToLatest, DashboardDoc700To720 } from './types';
 import { isDashboardDoc } from './is_dashboard_doc';
 import { moveFiltersToQuery } from './move_filters_to_query';
@@ -43,7 +44,9 @@ export function migrations730(
     );
   } catch (e) {
     logger.warning(
-      `Exception @ migrations730 while trying to migrate query filters!\nError:${e}\nSearchSource JSON:\n${doc.attributes.kibanaSavedObjectMeta.searchSourceJSON}`
+      `Exception @ migrations730 while trying to migrate dashboard query filters!\n` +
+        `${e.stack}\n` +
+        `dashboard: ${inspect(doc, false, null)}`
     );
     return doc;
   }
@@ -67,7 +70,11 @@ export function migrations730(
 
     delete doc.attributes.uiStateJSON;
   } catch (e) {
-    logger.warning(`Exception @ migrations730 while trying to migrate dashboard panels! ${e}`);
+    logger.warning(
+      `Exception @ migrations730 while trying to migrate dashboard panels!\n` +
+        `Error: ${e.stack}\n` +
+        `dashboard: ${inspect(doc, false, null)}`
+    );
     return doc;
   }
 
