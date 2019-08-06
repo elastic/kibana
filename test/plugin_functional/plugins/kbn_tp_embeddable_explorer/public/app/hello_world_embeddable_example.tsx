@@ -16,16 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import React from 'react';
 import {
   EmbeddablePanel,
   GetActionsCompatibleWithTrigger,
   GetEmbeddableFactory,
   GetEmbeddableFactories,
-} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { HelloWorldEmbeddable } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/hello_world/hello_world_embeddable';
-import { CoreStart } from 'src/core/public';
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { HelloWorldEmbeddable } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/hello_world/hello_world_embeddable';
+import { CoreStart } from '../../../../../../src/core/public';
+import { Start as InspectorStartContract } from '../../../../../../src/plugins/inspector/public';
 
 interface Props {
   getActions: GetActionsCompatibleWithTrigger;

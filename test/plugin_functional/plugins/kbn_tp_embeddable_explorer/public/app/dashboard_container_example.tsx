@@ -22,7 +22,7 @@ import {
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainer,
   DashboardContainerFactory,
-} from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
+} from '../../../../../../src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 
 import {
   ErrorEmbeddable,
@@ -32,9 +32,9 @@ import {
   GetActionsCompatibleWithTrigger,
   GetEmbeddableFactory,
   GetEmbeddableFactories,
-} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from '../../../../../../src/core/public';
 import { dashboardInput } from './dashboard_input';
 import { Start as InspectorStartContract } from '../../../../../../src/plugins/inspector/public';
 

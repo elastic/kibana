@@ -19,7 +19,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { npStart } from 'ui/new_platform';
-import { start } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { start } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { App } from './app/';
 import { CoreShim, PluginShim } from './shim';
 

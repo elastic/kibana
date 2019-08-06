@@ -21,14 +21,15 @@ import 'ui/autoload/all';
 import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
 
-import { Plugin } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { embeddablePluginMock } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/mocks';
-import { npStart } from 'src/legacy/ui/public/new_platform';
-
 import uiRoutes from 'ui/routes';
 
 // @ts-ignore
 import { uiModules } from 'ui/modules';
+
+import { Plugin } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { start } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { npStart } from '../../../../../src/legacy/ui/public/new_platform';
+
 import template from './index.html';
 
 export interface PluginShim {
@@ -42,9 +43,8 @@ export interface CoreShim {
   onRenderComplete: (listener: () => void) => void;
 }
 
-const { setup } = embeddablePluginMock.createInstance();
 const plugins: PluginShim = {
-  embeddable: setup,
+  embeddable: start,
 };
 
 let rendered = false;

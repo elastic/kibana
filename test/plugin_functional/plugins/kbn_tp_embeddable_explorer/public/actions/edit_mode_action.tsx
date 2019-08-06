@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { CONTEXT_MENU_TRIGGER } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { setup } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { EditModeAction } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/actions/edit_mode_action';
+import { CONTEXT_MENU_TRIGGER } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { EditModeAction } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/actions/edit_mode_action';
 
 const editModeAction = new EditModeAction();
 setup.registerAction(editModeAction);

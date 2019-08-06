@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { setup } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { HelloWorldEmbeddableFactory } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/hello_world/hello_world_embeddable_factory';
+import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { HelloWorldEmbeddableFactory } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/hello_world/hello_world_embeddable_factory';
 
 const factory = new HelloWorldEmbeddableFactory();
 setup.registerEmbeddableFactory(factory.type, factory);
