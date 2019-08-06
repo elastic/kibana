@@ -37,6 +37,7 @@ import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
 const POSTCSS_CONFIG_PATH = require.resolve('./postcss.config');
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
+const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
 const BABEL_EXCLUDE_RE = [
   /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
 ];
@@ -393,9 +394,9 @@ export default class BaseOptimizer {
                 options: {
                   babelrc: false,
                   presets: [
+                    ISTANBUL_PRESET_PATH,
                     BABEL_PRESET_PATH,
                   ],
-                  plugins: [ '@kbn/elastic-idx/babel', 'istanbul' ]
                 },
               }
             ]),
