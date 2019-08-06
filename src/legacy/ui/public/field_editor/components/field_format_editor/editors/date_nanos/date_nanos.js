@@ -17,12 +17,81 @@
  * under the License.
  */
 
-import { DateFormatEditor } from '../date';
+import React, { Fragment } from 'react';
+import moment from 'moment';
 
-export class DateNanosFormatEditor extends DateFormatEditor {
+import {
+  EuiCode,
+  EuiFieldText,
+  EuiFormRow,
+  EuiIcon,
+  EuiLink,
+} from '@elastic/eui';
+
+import {
+  DefaultFormatEditor
+} from '../default';
+
+import {
+  FormatEditorSamples
+} from '../../samples';
+
+import { FormattedMessage } from '@kbn/i18n/react';
+
+export class DateNanosFormatEditor extends DefaultFormatEditor {
   static formatId = 'date_nanos';
 
   constructor(props) {
     super(props);
+    this.state.sampleInputs = [
+      Date.now(),
+      moment().startOf('year').valueOf(),
+      moment().endOf('year').valueOf()
+    ];
+  }
+
+  render() {
+    const { format, formatParams } = this.props;
+    const { error, samples } = this.state;
+    const defaultPattern = format.getParamDefaults().pattern;
+
+    return (
+      <Fragment>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="common.ui.fieldEditor.date.momentLabel"
+              defaultMessage="Moment.js format pattern (Default: {defaultPattern})"
+              values={{
+                defaultPattern: <EuiCode>{defaultPattern}</EuiCode>
+              }}
+            />
+          }
+          isInvalid={!!error}
+          error={error}
+          helpText={
+            <span>
+              <EuiLink target="_blank" href="https://momentjs.com/">
+                <FormattedMessage id="common.ui.fieldEditor.date.documentationLabel" defaultMessage="Documentation" />&nbsp;
+                <EuiIcon type="link" />
+              </EuiLink>
+            </span>
+          }
+        >
+          <EuiFieldText
+            data-test-subj="dateEditorPattern"
+            value={formatParams.pattern}
+            placeholder={defaultPattern}
+            onChange={(e) => {
+              this.onChange({ pattern: e.target.value });
+            }}
+            isInvalid={!!error}
+          />
+        </EuiFormRow>
+        <FormatEditorSamples
+          samples={samples}
+        />
+      </Fragment>
+    );
   }
 }
