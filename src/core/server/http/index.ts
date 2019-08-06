@@ -38,7 +38,7 @@ export {
   kibanaResponseFactory,
   KibanaResponseFactory,
   RouteConfig,
-  Router,
+  IRouter,
   RouteMethod,
   RouteConfigOptions,
 } from './router';

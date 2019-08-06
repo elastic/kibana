@@ -21,7 +21,7 @@ import { Type } from '@kbn/config-schema';
 
 import { ConfigService, Env, Config, ConfigPath } from './config';
 import { ElasticsearchService } from './elasticsearch';
-import { HttpService, HttpServiceSetup, Router } from './http';
+import { HttpService, HttpServiceSetup } from './http';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { PluginsService, config as pluginsConfig } from './plugins';
@@ -110,8 +110,10 @@ export class Server {
   }
 
   private registerDefaultRoute(httpSetup: HttpServiceSetup) {
-    const router = new Router('/core');
-    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ version: '0.0.1' }));
+    const router = httpSetup.createRouter('/core');
+    router.get({ path: '/', validate: false }, async (context, req, res) =>
+      res.ok({ version: '0.0.1' })
+    );
     httpSetup.registerRouter(router);
   }
 

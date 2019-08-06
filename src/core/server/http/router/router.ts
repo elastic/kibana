@@ -30,54 +30,105 @@ interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions;
-  handler: (req: Request, responseToolkit: ResponseToolkit, log: Logger) => Promise<ResponseObject>;
+  handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject>;
 }
 
-/**
- * Provides ability to declare a handler function for a particular path and HTTP request method.
- * Each route can have only one handler functions, which is executed when the route is matched.
- *
- * @example
- * ```ts
- * const router = new Router('my-app');
- * // handler is called when 'my-app/path' resource is requested with `GET` method
- * router.get({ path: '/path', validate: false }, (req, res) => res.ok({ content: 'ok' }));
- * ```
- *
- * @public
- * */
-export class Router {
-  public routes: Array<Readonly<RouterRoute>> = [];
+export interface IRouter {
   /**
-   * @param path - a router path, set as the very first path segment for all registered routes.
+   * Resulted path
    */
-  constructor(readonly path: string) {}
+  routerPath: string;
 
   /**
    * Register a route handler for `GET` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
+  get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+    route: RouteConfig<P, Q, B>,
+    handler: RequestHandler<P, Q, B>
+  ) => void;
+  /**
+   * Register a route handler for `POST` request.
+   * @param route {@link RouteConfig} - a route configuration.
+   * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
+   */
+  post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+    route: RouteConfig<P, Q, B>,
+    handler: RequestHandler<P, Q, B>
+  ) => void;
+  /**
+   * Register a route handler for `PUT` request.
+   * @param route {@link RouteConfig} - a route configuration.
+   * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
+   */
+  put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+    route: RouteConfig<P, Q, B>,
+    handler: RequestHandler<P, Q, B>
+  ) => void;
+
+  /**
+   * Register a route handler for `DELETE` request.
+   * @param route {@link RouteConfig} - a route configuration.
+   * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
+   */
+  delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+    route: RouteConfig<P, Q, B>,
+    handler: RequestHandler<P, Q, B>
+  ) => void;
+  /**
+   * Returns all routes registered with the this router.
+   * @returns List of registered routes.
+   * @internal
+   */
+  getRoutes: () => RouterRoute[];
+}
+
+export type ContextEnhancer<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (
+  handler: RequestHandler<P, Q, B>
+) => RequestHandlerEnhanced<P, Q, B>;
+
+function getRouteFullPath(routerPath: string, routePath: string) {
+  // If router's path ends with slash and route's path starts with slash,
+  // we should omit one of them to have a valid concatenated path.
+  const routePathStartIndex = routerPath.endsWith('/') && routePath.startsWith('/') ? 1 : 0;
+  return `${routerPath}${routePath.slice(routePathStartIndex)}`;
+}
+
+/**
+ * @internal
+ */
+export class Router implements IRouter {
+  public routes: Array<Readonly<RouterRoute>> = [];
+
+  constructor(
+    readonly routerPath: string,
+    private readonly log: Logger,
+    private readonly enhanceWithContext: ContextEnhancer<any, any, any> = fn => fn.bind(null, {})
+  ) {}
+
   public get<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) {
     const { path, options = {} } = route;
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'get');
+
     this.routes.push({
-      handler: async (req, responseToolkit, log) =>
-        await this.handle(routeSchemas, req, responseToolkit, handler, log),
+      handler: async (req, responseToolkit) => {
+        return await this.handle({
+          routeSchemas,
+          request: req,
+          responseToolkit,
+          handler: this.enhanceWithContext(handler),
+        });
+      },
       method: 'get',
-      path,
+      path: getRouteFullPath(this.routerPath, path),
       options,
     });
   }
 
-  /**
-   * Register a route handler for `POST` request.
-   * @param route {@link RouteConfig} - a route configuration.
-   * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
-   */
   public post<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
@@ -85,19 +136,20 @@ export class Router {
     const { path, options = {} } = route;
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'post');
     this.routes.push({
-      handler: async (req, responseToolkit, log) =>
-        await this.handle(routeSchemas, req, responseToolkit, handler, log),
+      handler: async (req, responseToolkit) => {
+        return await this.handle({
+          routeSchemas,
+          request: req,
+          responseToolkit,
+          handler: this.enhanceWithContext(handler),
+        });
+      },
       method: 'post',
-      path,
+      path: getRouteFullPath(this.routerPath, path),
       options,
     });
   }
 
-  /**
-   * Register a route handler for `PUT` request.
-   * @param route {@link RouteConfig} - a route configuration.
-   * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
-   */
   public put<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
@@ -105,19 +157,20 @@ export class Router {
     const { path, options = {} } = route;
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'put');
     this.routes.push({
-      handler: async (req, responseToolkit, log) =>
-        await this.handle(routeSchemas, req, responseToolkit, handler, log),
+      handler: async (req, responseToolkit) => {
+        return await this.handle({
+          routeSchemas,
+          request: req,
+          responseToolkit,
+          handler: this.enhanceWithContext(handler),
+        });
+      },
       method: 'put',
-      path,
+      path: getRouteFullPath(this.routerPath, path),
       options,
     });
   }
 
-  /**
-   * Register a route handler for `DELETE` request.
-   * @param route {@link RouteConfig} - a route configuration.
-   * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
-   */
   public delete<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
@@ -125,19 +178,20 @@ export class Router {
     const { path, options = {} } = route;
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'delete');
     this.routes.push({
-      handler: async (req, responseToolkit, log) =>
-        await this.handle(routeSchemas, req, responseToolkit, handler, log),
+      handler: async (req, responseToolkit) => {
+        return await this.handle({
+          routeSchemas,
+          request: req,
+          responseToolkit,
+          handler: this.enhanceWithContext(handler),
+        });
+      },
       method: 'delete',
-      path,
+      path: getRouteFullPath(this.routerPath, path),
       options,
     });
   }
 
-  /**
-   * Returns all routes registered with the this router.
-   * @returns List of registered routes.
-   * @internal
-   */
   public getRoutes() {
     return [...this.routes];
   }
@@ -174,13 +228,17 @@ export class Router {
     return route.validate ? route.validate : undefined;
   }
 
-  private async handle<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    routeSchemas: RouteSchemas<P, Q, B> | undefined,
-    request: Request,
-    responseToolkit: ResponseToolkit,
-    handler: RequestHandler<P, Q, B>,
-    log: Logger
-  ) {
+  private async handle<P extends ObjectType, Q extends ObjectType, B extends ObjectType>({
+    routeSchemas,
+    request,
+    responseToolkit,
+    handler,
+  }: {
+    request: Request;
+    responseToolkit: ResponseToolkit;
+    handler: RequestHandlerEnhanced<P, Q, B>;
+    routeSchemas?: RouteSchemas<P, Q, B>;
+  }) {
     let kibanaRequest: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>;
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
@@ -193,11 +251,21 @@ export class Router {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (e) {
-      log.error(e);
+      this.log.error(e);
       return hapiResponseAdapter.toInternalError();
     }
   }
 }
+
+type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => infer Return
+  ? (...rest: Params) => Return
+  : never;
+
+type RequestHandlerEnhanced<
+  P extends ObjectType,
+  Q extends ObjectType,
+  B extends ObjectType
+> = WithoutHeadArgument<RequestHandler<P, Q, B>>;
 
 /**
  * A function executed when route path matched requested resource path.
@@ -221,8 +289,8 @@ export class Router {
  *     },
  *   },
  *   // function to execute to create a responses
- *   async (request, response) => {
- *     const data = await findObject(request.params.id);
+ *   async (context, request, response) => {
+ *     const data = await context.findObject(request.params.id);
  *     // creates a command to respond with 'not found' error
  *     if (!data) return response.notFound();
  *     // creates a command to send found data to the client
@@ -233,6 +301,7 @@ export class Router {
  * @public
  */
 export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (
+  context: {},
   request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
   response: KibanaResponseFactory
 ) => KibanaResponse<any> | Promise<KibanaResponse<any>>;

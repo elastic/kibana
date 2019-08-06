@@ -41,7 +41,8 @@ import {
   ElasticsearchClientConfig,
   ElasticsearchServiceSetup,
 } from './elasticsearch';
-import { HttpServiceSetup, HttpServiceStart } from './http';
+
+import { HttpServiceSetup, HttpServiceStart, IRouter } from './http';
 import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
 export { bootstrap } from './bootstrap';
@@ -85,7 +86,7 @@ export {
   kibanaResponseFactory,
   KibanaResponseFactory,
   RouteConfig,
-  Router,
+  IRouter,
   RouteMethod,
   RouteConfigOptions,
   SessionStorage,
@@ -161,6 +162,8 @@ export interface CoreSetup {
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
     basePath: HttpServiceSetup['basePath'];
     isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
+    createRouter: () => IRouter;
+    registerRouter: (router: IRouter) => void;
   };
 }
 
