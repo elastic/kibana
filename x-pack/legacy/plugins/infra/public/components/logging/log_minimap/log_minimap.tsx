@@ -245,7 +245,7 @@ const TimeCursor = euiStyled.line`
       : props.theme.eui.euiColorDarkShade};
 `;
 
-const MinimapWrapper = euiStyled.svg<any>`
+const MinimapWrapper = euiStyled.svg<React.SVGAttributes<SVGElement>>`
   cursor: move;
   background: ${props =>
     props.showOverscanBoundaries
