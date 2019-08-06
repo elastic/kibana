@@ -95,7 +95,7 @@ export class GoServerLauncher extends AbstractLauncher {
       fs.mkdirSync(goPath);
     }
 
-    const params: string[] = ['-mode=stdio', '-port=' + port.toString()];
+    const params: string[] = ['-port=' + port.toString()];
     const golsp = path.resolve(installationPath, launchersFound[0]);
     const p = spawn(golsp, params, {
       detached: false,
