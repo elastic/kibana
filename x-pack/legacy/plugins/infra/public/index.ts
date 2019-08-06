@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { useTrackPageview } from './hooks/use_track_metric';
+import { npSetup } from 'ui/new_platform';
+
+console.log(npSetup.plugins.observability.getBP());

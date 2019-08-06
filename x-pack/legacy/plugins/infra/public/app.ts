@@ -5,3 +5,10 @@
  */
 
 import './apps/kibana_app';
+
+import { npSetup } from 'ui/new_platform';
+
+console.log('\n\nINFRA PLUGIN\n\n\n');
+console.log(npSetup);
+console.log(npSetup.plugins.observability.getBP());
+console.log('\n\n\nINFRA PLUGIN\n\n');

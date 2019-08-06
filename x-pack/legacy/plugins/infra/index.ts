@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import JoiNamespace from 'joi';
 import { resolve } from 'path';
-
 import { getConfigSchema, initServerWithKibana, KbnServer } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 
@@ -18,7 +17,7 @@ export function infra(kibana: any) {
     id: APP_ID,
     configPrefix: 'xpack.infra',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'metrics'],
+    require: ['kibana', 'elasticsearch', 'metrics', 'observability'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.infra.infrastructureDescription', {

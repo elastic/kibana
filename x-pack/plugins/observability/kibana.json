@@ -1,0 +1,8 @@
+{
+  "id": "observability",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": ["kibana", "elasticsearch", "xpack_main"],
+  "server": false,
+  "ui": true
+}
