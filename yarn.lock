@@ -4266,7 +4266,14 @@
   resolved "https://registry.yarnpkg.com/@types/proper-lockfile/-/proper-lockfile-3.0.0.tgz#dcc7cc3714857a4ae6583331d2687e89dc5c94d2"
   integrity sha512-+tfnsA3KNPDm7Sj9x5omRgvS6ALc+edjTZXYeR3kVEm+qmsrF+59yJUWZDreV/O0+EQ6t0YSWlzxfdV58UOEVg==
 
-"@types/puppeteer@^1.12.4", "@types/puppeteer@^1.6.0":
+"@types/puppeteer@^1.19.0":
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-1.19.0.tgz#59f0050bae019cee7c3af2bb840a25892a3078b6"
+  integrity sha512-Db9LWOuTm2bR/qgPE7PQCmnsCQ6flHdULuIDWTks8YdQ/SGHKg5WGWG54gl0734NDKCTF5MbqAp2qWuvBiyQ3Q==
+  dependencies:
+    "@types/node" "*"
+
+"@types/puppeteer@^1.6.0":
   version "1.12.4"
   resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-1.12.4.tgz#8388efdb0b30a54a7e7c4831ca0d709191d77ff1"
   integrity sha512-aaGbJaJ9TuF9vZfTeoh876sBa+rYJWPwtsmHmYr28pGr42ewJnkDTq2aeSKEmS39SqUdkwLj73y/d7rBSp7mDQ==
@@ -22377,10 +22384,10 @@ punycode@^1.2.4, punycode@^1.4.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-1.4.1.tgz#c0d5a63b2718800ad8e1eb0fa5269c84dd41845e"
   integrity sha1-wNWmOycYgArY4esPpSachN1BhF4=
 
-puppeteer-core@^1.13.0:
-  version "1.13.0"
-  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-1.13.0.tgz#f8001851e924e6e9ef6e9fae1778c3ab87c3f307"
-  integrity sha512-8MypjWVHu2EEdtN2HxhCsTtIYdJgiCcbGpHoosv265fzanfOICC2/DadLZq6/Qc/OKsovQmjkO+2vKMrV3BRfA==
+puppeteer-core@^1.19.0:
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-1.19.0.tgz#3c3f98edb5862583e3a9c19cbc0da57ccc63ba5c"
+  integrity sha512-ZPbbjUymorIJomHBvdZX5+2gciUmQtAdepCrkweHH6rMJr96xd/dXzHgmYEOBMatH44SmJrcMtWkgsLHJqT89g==
   dependencies:
     debug "^4.1.0"
     extract-zip "^1.6.6"

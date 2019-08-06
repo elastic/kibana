@@ -6,13 +6,12 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-// @ts-ignore
-import puppeteer from 'puppeteer-core';
 import rimraf from 'rimraf';
 import * as Rx from 'rxjs';
 import { map, share, mergeMap, filter, partition } from 'rxjs/operators';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 
+import { launch, Browser, Page } from './puppeteer';
 import { HeadlessChromiumDriver } from '../driver';
 import { args, IArgOptions } from './args';
 import { safeChildProcess } from '../../safe_child_process';
@@ -62,23 +61,21 @@ export class HeadlessChromiumDriverFactory {
       proxyConfig: this.browserConfig.proxy,
     });
 
-    return puppeteer
-      .launch({
-        userDataDir,
-        executablePath: this.binaryPath,
-        ignoreHTTPSErrors: true,
-        args: chromiumArgs,
-        env: {
-          TZ: browserTimezone,
-        },
-      })
-      .catch((error: Error) => {
-        logger.warning(
-          `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports: [${error}]`
-        );
-        logger.warning(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
-        return null;
-      });
+    return launch({
+      userDataDir,
+      executablePath: this.binaryPath,
+      ignoreHTTPSErrors: true,
+      args: chromiumArgs,
+      env: {
+        TZ: browserTimezone,
+      },
+    }).catch((error: Error) => {
+      logger.warning(
+        `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports: [${error}]`
+      );
+      logger.warning(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
+      return null;
+    });
   }
 
   create({
@@ -103,10 +100,10 @@ export class HeadlessChromiumDriverFactory {
         proxyConfig: this.browserConfig.proxy,
       });
 
-      let browser: puppeteer.Browser;
-      let page: puppeteer.Page;
+      let browser: Browser;
+      let page: Page;
       try {
-        browser = await puppeteer.launch({
+        browser = await launch({
           pipe: true,
           userDataDir,
           executablePath: this.binaryPath,
