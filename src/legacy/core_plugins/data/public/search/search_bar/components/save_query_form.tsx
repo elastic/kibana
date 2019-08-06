@@ -61,10 +61,10 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
   const [title, setTitle] = useState(savedQuery ? savedQuery.title : '');
   const [description, setDescription] = useState(savedQuery ? savedQuery.description : '');
   const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
-    !!(savedQuery && savedQuery.filters)
+    savedQuery ? !!savedQuery.filters : true
   );
   const [shouldIncludeTimefilter, setIncludeTimefilter] = useState(
-    !!(savedQuery && savedQuery.timefilter)
+    savedQuery ? !!savedQuery.timefilter : false
   );
   const savedQueryDescriptionText = i18n.translate(
     'data.search.searchBar.savedQueryDescriptionText',

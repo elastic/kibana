@@ -159,61 +159,50 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
             </p>
           </EuiText>
         )}
-        {query.query !== '' ? (
-          <EuiFlexGroup direction="rowReverse" alignItems="center" justifyContent="flexEnd">
-            {showSaveQuery && loadedSavedQuery && (
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton onClick={() => onSaveAsNew()}>
-                      {i18n.translate(
-                        'data.search.searchBar.savedQueryPopoverSaveAsNewButtonText',
-                        {
-                          defaultMessage: 'Save As New',
-                        }
-                      )}
-                    </EuiButton>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem>
-                    <EuiButton
-                      fill
-                      onClick={() => onSave()}
-                      disabled={query.query === loadedSavedQuery.attributes.query.query}
-                    >
-                      {i18n.translate(
-                        'data.search.searchBar.savedQueryPopoverSaveChangesButtonText',
-                        {
-                          defaultMessage: 'Save changes',
-                        }
-                      )}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            )}
-            {showSaveQuery && !loadedSavedQuery && (
-              <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={() => onSave()}>
-                  {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
-                    defaultMessage: 'Save',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem />
+        <EuiFlexGroup direction="rowReverse" alignItems="center" justifyContent="flexEnd">
+          {showSaveQuery && loadedSavedQuery && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => onClearSavedQuery()}>
-                {loadedSavedQuery &&
-                  i18n.translate('data.search.searchBar.savedQueryPopoverClearButtonText', {
-                    defaultMessage: 'Clear',
-                  })}
-              </EuiButtonEmpty>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiButton onClick={() => onSaveAsNew()}>
+                    {i18n.translate('data.search.searchBar.savedQueryPopoverSaveAsNewButtonText', {
+                      defaultMessage: 'Save As New',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EuiButton fill onClick={() => onSave()}>
+                    {i18n.translate(
+                      'data.search.searchBar.savedQueryPopoverSaveChangesButtonText',
+                      {
+                        defaultMessage: 'Save changes',
+                      }
+                    )}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          ''
-        )}
+          )}
+          {showSaveQuery && !loadedSavedQuery && (
+            <EuiFlexItem grow={false}>
+              <EuiButton fill onClick={() => onSave()}>
+                {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
+                  defaultMessage: 'Save',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem />
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={() => onClearSavedQuery()}>
+              {loadedSavedQuery &&
+                i18n.translate('data.search.searchBar.savedQueryPopoverClearButtonText', {
+                  defaultMessage: 'Clear',
+                })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
     </EuiPopover>
   );
