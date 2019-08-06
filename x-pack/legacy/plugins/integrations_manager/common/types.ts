@@ -51,8 +51,8 @@ export interface RegistryPackage {
   icon: string;
   requirement: {
     kibana: {
-      min: string;
-      max: string;
+      'version.min': string;
+      'version.max': string;
     };
   };
 }
