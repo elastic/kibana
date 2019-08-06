@@ -2,27 +2,29 @@
 [[canvas-elements]]
 === Customize your workpad with elements
 
-Elements are the core building blocks of your workpad.
+Elements are the building blocks of your workpad. Add and combine elements to create presentations of your data.
 
 [float]
 [[add-canvas-element]]
-=== Add an element to your workpad
+=== Add elements to your workpad
+
+To customize your workpad to look the way you want, add elements to your workpad.
 
 . Click *Add Element*, then select the best element to show off your data. 
 +
-image::images/canvas-element-select.gif[]
+//TODO add image
 +
 Elements come preconfigured with demo data so that you can familiarize yourself with the element. Play around with the default settings and see what the element can do. 
 
-. To move the element, click and drag it across your workpad.
+. To move the element, click and drag it to your preferred location.
++
+You can also select the element, then use your arrow keys to move the element by 1 pixel. 
 +
 As you move the element, notice the alignment lines that appear to help you place the element exactly where you want it.
 
 . To resize the element, click a corner, then drag to the size you want.
 
-. Something about nudging...
-
-. Something about distributing items...
+. Want to delete the element? Select the element, click the *Element options* icon in the top right corner, then select *Delete*.
 
 [float]
 [[connect-element-data]]
@@ -39,8 +41,6 @@ To connect the element to your own data, use the panel on the right.
 ==== Connect the element to Elasticsearch SQL
 
 Use Elasticsearch SQL to generate a data table.
-
-Unfamiliar with writing Elasticsearch SQL queries? Go to {ref}/sql-spec.html[SQL language] for more information.
 
 . Click *Elasticsearch SQL*.
 
@@ -60,6 +60,8 @@ The element appears as a warning.
 +
 To manually refresh the data, click the *Refresh data* icon. 
 
+Unfamiliar with writing Elasticsearch SQL queries? Go to {ref}/sql-spec.html[SQL language] for more information.
+
 [float]
 [[elasticsearch-raw-doc-data-source]]
 ==== Connect the element to Elasticsearch raw documents
@@ -78,7 +80,7 @@ Use the Lucene query syntax to pull back raw documentation from Elasticsearch.
 +
 For for more information about the Lucene query string sytax, refer to <<lucene-query,Lucene Query Syntax>>.
 
-. Click *Preview. 
+. Click *Preview*. 
 
 . If your query looks correct, click *Save*. 
 + 
@@ -100,11 +102,9 @@ To manually refresh the data, click the *Refresh data* icon.
 
 Use Timelion queries to pull back time series data in a tabular format. 
 
-For more information about Timelion, refer to <<timelion,Timelion>>.
-
 . Click *Timelion*.
 
-Enter a *Query* using the Lucene query string syntax. 
+. Enter a *Query* using the Lucene query string syntax. 
 +
 For for more information about the Lucene query string syntax, refer to <<lucene-query,Lucene Query Syntax>>.
 
@@ -124,6 +124,8 @@ The element appears as a warning.
 +
 To manually refresh the data, click the *Refresh data* icon. 
 
+For more information about Timelion, refer to <<timelion,Timelion>>.
+
 [float]
 [[element-display-options]]
 === Choose the display options
@@ -140,25 +142,65 @@ Choose how you want the element to appear on your workpad. For each element type
 
 * To apply a CSS stylesheet to the element, click *CSS*.
 
-. To change the order of the element, use the icons next to *Selected element*.
-
 //For more advanced customization options, create Canvas plugins.
 
 //To further define the appearance and behavior of the element, use the <<canvas-expression-editor,expression editor>>.
 
 [float]
+[[organize-element]]
+=== Organize the elements on your workpad
+
+. Align the elements.
+
+.. Press Shift, then select the elements you want to align.
+
+.. Click the *Element options* icon in the top right corner, then select *Align elements*.
+
+.. From the *Alignment* menu, select the type of alignment.
+
+. Distribute the elements.
+
+.. Press Shift, then select the elements you want to distribute.
+
+.. Click the *Element options* icon in the top right corner, then select *Distribute elements*.
+
+.. From the *Distribution* menu, select the type of distribution.
+
+. Change the order of the elements.
+
+.. Click an element, then click the *Element options* icon in the top right corner. 
+
+.. Select *Order*, then select the action.
+
+[float]
 [[element-save]]
-=== Save an element
+=== Save elements
 
-After you have made changes to the element, save it so that you can use it in future workpads.
+After you have made changes to elements, save them so that you can reuse them across your workpads.
 
-. Next to *Selected element, click the *Save as new element* icon.
+. Make sure that the element is selected.
++
+To save a group of elements, press Shift, then select the elements you want to save.
+
+. Next to *Selected element*, click the *Save as new element* icon.
 
 . In the *Create new element* window, enter a *Name* for the element.
 
 . Enter an optional *Description*, then click *Save*.
 +
 To access the element, click *Add element*, then select *My elements*.
+
+[float]
+[[add-more-pages]]
+=== Add more pages to the workpad
+
+When you have run out of room on your workpad, you can add more pages.
+
+. Click *Page 1*, then click the *+* icon.
+
+. On the *Page* editor, select the page transition from the *Transition* dropdown. 
+
+//TODO insert image
 
 [float]
 [[workpad-display-options]]
@@ -171,19 +213,11 @@ For a better view of the elements on your workpad, change the display options.
 * To zoom in or out on the workpad, click the *Zoom controls* icon in the upper left corder, then select one of the options.
 
 [float]
-[[add-more-pages]]
-=== Add more pages to the workpad
+[[enable-autoplay]]
+=== Enable autoplay 
 
-When you have run out of room on your workpad, you can add more pages.
+Automatically cycle through your workpads pages in fullscreen mode.
 
-. Click *Page 1*, then click the *+* icon.
+. In the upper left corner, click the *Control settings* icon.
 
-. From the *Transition* drop-down list, select the page transition you want to use. 
-
-//TODO insert image
-
-[float]
-[[filter-groups]]
-=== Filter groups
-
-To dynamically change the scope of data on your workpad, apply dropdown and time filter elements. By default, filters apply to all elements. To add filter to specific elements, apply filter groups.
+. Under *Change cycling interval*, select the cycle interval you want to use.
