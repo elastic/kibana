@@ -77,14 +77,14 @@ exports[`after fetch initialFilter 1`] = `
           <React.Fragment>
             <p>
               <FormattedMessage
-                defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                defaultMessage="You can combine data views from any NetMon-UI app into one dashboard and see everything in one place."
                 id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
                 values={Object {}}
               />
             </p>
             <p>
               <FormattedMessage
-                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                defaultMessage="New to NetMon-UI? {sampleDataInstallLink} to take a test drive."
                 id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
                 values={
                   Object {
@@ -167,14 +167,14 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
           <React.Fragment>
             <p>
               <FormattedMessage
-                defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                defaultMessage="You can combine data views from any NetMon-UI app into one dashboard and see everything in one place."
                 id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
                 values={Object {}}
               />
             </p>
             <p>
               <FormattedMessage
-                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                defaultMessage="New to NetMon-UI? {sampleDataInstallLink} to take a test drive."
                 id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
                 values={
                   Object {
@@ -257,14 +257,14 @@ exports[`after fetch renders table rows 1`] = `
           <React.Fragment>
             <p>
               <FormattedMessage
-                defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                defaultMessage="You can combine data views from any NetMon-UI app into one dashboard and see everything in one place."
                 id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
                 values={Object {}}
               />
             </p>
             <p>
               <FormattedMessage
-                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                defaultMessage="New to NetMon-UI? {sampleDataInstallLink} to take a test drive."
                 id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
                 values={
                   Object {
@@ -347,14 +347,14 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
           <React.Fragment>
             <p>
               <FormattedMessage
-                defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                defaultMessage="You can combine data views from any NetMon-UI app into one dashboard and see everything in one place."
                 id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
                 values={Object {}}
               />
             </p>
             <p>
               <FormattedMessage
-                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                defaultMessage="New to NetMon-UI? {sampleDataInstallLink} to take a test drive."
                 id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
                 values={
                   Object {
@@ -437,14 +437,14 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
           <React.Fragment>
             <p>
               <FormattedMessage
-                defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                defaultMessage="You can combine data views from any NetMon-UI app into one dashboard and see everything in one place."
                 id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
                 values={Object {}}
               />
             </p>
             <p>
               <FormattedMessage
-                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                defaultMessage="New to NetMon-UI? {sampleDataInstallLink} to take a test drive."
                 id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
                 values={
                   Object {

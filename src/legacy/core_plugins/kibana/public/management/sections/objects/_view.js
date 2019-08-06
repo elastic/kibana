@@ -247,7 +247,7 @@ uiModules
               }
             ),
             title: i18n.translate('kbn.management.objects.confirmModalOptions.modalTitle', {
-              defaultMessage: 'Delete saved Kibana object?',
+              defaultMessage: 'Delete saved NetMon-UI object?',
             }),
           };
           confirmModal(

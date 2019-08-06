@@ -49,7 +49,7 @@ export const CreateIndexPatternPrompt = ({ onClose }: { onClose: () => void }) =
           <FormattedMessage
             id="kbn.management.indexPatternPrompt.subtitle"
             defaultMessage="Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in
-          Kibana."
+            NetMon-UI."
           />
         </p>
       </EuiText>

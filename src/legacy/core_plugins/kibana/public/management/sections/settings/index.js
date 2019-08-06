@@ -114,7 +114,7 @@ FeatureCatalogueRegistryProvider.register(() => {
       defaultMessage: 'Advanced Settings',
     }),
     description: i18n.translate('kbn.management.settings.advancedSettingsDescription', {
-      defaultMessage: 'Directly edit settings that control behavior in Kibana.',
+      defaultMessage: 'Directly edit settings that control behavior in NetMon-UI.',
     }),
     icon: 'advancedSettingsApp',
     path: '/app/kibana#/management/kibana/settings',

@@ -9,15 +9,15 @@
   <p
     i18n-id="common.ui.errorAutoCreateIndex.errorDescription"
     i18n-default-message="It looks like your Elasticsearch cluster's {autoCreateIndexActionConfig} setting is
-    preventing Kibana from automatically creating an index to store saved objects. Kibana uses this
+    preventing NetMon from automatically creating an index to store saved objects. NetMon uses this
     Elasticsearch feature because it is the best way to make sure that the saved object index uses
-    the correct mappings/schema, and it allows Kibana to poll Elasticsearch less often."
+    the correct mappings/schema, and it allows NetMon to poll Elasticsearch less often."
     i18n-values="{ html_autoCreateIndexActionConfig: '<code>action.auto_create_index</code>' }"
   ></p>
 
   <p
     i18n-id="common.ui.errorAutoCreateIndex.errorDisclaimer"
-    i18n-default-message="Unfortunately, until this issue is fixed you won't be able to save anything in Kibana."
+    i18n-default-message="Unfortunately, until this issue is fixed you won't be able to save anything in NetMon-UI."
   ></p>
 
   <h3
@@ -34,7 +34,7 @@
       i18n-id="common.ui.errorAutoCreateIndex.howToFixError.restartText"
       i18n-default-message="Restart elasticsearch."
     ></li>
-    <li 
+    <li
       i18n-id="common.ui.errorAutoCreateIndex.howToFixError.goBackText"
       i18n-default-message="Use the browser's back button to return to what you were doing."
     ></li>
@@ -61,7 +61,7 @@
         i18n-default-message="The {autoCreateIndexActionConfig} can also define a whitelist of patterns where this
         feature should be enabled. We don't discuss how to use the setting that way here because it
         requires knowing all of the other plugins/interactions that rely on the feature for the same
-        reasons that Kibana does."
+        reasons that NetMon-UI does."
         i18n-values="{ html_autoCreateIndexActionConfig: '<code>action.auto_create_index</code>' }"
       ></div>
     </div>

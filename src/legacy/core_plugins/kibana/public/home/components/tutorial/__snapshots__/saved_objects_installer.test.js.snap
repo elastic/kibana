@@ -139,7 +139,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                   isLoading={false}
                   onClick={[Function]}
                 >
-                  Load Kibana objects
+                  Load NetMon-UI objects
                 </EuiButton>
               </EuiFlexItem>
             </ForwardRef>
@@ -154,7 +154,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
           </React.Fragment>,
           "key": "installStep",
           "status": "incomplete",
-          "title": "Load Kibana objects",
+          "title": "Load NetMon-UI objects",
         },
       ]
     }
@@ -167,7 +167,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
         key="installStep"
         status="incomplete"
         step={1}
-        title="Load Kibana objects"
+        title="Load NetMon-UI objects"
       >
         <div
           className="euiStep"
@@ -204,7 +204,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
               <p
                 className="euiTitle euiTitle--small euiStep__title"
               >
-                Load Kibana objects
+                Load NetMon-UI objects
               </p>
             </EuiTitle>
           </div>
@@ -256,7 +256,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                           <span
                             className="euiButton__text"
                           >
-                            Load Kibana objects
+                            Load NetMon-UI objects
                           </span>
                         </span>
                       </button>
@@ -439,7 +439,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   isLoading={false}
                   onClick={[Function]}
                 >
-                  Load Kibana objects
+                  Load NetMon-UI objects
                 </EuiButton>
               </EuiFlexItem>
             </ForwardRef>
@@ -454,7 +454,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
           </React.Fragment>,
           "key": "installStep",
           "status": "complete",
-          "title": "Load Kibana objects",
+          "title": "Load NetMon-UI objects",
         },
       ]
     }
@@ -467,7 +467,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
         key="installStep"
         status="complete"
         step={1}
-        title="Load Kibana objects"
+        title="Load NetMon-UI objects"
       >
         <div
           className="euiStep"
@@ -538,7 +538,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
               <p
                 className="euiTitle euiTitle--small euiStep__title"
               >
-                Load Kibana objects
+                Load NetMon-UI objects
               </p>
             </EuiTitle>
           </div>
@@ -590,7 +590,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                           <span
                             className="euiButton__text"
                           >
-                            Load Kibana objects
+                            Load NetMon-UI objects
                           </span>
                         </span>
                       </button>
@@ -659,7 +659,7 @@ exports[`renders 1`] = `
                 isLoading={false}
                 onClick={[Function]}
               >
-                Load Kibana objects
+                Load NetMon-UI objects
               </EuiButton>
             </EuiFlexItem>
           </ForwardRef>
@@ -669,7 +669,7 @@ exports[`renders 1`] = `
         </React.Fragment>,
         "key": "installStep",
         "status": "incomplete",
-        "title": "Load Kibana objects",
+        "title": "Load NetMon-UI objects",
       },
     ]
   }

@@ -33,7 +33,7 @@ export default function(chrome, internals) {
     internals.appUrlStore.removeItem(verifySessionStorage);
   } catch (error) {
     throw new Error(
-      'Kibana requires access to sessionStorage, and it looks like ' +
+      'NetMon-UI requires access to sessionStorage, and it looks like ' +
         "your browser is restricting it. If you're " +
         'using Safari with private browsing enabled, you can solve this ' +
         'problem by disabling private browsing, or by using another browser.'

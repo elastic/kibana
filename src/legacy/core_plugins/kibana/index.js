@@ -76,7 +76,7 @@ export default function(kibana) {
       ],
       app: {
         id: 'kibana',
-        title: 'Kibana',
+        title: 'NetMon',
         listed: false,
         main: 'plugins/kibana/kibana',
       },

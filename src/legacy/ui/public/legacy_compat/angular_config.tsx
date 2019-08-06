@@ -306,7 +306,7 @@ const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
       if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
         toastNotifications.addWarning({
           title: i18n.translate('common.ui.chrome.bigUrlWarningNotificationTitle', {
-            defaultMessage: 'The URL is big and Kibana might stop working',
+            defaultMessage: 'The URL is big and NetMon-UI might stop working',
           }),
           text: (
             <Fragment>

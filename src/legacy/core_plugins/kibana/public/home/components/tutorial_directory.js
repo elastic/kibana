@@ -153,7 +153,7 @@ class TutorialDirectoryUi extends React.Component {
       }),
       description: this.props.intl.formatMessage({
         id: 'kbn.home.tutorial.card.sampleDataDescription',
-        defaultMessage: 'Get started exploring Kibana with these "one click" data sets.',
+        defaultMessage: 'Get started exploring NetMon-UI with these "one click" data sets.',
       }),
       url: this.props.addBasePath('#/home/tutorial_directory/sampleData'),
       elasticCloud: true,
@@ -235,7 +235,7 @@ class TutorialDirectoryUi extends React.Component {
             <h1>
               <FormattedMessage
                 id="kbn.home.tutorial.addDataToKibanaTitle"
-                defaultMessage="Add Data to Kibana"
+                defaultMessage="Add Data to NetMon"
               />
             </h1>
           </EuiTitle>

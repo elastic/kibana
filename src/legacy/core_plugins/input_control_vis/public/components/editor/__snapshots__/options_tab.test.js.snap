@@ -16,7 +16,7 @@ exports[`OptionsTab should renders OptionsTab 1`] = `
       data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
       label={
         <FormattedMessage
-          defaultMessage="Update Kibana filters on each change"
+          defaultMessage="Update NetMon-UI filters on each change"
           id="inputControl.editor.optionsTab.updateFilterLabel"
           values={Object {}}
         />

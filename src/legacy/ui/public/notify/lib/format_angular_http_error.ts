@@ -39,7 +39,7 @@ export function formatAngularHttpError(error: AngularHttpError) {
     return i18n.translate('common.ui.notify.fatalError.unavailableServerErrorMessage', {
       defaultMessage:
         'An HTTP request has failed to connect. ' +
-        'Please check if the Kibana server is running and that your browser has a working connection, ' +
+        'Please check if the NetMon-UI server is running and that your browser has a working connection, ' +
         'or contact your system administrator.',
     });
   }

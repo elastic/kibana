@@ -35,7 +35,7 @@ export function netflowSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.netflow.tutorialLongDescription', {
       defaultMessage:
         'The Logstash Netflow module collects and parses network flow data, \
-indexes the events into Elasticsearch, and installs a suite of Kibana dashboards. \
+indexes the events into Elasticsearch, and installs a suite of NetMon dashboards. \
 This module support Netflow Version 5 and 9. [Learn more]({linkUrl}).',
       values: {
         linkUrl: '{config.docs.logstash}/netflow-module.html',
