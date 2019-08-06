@@ -28,8 +28,6 @@ import {
   KuiTableBody,
 } from '../../../../components';
 
-import { RIGHT_ALIGNMENT } from '../../../../src/services';
-
 export function TableWithMenuButtons() {
   return (
     <KuiTable>
