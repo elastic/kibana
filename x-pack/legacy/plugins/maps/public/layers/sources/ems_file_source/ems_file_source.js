@@ -8,7 +8,7 @@ import { AbstractVectorSource } from '../vector_source';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import React from 'react';
 import { EMS_FILE } from '../../../../common/constants';
-import { getEmsVectorFilesMeta } from '../../../meta';
+import { getEMSClient } from '../../../meta';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -57,10 +57,11 @@ export class EMSFileSource extends AbstractVectorSource {
     );
   }
 
-  async _getEmsVectorFileMeta() {
-    const emsFiles = await getEmsVectorFilesMeta();
-    const meta = emsFiles.find((source => source.id === this._descriptor.id));
-    if (!meta) {
+  async _getEMSFileLayer() {
+    const emsClient = getEMSClient();
+    const emsFileLayers = await emsClient.getFileLayers();
+    const emsFileLayer = emsFileLayers.find((fileLayer => fileLayer.getId() === this._descriptor.id));
+    if (!emsFileLayer) {
       throw new Error(i18n.translate('xpack.maps.source.emsFile.unableToFindIdErrorMessage', {
         defaultMessage: `Unable to find EMS vector shapes for id: {id}`,
         values: {
@@ -68,15 +69,15 @@ export class EMSFileSource extends AbstractVectorSource {
         }
       }));
     }
-    return meta;
+    return emsFileLayer;
   }
 
   async getGeoJsonWithMeta() {
-    const emsVectorFileMeta = await this._getEmsVectorFileMeta();
+    const emsFileLayer = await this._getEMSFileLayer();
     const featureCollection = await AbstractVectorSource.getGeoJson({
-      format: emsVectorFileMeta.format,
+      format: emsFileLayer.getDefaultFormatType(),
       featureCollectionPath: 'data',
-      fetchUrl: emsVectorFileMeta.url
+      fetchUrl: emsFileLayer.getDefaultFormatUrl()
     });
     return {
       data: featureCollection,
@@ -87,8 +88,8 @@ export class EMSFileSource extends AbstractVectorSource {
   async getImmutableProperties() {
     let emsLink;
     try {
-      const emsVectorFileMeta = await this._getEmsVectorFileMeta();
-      emsLink = emsVectorFileMeta.emsLink;
+      const emsFileLayer = await this._getEMSFileLayer();
+      emsLink = emsFileLayer.getEMSHotLink();
     } catch(error) {
       // ignore error if EMS layer id could not be found
     }
@@ -110,22 +111,23 @@ export class EMSFileSource extends AbstractVectorSource {
 
   async getDisplayName() {
     try {
-      const emsVectorFileMeta = await this._getEmsVectorFileMeta();
-      return emsVectorFileMeta.name;
+      const emsFileLayer = await this._getEMSFileLayer();
+      return emsFileLayer.getDisplayName();
     } catch (error) {
       return this._descriptor.id;
     }
   }
 
   async getAttributions() {
-    const emsVectorFileMeta = await this._getEmsVectorFileMeta();
-    return emsVectorFileMeta.attributions;
+    const emsFileLayer = await this._getEMSFileLayer();
+    return emsFileLayer.getAttributions();
   }
 
 
   async getLeftJoinFields() {
-    const emsVectorFileMeta = await this._getEmsVectorFileMeta();
-    return emsVectorFileMeta.fields.map(f => {
+    const emsFileLayer = await this._getEMSFileLayer();
+    const fields = emsFileLayer.getFieldsInLanguage();
+    return fields.map(f => {
       return { name: f.name, label: f.description };
     });
   }
@@ -135,14 +137,15 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   async filterAndFormatPropertiesToHtml(properties) {
-    const meta = await this._getEmsVectorFileMeta();
+    const emsFileLayer = await this._getEMSFileLayer();
     const tooltipProperties = [];
+    const fields = emsFileLayer.getFieldsInLanguage();
     for (const key in properties) {
       if (properties.hasOwnProperty(key) && this._descriptor.tooltipProperties.indexOf(key) > -1) {
         let newFieldName = key;
-        for (let i = 0; i < meta.fields.length; i++) {
-          if (meta.fields[i].name === key) {
-            newFieldName = meta.fields[i].description;
+        for (let i = 0; i < fields.length; i++) {
+          if (fields[i].name === key) {
+            newFieldName = fields[i].description;
             break;
           }
         }

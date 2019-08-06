@@ -34,7 +34,8 @@ export function getObjectReferencesToFetch(savedObjectsMap: Map<string, SavedObj
 
 export async function injectNestedDependencies(
   savedObjects: SavedObject[],
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  namespace?: string
 ) {
   const savedObjectsMap = new Map<string, SavedObject>();
   for (const savedObject of savedObjects) {
@@ -42,7 +43,7 @@ export async function injectNestedDependencies(
   }
   let objectsToFetch = getObjectReferencesToFetch(savedObjectsMap);
   while (objectsToFetch.length > 0) {
-    const bulkGetResponse = await savedObjectsClient.bulkGet(objectsToFetch);
+    const bulkGetResponse = await savedObjectsClient.bulkGet(objectsToFetch, { namespace });
     // Check for errors
     const erroredObjects = bulkGetResponse.saved_objects.filter(obj => !!obj.error);
     if (erroredObjects.length) {

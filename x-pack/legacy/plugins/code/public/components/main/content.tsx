@@ -14,7 +14,7 @@ import ReactMarkdown from 'react-markdown';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
-import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import {
@@ -122,7 +122,9 @@ class CodeContent extends React.PureComponent<Props> {
     const { path, resource, org, repo, revision } = this.props.match.params;
     const repoUri = `${resource}/${org}/${repo}`;
     window.open(
-      chrome.addBasePath(`/app/code/repo/${repoUri}/raw/${encodeRevisionString(revision)}/${path}`)
+      npStart.core.http.basePath.prepend(
+        `/app/code/repo/${repoUri}/raw/${encodeRevisionString(revision)}/${path}`
+      )
     );
   };
 
@@ -221,6 +223,7 @@ class CodeContent extends React.PureComponent<Props> {
       return (
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
           <EuiButtonGroup
+            className="codeButtonGroup"
             buttonSize="s"
             color="primary"
             options={[
@@ -386,7 +389,9 @@ class CodeContent extends React.PureComponent<Props> {
             </div>
           );
         } else if (isImage) {
-          const rawUrl = chrome.addBasePath(`/app/code/repo/${repoUri}/raw/${revision}/${path}`);
+          const rawUrl = npStart.core.http.basePath.prepend(
+            `/app/code/repo/${repoUri}/raw/${revision}/${path}`
+          );
           return (
             <div className="code-auto-margin">
               <img src={rawUrl} alt={rawUrl} />

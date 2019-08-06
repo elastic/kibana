@@ -32,7 +32,7 @@ import { SourceConfigurationFlyoutState } from '../../components/source_configur
 import { LogHighlightsBridge } from '../../containers/logs/log_highlights';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
-  const { derivedIndexPattern, source, sourceId, version } = useContext(Source.Context);
+  const { createDerivedIndexPattern, source, sourceId, version } = useContext(Source.Context);
   const { intervalSize, textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
     setFlyoutVisibility,
@@ -44,6 +44,8 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     isLoading,
   } = useContext(LogFlyoutState.Context);
   const { showLogsConfiguration } = useContext(SourceConfigurationFlyoutState.Context);
+
+  const derivedIndexPattern = createDerivedIndexPattern('logs');
 
   return (
     <>

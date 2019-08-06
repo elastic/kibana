@@ -32,6 +32,7 @@ const {
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
+const { parseSettings, SettingsFilter } = require('./settings');
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>
@@ -250,9 +251,13 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
-    const args = extractConfigFiles(options.esArgs || [], installPath, {
-      log: this._log,
-    }).reduce((acc, cur) => acc.concat(['-E', cur]), []);
+    const args = parseSettings(
+      extractConfigFiles(options.esArgs || [], installPath, { log: this._log }),
+      { filter: SettingsFilter.NonSecureOnly }
+    ).reduce(
+      (acc, [settingName, settingValue]) => acc.concat(['-E', `${settingName}=${settingValue}`]),
+      []
+    );
 
     this._log.debug('%s %s', ES_BIN, args.join(' '));
 

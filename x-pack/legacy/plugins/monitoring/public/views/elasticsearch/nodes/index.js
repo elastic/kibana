@@ -16,6 +16,7 @@ import { ElasticsearchNodes } from '../../../components';
 import { I18nContext } from 'ui/i18n';
 import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
 import { SetupModeRenderer } from '../../../components/renderers';
+import { ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/nodes', {
   template,
@@ -82,7 +83,7 @@ uiRoutes.when('/elasticsearch/nodes', {
             <SetupModeRenderer
               scope={$scope}
               injector={$injector}
-              productName="elasticsearch"
+              productName={ELASTICSEARCH_CUSTOM_ID}
               render={({ setupMode, flyoutComponent }) => (
                 <Fragment>
                   {flyoutComponent}

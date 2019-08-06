@@ -39,7 +39,6 @@ test('successfully executes', async () => {
   const actionType = {
     id: 'test',
     name: 'Test',
-    unencryptedAttributes: [],
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -47,10 +46,10 @@ test('successfully executes', async () => {
     type: 'action',
     attributes: {
       actionTypeId: 'test',
-      actionTypeConfig: {
+      config: {
         bar: true,
       },
-      actionTypeConfigSecrets: {
+      secrets: {
         baz: true,
       },
     },
@@ -74,17 +73,18 @@ test('successfully executes', async () => {
     services: expect.anything(),
     config: {
       bar: true,
+    },
+    secrets: {
       baz: true,
     },
     params: { foo: true },
   });
 });
 
-test('provides empty config when actionTypeConfig and / or actionTypeConfigSecrets is empty', async () => {
+test('provides empty config when config and / or secrets is empty', async () => {
   const actionType = {
     id: 'test',
     name: 'Test',
-    unencryptedAttributes: [],
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -102,14 +102,13 @@ test('provides empty config when actionTypeConfig and / or actionTypeConfigSecre
 
   expect(actionType.executor).toHaveBeenCalledTimes(1);
   const executorCall = actionType.executor.mock.calls[0][0];
-  expect(executorCall.config).toMatchInlineSnapshot(`Object {}`);
+  expect(executorCall.config).toMatchInlineSnapshot(`undefined`);
 });
 
 test('throws an error when config is invalid', async () => {
   const actionType = {
     id: 'test',
     name: 'Test',
-    unencryptedAttributes: [],
     validate: {
       config: schema.object({
         param1: schema.string(),
@@ -133,7 +132,7 @@ test('throws an error when config is invalid', async () => {
   expect(result).toEqual({
     status: 'error',
     retry: false,
-    message: `The actionTypeConfig is invalid: [param1]: expected value of type [string] but got [undefined]`,
+    message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
   });
 });
 
@@ -141,7 +140,6 @@ test('throws an error when params is invalid', async () => {
   const actionType = {
     id: 'test',
     name: 'Test',
-    unencryptedAttributes: [],
     validate: {
       params: schema.object({
         param1: schema.string(),
@@ -165,6 +163,6 @@ test('throws an error when params is invalid', async () => {
   expect(result).toEqual({
     status: 'error',
     retry: false,
-    message: `The actionParams is invalid: [param1]: expected value of type [string] but got [undefined]`,
+    message: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
   });
 });
