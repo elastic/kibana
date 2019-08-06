@@ -49,6 +49,7 @@ describe('DashboardState', function() {
     isAutoRefreshSelectorEnabled: true,
     isTimeRangeSelectorEnabled: true,
   };
+
   function initDashboardState() {
     dashboardState = new DashboardStateManager({
       savedDashboard,

@@ -36,8 +36,7 @@ import { dispatchRenderComplete } from '../../../render_complete';
 import { PipelineDataLoader } from '../pipeline_data_loader';
 import { VisualizeDataLoader } from '../visualize_data_loader';
 import { PersistedState } from '../../../persisted_state';
-import { DataAdapter } from '../../../inspector/adapters/data';
-import { RequestAdapter } from '../../../inspector/adapters/request';
+import { DataAdapter, RequestAdapter } from '../../../inspector/adapters';
 
 describe('visualize loader', () => {
 

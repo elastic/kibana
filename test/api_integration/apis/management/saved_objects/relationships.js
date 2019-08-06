@@ -52,7 +52,7 @@ export default function ({ getService }) {
     const getSavedObjectTypesQuery = types => coerceToArray(types).map(type => `savedObjectTypes=${type}`).join('&');
     const defaultQuery = getSavedObjectTypesQuery(['visualization', 'index-pattern', 'search', 'dashboard']);
 
-    describe('searches', async () => {
+    describe('searches', () => {
       it('should validate search response schema', async () => {
         await supertest
           .get(`${baseApiUrl}/search/960372e0-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
@@ -145,7 +145,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('dashboards', async () => {
+    describe('dashboards', () => {
       it('should validate dashboard response schema', async () => {
         await supertest
           .get(`${baseApiUrl}/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
@@ -240,7 +240,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('visualizations', async () => {
+    describe('visualizations', () => {
       it('should validate visualization response schema', async () => {
         await supertest
           .get(`${baseApiUrl}/visualization/a42c0580-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
@@ -320,7 +320,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('index patterns', async () => {
+    describe('index patterns', () => {
       it('should validate visualization response schema', async () => {
         await supertest
           .get(`${baseApiUrl}/index-pattern/8963ca30-3224-11e8-a572-ffca06da1357?${defaultQuery}`)

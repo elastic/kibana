@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('shows lose changes warning', async function () {
+    describe('shows lose changes warning', function () {
       describe('and loses changes on confirmation', function () {
         beforeEach(async function () {
           await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
@@ -195,7 +195,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('Does not show lose changes warning', async function () {
+    describe('Does not show lose changes warning', function () {
       it('when time changed is not stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });

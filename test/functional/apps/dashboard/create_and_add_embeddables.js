@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe('create and add embeddables', async () => {
+  describe('create and add embeddables', () => {
     before(async () => {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });

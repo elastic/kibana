@@ -4,14 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { RequestQuery, ResponseToolkit, RouteOptions, ServerRoute } from 'hapi';
 import JoiNamespace from 'joi';
+import { Legacy } from 'kibana';
 import moment from 'moment';
 import { resolve } from 'path';
 
-import { init } from './server/init';
+import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { APP_TITLE } from './common/constants';
 import { LanguageServers, LanguageServersDeveloping } from './server/lsp/language_servers';
+import { codePlugin } from './server';
+
+export type RequestFacade = Legacy.Request;
+export type RequestQueryFacade = RequestQuery;
+export type ResponseToolkitFacade = ResponseToolkit;
+export type RouteOptionsFacade = RouteOptions;
+export type ServerFacade = Legacy.Server;
+export type ServerRouteFacade = ServerRoute;
 
 export const code = (kibana: any) =>
   new kibana.Plugin({
@@ -23,11 +32,11 @@ export const code = (kibana: any) =>
     uiExports: {
       app: {
         title: APP_TITLE,
-        main: 'plugins/code/app',
+        main: 'plugins/code/index',
         euiIconType: 'codeApp',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      injectDefaultVars(server: Server) {
+      injectDefaultVars(server: ServerFacade) {
         const config = server.config();
         return {
           codeUiEnabled: config.get('xpack.code.ui.enabled'),
@@ -55,12 +64,12 @@ export const code = (kibana: any) =>
         queueIndex: Joi.string().default('.code_internal-worker-queue'),
         // 1 hour by default.
         queueTimeoutMs: Joi.number().default(moment.duration(1, 'hour').asMilliseconds()),
-        // The frequency which update scheduler executes. 5 minutes by default.
-        updateFrequencyMs: Joi.number().default(moment.duration(5, 'minute').asMilliseconds()),
+        // The frequency which update scheduler executes. 1 minute by default.
+        updateFrequencyMs: Joi.number().default(moment.duration(1, 'minute').asMilliseconds()),
         // The frequency which index scheduler executes. 1 day by default.
         indexFrequencyMs: Joi.number().default(moment.duration(1, 'day').asMilliseconds()),
-        // The frequency which each repo tries to update. 1 hour by default.
-        updateRepoFrequencyMs: Joi.number().default(moment.duration(1, 'hour').asMilliseconds()),
+        // The frequency which each repo tries to update. 5 minutes by default.
+        updateRepoFrequencyMs: Joi.number().default(moment.duration(5, 'minute').asMilliseconds()),
         // The frequency which each repo tries to index. 1 day by default.
         indexRepoFrequencyMs: Joi.number().default(moment.duration(1, 'day').asMilliseconds()),
         // whether we want to show more logs
@@ -93,11 +102,37 @@ export const code = (kibana: any) =>
             .default(['https', 'git', 'ssh']),
           enableGitCertCheck: Joi.boolean().default(true),
         }).default(),
+        disk: Joi.object({
+          thresholdEnabled: Joi.bool().default(true),
+          watermarkLowMb: Joi.number().default(2048),
+        }).default(),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
-        disableIndexScheduler: Joi.boolean().default(false),
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now
         codeNodeUrl: Joi.string(),
       }).default();
     },
-    init,
+    init(server: ServerFacade, options: any) {
+      if (!options.ui.enabled) {
+        return;
+      }
+
+      const initializerContext = {} as PluginInitializerContext;
+      const coreSetup = ({
+        http: { server },
+      } as any) as CoreSetup;
+
+      // Set up with the new platform plugin lifecycle API.
+      const plugin = codePlugin(initializerContext);
+      plugin.setup(coreSetup, options);
+
+      // @ts-ignore
+      const kbnServer = this.kbnServer;
+      kbnServer.ready().then(async () => {
+        await plugin.start(coreSetup);
+      });
+
+      server.events.on('stop', async () => {
+        await plugin.stop();
+      });
+    },
   });

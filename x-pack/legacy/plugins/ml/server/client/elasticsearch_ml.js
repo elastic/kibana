@@ -737,4 +737,18 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'POST'
   });
 
+  ml.rollupIndexCapabilities = ca({
+    urls: [
+      {
+        fmt: '/<%=indexPattern%>/_rollup/data',
+        req: {
+          indexPattern: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'GET'
+  });
+
 };

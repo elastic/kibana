@@ -18,9 +18,9 @@
  */
 
 import { SavedObject } from '../service';
-import { Retry } from './types';
+import { SavedObjectsImportRetry } from './types';
 
-export function createObjectsFilter(retries: Retry[]) {
+export function createObjectsFilter(retries: SavedObjectsImportRetry[]) {
   const retryKeys = new Set<string>(retries.map(retry => `${retry.type}:${retry.id}`));
   return (obj: SavedObject) => {
     return retryKeys.has(`${obj.type}:${obj.id}`);

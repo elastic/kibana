@@ -41,6 +41,7 @@ export type getInitialContextFunction = () => InitialContextObject;
 export interface Handlers {
   getInitialContext: getInitialContextFunction;
   inspectorAdapters?: Adapters;
+  abortSignal?: AbortSignal;
 }
 
 type Context = object;

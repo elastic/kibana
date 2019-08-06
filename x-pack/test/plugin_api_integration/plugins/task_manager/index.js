@@ -31,7 +31,7 @@ export default function (kibana) {
           // taskInstance.params has the following optional fields:
           // nextRunMilliseconds: number - If specified, the run method will return a runAt that is now + nextRunMilliseconds
           // failWith: string - If specified, the task will throw an error with the specified message
-          createTaskRunner: ({ kbnServer, taskInstance }) => ({
+          createTaskRunner: ({ taskInstance }) => ({
             async run() {
               const { params, state } = taskInstance;
               const prevState = state || { count: 0 };
@@ -40,7 +40,7 @@ export default function (kibana) {
                 throw new Error(params.failWith);
               }
 
-              const callCluster = kbnServer.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+              const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
               await callCluster('index', {
                 index: '.task_manager_test_result',
                 body: {

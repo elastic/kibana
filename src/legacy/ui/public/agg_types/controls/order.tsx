@@ -30,7 +30,6 @@ function OrderParamEditor({
   setValue,
   setValidity,
   setTouched,
-  wrappedWithInlineComp,
 }: AggParamEditorProps<OptionedValueProp> & OptionedParamEditorProps) {
   const label = i18n.translate('common.ui.aggTypes.orderLabel', {
     defaultMessage: 'Order',

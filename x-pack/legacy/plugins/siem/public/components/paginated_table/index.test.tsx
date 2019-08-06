@@ -47,7 +47,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -66,7 +65,7 @@ describe('Paginated Table Component', () => {
         <ThemeProvider theme={theme}>
           <PaginatedTable
             columns={getHostsColumns()}
-            headerCount={1}
+            headerCount={-1}
             headerSupplement={<p>{'My test supplement.'}</p>}
             headerTitle="Hosts"
             headerTooltip="My test tooltip"
@@ -74,7 +73,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={true}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={[]}
             showMorePagesIndicator={true}
@@ -86,7 +84,7 @@ describe('Paginated Table Component', () => {
       );
 
       expect(
-        wrapper.find('[data-test-subj="InitialLoadingPanelPaginatedTable"]').exists()
+        wrapper.find('[data-test-subj="initialLoadingPanelPaginatedTable"]').exists()
       ).toBeTruthy();
     });
 
@@ -103,7 +101,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={true}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -114,7 +111,7 @@ describe('Paginated Table Component', () => {
         </ThemeProvider>
       );
 
-      expect(wrapper.find('[data-test-subj="LoadingPanelPaginatedTable"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="loadingPanelPaginatedTable"]').exists()).toBeTruthy();
     });
 
     test('it renders the correct amount of pages and starts at activePage: 0', () => {
@@ -130,7 +127,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -167,7 +163,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -198,7 +193,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={[]}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -226,7 +220,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={jest.fn()}
             onChange={mockOnChange}
             pageOfItems={mockData.Hosts.edges}
@@ -255,7 +248,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -285,7 +277,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -311,7 +302,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -339,7 +329,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -369,7 +358,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -408,7 +396,6 @@ describe('Paginated Table Component', () => {
         itemsPerRow: rowItems,
         limit: 1,
         loading: false,
-        loadingTitle: 'Hosts',
         loadPage: newActivePage => loadPage(newActivePage),
         pageOfItems: mockData.Hosts.edges,
         showMorePagesIndicator: true,
@@ -453,7 +440,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -490,7 +476,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={jest.fn()}
             onChange={mockOnChange}
             pageOfItems={mockData.Hosts.edges}

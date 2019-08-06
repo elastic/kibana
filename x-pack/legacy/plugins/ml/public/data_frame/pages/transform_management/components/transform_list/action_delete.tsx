@@ -28,7 +28,7 @@ interface DeleteActionProps {
 }
 
 export const DeleteAction: SFC<DeleteActionProps> = ({ item }) => {
-  const disabled = item.state.task_state === DATA_FRAME_TASK_STATE.STARTED;
+  const disabled = item.stats.task_state === DATA_FRAME_TASK_STATE.STARTED;
 
   const canDeleteDataFrame: boolean = checkPermission('canDeleteDataFrame');
 

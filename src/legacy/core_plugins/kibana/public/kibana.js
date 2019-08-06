@@ -60,7 +60,6 @@ import './context';
 import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
-import 'ui/timepicker';
 import { showAppRedirectNotification } from 'ui/notify';
 import 'leaflet';
 

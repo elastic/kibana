@@ -32,7 +32,7 @@ import {
 
 import { ViewMode } from '../../../embeddable_api/public';
 
-export type NavAction = (menuItem: any, navController: any, anchorElement: any) => void;
+export type NavAction = (anchorElement?: any) => void;
 
 export interface GridData {
   w: number;

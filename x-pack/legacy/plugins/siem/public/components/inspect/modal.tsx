@@ -25,14 +25,14 @@ import styled from 'styled-components';
 import * as i18n from './translations';
 
 const DescriptionListStyled = styled(EuiDescriptionList)`
-  dt .euiToolTipAnchor {
-    padding-left: 5px;
-  }
-  dt.euiDescriptionList__title {
-    width: 30% !important;
-  }
-  dd.euiDescriptionList__description {
-    width: 70% !important;
+  @media only screen and (min-width: ${props => props.theme.eui.euiBreakpoints.s}) {
+    .euiDescriptionList__title {
+      width: 30% !important;
+    }
+
+    .euiDescriptionList__description {
+      width: 70% !important;
+    }
   }
 `;
 
@@ -103,8 +103,8 @@ export const ModalInspectQuery = ({
     {
       title: (
         <span data-test-subj="index-pattern-title">
-          {i18n.INDEX_PATTERN}
-          <EuiIconTip content={i18n.INDEX_PATTERN_DESC} position="top" type="iInCircle" />
+          {i18n.INDEX_PATTERN}{' '}
+          <EuiIconTip color="subdued" content={i18n.INDEX_PATTERN_DESC} type="iInCircle" />
         </span>
       ),
       description: (
@@ -117,8 +117,8 @@ export const ModalInspectQuery = ({
     {
       title: (
         <span data-test-subj="query-time-title">
-          {i18n.QUERY_TIME}
-          <EuiIconTip content={i18n.QUERY_TIME_DESC} position="top" type="iInCircle" />
+          {i18n.QUERY_TIME}{' '}
+          <EuiIconTip color="subdued" content={i18n.QUERY_TIME_DESC} type="iInCircle" />
         </span>
       ),
       description: (
@@ -132,8 +132,8 @@ export const ModalInspectQuery = ({
     {
       title: (
         <span data-test-subj="request-timestamp-title">
-          {i18n.REQUEST_TIMESTAMP}
-          <EuiIconTip content={i18n.REQUEST_TIMESTAMP_DESC} position="top" type="iInCircle" />
+          {i18n.REQUEST_TIMESTAMP}{' '}
+          <EuiIconTip color="subdued" content={i18n.REQUEST_TIMESTAMP_DESC} type="iInCircle" />
         </span>
       ),
       description: (

@@ -39,15 +39,21 @@ export interface KibanaRequestRoute {
 }
 
 /**
+ * @deprecated
+ * `hapi` request object, supported during migration process only for backward compatibility.
+ * @public
+ */
+export interface LegacyRequest extends Request {} // eslint-disable-line @typescript-eslint/no-empty-interface
+
+/**
  * Kibana specific abstraction for an incoming request.
  * @public
- * */
+ */
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
    * @internal
-   *
    */
   public static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     req: Request,
@@ -68,6 +74,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
    * Validates the different parts of a request based on the schemas defined for
    * the route. Builds up the actual params, query and body object that will be
    * received in the route handler.
+   * @internal
    */
   private static validate<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     req: Request,
@@ -86,16 +93,25 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     }
 
     const params =
-      routeSchemas.params === undefined ? {} : routeSchemas.params.validate(req.params);
+      routeSchemas.params === undefined
+        ? {}
+        : routeSchemas.params.validate(req.params, {}, 'request params');
 
-    const query = routeSchemas.query === undefined ? {} : routeSchemas.query.validate(req.query);
+    const query =
+      routeSchemas.query === undefined
+        ? {}
+        : routeSchemas.query.validate(req.query, {}, 'request query');
 
-    const body = routeSchemas.body === undefined ? {} : routeSchemas.body.validate(req.payload);
+    const body =
+      routeSchemas.body === undefined
+        ? {}
+        : routeSchemas.body.validate(req.payload, {}, 'request body');
 
     return { query, params, body };
   }
-
+  /** a WHATWG URL standard object. */
   public readonly url: Url;
+  /** matched route details */
   public readonly route: RecursiveReadonly<KibanaRequestRoute>;
   /**
    * Readonly copy of incoming request headers.
@@ -145,14 +161,14 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
  * Returns underlying Hapi Request
  * @internal
  */
-export const ensureRawRequest = (request: KibanaRequest | Request) =>
+export const ensureRawRequest = (request: KibanaRequest | LegacyRequest) =>
   isKibanaRequest(request) ? request[requestSymbol] : request;
 
 function isKibanaRequest(request: unknown): request is KibanaRequest {
   return request instanceof KibanaRequest;
 }
 
-function isRequest(request: any): request is Request {
+function isRequest(request: any): request is LegacyRequest {
   try {
     return request.raw.req && typeof request.raw.req === 'object';
   } catch {
@@ -164,6 +180,6 @@ function isRequest(request: any): request is Request {
  * Checks if an incoming request either KibanaRequest or Legacy.Request
  * @internal
  */
-export function isRealRequest(request: unknown): request is KibanaRequest | Request {
+export function isRealRequest(request: unknown): request is KibanaRequest | LegacyRequest {
   return isKibanaRequest(request) || isRequest(request);
 }

@@ -25,8 +25,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
-  const kibanaServer = getService('kibanaServer');
-  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker']);
 
   describe('visual builder', function describeIndexTests() {
@@ -109,7 +107,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       it('should be able to switch between index patterns', async () => {
         const value = await PageObjects.visualBuilder.getMetricValue();
         expect(value).to.eql('156');
-        await PageObjects.visualBuilder.clickMetricPanelOptions();
+        await PageObjects.visualBuilder.clickPanelOptions('metric');
         const fromTime = '2018-10-22 00:00:00.000';
         const toTime = '2018-10-28 23:59:59.999';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
@@ -117,18 +115,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
         const newValue = await PageObjects.visualBuilder.getMetricValue();
         expect(newValue).to.eql('10');
-      });
-    });
-
-    describe.skip('dark mode', () => {
-      it('uses dark mode flag', async () => {
-        await kibanaServer.uiSettings.update({
-          'theme:darkMode': true,
-        });
-
-        await PageObjects.visualBuilder.resetPage();
-        const classNames = await testSubjects.getAttribute('timeseriesChart', 'class');
-        expect(classNames.includes('reversed')).to.be(true);
       });
     });
   });

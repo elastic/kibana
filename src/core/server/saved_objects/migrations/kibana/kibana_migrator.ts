@@ -93,8 +93,9 @@ export class KibanaMigrator {
     await server.plugins.elasticsearch.waitUntilReady();
 
     const config = server.config();
+    const kibanaIndexName = config.get('kibana.index');
     const indexMap = createIndexMap(
-      config.get('kibana.index'),
+      kibanaIndexName,
       this.kbnServer.uiExports.savedObjectSchemas,
       this.mappingProperties
     );
@@ -106,11 +107,14 @@ export class KibanaMigrator {
         documentMigrator: this.documentMigrator,
         index,
         log: this.log,
-        mappingProperties: indexMap[index],
+        mappingProperties: indexMap[index].typeMappings,
         pollInterval: config.get('migrations.pollInterval'),
         scrollDuration: config.get('migrations.scrollDuration'),
         serializer: this.serializer,
-        obsoleteIndexTemplatePattern: 'kibana_index_template*',
+        // Only necessary for the migrator of the kibana index.
+        obsoleteIndexTemplatePattern:
+          index === kibanaIndexName ? 'kibana_index_template*' : undefined,
+        convertToAliasScript: indexMap[index].script,
       });
     });
 

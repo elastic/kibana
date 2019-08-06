@@ -2,42 +2,66 @@
   "config": {
     "id": "fq_date_histogram_1m_1441",
     "source": { "index": ["farequote-2019"], "query": { "match_all": {} } },
-    "dest": { "index": "fq_data_histogram_1m_1441" },
+    "dest": { "index": "fq_date_histogram_1m_1441" },
     "pivot": {
       "group_by": {
-        "date_histogram(@timestamp)": {
-          "date_histogram": { "field": "@timestamp", "interval": "1m" }
+        "@timestamp": {
+          "date_histogram": { "field": "@timestamp", "calendar_interval": "1m" }
         }
       },
-      "aggregations": { "avg(response)": { "avg": { "field": "responsetime" } } }
-    }
+      "aggregations": { "responsetime.avg": { "avg": { "field": "responsetime" } } }
+    },
+    "version": "8.0.0",
+    "create_time": 1564388146667,
+    "mode": "batch"
   },
   "id": "fq_date_histogram_1m_1441",
-  "state": {
-    "task_state": "stopped",
-    "indexer_state": "stopped",
-    "current_position": { "date_histogram(@timestamp)": 1549929540000 },
-    "checkpoint": 1
-  },
-  "stats": {
-    "pages_processed": 0,
-    "documents_processed": 0,
-    "documents_indexed": 0,
-    "trigger_count": 0,
-    "index_time_in_ms": 0,
-    "index_total": 0,
-    "index_failures": 0,
-    "search_time_in_ms": 0,
-    "search_total": 0,
-    "search_failures": 0
-  },
   "checkpointing": {
-    "current": {
-      "timestamp": "2019-06-28T16:09:23.539Z",
-      "timestamp_millis": 1561738163539,
-      "time_upper_bound": "2019-06-28T16:09:13.539Z",
-      "time_upper_bound_millis": 1561738153539
+    "last": {
+      "checkpoint": 1,
+      "timestamp_millis": 1564388281199
+    },
+    "next": {
+      "checkpoint": 2,
+      "indexer_state": "stopped",
+      "checkpoint_progress": {
+        "total_docs": 86274,
+        "docs_remaining": 0,
+        "percent_complete": 100
+      }
     },
     "operations_behind": 0
+  },
+  "stats": {
+    "id": "fq_date_histogram_1m_1441",
+    "task_state": "stopped",
+    "stats": {
+      "pages_processed": 16,
+      "documents_processed": 86274,
+      "documents_indexed": 7200,
+      "trigger_count": 1,
+      "index_time_in_ms": 1310,
+      "index_total": 15,
+      "index_failures": 0,
+      "search_time_in_ms": 463,
+      "search_total": 16,
+      "search_failures": 0
+    },
+    "checkpointing": {
+      "last": {
+        "checkpoint": 1,
+        "timestamp_millis": 1564388281199
+      },
+      "next": {
+        "checkpoint": 2,
+        "indexer_state": "stopped",
+        "checkpoint_progress": {
+          "total_docs": 86274,
+          "docs_remaining": 0,
+          "percent_complete": 100
+        }
+      },
+      "operations_behind": 0
+    }
   }
 }

@@ -21,10 +21,6 @@ export function injectVars(server) {
   const serverConfig = server.config();
   const mapConfig = serverConfig.get('map');
   const regionmap = mapConfig.regionmap;
-  const tilemap = mapConfig.tilemap;
-
-  // If url is set, old settings must be used for backward compatibility
-  const isOverridden = typeof tilemap.url === 'string' && tilemap.url !== '';
 
   // Get types that are import and exportable, by default yes unless isImportableAndExportable is set to false
   const { types: allTypes } = server.savedObjects;
@@ -37,15 +33,8 @@ export function injectVars(server) {
     kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
     disableWelcomeScreen: serverConfig.get('kibana.disableWelcomeScreen'),
     regionmapsConfig: regionmap,
-    mapConfig: mapConfig,
     importAndExportableTypes,
     autocompleteTerminateAfter: serverConfig.get('kibana.autocompleteTerminateAfter'),
     autocompleteTimeout: serverConfig.get('kibana.autocompleteTimeout'),
-    tilemapsConfig: {
-      deprecated: {
-        isOverridden: isOverridden,
-        config: tilemap,
-      },
-    },
   };
 }

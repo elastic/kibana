@@ -8,10 +8,10 @@ import { FeatureRegistry } from './feature_registry';
 import { registerOssFeatures } from './register_oss_features';
 
 describe('registerOssFeatures', () => {
-  it('allows features to be registered', () => {
+  it('registers features including timelion', () => {
     const registry = new FeatureRegistry();
     const savedObjectTypes = ['foo', 'bar'];
-    registerOssFeatures(feature => registry.register(feature), savedObjectTypes);
+    registerOssFeatures(feature => registry.register(feature), savedObjectTypes, true);
 
     const features = registry.getAll();
     expect(features.map(f => f.id)).toMatchInlineSnapshot(`
@@ -24,6 +24,25 @@ Array [
   "indexPatterns",
   "savedObjectsManagement",
   "timelion",
+]
+`);
+  });
+
+  it('registers features excluding timelion', () => {
+    const registry = new FeatureRegistry();
+    const savedObjectTypes = ['foo', 'bar'];
+    registerOssFeatures(feature => registry.register(feature), savedObjectTypes, false);
+
+    const features = registry.getAll();
+    expect(features.map(f => f.id)).toMatchInlineSnapshot(`
+Array [
+  "discover",
+  "visualize",
+  "dashboard",
+  "dev_tools",
+  "advancedSettings",
+  "indexPatterns",
+  "savedObjectsManagement",
 ]
 `);
   });

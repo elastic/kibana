@@ -22,3 +22,14 @@ export interface UMMonitorStatesAdapter {
   ): Promise<MonitorSummary[]>;
   statesIndexExists(request: any): Promise<StatesIndexStatus>;
 }
+
+export interface LegacyMonitorStatesQueryResult {
+  result: any;
+  statusFilter?: any;
+  afterKey: any | null;
+}
+
+export interface LegacyMonitorStatesRecentCheckGroupsQueryResult {
+  checkGroups: string[];
+  afterKey: any | null;
+}

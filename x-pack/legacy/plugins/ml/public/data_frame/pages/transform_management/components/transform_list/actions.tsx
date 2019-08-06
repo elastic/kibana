@@ -26,7 +26,7 @@ export const getActions = () => {
     {
       isPrimary: true,
       render: (item: DataFrameTransformListRow) => {
-        if (item.state.task_state !== DATA_FRAME_TASK_STATE.STARTED) {
+        if (item.stats.task_state !== DATA_FRAME_TASK_STATE.STARTED) {
           return <StartAction item={item} />;
         }
 

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { useContext } from 'react';
 import {
@@ -44,7 +45,7 @@ import { i18n } from '@kbn/i18n';
 import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../common/timerange_data_modes';
 import { PANEL_TYPES } from '../../common/panel_types';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
-import { UIRestrictionsContext } from '../contexts/ui_restriction_context';
+import { VisDataContext } from '../contexts/vis_data_context';
 
 const RESTRICT_FIELDS = [ES_TYPES.DATE];
 
@@ -72,7 +73,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
   const intervalName = `${prefix}interval`;
   const dropBucketName = `${prefix}drop_last_bucket`;
   const updateControlValidity = useContext(FormValidationContext);
-  const uiRestrictions = useContext(UIRestrictionsContext);
+  const uiRestrictions = get(useContext(VisDataContext), 'uiRestrictions');
 
   const timeRangeOptions = [
     {

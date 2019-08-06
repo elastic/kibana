@@ -7,7 +7,7 @@
 import * as kbnTestServer from '../../../../src/test_utils/kbn_server';
 import { TestKbnServerConfig } from '../../kbn_server_config';
 
-describe('example integration test with kbn server', async () => {
+describe('example integration test with kbn server', () => {
   let kbn: any;
   let kbnServer: any;
   let kbnRootServer: any;
