@@ -151,7 +151,7 @@ function migrate610PanelToLatest(
     }
   });
 
-  const embeddableConfig = uiState ? uiState[`P-${panel.panelIndex}`] : {};
+  const embeddableConfig = uiState ? uiState[`P-${panel.panelIndex}`] || {} : {};
 
   // 2. (6.4) remove columns, sort properties
   if (panel.columns || panel.sort) {
