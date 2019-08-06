@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { visFactory, DefaultEditorSize } from '../../visualizations/public';
 
 import { MarkdownVisWrapper } from './markdown_vis_controller';
-import markdownVisParamsTemplate from './markdown_vis_params.html';
+import { MarkdownOptions } from './markdown_vis_options';
 
 export const markdownVis = visFactory.createReactVisualization({
   name: 'markdown',
@@ -41,7 +41,7 @@ export const markdownVis = visFactory.createReactVisualization({
     },
   },
   editorConfig: {
-    optionsTemplate: markdownVisParamsTemplate,
+    optionsTemplate: MarkdownOptions,
     enableAutoApply: true,
     defaultSize: DefaultEditorSize.LARGE,
   },
