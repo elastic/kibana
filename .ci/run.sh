@@ -28,7 +28,7 @@ x-pack-intake)
   ./test/scripts/jenkins_xpack.sh
   ;;
 x-pack-ciGroup*)
-  export CI_GROUP="${JOB##x-pack-ciGroup}"
+  export CI_GROUP=6
   ./test/scripts/jenkins_xpack_ci_group.sh
   ;;
 x-pack-visualRegression*)
