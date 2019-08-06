@@ -40,7 +40,6 @@ export const CopySourceTask = {
         '!src/cli/cluster/**',
         '!src/cli/repl/**',
         '!src/es_archiver/**',
-        '!src/functional_test_runner/**',
         '!src/dev/**',
         'bin/**',
         'typings/**',
