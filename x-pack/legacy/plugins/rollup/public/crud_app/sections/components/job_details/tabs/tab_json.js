@@ -12,15 +12,21 @@ import {
 
 export const TabJson = ({
   json,
+  endpoint,
 }) => {
-  const jsonString = JSON.stringify(json, null, 2);
+  let jsonString = JSON.stringify(json, null, 2);
+
+  if (endpoint) {
+    // Prepend endpoint.
+    jsonString = `${endpoint}\n${jsonString}`;
+  }
 
   return (
     <EuiCodeEditor
       mode="json"
       theme="textmate"
       isReadOnly
-      setOptions={{ maxLines: Infinity }}
+      setOptions={{ maxLines: Infinity, useWorker: false }}
       value={jsonString}
       editorProps={{
         $blockScrolling: Infinity

@@ -68,6 +68,7 @@ export const JobDetails = ({
   job,
   stats,
   json,
+  endpoint,
 }) => {
   const {
     metrics,
@@ -93,7 +94,7 @@ export const JobDetails = ({
       <TabMetrics metrics={metrics} />
     ),
     [JOB_DETAILS_TAB_JSON]: (
-      <TabJson json={json} />
+      <TabJson json={json} endpoint={endpoint} />
     ),
   };
 
