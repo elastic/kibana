@@ -54,6 +54,14 @@ export class VisEditor extends Component {
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
+
+    // In new_platform, this context should be populated with
+    // core dependencies required by React components downstream.
+    this.coreContext = {
+      appName: APP_NAME,
+      uiSettings: npSetup.core.uiSettings,
+      store: localStorage,
+    };
   }
 
   get uiState() {
@@ -76,7 +84,7 @@ export class VisEditor extends Component {
   isValidKueryQuery = filterQuery => {
     if (filterQuery && filterQuery.language === 'kuery') {
       try {
-        const queryOptions = npSetup.uiSettings.get('query:allowLeadingWildcards');
+        const queryOptions = this.coreContext.uiSettings.get('query:allowLeadingWildcards');
         fromKueryExpression(filterQuery.query, { allowLeadingWildcards: queryOptions });
       } catch (error) {
         return false;
@@ -153,14 +161,6 @@ export class VisEditor extends Component {
     const { model } = this.state;
 
     if (model) {
-      // In new_platform, this context should be populated with
-      // core dependencies required by React components downstream.
-      const coreContext = {
-        appName: APP_NAME,
-        uiSettings: npSetup.core.uiSettings,
-        store: localStorage,
-      };
-
       return (
         <div className="tvbEditor" data-test-subj="tvbVisEditor">
           <div className="tvbEditor--hideForReporting">
@@ -181,7 +181,7 @@ export class VisEditor extends Component {
             onDataChange={this.onDataChange}
           />
           <div className="tvbEditor--hideForReporting">
-            <CoreSetupContextProvider value={coreContext}>
+            <CoreSetupContextProvider value={this.coreContext}>
               <PanelConfig
                 fields={this.state.visFields}
                 model={model}
