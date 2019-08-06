@@ -74,6 +74,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IContextHandler](./kibana-plugin-public.icontexthandler.md) | A function registered by a plugin to perform some action. |
 |  [IContextProvider](./kibana-plugin-public.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [PluginInitializer](./kibana-plugin-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
+|  [PluginOpaqueId](./kibana-plugin-public.pluginopaqueid.md) |  |
 |  [RecursiveReadonly](./kibana-plugin-public.recursivereadonly.md) |  |
 |  [ToastInput](./kibana-plugin-public.toastinput.md) |  |
 |  [UiSettingsClientContract](./kibana-plugin-public.uisettingsclientcontract.md) | [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |
