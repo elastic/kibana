@@ -42,10 +42,12 @@ import {
   ElasticsearchServiceSetup,
 } from './elasticsearch';
 import { HttpServiceSetup, HttpServiceStart } from './http';
-import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
+import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
+import { ContextSetup } from './context';
 
 export { bootstrap } from './bootstrap';
 export { ConfigService } from './config';
+export { CoreId } from './core_context';
 export {
   CallAPIOptions,
   ClusterClient,
@@ -146,6 +148,9 @@ export { RecursiveReadonly } from '../utils';
  * @public
  */
 export interface CoreSetup {
+  context: {
+    createContextContainer: ContextSetup['createContextContainer'];
+  };
   elasticsearch: {
     adminClient$: Observable<ClusterClient>;
     dataClient$: Observable<ClusterClient>;
@@ -186,9 +191,11 @@ export interface InternalCoreStart {
 }
 
 export {
+  ContextSetup,
   HttpServiceSetup,
   HttpServiceStart,
   ElasticsearchServiceSetup,
   PluginsServiceSetup,
   PluginsServiceStart,
+  PluginOpaqueId,
 };
