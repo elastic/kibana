@@ -384,7 +384,6 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
     // If there is no data, then they are a net new user
     if (!indexBuckets || indexBuckets.length === 0) {
       productStatus.totalUniqueInstanceCount = 0;
-      productStatus.detected = detectedProducts[product.name];
     }
     // If there is a single bucket, then they are fully migrated or fully on the internal collector
     else if (indexBuckets.length === 1) {
@@ -524,6 +523,10 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
           }
         }), {}),
       };
+    }
+
+    if (productStatus.totalUniqueInstanceCount === 0) {
+      productStatus.detected = detectedProducts[product.name];
     }
 
     return {
