@@ -122,10 +122,6 @@ export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugi
         options.force = request.query.force;
       }
 
-      if (request.query.wait_for_completion !== undefined) {
-        options.waitForCompletion = request.query.wait_for_completion;
-      }
-
       return callWithRequest('ml.stopDataFrameAnalytics', options)
         .catch(resp => wrapError(resp));
     },

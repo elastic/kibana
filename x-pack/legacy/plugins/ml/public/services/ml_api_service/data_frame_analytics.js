@@ -52,9 +52,9 @@ export const dataFrameAnalytics = {
       method: 'POST',
     });
   },
-  stopDataFrameAnalytics(analyticsId, force = false, waitForCompletion = false) {
+  stopDataFrameAnalytics(analyticsId, force = false) {
     return http({
-      url: `${basePath}/data_frame/analytics/${analyticsId}/_stop?force=${force}&wait_for_completion=${waitForCompletion}`,
+      url: `${basePath}/data_frame/analytics/${analyticsId}/_stop?force=${force}`,
       method: 'POST',
     });
   },

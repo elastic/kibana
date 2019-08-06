@@ -191,7 +191,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.stopDataFrameAnalytics = ca({
     urls: [
       {
-        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>/_stop?&force=<%=force%>&wait_for_completion=<%waitForCompletion%>',
+        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>/_stop?&force=<%=force%>',
         req: {
           analyticsId: {
             type: 'string'
@@ -199,9 +199,6 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
           force: {
             type: 'boolean'
           },
-          waitForCompletion: {
-            type: 'boolean'
-          }
         }
       }
     ],

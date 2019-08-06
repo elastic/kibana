@@ -26,7 +26,10 @@ export const getActions = () => {
     {
       isPrimary: true,
       render: (item: DataFrameAnalyticsListRow) => {
-        if (item.stats.state !== DATA_FRAME_TASK_STATE.STARTED) {
+        if (
+          item.stats.state !== DATA_FRAME_TASK_STATE.STARTED &&
+          item.stats.state !== DATA_FRAME_TASK_STATE.REINDEXING
+        ) {
           return <StartAction item={item} />;
         }
 
