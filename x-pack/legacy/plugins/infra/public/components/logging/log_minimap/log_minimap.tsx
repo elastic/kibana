@@ -168,6 +168,8 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
       intervalSize,
     } = this.props;
     const { timeCursorY, drag, target } = this.state;
+    // Render the time ruler and density map beyond the visible range of time, so that
+    // the user doesn't run out of ruler when they click and drag
     const overscanHeight = Math.round(window.screen.availHeight * 2.5) || height * 3;
     const [minTime, maxTime] = calculateYScale(
       target,
@@ -243,7 +245,7 @@ const TimeCursor = euiStyled.line`
       : props.theme.eui.euiColorDarkShade};
 `;
 
-const MinimapWrapper = euiStyled.svg`
+const MinimapWrapper = euiStyled.svg<any>`
   cursor: move;
   background: ${props =>
     props.showOverscanBoundaries
