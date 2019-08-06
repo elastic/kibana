@@ -14,13 +14,13 @@ class EssqlDatasource extends PureComponent {
   componentDidMount() {
     const query = this.getQuery();
     if (typeof query !== 'string') {
-      this.setArg(this.getArgName(), this.defaultQuery);
+      this.setArg(this.getArgName(), this.getDefaultQuery());
     } else {
       this.props.setInvalid(!query.trim());
     }
   }
 
-  defaultQuery = 'SELECT * FROM "logstash*"';
+  getDefaultQuery = () => `SELECT * FROM "${this.props.defaultIndex}"`;
 
   getQuery = () => getSimpleArg(this.getArgName(), this.props.args)[0];
 
@@ -54,10 +54,11 @@ class EssqlDatasource extends PureComponent {
 
   render() {
     const { isInvalid } = this.props;
+
     return (
       <EuiFormRow isInvalid={isInvalid} label="Elasticsearch SQL query">
         <EuiTextArea
-          placeholder={this.defaultQuery}
+          placeholder={this.getDefaultQuery()}
           isInvalid={isInvalid}
           className="canvasTextArea--code"
           value={this.getQuery()}
@@ -73,6 +74,7 @@ EssqlDatasource.propTypes = {
   updateArgs: PropTypes.func,
   isInvalid: PropTypes.bool,
   setInvalid: PropTypes.func,
+  defaultIndex: PropTypes.string,
 };
 
 export const essql = () => ({
