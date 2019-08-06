@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Indexer, IndexerFactory, Commi } from '.';
+import { Indexer, IndexerFactory, CommitIndexer } from '.';
 import { RepositoryUri } from '../../model';
 import { GitOperations } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
