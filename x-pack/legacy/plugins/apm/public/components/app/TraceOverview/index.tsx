@@ -43,11 +43,7 @@ export function TraceOverview() {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={1}>
-        <LocalUIFilters
-          {...localUIFiltersConfig}
-          showTransactionTypeFilter={true}
-          allowEmptyTransactionType={true}
-        ></LocalUIFilters>
+        <LocalUIFilters {...localUIFiltersConfig}></LocalUIFilters>
       </EuiFlexItem>
       <EuiFlexItem grow={7}>
         <EuiPanel>

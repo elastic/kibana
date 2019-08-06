@@ -84,11 +84,7 @@ const ErrorGroupOverview: React.SFC = () => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={1}>
-        <LocalUIFilters
-          {...localUIFiltersConfig}
-          showTransactionTypeFilter={true}
-          allowEmptyTransactionType
-        />
+        <LocalUIFilters {...localUIFiltersConfig} />
       </EuiFlexItem>
       <EuiFlexItem grow={7}>
         <EuiFlexGroup>

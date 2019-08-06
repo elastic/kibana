@@ -33,6 +33,7 @@ import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { PROJECTION } from '../../../projections/typings';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
+import { TransactionTypeFilter } from '../../shared/LocalUIFilters/TransactionTypeFilter';
 
 function getRedirectLocation({
   urlParams,
@@ -116,11 +117,9 @@ export function TransactionOverview() {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={1}>
-        <LocalUIFilters
-          {...localFiltersConfig}
-          showTransactionTypeFilter={true}
-          transactionTypes={serviceTransactionTypes}
-        ></LocalUIFilters>
+        <LocalUIFilters {...localFiltersConfig}>
+          <TransactionTypeFilter transactionTypes={serviceTransactionTypes} />
+        </LocalUIFilters>
       </EuiFlexItem>
       <EuiFlexItem grow={7}>
         <ChartsSyncContextProvider>

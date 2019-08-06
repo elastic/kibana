@@ -13,19 +13,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { Filter } from './Filter';
 import { useLocalUIFilters } from '../../../hooks/useLocalUIFilters';
-import { TransactionTypeFilter } from './TransactionTypeFilter';
+import { PROJECTION } from '../../../projections/typings';
 
-type Props = Parameters<typeof useLocalUIFilters>[0] & {
+interface Props {
+  projection: PROJECTION;
+  filterNames: LocalUIFilterName[];
+  params?: Record<string, string | number | boolean | undefined>;
   showCount?: boolean;
-} & (
-    | {
-        showTransactionTypeFilter: true;
-        allowEmptyTransactionType?: boolean;
-        transactionTypes: string[];
-      }
-    | {});
+}
 
 const ButtonWrapper = styled.div`
    {
@@ -34,13 +32,7 @@ const ButtonWrapper = styled.div`
 `;
 
 const LocalUIFilters: React.FC<Props> = props => {
-  const { projection, params, filterNames, showCount = true } = props;
-
-  const {
-    showTransactionTypeFilter = false,
-    allowEmptyTransactionType = false,
-    transactionTypes = []
-  } = 'showTransactionTypeFilter' in props ? props : {};
+  const { projection, params, filterNames, children, showCount = true } = props;
 
   const { data: filters, values, setValues } = useLocalUIFilters({
     filterNames,
@@ -58,15 +50,7 @@ const LocalUIFilters: React.FC<Props> = props => {
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      {showTransactionTypeFilter ? (
-        <>
-          <TransactionTypeFilter
-            transactionTypes={transactionTypes}
-            showEmptyOption={allowEmptyTransactionType}
-          ></TransactionTypeFilter>
-          {!allowEmptyTransactionType && <EuiSpacer size="m" />}
-        </>
-      ) : null}
+      {children}
       {filters.map(filter => {
         const { name } = filter;
         const filterValue = (name in values && values[name]) || [];
@@ -95,7 +79,7 @@ const LocalUIFilters: React.FC<Props> = props => {
           iconType="cross"
           flush="left"
           onClick={() => {
-            let clearedValues = Object.keys(values).reduce(
+            const clearedValues = Object.keys(values).reduce(
               (acc, key) => {
                 return {
                   ...acc,
@@ -104,12 +88,6 @@ const LocalUIFilters: React.FC<Props> = props => {
               },
               {} as Record<string, string[] | string>
             );
-            if (showTransactionTypeFilter && allowEmptyTransactionType) {
-              clearedValues = {
-                ...clearedValues,
-                transactionType: ''
-              };
-            }
             setValues(clearedValues);
           }}
         >

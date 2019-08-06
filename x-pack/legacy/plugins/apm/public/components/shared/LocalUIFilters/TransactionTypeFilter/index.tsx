@@ -12,40 +12,23 @@ import {
   EuiSelect
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { pick } from 'lodash';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../Links/url_helpers';
 
 interface Props {
   transactionTypes: string[];
-  showEmptyOption?: boolean;
 }
 
-const TransactionTypeFilter: React.FC<Props> = ({
-  transactionTypes,
-  showEmptyOption = false
-}) => {
+const TransactionTypeFilter: React.FC<Props> = ({ transactionTypes }) => {
   const {
     urlParams: { transactionType }
   } = useUrlParams();
 
-  let options = transactionTypes.map(type => ({
+  const options = transactionTypes.map(type => ({
     text: `${type}`,
     value: type
   }));
-
-  if (showEmptyOption) {
-    options = [
-      {
-        text: i18n.translate('xpack.apm.localFilters.transactionTypeAll', {
-          defaultMessage: 'All'
-        }),
-        value: ''
-      },
-      ...options
-    ];
-  }
 
   return (
     <>
@@ -65,15 +48,10 @@ const TransactionTypeFilter: React.FC<Props> = ({
         onChange={event => {
           const newLocation = {
             ...history.location,
-            search: fromQuery(
-              pick(
-                {
-                  ...toQuery(history.location.search),
-                  transactionType: event.target.value
-                },
-                Boolean
-              )
-            )
+            search: fromQuery({
+              ...toQuery(history.location.search),
+              transactionType: event.target.value
+            })
           };
           history.push(newLocation);
         }}
