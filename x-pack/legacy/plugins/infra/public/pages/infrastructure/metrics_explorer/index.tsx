@@ -7,12 +7,9 @@
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { UICapabilities } from 'ui/capabilities';
-import { injectUICapabilities } from 'ui/capabilities/react';
 import { DocumentTitle } from '../../../components/document_title';
 import { MetricsExplorerCharts } from '../../../components/metrics_explorer/charts';
 import { MetricsExplorerToolbar } from '../../../components/metrics_explorer/toolbar';
-import { Header } from '../../../components/header';
 import { SourceQuery } from '../../../../common/graphql/types';
 import { NoData } from '../../../components/empty_states';
 import { useMetricsExplorerState } from './use_metric_explorer_state';
@@ -22,11 +19,10 @@ interface MetricsExplorerPageProps {
   intl: InjectedIntl;
   source: SourceQuery.Query['source']['configuration'] | undefined;
   derivedIndexPattern: StaticIndexPattern;
-  uiCapabilities: UICapabilities;
 }
 
-export const MetricsExplorerPage = injectUICapabilities(
-  injectI18n(({ intl, source, derivedIndexPattern, uiCapabilities }: MetricsExplorerPageProps) => {
+export const MetricsExplorerPage = injectI18n(
+  ({ intl, source, derivedIndexPattern }: MetricsExplorerPageProps) => {
     if (!source) {
       return null;
     }
@@ -65,18 +61,6 @@ export const MetricsExplorerPage = injectUICapabilities(
               }
             )
           }
-        />
-        <Header
-          breadcrumbs={[
-            {
-              href: '#/',
-              text: intl.formatMessage({
-                id: 'xpack.infra.header.infrastructureMetricsExplorerTitle',
-                defaultMessage: 'Infrastructure',
-              }),
-            },
-          ]}
-          readOnlyBadge={!uiCapabilities.infrastructure.save}
         />
         <MetricsExplorerToolbar
           derivedIndexPattern={derivedIndexPattern}
@@ -120,5 +104,5 @@ export const MetricsExplorerPage = injectUICapabilities(
         )}
       </React.Fragment>
     );
-  })
+  }
 );
