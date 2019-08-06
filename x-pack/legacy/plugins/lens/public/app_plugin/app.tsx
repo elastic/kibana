@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -28,7 +28,6 @@ interface State {
   };
   query: Query;
   indexPatternTitles: string[];
-  lastKnownDoc?: Document;
   persistedDoc?: Document;
 }
 
@@ -63,6 +62,8 @@ export function App({
     indexPatternTitles: [],
   });
 
+  const lastKnownDocRef = useRef<Document | undefined>(undefined);
+
   useEffect(() => {
     if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
       setState({ ...state, isLoading: true });
@@ -96,10 +97,10 @@ export function App({
   // Can save if the frame has told us what it has, and there is either:
   // a) No saved doc
   // b) A saved doc that differs from the frame state
-  const isSaveable =
-    state.lastKnownDoc &&
-    (!state.persistedDoc ||
-      (state.persistedDoc && !_.isEqual(state.lastKnownDoc, state.persistedDoc)));
+  const isSaveable = true;
+    // state.lastKnownDoc &&
+    // (!state.persistedDoc ||
+    //   (state.persistedDoc && !_.isEqual(state.lastKnownDoc, state.persistedDoc)));
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -119,16 +120,15 @@ export function App({
                 <EuiLink
                   data-test-subj="lnsApp_saveButton"
                   onClick={() => {
-                    if (isSaveable && state.lastKnownDoc) {
+                    if (isSaveable && lastKnownDocRef.current) {
                       docStorage
-                        .save(state.lastKnownDoc)
+                        .save(lastKnownDocRef.current)
                         .then(({ id }) => {
                           // Prevents unnecessary network request and disables save button
-                          const newDoc = { ...(state.lastKnownDoc as Document), id };
+                          const newDoc = { ...(lastKnownDocRef.current!), id };
                           setState({
                             ...state,
                             persistedDoc: newDoc,
-                            lastKnownDoc: newDoc,
                           });
                           if (docId !== id) {
                             redirectTo(id);
@@ -188,11 +188,13 @@ export function App({
               doc: state.persistedDoc,
               onError,
               onChange: ({ indexPatternTitles, doc }) => {
-                setState({
-                  ...state,
-                  indexPatternTitles,
-                  lastKnownDoc: doc,
-                });
+                if (!_.isEqual(state.indexPatternTitles, indexPatternTitles)) {
+                  setState({
+                    ...state,
+                    indexPatternTitles,
+                  });
+                }
+                lastKnownDocRef.current = doc;
               },
             }}
           />
