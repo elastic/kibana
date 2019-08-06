@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import chrome from 'ui/chrome';
 // @ts-ignore
 import { mockFields, mockIndexPattern } from 'ui/index_patterns/fixtures';
 // @ts-ignore
@@ -35,9 +33,15 @@ import { isFilterable, getFromSavedObject } from 'ui/index_patterns/static_utils
 
 // IndexPattern, StaticIndexPattern, Field
 import * as types from 'ui/index_patterns';
+import { SavedObjectsClient } from 'ui/saved_objects';
 
-const config = chrome.getUiSettingsClient();
-const savedObjectsClient = chrome.getSavedObjectsClient();
+import { UiSettingsClientContract } from 'src/core/public';
+
+export interface IndexPatternDependencies {
+  uiSettings: UiSettingsClientContract;
+  savedObjectsClient: SavedObjectsClient;
+}
+
 /**
  * Index Patterns Service
  *
@@ -50,9 +54,9 @@ const savedObjectsClient = chrome.getSavedObjectsClient();
  * @internal
  */
 export class IndexPatternsService {
-  public setup() {
+  public setup({ uiSettings, savedObjectsClient }: IndexPatternDependencies) {
     return {
-      indexPatterns: new IndexPatterns(config, savedObjectsClient),
+      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient),
     };
   }
 

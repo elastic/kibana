@@ -24,7 +24,7 @@ import { IndexPattern } from './_index_pattern';
 import { createIndexPatternCache } from './_pattern_cache';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
 import { SavedObjectsClient, SimpleSavedObject } from '../saved_objects';
-import { UiSettingsClient } from '../../../../core/public';
+import { UiSettingsClientContract } from '../../../../core/public';
 
 const indexPatternCache = createIndexPatternCache();
 const apiClient = new IndexPatternsApiClient();
@@ -32,11 +32,11 @@ const apiClient = new IndexPatternsApiClient();
 export class IndexPatterns {
   fieldFormats: fieldFormats;
 
-  private config: UiSettingsClient;
+  private config: UiSettingsClientContract;
   private savedObjectsClient: SavedObjectsClient;
   private savedObjectsCache?: Array<SimpleSavedObject<{}>> | null;
 
-  constructor(config: UiSettingsClient, savedObjectsClient: SavedObjectsClient) {
+  constructor(config: UiSettingsClientContract, savedObjectsClient: SavedObjectsClient) {
     this.config = config;
     this.savedObjectsClient = savedObjectsClient;
   }
