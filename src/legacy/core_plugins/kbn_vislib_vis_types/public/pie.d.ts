@@ -17,41 +17,15 @@
  * under the License.
  */
 
-import React from 'react';
-import { EuiFormRow, EuiRange } from '@elastic/eui';
+import { CommonVislibParams } from './types';
 
-interface RangeOptionProps<ParamName extends string> {
-  label: string;
-  max: number;
-  min: number;
-  paramName: ParamName;
-  step?: number;
-  value: string | number;
-  setValue: (paramName: ParamName, value: number) => void;
+export interface PieVisParams extends CommonVislibParams {
+  addLegend: boolean;
+  isDonut: boolean;
+  labels: {
+    show: boolean;
+    values: boolean;
+    last_level: boolean;
+    truncate: number;
+  };
 }
-
-function RangeOption<ParamName extends string>({
-  label,
-  max,
-  min,
-  step,
-  paramName,
-  value,
-  setValue,
-}: RangeOptionProps<ParamName>) {
-  return (
-    <EuiFormRow label={label} fullWidth={true} compressed>
-      <EuiRange
-        fullWidth
-        showValue
-        max={max}
-        min={min}
-        step={step}
-        value={value}
-        onChange={ev => setValue(paramName, ev.target.valueAsNumber)}
-      />
-    </EuiFormRow>
-  );
-}
-
-export { RangeOption };

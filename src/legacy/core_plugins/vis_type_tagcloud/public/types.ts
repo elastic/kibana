@@ -18,7 +18,6 @@
  */
 
 export interface TagCloudVisParams {
-  // scale: string;
   scale: 'linear' | 'log' | 'square root';
   orientation: 'single' | 'right angled' | 'multiple';
   minFontSize: number;

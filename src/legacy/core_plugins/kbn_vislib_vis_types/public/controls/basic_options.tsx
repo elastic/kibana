@@ -23,8 +23,9 @@ import { i18n } from '@kbn/i18n';
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { SwitchOption } from './switch';
 import { SelectOption } from './select';
+import { CommonVislibParams } from '../types';
 
-function BasicOptions({ stateParams, setValue, vis }: VisOptionsProps) {
+function BasicOptions({ stateParams, setValue, vis }: VisOptionsProps<CommonVislibParams>) {
   return (
     <>
       <SelectOption

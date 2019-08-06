@@ -17,41 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
-import { EuiFormRow, EuiRange } from '@elastic/eui';
-
-interface RangeOptionProps<ParamName extends string> {
-  label: string;
-  max: number;
-  min: number;
-  paramName: ParamName;
-  step?: number;
-  value: string | number;
-  setValue: (paramName: ParamName, value: number) => void;
+export interface CommonVislibParams {
+  addTooltip: boolean;
+  legendPosition: 'right' | 'left' | 'top' | 'bottom';
 }
-
-function RangeOption<ParamName extends string>({
-  label,
-  max,
-  min,
-  step,
-  paramName,
-  value,
-  setValue,
-}: RangeOptionProps<ParamName>) {
-  return (
-    <EuiFormRow label={label} fullWidth={true} compressed>
-      <EuiRange
-        fullWidth
-        showValue
-        max={max}
-        min={min}
-        step={step}
-        value={value}
-        onChange={ev => setValue(paramName, ev.target.valueAsNumber)}
-      />
-    </EuiFormRow>
-  );
-}
-
-export { RangeOption };
