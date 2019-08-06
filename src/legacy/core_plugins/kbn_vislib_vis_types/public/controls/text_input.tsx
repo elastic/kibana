@@ -17,22 +17,30 @@
  * under the License.
  */
 
-import { once } from 'lodash';
-// @ts-ignore
-import { uiModules } from 'ui/modules';
+import React from 'react';
+import { EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { VisOptionsSetValue } from 'ui/vis/editors/default';
 
-import 'ui/vis/map/service_settings';
-import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
+interface TextInputOptionProps {
+  helpText?: React.ReactNode;
+  label?: React.ReactNode;
+  paramName: string;
+  value?: string;
+  setValue: VisOptionsSetValue;
+}
 
-// @ts-ignore
-import { TileMapVisParams } from '../editors/tile_map_vis_params';
-// @ts-ignore
-import { WmsOptions } from '../editors/wms_options';
+function TextInputOption({
+  helpText,
+  label,
+  paramName,
+  value = '',
+  setValue,
+}: TextInputOptionProps) {
+  return (
+    <EuiFormRow helpText={helpText} label={label} fullWidth compressed>
+      <EuiFieldText fullWidth value={value} onChange={ev => setValue(paramName, ev.target.value)} />
+    </EuiFormRow>
+  );
+}
 
-/** @internal */
-export const initTileMapLegacyModule = once((): void => {
-  uiModules
-    .get('kibana/tile_map', ['kibana'])
-    .directive('tileMapVisParams', TileMapVisParams)
-    .directive('wmsOptions', WmsOptions);
-});
+export { TextInputOption };

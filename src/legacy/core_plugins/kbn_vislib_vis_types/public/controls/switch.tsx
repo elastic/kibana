@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
+import { EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { VisOptionsSetValue } from 'ui/vis/editors/default';
 
 interface SwitchOptionProps {
@@ -42,7 +42,7 @@ function SwitchOption({
   setValue,
 }: SwitchOptionProps) {
   return (
-    <EuiFormRow fullWidth={true} compressed>
+    <div className="visEditorSidebar__switchOptionFormRow">
       <EuiToolTip content={tooltip} delay="long" position="right">
         <EuiSwitch
           label={label}
@@ -52,7 +52,7 @@ function SwitchOption({
           onChange={ev => setValue(paramName, ev.target.checked)}
         />
       </EuiToolTip>
-    </EuiFormRow>
+    </div>
   );
 }
 
