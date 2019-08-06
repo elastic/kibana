@@ -26,8 +26,10 @@ import { DRAW_TYPE } from '../../../actions/map_actions';
 import { createShapeFilterWithMeta, createExtentFilterWithMeta } from '../../../elasticsearch_geo_utils';
 import chrome from 'ui/chrome';
 import { spritesheet } from '@elastic/maki';
-import sprites from '@elastic/maki/dist/sprite@1.png';
+import sprites1 from '@elastic/maki/dist/sprite@1.png';
+import sprites2 from '@elastic/maki/dist/sprite@2.png';
 
+const isRetina = window.devicePixelRatio === 2;
 const mbDrawModes = MapboxDraw.modes;
 mbDrawModes.draw_rectangle = DrawRectangle;
 
@@ -436,8 +438,9 @@ export class MBMapContainer extends React.Component {
   }
 
   _loadMakiSprites() {
-    // TODO Should we preface sprite ids in @elastic/maki? e.g. `__kbn__airfield-15`
-    addSpritesheetToMap(spritesheet[1], sprites, this._mbMap);
+    const sprites = isRetina ? sprites2 : sprites1;
+    const json = isRetina ? spritesheet[2] : spritesheet[1];
+    addSpritesheetToMap(json, sprites, this._mbMap);
   }
 
   _hideTooltip() {
