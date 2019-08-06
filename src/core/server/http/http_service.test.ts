@@ -21,7 +21,7 @@ import { mockHttpServer } from './http_service.test.mocks';
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { HttpService, Router } from '.';
+import { HttpService } from '.';
 import { HttpConfigType, config } from './http_config';
 import { httpServerMock } from './http_server.mocks';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
@@ -214,8 +214,9 @@ test('register route handler', async () => {
 
   const service = new HttpService({ configService, env, logger });
 
-  const router = new Router('/foo');
-  const { registerRouter } = await service.setup();
+  const { registerRouter, createRouter } = await service.setup();
+  const router = createRouter('/foo');
+
   registerRouter(router);
 
   expect(registerRouterMock).toHaveBeenCalledTimes(1);
@@ -233,8 +234,11 @@ test('returns http server contract on setup', async () => {
   }));
 
   const service = new HttpService({ configService, env, logger });
-  const setupHttpServer = await service.setup();
-  expect(setupHttpServer).toEqual(httpServer);
+  const setupContract = await service.setup();
+  expect(setupContract).toMatchObject(httpServer);
+  expect(setupContract).toMatchObject({
+    createRouter: expect.any(Function),
+  });
 });
 
 test('does not start http server if process is dev cluster master', async () => {

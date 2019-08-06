@@ -21,7 +21,6 @@ import { Request } from 'hapi';
 import { first } from 'rxjs/operators';
 import { clusterClientMock } from './http_service.test.mocks';
 
-import { Router } from '../router';
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
 
 interface User {
@@ -164,14 +163,14 @@ describe('http service', () => {
       it('rewrites authorization header via authHeaders to make a request to Elasticsearch', async () => {
         const authHeaders = { authorization: 'Basic: user:password' };
         const { http, elasticsearch } = await root.setup();
-        const { registerAuth, registerRouter } = http;
+        const { registerAuth, registerRouter, createRouter } = http;
 
         await registerAuth((req, t) => {
           return t.authenticated({ requestHeaders: authHeaders });
         });
 
-        const router = new Router('/new-platform');
-        router.get({ path: '/', validate: false }, async (req, res) => {
+        const router = createRouter('/new-platform');
+        router.get({ path: '/', validate: false }, async (context, req, res) => {
           const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
           client.asScoped(req);
           return res.ok({ header: 'ok' });
@@ -190,10 +189,10 @@ describe('http service', () => {
       it('passes request authorization header to Elasticsearch if registerAuth was not set', async () => {
         const authorizationHeader = 'Basic: username:password';
         const { http, elasticsearch } = await root.setup();
-        const { registerRouter } = http;
+        const { registerRouter, createRouter } = http;
 
-        const router = new Router('/new-platform');
-        router.get({ path: '/', validate: false }, async (req, res) => {
+        const router = createRouter('/new-platform');
+        router.get({ path: '/', validate: false }, async (context, req, res) => {
           const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
           client.asScoped(req);
           return res.ok({ header: 'ok' });
@@ -274,10 +273,12 @@ describe('http service', () => {
       afterEach(async () => await root.shutdown());
 
       it('supports passing request through to the route handler', async () => {
-        const router = new Router('/new-platform');
-        router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
-
         const { http } = await root.setup();
+        const router = http.createRouter('/new-platform');
+        router.get({ path: '/', validate: false }, async (context, req, res) =>
+          res.ok({ content: 'ok' })
+        );
+
         http.registerOnPostAuth((req, t) => t.next());
         http.registerOnPostAuth(async (req, t) => {
           await Promise.resolve();
@@ -328,21 +329,18 @@ describe('http service', () => {
       it(`doesn't share request object between interceptors`, async () => {
         const { http } = await root.setup();
         http.registerOnPostAuth(async (req, t) => {
-          // @ts-ignore. don't complain customField is not defined on Request type
-          req.customField = { value: 42 };
+          (req as any).customField = { value: 42 };
           return t.next();
         });
         http.registerOnPostAuth((req, t) => {
-          // @ts-ignore don't complain customField is not defined on Request type
-          if (typeof req.customField !== 'undefined') {
+          if (typeof (req as any).customField !== 'undefined') {
             throw new Error('Request object was mutated');
           }
           return t.next();
         });
-        const router = new Router('/new-platform');
-        router.get({ path: '/', validate: false }, async (req, res) =>
-          // @ts-ignore. don't complain customField is not defined on Request type
-          res.ok({ customField: String(req.customField) })
+        const router = http.createRouter('/new-platform');
+        router.get({ path: '/', validate: false }, async (context, req, res) =>
+          res.ok({ customField: String((req as any).customField) })
         );
         http.registerRouter(router);
         await root.start();
@@ -366,8 +364,8 @@ describe('http service', () => {
           return t.redirected('/new-platform/new-url', { forward: true });
         });
 
-        const router = new Router('/new-platform');
-        router.get({ path: '/new-url', validate: false }, async (req, res) =>
+        const router = http.createRouter('/new-platform');
+        router.get({ path: '/new-url', validate: false }, async (context, req, res) =>
           res.ok({ key: 'new-url-reached' })
         );
         http.registerRouter(router);

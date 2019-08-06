@@ -56,9 +56,22 @@ function pluginInitializerContextMock<T>(config: T) {
 }
 
 function createCoreSetupMock() {
+  const httpService = httpServiceMock.createSetupContract();
+  const httpMock: jest.Mocked<CoreSetup['http']> = {
+    createCookieSessionStorageFactory: httpService.createCookieSessionStorageFactory,
+    registerOnPreAuth: httpService.registerOnPreAuth,
+    registerAuth: httpService.registerAuth,
+    registerOnPostAuth: httpService.registerOnPostAuth,
+    basePath: httpService.basePath,
+    isTlsEnabled: httpService.isTlsEnabled,
+    registerRouter: httpService.registerRouter,
+    createRouter: jest.fn(),
+  };
+  httpMock.createRouter.mockImplementation(() => httpService.createRouter(''));
+
   const mock: MockedKeys<CoreSetup> = {
     elasticsearch: elasticsearchServiceMock.createSetupContract(),
-    http: httpServiceMock.createSetupContract(),
+    http: httpMock,
   };
 
   return mock;

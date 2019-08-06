@@ -19,27 +19,47 @@
 import request from 'request';
 import supertest from 'supertest';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { BehaviorSubject } from 'rxjs';
 
-import { HttpServer } from './http_server';
-import { HttpConfig } from './http_config';
-import { Router, KibanaRequest } from './router';
+import { CoreContext } from '../core_context';
+import { HttpService } from './http_service';
+import { KibanaRequest } from './router';
+
+import { Env } from '../config';
+import { getEnvOptions } from '../config/__mocks__/env';
+import { configServiceMock } from '../config/config_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 
 import { httpServerMock } from './http_server.mocks';
 import { createCookieSessionStorageFactory } from './cookie_session_storage';
 
-let server: HttpServer;
+let server: HttpService;
 
 let logger: ReturnType<typeof loggingServiceMock.create>;
-const config = {
-  host: '127.0.0.1',
-  maxPayload: new ByteSizeValue(1024),
-  ssl: {},
-} as HttpConfig;
+let env: Env;
+let coreContext: CoreContext;
+const configService = configServiceMock.create();
+
+configService.atPath.mockReturnValue(
+  new BehaviorSubject({
+    hosts: ['http://1.2.3.4'],
+    maxPayload: new ByteSizeValue(1024),
+    autoListen: true,
+    healthCheck: {
+      delay: 2000,
+    },
+    ssl: {
+      verificationMode: 'none',
+    },
+  } as any)
+);
 
 beforeEach(() => {
   logger = loggingServiceMock.create();
-  server = new HttpServer(logger, 'tests');
+  env = Env.createDefault(getEnvOptions());
+
+  coreContext = { env, logger, configService: configService as any };
+  server = new HttpService(coreContext);
 });
 
 afterEach(async () => {
@@ -78,15 +98,14 @@ const cookieOptions = {
 describe('Cookie based SessionStorage', () => {
   describe('#set()', () => {
     it('Should write to session storage & set cookies', async () => {
-      const router = new Router('');
+      const { registerRouter, server: innerServer, createRouter } = await server.setup();
+      const router = createRouter('');
 
-      router.get({ path: '/', validate: false }, (req, res) => {
+      router.get({ path: '/', validate: false }, (context, req, res) => {
         const sessionStorage = factory.asScoped(req);
         sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
         return res.ok({});
       });
-
-      const { registerRouter, server: innerServer } = await server.setup(config);
       registerRouter(router);
 
       const factory = await createCookieSessionStorageFactory(
@@ -114,9 +133,10 @@ describe('Cookie based SessionStorage', () => {
   });
   describe('#get()', () => {
     it('reads from session storage', async () => {
-      const router = new Router('');
+      const { registerRouter, server: innerServer, createRouter } = await server.setup();
+      const router = createRouter('');
 
-      router.get({ path: '/', validate: false }, async (req, res) => {
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
         const sessionStorage = factory.asScoped(req);
         const sessionValue = await sessionStorage.get();
         if (!sessionValue) {
@@ -126,7 +146,6 @@ describe('Cookie based SessionStorage', () => {
         return res.ok({ value: sessionValue.value });
       });
 
-      const { registerRouter, server: innerServer } = await server.setup(config);
       registerRouter(router);
 
       const factory = await createCookieSessionStorageFactory(
@@ -152,15 +171,15 @@ describe('Cookie based SessionStorage', () => {
         .expect(200, { value: userData });
     });
     it('returns null for empty session', async () => {
-      const router = new Router('');
+      const { registerRouter, server: innerServer, createRouter } = await server.setup();
 
-      router.get({ path: '/', validate: false }, async (req, res) => {
+      const router = createRouter('');
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
         const sessionStorage = factory.asScoped(req);
         const sessionValue = await sessionStorage.get();
         return res.ok({ value: sessionValue });
       });
 
-      const { registerRouter, server: innerServer } = await server.setup(config);
       registerRouter(router);
 
       const factory = await createCookieSessionStorageFactory(
@@ -179,10 +198,12 @@ describe('Cookie based SessionStorage', () => {
     });
 
     it('returns null for invalid session & clean cookies', async () => {
-      const router = new Router('');
+      const { registerRouter, server: innerServer, createRouter } = await server.setup();
+
+      const router = createRouter('');
 
       let setOnce = false;
-      router.get({ path: '/', validate: false }, async (req, res) => {
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
         const sessionStorage = factory.asScoped(req);
         if (!setOnce) {
           setOnce = true;
@@ -193,7 +214,6 @@ describe('Cookie based SessionStorage', () => {
         return res.ok({ value: sessionValue });
       });
 
-      const { registerRouter, server: innerServer } = await server.setup(config);
       registerRouter(router);
 
       const factory = await createCookieSessionStorageFactory(
@@ -313,9 +333,11 @@ describe('Cookie based SessionStorage', () => {
 
   describe('#clear()', () => {
     it('clears session storage & remove cookies', async () => {
-      const router = new Router('');
+      const { registerRouter, server: innerServer, createRouter } = await server.setup();
 
-      router.get({ path: '/', validate: false }, async (req, res) => {
+      const router = createRouter('');
+
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
         const sessionStorage = factory.asScoped(req);
         if (await sessionStorage.get()) {
           sessionStorage.clear();
@@ -325,7 +347,6 @@ describe('Cookie based SessionStorage', () => {
         return res.ok({});
       });
 
-      const { registerRouter, server: innerServer } = await server.setup(config);
       registerRouter(router);
 
       const factory = await createCookieSessionStorageFactory(

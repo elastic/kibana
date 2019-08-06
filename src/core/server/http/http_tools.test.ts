@@ -70,13 +70,12 @@ describe('timeouts', () => {
   const server = new HttpServer(logger, 'foo');
 
   test('returns 408 on timeout error', async () => {
-    const router = new Router('');
-    router.get({ path: '/a', validate: false }, async (req, res) => {
+    const router = new Router('', logger.get());
+    router.get({ path: '/a', validate: false }, async (context, req, res) => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       return res.ok({});
     });
-    router.get({ path: '/b', validate: false }, (req, res) => res.ok({}));
-
+    router.get({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
     const { registerRouter, server: innerServer } = await server.setup({
       socketTimeout: 1000,
       host: '127.0.0.1',
