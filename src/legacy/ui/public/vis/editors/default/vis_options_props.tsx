@@ -21,8 +21,8 @@ import { Vis } from 'ui/vis';
 
 export type VisOptionsSetValue = (paramName: string, value: unknown) => void;
 
-export interface VisOptionsProps<ParamType = unknown> {
-  stateParams: ParamType;
+export interface VisOptionsProps<VisParamType = unknown> {
+  stateParams: VisParamType;
   vis: Vis;
-  setValue: VisOptionsSetValue;
+  setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
 }
