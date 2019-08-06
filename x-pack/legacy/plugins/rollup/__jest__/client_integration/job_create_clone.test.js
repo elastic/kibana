@@ -140,7 +140,6 @@ describe('Cloning a rollup job through create job wizard', () => {
         if (shouldBeChecked) ++checkedCountActual;
         expect(props.checked).toBe(shouldBeChecked);
       });
-
       // All inputs from job config have been accounted for on the UI
       expect(checkedCountActual).toBe(checkedCountExpected);
     });
