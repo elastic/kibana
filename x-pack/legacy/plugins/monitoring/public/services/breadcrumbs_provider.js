@@ -6,6 +6,7 @@
 
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
+import { getSetupModeState } from '../lib/setup_mode';
 
 // Helper for making objects to use in a link element
 const createCrumb = (url, label, testSubj) => {
@@ -120,12 +121,17 @@ function getApmBreadcrumbs(mainInstance) {
 
 export function breadcrumbsProvider() {
   return function createBreadcrumbs(clusterName, mainInstance) {
-    let breadcrumbs = [ createCrumb('#/home',
-      i18n.translate(
+    const setupMode = getSetupModeState();
+    // This mimics how the edit mode works for dashboards
+    const homeCrumb = setupMode.enabled
+      ? i18n.translate(
+        'xpack.monitoring.breadcrumbs.clustersInSetupModeLabel', { defaultMessage: 'Clusters (Setup Mode)' }
+      )
+      : i18n.translate(
         'xpack.monitoring.breadcrumbs.clustersLabel', { defaultMessage: 'Clusters' }
-      ),
-      'breadcrumbClusters')
-    ];
+      );
+
+    let breadcrumbs = [ createCrumb('#/home', homeCrumb, 'breadcrumbClusters')];
 
     if (!mainInstance.inOverview && clusterName) {
       breadcrumbs.push(createCrumb('#/overview', clusterName));

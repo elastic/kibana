@@ -134,37 +134,39 @@ export const toggleSetupMode = inSetupMode => {
 };
 
 const setSetupModeMenuItem = () => {
-  // Disabling this for this initial release. This will be added back in
-  // in a subsequent PR
-  // checkAngularState();
+  checkAngularState();
 
-  // const globalState = angularState.injector.get('globalState');
-  // const navItems = globalState.inSetupMode
-  //   ? [
-  //     {
-  //       key: 'exit',
-  //       label: 'Exit Setup Mode',
-  //       description: 'Exit setup mode',
-  //       run: () => toggleSetupMode(false),
-  //       testId: 'exitSetupMode'
-  //     },
-  //     {
-  //       key: 'refresh',
-  //       label: 'Refresh Setup Data',
-  //       description: 'Refresh data used for setup mode',
-  //       run: () => updateSetupModeData(),
-  //       testId: 'refreshSetupModeData'
-  //     }
-  //   ]
-  //   : [{
-  //     key: 'enter',
-  //     label: 'Enter Setup Mode',
-  //     description: 'Enter setup mode',
-  //     run: () => toggleSetupMode(true),
-  //     testId: 'enterSetupMode'
-  //   }];
+  const globalState = angularState.injector.get('globalState');
+  const navItems = globalState.inSetupMode
+    ? [
+      {
+        id: 'exit',
+        label: 'Exit Setup Mode',
+        description: 'Exit setup mode',
+        run: () => toggleSetupMode(false),
+        testId: 'exitSetupMode'
+      },
+      {
+        id: 'refresh',
+        label: 'Refresh Setup Data',
+        description: 'Refresh data used for setup mode',
+        run: () => updateSetupModeData(),
+        testId: 'refreshSetupModeData'
+      }
+    ]
+    : [{
+      id: 'enter',
+      label: 'Enter Setup Mode',
+      description: 'Enter setup mode',
+      run: () => toggleSetupMode(true),
+      testId: 'enterSetupMode'
+    }];
 
-  // angularState.scope.topNavMenu = [...navItems];
+  angularState.scope.topNavMenu = [...navItems];
+  // LOL angular
+  if (!angularState.scope.$$phase) {
+    angularState.scope.$apply();
+  }
 };
 
 export const initSetupModeState = ($scope, $injector, callback) => {

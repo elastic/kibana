@@ -10,8 +10,8 @@ import { PageLoading } from 'plugins/monitoring/components';
 import uiRoutes from 'ui/routes';
 import { I18nContext } from 'ui/i18n';
 import template from './index.html';
-import { toggleSetupMode, getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
 import { CODE_PATH_LICENSE } from '../../../common/constants';
+import { toggleSetupMode, getSetupModeState } from '../../lib/setup_mode';
 
 const REACT_DOM_ID = 'monitoringLoadingReactApp';
 
@@ -22,8 +22,6 @@ uiRoutes
       constructor($injector, $scope) {
         const monitoringClusters = $injector.get('monitoringClusters');
         const kbnUrl = $injector.get('kbnUrl');
-
-        initSetupModeState($scope, $injector);
 
         const setupMode = getSetupModeState();
         // For phase 3, this is not an valid route unless
@@ -48,7 +46,6 @@ uiRoutes
               kbnUrl.changePath('/home');
               return;
             }
-            initSetupModeState($scope, $injector);
             return toggleSetupMode(true)
               .then(() => {
                 kbnUrl.changePath('/elasticsearch/nodes');

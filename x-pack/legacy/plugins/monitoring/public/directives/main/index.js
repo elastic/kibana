@@ -18,7 +18,7 @@ import template from './index.html';
 import { timefilter } from 'ui/timefilter';
 import { shortenPipelineHash } from '../../../common/formatting';
 import 'ui/directives/kbn_href';
-import { getSetupModeState } from '../../lib/setup_mode';
+import { getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
 
 const setOptions = (controller) => {
   if (!controller.pipelineVersions || !controller.pipelineVersions.length || !controller.pipelineDropdownElement) {
@@ -169,6 +169,9 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
     controllerAs: 'monitoringMain',
     bindToController: true,
     link(scope, _element, attributes, controller) {
+      initSetupModeState(scope, $injector, () => {
+        controller.setup(getSetupObj());
+      });
       if (!scope.cluster) {
         const $route = $injector.get('$route');
         const globalState = $injector.get('globalState');
