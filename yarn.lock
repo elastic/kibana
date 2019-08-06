@@ -1711,10 +1711,10 @@
     oppsy "2.x.x"
     pumpify "1.3.x"
 
-"@elastic/javascript-typescript-langserver@^0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@elastic/javascript-typescript-langserver/-/javascript-typescript-langserver-0.2.1.tgz#14fd5bc20f50cfbcb785c5741743f67ad1d96e77"
-  integrity sha512-QjVENpUpjOM3SWr2inHeq6Drg6VwO5jKD2JGT+D5apDYJQ0cWCauIkfX2XvrNw0c3tR/Nlt+yWqtdj+Cq9eybA==
+"@elastic/javascript-typescript-langserver@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.npm.taobao.org/@elastic/javascript-typescript-langserver/download/@elastic/javascript-typescript-langserver-0.2.2.tgz#0dc126e35ead4016dcf8f318281578934436be27"
+  integrity sha1-DcEm416tQBbc+PMYKBV4k0Q2vic=
   dependencies:
     "@elastic/lsp-extension" "^0.1.2"
     javascript-typescript-langserver "^2.11.3"
@@ -1745,6 +1745,11 @@
     progress "^1.1.8"
     through2 "^2.0.0"
     update-notifier "^0.5.0"
+
+"@elastic/maki@6.1.0":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/maki/-/maki-6.1.0.tgz#384bdd53b95e9f87bd6b27e3d9dfaad70e29715a"
+  integrity sha512-eCNuGV3bVfSpDn1af6qCJ1udwm9DqGFjNN5JXbNIonAQYrbPvrRXNe5CxDKlWXbgxKOaOIhWtJ3/62JN+YKlZA==
 
 "@elastic/node-crypto@^0.1.2":
   version "0.1.2"
