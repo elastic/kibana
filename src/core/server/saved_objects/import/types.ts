@@ -18,7 +18,7 @@
  */
 
 import { Readable } from 'stream';
-import { SavedObjectsClientContract } from '../service';
+import { SavedObjectsClientContract } from '../types';
 
 /**
  * Describes a retry operation for importing a saved object.

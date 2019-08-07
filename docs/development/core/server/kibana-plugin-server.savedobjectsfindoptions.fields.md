@@ -4,8 +4,15 @@
 
 ## SavedObjectsFindOptions.fields property
 
+An array of fields to include in the results
+
 <b>Signature:</b>
 
 ```typescript
 fields?: string[];
 ```
+
+## Example
+
+SavedObjects.find(<!-- -->{<!-- -->type: 'dashboard', fields: \['attributes.name', 'attributes.location'\]<!-- -->}<!-- -->)
+
