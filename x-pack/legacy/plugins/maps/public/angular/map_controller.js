@@ -52,7 +52,9 @@ import {
   MAP_SAVED_OBJECT_TYPE,
   MAP_APP_PATH
 } from '../../common/constants';
-import { getInitialFilters, partitionFilters, prepareFilters } from './filter_bar_utils';
+
+import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+const filterManager = data.filter.filterManager;
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
@@ -92,11 +94,10 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
   });
 
   function syncAppAndGlobalState() {
-    const { globalFilters, appFilters } = partitionFilters($scope.filters);
     $scope.$evalAsync(() => {
       // appState
       $state.query = $scope.query;
-      $state.filters = appFilters;
+      $state.filters = filterManager.getAppFilters();
       $state.save();
 
       // globalState
@@ -105,7 +106,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
         pause: $scope.refreshConfig.isPaused,
         value: $scope.refreshConfig.interval,
       };
-      globalState.filters = globalFilters;
+      globalState.filters = filterManager.getGlobalFilters();
       globalState.save();
     });
   }
@@ -126,7 +127,8 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
 
   async function onQueryChange({ filters, query, time }) {
     if (filters) {
-      $scope.filters = await prepareFilters(filters);
+      await filterManager.setFilters(filters); // Maps and merges filters
+      $scope.filters = filterManager.getFilters();
     }
     if (query) {
       $scope.query = query;
@@ -155,7 +157,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
   };
   $scope.updateFiltersAndDispatch = function (filters) {
     onQueryChange({
-      filters: filters,
+      filters,
     });
   };
   $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
@@ -213,6 +215,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
     });
 
     // sync store with savedMap mapState
+    let savedObjectFilters = [];
     if (savedMap.mapStateJSON) {
       const mapState = JSON.parse(savedMap.mapStateJSON);
       store.dispatch(setGotoWithCenter({
@@ -220,6 +223,9 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
         lon: mapState.center.lon,
         zoom: mapState.zoom,
       }));
+      if (mapState.filters) {
+        savedObjectFilters = mapState.filters;
+      }
     }
 
     if (savedMap.uiStateJSON) {
@@ -233,11 +239,11 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
     store.dispatch(replaceLayerList(layerList));
     store.dispatch(setRefreshConfig($scope.refreshConfig));
 
-    const initialFilters = getInitialFilters({
-      mapStateJSON: savedMap.mapStateJSON,
-      appFilters: getAppStateFilters(),
-      globalFilters: globalState.filters
-    });
+    const initialFilters = [
+      ..._.get(globalState, 'filters', []),
+      ...getAppStateFilters(),
+      ...savedObjectFilters
+    ];
     await onQueryChange({ filters: initialFilters });
 
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
