@@ -5,10 +5,9 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function createActionTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function createActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -33,9 +32,42 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         .then((resp: any) => {
           expect(resp.body).to.eql({
             id: resp.body.id,
+            description: 'My action',
+            actionTypeId: 'test.index-record',
+            config: {
+              unencrypted: `This value shouldn't get encrypted`,
+            },
           });
           expect(typeof resp.body.id).to.be('string');
         });
+    });
+
+    it('should return 200 when creating an action inside a space and to not be accessible from another space', async () => {
+      const { body: createdAction } = await supertest
+        .post('/s/space_1/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          description: 'My action',
+          actionTypeId: 'test.index-record',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(200);
+      expect(createdAction).to.eql({
+        id: createdAction.id,
+        description: 'My action',
+        actionTypeId: 'test.index-record',
+        config: {
+          unencrypted: `This value shouldn't get encrypted`,
+        },
+      });
+      expect(typeof createdAction.id).to.be('string');
+      await supertest.get(`/s/space_1/api/action/${createdAction.id}`).expect(200);
+      await supertest.get(`/api/action/${createdAction.id}`).expect(404);
     });
 
     it(`should return 400 when action type isn't registered`, async () => {
