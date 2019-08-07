@@ -11,6 +11,7 @@ import {
   EuiImage,
   EuiPage,
   EuiPageBody,
+  EuiPageWidthProps,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -33,15 +34,23 @@ export function Home() {
     getIntegrationsGroupedByStatus().then(setMap);
   }, []);
 
+  return <HomeLayout map={map} restrictWidth={1200} />;
+}
+
+type LayoutProps = {
+  map: IntegrationsGroupedByStatus;
+} & EuiPageWidthProps;
+function HomeLayout(props: LayoutProps) {
+  const { map, restrictWidth } = props;
   return (
     <>
       <EuiPage style={{ borderBottom: '1px solid #D3DAE6', paddingBottom: '7px' }}>
-        <EuiPageBody restrictWidth={1200}>
+        <EuiPageBody restrictWidth={restrictWidth}>
           <Header />
         </EuiPageBody>
       </EuiPage>
       <EuiPage>
-        <EuiPageBody restrictWidth={1200}>
+        <EuiPageBody restrictWidth={restrictWidth}>
           <IntegrationsGridByStatus map={map} />
         </EuiPageBody>
       </EuiPage>

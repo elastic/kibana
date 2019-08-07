@@ -5,17 +5,20 @@
  */
 import React, { FunctionComponent, ReactNode, useState, useEffect } from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiFacetButton,
+  EuiFacetGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiPage,
   EuiPageBody,
   EuiPageWidthProps,
   EuiPanel,
   EuiText,
+  EuiTextColor,
   EuiTitle,
   ICON_TYPES,
   IconType,
@@ -25,7 +28,10 @@ const ICON_HEIGHT_PANEL = 164;
 const ICON_HEIGHT_NATURAL = 32;
 
 import { PLUGIN } from '../../common/constants';
-import { IntegrationInfo } from '../../common/types';
+import { entries } from '../../common/type_utils';
+import { AssetsGroupedByServiceByType, IntegrationInfo, RequirementMap } from '../../common/types';
+import { AssetIcons, AssetTitleMap, ServiceIcons, ServiceTitleMap } from '../constants';
+import { VersionBadge } from '../components/version_badge';
 import { getIntegrationInfoByKey } from '../data';
 import { useBreadcrumbs, useLinks } from '../hooks';
 
@@ -86,7 +92,7 @@ function Header(props: HeaderProps) {
         <EuiTitle size="l">
           <h1>
             <span style={{ marginRight: '1rem' }}>{title}</span>
-            <EuiBadge color="hollow">v{version}</EuiBadge>
+            <VersionBadge version={version} />
           </h1>
         </EuiTitle>
       </CenterColumn>
@@ -136,7 +142,19 @@ function Content(props: ContentProps) {
           </EuiText>
         </>
       </CenterColumn>
-      <RightColumn />
+      <RightColumn>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <Requirements requirements={props.requirement} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiHorizontalRule margin="xl" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <Assets assets={props.assets} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </RightColumn>
     </EuiFlexGroup>
   );
 }
@@ -194,5 +212,78 @@ function NavButtonBack() {
     >
       Browse Integrations
     </EuiButtonEmpty>
+  );
+}
+
+interface RequirementsProps {
+  requirements: RequirementMap;
+}
+function Requirements(props: RequirementsProps) {
+  const { requirements } = props;
+
+  return (
+    <>
+      <EuiTitle size="xs">
+        <span style={{ paddingBottom: '16px' }}>Compatibility</span>
+      </EuiTitle>
+      {entries(requirements).map(([service, requirement]) => (
+        <EuiFlexGroup>
+          <EuiFlexItem grow={true}>
+            <EuiTextColor color="subdued" key={service}>
+              {ServiceTitleMap[service]}:
+            </EuiTextColor>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <div>
+              <VersionBadge version={requirement['version.min']} />
+              <span>{' - '}</span>
+              <VersionBadge version={requirement['version.max']} />
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ))}
+    </>
+  );
+}
+
+interface AssetsProps {
+  assets: AssetsGroupedByServiceByType;
+}
+
+function Assets(props: AssetsProps) {
+  const { assets } = props;
+  return (
+    <>
+      {entries(assets).map(([service, typeToParts], index) => {
+        return (
+          <>
+            <div style={{ padding: index === 0 ? '0 0 8px 0' : '8px 0' }}>
+              <EuiIcon type={ServiceIcons[service]} />
+              <EuiTitle key={service} size="xs">
+                <span style={{ paddingLeft: '8px' }}>{ServiceTitleMap[service]} Assets</span>
+              </EuiTitle>
+            </div>
+
+            <EuiFacetGroup style={{ flexGrow: 0 }}>
+              {entries(typeToParts).map(([type, parts]) => {
+                const iconType = AssetIcons[type];
+                const iconNode = iconType ? <EuiIcon type={iconType} size="s" /> : '';
+                return (
+                  <EuiFacetButton
+                    style={{ padding: '4px 0', height: 'unset' }}
+                    quantity={parts.length}
+                    icon={iconNode}
+                    // using noop buttonRef to avoid `'buttonRef' ... required in type 'EuiFacetButtonProps'.` error
+                    buttonRef={() => {}}
+                  >
+                    <EuiTextColor color="subdued">{AssetTitleMap[type]}</EuiTextColor>
+                  </EuiFacetButton>
+                );
+              })}
+            </EuiFacetGroup>
+          </>
+        );
+      })}
+    </>
   );
 }

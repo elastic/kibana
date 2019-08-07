@@ -12,6 +12,7 @@ import {
   IntegrationList,
   IntegrationListItem,
 } from '../../common/types';
+import { entries } from '../../common/type_utils';
 import { IntegrationCard } from './integration_card';
 
 interface GridProps {
@@ -22,12 +23,6 @@ interface ListProps {
   status: InstallationStatus;
   list: IntegrationList;
 }
-
-// Calling Object.entries(IntegrationsGroupedByStatus) gave `status: string`
-// which causes a "string is not assignable to type InstallationStatus` error
-// see https://github.com/Microsoft/TypeScript/issues/20322
-// and https://github.com/Microsoft/TypeScript/pull/12253#issuecomment-263132208
-const entries = Object.entries as <T>(o: T) => Array<[Extract<keyof T, string>, T[keyof T]]>;
 
 export function IntegrationsGridByStatus({ map }: GridProps) {
   if (!map) return null;

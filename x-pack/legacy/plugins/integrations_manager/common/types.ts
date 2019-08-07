@@ -44,17 +44,28 @@ export interface RegistryListItem {
 
 // from /package/{name}
 // https://github.com/elastic/integrations-registry/blob/master/docs/api/package.json
+export type ServiceName = 'kibana' | 'elasticsearch' | 'filebeat' | 'metricbeat';
+export type RequirementVersionValue = string;
+export interface RequirementGroup {
+  'version.min': RequirementVersionValue;
+  'version.max': RequirementVersionValue;
+}
+
+export type RequirementMap = Record<ServiceName, RequirementGroup>;
+export interface AssetParts {
+  pkgkey: string;
+  service: ServiceName;
+  type: AssetType;
+  file: string;
+}
+
+export type AssetsGroupedByServiceByType = Record<ServiceName, Record<AssetType, AssetParts[]>>;
 export interface RegistryPackage {
   name: string;
   version: string;
   description: string;
   icon: string;
-  requirement: {
-    kibana: {
-      'version.min': string;
-      'version.max': string;
-    };
-  };
+  requirement: RequirementMap;
 }
 
 // Managers public HTTP response types
@@ -62,13 +73,13 @@ export interface RegistryPackage {
 export type IntegrationList = IntegrationListItem[];
 // add title here until it's a part of registry response
 export type IntegrationListItem = Installable<RegistryListItem & { title: string }>;
-export type IntegrationsGroupedByStatus = {
-  [key in InstallationStatus]: IntegrationList;
-};
+export type IntegrationsGroupedByStatus = Record<InstallationStatus, IntegrationList>;
 
 // from API_INFO_PATTERN
 // add title here until it's a part of registry response
-export type IntegrationInfo = Installable<RegistryPackage & { title: string }>;
+export type IntegrationInfo = Installable<
+  RegistryPackage & { assets: AssetsGroupedByServiceByType; title: string }
+>;
 
 // from API_INSTALL_PATTERN
 // returns Installation
