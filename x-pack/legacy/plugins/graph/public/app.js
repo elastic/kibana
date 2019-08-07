@@ -330,10 +330,9 @@ app.controller('graphuiPlugin', function (
 
     // Check if user is toggling off an already-open config panel for the current field
     if ($scope.currentlyDisplayedKey === 'fieldConfig' && field === $scope.selectedFieldConfig) {
-      $scope.hideAllConfigPanels();
+      $scope.currentlyDisplayedKey = null;
       return;
     }
-    $scope.hideAllConfigPanels();
     $scope.selectedFieldConfig = field;
     $scope.currentlyDisplayedKey = 'fieldConfig';
   };
@@ -503,7 +502,6 @@ app.controller('graphuiPlugin', function (
 
   $scope.toggleShowAdvancedFieldsConfig = function () {
     if ($scope.currentlyDisplayedKey !== 'fields') {
-      $scope.closeMenus();
       $scope.currentlyDisplayedKey = 'fields';
       //Default the selected field
       $scope.selectedField = null;
@@ -515,7 +513,6 @@ app.controller('graphuiPlugin', function (
       }
     } else {
       $scope.currentlyDisplayedKey = undefined;
-      $scope.hideAllConfigPanels();
     }
   };
 
