@@ -6,7 +6,7 @@
 
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 
-// The internal representation of the confuguration used to build the visuals
+// The internal representation of the configuration used to build the visuals
 // which display the field information.
 // TODO - type stats
 export interface FieldVisConfig {

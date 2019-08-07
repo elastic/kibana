@@ -4,17 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { FC } from 'react';
 
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 
@@ -28,10 +18,12 @@ import {
   GeoPointContent,
   IpContent,
   KeywordContent,
+  NotInDocsContent,
   NumberContent,
   OtherContent,
   TextContent,
 } from './content_types';
+import { LoadingIndicator } from './loading_indicator';
 
 interface Props {
   config: FieldVisConfig;
@@ -41,6 +33,10 @@ export const FieldDataCard: FC<Props> = ({ config }) => {
   const { fieldName, loading, type, existsInDocs } = config;
 
   function getCardContent() {
+    if (existsInDocs === false) {
+      return <NotInDocsContent />;
+    }
+
     switch (type) {
       case ML_JOB_FIELD_TYPES.NUMBER:
         if (fieldName !== undefined) {
@@ -77,49 +73,7 @@ export const FieldDataCard: FC<Props> = ({ config }) => {
       <div className="mlFieldDataCard">
         <FieldTitleBar card={config} />
         <div className="mlFieldDataCard__content">
-          {loading === true && (
-            <Fragment>
-              <EuiSpacer size="xxl" />
-              <EuiFlexGroup justifyContent="spaceAround">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="l" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiFlexGroup justifyContent="spaceAround">
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued">
-                    <FormattedMessage
-                      id="xpack.ml.fieldDataCard.loadingLabel"
-                      defaultMessage="Loading"
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </Fragment>
-          )}
-          {loading === false && existsInDocs === true && getCardContent()}
-          {loading === false && existsInDocs === false && (
-            <Fragment>
-              <EuiSpacer size="xxl" />
-              <EuiFlexGroup justifyContent="spaceAround">
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="xs" justifyContent="spaceAround">
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="alert" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiFlexGroup style={{ padding: '0px 16px', textAlign: 'center' }}>
-                    <EuiFlexItem grow={false}>
-                      <FormattedMessage
-                        id="xpack.ml.fieldDataCard.fieldNotInDocsLabel"
-                        defaultMessage="This field does not appear in any documents for the selected time range"
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </Fragment>
-          )}
+          {loading === true ? <LoadingIndicator /> : getCardContent()}
         </div>
       </div>
     </div>

@@ -21,9 +21,10 @@ import {
   Settings,
 } from '@elastic/charts';
 
-import chrome from 'ui/chrome';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+
+import { useUiChromeContext } from '../../../../contexts/ui/use_ui_chrome_context';
 
 export interface DocumentCountChartPoint {
   time: number | string;
@@ -39,16 +40,6 @@ interface Props {
 }
 
 const SPEC_ID = 'document_count';
-
-// TODO - switch to use inline areaSeriesStyle to set series fill once charts version is 8.0.0+
-const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
-const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
-const EVENT_RATE_COLOR = themeName.euiColorVis2;
-const barSeriesColorValues: DataSeriesColorsValues = {
-  colorValues: [],
-  specId: getSpecId(SPEC_ID),
-};
-const seriesColors = new Map([[barSeriesColorValues, EVENT_RATE_COLOR]]);
 
 export const DocumentCountChart: FC<Props> = ({
   width,
@@ -67,6 +58,18 @@ export const DocumentCountChart: FC<Props> = ({
   };
 
   const dateFormatter = niceTimeFormatter([timeRangeEarliest, timeRangeLatest]);
+
+  // TODO - switch to use inline areaSeriesStyle to set series fill once charts version is 8.0.0+
+  const IS_DARK_THEME = useUiChromeContext()
+    .getUiSettingsClient()
+    .get('theme:darkMode');
+  const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
+  const EVENT_RATE_COLOR = themeName.euiColorVis2;
+  const barSeriesColorValues: DataSeriesColorsValues = {
+    colorValues: [],
+    specId: getSpecId(SPEC_ID),
+  };
+  const seriesColors = new Map([[barSeriesColorValues, EVENT_RATE_COLOR]]);
 
   return (
     <div style={{ width, height }}>

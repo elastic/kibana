@@ -10,6 +10,7 @@ export { DocumentCountContent } from './document_count_content';
 export { GeoPointContent } from './geo_point_content';
 export { KeywordContent } from './keyword_content';
 export { IpContent } from './ip_content';
+export { NotInDocsContent } from './not_in_docs_content';
 export { NumberContent } from './number_content';
 export { OtherContent } from './other_content';
 export { TextContent } from './text_content';

@@ -23,11 +23,11 @@ import {
   TooltipValue,
 } from '@elastic/charts';
 
-import chrome from 'ui/chrome';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
+import { useUiChromeContext } from '../../../../contexts/ui/use_ui_chrome_context';
 // @ts-ignore
 import { kibanaFieldFormat } from '../../../../formatters/kibana_field_format';
 
@@ -48,15 +48,6 @@ interface Props {
 
 const SPEC_ID = 'metric_distribution';
 
-const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
-const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
-const EVENT_RATE_COLOR = themeName.euiColorVis1;
-const seriesColorValues: DataSeriesColorsValues = {
-  colorValues: [],
-  specId: getSpecId(SPEC_ID),
-};
-const seriesColors = new Map([[seriesColorValues, EVENT_RATE_COLOR]]);
-
 export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, fieldFormat }) => {
   // This value is shown to label the y axis values in the tooltip.
   // Ideally we wouldn't show these values at all in the tooltip,
@@ -64,6 +55,18 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
   const seriesName = i18n.translate('xpack.ml.fieldDataCard.metricDistributionChart.seriesName', {
     defaultMessage: 'distribution',
   });
+
+  // TODO - switch to use inline areaSeriesStyle to set series fill once charts version is 8.0.0+
+  const IS_DARK_THEME = useUiChromeContext()
+    .getUiSettingsClient()
+    .get('theme:darkMode');
+  const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
+  const EVENT_RATE_COLOR = themeName.euiColorVis1;
+  const seriesColorValues: DataSeriesColorsValues = {
+    colorValues: [],
+    specId: getSpecId(SPEC_ID),
+  };
+  const seriesColors = new Map([[seriesColorValues, EVENT_RATE_COLOR]]);
 
   const headerFormatter: TooltipValueFormatter = (tooltipData: TooltipValue) => {
     const xValue = tooltipData.value;

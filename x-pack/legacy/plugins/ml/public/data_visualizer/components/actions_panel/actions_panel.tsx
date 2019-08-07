@@ -9,11 +9,11 @@ import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import chrome from 'ui/chrome';
 import { IndexPattern } from 'ui/index_patterns';
 
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
+import { useUiChromeContext } from '../../../contexts/ui/use_ui_chrome_context';
 import { CreateJobLinkCard } from '../../../components/create_job_link_card';
 
 interface Props {
@@ -21,13 +21,12 @@ interface Props {
 }
 
 export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
+  const basePath = useUiChromeContext().getBasePath();
+
   function openAdvancedJobWizard() {
     // TODO - pass the search string to the advanced job page as well as the index pattern
     //       (add in with new advanced job wizard?)
-    window.open(
-      `${chrome.getBasePath()}/app/ml#/jobs/new_job/advanced?index=${indexPattern}`,
-      '_self'
-    );
+    window.open(`${basePath}/app/ml#/jobs/new_job/advanced?index=${indexPattern}`, '_self');
   }
 
   return (
