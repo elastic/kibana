@@ -28,7 +28,7 @@ interface StartActionProps {
 }
 
 export const StartAction: SFC<StartActionProps> = ({ item }) => {
-  const canStartStopDataFrameAnalytics: boolean = checkPermission('canStartStopDataFrame');
+  const canStartStopDataFrameAnalytics: boolean = checkPermission('canStartStopDataFrameAnalytics');
 
   const [isModalVisible, setModalVisible] = useState(false);
 
@@ -65,7 +65,7 @@ export const StartAction: SFC<StartActionProps> = ({ item }) => {
         position="top"
         content={
           !canStartStopDataFrameAnalytics
-            ? createPermissionFailureMessage('canStartStopDataFrame')
+            ? createPermissionFailureMessage('canStartStopDataFrameAnalytics')
             : i18n.translate('xpack.ml.dataframe.analyticsList.completeBatchAnalyticsToolTip', {
                 defaultMessage:
                   '{analyticsId} is a completed batch analytics job and cannot be restarted.',

@@ -128,10 +128,19 @@ function setFullGettingPrivileges(
     privileges.canFindFileStructure = true;
   }
 
-  // Data Frames
+  // Data Frame Transforms
   if (
     forceTrue ||
     (cluster['cluster:monitor/data_frame/get'] && cluster['cluster:monitor/data_frame/stats/get'])
+  ) {
+    privileges.canGetDataFrame = true;
+  }
+
+  // Data Frame Analytics
+  if (
+    forceTrue ||
+    (cluster['cluster:monitor/xpack/ml/job/get'] &&
+      cluster['cluster:monitor/xpack/ml/job/stats/get'])
   ) {
     privileges.canGetDataFrame = true;
   }
@@ -224,7 +233,7 @@ function setFullActionPrivileges(
     privileges.canDeleteFilter = true;
   }
 
-  // Data Frames
+  // Data Frame Transforms
   if (forceTrue || cluster['cluster:admin/data_frame/put']) {
     privileges.canCreateDataFrame = true;
   }
@@ -245,6 +254,33 @@ function setFullActionPrivileges(
   ) {
     privileges.canStartStopDataFrame = true;
   }
+
+  // Data Frame Analytics
+  if (
+    forceTrue ||
+    (cluster['cluster:admin/xpack/ml/job/put'] &&
+      cluster['cluster:admin/xpack/ml/job/open'] &&
+      cluster['cluster:admin/xpack/ml/datafeeds/put'])
+  ) {
+    privileges.canCreateDataFrameAnalytics = true;
+  }
+
+  if (
+    forceTrue ||
+    (cluster['cluster:admin/xpack/ml/job/delete'] &&
+      cluster['cluster:admin/xpack/ml/datafeeds/delete'])
+  ) {
+    privileges.canDeleteDataFrameAnalytics = true;
+  }
+
+  if (
+    forceTrue ||
+    (cluster['cluster:admin/xpack/ml/job/open'] &&
+      cluster['cluster:admin/xpack/ml/datafeeds/start'] &&
+      cluster['cluster:admin/xpack/ml/datafeeds/stop'])
+  ) {
+    privileges.canStartStopDataFrameAnalytics = true;
+  }
 }
 
 function setBasicGettingPrivileges(
@@ -257,7 +293,7 @@ function setBasicGettingPrivileges(
     privileges.canFindFileStructure = true;
   }
 
-  // Data Frames
+  // Data Frame Transforms
   if (
     forceTrue ||
     (cluster['cluster:monitor/data_frame/get'] && cluster['cluster:monitor/data_frame/stats/get'])
@@ -271,7 +307,7 @@ function setBasicActionPrivileges(
   privileges: Privileges,
   forceTrue = false
 ) {
-  // Data Frames
+  // Data Frame Analytics
   if (forceTrue || cluster['cluster:admin/data_frame/put']) {
     privileges.canCreateDataFrame = true;
   }

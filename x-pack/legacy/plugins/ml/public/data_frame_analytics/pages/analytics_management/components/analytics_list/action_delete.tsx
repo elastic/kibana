@@ -70,7 +70,7 @@ export const DeleteAction: SFC<DeleteActionProps> = ({ item }) => {
                   defaultMessage: 'Stop the data frame analytics in order to delete it.',
                 }
               )
-            : createPermissionFailureMessage('canStartStopDataFrame')
+            : createPermissionFailureMessage('canStartStopDataFrameAnalytics')
         }
       >
         {deleteButton}

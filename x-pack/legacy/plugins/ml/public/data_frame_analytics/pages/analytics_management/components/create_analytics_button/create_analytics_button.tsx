@@ -19,9 +19,8 @@ import { moveToAnalyticsWizard } from '../../../../common';
 
 export const CreateAnalyticsButton: FC = () => {
   const disabled =
-    !checkPermission('canCreateDataFrame') ||
-    !checkPermission('canPreviewDataFrame') ||
-    !checkPermission('canStartStopDataFrame');
+    !checkPermission('canCreateDataFrameAnalytics') ||
+    !checkPermission('canStartStopDataFrameAnalytics');
 
   const button = (
     <EuiButton
@@ -41,7 +40,10 @@ export const CreateAnalyticsButton: FC = () => {
 
   if (disabled) {
     return (
-      <EuiToolTip position="top" content={createPermissionFailureMessage('canCreateDataFrame')}>
+      <EuiToolTip
+        position="top"
+        content={createPermissionFailureMessage('canCreateDataFrameAnalytics')}
+      >
         {button}
       </EuiToolTip>
     );

@@ -77,9 +77,8 @@ export const DataFrameAnalyticsList: SFC = () => {
   const [sortDirection, setSortDirection] = useState<string>(SortDirection.ASC);
 
   const disabled =
-    !checkPermission('canCreateDataFrame') ||
-    !checkPermission('canPreviewDataFrame') ||
-    !checkPermission('canStartStopDataFrame');
+    !checkPermission('canCreateDataFrameAnalytics') ||
+    !checkPermission('canStartStopDataFrameAnalytics');
 
   const getAnalytics = getAnalyticsFactory(
     setAnalytics,

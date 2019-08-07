@@ -20,7 +20,7 @@ import { StartAction } from './action_start';
 import { DeleteAction } from './action_delete';
 
 export const getActions = () => {
-  const canStartStopDataFrame: boolean = checkPermission('canStartStopDataFrame');
+  const canStartStopDataFrameAnalytics: boolean = checkPermission('canStartStopDataFrameAnalytics');
 
   return [
     {
@@ -41,7 +41,7 @@ export const getActions = () => {
           <EuiButtonEmpty
             size="xs"
             color="text"
-            disabled={!canStartStopDataFrame}
+            disabled={!canStartStopDataFrameAnalytics}
             iconType="stop"
             onClick={() => stopAnalytics(item)}
             aria-label={buttonStopText}
@@ -49,11 +49,11 @@ export const getActions = () => {
             {buttonStopText}
           </EuiButtonEmpty>
         );
-        if (!canStartStopDataFrame) {
+        if (!canStartStopDataFrameAnalytics) {
           return (
             <EuiToolTip
               position="top"
-              content={createPermissionFailureMessage('canStartStopDataFrame')}
+              content={createPermissionFailureMessage('canStartStopDataFrameAnalytics')}
             >
               {stopButton}
             </EuiToolTip>

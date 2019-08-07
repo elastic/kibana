@@ -7,9 +7,9 @@
 import uiRoutes from 'ui/routes';
 
 // @ts-ignore
-import { checkBasicLicense } from '../../../license/check_license';
+import { checkFullLicense } from '../../../license/check_license';
 // @ts-ignore
-import { checkGetDataFrameTransformsPrivilege } from '../../../privilege/check_privilege';
+import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
 // @ts-ignore
 import { loadIndexPatterns } from '../../../util/index_utils';
 // @ts-ignore
@@ -21,8 +21,8 @@ uiRoutes.when('/data_frame_analytics/?', {
   template,
   k7Breadcrumbs: getDataFrameAnalyticsBreadcrumbs,
   resolve: {
-    CheckLicense: checkBasicLicense,
-    privileges: checkGetDataFrameTransformsPrivilege,
+    CheckLicense: checkFullLicense,
+    privileges: checkGetJobsPrivilege,
     indexPatterns: loadIndexPatterns,
   },
 });
