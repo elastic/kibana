@@ -9,9 +9,7 @@ import { callApi } from './callApi';
 
 export interface LicenseApiResponse {
   license: {
-    expiry_date_in_millis: number;
     is_active: boolean;
-    type: string;
   };
   features: {
     beats_management?: StringMap;

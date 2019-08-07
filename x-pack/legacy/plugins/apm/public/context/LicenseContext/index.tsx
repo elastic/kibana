@@ -8,10 +8,12 @@ import { FETCH_STATUS, useFetcher } from '../../hooks/useFetcher';
 import { loadLicense, LicenseApiResponse } from '../../services/rest/xpack';
 import { InvalidLicenseNotification } from './InvalidLicenseNotification';
 
-const initialLicense = {
+const initialLicense: LicenseApiResponse = {
   features: {},
-  license: { is_active: false }
-} as LicenseApiResponse;
+  license: {
+    is_active: false
+  }
+};
 export const LicenseContext = React.createContext(initialLicense);
 
 export const LicenseProvider: React.FC = ({ children }) => {
