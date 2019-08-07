@@ -172,7 +172,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
         <EuiFormRow key={layer.layerId} data-test-subj={`lnsXY_layer_${layer.layerId}`}>
           <EuiPanel>
             <EuiFlexGroup>
-              <EuiFlexItem>
+              <EuiFlexItem grow={null}>
                 <EuiFormRow>
                   <LayerSettings
                     layer={layer}

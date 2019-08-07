@@ -58,6 +58,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
 
     return Boolean(
       newField &&
+        newField.type === 'string' &&
         newField.aggregatable &&
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms)
     );

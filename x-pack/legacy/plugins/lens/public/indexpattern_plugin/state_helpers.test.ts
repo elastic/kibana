@@ -474,6 +474,25 @@ describe('state_helpers', () => {
           searchable: true,
           type: 'date',
         },
+        {
+          name: 'fieldD',
+          aggregatable: true,
+          searchable: true,
+          type: 'date',
+          aggregationRestrictions: {
+            date_histogram: {
+              agg: 'date_histogram',
+              time_zone: 'CET',
+              calendar_interval: 'w',
+            },
+          },
+        },
+        {
+          name: 'fieldE',
+          aggregatable: true,
+          searchable: true,
+          type: 'date',
+        },
       ],
     };
 
@@ -506,7 +525,7 @@ describe('state_helpers', () => {
             isBucketed: false,
             label: '',
             operationType: 'avg',
-            sourceField: 'fieldD',
+            sourceField: 'xxx',
           },
         },
         indexPatternId: 'original',
@@ -549,6 +568,36 @@ describe('state_helpers', () => {
       });
     });
 
+    it('should rewrite column params if that is necessary due to restrictions', () => {
+      const layer: IndexPatternLayer = {
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: {
+            dataType: 'date',
+            isBucketed: true,
+            label: '',
+            operationType: 'date_histogram',
+            sourceField: 'fieldD',
+            params: {
+              interval: 'd',
+            },
+          },
+        },
+        indexPatternId: 'original',
+      };
+      const updatedLayer = updateLayerIndexPattern(layer, indexPattern);
+      expect(updatedLayer.columnOrder).toEqual(['col1']);
+      expect(updatedLayer.columns).toEqual({
+        col1: {
+          ...layer.columns.col1,
+          params: {
+            interval: 'w',
+            timeZone: 'CET',
+          },
+        },
+      });
+    });
+
     it('should remove operations referencing fields with wrong field types', () => {
       const layer: IndexPatternLayer = {
         columnOrder: ['col1', 'col2'],
@@ -570,7 +619,7 @@ describe('state_helpers', () => {
             isBucketed: false,
             label: '',
             operationType: 'avg',
-            sourceField: 'fieldC',
+            sourceField: 'fieldD',
           },
         },
         indexPatternId: 'original',

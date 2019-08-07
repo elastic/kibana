@@ -171,9 +171,17 @@ export function updateLayerIndexPattern(
   layer: IndexPatternLayer,
   newIndexPattern: IndexPattern
 ): IndexPatternLayer {
-  const newColumns: IndexPatternLayer['columns'] = _.pick(layer.columns, column =>
+  const keptColumns: IndexPatternLayer['columns'] = _.pick(layer.columns, column =>
     isColumnTransferable(column, newIndexPattern)
   );
+  const newColumns: IndexPatternLayer['columns'] = _.mapValues(keptColumns, column => {
+    const operationDefinition = operationDefinitionMap[column.operationType] as OperationDefinition<
+      IndexPatternColumn
+    >;
+    return operationDefinition.transfer
+      ? operationDefinition.transfer(column, newIndexPattern)
+      : column;
+  });
   const newColumnOrder = layer.columnOrder.filter(columnId => newColumns[columnId]);
 
   return {

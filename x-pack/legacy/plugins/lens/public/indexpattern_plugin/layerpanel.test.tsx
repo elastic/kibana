@@ -178,7 +178,7 @@ describe('Layer Data Panel', () => {
     const instance = shallow(<LayerPanel {...defaultProps} />);
     act(() => {
       instance
-        .find('[data-test-subj="layerIndexPatternLabel"]')
+        .find('[data-test-subj="lns_layerIndexPatternLabel"]')
         .first()
         .simulate('click');
     });
@@ -195,7 +195,7 @@ describe('Layer Data Panel', () => {
     const instance = shallow(<LayerPanel {...defaultProps} />);
     act(() => {
       instance
-        .find('[data-test-subj="layerIndexPatternLabel"]')
+        .find('[data-test-subj="lns_layerIndexPatternLabel"]')
         .first()
         .simulate('click');
     });
@@ -208,11 +208,36 @@ describe('Layer Data Panel', () => {
     ).toEqual([false, true]);
   });
 
+  it('should switch data panel to target index pattern', () => {
+    const instance = shallow(<LayerPanel {...defaultProps} />);
+    act(() => {
+      instance
+        .find('[data-test-subj="lns_layerIndexPatternLabel"]')
+        .first()
+        .simulate('click');
+    });
+
+    act(() => {
+      instance.find(EuiComboBox).prop('onChange')!([
+        {
+          label: 'my-compatible-pattern',
+          value: defaultProps.state.indexPatterns['3'],
+        },
+      ]);
+    });
+
+    expect(defaultProps.setState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        currentIndexPatternId: '3',
+      })
+    );
+  });
+
   it('should switch using updateLayerIndexPattern', () => {
     const instance = shallow(<LayerPanel {...defaultProps} />);
     act(() => {
       instance
-        .find('[data-test-subj="layerIndexPatternLabel"]')
+        .find('[data-test-subj="lns_layerIndexPatternLabel"]')
         .first()
         .simulate('click');
     });

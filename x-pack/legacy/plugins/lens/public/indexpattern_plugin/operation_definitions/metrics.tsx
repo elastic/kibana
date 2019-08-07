@@ -39,6 +39,7 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
 
       return Boolean(
         newField &&
+          newField.type === 'number' &&
           newField.aggregatable &&
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );

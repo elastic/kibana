@@ -85,6 +85,7 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   paramEditor?: React.ComponentType<ParamEditorProps>;
   toEsAggsConfig: (column: C, columnId: string) => unknown;
   isTransferable: (column: C, newIndexPattern: IndexPattern) => boolean;
+  transfer?: (column: C, newIndexPattern: IndexPattern) => C;
 }
 
 export function isColumnTransferable(column: IndexPatternColumn, newIndexPattern: IndexPattern) {
