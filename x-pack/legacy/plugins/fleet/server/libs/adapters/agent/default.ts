@@ -6,15 +6,8 @@
 
 import { isEqual } from 'lodash';
 import { SavedObject } from 'src/core/server';
-import { Agent, NewAgent, AgentAdapter as AgentAdapterType } from './adapter_type';
+import { Agent, NewAgent, AgentAdapter as AgentAdapterType, SortOptions } from './adapter_type';
 import { SODatabaseAdapter } from '../saved_objets_database/adapter_types';
-
-function _savedObjectToAgent(so: SavedObject<Agent>) {
-  if (so.error) {
-    throw new Error(so.error.message);
-  }
-  return so.attributes;
-}
 
 export class AgentAdapter implements AgentAdapterType {
   constructor(private readonly soAdapter: SODatabaseAdapter) {}
@@ -114,6 +107,7 @@ export class AgentAdapter implements AgentAdapterType {
       type: 'agents',
       search,
     });
+
     return res.saved_objects.map(_savedObjectToAgent).filter(agent => {
       return metadata.local
         ? isEqual(metadata.local, agent.local_metadata)
@@ -126,16 +120,26 @@ export class AgentAdapter implements AgentAdapterType {
   /**
    * List agents
    */
-  public async list(sortOptions: any, page?: number, perPage: number = 20): Promise<Agent[]> {
-    const res = await this.soAdapter.find<Agent>({
+  public async list(
+    sortOptions?: SortOptions,
+    page?: number,
+    perPage: number = 20
+  ): Promise<{ agents: Agent[]; total: number }> {
+    const { saved_objects, total } = await this.soAdapter.find<Agent>({
       type: 'agents',
       page,
       perPage,
+      ..._getSortFields(sortOptions),
     });
 
-    return res.saved_objects
+    const agents: Agent[] = saved_objects
       .map(_savedObjectToAgent)
       .filter(agent => agent.type !== 'EPHEMERAL_INSTANCE');
+
+    return {
+      agents,
+      total,
+    };
   }
 
   public async findEphemeralByConfigSharedId(configSharedId: string): Promise<Agent | null> {
@@ -169,5 +173,29 @@ export class AgentAdapter implements AgentAdapterType {
     }
 
     return agents[0];
+  }
+}
+
+function _savedObjectToAgent(so: SavedObject<Agent>) {
+  if (so.error) {
+    throw new Error(so.error.message);
+  }
+  return so.attributes;
+}
+
+function _getSortFields(sortOption?: SortOptions) {
+  switch (sortOption) {
+    case SortOptions.EnrolledAtASC:
+      return {
+        sortField: 'enrolled_at',
+        sortOrder: 'ASC',
+      };
+    case SortOptions.EnrolledAtDESC:
+      return {
+        sortField: 'enrolled_at',
+        sortOrder: 'DESC',
+      };
+    default:
+      return {};
   }
 }

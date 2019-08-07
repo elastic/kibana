@@ -50,8 +50,16 @@ export class InMemoryAgentAdapter implements AgentAdapter {
     return [];
   }
 
-  public async list(sortOptions: any, page?: number, perPage?: number): Promise<Agent[]> {
-    return [];
+  public async list(
+    sortOptions: any,
+    page: number = 1,
+    perPage: number = 20
+  ): Promise<{ agents: Agent[]; total: number }> {
+    const start = (page - 1) * perPage;
+    const agents = Object.values(this.agents).slice(start, start + perPage);
+    const total = Object.keys(this.agents).length;
+
+    return { agents, total };
   }
 
   public async findEphemeralByConfigSharedId(configSharedId: string): Promise<Agent | null> {
@@ -60,7 +68,6 @@ export class InMemoryAgentAdapter implements AgentAdapter {
     );
 
     return agent || null;
-    return null;
   }
 
   public async getByEphemeralAccessToken(token: any): Promise<Agent | null> {

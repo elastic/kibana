@@ -7,6 +7,7 @@
 import { AgentLib } from './agent';
 import { TokenLib } from './token';
 import { InMemoryAgentAdapter } from './adapters/agent/in_memory';
+import { Agent } from './adapters/agent/adapter_type';
 
 jest.mock('./token');
 
@@ -206,6 +207,55 @@ describe('Agent lib', () => {
       expect(parentAgent).toMatchObject({
         type: 'EPHEMERAL',
       });
+    });
+  });
+
+  describe('Delete', () => {
+    it('should delete ephemeral instances', async () => {
+      const token = new TokenLib();
+      const agentAdapter = new InMemoryAgentAdapter();
+      agentAdapter.delete = jest.fn(async () => {});
+      const agentLib = new AgentLib(agentAdapter, token);
+
+      await agentLib.delete({
+        id: 'agent:1',
+        type: 'EPHEMERAL_INSTANCE',
+      } as Agent);
+
+      expect(agentAdapter.delete).toHaveBeenCalled();
+    });
+
+    it('should desactivate other agent', async () => {
+      const token = new TokenLib();
+      const agentAdapter = new InMemoryAgentAdapter();
+      agentAdapter.update = jest.fn(async () => {});
+      const agentLib = new AgentLib(agentAdapter, token);
+
+      await agentLib.delete({
+        id: 'agent:1',
+        type: 'PERMANENT',
+      } as Agent);
+
+      expect(agentAdapter.update).toHaveBeenCalledWith('agent:1', {
+        active: false,
+      });
+    });
+  });
+
+  describe('list', () => {
+    it('should return all agents', async () => {
+      const token = new TokenLib();
+      const agentAdapter = new InMemoryAgentAdapter();
+      agentAdapter.agents['agent:1'] = { id: 'agent:1' } as Agent;
+      agentAdapter.agents['agent:2'] = { id: 'agent:2' } as Agent;
+
+      const agentLib = new AgentLib(agentAdapter, token);
+
+      const res = await agentLib.list();
+
+      expect(res).toBeDefined();
+      expect(res.total).toBe(2);
+      expect(res.agents).toHaveLength(2);
     });
   });
 });

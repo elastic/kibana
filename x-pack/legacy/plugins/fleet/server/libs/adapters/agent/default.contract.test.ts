@@ -5,17 +5,34 @@
  */
 
 import Slapshot from '@mattapperson/slapshot';
+import moment from 'moment';
+import { SavedObject } from 'src/core/server';
 import { AgentAdapter } from './default';
 import { SODatabaseAdapter as SODatabaseAdapterType } from '../saved_objets_database/adapter_types';
 import { SODatabaseAdapter } from '../saved_objets_database/default';
 import { MemorizeSODatabaseAdapter } from '../saved_objets_database/memorize_adapter';
 import { createKibanaServer } from '../../../../../../../test_utils/jest/contract_tests/servers';
-import { Agent } from './adapter_type';
+import { Agent, SortOptions } from './adapter_type';
 
 describe('Agent Adapter', () => {
   let adapter: AgentAdapter;
   let soAdapter: SODatabaseAdapterType;
   let servers: any;
+
+  async function loadFixtures(agents: any[]): Promise<SavedObject[]> {
+    return await Promise.all(
+      agents.map(agent => {
+        return soAdapter.create('agents', agent);
+      })
+    );
+  }
+
+  async function clearFixtures() {
+    const { saved_objects: savedObjects } = await soAdapter.find({ type: 'agents', perPage: 1000 });
+    for (const so of savedObjects) {
+      await soAdapter.delete('agents', so.id);
+    }
+  }
 
   beforeAll(async () => {
     await Slapshot.callWhenOnline(async () => {
@@ -41,13 +58,11 @@ describe('Agent Adapter', () => {
     }
   });
 
+  afterEach(clearFixtures);
+
   describe('create', () => {
-    let agent: Agent;
-    afterAll(async () => {
-      await adapter.delete(agent);
-    });
     it('should create a new agent', async () => {
-      agent = await adapter.create({
+      const agent = await adapter.create({
         shared_id: 'agent1',
         active: false,
         access_token: 'TOKEN_1',
@@ -80,80 +95,75 @@ describe('Agent Adapter', () => {
   });
 
   describe('update', () => {
-    let agent: Agent;
+    let agentId: string;
     beforeAll(async () => {
-      agent = await adapter.create({
-        shared_id: 'agent1',
-        active: false,
-        access_token: 'TOKEN_1',
-        config_id: 'config_id_1',
-        config_shared_id: 'shared_config_id-1',
-        type: 'EPHEMERAL',
-        version: '1',
-        local_metadata: {
-          host: 'localhost',
+      const agents = await loadFixtures([
+        {
+          shared_id: 'agent1',
+          active: false,
+          access_token: 'TOKEN_1',
+          config_id: 'config_id_1',
+          config_shared_id: 'shared_config_id-1',
+          type: 'EPHEMERAL',
+          version: '1',
+          local_metadata: {
+            host: 'localhost',
+          },
+          user_provided_metadata: undefined,
+          enrolled_at: '2019-08-05T19:35:14.861Z',
         },
-        user_provided_metadata: undefined,
-        enrolled_at: '2019-08-05T19:35:14.861Z',
-      });
-    });
-    afterAll(async () => {
-      await adapter.delete(agent);
+      ]);
+
+      agentId = agents[0].id;
     });
     it('should allow to update an agent', async () => {
-      await adapter.update(agent.id, {
+      await adapter.update(agentId, {
         active: true,
       });
 
-      const freshAgent = await adapter.getById(agent.id);
+      const freshAgent = await adapter.getById(agentId);
       expect(freshAgent).toBeDefined();
-      expect(agent).toMatchObject({
+      expect(freshAgent).toMatchObject({
         shared_id: 'agent1',
-        active: false,
-        access_token: 'TOKEN_1',
-        config_id: 'config_id_1',
-        config_shared_id: 'shared_config_id-1',
-        type: 'EPHEMERAL',
-        version: '1',
-        local_metadata: {
-          host: 'localhost',
-        },
+        active: true,
       });
     });
   });
 
   describe('delete', () => {
-    let agent: Agent;
+    let agentId: string;
     beforeAll(async () => {
-      agent = await adapter.create({
-        shared_id: 'agent1',
-        active: false,
-        access_token: 'TOKEN_1',
-        config_id: 'config_id_1',
-        config_shared_id: 'shared_config_id-1',
-        type: 'EPHEMERAL',
-        version: '1',
-        local_metadata: {
-          host: 'localhost',
+      const agents = await loadFixtures([
+        {
+          shared_id: 'agent1',
+          active: false,
+          access_token: 'TOKEN_1',
+          config_id: 'config_id_1',
+          config_shared_id: 'shared_config_id-1',
+          type: 'EPHEMERAL',
+          version: '1',
+          local_metadata: {
+            host: 'localhost',
+          },
+          user_provided_metadata: undefined,
+          enrolled_at: '2019-08-05T19:35:14.861Z',
         },
-        user_provided_metadata: undefined,
-        enrolled_at: '2019-08-05T19:35:14.861Z',
-      });
+      ]);
+      agentId = agents[0].id;
     });
 
     it('should delete an agent', async () => {
-      await adapter.delete(agent);
+      await adapter.delete({ id: agentId } as Agent);
 
-      const freshAgent = await adapter.getById(agent.id);
+      const freshAgent = await adapter.getById(agentId);
 
       expect(freshAgent).toBeNull();
     });
   });
   describe('findEphemeralByConfigSharedId', () => {
-    const agents: Agent[] = [];
     beforeAll(async () => {
-      agents.push(
-        await adapter.create({
+      await loadFixtures([
+        {
           shared_id: 'agent1',
           active: false,
           access_token: 'TOKEN_1',
@@ -168,10 +178,8 @@ describe('Agent Adapter', () => {
             color: 'red',
           },
           enrolled_at: '2019-08-05T19:35:14.861Z',
-        })
-      );
-      agents.push(
-        await adapter.create({
+        },
+        {
           shared_id: 'agent2',
           active: false,
           access_token: 'TOKEN_1',
@@ -186,14 +194,8 @@ describe('Agent Adapter', () => {
             color: 'blue',
           },
           enrolled_at: '2019-08-05T19:35:14.861Z',
-        })
-      );
-    });
-
-    afterAll(async () => {
-      for (const agent of agents) {
-        await adapter.delete(agent);
-      }
+        },
+      ]);
     });
 
     it('should allow to find agent by config shared id', async () => {
@@ -202,16 +204,59 @@ describe('Agent Adapter', () => {
       expect((agent as Agent).shared_id).toBe('agent1');
     });
   });
+
+  describe('list', () => {
+    beforeEach(async () => {
+      const agents = Array(20)
+        .fill(null)
+        .map((_, idx) => {
+          return {
+            shared_id: `agent${idx}`,
+            active: false,
+            access_token: 'TOKEN_1',
+            config_id: 'config_id_1',
+            config_shared_id: 'shared_config_id_1',
+            type: 'EPHEMERAL',
+            version: '1',
+            local_metadata: {
+              host: 'test.fr',
+            },
+            user_provided_metadata: {
+              color: 'red',
+            },
+            enrolled_at: moment('2019-08-05T19:35:14.861Z').add(idx, 'day'),
+          };
+        });
+      await loadFixtures(agents);
+    });
+
+    it('should list all agents', async () => {
+      const res = await adapter.list();
+      expect(res.total).toBe(20);
+    });
+
+    it('should support to sort by enrolled_at date ASC', async () => {
+      const res = await adapter.list(SortOptions.EnrolledAtASC, 1, 3);
+
+      expect(res.agents.map(a => a.shared_id)).toEqual(['agent0', 'agent1', 'agent2']);
+    });
+
+    it('should support to sort by enrolled_at date DESC', async () => {
+      const res = await adapter.list(SortOptions.EnrolledAtDESC, 1, 3);
+
+      expect(res.agents.map(a => a.shared_id)).toEqual(['agent19', 'agent18', 'agent17']);
+    });
+  });
+
   describe('findByMetadata', () => {
-    const agents: Agent[] = [];
-    beforeAll(async () => {
-      agents.push(
-        await adapter.create({
+    beforeEach(async () => {
+      await loadFixtures([
+        {
           shared_id: 'agent1',
           active: false,
           access_token: 'TOKEN_1',
           config_id: 'config_id_1',
-          config_shared_id: 'shared_config_id-1',
+          config_shared_id: 'shared_config_id_1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -221,10 +266,8 @@ describe('Agent Adapter', () => {
             color: 'red',
           },
           enrolled_at: '2019-08-05T19:35:14.861Z',
-        })
-      );
-      agents.push(
-        await adapter.create({
+        },
+        {
           shared_id: 'agent2',
           active: false,
           access_token: 'TOKEN_1',
@@ -239,14 +282,8 @@ describe('Agent Adapter', () => {
             color: 'blue',
           },
           enrolled_at: '2019-08-05T19:35:14.861Z',
-        })
-      );
-    });
-
-    afterAll(async () => {
-      for (const agent of agents) {
-        await adapter.delete(agent);
-      }
+        },
+      ]);
     });
 
     it('should allow to find agents by local metadata', async () => {
