@@ -71,7 +71,7 @@ const buildQueryForAndProvider = (
     }, '')
     .trim();
 
-export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
+export const buildGlobalQuery1 = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
   dataProviders
     .reduce((query, dataProvider: DataProvider) => {
       const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
@@ -82,6 +82,22 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
             ? ` and ${buildQueryForAndProvider(dataProvider.and, browserFields)}`
             : ''
         }`.trim()
+        : query;
+    }, '')
+    .trim();
+export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
+  dataProviders
+    .reduce((query, dataProvider: DataProvider, i) => {
+      const prepend = (q: string) => `${q !== '' ? `(${q}) or ` : ''}`;
+      const openParen = i > 0 ? '(' : '';
+      const closeParen = i > 0 ? ')' : '';
+      return dataProvider.enabled
+        ? `${prepend(query)}${openParen}${buildQueryMatch(dataProvider, browserFields)}
+        ${
+          dataProvider.and.length > 0
+            ? ` and ${buildQueryForAndProvider(dataProvider.and, browserFields)}`
+            : ''
+        }${closeParen}`.trim()
         : query;
     }, '')
     .trim();
@@ -100,10 +116,6 @@ export const combineQueries = (
     return null;
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery)) {
     kuery = `(${kqlQuery}) and @timestamp >= ${start} and @timestamp <= ${end}`;
-    console.log('kql query only', {
-      kuery,
-      filterQuery: JSON.parse(convertKueryToElasticSearchQuery(kuery, indexPattern)),
-    });
     return {
       filterQuery: convertKueryToElasticSearchQuery(kuery, indexPattern),
     };
@@ -112,10 +124,6 @@ export const combineQueries = (
       dataProviders,
       browserFields
     )}) and @timestamp >= ${start} and @timestamp <= ${end}`;
-    console.log('timeline query only', {
-      kuery,
-      filterQuery: JSON.parse(convertKueryToElasticSearchQuery(kuery, indexPattern)),
-    });
     return {
       filterQuery: convertKueryToElasticSearchQuery(kuery, indexPattern),
     };
@@ -125,10 +133,6 @@ export const combineQueries = (
   kuery = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
     kqlQuery
   )}) and @timestamp >= ${start} and @timestamp <= ${end}`;
-  console.log('timeline and kql query', {
-    kuery,
-    filterQuery: JSON.parse(convertKueryToElasticSearchQuery(kuery, indexPattern)),
-  });
   return {
     filterQuery: convertKueryToElasticSearchQuery(kuery, indexPattern),
   };

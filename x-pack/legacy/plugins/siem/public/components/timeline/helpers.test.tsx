@@ -12,7 +12,7 @@ import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { buildGlobalQuery, combineQueries } from './helpers';
 import { mockBrowserFields } from '../../containers/source/mock';
 
-const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
+export const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 const startDate = new Date('2018-03-23T18:49:23.132Z').valueOf();
 const endDate = new Date('2018-03-24T03:33:52.253Z').valueOf();
 
@@ -20,7 +20,7 @@ describe('Build KQL Query', () => {
   test('Build KQL query with one data provider', () => {
     const dataProviders = mockDataProviders.slice(0, 1);
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
-    expect(cleanUpKqlQuery(kqlQuery)).toEqual('( name : "Provider 1" )');
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 1"');
   });
 
   test('Build KQL query with one data provider as timestamp (string input)', () => {
@@ -28,7 +28,7 @@ describe('Build KQL Query', () => {
     dataProviders[0].queryMatch.field = '@timestamp';
     dataProviders[0].queryMatch.value = '2018-03-23T23:36:23.232Z';
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
-    expect(cleanUpKqlQuery(kqlQuery)).toEqual('( @timestamp: 1521848183232 )');
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('@timestamp: 1521848183232');
   });
 
   test('Buld KQL query with one data provider as timestamp (numeric input)', () => {
@@ -36,7 +36,7 @@ describe('Build KQL Query', () => {
     dataProviders[0].queryMatch.field = '@timestamp';
     dataProviders[0].queryMatch.value = 1521848183232;
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
-    expect(cleanUpKqlQuery(kqlQuery)).toEqual('( @timestamp: 1521848183232 )');
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('@timestamp: 1521848183232');
   });
 
   test('Build KQL query with one data provider as date type (string input)', () => {
@@ -44,7 +44,7 @@ describe('Build KQL Query', () => {
     dataProviders[0].queryMatch.field = 'event.end';
     dataProviders[0].queryMatch.value = '2018-03-23T23:36:23.232Z';
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
-    expect(cleanUpKqlQuery(kqlQuery)).toEqual('( event.end: 1521848183232 )');
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('event.end: 1521848183232');
   });
 
   test('Buld KQL query with one data provider as date type (numeric input)', () => {
@@ -52,20 +52,20 @@ describe('Build KQL Query', () => {
     dataProviders[0].queryMatch.field = 'event.end';
     dataProviders[0].queryMatch.value = 1521848183232;
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
-    expect(cleanUpKqlQuery(kqlQuery)).toEqual('( event.end: 1521848183232 )');
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('event.end: 1521848183232');
   });
 
   test('Build KQL query with two data provider', () => {
     const dataProviders = mockDataProviders.slice(0, 2);
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
-    expect(cleanUpKqlQuery(kqlQuery)).toEqual('( name : "Provider 1" ) or ( name : "Provider 2" )');
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('(name : "Provider 1") or (name : "Provider 2" )');
   });
 
   test('Build KQL query with one data provider and one and', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].and = mockDataProviders.slice(1, 2);
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
-    expect(cleanUpKqlQuery(kqlQuery)).toEqual('( name : "Provider 1" and name : "Provider 2")');
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 1" and name : "Provider 2"');
   });
 
   test('Build KQL query with one data provider and one and as timestamp (string input)', () => {
@@ -74,9 +74,7 @@ describe('Build KQL Query', () => {
     dataProviders[0].and[0].queryMatch.field = '@timestamp';
     dataProviders[0].and[0].queryMatch.value = '2018-03-23T23:36:23.232Z';
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
-    expect(cleanUpKqlQuery(kqlQuery)).toEqual(
-      '( name : "Provider 1" and @timestamp: 1521848183232)'
-    );
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 1" and @timestamp: 1521848183232');
   });
 
   test('Build KQL query with one data provider and one and as timestamp (numeric input)', () => {
@@ -85,9 +83,7 @@ describe('Build KQL Query', () => {
     dataProviders[0].and[0].queryMatch.field = '@timestamp';
     dataProviders[0].and[0].queryMatch.value = 1521848183232;
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
-    expect(cleanUpKqlQuery(kqlQuery)).toEqual(
-      '( name : "Provider 1" and @timestamp: 1521848183232)'
-    );
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 1" and @timestamp: 1521848183232');
   });
 
   test('Build KQL query with one data provider and one and as date type (string input)', () => {
@@ -96,9 +92,7 @@ describe('Build KQL Query', () => {
     dataProviders[0].and[0].queryMatch.field = 'event.end';
     dataProviders[0].and[0].queryMatch.value = '2018-03-23T23:36:23.232Z';
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
-    expect(cleanUpKqlQuery(kqlQuery)).toEqual(
-      '( name : "Provider 1" and event.end: 1521848183232)'
-    );
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 1" and event.end: 1521848183232');
   });
 
   test('Build KQL query with one data provider and one and as date type (numeric input)', () => {
@@ -107,9 +101,7 @@ describe('Build KQL Query', () => {
     dataProviders[0].and[0].queryMatch.field = 'event.end';
     dataProviders[0].and[0].queryMatch.value = 1521848183232;
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
-    expect(cleanUpKqlQuery(kqlQuery)).toEqual(
-      '( name : "Provider 1" and event.end: 1521848183232)'
-    );
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 1" and event.end: 1521848183232');
   });
 
   test('Build KQL query with two data provider and multiple and', () => {
@@ -118,7 +110,7 @@ describe('Build KQL Query', () => {
     dataProviders[1].and = mockDataProviders.slice(4, 5);
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
     expect(cleanUpKqlQuery(kqlQuery)).toEqual(
-      '( name : "Provider 1" and name : "Provider 3" and name : "Provider 4") or ( name : "Provider 2" and name : "Provider 5")'
+      '(name : "Provider 1" and name : "Provider 3" and name : "Provider 4") or (name : "Provider 2" and name : "Provider 5")'
     );
   });
 });
@@ -262,6 +254,42 @@ describe('Combined Queries', () => {
     )!;
     expect(filterQuery).toEqual(
       '{"bool":{"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
+    );
+  });
+
+  test('Data Provider & KQL search query multiple', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
+    dataProviders[0].and = mockDataProviders.slice(2, 4);
+    dataProviders[1].and = mockDataProviders.slice(4, 5);
+    const { filterQuery } = combineQueries(
+      dataProviders,
+      mockIndexPattern,
+      mockBrowserFields,
+      'host.name: "host-1"',
+      'search',
+      startDate,
+      endDate
+    )!;
+    expect(filterQuery).toEqual(
+      '{"bool":{"filter":[{"bool":{"should":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
+    );
+  });
+
+  test('Data Provider & KQL filter query multiple', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
+    dataProviders[0].and = mockDataProviders.slice(2, 4);
+    dataProviders[1].and = mockDataProviders.slice(4, 5);
+    const { filterQuery } = combineQueries(
+      dataProviders,
+      mockIndexPattern,
+      mockBrowserFields,
+      'host.name: "host-1"',
+      'filter',
+      startDate,
+      endDate
+    )!;
+    expect(filterQuery).toEqual(
+      '{"bool":{"filter":[{"bool":{"filter":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
     );
   });
 });
