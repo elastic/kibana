@@ -295,6 +295,7 @@ export const kibanaResponseFactory: {
     notFound: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
     conflict: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
     internalError: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
+    customError: (error: ResponseError, options: CustomHttpResponseOptions) => KibanaResponse<ResponseError>;
     redirected: (payload: HttpResponsePayload, options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     ok: (payload: HttpResponsePayload, options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     accepted: (payload?: HttpResponsePayload, options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;

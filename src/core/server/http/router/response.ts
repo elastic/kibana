@@ -180,6 +180,11 @@ const errorResponseFactory = {
   internalError: (error: ResponseError = 'Internal Error', options: HttpResponseOptions = {}) =>
     new KibanaResponse(500, error, options),
 
+  /**
+   * Creates an error response with defined status code and payload.
+   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
+   * @param options - {@link CustomHttpResponseOptions} configures HTTP response parameters.
+   */
   customError: (error: ResponseError, options: CustomHttpResponseOptions) => {
     if (!options || !options.statusCode) {
       throw new Error(`options.statusCode is expected to be set. given options: ${options}`);
