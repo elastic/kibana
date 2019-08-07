@@ -35,7 +35,7 @@ import { SavedQuery } from '../index';
 import { getAllSavedQueries, deleteSavedQuery } from '../lib/saved_query_service';
 import { Query } from '../../../query';
 
-const pageCount = 10;
+const pageCount = 50;
 
 interface Props {
   showSaveQuery?: boolean;
