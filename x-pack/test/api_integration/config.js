@@ -6,6 +6,7 @@
 
 import path from 'path';
 import { services } from './services';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 import { SLACK_ACTION_SIMULATOR_URI } from './fixtures/plugins/actions';
 
@@ -37,7 +38,7 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
         `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
         `--server.xsrf.whitelist=${JSON.stringify([SLACK_ACTION_SIMULATOR_URI])}`,
         `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
-        `--elasticsearch.ssl.certificateAuthorities=${path.resolve(__dirname, '../../../test/dev_certs/ca.crt')}`,
+        `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
       ],
     },
     esTestCluster: {
