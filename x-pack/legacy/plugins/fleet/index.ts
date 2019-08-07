@@ -6,7 +6,7 @@
 
 import * as Joi from 'joi';
 import { resolve } from 'path';
-import { i18n } from '@kbn/i18n';
+// import { i18n } from '@kbn/i18n';
 import { PLUGIN } from './common/constants';
 import { CONFIG_PREFIX } from './common/constants/plugin';
 import { initServerWithKibana } from './server/kibana.index';
@@ -22,16 +22,16 @@ export function fleet(kibana: any) {
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
-      app: {
-        title: 'Elastic Fleet',
-        description: i18n.translate('xpack.fleet.elasticFleetDescription', {
-          defaultMessage: 'Manage your elastic data ingestion stack',
-        }),
-        main: 'plugins/fleet/index',
-        icon: 'plugins/fleet/icon.svg',
-        euiIconType: 'apmApp',
-        order: 8000,
-      },
+      // app: {
+      //   title: 'Elastic Fleet',
+      //   description: i18n.translate('xpack.fleet.elasticFleetDescription', {
+      //     defaultMessage: 'Manage your elastic data ingestion stack',
+      //   }),
+      //   main: 'plugins/fleet/index',
+      //   icon: 'plugins/fleet/icon.svg',
+      //   euiIconType: 'apmApp',
+      //   order: 8000,
+      // },
       mappings,
     },
     config: () => config,

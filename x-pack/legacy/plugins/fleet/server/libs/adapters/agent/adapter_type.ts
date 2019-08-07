@@ -80,7 +80,10 @@ export interface AgentEvent
   timestamp: Date;
 }
 
-export enum SortOptions {}
+export enum SortOptions {
+  EnrolledAtASC,
+  EnrolledAtDESC,
+}
 
 export interface AgentAdapter {
   create(agent: NewAgent): Promise<Agent>;
@@ -95,7 +98,11 @@ export interface AgentAdapter {
 
   findByMetadata(metadata: { local?: any; userProvided?: any }): Promise<Agent[]>;
 
-  list(sortOptions: any, page?: number, perPage?: number): Promise<Agent[]>;
+  list(
+    sortOptions?: SortOptions,
+    page?: number,
+    perPage?: number
+  ): Promise<{ agents: Agent[]; total: number }>;
 
   findEphemeralByConfigSharedId(configSharedId: string): Promise<Agent | null>;
 

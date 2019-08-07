@@ -39,6 +39,12 @@ export const mappings = {
       config_id: {
         type: 'text',
       },
+      last_updated: {
+        type: 'date',
+      },
+      last_checkin: {
+        type: 'date',
+      },
     },
   },
 };

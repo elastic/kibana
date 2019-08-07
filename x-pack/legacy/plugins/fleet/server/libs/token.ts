@@ -8,7 +8,7 @@ import { TokenVerificationResponse } from './adapters/tokens/adapter_types';
 
 export class TokenLib {
   public async verify(token: any): Promise<TokenVerificationResponse> {
-    return { valid: true };
+    throw new Error('Not implemented');
   }
 
   public async generateAccessToken(token: any): Promise<string> {

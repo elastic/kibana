@@ -75,10 +75,6 @@ export class AgentLib {
    * Delete an agent
    */
   public async delete(agent: Agent) {
-    if (agent.type === 'EPHEMERAL') {
-      // TODO if we delete an ephemeral agent we probably want to delete all the EPHEMERAL INSTANCES associde to this agent
-      return this.agentAdater.delete(agent);
-    }
     if (agent.type === 'EPHEMERAL_INSTANCE') {
       return this.agentAdater.delete(agent);
     }
@@ -93,7 +89,11 @@ export class AgentLib {
    * @param page
    * @param perPage
    */
-  public async list(sortOptions: SortOptions, page?: number, perPage?: number): Promise<Agent[]> {
+  public async list(
+    sortOptions: SortOptions = SortOptions.EnrolledAtDESC,
+    page?: number,
+    perPage?: number
+  ): Promise<{ agents: Agent[]; total: number }> {
     return this.agentAdater.list(sortOptions, page, perPage);
   }
 
