@@ -7,7 +7,14 @@
 import moment from 'moment';
 
 import { Indexer, ProgressReporter } from '.';
-import { IndexProgress, IndexRequest, IndexStats, IndexStatsKey, RepositoryUri } from '../../model';
+import {
+  IndexProgress,
+  IndexRequest,
+  IndexStats,
+  IndexStatsKey,
+  IndexerType,
+  RepositoryUri,
+} from '../../model';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { aggregateIndexStats } from '../utils/index_stats_aggregator';
@@ -15,7 +22,7 @@ import { IndexCreationRequest } from './index_creation_request';
 import { IndexCreator } from './index_creator';
 
 export abstract class AbstractIndexer implements Indexer {
-  protected type: string = 'abstract';
+  public type: IndexerType = IndexerType.UNKNOWN;
   protected cancelled: boolean = false;
   protected indexCreator: IndexCreator;
   protected INDEXER_PROGRESS_UPDATE_INTERVAL_MS = 1000;

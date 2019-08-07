@@ -17,7 +17,7 @@ import {
   RepositoryGitStatusReservedField,
   RepositoryIndexName,
   RepositoryIndexNamePrefix,
-  RepositoryLspIndexStatusReservedField,
+  RepositoryIndexStatusReservedField,
   RepositoryReservedField,
 } from '../indexer/schema';
 import { AnyObject, EsClient } from '../lib/esqueue';
@@ -212,9 +212,9 @@ test('CRUD of Repository LSP Index Status', async () => {
   expect(indexSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
-      id: RepositoryLspIndexStatusReservedField,
+      id: RepositoryIndexStatusReservedField,
       body: JSON.stringify({
-        [RepositoryLspIndexStatusReservedField]: cObj,
+        [RepositoryIndexStatusReservedField]: cObj,
       }),
     })
   );
@@ -223,17 +223,17 @@ test('CRUD of Repository LSP Index Status', async () => {
   const getFake = sinon.fake.returns(
     Promise.resolve({
       _source: {
-        [RepositoryLspIndexStatusReservedField]: cObj,
+        [RepositoryIndexStatusReservedField]: cObj,
       },
     })
   );
   esClient.get = getFake;
-  await repoObjectClient.getRepositoryLspIndexStatus(repoUri);
+  await repoObjectClient.getRepositoryIndexStatus(repoUri);
   expect(getFake.calledOnce).toBeTruthy();
   expect(getFake.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
-      id: RepositoryLspIndexStatusReservedField,
+      id: RepositoryIndexStatusReservedField,
     })
   );
 
@@ -247,10 +247,10 @@ test('CRUD of Repository LSP Index Status', async () => {
   expect(updateSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
-      id: RepositoryLspIndexStatusReservedField,
+      id: RepositoryIndexStatusReservedField,
       body: JSON.stringify({
         doc: {
-          [RepositoryLspIndexStatusReservedField]: uObj,
+          [RepositoryIndexStatusReservedField]: uObj,
         },
       }),
     })

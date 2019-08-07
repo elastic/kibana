@@ -163,5 +163,8 @@ export interface IndexProgress {
 }
 
 export interface IndexWorkerProgress extends WorkerProgress {
+  // Index progress for LSP indexing.
   indexProgress?: IndexProgress;
+  // Index progress for commit indexing.
+  commitIndexProgress?: IndexProgress;
 }

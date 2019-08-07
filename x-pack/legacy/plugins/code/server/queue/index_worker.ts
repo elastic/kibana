@@ -10,6 +10,7 @@ import {
   IndexProgress,
   IndexRequest,
   IndexStats,
+  IndexerType,
   IndexWorkerProgress,
   IndexWorkerResult,
   RepositoryUri,
@@ -34,7 +35,7 @@ export class IndexWorker extends AbstractWorker {
     protected readonly queue: Esqueue,
     protected readonly log: Logger,
     protected readonly client: EsClient,
-    protected readonly indexerFactories: IndexerFactory[],
+    protected readonly indexerFactories: Map<IndexerType, IndexerFactory>,
     protected readonly gitOps: GitOperations,
     private readonly cancellationService: CancellationSerivce
   ) {
@@ -46,73 +47,49 @@ export class IndexWorker extends AbstractWorker {
   public async executeJob(job: Job) {
     const { payload, cancellationToken } = job;
     const { uri, revision, enforceReindex } = payload;
-    const indexerNumber = this.indexerFactories.length;
+    const indexerNumber = this.indexerFactories.size;
 
-    const workerProgress = (await this.objectClient.getRepositoryLspIndexStatus(
-      uri
-    )) as IndexWorkerProgress;
-    let checkpointReq: IndexRequest | undefined;
-    if (workerProgress) {
-      // There exist an ongoing index process
-      const {
-        uri: currentUri,
-        revision: currentRevision,
-        indexProgress: currentIndexProgress,
-        progress,
-      } = workerProgress;
-
-      checkpointReq = currentIndexProgress && currentIndexProgress.checkpoint;
-      if (
-        !checkpointReq &&
-        progress > WorkerReservedProgress.INIT &&
-        progress < WorkerReservedProgress.COMPLETED &&
-        currentUri === uri &&
-        currentRevision === revision
-      ) {
-        // If
-        // * no checkpoint exist (undefined or empty string)
-        // * index progress is ongoing
-        // * the uri and revision match the current job
-        // Then we can safely dedup this index job request.
-        this.log.info(`Index job skipped for ${uri} at revision ${revision}`);
-        return {
-          uri,
-          revision,
-        };
-      }
+    const { resume, checkpointReqs } = await this.shouldJobResume(payload);
+    if (!resume) {
+      this.log.info(`Index job skipped for ${uri} at revision ${revision}`);
+      return {
+        uri,
+        revision,
+      };
     }
 
     // Binding the index cancellation logic
     let cancelled = false;
     await this.cancellationService.cancelIndexJob(uri, CancellationReason.NEW_JOB_OVERRIDEN);
-    const indexPromises: Array<Promise<IndexStats>> = this.indexerFactories.map(
-      async (indexerFactory: IndexerFactory, index: number) => {
-        const indexer = await indexerFactory.create(uri, revision, enforceReindex);
-        if (!indexer) {
-          this.log.info(`Failed to create indexer for ${uri}`);
-          return new Map(); // return an empty map as stats.
-        }
-
-        if (cancellationToken) {
-          cancellationToken.on(() => {
-            indexer.cancel();
-            cancelled = true;
-          });
-        }
-        const progressReporter = this.getProgressReporter(uri, revision, index, indexerNumber);
-        const indexJobPromise = indexer.start(progressReporter, checkpointReq);
-
-        if (cancellationToken) {
-          await this.cancellationService.registerCancelableIndexJob(
-            uri,
-            cancellationToken,
-            indexJobPromise
-          );
-        }
-
-        return indexJobPromise;
+    const indexPromises: Array<Promise<IndexStats>> = Array.from(
+      this.indexerFactories.values()
+    ).map(async (factory: IndexerFactory) => {
+      const indexer = await factory.create(uri, revision, enforceReindex);
+      if (!indexer) {
+        this.log.info(`Failed to create indexer for ${uri}`);
+        return new Map(); // return an empty map as stats.
       }
-    );
+
+      if (cancellationToken) {
+        cancellationToken.on(() => {
+          indexer.cancel();
+          cancelled = true;
+        });
+      }
+
+      const progressReporter = this.getProgressReporter(uri, revision, indexer.type, indexerNumber);
+      const indexJobPromise = indexer.start(progressReporter, checkpointReqs.get(indexer.type));
+
+      if (cancellationToken) {
+        await this.cancellationService.registerCancelableIndexJob(
+          uri,
+          cancellationToken,
+          indexJobPromise
+        );
+      }
+
+      return indexJobPromise;
+    });
     const stats: IndexStats[] = await Promise.all(indexPromises);
     const res: IndexWorkerResult = {
       uri,
@@ -131,7 +108,7 @@ export class IndexWorker extends AbstractWorker {
       timestamp: new Date(),
       revision,
     };
-    return await this.objectClient.setRepositoryLspIndexStatus(uri, progress);
+    return await this.objectClient.setRepositoryIndexStatus(uri, progress);
   }
 
   public async onJobCompleted(job: Job, res: IndexWorkerResult) {
@@ -183,7 +160,7 @@ export class IndexWorker extends AbstractWorker {
       };
     }
     try {
-      return await this.objectClient.updateRepositoryLspIndexStatus(uri, p);
+      return await this.objectClient.updateRepositoryIndexStatus(uri, p);
     } catch (error) {
       this.log.error(`Update index progress error.`);
       this.log.error(error);
@@ -211,18 +188,88 @@ export class IndexWorker extends AbstractWorker {
   private getProgressReporter(
     repoUri: RepositoryUri,
     revision: string,
-    index: number,
+    type: IndexerType,
     total: number
   ) {
     return async (progress: IndexProgress) => {
       const p: IndexWorkerProgress = {
         uri: repoUri,
+        // TODO: compute the correct percentage when commit indexing is enabled.
         progress: progress.percentage,
         timestamp: new Date(),
         revision,
-        indexProgress: progress,
       };
-      return await this.objectClient.setRepositoryLspIndexStatus(repoUri, p);
+      switch (type) {
+        case IndexerType.COMMIT:
+          p.commitIndexProgress = progress;
+          break;
+        case IndexerType.LSP:
+          p.indexProgress = progress;
+          break;
+        default:
+          this.log.warn(`Unknown indexer type ${type} for indexing progress report.`);
+          break;
+      }
+      return await this.objectClient.setRepositoryIndexStatus(repoUri, p);
+    };
+  }
+
+  private async shouldJobResume(
+    payload: any
+  ): Promise<{
+    resume: boolean;
+    checkpointReqs: Map<IndexerType, IndexRequest | undefined>;
+  }> {
+    const { uri, revision } = payload;
+
+    const workerProgress = (await this.objectClient.getRepositoryIndexStatus(
+      uri
+    )) as IndexWorkerProgress;
+
+    let lspCheckpointReq: IndexRequest | undefined;
+    let commitCheckpointReq: IndexRequest | undefined;
+    const checkpointReqs: Map<IndexerType, IndexRequest | undefined> = new Map();
+    if (workerProgress) {
+      // There exist an ongoing index process
+      const {
+        uri: currentUri,
+        revision: currentRevision,
+        indexProgress: currentLspIndexProgress,
+        commitIndexProgress: currentCommitIndexProgress,
+        progress,
+      } = workerProgress;
+
+      lspCheckpointReq = currentLspIndexProgress && currentLspIndexProgress.checkpoint;
+      commitCheckpointReq = currentCommitIndexProgress && currentCommitIndexProgress.checkpoint;
+
+      if (
+        !lspCheckpointReq &&
+        !commitCheckpointReq &&
+        progress > WorkerReservedProgress.INIT &&
+        progress < WorkerReservedProgress.COMPLETED &&
+        currentUri === uri &&
+        currentRevision === revision
+      ) {
+        // If
+        // * no checkpoint exist (undefined or empty string) for either LSP or commit indexer
+        // * index progress is ongoing
+        // * the uri and revision match the current job
+        // Then we can safely dedup this index job request.
+        return {
+          resume: false,
+          checkpointReqs,
+        };
+      }
+    }
+
+    checkpointReqs.set(IndexerType.LSP, lspCheckpointReq);
+    checkpointReqs.set(IndexerType.LSP_INC, lspCheckpointReq);
+    checkpointReqs.set(IndexerType.COMMIT, commitCheckpointReq);
+    checkpointReqs.set(IndexerType.COMMIT_INC, commitCheckpointReq);
+
+    return {
+      resume: true,
+      checkpointReqs,
     };
   }
 }

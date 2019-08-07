@@ -13,7 +13,14 @@ import {
   LanguageServerStartFailed,
 } from '../../common/lsp_error_codes';
 import { toCanonicalUrl } from '../../common/uri_util';
-import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
+import {
+  Document,
+  IndexStats,
+  IndexStatsKey,
+  IndexerType,
+  LspIndexRequest,
+  RepositoryUri,
+} from '../../model';
 import { GitOperations, HEAD } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -30,7 +37,7 @@ import {
 import { ALL_RESERVED, DocumentIndexName, ReferenceIndexName, SymbolIndexName } from './schema';
 
 export class LspIndexer extends AbstractIndexer {
-  protected type: string = 'lsp';
+  public type: IndexerType = IndexerType.LSP;
   // Batch index helper for symbols/references
   protected lspBatchIndexHelper: BatchIndexHelper;
   // Batch index helper for documents

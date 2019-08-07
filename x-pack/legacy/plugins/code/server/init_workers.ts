@@ -7,13 +7,14 @@
 import checkDiskSpace from 'check-disk-space';
 import { Server } from 'hapi';
 
+import { IndexerType } from '../model';
 import { DiskWatermarkService } from './disk_watermark';
 import { EsClient, Esqueue } from './lib/esqueue';
 import { LspService } from './lsp/lsp_service';
 import { GitOperations } from './git_operations';
 import { ServerOptions } from './server_options';
 import { CodeServices } from './distributed/code_services';
-import { LspIndexerFactory, CommitIndexFactory } from './indexer';
+import { CommitIndexerFactory, IndexerFactory, LspIndexerFactory } from './indexer';
 import { CancellationSerivce, CloneWorker, DeleteWorker, IndexWorker, UpdateWorker } from './queue';
 import { RepositoryServiceFactory } from './repository_service_factory';
 import { getRepositoryHandler, RepositoryServiceDefinition } from './distributed/apis';
@@ -32,7 +33,13 @@ export function initWorkers(
 ) {
   // Initialize indexing factories.
   const lspIndexerFactory = new LspIndexerFactory(lspService, serverOptions, gitOps, esClient, log);
-  const commitIndexerFactory = new CommitIndexerFactory(lspService, gitOps, esClient, log);
+  const indexerFactoryMap: Map<IndexerType, IndexerFactory> = new Map();
+  indexerFactoryMap.set(IndexerType.LSP, lspIndexerFactory);
+
+  if (serverOptions.enableCommitIndexing) {
+    const commitIndexerFactory = new CommitIndexerFactory(lspService, gitOps, esClient, log);
+    indexerFactoryMap.set(IndexerType.COMMIT, commitIndexerFactory);
+  }
 
   // Initialize queue worker cancellation service.
   const cancellationService = new CancellationSerivce();
@@ -40,7 +47,7 @@ export function initWorkers(
     queue,
     log,
     esClient,
-    [lspIndexerFactory, commitIndexerFactory],
+    indexerFactoryMap,
     gitOps,
     cancellationService
   ).bind(codeServices);

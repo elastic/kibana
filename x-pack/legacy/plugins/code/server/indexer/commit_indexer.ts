@@ -5,7 +5,14 @@
  */
 
 import { ProgressReporter } from '.';
-import { Commit, CommitIndexRequest, IndexStats, IndexStatsKey, RepositoryUri } from '../../model';
+import {
+  Commit,
+  CommitIndexRequest,
+  IndexStats,
+  IndexStatsKey,
+  IndexerType,
+  RepositoryUri,
+} from '../../model';
 import { GitOperations, HEAD } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -13,11 +20,11 @@ import { LspService } from '../lsp/lsp_service';
 import { AbstractIndexer } from './abstract_indexer';
 import { BatchIndexHelper } from './batch_index_helper';
 import { getCommitIndexCreationRequest } from './index_creation_request';
-import { ALL_RESERVED, CommitIndexName } from './schema';
+import { CommitIndexName } from './schema';
 
+// TODO: implement an incremental commit indexer.
 export class CommitIndexer extends AbstractIndexer {
-  protected type: string = 'commit';
-
+  public type: IndexerType = IndexerType.COMMIT;
   // Batch index helper for commits
   protected commitBatchIndexHelper: BatchIndexHelper;
 
@@ -31,7 +38,7 @@ export class CommitIndexer extends AbstractIndexer {
     protected readonly client: EsClient,
     protected log: Logger
   ) {
-    super(repoUri, 'HEAD', client, log);
+    super(repoUri, HEAD, client, log);
     this.commitBatchIndexHelper = new BatchIndexHelper(client, log, this.COMMIT_BATCH_INDEX_SIZE);
   }
 
@@ -46,9 +53,15 @@ export class CommitIndexer extends AbstractIndexer {
     }
   }
 
+  public cancel() {
+    this.commitBatchIndexHelper.cancel();
+    super.cancel();
+  }
+
   // If the current checkpoint is valid
   protected validateCheckpoint(checkpointReq?: CommitIndexRequest): boolean {
-    return false; // update this
+    // Up to change when integrate with the actual git api.
+    return checkpointReq !== undefined && checkpointReq.revision === this.revision;
   }
 
   // If it's necessary to refresh (create and reset) all the related indices
@@ -59,8 +72,8 @@ export class CommitIndexer extends AbstractIndexer {
 
   protected ifCheckpointMet(req: CommitIndexRequest, checkpointReq: CommitIndexRequest): boolean {
     // Assume for the same revision, the order of the files we iterate the repository is definite
-    // everytime.
-    return true; // update this
+    // everytime. This is up to change when integrate with the actual git api.
+    return req.commitRevision === checkpointReq.commitRevision;
   }
 
   protected async prepareIndexCreationRequests() {
@@ -68,18 +81,12 @@ export class CommitIndexer extends AbstractIndexer {
   }
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<CommitIndexRequest> {
-    let repo;
     try {
-      const { workspaceRepo } = await this.lspService.workspaceHandler.openWorkspace(
-        this.repoUri,
-        HEAD
-      );
-      repo = workspaceRepo;
       const commitIterator = await this.gitOps.iterateCommits(this.repoUri, HEAD);
       for await (const commit of commitIterator) {
         const req: CommitIndexRequest = {
           repoUri: this.repoUri,
-          revision: commit.id,
+          commitRevision: commit.id,
         };
         yield req;
       }
@@ -87,10 +94,6 @@ export class CommitIndexer extends AbstractIndexer {
       this.log.error(`Prepare commit indexing requests error.`);
       this.log.error(error);
       throw error;
-    } finally {
-      if (repo) {
-        repo.cleanup();
-      }
     }
   }
 
@@ -111,7 +114,7 @@ export class CommitIndexer extends AbstractIndexer {
   }
 
   protected async cleanIndex() {
-    // Clean up all the commits documents in the commit index
+    // Clean up all the commits in the commit index
     try {
       await this.client.deleteByQuery({
         index: CommitIndexName(this.repoUri),
@@ -130,11 +133,11 @@ export class CommitIndexer extends AbstractIndexer {
 
   protected async processRequest(request: CommitIndexRequest): Promise<IndexStats> {
     const stats: IndexStats = new Map<IndexStatsKey, number>().set(IndexStatsKey.Commit, 0);
-    const { repoUri, revision } = request;
+    const { repoUri, commitRevision } = request;
 
     const body: Commit = {
       repoUri,
-      id: revision,
+      id: commitRevision,
     };
     await this.commitBatchIndexHelper.index(CommitIndexName(repoUri), body);
     stats.set(IndexStatsKey.Commit, 1);

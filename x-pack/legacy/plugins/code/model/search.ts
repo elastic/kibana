@@ -30,6 +30,14 @@ export interface IndexRequest {
   repoUri: RepositoryUri;
 }
 
+export enum IndexerType {
+  LSP = 'LSP',
+  LSP_INC = 'LSP_INCREMENTAL',
+  COMMIT = 'COMMIT',
+  COMMIT_INC = 'COMMIT_INCREMENTAL',
+  UNKNOWN = 'UNKNOWN',
+}
+
 // The request for LspIndexer
 export interface LspIndexRequest extends IndexRequest {
   filePath: string; // The file path within the repository
@@ -38,8 +46,8 @@ export interface LspIndexRequest extends IndexRequest {
 
 // The request for CommitIndexer
 export interface CommitIndexRequest extends IndexRequest {
-  revision: string;
-  // TODO: add more.
+  // The absolute revision of the commit to be indexed.
+  commitRevision: string;
 }
 
 export interface LspIncIndexRequest extends LspIndexRequest {
