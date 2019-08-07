@@ -17,7 +17,7 @@
  * under the License.
  */
 import { PriorityCollection } from './priority_collection';
-import { SavedObjectsClientContract } from '..';
+import { SavedObjectsClientContract } from '../../types';
 
 /**
  * Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance.

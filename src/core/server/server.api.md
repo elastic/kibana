@@ -89,8 +89,24 @@ export class ConfigService {
     setSchema(path: ConfigPath, schema: Type<unknown>): Promise<void>;
     }
 
+// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "kibana" does not have an export "IContextContainer"
+// 
+// @public (undocumented)
+export interface ContextSetup {
+    // Warning: (ae-forgotten-export) The symbol "IContextContainer" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "IContextContainer"
+    createContextContainer<TContext extends {}, THandlerReturn, THandlerParmaters extends any[] = []>(): IContextContainer<TContext, THandlerReturn, THandlerParmaters>;
+}
+
+// @internal (undocumented)
+export type CoreId = symbol;
+
 // @public
 export interface CoreSetup {
+    // (undocumented)
+    context: {
+        createContextContainer: ContextSetup['createContextContainer'];
+    };
     // (undocumented)
     elasticsearch: {
         adminClient$: Observable<ClusterClient>;
@@ -432,10 +448,15 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     };
     // (undocumented)
     logger: LoggerFactory;
+    // (undocumented)
+    opaqueId: PluginOpaqueId;
 }
 
 // @public
 export type PluginName = string;
+
+// @public (undocumented)
+export type PluginOpaqueId = symbol;
 
 // @public (undocumented)
 export interface PluginsServiceSetup {
@@ -520,31 +541,25 @@ export class Router {
 
 // @public (undocumented)
 export interface SavedObject<T extends SavedObjectAttributes = any> {
-    // (undocumented)
     attributes: T;
     // (undocumented)
     error?: {
         message: string;
         statusCode: number;
     };
-    // (undocumented)
     id: string;
-    // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
-    // (undocumented)
     references: SavedObjectReference[];
-    // (undocumented)
     type: string;
-    // (undocumented)
     updated_at?: string;
-    // (undocumented)
     version?: string;
 }
 
 // @public (undocumented)
+export type SavedObjectAttribute = string | number | boolean | null | undefined | SavedObjectAttributes | SavedObjectAttributes[];
+
+// @public
 export interface SavedObjectAttributes {
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectAttribute" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     [key: string]: SavedObjectAttribute | SavedObjectAttribute[];
 }
@@ -570,7 +585,6 @@ export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = 
     attributes: T;
     // (undocumented)
     id?: string;
-    // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
     // (undocumented)
     references?: SavedObjectReference[];
@@ -641,7 +655,6 @@ export interface SavedObjectsClientWrapperOptions<Request = unknown> {
 // @public (undocumented)
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     id?: string;
-    // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
     overwrite?: boolean;
     // (undocumented)
@@ -721,7 +734,6 @@ export interface SavedObjectsExportOptions {
 export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
-    // (undocumented)
     fields?: string[];
     // (undocumented)
     hasReference?: {
@@ -732,7 +744,6 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     page?: number;
     // (undocumented)
     perPage?: number;
-    // (undocumented)
     search?: string;
     searchFields?: string[];
     // (undocumented)
@@ -743,7 +754,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     type?: string | string[];
 }
 
-// @public (undocumented)
+// @public
 export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any> {
     // (undocumented)
     page: number;
@@ -847,6 +858,16 @@ export interface SavedObjectsImportUnsupportedTypeError {
     type: 'unsupported_type';
 }
 
+// @public (undocumented)
+export interface SavedObjectsMigrationLogger {
+    // (undocumented)
+    debug: (msg: string) => void;
+    // (undocumented)
+    info: (msg: string) => void;
+    // (undocumented)
+    warning: (msg: string) => void;
+}
+
 // @public
 export interface SavedObjectsMigrationVersion {
     // (undocumented)
@@ -892,7 +913,9 @@ export class SavedObjectsSchema {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsSchemaDefinition" needs to be exported by the entry point index.d.ts
     constructor(schemaDefinition?: SavedObjectsSchemaDefinition);
     // (undocumented)
-    getIndexForType(type: string): string | undefined;
+    getConvertToAliasScript(type: string): string | undefined;
+    // (undocumented)
+    getIndexForType(config: Config, type: string): string | undefined;
     // (undocumented)
     isHiddenType(type: string): boolean;
     // (undocumented)
@@ -984,7 +1007,7 @@ export interface SessionStorageFactory<T> {
 
 // Warnings were encountered during analysis:
 // 
-// src/core/server/plugins/plugin_context.ts:34:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:37:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:39:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:156:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 
 ```
