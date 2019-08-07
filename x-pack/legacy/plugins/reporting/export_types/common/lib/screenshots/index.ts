@@ -89,10 +89,8 @@ export function screenshotsObservableFactory(server: KbnServer) {
             ({ browser, itemsCount }) => ({ browser, itemsCount })
           ),
           mergeMap(
-            ({ browser, itemsCount }) => {
-              logger.debug(`waiting for ${itemsCount} to be in the DOM`);
-              return waitForElementsToBeInDOM(browser, itemsCount, layout);
-            },
+            ({ browser, itemsCount }) =>
+              waitForElementsToBeInDOM(browser, itemsCount, layout, logger),
             ({ browser, itemsCount }) => ({ browser, itemsCount })
           ),
           mergeMap(
