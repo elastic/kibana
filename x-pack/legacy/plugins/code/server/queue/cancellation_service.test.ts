@@ -25,11 +25,11 @@ test('Register and cancel cancellation token', async () => {
   const cancelSpy = sinon.spy();
   token.cancel = cancelSpy;
 
-  await service.registerCancelableIndexJob(
-    repoUri,
-    token as CancellationToken,
-    Promise.resolve('resolved')
-  );
+  // make sure the promise won't be fulfilled immediately
+  const promise = new Promise(resolve => {
+    setTimeout(resolve, 100);
+  });
+  await service.registerCancelableIndexJob(repoUri, token as CancellationToken, promise);
   await service.cancelIndexJob(repoUri);
 
   expect(cancelSpy.calledOnce).toBeTruthy();
