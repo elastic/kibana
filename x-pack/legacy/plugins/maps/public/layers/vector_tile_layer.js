@@ -81,11 +81,13 @@ export class VectorTileLayer extends TileLayer {
   }
 
   ownsMbLayerId(mbLayerId) {
+    //todo optimize: do not create temp array
     const mbLayerIds = this.getMbLayerIds();
     return mbLayerIds.indexOf(mbLayerId) >= 0;
   }
 
   ownsMbSourceId(mbSourceId) {
+    //todo optimize: do not create temp array
     const mbSourceIds = this.getMbSourceIds();
     return mbSourceIds.indexOf(mbSourceId) >= 0;
   }
