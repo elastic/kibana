@@ -18,6 +18,7 @@ export function registerPolicyRoutes(router: Router) {
   router.delete('policies/{names}', deleteHandler);
   router.put('policies', createHandler);
   router.put('policies/{name}', updateHandler);
+  router.get('policies/indices', getIndicesHandler);
 }
 
 export const getAllHandler: RouterRouteHandler = async (
@@ -140,4 +141,23 @@ export const updateHandler: RouterRouteHandler = async (req, callWithRequest) =>
     name,
     body: serializePolicy(policy),
   });
+};
+
+export const getIndicesHandler: RouterRouteHandler = async (
+  req,
+  callWithRequest
+): Promise<{
+  indices: string[];
+}> => {
+  // Get indices
+  const indices: Array<{
+    index: string;
+  }> = await callWithRequest('cat.indices', {
+    format: 'json',
+    h: 'index',
+  });
+
+  return {
+    indices: indices.map(({ index }) => index).sort(),
+  };
 };

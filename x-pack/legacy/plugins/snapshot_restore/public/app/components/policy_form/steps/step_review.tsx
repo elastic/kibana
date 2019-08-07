@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import {
   EuiCodeEditor,
   EuiFlexGroup,
@@ -17,6 +17,7 @@ import {
   EuiLink,
   EuiIcon,
   EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import { serializePolicy } from '../../../../../common/lib';
 import { useAppDependencies } from '../../../index';
@@ -38,17 +39,14 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
     partial: undefined,
   };
 
-  // const serializedRestoreSettings = serializeRestoreSettings(restoreSettings);
-  // const { index_settings: serializedIndexSettings } = serializedRestoreSettings;
-
-  // const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
-  // const displayIndices = restoreIndices
-  //   ? typeof restoreIndices === 'string'
-  //     ? restoreIndices.split(',')
-  //     : restoreIndices
-  //   : undefined;
-  // const hiddenIndicesCount =
-  //   displayIndices && displayIndices.length > 10 ? displayIndices.length - 10 : 0;
+  const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
+  const displayIndices = indices
+    ? typeof indices === 'string'
+      ? indices.split(',')
+      : indices
+    : undefined;
+  const hiddenIndicesCount =
+    displayIndices && displayIndices.length > 10 ? displayIndices.length - 10 : 0;
 
   const renderSummaryTab = () => (
     <Fragment>
@@ -159,7 +157,47 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {indices || (
+              {displayIndices ? (
+                <EuiText>
+                  <ul>
+                    {(isShowingFullIndicesList
+                      ? displayIndices
+                      : [...displayIndices].splice(0, 10)
+                    ).map(index => (
+                      <li key={index}>
+                        <EuiTitle size="xs">
+                          <span>{index}</span>
+                        </EuiTitle>
+                      </li>
+                    ))}
+                    {hiddenIndicesCount ? (
+                      <li key="hiddenIndicesCount">
+                        <EuiTitle size="xs">
+                          {isShowingFullIndicesList ? (
+                            <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
+                              <FormattedMessage
+                                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.indicesCollapseAllLink"
+                                defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
+                                values={{ count: hiddenIndicesCount }}
+                              />{' '}
+                              <EuiIcon type="arrowUp" />
+                            </EuiLink>
+                          ) : (
+                            <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
+                              <FormattedMessage
+                                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.indicesShowAllLink"
+                                defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
+                                values={{ count: hiddenIndicesCount }}
+                              />{' '}
+                              <EuiIcon type="arrowDown" />
+                            </EuiLink>
+                          )}
+                        </EuiTitle>
+                      </li>
+                    ) : null}
+                  </ul>
+                </EuiText>
+              ) : (
                 <FormattedMessage
                   id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.allIndicesValue"
                   defaultMessage="All indices"
@@ -168,9 +206,6 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle>
@@ -194,6 +229,9 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle>
@@ -217,9 +255,6 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle>

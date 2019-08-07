@@ -207,7 +207,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-            <EuiText>{isShowingFullIndicesList ? fullIndicesList : shortIndicesList}</EuiText>
+            {isShowingFullIndicesList ? fullIndicesList : shortIndicesList}
           </EuiDescriptionListDescription>
         </EuiFlexItem>
 

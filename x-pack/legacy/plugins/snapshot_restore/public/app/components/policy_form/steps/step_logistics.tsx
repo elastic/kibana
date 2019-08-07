@@ -71,7 +71,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepLogistics.nameDescription"
-          defaultMessage="A unique name for the policy."
+          defaultMessage="A unique identifier for the policy."
         />
       }
       idAria="nameDescription"
@@ -92,7 +92,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         <EuiFieldText
           defaultValue={policy.name}
           fullWidth
-          onFocus={() => setTouched({ ...touched, name: true })}
+          onBlur={() => setTouched({ ...touched, name: true })}
           onChange={e => {
             updatePolicy({
               name: e.target.value,
@@ -236,7 +236,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           text: name,
         }))}
         value={policy.repository || repositories[0].name}
-        onFocus={() => setTouched({ ...touched, repository: true })}
+        onBlur={() => setTouched({ ...touched, repository: true })}
         onChange={e => {
           updatePolicy({
             repository: e.target.value,
@@ -309,7 +309,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
               snapshotName: e.target.value,
             });
           }}
-          onFocus={() => setTouched({ ...touched, snapshotName: true })}
+          onBlur={() => setTouched({ ...touched, snapshotName: true })}
           placeholder={i18n.translate(
             'xpack.snapshotRestore.policyForm.stepLogistics.policySnapshotNamePlaceholder',
             {
@@ -381,7 +381,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
               schedule: e.target.value,
             });
           }}
-          onFocus={() => setTouched({ ...touched, schedule: true })}
+          onBlur={() => setTouched({ ...touched, schedule: true })}
           placeholder="0 30 1 * * ?"
           data-test-subj="snapshotNameInput"
         />

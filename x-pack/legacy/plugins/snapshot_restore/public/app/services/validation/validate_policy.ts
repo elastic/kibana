@@ -18,7 +18,7 @@ const isStringEmpty = (str: string | null): boolean => {
 export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
   const i18n = textService.i18n;
 
-  const { name, snapshotName, schedule, repository } = policy;
+  const { name, snapshotName, schedule, repository, config } = policy;
 
   const validation: PolicyValidation = {
     isValid: true,
@@ -27,6 +27,7 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
       snapshotName: [],
       schedule: [],
       repository: [],
+      indices: [],
     },
   };
 
@@ -58,6 +59,22 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
     validation.errors.repository.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.repositoryRequiredError', {
         defaultMessage: 'Repository is required.',
+      })
+    );
+  }
+
+  if (config && typeof config.indices === 'string' && config.indices.trim().length === 0) {
+    validation.errors.indices.push(
+      i18n.translate('xpack.snapshotRestore.policyValidation.indexPatternRequiredError', {
+        defaultMessage: 'At least one index pattern is required.',
+      })
+    );
+  }
+
+  if (config && Array.isArray(config.indices) && config.indices.length === 0) {
+    validation.errors.indices.push(
+      i18n.translate('xpack.snapshotRestore.policyValidation.indicesRequiredError', {
+        defaultMessage: 'You must select at least one index.',
       })
     );
   }

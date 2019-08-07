@@ -9,6 +9,7 @@ import { PolicyValidation } from '../../../services/validation';
 
 export interface StepProps {
   policy: SlmPolicyPayload;
+  indices: string[];
   updatePolicy: (updatedSettings: Partial<SlmPolicyPayload>) => void;
   isEditing: boolean;
   currentUrl: string;

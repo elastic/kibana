@@ -20,6 +20,7 @@ import { PolicyNavigation } from './navigation';
 
 interface Props {
   policy: SlmPolicyPayload;
+  indices: string[];
   currentUrl: string;
   isEditing?: boolean;
   isSaving: boolean;
@@ -31,6 +32,7 @@ interface Props {
 
 export const PolicyForm: React.FunctionComponent<Props> = ({
   policy: originalPolicy,
+  indices,
   currentUrl,
   isEditing,
   isSaving,
@@ -117,6 +119,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
       <EuiForm>
         <CurrentStepForm
           policy={policy}
+          indices={indices}
           updatePolicy={updatePolicy}
           isEditing={isEditing}
           currentUrl={currentUrl}
@@ -135,7 +138,11 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
         <EuiFlexGroup>
           {currentStep > 1 ? (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="arrowLeft" onClick={() => onBack()}>
+              <EuiButtonEmpty
+                iconType="arrowLeft"
+                onClick={() => onBack()}
+                disabled={!validation.isValid}
+              >
                 <FormattedMessage
                   id="xpack.snapshotRestore.policyForm.backButtonLabel"
                   defaultMessage="Back"

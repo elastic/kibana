@@ -9,11 +9,11 @@ import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
 
-import { PolicyForm, SectionError } from '../../components';
+import { PolicyForm, SectionError, SectionLoading } from '../../components';
 import { useAppDependencies } from '../../index';
 import { BASE_PATH } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
-import { addPolicy } from '../../services/http';
+import { addPolicy, useLoadIndicies } from '../../services/http';
 
 export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
   history,
@@ -26,6 +26,14 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
   } = useAppDependencies();
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
+
+  const {
+    error: errorLoadingIndices,
+    isLoading: isLoadingIndices,
+    data: { indices } = {
+      indices: [],
+    },
+  } = useLoadIndicies();
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -89,15 +97,35 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
           </h1>
         </EuiTitle>
         <EuiSpacer size="l" />
-        <PolicyForm
-          policy={emptyPolicy}
-          currentUrl={pathname}
-          isSaving={isSaving}
-          saveError={renderSaveError()}
-          clearSaveError={clearSaveError}
-          onSave={onSave}
-          onCancel={onCancel}
-        />
+        {isLoadingIndices ? (
+          <SectionLoading>
+            <FormattedMessage
+              id="xpack.snapshotRestore.addPolicy.loadingIndicesDescription"
+              defaultMessage="Loading available indices…"
+            />
+          </SectionLoading>
+        ) : errorLoadingIndices ? (
+          <SectionError
+            title={
+              <FormattedMessage
+                id="xpack.snapshotRestore.addPolicy.LoadingIndicesErrorMessage"
+                defaultMessage="Error loading available indices"
+              />
+            }
+            error={errorLoadingIndices}
+          />
+        ) : (
+          <PolicyForm
+            policy={emptyPolicy}
+            indices={indices}
+            currentUrl={pathname}
+            isSaving={isSaving}
+            saveError={renderSaveError()}
+            clearSaveError={clearSaveError}
+            onSave={onSave}
+            onCancel={onCancel}
+          />
+        )}
       </EuiPageContent>
     </EuiPageBody>
   );

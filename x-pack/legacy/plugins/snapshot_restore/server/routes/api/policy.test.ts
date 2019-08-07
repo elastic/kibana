@@ -11,6 +11,7 @@ import {
   deleteHandler,
   createHandler,
   updateHandler,
+  getIndicesHandler,
 } from './policy';
 
 describe('[Snapshot and Restore API Routes] Restore', () => {
@@ -283,6 +284,42 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
       const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
       await expect(
         updateHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('getIndicesHandler()', () => {
+    it('should arrify and sort index names returned from ES', async () => {
+      const mockEsResponse = [
+        {
+          index: 'fooIndex',
+        },
+        {
+          index: 'barIndex',
+        },
+      ];
+      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
+      const expectedResponse = {
+        indices: ['barIndex', 'fooIndex'],
+      };
+      await expect(
+        getIndicesHandler(mockRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should return empty array if no indices returned from ES', async () => {
+      const mockEsResponse: any[] = [];
+      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
+      const expectedResponse = { indices: [] };
+      await expect(
+        getIndicesHandler(mockRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should throw if ES error', async () => {
+      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
+      await expect(
+        getIndicesHandler(mockRequest, callWithRequest, mockResponseToolkit)
       ).rejects.toThrow();
     });
   });

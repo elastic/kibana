@@ -30,6 +30,13 @@ export const useLoadPolicy = (name: SlmPolicy['name']) => {
   });
 };
 
+export const useLoadIndicies = () => {
+  return useRequest({
+    path: httpService.addBasePath(`${API_BASE_PATH}policies/indices`),
+    method: 'get',
+  });
+};
+
 export const executePolicy = async (name: SlmPolicy['name']) => {
   const result = sendRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}policy/${encodeURIComponent(name)}/run`),
