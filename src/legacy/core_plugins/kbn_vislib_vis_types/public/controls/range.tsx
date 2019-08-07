@@ -17,23 +17,34 @@
  * under the License.
  */
 
-import { once } from 'lodash';
-// @ts-ignore
-import { uiModules } from 'ui/modules';
+import React from 'react';
+import { EuiFormRow, EuiRange } from '@elastic/eui';
+import { VisOptionsSetValue } from 'ui/vis/editors/default';
 
-import 'ui/vis/map/service_settings';
+interface RangeOptionProps {
+  label: string;
+  max: number;
+  min: number;
+  paramName: string;
+  step?: number;
+  value: string | number;
+  setValue: VisOptionsSetValue;
+}
 
-// @ts-ignore
-import { RegionMapVisParams } from '../region_map_vis_params';
-// @ts-ignore
-import { WmsOptions } from '../wms_options';
+function RangeOption({ label, max, min, step, paramName, value, setValue }: RangeOptionProps) {
+  return (
+    <EuiFormRow label={label} fullWidth={true} compressed>
+      <EuiRange
+        fullWidth
+        showValue
+        max={max}
+        min={min}
+        step={step}
+        value={value}
+        onChange={ev => setValue(paramName, ev.target.value)}
+      />
+    </EuiFormRow>
+  );
+}
 
-/** @internal */
-export const initTileMapLegacyModule = once((): void => {
-  uiModules
-    // TODO: Region Map Plugin uses wmsOptions directive from the kibana/tile_map module.
-    // in future this reference should be removed
-    .get('kibana/region_map', ['kibana'])
-    .directive('regionMapVisParams', RegionMapVisParams)
-    .directive('wmsOptions', WmsOptions);
-});
+export { RangeOption };

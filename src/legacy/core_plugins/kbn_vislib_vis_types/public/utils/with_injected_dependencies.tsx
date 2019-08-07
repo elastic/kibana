@@ -17,14 +17,19 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import vislibBasicOptionsTemplate from './vislib_basic_options.html';
-const module = uiModules.get('kibana');
+import React from 'react';
+import { VisOptionsProps } from 'ui/vis/editors/default';
+import { ServiceSettings } from 'ui/vis/map/service_settings';
 
-module.directive('vislibBasicOptions', function () {
-  return {
-    restrict: 'E',
-    template: vislibBasicOptionsTemplate,
-    replace: true
-  };
-});
+export interface InjectedDependencies {
+  serviceSettings: ServiceSettings;
+}
+
+export type ExtendedVisOptionsProps = VisOptionsProps & InjectedDependencies;
+
+const withInjectedDependencies = (
+  Component: React.ComponentType<ExtendedVisOptionsProps>,
+  dependencies: InjectedDependencies
+) => (props: VisOptionsProps) => <Component {...props} {...dependencies} />;
+
+export { withInjectedDependencies };
