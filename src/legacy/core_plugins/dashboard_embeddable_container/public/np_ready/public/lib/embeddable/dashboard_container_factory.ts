@@ -20,6 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { SavedObjectAttributes } from 'target/types/server';
 import { SavedObjectMetaData } from '../types';
+
 import {
   ContainerOutput,
   EmbeddableFactory,

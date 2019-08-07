@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { idx } from '@kbn/elastic-idx';
+
 import { Dictionary } from '../../../../../../common/types/common';
 
 import { DataFrameTransformId, DataFrameTransformPivotConfig } from '../../../../common';
@@ -75,6 +77,16 @@ export interface DataFrameTransformStats {
   // task_state is the attribute to check against if a transform
   // is running or not.
   task_state: DATA_FRAME_TASK_STATE;
+}
+
+export function getTransformProgress(item: DataFrameTransformListRow) {
+  if (isCompletedBatchTransform(item)) {
+    return 100;
+  }
+
+  return Math.round(
+    idx(item, _ => _.stats.checkpointing.next.checkpoint_progress.percent_complete) || 0
+  );
 }
 
 export function isDataFrameTransformStats(arg: any): arg is DataFrameTransformStats {
