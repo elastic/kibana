@@ -31,7 +31,26 @@ export class TMSService {
   _getVectorStyleJson = _.once(async () => {
     const vectorUrl = this._getVectorStyleUrl();
     const url = this._proxyPath + vectorUrl;
-    return this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
+    const vectorJson =  await this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
+
+    const inlinedSources = {};
+    for (const sourceName in vectorJson.sources) {
+      if (vectorJson.sources.hasOwnProperty(sourceName)) {
+        const sourceUrl = vectorJson.sources[sourceName].url;
+        const extendedUrl = this._emsClient.extendUrlWithParams(sourceUrl);
+        const sourceJson = await this._emsClient.getManifest(extendedUrl);
+
+
+        const extendedTileUrls = sourceJson.tiles.map(tileUrl => this._emsClient.extendUrlWithParams(tileUrl));
+        inlinedSources[sourceName] = {
+          type: 'vector',
+          ...sourceJson,
+          tiles: extendedTileUrls
+        };
+      }
+    }
+    vectorJson.sources = inlinedSources;
+    return vectorJson;
   });
 
   constructor(config, emsClient, proxyPath) {
@@ -92,9 +111,8 @@ export class TMSService {
   }
 
   async getVectorStyleSheet() {
-    const tileJson = await this._getVectorStyleJson();
-    console.log('vector json', tileJson);
-    return tileJson;
+    const vectorJson = await this._getVectorStyleJson();
+    return vectorJson;
   }
 
   getDisplayName() {

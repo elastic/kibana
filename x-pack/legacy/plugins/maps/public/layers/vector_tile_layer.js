@@ -105,10 +105,7 @@ export class VectorTileLayer extends TileLayer {
         return;
       }
 
-      mbMap.addSource(mbSourceId, {
-        type: 'vector',
-        url: vectorStyle.sources[sourceId].url
-      });
+      mbMap.addSource(mbSourceId, vectorStyle.sources[sourceId]);
     });
 
     vectorStyle.layers.forEach(layer => {

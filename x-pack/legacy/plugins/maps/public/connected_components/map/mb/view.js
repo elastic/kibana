@@ -13,6 +13,7 @@ import {
   removeOrphanedSourcesAndLayers,
   addSpritesheetToMap
 } from './utils';
+import { getGlyphUrl } from '../../../meta';
 import {
   DECIMAL_DEGREES_PRECISION,
   FEATURE_ID_PROPERTY_NAME,
@@ -360,8 +361,7 @@ export class MBMapContainer extends React.Component {
           version: 8,
           sources: {},
           layers: [],
-          //todo. ship with kibana or read dynamically from EMS
-          glyphs: `https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf`
+          glyphs: getGlyphUrl()
         },
         scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false)

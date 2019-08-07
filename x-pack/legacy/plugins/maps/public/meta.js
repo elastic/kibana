@@ -78,3 +78,9 @@ export function getEMSClient() {
   return emsClient;
 
 }
+
+
+export function getGlyphUrl() {
+  //todo: take into account proxying
+  return chrome.getInjected('isEmsEnabled', true) ? 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf' : '';
+}

@@ -266,6 +266,7 @@ export default () => Joi.object({
       desaturated: 'road_map_desaturated',
       dark: 'dark_map',
     }),
+    emsFontLibraryUrl: 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'
   }).default(),
 
   i18n: Joi.object({
