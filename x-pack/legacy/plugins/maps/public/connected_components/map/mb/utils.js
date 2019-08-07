@@ -22,13 +22,17 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
     }
   }
 
-  const mbLayersToRemove = [];
-  mbStyle.layers.forEach(layer => {
-    if (mbSourcesToRemove.indexOf(layer.source) >= 0) {
-      mbLayersToRemove.push(layer.id);
+  const mbLayerIdsToRemove = [];
+  mbStyle.layers.forEach(mbLayer => {
+    const layer = layerList.find(layer => {
+      return layer.ownsMbLayerId(mbLayer.id);
+    });
+    if (!layer) {
+      mbLayerIdsToRemove.push(mbLayer.id);
     }
   });
-  mbLayersToRemove.forEach((mbLayerId) => {
+
+  mbLayerIdsToRemove.forEach((mbLayerId) => {
     mbMap.removeLayer(mbLayerId);
   });
   mbSourcesToRemove.forEach(mbSourceId => {
