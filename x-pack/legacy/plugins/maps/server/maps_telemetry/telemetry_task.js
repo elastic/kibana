@@ -34,24 +34,24 @@ export function scheduleTask(server, taskManager) {
   });
 }
 
-export function registerMapsTelemetryTask(taskManager) {
+export function registerMapsTelemetryTask(server) {
+  const taskManager = server.taskManager;
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Maps telemetry fetch task',
       type: TELEMETRY_TASK_TYPE,
       timeout: '1m',
       numWorkers: 2,
-      createTaskRunner: telemetryTaskRunner(),
+      createTaskRunner: telemetryTaskRunner(server),
     },
   });
 }
 
-export function telemetryTaskRunner() {
+export function telemetryTaskRunner(server) {
 
-  return ({ kbnServer, taskInstance }) => {
+  return ({ taskInstance }) => {
     const { state } = taskInstance;
     const prevState = state;
-    const { server } = kbnServer;
     let mapsTelemetry = {};
 
     const callCluster = server.plugins.elasticsearch.getCluster('admin')

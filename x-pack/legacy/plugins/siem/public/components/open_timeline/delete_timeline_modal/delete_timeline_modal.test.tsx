@@ -26,7 +26,7 @@ describe('DeleteTimelineModal', () => {
         .find('[data-test-subj="title"]')
         .first()
         .text()
-    ).toEqual('Delete `Privilege Escalation`?');
+    ).toEqual('Delete "Privilege Escalation"?');
   });
 
   test('it trims leading and trailing whitespace around the title', () => {
@@ -43,7 +43,7 @@ describe('DeleteTimelineModal', () => {
         .find('[data-test-subj="title"]')
         .first()
         .text()
-    ).toEqual('Delete `Leading and trailing whitespace`?');
+    ).toEqual('Delete "Leading and trailing whitespace"?');
   });
 
   test('it displays `Untitled Timeline` in the title when title is undefined', () => {
@@ -56,7 +56,7 @@ describe('DeleteTimelineModal', () => {
         .find('[data-test-subj="title"]')
         .first()
         .text()
-    ).toEqual('Delete `Untitled Timeline`?');
+    ).toEqual('Delete "Untitled timeline"?');
   });
 
   test('it displays `Untitled Timeline` in the title when title is null', () => {
@@ -69,7 +69,7 @@ describe('DeleteTimelineModal', () => {
         .find('[data-test-subj="title"]')
         .first()
         .text()
-    ).toEqual('Delete `Untitled Timeline`?');
+    ).toEqual('Delete "Untitled timeline"?');
   });
 
   test('it displays `Untitled Timeline` in the title when title is just whitespace', () => {
@@ -82,7 +82,7 @@ describe('DeleteTimelineModal', () => {
         .find('[data-test-subj="title"]')
         .first()
         .text()
-    ).toEqual('Delete `Untitled Timeline`?');
+    ).toEqual('Delete "Untitled timeline"?');
   });
 
   test('it renders a deletion warning', () => {

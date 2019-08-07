@@ -27,7 +27,10 @@ import {
   SavedObjectsClient,
   SavedObjectsRepository,
   ScopedSavedObjectsClientProvider,
-} from '../../../core/server/saved_objects/service';
+  getSortedObjectsForExport,
+  importSavedObjects,
+  resolveImportErrors,
+} from '../../../core/server/saved_objects';
 import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
 import { SavedObjectsManagement } from '../../../core/server/saved_objects/management';
 
@@ -111,9 +114,11 @@ export function savedObjectsMixin(kbnServer, server) {
     });
     const combinedTypes = visibleTypes.concat(extraTypes);
     const allowedTypes = [...new Set(combinedTypes)];
+    const config = server.config();
 
     return new SavedObjectsRepository({
-      index: server.config().get('kibana.index'),
+      index: config.get('kibana.index'),
+      config,
       migrator,
       mappings,
       schema,
@@ -144,6 +149,13 @@ export function savedObjectsMixin(kbnServer, server) {
     setScopedSavedObjectsClientFactory: (...args) => provider.setClientFactory(...args),
     addScopedSavedObjectsClientWrapperFactory: (...args) =>
       provider.addClientWrapperFactory(...args),
+    importExport: {
+      objectLimit: server.config().get('savedObjects.maxImportExportSize'),
+      importSavedObjects,
+      resolveImportErrors,
+      getSortedObjectsForExport,
+    },
+    schema,
   };
   server.decorate('server', 'savedObjects', service);
 

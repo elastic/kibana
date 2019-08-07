@@ -12,6 +12,7 @@ import {
   startJobs,
   stopJobs,
   deleteJobs,
+  cloneJob
 } from '../../../store/actions';
 
 import { JobActionMenu as JobActionMenuComponent } from './job_action_menu';
@@ -33,6 +34,9 @@ const mapDispatchToProps = (dispatch, { jobs }) => {
     },
     deleteJobs: () => {
       dispatch(deleteJobs(jobIds));
+    },
+    cloneJob: (jobConfig) => {
+      dispatch(cloneJob(jobConfig));
     },
   };
 };

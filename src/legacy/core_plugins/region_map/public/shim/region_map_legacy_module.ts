@@ -22,16 +22,18 @@ import { once } from 'lodash';
 import { uiModules } from 'ui/modules';
 
 import 'ui/vis/map/service_settings';
-import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 
 // @ts-ignore
 import { RegionMapVisParams } from '../region_map_vis_params';
+// @ts-ignore
+import { WmsOptions } from '../wms_options';
 
 /** @internal */
 export const initTileMapLegacyModule = once((): void => {
   uiModules
     // TODO: Region Map Plugin uses wmsOptions directive from the kibana/tile_map module.
     // in future this reference should be removed
-    .get('kibana/region_map', ['kibana', 'kibana/tile_map'])
-    .directive('regionMapVisParams', RegionMapVisParams);
+    .get('kibana/region_map', ['kibana'])
+    .directive('regionMapVisParams', RegionMapVisParams)
+    .directive('wmsOptions', WmsOptions);
 });
