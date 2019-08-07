@@ -76,13 +76,12 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
     .reduce((query, dataProvider: DataProvider) => {
       const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
       return dataProvider.enabled
-        ? `${prepend(query)}(
-          ${buildQueryMatch(dataProvider, browserFields)}
+        ? `${prepend(query)}${buildQueryMatch(dataProvider, browserFields)}
         ${
           dataProvider.and.length > 0
             ? ` and ${buildQueryForAndProvider(dataProvider.and, browserFields)}`
             : ''
-        })`.trim()
+        }`.trim()
         : query;
     }, '')
     .trim();
@@ -96,33 +95,42 @@ export const combineQueries = (
   start: number,
   end: number
 ): { filterQuery: string } | null => {
+  let kuery: string;
   if (isEmpty(dataProviders) && isEmpty(kqlQuery)) {
     return null;
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery)) {
+    kuery = `(${kqlQuery}) and @timestamp >= ${start} and @timestamp <= ${end}`;
+    console.log('kql query only', {
+      kuery,
+      filterQuery: JSON.parse(convertKueryToElasticSearchQuery(kuery, indexPattern)),
+    });
     return {
-      filterQuery: convertKueryToElasticSearchQuery(
-        `(${kqlQuery}) and @timestamp >= ${start} and @timestamp <= ${end}`,
-        indexPattern
-      ),
+      filterQuery: convertKueryToElasticSearchQuery(kuery, indexPattern),
     };
   } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
+    kuery = `(${buildGlobalQuery(
+      dataProviders,
+      browserFields
+    )}) and @timestamp >= ${start} and @timestamp <= ${end}`;
+    console.log('timeline query only', {
+      kuery,
+      filterQuery: JSON.parse(convertKueryToElasticSearchQuery(kuery, indexPattern)),
+    });
     return {
-      filterQuery: convertKueryToElasticSearchQuery(
-        `((${buildGlobalQuery(
-          dataProviders,
-          browserFields
-        )}) and @timestamp >= ${start} and @timestamp <= ${end})`,
-        indexPattern
-      ),
+      filterQuery: convertKueryToElasticSearchQuery(kuery, indexPattern),
     };
   }
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
   const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
-  const globalQuery = `((${buildGlobalQuery(dataProviders, browserFields)}${postpend(
+  kuery = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
     kqlQuery
-  )}) and @timestamp >= ${start} and @timestamp <= ${end})`;
+  )}) and @timestamp >= ${start} and @timestamp <= ${end}`;
+  console.log('timeline and kql query', {
+    kuery,
+    filterQuery: JSON.parse(convertKueryToElasticSearchQuery(kuery, indexPattern)),
+  });
   return {
-    filterQuery: convertKueryToElasticSearchQuery(globalQuery, indexPattern),
+    filterQuery: convertKueryToElasticSearchQuery(kuery, indexPattern),
   };
 };
 
