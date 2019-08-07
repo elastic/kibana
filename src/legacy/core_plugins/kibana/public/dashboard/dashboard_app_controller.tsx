@@ -54,6 +54,7 @@ import { IPrivate } from 'ui/private';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
 import { Subscription } from 'rxjs';
+import { npStart } from 'ui/new_platform';
 import {
   DashboardContainer,
   DASHBOARD_CONTAINER_TYPE,
@@ -660,7 +661,13 @@ export class DashboardAppController {
     };
     navActions[TopNavIds.ADD] = () => {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
-        openAddPanelFlyout(dashboardContainer as any);
+        openAddPanelFlyout({
+          embeddable: dashboardContainer,
+          getAllFactories: start.getEmbeddableFactories,
+          getFactory: start.getEmbeddableFactory,
+          notifications: npStart.core.notifications,
+          overlays: npStart.core.overlays,
+        });
       }
     };
 

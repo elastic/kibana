@@ -22,19 +22,14 @@ import { AddPanelFlyout } from './add_panel_flyout';
 import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
 import { OverlayStart, NotificationsStart } from '../../../../../../../../../../../core/public';
 
-export async function openAddPanelFlyout({
-  embeddable,
-  getFactory,
-  getAllFactories,
-  overlays,
-  notifications,
-}: {
+export async function openAddPanelFlyout(options: {
   embeddable: IContainer;
   getFactory: GetEmbeddableFactory;
   getAllFactories: GetEmbeddableFactories;
   overlays: OverlayStart;
   notifications: NotificationsStart;
 }) {
+  const { embeddable, getFactory, getAllFactories, overlays, notifications } = options;
   const flyoutSession = overlays.openFlyout(
     <AddPanelFlyout
       container={embeddable}

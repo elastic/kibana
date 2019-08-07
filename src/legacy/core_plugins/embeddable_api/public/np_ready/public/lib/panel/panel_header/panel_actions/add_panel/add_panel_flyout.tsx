@@ -42,6 +42,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+/* eslint-disable */
+import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+/* eslint-enable */
+
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
@@ -140,27 +144,19 @@ export class AddPanelFlyout extends React.Component<Props> {
 
   public render() {
     const savedObjectsFinder = (
-      <div>NEEDS ADAPTION FOR NP</div>
-      /*
       <SavedObjectFinder
         onChoose={this.onAddPanel}
-        savedObjectMetaData={
-          [...this.props.container.embeddableFactories.values()]
-            .filter(
-              embeddableFactory =>
-                Boolean(embeddableFactory.savedObjectMetaData) &&
-                !embeddableFactory.isContainerType
-            )
-            .map(({ savedObjectMetaData }) => savedObjectMetaData) as Array<
-            SavedObjectMetaData<SavedObjectAttributes>
-          >
-        }
+        savedObjectMetaData={[...this.props.getAllFactories()]
+          .filter(
+            embeddableFactory =>
+              Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
+          )
+          .map(({ savedObjectMetaData }) => savedObjectMetaData as any)}
         showFilter={true}
         noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
           defaultMessage: 'No matching objects found.',
         })}
       />
-      */
     );
     return (
       <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardAddPanel">
