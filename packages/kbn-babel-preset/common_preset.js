@@ -17,6 +17,9 @@
  * under the License.
  */
 
+const path = require('path');
+const REPO_ROOT = path.resolve(__dirname, '..', '..');
+
 module.exports = {
   presets: [require.resolve('@babel/preset-typescript'), require.resolve('@babel/preset-react')],
   plugins: [
@@ -30,6 +33,10 @@ module.exports = {
     //
     // See https://github.com/babel/proposals/issues/12 for progress
     require.resolve('@babel/plugin-proposal-class-properties'),
+    [require.resolve('babel-plugin-module-resolver'), {
+      extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      root: REPO_ROOT,
+    }],
   ],
   overrides: [
     {
