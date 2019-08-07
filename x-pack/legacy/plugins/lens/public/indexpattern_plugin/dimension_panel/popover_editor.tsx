@@ -202,7 +202,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
           <EuiLink
             className="lnsConfigPanel__summaryLink"
             onClick={() => {
-              setPopoverOpen(true);
+              setPopoverOpen(!isPopoverOpen);
             }}
             data-test-subj="indexPattern-configure-dimension"
           >
@@ -212,7 +212,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
           <EuiButton
             className="lnsConfigPanel__summaryLink"
             data-test-subj="indexPattern-configure-dimension"
-            onClick={() => setPopoverOpen(true)}
+            onClick={() => setPopoverOpen(!isPopoverOpen)}
             iconType="plusInCircle"
             size="s"
           />
