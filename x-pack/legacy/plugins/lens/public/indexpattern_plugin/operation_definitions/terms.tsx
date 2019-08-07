@@ -10,6 +10,7 @@ import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
 import { TermsIndexPatternColumn, IndexPatternColumn } from '../indexpattern';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
+import { DataType } from '../../types';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -42,11 +43,15 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     defaultMessage: 'Top Values',
   }),
   getPossibleOperationsForDocument: () => [],
-  getPossibleOperationsForField: ({ aggregationRestrictions, type }) => {
-    if (type === 'string' && (!aggregationRestrictions || aggregationRestrictions.terms)) {
+  getPossibleOperationsForField: ({ aggregationRestrictions, aggregatable, type }) => {
+    if (
+      (type === 'string' || type === 'boolean') &&
+      aggregatable &&
+      (!aggregationRestrictions || aggregationRestrictions.terms)
+    ) {
       return [
         {
-          dataType: 'string',
+          dataType: type,
           isBucketed: true,
         },
       ];
@@ -60,7 +65,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
 
     return {
       label: ofName(field ? field.name : ''),
-      dataType: 'string',
+      dataType: field!.type as DataType,
       operationType: 'terms',
       suggestedPriority,
       sourceField: field ? field.name : '',
