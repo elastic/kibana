@@ -59,8 +59,9 @@ export function isDataFrameAnalyticsStats(arg: any): arg is DataFrameAnalyticsSt
 export interface DataFrameAnalyticsListRow {
   id: DataFrameAnalyticsId;
   checkpointing: object;
-  stats: DataFrameAnalyticsStats;
   config: DataFrameAnalyticsOutlierConfig;
+  mode: string;
+  stats: DataFrameAnalyticsStats;
 }
 
 // Used to pass on attribute names to table columns

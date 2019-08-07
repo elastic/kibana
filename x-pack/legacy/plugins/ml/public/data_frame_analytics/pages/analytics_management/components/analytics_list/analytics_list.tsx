@@ -153,7 +153,7 @@ export const DataFrameAnalyticsList: SFC = () => {
           // the status value is an array of string(s) e.g. ['failed', 'stopped']
           ts = analytics.filter(d => c.value.includes(d.stats.state));
         } else {
-          ts = analytics.filter(d => d.config.mode === c.value);
+          ts = analytics.filter(d => d.mode === c.value);
         }
       }
 
@@ -255,9 +255,11 @@ export const DataFrameAnalyticsList: SFC = () => {
           view: getTaskStateBadge(val),
         })),
       },
+      // For now analytics jobs are batch only
+      /*
       {
         type: 'field_value_selection',
-        field: 'config.mode',
+        field: 'mode',
         name: i18n.translate('xpack.ml.dataframe.analyticsList.modeFilter', {
           defaultMessage: 'Mode',
         }),
@@ -272,6 +274,7 @@ export const DataFrameAnalyticsList: SFC = () => {
           ),
         })),
       },
+      */
     ],
   };
 

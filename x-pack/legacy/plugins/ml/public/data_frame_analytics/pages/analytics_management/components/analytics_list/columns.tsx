@@ -141,11 +141,11 @@ export const getColumns = (
     // For now there is batch mode only so we hide this column for now.
     /*
     {
-      name: i18n.translate('xpack.ml.dataframe.mode', { defaultMessage: 'Mode' }),
-      sortable: (item: DataFrameAnalyticsListRow) => item.config.mode,
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.mode', { defaultMessage: 'Mode' }),
+      sortable: (item: DataFrameAnalyticsListRow) => item.mode,
       truncateText: true,
       render(item: DataFrameAnalyticsListRow) {
-        const mode = item.config.mode;
+        const mode = item.mode;
         const color = 'hollow';
         return <EuiBadge color={color}>{mode}</EuiBadge>;
       },

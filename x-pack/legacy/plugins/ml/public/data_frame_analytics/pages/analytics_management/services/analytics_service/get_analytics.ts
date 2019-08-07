@@ -86,13 +86,12 @@ export const getAnalyticsFactory = (
               return reducedtableRows;
             }
 
-            config.mode = DATA_FRAME_MODE.BATCH;
-
             // Table with expandable rows requires `id` on the outer most level
             reducedtableRows.push({
               config,
               id: config.id,
               checkpointing: {},
+              mode: DATA_FRAME_MODE.BATCH,
               stats,
             });
             return reducedtableRows;

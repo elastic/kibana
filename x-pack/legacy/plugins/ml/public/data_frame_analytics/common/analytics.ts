@@ -38,7 +38,6 @@ export interface DataFrameAnalyticsOutlierConfig extends CreateRequestBody {
     includes: string[];
     excludes: string[];
   };
-  mode?: string;
   model_memory_limit: string;
   create_time: number;
   version: string;

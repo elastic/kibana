@@ -5,10 +5,13 @@
  */
 
 import React, { SFC } from 'react';
+import moment from 'moment-timezone';
 
 import { EuiTabbedContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
+import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 
 import { DataFrameAnalyticsListRow } from './common';
 import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
@@ -48,7 +51,16 @@ export const ExpandedRow: SFC<Props> = ({ item }) => {
 
   const stats: SectionConfig = {
     title: 'Stats',
-    items: [],
+    items: [
+      {
+        title: 'create_time',
+        description: formatHumanReadableDateTimeSeconds(
+          moment(item.config.create_time).unix() * 1000
+        ),
+      },
+      { title: 'model_memory_limit', description: item.config.model_memory_limit },
+      { title: 'version', description: item.config.version },
+    ],
     position: 'right',
   };
 
