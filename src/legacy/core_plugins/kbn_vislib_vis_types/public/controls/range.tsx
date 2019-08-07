@@ -26,12 +26,22 @@ interface RangeOptionProps {
   max: number;
   min: number;
   paramName: string;
+  showInput?: boolean;
   step?: number;
   value: string | number;
   setValue: VisOptionsSetValue;
 }
 
-function RangeOption({ label, max, min, step, paramName, value, setValue }: RangeOptionProps) {
+function RangeOption({
+  label,
+  max,
+  min,
+  showInput,
+  step,
+  paramName,
+  value,
+  setValue,
+}: RangeOptionProps) {
   return (
     <EuiFormRow label={label} fullWidth={true} compressed>
       <EuiRange
@@ -39,6 +49,7 @@ function RangeOption({ label, max, min, step, paramName, value, setValue }: Rang
         showValue
         max={max}
         min={min}
+        showInput={showInput}
         step={step}
         value={value}
         onChange={ev => setValue(paramName, ev.target.value)}

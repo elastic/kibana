@@ -55,8 +55,8 @@ function MarkdownOptions({ stateParams, setValue, vis }: VisOptionsProps) {
               href="https://help.github.com/articles/github-flavored-markdown/"
               target="_blank"
             >
-              <EuiIcon type="link" />{' '}
-              <FormattedMessage id="visTypeMarkdown.params.helpLinkLabel" defaultMessage="Help" />
+              <FormattedMessage id="visTypeMarkdown.params.helpLinkLabel" defaultMessage="Help" />{' '}
+              <EuiIcon type="popout" />
             </EuiLink>
           </EuiText>
         </EuiFlexItem>
@@ -65,11 +65,12 @@ function MarkdownOptions({ stateParams, setValue, vis }: VisOptionsProps) {
 
       <RangeOption
         label={i18n.translate('visTypeMarkdown.params.fontSizeLabel', {
-          defaultMessage: 'Font size in points',
+          defaultMessage: 'Base font size in points',
         })}
         max={36}
         min={8}
         paramName="fontSize"
+        showInput
         value={stateParams.fontSize}
         setValue={setValue}
       />
