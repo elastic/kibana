@@ -20,7 +20,13 @@ import { ResponseObject as HapiResponseObject, ResponseToolkit as HapiResponseTo
 import typeDetect from 'type-detect';
 import Boom from 'boom';
 
-import { HttpResponsePayload, KibanaResponse, ResponseError } from './response';
+import { HttpResponsePayload, KibanaResponse, ResponseError, ResponseErrorMeta } from './response';
+
+declare module 'boom' {
+  interface Payload {
+    meta?: ResponseErrorMeta;
+  }
+}
 
 function setHeaders(response: HapiResponseObject, headers: Record<string, string | string[]> = {}) {
   Object.entries(headers).forEach(([header, value]) => {
@@ -41,7 +47,9 @@ const statusHelpers = {
 export class HapiResponseAdapter {
   constructor(private readonly responseToolkit: HapiResponseToolkit) {}
   public toBadRequest(message: string) {
-    return this.responseToolkit.response({ message }).code(400);
+    const error = Boom.badRequest();
+    error.output.payload.message = message;
+    return error;
   }
 
   public toInternalError() {
@@ -49,9 +57,7 @@ export class HapiResponseAdapter {
       statusCode: 500,
     });
 
-    error.output.payload = {
-      message: 'An internal server error occurred.',
-    } as any; // our error format is not compatible with boom
+    error.output.payload.message = 'An internal server error occurred.';
 
     return error;
   }
@@ -109,14 +115,13 @@ export class HapiResponseAdapter {
 
   private toError(kibanaResponse: KibanaResponse<ResponseError>) {
     const { payload } = kibanaResponse;
+    // we use for BWC with Boom payload for error responses - {error: string, message: string, statusCode: string}
     const error = new Boom('', {
       statusCode: kibanaResponse.status,
     });
 
-    error.output.payload = {
-      message: getErrorMessage(payload),
-      meta: getErrorMeta(payload),
-    } as any; // our error format is not compatible with boom
+    error.output.payload.message = getErrorMessage(payload);
+    error.output.payload.meta = getErrorMeta(payload);
 
     const headers = kibanaResponse.options.headers;
     if (headers) {

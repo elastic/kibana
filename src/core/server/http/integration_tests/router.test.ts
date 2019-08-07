@@ -146,7 +146,9 @@ describe('Handler', () => {
       .expect(400);
 
     expect(result.body).toEqual({
+      error: 'Bad Request',
       message: '[request query.page]: expected value of type [number] but got [string]',
+      statusCode: 400,
     });
   });
 });
@@ -559,7 +561,11 @@ describe('Response factory', () => {
         .get('/')
         .expect(400);
 
-      expect(result.body).toEqual({ message: 'some message' });
+      expect(result.body).toEqual({
+        error: 'Bad Request',
+        message: 'some message',
+        statusCode: 400,
+      });
     });
 
     it('400 Bad request with default message', async () => {
@@ -577,7 +583,11 @@ describe('Response factory', () => {
         .get('/')
         .expect(400);
 
-      expect(result.body).toEqual({ message: 'Bad Request' });
+      expect(result.body).toEqual({
+        error: 'Bad Request',
+        message: 'Bad Request',
+        statusCode: 400,
+      });
     });
 
     it('400 Bad request with additional data', async () => {
@@ -596,10 +606,12 @@ describe('Response factory', () => {
         .expect(400);
 
       expect(result.body).toEqual({
+        error: 'Bad Request',
         message: 'some message',
         meta: {
           data: ['good', 'bad'],
         },
+        statusCode: 400,
       });
     });
 
@@ -774,7 +786,11 @@ describe('Response factory', () => {
         .get('/')
         .expect(418);
 
-      expect(result.body).toEqual({ message: 'some message' });
+      expect(result.body).toEqual({
+        error: "I'm a teapot",
+        message: 'some message',
+        statusCode: 418,
+      });
     });
 
     it('Custom error response requires error status code', async () => {
@@ -795,7 +811,11 @@ describe('Response factory', () => {
         .get('/')
         .expect(500);
 
-      expect(result.body).toEqual({ message: 'An internal server error occurred.' });
+      expect(result.body).toEqual({
+        error: 'Internal Server Error',
+        message: 'An internal server error occurred.',
+        statusCode: 500,
+      });
       expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
@@ -925,8 +945,10 @@ describe('Response factory', () => {
         .expect(401);
 
       expect(result.body).toEqual({
+        error: 'Unauthorized',
         message: 'unauthorized',
         meta: { errorCode: 'K401' },
+        statusCode: 401,
       });
     });
 
@@ -954,8 +976,10 @@ describe('Response factory', () => {
         .expect(401);
 
       expect(result.body).toEqual({
+        error: 'Unauthorized',
         message: 'unauthorized',
         meta: { errorCode: 'K401' },
+        statusCode: 401,
       });
     });
 

@@ -327,7 +327,11 @@ export default function ({ getService }) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(400);
 
-        expect(apiResponse.body).to.have.property('message', 'Both access and refresh tokens are expired.');
+        expect(apiResponse.body).to.eql({
+          error: 'Bad Request',
+          message: 'Both access and refresh tokens are expired.',
+          statusCode: 400
+        });
       });
 
       it('should redirect to home page if session cookie is not provided', async () => {
@@ -380,7 +384,11 @@ export default function ({ getService }) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(400);
 
-        expect(apiResponse.body).to.have.property('message', 'Both access and refresh tokens are expired.');
+        expect(apiResponse.body).to.eql({
+          error: 'Bad Request',
+          message: 'Both access and refresh tokens are expired.',
+          statusCode: 400
+        });
       });
 
       it('should invalidate access token on IdP initiated logout even if there is no Kibana session', async () => {
@@ -403,7 +411,11 @@ export default function ({ getService }) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(400);
 
-        expect(apiResponse.body).to.have.property('message', 'Both access and refresh tokens are expired.');
+        expect(apiResponse.body).to.eql({
+          error: 'Bad Request',
+          message: 'Both access and refresh tokens are expired.',
+          statusCode: 400
+        });
       });
     });
 

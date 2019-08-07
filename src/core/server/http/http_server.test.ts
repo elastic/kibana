@@ -147,6 +147,8 @@ test('invalid params', async () => {
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({
+        error: 'Bad Request',
+        statusCode: 400,
         message: '[request params.test]: expected value of type [number] but got [string]',
       });
     });
@@ -210,6 +212,8 @@ test('invalid query', async () => {
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({
+        error: 'Bad Request',
+        statusCode: 400,
         message: '[request query.bar]: expected value of type [number] but got [string]',
       });
     });
@@ -278,6 +282,8 @@ test('invalid body', async () => {
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({
+        error: 'Bad Request',
+        statusCode: 400,
         message: '[request body.bar]: expected value of type [number] but got [string]',
       });
     });
