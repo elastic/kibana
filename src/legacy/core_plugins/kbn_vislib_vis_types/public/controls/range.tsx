@@ -26,7 +26,7 @@ interface RangeOptionProps<ParamName extends string> {
   min: number;
   paramName: ParamName;
   step?: number;
-  value: string | number;
+  value: '' | number;
   setValue: (paramName: ParamName, value: number) => void;
 }
 
