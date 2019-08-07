@@ -11,60 +11,35 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps']);
 
   describe('Add layer panel', () => {
+    const LAYER_NAME = 'World Countries';
+
     before(async () => {
       await PageObjects.maps.openNewMap();
+      await PageObjects.maps.clickAddLayer();
+      await PageObjects.maps.selectVectorSource();
+      await PageObjects.maps.selectVectorLayer(LAYER_NAME);
     });
 
-    describe('visibility', () => {
-
-
-      //skip for now
-      //cf. https://github.com/elastic/kibana/issues/42626
-      it.skip('should open on clicking "Add layer"', async () => {
-        await PageObjects.maps.clickAddLayer();
-        const panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
-        expect(panelOpen).to.be(true);
-      });
-
-      it.skip('should close on clicking "Cancel"', async () => {
-        await PageObjects.maps.cancelLayerAdd();
-        const panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
-        expect(panelOpen).to.be(false);
-      });
+    it('should show unsaved layer in layer TOC', async () => {
+      const vectorLayerExists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
+      expect(vectorLayerExists).to.be(true);
     });
 
-    describe('with unsaved layer', () => {
-      const LAYER_NAME = 'World Countries';
+    it('should disable Map application save button', async () => {
+      // saving map should be a no-op because its diabled
+      await testSubjects.click('mapSaveButton');
 
-      before(async () => {
-        await PageObjects.maps.clickAddLayer();
-        await PageObjects.maps.selectVectorSource();
-        await PageObjects.maps.selectVectorLayer(LAYER_NAME);
-      });
+      const panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
+      expect(panelOpen).to.be(true);
+      const vectorLayerExists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
+      expect(vectorLayerExists).to.be(true);
+    });
 
-      it('should show unsaved layer in layer TOC', async () => {
-        const vectorLayerExists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
-        expect(vectorLayerExists).to.be(true);
-      });
+    it('should remove layer on cancel', async () => {
+      await PageObjects.maps.cancelLayerAdd(LAYER_NAME);
 
-      it('should disable Map application save button', async () => {
-        // saving map should be a no-op because its diabled
-        await testSubjects.click('mapSaveButton');
-
-        const panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
-        expect(panelOpen).to.be(true);
-        const vectorLayerExists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
-        expect(vectorLayerExists).to.be(true);
-      });
-
-      it('should close & remove layer on clicking "Cancel"', async () => {
-        await PageObjects.maps.cancelLayerAdd(LAYER_NAME);
-
-        const panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
-        expect(panelOpen).to.be(false);
-        const vectorLayerExists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
-        expect(vectorLayerExists).to.be(false);
-      });
+      const vectorLayerExists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
+      expect(vectorLayerExists).to.be(false);
     });
   });
 }

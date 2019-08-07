@@ -31,7 +31,7 @@ export function TransactionDetails() {
 
   const { data: transactionChartsData } = useTransactionCharts();
 
-  const { data: waterfall } = useWaterfall(urlParams);
+  const { data: waterfall, exceedsMax } = useWaterfall(urlParams);
   const transaction = waterfall.getTransactionById(urlParams.transactionId);
 
   const { transactionName } = urlParams;
@@ -81,6 +81,7 @@ export function TransactionDetails() {
           transaction={transaction}
           urlParams={urlParams}
           waterfall={waterfall}
+          exceedsMax={exceedsMax}
         />
       )}
     </div>
