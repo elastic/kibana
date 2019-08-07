@@ -17,7 +17,7 @@ import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks'
 import { registerBuiltInActionTypes } from './index';
 import { sendEmail } from './lib/send_email';
 import { ActionParamsType, ActionTypeConfigType, ActionTypeSecretsType } from './email';
-import { getMockAuditLog } from '../audit_log.mock';
+import { getMockAuditLog } from '../../../../../plugins/audit_log/server/audit_log.mock';
 
 const sendEmailMock = sendEmail as jest.Mock;
 

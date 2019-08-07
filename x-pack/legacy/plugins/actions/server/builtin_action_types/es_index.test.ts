@@ -16,7 +16,7 @@ import { validateConfig, validateParams } from '../lib';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { registerBuiltInActionTypes } from './index';
 import { ActionParamsType, ActionTypeConfigType } from './es_index';
-import { getMockAuditLog } from '../audit_log.mock';
+import { getMockAuditLog } from '../../../../../plugins/audit_log/server/audit_log.mock';
 
 const ACTION_TYPE_ID = '.index';
 const NO_OP_FN = () => {};

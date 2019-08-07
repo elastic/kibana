@@ -12,7 +12,7 @@ import { ExecutorType } from './types';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/plugin.mock';
-import { getMockAuditLog } from './audit_log.mock';
+import { getMockAuditLog } from '../../../../plugins/audit_log/server/audit_log.mock';
 
 const savedObjectsClient = SavedObjectsClientMock.create();
 

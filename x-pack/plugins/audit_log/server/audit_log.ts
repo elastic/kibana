@@ -34,10 +34,12 @@ export class AuditLog implements IAuditLog {
       return;
     }
 
+    // TODO: eventually, this will add a saved object to ES
     this.logger.info(`audit_log: ${this.id}: ${JSON.stringify(record)}`);
   }
 
   async search() {
+    // TODO: eventually, this return a search over saved objects
     return [];
   }
 }

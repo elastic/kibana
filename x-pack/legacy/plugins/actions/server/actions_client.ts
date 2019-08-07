@@ -9,6 +9,7 @@ import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets } from './lib';
 import { ActionResult } from './types';
 import { IAuditLog } from '../../../../plugins/audit_log/server/types';
+import { AuditRecordType } from './audit_record';
 
 interface ActionUpdate extends SavedObjectAttributes {
   description: string;
@@ -85,12 +86,14 @@ export class ActionsClient {
       secrets: validatedActionTypeSecrets as SavedObjectAttributes,
     });
 
-    this.auditLog.log({
+    const auditRecord: AuditRecordType = {
       actionTypeId,
       id: result.id,
       operation: 'create',
       status: 'success',
-    });
+      message: undefined,
+    };
+    this.auditLog.log(auditRecord);
 
     return {
       id: result.id,
@@ -118,12 +121,14 @@ export class ActionsClient {
       secrets: validatedActionTypeSecrets as SavedObjectAttributes,
     });
 
-    this.auditLog.log({
+    const auditRecord: AuditRecordType = {
       actionTypeId,
       id: result.id,
       operation: 'update',
       status: 'success',
-    });
+      message: undefined,
+    };
+    this.auditLog.log(auditRecord);
 
     return {
       id,
@@ -171,12 +176,14 @@ export class ActionsClient {
     const action = await this.savedObjectsClient.get('action', id);
     const result = await this.savedObjectsClient.delete('action', id);
 
-    this.auditLog.log({
+    const auditRecord: AuditRecordType = {
       actionTypeId: action.attributes.actionTypeId,
       id,
       operation: 'delete',
       status: 'success',
-    });
+      message: undefined,
+    };
+    this.auditLog.log(auditRecord);
 
     return result;
   }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IAuditLog } from '../../../../plugins/audit_log/server/types';
+import { IAuditLog } from './types';
 
 export function getMockAuditLog(): IAuditLog {
   return {

@@ -6,7 +6,7 @@
 
 import { ObjectType } from '@kbn/config-schema';
 
-export type IAuditRecord = Record<string, any>;
+export type IAuditRecord = ObjectType;
 
 export interface IAuditLog {
   log(data: any): Promise<void>;

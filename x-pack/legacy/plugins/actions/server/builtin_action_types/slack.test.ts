@@ -11,7 +11,7 @@ import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks'
 import { validateParams, validateSecrets } from '../lib';
 import { getActionType } from './slack';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
-import { getMockAuditLog } from '../audit_log.mock';
+import { getMockAuditLog } from '../../../../../plugins/audit_log/server/audit_log.mock';
 
 const ACTION_TYPE_ID = '.slack';
 

@@ -12,7 +12,7 @@ import { validateParams } from '../lib';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 
 import { registerBuiltInActionTypes } from './index';
-import { getMockAuditLog } from '../audit_log.mock';
+import { getMockAuditLog } from '../../../../../plugins/audit_log/server/audit_log.mock';
 
 const ACTION_TYPE_ID = '.server-log';
 const NO_OP_FN = () => {};

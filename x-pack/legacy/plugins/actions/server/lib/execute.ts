@@ -7,6 +7,7 @@
 import { Services, ActionTypeRegistryContract, ActionTypeExecutorResult } from '../types';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
+import { AuditRecordType } from '../audit_record';
 
 interface ExecuteOptions {
   actionId: string;
@@ -61,23 +62,27 @@ export async function execute({
       ['warning', 'x-pack', 'actions'],
       `action executed unsuccessfully: ${actionLabel} - ${err.message}`
     );
-    services.auditLog.log({
+    const auditRecord: AuditRecordType = {
       actionTypeId,
       id: actionId,
       operation: 'fire',
       status: 'error',
       message: err.message,
-    });
+    };
+    services.auditLog.log(auditRecord);
     throw err;
   }
 
   services.log(['debug', 'x-pack', 'actions'], `action executed successfully: ${actionLabel}`);
-  services.auditLog.log({
+  const auditRecord: AuditRecordType = {
     actionTypeId,
     id: actionId,
     operation: 'fire',
     status: 'success',
-  });
+    message: undefined,
+  };
+
+  services.auditLog.log(auditRecord);
 
   // return basic response if none provided
   if (result == null) return { status: 'ok' };

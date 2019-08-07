@@ -14,7 +14,7 @@ import { ActionTypeRegistry } from './action_type_registry';
 import { ExecutorType } from './types';
 import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { ExecutorError } from './lib';
-import { getMockAuditLog } from './audit_log.mock';
+import { getMockAuditLog } from '../../../../plugins/audit_log/server/audit_log.mock';
 
 const mockTaskManager = taskManagerMock.create();
 
