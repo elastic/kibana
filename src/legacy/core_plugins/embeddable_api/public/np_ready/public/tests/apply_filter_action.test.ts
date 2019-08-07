@@ -107,6 +107,7 @@ test('ApplyFilterAction is incompatible if the root container does not accept a 
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
       inspector,
+      SavedObjectFinder: () => null,
     }
   );
 
@@ -144,6 +145,7 @@ test('trying to execute on incompatible context throws an error ', async () => {
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
       inspector,
+      SavedObjectFinder: () => null,
     }
   );
 

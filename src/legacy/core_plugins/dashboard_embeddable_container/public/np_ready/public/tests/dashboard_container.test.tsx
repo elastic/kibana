@@ -76,6 +76,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
         notifications={{} as any}
         overlays={{} as any}
         inspector={inspector}
+        SavedObjectFinder={() => null}
       />
     </I18nProvider>
   );

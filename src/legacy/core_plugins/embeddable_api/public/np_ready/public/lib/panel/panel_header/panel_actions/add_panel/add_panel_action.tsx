@@ -35,7 +35,8 @@ export class AddPanelAction extends Action {
     private readonly getFactory: GetEmbeddableFactory,
     private readonly getAllFactories: GetEmbeddableFactories,
     private readonly overlays: OverlayStart,
-    private readonly notifications: NotificationsStart
+    private readonly notifications: NotificationsStart,
+    private readonly SavedObjectFinder: React.ComponentType<any>
   ) {
     super(ADD_PANEL_ACTION_ID);
   }
@@ -65,6 +66,7 @@ export class AddPanelAction extends Action {
       getAllFactories: this.getAllFactories,
       overlays: this.overlays,
       notifications: this.notifications,
+      SavedObjectFinder: this.SavedObjectFinder,
     });
   }
 }

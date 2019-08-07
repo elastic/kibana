@@ -55,6 +55,7 @@ interface HelloWorldContainerOptions {
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
+  SavedObjectFinder: React.ComponentType<any>;
 }
 
 export class HelloWorldContainer extends Container<InheritedInput, HelloWorldContainerInput> {
@@ -87,6 +88,7 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
           overlays={this.options.overlays}
           notifications={this.options.notifications}
           inspector={this.options.inspector}
+          SavedObjectFinder={this.options.SavedObjectFinder}
         />
       </I18nProvider>,
       node

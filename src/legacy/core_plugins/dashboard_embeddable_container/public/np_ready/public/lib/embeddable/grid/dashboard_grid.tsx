@@ -125,6 +125,7 @@ export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
   landingPagePath: string;
+  SavedObjectFinder: React.ComponentType<any>;
 }
 
 interface State {
@@ -284,6 +285,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
             overlays={this.props.overlays}
             notifications={this.props.notifications}
             inspector={this.props.inspector}
+            SavedObjectFinder={this.props.SavedObjectFinder}
           />
         </div>
       );

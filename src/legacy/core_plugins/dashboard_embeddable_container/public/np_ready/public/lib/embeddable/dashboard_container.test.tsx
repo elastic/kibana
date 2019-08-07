@@ -41,6 +41,7 @@ const viewportProps: ViewportProps = {
   overlays: {} as any,
   inspector: {} as any,
   landingPagePath: '/dashboard',
+  SavedObjectFinder: () => null,
 };
 
 beforeEach(() => {

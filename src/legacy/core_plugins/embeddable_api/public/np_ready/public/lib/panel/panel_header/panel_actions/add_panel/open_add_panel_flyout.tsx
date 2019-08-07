@@ -28,8 +28,16 @@ export async function openAddPanelFlyout(options: {
   getAllFactories: GetEmbeddableFactories;
   overlays: OverlayStart;
   notifications: NotificationsStart;
+  SavedObjectFinder: React.ComponentType<any>;
 }) {
-  const { embeddable, getFactory, getAllFactories, overlays, notifications } = options;
+  const {
+    embeddable,
+    getFactory,
+    getAllFactories,
+    overlays,
+    notifications,
+    SavedObjectFinder,
+  } = options;
   const flyoutSession = overlays.openFlyout(
     <AddPanelFlyout
       container={embeddable}
@@ -41,6 +49,7 @@ export async function openAddPanelFlyout(options: {
       getFactory={getFactory}
       getAllFactories={getAllFactories}
       notifications={notifications}
+      SavedObjectFinder={SavedObjectFinder}
     />,
     {
       'data-test-subj': 'addPanelFlyout',

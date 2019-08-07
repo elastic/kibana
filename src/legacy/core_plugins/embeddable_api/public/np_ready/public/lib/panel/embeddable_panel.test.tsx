@@ -162,6 +162,7 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
         notifications={{} as any}
         overlays={{} as any}
         inspector={inspector}
+        SavedObjectFinder={() => null}
       />
     </I18nProvider>
   );
@@ -198,6 +199,7 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
         notifications={{} as any}
         overlays={{} as any}
         inspector={inspector}
+        SavedObjectFinder={() => null}
       />
     </I18nProvider>
   );
@@ -259,6 +261,7 @@ test('Updates when hidePanelTitles is toggled', async () => {
         notifications={{} as any}
         overlays={{} as any}
         inspector={inspector}
+        SavedObjectFinder={() => null}
       />
     </I18nProvider>
   );

@@ -50,6 +50,7 @@ export interface DashboardViewportProps {
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
   landingPagePath: string;
+  SavedObjectFinder: React.ComponentType<any>;
 }
 
 interface State {
@@ -127,6 +128,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           overlays={this.props.overlays}
           inspector={this.props.inspector}
           landingPagePath={this.props.landingPagePath}
+          SavedObjectFinder={this.props.SavedObjectFinder}
         />
       </div>
     );

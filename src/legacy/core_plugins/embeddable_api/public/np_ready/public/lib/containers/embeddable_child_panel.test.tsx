@@ -69,6 +69,7 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
       notifications={{} as any}
       overlays={{} as any}
       inspector={inspector}
+      SavedObjectFinder={() => null}
     />
   );
 
@@ -107,6 +108,7 @@ test(`EmbeddableChildPanel renders an error message if the factory doesn't exist
       notifications={{} as any}
       overlays={{} as any}
       inspector={inspector}
+      SavedObjectFinder={() => null}
     />
   );
 

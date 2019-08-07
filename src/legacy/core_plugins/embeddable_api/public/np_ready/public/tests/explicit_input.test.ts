@@ -82,6 +82,7 @@ test('Explicit embeddable input mapped to undefined with no inherited value will
       notifications: coreStart.notifications,
       overlays: coreStart.overlays,
       inspector: {} as any,
+      SavedObjectFinder: () => null,
     }
   );
 
@@ -129,6 +130,7 @@ test('Explicit input tests in async situations', (done: () => void) => {
       notifications: coreStart.notifications,
       overlays: coreStart.overlays,
       inspector: {} as any,
+      SavedObjectFinder: () => null,
     }
   );
 

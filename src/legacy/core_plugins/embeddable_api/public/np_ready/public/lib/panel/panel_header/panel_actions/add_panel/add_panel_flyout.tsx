@@ -21,14 +21,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { CoreSetup } from 'src/core/public';
 
-// TODO: This needs to be adapted for NP.
-/*
-import {
-  SavedObjectFinder,
-  SavedObjectMetaData,
-} from 'ui/saved_objects/components/saved_object_finder';
-*/
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -42,10 +34,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-/* eslint-disable */
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-/* eslint-enable */
-
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
@@ -56,6 +44,7 @@ interface Props {
   getFactory: GetEmbeddableFactory;
   getAllFactories: GetEmbeddableFactories;
   notifications: CoreSetup['notifications'];
+  SavedObjectFinder: React.ComponentType<any>;
 }
 
 export class AddPanelFlyout extends React.Component<Props> {
@@ -143,6 +132,7 @@ export class AddPanelFlyout extends React.Component<Props> {
   }
 
   public render() {
+    const SavedObjectFinder = this.props.SavedObjectFinder;
     const savedObjectsFinder = (
       <SavedObjectFinder
         onChoose={this.onAddPanel}

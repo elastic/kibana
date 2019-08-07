@@ -69,6 +69,7 @@ function getProps(props?: Partial<DashboardGridProps>): DashboardGridProps {
     overlays: {} as any,
     inspector: {} as any,
     landingPagePath: '/dashboard',
+    SavedObjectFinder: () => null,
   };
   return Object.assign(defaultTestProps, props);
 }

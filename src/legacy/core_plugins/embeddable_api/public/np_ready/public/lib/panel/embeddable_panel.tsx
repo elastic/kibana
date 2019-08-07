@@ -49,6 +49,7 @@ interface Props {
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
+  SavedObjectFinder: React.ComponentType<any>;
 }
 
 interface State {
@@ -196,7 +197,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         this.props.getEmbeddableFactory,
         this.props.getAllEmbeddableFactories,
         this.props.overlays,
-        this.props.notifications
+        this.props.notifications,
+        this.props.SavedObjectFinder
       ),
       new InspectPanelAction(this.props.inspector),
       new RemovePanelAction(),

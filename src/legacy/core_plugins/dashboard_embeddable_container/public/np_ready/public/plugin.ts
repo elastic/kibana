@@ -29,6 +29,9 @@ interface SetupDependencies {
 interface StartDependencies {
   embeddable: ReturnType<EmbeddablePlugin['start']>;
   inspector: InspectorStartContract;
+  __LEGACY: {
+    SavedObjectFinder: React.ComponentType<any>;
+  };
 }
 
 export type Setup = void;
@@ -49,7 +52,7 @@ export class DashboardEmbeddableContainerPublicPlugin
 
   public start(core: CoreStart, plugins: StartDependencies): Start {
     const { application, notifications, overlays } = core;
-    const { embeddable, inspector } = plugins;
+    const { embeddable, inspector, __LEGACY } = plugins;
 
     const registerDashboardContainerFactory: Start['registerDashboardContainerFactory'] = ({
       landingPagePath,
@@ -66,6 +69,7 @@ export class DashboardEmbeddableContainerPublicPlugin
         overlays,
         inspector,
         landingPagePath,
+        SavedObjectFinder: __LEGACY.SavedObjectFinder,
       });
 
       embeddable.registerEmbeddableFactory(factory.type, factory);

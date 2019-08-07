@@ -37,6 +37,7 @@ interface Props {
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
+  SavedObjectFinder: React.ComponentType<any>;
 }
 
 interface State {
@@ -115,6 +116,7 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
             overlays={this.props.overlays}
             notifications={this.props.notifications}
             inspector={this.props.inspector}
+            SavedObjectFinder={this.props.SavedObjectFinder}
           />
         </EuiFlexItem>
       );

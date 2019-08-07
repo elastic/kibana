@@ -45,7 +45,8 @@ beforeEach(async () => {
     () => undefined,
     () => [] as any,
     start.overlays,
-    start.notifications
+    start.notifications,
+    () => null
   );
 
   const derivedFilter: Filter = {
@@ -79,7 +80,8 @@ test('Is not compatible when container is in view mode', async () => {
     () => undefined,
     () => [] as any,
     start.overlays,
-    start.notifications
+    start.notifications,
+    () => null
   );
   container.updateInput({ viewMode: ViewMode.VIEW });
   expect(await addPanelAction.isCompatible({ embeddable: container })).toBe(false);

@@ -80,6 +80,7 @@ export interface ViewportProps {
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
   landingPagePath: string;
+  SavedObjectFinder: React.ComponentType<any>;
 }
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {

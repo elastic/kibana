@@ -44,6 +44,7 @@ function getProps(props?: Partial<DashboardViewportProps>): DashboardViewportPro
     overlays: {} as any,
     inspector: {} as any,
     landingPagePath: '/dashboard',
+    SavedObjectFinder: () => null,
   };
 
   const __embeddableFactories = new Map<string, EmbeddableFactory>();

@@ -39,6 +39,7 @@ interface Props {
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
+  SavedObjectFinder: React.ComponentType<any>;
 }
 
 export class HelloWorldContainerExample extends React.Component<Props, { lastName?: string }> {
@@ -77,6 +78,7 @@ export class HelloWorldContainerExample extends React.Component<Props, { lastNam
         overlays: this.props.overlays,
         notifications: this.props.notifications,
         inspector: this.props.inspector,
+        SavedObjectFinder: this.props.SavedObjectFinder,
       }
     );
     this.state = {
@@ -124,6 +126,7 @@ export class HelloWorldContainerExample extends React.Component<Props, { lastNam
           overlays={this.props.overlays}
           notifications={this.props.notifications}
           inspector={this.props.inspector}
+          SavedObjectFinder={this.props.SavedObjectFinder}
         />
       </div>
     );
