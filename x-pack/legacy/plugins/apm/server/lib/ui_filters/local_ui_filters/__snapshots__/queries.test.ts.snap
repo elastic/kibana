@@ -14,7 +14,7 @@ Object {
                   "order": Object {
                     "_count": "desc",
                   },
-                  "size": 500,
+                  "size": 10,
                 },
               },
             },
@@ -50,7 +50,7 @@ Object {
                   "order": Object {
                     "_count": "desc",
                   },
-                  "size": 500,
+                  "size": 10,
                 },
               },
             },

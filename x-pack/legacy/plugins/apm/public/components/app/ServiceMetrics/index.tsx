@@ -12,7 +12,6 @@ import {
   EuiFlexGroup
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
 import { MetricsChart } from './MetricsChart';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -30,9 +29,11 @@ export function ServiceMetrics({ agentName }: ServiceMetricsProps) {
   const { data } = useServiceMetricCharts(urlParams, agentName);
   const { start, end } = urlParams;
 
-  const localFiltersConfig = useMemo(
+  const localFiltersConfig: React.ComponentProps<
+    typeof LocalUIFilters
+  > = useMemo(
     () => ({
-      filterNames: ['host', 'containerId', 'podId'] as LocalUIFilterName[],
+      filterNames: ['host', 'containerId', 'podId'],
       params: {
         serviceName
       },

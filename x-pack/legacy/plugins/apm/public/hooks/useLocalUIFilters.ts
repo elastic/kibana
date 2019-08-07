@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit, mapValues } from 'lodash';
+import { omit } from 'lodash';
 import { useFetcher } from './useFetcher';
 import { callApi } from '../services/rest/callApi';
 import { LocalUIFiltersAPIResponse } from '../../server/lib/ui_filters/local_ui_filters';
@@ -18,7 +18,7 @@ import { pickKeys } from '../utils/pickKeys';
 
 const initialData = [] as LocalUIFiltersAPIResponse;
 
-export const useLocalUIFilters = ({
+export function useLocalUIFilters({
   projection,
   filterNames,
   params
@@ -26,24 +26,30 @@ export const useLocalUIFilters = ({
   projection: PROJECTION;
   filterNames: LocalUIFilterName[];
   params?: Record<string, string | number | boolean | undefined>;
-}) => {
+}) {
   const { uiFilters, urlParams } = useUrlParams();
 
   const values = pickKeys(uiFilters, ...filterNames);
 
-  const setValues = (vals: typeof values) => {
-    const search = omit(toQuery(history.location.search), filterNames);
+  const setFilterValue = (name: LocalUIFilterName, value: string[]) => {
+    const search = omit(toQuery(history.location.search), name);
 
     history.push({
       ...history.location,
       search: fromQuery(
         removeUndefinedProps({
           ...search,
-          ...mapValues(vals, val =>
-            val && val.length ? val.join(',') : undefined
-          )
+          [name]: value.length ? value.join(',') : undefined
         })
       )
+    });
+  };
+
+  const clearValues = () => {
+    const search = omit(toQuery(history.location.search), filterNames);
+    history.push({
+      ...history.location,
+      search: fromQuery(search)
     });
   };
 
@@ -62,10 +68,15 @@ export const useLocalUIFilters = ({
     return foo;
   }, [uiFilters, urlParams, params, filterNames, projection]);
 
+  const filters = data.map(filter => ({
+    ...filter,
+    value: values[filter.name] || []
+  }));
+
   return {
-    data,
+    filters,
     status,
-    values,
-    setValues
+    setFilterValue,
+    clearValues
   };
-};
+}

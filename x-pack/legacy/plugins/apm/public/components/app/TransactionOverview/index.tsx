@@ -15,7 +15,6 @@ import {
 import { Location } from 'history';
 import { first } from 'lodash';
 import React, { useMemo } from 'react';
-import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
@@ -92,14 +91,11 @@ export function TransactionOverview() {
     }
   }, [serviceName, transactionType]);
 
-  const localFiltersConfig = useMemo(
+  const localFiltersConfig: React.ComponentProps<
+    typeof LocalUIFilters
+  > = useMemo(
     () => ({
-      filterNames: [
-        'transactionResult',
-        'host',
-        'containerId',
-        'podId'
-      ] as LocalUIFilterName[],
+      filterNames: ['transactionResult', 'host', 'containerId', 'podId'],
       params: {
         serviceName,
         transactionType

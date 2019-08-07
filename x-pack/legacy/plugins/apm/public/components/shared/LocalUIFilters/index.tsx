@@ -27,9 +27,7 @@ interface Props {
 }
 
 const ButtonWrapper = styled.div`
-   {
-    display: inline-block;
-  }
+  display: inline-block;
 `;
 
 const LocalUIFilters = ({
@@ -39,7 +37,7 @@ const LocalUIFilters = ({
   children,
   showCount = true
 }: Props) => {
-  const { data: filters, values, setValues } = useLocalUIFilters({
+  const { filters, setFilterValue, clearValues } = useLocalUIFilters({
     filterNames,
     projection,
     params
@@ -57,20 +55,13 @@ const LocalUIFilters = ({
       <EuiSpacer size="s" />
       {children}
       {filters.map(filter => {
-        const { name } = filter;
-        const filterValue = (name in values && values[name]) || [];
-
         return (
           <React.Fragment key={filter.name}>
             <Filter
               {...filter}
               onChange={value => {
-                setValues({
-                  ...values,
-                  [filter.name]: value
-                });
+                setFilterValue(filter.name, value);
               }}
-              value={filterValue}
               showCount={showCount}
             />
             <EuiHorizontalRule margin="none" />
@@ -83,18 +74,7 @@ const LocalUIFilters = ({
           size="xs"
           iconType="cross"
           flush="left"
-          onClick={() => {
-            const clearedValues = Object.keys(values).reduce(
-              (acc, key) => {
-                return {
-                  ...acc,
-                  [key]: []
-                };
-              },
-              {} as Record<string, string[] | string>
-            );
-            setValues(clearedValues);
-          }}
+          onClick={clearValues}
         >
           {i18n.translate('xpack.apm.clearFilters', {
             defaultMessage: 'Clear filters'

@@ -26,7 +26,7 @@ const TransactionTypeFilter = ({ transactionTypes }: Props) => {
   } = useUrlParams();
 
   const options = transactionTypes.map(type => ({
-    text: `${type}`,
+    text: type,
     value: type
   }));
 

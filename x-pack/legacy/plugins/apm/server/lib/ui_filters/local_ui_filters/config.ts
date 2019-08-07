@@ -45,6 +45,8 @@ const filtersByName = {
   }
 };
 
+export const TERM_COUNT_LIMIT = 10;
+
 export type LocalUIFilterName = keyof typeof filtersByName;
 
 export interface LocalUIFilter {

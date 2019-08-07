@@ -36,8 +36,7 @@ export function getServicesProjection({ setup }: { setup: Setup }) {
       aggs: {
         services: {
           terms: {
-            field: SERVICE_NAME,
-            size: 500
+            field: SERVICE_NAME
           }
         }
       }

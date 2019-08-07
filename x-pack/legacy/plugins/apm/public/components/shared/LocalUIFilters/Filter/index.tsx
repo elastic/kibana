@@ -50,7 +50,7 @@ interface Props {
   title: string;
   options: Array<{
     name: string;
-    count: number;
+    count: string;
   }>;
   onChange: (value: string[]) => void;
   value: string[];
@@ -84,7 +84,7 @@ const Filter = ({
             <EuiText size="xs">{option.count}</EuiText>
           </Counter>
         ) : null,
-        ...(value.includes(option.name) ? { checked: 'on' } : {})
+        checked: value.includes(option.name) ? 'on' : undefined
       })),
     [value, options, showCount]
   );

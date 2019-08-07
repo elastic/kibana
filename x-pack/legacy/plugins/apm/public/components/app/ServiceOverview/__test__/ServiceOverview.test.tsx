@@ -42,9 +42,9 @@ describe('Service Overview -> View', () => {
     spyOn(coreHooks, 'useCore').and.returnValue(coreMock);
 
     jest.spyOn(useLocalUIFilters, 'useLocalUIFilters').mockReturnValue({
-      data: [],
-      values: {},
-      setValues: () => null,
+      filters: [],
+      setFilterValue: () => null,
+      clearValues: () => null,
       status: FETCH_STATUS.SUCCESS
     });
   });

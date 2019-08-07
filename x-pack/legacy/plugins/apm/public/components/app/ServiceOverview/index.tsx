@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import { toastNotifications } from 'ui/notify';
 import url from 'url';
-import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { loadServiceList } from '../../../services/rest/apm/services';
 import { NoServicesMessage } from './NoServicesMessage';
@@ -78,9 +77,11 @@ export function ServiceOverview() {
   useTrackPageview({ app: 'apm', path: 'services_overview' });
   useTrackPageview({ app: 'apm', path: 'services_overview', delay: 15000 });
 
-  const localFiltersConfig = useMemo(
+  const localFiltersConfig: React.ComponentProps<
+    typeof LocalUIFilters
+  > = useMemo(
     () => ({
-      filterNames: ['host', 'agentName'] as LocalUIFilterName[],
+      filterNames: ['host', 'agentName'],
       projection: PROJECTION.SERVICES
     }),
     []

@@ -11,7 +11,7 @@ import { Projection } from '../../../../public/projections/typings';
 import { PromiseReturnType } from '../../../../typings/common';
 import { getFilterAggregations } from './get_filter_aggregations';
 import { Setup } from '../../helpers/setup_request';
-import { localUIFilters, LocalUIFilterName } from './config';
+import { localUIFilters, LocalUIFilterName, TERM_COUNT_LIMIT } from './config';
 
 export type LocalUIFiltersAPIResponse = PromiseReturnType<
   typeof getLocalUIFilters
@@ -61,10 +61,20 @@ export async function getLocalUIFilters({
       ...filter,
       options: sortByOrder(
         aggregations.by_terms.buckets.map(bucket => {
+          let count;
+
+          if ('count' in bucket) {
+            count =
+              bucket.count.buckets.length >= TERM_COUNT_LIMIT
+                ? `${TERM_COUNT_LIMIT}+`
+                : bucket.count.buckets.length.toString();
+          } else {
+            count = bucket.doc_count.toString();
+          }
+
           return {
             name: bucket.key,
-            count:
-              'count' in bucket ? bucket.count.buckets.length : bucket.doc_count
+            count
           };
         }),
         'count',
