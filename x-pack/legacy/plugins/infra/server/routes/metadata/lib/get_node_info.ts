@@ -10,25 +10,25 @@ import {
   InfraBackendFrameworkAdapter,
 } from '../../../lib/adapters/framework';
 import { InfraSourceConfiguration } from '../../../lib/sources';
-import { InfraNodeType } from '../../../graphql/types';
 import { InfraMetadataInfo } from '../../../../common/http_api/metadata_api';
 import { getPodNodeName } from './get_pod_node_name';
 import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
-import { getIdFieldName } from './get_id_field_name';
+import { getIdFieldName } from '../../../../common/utils/get_apm_field_name';
+import { InfraNodeType } from '../../../../common/http_api/common';
 
 export const getNodeInfo = async (
   framework: InfraBackendFrameworkAdapter,
   req: InfraFrameworkRequest,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
-  nodeType: 'host' | 'pod' | 'container'
+  nodeType: InfraNodeType
 ): Promise<InfraMetadataInfo> => {
   // If the nodeType is a Kubernetes pod then we need to get the node info
   // from a host record instead of a pod. This is due to the fact that any host
   // can report pod details and we can't rely on the host/cloud information associated
   // with the kubernetes.pod.uid. We need to first lookup the `kubernetes.node.name`
   // then use that to lookup the host's node information.
-  if (nodeType === InfraNodeType.pod) {
+  if (nodeType === 'pod') {
     const kubernetesNodeName = await getPodNodeName(
       framework,
       req,
@@ -37,13 +37,7 @@ export const getNodeInfo = async (
       nodeType
     );
     if (kubernetesNodeName) {
-      return getNodeInfo(
-        framework,
-        req,
-        sourceConfiguration,
-        kubernetesNodeName,
-        InfraNodeType.host
-      );
+      return getNodeInfo(framework, req, sourceConfiguration, kubernetesNodeName, 'host');
     }
     return {};
   }

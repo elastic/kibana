@@ -4,9 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSourceConfiguration } from '../../../lib/sources';
+import { InfraSourceConfiguration } from '../graphql/types';
+import { InfraNodeType } from '../http_api/common';
 
-export const getIdFieldName = (sourceConfiguration: InfraSourceConfiguration, nodeType: string) => {
+export const getApmFieldName = (
+  sourceConfiguration: InfraSourceConfiguration,
+  nodeType: InfraNodeType
+) => {
+  return nodeType === 'host' ? 'host.hostname' : getIdFieldName(sourceConfiguration, nodeType);
+};
+
+export const getIdFieldName = (
+  sourceConfiguration: InfraSourceConfiguration,
+  nodeType: InfraNodeType
+) => {
   switch (nodeType) {
     case 'host':
       return sourceConfiguration.fields.host;

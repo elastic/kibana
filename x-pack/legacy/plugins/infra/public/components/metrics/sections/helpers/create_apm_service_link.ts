@@ -7,6 +7,7 @@
 import moment from 'moment';
 import { InfraNodeType, InfraTimerangeInput } from '../../../../graphql/types';
 import { SourceConfiguration } from '../../../../utils/source_configuration';
+import { getApmFieldName } from '../../../../../common/utils/get_apm_field_name';
 
 export const createAPMServiceLink = (
   serviceName: string,
@@ -15,22 +16,10 @@ export const createAPMServiceLink = (
   sourceConfiguration: SourceConfiguration,
   timeRange: InfraTimerangeInput
 ) => {
-  const nodeField =
-    nodeType === 'host' ? 'host.hostname' : getIdFieldName(sourceConfiguration, nodeType);
+  const nodeField = getApmFieldName(sourceConfiguration, nodeType);
   const from = moment(timeRange.from).toISOString();
   const to = moment(timeRange.to).toISOString();
   return `../app/apm#/services/${serviceName}/transactions?rangeFrom=${from}&rangeTo=${to}&transactionType=request&kuery=${encodeURIComponent(
     `${nodeField}:"${nodeId}"`
   )}`;
-};
-
-export const getIdFieldName = (sourceConfiguration: SourceConfiguration, nodeType: string) => {
-  switch (nodeType) {
-    case 'host':
-      return sourceConfiguration.fields.host;
-    case 'container':
-      return sourceConfiguration.fields.container;
-    default:
-      return sourceConfiguration.fields.pod;
-  }
 };

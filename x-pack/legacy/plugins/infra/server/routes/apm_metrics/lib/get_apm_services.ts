@@ -10,12 +10,12 @@ import { Legacy } from 'kibana';
 import { throwErrors } from '../../../../common/runtime_types';
 import { APMServiceResponseRT, InfraApmMetricsService } from '../../../../common/http_api';
 import { InfraNodeType } from '../../../../common/http_api/common';
-import { getIdFieldName } from '../../metadata/lib/get_id_field_name';
 import {
   InfraBackendFrameworkAdapter,
   InfraFrameworkRequest,
 } from '../../../lib/adapters/framework';
 import { InfraSourceConfiguration } from '../../../lib/sources';
+import { getApmFieldName } from '../../../../common/utils/get_apm_field_name';
 
 export const getApmServices = async (
   framework: InfraBackendFrameworkAdapter,
@@ -25,8 +25,7 @@ export const getApmServices = async (
   nodeType: InfraNodeType,
   timeRange: { min: number; max: number }
 ): Promise<InfraApmMetricsService[]> => {
-  const nodeField =
-    nodeType === 'host' ? 'host.hostname' : getIdFieldName(sourceConfiguration, nodeType);
+  const nodeField = getApmFieldName(sourceConfiguration, nodeType);
   const params = new URLSearchParams({
     start: moment(timeRange.min).toISOString(),
     end: moment(timeRange.max).toISOString(),

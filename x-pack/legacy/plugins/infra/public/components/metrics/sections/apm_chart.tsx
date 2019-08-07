@@ -18,7 +18,12 @@ import { i18n } from '@kbn/i18n';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 import { getChartTheme } from '../../metrics_explorer/helpers/get_chart_theme';
 import { SeriesChart } from './series_chart';
-import { getFormatter, getMaxMinTimestamp, seriesHasLessThen2DataPoints } from './helpers';
+import {
+  getFormatter,
+  getTimestampDomainFromSeries,
+  getMaxMinTimestamp,
+  seriesHasLessThen2DataPoints,
+} from './helpers';
 import { InfraApmMetricsDataSet } from '../../../../common/http_api';
 import { InfraFormatterType } from '../../../lib/lib';
 import {
@@ -100,6 +105,8 @@ export const ApmChart = ({
     },
     [onChangeRangeTime, isLiveStreaming, stopLiveStreaming]
   );
+  const [minTimestamp, maxTimestamp] = getMaxMinTimestamp(dataSet);
+  const timestampDomain = { min: minTimestamp, max: maxTimestamp };
 
   return (
     <Chart>
@@ -125,7 +132,12 @@ export const ApmChart = ({
             ignoreGaps={true}
           />
         ))}
-      <Settings tooltip={tooltipProps} theme={getChartTheme()} onBrushEnd={handleTimeChange} />
+      <Settings
+        xDomain={timestampDomain}
+        tooltip={tooltipProps}
+        theme={getChartTheme()}
+        onBrushEnd={handleTimeChange}
+      />
     </Chart>
   );
 };

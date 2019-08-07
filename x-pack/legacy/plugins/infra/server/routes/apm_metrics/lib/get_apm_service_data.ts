@@ -9,7 +9,6 @@ import { Legacy } from 'kibana';
 import Boom from 'boom';
 import { throwErrors } from '../../../../common/runtime_types';
 import { InfraNodeType } from '../../../../common/http_api/common';
-import { getIdFieldName } from '../../metadata/lib/get_id_field_name';
 import {
   InfraApmMetricsService,
   APMChartResponseRT,
@@ -24,6 +23,7 @@ import {
   InfraFrameworkRequest,
 } from '../../../lib/adapters/framework';
 import { InfraSourceConfiguration } from '../../../lib/sources';
+import { getApmFieldName } from '../../../../common/utils/get_apm_field_name';
 
 export const getApmServiceData = async (
   framework: InfraBackendFrameworkAdapter,
@@ -60,8 +60,7 @@ const getDataForTransactionType = async (
   nodeType: InfraNodeType,
   timeRange: { min: number; max: number }
 ): Promise<InfraApmMetricsDataSet[]> => {
-  const nodeField =
-    nodeType === 'host' ? 'host.hostname' : getIdFieldName(sourceConfiguration, nodeType);
+  const nodeField = getApmFieldName(sourceConfiguration, nodeType);
   const params = new URLSearchParams({
     start: moment(timeRange.min).toISOString(),
     end: moment(timeRange.max).toISOString(),

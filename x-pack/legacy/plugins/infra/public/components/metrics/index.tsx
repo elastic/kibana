@@ -32,16 +32,9 @@ interface Props {
   timeRange: InfraTimerangeInput;
 }
 
-interface State {
-  crosshairValue: number | null;
-}
-
 export const Metrics = injectI18n(
-  class extends React.PureComponent<Props, State> {
+  class extends React.PureComponent<Props> {
     public static displayName = 'Metrics';
-    public readonly state = {
-      crosshairValue: null,
-    };
 
     public render() {
       const { intl } = this.props;
@@ -99,7 +92,6 @@ export const Metrics = injectI18n(
     };
 
     private renderSection = (layout: InfraMetricLayout) => (section: InfraMetricLayoutSection) => {
-      const sectionProps = {};
       return (
         <Section
           section={section}
@@ -110,18 +102,10 @@ export const Metrics = injectI18n(
           sourceConfiguration={this.props.sourceConfiguration}
           timeRange={this.props.timeRange}
           onChangeRangeTime={this.props.onChangeRangeTime}
-          isLiveStreaming={isLiveStreaming}
-          stopLiveStreaming={stopLiveStreaming}
-          crosshairValue={this.state.crosshairValue}
-          onCrosshairUpdate={this.state.onCrosshairUpdate}
+          isLiveStreaming={this.props.isLiveStreaming}
+          stopLiveStreaming={this.props.stopLiveStreaming}
         />
       );
-    };
-
-    private onCrosshairUpdate = (crosshairValue: number) => {
-      this.setState({
-        crosshairValue,
-      });
     };
   }
 );

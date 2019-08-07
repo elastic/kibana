@@ -10,14 +10,15 @@ import {
   InfraBackendFrameworkAdapter,
 } from '../../../lib/adapters/framework';
 import { InfraSourceConfiguration } from '../../../lib/sources';
-import { getIdFieldName } from './get_id_field_name';
+import { getIdFieldName } from '../../../../common/utils/get_apm_field_name';
+import { InfraNodeType } from '../../../../common/http_api/common';
 
 export const getPodNodeName = async (
   framework: InfraBackendFrameworkAdapter,
   req: InfraFrameworkRequest,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
-  nodeType: 'host' | 'pod' | 'container'
+  nodeType: InfraNodeType
 ): Promise<string | undefined> => {
   const params = {
     allowNoIndices: true,

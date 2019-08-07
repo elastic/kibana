@@ -12,8 +12,9 @@ import {
   InfraMetadataAggregationResponse,
 } from '../../../lib/adapters/framework';
 import { InfraSourceConfiguration } from '../../../lib/sources';
-import { getIdFieldName } from './get_id_field_name';
 import { NAME_FIELDS } from '../../../lib/constants';
+import { getIdFieldName } from '../../../../common/utils/get_apm_field_name';
+import { InfraNodeType } from '../../../../common/http_api/common';
 
 export interface InfraMetricsAdapterResponse {
   id: string;
@@ -26,7 +27,7 @@ export const getMetricMetadata = async (
   req: InfraFrameworkRequest,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
-  nodeType: 'host' | 'pod' | 'container'
+  nodeType: InfraNodeType
 ): Promise<InfraMetricsAdapterResponse> => {
   const idFieldName = getIdFieldName(sourceConfiguration, nodeType);
 
