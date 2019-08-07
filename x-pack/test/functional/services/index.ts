@@ -44,9 +44,9 @@ import { GrokDebuggerProvider } from './grok_debugger';
 // @ts-ignore not ts yet
 import { UserMenuProvider } from './user_menu';
 import { UptimeProvider } from './uptime';
-import { InfraSourceConfigurationFlyoutProvider } from './infra_source_configuration_flyout';
+import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
 import { InfraLogStreamProvider } from './infra_log_stream';
-import { MachineLearningProvider } from './machine_learning';
+import { MachineLearningProvider } from './ml';
 
 import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/services';
 
@@ -86,7 +86,7 @@ export const services = {
   spaces: SpacesServiceProvider,
   userMenu: UserMenuProvider,
   uptime: UptimeProvider,
-  infraSourceConfigurationFlyout: InfraSourceConfigurationFlyoutProvider,
+  infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
   infraLogStream: InfraLogStreamProvider,
   ml: MachineLearningProvider,
 };

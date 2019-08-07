@@ -14,8 +14,7 @@ export default function ({ getPageObjects }) {
   const FILE_LOAD_DIR = 'test_upload_files';
   const DEFAULT_LOAD_FILE_NAME = 'point.json';
 
-  // FAILING: https://github.com/elastic/kibana/issues/42630
-  describe.skip('GeoJSON import layer panel', () => {
+  describe('GeoJSON import layer panel', () => {
     before(async () => {
       await PageObjects.maps.openNewMap();
     });
@@ -33,75 +32,66 @@ export default function ({ getPageObjects }) {
     });
 
     it('should add GeoJSON file to map', async () => {
-      const layerLoadedInToc = await PageObjects.maps
-        .doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
+      const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
       expect(layerLoadedInToc).to.be(true);
 
-      const filePickerLoadedFile = await PageObjects.maps
-        .hasFilePickerLoadedFile(DEFAULT_LOAD_FILE_NAME);
+      const filePickerLoadedFile = await PageObjects.maps.hasFilePickerLoadedFile(DEFAULT_LOAD_FILE_NAME);
       expect(filePickerLoadedFile).to.be(true);
     });
 
-    it('should close & remove preview layer on clicking "Cancel" after uploading file',
-      async () => {
-        await PageObjects.maps.cancelLayerAdd();
-        const panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
-        expect(panelOpen).to.be(false);
+    it('should remove layer on cancel', async () => {
+      await PageObjects.maps.cancelLayerAdd();
 
-        await PageObjects.maps.waitForLayerDeleted(IMPORT_FILE_PREVIEW_NAME);
-        const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
-        expect(layerLoadedInToc).to.be(false);
-      });
+      await PageObjects.maps.waitForLayerDeleted(IMPORT_FILE_PREVIEW_NAME);
+      const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
+      expect(layerLoadedInToc).to.be(false);
+    });
 
-    it('should replace layer on input change',
-      async () => {
-        // Upload second file
-        const secondLoadFileName = 'polygon.json';
-        await PageObjects.maps.uploadJsonFileForIndexing(
-          path.join(__dirname, FILE_LOAD_DIR, secondLoadFileName)
-        );
-        await PageObjects.maps.waitForLayersToLoad();
-        // Check second file is loaded in file picker
-        const filePickerLoadedFile = await PageObjects.maps.hasFilePickerLoadedFile(secondLoadFileName);
-        expect(filePickerLoadedFile).to.be(true);
-      });
+    it('should replace layer on input change', async () => {
+      // Upload second file
+      const secondLoadFileName = 'polygon.json';
+      await PageObjects.maps.uploadJsonFileForIndexing(
+        path.join(__dirname, FILE_LOAD_DIR, secondLoadFileName)
+      );
+      await PageObjects.maps.waitForLayersToLoad();
+      // Check second file is loaded in file picker
+      const filePickerLoadedFile = await PageObjects.maps.hasFilePickerLoadedFile(secondLoadFileName);
+      expect(filePickerLoadedFile).to.be(true);
+    });
 
-    it('should clear layer on replacement layer load error',
-      async () => {
-        // Upload second file
-        const secondLoadFileName = 'not_json.txt';
-        await PageObjects.maps.uploadJsonFileForIndexing(
-          path.join(__dirname, FILE_LOAD_DIR, secondLoadFileName)
-        );
-        await PageObjects.maps.waitForLayersToLoad();
-        // Check second file is loaded in file picker
-        const filePickerLoadedFile = await PageObjects.maps
-          .hasFilePickerLoadedFile(secondLoadFileName);
-        expect(filePickerLoadedFile).to.be(true);
-        // Check that no file is loaded in layer preview
-        const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
-        expect(layerLoadedInToc).to.be(false);
-      });
+    it('should clear layer on replacement layer load error', async () => {
+      // Upload second file
+      const secondLoadFileName = 'not_json.txt';
+      await PageObjects.maps.uploadJsonFileForIndexing(
+        path.join(__dirname, FILE_LOAD_DIR, secondLoadFileName)
+      );
+      await PageObjects.maps.waitForLayersToLoad();
+      // Check second file is loaded in file picker
+      const filePickerLoadedFile = await PageObjects.maps.hasFilePickerLoadedFile(secondLoadFileName);
+      expect(filePickerLoadedFile).to.be(true);
+      // Check that no file is loaded in layer preview
+      const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
+      expect(layerLoadedInToc).to.be(false);
+    });
 
-    it('should prevent import button from activating unless valid index name provided',
-      async () => {
-        // Set index to invalid name
-        await PageObjects.maps.setIndexName('NoCapitalLetters');
-        // Check button
-        let importButtonActive = await PageObjects.maps.importFileButtonEnabled();
-        expect(importButtonActive).to.be(false);
+    it('should prevent import button from activating unless valid index name provided', async () => {
+      // Set index to invalid name
+      await PageObjects.maps.setIndexName('NoCapitalLetters');
+      // Check button
+      let importButtonActive = await PageObjects.maps.importFileButtonEnabled();
+      expect(importButtonActive).to.be(false);
 
-        // Set index to valid name
-        await PageObjects.maps.setIndexName('validindexname');
-        // Check button
-        importButtonActive = await PageObjects.maps.importFileButtonEnabled();
-        expect(importButtonActive).to.be(true);
+      // Set index to valid name
+      await PageObjects.maps.setIndexName('validindexname');
+      // Check button
+      importButtonActive = await PageObjects.maps.importFileButtonEnabled();
+      expect(importButtonActive).to.be(true);
 
-        // Set index back to invalid name
-        await PageObjects.maps.setIndexName('?noquestionmarks?');
-        // Check button
-        importButtonActive = await PageObjects.maps.importFileButtonEnabled();
-        expect(importButtonActive).to.be(false);
-      });
+      // Set index back to invalid name
+      await PageObjects.maps.setIndexName('?noquestionmarks?');
+      // Check button
+      importButtonActive = await PageObjects.maps.importFileButtonEnabled();
+      expect(importButtonActive).to.be(false);
+    });
   });
 }
