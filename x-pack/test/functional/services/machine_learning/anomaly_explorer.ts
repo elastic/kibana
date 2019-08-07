@@ -3,14 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('machine learning', function() {
-    this.tags('ciGroup3');
+export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProviderContext) {
+  const testSubjects = getService('testSubjects');
 
-    loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./pages'));
-    loadTestFile(require.resolve('./create_single_metric_job'));
-  });
+  return {
+    async assertAnomalyExplorerEmptyListMessageExists() {
+      await testSubjects.existOrFail('mlNoJobsFound');
+    },
+  };
 }
