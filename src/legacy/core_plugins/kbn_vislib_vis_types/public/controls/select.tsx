@@ -25,16 +25,23 @@ interface SelectOptionProps {
   label: string;
   options: Array<{ value: string; text: string }>;
   paramName: string;
-  value: string;
+  value?: string;
   setValue: VisOptionsSetValue;
 }
+
+const emptyValue = {
+  text: '',
+  value: 'EMPTY_VALUE',
+  disabled: true,
+  hidden: true,
+};
 
 function SelectOption({ label, options, paramName, value, setValue }: SelectOptionProps) {
   return (
     <EuiFormRow label={label} fullWidth={true} compressed>
       <EuiSelect
-        options={options}
-        value={value}
+        options={[emptyValue, ...options]}
+        value={value || emptyValue.value}
         onChange={ev => setValue(paramName, ev.target.value)}
         fullWidth={true}
       />

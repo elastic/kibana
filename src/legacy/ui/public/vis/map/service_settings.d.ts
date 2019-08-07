@@ -25,6 +25,15 @@ export interface TmsLayer {
   attribution: string;
 }
 
+export interface FileLayer {
+  name: string;
+  origin: string;
+  id: string;
+  format: string | { type: string };
+}
+
 export interface ServiceSettings {
+  getEMSHotLink(layer: FileLayer): Promise<string>;
   getTMSServices(): Promise<TmsLayer[]>;
+  getFileLayers(): Promise<FileLayer[]>;
 }

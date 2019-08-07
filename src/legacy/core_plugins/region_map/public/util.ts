@@ -17,14 +17,17 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
 // TODO: reference to TILE_MAP plugin should be removed
+import { FileLayer } from 'ui/vis/map/service_settings';
 import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
 
-export function mapToLayerWithId(prefix, layer) {
-  const clonedLayer = _.cloneDeep(layer);
-  clonedLayer.layerId = prefix + '.' + layer.name;
-  clonedLayer.isEMS = ORIGIN.EMS === prefix ?  true : false;
-  return clonedLayer;
+export interface ExtendedFileLayer extends FileLayer {
+  layerId: string;
+  isEMS: boolean;
 }
+
+export const mapToLayerWithId = (prefix: string, layer: FileLayer): ExtendedFileLayer => ({
+  ...layer,
+  layerId: `${prefix}.${layer.name}`,
+  isEMS: ORIGIN.EMS === prefix,
+});

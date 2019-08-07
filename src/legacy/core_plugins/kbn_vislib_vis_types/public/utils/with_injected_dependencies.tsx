@@ -23,6 +23,7 @@ import { ServiceSettings } from 'ui/vis/map/service_settings';
 
 export interface InjectedDependencies {
   serviceSettings: ServiceSettings;
+  regionmapsConfig: any;
 }
 
 export type ExtendedVisOptionsProps = VisOptionsProps & InjectedDependencies;

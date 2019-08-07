@@ -35,9 +35,7 @@ const mapLayerForOption = ({ id }: TmsLayer) => ({ text: id });
 function WmsOptions({ serviceSettings, stateParams, setValue, vis }: ExtendedVisOptionsProps) {
   const { wms } = stateParams;
   const { tmsLayers } = vis.type.editorConfig.collections;
-  const [tmsLayerOptions, setTmsLayersOptions] = useState(
-    vis.type.editorConfig.collections.tmsLayers.map(mapLayerForOption)
-  );
+  const [tmsLayerOptions, setTmsLayersOptions] = useState(tmsLayers.map(mapLayerForOption));
 
   const setWmsOption: VisOptionsSetValue = (paramName, value) =>
     setValue('wms', {

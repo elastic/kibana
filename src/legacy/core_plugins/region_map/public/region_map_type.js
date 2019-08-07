@@ -22,18 +22,20 @@ import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colorma
 import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
+import { RegionMapOptions } from './components/region_map_options';
+import { withInjectedDependencies } from '../../kbn_vislib_vis_types/public/utils/with_injected_dependencies';
 
 import { visFactory } from '../../visualizations/public';
 
 // TODO: reference to TILE_MAP plugin should be removed
-import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
+import { ORIGIN } from '../../tile_map/common/origin';
 
 export function createRegionMapTypeDefinition(dependencies) {
-  const { uiSettings, regionmapsConfig } = dependencies;
+  const { uiSettings, regionmapsConfig, serviceSettings } = dependencies;
   const RegionMapsVisualization = createRegionMapVisualization(dependencies);
   const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML));
   const selectedLayer = vectorLayers[0];
-  const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
+  const selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
 
   return visFactory.createBaseVisualization({
     name: 'region_map',
@@ -60,7 +62,8 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.DATA, Status.UI_STATE],
     visualization: RegionMapsVisualization,
     editorConfig: {
-      optionsTemplate: '<region_map-vis-params></region_map-vis-params>',
+      optionsTemplate: withInjectedDependencies(RegionMapOptions, { serviceSettings, regionmapsConfig }),
+      // optionsTemplate: '<region_map-vis-params></region_map-vis-params>',
       collections: {
         legendPositions: [{
           value: 'bottomleft',
