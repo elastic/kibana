@@ -55,7 +55,6 @@ export class VisualizeDataLoader {
   private visData: any;
   private previousVisState: any;
   private previousRequestHandlerResponse: any;
-  private abortController?: AbortController;
 
   constructor(private readonly vis: Vis, Private: IPrivate) {
     const { requestHandler, responseHandler } = vis.type;
@@ -66,14 +65,7 @@ export class VisualizeDataLoader {
     this.responseHandler = getHandler(responseHandlers, responseHandler);
   }
 
-  public cancel(): void {
-    if (this.abortController) this.abortController.abort();
-  }
-
   public async fetch(params: RequestHandlerParams): Promise<VisResponseData | void> {
-    this.cancel();
-    this.abortController = new AbortController();
-
     // add necessary params to vis object (dimensions, bucket, metric, etc)
     const visParams = await getVisParams(this.vis, {
       searchSource: params.searchSource,
@@ -93,7 +85,7 @@ export class VisualizeDataLoader {
       ...params,
       query,
       filters: filters.concat(savedFilters).filter(f => !f.meta.disabled),
-      abortSignal: this.abortController.signal,
+      abortSignal: params.abortSignal,
     });
 
     // No need to call the response handler when there have been no data nor has there been changes

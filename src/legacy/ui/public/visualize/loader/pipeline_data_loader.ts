@@ -21,20 +21,12 @@ import { RequestHandlerParams, Vis } from '../../vis';
 import { buildPipeline, runPipeline } from './pipeline_helpers';
 
 export class PipelineDataLoader {
-  private abortController?: AbortController;
-
   constructor(private readonly vis: Vis) {}
 
-  public cancel() {
-    if (this.abortController) this.abortController.abort();
-  }
-
   public async fetch(params: RequestHandlerParams): Promise<any> {
-    this.cancel();
-    this.abortController = new AbortController();
     this.vis.pipelineExpression = await buildPipeline(this.vis, params);
 
-    return await runPipeline(
+    return runPipeline(
       this.vis.pipelineExpression,
       {},
       {
@@ -47,7 +39,7 @@ export class PipelineDataLoader {
             : undefined,
         }),
         inspectorAdapters: params.inspectorAdapters,
-        abortSignal: this.abortController.signal,
+        abortSignal: params.abortSignal,
       }
     );
   }

@@ -104,6 +104,7 @@ export class EmbeddedVisualizeHandler {
   private actions: any = {};
   private events$: Rx.Observable<any>;
   private autoFetch: boolean;
+  private abortController?: AbortController;
 
   constructor(
     private readonly element: HTMLElement,
@@ -437,10 +438,13 @@ export class EmbeddedVisualizeHandler {
   };
 
   private cancel = () => {
-    this.dataLoader.cancel();
+    if (this.abortController) this.abortController.abort();
   };
 
   private fetch = (forceFetch: boolean = false) => {
+    this.cancel();
+    this.abortController = new AbortController();
+    this.dataLoaderParams.abortSignal = this.abortController.signal;
     this.dataLoaderParams.aggs = this.vis.getAggConfig();
     this.dataLoaderParams.forceFetch = forceFetch;
     this.dataLoaderParams.inspectorAdapters = this.inspectorAdapters;
