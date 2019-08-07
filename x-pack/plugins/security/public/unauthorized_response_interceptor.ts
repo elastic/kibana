@@ -11,10 +11,16 @@ import {
   HttpInterceptController,
 } from 'src/core/public';
 
+import { AnonymousPaths } from './anonymous_paths';
+
 export class UnauthorizedResponseInterceptor implements HttpInterceptor {
-  constructor(private basePath: HttpSetup['basePath']) {}
+  constructor(private basePath: HttpSetup['basePath'], private anonymousPaths: AnonymousPaths) {}
 
   responseError(httpErrorResponse: HttpErrorResponse, controller: HttpInterceptController) {
+    if (this.anonymousPaths.isAnonymous(window.location.pathname)) {
+      return;
+    }
+
     // this doesn't work until https://github.com/elastic/kibana/issues/42311 is fixed
     const response = httpErrorResponse.response;
     // if we happen to not have a response, for example if there is no
@@ -26,9 +32,9 @@ export class UnauthorizedResponseInterceptor implements HttpInterceptor {
     // We can't do the following until https://github.com/elastic/kibana/issues/42307 is fixed
     // if the request was omitting credentials it's to an anonymous endpoint
     // (for example to login) and we don't wish to ever redirect
-    // if (httpErrorResponse.request.credentials === 'omit') {
-    //   return;
-    // }
+    if (httpErrorResponse.request.credentials === 'omit') {
+      return;
+    }
 
     if (response.status === 401) {
       this.logout();

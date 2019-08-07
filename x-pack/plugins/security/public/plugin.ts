@@ -5,11 +5,24 @@
  */
 
 import { Plugin, CoreSetup } from 'src/core/public';
+import { AnonymousPaths } from './anonymous_paths';
 import { UnauthorizedResponseInterceptor } from './unauthorized_response_interceptor';
 
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {
   public setup(core: CoreSetup, deps: {}) {
-    core.http.intercept(new UnauthorizedResponseInterceptor(core.http.basePath));
+    const { basePath } = core.http;
+    const anonymousPaths = new AnonymousPaths(basePath, [
+      '/login',
+      '/logout',
+      '/logged_out',
+      '/status',
+      '/app/kibana',
+    ]);
+    core.http.intercept(new UnauthorizedResponseInterceptor(basePath, anonymousPaths));
+
+    return {
+      anonymousPaths,
+    };
   }
 
   public start() {}
