@@ -16,7 +16,7 @@ function generatePngObservableFn(server) {
 
   const urlScreenshotsObservable = (url, conditionalHeaders, layout, browserTimezone) => {
     return Rx.of(url).pipe(
-      mergeMap(url => screenshotsObservable(url, conditionalHeaders, layout, browserTimezone),
+      mergeMap(url => screenshotsObservable({ url, conditionalHeaders, layout, browserTimezone }),
         (outer, inner) => inner,
         captureConcurrency
       )
