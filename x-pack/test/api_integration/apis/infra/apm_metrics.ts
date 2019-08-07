@@ -11,9 +11,9 @@ import {
   InfraApmMetricsRequest,
 } from '../../../../legacy/plugins/infra/common/http_api/apm_metrics_api';
 import { DATES } from './constants';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export const apmMetricsTests: KbnTestProvider = ({ getService }) => {
+export const apmMetricsTests = ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const fetchMetrics = async (
@@ -43,17 +43,22 @@ export const apmMetricsTests: KbnTestProvider = ({ getService }) => {
       expect(metrics).to.have.property('services');
       expect(metrics!.services).to.have.length(1);
       const firstService = first(metrics!.services);
-      expect(firstService).to.have.property('name', 'opbeans-go');
-      expect(firstService).to.have.property('transactionsPerMinute');
-      expect(firstService.transactionsPerMinute).to.have.length(1);
-      const firstTPM = first(firstService.transactionsPerMinute);
-      expect(firstTPM).to.have.property('name', 'HTTP 2xx');
-      expect(firstTPM.data).to.have.length(296);
-      expect(firstService.responseTimes).to.have.length(3);
-      const firstResponseTime = first(firstService.responseTimes);
-      expect(firstResponseTime).to.have.property('name', 'avg');
-      expect(firstResponseTime.data).to.have.length(296);
-      const dataPoint = firstResponseTime.data.find(d => d.timestamp === 1564432831000);
+      expect(firstService).to.have.property('id', 'opbeans-go');
+      expect(firstService).to.have.property('transactionsPerMinute', 5.2862003063285306);
+      expect(firstService).to.have.property('avgResponseTime', 8879.423076923076);
+      expect(firstService).to.have.property('errorsPerMinute', 0);
+      expect(firstService).to.have.property('agentName', 'go');
+      expect(firstService).to.have.property('dataSets');
+      expect(firstService.dataSets).to.have.length(2);
+      const dataSet = firstService.dataSets.find(
+        d => d.id === 'responseTimes' && d.type === 'request'
+      );
+      expect(dataSet).to.be.ok();
+      expect(dataSet!.series).to.have.length(3);
+      const series = dataSet!.series.find(s => s.id === 'avg');
+      expect(series).to.be.ok();
+      expect(series!.data).to.have.length(296);
+      const dataPoint = series!.data.find(d => d.timestamp === 1564432831000);
       expect(dataPoint).to.eql({
         timestamp: 1564432831000,
         value: 10623,

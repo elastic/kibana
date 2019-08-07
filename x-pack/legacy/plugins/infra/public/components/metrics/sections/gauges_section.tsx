@@ -57,7 +57,7 @@ export class GaugesSection extends React.PureComponent<Props> {
   public render() {
     const { metric, section } = this.props;
     if (!isInfraMetricData(metric)) {
-      throw new Error('ChartSection only accepts InfraMetricData');
+      throw new Error('GaugesSection only accepts InfraMetricData');
     }
     return (
       <EuiPageContentBody>
