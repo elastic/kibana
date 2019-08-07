@@ -86,13 +86,13 @@ export const getColumns = (
           onClick={() => toggleDetails(item)}
           aria-label={
             expandedRowItemIds.includes(item.config.id)
-              ? i18n.translate('xpack.ml.dataframe.transformList.rowCollapse', {
-                  defaultMessage: 'Hide details for {transformId}',
-                  values: { transformId: item.config.id },
+              ? i18n.translate('xpack.ml.dataframe.analyticsList.rowCollapse', {
+                  defaultMessage: 'Hide details for {analyticsId}',
+                  values: { analyticsId: item.config.id },
                 })
-              : i18n.translate('xpack.ml.dataframe.transformList.rowExpand', {
-                  defaultMessage: 'Show details for {transformId}',
-                  values: { transformId: item.config.id },
+              : i18n.translate('xpack.ml.dataframe.analyticsList.rowExpand', {
+                  defaultMessage: 'Show details for {analyticsId}',
+                  values: { analyticsId: item.config.id },
                 })
           }
           iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowUp' : 'arrowDown'}
@@ -107,26 +107,30 @@ export const getColumns = (
     },
     {
       field: DataFrameAnalyticsListColumn.description,
-      name: i18n.translate('xpack.ml.dataframe.description', { defaultMessage: 'Description' }),
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.description', {
+        defaultMessage: 'Description',
+      }),
       sortable: true,
       truncateText: true,
     },
     {
       field: DataFrameAnalyticsListColumn.configSourceIndex,
-      name: i18n.translate('xpack.ml.dataframe.sourceIndex', { defaultMessage: 'Source index' }),
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.sourceIndex', {
+        defaultMessage: 'Source index',
+      }),
       sortable: true,
       truncateText: true,
     },
     {
       field: DataFrameAnalyticsListColumn.configDestIndex,
-      name: i18n.translate('xpack.ml.dataframe.destinationIndex', {
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.destinationIndex', {
         defaultMessage: 'Destination index',
       }),
       sortable: true,
       truncateText: true,
     },
     {
-      name: i18n.translate('xpack.ml.dataframe.status', { defaultMessage: 'Status' }),
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.status', { defaultMessage: 'Status' }),
       sortable: (item: DataFrameAnalyticsListRow) => item.stats.state,
       truncateText: true,
       render(item: DataFrameAnalyticsListRow) {
@@ -149,7 +153,9 @@ export const getColumns = (
     },
     */
     {
-      name: i18n.translate('xpack.ml.dataframe.progress', { defaultMessage: 'Progress' }),
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.progress', {
+        defaultMessage: 'Progress',
+      }),
       sortable: (item: DataFrameAnalyticsListRow) => idx(item, _ => _.stats.progress_percent) || 0,
       truncateText: true,
       render(item: DataFrameAnalyticsListRow) {
@@ -197,7 +203,9 @@ export const getColumns = (
       width: '100px',
     },
     {
-      name: i18n.translate('xpack.ml.dataframe.tableActionLabel', { defaultMessage: 'Actions' }),
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.tableActionLabel', {
+        defaultMessage: 'Actions',
+      }),
       actions,
       width: '200px',
     },
