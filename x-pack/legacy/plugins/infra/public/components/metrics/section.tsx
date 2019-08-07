@@ -14,6 +14,7 @@ import { SourceConfiguration } from '../../utils/source_configuration';
 interface Props {
   section: InfraMetricLayoutSection;
   metrics: InfraMetricCombinedData[];
+  onChangeRangeTime?: (time: InfraTimerangeInput) => void;
   isLiveStreaming?: boolean;
   stopLiveStreaming?: () => void;
   nodeId: string;
