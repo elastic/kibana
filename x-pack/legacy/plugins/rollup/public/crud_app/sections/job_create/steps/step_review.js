@@ -22,6 +22,15 @@ import {
   tabToHumanizedMap,
 } from '../../components';
 
+
+const JOB_DETAILS_TABS = [
+  JOB_DETAILS_TAB_SUMMARY,
+  JOB_DETAILS_TAB_TERMS,
+  JOB_DETAILS_TAB_HISTOGRAM,
+  JOB_DETAILS_TAB_METRICS,
+  JOB_DETAILS_TAB_REQUEST,
+];
+
 export class StepReviewUi extends Component {
   static propTypes = {
     job: PropTypes.object.isRequired,
@@ -30,16 +39,8 @@ export class StepReviewUi extends Component {
   constructor(props) {
     super(props);
 
-    this.JOB_DETAILS_TABS = [
-      JOB_DETAILS_TAB_SUMMARY,
-      JOB_DETAILS_TAB_TERMS,
-      JOB_DETAILS_TAB_HISTOGRAM,
-      JOB_DETAILS_TAB_METRICS,
-      JOB_DETAILS_TAB_REQUEST,
-    ];
-
     this.state = {
-      selectedTab: this.JOB_DETAILS_TABS[0],
+      selectedTab: JOB_DETAILS_TABS[0],
     };
   }
 
@@ -55,7 +56,7 @@ export class StepReviewUi extends Component {
 
     const renderedTabs = [];
 
-    this.JOB_DETAILS_TABS.forEach((tab, index) => {
+    JOB_DETAILS_TABS.forEach((tab, index) => {
       if (tab === JOB_DETAILS_TAB_TERMS && !job.terms.length) {
         return;
       }
