@@ -56,7 +56,7 @@ export const LogColumnsConfigurationPanel: React.FunctionComponent<
             <h3>
               <FormattedMessage
                 id="xpack.infra.sourceConfiguration.logColumnsSectionTitle"
-                defaultMessage="Columns"
+                defaultMessage="Log Columns"
               />
             </h3>
           </EuiTitle>
@@ -245,6 +245,7 @@ const RemoveLogColumnButton: React.FunctionComponent<{
       iconType="trash"
       onClick={onClick}
       title={removeColumnLabel}
+      aria-label={removeColumnLabel}
     />
   );
 };

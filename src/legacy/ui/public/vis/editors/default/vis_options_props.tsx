@@ -20,6 +20,7 @@
 import { Vis, VisParams } from 'ui/vis';
 
 export type VisOptionsSetValue = (paramName: string, value: unknown) => void;
+
 export interface VisOptionsProps {
   stateParams: VisParams;
   vis: Vis;
