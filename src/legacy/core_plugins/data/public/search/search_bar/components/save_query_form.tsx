@@ -138,7 +138,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
 
   return (
     <EuiOverlayMask>
-      <EuiModal onClose={onClose} initialFocus="[name=popswitch]">
+      <EuiModal onClose={onClose} initialFocus="[name=title]">
         <EuiModalHeader>
           <EuiModalHeaderTitle>Save query</EuiModalHeaderTitle>
         </EuiModalHeader>

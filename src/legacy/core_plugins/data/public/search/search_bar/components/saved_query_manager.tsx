@@ -26,6 +26,8 @@ import {
   EuiFlexItem,
   EuiPagination,
   EuiText,
+  EuiConfirmModal,
+  EuiOverlayMask,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -58,8 +60,8 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
-
   const [activePage, setActivePage] = useState(0);
+  const [confirmDeletionModal, setConfirmDeletionModal] = useState(null as React.ReactNode);
 
   useEffect(() => {
     const fetchQueries = async () => {
@@ -131,7 +133,42 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
           {savedQuery.attributes.title}
         </EuiButtonEmpty>
         <EuiButtonEmpty
-          onClick={() => onDeleteSavedQuery(savedQuery)}
+          onClick={() => {
+            setConfirmDeletionModal(
+              <EuiOverlayMask>
+                <EuiConfirmModal
+                  title={i18n.translate(
+                    'data.search.searchBar.savedQueryPopoverConfirmDeletionTitle',
+                    {
+                      defaultMessage: 'Delete {savedQueryName}?',
+                      values: {
+                        savedQueryName: savedQuery.attributes.title,
+                      },
+                    }
+                  )}
+                  confirmButtonText={i18n.translate(
+                    'data.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
+                    {
+                      defaultMessage: 'Delete',
+                    }
+                  )}
+                  cancelButtonText={i18n.translate(
+                    'data.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText',
+                    {
+                      defaultMessage: 'Cancel',
+                    }
+                  )}
+                  onConfirm={() => {
+                    onDeleteSavedQuery(savedQuery);
+                    setConfirmDeletionModal(null);
+                  }}
+                  onCancel={() => {
+                    setConfirmDeletionModal(null);
+                  }}
+                ></EuiConfirmModal>
+              </EuiOverlayMask>
+            );
+          }}
           iconType="trash"
           color="danger"
         />
@@ -140,92 +177,99 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
   };
 
   return (
-    <EuiPopover
-      id="savedQueryPopover"
-      button={filterTriggerButton}
-      isOpen={isOpen}
-      closePopover={() => {
-        setIsOpen(false);
-      }}
-      anchorPosition="downLeft"
-    >
-      <div className="saved-query-manager-popover">
-        <EuiPopoverTitle>{savedQueryPopoverTitleText}</EuiPopoverTitle>
-        {savedQueries.length > 0 ? (
-          <Fragment>
-            <EuiFlexGroup wrap>
-              <EuiFlexItem>
-                <EuiText>{savedQueryDescriptionText}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiFlexGroup>
-              <EuiFlexItem className="saved-query-list-wrapper">
-                <ul className="saved-query-list">{savedQueryRows()}</ul>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiFlexGroup justifyContent="spaceAround">
-              <EuiFlexItem grow={false}>
-                <EuiPagination
-                  pageCount={Math.ceil(savedQueries.length / pageCount)}
-                  activePage={activePage}
-                  onPageClick={goToPage}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </Fragment>
-        ) : (
-          <EuiText grow={false}>
-            <p>
-              There are no saved queries. You can save search snippets and filters for later use.{' '}
-              this, enter a query and click 'Save query for reuse'.
-            </p>
-          </EuiText>
-        )}
-        <EuiFlexGroup direction="rowReverse" alignItems="center" justifyContent="flexEnd">
-          {showSaveQuery && loadedSavedQuery && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiButton onClick={() => onSaveAsNew()}>
-                    {i18n.translate('data.search.searchBar.savedQueryPopoverSaveAsNewButtonText', {
-                      defaultMessage: 'Save As New',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-
+    <Fragment>
+      <EuiPopover
+        id="savedQueryPopover"
+        button={filterTriggerButton}
+        isOpen={isOpen}
+        closePopover={() => {
+          setIsOpen(false);
+        }}
+        anchorPosition="downLeft"
+        ownFocus
+      >
+        <div className="saved-query-manager-popover">
+          <EuiPopoverTitle>{savedQueryPopoverTitleText}</EuiPopoverTitle>
+          {savedQueries.length > 0 ? (
+            <Fragment>
+              <EuiFlexGroup wrap>
                 <EuiFlexItem>
-                  <EuiButton fill onClick={() => onSave()}>
-                    {i18n.translate(
-                      'data.search.searchBar.savedQueryPopoverSaveChangesButtonText',
-                      {
-                        defaultMessage: 'Save changes',
-                      }
-                    )}
-                  </EuiButton>
+                  <EuiText>{savedQueryDescriptionText}</EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiFlexItem>
+              <EuiFlexGroup>
+                <EuiFlexItem className="saved-query-list-wrapper">
+                  <ul className="saved-query-list">{savedQueryRows()}</ul>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup justifyContent="spaceAround">
+                <EuiFlexItem grow={false}>
+                  <EuiPagination
+                    pageCount={Math.ceil(savedQueries.length / pageCount)}
+                    activePage={activePage}
+                    onPageClick={goToPage}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </Fragment>
+          ) : (
+            <EuiText grow={false}>
+              <p>
+                There are no saved queries. You can save search snippets and filters for later use.{' '}
+                this, enter a query and click 'Save query for reuse'.
+              </p>
+            </EuiText>
           )}
-          {showSaveQuery && !loadedSavedQuery && (
+          <EuiFlexGroup direction="rowReverse" alignItems="center" justifyContent="flexEnd">
+            {showSaveQuery && loadedSavedQuery && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton onClick={() => onSaveAsNew()}>
+                      {i18n.translate(
+                        'data.search.searchBar.savedQueryPopoverSaveAsNewButtonText',
+                        {
+                          defaultMessage: 'Save As New',
+                        }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem>
+                    <EuiButton fill onClick={() => onSave()}>
+                      {i18n.translate(
+                        'data.search.searchBar.savedQueryPopoverSaveChangesButtonText',
+                        {
+                          defaultMessage: 'Save changes',
+                        }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+            {showSaveQuery && !loadedSavedQuery && (
+              <EuiFlexItem grow={false}>
+                <EuiButton fill onClick={() => onSave()}>
+                  {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
+                    defaultMessage: 'Save',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem />
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={() => onSave()}>
-                {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
-                  defaultMessage: 'Save',
-                })}
-              </EuiButton>
+              <EuiButtonEmpty onClick={() => onClearSavedQuery()}>
+                {loadedSavedQuery &&
+                  i18n.translate('data.search.searchBar.savedQueryPopoverClearButtonText', {
+                    defaultMessage: 'Clear',
+                  })}
+              </EuiButtonEmpty>
             </EuiFlexItem>
-          )}
-          <EuiFlexItem />
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => onClearSavedQuery()}>
-              {loadedSavedQuery &&
-                i18n.translate('data.search.searchBar.savedQueryPopoverClearButtonText', {
-                  defaultMessage: 'Clear',
-                })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-    </EuiPopover>
+          </EuiFlexGroup>
+        </div>
+      </EuiPopover>
+      {confirmDeletionModal}
+    </Fragment>
   );
 };
