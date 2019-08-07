@@ -110,7 +110,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
     deleteSavedQuery(savedQuery.id);
   };
 
-  const filterTriggerButton = (
+  const savedQueryPopoverButton = (
     <EuiButtonEmpty
       className="euiFormControlLayout__prepend"
       iconType="arrowDown"
@@ -118,6 +118,9 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
       onClick={() => {
         setIsOpen(!isOpen);
       }}
+      aria-label={i18n.translate('data.search.searchBar.savedQueryPopoverButtonText', {
+        defaultMessage: 'See saved queries',
+      })}
     >
       #
     </EuiButtonEmpty>
@@ -187,7 +190,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
     <Fragment>
       <EuiPopover
         id="savedQueryPopover"
-        button={filterTriggerButton}
+        button={savedQueryPopoverButton}
         isOpen={isOpen}
         closePopover={() => {
           setIsOpen(false);
@@ -196,7 +199,9 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
         ownFocus
       >
         <div className="saved-query-manager-popover">
-          <EuiPopoverTitle>{savedQueryPopoverTitleText}</EuiPopoverTitle>
+          <EuiPopoverTitle id={'savedQueryManagerPopoverTitle'}>
+            {savedQueryPopoverTitleText}
+          </EuiPopoverTitle>
           {savedQueries.length > 0 ? (
             <Fragment>
               <EuiFlexGroup wrap>
@@ -206,7 +211,12 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
               </EuiFlexGroup>
               <EuiFlexGroup>
                 <EuiFlexItem className="saved-query-list-wrapper">
-                  <ul className="saved-query-list">{savedQueryRows()}</ul>
+                  <ul
+                    className="saved-query-list"
+                    aria-labelledby={'savedQueryManagerPopoverTitle'}
+                  >
+                    {savedQueryRows()}
+                  </ul>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiFlexGroup justifyContent="spaceAround">
