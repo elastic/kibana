@@ -29,7 +29,7 @@ export const HighlightedInterval: React.SFC<HighlightedIntervalProps> = ({
   return (
     <HighlightPolygon
       className={className}
-      points={`0,${yStart} ${width},${yStart} ${width},${yEnd} 0,${yEnd}`}
+      points={` ${width / 3},${yStart} ${width},${yStart} ${width},${yEnd}  ${width / 3},${yEnd}`}
     />
   );
 };

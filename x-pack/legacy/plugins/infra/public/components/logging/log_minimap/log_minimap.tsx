@@ -176,7 +176,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
       overscanHeight,
       intervalSize * (overscanHeight / height)
     ).domain();
-    const tickCount = height ? Math.round((overscanHeight / height) * 12) : 12;
+    const tickCount = height ? Math.round((overscanHeight / height) * 144) : 12;
     const overscanTranslate = height ? -(overscanHeight - height) / 2 : 0;
     const dragTransform = !drag || !drag.currentY ? 0 : drag.currentY - drag.startY;
     return (
@@ -199,7 +199,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
             height={overscanHeight}
           />
 
-          <MinimapBorder x1={width / 2} y1={0} x2={width / 2} y2={overscanHeight} />
+          <MinimapBorder x1={width / 3} y1={0} x2={width / 3} y2={overscanHeight} />
           <TimeRuler
             start={minTime}
             end={maxTime}
@@ -216,7 +216,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
             width={width}
           />
         ) : null}
-        <TimeCursor x1={0} x2={width} y1={timeCursorY} y2={timeCursorY} />
+        <TimeCursor x1={width / 3} x2={width} y1={timeCursorY} y2={timeCursorY} />
         {/* <g transform={`translate(${width * 0.5}, 0)`}>
           <SearchMarkers
             buckets={searchSummaryBuckets || []}
@@ -245,8 +245,7 @@ const TimeCursor = euiStyled.line`
       : props.theme.eui.euiColorDarkShade};
 `;
 
-const MinimapWrapper = euiStyled.svg<React.SVGAttributes<SVGElement>>`
-  cursor: move;
+const MinimapWrapper = euiStyled.svg<{ showOverscanBoundaries: boolean }>`
   background: ${props =>
     props.showOverscanBoundaries
       ? `repeating-linear-gradient(
