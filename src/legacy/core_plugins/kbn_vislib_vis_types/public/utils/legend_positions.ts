@@ -17,18 +17,33 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import vislibGridTemplate from './grid.html';
-const module = uiModules.get('kibana');
+import { i18n } from '@kbn/i18n';
 
-module.directive('vislibGrid', function () {
-  return {
-    restrict: 'E',
-    template: vislibGridTemplate,
-    replace: true,
-    link: function ($scope) {
+const legendPositions = [
+  {
+    text: i18n.translate('kbnVislibVisTypes.legendPositions.topText', {
+      defaultMessage: 'Top',
+    }),
+    value: 'top',
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.legendPositions.leftText', {
+      defaultMessage: 'Left',
+    }),
+    value: 'left',
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.legendPositions.rightText', {
+      defaultMessage: 'Right',
+    }),
+    value: 'right',
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.legendPositions.bottomText', {
+      defaultMessage: 'Bottom',
+    }),
+    value: 'bottom',
+  },
+];
 
-      $scope.isGridOpen = true;
-    }
-  };
-});
+export { legendPositions };
