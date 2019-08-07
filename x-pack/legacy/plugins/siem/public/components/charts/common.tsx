@@ -17,14 +17,18 @@ import {
   ScaleType,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { TickFormatter } from '@elastic/charts/dist/lib/series/specs';
+import { TickFormatter, Rotation, Rendering } from '@elastic/charts/dist/lib/series/specs';
 import chrome from 'ui/chrome';
 import moment from 'moment-timezone';
+import { SettingSpecProps } from '@elastic/charts/dist/specs/settings';
 
 const chartHeight = 74;
+const chartDefaultRotation: Rotation = 0;
+const chartDefaultRendering: Rendering = 'canvas';
 const FlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
+export type UpdateDateRange = (min: number, max: number) => void;
 
 export const ChartHolder = () => (
   <FlexGroup justifyContent="center" alignItems="center">
@@ -37,6 +41,15 @@ export const ChartHolder = () => (
     </EuiFlexItem>
   </FlexGroup>
 );
+
+export const chartDefaultSettings = {
+  rotation: chartDefaultRotation,
+  rendering: chartDefaultRendering,
+  animatedData: false,
+  showLegend: false,
+  showLegendDisplayValue: false,
+  debug: false,
+};
 
 export interface ChartData {
   x: number | string | null;
@@ -54,6 +67,7 @@ export interface ChartSeriesConfigs {
     xTickFormatter?: TickFormatter | undefined;
     yTickFormatter?: TickFormatter | undefined;
   };
+  settings?: Partial<SettingSpecProps>;
 }
 
 export interface ChartConfigsData {
