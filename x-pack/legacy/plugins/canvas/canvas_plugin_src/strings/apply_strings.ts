@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElementFactory } from '../elements/types';
+import { ElementFactory } from '../../types';
 import { getElementStrings } from './index';
 
 /**

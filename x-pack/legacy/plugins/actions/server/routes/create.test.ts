@@ -19,73 +19,39 @@ it('creates an action with proper parameters', async () => {
     method: 'POST',
     url: '/api/action',
     payload: {
-      attributes: {
-        description: 'My description',
-        actionTypeId: 'abc',
-        actionTypeConfig: { foo: true },
-      },
-      migrationVersion: {
-        abc: '1.2.3',
-      },
-      references: [
-        {
-          name: 'ref_0',
-          type: 'bcd',
-          id: '234',
-        },
-      ],
-    },
-  };
-  const expectedResult = {
-    id: '1',
-    type: 'action',
-    attributes: {
       description: 'My description',
       actionTypeId: 'abc',
-      actionTypeConfig: { foo: true },
-      actionTypeConfigSecrets: {},
+      config: { foo: true },
+      secrets: {},
     },
-    migrationVersion: {
-      abc: '1.2.3',
-    },
-    references: [
-      {
-        name: 'ref_0',
-        type: 'bcd',
-        id: '234',
-      },
-    ],
+  };
+  const createResult = {
+    id: '1',
+    type: 'action',
+    description: 'My description',
+    actionTypeId: 'abc',
+    config: { foo: true },
+    secrets: {},
   };
 
-  actionsClient.create.mockResolvedValueOnce(expectedResult);
+  actionsClient.create.mockResolvedValueOnce(createResult);
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
-  expect(response).toEqual(expectedResult);
+  expect(response).toEqual({ id: '1' });
   expect(actionsClient.create).toHaveBeenCalledTimes(1);
   expect(actionsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "attributes": Object {
-      "actionTypeConfig": Object {
-        "foo": true,
-      },
-      "actionTypeId": "abc",
-      "description": "My description",
-    },
-    "options": Object {
-      "migrationVersion": Object {
-        "abc": "1.2.3",
-      },
-      "references": Array [
-        Object {
-          "id": "234",
-          "name": "ref_0",
-          "type": "bcd",
+    Array [
+      Object {
+        "action": Object {
+          "actionTypeId": "abc",
+          "config": Object {
+            "foo": true,
+          },
+          "description": "My description",
+          "secrets": Object {},
         },
-      ],
-    },
-  },
-]
-`);
+      },
+    ]
+  `);
 });

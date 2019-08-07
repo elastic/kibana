@@ -9,7 +9,6 @@
       "payloads": "__flag__",
       "preference": "random",
       "routing": "",
-      "parent": "",
       "realtime": "__flag__",
       "version": "",
       "version_type": [
@@ -24,8 +23,8 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/{type}/_termvectors",
-      "{indices}/{type}/{id}/_termvectors"
+      "{indices}/_termvectors/{id}",
+      "{indices}/_termvectors"
     ],
     "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-termvectors.html"
   }

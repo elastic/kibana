@@ -19,18 +19,22 @@ function getPointByX(serie, x) {
 
 class InteractivePlot extends PureComponent {
   getMarkPoints = hoverX => {
-    return this.props.series
-      .filter(serie =>
-        serie.data.some(point => point.x === hoverX && point.y != null)
-      )
-      .map(serie => {
-        const { x, y } = getPointByX(serie, hoverX) || {};
-        return {
-          x,
-          y,
-          color: serie.color
-        };
-      });
+    return (
+      this.props.series
+        .filter(serie =>
+          serie.data.some(point => point.x === hoverX && point.y != null)
+        )
+        .map(serie => {
+          const { x, y } = getPointByX(serie, hoverX) || {};
+          return {
+            x,
+            y,
+            color: serie.color
+          };
+        })
+        // needs to be reversed, as StaticPlot.js does the same
+        .reverse()
+    );
   };
 
   getTooltipPoints = hoverX => {

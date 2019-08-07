@@ -21,7 +21,6 @@ import sinon from 'sinon';
 import { IndexPattern } from 'ui/index_patterns/_index_pattern';
 import { getRoutes } from 'ui/index_patterns/get_routes';
 import { formatHitProvider } from 'ui/index_patterns/_format_hit';
-import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
 import { fieldFormats } from 'ui/registry/field_formats';
 import { flattenHitWrapper } from 'ui/index_patterns/_flatten_hit';
 import { FieldList } from 'ui/index_patterns/_field_list';
@@ -36,12 +35,13 @@ export default function () {
     this.isTimeBased = () => Boolean(this.timeFieldName);
     this.getNonScriptedFields = sinon.spy(IndexPattern.prototype.getNonScriptedFields);
     this.getScriptedFields = sinon.spy(IndexPattern.prototype.getScriptedFields);
+    this.getFieldByName = sinon.spy(IndexPattern.prototype.getFieldByName);
     this.getSourceFiltering = sinon.stub();
     this.metaFields = ['_id', '_type', '_source'];
     this.fieldFormatMap = {};
     this.routes = getRoutes();
 
-    this.getComputedFields = getComputedFields.bind(this);
+    this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
     this.flattenHit = flattenHitWrapper(this, this.metaFields);
     this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
     this.fieldsFetcher = { apiClient: { baseUrl: '' } };

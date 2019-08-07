@@ -7,46 +7,64 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { Direction, HostsFields } from '../../graphql/types';
-import { DEFAULT_TABLE_LIMIT } from '../constants';
+import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 
 import {
   applyHostsFilterQuery,
   setHostsFilterQueryDraft,
-  updateAuthenticationsLimit,
-  updateEventsLimit,
-  updateHostsLimit,
   updateHostsSort,
-  updateUncommonProcessesLimit,
+  updateTableActivePage,
+  updateTableLimit,
 } from './actions';
-import { HostsModel } from './model';
+import { HostsModel, HostsTableType } from './model';
 
 export type HostsState = HostsModel;
 
 export const initialHostsState: HostsState = {
   page: {
     queries: {
-      authentications: { limit: DEFAULT_TABLE_LIMIT },
-      hosts: {
+      [HostsTableType.authentications]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
+      },
+      [HostsTableType.hosts]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         direction: Direction.desc,
+        limit: DEFAULT_TABLE_LIMIT,
         sortField: HostsFields.lastSeen,
       },
-      events: { limit: DEFAULT_TABLE_LIMIT },
-      uncommonProcesses: { limit: DEFAULT_TABLE_LIMIT },
+      [HostsTableType.events]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
+      [HostsTableType.uncommonProcesses]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
     filterQuery: null,
     filterQueryDraft: null,
   },
   details: {
     queries: {
-      authentications: { limit: DEFAULT_TABLE_LIMIT },
-      hosts: {
+      [HostsTableType.authentications]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
+      },
+      [HostsTableType.hosts]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         direction: Direction.desc,
+        limit: DEFAULT_TABLE_LIMIT,
         sortField: HostsFields.lastSeen,
       },
-      events: { limit: DEFAULT_TABLE_LIMIT },
-      uncommonProcesses: { limit: DEFAULT_TABLE_LIMIT },
+      [HostsTableType.events]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
+      [HostsTableType.uncommonProcesses]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
     filterQuery: null,
     filterQueryDraft: null,
@@ -54,26 +72,27 @@ export const initialHostsState: HostsState = {
 };
 
 export const hostsReducer = reducerWithInitialState(initialHostsState)
-  .case(updateAuthenticationsLimit, (state, { limit, hostsType }) => ({
+  .case(updateTableActivePage, (state, { activePage, hostsType, tableType }) => ({
     ...state,
     [hostsType]: {
       ...state[hostsType],
       queries: {
         ...state[hostsType].queries,
-        authentications: {
-          limit,
+        [tableType]: {
+          ...state[hostsType].queries[tableType],
+          activePage,
         },
       },
     },
   }))
-  .case(updateHostsLimit, (state, { limit, hostsType }) => ({
+  .case(updateTableLimit, (state, { limit, hostsType, tableType }) => ({
     ...state,
     [hostsType]: {
       ...state[hostsType],
       queries: {
         ...state[hostsType].queries,
-        hosts: {
-          ...state[hostsType].queries.hosts,
+        [tableType]: {
+          ...state[hostsType].queries[tableType],
           limit,
         },
       },
@@ -89,30 +108,6 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
           ...state[hostsType].queries.hosts,
           direction: sort.direction,
           sortField: sort.field,
-        },
-      },
-    },
-  }))
-  .case(updateEventsLimit, (state, { limit, hostsType }) => ({
-    ...state,
-    [hostsType]: {
-      ...state[hostsType],
-      queries: {
-        ...state[hostsType].queries,
-        events: {
-          limit,
-        },
-      },
-    },
-  }))
-  .case(updateUncommonProcessesLimit, (state, { limit, hostsType }) => ({
-    ...state,
-    [hostsType]: {
-      ...state[hostsType],
-      queries: {
-        ...state[hostsType].queries,
-        uncommonProcesses: {
-          limit,
         },
       },
     },

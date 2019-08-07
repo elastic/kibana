@@ -56,7 +56,9 @@ export function initEditorConfig() {
 
     // Set date histogram time zone based on rollup capabilities
     if (aggTypeName === 'date_histogram') {
-      const interval = fieldAgg.interval;
+      // Interval is deprecated on date_histogram rollups, but may still be present
+      // See https://github.com/elastic/kibana/pull/36310
+      const interval = fieldAgg.calendar_interval || fieldAgg.fixed_interval || fieldAgg.interval;
       return {
         useNormalizedEsInterval: {
           fixedValue: false,

@@ -15,6 +15,8 @@ import 'ui/persisted_log';
 import 'ui/autoload/all';
 import 'ui/kbn_top_nav';
 
+import 'plugins/ml/components/transition/transition';
+import 'plugins/ml/components/modal/modal';
 import 'plugins/ml/access_denied';
 import 'plugins/ml/jobs';
 import 'plugins/ml/services/calendar_service';
@@ -27,7 +29,7 @@ import 'plugins/ml/components/form_label';
 import 'plugins/ml/components/json_tooltip';
 import 'plugins/ml/components/tooltip';
 import 'plugins/ml/components/confirm_modal';
-import 'plugins/ml/components/nav_menu';
+import 'plugins/ml/components/navigation_menu';
 import 'plugins/ml/components/loading_indicator';
 import 'plugins/ml/settings';
 import 'plugins/ml/file_datavisualizer';

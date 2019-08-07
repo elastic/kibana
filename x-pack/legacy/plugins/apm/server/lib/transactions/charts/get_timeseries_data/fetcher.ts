@@ -26,8 +26,8 @@ export function timeseriesFetcher({
   setup
 }: {
   serviceName: string;
-  transactionType?: string;
-  transactionName?: string;
+  transactionType: string | undefined;
+  transactionName: string | undefined;
   setup: Setup;
 }) {
   const { start, end, uiFiltersES, client, config } = setup;
@@ -58,7 +58,7 @@ export function timeseriesFetcher({
         response_times: {
           date_histogram: {
             field: '@timestamp',
-            interval: intervalString,
+            fixed_interval: intervalString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end }
           },
@@ -76,7 +76,7 @@ export function timeseriesFetcher({
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
-                interval: intervalString,
+                fixed_interval: intervalString,
                 min_doc_count: 0,
                 extended_bounds: { min: start, max: end }
               }

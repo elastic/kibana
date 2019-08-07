@@ -17,15 +17,12 @@
  * under the License.
  */
 
-jest.mock('process', () => ({
-  cwd() {
-    return '/test/cwd';
-  },
-}));
-
 jest.mock('path', () => ({
   resolve(...pathSegments: string[]) {
     return pathSegments.join('/');
+  },
+  dirname(filePath: string) {
+    return '/test/kibanaRoot';
   },
 }));
 

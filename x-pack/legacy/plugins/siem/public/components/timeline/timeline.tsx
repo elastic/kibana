@@ -71,6 +71,7 @@ interface Props {
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
   show: boolean;
+  showCallOutUnauthorizedMsg: boolean;
   start: number;
   sort: Sort;
 }
@@ -99,6 +100,7 @@ export const Timeline = pure<Props>(
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
     show,
+    showCallOutUnauthorizedMsg,
     start,
     sort,
   }) => {
@@ -134,12 +136,14 @@ export const Timeline = pure<Props>(
                 onToggleDataProviderEnabled={onToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={onToggleDataProviderExcluded}
                 show={show}
+                showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
                 sort={sort}
               />
             </WrappedByAutoSizer>
 
             {combinedQueries != null ? (
               <TimelineQuery
+                id={id}
                 fields={columnsHeader.map(c => c.id)}
                 sourceId="default"
                 limit={itemsPerPage}
@@ -149,8 +153,17 @@ export const Timeline = pure<Props>(
                   direction: sort.sortDirection as Direction,
                 }}
               >
-                {({ events, loading, totalCount, pageInfo, loadMore, getUpdatedAt, refetch }) => (
-                  <TimelineRefetch loading={loading} id={id} refetch={refetch}>
+                {({
+                  events,
+                  inspect,
+                  loading,
+                  totalCount,
+                  pageInfo,
+                  loadMore,
+                  getUpdatedAt,
+                  refetch,
+                }) => (
+                  <TimelineRefetch loading={loading} id={id} inspect={inspect} refetch={refetch}>
                     <TimelineContext.Provider value={{ isLoading: loading }} />
                     <StatefulBody
                       browserFields={browserFields}

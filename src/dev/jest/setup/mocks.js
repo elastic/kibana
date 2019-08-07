@@ -35,6 +35,7 @@
  */
 
 jest.mock('ui/metadata');
+jest.mock('ui/documentation_links/documentation_links');
 jest.mock('ui/chrome');
 
 jest.mock('moment-timezone', () => {

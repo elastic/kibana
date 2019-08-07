@@ -10,13 +10,17 @@ import { pure, compose, withState, withProps, getContext, withHandlers } from 'r
 import { transitionsRegistry } from '../../lib/transitions_registry';
 import { undoHistory, redoHistory } from '../../state/actions/history';
 import { fetchAllRenderables } from '../../state/actions/elements';
-import { getFullscreen } from '../../state/selectors/app';
+import { setZoomScale, setFullscreen } from '../../state/actions/transient';
+import { getFullscreen, getZoomScale } from '../../state/selectors/app';
 import {
   getSelectedPageIndex,
   getAllElements,
   getWorkpad,
   getPages,
 } from '../../state/selectors/workpad';
+import { zoomHandlerCreators } from '../../lib/app_handler_creators';
+import { trackCanvasUiMetric } from '../../lib/ui_metric';
+import { LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY } from '../../../common/lib/constants';
 import { Workpad as Component } from './workpad';
 
 const mapStateToProps = state => {
@@ -30,6 +34,7 @@ const mapStateToProps = state => {
     workpadCss,
     workpadId,
     isFullscreen: getFullscreen(state),
+    zoomScale: getZoomScale(state),
   };
 };
 
@@ -37,6 +42,27 @@ const mapDispatchToProps = {
   undoHistory,
   redoHistory,
   fetchAllRenderables,
+  setZoomScale,
+  setFullscreen,
+};
+
+const mergeProps = (stateProps, dispatchProps, ownProps) => {
+  return {
+    ...ownProps,
+    ...stateProps,
+    ...dispatchProps,
+    setFullscreen: value => {
+      dispatchProps.setFullscreen(value);
+
+      if (value === true) {
+        trackCanvasUiMetric(
+          stateProps.autoplayEnabled
+            ? [LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY]
+            : LAUNCHED_FULLSCREEN
+        );
+      }
+    },
+  };
 };
 
 export const Workpad = compose(
@@ -47,7 +73,8 @@ export const Workpad = compose(
   withState('grid', 'setGrid', false),
   connect(
     mapStateToProps,
-    mapDispatchToProps
+    mapDispatchToProps,
+    mergeProps
   ),
   withState('transition', 'setTransition', null),
   withState('prevSelectedPageNumber', 'setPrevSelectedPageNumber', 0),
@@ -92,5 +119,6 @@ export const Workpad = compose(
       const pageNumber = Math.max(1, props.selectedPageNumber - 1);
       props.onPageChange(pageNumber);
     },
-  })
+  }),
+  withHandlers(zoomHandlerCreators)
 )(Component);

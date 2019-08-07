@@ -160,5 +160,6 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
 
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
-  return getClustersSummary(clusters, kibanaUuid, isCcrEnabled);
+
+  return getClustersSummary(req.server, clusters, kibanaUuid, isCcrEnabled);
 }

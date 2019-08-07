@@ -23,6 +23,7 @@ import { InstallManager } from './install_manager';
 import { ILanguageServerLauncher } from './language_server_launcher';
 import { enabledLanguageServers, LanguageServerDefinition } from './language_servers';
 import { ILanguageServerHandler } from './proxy';
+import { WorkspaceStatus } from './request_expander';
 
 export interface LanguageServerHandlerMap {
   [workspaceUri: string]: Promise<ILanguageServerHandler>;
@@ -45,7 +46,7 @@ export class LanguageServerController implements ILanguageServerHandler {
   // a list of support language servers
   private readonly languageServers: LanguageServerData[];
   // a { lang -> server } map from above list
-  private readonly languageServerMap: { [lang: string]: LanguageServerData };
+  private readonly languageServerMap: { [lang: string]: LanguageServerData[] };
   private log: Logger;
 
   constructor(
@@ -63,13 +64,22 @@ export class LanguageServerController implements ILanguageServerHandler {
       maxWorkspace: options.maxWorkspace,
       launcher: new def.launcher(this.targetHost, options, loggerFactory),
     }));
+    const add2map = (
+      map: { [lang: string]: LanguageServerData[] },
+      lang: string,
+      ls: LanguageServerData
+    ) => {
+      const arr = map[lang] || [];
+      arr.push(ls);
+      map[lang] = arr.sort((a, b) => b.definition.priority - a.definition.priority);
+    };
     this.languageServerMap = this.languageServers.reduce(
       (map, ls) => {
-        ls.languages.forEach(lang => (map[lang] = ls));
-        map[ls.definition.name] = ls;
+        ls.languages.forEach(lang => add2map(map, lang, ls));
+        map[ls.definition.name] = [ls];
         return map;
       },
-      {} as { [lang: string]: LanguageServerData }
+      {} as { [lang: string]: LanguageServerData[] }
     );
   }
 
@@ -121,8 +131,12 @@ export class LanguageServerController implements ILanguageServerHandler {
       if (ls.languageServerHandlers) {
         if (ls.builtinWorkspaceFolders) {
           if (ls.languageServerHandlers) {
-            const h = await (ls.languageServerHandlers as Promise<ILanguageServerHandler>);
-            await h.exit();
+            try {
+              const h = await (ls.languageServerHandlers as Promise<ILanguageServerHandler>);
+              await h.exit();
+            } catch (e) {
+              // expected error because of handler launch failed
+            }
           }
         } else {
           const handlers = ls.languageServerHandlers as LanguageServerHandlerMap;
@@ -157,10 +171,14 @@ export class LanguageServerController implements ILanguageServerHandler {
     for (const languageServer of this.languageServers) {
       if (languageServer.languageServerHandlers) {
         if (languageServer.builtinWorkspaceFolders) {
-          const handler = await (languageServer.languageServerHandlers as Promise<
-            ILanguageServerHandler
-          >);
-          await handler.unloadWorkspace(workspaceDir);
+          try {
+            const handler = await (languageServer.languageServerHandlers as Promise<
+              ILanguageServerHandler
+            >);
+            await handler.unloadWorkspace(workspaceDir);
+          } catch (err) {
+            // expected error because of handler launch failed
+          }
         } else {
           const handlers = languageServer.languageServerHandlers as LanguageServerHandlerMap;
           const realPath = fs.realpathSync(workspaceDir);
@@ -174,20 +192,24 @@ export class LanguageServerController implements ILanguageServerHandler {
     }
   }
 
-  public status(lang: string): LanguageServerStatus {
-    const ls = this.languageServerMap[lang];
-    const status = this.installManager.status(ls.definition);
+  public status(def: LanguageServerDefinition): LanguageServerStatus {
+    const status = this.installManager.status(def);
     // installed, but is it running?
     if (status === LanguageServerStatus.READY) {
-      if (ls.launcher.running) {
+      const ls = this.languageServers.find(d => d.definition === def);
+      if (ls && ls.launcher.running) {
         return LanguageServerStatus.RUNNING;
       }
     }
     return status;
   }
 
-  public supportLanguage(lang: string) {
-    return this.languageServerMap[lang] !== undefined;
+  public getLanguageServerDef(lang: string): LanguageServerDefinition[] {
+    const data = this.languageServerMap[lang];
+    if (data) {
+      return data.map(d => d.definition);
+    }
+    return [];
   }
 
   private async findOrCreateHandler(
@@ -237,21 +259,47 @@ export class LanguageServerController implements ILanguageServerHandler {
   }
 
   private findLanguageServer(lang: string) {
-    const ls = this.languageServerMap[lang];
-    if (ls) {
-      if (
-        !this.options.lsp.detach &&
-        this.installManager.status(ls.definition) !== LanguageServerStatus.READY
-      ) {
+    const lsArr = this.languageServerMap[lang];
+    if (lsArr) {
+      const ls = lsArr.find(
+        d => this.installManager.status(d.definition) !== LanguageServerStatus.NOT_INSTALLED
+      );
+      if (!this.options.lsp.detach && ls === undefined) {
         throw new ResponseError(
           LanguageServerNotInstalled,
           `language server ${lang} not installed`
         );
       } else {
-        return ls;
+        return ls!;
       }
     } else {
       throw new ResponseError(UnknownFileLanguage, `unsupported language ${lang}`);
     }
+  }
+
+  public async initializeState(workspacePath: string) {
+    const result: { [lang: string]: WorkspaceStatus } = {};
+    for (const languageServer of this.languageServers) {
+      if (languageServer.languageServerHandlers) {
+        if (languageServer.builtinWorkspaceFolders) {
+          const handler = await (languageServer.languageServerHandlers as Promise<
+            ILanguageServerHandler
+          >);
+          result[languageServer.definition.name] = (await handler.initializeState!(
+            workspacePath
+          )) as WorkspaceStatus;
+        } else {
+          const handlers = languageServer.languageServerHandlers as LanguageServerHandlerMap;
+          const realPath = fs.realpathSync(workspacePath);
+          const handler = handlers[realPath];
+          if (handler) {
+            result[languageServer.definition.name] = (await handler).initializeState!(
+              workspacePath
+            ) as WorkspaceStatus;
+          }
+        }
+      }
+    }
+    return result;
   }
 }

@@ -5,7 +5,7 @@ exports[`Logs should render a link to filter by cluster uuid 1`] = `
   color="primary"
   iconType="loggingApp"
   size="m"
-  title="Want to see more logs?"
+  title="Want to see more log entries?"
 >
   <p>
     <FormattedMessage
@@ -32,7 +32,7 @@ exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] 
   color="primary"
   iconType="loggingApp"
   size="m"
-  title="Want to see more logs?"
+  title="Want to see more log entries?"
 >
   <p>
     <FormattedMessage
@@ -59,7 +59,7 @@ exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] =
   color="primary"
   iconType="loggingApp"
   size="m"
-  title="Want to see more logs?"
+  title="Want to see more log entries?"
 >
   <p>
     <FormattedMessage
@@ -85,14 +85,14 @@ exports[`Logs should render a reason if the logs are disabled 1`] = `
 <div>
   <EuiTitle>
     <h1>
-      Recent Logs
+      Recent Log Entries
     </h1>
   </EuiTitle>
   <EuiText
     size="s"
   >
     <p>
-      Showing the most recent logs for this cluster, up to 15 total logs.
+      Showing the most recent log entries for this cluster, up to 15 total log entries.
     </p>
   </EuiText>
   <EuiSpacer
@@ -143,14 +143,14 @@ exports[`Logs should render normally 1`] = `
 <div>
   <EuiTitle>
     <h1>
-      Recent Logs
+      Recent Log Entries
     </h1>
   </EuiTitle>
   <EuiText
     size="s"
   >
     <p>
-      Showing the most recent logs for this cluster, up to 10 total logs.
+      Showing the most recent log entries for this cluster, up to 10 total log entries.
     </p>
   </EuiText>
   <EuiSpacer
@@ -287,7 +287,7 @@ exports[`Logs should render normally 1`] = `
     color="primary"
     iconType="loggingApp"
     size="m"
-    title="Want to see more logs?"
+    title="Want to see more log entries?"
   >
     <p>
       <FormattedMessage

@@ -18,7 +18,9 @@
  */
 
 import { set } from 'lodash';
+import { dateHistogramInterval } from '../../../../../../data/common';
 import { getBucketSize } from '../../helpers/get_bucket_size';
+import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { getTimerange } from '../../helpers/get_timerange';
 import { calculateAggRoot } from './calculate_agg_root';
@@ -26,28 +28,54 @@ import { calculateAggRoot } from './calculate_agg_root';
 export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, capabilities) {
   return next => doc => {
     const { timeField, interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
-    const { bucketSize, intervalString } = getBucketSize(req, interval, capabilities);
-    const { from, to } = getTimerange(req);
-    const timezone = capabilities.searchTimezone;
+    const meta = {
+      timeField,
+    };
 
-    panel.series.forEach(column => {
-      const aggRoot = calculateAggRoot(doc, column);
-      set(doc, `${aggRoot}.timeseries.date_histogram`, {
-        field: timeField,
-        interval: intervalString,
-        min_doc_count: 0,
-        time_zone: timezone,
-        extended_bounds: {
-          min: from.valueOf(),
-          max: to.valueOf(),
-        },
+    const getDateHistogramForLastBucketMode = () => {
+      const { bucketSize, intervalString } = getBucketSize(req, interval, capabilities);
+      const { from, to } = getTimerange(req);
+      const timezone = capabilities.searchTimezone;
+
+      panel.series.forEach(column => {
+        const aggRoot = calculateAggRoot(doc, column);
+
+        set(doc, `${aggRoot}.timeseries.date_histogram`, {
+          field: timeField,
+          min_doc_count: 0,
+          time_zone: timezone,
+          extended_bounds: {
+            min: from.valueOf(),
+            max: to.valueOf(),
+          },
+          ...dateHistogramInterval(intervalString),
+        });
+
+        set(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
+          timeField,
+          intervalString,
+          bucketSize,
+        });
       });
-      set(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
-        timeField,
-        intervalString,
-        bucketSize,
+    };
+
+    const getDateHistogramForEntireTimerangeMode = () => {
+      panel.series.forEach(column => {
+        const aggRoot = calculateAggRoot(doc, column);
+
+        set(doc, `${aggRoot}.timeseries.auto_date_histogram`, {
+          field: timeField,
+          buckets: 1,
+        });
+
+        set(doc, aggRoot.replace(/\.aggs$/, '.meta'), meta);
       });
-    });
+    };
+
+    isLastValueTimerangeMode(panel)
+      ? getDateHistogramForLastBucketMode()
+      : getDateHistogramForEntireTimerangeMode();
+
     return next(doc);
   };
 }

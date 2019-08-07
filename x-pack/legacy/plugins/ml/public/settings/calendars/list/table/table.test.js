@@ -52,7 +52,7 @@ describe('CalendarsListTable', () => {
       <CalendarsListTable.WrappedComponent {...props} />
     );
 
-    const buttons = wrapper.find('[data-testid="new_calendar_button"]');
+    const buttons = wrapper.find('[data-test-subj="mlCalendarButtonCreate"]');
     const button = buttons.find('EuiButton');
 
     expect(button.prop('isDisabled')).toEqual(false);
@@ -68,7 +68,7 @@ describe('CalendarsListTable', () => {
       <CalendarsListTable.WrappedComponent {...disableProps} />
     );
 
-    const buttons = wrapper.find('[data-testid="new_calendar_button"]');
+    const buttons = wrapper.find('[data-test-subj="mlCalendarButtonCreate"]');
     const button = buttons.find('EuiButton');
 
     expect(button.prop('isDisabled')).toEqual(true);
@@ -85,7 +85,7 @@ describe('CalendarsListTable', () => {
       <CalendarsListTable.WrappedComponent {...disableProps} />
     );
 
-    const buttons = wrapper.find('[data-testid="new_calendar_button"]');
+    const buttons = wrapper.find('[data-test-subj="mlCalendarButtonCreate"]');
     const button = buttons.find('EuiButton');
 
     expect(button.prop('isDisabled')).toEqual(true);

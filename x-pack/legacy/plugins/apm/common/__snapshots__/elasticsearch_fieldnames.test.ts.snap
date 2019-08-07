@@ -56,11 +56,15 @@ exports[`Error SPAN_ID 1`] = `undefined`;
 
 exports[`Error SPAN_NAME 1`] = `undefined`;
 
+exports[`Error SPAN_SELF_TIME_SUM 1`] = `undefined`;
+
 exports[`Error SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Error SPAN_TYPE 1`] = `undefined`;
 
 exports[`Error TRACE_ID 1`] = `"trace id"`;
+
+exports[`Error TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
 
@@ -134,11 +138,15 @@ exports[`Span SPAN_ID 1`] = `"span id"`;
 
 exports[`Span SPAN_NAME 1`] = `"span name"`;
 
+exports[`Span SPAN_SELF_TIME_SUM 1`] = `undefined`;
+
 exports[`Span SPAN_SUBTYPE 1`] = `"my subtype"`;
 
 exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
 exports[`Span TRACE_ID 1`] = `"trace id"`;
+
+exports[`Span TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
 
@@ -212,11 +220,15 @@ exports[`Transaction SPAN_ID 1`] = `undefined`;
 
 exports[`Transaction SPAN_NAME 1`] = `undefined`;
 
+exports[`Transaction SPAN_SELF_TIME_SUM 1`] = `undefined`;
+
 exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
+
+exports[`Transaction TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
 

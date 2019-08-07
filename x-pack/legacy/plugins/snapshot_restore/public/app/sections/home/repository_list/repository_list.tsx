@@ -12,7 +12,7 @@ import { Repository } from '../../../../../common/types';
 import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
-import { loadRepositories } from '../../../services/http';
+import { useLoadRepositories } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
 
 import { RepositoryDetails } from './repository_details';
@@ -36,13 +36,13 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const {
     error,
-    loading,
+    isLoading,
     data: { repositories, managedRepository } = {
       repositories: undefined,
       managedRepository: undefined,
     },
-    request: reload,
-  } = loadRepositories();
+    sendRequest: reload,
+  } = useLoadRepositories();
 
   const openRepositoryDetailsUrl = (newRepositoryName: Repository['name']): string => {
     return history.createHref({
@@ -71,7 +71,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   let content;
 
-  if (loading) {
+  if (isLoading) {
     content = (
       <SectionLoading>
         <FormattedMessage

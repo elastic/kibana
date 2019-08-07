@@ -18,9 +18,9 @@
  */
 
 import { SavedObject } from '../service';
-import { Retry } from './types';
+import { SavedObjectsImportRetry } from './types';
 
-export function splitOverwrites(savedObjects: SavedObject[], retries: Retry[]) {
+export function splitOverwrites(savedObjects: SavedObject[], retries: SavedObjectsImportRetry[]) {
   const objectsToOverwrite: SavedObject[] = [];
   const objectsToNotOverwrite: SavedObject[] = [];
   const overwrites = retries

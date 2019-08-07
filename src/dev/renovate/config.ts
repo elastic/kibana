@@ -85,6 +85,7 @@ export const RENOVATE_CONFIG = {
         packageNames: maybeFlatMap(group.packageNames, name => [name, getTypePackageName(name)]),
         labels: group.extraLabels && [...DEFAULT_LABELS, ...group.extraLabels],
         enabled: group.enabled === false ? false : undefined,
+        allowedVersions: group.allowedVersions || undefined,
       })),
 
       // internal/local packages

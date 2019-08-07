@@ -1,0 +1,21 @@
+{
+  "lens": {
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "visualizationType": {
+        "type": "keyword"
+      },
+      "activeDatasourceId": {
+        "type": "keyword"
+      },
+      "state": {
+        "type": "text"
+      },
+      "expression": {
+        "type": "text"
+      }
+    }
+  }
+}

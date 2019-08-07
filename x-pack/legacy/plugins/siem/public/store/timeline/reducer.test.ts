@@ -24,6 +24,7 @@ import { defaultHeaders } from '../../mock';
 import {
   addNewTimeline,
   addTimelineProvider,
+  addTimelineToStore,
   applyDeltaToTimelineColumnWidth,
   removeTimelineColumn,
   removeTimelineProvider,
@@ -97,6 +98,99 @@ const timelineByIdMock: TimelineById = {
 const columnsMock: ColumnHeader[] = [defaultHeaders[0], defaultHeaders[1], defaultHeaders[2]];
 
 describe('Timeline', () => {
+  describe('#add saved object Timeline to store ', () => {
+    test('should return a timelineModel with default value and not just a timelineResult ', () => {
+      const update = addTimelineToStore({
+        id: 'foo',
+        timeline: {
+          savedObjectId: 'superUniqueId',
+          title: 'saved object timeline',
+          version: 'doNotForgetVersion',
+        },
+      });
+
+      expect(update).toEqual({
+        foo: {
+          columns: [
+            {
+              columnHeaderType: 'not-filtered',
+              id: '@timestamp',
+              width: 240,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'message',
+              width: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'event.category',
+              width: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'event.action',
+              width: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'host.name',
+              width: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'source.ip',
+              width: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'destination.ip',
+              width: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'user.name',
+              width: 180,
+            },
+          ],
+          dataProviders: [],
+          dateRange: {
+            end: 0,
+            start: 0,
+          },
+          description: '',
+          eventIdToNoteIds: {},
+          highlightedDropAndProviderId: '',
+          historyIds: [],
+          id: 'superUniqueId',
+          isFavorite: false,
+          isLive: false,
+          isLoading: false,
+          isSaving: false,
+          itemsPerPage: 25,
+          itemsPerPageOptions: [10, 25, 50, 100],
+          kqlMode: 'filter',
+          kqlQuery: {
+            filterQuery: null,
+            filterQueryDraft: null,
+          },
+          noteIds: [],
+          pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
+          savedObjectId: 'superUniqueId',
+          show: true,
+          sort: {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+          title: 'saved object timeline',
+          version: 'doNotForgetVersion',
+          width: 1100,
+        },
+      });
+    });
+  });
+
   describe('#addNewTimeline', () => {
     test('should return a new reference and not the same reference', () => {
       const update = addNewTimeline({

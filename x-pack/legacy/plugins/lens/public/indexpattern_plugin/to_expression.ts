@@ -6,15 +6,18 @@
 
 import _ from 'lodash';
 
-import { IndexPatternPrivateState, IndexPatternColumn } from './indexpattern';
-import { operationDefinitionMap, OperationDefinition } from './operations';
+import { IndexPatternPrivateState, IndexPatternColumn, IndexPattern } from './indexpattern';
+import { operationDefinitionMap, OperationDefinition, buildColumn } from './operations';
 
-export function toExpression(state: IndexPatternPrivateState) {
-  if (state.columnOrder.length === 0) {
+function getExpressionForLayer(
+  indexPattern: IndexPattern,
+  layerId: string,
+  columns: Record<string, IndexPatternColumn>,
+  columnOrder: string[]
+) {
+  if (columnOrder.length === 0) {
     return null;
   }
-
-  const sortedColumns = state.columnOrder.map(col => state.columns[col]);
 
   function getEsAggsConfig<C extends IndexPatternColumn>(column: C, columnId: string) {
     // Typescript is not smart enough to infer that definitionMap[C['operationType']] is always OperationDefinition<C>,
@@ -25,24 +28,66 @@ export function toExpression(state: IndexPatternPrivateState) {
     return operationDefinition.toEsAggsConfig(column, columnId);
   }
 
-  if (sortedColumns.length) {
-    const aggs = sortedColumns.map((col, index) => {
-      return getEsAggsConfig(col, state.columnOrder[index]);
+  const columnEntries = columnOrder.map(
+    colId => [colId, columns[colId]] as [string, IndexPatternColumn]
+  );
+
+  if (columnEntries.length) {
+    const aggs = columnEntries.map(([colId, col]) => {
+      return getEsAggsConfig(col, colId);
     });
 
-    const idMap = state.columnOrder.reduce(
-      (currentIdMap, columnId, index) => ({
-        ...currentIdMap,
-        [`col-${index}-${columnId}`]: columnId,
-      }),
+    const idMap = columnEntries.reduce(
+      (currentIdMap, [colId], index) => {
+        return {
+          ...currentIdMap,
+          [`col-${index}-${colId}`]: colId,
+        };
+      },
       {} as Record<string, string>
     );
 
+    const filterRatios = columnEntries.filter(
+      ([colId, col]) => col.operationType === 'filter_ratio'
+    );
+
+    if (filterRatios.length) {
+      const countColumn = buildColumn({
+        op: 'count',
+        columns,
+        suggestedPriority: 2,
+        layerId,
+        indexPattern,
+      });
+      aggs.push(getEsAggsConfig(countColumn, 'filter-ratio'));
+
+      return `esaggs
+        index="${indexPattern.id}"
+        metricsAtAllLevels=false
+        partialRows=false
+        aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(
+        idMap
+      )}' | ${filterRatios.map(([id]) => `lens_calculate_filter_ratio id=${id}`).join(' | ')}`;
+    }
+
     return `esaggs
-      index="${state.currentIndexPatternId}"
-      metricsAtAllLevels="false"
-      partialRows="false"
+      index="${indexPattern.id}"
+      metricsAtAllLevels=false
+      partialRows=false
       aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
+  }
+
+  return null;
+}
+
+export function toExpression(state: IndexPatternPrivateState, layerId: string) {
+  if (state.layers[layerId]) {
+    return getExpressionForLayer(
+      state.indexPatterns[state.layers[layerId].indexPatternId],
+      layerId,
+      state.layers[layerId].columns,
+      state.layers[layerId].columnOrder
+    );
   }
 
   return null;

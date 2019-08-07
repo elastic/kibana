@@ -26,10 +26,16 @@ export interface FilterableContainerInput extends ContainerInput {
   filters: Filter[];
 }
 
-export interface InheritedChildrenInput {
+/**
+ * interfaces are not allowed to specify a sub-set of the required types until
+ * https://github.com/microsoft/TypeScript/issues/15300 is fixed so we use a type
+ * here instead
+ */
+// eslint-disable-next-line @typescript-eslint/prefer-interface
+export type InheritedChildrenInput = {
   filters: Filter[];
   id?: string;
-}
+};
 
 export class FilterableContainer extends Container<
   InheritedChildrenInput,

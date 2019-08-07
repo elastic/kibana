@@ -5,20 +5,17 @@
  */
 
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
+import { get } from 'lodash';
 
 const angularState = {
   injector: null,
   scope: null,
 };
 
-export const setAngularState = ($scope, $injector) => {
-  angularState.scope = $scope;
-  angularState.injector = $injector;
-};
 const checkAngularState = () => {
   if (!angularState.injector || !angularState.scope) {
     throw 'Unable to interact with setup mode because the angular injector was not previously set.'
-      + ' This needs to be set by calling `setAngularState`.';
+      + ' This needs to be set by calling `initSetupModeState`.';
   }
 };
 
@@ -30,7 +27,17 @@ const setupModeState = {
 
 export const getSetupModeState = () => setupModeState;
 
-export const fetchCollectionData = async () => {
+export const setNewlyDiscoveredClusterUuid = clusterUuid => {
+  const globalState = angularState.injector.get('globalState');
+  const executor = angularState.injector.get('$executor');
+  angularState.scope.$apply(() => {
+    globalState.cluster_uuid = clusterUuid;
+    globalState.save();
+  });
+  executor.run();
+};
+
+export const fetchCollectionData = async (uuid, fetchWithoutClusterUuid = false) => {
   checkAngularState();
 
   const http = angularState.injector.get('$http');
@@ -39,8 +46,11 @@ export const fetchCollectionData = async () => {
   const ccs = globalState.ccs;
 
   let url = '../api/monitoring/v1/setup/collection';
-  if (clusterUuid) {
-    url += `/${clusterUuid}`;
+  if (uuid) {
+    url += `/node/${uuid}`;
+  }
+  else if (!fetchWithoutClusterUuid && clusterUuid) {
+    url += `/cluster/${clusterUuid}`;
   }
 
   try {
@@ -54,20 +64,28 @@ export const fetchCollectionData = async () => {
   }
 };
 
-const notifySetupModeDataChange = () => {
-  setupModeState.callbacks.forEach(cb => cb());
+const notifySetupModeDataChange = (oldData) => {
+  setupModeState.callbacks.forEach(cb => cb(oldData));
 };
 
-export const updateSetupModeData = async () => {
-  setupModeState.data = await fetchCollectionData();
-  notifySetupModeDataChange();
+export const updateSetupModeData = async (uuid, fetchWithoutClusterUuid = false) => {
+  const oldData = setupModeState.data;
+  setupModeState.data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
+  if (get(setupModeState.data, '_meta.isOnCloud', false)) {
+    return toggleSetupMode(false); // eslint-disable-line no-use-before-define
+  }
+  notifySetupModeDataChange(oldData);
 };
 
 export const toggleSetupMode = inSetupMode => {
-  checkAngularState();
+  return new Promise(async (resolve, reject) => {
+    try {
+      checkAngularState();
+    } catch (err) {
+      return reject(err);
+    }
 
-  const globalState = angularState.injector.get('globalState');
-  angularState.scope.$evalAsync(async () => {
+    const globalState = angularState.injector.get('globalState');
     setupModeState.enabled = inSetupMode;
     globalState.inSetupMode = inSetupMode;
     globalState.save();
@@ -77,6 +95,8 @@ export const toggleSetupMode = inSetupMode => {
     if (inSetupMode) {
       await updateSetupModeData();
     }
+
+    resolve();
   });
 };
 
@@ -114,8 +134,9 @@ const setSetupModeMenuItem = () => {
   // angularState.scope.topNavMenu = [...navItems];
 };
 
-export const initSetupModeState = (callback) => {
-  checkAngularState();
+export const initSetupModeState = ($scope, $injector, callback) => {
+  angularState.scope = $scope;
+  angularState.injector = $injector;
   setSetupModeMenuItem();
   callback && setupModeState.callbacks.push(callback);
 

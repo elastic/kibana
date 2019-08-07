@@ -19,7 +19,7 @@ import { UsersTable } from '.';
 import { mockUsersData } from './mock';
 
 describe('Users Table Component', () => {
-  const loadMore = jest.fn();
+  const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
@@ -33,13 +33,14 @@ describe('Users Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <UsersTable
-            totalCount={1}
-            loading={false}
-            loadMore={loadMore}
             data={mockUsersData.edges}
             flowTarget={FlowTarget.source}
-            hasNextPage={getOr(false, 'hasNextPage', mockUsersData.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockUsersData.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
+            id="user"
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockUsersData.pageInfo)}
+            totalCount={1}
             type={networkModel.NetworkType.details}
           />
         </ReduxStoreProvider>
@@ -55,13 +56,18 @@ describe('Users Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <UsersTable
-              totalCount={1}
-              loading={false}
-              loadMore={loadMore}
               data={mockUsersData.edges}
               flowTarget={FlowTarget.source}
-              hasNextPage={getOr(false, 'hasNextPage', mockUsersData.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockUsersData.pageInfo)!}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
+              id="user"
+              loading={false}
+              loadPage={loadPage}
+              showMorePagesIndicator={getOr(
+                false,
+                'showMorePagesIndicator',
+                mockUsersData.pageInfo
+              )}
+              totalCount={1}
               type={networkModel.NetworkType.details}
             />
           </TestProviders>

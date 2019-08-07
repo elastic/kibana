@@ -8,9 +8,10 @@
 
 import fs from 'fs';
 import Boom from 'boom';
-import { prefixDatafeedId } from '../../../common/util/job_utils';
+import { getLatestDataOrBucketTimestamp, prefixDatafeedId } from '../../../common/util/job_utils';
 import { mlLog } from '../../client/log';
-import { jobServiceProvider } from '../../models/job_service';
+import { jobServiceProvider } from '../job_service';
+import { resultsServiceProvider } from '../results_service';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -366,6 +367,10 @@ export class DataRecognizer {
         const jobStats = await this.callWithRequest('ml.jobStats', { jobId: jobIds });
         const jobStatsJobs = [];
         if (jobStats.jobs && jobStats.jobs.length > 0) {
+          const foundJobIds = jobStats.jobs.map(job => job.job_id);
+          const { getLatestBucketTimestampByJob } = resultsServiceProvider(this.callWithRequest);
+          const latestBucketTimestampsByJob = await getLatestBucketTimestampByJob(foundJobIds);
+
           jobStats.jobs.forEach((job) => {
             const jobStat = {
               id: job.job_id
@@ -374,6 +379,9 @@ export class DataRecognizer {
             if (job.data_counts) {
               jobStat.earliestTimestampMs = job.data_counts.earliest_record_timestamp;
               jobStat.latestTimestampMs = job.data_counts.latest_record_timestamp;
+              jobStat.latestResultsTimestampMs = getLatestDataOrBucketTimestamp(
+                jobStat.latestTimestampMs,
+                latestBucketTimestampsByJob[job.job_id]);
             }
             jobStatsJobs.push(jobStat);
           });

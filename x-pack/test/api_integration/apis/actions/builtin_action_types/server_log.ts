@@ -6,40 +6,58 @@
 
 import expect from '@kbn/expect';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function serverLogTest({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function serverLogTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
-  describe('create server-log action', () => {
+  describe('server-log action', () => {
+    after(() => esArchiver.unload('empty_kibana'));
+
+    let serverLogActionId: string;
+
     it('should return 200 when creating a builtin server-log action', async () => {
-      await supertest
+      const { body: createdAction } = await supertest
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          attributes: {
-            description: 'A server.log action',
-            actionTypeId: 'kibana.server-log',
-            actionTypeConfig: {},
+          description: 'A server.log action',
+          actionTypeId: '.server-log',
+        })
+        .expect(200);
+
+      serverLogActionId = createdAction.id;
+      expect(createdAction).to.eql({
+        id: createdAction.id,
+      });
+
+      expect(typeof createdAction.id).to.be('string');
+
+      const { body: fetchedAction } = await supertest
+        .get(`/api/action/${createdAction.id}`)
+        .expect(200);
+
+      expect(fetchedAction).to.eql({
+        id: fetchedAction.id,
+        description: 'A server.log action',
+        actionTypeId: '.server-log',
+        config: {},
+      });
+    });
+
+    it('should handle firing the action', async () => {
+      const { body: result } = await supertest
+        .post(`/api/action/${serverLogActionId}/_fire`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            message: 'message posted by firing an action during a test',
           },
         })
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            type: 'action',
-            id: resp.body.id,
-            attributes: {
-              description: 'A server.log action',
-              actionTypeId: 'kibana.server-log',
-              actionTypeConfig: {},
-            },
-            references: [],
-            updated_at: resp.body.updated_at,
-            version: resp.body.version,
-          });
-          expect(typeof resp.body.id).to.be('string');
-        });
+        .expect(200);
+
+      expect(result.status).to.eql('ok');
     });
   });
 }

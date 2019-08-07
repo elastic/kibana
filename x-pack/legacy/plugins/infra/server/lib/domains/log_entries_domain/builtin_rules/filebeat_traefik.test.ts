@@ -51,7 +51,7 @@ describe('Filebeat Rules', () => {
         'traefik.access.user_name': '-',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[traefik][access] ",

@@ -42,6 +42,7 @@ export interface MigrationOpts {
   mappingProperties: MappingProperties;
   documentMigrator: VersionedTransformer;
   serializer: SavedObjectsSerializer;
+  convertToAliasScript?: string;
 
   /**
    * If specified, templates matching the specified pattern will be removed
@@ -62,6 +63,7 @@ export interface Context {
   scrollDuration: string;
   serializer: SavedObjectsSerializer;
   obsoleteIndexTemplatePattern?: string;
+  convertToAliasScript?: string;
 }
 
 /**
@@ -87,6 +89,7 @@ export async function migrationContext(opts: MigrationOpts): Promise<Context> {
     scrollDuration: opts.scrollDuration,
     serializer: opts.serializer,
     obsoleteIndexTemplatePattern: opts.obsoleteIndexTemplatePattern,
+    convertToAliasScript: opts.convertToAliasScript,
   };
 }
 

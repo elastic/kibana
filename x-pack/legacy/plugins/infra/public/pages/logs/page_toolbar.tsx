@@ -11,6 +11,8 @@ import React, { useContext } from 'react';
 import { AutocompleteField } from '../../components/autocomplete_field';
 import { Toolbar } from '../../components/eui';
 import { LogCustomizationMenu } from '../../components/logging/log_customization_menu';
+import { LogHighlightsMenu } from '../../components/logging/log_highlights_menu';
+import { LogHighlightsState } from '../../containers/logs/log_highlights/log_highlights';
 import { LogMinimapScaleControls } from '../../components/logging/log_minimap_scale_controls';
 import { LogTextScaleControls } from '../../components/logging/log_text_scale_controls';
 import { LogTextWrapControls } from '../../components/logging/log_text_wrap_controls';
@@ -24,7 +26,8 @@ import { Source } from '../../containers/source';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 
 export const LogsToolbar = injectI18n(({ intl }) => {
-  const { derivedIndexPattern } = useContext(Source.Context);
+  const { createDerivedIndexPattern } = useContext(Source.Context);
+  const derivedIndexPattern = createDerivedIndexPattern('logs');
   const {
     availableIntervalSizes,
     availableTextScales,
@@ -37,6 +40,16 @@ export const LogsToolbar = injectI18n(({ intl }) => {
   } = useContext(LogViewConfiguration.Context);
 
   const { setSurroundingLogsId } = useContext(LogFlyout.Context);
+
+  const {
+    setHighlightTerms,
+    loadLogEntryHighlightsRequest,
+    highlightTerms,
+    hasPreviousHighlight,
+    hasNextHighlight,
+    goToPreviousHighlight,
+    goToNextHighlight,
+  } = useContext(LogHighlightsState.Context);
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
@@ -68,6 +81,10 @@ export const LogsToolbar = injectI18n(({ intl }) => {
                     })}
                     suggestions={suggestions}
                     value={filterQueryDraft ? filterQueryDraft.expression : ''}
+                    aria-label={intl.formatMessage({
+                      id: 'xpack.infra.logsPage.toolbar.kqlSearchFieldAriaLabel',
+                      defaultMessage: 'Search for log entries',
+                    })}
                   />
                 )}
               </WithLogFilter>
@@ -91,6 +108,19 @@ export const LogsToolbar = injectI18n(({ intl }) => {
               setTextScale={setTextScale}
             />
           </LogCustomizationMenu>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LogHighlightsMenu
+            onChange={setHighlightTerms}
+            isLoading={loadLogEntryHighlightsRequest.state === 'pending'}
+            activeHighlights={
+              highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length > 0
+            }
+            goToPreviousHighlight={goToPreviousHighlight}
+            goToNextHighlight={goToNextHighlight}
+            hasPreviousHighlight={hasPreviousHighlight}
+            hasNextHighlight={hasNextHighlight}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <WithLogPosition resetOnUnmount>

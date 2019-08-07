@@ -20,8 +20,11 @@ describe('Generic Rules', () => {
         'log.level': 'TEST_LEVEL',
         first_generic_message: 'TEST_MESSAGE',
       };
+      const highlights = {
+        first_generic_message: ['TEST'],
+      };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, highlights)).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[",
@@ -44,7 +47,9 @@ Array [
   },
   Object {
     "field": "first_generic_message",
-    "highlights": Array [],
+    "highlights": Array [
+      "TEST",
+    ],
     "value": "TEST_MESSAGE",
   },
 ]
@@ -58,7 +63,7 @@ Array [
         first_generic_message: 'TEST_MESSAGE',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[",
@@ -86,7 +91,7 @@ Array [
         first_generic_message: 'FIRST_TEST_MESSAGE',
       };
 
-      expect(format(firstFlattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(firstFlattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "field": "first_generic_message",
@@ -101,7 +106,7 @@ Array [
         second_generic_message: 'SECOND_TEST_MESSAGE',
       };
 
-      expect(format(secondFlattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(secondFlattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "field": "second_generic_message",
@@ -121,7 +126,7 @@ Array [
         'log.original': 'TEST_MESSAGE',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[",
@@ -149,7 +154,7 @@ Array [
         'log.original': 'TEST_MESSAGE',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "field": "log.original",

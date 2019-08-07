@@ -63,6 +63,12 @@ export const config = {
       }),
       rewriteBasePath: schema.boolean({ defaultValue: false }),
       ssl: sslSchema,
+      keepaliveTimeout: schema.number({
+        defaultValue: 120000,
+      }),
+      socketTimeout: schema.number({
+        defaultValue: 120000,
+      }),
     },
     {
       validate: rawConfig => {
@@ -90,6 +96,8 @@ export type HttpConfigType = TypeOf<typeof config.schema>;
 export class HttpConfig {
   public autoListen: boolean;
   public host: string;
+  public keepaliveTimeout: number;
+  public socketTimeout: number;
   public port: number;
   public cors: boolean | { origin: string[] };
   public maxPayload: ByteSizeValue;
@@ -108,6 +116,8 @@ export class HttpConfig {
     this.cors = rawConfig.cors;
     this.maxPayload = rawConfig.maxPayload;
     this.basePath = rawConfig.basePath;
+    this.keepaliveTimeout = rawConfig.keepaliveTimeout;
+    this.socketTimeout = rawConfig.socketTimeout;
     this.rewriteBasePath = rawConfig.rewriteBasePath;
     this.publicDir = env.staticFilesDir;
     this.ssl = new SslConfig(rawConfig.ssl || {});

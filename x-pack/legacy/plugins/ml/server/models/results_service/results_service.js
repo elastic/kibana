@@ -200,6 +200,75 @@ export function resultsServiceProvider(callWithRequest) {
 
   }
 
+  // Obtains the latest bucket result timestamp by job ID.
+  // Returns data over all jobs unless an optional list of job IDs of interest is supplied.
+  // Returned response consists of latest bucket timestamps (ms since Jan 1 1970) against job ID
+  async function getLatestBucketTimestampByJob(jobIds = []) {
+    const filter = [
+      {
+        term: {
+          result_type: 'bucket'
+        }
+      }
+    ];
+
+    if (jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
+      let jobIdFilterStr = '';
+      jobIds.forEach((jobId, i) => {
+        if (i > 0) {
+          jobIdFilterStr += ' OR ';
+        }
+        jobIdFilterStr += 'job_id:';
+        jobIdFilterStr += jobId;
+      });
+      filter.push({
+        query_string: {
+          analyze_wildcard: false,
+          query: jobIdFilterStr
+        }
+      });
+    }
+
+    // Size of job terms agg, consistent with maximum number of jobs supported by Java endpoints.
+    const maxJobs = 10000;
+
+    const resp = await callWithRequest('search', {
+      index: ML_RESULTS_INDEX_PATTERN,
+      size: 0,
+      body: {
+        query: {
+          bool: {
+            filter
+          }
+        },
+        aggs: {
+          byJobId: {
+            terms: {
+              field: 'job_id',
+              size: maxJobs
+            },
+            aggs: {
+              maxTimestamp: {
+                max: {
+                  field: 'timestamp'
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+
+    const bucketsByJobId = _.get(resp, ['aggregations', 'byJobId', 'buckets'], []);
+    const timestampByJobId = {};
+    bucketsByJobId.forEach((bucket) => {
+      timestampByJobId[bucket.key] = bucket.maxTimestamp.value;
+    });
+
+    return timestampByJobId;
+  }
+
 
   // Obtains the categorization examples for the categories with the specified IDs
   // from the given index and job ID.
@@ -271,7 +340,8 @@ export function resultsServiceProvider(callWithRequest) {
   return {
     getAnomaliesTableData,
     getCategoryDefinition,
-    getCategoryExamples
+    getCategoryExamples,
+    getLatestBucketTimestampByJob,
   };
 
 }

@@ -7,27 +7,29 @@
 import { i18n } from '@kbn/i18n';
 import { csv } from '../../functions/common/csv';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { DATATABLE, CSV } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof csv>> = {
   help: i18n.translate('xpack.canvas.functions.csvHelpText', {
-    defaultMessage: 'Create datatable from {csv} input',
+    defaultMessage: 'Creates a {DATATABLE} from {CSV} input.',
     values: {
-      csv: 'CSV',
+      DATATABLE,
+      CSV,
     },
   }),
   args: {
     data: i18n.translate('xpack.canvas.functions.csv.args.dataHelpText', {
-      defaultMessage: '{csv} data to use',
+      defaultMessage: 'The {CSV} data to use.',
       values: {
-        csv: 'CSV',
+        CSV,
       },
     }),
     delimiter: i18n.translate('xpack.canvas.functions.csv.args.delimeterHelpText', {
-      defaultMessage: 'Data separation character',
+      defaultMessage: 'The data separation character.',
     }),
     newline: i18n.translate('xpack.canvas.functions.csv.args.newlineHelpText', {
-      defaultMessage: 'Row separation character',
+      defaultMessage: 'The row separation character.',
     }),
   },
 };

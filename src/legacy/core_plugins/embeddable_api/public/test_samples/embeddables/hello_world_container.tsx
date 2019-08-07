@@ -25,13 +25,23 @@ import { EmbeddableFactory } from '../../embeddables';
 
 export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
 
-interface InheritedInput {
+/**
+ * interfaces are not allowed to specify a sub-set of the required types until
+ * https://github.com/microsoft/TypeScript/issues/15300 is fixed so we use a type
+ * here instead
+ */
+// eslint-disable-next-line @typescript-eslint/prefer-interface
+type InheritedInput = {
   id: string;
   viewMode: ViewMode;
   lastName: string;
+};
+
+interface HelloWorldContainerInput extends ContainerInput {
+  lastName?: string;
 }
 
-export class HelloWorldContainer extends Container<InheritedInput> {
+export class HelloWorldContainer extends Container<InheritedInput, HelloWorldContainerInput> {
   public readonly type = HELLO_WORLD_CONTAINER;
 
   constructor(input: ContainerInput, embeddableFactories: Map<string, EmbeddableFactory>) {
@@ -42,7 +52,7 @@ export class HelloWorldContainer extends Container<InheritedInput> {
     return {
       id,
       viewMode: this.input.viewMode || ViewMode.EDIT,
-      lastName: 'foo',
+      lastName: this.input.lastName || 'foo',
     };
   }
 

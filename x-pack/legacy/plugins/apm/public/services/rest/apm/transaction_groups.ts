@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TransactionBreakdownAPIResponse } from '../../../../server/lib/transactions/breakdown';
 import { TimeSeriesAPIResponse } from '../../../../server/lib/transactions/charts';
-import { ITransactionDistributionAPIResponse } from '../../../../server/lib/transactions/distribution';
-import { TransactionListAPIResponse } from '../../../../server/lib/transactions/get_top_transactions';
+import { TransactionDistributionAPIResponse } from '../../../../server/lib/transactions/distribution';
 import { callApi } from '../callApi';
-import { getUiFiltersES } from '../../ui_filters/get_ui_filters_es';
 import { UIFilters } from '../../../../typings/ui-filters';
+import { TransactionGroupListAPIResponse } from '../../../../server/lib/transaction_groups';
 
 export async function loadTransactionList({
   serviceName,
@@ -24,13 +24,13 @@ export async function loadTransactionList({
   transactionType: string;
   uiFilters: UIFilters;
 }) {
-  return await callApi<TransactionListAPIResponse>({
+  return await callApi<TransactionGroupListAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups`,
     query: {
       start,
       end,
       transactionType,
-      uiFiltersES: await getUiFiltersES(uiFilters)
+      uiFilters: JSON.stringify(uiFilters)
     }
   });
 }
@@ -54,7 +54,7 @@ export async function loadTransactionDistribution({
   traceId?: string;
   uiFilters: UIFilters;
 }) {
-  return callApi<ITransactionDistributionAPIResponse>({
+  return callApi<TransactionDistributionAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/distribution`,
     query: {
       start,
@@ -63,7 +63,7 @@ export async function loadTransactionDistribution({
       transactionName,
       transactionId,
       traceId,
-      uiFiltersES: await getUiFiltersES(uiFilters)
+      uiFilters: JSON.stringify(uiFilters)
     }
   });
 }
@@ -90,7 +90,34 @@ export async function loadTransactionCharts({
       end,
       transactionType,
       transactionName,
-      uiFiltersES: await getUiFiltersES(uiFilters)
+      uiFilters: JSON.stringify(uiFilters)
+    }
+  });
+}
+
+export async function loadTransactionBreakdown({
+  serviceName,
+  start,
+  end,
+  transactionName,
+  transactionType,
+  uiFilters
+}: {
+  serviceName: string;
+  start: string;
+  end: string;
+  transactionName?: string;
+  transactionType: string;
+  uiFilters: UIFilters;
+}) {
+  return callApi<TransactionBreakdownAPIResponse>({
+    pathname: `/api/apm/services/${serviceName}/transaction_groups/breakdown`,
+    query: {
+      start,
+      end,
+      transactionName,
+      transactionType,
+      uiFilters: JSON.stringify(uiFilters)
     }
   });
 }

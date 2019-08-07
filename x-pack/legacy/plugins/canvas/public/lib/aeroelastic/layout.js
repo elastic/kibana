@@ -26,12 +26,18 @@ import {
   cascadeProperties,
   draggingShape,
   getAdHocChildrenAnnotations,
+  getAlignAction,
+  getAlignDistributeTransformIntents,
   getAlignmentGuideAnnotations,
   getAlterSnapGesture,
   getAnnotatedShapes,
   getConfiguration,
   getConstrainedShapesWithPreexistingAnnotations,
   getCursor,
+  getDistributeAction,
+  getDragBox,
+  getDragBoxAnnotation,
+  getDragboxHighlighted,
   getDraggedPrimaryShape,
   getFocusedShape,
   getGroupAction,
@@ -57,6 +63,7 @@ import {
   getSelectionState,
   getSelectionStateFull,
   getShapes,
+  getShapesToHover,
   getSnappedShapes,
   getTransformIntents,
   resizeAnnotationsFunction,
@@ -89,13 +96,15 @@ const mouseTransformState = select(getMouseTransformState)(
   dragVector
 );
 
-const mouseTransformGesture = select(getMouseTransformGesture)(mouseTransformState);
+const directManipulationTransformGestures = select(getMouseTransformGesture)(mouseTransformState);
 
-const transformGestures = mouseTransformGesture;
+const dragBox = select(getDragBox)(dragging, draggedShape, dragVector);
 
 const selectedShapeObjects = select(getSelectedShapeObjects)(scene, shapes);
 
 const selectedShapesPrev = select(getSelectedShapesPrev)(scene);
+
+const boxHighlightedShapes = select(getDragboxHighlighted)(dragBox, shapes);
 
 const selectionStateFull = select(getSelectionStateFull)(
   selectedShapesPrev,
@@ -104,7 +113,8 @@ const selectionStateFull = select(getSelectionStateFull)(
   hoveredShapes,
   mouseButton,
   metaHeld,
-  multiselectModifier
+  multiselectModifier,
+  boxHighlightedShapes
 );
 
 const selectionState = select(getSelectionState)(selectionStateFull);
@@ -117,15 +127,31 @@ const symmetricManipulation = optionHeld; // as in comparable software applicati
 
 const resizeManipulator = select(getResizeManipulator)(configuration, symmetricManipulation);
 
-const transformIntents = select(getTransformIntents)(
+const directManipulationTransformIntents = select(getTransformIntents)(
   configuration,
-  transformGestures,
+  directManipulationTransformGestures,
   selectedShapes,
   shapes,
   cursorPosition,
   alterSnapGesture,
   resizeManipulator
 );
+
+const alignAction = select(getAlignAction)(actionEvent);
+const distributeAction = select(getDistributeAction)(actionEvent);
+
+const alignDistributeTransformIntents = select(getAlignDistributeTransformIntents)(
+  alignAction,
+  distributeAction,
+  shapes,
+  selectedShapes
+);
+
+const commandTransformIntents = alignDistributeTransformIntents; // will expand in the future, eg. nudge
+
+const transformIntents = select((directIntents, commandIntents) =>
+  directIntents.concat(commandIntents)
+)(directManipulationTransformIntents, commandTransformIntents);
 
 const transformedShapes = select(applyLocalTransforms)(shapes, transformIntents);
 
@@ -138,9 +164,11 @@ const alignmentGuideAnnotations = select(getAlignmentGuideAnnotations)(
   draggedShape
 );
 
+const shapesToHover = select(getShapesToHover)(dragBox, hoveredShapes, boxHighlightedShapes);
+
 const hoverAnnotations = select(getHoverAnnotations)(
   configuration,
-  select(h => h.slice(0, 1))(hoveredShapes), // todo remove this slicing when box select arrives
+  shapesToHover,
   selectedPrimaryShapeIds,
   draggedShape
 );
@@ -201,6 +229,8 @@ const resizeAnnotations = select(resizeAnnotationsFunction)(configuration, group
 
 const rotationAnnotations = select(getRotationAnnotations)(configuration, grouping);
 
+const dragBoxAnnotation = select(getDragBoxAnnotation)(configuration, dragBox);
+
 const annotatedShapes = select(getAnnotatedShapes)(
   grouping,
   alignmentGuideAnnotations,
@@ -208,7 +238,8 @@ const annotatedShapes = select(getAnnotatedShapes)(
   rotationAnnotations,
   resizeAnnotations,
   rotationTooltipAnnotation,
-  adHocChildrenAnnotations
+  adHocChildrenAnnotations,
+  dragBoxAnnotation
 );
 
 const globalTransformShapes = select(cascadeProperties)(annotatedShapes);

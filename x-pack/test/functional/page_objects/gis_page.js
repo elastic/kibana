@@ -185,6 +185,15 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click(`mapListingTitleLink-${name.split(' ').join('-')}`);
     }
 
+    async getHits() {
+      await inspector.open();
+      await inspector.openInspectorRequestsView();
+      const requestStats = await inspector.getTableData();
+      const hits = this.getInspectorStatRowHit(requestStats, 'Hits');
+      await inspector.close();
+      return hits;
+    }
+
     async gotoMapListingPage() {
       log.debug('gotoMapListingPage');
       const onPage = await this.onMapListingPage();
@@ -270,6 +279,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('layerVisibilityToggleButton');
     }
 
+    async closeLegend() {
+      const isOpen = await testSubjects.exists('mapLayerTOC');
+      if (isOpen) {
+        await testSubjects.click('mapToggleLegendButton');
+        await testSubjects.waitForDeleted('mapLayerTOC');
+      }
+    }
+
     async clickFitToBounds(layerName) {
       log.debug(`Fit to bounds, layer: ${layerName}`);
       const origView = await this.getView();
@@ -321,6 +338,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists(`layerTocActionsPanelToggleButton${escapeLayerName(layerName)}`);
     }
 
+    async hasFilePickerLoadedFile(fileName) {
+      log.debug(`Has file picker loaded file ${fileName}`);
+      const filePickerText = await find.byCssSelector('.euiFilePicker__promptText');
+      const filePickerTextContent = await filePickerText.getVisibleText();
+
+      return fileName === filePickerTextContent;
+    }
+
     /*
      * Layer panel utility functions
      */
@@ -329,12 +354,84 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('layerAddForm');
     }
 
-    async cancelLayerAdd() {
+    async waitForLayerAddPanelClosed() {
+      let layerAddPanelOpen = false;
+      await retry.waitForWithTimeout('Layer add panel closed', 1000, async () => {
+        layerAddPanelOpen = await this.isLayerAddPanelOpen();
+        return !layerAddPanelOpen;
+      });
+    }
+
+    async cancelLayerAdd(layerName) {
       log.debug(`Cancel layer add`);
       const cancelExists = await testSubjects.exists('layerAddCancelButton');
       if (cancelExists) {
         await testSubjects.click('layerAddCancelButton');
+        if (layerName) {
+          await this.waitForLayerDeleted(layerName);
+        }
       }
+    }
+
+    async importFileButtonEnabled() {
+      log.debug(`Check "Import file" button enabled`);
+      const importFileButton = await testSubjects.find('importFileButton');
+      const isDisabled = await importFileButton.getAttribute('disabled');
+      return !isDisabled;
+    }
+
+    async importLayerReadyForAdd() {
+      log.debug(`Wait until import complete`);
+      await testSubjects.find('indexRespCodeBlock', 5000);
+      let layerAddReady = false;
+      await retry.waitForWithTimeout('Add layer button ready', 2000, async () => {
+        layerAddReady = await this.importFileButtonEnabled();
+        return layerAddReady;
+      });
+      return layerAddReady;
+    }
+
+    async clickImportFileButton() {
+      log.debug(`Click "Import file" button`);
+      await testSubjects.click('importFileButton');
+    }
+
+    async setIndexName(indexName) {
+      log.debug(`Set index name to: ${indexName}`);
+      await testSubjects.setValue('fileUploadIndexNameInput', indexName);
+    }
+
+    async setIndexType(indexType) {
+      log.debug(`Set index type to: ${indexType}`);
+      await find.clickByCssSelector(
+        `select[data-test-subj="fileImportIndexSelect"] > option[value="${indexType}"]`
+      );
+    }
+
+    async indexTypeOptionExists(indexType) {
+      log.debug(`Check index type "${indexType}" available`);
+      return await find.existsByCssSelector(
+        `select[data-test-subj="fileImportIndexSelect"] > option[value="${indexType}"]`
+      );
+    }
+
+    async getCodeBlockParsedJson(dataTestSubjName) {
+      log.debug(`Get parsed code block for ${dataTestSubjName}`);
+      const indexRespCodeBlock = await find.byCssSelector(
+        `[data-test-subj="${dataTestSubjName}"]`
+      );
+      const indexRespJson = await indexRespCodeBlock.getAttribute('innerText');
+      return JSON.parse(indexRespJson);
+    }
+
+    async getIndexResults() {
+      log.debug('Get index results');
+      return await this.getCodeBlockParsedJson('indexRespCodeBlock');
+    }
+
+    async getIndexPatternResults() {
+      log.debug('Get index pattern results');
+      return await this.getCodeBlockParsedJson('indexPatternRespCodeBlock');
     }
 
     async setLayerQuery(layerName, query) {
@@ -350,20 +447,51 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.waitForLayersToLoad();
     }
 
+    async setJoinWhereQuery(layerName, query) {
+      await this.openLayerPanel(layerName);
+      await testSubjects.click('mapJoinWhereExpressionButton');
+      const filterEditorContainer = await testSubjects.find('mapJoinWhereFilterEditor');
+      const queryBarInFilterEditor = await testSubjects.findDescendant('queryInput', filterEditorContainer);
+      await queryBarInFilterEditor.click();
+      const input = await find.activeElement();
+      await input.clearValue();
+      await input.type(query);
+      await testSubjects.click('mapWhereFilterEditorSubmitButton');
+      await this.waitForLayersToLoad();
+    }
+
     async selectVectorSource() {
       log.debug(`Select vector source`);
       await testSubjects.click('vectorShapes');
     }
 
+    async selectGeoJsonUploadSource() {
+      log.debug(`Select upload geojson vector file`);
+      await testSubjects.click('uploadGeoJsonVectorFile');
+    }
+
+    async uploadJsonFileForIndexing(path) {
+      log.debug(`Setting the path on the file input`);
+      if (browser.isW3CEnabled) {
+        const input = await find.byCssSelector('.euiFilePicker__input');
+        await input.type(path);
+      } else {
+        await find.setValue('.euiFilePicker__input', path);
+      }
+      log.debug(`File selected`);
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForLayersToLoad();
+    }
+
     // Returns first layer by default
-    async selectVectorLayer(vectorLayerName = '') {
-      log.debug(`Select vector layer ${vectorLayerName}`);
-      const optionsStringList = await comboBox.getOptionsList('emsVectorComboBox');
-      const selectedVectorLayer = vectorLayerName
-        ? vectorLayerName
-        : optionsStringList.trim().split('\n')[0];
-      await comboBox.set('emsVectorComboBox', selectedVectorLayer);
-      return selectedVectorLayer;
+    async selectVectorLayer(vectorLayerName) {
+      log.debug(`Select EMS vector layer ${vectorLayerName}`);
+      if (!vectorLayerName) {
+        throw new Error(`You did not provide the EMS layer to select`);
+      }
+      await comboBox.set('emsVectorComboBox', vectorLayerName);
+      await this.waitForLayersToLoad();
     }
 
     async removeLayer(layerName) {
@@ -377,6 +505,27 @@ export function GisPageProvider({ getService, getPageObjects }) {
       log.debug(`Remove layer ${layerName}`);
       await this.openLayerPanel(layerName);
       return await testSubjects.getVisibleText(`layerErrorMessage`);
+    }
+
+    async fullScreenModeMenuItemExists() {
+      return await testSubjects.exists('mapsFullScreenMode');
+    }
+
+    async clickFullScreenMode() {
+      log.debug(`clickFullScreenMode`);
+      await testSubjects.click('mapsFullScreenMode');
+    }
+
+    async exitFullScreenLogoButtonExists() {
+      return await testSubjects.exists('exitFullScreenModeLogo');
+    }
+
+    async getExitFullScreenLogoButton() {
+      return await testSubjects.find('exitFullScreenModeLogo');
+    }
+
+    async clickExitFullScreenTextButton() {
+      await testSubjects.click('exitFullScreenModeText');
     }
 
     async openInspectorMapView() {

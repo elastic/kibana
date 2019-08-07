@@ -16,24 +16,37 @@ import {
   getRoute,
   updateRoute,
   listActionTypesRoute,
+  fireRoute,
 } from './routes';
-
 import { registerBuiltInActionTypes } from './builtin_action_types';
+import { SpacesPlugin } from '../../spaces';
+import { createOptionalPlugin } from '../../../server/lib/optional_plugin';
 
 export function init(server: Legacy.Server) {
+  const config = server.config();
+  const spaces = createOptionalPlugin<SpacesPlugin>(
+    config,
+    'xpack.spaces',
+    server.plugins,
+    'spaces'
+  );
+
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
     callWithInternalUser
   );
 
   // Encrypted attributes
+  // - `secrets` properties will be encrypted
+  // - `config` will be included in AAD
+  // - everything else excluded from AAD
   server.plugins.encrypted_saved_objects!.registerType({
     type: 'action',
-    attributesToEncrypt: new Set(['actionTypeConfigSecrets']),
+    attributesToEncrypt: new Set(['secrets']),
     attributesToExcludeFromAAD: new Set(['description']),
   });
 
-  function getServices(basePath: string): Services {
+  function getServices(basePath: string, overwrites: Partial<Services> = {}): Services {
     // Fake request is here to allow creating a scoped saved objects client
     // and use it when security is disabled. This will be replaced when the
     // future phase of API tokens is complete.
@@ -42,9 +55,10 @@ export function init(server: Legacy.Server) {
       getBasePath: () => basePath,
     };
     return {
-      log: server.log,
+      log: server.log.bind(server),
       callCluster: callWithInternalUser,
       savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(fakeRequest),
+      ...overwrites,
     };
   }
 
@@ -53,6 +67,14 @@ export function init(server: Legacy.Server) {
     getServices,
     taskManager: taskManager!,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
+    getBasePath(...args) {
+      return spaces.isEnabled
+        ? spaces.getBasePath(...args)
+        : server.config().get('server.basePath');
+    },
+    spaceIdToNamespace(...args) {
+      return spaces.isEnabled ? spaces.spaceIdToNamespace(...args) : undefined;
+    },
   });
 
   registerBuiltInActionTypes(actionTypeRegistry);
@@ -64,10 +86,18 @@ export function init(server: Legacy.Server) {
   findRoute(server);
   updateRoute(server);
   listActionTypesRoute(server);
+  fireRoute({
+    server,
+    actionTypeRegistry,
+    getServices,
+  });
 
   const fireFn = createFireFunction({
     taskManager: taskManager!,
     internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
+    spaceIdToNamespace(...args) {
+      return spaces.isEnabled ? spaces.spaceIdToNamespace(...args) : undefined;
+    },
   });
 
   // Expose functions to server

@@ -115,7 +115,7 @@ export const JobStatsBar = ({ jobsSummaryList }) => {
   const stats = Object.keys(jobStats).map(k => jobStats[k]);
 
   return (
-    <div className="jobs-stats-bar">
+    <div className="jobs-stats-bar" data-test-subj="mlJobStatsBar">
       {
         stats.filter(s => (s.show)).map(s => <Stat key={s.label} stat={s} />)
       }

@@ -8,8 +8,8 @@ import * as Joi from 'joi';
 import { Server } from 'hapi';
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from 'src/legacy/types';
-
-import { PLUGIN_ID } from './common';
+import mappings from './mappings.json';
+import { PLUGIN_ID, getEditPath } from './common';
 
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 
@@ -26,7 +26,21 @@ export const lens: LegacyPluginInitializer = kibana => {
         description: 'Explore and visualize data.',
         main: `plugins/${PLUGIN_ID}/index`,
       },
+      embeddableFactories: ['plugins/lens/register_embeddable'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      mappings,
+      visTypes: ['plugins/lens/register_vis_type_alias'],
+      savedObjectsManagement: {
+        lens: {
+          defaultSearchField: 'title',
+          isImportableAndExportable: true,
+          getTitle: (obj: { attributes: { title: string } }) => obj.attributes.title,
+          getInAppUrl: (obj: { id: string }) => ({
+            path: getEditPath(obj.id),
+            uiCapabilitiesPath: 'lens.show',
+          }),
+        },
+      },
     },
 
     config: () => {
@@ -50,7 +64,7 @@ export const lens: LegacyPluginInitializer = kibana => {
               all: [],
               read: [],
             },
-            ui: ['show'],
+            ui: ['save', 'show'],
           },
           read: {
             api: [PLUGIN_ID],

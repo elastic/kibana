@@ -102,7 +102,7 @@ export default function (opts) {
         const hasDefault = !(err instanceof NoDefaultIndexPattern);
         if (hasDefault || !whenMissingRedirectTo) throw err; // rethrow
 
-        kbnUrl.change(whenMissingRedirectTo);
+        kbnUrl.change(whenMissingRedirectTo());
 
         displayBanner();
       }

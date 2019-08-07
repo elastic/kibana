@@ -85,9 +85,9 @@ export class ContactCardEmbeddableComponent extends React.Component<Props, State
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiFormRow label="">
-          <EuiButton onClick={this.emitContactTrigger}>{`Contact ${
-            this.state.firstName
-          }`}</EuiButton>
+          <EuiButton
+            onClick={this.emitContactTrigger}
+          >{`Contact ${this.state.firstName}`}</EuiButton>
         </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>

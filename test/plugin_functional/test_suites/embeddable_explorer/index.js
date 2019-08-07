@@ -36,5 +36,6 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
 
     loadTestFile(require.resolve('./hello_world_container'));
     loadTestFile(require.resolve('./hello_world_embeddable'));
+    loadTestFile(require.resolve('./dashboard_container'));
   });
 }

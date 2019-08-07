@@ -1,3 +1,70 @@
-.lnsIndexPattern__dimensionPopover {
-  max-width: 600px;
+@import './dimension_panel/index';
+
+.lnsIndexPatternDataPanel__header {
+  display: flex;
+  align-items: center;
+  height: $euiSize * 3;
+  margin-top: -$euiSizeS;
+
+
+  & > .lnsIndexPatternDataPanel__changeLink {
+    flex: 0 0 auto;
+    margin: 0 $euiSize;
+  }
+}
+
+.lnsIndexPatternDataPanel__filter-wrapper {
+  flex-grow: 0;
+}
+
+.lnsIndexPatternDataPanel__header-text {
+  flex: 0 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lnsIndexPatternDataPanel {
+  width: 100%;
+  height: 100%;
+  padding: $euiSize $euiSize 0;
+}
+
+.lnsFieldListPanel__list-wrapper {
+  @include euiOverflowShadow;
+  margin-top: 2px; // form control shadow
+  position: relative;
+  flex-grow: 1;
+  overflow: auto;
+}
+
+.lnsFieldListPanel__list {
+  padding-top: $euiSizeS;
+  scrollbar-width: thin;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  @include euiScrollBar;
+}
+
+.lnsFieldListPanel__field {
+  @include euiFontSizeS;
+  background: $euiColorEmptyShade;
+  border-radius: $euiBorderRadius;
+  padding: $euiSizeS;
+  display: flex;
+  align-items: center;
+  margin-bottom: $euiSizeXS;
+  font-weight: $euiFontWeightMedium;
+  transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance;
+
+  &:hover {
+    @include euiBottomShadowMedium;
+    z-index: 2;
+    cursor: grab;
+  }
+}
+
+.lnsFieldListPanel__fieldName {
+  margin-left: $euiSizeXS;
 }

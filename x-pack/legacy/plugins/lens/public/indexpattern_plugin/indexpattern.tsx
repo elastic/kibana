@@ -7,22 +7,28 @@
 import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
-import { Chrome } from 'ui/chrome';
-import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
-import { EuiComboBox } from '@elastic/eui';
-import uuid from 'uuid';
-import { Datasource, DataType } from '../../public';
+import { I18nProvider } from '@kbn/i18n/react';
+import { EuiText } from '@elastic/eui';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
   DimensionPriority,
-  DatasourceSuggestion,
+  Operation,
+  DatasourceLayerPanelProps,
 } from '../types';
+import { Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { getIndexPatterns } from './loader';
-import { ChildDragDropProvider, DragDrop } from '../drag_drop';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
-import { buildColumnForOperationType, getOperationTypesForField } from './operations';
+import { IndexPatternDatasourcePluginPlugins, DataPluginDependencies } from './plugin';
+import { IndexPatternDataPanel } from './datapanel';
+import {
+  getDatasourceSuggestionsForField,
+  getDatasourceSuggestionsFromCurrentState,
+} from './indexpattern_suggestions';
+
+import { isDraggedField } from './utils';
+import { Datasource, DataType } from '..';
 
 export type OperationType = IndexPatternColumn['operationType'];
 
@@ -33,18 +39,17 @@ export type IndexPatternColumn =
   | AvgIndexPatternColumn
   | MinIndexPatternColumn
   | MaxIndexPatternColumn
-  | CountIndexPatternColumn;
+  | CountIndexPatternColumn
+  | FilterRatioIndexPatternColumn;
 
 export interface BaseIndexPatternColumn {
-  // Public
-  operationId: string;
   label: string;
   dataType: DataType;
   isBucketed: boolean;
 
   // Private
   operationType: OperationType;
-  suggestedOrder?: DimensionPriority;
+  suggestedPriority?: DimensionPriority;
 }
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
@@ -55,7 +60,7 @@ type ParameterlessIndexPatternColumn<
 
 export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
   sourceField: string;
-  suggestedOrder?: DimensionPriority;
+  suggestedPriority?: DimensionPriority;
 }
 
 export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternColumn {
@@ -71,6 +76,15 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   params: {
     size: number;
     orderBy: { type: 'alphabetical' } | { type: 'column'; columnId: string };
+    orderDirection: 'asc' | 'desc';
+  };
+}
+
+export interface FilterRatioIndexPatternColumn extends BaseIndexPatternColumn {
+  operationType: 'filter_ratio';
+  params: {
+    numerator: Query;
+    denominator: Query;
   };
 }
 
@@ -111,64 +125,29 @@ export interface IndexPatternField {
   >;
 }
 
-export interface IndexPatternPersistedState {
-  currentIndexPatternId: string;
+export interface DraggedField {
+  field: IndexPatternField;
+  indexPatternId: string;
+}
 
+export interface IndexPatternLayer {
   columnOrder: string[];
   columns: Record<string, IndexPatternColumn>;
+  // Each layer is tied to the index pattern that created it
+  indexPatternId: string;
+}
+export interface IndexPatternPersistedState {
+  currentIndexPatternId: string;
+  layers: Record<string, IndexPatternLayer>;
 }
 
 export type IndexPatternPrivateState = IndexPatternPersistedState & {
   indexPatterns: Record<string, IndexPattern>;
 };
 
-export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatternPrivateState>) {
-  return (
-    <ChildDragDropProvider {...props.dragDropContext}>
-      Index Pattern Data Source
-      <div>
-        <EuiComboBox
-          data-test-subj="indexPattern-switcher"
-          options={Object.values(props.state.indexPatterns).map(({ title, id }) => ({
-            label: title,
-            value: id,
-          }))}
-          selectedOptions={
-            props.state.currentIndexPatternId
-              ? [
-                  {
-                    label: props.state.indexPatterns[props.state.currentIndexPatternId].title,
-                    value: props.state.indexPatterns[props.state.currentIndexPatternId].id,
-                  },
-                ]
-              : undefined
-          }
-          singleSelection={{ asPlainText: true }}
-          isClearable={false}
-          onChange={choices => {
-            props.setState({
-              ...props.state,
-              currentIndexPatternId: choices[0].value as string,
-            });
-          }}
-        />
-        <div>
-          {props.state.currentIndexPatternId &&
-            props.state.indexPatterns[props.state.currentIndexPatternId].fields.map(field => (
-              <DragDrop key={field.name} value={field} draggable>
-                {field.name}
-              </DragDrop>
-            ))}
-        </div>
-      </div>
-    </ChildDragDropProvider>
-  );
-}
-
-export function columnToOperation(column: IndexPatternColumn) {
-  const { dataType, label, isBucketed, operationId } = column;
+export function columnToOperation(column: IndexPatternColumn): Operation {
+  const { dataType, label, isBucketed } = column;
   return {
-    id: operationId,
     label,
     dataType,
     isBucketed,
@@ -211,7 +190,18 @@ function addRestrictionsToFields(
   };
 }
 
-export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: ToastNotifications) {
+function removeProperty<T>(prop: string, object: Record<string, T>): Record<string, T> {
+  const result = { ...object };
+  delete result[prop];
+  return result;
+}
+
+export function getIndexPatternDatasource({
+  chrome,
+  toastNotifications,
+  data,
+  storage,
+}: Omit<IndexPatternDatasourcePluginPlugins, 'data'> & { data: DataPluginDependencies }) {
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
     async initialize(state?: IndexPatternPersistedState) {
@@ -233,145 +223,132 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
       return {
         currentIndexPatternId: indexPatternObjects ? indexPatternObjects[0].id : '',
         indexPatterns,
-        columns: {},
-        columnOrder: [],
+        layers: {},
       };
     },
 
-    getPersistableState({ currentIndexPatternId, columns, columnOrder }: IndexPatternPrivateState) {
-      return { currentIndexPatternId, columns, columnOrder };
+    getPersistableState({ currentIndexPatternId, layers }: IndexPatternPrivateState) {
+      return { currentIndexPatternId, layers };
+    },
+
+    insertLayer(state: IndexPatternPrivateState, newLayerId: string) {
+      return {
+        ...state,
+        layers: {
+          ...state.layers,
+          [newLayerId]: {
+            indexPatternId: state.currentIndexPatternId,
+            columns: {},
+            columnOrder: [],
+          },
+        },
+      };
+    },
+
+    removeLayer(state: IndexPatternPrivateState, layerId: string) {
+      const newLayers = { ...state.layers };
+      delete newLayers[layerId];
+
+      return {
+        ...state,
+        layers: newLayers,
+      };
+    },
+
+    getLayers(state: IndexPatternPrivateState) {
+      return Object.keys(state.layers);
     },
 
     toExpression,
+
+    getMetaData(state: IndexPatternPrivateState) {
+      return {
+        filterableIndexPatterns: _.uniq(
+          Object.values(state.layers)
+            .map(layer => layer.indexPatternId)
+            .map(indexPatternId => ({
+              id: indexPatternId,
+              title: state.indexPatterns[indexPatternId].title,
+            }))
+        ),
+      };
+    },
 
     renderDataPanel(
       domElement: Element,
       props: DatasourceDataPanelProps<IndexPatternPrivateState>
     ) {
-      render(<IndexPatternDataPanel {...props} />, domElement);
+      render(
+        <I18nProvider>
+          <IndexPatternDataPanel {...props} />
+        </I18nProvider>,
+        domElement
+      );
     },
 
-    getPublicAPI(state, setState) {
+    getPublicAPI(state, setState, layerId) {
       return {
         getTableSpec: () => {
-          return state.columnOrder.map(colId => ({ columnId: colId }));
+          return state.layers[layerId].columnOrder.map(colId => ({ columnId: colId }));
         },
         getOperationForColumnId: (columnId: string) => {
-          return columnToOperation(state.columns[columnId]);
-        },
-        generateColumnId: () => {
-          // TODO: Come up with a more compact form of generating unique column ids
-          return uuid.v4();
-        },
+          const layer = state.layers[layerId];
 
+          if (layer && layer.columns[columnId]) {
+            return columnToOperation(layer.columns[columnId]);
+          }
+          return null;
+        },
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
           render(
-            <IndexPatternDimensionPanel
-              state={state}
-              setState={newState => setState(newState)}
-              {...props}
-            />,
+            <I18nProvider>
+              <IndexPatternDimensionPanel
+                state={state}
+                setState={newState => setState(newState)}
+                dataPluginDependencies={data}
+                storage={storage}
+                layerId={props.layerId}
+                {...props}
+              />
+            </I18nProvider>,
             domElement
           );
         },
 
-        removeColumnInTableSpec: (columnId: string) => [],
-        moveColumnTo: (columnId: string, targetIndex: number) => {},
-        duplicateColumn: (columnId: string) => [],
+        renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => {
+          render(
+            <I18nProvider>
+              <EuiText size="s">
+                {state.indexPatterns[state.layers[props.layerId].indexPatternId].title}
+              </EuiText>
+            </I18nProvider>,
+            domElement
+          );
+        },
+
+        removeColumnInTableSpec: (columnId: string) => {
+          setState({
+            ...state,
+            layers: {
+              ...state.layers,
+              [layerId]: {
+                ...state.layers[layerId],
+                columnOrder: state.layers[layerId].columnOrder.filter(id => id !== columnId),
+                columns: removeProperty(columnId, state.layers[layerId].columns),
+              },
+            },
+          });
+        },
+        moveColumnTo: () => {},
+        duplicateColumn: () => [],
       };
     },
-
-    getDatasourceSuggestionsForField(
-      state,
-      item
-    ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
-      const field: IndexPatternField = item as IndexPatternField;
-
-      if (Object.keys(state.columns).length) {
-        // Not sure how to suggest multiple fields yet
-        return [];
-      }
-
-      const operations = getOperationTypesForField(field);
-      const hasBucket = operations.find(op => op === 'date_histogram' || op === 'terms');
-
-      if (hasBucket) {
-        const column = buildColumnForOperationType(0, hasBucket, undefined, field);
-
-        const countColumn = buildColumnForOperationType(1, 'count');
-
-        const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
-          state: {
-            ...state,
-            columns: {
-              col1: column,
-              col2: countColumn,
-            },
-            columnOrder: ['col1', 'col2'],
-          },
-
-          table: {
-            columns: [
-              {
-                columnId: 'col1',
-                operation: columnToOperation(column),
-              },
-              {
-                columnId: 'col2',
-                operation: columnToOperation(countColumn),
-              },
-            ],
-            isMultiRow: true,
-            datasourceSuggestionId: 0,
-          },
-        };
-
-        return [suggestion];
-      } else if (state.indexPatterns[state.currentIndexPatternId].timeFieldName) {
-        const currentIndexPattern = state.indexPatterns[state.currentIndexPatternId];
-        const dateField = currentIndexPattern.fields.find(
-          f => f.name === currentIndexPattern.timeFieldName
-        )!;
-
-        const column = buildColumnForOperationType(0, operations[0], undefined, field);
-
-        const dateColumn = buildColumnForOperationType(1, 'date_histogram', undefined, dateField);
-
-        const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
-          state: {
-            ...state,
-            columns: {
-              col1: dateColumn,
-              col2: column,
-            },
-            columnOrder: ['col1', 'col2'],
-          },
-
-          table: {
-            columns: [
-              {
-                columnId: 'col1',
-                operation: columnToOperation(column),
-              },
-              {
-                columnId: 'col2',
-                operation: columnToOperation(dateColumn),
-              },
-            ],
-            isMultiRow: true,
-            datasourceSuggestionId: 0,
-          },
-        };
-
-        return [suggestion];
-      }
-
-      return [];
+    getDatasourceSuggestionsForField(state, draggedField) {
+      return isDraggedField(draggedField)
+        ? getDatasourceSuggestionsForField(state, draggedField.indexPatternId, draggedField.field)
+        : [];
     },
-
-    getDatasourceSuggestionsFromCurrentState(state) {
-      return [];
-    },
+    getDatasourceSuggestionsFromCurrentState,
   };
 
   return indexPatternDatasource;

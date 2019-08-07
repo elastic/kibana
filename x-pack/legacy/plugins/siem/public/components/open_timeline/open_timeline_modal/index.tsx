@@ -8,10 +8,9 @@ import { EuiButtonEmpty, EuiModal, EuiOverlayMask } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 
-import { StatefulOpenTimeline } from '..';
-
 import { ApolloConsumer } from 'react-apollo';
 import * as i18n from '../translations';
+import { StatefulOpenTimeline } from '..';
 
 export interface OpenTimelineModalButtonProps {
   /**

@@ -36,7 +36,8 @@ export function serializeFetchParams(
         const body = {
           ...fetchParams.body || {},
         };
-        if (esShardTimeout > 0) {
+
+        if (!('timeout' in body) && esShardTimeout > 0) {
           body.timeout = `${esShardTimeout}ms`;
         }
 

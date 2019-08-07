@@ -27,6 +27,7 @@ import { AggConfigs } from '../agg_configs';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { Schemas } from '../editors/default/schemas';
 import { IndexedArray } from '../../indexed_array';
+import { AggGroupNames } from '../editors/default/agg_groups';
 
 describe('AggConfigs', function () {
 
@@ -108,7 +109,7 @@ describe('AggConfigs', function () {
           type: {
             schemas: new Schemas([
               {
-                group: 'metrics',
+                group: AggGroupNames.Metrics,
                 name: 'metric',
                 title: 'Simple',
                 min: 1,
@@ -120,7 +121,7 @@ describe('AggConfigs', function () {
                 ]
               },
               {
-                group: 'buckets',
+                group: AggGroupNames.Buckets,
                 name: 'segment',
                 title: 'Example',
                 min: 0,
@@ -276,7 +277,7 @@ describe('AggConfigs', function () {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
-          { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp' } },
+          { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp', interval: '10s' } },
           { type: 'count', schema: 'metric' }
         ]
       });
@@ -295,7 +296,7 @@ describe('AggConfigs', function () {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
-          { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp' } },
+          { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp', interval: '10s' } },
           { type: 'avg', schema: 'metric', params: { field: 'bytes' }  },
           { type: 'sum', schema: 'metric', params: { field: 'bytes' }  },
           { type: 'min', schema: 'metric', params: { field: 'bytes' }  },
@@ -368,7 +369,8 @@ describe('AggConfigs', function () {
                 type: 'date_histogram',
                 schema: 'bucketAgg',
                 params: {
-                  field: '@timestamp'
+                  field: '@timestamp',
+                  interval: '10s',
                 }
               },
               customMetric: {

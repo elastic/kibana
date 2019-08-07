@@ -11,7 +11,15 @@
         "shards"
       ],
       "types": [],
-      "include_segment_file_sizes": "__flag__"
+      "include_segment_file_sizes": "__flag__",
+      "include_unloaded_segments": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ],
+      "forbid_closed_indices": "__flag__"
     },
     "methods": [
       "GET"

@@ -94,7 +94,7 @@ export class BaseWatch {
     if (!json.id) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.baseWatch.idPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {id} property',
+          defaultMessage: 'JSON argument must contain an {id} property',
           values: {
             id: 'id'
           }
@@ -104,7 +104,7 @@ export class BaseWatch {
     if (!json.watchJson) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.baseWatch.watchJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain a {watchJson} property',
+          defaultMessage: 'JSON argument must contain a {watchJson} property',
           values: {
             watchJson: 'watchJson'
           }
@@ -114,7 +114,7 @@ export class BaseWatch {
     if (!json.watchStatusJson) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.baseWatch.watchStatusJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain a {watchStatusJson} property',
+          defaultMessage: 'JSON argument must contain a {watchStatusJson} property',
           values: {
             watchStatusJson: 'watchStatusJson'
           }

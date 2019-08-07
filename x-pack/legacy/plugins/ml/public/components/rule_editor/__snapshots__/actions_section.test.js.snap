@@ -42,7 +42,6 @@ exports[`ActionsSection renders with no actions selected 1`] = `
       grow={false}
     >
       <EuiIconTip
-        aria-label="Info"
         content={
           <FormattedMessage
             defaultMessage="The result will not be created."
@@ -52,7 +51,6 @@ exports[`ActionsSection renders with no actions selected 1`] = `
         }
         position="right"
         size="s"
-        type="questionInCircle"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -87,7 +85,6 @@ exports[`ActionsSection renders with no actions selected 1`] = `
       grow={false}
     >
       <EuiIconTip
-        aria-label="Info"
         content={
           <FormattedMessage
             defaultMessage="The value for that series will not be used to update the model."
@@ -97,7 +94,6 @@ exports[`ActionsSection renders with no actions selected 1`] = `
         }
         position="right"
         size="s"
-        type="questionInCircle"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -146,7 +142,6 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
       grow={false}
     >
       <EuiIconTip
-        aria-label="Info"
         content={
           <FormattedMessage
             defaultMessage="The result will not be created."
@@ -156,7 +151,6 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
         }
         position="right"
         size="s"
-        type="questionInCircle"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -191,7 +185,6 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
       grow={false}
     >
       <EuiIconTip
-        aria-label="Info"
         content={
           <FormattedMessage
             defaultMessage="The value for that series will not be used to update the model."
@@ -201,7 +194,6 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
         }
         position="right"
         size="s"
-        type="questionInCircle"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -250,7 +242,6 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
       grow={false}
     >
       <EuiIconTip
-        aria-label="Info"
         content={
           <FormattedMessage
             defaultMessage="The result will not be created."
@@ -260,7 +251,6 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
         }
         position="right"
         size="s"
-        type="questionInCircle"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -295,7 +285,6 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
       grow={false}
     >
       <EuiIconTip
-        aria-label="Info"
         content={
           <FormattedMessage
             defaultMessage="The value for that series will not be used to update the model."
@@ -305,7 +294,6 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
         }
         position="right"
         size="s"
-        type="questionInCircle"
       />
     </EuiFlexItem>
   </EuiFlexGroup>

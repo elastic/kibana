@@ -121,6 +121,24 @@ describe('native_renderer', () => {
     expect(containerElement.nodeName).toBe('DIV');
   });
 
+  it('should pass regular html attributes to the wrapping element', () => {
+    const renderSpy = jest.fn();
+    const testProps = { a: 'abc' };
+
+    renderAndTriggerHooks(
+      <NativeRenderer
+        render={renderSpy}
+        nativeProps={testProps}
+        className="testClass"
+        data-test-subj="container"
+      />,
+      mountpoint
+    );
+    const containerElement: HTMLElement = mountpoint.firstElementChild! as HTMLElement;
+    expect(containerElement.className).toBe('testClass');
+    expect(containerElement.dataset.testSubj).toBe('container');
+  });
+
   it('should render a specified element as container', () => {
     const renderSpy = jest.fn();
     const testProps = { a: 'abc' };

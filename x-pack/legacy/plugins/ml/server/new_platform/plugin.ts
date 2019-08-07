@@ -87,6 +87,7 @@ export interface PluginsSetup {
   elasticsearch: ElasticsearchPlugin;
   xpackMain: MlXpackMainPlugin;
   security: any;
+  spaces: any;
   // TODO: this is temporary for `mirrorPluginStatus`
   ml: any;
 }
@@ -97,6 +98,7 @@ export interface RouteInitialization {
   route(route: ServerRoute | ServerRoute[]): void;
   xpackMainPlugin?: MlXpackMainPlugin;
   savedObjects?: SavedObjectsService;
+  spacesPlugin: any;
 }
 export interface UsageInitialization {
   elasticsearchPlugin: ElasticsearchPlugin;
@@ -193,6 +195,7 @@ export class Plugin {
       commonRouteConfig,
       route: http.route,
       elasticsearchPlugin: plugins.elasticsearch,
+      spacesPlugin: plugins.spaces,
     };
 
     const extendedRouteInitializationDeps: RouteInitialization = {
@@ -200,6 +203,7 @@ export class Plugin {
       config: this.config,
       xpackMainPlugin: plugins.xpackMain,
       savedObjects: core.savedObjects,
+      spacesPlugin: plugins.spaces,
     };
 
     const usageInitializationDeps: UsageInitialization = {

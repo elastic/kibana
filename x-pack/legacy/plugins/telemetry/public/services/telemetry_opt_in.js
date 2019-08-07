@@ -17,7 +17,6 @@ export function TelemetryOptInProvider($injector, chrome) {
     getOptIn: () => currentOptInStatus,
     setOptIn: async (enabled) => {
       setCanTrackUiMetrics(enabled);
-
       const $http = $injector.get('$http');
 
       try {

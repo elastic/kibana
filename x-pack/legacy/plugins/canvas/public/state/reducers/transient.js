@@ -5,12 +5,14 @@
  */
 
 import { handleActions } from 'redux-actions';
-import { set, del } from 'object-path-immutable';
+import immutable from 'object-path-immutable';
 import { restoreHistory } from '../actions/history';
 import * as pageActions from '../actions/pages';
 import * as transientActions from '../actions/transient';
 import { removeElements } from '../actions/elements';
 import { setRefreshInterval, enableAutoplay, setAutoplayInterval } from '../actions/workpad';
+
+const { set, del } = immutable;
 
 export const transientReducer = handleActions(
   {
@@ -45,6 +47,13 @@ export const transientReducer = handleActions(
       return {
         ...transientState,
         selectedToplevelNodes: payload,
+      };
+    },
+
+    [transientActions.setZoomScale]: (transientState, { payload }) => {
+      return {
+        ...transientState,
+        zoomScale: payload || 1,
       };
     },
 

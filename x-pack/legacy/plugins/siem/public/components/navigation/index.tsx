@@ -12,7 +12,10 @@ import { TabNavigation } from './tab_navigation';
 
 export class SiemNavigationComponent extends React.Component<RouteComponentProps> {
   public shouldComponentUpdate(nextProps: Readonly<RouteComponentProps>): boolean {
-    if (this.props.location.pathname === nextProps.location.pathname) {
+    if (
+      this.props.location.pathname === nextProps.location.pathname &&
+      this.props.location.search === nextProps.location.search
+    ) {
       return false;
     }
     return true;
@@ -33,7 +36,7 @@ export class SiemNavigationComponent extends React.Component<RouteComponentProps
 
   public render() {
     const { location } = this.props;
-    return <TabNavigation location={location.pathname} />;
+    return <TabNavigation location={location.pathname} search={location.search} />;
   }
 }
 

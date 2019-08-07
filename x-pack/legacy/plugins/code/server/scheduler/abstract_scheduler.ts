@@ -5,9 +5,9 @@
  */
 
 import { Repository } from '../../model';
-import { RepositoryIndexNamePrefix, RepositoryReservedField } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
 import { Poller } from '../poller';
+import { RepositoryObjectClient } from '../search';
 
 export abstract class AbstractScheduler {
   private poller: Poller;
@@ -36,23 +36,14 @@ export abstract class AbstractScheduler {
     this.poller.stop();
   }
 
-  protected async schedule(): Promise<void> {
-    const res = await this.client.search({
-      index: `${RepositoryIndexNamePrefix}*`,
-      body: {
-        query: {
-          exists: {
-            field: RepositoryReservedField,
-          },
-        },
-      },
-      from: 0,
-      size: 10000,
+  public async schedule(): Promise<void> {
+    const repoObjectClient = new RepositoryObjectClient(this.client);
+    const repos = await repoObjectClient.getAllRepositories();
+
+    const schedulingPromises = repos.map((r: Repository) => {
+      return this.executeSchedulingJob(r);
     });
-    const schedulingPromises = Array.from(res.hits.hits).map((hit: any) => {
-      const repo: Repository = hit._source[RepositoryReservedField];
-      return this.executeSchedulingJob(repo);
-    });
+
     await Promise.all(schedulingPromises);
     // Execute the callback after each schedule is done.
     if (this.onScheduleFinished) {

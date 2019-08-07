@@ -16,8 +16,7 @@
       "request": "__flag__"
     },
     "methods": [
-      "POST",
-      "GET"
+      "POST"
     ],
     "patterns": [
       "_cache/clear",

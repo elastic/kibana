@@ -6,13 +6,33 @@
 
 // @ts-ignore
 import contentDisposition from 'content-disposition';
+import * as _ from 'lodash';
 // @ts-ignore
 import { oncePerServer } from '../../lib/once_per_server';
+import { CSV_JOB_TYPE } from '../../../common/constants';
+
+interface ICustomHeaders {
+  [x: string]: any;
+}
 
 const DEFAULT_TITLE = 'report';
 
 const getTitle = (exportType: any, title?: string): string =>
   `${title || DEFAULT_TITLE}.${exportType.jobContentExtension}`;
+
+const getReportingHeaders = (output: any, exportType: any) => {
+  const metaDataHeaders: ICustomHeaders = {};
+
+  if (exportType.jobType === CSV_JOB_TYPE) {
+    const csvContainsFormulas = _.get(output, 'csv_contains_formulas', false);
+    const maxSizedReach = _.get(output, 'max_size_reached', false);
+
+    metaDataHeaders['kbn-csv-contains-formulas'] = csvContainsFormulas;
+    metaDataHeaders['kbn-max-size-reached'] = maxSizedReach;
+  }
+
+  return metaDataHeaders;
+};
 
 function getDocumentPayloadFn(server: any) {
   const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
@@ -29,12 +49,14 @@ function getDocumentPayloadFn(server: any) {
   function getCompleted(output: any, jobType: string, title: any) {
     const exportType = exportTypesRegistry.get((item: any) => item.jobType === jobType);
     const filename = getTitle(exportType, title);
+    const headers = getReportingHeaders(output, exportType);
 
     return {
       statusCode: 200,
       content: encodeContent(output.content, exportType),
       contentType: output.content_type,
       headers: {
+        ...headers,
         'Content-Disposition': contentDisposition(filename, { type: 'inline' }),
       },
     };

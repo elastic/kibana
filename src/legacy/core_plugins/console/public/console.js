@@ -27,9 +27,6 @@ require('ui/capabilities/route_setup');
 
 require('./src/controllers/sense_controller');
 require('./src/directives/sense_history');
-require('./src/directives/sense_settings');
-require('./src/directives/sense_help');
-require('./src/directives/sense_welcome');
 require('./src/directives/console_menu_directive');
 
 

@@ -26,7 +26,3 @@ const MutationObserver = require('mutation-observer');
 Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
 
 require('whatwg-fetch');
-
-// TextEncoder + TextDecoder
-require('fast-text-encoding');
-window.crypto = require('@trust/webcrypto');

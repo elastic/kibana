@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { Sha256 } from '../../utils/';
 export async function createLogKey(type: string, optionalIdentifier?: string) {
   const baseKey = `kibana.history.${type}`;
 
@@ -24,10 +24,6 @@ export async function createLogKey(type: string, optionalIdentifier?: string) {
     return baseKey;
   }
 
-  const encoder = new TextEncoder();
-  const data = encoder.encode(optionalIdentifier);
-  const buffer = await window.crypto.subtle.digest({ name: 'SHA-256' }, data);
-  const protectedIdentifier = btoa(String.fromCharCode(...new Uint8Array(buffer)));
-
+  const protectedIdentifier = new Sha256().update(optionalIdentifier, 'utf8').digest('base64');
   return `${baseKey}-${protectedIdentifier}`;
 }

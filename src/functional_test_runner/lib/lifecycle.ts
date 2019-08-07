@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import * as Rx from 'rxjs';
+
 type Listener = (...args: any[]) => Promise<void> | void;
 export type Lifecycle = ReturnType<typeof createLifecycle>;
 
@@ -34,7 +36,11 @@ export function createLifecycle() {
     phaseEnd: [] as Listener[],
   };
 
+  const cleanup$ = new Rx.ReplaySubject(1);
+
   return {
+    cleanup$: cleanup$.asObservable(),
+
     on(name: keyof typeof listeners, fn: Listener) {
       if (!listeners[name]) {
         throw new TypeError(`invalid lifecycle event "${name}"`);
@@ -47,6 +53,15 @@ export function createLifecycle() {
     async trigger(name: keyof typeof listeners, ...args: any[]) {
       if (!listeners[name]) {
         throw new TypeError(`invalid lifecycle event "${name}"`);
+      }
+
+      if (name === 'cleanup') {
+        if (cleanup$.closed) {
+          return;
+        }
+
+        cleanup$.next();
+        cleanup$.complete();
       }
 
       try {

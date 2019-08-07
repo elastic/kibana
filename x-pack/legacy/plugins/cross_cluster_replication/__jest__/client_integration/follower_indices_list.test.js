@@ -19,10 +19,6 @@ jest.mock('ui/index_patterns', () => {
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 
-jest.mock('../../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
-  trackUiMetric: jest.fn(),
-}));
-
 const { setup } = pageHelpers.followerIndexList;
 
 describe('<FollowerIndicesList />', () => {
@@ -74,7 +70,7 @@ describe('<FollowerIndicesList />', () => {
     });
   });
 
-  describe('when there are follower indices', async () => {
+  describe('when there are follower indices', () => {
     let find;
     let exists;
     let component;

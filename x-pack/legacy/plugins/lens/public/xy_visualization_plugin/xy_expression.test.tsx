@@ -15,46 +15,54 @@ jest.mock(
   }
 );
 
-import { Position, Axis } from '@elastic/charts';
+import { Axis } from '@elastic/charts';
+import { getFormat } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
+import { AreaSeries, BarSeries, Position, LineSeries, Settings, ScaleType } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
+import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
-import { XYArgs, LegendConfig, legendConfig, XConfig, xConfig, YConfig, yConfig } from './types';
-import { getFormat } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
-import { KibanaDatatable } from 'src/legacy/core_plugins/interpreter/common';
+import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerConfig } from './types';
 
 function sampleArgs() {
-  const data: KibanaDatatable = {
-    type: 'kibana_datatable',
-    columns: [
-      { id: 'a', name: 'a', formatterMapping: { id: 'number', params: { pattern: '0,0.000' } } },
-      { id: 'b', name: 'b', formatterMapping: { id: 'number', params: { pattern: '000,0' } } },
-      { id: 'c', name: 'c', formatterMapping: { id: 'string' } },
-    ],
-    rows: [{ a: 1, b: 2, c: 'I' }, { a: 1, b: 5, c: 'J' }],
+  const data: LensMultiTable = {
+    type: 'lens_multitable',
+    tables: {
+      first: {
+        type: 'kibana_datatable',
+        columns: [
+          {
+            id: 'a',
+            name: 'a',
+            formatterMapping: { id: 'number', params: { pattern: '0,0.000' } },
+          },
+          { id: 'b', name: 'b', formatterMapping: { id: 'number', params: { pattern: '000,0' } } },
+          { id: 'c', name: 'c', formatterMapping: { id: 'string' } },
+        ],
+        rows: [{ a: 1, b: 2, c: 'I' }, { a: 1, b: 5, c: 'J' }],
+      },
+    },
   };
 
   const args: XYArgs = {
-    seriesType: 'line',
-    title: 'My fanci line chart',
+    xTitle: '',
+    yTitle: '',
+    isHorizontal: false,
     legend: {
       isVisible: false,
       position: Position.Top,
     },
-    y: {
-      accessors: ['a', 'b'],
-      position: Position.Left,
-      showGridlines: false,
-      title: 'A and B',
-    },
-    x: {
-      accessor: 'c',
-      position: Position.Bottom,
-      showGridlines: false,
-      title: 'C',
-    },
-    splitSeriesAccessors: [],
-    stackAccessors: [],
+    layers: [
+      {
+        layerId: 'first',
+        seriesType: 'line',
+        xAccessor: 'c',
+        accessors: ['a', 'b'],
+        title: 'A and B',
+        splitAccessor: 'd',
+        columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+      },
+    ],
   };
 
   return { data, args };
@@ -74,30 +82,18 @@ describe('xy_expression', () => {
       });
     });
 
-    test('xConfig produces the correct arguments', () => {
-      const args: XConfig = {
-        accessor: 'foo',
-        position: Position.Right,
-        showGridlines: true,
-        title: 'Foooo!',
+    test('layerConfig produces the correct arguments', () => {
+      const args: LayerConfig = {
+        layerId: 'first',
+        seriesType: 'line',
+        xAccessor: 'c',
+        accessors: ['a', 'b'],
+        title: 'A and B',
+        splitAccessor: 'd',
       };
 
-      expect(xConfig.fn(null, args, {})).toEqual({
-        type: 'lens_xy_xConfig',
-        ...args,
-      });
-    });
-
-    test('yConfig produces the correct arguments', () => {
-      const args: YConfig = {
-        accessors: ['bar'],
-        position: Position.Bottom,
-        showGridlines: true,
-        title: 'Barrrrrr!',
-      };
-
-      expect(yConfig.fn(null, args, {})).toEqual({
-        type: 'lens_xy_yConfig',
+      expect(layerConfig.fn(null, args, {})).toEqual({
+        type: 'lens_xy_layer',
         ...args,
       });
     });
@@ -123,25 +119,137 @@ describe('xy_expression', () => {
     test('it renders line', () => {
       const { data, args } = sampleArgs();
 
-      expect(
-        shallow(<XYChart data={data} args={{ ...args, seriesType: 'line' }} />)
-      ).toMatchSnapshot();
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'line' }] }}
+        />
+      );
+      expect(component).toMatchSnapshot();
+      expect(component.find(LineSeries)).toHaveLength(1);
     });
 
     test('it renders bar', () => {
       const { data, args } = sampleArgs();
-
-      expect(
-        shallow(<XYChart data={data} args={{ ...args, seriesType: 'bar' }} />)
-      ).toMatchSnapshot();
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
+        />
+      );
+      expect(component).toMatchSnapshot();
+      expect(component.find(BarSeries)).toHaveLength(1);
     });
 
     test('it renders area', () => {
       const { data, args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area' }] }}
+        />
+      );
+      expect(component).toMatchSnapshot();
+      expect(component.find(AreaSeries)).toHaveLength(1);
+    });
 
-      expect(
-        shallow(<XYChart data={data} args={{ ...args, seriesType: 'area' }} />)
-      ).toMatchSnapshot();
+    test('it renders horizontal bar', () => {
+      const { data, args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, isHorizontal: true, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
+        />
+      );
+      expect(component).toMatchSnapshot();
+      expect(component.find(BarSeries)).toHaveLength(1);
+      expect(component.find(Settings).prop('rotation')).toEqual(90);
+    });
+
+    test('it renders stacked bar', () => {
+      const { data, args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar_stacked' }] }}
+        />
+      );
+      expect(component).toMatchSnapshot();
+      expect(component.find(BarSeries)).toHaveLength(1);
+      expect(component.find(BarSeries).prop('stackAccessors')).toHaveLength(1);
+    });
+
+    test('it renders stacked area', () => {
+      const { data, args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area_stacked' }] }}
+        />
+      );
+      expect(component).toMatchSnapshot();
+      expect(component.find(AreaSeries)).toHaveLength(1);
+      expect(component.find(AreaSeries).prop('stackAccessors')).toHaveLength(1);
+    });
+
+    test('it renders stacked horizontal bar', () => {
+      const { data, args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{
+            ...args,
+            isHorizontal: true,
+            layers: [{ ...args.layers[0], seriesType: 'bar_stacked' }],
+          }}
+        />
+      );
+      expect(component).toMatchSnapshot();
+      expect(component.find(BarSeries)).toHaveLength(1);
+      expect(component.find(BarSeries).prop('stackAccessors')).toHaveLength(1);
+      expect(component.find(Settings).prop('rotation')).toEqual(90);
+    });
+
+    test('it rewrites the rows based on provided labels', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(<XYChart data={data} args={args} />);
+      expect(component.find(LineSeries).prop('data')).toEqual([
+        { 'Label A': 1, 'Label B': 2, c: 3 },
+        { 'Label A': 1, 'Label B': 5, c: 4 },
+      ]);
+    });
+
+    test('it uses labels as Y accessors', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(<XYChart data={data} args={args} />);
+      expect(component.find(LineSeries).prop('yAccessors')).toEqual(['Label A', 'Label B']);
+    });
+
+    test('it indicates a linear scale for a numeric X axis', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(<XYChart data={data} args={args} />);
+      expect(component.find(LineSeries).prop('xScaleType')).toEqual(ScaleType.Linear);
+    });
+
+    test('it indicates an ordinal scale for a string X axis', () => {
+      const { args } = sampleArgs();
+
+      const data: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          first: {
+            type: 'kibana_datatable',
+            columns: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }, { id: 'c', name: 'c' }],
+            rows: [{ a: 1, b: 2, c: 'Hello' }, { a: 6, b: 5, c: 'World' }],
+          },
+        },
+      };
+
+      const component = shallow(<XYChart data={data} args={args} />);
+      expect(component.find(LineSeries).prop('xScaleType')).toEqual(ScaleType.Ordinal);
     });
 
     test('it gets the formatter for the x axis', () => {

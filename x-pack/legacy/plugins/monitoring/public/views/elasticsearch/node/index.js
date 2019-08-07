@@ -83,6 +83,7 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
               nodeId={this.nodeName}
               clusterUuid={$scope.cluster.cluster_uuid}
               onBrush={this.onBrush}
+              zoomInfo={this.zoomInfo}
               {...data}
             />
           </I18nContext>

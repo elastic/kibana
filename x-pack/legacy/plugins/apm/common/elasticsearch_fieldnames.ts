@@ -20,12 +20,14 @@ export const TRANSACTION_RESULT = 'transaction.result';
 export const TRANSACTION_NAME = 'transaction.name';
 export const TRANSACTION_ID = 'transaction.id';
 export const TRANSACTION_SAMPLED = 'transaction.sampled';
+export const TRANSACTION_BREAKDOWN_COUNT = 'transaction.breakdown.count';
 
 export const TRACE_ID = 'trace.id';
 
 export const SPAN_DURATION = 'span.duration.us';
 export const SPAN_TYPE = 'span.type';
 export const SPAN_SUBTYPE = 'span.subtype';
+export const SPAN_SELF_TIME_SUM = 'span.self_time.sum.us';
 export const SPAN_ACTION = 'span.action';
 export const SPAN_NAME = 'span.name';
 export const SPAN_ID = 'span.id';

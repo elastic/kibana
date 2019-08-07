@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function actionsTests({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
+export default function actionsTests({ loadTestFile }: FtrProviderContext) {
   describe('Actions', () => {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
@@ -15,6 +14,10 @@ export default function actionsTests({ loadTestFile }: KibanaFunctionalTestDefau
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./list_action_types'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./fire'));
     loadTestFile(require.resolve('./builtin_action_types/server_log'));
+    loadTestFile(require.resolve('./builtin_action_types/slack'));
+    loadTestFile(require.resolve('./builtin_action_types/email'));
+    loadTestFile(require.resolve('./builtin_action_types/es_index'));
   });
 }

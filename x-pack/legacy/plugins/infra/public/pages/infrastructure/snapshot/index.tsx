@@ -26,6 +26,7 @@ import { WithWaffleFilterUrlState } from '../../../containers/waffle/with_waffle
 import { WithWaffleOptionsUrlState } from '../../../containers/waffle/with_waffle_options';
 import { WithWaffleTimeUrlState } from '../../../containers/waffle/with_waffle_time';
 import { WithKibanaChrome } from '../../../containers/with_kibana_chrome';
+import { useTrackPageview } from '../../../hooks/use_track_metric';
 
 interface SnapshotPageProps {
   intl: InjectedIntl;
@@ -37,13 +38,16 @@ export const SnapshotPage = injectUICapabilities(
     const { intl, uiCapabilities } = props;
     const { showIndicesConfiguration } = useContext(SourceConfigurationFlyoutState.Context);
     const {
-      derivedIndexPattern,
+      createDerivedIndexPattern,
       hasFailedLoadingSource,
       isLoading,
       loadSourceFailureMessage,
       loadSource,
       metricIndicesExist,
     } = useContext(Source.Context);
+
+    useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
+    useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
 
     return (
       <ColumnarPage>
@@ -80,7 +84,7 @@ export const SnapshotPage = injectUICapabilities(
         ) : metricIndicesExist ? (
           <>
             <WithWaffleTimeUrlState />
-            <WithWaffleFilterUrlState indexPattern={derivedIndexPattern} />
+            <WithWaffleFilterUrlState indexPattern={createDerivedIndexPattern('metrics')} />
             <WithWaffleOptionsUrlState />
             <SnapshotToolbar />
             <SnapshotPageContent />

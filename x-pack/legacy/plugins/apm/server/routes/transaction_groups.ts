@@ -11,7 +11,8 @@ import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getTransactionCharts } from '../lib/transactions/charts';
 import { getTransactionDistribution } from '../lib/transactions/distribution';
-import { getTopTransactions } from '../lib/transactions/get_top_transactions';
+import { getTransactionBreakdown } from '../lib/transactions/breakdown';
+import { getTransactionGroupList } from '../lib/transaction_groups';
 
 const defaultErrorHandler = (err: Error) => {
   // eslint-disable-next-line
@@ -33,16 +34,19 @@ export function initTransactionGroupsApi(core: InternalCoreSetup) {
       },
       tags: ['access:apm']
     },
-    handler: req => {
+    handler: async req => {
       const { serviceName } = req.params;
-      const { transactionType } = req.query as { transactionType?: string };
-      const setup = setupRequest(req);
+      const { transactionType } = req.query as { transactionType: string };
+      const setup = await setupRequest(req);
 
-      return getTopTransactions({
-        serviceName,
-        transactionType,
+      return getTransactionGroupList(
+        {
+          type: 'top_transactions',
+          serviceName,
+          transactionType
+        },
         setup
-      }).catch(defaultErrorHandler);
+      ).catch(defaultErrorHandler);
     }
   });
 
@@ -58,8 +62,8 @@ export function initTransactionGroupsApi(core: InternalCoreSetup) {
       },
       tags: ['access:apm']
     },
-    handler: req => {
-      const setup = setupRequest(req);
+    handler: async req => {
+      const setup = await setupRequest(req);
       const { serviceName } = req.params;
       const { transactionType, transactionName } = req.query as {
         transactionType?: string;
@@ -89,8 +93,8 @@ export function initTransactionGroupsApi(core: InternalCoreSetup) {
       },
       tags: ['access:apm']
     },
-    handler: req => {
-      const setup = setupRequest(req);
+    handler: async req => {
+      const setup = await setupRequest(req);
       const { serviceName } = req.params;
       const {
         transactionType,
@@ -110,6 +114,34 @@ export function initTransactionGroupsApi(core: InternalCoreSetup) {
         transactionName,
         transactionId,
         traceId,
+        setup
+      }).catch(defaultErrorHandler);
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: `/api/apm/services/{serviceName}/transaction_groups/breakdown`,
+    options: {
+      validate: {
+        query: withDefaultValidators({
+          transactionName: Joi.string(),
+          transactionType: Joi.string().required()
+        })
+      }
+    },
+    handler: async req => {
+      const setup = await setupRequest(req);
+      const { serviceName } = req.params;
+      const { transactionName, transactionType } = req.query as {
+        transactionName?: string;
+        transactionType: string;
+      };
+
+      return getTransactionBreakdown({
+        serviceName,
+        transactionName,
+        transactionType,
         setup
       }).catch(defaultErrorHandler);
     }

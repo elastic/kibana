@@ -448,7 +448,6 @@ describe('AggConfig', function () {
   describe('#fieldFormatter - no custom getFormat handler', function () {
 
     const visStateAggWithoutCustomGetFormat = {
-      type: 'table',
       aggs: [
         {
           type: 'histogram',

@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
 import { i18n } from '@kbn/i18n';
 import wmsOptionsTemplate from './wms_options.html';
-const module = uiModules.get('kibana');
 
-module.directive('wmsOptions', function (serviceSettings) {
+export function WmsOptions(serviceSettings) {
   return {
     restrict: 'E',
     template: wmsOptionsTemplate,
@@ -35,7 +33,6 @@ module.directive('wmsOptions', function (serviceSettings) {
       $scope.wmsLinkText = i18n.translate('tileMap.wmsOptions.wmsLinkText', { defaultMessage: 'here' });
 
       new Promise((resolve, reject) => {
-
         serviceSettings
           .getTMSServices()
           .then((allTMSServices) => {
@@ -53,16 +50,11 @@ module.directive('wmsOptions', function (serviceSettings) {
               $scope.options.selectedTmsLayer = $scope.collections.tmsLayers[0];
             }
             resolve(true);
-
           })
           .catch(function (e) {
             reject(e);
           });
-
-
       });
-
-
-    }
+    },
   };
-});
+}

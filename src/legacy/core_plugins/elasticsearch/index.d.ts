@@ -150,7 +150,7 @@ import {
 export class Cluster {
   public callWithRequest: CallClusterWithRequest;
   public callWithInternalUser: CallCluster;
-  public constructor(config: ClusterConfig);
+  constructor(config: ClusterConfig);
 }
 
 export interface ClusterConfig {

@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TextScale } from '../../../../common/log_text_scale';
-import { TimeKey } from '../../../../common/time';
+import { TimeKey, UniqueTimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
 import { LogColumnConfiguration } from '../../../utils/source_configuration';
 import { AutoSizer } from '../../auto_sizer';
@@ -22,7 +22,7 @@ import { LogTextStreamLoadingItemView } from './loading_item_view';
 import { LogEntryRow } from './log_entry_row';
 import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
-import { getColumnWidths, LogEntryColumnWidth } from './log_entry_column';
+import { getColumnWidths, LogEntryColumnWidths } from './log_entry_column';
 import { useMeasuredCharacterDimensions } from './text_styles';
 
 interface ScrollableLogTextStreamViewProps {
@@ -38,21 +38,20 @@ interface ScrollableLogTextStreamViewProps {
   lastLoadedTime: number | null;
   target: TimeKey | null;
   jumpToTarget: (target: TimeKey) => any;
-  reportVisibleInterval: (
-    params: {
-      pagesBeforeStart: number;
-      pagesAfterEnd: number;
-      startKey: TimeKey | null;
-      middleKey: TimeKey | null;
-      endKey: TimeKey | null;
-    }
-  ) => any;
+  reportVisibleInterval: (params: {
+    pagesBeforeStart: number;
+    pagesAfterEnd: number;
+    startKey: TimeKey | null;
+    middleKey: TimeKey | null;
+    endKey: TimeKey | null;
+  }) => any;
   loadNewerItems: () => void;
   setFlyoutItem: (id: string) => void;
   setFlyoutVisibility: (visible: boolean) => void;
   showColumnConfiguration: () => void;
   intl: InjectedIntl;
   highlightedItem: string | null;
+  currentHighlightKey: UniqueTimeKey | null;
 }
 
 interface ScrollableLogTextStreamViewState {
@@ -99,6 +98,7 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
   public render() {
     const {
       columnConfigurations,
+      currentHighlightKey,
       hasMoreAfterEnd,
       hasMoreBeforeStart,
       highlightedItem,
@@ -188,6 +188,11 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
                                     openFlyoutWithItem={this.handleOpenFlyout}
                                     boundingBoxRef={itemMeasureRef}
                                     logEntry={item.logEntry}
+                                    highlights={item.highlights}
+                                    isActiveHighlight={
+                                      !!currentHighlightKey &&
+                                      currentHighlightKey.gid === item.logEntry.gid
+                                    }
                                     scale={scale}
                                     wrap={wrap}
                                     isHighlighted={
@@ -280,9 +285,10 @@ export const ScrollableLogTextStreamView = injectI18n(ScrollableLogTextStreamVie
  * written as a hook.
  */
 const WithColumnWidths: React.FunctionComponent<{
-  children: (
-    params: { columnWidths: LogEntryColumnWidth[]; CharacterDimensionsProbe: React.ComponentType }
-  ) => React.ReactElement<any> | null;
+  children: (params: {
+    columnWidths: LogEntryColumnWidths;
+    CharacterDimensionsProbe: React.ComponentType;
+  }) => React.ReactElement<any> | null;
   columnConfigurations: LogColumnConfiguration[];
   scale: TextScale;
 }> = ({ children, columnConfigurations, scale }) => {

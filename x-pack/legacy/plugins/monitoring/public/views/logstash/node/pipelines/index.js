@@ -101,6 +101,7 @@ uiRoutes
               <PipelineListing
                 className="monitoringLogstashPipelinesTable"
                 onBrush={this.onBrush}
+                zoomInfo={this.zoomInfo}
                 stats={data.nodeSummary}
                 statusComponent={DetailStatus}
                 data={data.pipelines}

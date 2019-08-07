@@ -36,6 +36,10 @@ $canvasElementCardWidth: 210px;
   max-width: 100%;
 }
 
+.canvasContextMenu--topBorder {
+  border-top: $euiBorderThin;
+}
+
 #canvas-app {
   overflow-y: hidden;
 

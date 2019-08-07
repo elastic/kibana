@@ -5,12 +5,18 @@
  */
 
 import { InfraNodeType } from '../../../graphql/types';
-import { rate } from './rate';
+import { networkTraffic } from './network_traffic';
 
-const FIELDS = {
+const METRIC_FIELDS = {
   [InfraNodeType.host]: 'system.network.out.bytes',
   [InfraNodeType.pod]: 'kubernetes.pod.network.tx.bytes',
   [InfraNodeType.container]: 'docker.network.out.bytes',
 };
 
-export const tx = rate('tx', FIELDS);
+const INTERFACE_FIELDS = {
+  [InfraNodeType.host]: 'system.network.name',
+  [InfraNodeType.pod]: null,
+  [InfraNodeType.container]: 'docker.network.interface',
+};
+
+export const tx = networkTraffic('tx', METRIC_FIELDS, INTERFACE_FIELDS);

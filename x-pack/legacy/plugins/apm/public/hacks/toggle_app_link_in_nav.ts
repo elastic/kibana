@@ -6,9 +6,9 @@
 
 import { npStart } from 'ui/new_platform';
 
-const apmUiEnabled = npStart.core.injectedMetadata.getInjectedVar(
-  'apmUiEnabled'
-);
+const { core } = npStart;
+const apmUiEnabled = core.injectedMetadata.getInjectedVar('apmUiEnabled');
+
 if (apmUiEnabled === false) {
-  npStart.core.chrome.navLinks.update('apm', { hidden: true });
+  core.chrome.navLinks.update('apm', { hidden: true });
 }

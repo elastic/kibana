@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -44,9 +44,7 @@ export const Button = styled(EuiPanel)`
   border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   border-radius: 6px 0 0 6px;
   box-shadow: ${({ theme }) =>
-    `0 3px 3px -1px ${theme.eui.euiColorLightestShade}, 0 5px 7px -2px ${
-      theme.eui.euiColorLightestShade
-    }`};
+    `0 3px 3px -1px ${theme.eui.euiColorLightestShade}, 0 5px 7px -2px ${theme.eui.euiColorLightestShade}`};
   background-color: inherit;
   cursor: pointer;
 `;
@@ -57,13 +55,26 @@ export const Text = styled(EuiText)`
   user-select: none;
 `;
 
-export const Badge = styled(EuiBadge)`
-  border-radius: 5px;
-  min-width: 25px;
-  padding: 0px;
-  transform: translateY(10px);
-  z-index: 10;
-`;
+// Ref: https://github.com/elastic/eui/issues/1655
+// export const Badge = styled(EuiBadge)`
+//   border-radius: 5px;
+//   min-width: 25px;
+//   padding: 0px;
+//   transform: translateY(10px);
+//   z-index: 10;
+// `;
+export const Badge = (props: EuiBadgeProps) => (
+  <EuiBadge
+    {...props}
+    style={{
+      borderRadius: '5px',
+      minWidth: '25px',
+      padding: '0px',
+      transform: 'translateY(10px)',
+      zIndex: 10,
+    }}
+  />
+);
 interface FlyoutButtonProps {
   dataProviders: DataProvider[];
   onOpen: () => void;

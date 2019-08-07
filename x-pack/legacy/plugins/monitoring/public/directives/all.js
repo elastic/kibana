@@ -5,14 +5,6 @@
  */
 
 import './main';
-import './chart';
-import './sparkline';
-import './elasticsearch/cluster_status';
-import './elasticsearch/index_summary';
-import './elasticsearch/node_summary';
 import './elasticsearch/ml_job_listing';
-import './kibana/cluster_status';
-import './kibana/listing';
-import './kibana/summary';
 import './beats/overview';
 import './beats/beat';

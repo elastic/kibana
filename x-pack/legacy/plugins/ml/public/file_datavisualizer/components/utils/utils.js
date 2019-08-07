@@ -139,6 +139,6 @@ export async function hasImportPermission(indexName) {
     ];
   }
 
-  const resp = await ml.checkPrivilege(priv);
+  const resp = await ml.hasPrivileges(priv);
   return (resp.securityDisabled === true || resp.has_all_requested === true);
 }

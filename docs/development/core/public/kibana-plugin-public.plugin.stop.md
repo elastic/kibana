@@ -2,10 +2,14 @@
 
 [Home](./index.md) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [Plugin](./kibana-plugin-public.plugin.md) &gt; [stop](./kibana-plugin-public.plugin.stop.md)
 
-## Plugin.stop property
+## Plugin.stop() method
 
 <b>Signature:</b>
 
 ```typescript
-stop?: () => void;
+stop?(): void;
 ```
+<b>Returns:</b>
+
+`void`
+

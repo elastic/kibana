@@ -6,19 +6,27 @@
 
 import { Location } from 'history';
 import { BreadcrumbRoute, getBreadcrumbs } from '../ProvideBreadcrumbs';
+import { RouteName } from '../route_config/route_names';
 
 describe('getBreadcrumbs', () => {
   const getTestRoutes = (): BreadcrumbRoute[] => [
-    { path: '/a', exact: true, breadcrumb: 'A' },
-    { path: '/a/ignored', exact: true, breadcrumb: 'Ignored Route' },
+    { path: '/a', exact: true, breadcrumb: 'A', name: RouteName.HOME },
+    {
+      path: '/a/ignored',
+      exact: true,
+      breadcrumb: 'Ignored Route',
+      name: RouteName.METRICS
+    },
     {
       path: '/a/:letter',
       exact: true,
+      name: RouteName.SERVICE,
       breadcrumb: ({ match }) => `Second level: ${match.params.letter}`
     },
     {
       path: '/a/:letter/c',
       exact: true,
+      name: RouteName.ERRORS,
       breadcrumb: ({ match }) => `Third level: ${match.params.letter}`
     }
   ];

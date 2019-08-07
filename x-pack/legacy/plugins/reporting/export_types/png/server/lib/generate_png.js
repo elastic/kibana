@@ -42,7 +42,7 @@ function generatePngObservableFn(server) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
     }
 
-    const layout =  new PreserveLayout(layoutParams.dimensions);
+    const layout = new PreserveLayout(layoutParams.dimensions);
 
     const screenshots$ = urlScreenshotsObservable(url, conditionalHeaders, layout, browserTimezone);
 

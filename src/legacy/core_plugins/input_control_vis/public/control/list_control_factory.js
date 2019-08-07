@@ -26,6 +26,7 @@ import {
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
@@ -98,8 +99,8 @@ class ListControl extends Control {
 
     const fieldName = this.filterManager.fieldName;
     const initialSearchSourceState = {
-      timeout: '1s',
-      terminate_after: 100000
+      timeout: `${chrome.getInjected('autocompleteTimeout')}ms`,
+      terminate_after: chrome.getInjected('autocompleteTerminateAfter')
     };
     const aggs = termsAgg({
       field: indexPattern.fields.byName[fieldName],
@@ -141,6 +142,7 @@ class ListControl extends Control {
       return;
     }
 
+    this.partialResults = resp.terminated_early || resp.timed_out;
     this.selectOptions = selectOptions;
     this.enable = true;
     this.disabledReason = '';

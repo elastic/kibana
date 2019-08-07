@@ -100,6 +100,7 @@ uiRoutes.when('/elasticsearch/indices/:index', {
               onBrush={this.onBrush}
               indexUuid={this.indexName}
               clusterUuid={$scope.cluster.cluster_uuid}
+              zoomInfo={this.zoomInfo}
               {...data}
             />
           </I18nContext>

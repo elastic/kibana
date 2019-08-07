@@ -10,7 +10,7 @@ import { RepoConfig, RepoConfigs } from '../model';
 export interface LspOptions {
   requestTimeoutMs: number;
   detach: boolean;
-  verbose: boolean;
+  oomScoreAdj: boolean;
 }
 
 export interface SecurityOptions {
@@ -20,6 +20,11 @@ export interface SecurityOptions {
   gitHostWhitelist: string[];
   gitProtocolWhitelist: string[];
   enableGitCertCheck: boolean;
+}
+
+export interface DiskOptions {
+  thresholdEnabled: boolean;
+  watermarkLowMb: number;
 }
 
 export class ServerOptions {
@@ -43,13 +48,13 @@ export class ServerOptions {
 
   public readonly maxWorkspace: number = this.options.maxWorkspace;
 
-  public readonly disableIndexScheduler: boolean = this.options.disableIndexScheduler;
-
   public readonly enableGlobalReference: boolean = this.options.enableGlobalReference;
 
   public readonly lsp: LspOptions = this.options.lsp;
 
   public readonly security: SecurityOptions = this.options.security;
+
+  public readonly disk: DiskOptions = this.options.disk;
 
   public readonly repoConfigs: RepoConfigs = (this.options.repos as RepoConfig[]).reduce(
     (previous, current) => {

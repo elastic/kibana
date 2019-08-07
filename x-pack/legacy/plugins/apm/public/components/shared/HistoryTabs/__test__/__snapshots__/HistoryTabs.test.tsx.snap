@@ -10,7 +10,7 @@ exports[`HistoryTabs should render correctly 1`] = `
     <EuiTab
       disabled={false}
       isSelected={false}
-      key="/one--0"
+      key="one"
       onClick={[Function]}
     >
       One
@@ -18,7 +18,7 @@ exports[`HistoryTabs should render correctly 1`] = `
     <EuiTab
       disabled={false}
       isSelected={true}
-      key="/two--1"
+      key="two"
       onClick={[Function]}
     >
       Two
@@ -26,7 +26,7 @@ exports[`HistoryTabs should render correctly 1`] = `
     <EuiTab
       disabled={false}
       isSelected={false}
-      key="/three--2"
+      key="three"
       onClick={[Function]}
     >
       Three
@@ -34,17 +34,17 @@ exports[`HistoryTabs should render correctly 1`] = `
   </EuiTabs>
   <EuiSpacer />
   <Route
-    key="/one"
+    key="one"
     path="/one"
     render={[Function]}
   />
   <Route
-    key="/two"
+    key="two"
     path="/two"
     render={[Function]}
   />
   <Route
-    key="/three"
+    key="three"
     path="/three"
     render={[Function]}
   />

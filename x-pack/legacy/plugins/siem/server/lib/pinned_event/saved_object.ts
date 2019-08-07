@@ -18,7 +18,7 @@ import {
   PinnedEventSavedObjectRuntimeType,
   SavedPinnedEvent,
 } from './types';
-import { PageInfoNote, SortNote } from '../../graphql/types';
+import { PageInfoNote, SortNote, PinnedEvent as PinnedEventResponse } from '../../graphql/types';
 import { pinnedEventSavedObjectType, timelineSavedObjectType } from '../../saved_objects';
 import { pickSavedTimeline } from '../timeline/pick_saved_timeline';
 import { convertSavedObjectToSavedTimeline } from '../timeline/convert_saved_object_to_savedtimeline';
@@ -96,52 +96,69 @@ export class PinnedEvent {
     pinnedEventId: string | null,
     eventId: string,
     timelineId: string | null
-  ): Promise<PinnedEventSavedObject | null> {
-    let timelineVersionSavedObject = null;
+  ): Promise<PinnedEventResponse | null> {
     try {
-      if (timelineId == null) {
-        const timelineResult = convertSavedObjectToSavedTimeline(
-          await this.libs.savedObjects
-            .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-            .create(
-              timelineSavedObjectType,
-              pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
-            )
-        );
-        timelineId = timelineResult.savedObjectId;
-        timelineVersionSavedObject = timelineResult.version;
-      }
       if (pinnedEventId == null) {
-        const allPinnedEventId = await this.getAllPinnedEventsByTimelineId(request, timelineId);
-        const isPinnedAlreadyExisting = allPinnedEventId.filter(
-          pinnedEvent => pinnedEvent.eventId === eventId
-        );
-        if (isPinnedAlreadyExisting.length === 0) {
-          const savedPinnedEvent: SavedPinnedEvent = {
-            eventId,
-            timelineId,
-          };
-          // create Pinned Event on Timeline
-          return convertSavedObjectToSavedPinnedEvent(
-            await this.libs.savedObjects
-              .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-              .create(
-                pinnedEventSavedObjectType,
-                pickSavedPinnedEvent(
-                  pinnedEventId,
-                  savedPinnedEvent,
-                  request[internalFrameworkRequest].auth || null
-                )
-              ),
-            timelineVersionSavedObject != null ? timelineVersionSavedObject : undefined
+        const timelineVersionSavedObject =
+          timelineId == null
+            ? await (async () => {
+                const timelineResult = convertSavedObjectToSavedTimeline(
+                  await this.libs.savedObjects
+                    .getScopedSavedObjectsClient(request[internalFrameworkRequest])
+                    .create(
+                      timelineSavedObjectType,
+                      pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
+                    )
+                );
+                timelineId = timelineResult.savedObjectId;
+                return timelineResult.version;
+              })()
+            : null;
+
+        if (timelineId != null) {
+          const allPinnedEventId = await this.getAllPinnedEventsByTimelineId(request, timelineId);
+          const isPinnedAlreadyExisting = allPinnedEventId.filter(
+            pinnedEvent => pinnedEvent.eventId === eventId
           );
+          if (isPinnedAlreadyExisting.length === 0) {
+            const savedPinnedEvent: SavedPinnedEvent = {
+              eventId,
+              timelineId,
+            };
+            // create Pinned Event on Timeline
+            return convertSavedObjectToSavedPinnedEvent(
+              await this.libs.savedObjects
+                .getScopedSavedObjectsClient(request[internalFrameworkRequest])
+                .create(
+                  pinnedEventSavedObjectType,
+                  pickSavedPinnedEvent(
+                    pinnedEventId,
+                    savedPinnedEvent,
+                    request[internalFrameworkRequest].auth || null
+                  )
+                ),
+              timelineVersionSavedObject != null ? timelineVersionSavedObject : undefined
+            );
+          }
+          return isPinnedAlreadyExisting[0];
         }
-        return isPinnedAlreadyExisting[0];
+        throw new Error('You can NOT pinned event without a timelineID');
       }
       // Delete Pinned Event on Timeline
       await this.deletePinnedEventOnTimeline(request, [pinnedEventId]);
       return null;
     } catch (err) {
+      if (getOr(null, 'output.statusCode', err) === 403) {
+        return pinnedEventId != null
+          ? {
+              code: 403,
+              message: err.message,
+              pinnedEventId: eventId,
+              timelineId: '',
+              timelineVersion: '',
+            }
+          : null;
+      }
       throw err;
     }
   }

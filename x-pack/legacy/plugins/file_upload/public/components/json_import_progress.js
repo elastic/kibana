@@ -4,18 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import React, { Fragment, Component } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiCodeBlock,
-  EuiSpacer,
-  EuiFormRow,
-  EuiText,
-  EuiProgress,
-  EuiFlexItem,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle, EuiProgress, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 
@@ -70,101 +61,72 @@ export class JsonImportProgress extends Component {
 
     return (
       <Fragment>
-        {!complete ?
-          <EuiProgress size="xs" color="accent" position="absolute"/> : null}
-        <EuiSpacer size="m"/>
-        <EuiFormRow
-          label={
+        {!complete ? <EuiProgress size="xs" color="accent" position="absolute" /> : null}
+        <EuiTitle size="xs">
+          <h3>
             <FormattedMessage
               id="xpack.fileUpload.jsonImport.indexingStatus"
               defaultMessage="Indexing status"
             />
-          }
-        >
-          <EuiText>
-            {importMessage}
-          </EuiText>
-        </EuiFormRow>
-        <EuiSpacer size="m"/>
-        {complete
-          ? (
-            <Fragment>
-              {
-                indexDataJson
-                  ? (
-                    <EuiFormRow
-                      label={
-                        <FormattedMessage
-                          id="xpack.fileUpload.jsonImport.indexingResponse"
-                          defaultMessage="Indexing response"
-                        />
-                      }
-                    >
-                      <EuiCodeBlock
-                        paddingSize="s"
-                        overflowHeight={200}
-                      >
-                        {indexDataJson}
-                      </EuiCodeBlock>
-                    </EuiFormRow>
-                  )
-                  : null
-              }
-              {
-                indexPatternJson
-                  ? (
-                    <EuiFormRow
-                      label={
-                        <FormattedMessage
-                          id="xpack.fileUpload.jsonImport.indexPatternResponse"
-                          defaultMessage="Index pattern response"
-                        />
-                      }
-                    >
-                      <EuiCodeBlock
-                        paddingSize="s"
-                        overflowHeight={200}
-                      >
-                        {indexPatternJson}
-                      </EuiCodeBlock>
-                    </EuiFormRow>
-                  )
-                  : null
-              }
-              <EuiFormRow>
-                <EuiFlexItem>
-                  <EuiCallOut
-                    title={
-                      i18n.translate('xpack.fileUpload.jsonImport.indexModsTitle',
-                        { defaultMessage: 'Index modifications' })}
-                    iconType="pin"
-                  >
-                    <div>
-                      {
-                        i18n.translate('xpack.fileUpload.jsonImport.indexModsMsg',
-                          { defaultMessage: 'Further index modifications can be made using\n'
-                          })
-                      }
-                      <a
-                        target="_blank"
-                        href={`${chrome.getBasePath()}/app/kibana#/
-                          management/elasticsearch/index_management/indices/
-                          filter/${indexName}`.replace(/\s/g, '')}
-                      >
-                        {
-                          i18n.translate('xpack.fileUpload.jsonImport.indexMgmtLink',
-                            { defaultMessage: 'Index Management' })
-                        }
-                      </a>
-                    </div>
-                  </EuiCallOut>
-                </EuiFlexItem>
-              </EuiFormRow>
-            </Fragment>
-          )
-          : null
-        }
-        <EuiSpacer size="s"/>
+          </h3>
+        </EuiTitle>
+        <EuiText>{importMessage && <p>{importMessage}</p>}</EuiText>
+        <EuiSpacer size="m" />
+        {complete ? (
+          <Fragment>
+            {indexDataJson ? (
+              <Fragment>
+                <EuiTitle size="xxs">
+                  <h4>
+                    <FormattedMessage
+                      id="xpack.fileUpload.jsonImport.indexingResponse"
+                      defaultMessage="Indexing response"
+                    />
+                  </h4>
+                </EuiTitle>
+                <EuiCodeBlock data-test-subj="indexRespCodeBlock" paddingSize="s" overflowHeight={200}>
+                  {indexDataJson}
+                </EuiCodeBlock>
+                <EuiSpacer size="m" />
+              </Fragment>
+            ) : null}
+            {indexPatternJson ? (
+              <Fragment>
+                <EuiTitle size="xxs">
+                  <h4>
+                    <FormattedMessage
+                      id="xpack.fileUpload.jsonImport.indexPatternResponse"
+                      defaultMessage="Index pattern response"
+                    />
+                  </h4>
+                </EuiTitle>
+                <EuiCodeBlock data-test-subj="indexPatternRespCodeBlock" paddingSize="s" overflowHeight={200}>
+                  {indexPatternJson}
+                </EuiCodeBlock>
+                <EuiSpacer size="m" />
+              </Fragment>
+            ) : null}
+            <EuiCallOut>
+              <div>
+                {i18n.translate('xpack.fileUpload.jsonImport.indexModsMsg', {
+                  defaultMessage: 'Further index modifications can be made using\n',
+                })}
+                <a
+                  data-test-subj="indexManagementNewIndexLink"
+                  target="_blank"
+                  href={`${chrome.getBasePath()}/app/kibana#/
+                      management/elasticsearch/index_management/indices/
+                      filter/${indexName}`.replace(/\s/g, '')}
+                >
+                  {i18n.translate('xpack.fileUpload.jsonImport.indexMgmtLink', {
+                    defaultMessage: 'Index Management',
+                  })}
+                </a>
+                .
+              </div>
+            </EuiCallOut>
+          </Fragment>
+        ) : null}
       </Fragment>
     );
   }

@@ -23,7 +23,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/sense', ['react']);
 
-import { ConsoleMenu } from '../console_menu';
+import { ConsoleMenu } from '../components/console_menu';
 
 module.directive('consoleMenu', function (reactDirective) {
   return reactDirective(wrapInI18nContext(ConsoleMenu));

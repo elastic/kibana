@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, Toast } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiGlobalToastListToast as Toast,
+} from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import { pure } from 'recompose';
 import * as React from 'react';

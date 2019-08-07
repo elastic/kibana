@@ -5,135 +5,169 @@
  */
 
 import _ from 'lodash';
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiButtonEmpty, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
-import { IndexPatternColumn, FieldBasedIndexPatternColumn } from '../indexpattern';
-import { IndexPatternDimensionPanelProps } from './dimension_panel';
-import { changeColumn, deleteColumn, hasField, sortByField } from '../state_helpers';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiComboBoxOptionProps } from '@elastic/eui';
+import classNames from 'classnames';
+import {
+  // @ts-ignore
+  EuiHighlight,
+} from '@elastic/eui';
+import { OperationType, IndexPattern, IndexPatternField } from '../indexpattern';
+import { FieldIcon } from '../field_icon';
+import { DataType } from '../../types';
+import { OperationFieldSupportMatrix } from './dimension_panel';
 
-export interface FieldSelectProps extends IndexPatternDimensionPanelProps {
-  selectedColumn: IndexPatternColumn;
-  filteredColumns: IndexPatternColumn[];
+export type FieldChoice =
+  | { type: 'field'; field: string; operationType?: OperationType }
+  | { type: 'document' };
+
+export interface FieldSelectProps {
+  currentIndexPattern: IndexPattern;
+  fieldMap: Record<string, IndexPatternField>;
+  incompatibleSelectedOperationType: OperationType | null;
+  selectedColumnOperationType?: OperationType;
+  selectedColumnSourceField?: string;
+  operationFieldSupportMatrix: OperationFieldSupportMatrix;
+  onChoose: (choice: FieldChoice) => void;
+  onDeleteColumn: () => void;
 }
 
 export function FieldSelect({
-  selectedColumn,
-  filteredColumns,
-  state,
-  columnId,
-  setState,
+  incompatibleSelectedOperationType,
+  selectedColumnOperationType,
+  selectedColumnSourceField,
+  operationFieldSupportMatrix,
+  currentIndexPattern,
+  fieldMap,
+  onChoose,
+  onDeleteColumn,
 }: FieldSelectProps) {
-  const [isFieldSelectOpen, setFieldSelectOpen] = useState(false);
-  const fieldColumns = filteredColumns.filter(hasField) as FieldBasedIndexPatternColumn[];
+  const { operationByDocument, operationByField } = operationFieldSupportMatrix;
+  const memoizedFieldOptions = useMemo(() => {
+    const fields = Object.keys(operationByField).sort();
 
-  const uniqueColumnsByField = sortByField(
-    _.uniq(
-      fieldColumns
-        .filter(col => selectedColumn && col.operationType === selectedColumn.operationType)
-        .concat(fieldColumns),
-      col => col.sourceField
-    )
-  );
+    function isCompatibleWithCurrentOperation(fieldName: string) {
+      if (incompatibleSelectedOperationType) {
+        return operationByField[fieldName]!.includes(incompatibleSelectedOperationType);
+      }
+      return (
+        !selectedColumnOperationType ||
+        operationByField[fieldName]!.includes(selectedColumnOperationType)
+      );
+    }
 
-  const fieldOptions = [];
-  const fieldLessColumn = filteredColumns.find(column => !hasField(column));
-  if (fieldLessColumn) {
-    fieldOptions.push({
-      label: i18n.translate('xpack.lens.indexPattern.documentField', {
-        defaultMessage: 'Document',
-      }),
-      value: fieldLessColumn.operationId,
-    });
-  }
+    const isCurrentOperationApplicableWithoutField =
+      (!selectedColumnOperationType && !incompatibleSelectedOperationType) ||
+      operationByDocument.includes(
+        incompatibleSelectedOperationType || selectedColumnOperationType!
+      );
 
-  if (uniqueColumnsByField.length > 0) {
-    fieldOptions.push({
-      label: i18n.translate('xpack.lens.indexPattern.individualFieldsLabel', {
-        defaultMessage: 'Individual fields',
-      }),
-      options: uniqueColumnsByField.map(col => ({
-        label: col.sourceField,
-        value: col.operationId,
-      })),
-    });
-  }
+    const fieldOptions = [];
+
+    if (operationByDocument.length > 0) {
+      fieldOptions.push({
+        label: i18n.translate('xpack.lens.indexPattern.documentField', {
+          defaultMessage: 'Document',
+        }),
+        value: { type: 'document' },
+        className: classNames({
+          'lnsConfigPanel__fieldOption--incompatible': !isCurrentOperationApplicableWithoutField,
+        }),
+        'data-test-subj': `lns-documentOption${
+          isCurrentOperationApplicableWithoutField ? '' : 'Incompatible'
+        }`,
+      });
+    }
+
+    if (fields.length > 0) {
+      fieldOptions.push({
+        label: i18n.translate('xpack.lens.indexPattern.individualFieldsLabel', {
+          defaultMessage: 'Individual fields',
+        }),
+        options: fields
+          .map(field => ({
+            label: field,
+            value: {
+              type: 'field',
+              field,
+              dataType: fieldMap[field].type,
+              operationType:
+                selectedColumnOperationType && isCompatibleWithCurrentOperation(field)
+                  ? selectedColumnOperationType
+                  : undefined,
+            },
+            compatible: isCompatibleWithCurrentOperation(field),
+          }))
+          .sort(({ compatible: a }, { compatible: b }) => {
+            if (a && !b) {
+              return -1;
+            }
+            if (!a && b) {
+              return 1;
+            }
+            return 0;
+          })
+          .map(({ label, value, compatible }) => ({
+            label,
+            value,
+            className: classNames({ 'lnsConfigPanel__fieldOption--incompatible': !compatible }),
+            'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${label}`,
+          })),
+      });
+    }
+    return fieldOptions;
+  }, [
+    incompatibleSelectedOperationType,
+    selectedColumnOperationType,
+    selectedColumnSourceField,
+    operationFieldSupportMatrix,
+    currentIndexPattern,
+    fieldMap,
+  ]);
 
   return (
-    <>
-      <EuiFlexItem grow={true}>
-        {!isFieldSelectOpen ? (
-          <EuiButtonEmpty
-            data-test-subj="indexPattern-configure-dimension"
-            onClick={() => setFieldSelectOpen(true)}
-          >
-            {selectedColumn
-              ? selectedColumn.label
-              : i18n.translate('xpack.lens.indexPattern.configureDimensionLabel', {
-                  defaultMessage: 'Configure dimension',
-                })}
-          </EuiButtonEmpty>
-        ) : (
-          <EuiComboBox
-            fullWidth
-            inputRef={el => {
-              if (el) {
-                el.focus();
-              }
-            }}
-            onBlur={() => {
-              setFieldSelectOpen(false);
-            }}
-            data-test-subj="indexPattern-dimension-field"
-            placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
-              defaultMessage: 'Field',
-            })}
-            options={fieldOptions}
-            selectedOptions={
-              selectedColumn && hasField(selectedColumn)
-                ? [
-                    {
-                      label: selectedColumn.sourceField,
-                      value: selectedColumn.operationId,
-                    },
-                  ]
-                : []
-            }
-            singleSelection={{ asPlainText: true }}
-            isClearable={true}
-            onChange={choices => {
-              setFieldSelectOpen(false);
+    <EuiComboBox
+      fullWidth
+      data-test-subj="indexPattern-dimension-field"
+      placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
+        defaultMessage: 'Field',
+      })}
+      options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionProps[]}
+      isInvalid={Boolean(incompatibleSelectedOperationType && selectedColumnOperationType)}
+      selectedOptions={
+        selectedColumnOperationType
+          ? selectedColumnSourceField
+            ? [
+                {
+                  label: selectedColumnSourceField,
+                  value: { type: 'field', field: selectedColumnSourceField },
+                },
+              ]
+            : [memoizedFieldOptions[0]]
+          : []
+      }
+      singleSelection={{ asPlainText: true }}
+      onChange={choices => {
+        if (choices.length === 0) {
+          onDeleteColumn();
+          return;
+        }
 
-              if (choices.length === 0) {
-                setState(deleteColumn(state, columnId));
-                return;
-              }
-
-              const column: IndexPatternColumn = filteredColumns.find(
-                ({ operationId }) => operationId === choices[0].value
-              )!;
-
-              setState(changeColumn(state, columnId, column));
-            }}
-          />
-        )}
-      </EuiFlexItem>
-      {selectedColumn && (
-        <EuiFlexItem>
-          <EuiButtonIcon
-            data-test-subj="indexPattern-dimensionPopover-remove"
-            iconType="cross"
-            iconSize="s"
-            color="danger"
-            aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-              defaultMessage: 'Remove',
-            })}
-            onClick={() => {
-              setState(deleteColumn(state, columnId));
-            }}
-          />
-        </EuiFlexItem>
-      )}
-    </>
+        onChoose((choices[0].value as unknown) as FieldChoice);
+      }}
+      renderOption={(option, searchValue) => {
+        return (
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={null}>
+              <FieldIcon type={((option.value as unknown) as { dataType: DataType }).dataType} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      }}
+    />
   );
 }

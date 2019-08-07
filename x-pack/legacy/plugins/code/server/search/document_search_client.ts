@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { IRange } from 'monaco-editor';
 import { LineMapper } from '../../common/line_mapper';
 import {
@@ -30,7 +31,8 @@ const HIT_MERGE_LINE_INTERVAL = 2; // Inclusive
 const MAX_HIT_NUMBER = 5;
 
 export class DocumentSearchClient extends AbstractSearchClient {
-  private HIGHLIGHT_TAG = '_@_';
+  private HIGHLIGHT_PRE_TAG = '_@-';
+  private HIGHLIGHT_POST_TAG = '-@_';
   private LINE_SEPARATOR = '\n';
 
   constructor(protected readonly client: EsClient, protected readonly log: Logger) {
@@ -63,15 +65,15 @@ export class DocumentSearchClient extends AbstractSearchClient {
       },
     };
 
-    // The query to search content and path filter.
-    const contentAndPathQuery = {
-      simple_query_string: {
-        query: req.query,
-        fields: ['content^1.0', 'path^1.0'],
-        default_operator: 'or',
-        lenient: false,
-        analyze_wildcard: false,
-        boost: 1.0,
+    // The queries to search content and path filter.
+    const contentQuery = {
+      match: {
+        content: req.query,
+      },
+    };
+    const pathQuery = {
+      match: {
+        path: req.query,
       },
     };
 
@@ -110,7 +112,7 @@ export class DocumentSearchClient extends AbstractSearchClient {
         size,
         query: {
           bool: {
-            should: [qnameQuery, contentAndPathQuery],
+            should: [qnameQuery, contentQuery, pathQuery],
             disable_coord: false,
             adjust_pure_negative: true,
             boost: 1.0,
@@ -179,8 +181,8 @@ export class DocumentSearchClient extends AbstractSearchClient {
         },
         highlight: {
           // TODO: we might need to improve the highlighting separator.
-          pre_tags: [this.HIGHLIGHT_TAG],
-          post_tags: [this.HIGHLIGHT_TAG],
+          pre_tags: [this.HIGHLIGHT_PRE_TAG],
+          post_tags: [this.HIGHLIGHT_POST_TAG],
           fields: {
             content: {},
             path: {},
@@ -195,15 +197,16 @@ export class DocumentSearchClient extends AbstractSearchClient {
       const doc: Document = hit._source;
       const { repoUri, path, language } = doc;
 
-      const highlight = hit.highlight;
+      let termContent: string[] = [];
       // Similar to https://github.com/lambdalab/lambdalab/blob/master/services/liaceservice/src/main/scala/com/lambdalab/liaceservice/LiaceServiceImpl.scala#L147
       // Might need refactoring.
-      const highlightContent: string[] = highlight.content;
-      let termContent: string[] = [];
-      if (highlightContent) {
-        highlightContent.forEach((c: string) => {
-          termContent = termContent.concat(this.extractKeywords(c));
-        });
+      if (hit.highlight) {
+        const highlightContent: string[] = hit.highlight.content;
+        if (highlightContent) {
+          highlightContent.forEach((c: string) => {
+            termContent = termContent.concat(this.extractKeywords(c));
+          });
+        }
       }
       const hitsContent = this.termsToHits(doc.content, termContent);
       const sourceContent = this.getSourceContent(hitsContent, doc);
@@ -344,13 +347,16 @@ export class DocumentSearchClient extends AbstractSearchClient {
   }
 
   private termsToHits(source: string, terms: string[]): SourceHit[] {
-    const filteredTerms = terms.filter(t => t.trim().length > 0);
-    if (filteredTerms.length === 0) {
+    // Dedup search terms by using Set.
+    const filteredTerms = new Set(
+      terms.filter(t => t.trim().length > 0).map(t => _.escapeRegExp(t))
+    );
+    if (filteredTerms.size === 0) {
       return [];
     }
 
     const lineMapper = new LineMapper(source);
-    const regex = new RegExp(`(${filteredTerms.join('|')})`, 'g');
+    const regex = new RegExp(`(${Array.from(filteredTerms.values()).join('|')})`, 'g');
     let match;
     const hits: SourceHit[] = [];
     do {
@@ -379,11 +385,17 @@ export class DocumentSearchClient extends AbstractSearchClient {
     if (!text) {
       return [];
     } else {
-      const keywordRegex = new RegExp(`${this.HIGHLIGHT_TAG}(\\w*)${this.HIGHLIGHT_TAG}`, 'g');
+      // console.log(text);
+      const keywordRegex = new RegExp(
+        `${this.HIGHLIGHT_PRE_TAG}(\\w*)${this.HIGHLIGHT_POST_TAG}`,
+        'g'
+      );
       const keywords = text.match(keywordRegex);
       if (keywords) {
         return keywords.map((k: string) => {
-          return k.replace(new RegExp(this.HIGHLIGHT_TAG, 'g'), '');
+          return k
+            .replace(new RegExp(this.HIGHLIGHT_PRE_TAG, 'g'), '')
+            .replace(new RegExp(this.HIGHLIGHT_POST_TAG, 'g'), '');
         });
       } else {
         return [];

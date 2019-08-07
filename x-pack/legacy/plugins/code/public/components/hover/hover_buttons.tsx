@@ -5,6 +5,8 @@
  */
 
 import { EuiButton, EuiFlexGroup } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import React from 'react';
 import { HoverState } from './hover_widget';
 
@@ -25,7 +27,10 @@ export class HoverButtons extends React.PureComponent<HoverButtonProps> {
             onClick={this.props.gotoDefinition}
             data-test-subj="codeGoToDefinitionButton"
           >
-            Goto Definition
+            <FormattedMessage
+              id="xpack.code.monaco.hover.gotoDefinitionButtonLabel"
+              defaultMessage="Goto Definition"
+            />
           </EuiButton>
           <EuiButton
             size="s"
@@ -33,7 +38,10 @@ export class HoverButtons extends React.PureComponent<HoverButtonProps> {
             onClick={this.props.findReferences}
             data-test-subj="codeFindReferenceButton"
           >
-            Find Reference
+            <FormattedMessage
+              id="xpack.code.monaco.hover.findReferenceButtonLabel"
+              defaultMessage="Find Reference"
+            />
           </EuiButton>
         </EuiFlexGroup>
       </React.Fragment>

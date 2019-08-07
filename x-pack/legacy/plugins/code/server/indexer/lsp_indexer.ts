@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import fs from 'fs';
-import util from 'util';
-
 import { ResponseError } from 'vscode-jsonrpc';
 
 import { ProgressReporter } from '.';
@@ -17,7 +14,7 @@ import {
 } from '../../common/lsp_error_codes';
 import { toCanonicalUrl } from '../../common/uri_util';
 import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
-import { GitOperations } from '../git_operations';
+import { GitOperations, HEAD } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
@@ -101,22 +98,18 @@ export class LspIndexer extends AbstractIndexer {
   }
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIndexRequest> {
-    let repo;
     try {
-      const {
-        workspaceRepo,
-        workspaceRevision,
-      } = await this.lspService.workspaceHandler.openWorkspace(this.repoUri, 'head');
-      repo = workspaceRepo;
-      const workspaceDir = workspaceRepo.workdir();
-      const fileIterator = await this.gitOps.iterateRepo(this.repoUri, 'head');
+      const fileIterator = await this.gitOps.iterateRepo(this.repoUri, HEAD);
       for await (const file of fileIterator) {
         const filePath = file.path!;
         const req: LspIndexRequest = {
           repoUri: this.repoUri,
-          localRepoPath: workspaceDir,
           filePath,
-          revision: workspaceRevision,
+          // Always use HEAD for now until we have multi revision.
+          // Also, since the workspace might get updated during the index, we always
+          // want the revision to keep updated so that lsp proxy could pass the revision
+          // check per discussion here: https://github.com/elastic/code/issues/1317#issuecomment-504615833
+          revision: HEAD,
         };
         yield req;
       }
@@ -124,16 +117,12 @@ export class LspIndexer extends AbstractIndexer {
       this.log.error(`Prepare lsp indexing requests error.`);
       this.log.error(error);
       throw error;
-    } finally {
-      if (repo) {
-        repo.cleanup();
-      }
     }
   }
 
   protected async getIndexRequestCount(): Promise<number> {
     try {
-      return await this.gitOps.countRepoFiles(this.repoUri, 'head');
+      return await this.gitOps.countRepoFiles(this.repoUri, HEAD);
     } catch (error) {
       if (this.isCancelled()) {
         this.log.debug(`Indexer got cancelled. Skip get index count error.`);
@@ -202,32 +191,29 @@ export class LspIndexer extends AbstractIndexer {
     }
   }
 
-  protected async processRequest(request: LspIndexRequest): Promise<IndexStats> {
-    const stats: IndexStats = new Map<IndexStatsKey, number>()
-      .set(IndexStatsKey.Symbol, 0)
-      .set(IndexStatsKey.Reference, 0)
-      .set(IndexStatsKey.File, 0);
-    const { repoUri, revision, filePath, localRepoPath } = request;
+  protected FILE_OVERSIZE_ERROR_MSG = 'File size exceeds limit. Skip index.';
+  protected async getFileSource(request: LspIndexRequest): Promise<string> {
+    const { revision, filePath } = request;
+    // Always read file content from the original bare repo
+    const blob = await this.gitOps.fileContent(this.repoUri, filePath, revision);
+    if (blob.rawsize() > TEXT_FILE_LIMIT) {
+      throw new Error(this.FILE_OVERSIZE_ERROR_MSG);
+    }
+    return blob.content().toString();
+  }
 
-    this.log.debug(`Indexing ${filePath} at revision ${revision} for ${repoUri}`);
+  protected async execLspIndexing(
+    request: LspIndexRequest
+  ): Promise<{
+    symbolNames: Set<string>;
+    symbolsLength: number;
+    referencesLength: number;
+  }> {
+    const { repoUri, revision, filePath } = request;
     const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
     const symbolNames = new Set<string>();
-
-    const localFilePath = `${localRepoPath}${filePath}`;
-    const lstat = util.promisify(fs.lstat);
-    const stat = await lstat(localFilePath);
-
-    if (stat.size > TEXT_FILE_LIMIT) {
-      this.log.debug(`File size exceeds limit. Skip index.`);
-      return stats;
-    }
-
-    const readLink = util.promisify(fs.readlink);
-    const readFile = util.promisify(fs.readFile);
-    const content = stat.isSymbolicLink()
-      ? await readLink(localFilePath, 'utf8')
-      : await readFile(localFilePath, 'utf8');
-
+    let symbolsLength = 0;
+    let referencesLength = 0;
     try {
       const lang = detectLanguageByFilename(filePath);
       // filter file by language
@@ -245,12 +231,12 @@ export class LspIndexer extends AbstractIndexer {
             await this.lspBatchIndexHelper.index(SymbolIndexName(repoUri), symbol);
             symbolNames.add(symbol.symbolInformation.name);
           }
-          stats.set(IndexStatsKey.Symbol, symbols.length);
+          symbolsLength = symbols.length;
 
           for (const ref of references) {
             await this.lspBatchIndexHelper.index(ReferenceIndexName(repoUri), ref);
           }
-          stats.set(IndexStatsKey.Reference, references.length);
+          referencesLength = references.length;
         } else {
           this.log.debug(`Empty response from lsp server. Skip symbols and references indexing.`);
         }
@@ -270,6 +256,35 @@ export class LspIndexer extends AbstractIndexer {
         this.log.warn(error);
       }
     }
+
+    return { symbolNames, symbolsLength, referencesLength };
+  }
+
+  protected async processRequest(request: LspIndexRequest): Promise<IndexStats> {
+    const stats: IndexStats = new Map<IndexStatsKey, number>()
+      .set(IndexStatsKey.Symbol, 0)
+      .set(IndexStatsKey.Reference, 0)
+      .set(IndexStatsKey.File, 0);
+    const { repoUri, revision, filePath } = request;
+    this.log.debug(`Indexing ${filePath} at revision ${revision} for ${repoUri}`);
+
+    let content = '';
+    try {
+      content = await this.getFileSource(request);
+    } catch (error) {
+      if ((error as Error).message === this.FILE_OVERSIZE_ERROR_MSG) {
+        // Skip this index request if the file is oversized
+        this.log.debug(this.FILE_OVERSIZE_ERROR_MSG);
+        return stats;
+      } else {
+        // Rethrow the issue if for other reasons
+        throw error;
+      }
+    }
+
+    const { symbolNames, symbolsLength, referencesLength } = await this.execLspIndexing(request);
+    stats.set(IndexStatsKey.Symbol, symbolsLength);
+    stats.set(IndexStatsKey.Reference, referencesLength);
 
     const language = await detectLanguage(filePath, Buffer.from(content));
     const body: Document = {

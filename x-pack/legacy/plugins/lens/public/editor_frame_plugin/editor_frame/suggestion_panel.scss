@@ -1,0 +1,21 @@
+.lnsSidebar__suggestions {
+  > * {
+    margin-top: $euiSizeS;
+  }
+}
+
+$suggestionHeight: 120px;
+
+.lnsSidebar__suggestionIcon {
+  width: 100%;
+  height: $suggestionHeight;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $euiSize;
+}
+
+ .lnsSuggestionChartWrapper {
+   height: $suggestionHeight;
+   pointer-events: none;
+ }

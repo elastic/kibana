@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ScaleType, niceTimeFormatter, Rotation } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,17 +14,18 @@ import {
   EuiTitle,
   IconType,
 } from '@elastic/eui';
+import { get, getOr } from 'lodash/fp';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { get, getOr } from 'lodash/fp';
-import { ScaleType, niceTimeFormatter } from '@elastic/charts';
-import { BarChart } from '../charts/barchart';
-import { AreaChart } from '../charts/areachart';
-import { getEmptyTagValue } from '../empty_value';
-import { ChartConfigsData, ChartData, ChartSeriesConfigs } from '../charts/common';
+import { BrushEndListener, ElementClickListener } from '@elastic/charts/dist/state/chart_state';
 import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
-import { GlobalTime } from '../../containers/global_time';
+import { AreaChart } from '../charts/areachart';
+import { BarChart } from '../charts/barchart';
+import { ChartConfigsData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';
+import { getEmptyTagValue } from '../empty_value';
+
+import { InspectButton } from '../inspect';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
@@ -51,6 +53,7 @@ export interface StatItems {
   enableAreaChart?: boolean;
   enableBarChart?: boolean;
   grow?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | true | false | null;
+  index: number;
   areachartConfigs?: ChartSeriesConfigs;
   barchartConfigs?: ChartSeriesConfigs;
 }
@@ -58,20 +61,33 @@ export interface StatItems {
 export interface StatItemsProps extends StatItems {
   areaChart?: ChartConfigsData[];
   barChart?: ChartConfigsData[];
+  from: number;
+  id: string;
+  to: number;
+  narrowDateRange: UpdateDateRange;
 }
 
 export const numberFormatter = (value: string | number): string => value.toLocaleString();
-export const areachartConfigs = (from: number, to: number) => ({
+const statItemBarchartRotation: Rotation = 90;
+
+export const areachartConfigs = (config?: {
+  xTickFormatter: (value: number) => string;
+  onBrushEnd?: BrushEndListener;
+}) => ({
   series: {
     xScaleType: ScaleType.Time,
     yScaleType: ScaleType.Linear,
   },
   axis: {
-    xTickFormatter: niceTimeFormatter([from, to]),
+    xTickFormatter: get('xTickFormatter', config),
     yTickFormatter: numberFormatter,
   },
+  settings: {
+    onBrushEnd: getOr(() => {}, 'onBrushEnd', config),
+  },
 });
-export const barchartConfigs = {
+
+export const barchartConfigs = (config?: { onElementClick?: ElementClickListener }) => ({
   series: {
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
@@ -79,7 +95,11 @@ export const barchartConfigs = {
   axis: {
     xTickFormatter: numberFormatter,
   },
-};
+  settings: {
+    onElementClick: getOr(() => {}, 'onElementClick', config),
+    rotation: statItemBarchartRotation,
+  },
+});
 
 export const addValueToFields = (
   fields: StatItem[],
@@ -128,32 +148,51 @@ export const addValueToBarChart = (
 
 export const useKpiMatrixStatus = (
   mappings: Readonly<StatItems[]>,
-  data: KpiHostsData | KpiNetworkData
+  data: KpiHostsData | KpiNetworkData,
+  id: string,
+  from: number,
+  to: number,
+  narrowDateRange: UpdateDateRange
 ): StatItemsProps[] => {
   const [statItemsProps, setStatItemsProps] = useState(mappings as StatItemsProps[]);
 
-  useEffect(
-    () => {
-      setStatItemsProps(
-        mappings.map(stat => {
-          return {
-            ...stat,
-            key: `kpi-summary-${stat.key}`,
-            fields: addValueToFields(stat.fields, data),
-            areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
-            barChart: stat.enableBarChart ? addValueToBarChart(stat.fields, data) : undefined,
-          };
-        })
-      );
-    },
-    [data]
-  );
+  useEffect(() => {
+    setStatItemsProps(
+      mappings.map(stat => {
+        return {
+          ...stat,
+          areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
+          barChart: stat.enableBarChart ? addValueToBarChart(stat.fields, data) : undefined,
+          fields: addValueToFields(stat.fields, data),
+          id,
+          key: `kpi-summary-${stat.key}`,
+          from,
+          to,
+          narrowDateRange,
+        };
+      })
+    );
+  }, [data]);
 
   return statItemsProps;
 };
 
 export const StatItemsComponent = React.memo<StatItemsProps>(
-  ({ fields, description, grow, barChart, areaChart, enableAreaChart, enableBarChart }) => {
+  ({
+    areaChart,
+    barChart,
+    description,
+    enableAreaChart,
+    enableBarChart,
+    fields,
+    from,
+    grow,
+    id,
+    index,
+    to,
+    narrowDateRange,
+  }) => {
+    const [isHover, setIsHover] = useState(false);
     const isBarChartDataAvailable =
       barChart &&
       barChart.length &&
@@ -164,10 +203,22 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
       areaChart.every(item => item.value != null && item.value.length > 0);
     return (
       <FlexItem grow={grow}>
-        <EuiPanel>
-          <EuiTitle size="xxxs">
-            <h6>{description}</h6>
-          </EuiTitle>
+        <EuiPanel onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
+          <EuiFlexGroup gutterSize={'none'}>
+            <EuiFlexItem>
+              <EuiTitle size="xxxs">
+                <h6>{description}</h6>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <InspectButton
+                queryId={id}
+                title={`KPI ${description}`}
+                inspectIndex={index}
+                show={isHover}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
           <EuiFlexGroup>
             {fields.map(field => (
@@ -198,21 +249,22 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
           </EuiFlexGroup>
 
           {(enableAreaChart || enableBarChart) && <EuiHorizontalRule />}
-
           <EuiFlexGroup>
             {enableBarChart && (
               <FlexItem>
-                <BarChart barChart={barChart} configs={barchartConfigs} />
+                <BarChart barChart={barChart} configs={barchartConfigs()} />
               </FlexItem>
             )}
 
-            {enableAreaChart && (
+            {enableAreaChart && from != null && to != null && (
               <FlexItem>
-                <GlobalTime>
-                  {({ from, to }) => (
-                    <AreaChart areaChart={areaChart} configs={areachartConfigs(from, to)} />
-                  )}
-                </GlobalTime>
+                <AreaChart
+                  areaChart={areaChart}
+                  configs={areachartConfigs({
+                    xTickFormatter: niceTimeFormatter([from, to]),
+                    onBrushEnd: narrowDateRange,
+                  })}
+                />
               </FlexItem>
             )}
           </EuiFlexGroup>

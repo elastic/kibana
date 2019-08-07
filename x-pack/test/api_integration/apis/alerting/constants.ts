@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ES_ARCHIVER_ACTION_ID = '19cfba7c-711a-4170-8590-9a99a281e85c';
+import {
+  ES_ARCHIVER_ACTION_ID as ActionArchiverActionId,
+  SPACE_1_ES_ARCHIVER_ACTION_ID as ActionArchiverSpace1ActionId,
+} from '../actions/constants';
+
+export const ES_ARCHIVER_ACTION_ID = ActionArchiverActionId;
+export const SPACE_1_ES_ARCHIVER_ACTION_ID = ActionArchiverSpace1ActionId;

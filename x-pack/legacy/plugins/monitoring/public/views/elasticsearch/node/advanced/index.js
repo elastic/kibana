@@ -78,6 +78,7 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
               nodeSummary={data.nodeSummary}
               metrics={data.metrics}
               onBrush={this.onBrush}
+              zoomInfo={this.zoomInfo}
             />
           </I18nContext>
         );

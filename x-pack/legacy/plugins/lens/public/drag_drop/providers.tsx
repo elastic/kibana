@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
 /**
  * The shape of the drag / drop context.
@@ -64,7 +64,7 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
   const [state, setState] = useState<{ dragging: unknown }>({
     dragging: undefined,
   });
-  const setDragging = (dragging: unknown) => setState({ dragging });
+  const setDragging = useMemo(() => (dragging: unknown) => setState({ dragging }), [setState]);
 
   return (
     <ChildDragDropProvider dragging={state.dragging} setDragging={setDragging}>
@@ -81,5 +81,6 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
  * @param props
  */
 export function ChildDragDropProvider({ dragging, setDragging, children }: ProviderProps) {
-  return <DragContext.Provider value={{ dragging, setDragging }}>{children}</DragContext.Provider>;
+  const value = useMemo(() => ({ dragging, setDragging }), [setDragging, dragging]);
+  return <DragContext.Provider value={value}>{children}</DragContext.Provider>;
 }

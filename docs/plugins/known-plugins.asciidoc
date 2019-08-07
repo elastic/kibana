@@ -39,9 +39,11 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/fbaligand/kibana-enhanced-table[Enhanced Table] (fbaligand)
 * https://github.com/nreese/enhanced_tilemap[Enhanced Tilemap] (nreese)
 * https://github.com/ommsolutions/kibana_ext_metrics_vis[Extended Metric] (ommsolutions)
+* https://github.com/flexmonster/pivot-kibana[Flexmonster Pivot Table & Charts] - a customizable pivot table component for advanced data analysis and reporting.
 * https://github.com/outbrain/ob-kb-funnel[Funnel Visualization] (roybass)
 * https://github.com/sbeyn/kibana-plugin-gauge-sg[Gauge] (sbeyn)
 * https://github.com/clamarque/Kibana_health_metric_vis[Health Metric] (clamarque)
+* https://github.com/tshoeb/Insight[Insight] (tshoeb) - Multidimensional data exploration
 * https://github.com/sbeyn/kibana-plugin-line-sg[Line] (sbeyn)
 * https://github.com/walterra/kibana-milestones-vis[Milestones] (walterra)
 * https://github.com/varundbest/navigation[Navigation] (varundbest)
@@ -59,7 +61,6 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 [float]
 === Other
 * https://github.com/nreese/kibana-time-plugin[Time picker as a dashboard panel] Widget to view and edit the time range from within dashboards.
-* https://github.com/sw-jung/kibana_notification_center[Notification Center] (sw-jung) - for better experience of notifier toasts.
 
 * https://github.com/Webiks/kibana-API.git[Kibana-API] (webiks) Exposes an API with Kibana functionality.
 Use it to create, edit and embed visualizations, and also to search inside an embedded dashboard.

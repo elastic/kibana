@@ -4,61 +4,83 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-
+import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { Action } from './state_management';
-import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
-import { DragDrop } from '../../drag_drop';
+import { Datasource, Visualization, FramePublicAPI } from '../../types';
+import { DragDrop, DragContext } from '../../drag_drop';
 import { getSuggestions, toSwitchAction } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
+import { debouncedComponent } from '../../debounced_component';
 
 export interface WorkspacePanelProps {
-  activeDatasource: Datasource;
-  datasourceState: unknown;
   activeVisualizationId: string | null;
   visualizationMap: Record<string, Visualization>;
   visualizationState: unknown;
-  datasourcePublicAPI: DatasourcePublicAPI;
+  activeDatasourceId: string | null;
+  datasourceMap: Record<string, Datasource>;
+  datasourceStates: Record<
+    string,
+    {
+      state: unknown;
+      isLoading: boolean;
+    }
+  >;
+  framePublicAPI: FramePublicAPI;
   dispatch: (action: Action) => void;
   ExpressionRenderer: ExpressionRenderer;
 }
 
-export function WorkspacePanel({
-  activeDatasource,
+export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
+
+// Exported for testing purposes only.
+export function InnerWorkspacePanel({
+  activeDatasourceId,
   activeVisualizationId,
-  datasourceState,
   visualizationMap,
   visualizationState,
-  datasourcePublicAPI,
+  datasourceMap,
+  datasourceStates,
+  framePublicAPI,
   dispatch,
   ExpressionRenderer: ExpressionRendererComponent,
 }: WorkspacePanelProps) {
-  function onDrop(item: unknown) {
-    const datasourceSuggestions = activeDatasource.getDatasourceSuggestionsForField(
-      datasourceState,
-      item
+  const dragDropContext = useContext(DragContext);
+
+  const suggestionForDraggedField = useMemo(() => {
+    if (!dragDropContext.dragging || !activeDatasourceId) {
+      return;
+    }
+    const datasourceSuggestions = datasourceMap[
+      activeDatasourceId
+    ].getDatasourceSuggestionsForField(
+      datasourceStates[activeDatasourceId].state,
+      dragDropContext.dragging
+    );
+
+    const hasData = Object.values(framePublicAPI.datasourceLayers).some(
+      datasource => datasource.getTableSpec().length > 0
     );
 
     const suggestions = getSuggestions(
       datasourceSuggestions,
-      visualizationMap,
+      hasData && activeVisualizationId
+        ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
+        : visualizationMap,
       activeVisualizationId,
       visualizationState
     );
 
-    if (suggestions.length === 0) {
-      // TODO specify and implement behavior in case of no valid suggestions
-      return;
+    return suggestions[0];
+  }, [dragDropContext.dragging]);
+
+  function onDrop() {
+    if (suggestionForDraggedField) {
+      dispatch(toSwitchAction(suggestionForDraggedField));
     }
-
-    const suggestion = suggestions[0];
-
-    // TODO heuristically present the suggestions in a modal instead of just picking the first one
-    dispatch(toSwitchAction(suggestion));
   }
 
   function renderEmptyWorkspace() {
@@ -78,38 +100,33 @@ export function WorkspacePanel({
     const activeVisualization = activeVisualizationId
       ? visualizationMap[activeVisualizationId]
       : null;
-    const expression = useMemo(
-      () => {
-        try {
-          return buildExpression(
-            activeVisualization,
-            visualizationState,
-            activeDatasource,
-            datasourceState,
-            datasourcePublicAPI
-          );
-        } catch (e) {
-          setExpressionError(e.toString());
-        }
-      },
-      [
-        activeVisualization,
-        visualizationState,
-        activeDatasource,
-        datasourceState,
-        datasourcePublicAPI,
-      ]
-    );
+    const expression = useMemo(() => {
+      try {
+        return buildExpression({
+          visualization: activeVisualization,
+          visualizationState,
+          datasourceMap,
+          datasourceStates,
+          framePublicAPI,
+        });
+      } catch (e) {
+        setExpressionError(e.toString());
+      }
+    }, [
+      activeVisualization,
+      visualizationState,
+      datasourceMap,
+      datasourceStates,
+      framePublicAPI.dateRange,
+      framePublicAPI.query,
+    ]);
 
-    useEffect(
-      () => {
-        // reset expression error if component attempts to run it again
-        if (expressionError) {
-          setExpressionError(undefined);
-        }
-      },
-      [expression]
-    );
+    useEffect(() => {
+      // reset expression error if component attempts to run it again
+      if (expressionError) {
+        setExpressionError(undefined);
+      }
+    }, [expression]);
 
     if (expression === null) {
       return renderEmptyWorkspace();
@@ -117,26 +134,28 @@ export function WorkspacePanel({
 
     if (expressionError) {
       return (
-        <>
-          <p data-test-subj="expression-failure">
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem data-test-subj="expression-failure">
             {/* TODO word this differently because expressions should not be exposed at this level */}
             <FormattedMessage
               id="xpack.lens.editorFrame.expressionFailure"
               defaultMessage="Expression could not be executed successfully"
             />
-          </p>
+          </EuiFlexItem>
           {expression && (
-            <>
+            <EuiFlexItem>
               <EuiCodeBlock>{toExpression(expression)}</EuiCodeBlock>
-              <EuiSpacer />
-            </>
+            </EuiFlexItem>
           )}
-          <EuiCodeBlock>{JSON.stringify(expressionError, null, 2)}</EuiCodeBlock>
-        </>
+          <EuiFlexItem>
+            <EuiCodeBlock>{JSON.stringify(expressionError, null, 2)}</EuiCodeBlock>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     } else {
       return (
         <ExpressionRendererComponent
+          className="lnsExpressionOutput"
           expression={expression!}
           onRenderFailure={(e: unknown) => {
             setExpressionError(e);
@@ -147,7 +166,7 @@ export function WorkspacePanel({
   }
 
   return (
-    <DragDrop draggable={false} droppable={true} onDrop={onDrop}>
+    <DragDrop draggable={false} droppable={Boolean(suggestionForDraggedField)} onDrop={onDrop}>
       {renderVisualization()}
     </DragDrop>
   );

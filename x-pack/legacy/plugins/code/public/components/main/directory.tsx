@@ -14,11 +14,13 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import React from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import { FileTree, FileTreeItemType } from '../../../model';
 import { MainRouteParams, PathTypes } from '../../common/types';
-import { encodeRevisionString } from '../../utils/url';
+import { encodeRevisionString } from '../../../common/uri_util';
 
 interface DirectoryNodesProps {
   title: string;
@@ -51,7 +53,7 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
   ));
   return (
     <EuiFlexItem className="codeContainer__directoryList">
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiTitle size="s">
             <h3>{props.title}</h3>
@@ -84,9 +86,23 @@ export const Directory = withRouter((props: Props) => {
   const { resource, org, repo, revision } = props.match.params;
   const getUrl = (pathType: PathTypes) => (path: string) =>
     `/${resource}/${org}/${repo}/${pathType}/${encodeRevisionString(revision)}/${path}`;
-  const fileList = <DirectoryNodes nodes={files} title="Files" getUrl={getUrl(PathTypes.blob)} />;
+  const fileList = (
+    <DirectoryNodes
+      nodes={files}
+      title={i18n.translate('xpack.code.mainPage.content.directory.filesTitle', {
+        defaultMessage: 'Files',
+      })}
+      getUrl={getUrl(PathTypes.blob)}
+    />
+  );
   const folderList = (
-    <DirectoryNodes nodes={folders} title="Directories" getUrl={getUrl(PathTypes.tree)} />
+    <DirectoryNodes
+      nodes={folders}
+      title={i18n.translate('xpack.code.mainPage.content.directory.directoriesTitle', {
+        defaultMessage: 'Directories',
+      })}
+      getUrl={getUrl(PathTypes.tree)}
+    />
   );
   const children = props.loading ? (
     <div>

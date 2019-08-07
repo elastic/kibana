@@ -15,12 +15,15 @@ export const RowRendererContainer = styled.div<{ width: number }>`
 
 export interface RowRenderer {
   isInstance: (data: Ecs) => boolean;
-  renderRow: (
-    {
-      browserFields,
-      data,
-      width,
-      children,
-    }: { browserFields: BrowserFields; data: Ecs; width: number; children: React.ReactNode }
-  ) => React.ReactNode;
+  renderRow: ({
+    browserFields,
+    data,
+    width,
+    children,
+  }: {
+    browserFields: BrowserFields;
+    data: Ecs;
+    width: number;
+    children: React.ReactNode;
+  }) => React.ReactNode;
 }

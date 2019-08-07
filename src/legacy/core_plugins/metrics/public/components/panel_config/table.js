@@ -44,10 +44,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
-import { data } from 'plugins/data/setup';
-import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+import { QueryBarInput } from 'plugins/data';
+
 export class TablePanelConfig extends Component {
   constructor(props) {
     super(props);
@@ -173,7 +173,6 @@ export class TablePanelConfig extends Component {
             fields={this.props.fields}
             model={this.props.model}
             name={this.props.name}
-            visData$={this.props.visData$}
             onChange={this.props.onChange}
           />
         </div>
@@ -291,5 +290,4 @@ TablePanelConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  visData$: PropTypes.object,
 };

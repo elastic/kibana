@@ -5,34 +5,14 @@
  */
 
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
-import sinon from 'sinon';
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-import { mockWindow } from './_mock_window';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 const XPACK_INFO_KEY = 'xpackMain.info';
 
 describe('xpack_info service', () => {
-  let xpackInfo;
-
-  beforeEach(ngMock.module('kibana', () => {
-    sinon.stub(sessionStorage, 'getItem')
-      .callsFake(mockWindow.sessionStorage.getItem);
-    sinon.stub(sessionStorage, 'setItem')
-      .callsFake(mockWindow.sessionStorage.setItem);
-    sinon.stub(sessionStorage, 'removeItem')
-      .callsFake(mockWindow.sessionStorage.removeItem);
-  }));
-
   afterEach(() => {
-    sessionStorage.getItem.restore();
-    sessionStorage.setItem.restore();
-    sessionStorage.removeItem.restore();
+    sessionStorage.clear();
   });
-
-  beforeEach(ngMock.inject((Private) => {
-    xpackInfo = Private(XPackInfoProvider);
-  }));
 
   it ('updates the stored xpack info', () => {
     const updatedXPackInfo = {
@@ -41,7 +21,7 @@ describe('xpack_info service', () => {
       }
     };
     xpackInfo.setAll(updatedXPackInfo);
-    expect(mockWindow.sessionStorage.getItem(XPACK_INFO_KEY)).to.be(JSON.stringify(updatedXPackInfo));
+    expect(sessionStorage.getItem(XPACK_INFO_KEY)).to.be(JSON.stringify(updatedXPackInfo));
     expect(xpackInfo.get('foo.bar')).to.be(17);
   });
 
@@ -52,10 +32,10 @@ describe('xpack_info service', () => {
       }
     };
     xpackInfo.setAll(updatedXPackInfo);
-    expect(xpackInfo.get('foo.bar')).not.to.be(undefined);
+    expect(xpackInfo.get('foo.bar')).not.to.be(null);
 
     xpackInfo.clear();
-    expect(mockWindow.sessionStorage.getItem(XPACK_INFO_KEY)).to.be(undefined);
+    expect(sessionStorage.getItem(XPACK_INFO_KEY)).to.be(null);
     expect(xpackInfo.get('foo.bar')).to.be(undefined);
   });
 

@@ -17,13 +17,23 @@
  * under the License.
  */
 
-export { Headers, filterHeaders } from './headers';
-export { Router } from './router';
+export { Headers, filterHeaders, ResponseHeaders, KnownHeaders } from './headers';
+export { Router, RequestHandler } from './router';
 export {
   KibanaRequest,
   KibanaRequestRoute,
-  ensureRawRequest,
   isRealRequest,
-  getIncomingMessage,
+  LegacyRequest,
+  ensureRawRequest,
 } from './request';
-export { RouteMethod, RouteConfigOptions } from './route';
+export { RouteMethod, RouteConfig, RouteConfigOptions } from './route';
+export {
+  CustomHttpResponseOptions,
+  HttpResponseOptions,
+  HttpResponsePayload,
+  RedirectResponseOptions,
+  ResponseError,
+  ResponseErrorMeta,
+  kibanaResponseFactory,
+  KibanaResponseFactory,
+} from './response';

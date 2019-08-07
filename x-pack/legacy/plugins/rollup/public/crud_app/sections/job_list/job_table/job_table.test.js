@@ -7,7 +7,7 @@
 import { Pager } from '@elastic/eui';
 
 import { registerTestBed } from '../../../../../../../../test_utils';
-import { getJobs } from '../../../../../fixtures';
+import { getJobs, jobCount } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
 import { JobTable } from './job_table';
 
@@ -37,7 +37,7 @@ const initTestBed = registerTestBed(JobTable, { defaultProps, store: rollupJobsS
 
 describe('<JobTable />', () => {
   describe('table rows', () => {
-    const totalJobs = 5;
+    const totalJobs = jobCount;
     const jobs = getJobs(totalJobs);
     const openDetailPanel = jest.fn();
     const { find } = initTestBed({ jobs, openDetailPanel });
@@ -68,6 +68,8 @@ describe('<JobTable />', () => {
       expect(tableColumns).toEqual(expectedColumns);
     });
 
+    const getRowTextGetter = (row) => (field) => row.find(`[data-test-subj="jobTableCell-${field}"]`).hostNodes().text();
+
     it('should set the correct job value in each row cell', () => {
       const unformattedFields = [
         'id',
@@ -78,7 +80,7 @@ describe('<JobTable />', () => {
       ];
       const row = tableRows.first();
       const job = jobs[0];
-      const getCellText = (field) => row.find(`[data-test-subj="jobTableCell-${field}"]`).hostNodes().text();
+      const getCellText = getRowTextGetter(row);
 
       unformattedFields.forEach((field) => {
         const cellText = getCellText(field);
@@ -111,6 +113,13 @@ describe('<JobTable />', () => {
 
       expect(openDetailPanel.mock.calls.length).toBe(1);
       expect(openDetailPanel.mock.calls[0][0]).toBe(job.id);
+    });
+
+    it('should still render despite unknown job statuses', () => {
+      const row = tableRows.last();
+      const getCellText = getRowTextGetter(row);
+      // In job fixtures, the last job has unknown status
+      expect('Unknown').toEqual(getCellText('status'));
     });
   });
 

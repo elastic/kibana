@@ -5,7 +5,7 @@
  */
 
 import { SymbolKind } from 'vscode-languageserver-types';
-import { SymbolWithMembers } from '../../../../reducers/symbol';
+import { SymbolWithMembers } from '../../../../actions/structure';
 
 export const props: { structureTree: SymbolWithMembers[] } = {
   structureTree: [

@@ -21,9 +21,8 @@ import _ from 'lodash';
 import { AggConfig } from '../../../vis/agg_config';
 import { Schemas } from '../../../vis/editors/default/schemas';
 
-import { siblingPipelineAggController } from './sibling_pipeline_agg_controller';
 import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
-import metricAggTemplate from '../../controls/sub_metric.html';
+import { SubMetricParamEditor } from '../../controls/sub_metric';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { i18n } from '@kbn/i18n';
 
@@ -80,8 +79,7 @@ const siblingPipelineAggHelper = {
           orderAgg.id = agg.id + '-bucket';
           return orderAgg;
         },
-        editor: metricAggTemplate,
-        controller: siblingPipelineAggController('customBucket'),
+        editorComponent: SubMetricParamEditor,
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart('customBucket'),
         write: _.noop
       },
@@ -102,8 +100,7 @@ const siblingPipelineAggHelper = {
           orderAgg.id = agg.id + '-metric';
           return orderAgg;
         },
-        editor: metricAggTemplate,
-        controller: siblingPipelineAggController('customMetric'),
+        editorComponent: SubMetricParamEditor,
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart('customMetric'),
         write: siblingPipelineAggWriter
       }
