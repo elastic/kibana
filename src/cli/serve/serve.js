@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import { statSync } from 'fs';
 import { resolve } from 'path';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import { getConfig } from '../../legacy/server/path';
@@ -93,6 +94,14 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     if (opts.ssl && !has('server.ssl.certificate') && !has('server.ssl.key')) {
       set('server.ssl.certificate', DEV_SSL_CERT_PATH);
       set('server.ssl.key', DEV_SSL_KEY_PATH);
+    }
+
+    if (opts.ssl && !opts.elasticsearch) {
+      set('elasticsearch.hosts', 'https://localhost:9200');
+    }
+
+    if (opts.ssl && !has('elasticsearch.ssl.certificateAuthorities')) {
+      set('elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
     }
   }
 
