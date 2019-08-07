@@ -95,7 +95,7 @@ export function initUsersApi({ authc: { login }, config }, server) {
             BasicCredentials.decorateRequest(request, username, password)
           );
         } catch(err) {
-          throw Boom.unauthorized(err);
+          throw Boom.forbidden(err);
         }
       }
 

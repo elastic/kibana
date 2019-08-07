@@ -81,7 +81,7 @@ describe('User routes', () => {
           );
       });
 
-      it('returns 401 if old password is wrong.', async () => {
+      it('returns 403 if old password is wrong.', async () => {
         getUserStub.returns(Promise.reject(new Error('Something went wrong.')));
 
         return changePasswordRoute
@@ -90,14 +90,14 @@ describe('User routes', () => {
             sinon.assert.notCalled(clusterStub.callWithRequest);
             expect(response.isBoom).to.be(true);
             expect(response.output.payload).to.eql({
-              statusCode: 401,
-              error: 'Unauthorized',
+              statusCode: 403,
+              error: 'Forbidden',
               message: 'Something went wrong.'
             });
           });
       });
 
-      it('returns 401 if user can authenticate with new password.', async () => {
+      it(`returns 401 if user can't authenticate with new password.`, async () => {
         getUserStub.returns(Promise.resolve({}));
 
         loginStub
