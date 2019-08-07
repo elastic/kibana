@@ -27,7 +27,13 @@ export const WizardNav: FC<StepsNavProps> = ({
     <EuiFlexItem />
     {previous && (
       <EuiFlexItem grow={false}>
-        <EuiButton disabled={!previousActive} onClick={previous} iconType="arrowLeft" size="s">
+        <EuiButton
+          disabled={!previousActive}
+          onClick={previous}
+          iconType="arrowLeft"
+          size="s"
+          data-test-subj="mlJobWizardNavButtonPrevious"
+        >
           {i18n.translate('xpack.ml.newJob.wizard.previousStepButton', {
             defaultMessage: 'Previous',
           })}
@@ -36,7 +42,13 @@ export const WizardNav: FC<StepsNavProps> = ({
     )}
     {next && (
       <EuiFlexItem grow={false}>
-        <EuiButton disabled={!nextActive} onClick={next} iconType="arrowRight" size="s">
+        <EuiButton
+          disabled={!nextActive}
+          onClick={next}
+          iconType="arrowRight"
+          size="s"
+          data-test-subj="mlJobWizardNavButtonNext"
+        >
           {i18n.translate('xpack.ml.newJob.wizard.nextStepButton', {
             defaultMessage: 'Next',
           })}
