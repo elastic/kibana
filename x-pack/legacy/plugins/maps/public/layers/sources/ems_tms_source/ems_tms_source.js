@@ -135,9 +135,22 @@ export class EMSTMSSource extends AbstractTMSSource {
     return await emsTMSService.getUrlTemplate();
   }
 
-  async getVectorStyleSheet() {
+  getSpriteNamespacePrefix() {
+    return 'ems/' + this._getEmsTileLayerId();
+  }
+
+  async getVectorStyleSheetAndSpriteMeta() {
+
     const emsTMSService = await this._getEMSTMSService();
-    return await emsTMSService.getVectorStyleSheet();
+    const vectorStyleSheet = await emsTMSService.getVectorStyleSheet();
+    console.log('cvss', vectorStyleSheet);
+    const spriteMeta = await emsTMSService.getSpriteSheetMeta();
+    console.log('sm', spriteMeta);
+
+    return {
+      vectorStyleSheet: vectorStyleSheet,
+      spriteMeta: spriteMeta
+    };
   }
 
   _getEmsTileLayerId() {

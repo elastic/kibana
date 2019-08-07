@@ -111,8 +111,20 @@ export class TMSService {
   }
 
   async getVectorStyleSheet() {
-    const vectorJson = await this._getVectorStyleJson();
-    return vectorJson;
+    return await this._getVectorStyleJson();
+  }
+
+  async getSpriteSheetMeta() {
+    const vsjson = await this._getVectorStyleJson();
+    //hardcode to retina
+    const metaUrl = vsjson.sprite + '@2x.json';
+    const spritePngs =  vsjson.sprite + '@2x.png';
+    const metaUrlExtended = this._emsClient.extendUrlWithParams(metaUrl);
+    const jsonMeta = await this._emsClient.getManifest(metaUrlExtended);
+    return {
+      png: spritePngs,
+      json: jsonMeta
+    };
   }
 
   getDisplayName() {

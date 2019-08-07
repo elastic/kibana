@@ -113,19 +113,38 @@ function getImageData(img) {
   return context.getImageData(0, 0, img.width, img.height);
 }
 
-export async function addSpritesheetToMap(json, img, mbMap) {
+export async function addSpritesheetToMap(json, imgUrl, mbMap) {
+  console.log('add sprite sheet i image', json);
   const image = new Image();
+  image.crossOrigin = 'Anonymous';
   image.onload = (el) => {
-    const imgData = getImageData(el.currentTarget);
+    console.log('loaded', el);
+    let imgData;
+    try {
+      imgData = getImageData(el.currentTarget);
+    }catch(e) {
+      console.error(e);
+      throw e;
+    }
     for (const imageId in json) {
       if (json.hasOwnProperty(imageId)) {
-        const { width, height, x, y, sdf, pixelRatio } = json[imageId];
-        const data = new RGBAImage({ width, height });
-        RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
-        // TODO not sure how to catch errors?
-        mbMap.addImage(imageId, data, { pixelRatio, sdf });
+        console.log('trying', imageId);
+        if (!mbMap.hasImage(imageId)) {
+
+          const { width, height, x, y, sdf, pixelRatio } = json[imageId];
+          const data = new RGBAImage({ width, height });
+          RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
+          // TODO not sure how to catch errors?
+
+          console.log('add', imageId);
+          mbMap.addImage(imageId, data, { pixelRatio, sdf });
+
+        } else {
+          console.log('skip adding', imageId);
+        }
       }
     }
   };
-  image.src = img;
+  console.log('load', imgUrl);
+  image.src = imgUrl;
 }

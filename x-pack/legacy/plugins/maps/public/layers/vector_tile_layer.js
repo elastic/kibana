@@ -7,6 +7,7 @@
 import { TileLayer } from './tile_layer';
 import _ from 'lodash';
 import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import { addSpritesheetToMap } from '../connected_components/map/mb/utils';//todo move this implementation
 
 const MB_STYLE_TYPE_TO_OPACITY = {
   'fill': ['fill-opacity'],
@@ -42,8 +43,10 @@ export class VectorTileLayer extends TileLayer {
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
     startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
     try {
-      const vectorStyle = await this._source.getVectorStyleSheet();
-      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, vectorStyle, {});
+      console.log('need to load stly e ans prites');
+      const styleAndSprites = await this._source.getVectorStyleSheetAndSpriteMeta();
+      console.log('sas', styleAndSprites);
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, styleAndSprites, {});
     } catch(error) {
       onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
     }
@@ -58,7 +61,20 @@ export class VectorTileLayer extends TileLayer {
     if (!sourceDataRequest) {
       return null;
     }
-    return sourceDataRequest.getData();
+    const styleAndSprits = sourceDataRequest.getData();
+    if (!styleAndSprits) {
+      return null;
+    }
+    return styleAndSprits.vectorStyleSheet;
+  }
+
+  _getSpriteMeta() {
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (!sourceDataRequest) {
+      return null;
+    }
+    const styleAndSprits = sourceDataRequest.getData();
+    return styleAndSprits.spriteMeta;
   }
 
   getMbLayerIds() {
@@ -66,8 +82,7 @@ export class VectorTileLayer extends TileLayer {
     if (!vectorStyle) {
       return [];
     }
-    const mbLayerIds = vectorStyle.layers.map(layer => this._generateMbId(layer.id));
-    return mbLayerIds;
+    return vectorStyle.layers.map(layer => this._generateMbId(layer.id));
   }
 
   getMbSourceIds() {
@@ -76,8 +91,7 @@ export class VectorTileLayer extends TileLayer {
       return [];
     }
     const sourceIds = Object.keys(vectorStyle.sources);
-    const  mbSourceIds = sourceIds.map(sourceId => this._generateMbId(sourceId));
-    return mbSourceIds;
+    return sourceIds.map(sourceId => this._generateMbId(sourceId));
   }
 
   ownsMbLayerId(mbLayerId) {
@@ -92,6 +106,12 @@ export class VectorTileLayer extends TileLayer {
     return mbSourceIds.indexOf(mbSourceId) >= 0;
   }
 
+  _makeNamespacedImageId(imageId) {
+    // const prefix = this._source.getSpriteNamespacePrefix() + '/';
+    const prefix = '';
+    return prefix + imageId;
+  }
+
   syncLayerWithMB(mbMap) {
 
     const vectorStyle = this._getVectorStyle();
@@ -100,29 +120,57 @@ export class VectorTileLayer extends TileLayer {
     }
 
     const sourceIds = Object.keys(vectorStyle.sources);
+
+    let initialBootstrapCompleted = false;
     sourceIds.forEach(sourceId => {
+      if (initialBootstrapCompleted) {
+        return;
+      }
       const mbSourceId = this._generateMbId(sourceId);
       const mbSource = mbMap.getSource(mbSourceId);
       if (mbSource) {
+        //if a single source is present, the layer already has bootstrapped with the mbMap
+        initialBootstrapCompleted = true;
         return;
       }
-
       mbMap.addSource(mbSourceId, vectorStyle.sources[sourceId]);
     });
 
-    vectorStyle.layers.forEach(layer => {
-      const mbLayerId = this._generateMbId(layer.id);
-      const mbLayer = mbMap.getLayer(mbLayerId);
-      if (mbLayer) {
-        return;
+    if (!initialBootstrapCompleted) {
+      //add the images.
+      console.log('shoulad add spriteshet');
+      const spriteMeta = this._getSpriteMeta();
+      const newJson = {};
+      for (const imageId in spriteMeta.json) {
+        if (spriteMeta.json.hasOwnProperty(imageId)) {
+          const namespacedImageId = this._makeNamespacedImageId(imageId);
+          newJson[namespacedImageId] = spriteMeta.json[imageId];
+        }
       }
-      const newLayerObject = {
-        ...layer,
-        source: this._generateMbId(layer.source),
-        id: mbLayerId
-      };
-      mbMap.addLayer(newLayerObject);
-    });
+      console.log('sm', newJson);
+      addSpritesheetToMap(newJson, spriteMeta.png, mbMap);
+
+
+      // addSpritesheetToMap(spriteMeta.json, spriteMeta.png, mbMap);
+    } else {
+      console.log('should not add spritesheet');
+    }
+
+    if (!initialBootstrapCompleted) {
+      vectorStyle.layers.forEach(layer => {
+        const mbLayerId = this._generateMbId(layer.id);
+        const mbLayer = mbMap.getLayer(mbLayerId);
+        if (mbLayer) {
+          return;
+        }
+        const newLayerObject = {
+          ...layer,
+          source: this._generateMbId(layer.source),
+          id: mbLayerId
+        };
+        mbMap.addLayer(newLayerObject);
+      });
+    }
 
     this._setTileLayerProperties(mbMap);
   }
