@@ -83,6 +83,7 @@ export async function migrateKibanaIndex({ client, log, kibanaPluginIds }) {
     'migrations.scrollDuration': '5m',
     'migrations.batchSize': 100,
     'migrations.pollInterval': 100,
+    'xpack.task_manager.index': '.kibana_task_manager',
   };
   const ready = async () => undefined;
   const elasticsearch = {

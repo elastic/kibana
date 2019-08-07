@@ -24,7 +24,12 @@ export const DedicatedIndexSwitch: FC = () => {
 
   return (
     <Description>
-      <EuiSwitch name="switch" checked={useDedicatedIndex} onChange={toggleModelPlot} />
+      <EuiSwitch
+        name="switch"
+        checked={useDedicatedIndex}
+        onChange={toggleModelPlot}
+        data-test-subj="mlJobWizardSwitchUseDedicatedIndex"
+      />
     </Description>
   );
 };
