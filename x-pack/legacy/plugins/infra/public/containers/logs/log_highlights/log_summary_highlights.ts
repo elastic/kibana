@@ -34,7 +34,7 @@ export const useLogSummaryHighlights = (
           throw new DependencyError('Failed to load source: No apollo client available.');
         }
         if (!start || !end || !highlightTerms.length) {
-          throw new Error();
+          throw new Error('Skipping request: Insufficient parameters');
         }
 
         return await apolloClient.query<
