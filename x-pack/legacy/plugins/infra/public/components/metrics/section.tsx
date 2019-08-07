@@ -14,9 +14,6 @@ import { SourceConfiguration } from '../../utils/source_configuration';
 interface Props {
   section: InfraMetricLayoutSection;
   metrics: InfraMetricCombinedData[];
-  onChangeRangeTime?: (time: InfraTimerangeInput) => void;
-  crosshairValue?: number;
-  onCrosshairUpdate?: (crosshairValue: number) => void;
   isLiveStreaming?: boolean;
   stopLiveStreaming?: () => void;
   nodeId: string;
@@ -35,8 +32,6 @@ export class Section extends React.PureComponent<Props> {
     if (['apm', 'chart'].includes(this.props.section.type)) {
       sectionProps = {
         onChangeRangeTime: this.props.onChangeRangeTime,
-        crosshairValue: this.props.crosshairValue,
-        onCrosshairUpdate: this.props.onCrosshairUpdate,
         isLiveStreaming: this.props.isLiveStreaming,
         stopLiveStreaming: this.props.stopLiveStreaming,
       };
