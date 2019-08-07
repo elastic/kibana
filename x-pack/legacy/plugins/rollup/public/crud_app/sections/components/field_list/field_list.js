@@ -12,6 +12,14 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 
+const getActionsEntry = ({ name, actions }) => {
+  return {
+    name,
+    width: '80px',
+    actions
+  };
+};
+
 export const FieldList = ({
   columns,
   fields,
@@ -19,6 +27,7 @@ export const FieldList = ({
   addButton,
   emptyMessage,
   dataTestSubj,
+  addActions,
 }) => {
   let message;
 
@@ -33,20 +42,25 @@ export const FieldList = ({
 
   let extendedColumns;
 
-  if (onRemoveField) {
-    extendedColumns = columns.concat({
+  const actions = [
+    onRemoveField ? [{
       name: 'Remove',
-      width: '80px',
-      actions: [{
-        name: 'Remove',
-        isPrimary: true,
-        description: 'Remove this field',
-        icon: 'trash',
-        type: 'icon',
-        color: 'danger',
-        onClick: (field) => onRemoveField(field),
-      }]
+      isPrimary: true,
+      description: 'Remove this field',
+      icon: 'trash',
+      type: 'icon',
+      color: 'danger',
+      onClick: (field) => onRemoveField(field),
+    }] : [],
+    addActions ? [ ...addActions() ] : [],
+  ].flatMap(action => action);
+
+  if (actions.length) {
+    const actionsEntry = getActionsEntry({
+      name: addActions ? 'Actions' : 'Remove',
+      actions
     });
+    extendedColumns = columns.concat(actionsEntry);
   } else {
     extendedColumns = columns;
   }
