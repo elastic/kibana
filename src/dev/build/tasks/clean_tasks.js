@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import minimatch from 'minimatch';
+
 import { deleteAll, deleteEmptyFolders, scanDelete } from '../lib';
 import { resolve } from 'path';
 

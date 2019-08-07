@@ -18,5 +18,5 @@
  */
 
 require('jquery');
-require('angular/angular');
+require('../node_modules/angular/angular');
 module.exports = window.angular;

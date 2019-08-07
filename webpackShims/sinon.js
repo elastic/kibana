@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('script-loader!sinon/pkg/sinon.js');
+require('../node_modules/script-loader!sinon/pkg/sinon.js');
 module.exports = window.sinon;

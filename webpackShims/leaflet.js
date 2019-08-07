@@ -17,15 +17,15 @@
  * under the License.
  */
 
-require('leaflet/dist/leaflet.css');
-window.L = module.exports = require('leaflet/dist/leaflet');
+require('../node_modules/leaflet/dist/leaflet.css');
+window.L = module.exports = require('../node_modules/leaflet/dist/leaflet');
 window.L.Browser.touch = false;
 window.L.Browser.pointer = false;
 
-require('leaflet.heat/dist/leaflet-heat.js');
+require('../node_modules/leaflet.heat/dist/leaflet-heat.js');
 
-require('leaflet-draw/dist/leaflet.draw.css');
-require('leaflet-draw/dist/leaflet.draw.js');
+require('../node_modules/leaflet-draw/dist/leaflet.draw.css');
+require('../node_modules/leaflet-draw/dist/leaflet.draw.js');
 
-require('leaflet-responsive-popup/leaflet.responsive.popup.css');
-require('leaflet-responsive-popup/leaflet.responsive.popup.js');
+require('../node_modules/leaflet-responsive-popup/leaflet.responsive.popup.css');
+require('../node_modules/leaflet-responsive-popup/leaflet.responsive.popup.js');

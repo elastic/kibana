@@ -19,6 +19,6 @@
 
 require('brace');
 require('brace/mode/json');
-require('@elastic/ui-ace/ui-ace');
+require('../node_modules/@elastic/ui-ace/ui-ace');
 
 module.exports = window.ace;
