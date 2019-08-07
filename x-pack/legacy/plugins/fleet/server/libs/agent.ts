@@ -5,8 +5,13 @@
  */
 
 import moment from 'moment';
-import { Agent, SortOptions, NewAgent } from './adapters/agent/adapter_type';
-import { AgentAdapter } from './adapters/agent/default';
+import {
+  AgentAdapter,
+  Agent,
+  SortOptions,
+  NewAgent,
+  AgentType,
+} from './adapters/agent/adapter_type';
 import { TokenLib } from './token';
 
 export class AgentLib {
@@ -15,15 +20,19 @@ export class AgentLib {
   /**
    * Enroll a new token into elastic fleet
    */
-  public async enroll(token: any, agentData: NewAgent): Promise<Agent> {
+  public async enroll(
+    token: any,
+    type: AgentType,
+    config: { id: string; sharedId: string },
+    metadata?: { local: any; userProvided: any },
+    sharedId?: string
+  ): Promise<Agent> {
     const verifyResponse = await this.tokens.verify(token);
     if (!verifyResponse.valid) {
-      throw new Error(`Enrollment token is not valid ${verifyResponse.reason}`);
+      throw new Error(`Enrollment token is not valid: ${verifyResponse.reason}`);
     }
 
-    const existingAgent = agentData.shared_id
-      ? await this.agentAdater.getBySharedId(agentData.shared_id)
-      : null;
+    const existingAgent = sharedId ? await this.agentAdater.getBySharedId(sharedId) : null;
 
     if (existingAgent && existingAgent.active === true) {
       throw new Error('Impossible to enroll an already active agent');
@@ -33,17 +42,25 @@ export class AgentLib {
     const enrolledAt = moment().toISOString();
 
     const parentId =
-      agentData.type === 'EPHEMERAL_INSTANCE'
-        ? (await this._findOrCreateParentForEphemeral(agentData)).id
+      type === 'EPHEMERAL_INSTANCE'
+        ? (await this._findOrCreateParentForEphemeral(config.id, config.sharedId)).id
         : undefined;
 
+    const agentData: NewAgent = {
+      shared_id: sharedId,
+      active: true,
+      config_id: config.id,
+      config_shared_id: config.sharedId,
+      type,
+      access_token: accessToken,
+      enrolled_at: enrolledAt,
+      parent_id: parentId,
+      user_provided_metadata: metadata && metadata.userProvided,
+      local_metadata: metadata && metadata.local,
+    };
+
     if (existingAgent) {
-      await this.agentAdater.update(existingAgent.id, {
-        ...agentData,
-        access_token: accessToken,
-        enrolled_at: enrolledAt,
-        parent_id: parentId,
-      });
+      await this.agentAdater.update(existingAgent.id, agentData);
 
       return {
         ...existingAgent,
@@ -51,12 +68,7 @@ export class AgentLib {
       };
     }
 
-    return await this.agentAdater.create({
-      ...agentData,
-      access_token: accessToken,
-      enrolled_at: enrolledAt,
-      parent_id: parentId,
-    });
+    return await this.agentAdater.create(agentData);
   }
 
   /**
@@ -85,10 +97,11 @@ export class AgentLib {
     return this.agentAdater.list(sortOptions, page, perPage);
   }
 
-  private async _findOrCreateParentForEphemeral(agent: NewAgent): Promise<Agent> {
-    const parentAgent = await this.agentAdater.findEphemeralByConfigSharedId(
-      agent.config_shared_id
-    );
+  private async _findOrCreateParentForEphemeral(
+    configId: string,
+    configSharedId: string
+  ): Promise<Agent> {
+    const parentAgent = await this.agentAdater.findEphemeralByConfigSharedId(configSharedId);
 
     if (parentAgent) {
       return parentAgent;
@@ -96,9 +109,8 @@ export class AgentLib {
 
     return await this.agentAdater.create({
       type: 'EPHEMERAL',
-      config_id: agent.config_id,
-      config_shared_id: agent.config_shared_id,
-      version: agent.version,
+      config_id: configId,
+      config_shared_id: configSharedId,
       active: true,
     });
   }
