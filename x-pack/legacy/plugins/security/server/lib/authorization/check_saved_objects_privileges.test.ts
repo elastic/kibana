@@ -16,14 +16,10 @@ test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
   };
   const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
 
-  const mockSpaces = {
+  const mockSpaces = ({
     isEnabled: true,
-    getSpaceId: jest.fn(),
-    spaceIdToNamespace: jest.fn(),
     namespaceToSpaceId: jest.fn().mockReturnValue(spaceId),
-    getBasePath: jest.fn(),
-    getScopedSpacesClient: jest.fn(),
-  } as OptionalPlugin<SpacesPlugin>;
+  } as unknown) as OptionalPlugin<SpacesPlugin>;
   const request = Symbol();
 
   const privilegeOrPrivileges = ['foo', 'bar'];
@@ -33,11 +29,14 @@ test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
     mockSpaces
   )(request as any);
 
-  const result = await checkSavedObjectsPrivileges(privilegeOrPrivileges);
+  const namespace = 'foo';
+
+  const result = await checkSavedObjectsPrivileges(privilegeOrPrivileges, namespace);
 
   expect(result).toBe(expectedResult);
   expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
   expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, privilegeOrPrivileges);
+  expect(mockSpaces.namespaceToSpaceId).toBeCalledWith(namespace);
 });
 
 test(`checkPrivileges.globally when spaces is disabled`, async () => {
@@ -62,9 +61,12 @@ test(`checkPrivileges.globally when spaces is disabled`, async () => {
     mockSpaces
   )(request as any);
 
-  const result = await checkSavedObjectsPrivileges(privilegeOrPrivileges);
+  const namespace = 'foo';
+
+  const result = await checkSavedObjectsPrivileges(privilegeOrPrivileges, namespace);
 
   expect(result).toBe(expectedResult);
   expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
   expect(mockCheckPrivileges.globally).toHaveBeenCalledWith(privilegeOrPrivileges);
+  expect(mockSpaces.namespaceToSpaceId).not.toHaveBeenCalled();
 });
