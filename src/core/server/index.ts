@@ -105,42 +105,47 @@ export {
 } from './plugins';
 
 export {
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectReference,
-  SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
   SavedObjectsClient,
-  SavedObjectsClientContract,
-  SavedObjectsCreateOptions,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
+  SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
-  SavedObjectsFindOptions,
+  SavedObjectsExportOptions,
   SavedObjectsFindResponse,
-  SavedObjectsMigrationVersion,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportOptions,
+  SavedObjectsImportResponse,
+  SavedObjectsImportRetry,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
+  SavedObjectsResolveImportErrorsOptions,
   SavedObjectsSchema,
   SavedObjectsSerializer,
   SavedObjectsService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-  SavedObjectsExportOptions,
-  SavedObjectsImportError,
-  SavedObjectsImportConflictError,
-  SavedObjectsImportMissingReferencesError,
-  SavedObjectsImportUnknownError,
-  SavedObjectsImportUnsupportedTypeError,
-  SavedObjectsImportOptions,
-  SavedObjectsImportResponse,
-  SavedObjectsImportRetry,
-  SavedObjectsResolveImportErrorsOptions,
 } from './saved_objects';
 
 export { RecursiveReadonly } from '../utils';
+
+export {
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectReference,
+  SavedObjectsBaseOptions,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  SavedObjectsMigrationVersion,
+} from './types';
 
 /**
  * Context passed to the plugins `setup` method.

@@ -25,46 +25,80 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
   SavedObjectsClientContract as SavedObjectsApi,
-  SavedObjectsFindOptions,
+  SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
-} from 'src/core/server';
-import { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from '../error_auto_create_index';
-import { kfetch, KFetchQuery } from '../kfetch';
-import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../utils/case_conversion';
+} from '../../server';
+
+// TODO: Migrate to an error modal powered by the NP?
+import {
+  isAutoCreateIndexError,
+  showAutoCreateIndexErrorPage,
+} from '../../../legacy/ui/public/error_auto_create_index/error_auto_create_index';
 import { SimpleSavedObject } from './simple_saved_object';
+import { HttpFetchOptions, HttpServiceBase } from '../http';
 
-interface RequestParams {
-  method: 'POST' | 'GET' | 'PUT' | 'DELETE';
-  path: string;
-  query?: KFetchQuery;
-  body?: object;
-}
+type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
 
-interface CreateOptions {
+type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
+
+/** @public */
+export interface SavedObjectsCreateOptions {
+  /**
+   * (Not recommended) Specify an id instead of having the saved objects service generate one for you.
+   */
   id?: string;
+  /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
   overwrite?: boolean;
+  /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
 }
 
-interface BulkCreateOptions<T extends SavedObjectAttributes = SavedObjectAttributes>
-  extends CreateOptions {
+/**
+ * @param type - Create a SavedObject of the given type
+ * @param attributes - Create a SavedObject with the given attributes
+ *
+ * @public
+ */
+export interface SavedObjectsBulkCreateObject<
+  T extends SavedObjectAttributes = SavedObjectAttributes
+> extends SavedObjectsCreateOptions {
   type: string;
   attributes: T;
 }
 
-interface UpdateOptions {
+/** @public */
+export interface SavedObjectsBulkCreateOptions {
+  /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
+  overwrite?: boolean;
+}
+
+/** @public */
+export interface SavedObjectsUpdateOptions {
   version?: string;
+  /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
 }
 
-interface BatchResponse<T extends SavedObjectAttributes = SavedObjectAttributes> {
+/** @public */
+export interface SavedObjectsBatchResponse<
+  T extends SavedObjectAttributes = SavedObjectAttributes
+> {
   savedObjects: Array<SimpleSavedObject<T>>;
 }
 
-interface FindResults<T extends SavedObjectAttributes = SavedObjectAttributes>
-  extends BatchResponse<T> {
+/**
+ * Return type of the Saved Objects `find()` method.
+ *
+ * *Note*: this type is different between the Public and Server Saved Objects
+ * clients.
+ *
+ * @public
+ */
+export interface SavedObjectsFindResponsePublic<
+  T extends SavedObjectAttributes = SavedObjectAttributes
+> extends SavedObjectsBatchResponse<T> {
   total: number;
   perPage: number;
   page: number;
@@ -92,14 +126,24 @@ const BATCH_INTERVAL = 100;
 const API_BASE_URL = '/api/saved_objects/';
 
 /**
- * The SavedObjectsClient class acts as a generic data fetcher
- * and data saver for saved objects regardless of type.
+ * SavedObjectsClientContract as implemented by the {@link SavedObjectsClient}
  *
- * If possible, this class should be used to load saved objects
- * instead of the SavedObjectLoader class which implements some
- * additional functionality.
+ * @public
+ */
+export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
+
+/**
+ * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
+ * use Elasticsearch for storing plugin state. The client-side
+ * SavedObjectsClient is a thin convenience library around the SavedObjects
+ * HTTP API for interacting with Saved Objects.
+ *
+ * @public
  */
 export class SavedObjectsClient {
+  private http: HttpServiceBase;
+  private batchQueue: BatchQueueEntry[];
+
   /**
    * Throttled processing of get requests into bulk requests at 100ms interval
    */
@@ -132,27 +176,24 @@ export class SavedObjectsClient {
     { leading: false }
   );
 
-  private batchQueue: BatchQueueEntry[];
-
-  constructor() {
+  /** @internal */
+  constructor(http: HttpServiceBase) {
+    this.http = http;
     this.batchQueue = [];
   }
 
   /**
    * Persists an object
    *
-   * @param {string} type
-   * @param {object} [attributes={}]
-   * @param {object} [options={}]
-   * @property {string} [options.id] - force id on creation, not recommended
-   * @property {boolean} [options.overwrite=false]
-   * @property {object} [options.migrationVersion]
+   * @param type
+   * @param attributes
+   * @param options
    * @returns
    */
   public create = <T extends SavedObjectAttributes>(
     type: string,
     attributes: T,
-    options: CreateOptions = {}
+    options: SavedObjectsCreateOptions = {}
   ): Promise<SimpleSavedObject<T>> => {
     if (!type || !attributes) {
       return Promise.reject(new Error('requires type and attributes'));
@@ -163,15 +204,14 @@ export class SavedObjectsClient {
       overwrite: options.overwrite,
     };
 
-    const createRequest: Promise<SavedObject<T>> = this.request({
+    const createRequest: Promise<SavedObject<T>> = this.savedObjectsFetch(path, {
       method: 'POST',
-      path,
       query,
-      body: {
+      body: JSON.stringify({
         attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
-      },
+      }),
     });
 
     return createRequest
@@ -193,19 +233,24 @@ export class SavedObjectsClient {
    * @property {boolean} [options.overwrite=false]
    * @returns The result of the create operation containing created saved objects.
    */
-  public bulkCreate = (objects: BulkCreateOptions[] = [], options: KFetchQuery = {}) => {
+  public bulkCreate = (
+    objects: SavedObjectsBulkCreateObject[] = [],
+    options: SavedObjectsBulkCreateOptions = { overwrite: false }
+  ) => {
     const path = this.getPath(['_bulk_create']);
-    const query = pick(options, ['overwrite']) as Pick<KFetchQuery, 'overwrite'>;
+    const query = { overwrite: options.overwrite };
 
-    const request: ReturnType<SavedObjectsApi['bulkCreate']> = this.request({
+    const request: ReturnType<SavedObjectsApi['bulkCreate']> = this.savedObjectsFetch(path, {
       method: 'POST',
-      path,
       query,
-      body: objects,
+      body: JSON.stringify(objects),
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return keysToCamelCaseShallow(resp) as BatchResponse;
+      return renameKeys<
+        PromiseType<ReturnType<SavedObjectsApi['bulkCreate']>>,
+        SavedObjectsBatchResponse
+      >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
     });
   };
 
@@ -221,7 +266,7 @@ export class SavedObjectsClient {
       return Promise.reject(new Error('requires type and id'));
     }
 
-    return this.request({ method: 'DELETE', path: this.getPath([type, id]) });
+    return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE' });
   };
 
   /**
@@ -240,18 +285,41 @@ export class SavedObjectsClient {
    */
   public find = <T extends SavedObjectAttributes>(
     options: SavedObjectsFindOptions = {}
-  ): Promise<FindResults<T>> => {
+  ): Promise<SavedObjectsFindResponsePublic<T>> => {
     const path = this.getPath(['_find']);
-    const query = keysToSnakeCaseShallow(options);
+    const renameMap = {
+      defaultSearchOperator: 'default_search_operator',
+      fields: 'fields',
+      hasReference: 'has_reference',
+      page: 'page',
+      perPage: 'per_page',
+      search: 'search',
+      searchFields: 'search_fields',
+      sortField: 'sort_field',
+      type: 'type',
+    };
 
-    const request: ReturnType<SavedObjectsApi['find']> = this.request({
+    const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);
+    const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]);
+
+    const request: ReturnType<SavedObjectsApi['find']> = this.savedObjectsFetch(path, {
       method: 'GET',
-      path,
       query,
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return keysToCamelCaseShallow(resp) as FindResults<T>;
+      return renameKeys<
+        PromiseType<ReturnType<SavedObjectsApi['find']>>,
+        SavedObjectsFindResponsePublic
+      >(
+        {
+          saved_objects: 'savedObjects',
+          total: 'total',
+          per_page: 'perPage',
+          page: 'page',
+        },
+        resp
+      ) as SavedObjectsFindResponsePublic<T>;
     });
   };
 
@@ -292,14 +360,16 @@ export class SavedObjectsClient {
     const path = this.getPath(['_bulk_get']);
     const filteredObjects = objects.map(obj => pick(obj, ['id', 'type']));
 
-    const request: ReturnType<SavedObjectsApi['bulkGet']> = this.request({
+    const request: ReturnType<SavedObjectsApi['bulkGet']> = this.savedObjectsFetch(path, {
       method: 'POST',
-      path,
-      body: filteredObjects,
+      body: JSON.stringify(filteredObjects),
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return keysToCamelCaseShallow(resp) as BatchResponse;
+      return renameKeys<
+        PromiseType<ReturnType<SavedObjectsApi['bulkGet']>>,
+        SavedObjectsBatchResponse
+      >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
     });
   };
 
@@ -318,7 +388,7 @@ export class SavedObjectsClient {
     type: string,
     id: string,
     attributes: T,
-    { version, migrationVersion, references }: UpdateOptions = {}
+    { version, migrationVersion, references }: SavedObjectsUpdateOptions = {}
   ): Promise<SimpleSavedObject<T>> {
     if (!type || !id || !attributes) {
       return Promise.reject(new Error('requires type, id and attributes'));
@@ -332,10 +402,9 @@ export class SavedObjectsClient {
       version,
     };
 
-    return this.request({
+    return this.savedObjectsFetch(path, {
       method: 'PUT',
-      path,
-      body,
+      body: JSON.stringify(body),
     }).then((resp: SavedObject<T>) => {
       return this.createSavedObject(resp);
     });
@@ -351,11 +420,34 @@ export class SavedObjectsClient {
     return resolveUrl(API_BASE_URL, join(...path));
   }
 
-  private request({ method, path, query, body }: RequestParams) {
-    if (method === 'GET' && body) {
-      return Promise.reject(new Error('body not permitted for GET requests'));
-    }
-
-    return kfetch({ method, pathname: path, query, body: JSON.stringify(body) });
+  /**
+   * To ensure we don't break backwards compatibility, savedObjectsFetch keeps
+   * the old kfetch error format of `{res: {status: number}}` whereas `http.fetch`
+   * uses `{response: {status: number}}`.
+   */
+  private savedObjectsFetch(path: string, { method, query, body }: HttpFetchOptions) {
+    return this.http.fetch(path, { method, query, body }).catch(err => {
+      const kfetchError = Object.assign(err, { res: err.response });
+      delete kfetchError.response;
+      return Promise.reject(kfetchError);
+    });
   }
 }
+
+/**
+ * Returns a new object with the own properties of `obj`, but the
+ * keys renamed according to the `keysMap`.
+ *
+ * @param keysMap - a map of the form `{oldKey: newKey}`
+ * @param obj - the object whose own properties will be renamed
+ */
+const renameKeys = <T extends Record<string, any>, U extends Record<string, any>>(
+  keysMap: Record<keyof T, keyof U>,
+  obj: Record<string, any>
+) =>
+  Object.keys(obj).reduce((acc, key) => {
+    return {
+      ...acc,
+      ...{ [keysMap[key] || key]: obj[key] },
+    };
+  }, {});
