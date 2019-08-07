@@ -285,7 +285,7 @@ export class DataRecognizer {
       );
     }
 
-    // the module's saved objects contain require an index patten id
+    // the module's saved objects require an index patten id
     // but there is no corresponding index pattern, throw an error
     if (this.indexPatternId === undefined && this.doSavedObjectsContainIndexPatternId(moduleConfig)) {
       throw Boom.badRequest(
