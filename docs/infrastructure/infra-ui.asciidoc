@@ -13,8 +13,6 @@ From here, you can drill down into areas of interest.
 [role="screenshot"]
 image::infrastructure/images/infra-sysmon.png[Infrastructure Overview in Kibana]
 
-// ++ Change this screenshot to really show hosts! others can come later!
-
 [float]
 [[infra-cat]]
 === Choose the high-level view of your infrastructure
@@ -22,12 +20,7 @@ image::infrastructure/images/infra-sysmon.png[Infrastructure Overview in Kibana]
 Select the high-level view from *Hosts*, *Kubernetes*, or *Docker*.
 When you change views, you see the same data through the perspective of a different category.
 
-[float]
-[[infra-search]]
-=== Use the power of Search
-
-Use the Search bar to perform ad hoc or structured searches using {kibana-ref}/kuery-query.html[Kibana Query Language] which features autocomplete and a simple, easy to use syntax.
-For example, enter `host.hostname : "host1"` to see only the information for `host1`.
+If the view you select has a large number of components, you can hover over the component to see the the details for that component.
 
 [float]
 [[infra-metric]]
@@ -45,11 +38,17 @@ The available options are specific to your physical, virtual, or container-based
 Examples of grouping options include Availability Zone, Machine Type, Project ID, and Cloud Provider for Hosts, and Namespace and Node for Kubernetes.
 
 [float]
+[[infra-search]]
+=== Use the power of search
+
+Use the search bar to perform ad hoc or structured searches using {kibana-ref}/kuery-query.html[Kibana Query Language] which features autocomplete and a simple, easy to use syntax.
+For example, enter `host.hostname : "host1"` to see only the information for `host1`.
+
+[float]
 [[infra-date]]
 === Specify the time and date
 
-Click the time selector to choose the timeframe for the metrics.
-// +++ Note this is *NOT* the time filter. Logs has the same as this.
+Click the time selector to choose the timeframe for the metrics. The values shown are the values for the last minute at the specified time and date.
 
 [float]
 [[infra-refresh]]
@@ -59,19 +58,29 @@ Select *Auto-refresh* to keep up-to-date metrics information coming in, or *Stop
 
 [float]
 [[infra-configure-source]]
-=== Configure the view for your metric sources
+=== Configure the data to use for your metrics
 
-If your metrics have custom index patterns, or use non-default fields for things like timestamps or container names, or contain parsed fields which you want to expose as individual columns, click *Configuration* to adjust the configuration. You can also adjust the configuration in the {kibana-ref}/settings.html[Kibana configuration file].
+The deafult source configuration for metrics is specified in the {kibana-ref}/settings.html[Kibana configuration file].
+The `metricbeat-*` index pattern is used to query the data and default field settings are also defined.
 
-// +++ more investigation needed here. Include info (currently in dumping ground topic) or add a link.
+If your metrics have custom index patterns, or use non-default field settings for things like timestamps or container names, you can override the default settings.
+Click *Configuration* to change the settings.
+This opens the *Configure source* fly-out dialog.
 
-// +++ and what about the related logging features? Are the two configs identical or not?
+NOTE: The settings here are shared with logs. Changes you make here also affect the settings used by the *Logs* tab.
 
-// +++ The logs section mentions "contain parsed fields which you want to expose as individual columns". Does that apply here too? in fcat does the columns setting do anything for metrics?
+In the *Configure source* dialog, you can change the following values:
 
-// +++ and what about the link to the Kibana settings? Should it be to logs, or to something else more specific?
+* *Name*: the name of the source configuration.
+* *Indices*: the index pattern or patterns in the Elasticsearch indices to read metrics data and log data
+  from.
+* *Fields*: the names of specific fields in the indices that need are used to query and interpret the data correctly.
 
-NOTE: The settings here are shared with logs. Changes you make here also affect the information shown in the *Logs* tab.
+TIP: If <<xpack-spaces>> are enabled in your Kibana instance, any configuration changes you make using Configure source are specific to the current space.
+You can make different subsets of data available by creating multiple spaces with different data source configurations.
+
+TIP: If you don't see the *Configuration* option, you may not have sufficient privileges to change the source configuration.
+For more information on granting access to Kibana see <<xpack-security-authorization>>.
 
 [float]
 [[infra-drill-down]]
