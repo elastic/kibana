@@ -31,6 +31,7 @@ interface StartDependencies {
   inspector: InspectorStartContract;
   __LEGACY: {
     SavedObjectFinder: React.ComponentType<any>;
+    ExitFullScreenButton: React.ComponentType<any>;
   };
 }
 
@@ -70,6 +71,7 @@ export class DashboardEmbeddableContainerPublicPlugin
         inspector,
         landingPagePath,
         SavedObjectFinder: __LEGACY.SavedObjectFinder,
+        ExitFullScreenButton: __LEGACY.ExitFullScreenButton,
       });
 
       embeddable.registerEmbeddableFactory(factory.type, factory);

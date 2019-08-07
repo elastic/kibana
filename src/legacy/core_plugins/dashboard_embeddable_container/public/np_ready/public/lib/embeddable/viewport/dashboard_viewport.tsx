@@ -30,17 +30,6 @@ import { DashboardContainer } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { Start as InspectorStartContract } from '../../../../../../../../../plugins/inspector/public';
 
-// TODO: Adapt this for NP, this used to be `import { ExitFullScreenButton } from 'ui/exit_full_screen';`.
-const ExitFullScreenButton: React.FC<any> = props => (
-  <button
-    {...props}
-    data-test-subj="exitFullScreenModeText"
-    style={{ border: '1px solid tomato', width: 16, height: 16 }}
-  >
-    X
-  </button>
-);
-
 export interface DashboardViewportProps {
   container: DashboardContainer;
   getActions: GetActionsCompatibleWithTrigger;
@@ -51,6 +40,7 @@ export interface DashboardViewportProps {
   inspector: InspectorStartContract;
   landingPagePath: string;
   SavedObjectFinder: React.ComponentType<any>;
+  ExitFullScreenButton: React.ComponentType<any>;
 }
 
 interface State {
@@ -117,7 +107,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
         }
       >
         {this.state.isFullScreenMode && (
-          <ExitFullScreenButton onExitFullScreenMode={this.onExitFullScreenMode} />
+          <this.props.ExitFullScreenButton onExitFullScreenMode={this.onExitFullScreenMode} />
         )}
         <DashboardGrid
           container={container}

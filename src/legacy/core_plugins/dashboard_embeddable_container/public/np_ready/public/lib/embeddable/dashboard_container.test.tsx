@@ -42,6 +42,7 @@ const viewportProps: ViewportProps = {
   inspector: {} as any,
   landingPagePath: '/dashboard',
   SavedObjectFinder: () => null,
+  ExitFullScreenButton: () => null,
 };
 
 beforeEach(() => {

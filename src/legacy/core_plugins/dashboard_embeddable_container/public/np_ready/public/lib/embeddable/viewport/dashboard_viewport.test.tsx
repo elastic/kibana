@@ -45,6 +45,7 @@ function getProps(props?: Partial<DashboardViewportProps>): DashboardViewportPro
     inspector: {} as any,
     landingPagePath: '/dashboard',
     SavedObjectFinder: () => null,
+    ExitFullScreenButton: () => null,
   };
 
   const __embeddableFactories = new Map<string, EmbeddableFactory>();
@@ -75,6 +76,7 @@ function getProps(props?: Partial<DashboardViewportProps>): DashboardViewportPro
     container: dashboardContainer,
     ...viewportProps,
     inspector: {} as any,
+    ExitFullScreenButton: () => null,
   };
   return Object.assign(defaultTestProps, props);
 }

@@ -81,6 +81,7 @@ export interface ViewportProps {
   inspector: InspectorStartContract;
   landingPagePath: string;
   SavedObjectFinder: React.ComponentType<any>;
+  ExitFullScreenButton: React.ComponentType<any>;
 }
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
