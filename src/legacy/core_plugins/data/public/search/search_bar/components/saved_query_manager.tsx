@@ -252,7 +252,15 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
-                    <EuiButton onClick={() => onSaveAsNew()}>
+                    <EuiButton
+                      onClick={() => onSaveAsNew()}
+                      aria-label={i18n.translate(
+                        'data.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel',
+                        {
+                          defaultMessage: 'Save as a new saved query',
+                        }
+                      )}
+                    >
                       {i18n.translate(
                         'data.search.searchBar.savedQueryPopoverSaveAsNewButtonText',
                         {
