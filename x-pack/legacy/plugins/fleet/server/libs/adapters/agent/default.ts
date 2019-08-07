@@ -6,7 +6,7 @@
 
 import { isEqual } from 'lodash';
 import { SavedObject } from 'src/core/server';
-import { Agent, NewAgent } from './adapter_type';
+import { Agent, NewAgent, AgentAdapter as AgentAdapterType } from './adapter_type';
 import { SODatabaseAdapter } from '../saved_objets_database/adapter_types';
 
 function _savedObjectToAgent(so: SavedObject<Agent>) {
@@ -16,7 +16,7 @@ function _savedObjectToAgent(so: SavedObject<Agent>) {
   return so.attributes;
 }
 
-export class AgentAdapter {
+export class AgentAdapter implements AgentAdapterType {
   constructor(private readonly soAdapter: SODatabaseAdapter) {}
 
   /**
@@ -97,8 +97,6 @@ export class AgentAdapter {
     if (error) {
       throw new Error(error.message);
     }
-
-    return { id };
   }
 
   /**

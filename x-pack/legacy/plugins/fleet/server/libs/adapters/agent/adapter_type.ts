@@ -81,3 +81,23 @@ export interface AgentEvent
 }
 
 export enum SortOptions {}
+
+export interface AgentAdapter {
+  create(agent: NewAgent): Promise<Agent>;
+
+  delete(agent: Agent): Promise<void>;
+
+  getById(id: string): Promise<Agent | null>;
+
+  getBySharedId(sharedId: string): Promise<Agent | null>;
+
+  update(id: string, newData: Partial<Agent>): Promise<void>;
+
+  findByMetadata(metadata: { local?: any; userProvided?: any }): Promise<Agent[]>;
+
+  list(sortOptions: any, page?: number, perPage?: number): Promise<Agent[]>;
+
+  findEphemeralByConfigSharedId(configSharedId: string): Promise<Agent | null>;
+
+  getByEphemeralAccessToken(token: any): Promise<Agent | null>;
+}
