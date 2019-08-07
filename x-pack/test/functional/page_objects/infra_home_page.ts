@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraHomePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const find = getService('find');
   const browser = getService('browser');
 
@@ -23,6 +24,12 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
     },
 
     async getWaffleMap() {
+      await retry.try(async () => {
+        const element = await testSubjects.find('waffleMap');
+        if (!element) {
+          throw new Error();
+        }
+      });
       return await testSubjects.find('waffleMap');
     },
 
