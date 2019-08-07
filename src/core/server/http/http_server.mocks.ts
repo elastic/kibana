@@ -114,6 +114,7 @@ const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
   notFound: jest.fn(),
   conflict: jest.fn(),
   internalError: jest.fn(),
+  customError: jest.fn(),
 });
 
 const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFactory> => ({
@@ -124,6 +125,7 @@ const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFact
   notFound: jest.fn(),
   conflict: jest.fn(),
   internalError: jest.fn(),
+  customError: jest.fn(),
 });
 
 export const httpServerMock = {

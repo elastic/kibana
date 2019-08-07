@@ -179,6 +179,18 @@ const errorResponseFactory = {
    */
   internalError: (error: ResponseError = 'Internal Error', options: HttpResponseOptions = {}) =>
     new KibanaResponse(500, error, options),
+
+  customError: (error: ResponseError, options: CustomHttpResponseOptions) => {
+    if (!options || !options.statusCode) {
+      throw new Error(`options.statusCode is expected to be set. given options: ${options}`);
+    }
+    if (options.statusCode < 400 || options.statusCode >= 600) {
+      throw new Error(
+        `Unexpected Http status code. Expected from 400 to 599, but given: ${options.statusCode}`
+      );
+    }
+    return new KibanaResponse(options.statusCode, error, options);
+  },
 };
 /**
  * Set of helpers used to create `KibanaResponse` to form HTTP response on an incoming request.

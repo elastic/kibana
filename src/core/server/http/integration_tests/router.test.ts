@@ -755,6 +755,55 @@ describe('Response factory', () => {
 
       expect(result.body.message).toBe('Conflict');
     });
+
+    it('Custom error response', async () => {
+      const router = new Router('/');
+
+      router.get({ path: '/', validate: false }, (req, res) => {
+        const error = new Error('some message');
+        return res.customError(error, {
+          statusCode: 418,
+        });
+      });
+
+      const { registerRouter, server: innerServer } = await server.setup(config);
+      registerRouter(router);
+      await server.start();
+
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .expect(418);
+
+      expect(result.body).toEqual({ message: 'some message' });
+    });
+
+    it('Custom error response requires error status code', async () => {
+      const router = new Router('/');
+
+      router.get({ path: '/', validate: false }, (req, res) => {
+        const error = new Error('some message');
+        return res.customError(error, {
+          statusCode: 200,
+        });
+      });
+
+      const { registerRouter, server: innerServer } = await server.setup(config);
+      registerRouter(router);
+      await server.start();
+
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .expect(500);
+
+      expect(result.body).toEqual({ message: 'An internal server error occurred.' });
+      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            [Error: Unexpected Http status code. Expected from 400 to 599, but given: 200],
+          ],
+        ]
+      `);
+    });
   });
 
   describe('Custom', () => {
