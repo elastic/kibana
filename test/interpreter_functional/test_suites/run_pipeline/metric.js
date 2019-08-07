@@ -51,7 +51,7 @@ export default function ({ getService, updateBaselines }) {
         await (await expectExpression('metric_invalid_data', expression).toMatchSnapshot()).toMatchScreenshot();
       });
 
-      it('with single metric data', async () => {
+      it.skip('with single metric data', async () => {
         const expression = 'metricVis metric={visdimension 0}';
         await (await expectExpression('metric_single_metric_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
       });
@@ -61,7 +61,7 @@ export default function ({ getService, updateBaselines }) {
         await expectExpression('metric_multi_metric_data', expression, dataContext).toMatchSnapshot();
       });
 
-      it('with metric and bucket data', async () => {
+      it.skip('with metric and bucket data', async () => {
         const expression = 'metricVis metric={visdimension 0} bucket={visdimension 2}';
         await (await expectExpression('metric_all_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
       });

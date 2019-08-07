@@ -70,19 +70,19 @@ export default function ({ getService, updateBaselines }) {
       });
 
       // and we can do screenshot comparison of the rendered output of expression (if expression returns renderable)
-      it ('runs the expression and compares screenshots', async () => {
+      it.skip ('runs the expression and compares screenshots', async () => {
         await expectExpression('final_screenshot_test', expression).toMatchScreenshot();
       });
 
       // it is also possible to combine different checks
-      it('runs the expression and combines different checks', async () => {
+      it.skip ('runs the expression and combines different checks', async () => {
         await (await expectExpression('combined_test', expression).steps.toMatchSnapshot()).toMatchScreenshot();
       });
     });
 
     // if we want to do multiple different tests using the same data, or reusing a part of expression its
     // possible to retrieve the intermediate result and reuse it in later expressions
-    describe('reusing partial results', () => {
+    describe.skip('reusing partial results', () => {
       it ('does some screenshot comparisons', async () => {
         const expression = `kibana | kibana_context | esaggs index='logstash-*' aggConfigs='[
           {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
