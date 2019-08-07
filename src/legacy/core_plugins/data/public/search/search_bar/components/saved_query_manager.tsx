@@ -183,12 +183,19 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
                   onCancel={() => {
                     setConfirmDeletionModal(null);
                   }}
-                ></EuiConfirmModal>
+                />
               </EuiOverlayMask>
             );
           }}
           iconType="trash"
           color="danger"
+          aria-label={i18n.translate(
+            'data.search.searchBar.savedQueryPopoverDeleteButtonAriaLabel',
+            {
+              defaultMessage: 'Delete saved query {title}',
+              values: { title: savedQuery.attributes.title },
+            }
+          )}
         />
       </li>
     ));
