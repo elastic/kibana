@@ -54,7 +54,6 @@ import {
 } from '../../common/constants';
 
 import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
-const filterManager = data.filter.filterManager;
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
@@ -97,7 +96,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
     $scope.$evalAsync(() => {
       // appState
       $state.query = $scope.query;
-      $state.filters = filterManager.getAppFilters();
+      $state.filters = data.filter.filterManager.getAppFilters();
       $state.save();
 
       // globalState
@@ -106,7 +105,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
         pause: $scope.refreshConfig.isPaused,
         value: $scope.refreshConfig.interval,
       };
-      globalState.filters = filterManager.getGlobalFilters();
+      globalState.filters = data.filter.filterManager.getGlobalFilters();
       globalState.save();
     });
   }
@@ -127,8 +126,8 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
 
   async function onQueryChange({ filters, query, time }) {
     if (filters) {
-      await filterManager.setFilters(filters); // Maps and merges filters
-      $scope.filters = filterManager.getFilters();
+      await data.filter.filterManager.setFilters(filters); // Maps and merges filters
+      $scope.filters = data.filter.filterManager.getFilters();
     }
     if (query) {
       $scope.query = query;
