@@ -17,22 +17,8 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
+import { resolve } from 'path';
 
-var resolve = require('path').resolve;
-var pkg = require('../package.json');
-var kbnEs = require('@kbn/es');
-
-kbnEs
-  .run({
-    license: 'basic',
-    password: 'changeme',
-    version: pkg.version,
-    'source-path': resolve(__dirname, '../../elasticsearch'),
-    'base-path': resolve(__dirname, '../.es'),
-    ssl: false,
-  })
-  .catch(function (e) {
-    console.error(e);
-    process.exitCode = 1;
-  });
+export const CA_CERT_PATH = resolve(__dirname, 'ca.crt');
+export const ES_KEY_PATH = resolve(__dirname, 'elasticsearch.key');
+export const ES_CERT_PATH = resolve(__dirname, 'elasticsearch.crt');
