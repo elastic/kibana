@@ -10,9 +10,9 @@ import {
   InfraMetadata,
   InfraMetadataRequest,
 } from '../../../../legacy/plugins/infra/common/http_api/metadata_api';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-const metadataTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const fetchMetadata = async (body: InfraMetadataRequest): Promise<InfraMetadata | undefined> => {
@@ -277,7 +277,4 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default metadataTests;
+}

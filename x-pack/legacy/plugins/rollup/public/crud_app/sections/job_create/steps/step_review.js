@@ -32,9 +32,7 @@ const JOB_DETAILS_TABS = [
 
 export class StepReviewUi extends Component {
   static propTypes = {
-    fields: PropTypes.object.isRequired,
     job: PropTypes.object.isRequired,
-    onFieldsChange: PropTypes.func.isRequired,
   };
 
   constructor(props) {

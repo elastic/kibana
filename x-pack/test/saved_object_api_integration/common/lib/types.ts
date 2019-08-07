@@ -10,15 +10,3 @@ export interface TestDefinitionAuthentication {
   username?: string;
   password?: string;
 }
-
-export type LoadTestFileFn = (path: string) => string;
-
-export type GetServiceFn = (service: string) => any;
-
-export type ReadConfigFileFn = (path: string) => any;
-
-export interface TestInvoker {
-  getService: GetServiceFn;
-  loadTestFile: LoadTestFileFn;
-  readConfigFile: ReadConfigFileFn;
-}
