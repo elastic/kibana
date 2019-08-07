@@ -5,18 +5,13 @@
  */
 
 import React, { PureComponent } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
-import { toastNotifications } from 'ui/notify';
 
 import {
-  EuiButton,
-  EuiCodeEditor,
-  EuiCopy,
+  EuiCodeBlock,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiPortal,
   EuiSpacer,
@@ -70,47 +65,20 @@ export class PolicyJsonFlyout extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.policyJsonFlyout.descriptionText"
-                  defaultMessage="This is the underlying request to Elasticsearch that will create or update this index lifecycle policy."
+                  defaultMessage="This Elasticsearch request will create or update this index lifecycle policy."
                 />
               </p>
             </EuiText>
 
             <EuiSpacer />
 
-            <EuiCodeEditor
-              mode="json"
-              theme="textmate"
-              isReadOnly
-              setOptions={{ maxLines: Infinity, useWorker: false }}
-              value={request}
-              editorProps={{
-                $blockScrolling: Infinity
-              }}
-            />
+            <EuiCodeBlock
+              language="json"
+              isCopyable
+            >
+              {request}
+            </EuiCodeBlock>
           </EuiFlyoutBody>
-
-          <EuiFlyoutFooter>
-            <EuiCopy textToCopy={request}>
-              {copy => (
-                <EuiButton
-                  onClick={() => {
-                    copy();
-                    toastNotifications.add(i18n.translate(
-                      'xpack.indexLifecycleMgmt.editPolicy.policyJsonFlyout.copiedToClipboardMessage',
-                      {
-                        defaultMessage: 'Request copied to clipboard'
-                      }
-                    ));
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.policyJsonFlyout.copyToClipboardButton"
-                    defaultMessage="Copy to clipboard"
-                  />
-                </EuiButton>
-              )}
-            </EuiCopy>
-          </EuiFlyoutFooter>
         </EuiFlyout>
       </EuiPortal>
     );
