@@ -1,5 +1,13 @@
 [role="xpack"]
 [[canvas-workpad]]
+== Create and build a workpad
+
+Description.
+
+For workpad inspiration, go to the link:https://www.elastic.co/blog/[Elastic Blog]. 
+
+[float]
+[[create-canvas-workpad]]
 === Create a workpad
 
 When you create a workpad, you'll start with a blank page, or you can choose a workpad that is already started for you. 
@@ -15,8 +23,6 @@ When you create a workpad, you'll start with a blank page, or you can choose a w
 * To import an existing workpad, click and drag a workpad JSON file to the *Import workpad JSON file* field.
 
 * To use a sample data workpad, click *Try the sample data workpads*, add the data, then select *Canvas* from the *View Data* dropdown list.
-
-For workpad inspiration, go to the link:https://www.elastic.co/blog/[Elastic Blog]. 
 
 [float]
 [[customize-workpad-basic]]
@@ -41,3 +47,255 @@ image::images/canvas-background-color-picker.gif[]
 .. Expand *Global CCS overrides*.
 
 .. Enter the CCS, then click *Apply stylesheet*.
+
+[float]
+[[element-intro]]
+== Showcase your data with elements
+
+Elements are the building blocks of your workpad. You can add and combine elements to create presentations of your data.
+
+[float]
+[[add-canvas-element]]
+=== Add elements
+
+. Click *Add element*.
+
+. On the *Elements* window, then select the element you want to use. 
++
+//TODO add image
++
+Elements come preconfigured with a small data set so that you can familiarize yourself with the element. Play around with the default settings and see what the element can do. 
+
+TIP: Changed your mind? You can delete the element by selecting it, clicking the *Element options* icon in the top right corner, then selecting *Delete*.
+
+[float]
+[[connect-element-data]]
+=== Connect the element to your data
+
+When you are ready to move on from the demo data, connect the element to your own data.
+
+. Make sure that the element is selected, then select *Data*.
+
+. Click *Change your data source*.
+
+[float]
+[[elasticsearch-sql-data-source]]
+==== Connect to Elasticsearch SQL
+
+Access your data in Elasticsearch using the Elasticsearch SQL syntax.
+
+. Click *Elasticsearch SQL*.
+
+. In the *Elasticearch SQL query* box, enter your query, then click *Preview*.
+
+. If everything looks correct, click *Save*. 
++ 
+The element appears as a warning. 
+
+. Click *Display*
+
+. Change the data points to display in your element. 
+
+. In the *Label* field, enter a name for the data.
+
+Unfamiliar with writing Elasticsearch SQL queries? Go to {ref}/sql-spec.html[SQL language] for more information.
+
+[float]
+[[elasticsearch-raw-doc-data-source]]
+==== Connect to Elasticsearch raw data
+
+Use the Lucene query syntax to use your raw data in Elasticsearch.
+
+. Click *Elasticsearch raw documents*.
+
+.. From the *Index* dropdown, select the index data that you want to display. 
+
+.. From the *Fields* dropdown, select the associated fields you want to display.
+
+.. To sort the data, select an option from the *Sort Field* and *Sort Order* dropdowns.
+
+.. For more targeted queries, enter a *Query* using the Lucene query string syntax. 
++
+For for more information about the Lucene query string sytax, refer to <<lucene-query,Lucene Query Syntax>>.
+
+. Click *Preview*. 
+
+. If your query looks correct, click *Save*. 
++ 
+The element appears as a warning. 
+
+. Click *Display*
+
+.. Change the data points to display in your element. 
+
+.. In the *Label* field, enter a name for the data.
+
+[float]
+[[timelion-data-source]]
+==== Connect to Timelion
+
+Use Timelion queries to use your time series data. 
+
+. Click *Timelion*.
+
+. Enter a *Query* using the Lucene query string syntax. 
++
+For for more information about the Lucene query string syntax, refer to <<lucene-query,Lucene Query Syntax>>.
+
+. Enter the *Interval*, then click *Preview*.
+
+. If your query looks correct, click *Save*. 
++ 
+The element appears as a warning. 
+
+. Click *Display*
+
+. Change the data points to display in your element. 
+
+. In the *Label* field, enter a name for the data.
+
+For more information about Timelion, refer to <<timelion,Timelion>>.
+
+[float]
+[[configure-auto-refresh-interval]]
+=== Change the auto-refresh interval
+
+Choose the interval to refresh the data on your workpad.
+
+. In the top left corner, click the *Control settings* icon.
+
+. Under *Change auto-refresh interval*, select the interval you want to use.
++
+To manually refresh the data, click the *Refresh data* icon. 
+
+[float]
+[[element-display-options]]
+=== Choose the advanced display options
+
+Choose how you want the element to appear on your workpad.
+
+. Next to *Element style*, click *+*.
+
+. Choose one of these options:
+
+* To make small changes to the appearance of the element, click *Container style*.
+
+* To apply a CSS stylesheet to the element, click *CSS*.
+
+//For more advanced customization options, create Canvas plugins.
+
+//To further define the appearance and behavior of the element, use the <<canvas-expression-editor,expression editor>>.
+
+[float]
+[[organize-element]]
+=== Organize the elements on your workpad
+
+Choose where you want the elements to appear on your workpad.
+
+[float]
+[[move-canvas-elements]]
+==== Move elements
+
+Move the element to a preferred location on your workpad.
+
+* Click and drag the element to your preferred location.
+
+* To move the element by 1 pixel, select the element, then use your arrow keys.
++
+As you move the element, notice the alignment lines that appear to help you place the element exactly where you want it.
+
+[float]
+[[resize-canvas-elements]]
+==== Resize elements
+
+Make your elements bigger or smaller than the default size.
+
+. Select the element.
+
+. Click and drag the resizing icon to the size you want.
+
+[float]
+[[alighn-canvas-elements]]
+==== Align elements
+
+Align two or more elements on your workpad.
+
+. Press Shift, then select the elements you want to align.
+
+. Click the *Element options* icon in the top right corner, then select *Align elements*.
+
+. From the *Alignment* menu, how you want to align the elements on the workpad.
+
+[float]
+[[distribute-canvas-elements]]
+==== Distribute elements
+
+Distribute two or more elements on your workpad.
+
+. Press Shift, then select the elements you want to distribute.
+
+. Click the *Element options* icon in the top right corner, then select *Distribute elements*.
+
+. From the *Distribution* menu, how you want to distribute the elements on the workpad.
+
+[float]
+[[change-element-order]]
+==== Change the element order
+
+Change the order of how the elements are displayed on your workpad.
+
+. Select an element.
+
+. In the top right corder, click the *Element options* icon. 
+
+.. Select *Order*, then select the order that you want the element to appear.
+
+[float]
+[[element-save]]
+=== Save elements
+
+After you have made changes to elements, save them so that you can reuse them across your workpads.
+
+. Select the element that you want to save.
++
+To save a group of elements, press Shift, then select the elements you want to save.
+
+. Next to *Selected element*, click the *Save as new element* icon.
+
+. In the *Create new element* window, enter a *Name*.
+
+. Enter an optional *Description*, then click *Save*.
++
+To access the element, click *Add element*, then select *My elements*.
+
+[float]
+[[add-more-pages]]
+=== Add more pages to the workpad
+
+When you have run out of room on your workpad page, you can add more pages.
+
+. Click *Page 1*, then click the *+* icon.
+
+. On the *Page* editor panel on the right, select the page transition from the *Transition* dropdown. 
+
+//TODO insert image
+
+[float]
+[[workpad-display-options]]
+=== Change the workpad display options
+
+For a better view of the elements on your workpad, change the display options.
+
+* To view your workpad in fullscreen mode, click the *Enter fullscreen mode* icon in the upper left corner.
+
+* To zoom in or out on the workpad, click the *Zoom controls* icon in the upper left corder, then select one of the options.
+
+[float]
+[[enable-autoplay]]
+=== Enable autoplay 
+
+Automatically cycle through your workpads pages in fullscreen mode.
+
+. In the upper left corner, click the *Control settings* icon.
+
+. Under *Change cycling interval*, select the cycle interval you want to use.
