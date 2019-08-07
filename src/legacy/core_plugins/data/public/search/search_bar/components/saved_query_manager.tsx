@@ -86,6 +86,13 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
     }
   );
 
+  const noSavedQueriesDescriptionText =
+    i18n.translate('data.search.searchBar.savedQueryDescriptionText', {
+      defaultMessage: 'There are no saved queries.',
+    }) +
+    ' ' +
+    savedQueryDescriptionText;
+
   const savedQueryPopoverTitleText = i18n.translate(
     'data.search.searchBar.savedQueryPopoverTitleText',
     {
@@ -213,12 +220,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
               </EuiFlexGroup>
             </Fragment>
           ) : (
-            <EuiText grow={false}>
-              <p>
-                There are no saved queries. You can save search snippets and filters for later use.{' '}
-                this, enter a query and click 'Save query for reuse'.
-              </p>
-            </EuiText>
+            <EuiText grow={false}>{noSavedQueriesDescriptionText}</EuiText>
           )}
           <EuiFlexGroup direction="rowReverse" alignItems="center" justifyContent="flexEnd">
             {showSaveQuery && loadedSavedQuery && (
