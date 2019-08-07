@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { Vis } from 'ui/vis';
-
-export interface VisOptionsProps<VisParamType = unknown> {
-  stateParams: VisParamType;
-  vis: Vis;
-  setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
+export interface TagCloudVisParams {
+  scale: 'linear' | 'log' | 'square root';
+  orientation: 'single' | 'right angled' | 'multiple';
+  minFontSize: number;
+  maxFontSize: number;
+  showLabel: boolean;
 }
