@@ -14,25 +14,25 @@ export interface LicenseApiResponse {
     type: string;
   };
   features: {
-    beats_management: StringMap;
-    graph: StringMap;
-    grokdebugger: StringMap;
-    index_management: StringMap;
-    logstash: StringMap;
-    ml: {
+    beats_management?: StringMap;
+    graph?: StringMap;
+    grokdebugger?: StringMap;
+    index_management?: StringMap;
+    logstash?: StringMap;
+    ml?: {
       is_available: boolean;
       license_type: number;
       has_expired: boolean;
       enable_links: boolean;
       show_links: boolean;
     };
-    reporting: StringMap;
-    rollup: StringMap;
-    searchprofiler: StringMap;
-    security: StringMap;
-    spaces: StringMap;
-    tilemap: StringMap;
-    watcher: {
+    reporting?: StringMap;
+    rollup?: StringMap;
+    searchprofiler?: StringMap;
+    security?: StringMap;
+    spaces?: StringMap;
+    tilemap?: StringMap;
+    watcher?: {
       is_available: boolean;
       enable_links: boolean;
       show_links: boolean;

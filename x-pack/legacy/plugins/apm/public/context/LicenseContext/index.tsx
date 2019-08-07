@@ -5,16 +5,13 @@
  */
 import React from 'react';
 import { FETCH_STATUS, useFetcher } from '../../hooks/useFetcher';
-import { loadLicense } from '../../services/rest/xpack';
+import { loadLicense, LicenseApiResponse } from '../../services/rest/xpack';
 import { InvalidLicenseNotification } from './InvalidLicenseNotification';
 
 const initialLicense = {
-  features: {
-    watcher: { is_available: false },
-    ml: { is_available: false }
-  },
+  features: {},
   license: { is_active: false }
-};
+} as LicenseApiResponse;
 export const LicenseContext = React.createContext(initialLicense);
 
 export const LicenseProvider: React.FC = ({ children }) => {
