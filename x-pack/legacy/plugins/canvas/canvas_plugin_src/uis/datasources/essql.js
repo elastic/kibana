@@ -14,13 +14,13 @@ class EssqlDatasource extends PureComponent {
   componentDidMount() {
     const query = this.getQuery();
     if (typeof query !== 'string') {
-      this.setArg(this.getArgName(), this.getDefaultQuery());
+      this.setArg(this.getArgName(), this.defaultQuery);
     } else {
       this.props.setInvalid(!query.trim());
     }
   }
 
-  getDefaultQuery = () => `SELECT * FROM "${this.props.defaultIndex}"`;
+  defaultQuery = `SELECT * FROM "${this.props.defaultIndex}"`;
 
   getQuery = () => getSimpleArg(this.getArgName(), this.props.args)[0];
 
@@ -58,7 +58,7 @@ class EssqlDatasource extends PureComponent {
     return (
       <EuiFormRow isInvalid={isInvalid} label="Elasticsearch SQL query">
         <EuiTextArea
-          placeholder={this.getDefaultQuery()}
+          placeholder={this.defaultQuery}
           isInvalid={isInvalid}
           className="canvasTextArea--code"
           value={this.getQuery()}
