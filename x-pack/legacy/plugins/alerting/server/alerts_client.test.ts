@@ -20,6 +20,9 @@ const alertsClientParams = {
   alertTypeRegistry,
   savedObjectsClient,
   spaceId: 'default',
+  async getUserName() {
+    return 'elastic';
+  },
 };
 
 beforeEach(() => jest.resetAllMocks());

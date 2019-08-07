@@ -16,6 +16,7 @@ interface ConstructorOptions {
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
   spaceId?: string;
+  getUserName: () => Promise<string | null>;
 }
 
 interface FindOptions {
@@ -42,7 +43,7 @@ interface FindResult {
 }
 
 interface CreateOptions {
-  data: Alert;
+  data: Pick<Alert, Exclude<keyof Alert, 'createdBy'>>;
   options?: {
     migrationVersion?: Record<string, string>;
   };
@@ -60,6 +61,7 @@ interface UpdateOptions {
 
 export class AlertsClient {
   private readonly log: Log;
+  private readonly getUserName: () => Promise<string | null>;
   private readonly spaceId?: string;
   private readonly taskManager: TaskManager;
   private readonly savedObjectsClient: SavedObjectsClientContract;
@@ -71,8 +73,10 @@ export class AlertsClient {
     taskManager,
     log,
     spaceId,
+    getUserName,
   }: ConstructorOptions) {
     this.log = log;
+    this.getUserName = getUserName;
     this.spaceId = spaceId;
     this.taskManager = taskManager;
     this.alertTypeRegistry = alertTypeRegistry;
@@ -85,6 +89,7 @@ export class AlertsClient {
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.alertTypeParams);
     const { alert: rawAlert, references } = this.getRawAlert({
       ...data,
+      createdBy: await this.getUserName(),
       alertTypeParams: validatedAlertTypeParams,
     });
     const createdAlert = await this.savedObjectsClient.create('alert', rawAlert, {

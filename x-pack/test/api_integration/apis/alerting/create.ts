@@ -61,6 +61,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             enabled: true,
             alertTypeId: 'test.noop',
             alertTypeParams: {},
+            createdBy: 'elastic',
             interval: '10s',
             scheduledTaskId: resp.body.scheduledTaskId,
           });
@@ -97,6 +98,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         enabled: true,
         alertTypeId: 'test.noop',
         alertTypeParams: {},
+        createdBy: 'elastic',
         interval: '10s',
         scheduledTaskId: createdAlert.scheduledTaskId,
       });

@@ -69,6 +69,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               },
             ],
             alertTypeParams: {},
+            createdBy: 'elastic',
             scheduledTaskId: resp.body.scheduledTaskId,
           });
         });
@@ -99,6 +100,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               },
             ],
             alertTypeParams: {},
+            createdBy: 'elastic',
             scheduledTaskId: resp.body.scheduledTaskId,
           });
         });

@@ -19,6 +19,7 @@ import { AlertingPlugin, Services } from './types';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { AlertsClient } from './alerts_client';
 import { SpacesPlugin } from '../../spaces';
+import { SecurityPlugin } from '../../security';
 import { createOptionalPlugin } from '../../../server/lib/optional_plugin';
 
 export function init(server: Legacy.Server) {
@@ -29,11 +30,30 @@ export function init(server: Legacy.Server) {
     server.plugins,
     'spaces'
   );
+  const security = createOptionalPlugin<SecurityPlugin>(
+    config,
+    'xpack.security',
+    server.plugins,
+    'security'
+  );
 
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
     callWithInternalUser
   );
+
+  // Encrypted attributes
+  server.plugins.encrypted_saved_objects!.registerType({
+    type: 'alert',
+    attributesToEncrypt: new Set(['apiKeyId', 'generatedApiKey']),
+    attributesToExcludeFromAAD: new Set([
+      'enabled',
+      'interval',
+      'actions',
+      'alertTypeParams',
+      'scheduledTaskId',
+    ]),
+  });
 
   function getServices(basePath: string): Services {
     const fakeRequest: any = {
@@ -54,9 +74,7 @@ export function init(server: Legacy.Server) {
     fireAction: server.plugins.actions!.fire,
     internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
     getBasePath(...args) {
-      return spaces.isEnabled
-        ? spaces.getBasePath(...args)
-        : server.config().get('server.basePath');
+      return spaces.isEnabled ? spaces.getBasePath(...args) : config.get('server.basePath');
     },
     spaceIdToNamespace(...args) {
       return spaces.isEnabled ? spaces.spaceIdToNamespace(...args) : undefined;
@@ -77,15 +95,25 @@ export function init(server: Legacy.Server) {
   server.decorate('request', 'getAlertsClient', function() {
     const request = this;
     const savedObjectsClient = request.getSavedObjectsClient();
+
     const alertsClient = new AlertsClient({
       log: server.log.bind(server),
       savedObjectsClient,
       alertTypeRegistry,
       taskManager: taskManager!,
       spaceId: spaces.isEnabled ? spaces.getSpaceId(request) : undefined,
+      async getUserName(): Promise<string | null> {
+        if (!security.isEnabled) {
+          return null;
+        }
+        const user = await security.getUser(request);
+        return user ? user.username : null;
+      },
     });
+
     return alertsClient;
   });
+
   const exposedFunctions: AlertingPlugin = {
     registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
     listTypes: alertTypeRegistry.list.bind(alertTypeRegistry),

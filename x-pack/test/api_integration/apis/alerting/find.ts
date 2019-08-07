@@ -74,6 +74,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               },
             ],
             alertTypeParams: {},
+            createdBy: 'elastic',
             scheduledTaskId: match.scheduledTaskId,
           });
         });
@@ -101,6 +102,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               },
             ],
             alertTypeParams: {},
+            createdBy: 'elastic',
             scheduledTaskId: match.scheduledTaskId,
           });
         });

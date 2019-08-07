@@ -31,6 +31,15 @@
       },
       "scheduledTaskId": {
         "type": "keyword"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "apiKeyId": {
+        "type": "binary"
+      },
+      "generatedApiKey": {
+        "type": "binary"
       }
     }
   }

@@ -12,8 +12,11 @@ import { migrations } from './migrations';
 export function taskManager(kibana) {
   return new kibana.Plugin({
     id: 'task_manager',
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'encrypted_saved_objects'],
     configPrefix: 'xpack.task_manager',
+    isEnabled(config) {
+      return config.get('xpack.encrypted_saved_objects.enabled') === true;
+    },
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
@@ -43,15 +46,31 @@ export function taskManager(kibana) {
       const schema = new SavedObjectsSchema(this.kbnServer.uiExports.savedObjectSchemas);
       const serializer = new SavedObjectsSerializer(schema);
       const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-      const savedObjectsRepository = server.savedObjects.getSavedObjectsRepository(
+      const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
         callWithInternalUser,
         ['task']
       );
 
+      // Encrypted attributes
+      server.plugins.encrypted_saved_objects.registerType({
+        type: 'task',
+        attributesToEncrypt: new Set(['secrets']),
+        attributesToExcludeFromAAD: new Set([
+          'scheduledAt',
+          'runAt',
+          'startedAt',
+          'retryAt',
+          'interval',
+          'attempts',
+          'status',
+          'state',
+        ]),
+      });
+
       const taskManager = new TaskManager({
         kbnServer: this.kbnServer,
         config,
-        savedObjectsRepository,
+        savedObjectsRepositoryWithInternalUser,
         serializer,
       });
       server.decorate('server', 'taskManager', taskManager);
@@ -61,7 +80,8 @@ export function taskManager(kibana) {
       migrations,
       savedObjectSchemas: {
         task: {
-          hidden: true,
+          // TODO: ADD BACK
+          // hidden: true,
           isNamespaceAgnostic: true,
           convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
           indexPattern(config) {
