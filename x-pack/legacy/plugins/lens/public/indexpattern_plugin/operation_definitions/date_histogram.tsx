@@ -38,8 +38,12 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     defaultMessage: 'Date Histogram',
   }),
   getPossibleOperationsForDocument: () => [],
-  getPossibleOperationsForField: ({ aggregationRestrictions, type }) => {
-    if (type === 'date' && (!aggregationRestrictions || aggregationRestrictions.date_histogram)) {
+  getPossibleOperationsForField: ({ aggregationRestrictions, aggregatable, type }) => {
+    if (
+      type === 'date' &&
+      aggregatable &&
+      (!aggregationRestrictions || aggregationRestrictions.date_histogram)
+    ) {
       return [
         {
           dataType: 'date',
