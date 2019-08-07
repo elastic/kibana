@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { supports } from 'ui/utils/supports';
@@ -28,7 +29,6 @@ import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 import { createTileMapVisualization } from './tile_map_visualization';
 import { visFactory } from '../../visualizations/public';
 import { TileMapOptions } from './components/tile_map_options';
-import { withInjectedDependencies } from '../../kbn_vislib_vis_types/public/utils/with_injected_dependencies';
 
 export function createTileMapTypeDefinition(dependencies) {
   const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
@@ -113,7 +113,7 @@ export function createTileMapTypeDefinition(dependencies) {
         ],
         tmsLayers: [],
       },
-      optionsTemplate: withInjectedDependencies(TileMapOptions, { serviceSettings }),
+      optionsTemplate: (props) => <TileMapOptions {...props} serviceSettings={serviceSettings} />,
       schemas: new Schemas([
         {
           group: 'metrics',

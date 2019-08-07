@@ -271,11 +271,27 @@ export class DataRecognizer {
     const moduleConfig = await this.getModule(moduleId, jobPrefix);
 
     if (indexPatternName === undefined && moduleConfig.defaultIndexPattern === undefined) {
-
       throw Boom.badRequest(`No index pattern configured in "${moduleId}" configuration file and no index pattern passed to the endpoint`);
     }
+
     this.indexPatternName = (indexPatternName === undefined) ? moduleConfig.defaultIndexPattern : indexPatternName;
     this.indexPatternId = this.getIndexPatternId(this.indexPatternName);
+
+    // the module's jobs contain custom URLs which require an index patten id
+    // but there is no corresponding index pattern, throw an error
+    if (this.indexPatternId === undefined && this.doJobUrlsContainIndexPatternId(moduleConfig)) {
+      throw Boom.badRequest(
+        `Module's jobs contain custom URLs which require a kibana index pattern (${this.indexPatternName}) which cannot be found.`
+      );
+    }
+
+    // the module's saved objects require an index patten id
+    // but there is no corresponding index pattern, throw an error
+    if (this.indexPatternId === undefined && this.doSavedObjectsContainIndexPatternId(moduleConfig)) {
+      throw Boom.badRequest(
+        `Module's saved objects contain custom URLs which require a kibana index pattern (${this.indexPatternName}) which cannot be found.`
+      );
+    }
 
     // create an empty results object
     const results = this.createResultsTemplate(moduleConfig);
@@ -652,20 +668,15 @@ export class DataRecognizer {
   // if an override index pattern has been specified,
   // update all of the datafeeds.
   updateDatafeedIndices(moduleConfig) {
-    // only use the override index pattern if it actually exists in kibana
-    const idxId = this.getIndexPatternId(this.indexPatternName);
-    if (idxId !== undefined) {
-      moduleConfig.datafeeds.forEach((df) => {
-        df.config.indexes = df.config.indexes.map(idx => (idx === INDEX_PATTERN_NAME ? this.indexPatternName : idx));
-      });
-    }
+    moduleConfig.datafeeds.forEach((df) => {
+      df.config.indexes = df.config.indexes.map(index => (index === INDEX_PATTERN_NAME ? this.indexPatternName : index));
+    });
   }
 
   // loop through the custom urls in each job and replace the INDEX_PATTERN_ID
   // marker for the id of the specified index pattern
   updateJobUrlIndexPatterns(moduleConfig) {
-    if (moduleConfig.jobs && moduleConfig.jobs.length) {
-      // find the job associated with the datafeed
+    if (Array.isArray(moduleConfig.jobs)) {
       moduleConfig.jobs.forEach((job) => {
         // if the job has custom_urls
         if (job.config.custom_settings && job.config.custom_settings.custom_urls) {
@@ -681,6 +692,24 @@ export class DataRecognizer {
         }
       });
     }
+  }
+
+  // check the custom urls in the module's jobs to see if they contain INDEX_PATTERN_ID
+  // which needs replacement
+  doJobUrlsContainIndexPatternId(moduleConfig) {
+    if (Array.isArray(moduleConfig.jobs)) {
+      for (const job of moduleConfig.jobs) {
+        // if the job has custom_urls
+        if (job.config.custom_settings && job.config.custom_settings.custom_urls) {
+          for (const cUrl of job.config.custom_settings.custom_urls) {
+            if (cUrl.url_value.match(INDEX_PATTERN_ID)) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+    return false;
   }
 
   // loop through each kibana saved object and replace any INDEX_PATTERN_ID and
@@ -707,6 +736,22 @@ export class DataRecognizer {
         });
       });
     }
+  }
+
+  // check the kibana saved searches JSON in the module to see if they contain INDEX_PATTERN_ID
+  // which needs replacement
+  doSavedObjectsContainIndexPatternId(moduleConfig) {
+    if (moduleConfig.kibana) {
+      for (const category of Object.keys(moduleConfig.kibana)) {
+        for (const item of moduleConfig.kibana[category]) {
+          const jsonString = item.config.kibanaSavedObjectMeta.searchSourceJSON;
+          if (jsonString.match(INDEX_PATTERN_ID)) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }
 
 }
