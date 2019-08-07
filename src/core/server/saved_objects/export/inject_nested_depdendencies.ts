@@ -18,7 +18,7 @@
  */
 
 import Boom from 'boom';
-import { SavedObject, SavedObjectsClientContract } from '../service/saved_objects_client';
+import { SavedObject, SavedObjectsClientContract } from '../types';
 
 export function getObjectReferencesToFetch(savedObjectsMap: Map<string, SavedObject>) {
   const objectsToFetch = new Map<string, { type: string; id: string }>();
