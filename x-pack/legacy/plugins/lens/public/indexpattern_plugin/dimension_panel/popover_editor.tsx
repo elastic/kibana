@@ -31,6 +31,7 @@ import { operationDefinitionMap, getOperationDisplay, buildColumn } from '../ope
 import { deleteColumn, changeColumn } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
+import { BucketNestingEditor } from './bucket_nesting_editor';
 
 const operationPanels = getOperationDisplay();
 
@@ -335,6 +336,22 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     />
                   </EuiFormRow>
                 )}
+                <BucketNestingEditor
+                  layer={state.layers[props.layerId]}
+                  columnId={props.columnId}
+                  setColumns={columnOrder => {
+                    setState({
+                      ...state,
+                      layers: {
+                        ...state.layers,
+                        [props.layerId]: {
+                          ...state.layers[props.layerId],
+                          columnOrder,
+                        },
+                      },
+                    });
+                  }}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
