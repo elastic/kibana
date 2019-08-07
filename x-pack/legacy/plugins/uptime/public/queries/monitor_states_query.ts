@@ -11,7 +11,7 @@ query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $paginatio
   monitorStates: getMonitorStates(
     dateRangeStart: $dateRangeStart
     dateRangeEnd: $dateRangeEnd
-    pagination: $cursorPagination
+    pagination: $pagination
     filters: $filters
   ) {
     searchAfter

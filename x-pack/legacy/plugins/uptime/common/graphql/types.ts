@@ -689,9 +689,9 @@ export interface MonitorCursorKey {
 export interface CursorPagination {
   cursorKey?: string | null;
 
-  cursorDirection?: CursorDirection | null;
+  cursorDirection: CursorDirection;
 
-  sortOrder?: SortOrder | null;
+  sortOrder: SortOrder;
 }
 
 // ====================================================

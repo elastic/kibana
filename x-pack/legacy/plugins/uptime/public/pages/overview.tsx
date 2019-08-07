@@ -21,6 +21,7 @@ import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
+import { CursorDirection, SortOrder, CursorPagination } from '../../common/graphql/types';
 
 interface OverviewPageProps {
   basePath: string;
@@ -40,25 +41,18 @@ export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
   queryText?: string;
 }) => void;
 
-export type UptimeSearchAfterChangeHandler = (prevSearchAfter: string | null, searchAfter: string | null) => void;
+export type UptimeSearchAfterChangeHandler = (
+  prevSearchAfter: string | null,
+  searchAfter: string | null
+) => void;
 
 export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
-  const {
-    absoluteStartDate,
-    absoluteEndDate,
-    colors,
-    refreshApp,
-    setHeadingText,
-  } = useContext(UptimeSettingsContext);
+  const { absoluteStartDate, absoluteEndDate, colors, refreshApp, setHeadingText } = useContext(
+    UptimeSettingsContext
+  );
   const [getUrlParams, updateUrl] = useUrlParams();
   const params = getUrlParams();
-  const {
-    dateRangeStart,
-    dateRangeEnd,
-    search,
-    searchAfter,
-    prevSearchAfter,
-  } = params;
+  const { dateRangeStart, dateRangeEnd, search, searchAfter, prevSearchAfter } = params;
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
@@ -121,6 +115,12 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
   //   });
   // };
 
+  const pagination: CursorPagination = {
+    cursorKey: null,
+    cursorDirection: CursorDirection.AFTER,
+    sortOrder: SortOrder.ASC,
+  };
+
   return (
     <Fragment>
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
@@ -166,7 +166,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           // onChange={onMonitorListChange}
           variables={{
             ...sharedProps,
-            searchAfter,
+            pagination,
             // TODO: reintegrate pagination in future release
             // pageIndex: monitorListPageIndex,
             // pageSize: monitorListPageSize,

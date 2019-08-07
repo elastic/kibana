@@ -174,8 +174,8 @@ export const monitorStatesSchema = gql`
 
   input CursorPagination {
     cursorKey: String
-    cursorDirection: CursorDirection
-    sortOrder: SortOrder
+    cursorDirection: CursorDirection!
+    sortOrder: SortOrder!
   }
 
   extend type Query {

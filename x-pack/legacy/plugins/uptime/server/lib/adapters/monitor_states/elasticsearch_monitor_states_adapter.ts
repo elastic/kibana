@@ -30,17 +30,17 @@ const checksSortBy = (check: Check) => [
   get<string>(check, 'monitor.ip'),
 ];
 
+const DefaultCursorPagination: CursorPagination = {
+  cursorDirection: CursorDirection.AFTER,
+  sortOrder: SortOrder.DESC,
+};
 
 export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter {
   constructor(private readonly database: DatabaseAdapter) {
     this.database = database;
   }
 
-  private checkGroupsBody(
-    subQuery: any,
-    size: number,
-    pagination: CursorPagination,
-  ): any {
+  private checkGroupsBody(subQuery: any, size: number, searchAfter: any, pagination: CursorPagination): any {
     const composite_order = pagination.cursorDirection === CursorDirection.AFTER ? 'asc' : 'desc';
 
     const body = {
@@ -113,7 +113,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       },
     };
     if (pagination.cursorKey) {
-      set(body, 'aggs.monitors.composite.after', pagination.cursorKey);
+      set(body, 'aggs.monitors.composite.after', searchAfter);
     }
     return body;
   }
@@ -122,9 +122,10 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     request: any,
     query: any,
     size: number,
+    searchAfter: any,
     pagination: CursorPagination
   ) {
-    const body = this.checkGroupsBody(query, size, pagination);
+    const body = this.checkGroupsBody(query, size, searchAfter, pagination);
 
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
@@ -156,19 +157,14 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
   private async queryCheckGroupsPage(
     request: any,
     query: any,
+    searchAfter: any,
     pagination: CursorPagination,
     size: number = 50
   ): Promise<MonitorStatesCheckGroupsResult> {
     const checkGroupsById = new Map<string, string[]>();
 
-    const result = this.execCheckGroupsQuery(
-      request,
-      query,
-      size,
-      pagination
-    );
+    const result = await this.execCheckGroupsQuery(request, query, size, searchAfter, pagination);
 
-    const afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
     get<any>(result, 'aggregations.monitors.buckets', []).forEach((bucket: any) => {
       const id = get<string>(bucket, 'key.monitor_id');
       const checkGroup = get<string>(bucket, 'top.hits.hits[0]._source.monitor.check_group');
@@ -182,6 +178,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
 
     return {
       checkGroups: this.reorderResults(flatten(Array.from(checkGroupsById.values())), pagination),
+      searchAfter: result.aggregations.monitors.after_key,
     };
   }
 
@@ -190,21 +187,25 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     dateRangeStart: string,
     dateRangeEnd: string,
     pagination: CursorPagination,
-    filters?: string | null,
+    filters?: string | null
   ) {
     const monitors: any[] = [];
+    let searchAfter = pagination.cursorKey
     do {
+      console.log("DO ENRICH", searchAfter)
       const queryRes: LegacyMonitorStatesQueryResult = await this.enrichAndCollapsePage(
         request,
         dateRangeStart,
         dateRangeEnd,
+        searchAfter,
         pagination,
-        filters,
+        filters
       );
       const { result, statusFilter } = queryRes;
+      searchAfter = queryRes.searchAfter;
 
       monitors.push(...this.getMonitorBuckets(result, statusFilter));
-    } while (pagination.cursorKey !== null && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
+    } while (searchAfter !== null && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
 
     return monitors;
   }
@@ -213,6 +214,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
+    searchAfter: any,
     pagination: CursorPagination,
     filters?: string | null,
     size: number = 10
@@ -230,7 +232,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     // over large numbers of documents.
     // It only really needs to run over the latest complete check group for each
     // agent.
-    const queryRes = await this.queryCheckGroupsPage(request, query, pagination, size);
+    const queryRes = await this.queryCheckGroupsPage(request, query, searchAfter, pagination, size);
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -447,16 +449,19 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    pagination: CursorPagination,
-    filters?: string | null,
+    pagination: CursorPagination = DefaultCursorPagination,
+    filters?: string | null
   ): Promise<GetMonitorStatesResult> {
+    console.log("EXEC GET MONITOR STATES", pagination)
+
     const monitors = await this.enrichAndCollapse(
       request,
       dateRangeStart,
       dateRangeEnd,
       pagination,
-      filters,
+      filters
     );
+    console.log("ENRICHED STATES", pagination)
 
     if (monitors.length == 0) {
       return { summaries: [] };
@@ -500,7 +505,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       monitorIds
     );
 
-   return {
+    return {
       summaries: summaries.map(summary => ({
         ...summary,
         histogram: histogramMap[summary.monitor_id],

@@ -24,8 +24,10 @@ export interface GetMonitorStatesResult {
 export interface LegacyMonitorStatesQueryResult {
   result: any;
   statusFilter?: any;
+  searchAfter: any;
 }
 
 export interface MonitorStatesCheckGroupsResult {
   checkGroups: string[];
+  searchAfter: any;
 }

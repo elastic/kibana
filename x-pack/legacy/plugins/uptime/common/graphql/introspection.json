@@ -2678,13 +2678,21 @@
           {
             "name": "cursorDirection",
             "description": "",
-            "type": { "kind": "ENUM", "name": "CursorDirection", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "ENUM", "name": "CursorDirection", "ofType": null }
+            },
             "defaultValue": null
           },
           {
             "name": "sortOrder",
             "description": "",
-            "type": { "kind": "ENUM", "name": "SortOrder", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "ENUM", "name": "SortOrder", "ofType": null }
+            },
             "defaultValue": null
           }
         ],
