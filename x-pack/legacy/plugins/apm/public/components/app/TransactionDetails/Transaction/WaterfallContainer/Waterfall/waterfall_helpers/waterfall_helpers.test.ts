@@ -18,6 +18,17 @@ describe('waterfall_helpers', () => {
   describe('getWaterfall', () => {
     const hits = [
       {
+        processor: { event: 'transaction' },
+        trace: { id: 'myTraceId' },
+        service: { name: 'opbeans-node' },
+        transaction: {
+          duration: { us: 49660 },
+          name: 'GET /api',
+          id: 'myTransactionId1'
+        },
+        timestamp: { us: 1549324795784006 }
+      } as Transaction,
+      {
         parent: { id: 'mySpanIdA' },
         processor: { event: 'span' },
         trace: { id: 'myTraceId' },
@@ -80,17 +91,6 @@ describe('waterfall_helpers', () => {
           id: 'myTransactionId2'
         },
         timestamp: { us: 1549324795823304 }
-      } as Transaction,
-      {
-        processor: { event: 'transaction' },
-        trace: { id: 'myTraceId' },
-        service: { name: 'opbeans-node' },
-        transaction: {
-          duration: { us: 49660 },
-          name: 'GET /api',
-          id: 'myTransactionId1'
-        },
-        timestamp: { us: 1549324795784006 }
       } as Transaction
     ];
 
@@ -101,7 +101,10 @@ describe('waterfall_helpers', () => {
         myTransactionId2: 3
       };
       const waterfall = getWaterfall(
-        { trace: hits, errorsPerTransaction },
+        {
+          trace: { items: hits, exceedsMax: false },
+          errorsPerTransaction
+        },
         entryTransactionId
       );
       expect(waterfall.orderedItems.length).toBe(6);
@@ -116,7 +119,10 @@ describe('waterfall_helpers', () => {
         myTransactionId2: 3
       };
       const waterfall = getWaterfall(
-        { trace: hits, errorsPerTransaction },
+        {
+          trace: { items: hits, exceedsMax: false },
+          errorsPerTransaction
+        },
         entryTransactionId
       );
       expect(waterfall.orderedItems.length).toBe(4);
@@ -131,7 +137,10 @@ describe('waterfall_helpers', () => {
         myTransactionId2: 3
       };
       const waterfall = getWaterfall(
-        { trace: hits, errorsPerTransaction },
+        {
+          trace: { items: hits, exceedsMax: false },
+          errorsPerTransaction
+        },
         entryTransactionId
       );
       const transaction = waterfall.getTransactionById('myTransactionId2');
