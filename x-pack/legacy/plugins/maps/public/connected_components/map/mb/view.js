@@ -553,9 +553,7 @@ export class MBMapContainer extends React.Component {
     //todo: layer removal is buggy in the
 
     //before sync: this
-    console.log('before', this._mbMap.getStyle().layers.slice(), this.props.layerList.slice());
     removeOrphanedSourcesAndLayers(this._mbMap, this.props.layerList);
-    console.log('after', this._mbMap.getStyle().layers.slice(), this.props.layerList.slice());
 
     this.props.layerList.forEach(layer => {
       layer.syncLayerWithMB(this._mbMap);

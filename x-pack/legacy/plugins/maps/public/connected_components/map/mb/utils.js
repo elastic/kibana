@@ -10,27 +10,28 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
 
   const mbStyle = mbMap.getStyle();
   const mbSourcesToRemove = [];
-  for (const sourceId in mbStyle.sources) {
-    if (mbStyle.sources.hasOwnProperty(sourceId)) {
+  for (const mbSourceId in mbStyle.sources) {
+    if (mbStyle.sources.hasOwnProperty(mbSourceId)) {
       const layer = layerList.find(layer => {
-        return layer.ownsMbSourceId(sourceId);
+        return layer.ownsMbSourceId(mbSourceId);
       });
       if (!layer) {
-        mbSourcesToRemove.push(sourceId);
+        mbSourcesToRemove.push(mbSourceId);
       }
     }
   }
+
   const mbLayersToRemove = [];
   mbStyle.layers.forEach(layer => {
     if (mbSourcesToRemove.indexOf(layer.source) >= 0) {
       mbLayersToRemove.push(layer.id);
     }
   });
-  mbLayersToRemove.forEach((layerId) => {
-    mbMap.removeLayer(layerId);
+  mbLayersToRemove.forEach((mbLayerId) => {
+    mbMap.removeLayer(mbLayerId);
   });
-  mbSourcesToRemove.forEach(sourceId => {
-    mbMap.removeSource(sourceId);
+  mbSourcesToRemove.forEach(mbSourceId => {
+    mbMap.removeSource(mbSourceId);
   });
 
 }
