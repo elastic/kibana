@@ -15,12 +15,20 @@ import { ACCESS_DENIED_PATH } from '../management/management_urls';
 
 let privileges: Privileges = getDefaultPrivileges();
 
-// TODO: needs to resolve regardless of space
 export function canGetManagementMlJobs(kbnUrl: any) {
   return new Promise((resolve, reject) => {
     getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
       privileges = capabilities;
-      if (privileges.canGetJobs && isPlatinumOrTrialLicense === true) {
+      const isManageML =
+        privileges.canGetJobs &&
+        privileges.canCreateJob &&
+        privileges.canUpdateJob &&
+        privileges.canOpenJob &&
+        privileges.canCloseJob &&
+        privileges.canDeleteJob &&
+        privileges.canForecastJob;
+
+      if (isManageML === true && isPlatinumOrTrialLicense === true) {
         return resolve();
       } else {
         kbnUrl.redirect(ACCESS_DENIED_PATH);

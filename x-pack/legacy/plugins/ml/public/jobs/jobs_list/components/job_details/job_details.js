@@ -123,7 +123,7 @@ class JobDetailsUI extends Component {
           content: <JobDetailsPane sections={[datafeed, datafeedTimingStats]} />,
         });
 
-        tabs.push(...[ {
+        tabs.push({
           id: 'datafeed-preview',
           name: intl.formatMessage({
             id: 'xpack.ml.jobsList.jobDetails.tabs.datafeedPreviewLabel',
@@ -137,7 +137,7 @@ class JobDetailsUI extends Component {
             defaultMessage: 'Forecasts'
           }),
           content: <ForecastsTable job={job} />,
-        }]);
+        });
       }
 
       if (mlAnnotationsEnabled && fullDetails) {
