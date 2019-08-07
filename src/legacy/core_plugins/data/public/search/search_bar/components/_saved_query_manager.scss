@@ -1,0 +1,10 @@
+.saved-query-manager-popover {
+  width: 400px;
+}
+.saved-query-list {
+  @include euiYScrollWithShadows;
+}
+.saved-query-list-wrapper {
+  height: 20vh;
+  overflow-y:scroll;
+}

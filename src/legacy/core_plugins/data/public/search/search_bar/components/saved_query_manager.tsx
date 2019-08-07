@@ -24,6 +24,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPagination,
   EuiText,
 } from '@elastic/eui';
 
@@ -33,6 +34,8 @@ import { sortBy } from 'lodash';
 import { SavedQuery } from '../index';
 import { getAllSavedQueries, deleteSavedQuery } from '../lib/saved_query_service';
 import { Query } from '../../../query';
+
+const pageCount = 10;
 
 interface Props {
   showSaveQuery?: boolean;
@@ -56,6 +59,8 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
 
+  const [activePage, setActivePage] = useState(0);
+
   useEffect(() => {
     const fetchQueries = async () => {
       const allSavedQueries = await getAllSavedQueries();
@@ -66,6 +71,10 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
       fetchQueries();
     }
   }, [isOpen]);
+
+  const goToPage = (pageNumber: number) => {
+    setActivePage(pageNumber);
+  };
 
   const savedQueryDescriptionText = i18n.translate(
     'data.search.searchBar.savedQueryDescriptionText',
@@ -105,8 +114,12 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
     </EuiButtonEmpty>
   );
 
-  const savedQueryRows = savedQueries.map(savedQuery => {
-    return (
+  const savedQueryRows = () => {
+    const savedQueriesDisplayRows = savedQueries.slice(
+      activePage * pageCount,
+      activePage * pageCount + pageCount
+    );
+    return savedQueriesDisplayRows.map(savedQuery => (
       <li key={savedQuery.id}>
         <EuiButtonEmpty
           onClick={() => {
@@ -123,8 +136,8 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
           color="danger"
         />
       </li>
-    );
-  });
+    ));
+  };
 
   return (
     <EuiPopover
@@ -136,7 +149,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
       }}
       anchorPosition="downLeft"
     >
-      <div style={{ width: '400px' }}>
+      <div className="saved-query-manager-popover">
         <EuiPopoverTitle>{savedQueryPopoverTitleText}</EuiPopoverTitle>
         {savedQueries.length > 0 ? (
           <Fragment>
@@ -146,8 +159,17 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiFlexGroup>
-              <EuiFlexItem>
-                <ul>{savedQueryRows}</ul>
+              <EuiFlexItem className="saved-query-list-wrapper">
+                <ul className="saved-query-list">{savedQueryRows()}</ul>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexGroup justifyContent="spaceAround">
+              <EuiFlexItem grow={false}>
+                <EuiPagination
+                  pageCount={Math.ceil(savedQueries.length / pageCount)}
+                  activePage={activePage}
+                  onPageClick={goToPage}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </Fragment>
