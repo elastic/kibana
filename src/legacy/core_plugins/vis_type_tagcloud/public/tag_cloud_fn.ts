@@ -20,27 +20,21 @@
 import { i18n } from '@kbn/i18n';
 
 import { ExpressionFunction, KibanaDatatable, Render } from '../../interpreter/types';
+import { TagCloudVisParams } from './types';
 
 const name = 'tagcloud';
 
 type Context = KibanaDatatable;
 
-interface Arguments {
-  scale: string;
-  orientation: string;
-  minFontSize: number;
-  maxFontSize: number;
-  showLabel: boolean;
+interface Arguments extends TagCloudVisParams {
   metric: any; // these aren't typed yet
   bucket: any; // these aren't typed yet
 }
 
-type VisParams = Omit<Arguments, 'bucket'>;
-
 interface RenderValue {
   visType: typeof name;
   visData: Context;
-  visConfig: VisParams;
+  visConfig: Arguments;
   params: any;
 }
 
