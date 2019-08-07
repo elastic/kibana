@@ -6,7 +6,6 @@
 
 import React from 'react';
 
-import { SourceConfigurationFlyoutState } from '../../components/source_configuration';
 import { MetricsTimeContainer } from '../../containers/metrics/with_metrics_time';
 import { Source } from '../../containers/source';
 
@@ -14,10 +13,8 @@ export const withMetricPageProviders = <T extends object>(Component: React.Compo
   props: T
 ) => (
   <Source.Provider sourceId="default">
-    <SourceConfigurationFlyoutState.Provider>
-      <MetricsTimeContainer.Provider>
-        <Component {...props} />
-      </MetricsTimeContainer.Provider>
-    </SourceConfigurationFlyoutState.Provider>
+    <MetricsTimeContainer.Provider>
+      <Component {...props} />
+    </MetricsTimeContainer.Provider>
   </Source.Provider>
 );
