@@ -271,7 +271,17 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
                   </EuiFlexItem>
 
                   <EuiFlexItem>
-                    <EuiButton fill onClick={() => onSave()}>
+                    <EuiButton
+                      fill
+                      onClick={() => onSave()}
+                      aria-label={i18n.translate(
+                        'data.search.searchBar.savedQueryPopoverSaveChangesButtonAriaLabel',
+                        {
+                          defaultMessage: 'Save changes to {title}',
+                          values: { title: loadedSavedQuery.attributes.title },
+                        }
+                      )}
+                    >
                       {i18n.translate(
                         'data.search.searchBar.savedQueryPopoverSaveChangesButtonText',
                         {
