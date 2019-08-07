@@ -74,6 +74,9 @@ export class ClusterClient {
     close(): void;
     }
 
+// @public (undocumented)
+export type ConfigPath = string | string[];
+
 // @internal (undocumented)
 export class ConfigService {
     // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
@@ -88,12 +91,27 @@ export class ConfigService {
     // (undocumented)
     isEnabledAtPath(path: ConfigPath): Promise<boolean>;
     optionalAtPath<TSchema>(path: ConfigPath): Observable<TSchema | undefined>;
-    // Warning: (ae-forgotten-export) The symbol "ConfigPath" needs to be exported by the entry point index.d.ts
     setSchema(path: ConfigPath, schema: Type<unknown>): Promise<void>;
     }
 
+// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "kibana" does not have an export "IContextContainer"
+// 
+// @public (undocumented)
+export interface ContextSetup {
+    // Warning: (ae-forgotten-export) The symbol "IContextContainer" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "IContextContainer"
+    createContextContainer<TContext extends {}, THandlerReturn, THandlerParmaters extends any[] = []>(): IContextContainer<TContext, THandlerReturn, THandlerParmaters>;
+}
+
+// @internal (undocumented)
+export type CoreId = symbol;
+
 // @public
 export interface CoreSetup {
+    // (undocumented)
+    context: {
+        createContextContainer: ContextSetup['createContextContainer'];
+    };
     // (undocumented)
     elasticsearch: {
         adminClient$: Observable<ClusterClient>;
@@ -438,10 +456,27 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     };
     // (undocumented)
     logger: LoggerFactory;
+    // (undocumented)
+    opaqueId: PluginOpaqueId;
+}
+
+// @public
+export interface PluginManifest {
+    readonly configPath: ConfigPath;
+    readonly id: PluginName;
+    readonly kibanaVersion: string;
+    readonly optionalPlugins: readonly PluginName[];
+    readonly requiredPlugins: readonly PluginName[];
+    readonly server: boolean;
+    readonly ui: boolean;
+    readonly version: string;
 }
 
 // @public
 export type PluginName = string;
+
+// @public (undocumented)
+export type PluginOpaqueId = symbol;
 
 // @public (undocumented)
 export interface PluginsServiceSetup {
@@ -528,31 +563,25 @@ export class Router {
 
 // @public (undocumented)
 export interface SavedObject<T extends SavedObjectAttributes = any> {
-    // (undocumented)
     attributes: T;
     // (undocumented)
     error?: {
         message: string;
         statusCode: number;
     };
-    // (undocumented)
     id: string;
-    // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
-    // (undocumented)
     references: SavedObjectReference[];
-    // (undocumented)
     type: string;
-    // (undocumented)
     updated_at?: string;
-    // (undocumented)
     version?: string;
 }
 
 // @public (undocumented)
+export type SavedObjectAttribute = string | number | boolean | null | undefined | SavedObjectAttributes | SavedObjectAttributes[];
+
+// @public
 export interface SavedObjectAttributes {
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectAttribute" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     [key: string]: SavedObjectAttribute | SavedObjectAttribute[];
 }
@@ -578,7 +607,6 @@ export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = 
     attributes: T;
     // (undocumented)
     id?: string;
-    // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
     // (undocumented)
     references?: SavedObjectReference[];
@@ -649,7 +677,6 @@ export interface SavedObjectsClientWrapperOptions<Request = unknown> {
 // @public (undocumented)
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     id?: string;
-    // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
     overwrite?: boolean;
     // (undocumented)
@@ -729,7 +756,6 @@ export interface SavedObjectsExportOptions {
 export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
-    // (undocumented)
     fields?: string[];
     // (undocumented)
     hasReference?: {
@@ -740,7 +766,6 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     page?: number;
     // (undocumented)
     perPage?: number;
-    // (undocumented)
     search?: string;
     searchFields?: string[];
     // (undocumented)
@@ -751,7 +776,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     type?: string | string[];
 }
 
-// @public (undocumented)
+// @public
 export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any> {
     // (undocumented)
     page: number;
@@ -853,6 +878,16 @@ export interface SavedObjectsImportUnknownError {
 export interface SavedObjectsImportUnsupportedTypeError {
     // (undocumented)
     type: 'unsupported_type';
+}
+
+// @public (undocumented)
+export interface SavedObjectsMigrationLogger {
+    // (undocumented)
+    debug: (msg: string) => void;
+    // (undocumented)
+    info: (msg: string) => void;
+    // (undocumented)
+    warning: (msg: string) => void;
 }
 
 // @public
@@ -995,7 +1030,7 @@ export interface SessionStorageFactory<T> {
 // Warnings were encountered during analysis:
 // 
 // src/core/server/http/router/response.ts:188:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugin_context.ts:34:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:37:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:39:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:162:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 
 ```
