@@ -16,16 +16,14 @@ describe('editor_frame state management', () => {
     beforeEach(() => {
       props = {
         onError: jest.fn(),
-        redirectTo: jest.fn(),
-        store: {
-          load: jest.fn(),
-          save: jest.fn(),
-        },
         datasourceMap: { testDatasource: ({} as unknown) as Datasource },
         visualizationMap: { testVis: ({ initialize: jest.fn() } as unknown) as Visualization },
         initialDatasourceId: 'testDatasource',
         initialVisualizationId: 'testVis',
         ExpressionRenderer: createExpressionRendererMock(),
+        onChange: jest.fn(),
+        dateRange: { fromDate: 'now-7d', toDate: 'now' },
+        query: { query: '', language: 'lucene' },
       };
     });
 
@@ -58,6 +56,8 @@ describe('editor_frame state management', () => {
             datasourceMetaData: {
               filterableIndexPatterns: [],
             },
+            query: { query: '', language: 'lucene' },
+            filters: [],
           },
           title: '',
           visualizationType: 'testVis',
@@ -109,7 +109,6 @@ describe('editor_frame state management', () => {
             },
           },
           activeDatasourceId: 'testDatasource',
-          saving: false,
           title: 'aaa',
           visualization: {
             activeId: 'testVis',
@@ -136,7 +135,6 @@ describe('editor_frame state management', () => {
             },
           },
           activeDatasourceId: 'testDatasource',
-          saving: false,
           title: 'bbb',
           visualization: {
             activeId: 'testVis',
@@ -164,7 +162,6 @@ describe('editor_frame state management', () => {
             },
           },
           activeDatasourceId: 'testDatasource',
-          saving: false,
           title: 'bbb',
           visualization: {
             activeId: 'testVis',
@@ -195,7 +192,6 @@ describe('editor_frame state management', () => {
             },
           },
           activeDatasourceId: 'testDatasource',
-          saving: false,
           title: 'ccc',
           visualization: {
             activeId: 'testVis',
@@ -225,7 +221,6 @@ describe('editor_frame state management', () => {
             },
           },
           activeDatasourceId: 'testDatasource',
-          saving: false,
           title: 'ddd',
           visualization: {
             activeId: 'testVis',
@@ -254,7 +249,6 @@ describe('editor_frame state management', () => {
             },
           },
           activeDatasourceId: 'testDatasource',
-          saving: false,
           title: 'eee',
           visualization: {
             activeId: 'testVis',
@@ -286,7 +280,6 @@ describe('editor_frame state management', () => {
             },
           },
           activeDatasourceId: 'testDatasource',
-          saving: false,
           title: 'eee',
           visualization: {
             activeId: 'testVis',
@@ -303,84 +296,6 @@ describe('editor_frame state management', () => {
       expect(newState.datasourceStates.testDatasource2.state).toBe(datasource2State);
     });
 
-    it('should mark as saving', () => {
-      const newState = reducer(
-        {
-          datasourceStates: {
-            a: {
-              state: {},
-              isLoading: false,
-            },
-          },
-          activeDatasourceId: 'a',
-          saving: false,
-          title: 'fff',
-          visualization: {
-            activeId: 'b',
-            state: {},
-          },
-        },
-        {
-          type: 'SAVING',
-          isSaving: true,
-        }
-      );
-
-      expect(newState.saving).toBeTruthy();
-    });
-
-    it('should mark as saved', () => {
-      const newState = reducer(
-        {
-          datasourceStates: {
-            a: {
-              state: {},
-              isLoading: false,
-            },
-          },
-          activeDatasourceId: 'a',
-          saving: false,
-          title: 'hhh',
-          visualization: {
-            activeId: 'b',
-            state: {},
-          },
-        },
-        {
-          type: 'SAVING',
-          isSaving: false,
-        }
-      );
-
-      expect(newState.saving).toBeFalsy();
-    });
-
-    it('should change the persisted id', () => {
-      const newState = reducer(
-        {
-          datasourceStates: {
-            a: {
-              state: {},
-              isLoading: false,
-            },
-          },
-          activeDatasourceId: 'a',
-          saving: false,
-          title: 'iii',
-          visualization: {
-            activeId: 'b',
-            state: {},
-          },
-        },
-        {
-          type: 'UPDATE_PERSISTED_ID',
-          id: 'baz',
-        }
-      );
-
-      expect(newState.persistedId).toEqual('baz');
-    });
-
     it('should reset the state', () => {
       const newState = reducer(
         {
@@ -391,7 +306,6 @@ describe('editor_frame state management', () => {
             },
           },
           activeDatasourceId: 'a',
-          saving: false,
           title: 'jjj',
           visualization: {
             activeId: 'b',
@@ -409,7 +323,6 @@ describe('editor_frame state management', () => {
             },
             activeDatasourceId: 'z',
             persistedId: 'bar',
-            saving: false,
             title: 'lll',
             visualization: {
               activeId: 'q',
@@ -428,7 +341,6 @@ describe('editor_frame state management', () => {
         },
         activeDatasourceId: 'z',
         persistedId: 'bar',
-        saving: false,
         visualization: {
           activeId: 'q',
           state: { my: 'viz' },
@@ -446,7 +358,6 @@ describe('editor_frame state management', () => {
             },
           },
           activeDatasourceId: 'a',
-          saving: false,
           title: 'mmm',
           visualization: {
             activeId: 'b',
@@ -463,6 +374,8 @@ describe('editor_frame state management', () => {
               datasourceMetaData: { filterableIndexPatterns: [] },
               datasourceStates: { a: { foo: 'c' } },
               visualization: { bar: 'd' },
+              query: { query: '', language: 'lucene' },
+              filters: [],
             },
             title: 'heyo!',
             type: 'lens',
@@ -482,7 +395,6 @@ describe('editor_frame state management', () => {
           },
         },
         persistedId: 'b',
-        saving: false,
         title: 'heyo!',
         visualization: {
           activeId: 'line',
