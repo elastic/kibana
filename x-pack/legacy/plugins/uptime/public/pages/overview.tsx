@@ -42,8 +42,7 @@ export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
 }) => void;
 
 export type UptimeSearchAfterChangeHandler = (
-  prevSearchAfter: string | null,
-  searchAfter: string | null
+  pagination: CursorPagination
 ) => void;
 
 export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
@@ -52,7 +51,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
   );
   const [getUrlParams, updateUrl] = useUrlParams();
   const params = getUrlParams();
-  const { dateRangeStart, dateRangeEnd, search, searchAfter, prevSearchAfter } = params;
+  const { dateRangeStart, dateRangeEnd, search, cursorKey, cursorDirection, sortOrder } = params;
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
@@ -92,34 +91,25 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
     refreshApp();
   };
 
-  const updateSearchAfter: UptimeSearchAfterChangeHandler = (prevSearchAfter, searchAfter) => {
-    if (prevSearchAfter) {
-      updateUrl({ prevSearchAfter });
+  const updateSearchAfter: UptimeSearchAfterChangeHandler = (pagination: CursorPagination) => {
+    const update: any = { 
+      cursorDirection: pagination.cursorDirection,
+      sortOrder: pagination.sortOrder
     }
-    if (searchAfter) {
-      updateUrl({ searchAfter });
+    if (typeof(pagination.cursorKey) === "string") {
+      update.cursorKey = pagination.cursorKey;
     }
-
-    refreshApp();
+    updateUrl(update);
   };
 
   const linkParameters = stringifyUrlParams(params);
 
-  // TODO: reintroduce for pagination and sorting
-  // const onMonitorListChange = ({ page: { index, size }, sort: { field, direction } }: Criteria) => {
-  //   updateUrl({
-  //     monitorListPageIndex: index,
-  //     monitorListPageSize: size,
-  //     monitorListSortDirection: direction,
-  //     monitorListSortField: field,
-  //   });
-  // };
-
   const pagination: CursorPagination = {
-    cursorKey: null,
-    cursorDirection: CursorDirection.AFTER,
-    sortOrder: SortOrder.ASC,
+    cursorKey,
+    cursorDirection,
+    sortOrder,
   };
+  console.log("Using pagination", pagination)
 
   return (
     <Fragment>
@@ -154,25 +144,10 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           linkParameters={linkParameters}
           successColor={colors.success}
           updateSearchAfter={updateSearchAfter}
-          prevSearchAfter={prevSearchAfter}
-          curSearchAfter={searchAfter}
-          // TODO: reintegrate pagination in future release
-          // pageIndex={monitorListPageIndex}
-          // pageSize={monitorListPageSize}
-          // TODO: reintegrate sorting in future release
-          // sortDirection={monitorListSortDirection}
-          // sortField={monitorListSortField}
-          // TODO: reintroduce for pagination and sorting
-          // onChange={onMonitorListChange}
+          pagination={pagination}
           variables={{
             ...sharedProps,
             pagination,
-            // TODO: reintegrate pagination in future release
-            // pageIndex: monitorListPageIndex,
-            // pageSize: monitorListPageSize,
-            // TODO: reintegrate sorting in future release
-            // sortField: monitorListSortField,
-            // sortDirection: monitorListSortDirection,
           }}
         />
       </EmptyState>

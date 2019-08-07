@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import { get, last, max } from 'lodash';
 import React, { useState, Fragment } from 'react';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { monitorStatesQuery } from '../../../queries/monitor_states_query';
@@ -24,6 +24,9 @@ import {
   MonitorSummary,
   MonitorSummaryResult,
   SummaryHistogramPoint,
+  CursorPagination,
+  CursorDirection,
+  SortOrder,
 } from '../../../../common/graphql/types';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
@@ -46,8 +49,7 @@ interface MonitorListProps {
   successColor: string;
   linkParameters?: string;
   updateSearchAfter: UptimeSearchAfterChangeHandler;
-  prevSearchAfter: string | null;
-  curSearchAfter: string | null;
+  pagination: CursorPagination;
 }
 
 type Props = UptimeGraphQLQueryProps<MonitorListQueryResult> & MonitorListProps;
@@ -63,40 +65,28 @@ export const MonitorListComponent = (props: Props) => {
     linkParameters,
     loading,
     updateSearchAfter,
-    prevSearchAfter,
-    curSearchAfter,
-    // TODO: reintroduce for pagination and sorting
-    // onChange,
-    // TODO: reintegrate pagination in future release
-    // pageIndex,
-    // pageSize,
-    // TODO: reintegrate sorting in future release
-    // sortDirection,
-    // sortField,
+    pagination,
   } = props;
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
   const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
-  const nextSearchAfter = get<string>(data, 'monitorStates.afterKey');
-  // TODO: use with pagination
-  // const count = get<number>(data, 'monitorStates.totalSummaryCount.count', 0);
 
-  // TODO: reintegrate pagination in future release
-  // const pagination: Pagination = {
-  //   pageIndex,
-  //   pageSize,
-  //   pageSizeOptions: [5, 10, 20, 50],
-  //   totalItemCount: count,
-  //   hidePerPageOptions: false,
-  // };
+  const hasNextPage = items.length > 0;
+  
+  const nextPagination = (): CursorPagination => {
+    const lastItem = last(items);
+    const lastLocations = get(lastItem.state, 'observer.geo.name', []);
+    lastLocations.sort();
 
-  // TODO: reintegrate sorting in future release
-  // const sorting = {
-  //   sort: {
-  //     field: sortField,
-  //     direction: sortDirection,
-  //   },
-  // };
+    return {
+      cursorKey: JSON.stringify({
+        monitor_id: lastItem.monitor_id,
+        location: lastLocations[0],
+      }),
+      cursorDirection: CursorDirection.AFTER,
+      sortOrder: SortOrder.ASC,
+    };
+  };
 
   return (
     <Fragment>
@@ -137,10 +127,6 @@ export const MonitorListComponent = (props: Props) => {
             description:
               'This message is shown if the monitors table is rendered but has no items.',
           })}
-          // TODO: reintegrate pagination in future release
-          // pagination={pagination}
-          // TODO: reintegrate sorting in future release
-          // sorting={sorting}
           columns={[
             {
               align: 'left',
@@ -251,7 +237,11 @@ export const MonitorListComponent = (props: Props) => {
           <EuiPagination
             pageCount={4}
             activePage={2}
-            onPageClick={(p: number) => {updateSearchAfter(prevSearchAfter, nextSearchAfter)}}
+            onPageClick={(p: number) => {
+              if (hasNextPage) {
+              updateSearchAfter(nextPagination());
+              }
+            }}
             compressed={true}
           />
         </EuiFlexItem>

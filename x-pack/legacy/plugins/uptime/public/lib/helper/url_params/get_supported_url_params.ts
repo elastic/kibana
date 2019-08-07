@@ -7,21 +7,18 @@
 import { parseIsPaused } from './parse_is_paused';
 import { parseUrlInt } from './parse_url_int';
 import { CLIENT_DEFAULTS } from '../../../../common/constants';
+import { CursorDirection, SortOrder } from '../../../../common/graphql/types';
 
 export interface UptimeUrlParams {
   autorefreshInterval: number;
   autorefreshIsPaused: boolean;
   dateRangeStart: string;
   dateRangeEnd: string;
-  // TODO: reintroduce for pagination and sorting
-  // monitorListPageIndex: number;
-  // monitorListPageSize: number;
-  // monitorListSortDirection: string;
-  // monitorListSortField: string;
   search: string;
   selectedPingStatus: string;
-  searchAfter: string | null;
-  prevSearchAfter: string | null;
+  cursorKey?: string;
+  cursorDirection: CursorDirection;
+  sortOrder: SortOrder;
 }
 
 const {
@@ -29,11 +26,6 @@ const {
   AUTOREFRESH_IS_PAUSED,
   DATE_RANGE_START,
   DATE_RANGE_END,
-  // TODO: reintroduce for pagination and sorting
-  // MONITOR_LIST_PAGE_INDEX,
-  // MONITOR_LIST_PAGE_SIZE,
-  // MONITOR_LIST_SORT_DIRECTION,
-  // MONITOR_LIST_SORT_FIELD,
   SEARCH,
   SELECTED_PING_LIST_STATUS,
 } = CLIENT_DEFAULTS;
@@ -72,15 +64,11 @@ export const getSupportedUrlParams = (params: {
     autorefreshIsPaused,
     dateRangeStart,
     dateRangeEnd,
-    // TODO: reintroduce for pagination and sorting
-    // monitorListPageIndex,
-    // monitorListPageSize,
-    // monitorListSortDirection,
-    // monitorListSortField,
     search,
     selectedPingStatus,
-    searchAfter,
-    prevSearchAfter,
+    cursorKey,
+    cursorDirection,
+    sortOrder,
   } = filteredParams;
 
   return {
@@ -96,7 +84,8 @@ export const getSupportedUrlParams = (params: {
     search: search || SEARCH,
     selectedPingStatus:
       selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,
-    searchAfter: searchAfter || null,
-    prevSearchAfter: prevSearchAfter || null,
+    cursorKey,
+    cursorDirection: cursorDirection === CursorDirection.BEFORE ? CursorDirection.BEFORE : CursorDirection.AFTER,
+    sortOrder: sortOrder === SortOrder.DESC ? SortOrder.DESC : SortOrder.ASC,
   };
 };

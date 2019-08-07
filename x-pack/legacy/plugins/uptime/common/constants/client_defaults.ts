@@ -1,3 +1,5 @@
+import { CursorDirection, SortOrder } from '../graphql/types';
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License;

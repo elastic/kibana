@@ -112,7 +112,13 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         },
       },
     };
-    if (pagination.cursorKey) {
+    if (searchAfter) {
+      if (typeof(searchAfter) === "string") {
+        console.log("DECODE")
+        // This is usually passed through from the browser as string encoded JSON
+        searchAfter = JSON.parse(searchAfter);
+      }
+      console.log("SA ", searchAfter, typeof(searchAfter))
       set(body, 'aggs.monitors.composite.after', searchAfter);
     }
     return body;
@@ -159,7 +165,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     query: any,
     searchAfter: any,
     pagination: CursorPagination,
-    size: number = 50
+    size: number = 10
   ): Promise<MonitorStatesCheckGroupsResult> {
     const checkGroupsById = new Map<string, string[]>();
 
