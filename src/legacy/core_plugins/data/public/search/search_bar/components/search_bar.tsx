@@ -185,10 +185,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   public render() {
-    if (!this.props.uiSettings) {
-      return null;
-    }
-
     let queryBar;
     if (this.shouldRenderQueryBar()) {
       queryBar = (
