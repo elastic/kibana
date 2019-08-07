@@ -295,7 +295,14 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
             )}
             {showSaveQuery && !loadedSavedQuery && (
               <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={() => onSave()}>
+                <EuiButton
+                  fill
+                  onClick={() => onSave()}
+                  aria-label={i18n.translate(
+                    'data.search.searchBar.savedQueryPopoverSaveButtonAriaLabel',
+                    { defaultMessage: 'Save a new saved query' }
+                  )}
+                >
                   {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
                     defaultMessage: 'Save',
                   })}
