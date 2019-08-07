@@ -99,17 +99,7 @@ export const Metrics = injectI18n(
     };
 
     private renderSection = (layout: InfraMetricLayout) => (section: InfraMetricLayoutSection) => {
-      let sectionProps = {};
-      if (['apm', 'chart'].includes(section.type)) {
-        const { onChangeRangeTime, isLiveStreaming, stopLiveStreaming } = this.props;
-        sectionProps = {
-          onChangeRangeTime,
-          isLiveStreaming,
-          stopLiveStreaming,
-          crosshairValue: this.state.crosshairValue,
-          onCrosshairUpdate: this.onCrosshairUpdate,
-        };
-      }
+      const sectionProps = {};
       return (
         <Section
           section={section}
@@ -119,7 +109,11 @@ export const Metrics = injectI18n(
           nodeType={this.props.nodeType}
           sourceConfiguration={this.props.sourceConfiguration}
           timeRange={this.props.timeRange}
-          {...sectionProps}
+          onChangeRangeTime={this.props.onChangeRangeTime}
+          isLiveStreaming={isLiveStreaming}
+          stopLiveStreaming={stopLiveStreaming}
+          crosshairValue={this.state.crosshairValue}
+          onCrosshairUpdate={this.state.onCrosshairUpdate}
         />
       );
     };
