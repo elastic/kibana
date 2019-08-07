@@ -33,13 +33,12 @@ import { isFilterable, getFromSavedObject } from 'ui/index_patterns/static_utils
 
 // IndexPattern, StaticIndexPattern, Field
 import * as types from 'ui/index_patterns';
-import { SavedObjectsClient } from 'ui/saved_objects';
 
-import { UiSettingsClientContract } from 'src/core/public';
+import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
 
 export interface IndexPatternDependencies {
   uiSettings: UiSettingsClientContract;
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 /**
