@@ -12,10 +12,6 @@ export const EMS_TILES_CATALOGUE_PATH = 'ems/tiles';
 export const EMS_TILES_RASTER_TILE_PATH = 'ems/tiles/raster/tile';
 export const EMS_TILES_RASTER_STYLE_PATH = 'ems/tiles/raster/style';
 
-
-export const SPRITE_PATH = '/maps/sprite';
-export const MAKI_SPRITE_PATH = `${SPRITE_PATH}/maki`;
-
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
