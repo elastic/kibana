@@ -23,7 +23,7 @@ export interface IGetAuditLogOptions {
 }
 
 export interface IAuditLogPluginAPI {
-  registerAuditLog(options: IRegisterAuditLogOptions): void;
+  registerAuditLog(options: IRegisterAuditLogOptions): IAuditLog;
   getAuditLog(options: IGetAuditLogOptions): IAuditLog;
   hasAuditLog(options: IGetAuditLogOptions): boolean;
 }

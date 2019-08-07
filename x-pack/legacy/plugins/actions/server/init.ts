@@ -35,8 +35,21 @@ export function init(server: Legacy.Server) {
 
   const newServer = server as any;
   const auditLogAPI = newServer.newPlatform.start.plugins.audit_log as IAuditLogPluginAPI;
-  auditLogAPI.registerAuditLog({ id: 'actions', recordSchema: AuditRecordSchema });
-  const auditLog: IAuditLog = auditLogAPI.getAuditLog({ id: 'actions' });
+
+  // For some reason the audit_log NP plugin is not available when running
+  // x-pack/scripts/jest_contract.js, so dealing with that here.
+  let auditLog: IAuditLog;
+  if (auditLogAPI != null) {
+    auditLog = auditLogAPI.registerAuditLog({ id: 'actions', recordSchema: AuditRecordSchema });
+  } else {
+    server.log(['actions', 'warn'], 'audit log plugin not available');
+    auditLog = {
+      async log(data: any) {},
+      async search() {
+        return [];
+      },
+    };
+  }
 
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(

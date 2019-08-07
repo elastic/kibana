@@ -24,7 +24,7 @@ export class PluginAPI implements IAuditLogPluginAPI {
   }
 
   // register a new audit log
-  registerAuditLog(options: IRegisterAuditLogOptions): void {
+  registerAuditLog(options: IRegisterAuditLogOptions): IAuditLog {
     if (AuditLogs.has(options.id)) {
       throw new Error(`audit log already registered: ${options.id}`);
     }
@@ -34,6 +34,8 @@ export class PluginAPI implements IAuditLogPluginAPI {
     const logger = this.logger;
     const auditLog = new AuditLog({ id, recordSchema, logger });
     AuditLogs.set(options.id, auditLog);
+
+    return auditLog;
   }
 
   // get a previously registered audit log
