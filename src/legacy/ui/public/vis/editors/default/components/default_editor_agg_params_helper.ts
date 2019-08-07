@@ -24,7 +24,7 @@ import { aggTypeFilters } from 'ui/agg_types/filter';
 import { IndexPattern, Field } from 'ui/index_patterns';
 import { aggTypes, AggParam, FieldParamType, AggType } from 'ui/agg_types';
 import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
-import { groupAndSortBy, ComboBoxGroupedOptions, IndexType } from '../default_editor_utils';
+import { groupAndSortBy, ComboBoxGroupedOptions } from '../default_editor_utils';
 import { EditorConfig } from '../../config/types';
 import { AggTypeState, AggParamsState } from './default_editor_agg_params_state';
 import { AggParamEditorProps } from './default_editor_agg_param_props';
@@ -70,7 +70,7 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
         agg.getIndexPattern().fields
       );
       fields = aggTypeFieldFilters.filter(availableFields, agg);
-      indexedFields = groupAndSortBy(fields as Array<Field & IndexType>, 'type', 'displayName');
+      indexedFields = groupAndSortBy(fields, 'type', 'displayName');
 
       if (fields && !indexedFields.length && index > 0) {
         // don't draw the rest of the options if there are no indexed fields and it's an extra param (index > 0).
@@ -118,7 +118,7 @@ function getAggTypeOptions(
   groupName: string
 ): ComboBoxGroupedOptions<AggType> {
   const aggTypeOptions = aggTypeFilters.filter(aggTypes.byType[groupName], indexPattern, agg);
-  return groupAndSortBy(aggTypeOptions as Array<AggType & IndexType>, 'subtype');
+  return groupAndSortBy(aggTypeOptions, 'subtype', 'title');
 }
 
 /**

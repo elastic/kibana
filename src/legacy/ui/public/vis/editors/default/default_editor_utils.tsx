@@ -17,22 +17,18 @@
  * under the License.
  */
 
-export interface ComboBoxOption<T> {
+interface ComboBoxOption<T> {
   label: string;
   target: T;
 }
-export interface ComboBoxGroupedOption<T> {
+interface ComboBoxGroupedOption<T> {
   label: string;
   options: Array<ComboBoxOption<T>>;
 }
 
 type GroupOrOption<T> = ComboBoxGroupedOption<T> | ComboBoxOption<T>;
 
-export type ComboBoxGroupedOptions<T> = Array<GroupOrOption<T>> | [];
-
-export interface IndexType {
-  [key: string]: string;
-}
+export type ComboBoxGroupedOptions<T> = Array<GroupOrOption<T>>;
 
 /**
  * Groups and sorts alphabetically objects and returns an array of options that are compatible with EuiComboBox options.
@@ -43,11 +39,11 @@ export interface IndexType {
  *
  * @returns An array of grouped and sorted alphabetically `objects` that are compatible with EuiComboBox options.
  */
-function groupAndSortBy<T extends IndexType>(
-  objects: T[],
-  groupBy: string = 'type',
-  labelName: string = 'title'
-): ComboBoxGroupedOptions<T> {
+function groupAndSortBy<
+  T extends Record<TGroupBy | TLabelName, string>,
+  TGroupBy extends string = 'type',
+  TLabelName extends string = 'title'
+>(objects: T[], groupBy: TGroupBy, labelName: TLabelName): ComboBoxGroupedOptions<T> {
   const groupedOptions = objects.reduce(
     (array, obj) => {
       const group = array.find(element => element.label === obj[groupBy]);
