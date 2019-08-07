@@ -142,7 +142,7 @@ function setFullGettingPrivileges(
     (cluster['cluster:monitor/xpack/ml/job/get'] &&
       cluster['cluster:monitor/xpack/ml/job/stats/get'])
   ) {
-    privileges.canGetDataFrame = true;
+    privileges.canGetDataFrameAnalytics = true;
   }
 }
 
@@ -307,7 +307,7 @@ function setBasicActionPrivileges(
   privileges: Privileges,
   forceTrue = false
 ) {
-  // Data Frame Analytics
+  // Data Frame Transforms
   if (forceTrue || cluster['cluster:admin/data_frame/put']) {
     privileges.canCreateDataFrame = true;
   }

@@ -8,7 +8,13 @@ import React, { Fragment, SFC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiBadge, EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, SortDirection } from '@elastic/eui';
+import {
+  // EuiBadge,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  SortDirection,
+} from '@elastic/eui';
 
 import {
   DataFrameAnalyticsId,
@@ -23,7 +29,7 @@ import {
   DataFrameAnalyticsListRow,
   ItemIdToExpandedRowMap,
   DATA_FRAME_TASK_STATE,
-  DATA_FRAME_MODE,
+  // DATA_FRAME_MODE,
   Query,
   Clause,
 } from './common';

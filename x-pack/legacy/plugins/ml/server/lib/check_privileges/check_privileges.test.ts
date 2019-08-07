@@ -104,7 +104,7 @@ describe('check_privileges', () => {
       );
       const { capabilities } = await getPrivileges();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(23);
+      expect(count).toBe(27);
       done();
     });
   });
@@ -144,9 +144,9 @@ describe('check_privileges', () => {
       expect(capabilities.canCreateDataFrame).toBe(false);
       expect(capabilities.canStartStopDataFrame).toBe(false);
       expect(capabilities.canGetDataFrameAnalytics).toBe(true);
-      expect(capabilities.canDeleteDataFrameAnalytics).toBe(true);
-      expect(capabilities.canCreateDataFrameAnalytics).toBe(true);
-      expect(capabilities.canStartStopDataFrameAnalytics).toBe(true);
+      expect(capabilities.canDeleteDataFrameAnalytics).toBe(false);
+      expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
+      expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
       done();
     });
 
@@ -505,7 +505,7 @@ describe('check_privileges', () => {
       expect(capabilities.canPreviewDataFrame).toBe(false);
       expect(capabilities.canCreateDataFrame).toBe(false);
       expect(capabilities.canStartStopDataFrame).toBe(false);
-      expect(capabilities.canGetDataFrameAnalytics).toBe(false);
+      expect(capabilities.canGetDataFrameAnalytics).toBe(true);
       expect(capabilities.canDeleteDataFrameAnalytics).toBe(false);
       expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
