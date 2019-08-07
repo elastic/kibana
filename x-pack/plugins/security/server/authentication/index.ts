@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import Boom from 'boom';
 import {
   ClusterClient,
   CoreSetup,
@@ -88,7 +86,7 @@ export async function setupAuthentication({
       authenticationResult = await authenticator.authenticate(request);
     } catch (err) {
       authLogger.error(err);
-      return response.internalError(err);
+      return response.internalError();
     }
 
     if (authenticationResult.succeeded()) {
@@ -114,21 +112,25 @@ export async function setupAuthentication({
 
     if (authenticationResult.failed()) {
       authLogger.info(`Authentication attempt failed: ${authenticationResult.error!.message}`);
-      const error = authenticationResult.error;
-      return getErrorStatusCode(error) === 400
-        ? response.badRequest(error, {
-            headers: authenticationResult.authResponseHeaders,
-          })
-        : response.unauthorized(error, {
-            headers: authenticationResult.authResponseHeaders,
-          });
-    } else {
-      authLogger.info('Could not handle authentication attempt');
-      const error = Boom.unauthorized();
-      return response.unauthorized(error, {
+      const error = authenticationResult.error!;
+      // proxy Elasticsearch "native" errors
+      const statusCode = getErrorStatusCode(error);
+      if (typeof statusCode === 'number') {
+        return response.customError(error, {
+          statusCode,
+          headers: authenticationResult.authResponseHeaders,
+        });
+      }
+
+      return response.unauthorized(undefined, {
         headers: authenticationResult.authResponseHeaders,
       });
     }
+
+    authLogger.info('Could not handle authentication attempt');
+    return response.unauthorized(undefined, {
+      headers: authenticationResult.authResponseHeaders,
+    });
   });
 
   authLogger.debug('Successfully registered core authentication handler.');

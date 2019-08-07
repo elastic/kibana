@@ -212,7 +212,7 @@ describe('setupAuthentication()', () => {
       expect(mockResponse.internalError).not.toHaveBeenCalled();
     });
 
-    it('rejects with `Internal Server Error` when `authenticate` throws unhandled exception', async () => {
+    it('rejects with `Internal Server Error` and log error when `authenticate` throws unhandled exception', async () => {
       const mockResponse = httpServerMock.createLifecycleResponseFactory();
       authenticate.mockRejectedValue(new Error('something went wrong'));
 
@@ -220,10 +220,18 @@ describe('setupAuthentication()', () => {
 
       expect(mockResponse.internalError).toHaveBeenCalledTimes(1);
       const [[error]] = mockResponse.internalError.mock.calls;
-      expect(String(error)).toBe('Error: something went wrong');
+      expect(error).toBeUndefined();
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
       expect(mockResponse.redirected).not.toHaveBeenCalled();
+      expect(loggingServiceMock.collect(mockSetupAuthenticationParams.loggers).error)
+        .toMatchInlineSnapshot(`
+        Array [
+          Array [
+            [Error: something went wrong],
+          ],
+        ]
+      `);
     });
 
     it('rejects with original `badRequest` error when `authenticate` fails to authenticate user', async () => {
@@ -233,8 +241,8 @@ describe('setupAuthentication()', () => {
 
       await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
-      expect(mockResponse.badRequest).toHaveBeenCalledTimes(1);
-      const [[error]] = mockResponse.badRequest.mock.calls;
+      expect(mockResponse.customError).toHaveBeenCalledTimes(1);
+      const [[error]] = mockResponse.customError.mock.calls;
       expect(error).toBe(esError);
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
@@ -257,9 +265,9 @@ describe('setupAuthentication()', () => {
 
       await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
-      expect(mockResponse.unauthorized).toHaveBeenCalledTimes(1);
-      const [[error, options]] = mockResponse.unauthorized.mock.calls;
-      expect(String(error)).toBe(`Error: ${originalError.message}`);
+      expect(mockResponse.customError).toHaveBeenCalledTimes(1);
+      const [[error, options]] = mockResponse.customError.mock.calls;
+      expect(error).toBe(originalError);
       expect(options!.headers).toEqual({ 'WWW-Authenticate': 'Negotiate' });
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
@@ -275,7 +283,7 @@ describe('setupAuthentication()', () => {
       expect(mockResponse.unauthorized).toHaveBeenCalledTimes(1);
       const [[error]] = mockResponse.unauthorized.mock.calls;
 
-      expect(String(error)).toBe('Error: Unauthorized');
+      expect(error).toBeUndefined();
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
       expect(mockResponse.redirected).not.toHaveBeenCalled();

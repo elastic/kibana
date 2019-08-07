@@ -145,7 +145,7 @@ export default function({ getService }: FtrProviderContext) {
         const spnegoResponse = await supertest
           .get('/api/security/v1/me')
           .set('Authorization', 'Negotiate (:I am malformed:)')
-          .expect(401);
+          .expect(500);
         expect(spnegoResponse.headers['set-cookie']).to.be(undefined);
         expect(spnegoResponse.headers['www-authenticate']).to.be(undefined);
       });
