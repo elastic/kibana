@@ -26,6 +26,6 @@ export interface PieVisParams extends CommonVislibParams {
     show: boolean;
     values: boolean;
     last_level: boolean;
-    truncate: number;
+    truncate: number | null;
   };
 }

@@ -30,7 +30,9 @@ import { SwitchOption } from '../../../kbn_vislib_vis_types/public/controls/swit
 import { WmsOptions } from './wms_options';
 import { TileMapVisParams } from '../types';
 
-type TileMapOptionsProps = { serviceSettings: ServiceSettings } & VisOptionsProps<TileMapVisParams>;
+export type TileMapOptionsProps = { serviceSettings: ServiceSettings } & VisOptionsProps<
+  TileMapVisParams
+>;
 
 function TileMapOptions(props: TileMapOptionsProps) {
   const { stateParams, setValue, vis } = props;

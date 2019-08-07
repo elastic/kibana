@@ -29,8 +29,10 @@ import { PieVisParams } from '../pie';
 
 function PieOptions(props: VisOptionsProps<PieVisParams>) {
   const { stateParams, setValue } = props;
-  const setLabels = (paramName: string, value: unknown) =>
-    setValue('labels', { ...stateParams.labels, [paramName]: value });
+  const setLabels = <T extends keyof PieVisParams['labels']>(
+    paramName: T,
+    value: PieVisParams['labels'][T]
+  ) => setValue('labels', { ...stateParams.labels, [paramName]: value });
 
   return (
     <>

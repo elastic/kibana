@@ -53,7 +53,10 @@ function WmsInternalOptions({ wms, setValue }: WmsInternalOptions) {
     </EuiScreenReaderOnly>
   );
 
-  const setOptions = (paramName: string, value: unknown) =>
+  const setOptions = <T extends keyof TileMapVisParams['wms']['options']>(
+    paramName: T,
+    value: TileMapVisParams['wms']['options'][T]
+  ) =>
     setValue('options', {
       ...wms.options,
       [paramName]: value,
