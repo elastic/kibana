@@ -256,7 +256,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
                       {i18n.translate(
                         'data.search.searchBar.savedQueryPopoverSaveAsNewButtonText',
                         {
-                          defaultMessage: 'Save As New',
+                          defaultMessage: 'Save as new',
                         }
                       )}
                     </EuiButton>
