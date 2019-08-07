@@ -18,13 +18,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createTableVisResponseHandler } from './table_vis_request_handler';
-import { Schemas } from 'ui/vis/editors/default/schemas';
+import { Vis } from 'ui/vis';
 
+// @ts-ignore
+import { Schemas } from 'ui/vis/editors/default/schemas';
+import { createTableVisResponseHandler } from './table_vis_request_handler';
+
+import { TableVisualizationDependencies } from './plugin';
 import tableVisTemplate from './table_vis.html';
 
-export const createTableVisTypeDefinition = (dependencies) => {
-  const responseHandler = createTableVisResponseHandler(dependencies);
+export const createTableVisTypeDefinition = (dependencies: TableVisualizationDependencies) => {
+  const responseHandler = createTableVisResponseHandler();
 
   return dependencies.createAngularVisualization({
     type: 'table',
@@ -43,7 +47,7 @@ export const createTableVisTypeDefinition = (dependencies) => {
         showMetricsAtAllLevels: false,
         sort: {
           columnIndex: null,
-          direction: null
+          direction: null,
         },
         showTotal: false,
         totalFunc: 'sum',
@@ -67,9 +71,7 @@ export const createTableVisTypeDefinition = (dependencies) => {
             },
           },
           min: 1,
-          defaults: [
-            { type: 'count', schema: 'metric' }
-          ]
+          defaults: [{ type: 'count', schema: 'metric' }],
         },
         {
           group: 'buckets',
@@ -77,7 +79,7 @@ export const createTableVisTypeDefinition = (dependencies) => {
           title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.bucketTitle', {
             defaultMessage: 'Split rows',
           }),
-          aggFilter: ['!filter']
+          aggFilter: ['!filter'],
         },
         {
           group: 'buckets',
@@ -87,14 +89,13 @@ export const createTableVisTypeDefinition = (dependencies) => {
           }),
           min: 0,
           max: 1,
-          aggFilter: ['!filter']
-        }
-      ])
+          aggFilter: ['!filter'],
+        },
+      ]),
     },
     responseHandler,
-    hierarchicalData: function (vis) {
+    hierarchicalData: (vis: Vis) => {
       return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
-    }
+    },
   });
 };
-

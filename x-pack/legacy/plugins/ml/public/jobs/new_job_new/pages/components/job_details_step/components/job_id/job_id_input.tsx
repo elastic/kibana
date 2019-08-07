@@ -36,6 +36,7 @@ export const JobIdInput: FC = () => {
         value={jobId}
         onChange={e => setJobId(e.target.value)}
         isInvalid={validation.valid === false}
+        data-test-subj="mlJobWizardInputJobId"
       />
     </Description>
   );
