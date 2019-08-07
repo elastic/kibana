@@ -80,7 +80,9 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
     const { svgPosition } = this.state;
     const clickedYPosition = event.clientY - svgPosition.top;
     const clickedTime = Math.floor(this.getYScale().invert(clickedYPosition));
-
+    this.setState({
+      drag: null,
+    });
     this.props.jumpToTarget({
       tiebreaker: 0,
       time: clickedTime,
@@ -214,6 +216,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
             getPositionOfTime={this.getPositionOfTime}
             start={highlightedInterval.start}
             width={width}
+            target={target}
           />
         ) : null}
         <TimeCursor x1={width / 3} x2={width} y1={timeCursorY} y2={timeCursorY} />
