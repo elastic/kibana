@@ -28,6 +28,7 @@ import {
   EuiText,
   EuiConfirmModal,
   EuiOverlayMask,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -140,6 +141,13 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
           }}
           flush="left"
         >
+          <EuiScreenReaderOnly>
+            <span>
+              {i18n.translate('data.search.searchBar.savedQueryScreenReaderOpenText', {
+                defaultMessage: 'Open saved query',
+              })}
+            </span>
+          </EuiScreenReaderOnly>
           {savedQuery.attributes.title}
         </EuiButtonEmpty>
         <EuiButtonEmpty
