@@ -87,6 +87,7 @@ export class CommitIndexer extends AbstractIndexer {
         const req: CommitIndexRequest = {
           repoUri: this.repoUri,
           commitRevision: commit.id,
+          revision: this.revision,
         };
         yield req;
       }

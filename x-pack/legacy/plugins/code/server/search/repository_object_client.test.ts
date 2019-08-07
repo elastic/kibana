@@ -207,7 +207,7 @@ test('CRUD of Repository LSP Index Status', async () => {
     progress: WorkerReservedProgress.COMPLETED,
     timestamp: new Date(),
   };
-  await repoObjectClient.setRepositoryLspIndexStatus(repoUri, cObj);
+  await repoObjectClient.setRepositoryIndexStatus(repoUri, cObj);
   expect(indexSpy.calledOnce).toBeTruthy();
   expect(indexSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
@@ -242,7 +242,7 @@ test('CRUD of Repository LSP Index Status', async () => {
   const uObj = {
     progress: 50,
   };
-  await repoObjectClient.updateRepositoryLspIndexStatus(repoUri, uObj);
+  await repoObjectClient.updateRepositoryIndexStatus(repoUri, uObj);
   expect(updateSpy.calledOnce).toBeTruthy();
   expect(updateSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({

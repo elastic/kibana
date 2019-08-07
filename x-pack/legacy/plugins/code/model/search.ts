@@ -35,6 +35,7 @@ export enum IndexerType {
   LSP_INC = 'LSP_INCREMENTAL',
   COMMIT = 'COMMIT',
   COMMIT_INC = 'COMMIT_INCREMENTAL',
+  REPOSITORY = 'REPOSITORY',
   UNKNOWN = 'UNKNOWN',
 }
 
@@ -48,6 +49,8 @@ export interface LspIndexRequest extends IndexRequest {
 export interface CommitIndexRequest extends IndexRequest {
   // The absolute revision of the commit to be indexed.
   commitRevision: string;
+  // The git ref as the starting point for the entire commit index job.
+  revision: string;
 }
 
 export interface LspIncIndexRequest extends LspIndexRequest {
