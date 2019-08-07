@@ -69,7 +69,9 @@ export const ApmSection = ({
                   timeRange
                 )}
               >
-                View in APM
+                {i18n.translate('xpack.infra.apmSection.viewInApmLabel', {
+                  defaultMessage: 'View in APM',
+                })}
               </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
