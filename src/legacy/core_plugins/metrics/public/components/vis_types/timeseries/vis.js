@@ -24,7 +24,7 @@ import { toastNotifications } from 'ui/notify';
 import { tickFormatter } from '../../lib/tick_formatter';
 import _ from 'lodash';
 import { Timeseries } from '../../../visualizations/components/timeseries';
-import { MarkdownSimple } from '../../../../../kibana_react/public/markdown';
+import { MarkdownSimple } from '../../../../../kibana_react/public';
 import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';

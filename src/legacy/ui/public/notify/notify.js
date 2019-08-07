@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { MarkdownSimple } from '../../../core_plugins/kibana_react/public/markdown';
+import { MarkdownSimple } from '../../../core_plugins/kibana_react/public';
 import chrome from '../chrome';
 import { fatalError } from './fatal_error';
 import { banners } from './banners';
