@@ -4966,7 +4966,6 @@
     "xpack.indexLifecycleMgmt.noMatch.noPolicicesDescription": "表示するポリシーがありません",
     "xpack.indexLifecycleMgmt.optionalMessage": " (オプション)",
     "xpack.indexLifecycleMgmt.policyJsonFlyout.copyToClipboardButton": "クリップボードにコピー",
-    "xpack.indexLifecycleMgmt.policyJsonFlyout.title": "インデックスライフサイクルポリシー {policyName} の JSON",
     "xpack.indexLifecycleMgmt.policyTable.actionsButtonText": "アクション",
     "xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.cancelButton": "キャンセル",
     "xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.chooseTemplateLabel": "インデックステンプレート",
