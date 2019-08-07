@@ -25,7 +25,7 @@ import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
-import { escapeCdata } from './xml';
+import { escapeCdata } from '../';
 
 const dateNow = Date.now.bind(Date);
 
