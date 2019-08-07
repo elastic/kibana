@@ -14,7 +14,6 @@ export const apmLayoutCreator: InfraMetricLayoutCreator = () => [
   {
     id: 'apm',
     label: 'APM',
-    requires: ['apm'],
     mapNavItem: (item: InfraMetricLayout, metrics: InfraMetricCombinedData[]) => {
       const apmMetrics = metrics.find(m => m.id === InfraMetric.apmMetrics);
       if (apmMetrics && isInfraApmMetrics(apmMetrics)) {

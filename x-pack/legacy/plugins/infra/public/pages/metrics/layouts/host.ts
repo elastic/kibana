@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { InfraMetric } from '../../../graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 import { nginxLayoutCreator } from './nginx';
+import { apmLayoutCreator } from './apm';
 import {
   InfraMetricLayoutCreator,
   InfraMetricLayoutSectionType,

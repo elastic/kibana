@@ -60,7 +60,7 @@ export interface InfraMetricSideNav {
 export interface InfraMetricLayout {
   id: string;
   label: string;
-  mapNavItem: (
+  mapNavItem?: (
     item: InfraMetricLayout,
     metrics: InfraMetricCombinedData[]
   ) => InfraMetricSideNav | undefined;

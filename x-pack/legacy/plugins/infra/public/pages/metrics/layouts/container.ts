@@ -13,6 +13,7 @@ import {
   InfraMetricLayoutSectionType,
   InfraMetricLayoutVisualizationType,
 } from './types';
+import { apmLayoutCreator } from './apm';
 
 export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
