@@ -860,7 +860,10 @@ describe('IndexPatternDimensionPanel', () => {
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
-            dragging: { indexPatternId: 'foo', field: { type: 'number', name: 'bar' } },
+            dragging: {
+              indexPatternId: 'foo',
+              field: { type: 'number', name: 'bar', aggregatable: true },
+            },
           }}
           state={dragDropState()}
           filterOperations={() => false}
@@ -882,7 +885,10 @@ describe('IndexPatternDimensionPanel', () => {
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
-            dragging: { field: { type: 'number', name: 'bar' }, indexPatternId: 'foo' },
+            dragging: {
+              field: { type: 'number', name: 'bar', aggregatable: true },
+              indexPatternId: 'foo',
+            },
           }}
           state={dragDropState()}
           filterOperations={op => op.dataType === 'number'}
@@ -904,7 +910,10 @@ describe('IndexPatternDimensionPanel', () => {
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
-            dragging: { field: { type: 'number', name: 'bar' }, indexPatternId: 'foo2' },
+            dragging: {
+              field: { type: 'number', name: 'bar', aggregatable: true },
+              indexPatternId: 'foo2',
+            },
           }}
           state={dragDropState()}
           filterOperations={op => op.dataType === 'number'}
@@ -921,7 +930,10 @@ describe('IndexPatternDimensionPanel', () => {
     });
 
     it('appends the dropped column when a field is dropped', () => {
-      const dragging = { field: { type: 'number', name: 'bar' }, indexPatternId: 'foo' };
+      const dragging = {
+        field: { type: 'number', name: 'bar', aggregatable: true },
+        indexPatternId: 'foo',
+      };
       const testState = dragDropState();
       wrapper = shallow(
         <IndexPatternDimensionPanel
@@ -966,7 +978,10 @@ describe('IndexPatternDimensionPanel', () => {
     });
 
     it('updates a column when a field is dropped', () => {
-      const dragging = { field: { type: 'number', name: 'bar' }, indexPatternId: 'foo' };
+      const dragging = {
+        field: { type: 'number', name: 'bar', aggregatable: true },
+        indexPatternId: 'foo',
+      };
       const testState = dragDropState();
       wrapper = shallow(
         <IndexPatternDimensionPanel
