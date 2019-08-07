@@ -18,9 +18,6 @@
  */
 
 import Joi from 'joi';
-import {
-  constants as cryptoConstants
-} from 'crypto';
 import os from 'os';
 
 import {
@@ -35,6 +32,7 @@ import {
   DEFAULT_CSP_WARN_LEGACY_BROWSERS,
 } from '../csp';
 
+const HANDLED_IN_NEW_PLATFORM = Joi.any().description('This key is handled in the new platform ONLY');
 export default () => Joi.object({
   pkg: Joi.object({
     version: Joi.string().default(Joi.ref('$version')),
@@ -83,43 +81,8 @@ export default () => Joi.object({
   server: Joi.object({
     uuid: Joi.string().guid().default(),
     name: Joi.string().default(os.hostname()),
-    host: Joi.string().hostname().default('localhost'),
-    port: Joi.number().default(5601),
-    keepaliveTimeout: Joi.number().default(120000),
-    socketTimeout: Joi.number().default(120000),
-    maxPayloadBytes: Joi.number().default(1048576),
-    autoListen: Joi.boolean().default(true),
     defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
-    basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
-    rewriteBasePath: Joi.boolean().when('basePath', {
-      is: '',
-      then: Joi.default(false).valid(false),
-      otherwise: Joi.default(false),
-    }),
     customResponseHeaders: Joi.object().unknown(true).default({}),
-    ssl: Joi.object({
-      enabled: Joi.boolean().default(false),
-      redirectHttpFromPort: Joi.number(),
-      certificate: Joi.string().when('enabled', {
-        is: true,
-        then: Joi.required(),
-      }),
-      key: Joi.string().when('enabled', {
-        is: true,
-        then: Joi.required()
-      }),
-      keyPassphrase: Joi.string(),
-      certificateAuthorities: Joi.array().single().items(Joi.string()).default([]),
-      supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')).default(['TLSv1.1', 'TLSv1.2']),
-      cipherSuites: Joi.array().items(Joi.string()).default(cryptoConstants.defaultCoreCipherList.split(':'))
-    }).default(),
-    cors: Joi.when('$dev', {
-      is: true,
-      then: Joi.object().default({
-        origin: ['*://localhost:9876'] // karma test server
-      }),
-      otherwise: Joi.boolean().default(false)
-    }),
     xsrf: Joi.object({
       disableProtection: Joi.boolean().default(false),
       whitelist: Joi.array().items(
@@ -127,6 +90,24 @@ export default () => Joi.object({
       ).default([]),
       token: Joi.string().optional().notes('Deprecated')
     }).default(),
+
+    // keep them for BWC, remove when not used in Legacy.
+    // validation should be in sync with one in New platform.
+    basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
+    host: Joi.string().hostname().default('localhost'),
+    port: Joi.number().default(5601),
+    rewriteBasePath: Joi.boolean().when('basePath', {
+      is: '',
+      then: Joi.default(false).valid(false),
+      otherwise: Joi.default(false),
+    }),
+
+    autoListen: HANDLED_IN_NEW_PLATFORM,
+    cors: HANDLED_IN_NEW_PLATFORM,
+    keepaliveTimeout: HANDLED_IN_NEW_PLATFORM,
+    maxPayloadBytes: HANDLED_IN_NEW_PLATFORM,
+    socketTimeout: HANDLED_IN_NEW_PLATFORM,
+    ssl: HANDLED_IN_NEW_PLATFORM,
   }).default(),
 
   uiSettings: Joi.object().keys({
