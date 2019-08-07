@@ -96,7 +96,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       set('server.ssl.key', DEV_SSL_KEY_PATH);
     }
 
-    if (opts.ssl && !opts.elasticsearch) {
+    if (opts.ssl && !opts.elasticsearch && !has('elasticsearch.hosts')) {
       set('elasticsearch.hosts', 'https://localhost:9200');
     }
 
