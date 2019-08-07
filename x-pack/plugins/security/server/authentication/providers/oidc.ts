@@ -198,8 +198,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Request has been authenticated via OpenID Connect.');
 
       return AuthenticationResult.redirectTo(stateRedirectURL, {
-        accessToken,
-        refreshToken,
+        state: { accessToken, refreshToken },
       });
     } catch (err) {
       this.logger.debug(`Failed to authenticate request via OpenID Connect: ${err.message}`);
@@ -252,7 +251,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.redirectTo(
         redirect,
         // Store the state and nonce parameters in the session state of the user
-        { state, nonce, nextURL: redirectAfterLogin }
+        { state: { state, nonce, nextURL: redirectAfterLogin } }
       );
     } catch (err) {
       this.logger.debug(`Failed to initiate OpenID Connect authentication: ${err.message}`);

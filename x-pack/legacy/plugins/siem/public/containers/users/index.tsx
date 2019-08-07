@@ -127,7 +127,7 @@ class UsersComponentQuery extends QueryTemplatePaginated<
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Users.pageInfo', data),
             refetch,
-            totalCount: getOr(0, 'source.Users.totalCount', data),
+            totalCount: getOr(-1, 'source.Users.totalCount', data),
             users,
           });
         }}

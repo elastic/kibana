@@ -19,7 +19,7 @@
 import { get, has } from 'lodash';
 import React, { useEffect } from 'react';
 
-import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggType } from 'ui/agg_types';
@@ -28,7 +28,7 @@ import { documentationLinks } from '../../../../documentation_links/documentatio
 import { ComboBoxGroupedOption } from '../default_editor_utils';
 
 interface DefaultEditorAggSelectProps {
-  aggError?: string | null;
+  aggError?: string;
   aggTypeOptions: AggType[];
   id: string;
   indexPattern: IndexPattern;
@@ -72,17 +72,14 @@ function DefaultEditorAggSelect({
   }
 
   const helpLink = value && aggHelpLink && (
-    <EuiLink
-      href={aggHelpLink}
-      target="_blank"
-      rel="noopener"
-      className="visEditorAggSelect__helpLink"
-    >
-      <FormattedMessage
-        id="common.ui.vis.defaultEditor.aggSelect.helpLinkLabel"
-        defaultMessage="{aggTitle} help"
-        values={{ aggTitle: value ? value.title : '' }}
-      />
+    <EuiLink href={aggHelpLink} target="_blank" rel="noopener">
+      <EuiText size="xs">
+        <FormattedMessage
+          id="common.ui.vis.defaultEditor.aggSelect.helpLinkLabel"
+          defaultMessage="{aggTitle} help"
+          values={{ aggTitle: value ? value.title : '' }}
+        />
+      </EuiText>
     </EuiLink>
   );
 

@@ -8,7 +8,7 @@ import _ from 'lodash';
 import { TASK_ID, scheduleTask, registerMapsTelemetryTask } from './telemetry_task';
 
 export function initTelemetryCollection(server) {
-  registerMapsTelemetryTask(server.taskManager);
+  registerMapsTelemetryTask(server);
   scheduleTask(server, server.taskManager);
   registerMapsUsageCollector(server);
 }
@@ -26,7 +26,7 @@ async function fetch(server) {
         bool: {
           filter: {
             term: {
-              _id: TASK_ID
+              _id: `task:${TASK_ID}`
             }
           }
         }

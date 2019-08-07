@@ -20,7 +20,6 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
-import { RegionMapsVisualizationProvider } from '../region_map_visualization';
 import ChoroplethLayer from '../choropleth_layer';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import * as visModule from 'ui/vis';
@@ -40,7 +39,10 @@ import afterdatachangePng from './afterdatachange.png';
 import afterdatachangeandresizePng from './afterdatachangeandresize.png';
 import aftercolorchangePng from './aftercolorchange.png';
 import changestartupPng from './changestartup.png';
+import { visualizations } from '../../../visualizations/public';
 
+import { createRegionMapVisualization } from '../region_map_visualization';
+import { createRegionMapTypeDefinition } from '../region_map_type';
 
 const THRESHOLD = 0.45;
 const PIXEL_DIFF = 96;
@@ -52,6 +54,7 @@ describe('RegionMapsVisualizationTests', function () {
   let Vis;
   let indexPattern;
   let vis;
+  let dependencies;
 
   let imageComparator;
 
@@ -85,9 +88,23 @@ describe('RegionMapsVisualizationTests', function () {
 
   let getManifestStub;
   beforeEach(ngMock.inject((Private, $injector) => {
+    const serviceSettings = $injector.get('serviceSettings');
+    const regionmapsConfig = $injector.get('regionmapsConfig');
+    const uiSettings = $injector.get('config');
+
+    dependencies = {
+      serviceSettings,
+      $injector,
+      regionmapsConfig,
+      uiSettings
+    };
+
+    visualizations.types.VisTypesRegistryProvider.register(() =>
+      createRegionMapTypeDefinition(dependencies)
+    );
 
     Vis = Private(visModule.VisProvider);
-    RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
+    RegionMapsVisualization = createRegionMapVisualization(dependencies);
     indexPattern = Private(LogstashIndexPatternStubProvider);
 
     ChoroplethLayer.prototype._makeJsonAjaxCall = async function () {
@@ -99,7 +116,6 @@ describe('RegionMapsVisualizationTests', function () {
       });
     };
 
-    const serviceSettings = $injector.get('serviceSettings');
     getManifestStub = serviceSettings.__debugStubManifestCalls(async (url) => {
       //simulate network calls
       if (url.startsWith('https://foobar')) {
@@ -118,15 +134,12 @@ describe('RegionMapsVisualizationTests', function () {
         }
       }
     });
-
   }));
-
 
   afterEach(function () {
     ChoroplethLayer.prototype._makeJsonAjaxCall = _makeJsonAjaxCallOld;
     getManifestStub.removeStub();
   });
-
 
   describe('RegionMapVisualization - basics', function () {
 
@@ -260,6 +273,7 @@ describe('RegionMapsVisualizationTests', function () {
       });
 
       const newTableGroup = _.cloneDeep(dummyTableGroup);
+
       newTableGroup.rows.pop();//remove one shape
 
       await regionMapsVisualization.render(newTableGroup, vis.params, {
@@ -269,10 +283,10 @@ describe('RegionMapsVisualizationTests', function () {
         data: true,
         uiState: false
       });
+
       const mismatchedPixelsAfterDataChange = await compareImage(afterdatachangePng);
-
-
       const anotherTableGroup = _.cloneDeep(newTableGroup);
+
       anotherTableGroup.rows.pop();//remove one shape
       domNode.style.width = '412px';
       domNode.style.height = '112px';
@@ -288,11 +302,9 @@ describe('RegionMapsVisualizationTests', function () {
       regionMapsVisualization.destroy();
       expect(mismatchedPixelsAfterDataChange).to.be.lessThan(PIXEL_DIFF);
       expect(mismatchedPixelsAfterDataChangeAndResize).to.be.lessThan(PIXEL_DIFF);
-
     });
 
     it('should redo data and color ramp', async function () {
-
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -316,12 +328,9 @@ describe('RegionMapsVisualizationTests', function () {
 
       regionMapsVisualization.destroy();
       expect(mismatchedPixelsAfterDataAndColorChange).to.be.lessThan(PIXEL_DIFF);
-
     });
 
-
     it('should zoom and center elsewhere', async function () {
-
       vis.params.mapZoom = 4;
       vis.params.mapCenter = [36, -85];
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
@@ -337,12 +346,9 @@ describe('RegionMapsVisualizationTests', function () {
       regionMapsVisualization.destroy();
 
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
-
     });
 
-
   });
-
 
   async function compareImage(expectedImageSource) {
     const elementList = domNode.querySelectorAll('canvas');
@@ -350,7 +356,6 @@ describe('RegionMapsVisualizationTests', function () {
     const firstCanvasOnMap = elementList[0];
     return imageComparator.compareImage(firstCanvasOnMap, expectedImageSource, THRESHOLD);
   }
-
 
   function setupDOM(width, height) {
     domNode = document.createElement('div');
@@ -368,6 +373,4 @@ describe('RegionMapsVisualizationTests', function () {
     domNode.innerHTML = '';
     document.body.removeChild(domNode);
   }
-
 });
-

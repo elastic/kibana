@@ -71,7 +71,6 @@ exports[`Load More Table Component rendering it renders the default load more ta
   limit={1}
   loadMore={[Function]}
   loading={false}
-  loadingTitle="Hosts"
   pageOfItems={
     Array [
       Object {

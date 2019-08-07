@@ -7,7 +7,7 @@
 import boom from 'boom';
 import { Request, ResponseToolkit } from 'hapi';
 import { API_BASE_URL } from '../../common/constants';
-import { KbnServer } from '../../types';
+import { KbnServer, Logger } from '../../types';
 // @ts-ignore
 import { enqueueJobFactory } from '../lib/enqueue_job';
 import { registerGenerate } from './generate';
@@ -16,7 +16,7 @@ import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_sav
 import { registerJobs } from './jobs';
 import { registerLegacy } from './legacy';
 
-export function registerRoutes(server: KbnServer) {
+export function registerRoutes(server: KbnServer, logger: Logger) {
   const config = server.config();
   const DOWNLOAD_BASE_URL = config.get('server.basePath') + `${API_BASE_URL}/jobs/download`;
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('admin');
@@ -67,7 +67,7 @@ export function registerRoutes(server: KbnServer) {
   // Register beta panel-action download-related API's
   if (config.get('xpack.reporting.csv.enablePanelActionDownload')) {
     registerGenerateCsvFromSavedObject(server, handler, handleError);
-    registerGenerateCsvFromSavedObjectImmediate(server);
+    registerGenerateCsvFromSavedObjectImmediate(server, logger);
   }
 
   registerJobs(server);

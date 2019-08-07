@@ -102,7 +102,6 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}
-      loadingTitle={i18n.UNCOMMON_PROCESSES}
       loadPage={newActivePage => loadPage(newActivePage)}
       pageOfItems={data}
       showMorePagesIndicator={showMorePagesIndicator}

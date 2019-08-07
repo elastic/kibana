@@ -93,7 +93,7 @@ function getWizardUrlFromCloningJob(job) {
     }
     const indexPatternId = getIndexPatternIdFromName(job.datafeed_config.indices[0]);
 
-    return `jobs/new_job/simple/${page}?index=${indexPatternId}&_g=()`;
+    return `jobs/new_job/new_new_job/${page}?index=${indexPatternId}&_g=()`;
   } else {
     return null;
   }

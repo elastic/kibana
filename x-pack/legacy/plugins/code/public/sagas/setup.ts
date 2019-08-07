@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 import { call, put, takeEvery } from 'redux-saga/effects';
 import { checkSetupFailed, checkSetupSuccess } from '../actions';
 import { rootRoutePattern, setupRoutePattern } from './patterns';
@@ -19,7 +19,7 @@ function* handleRootRoute() {
 }
 
 function requestSetup() {
-  return kfetch({ pathname: `/api/code/setup`, method: 'head' });
+  return npStart.core.http.head(`/api/code/setup`);
 }
 
 export function* watchRootRoute() {

@@ -131,7 +131,7 @@ class DomainsComponentQuery extends QueryTemplatePaginated<
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Domains.pageInfo', data),
             refetch,
-            totalCount: getOr(0, 'source.Domains.totalCount', data),
+            totalCount: getOr(-1, 'source.Domains.totalCount', data),
           });
         }}
       </Query>

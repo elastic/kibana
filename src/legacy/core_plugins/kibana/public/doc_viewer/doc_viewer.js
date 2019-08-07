@@ -21,7 +21,7 @@ import $ from 'jquery';
 import { uiModules } from 'ui/modules';
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 
-import 'ui/render_directive';
+import 'ui/directives/render_directive';
 
 uiModules.get('apps/discover')
   .directive('docViewer', function (Private) {

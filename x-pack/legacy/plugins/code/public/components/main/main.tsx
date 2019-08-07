@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 
-import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
 import { APP_TITLE } from '../../../common/constants';
 import { MainRouteParams } from '../../common/types';
 import { ShortcutsProvider } from '../shortcuts';
@@ -37,7 +37,7 @@ class CodeMain extends React.Component<Props> {
 
   public setBreadcrumbs() {
     const { resource, org, repo } = this.props.match.params;
-    chrome.breadcrumbs.set([
+    npStart.core.chrome.setBreadcrumbs([
       { text: APP_TITLE, href: '#/' },
       {
         text: `${org} → ${repo}`,
@@ -47,7 +47,7 @@ class CodeMain extends React.Component<Props> {
   }
 
   public componentWillUnmount() {
-    chrome.breadcrumbs.set([{ text: APP_TITLE, href: '#/' }]);
+    npStart.core.chrome.setBreadcrumbs([{ text: APP_TITLE, href: '#/' }]);
   }
 
   public render() {

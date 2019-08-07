@@ -36,10 +36,22 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setLoadTemplateResponse = (response?: HttpResponse, error?: any) => {
+    const status = error ? error.status || 400 : 200;
+    const body = error ? error.body : response;
+
+    server.respondWith('GET', `${API_PATH}/templates/:id`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
     setDeleteTemplateResponse,
+    setLoadTemplateResponse,
   };
 };
 

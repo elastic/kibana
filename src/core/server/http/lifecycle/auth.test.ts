@@ -25,7 +25,7 @@ describe('adoptToHapiAuthFormat', () => {
   it('allows to associate arbitrary data with an incoming request', async () => {
     const authData = {
       state: { foo: 'bar' },
-      headers: { authorization: 'baz' },
+      requestHeaders: { authorization: 'baz' },
     };
     const authenticatedMock = jest.fn();
     const onSuccessMock = jest.fn();

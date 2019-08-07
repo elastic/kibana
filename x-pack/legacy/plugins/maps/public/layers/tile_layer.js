@@ -48,11 +48,19 @@ export class TileLayer extends AbstractLayer {
   }
 
   _getMbLayerId() {
-    return this.getId() + '_raster';
+    return this.makeMbLayerId('raster');
   }
 
   getMbLayerIds() {
     return [this._getMbLayerId()];
+  }
+
+  ownsMbLayerId(mbLayerId) {
+    return this._getMbLayerId() === mbLayerId;
+  }
+
+  ownsMbSourceId(mbSourceId) {
+    return this.getId() === mbSourceId;
   }
 
   syncLayerWithMB(mbMap) {

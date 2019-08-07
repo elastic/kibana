@@ -16,6 +16,7 @@ import { ConfigType } from '../config';
 import { getErrorStatusCode, wrapError } from '../errors';
 import { Authenticator, ProviderSession } from './authenticator';
 import { LegacyAPI } from '../plugin';
+import { createAPIKey, CreateAPIKeyOptions } from './api_keys';
 
 export { canRedirectRequest } from './can_redirect_request';
 export { Authenticator, ProviderLoginAttempt } from './authenticator';
@@ -93,7 +94,8 @@ export async function setupAuthentication({
     if (authenticationResult.succeeded()) {
       return t.authenticated({
         state: authenticationResult.user,
-        headers: authenticationResult.authHeaders,
+        requestHeaders: authenticationResult.authHeaders,
+        responseHeaders: authenticationResult.authResponseHeaders,
       });
     }
 
@@ -106,18 +108,25 @@ export async function setupAuthentication({
       return t.redirected(authenticationResult.redirectURL!);
     }
 
+    let error;
     if (authenticationResult.failed()) {
       authLogger.info(`Authentication attempt failed: ${authenticationResult.error!.message}`);
+      error = wrapError(authenticationResult.error);
 
-      const error = wrapError(authenticationResult.error);
-      if (authenticationResult.challenges) {
-        error.output.headers['WWW-Authenticate'] = authenticationResult.challenges as any;
+      const authResponseHeaders = authenticationResult.authResponseHeaders;
+      for (const [headerName, headerValue] of Object.entries(authResponseHeaders || {})) {
+        if (error.output.headers[headerName] !== undefined) {
+          authLogger.warn(`Server rewrites a error response header [${headerName}].`);
+        }
+        // Hapi typings don't support headers that are `string[]`.
+        error.output.headers[headerName] = headerValue as any;
       }
-
-      return t.rejected(error);
+    } else {
+      authLogger.info('Could not handle authentication attempt');
+      error = Boom.unauthorized();
     }
 
-    return t.rejected(Boom.unauthorized());
+    return t.rejected(error);
   });
 
   authLogger.debug('Successfully registered core authentication handler.');
@@ -126,6 +135,13 @@ export async function setupAuthentication({
     login: authenticator.login.bind(authenticator),
     logout: authenticator.logout.bind(authenticator),
     getCurrentUser,
+    createAPIKey: (request: KibanaRequest, body: CreateAPIKeyOptions['body']) =>
+      createAPIKey({
+        body,
+        loggers,
+        isSecurityFeatureDisabled,
+        callAsCurrentUser: clusterClient.asScoped(request).callAsCurrentUser,
+      }),
     isAuthenticated: async (request: KibanaRequest) => {
       try {
         await getCurrentUser(request);

@@ -95,7 +95,6 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadingTitle={i18n.USERS}
         loadPage={newActivePage => loadPage(newActivePage)}
         onChange={this.onChange}
         pageOfItems={data}

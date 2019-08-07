@@ -20,6 +20,7 @@ describe('getAnomalySeries', () => {
     avgAnomalies = await getAnomalySeries({
       serviceName: 'myServiceName',
       transactionType: 'myTransactionType',
+      transactionName: undefined,
       timeSeriesDates: [100, 100000],
       setup: {
         start: 0,

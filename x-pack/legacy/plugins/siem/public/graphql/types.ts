@@ -79,6 +79,10 @@ export interface ResponseNotes {
 }
 
 export interface PinnedEvent {
+  code?: number | null;
+
+  message?: string | null;
+
   pinnedEventId: string;
 
   eventId?: string | null;
@@ -846,15 +850,7 @@ export interface TimelineDetailsData {
 }
 
 export interface DetailItem {
-  category: string;
-
-  description?: string | null;
-
-  example?: string | null;
-
   field: string;
-
-  type: string;
 
   values?: ToStringArray | null;
 
@@ -1476,6 +1472,10 @@ export interface ResponseTimeline {
 }
 
 export interface ResponseFavoriteTimeline {
+  code?: number | null;
+
+  message?: string | null;
+
   savedObjectId: string;
 
   version: string;
@@ -3721,15 +3721,7 @@ export namespace GetTimelineDetailsQuery {
   export type Data = {
     __typename?: 'DetailItem';
 
-    category: string;
-
-    description?: string | null;
-
-    example?: string | null;
-
     field: string;
-
-    type: string;
 
     values?: ToStringArray | null;
 
