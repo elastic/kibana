@@ -28,10 +28,15 @@ export const getAllHandler: RouterRouteHandler = async (
 ): Promise<{
   snapshots: SnapshotDetails[];
   errors: any[];
+  policies: string[];
   repositories: string[];
   managedRepository?: string;
 }> => {
   const managedRepository = await getManagedRepositoryName(callWithInternalUser);
+
+  // Get policies
+  const policiesByName = await callWithRequest('slm.policies');
+  const policies = Object.keys(policiesByName);
 
   /*
    * TODO: For 8.0, replace the logic in this handler with one call to `GET /_snapshot/_all/_all`
@@ -45,7 +50,7 @@ export const getAllHandler: RouterRouteHandler = async (
   const repositoryNames = Object.keys(repositoriesByName);
 
   if (repositoryNames.length === 0) {
-    return { snapshots: [], errors: [], repositories: [] };
+    return { snapshots: [], errors: [], repositories: [], policies };
   }
 
   const snapshots: SnapshotDetails[] = [];
@@ -87,6 +92,7 @@ export const getAllHandler: RouterRouteHandler = async (
 
   return {
     snapshots,
+    policies,
     repositories,
     errors,
   };

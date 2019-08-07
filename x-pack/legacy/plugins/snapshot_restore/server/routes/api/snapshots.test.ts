@@ -55,6 +55,10 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
     const mockRequest = {} as Request;
 
     test('combines snapshots and their repositories returned from ES', async () => {
+      const mockSnapshotGetPolicyEsResponse = {
+        fooPolicy: {},
+      };
+
       const mockSnapshotGetRepositoryEsResponse = {
         fooRepository: {},
         barRepository: {},
@@ -80,6 +84,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
 
       const callWithRequest = jest
         .fn()
+        .mockReturnValueOnce(mockSnapshotGetPolicyEsResponse)
         .mockReturnValueOnce(mockSnapshotGetRepositoryEsResponse)
         .mockReturnValueOnce(mockGetSnapshotsFooResponse)
         .mockReturnValueOnce(mockGetSnapshotsBarResponse);
@@ -87,6 +92,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       const expectedResponse = {
         errors: {},
         repositories: ['fooRepository', 'barRepository'],
+        policies: ['fooPolicy'],
         snapshots: [
           {
             ...defaultSnapshot,
@@ -108,12 +114,17 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
     });
 
     test('returns empty arrays if no snapshots returned from ES', async () => {
+      const mockSnapshotGetPolicyEsResponse = {};
       const mockSnapshotGetRepositoryEsResponse = {};
-      const callWithRequest = jest.fn().mockReturnValue(mockSnapshotGetRepositoryEsResponse);
+      const callWithRequest = jest
+        .fn()
+        .mockReturnValue(mockSnapshotGetPolicyEsResponse)
+        .mockReturnValue(mockSnapshotGetRepositoryEsResponse);
       const expectedResponse = {
         errors: [],
         snapshots: [],
         repositories: [],
+        policies: [],
       };
 
       const response = await getAllHandler(mockRequest, callWithRequest, mockResponseToolkit);

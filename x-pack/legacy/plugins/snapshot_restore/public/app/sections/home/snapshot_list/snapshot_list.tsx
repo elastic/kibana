@@ -19,6 +19,7 @@ import {
   linkToRepositories,
   linkToAddRepository,
   linkToPolicies,
+  linkToAddPolicy,
   linkToSnapshot,
 } from '../../../services/navigation';
 import { uiMetricService } from '../../../services/ui_metric';
@@ -47,7 +48,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   const {
     error,
     isLoading,
-    data: { snapshots = [], repositories = [], errors = {} },
+    data: { snapshots = [], repositories = [], policies = [], errors = {} },
     sendRequest: reload,
   } = useLoadSnapshots();
 
@@ -228,8 +229,8 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsDescription"
-                defaultMessage="You can create a snapshot using Snapshot Lifecycle Policies. Snapshots
-                  can also be created by using the Elasticsearch API. {docLink}"
+                defaultMessage="You can create a snapshot running a Snapshot Lifecycle Policy.
+                  Snapshots can also be created by using {docLink}."
                 values={{
                   docLink: (
                     <EuiLink
@@ -239,21 +240,39 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
                     >
                       <FormattedMessage
                         id="xpack.snapshotRestore.emptyPrompt.noSnapshotsDocLinkText"
-                        defaultMessage="Learn more"
-                      />{' '}
-                      <EuiIcon type="link" />
+                        defaultMessage="the Elasticsearch API"
+                      />
                     </EuiLink>
                   ),
                 }}
               />
             </p>
             <p>
-              <EuiButton href={linkToPolicies()} fill data-test-subj="goToPoliciesButton">
-                <FormattedMessage
-                  id="xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsGoToPoliciesText"
-                  defaultMessage="View policies"
-                />
-              </EuiButton>
+              {policies.length === 0 ? (
+                <EuiButton
+                  href={linkToAddPolicy()}
+                  fill
+                  iconType="plusInCircle"
+                  data-test-subj="addPolicyButton"
+                >
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsAddPolicyText"
+                    defaultMessage="Create a policy"
+                  />
+                </EuiButton>
+              ) : (
+                <EuiButton
+                  href={linkToPolicies()}
+                  fill
+                  iconType="list"
+                  data-test-subj="goToPoliciesButton"
+                >
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsGoToPoliciesText"
+                    defaultMessage="View policies"
+                  />
+                </EuiButton>
+              )}
             </p>
           </Fragment>
         }
