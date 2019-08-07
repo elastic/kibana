@@ -17,6 +17,9 @@
  * under the License.
  */
 
-export { createAutoJUnitReporter } from './auto_junit_reporter';
-export { setupJUnitReportGeneration } from './junit_report_generation';
-export { runMochaCli } from './run_mocha_cli';
+// when the reporter is loaded by mocha in child process it might be before setup_node_env
+require('../../../../src/setup_node_env');
+
+module.exports = require('./auto_junit_reporter').createAutoJUnitReporter({
+  reportName: 'Server Mocha Tests',
+});
