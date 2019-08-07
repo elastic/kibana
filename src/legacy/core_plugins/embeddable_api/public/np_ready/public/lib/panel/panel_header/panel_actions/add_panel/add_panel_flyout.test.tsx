@@ -19,13 +19,6 @@
 
 import * as React from 'react';
 import { AddPanelFlyout } from './add_panel_flyout';
-import { Container } from '../../../..';
-// @ts-ignore
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { skip } from 'rxjs/operators';
-import * as Rx from 'rxjs';
-import { EmbeddableFactory } from '../../../../embeddables';
 import { GetEmbeddableFactory } from '../../../../types';
 import {
   ContactCardEmbeddableFactory,
@@ -33,69 +26,98 @@ import {
 } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
 import { ContactCardEmbeddable } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable';
+import { ContainerInput } from '../../../../containers';
+import { mount } from 'enzyme';
 
-const onClose = jest.fn();
-let container: Container;
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
 
-function createHelloWorldContainer(input = { id: '123', panels: {} }) {
-  const __embeddableFactories = new Map<string, EmbeddableFactory>();
-  __embeddableFactories.set(
-    CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory({}, (() => null) as any, {} as any)
+// eslint-disable-next-line
+import { coreMock } from '../../../../../../../../../../../core/public/mocks';
+
+test('createNewEmbeddable() add embeddable to container', async () => {
+  const core = coreMock.createStart();
+  const { overlays } = core;
+  const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
+    {},
+    (() => null) as any,
+    overlays
   );
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
-  return new HelloWorldContainer(input, { getEmbeddableFactory } as any);
-}
-
-beforeEach(() => {
-  container = createHelloWorldContainer();
-});
-
-// TODO: Adapt this for NP.
-xtest('create new calls factory.adds a panel to the container', async done => {
-  const component = mountWithIntl(
+  contactCardEmbeddableFactory.getExplicitInput = () =>
+    ({
+      firstName: 'foo',
+      lastName: 'bar',
+    } as any);
+  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => contactCardEmbeddableFactory;
+  const input: ContainerInput<{ firstName: string; lastName: string }> = {
+    id: '1',
+    panels: {},
+  };
+  const container = new HelloWorldContainer(input, { getEmbeddableFactory } as any);
+  const onClose = jest.fn();
+  const component = mount<AddPanelFlyout>(
     <AddPanelFlyout
       container={container}
       onClose={onClose}
-      getFactory={() => undefined}
-      getAllFactories={() => [] as any}
-      notifications={{} as any}
+      getFactory={getEmbeddableFactory}
+      getAllFactories={() => new Set<any>([contactCardEmbeddableFactory]).values()}
+      notifications={core.notifications}
       SavedObjectFinder={() => null}
     />
   );
 
   expect(Object.values(container.getInput().panels).length).toBe(0);
+  component.instance().createNewEmbeddable(CONTACT_CARD_EMBEDDABLE);
+  await new Promise(r => setTimeout(r, 1));
 
-  const subscription = Rx.merge(container.getOutput$(), container.getInput$())
-    .pipe(skip(2))
-    .subscribe(() => {
-      if (container.getInput().panels) {
-        const ids = Object.keys(container.getInput().panels);
-        expect(ids.length).toBe(1);
-        const embeddableId = ids[0];
+  const ids = Object.keys(container.getInput().panels);
+  const embeddableId = ids[0];
+  const child = container.getChild<ContactCardEmbeddable>(embeddableId);
 
-        if (container.getOutput().embeddableLoaded[embeddableId]) {
-          const child = container.getChild<ContactCardEmbeddable>(embeddableId);
-          expect(child).toBeDefined();
-          expect(child.getInput().firstName).toBe('Dany');
-          expect(child.getInput().lastName).toBe('Targaryan');
-          subscription.unsubscribe();
-          done();
-        }
-      }
-    });
+  expect(child.getInput()).toMatchObject({
+    firstName: 'foo',
+    lastName: 'bar',
+  });
+});
+
+test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()', async () => {
+  const core = coreMock.createStart();
+  const { overlays } = core;
+  const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
+    {},
+    (() => null) as any,
+    overlays
+  );
+  contactCardEmbeddableFactory.getExplicitInput = () =>
+    ({
+      firstName: 'foo',
+      lastName: 'bar',
+    } as any);
+  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => contactCardEmbeddableFactory;
+  const input: ContainerInput<{ firstName: string; lastName: string }> = {
+    id: '1',
+    panels: {},
+  };
+  const container = new HelloWorldContainer(input, { getEmbeddableFactory } as any);
+  const onClose = jest.fn();
+  const component = mount<AddPanelFlyout>(
+    <AddPanelFlyout
+      container={container}
+      onClose={onClose}
+      getFactory={getEmbeddableFactory}
+      getAllFactories={() => new Set<any>([contactCardEmbeddableFactory]).values()}
+      notifications={core.notifications}
+      SavedObjectFinder={() => null}
+    />
+  );
+
+  const spy = jest.fn();
+  component.instance().createNewEmbeddable = spy;
+
+  expect(spy).toHaveBeenCalledTimes(0);
 
   findTestSubject(component, 'createNew').simulate('click');
   findTestSubject(component, `createNew-${CONTACT_CARD_EMBEDDABLE}`).simulate('click');
 
-  await nextTick();
-
-  // TODO: This needs to use NP primitives.
-  /*
-  const overlayMock = coreStartMock.overlays;
-  ((overlayMock.openModal.mock.calls[0][0] as any).props as ContactCardInitializerProps).onCreate({
-    firstName: 'Dany',
-    lastName: 'Targaryan',
-  });
-  */
+  expect(spy).toHaveBeenCalledTimes(1);
 });

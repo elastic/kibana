@@ -97,7 +97,7 @@ export class AddPanelFlyout extends React.Component<Props> {
   };
 
   private getSelectCreateNewOptions() {
-    return [
+    const list = [
       {
         value: 'createNew',
         inputDisplay: (
@@ -129,6 +129,8 @@ export class AddPanelFlyout extends React.Component<Props> {
           'data-test-subj': `createNew-${factory.type}`,
         })),
     ];
+
+    return list;
   }
 
   public render() {
