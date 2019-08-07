@@ -15,7 +15,12 @@ import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { documentationLinksService } from '../../../services/documentation';
 import { useLoadSnapshots } from '../../../services/http';
-import { linkToRepositories } from '../../../services/navigation';
+import {
+  linkToRepositories,
+  linkToAddRepository,
+  linkToPolicies,
+  linkToSnapshot,
+} from '../../../services/navigation';
 import { uiMetricService } from '../../../services/ui_metric';
 
 import { SnapshotDetails } from './snapshot_details';
@@ -50,11 +55,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     repositoryNameToOpen: string,
     snapshotIdToOpen: string
   ): string => {
-    return history.createHref({
-      pathname: `${BASE_PATH}/snapshots/${encodeURIComponent(
-        repositoryNameToOpen
-      )}/${encodeURIComponent(snapshotIdToOpen)}`,
-    });
+    return linkToSnapshot(repositoryNameToOpen, snapshotIdToOpen);
   };
 
   const closeSnapshotDetails = () => {
@@ -194,9 +195,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             </p>
             <p>
               <EuiButton
-                href={history.createHref({
-                  pathname: `${BASE_PATH}/add_repository`,
-                })}
+                href={linkToAddRepository()}
                 fill
                 iconType="plusInCircle"
                 data-test-subj="registerRepositoryButton"
@@ -229,21 +228,32 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsDescription"
-                defaultMessage="Create a snapshot using the Elasticsearch API."
+                defaultMessage="You can create a snapshot using Snapshot Lifecycle Policies. Snapshots
+                  can also be created by using the Elasticsearch API. {docLink}"
+                values={{
+                  docLink: (
+                    <EuiLink
+                      href={documentationLinksService.getSnapshotDocUrl()}
+                      target="_blank"
+                      data-test-subj="documentationLink"
+                    >
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.emptyPrompt.noSnapshotsDocLinkText"
+                        defaultMessage="Learn more"
+                      />{' '}
+                      <EuiIcon type="link" />
+                    </EuiLink>
+                  ),
+                }}
               />
             </p>
             <p>
-              <EuiLink
-                href={documentationLinksService.getSnapshotDocUrl()}
-                target="_blank"
-                data-test-subj="documentationLink"
-              >
+              <EuiButton href={linkToPolicies()} fill data-test-subj="goToPoliciesButton">
                 <FormattedMessage
-                  id="xpack.snapshotRestore.emptyPrompt.noSnapshotsDocLinkText"
-                  defaultMessage="Learn how to create a snapshot"
-                />{' '}
-                <EuiIcon type="link" />
-              </EuiLink>
+                  id="xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsGoToPoliciesText"
+                  defaultMessage="View policies"
+                />
+              </EuiButton>
             </p>
           </Fragment>
         }

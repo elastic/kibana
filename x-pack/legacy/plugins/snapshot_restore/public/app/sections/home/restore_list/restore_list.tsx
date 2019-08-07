@@ -17,6 +17,7 @@ import {
   EuiLoadingSpinner,
   EuiLink,
 } from '@elastic/eui';
+import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common/constants';
 import { SectionError, SectionLoading } from '../../../components';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
@@ -207,7 +208,7 @@ export const RestoreList: React.FunctionComponent = () => {
   }
 
   return (
-    <WithPrivileges privileges="index.*">
+    <WithPrivileges privileges={APP_RESTORE_INDEX_PRIVILEGES.map(name => `index.${name}`)}>
       {({ hasPrivileges, privilegesMissing }) =>
         hasPrivileges ? (
           <section data-test-subj="restoreList">{content}</section>

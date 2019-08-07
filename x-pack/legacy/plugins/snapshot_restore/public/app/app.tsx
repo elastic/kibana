@@ -8,6 +8,7 @@ import React, { useContext } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { EuiPageContent } from '@elastic/eui';
 
+import { APP_REQUIRED_CLUSTER_PRIVILEGES } from '../../common/constants';
 import { SectionLoading, SectionError } from './components';
 import { BASE_PATH, DEFAULT_SECTION, Section } from './constants';
 import {
@@ -43,7 +44,7 @@ export const App: React.FunctionComponent = () => {
       error={apiError}
     />
   ) : (
-    <WithPrivileges privileges="cluster.*">
+    <WithPrivileges privileges={APP_REQUIRED_CLUSTER_PRIVILEGES.map(name => `cluster.${name}`)}>
       {({ isLoading, hasPrivileges, privilegesMissing }) =>
         isLoading ? (
           <SectionLoading>

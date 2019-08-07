@@ -8,6 +8,7 @@ import { wrapCustomError } from '../../../../../server/lib/create_router/error_w
 import {
   APP_REQUIRED_CLUSTER_PRIVILEGES,
   APP_RESTORE_INDEX_PRIVILEGES,
+  APP_SLM_CLUSTER_PRIVILEGES,
 } from '../../../common/constants';
 // NOTE: now we import it from our "public" folder, but when the Authorisation lib
 // will move to the "es_ui_shared" plugin, it will be imported from its "static" folder
@@ -65,7 +66,7 @@ export const getPrivilegesHandler: RouterRouteHandler = async (
       path: '/_security/user/_has_privileges',
       method: 'POST',
       body: {
-        cluster: APP_REQUIRED_CLUSTER_PRIVILEGES,
+        cluster: [...APP_REQUIRED_CLUSTER_PRIVILEGES, ...APP_SLM_CLUSTER_PRIVILEGES],
       },
     }
   );

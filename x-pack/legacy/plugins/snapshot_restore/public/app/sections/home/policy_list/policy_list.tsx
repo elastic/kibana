@@ -9,12 +9,14 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { SlmPolicy } from '../../../../../common/types';
+import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';
 import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadPolicies } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
-import { linkToAddPolicy } from '../../../services/navigation';
+import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
+import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
 
 import { PolicyDetails } from './policy_details';
 import { PolicyTable } from './policy_table';
@@ -45,9 +47,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
   } = useLoadPolicies();
 
   const openPolicyDetailsUrl = (newPolicyName: SlmPolicy['name']): string => {
-    return history.createHref({
-      pathname: `${BASE_PATH}/policies/${newPolicyName}`,
-    });
+    return linkToPolicy(newPolicyName);
   };
 
   const closePolicyDetails = () => {
@@ -73,7 +73,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     trackUiMetric(UIM_POLICY_LIST_LOAD);
   }, []);
 
-  let content;
+  let content: JSX.Element;
 
   if (isLoading) {
     content = (
@@ -147,16 +147,42 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
   }
 
   return (
-    <section data-test-subj="policyList">
-      {policyName ? (
-        <PolicyDetails
-          policyName={policyName}
-          onClose={closePolicyDetails}
-          onPolicyDeleted={onPolicyDeleted}
-          onPolicyExecuted={onPolicyExecuted}
-        />
-      ) : null}
-      {content}
-    </section>
+    <WithPrivileges privileges={APP_SLM_CLUSTER_PRIVILEGES.map(name => `cluster.${name}`)}>
+      {({ hasPrivileges, privilegesMissing }) =>
+        hasPrivileges ? (
+          <section data-test-subj="policyList">
+            {policyName ? (
+              <PolicyDetails
+                policyName={policyName}
+                onClose={closePolicyDetails}
+                onPolicyDeleted={onPolicyDeleted}
+                onPolicyExecuted={onPolicyExecuted}
+              />
+            ) : null}
+            {content}
+          </section>
+        ) : (
+          <NotAuthorizedSection
+            title={
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyList.deniedPrivilegeTitle"
+                defaultMessage="You're missing cluster privileges"
+              />
+            }
+            message={
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyList.deniedPrivilegeDescription"
+                defaultMessage="To manage Snapshot Lifecycle Policies, you must have {privilegesCount,
+                  plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
+                values={{
+                  missingPrivileges: privilegesMissing.cluster!.join(', '),
+                  privilegesCount: privilegesMissing.cluster!.length,
+                }}
+              />
+            }
+          />
+        )
+      }
+    </WithPrivileges>
   );
 };
