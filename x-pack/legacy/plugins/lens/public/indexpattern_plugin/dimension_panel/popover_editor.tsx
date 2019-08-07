@@ -127,7 +127,9 @@ export function PopoverEditor(props: PopoverEditorProps) {
             ),
             'lnsConfigPanel__operation--incompatible': !compatibleWithCurrentField,
           }),
-          'data-test-subj': `lns-indexPatternDimension-${operationType}`,
+          'data-test-subj': `lns-indexPatternDimension${
+            compatibleWithCurrentField ? '' : 'Incompatible'
+          }-${operationType}`,
           onClick() {
             if (!selectedColumn) {
               const possibleFields = fieldByOperation[operationType] || [];

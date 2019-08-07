@@ -70,7 +70,80 @@ describe('terms', () => {
     });
   });
 
+  describe('getPossibleOperationsForField', () => {
+    it('should return operation with the right type', () => {
+      expect(
+        termsOperation.getPossibleOperationsForField({
+          aggregatable: true,
+          searchable: true,
+          name: 'test',
+          type: 'string',
+          aggregationRestrictions: {
+            terms: {
+              agg: 'terms',
+            },
+          },
+        })
+      ).toEqual([
+        {
+          dataType: 'string',
+          isBucketed: true,
+        },
+      ]);
+
+      expect(
+        termsOperation.getPossibleOperationsForField({
+          aggregatable: true,
+          searchable: true,
+          name: 'test',
+          type: 'boolean',
+        })
+      ).toEqual([
+        {
+          dataType: 'boolean',
+          isBucketed: true,
+        },
+      ]);
+    });
+
+    it('should not return an operation if restrictions prevent terms', () => {
+      expect(
+        termsOperation.getPossibleOperationsForField({
+          aggregatable: false,
+          searchable: true,
+          name: 'test',
+          type: 'string',
+        })
+      ).toEqual([]);
+
+      expect(
+        termsOperation.getPossibleOperationsForField({
+          aggregatable: true,
+          aggregationRestrictions: {},
+          searchable: true,
+          name: 'test',
+          type: 'string',
+        })
+      ).toEqual([]);
+    });
+  });
+
   describe('buildColumn', () => {
+    it('should use type from the passed field', () => {
+      const termsColumn = termsOperation.buildColumn({
+        layerId: 'first',
+        suggestedPriority: undefined,
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+        },
+        columns: {},
+      });
+      expect(termsColumn.dataType).toEqual('boolean');
+    });
+
     it('should use existing metric column as order column', () => {
       const termsColumn = termsOperation.buildColumn({
         layerId: 'first',
@@ -84,6 +157,12 @@ describe('terms', () => {
             // Private
             operationType: 'count',
           },
+        },
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
         },
       });
       expect(termsColumn.params).toEqual(
