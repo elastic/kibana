@@ -23,14 +23,13 @@ import { i18n } from '@kbn/i18n';
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { SwitchOption } from './switch';
 import { SelectOption } from './select';
-import { CommonVislibParams } from '../types';
 
 export interface BasicOptionsParams {
   addTooltip: boolean;
   legendPosition: string;
 }
 
-function BasicOptions<VisParams extends BasicOptionsParams = CommonVislibParams>({
+function BasicOptions<VisParams extends BasicOptionsParams>({
   stateParams,
   setValue,
   vis,
