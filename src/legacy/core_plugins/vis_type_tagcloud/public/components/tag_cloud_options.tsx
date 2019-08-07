@@ -25,11 +25,12 @@ import { ValidatedDualRange } from 'ui/validated_range';
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { SelectOption } from '../../../kbn_vislib_vis_types/public/controls/select';
 import { SwitchOption } from '../../../kbn_vislib_vis_types/public/controls/switch';
+import { TagCloudVisParams } from '../types';
 
-function TagCloudOptions({ stateParams, setValue, vis }: VisOptionsProps) {
-  const handleFontSizeChange = ([minFontSize, maxFontSize]: string[]) => {
-    setValue('minFontSize', minFontSize);
-    setValue('maxFontSize', maxFontSize);
+function TagCloudOptions({ stateParams, setValue, vis }: VisOptionsProps<TagCloudVisParams>) {
+  const handleFontSizeChange = ([minFontSize, maxFontSize]: [string | number, string | number]) => {
+    setValue('minFontSize', Number(minFontSize));
+    setValue('maxFontSize', Number(maxFontSize));
   };
   const fontSizeRangeLabel = i18n.translate('visTypeTagCloud.visParams.fontSizeLabel', {
     defaultMessage: 'Font size range in pixels',
