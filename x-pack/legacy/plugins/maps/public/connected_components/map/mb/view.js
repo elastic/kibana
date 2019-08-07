@@ -354,15 +354,21 @@ export class MBMapContainer extends React.Component {
   async _createMbMapInstance() {
     const initialView = this.props.goto ? this.props.goto.center : null;
     return new Promise((resolve) => {
+
+      const mbStyle = {
+        version: 8,
+        sources: {},
+        layers: []
+      };
+      const glyphUrl = getGlyphUrl();
+      if (glyphUrl) {
+        mbStyle.glyphs = glyphUrl;
+      }
+
       const options = {
         attributionControl: false,
         container: this.refs.mapContainer,
-        style: {
-          version: 8,
-          sources: {},
-          layers: [],
-          glyphs: getGlyphUrl()
-        },
+        style: mbStyle,
         scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false)
       };
