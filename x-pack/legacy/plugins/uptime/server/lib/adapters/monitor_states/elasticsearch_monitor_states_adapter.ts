@@ -17,7 +17,9 @@ import {
   SummaryHistogram,
   Check,
   StatesIndexStatus,
-  SearchDirection,
+  CursorDirection,
+  SortOrder,
+  CursorPagination,
 } from '../../../../common/graphql/types';
 import { INDEX_NAMES, STATES, QUERY } from '../../../../common/constants';
 import { getHistogramInterval, getFilteredQueryAndStatusFilter } from '../../helper';
@@ -28,12 +30,19 @@ const checksSortBy = (check: Check) => [
   get<string>(check, 'monitor.ip'),
 ];
 
+
 export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter {
   constructor(private readonly database: DatabaseAdapter) {
     this.database = database;
   }
 
-  private checkGroupsBody(subQuery: any, size: number, searchAfter: any): any {
+  private checkGroupsBody(
+    subQuery: any,
+    size: number,
+    pagination: CursorPagination,
+  ): any {
+    const composite_order = pagination.cursorDirection === CursorDirection.AFTER ? 'asc' : 'desc';
+
     const body = {
       query: {
         bool: {
@@ -50,11 +59,6 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
           ],
         },
       },
-      sort: [
-        {
-          '@timestamp': 'desc',
-        },
-      ],
       size: 0,
       aggs: {
         monitors: {
@@ -75,6 +79,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                 monitor_id: {
                   terms: {
                     field: 'monitor.id',
+                    order: composite_order,
                   },
                 },
               },
@@ -83,6 +88,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                   terms: {
                     field: 'observer.geo.name',
                     missing_bucket: true,
+                    order: composite_order,
                   },
                 },
               },
@@ -106,37 +112,63 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         },
       },
     };
-    if (searchAfter) {
-      set(body, 'aggs.monitors.composite.after', searchAfter);
+    if (pagination.cursorKey) {
+      set(body, 'aggs.monitors.composite.after', pagination.cursorKey);
     }
-    return body
- }
+    return body;
+  }
 
- private async execCheckGroupsQuery(request: any, query: any, size: number, searchAfter?: any) {
-    const body = this.checkGroupsBody(query, size, searchAfter);
-    if (searchAfter) {
-      set(body, 'aggs.monitors.composite.after', searchAfter);
-    }
+  private async execCheckGroupsQuery(
+    request: any,
+    query: any,
+    size: number,
+    pagination: CursorPagination
+  ) {
+    const body = this.checkGroupsBody(query, size, pagination);
+
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body,
     };
+
     return await this.database.search(request, params);
- }
+  }
+
+  private searchSortAligned(pagination: CursorPagination): boolean {
+    if (pagination.cursorDirection === CursorDirection.AFTER) {
+      return pagination.sortOrder === SortOrder.ASC;
+    } else {
+      return pagination.sortOrder === SortOrder.DESC;
+    }
+  }
+
+  private reorderResults<T>(results: T[], pagination: CursorPagination): T[] {
+    if (this.searchSortAligned(pagination)) {
+      return results;
+    }
+
+    results.reverse();
+    return results;
+  }
 
   // This query returns the most recent check groups for a given
   // monitor ID.
   private async queryCheckGroupsPage(
     request: any,
     query: any,
-    searchAfter?: any,
+    pagination: CursorPagination,
     size: number = 50
   ): Promise<MonitorStatesCheckGroupsResult> {
     const checkGroupsById = new Map<string, string[]>();
 
-    const result = this.execCheckGroupsQuery(request, query, size, searchAfter)
+    const result = this.execCheckGroupsQuery(
+      request,
+      query,
+      size,
+      pagination
+    );
 
-    searchAfter = get<any | null>(result, 'aggregations.monitors.after_key', null);
+    const afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
     get<any>(result, 'aggregations.monitors.buckets', []).forEach((bucket: any) => {
       const id = get<string>(bucket, 'key.monitor_id');
       const checkGroup = get<string>(bucket, 'top.hits.hits[0]._source.monitor.check_group');
@@ -147,20 +179,42 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         checkGroupsById.set(id, [...value, checkGroup]);
       }
     });
+
     return {
-      checkGroups: flatten(Array.from(checkGroupsById.values())),
-      searchAfter,
+      checkGroups: this.reorderResults(flatten(Array.from(checkGroupsById.values())), pagination),
     };
+  }
+
+  private async enrichAndCollapse(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    pagination: CursorPagination,
+    filters?: string | null,
+  ) {
+    const monitors: any[] = [];
+    do {
+      const queryRes: LegacyMonitorStatesQueryResult = await this.enrichAndCollapsePage(
+        request,
+        dateRangeStart,
+        dateRangeEnd,
+        pagination,
+        filters,
+      );
+      const { result, statusFilter } = queryRes;
+
+      monitors.push(...this.getMonitorBuckets(result, statusFilter));
+    } while (pagination.cursorKey !== null && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
+
+    return monitors;
   }
 
   private async enrichAndCollapsePage(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
+    pagination: CursorPagination,
     filters?: string | null,
-    searchKey?: string | null,
-    searchDirection: SearchDirection | null,
-    sortDirection: SortDirection | null,
     size: number = 10
   ): Promise<LegacyMonitorStatesQueryResult> {
     size = Math.min(size, QUERY.DEFAULT_AGGS_CAP);
@@ -176,19 +230,14 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     // over large numbers of documents.
     // It only really needs to run over the latest complete check group for each
     // agent.
-    const { checkGroups, searchAfter: pageSearchAfter } = await this.queryCheckGroupsPage(
-      request,
-      query,
-      searchAfter,
-      size
-    );
+    const queryRes = await this.queryCheckGroupsPage(request, query, pagination, size);
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         query: {
           bool: {
             filter: [
-              { terms: { 'monitor.check_group': checkGroups } },
+              { terms: { 'monitor.check_group': queryRes.checkGroups } },
               // Even though this work is already done when calculating the groups
               // this helps the planner
               query,
@@ -381,7 +430,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     };
 
     const result = await this.database.search(request, params);
-    return { searchAfter: pageSearchAfter, result, statusFilter };
+    return { result, statusFilter };
   }
 
   private getMonitorBuckets(queryResult: any, statusFilter?: any) {
@@ -394,49 +443,30 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     return monitors;
   }
 
-  private async enrichAndCollapse(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null,
-    searchFrom: String | null,
-    searchDirection: SearchDirection,
-  ) {}
-
   public async getMonitorStates(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
+    pagination: CursorPagination,
     filters?: string | null,
-    searchAfter?: string | null,
-    searchBefore?: string | null,
   ): Promise<GetMonitorStatesResult> {
-    const monitors: any[] = [];
-    let afterKey: any | null = searchAfter ? JSON.parse(searchAfter) : null;
-
-    do {
-       const queryRes: LegacyMonitorStatesQueryResult = await this.enrichAndCollapsePage(
-        request,
-        dateRangeStart,
-        dateRangeEnd,
-        filters,
-        afterKey
-      );
-      const { result, statusFilter } = queryRes;
-
-      monitors.push(...this.getMonitorBuckets(result, statusFilter));
-
-    } while (afterKey !== null && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
+    const monitors = await this.enrichAndCollapse(
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      pagination,
+      filters,
+    );
 
     if (monitors.length == 0) {
-      return {afterKey: null, summaries: []}
+      return { summaries: [] };
     }
 
     const monitorIds: string[] = [];
 
     // Convert the results to MonitorSummary objects and also include the last location value found
-    // this value will be used later for calculating the correct afterKey. 
-    type SummaryWithLastLocation = (MonitorSummary & {lastLocation: string});
+    // this value will be used later for calculating the correct afterKey.
+    type SummaryWithLastLocation = MonitorSummary & { lastLocation: string };
 
     const summaries: SummaryWithLastLocation[] = monitors.map((monitor: any) => {
       const monitorId = get<string>(monitor, 'key.monitor_id');
@@ -456,7 +486,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       } else {
         state.checks = [];
       }
-      const lastCheck = state.checks[state.checks.length-1];
+      const lastCheck = state.checks[state.checks.length - 1];
       return {
         monitor_id: monitorId,
         lastLocation: get(lastCheck, 'observer.geo.name'),
@@ -470,15 +500,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       monitorIds
     );
 
-    // Here we manually calculate the afterKey we'll be returning to the caller.
-    // We can't use the ES one because it's very likely it will return the wrong results.
-    // Since we trim the actual results returned that after key is after those trimmed results.
-    // Calculating it is easy luckily.
-    const lastSummary = summaries[summaries.length-1];
-    afterKey = lastSummary ? {monitor_id: lastSummary.monitor_id, location: lastSummary.lastLocation} : null
-
-    return {
-      afterKey: JSON.stringify(afterKey),
+   return {
       summaries: summaries.map(summary => ({
         ...summary,
         histogram: histogramMap[summary.monitor_id],

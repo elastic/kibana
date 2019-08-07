@@ -7,14 +7,12 @@
 import gql from 'graphql-tag';
 
 export const monitorStatesQueryString = `
-query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $filters: String, $searchFrom: String, $searchDirection: SearchDirection, $sortDirection: SortDirection) {
+query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $pagination: CursorPagination, $filters: String) {
   monitorStates: getMonitorStates(
     dateRangeStart: $dateRangeStart
     dateRangeEnd: $dateRangeEnd
+    pagination: $cursorPagination
     filters: $filters
-    searchFrom: $searchFrom
-    searchDirection: $searchDirection
-    sortDirection: $sortDirection
   ) {
     searchAfter
     searchBefore

@@ -4,31 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MonitorSummary, StatesIndexStatus } from '../../../../common/graphql/types';
+import { MonitorSummary, StatesIndexStatus, CursorPagination } from '../../../../common/graphql/types';
 
 export interface UMMonitorStatesAdapter {
   getMonitorStates(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
+    pagination?: CursorPagination,
     filters?: string | null,
-    searchAfter?: string | null
   ): Promise<GetMonitorStatesResult>;
   statesIndexExists(request: any): Promise<StatesIndexStatus>;
 }
 
 export interface GetMonitorStatesResult {
-  afterKey: string | null,
   summaries: MonitorSummary[],
 }
 
 export interface LegacyMonitorStatesQueryResult {
   result: any;
   statusFilter?: any;
-  searchAfter: any | null;
 }
 
 export interface MonitorStatesCheckGroupsResult {
   checkGroups: string[];
-  searchAfter: any | null;
 }

@@ -5,7 +5,7 @@
  */
 
 import { UMMonitorStatesAdapter, GetMonitorStatesResult } from '../adapters/monitor_states';
-import { StatesIndexStatus } from '../../../common/graphql/types';
+import { StatesIndexStatus, CursorPagination } from '../../../common/graphql/types';
 
 export class UMMonitorStatesDomain {
   constructor(private readonly adapter: UMMonitorStatesAdapter, libs: {}) {
@@ -20,10 +20,9 @@ export class UMMonitorStatesDomain {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null,
-    searchAfter?: string | null
+    pagination: CursorPagination,
+    filters?: string | null
   ): Promise<GetMonitorStatesResult> {
-    console.log("ADAPTER SA", searchAfter);
-    return this.adapter.getMonitorStates(request, dateRangeStart, dateRangeEnd, filters, searchAfter);
+    return this.adapter.getMonitorStates(request, dateRangeStart, dateRangeEnd, pagination, filters);
   }
 }

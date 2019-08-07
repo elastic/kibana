@@ -676,6 +676,24 @@ export interface MonitorSummaryUrl {
   username?: string | null;
 }
 
+export interface MonitorCursorKey {
+  monitor_id: string;
+
+  location?: string | null;
+}
+
+// ====================================================
+// InputTypes
+// ====================================================
+
+export interface CursorPagination {
+  cursorKey?: string | null;
+
+  cursorDirection?: CursorDirection | null;
+
+  sortOrder?: SortOrder | null;
+}
+
 // ====================================================
 // Arguments
 // ====================================================
@@ -758,25 +776,21 @@ export interface GetMonitorStatesQueryArgs {
 
   dateRangeEnd: string;
 
+  pagination?: CursorPagination | null;
+
   filters?: string | null;
-
-  searchFrom?: string | null;
-
-  searchDirection?: SearchDirection | null;
-
-  sortDirection?: SortDirection | null;
 }
 
 // ====================================================
 // Enums
 // ====================================================
 
-export enum SearchDirection {
+export enum CursorDirection {
   AFTER = 'AFTER',
   BEFORE = 'BEFORE',
 }
 
-export enum SortDirection {
+export enum SortOrder {
   ASC = 'ASC',
   DESC = 'DESC',
 }

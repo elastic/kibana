@@ -421,27 +421,15 @@
                 "defaultValue": null
               },
               {
+                "name": "pagination",
+                "description": "",
+                "type": { "kind": "INPUT_OBJECT", "name": "CursorPagination", "ofType": null },
+                "defaultValue": null
+              },
+              {
                 "name": "filters",
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-                "defaultValue": null
-              },
-              {
-                "name": "searchFrom",
-                "description": "",
-                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-                "defaultValue": null
-              },
-              {
-                "name": "searchDirection",
-                "description": "",
-                "type": { "kind": "ENUM", "name": "SearchDirection", "ofType": null },
-                "defaultValue": null
-              },
-              {
-                "name": "sortDirection",
-                "description": "",
-                "type": { "kind": "ENUM", "name": "SortDirection", "ofType": null },
                 "defaultValue": null
               }
             ],
@@ -2676,8 +2664,37 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "CursorPagination",
+        "description": "",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "cursorKey",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "cursorDirection",
+            "description": "",
+            "type": { "kind": "ENUM", "name": "CursorDirection", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "sortOrder",
+            "description": "",
+            "type": { "kind": "ENUM", "name": "SortOrder", "ofType": null },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "ENUM",
-        "name": "SearchDirection",
+        "name": "CursorDirection",
         "description": "",
         "fields": null,
         "inputFields": null,
@@ -2690,7 +2707,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "SortDirection",
+        "name": "SortOrder",
         "description": "",
         "fields": null,
         "inputFields": null,
@@ -4205,6 +4222,37 @@
           },
           {
             "name": "username",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "MonitorCursorKey",
+        "description": "",
+        "fields": [
+          {
+            "name": "monitor_id",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "location",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
