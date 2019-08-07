@@ -49,9 +49,7 @@ export const useLogEntryHighlights = (
             filterQuery,
             highlights: [
               {
-                query: JSON.stringify({
-                  multi_match: { query: highlightTerms[0], type: 'phrase', lenient: true },
-                }),
+                query: highlightTerms[0],
                 countBefore: 1,
                 countAfter: 1,
               },

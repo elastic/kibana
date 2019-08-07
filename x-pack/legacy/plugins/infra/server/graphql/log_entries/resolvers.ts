@@ -6,11 +6,9 @@
 
 import { failure } from 'io-ts/lib/PathReporter';
 
-import { JsonObject } from '../../../common/typed_json';
 import {
   InfraLogEntryColumn,
   InfraLogEntryFieldColumn,
-  InfraLogEntryHighlightInput,
   InfraLogEntryMessageColumn,
   InfraLogEntryTimestampColumn,
   InfraLogMessageConstantSegment,
@@ -136,7 +134,7 @@ export const createLogEntriesResolvers = (libs: {
         source.id,
         args.startKey,
         args.endKey,
-        parseHighlightInputs(args.highlights),
+        args.highlights.filter(highlightInput => !!highlightInput.query),
         parseFilterQuery(args.filterQuery)
       );
 
@@ -173,7 +171,7 @@ export const createLogEntriesResolvers = (libs: {
         args.start,
         args.end,
         args.bucketSize,
-        args.highlightQueries.map(parseFilterQuery).filter(isDefined),
+        args.highlightQueries.filter(highlightQuery => !!highlightQuery),
         parseFilterQuery(args.filterQuery)
       );
 
@@ -240,26 +238,3 @@ const isConstantSegment = (
 
 const isFieldSegment = (segment: InfraLogMessageSegment): segment is InfraLogMessageFieldSegment =>
   'field' in segment && 'value' in segment && 'highlights' in segment;
-
-const isDefined = <Value>(value?: Value): value is Value => typeof value !== 'undefined';
-
-const parseHighlightInputs = (highlightInputs: InfraLogEntryHighlightInput[]) =>
-  highlightInputs
-    ? highlightInputs.reduce<Array<{ query: JsonObject; countBefore: number; countAfter: number }>>(
-        (parsedHighlightInputs, highlightInput) => {
-          const parsedQuery = parseFilterQuery(highlightInput.query);
-          if (parsedQuery) {
-            return [
-              ...parsedHighlightInputs,
-              {
-                ...highlightInput,
-                query: parsedQuery,
-              },
-            ];
-          } else {
-            return parsedHighlightInputs;
-          }
-        },
-        []
-      )
-    : [];

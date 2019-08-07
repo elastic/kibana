@@ -134,7 +134,7 @@ export class InfraLogEntriesDomain {
     startKey: TimeKey,
     endKey: TimeKey,
     highlights: Array<{
-      query: JsonObject;
+      query: string;
       countBefore: number;
       countAfter: number;
     }>,
@@ -148,13 +148,14 @@ export class InfraLogEntriesDomain {
 
     const documentSets = await Promise.all(
       highlights.map(async highlight => {
+        const highlightQuery = createHighlightQueryDsl(highlight.query, requiredFields);
         const query = filterQuery
           ? {
               bool: {
-                filter: [filterQuery, highlight.query],
+                filter: [filterQuery, highlightQuery],
               },
             }
-          : highlight.query;
+          : highlightQuery;
         const [documentsBefore, documents, documentsAfter] = await Promise.all([
           this.adapter.getAdjacentLogEntryDocuments(
             request,
@@ -164,7 +165,7 @@ export class InfraLogEntriesDomain {
             'desc',
             highlight.countBefore,
             query,
-            highlight.query
+            highlightQuery
           ),
           this.adapter.getContainedLogEntryDocuments(
             request,
@@ -173,7 +174,7 @@ export class InfraLogEntriesDomain {
             startKey,
             endKey,
             query,
-            highlight.query
+            highlightQuery
           ),
           this.adapter.getAdjacentLogEntryDocuments(
             request,
@@ -183,7 +184,7 @@ export class InfraLogEntriesDomain {
             'asc',
             highlight.countAfter,
             query,
-            highlight.query
+            highlightQuery
           ),
         ]);
         const entries = [...documentsBefore, ...documents, ...documentsAfter].map(
@@ -227,12 +228,18 @@ export class InfraLogEntriesDomain {
     start: number,
     end: number,
     bucketSize: number,
-    highlightQueries: LogEntryQuery[],
+    highlightQueries: string[],
     filterQuery?: LogEntryQuery
   ): Promise<InfraLogSummaryHighlightBucket[][]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
+    const messageFormattingRules = compileFormattingRules(
+      getBuiltinRules(configuration.fields.message)
+    );
+    const requiredFields = getRequiredFields(configuration, messageFormattingRules);
+
     const summaries = await Promise.all(
-      highlightQueries.map(async highlightQuery => {
+      highlightQueries.map(async highlightQueryPhrase => {
+        const highlightQuery = createHighlightQueryDsl(highlightQueryPhrase, requiredFields);
         const query = filterQuery
           ? {
               bool: {
@@ -404,3 +411,12 @@ const getRequiredFields = (
 
   return Array.from(new Set([...fieldsFromCustomColumns, ...fieldsFromFormattingRules]));
 };
+
+const createHighlightQueryDsl = (phrase: string, fields: string[]) => ({
+  multi_match: {
+    fields,
+    lenient: true,
+    query: phrase,
+    type: 'phrase',
+  },
+});

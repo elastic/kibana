@@ -48,11 +48,7 @@ export const useLogSummaryHighlights = (
             start,
             end,
             bucketSize,
-            highlightQueries: [
-              JSON.stringify({
-                multi_match: { query: highlightTerms[0], type: 'phrase', lenient: true },
-              }),
-            ],
+            highlightQueries: [highlightTerms[0]],
             filterQuery,
           },
         });
