@@ -20,19 +20,18 @@
 import React from 'react';
 
 import { EuiSwitch, EuiToolTip } from '@elastic/eui';
-import { VisOptionsSetValue } from 'ui/vis/editors/default';
 
-interface SwitchOptionProps {
+interface SwitchOptionProps<ParamName extends string> {
   dataTestSubj?: string;
   label?: string;
   tooltip?: string;
   disabled?: boolean;
   value?: boolean;
-  paramName: string;
-  setValue: VisOptionsSetValue;
+  paramName: ParamName;
+  setValue: (paramName: ParamName, value: boolean) => void;
 }
 
-function SwitchOption({
+function SwitchOption<ParamName extends string>({
   dataTestSubj,
   tooltip,
   label,
@@ -40,7 +39,7 @@ function SwitchOption({
   paramName,
   value = false,
   setValue,
-}: SwitchOptionProps) {
+}: SwitchOptionProps<ParamName>) {
   return (
     <div className="visEditorSidebar__switchOptionFormRow">
       <EuiToolTip content={tooltip} delay="long" position="right">

@@ -17,10 +17,15 @@
  * under the License.
  */
 
-import { Vis } from 'ui/vis';
+import { CommonVislibParams } from './types';
 
-export interface VisOptionsProps<VisParamType = unknown> {
-  stateParams: VisParamType;
-  vis: Vis;
-  setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
+export interface PieVisParams extends CommonVislibParams {
+  addLegend: boolean;
+  isDonut: boolean;
+  labels: {
+    show: boolean;
+    values: boolean;
+    last_level: boolean;
+    truncate: number | null;
+  };
 }
