@@ -17,6 +17,7 @@ import {
   SummaryHistogram,
   Check,
   StatesIndexStatus,
+  SearchDirection,
 } from '../../../../common/graphql/types';
 import { INDEX_NAMES, STATES, QUERY } from '../../../../common/constants';
 import { getHistogramInterval, getFilteredQueryAndStatusFilter } from '../../helper';
@@ -157,8 +158,10 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     dateRangeStart: string,
     dateRangeEnd: string,
     filters?: string | null,
-    searchAfter?: any,
-    size: number = 50
+    searchKey?: string | null,
+    searchDirection: SearchDirection | null,
+    sortDirection: SortDirection | null,
+    size: number = 10
   ): Promise<LegacyMonitorStatesQueryResult> {
     size = Math.min(size, QUERY.DEFAULT_AGGS_CAP);
     const { query, statusFilter } = getFilteredQueryAndStatusFilter(
@@ -173,7 +176,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     // over large numbers of documents.
     // It only really needs to run over the latest complete check group for each
     // agent.
-    const { checkGroups, afterKey } = await this.queryCheckGroupsPage(
+    const { checkGroups, searchAfter: pageSearchAfter } = await this.queryCheckGroupsPage(
       request,
       query,
       searchAfter,
@@ -378,7 +381,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     };
 
     const result = await this.database.search(request, params);
-    return { afterKey, result, statusFilter };
+    return { searchAfter: pageSearchAfter, result, statusFilter };
   }
 
   private getMonitorBuckets(queryResult: any, statusFilter?: any) {
@@ -391,14 +394,14 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     return monitors;
   }
 
-  private async enrichAndCollapsaae(
+  private async enrichAndCollapse(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
     filters?: string | null,
-    searchAfter?: string | null,
-    searchBefore?: string | null,
-  )
+    searchFrom: String | null,
+    searchDirection: SearchDirection,
+  ) {}
 
   public async getMonitorStates(
     request: any,

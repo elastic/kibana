@@ -139,7 +139,9 @@ export const monitorStatesSchema = gql`
   "The primary object returned for monitor states."
   type MonitorSummaryResult {
     "Key used to go to the next page of results"
-    afterKey: String
+    searchAfter: String
+    "Key used to go to the previous page of results"
+    searchBefore: String
     "The objects representing the state of a series of heartbeat monitors."
     summaries: [MonitorSummary!]
     "The number of summaries."
@@ -154,13 +156,25 @@ export const monitorStatesSchema = gql`
     docCount: DocCount
   }
 
+  enum SearchDirection {
+    AFTER
+    BEFORE
+  }
+
+  enum SortDirection {
+    ASC
+    DESC
+  }
+
   extend type Query {
     "Fetches the current state of Uptime monitors for the given parameters."
     getMonitorStates(
       dateRangeStart: String!
       dateRangeEnd: String!
       filters: String
-      searchAfter: String
+      searchFrom: String
+      searchDirection: SearchDirection
+      sortDirection: SortDirection
     ): MonitorSummaryResult
 
     "Fetches details about the uptime index."

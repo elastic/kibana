@@ -427,9 +427,21 @@
                 "defaultValue": null
               },
               {
-                "name": "searchAfter",
+                "name": "searchFrom",
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "searchDirection",
+                "description": "",
+                "type": { "kind": "ENUM", "name": "SearchDirection", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "sortDirection",
+                "description": "",
+                "type": { "kind": "ENUM", "name": "SortDirection", "ofType": null },
                 "defaultValue": null
               }
             ],
@@ -2664,13 +2676,47 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "SearchDirection",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          { "name": "AFTER", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "BEFORE", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "SortDirection",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          { "name": "ASC", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "DESC", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "MonitorSummaryResult",
         "description": "The primary object returned for monitor states.",
         "fields": [
           {
-            "name": "afterKey",
+            "name": "searchAfter",
             "description": "Key used to go to the next page of results",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "searchBefore",
+            "description": "Key used to go to the previous page of results",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,

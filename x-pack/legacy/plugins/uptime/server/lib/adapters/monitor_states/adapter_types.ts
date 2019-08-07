@@ -25,7 +25,7 @@ export interface GetMonitorStatesResult {
 export interface LegacyMonitorStatesQueryResult {
   result: any;
   statusFilter?: any;
-  afterKey: any | null;
+  searchAfter: any | null;
 }
 
 export interface MonitorStatesCheckGroupsResult {
