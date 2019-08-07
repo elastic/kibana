@@ -12,14 +12,8 @@ import {
 
 export const TabJson = ({
   json,
-  endpoint,
 }) => {
-  let jsonString = JSON.stringify(json, null, 2);
-
-  if (endpoint) {
-    // Prepend endpoint.
-    jsonString = `${endpoint}\n${jsonString}`;
-  }
+  const jsonString = JSON.stringify(json, null, 2);
 
   return (
     <EuiCodeEditor

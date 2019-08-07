@@ -18,17 +18,9 @@ import {
   JOB_DETAILS_TAB_TERMS,
   JOB_DETAILS_TAB_HISTOGRAM,
   JOB_DETAILS_TAB_METRICS,
-  JOB_DETAILS_TAB_JSON,
+  JOB_DETAILS_TAB_REQUEST,
   tabToHumanizedMap,
 } from '../../components';
-
-const JOB_DETAILS_TABS = [
-  JOB_DETAILS_TAB_SUMMARY,
-  JOB_DETAILS_TAB_TERMS,
-  JOB_DETAILS_TAB_HISTOGRAM,
-  JOB_DETAILS_TAB_METRICS,
-  JOB_DETAILS_TAB_JSON,
-];
 
 export class StepReviewUi extends Component {
   static propTypes = {
@@ -38,8 +30,16 @@ export class StepReviewUi extends Component {
   constructor(props) {
     super(props);
 
+    this.JOB_DETAILS_TABS = [
+      JOB_DETAILS_TAB_SUMMARY,
+      JOB_DETAILS_TAB_TERMS,
+      JOB_DETAILS_TAB_HISTOGRAM,
+      JOB_DETAILS_TAB_METRICS,
+      JOB_DETAILS_TAB_REQUEST,
+    ];
+
     this.state = {
-      selectedTab: JOB_DETAILS_TABS[0],
+      selectedTab: this.JOB_DETAILS_TABS[0],
     };
   }
 
@@ -55,7 +55,7 @@ export class StepReviewUi extends Component {
 
     const renderedTabs = [];
 
-    JOB_DETAILS_TABS.forEach((tab, index) => {
+    this.JOB_DETAILS_TABS.forEach((tab, index) => {
       if (tab === JOB_DETAILS_TAB_TERMS && !job.terms.length) {
         return;
       }
@@ -115,7 +115,7 @@ export class StepReviewUi extends Component {
         {this.renderTabs()}
 
         <EuiErrorBoundary>
-          <JobDetails job={job} json={json} tab={selectedTab} endpoint={endpoint} />
+          <JobDetails job={job} json={json} endpoint={endpoint} tab={selectedTab} />
         </EuiErrorBoundary>
       </Fragment>
     );
