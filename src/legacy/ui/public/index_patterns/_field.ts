@@ -50,7 +50,7 @@ export interface FieldType {
   scripted?: boolean;
   parent?: string;
   subType?: string;
-  displayName?: string;
+  displayName: string;
   format?: any;
 }
 
@@ -71,7 +71,7 @@ export class Field implements FieldType {
   scripted?: boolean;
   parent?: string;
   subType?: string;
-  displayName?: string;
+  displayName: string;
   format: any;
   routes: Record<string, string> = {
     edit: '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}',
@@ -157,6 +157,7 @@ export class Field implements FieldType {
 
     // computed values
     obj.comp('indexPattern', indexPattern);
+    this.displayName = '';
     obj.comp('displayName', shortDotsEnable ? shortenDottedString(spec.name) : spec.name);
     this.$$spec = spec;
     obj.comp('$$spec', spec);
