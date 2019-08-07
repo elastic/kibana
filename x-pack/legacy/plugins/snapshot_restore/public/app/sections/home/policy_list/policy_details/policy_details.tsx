@@ -15,6 +15,7 @@ import {
   EuiTitle,
   EuiTabs,
   EuiTab,
+  EuiButton,
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
@@ -26,12 +27,19 @@ import {
 import { useLoadPolicy } from '../../../../services/http';
 import { uiMetricService } from '../../../../services/ui_metric';
 
-import { SectionError, SectionLoading } from '../../../../components';
+import {
+  SectionError,
+  SectionLoading,
+  PolicyExecuteProvider,
+  PolicyDeleteProvider,
+} from '../../../../components';
 import { TabSummary, TabHistory } from './tabs';
 
 interface Props {
   policyName: SlmPolicy['name'];
   onClose: () => void;
+  onPolicyDeleted: (policiesDeleted: Array<SlmPolicy['name']>) => void;
+  onPolicyExecuted: () => void;
 }
 
 const TAB_SUMMARY = 'summary';
@@ -42,14 +50,19 @@ const tabToUiMetricMap: { [key: string]: string } = {
   [TAB_HISTORY]: UIM_POLICY_DETAIL_PANEL_HISTORY_TAB,
 };
 
-export const PolicyDetails: React.FunctionComponent<Props> = ({ policyName, onClose }) => {
+export const PolicyDetails: React.FunctionComponent<Props> = ({
+  policyName,
+  onClose,
+  onPolicyDeleted,
+  onPolicyExecuted,
+}) => {
   const {
     core: { i18n },
   } = useAppDependencies();
 
   const { FormattedMessage } = i18n;
   const { trackUiMetric } = uiMetricService;
-  const { error, data: policyDetails } = useLoadPolicy(policyName);
+  const { error, data: policyDetails, sendRequest: reload } = useLoadPolicy(policyName);
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
 
   // Reset tab when we look at a different policy
@@ -170,6 +183,55 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({ policyName, onCl
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
+
+        {policyDetails ? (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <PolicyDeleteProvider>
+                  {deletePolicyPrompt => {
+                    return (
+                      <EuiButtonEmpty
+                        color="danger"
+                        data-test-subj="srPolicyDetailsDeleteActionButton"
+                        onClick={() => deletePolicyPrompt([policyName], onPolicyDeleted)}
+                      >
+                        <FormattedMessage
+                          id="xpack.snapshotRestore.policyDetails.deleteButtonLabel"
+                          defaultMessage="Delete"
+                        />
+                      </EuiButtonEmpty>
+                    );
+                  }}
+                </PolicyDeleteProvider>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <PolicyExecuteProvider>
+                  {executePolicyPrompt => {
+                    return (
+                      <EuiButton
+                        onClick={() =>
+                          executePolicyPrompt(policyName, () => {
+                            onPolicyExecuted();
+                            reload();
+                          })
+                        }
+                        fill
+                        color="primary"
+                        data-test-subj="srPolicyDetailsExecuteActionButton"
+                      >
+                        <FormattedMessage
+                          id="xpack.snapshotRestore.policyDetails.executeButtonLabel"
+                          defaultMessage="Run policy"
+                        />
+                      </EuiButton>
+                    );
+                  }}
+                </PolicyExecuteProvider>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     );
   };
@@ -180,7 +242,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({ policyName, onCl
       data-test-subj="policyDetail"
       aria-labelledby="srPolicyDetailsFlyoutTitle"
       size="m"
-      maxWidth={400}
+      maxWidth={550}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">

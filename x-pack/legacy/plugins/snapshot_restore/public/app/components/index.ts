@@ -14,3 +14,5 @@ export { SectionError } from './section_error';
 export { SectionLoading } from './section_loading';
 export { SnapshotDeleteProvider } from './snapshot_delete_provider';
 export { RestoreSnapshotForm } from './restore_snapshot_form';
+export { PolicyExecuteProvider } from './policy_execute_provider';
+export { PolicyDeleteProvider } from './policy_delete_provider';

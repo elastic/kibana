@@ -52,3 +52,4 @@ SIEM can ingest and normalize events from ECS-compatible data sources.
 
 
 include::siem-ui.asciidoc[]
+include::machine-learning.asciidoc[]
