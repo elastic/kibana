@@ -8,7 +8,7 @@ import * as Rx from 'rxjs';
 import { toArray, mergeMap } from 'rxjs/operators';
 import moment from 'moment-timezone';
 import { groupBy } from 'lodash';
-import { KbnServer } from '../../../../types';
+import { KbnServer, ConditionalHeaders } from '../../../../types';
 // @ts-ignore
 import { pdf } from './pdf';
 // @ts-ignore
@@ -16,7 +16,7 @@ import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { createLayout } from '../../../common/layouts';
 import { TimeRange } from '../../../common/lib/screenshots/types';
-import { LayoutInstance } from '../../../common/layouts/layout';
+import { LayoutInstance, LayoutParams } from '../../../common/layouts/layout';
 
 interface ScreenshotData {
   base64EncodedData: string;
@@ -51,8 +51,8 @@ function generatePdfObservableFn(server: KbnServer) {
     title: string,
     urls: string[],
     browserTimezone: string,
-    conditionalHeaders: any,
-    layoutParams: any,
+    conditionalHeaders: ConditionalHeaders,
+    layoutParams: LayoutParams,
     logo: string
   ) {
     const layout = createLayout(server, layoutParams) as LayoutInstance;

@@ -6,11 +6,12 @@
 
 import * as Rx from 'rxjs';
 import { toArray, mergeMap } from 'rxjs/operators';
-import { KbnServer } from '../../../../types';
+import { KbnServer, ConditionalHeaders } from '../../../../types';
 // @ts-ignore
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { PreserveLayout } from '../../../common/layouts/preserve_layout';
+import { LayoutParams } from '../../../common/layouts/layout';
 
 interface ScreenshotData {
   base64EncodedData: string;
@@ -45,8 +46,8 @@ function generatePngObservableFn(server: KbnServer) {
   return function generatePngObservable(
     url: string,
     browserTimezone: string,
-    conditionalHeaders: any,
-    layoutParams: any
+    conditionalHeaders: ConditionalHeaders,
+    layoutParams: LayoutParams
   ) {
     if (!layoutParams || !layoutParams.dimensions) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
