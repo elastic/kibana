@@ -20,7 +20,13 @@
 import { Socket } from 'net';
 import { DetailedPeerCertificate, PeerCertificate, TLSSocket } from 'tls';
 
+/**
+ * A tiny abstraction for TCP socket.
+ * @public
+ */
 export interface IKibanaSocket {
+  getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
+  getPeerCertificate(detailed: false): PeerCertificate | null;
   /**
    * Returns an object representing the peer's certificate.
    * The returned object has some properties corresponding to the field of the certificate.
@@ -30,8 +36,6 @@ export interface IKibanaSocket {
    * @param detailed - If true; the full chain with issuer property will be returned.
    * @returns An object representing the peer's certificate.
    */
-  getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
-  getPeerCertificate(detailed: false): PeerCertificate | null;
   getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
 }
 
