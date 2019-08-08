@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ParamInstance } from './default_editor_agg_params_helper';
+import { ParamInstance } from './agg_params_helper';
 
 export enum AGG_TYPE_ACTION_KEYS {
   TOUCHED = 'aggTypeTouched',
