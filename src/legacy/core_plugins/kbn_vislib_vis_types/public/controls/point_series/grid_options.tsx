@@ -17,8 +17,9 @@
  * under the License.
  */
 import React, { useMemo } from 'react';
-import { EuiFormRow, EuiAccordion } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { SwitchOption } from '../switch';
@@ -47,35 +48,37 @@ function GridOptions({ stateParams, setValue }: VisOptionsProps<BasicVislibParam
     [stateParams.valueAxes.map(({ id }: ValueAxis) => id)]
   );
   return (
-    <EuiFormRow>
-      <EuiAccordion
-        id="gridAccordion"
-        paddingSize="s"
-        buttonContent={i18n.translate('kbnVislibVisTypes.controls.pointSeries.gridAxis.gridText', {
-          defaultMessage: 'Grid',
-        })}
-        initialIsOpen={true}
-      >
-        <SwitchOption
-          label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.gridAxis.xAxisLinesLabel', {
-            defaultMessage: 'X-axis lines',
-          })}
-          paramName="categoryLines"
-          value={stateParams.grid.categoryLines}
-          setValue={setGrid}
-        />
+    <EuiPanel paddingSize="s">
+      <EuiTitle size="xs">
+        <h2>
+          <FormattedMessage
+            id="kbnVislibVisTypes.controls.pointSeries.gridAxis.gridText"
+            defaultMessage="Grid"
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
 
-        <SelectOption
-          label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.gridAxis.yAxisLinesLabel', {
-            defaultMessage: 'Y-axis lines',
-          })}
-          options={options}
-          paramName="valueAxis"
-          value={stateParams.grid.valueAxis || ''}
-          setValue={setGrid}
-        />
-      </EuiAccordion>
-    </EuiFormRow>
+      <SwitchOption
+        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.gridAxis.xAxisLinesLabel', {
+          defaultMessage: 'Show x-axis lines',
+        })}
+        paramName="categoryLines"
+        value={stateParams.grid.categoryLines}
+        setValue={setGrid}
+        dataTestSubj="showCategoryLines"
+      />
+
+      <SelectOption
+        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.gridAxis.yAxisLinesLabel', {
+          defaultMessage: 'Y-axis lines',
+        })}
+        options={options}
+        paramName="valueAxis"
+        value={stateParams.grid.valueAxis || ''}
+        setValue={setGrid}
+      />
+    </EuiPanel>
   );
 }
 

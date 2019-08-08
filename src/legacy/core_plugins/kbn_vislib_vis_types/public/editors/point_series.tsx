@@ -32,72 +32,77 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue, vis } = props;
 
   return (
-    <EuiPanel paddingSize="s">
-      <EuiTitle size="xs">
-        <h2>
-          <FormattedMessage
-            id="kbnVislibVisTypes.editors.pointSeries.settingsTitle"
-            defaultMessage="Settings"
+    <>
+      <EuiPanel paddingSize="s">
+        <EuiTitle size="xs">
+          <h2>
+            <FormattedMessage
+              id="kbnVislibVisTypes.editors.pointSeries.settingsTitle"
+              defaultMessage="Settings"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+
+        <SelectOption
+          label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.legendPositionLabel', {
+            defaultMessage: 'Legend position',
+          })}
+          options={legendPositions}
+          paramName="legendPosition"
+          value={stateParams.legendPosition}
+          setValue={setValue}
+        />
+
+        <SwitchOption
+          label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.showTooltipLabel', {
+            defaultMessage: 'Show tooltip',
+          })}
+          paramName="addTooltip"
+          value={stateParams.addTooltip}
+          setValue={setValue}
+        />
+
+        {vis.hasSchemaAgg('segment', 'date_histogram') ? (
+          <SwitchOption
+            label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.currentTimeMarkerLabel', {
+              defaultMessage: 'Current time marker',
+            })}
+            paramName="addTimeMarker"
+            value={stateParams.addTimeMarker}
+            setValue={setValue}
           />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
+        ) : (
+          <SwitchOption
+            label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.orderBucketsBySumLabel', {
+              defaultMessage: 'Order buckets by sum',
+            })}
+            paramName="orderBucketsBySum"
+            value={stateParams.orderBucketsBySum}
+            setValue={setValue}
+          />
+        )}
 
-      <SelectOption
-        label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.legendPositionLabel', {
-          defaultMessage: 'Legend position',
-        })}
-        options={legendPositions}
-        paramName="legendPosition"
-        value={stateParams.legendPosition}
-        setValue={setValue}
-      />
+        {vis.type.type === 'histogram' && (
+          <SwitchOption
+            label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.showLabels', {
+              defaultMessage: 'Show values on chart',
+            })}
+            paramName="show"
+            value={stateParams.labels.show}
+            setValue={(paramName, value) =>
+              setValue('labels', { ...stateParams.labels, [paramName]: value })
+            }
+          />
+        )}
 
-      <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.showTooltipLabel', {
-          defaultMessage: 'Show tooltip',
-        })}
-        paramName="addTooltip"
-        value={stateParams.addTooltip}
-        setValue={setValue}
-      />
-
-      {vis.hasSchemaAgg('segment', 'date_histogram') ? (
-        <SwitchOption
-          label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.currentTimeMarkerLabel', {
-            defaultMessage: 'Current time marker',
-          })}
-          paramName="addTimeMarker"
-          value={stateParams.addTimeMarker}
-          setValue={setValue}
-        />
-      ) : (
-        <SwitchOption
-          label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.orderBucketsBySumLabel', {
-            defaultMessage: 'Order buckets by sum',
-          })}
-          paramName="orderBucketsBySum"
-          value={stateParams.orderBucketsBySum}
-          setValue={setValue}
-        />
-      )}
-
-      {vis.type.type === 'histogram' && (
-        <SwitchOption
-          label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.showLabels', {
-            defaultMessage: 'Show values on chart',
-          })}
-          paramName="show"
-          value={stateParams.labels.show}
-          setValue={(paramName, value) =>
-            setValue('labels', { ...stateParams.labels, [paramName]: value })
-          }
-        />
-      )}
+        <EuiSpacer size="s" />
+      </EuiPanel>
 
       <EuiSpacer size="s" />
+
       <GridOptions {...props} />
-    </EuiPanel>
+    </>
   );
 }
 

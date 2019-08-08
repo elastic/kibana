@@ -74,7 +74,7 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     async toggleGridCategoryLines() {
-      return await find.clickByCssSelector('#showCategoryLines');
+      return await testSubjects.click('showCategoryLines');
     }
 
     async setGridValueAxis(axis) {
