@@ -164,6 +164,11 @@ export class VectorTileLayer extends TileLayer {
         if (newLayerObject.type === 'symbol' && newLayerObject.layout && typeof newLayerObject.layout['icon-image'] === 'string') {
           newLayerObject.layout['icon-image'] = this._makeNamespacedImageId(newLayerObject.layout['icon-image']);
         }
+
+        if (newLayerObject.type === 'fill' && newLayerObject.paint && typeof newLayerObject.paint['fill-pattern'] === 'string') {
+          newLayerObject.paint['fill-pattern'] = this._makeNamespacedImageId(newLayerObject.paint['fill-pattern']);
+        }
+
         mbMap.addLayer(newLayerObject);
       });
 
