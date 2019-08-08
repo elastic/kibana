@@ -7,7 +7,7 @@ exports.assertNoneExcluded = assertNoneExcluded;
 exports.runFtr = runFtr;
 exports.hasTests = hasTests;
 
-var _functional_test_runner = require("../../../../../src/functional_test_runner");
+var _functional_test_runner = require("../../functional_test_runner");
 
 var _run_cli = require("./run_cli");
 

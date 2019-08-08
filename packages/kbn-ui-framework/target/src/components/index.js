@@ -69,18 +69,6 @@ Object.defineProperty(exports, "KuiEmptyTablePromptPanel", {
     return _empty_table_prompt.KuiEmptyTablePromptPanel;
   }
 });
-Object.defineProperty(exports, "KuiExpression", {
-  enumerable: true,
-  get: function get() {
-    return _expression.KuiExpression;
-  }
-});
-Object.defineProperty(exports, "KuiExpressionButton", {
-  enumerable: true,
-  get: function get() {
-    return _expression.KuiExpressionButton;
-  }
-});
 Object.defineProperty(exports, "KuiFieldGroup", {
   enumerable: true,
   get: function get() {
@@ -165,78 +153,6 @@ Object.defineProperty(exports, "KuiLocalTitle", {
     return _local_nav.KuiLocalTitle;
   }
 });
-Object.defineProperty(exports, "KuiMenu", {
-  enumerable: true,
-  get: function get() {
-    return _menu.KuiMenu;
-  }
-});
-Object.defineProperty(exports, "KuiMenuItem", {
-  enumerable: true,
-  get: function get() {
-    return _menu.KuiMenuItem;
-  }
-});
-Object.defineProperty(exports, "KUI_MODAL_CANCEL_BUTTON", {
-  enumerable: true,
-  get: function get() {
-    return _modal.KUI_MODAL_CANCEL_BUTTON;
-  }
-});
-Object.defineProperty(exports, "KUI_MODAL_CONFIRM_BUTTON", {
-  enumerable: true,
-  get: function get() {
-    return _modal.KUI_MODAL_CONFIRM_BUTTON;
-  }
-});
-Object.defineProperty(exports, "KuiConfirmModal", {
-  enumerable: true,
-  get: function get() {
-    return _modal.KuiConfirmModal;
-  }
-});
-Object.defineProperty(exports, "KuiModal", {
-  enumerable: true,
-  get: function get() {
-    return _modal.KuiModal;
-  }
-});
-Object.defineProperty(exports, "KuiModalBody", {
-  enumerable: true,
-  get: function get() {
-    return _modal.KuiModalBody;
-  }
-});
-Object.defineProperty(exports, "KuiModalFooter", {
-  enumerable: true,
-  get: function get() {
-    return _modal.KuiModalFooter;
-  }
-});
-Object.defineProperty(exports, "KuiModalHeader", {
-  enumerable: true,
-  get: function get() {
-    return _modal.KuiModalHeader;
-  }
-});
-Object.defineProperty(exports, "KuiModalHeaderTitle", {
-  enumerable: true,
-  get: function get() {
-    return _modal.KuiModalHeaderTitle;
-  }
-});
-Object.defineProperty(exports, "KuiModalOverlay", {
-  enumerable: true,
-  get: function get() {
-    return _modal.KuiModalOverlay;
-  }
-});
-Object.defineProperty(exports, "KuiOutsideClickDetector", {
-  enumerable: true,
-  get: function get() {
-    return _outside_click_detector.KuiOutsideClickDetector;
-  }
-});
 Object.defineProperty(exports, "KuiPager", {
   enumerable: true,
   get: function get() {
@@ -247,24 +163,6 @@ Object.defineProperty(exports, "KuiPagerButtonGroup", {
   enumerable: true,
   get: function get() {
     return _pager.KuiPagerButtonGroup;
-  }
-});
-Object.defineProperty(exports, "KuiPanelSimple", {
-  enumerable: true,
-  get: function get() {
-    return _panel_simple.KuiPanelSimple;
-  }
-});
-Object.defineProperty(exports, "KuiPopover", {
-  enumerable: true,
-  get: function get() {
-    return _popover.KuiPopover;
-  }
-});
-Object.defineProperty(exports, "KuiPopoverTitle", {
-  enumerable: true,
-  get: function get() {
-    return _popover.KuiPopoverTitle;
   }
 });
 Object.defineProperty(exports, "KuiTabs", {
@@ -414,25 +312,13 @@ var _collapse_button = require("./collapse_button");
 
 var _empty_table_prompt = require("./empty_table_prompt");
 
-var _expression = require("./expression");
-
 var _form_layout = require("./form_layout");
 
 var _form = require("./form");
 
 var _local_nav = require("./local_nav");
 
-var _menu = require("./menu");
-
-var _modal = require("./modal");
-
-var _outside_click_detector = require("./outside_click_detector");
-
 var _pager = require("./pager");
-
-var _panel_simple = require("./panel_simple");
-
-var _popover = require("./popover");
 
 var _tabs = require("./tabs");
 

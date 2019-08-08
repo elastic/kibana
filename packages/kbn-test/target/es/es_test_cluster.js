@@ -67,7 +67,9 @@ function createEsTestCluster(options = {}) {
     basePath,
     esArgs
   };
-  const cluster = new _es.Cluster(log);
+  const cluster = new _es.Cluster({
+    log
+  });
   return new class EsTestCluster {
     getStartTimeout() {
       const second = 1000;

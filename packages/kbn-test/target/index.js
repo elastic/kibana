@@ -87,6 +87,18 @@ Object.defineProperty(exports, "DEFAULT_SUPERUSER_PASS", {
     return _auth.DEFAULT_SUPERUSER_PASS;
   }
 });
+Object.defineProperty(exports, "readConfigFile", {
+  enumerable: true,
+  get: function () {
+    return _read_config_file.readConfigFile;
+  }
+});
+Object.defineProperty(exports, "runFtrCli", {
+  enumerable: true,
+  get: function () {
+    return _cli2.runFtrCli;
+  }
+});
 
 var _cli = require("./functional_tests/cli");
 
@@ -99,3 +111,7 @@ var _es = require("./es");
 var _kbn = require("./kbn");
 
 var _auth = require("./functional_tests/lib/auth");
+
+var _read_config_file = require("./functional_test_runner/lib/config/read_config_file");
+
+var _cli2 = require("./functional_test_runner/cli");

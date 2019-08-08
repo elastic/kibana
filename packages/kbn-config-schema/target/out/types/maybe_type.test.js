@@ -37,6 +37,10 @@ test('validates contained type', () => {
     const type = __1.schema.maybe(__1.schema.string({ maxLength: 1 }));
     expect(() => type.validate('foo')).toThrowErrorMatchingSnapshot();
 });
+test('validates basic type', () => {
+    const type = __1.schema.maybe(__1.schema.string());
+    expect(() => type.validate(666)).toThrowErrorMatchingSnapshot();
+});
 test('fails if null', () => {
     const type = __1.schema.maybe(__1.schema.string());
     expect(() => type.validate(null)).toThrowErrorMatchingSnapshot();

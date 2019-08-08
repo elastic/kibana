@@ -17,6 +17,7 @@ declare function never(): Type<never>;
  * Create an optional type
  */
 declare function maybe<V>(type: Type<V>): Type<V | undefined>;
+declare function nullable<V>(type: Type<V>): Type<V | null>;
 declare function object<P extends Props>(props: P, options?: ObjectTypeOptions<P>): ObjectType<P>;
 declare function arrayOf<T>(itemType: Type<T>, options?: ArrayOptions<T>): Type<T[]>;
 declare function mapOf<K, V>(keyType: Type<K>, valueType: Type<V>, options?: MapOfOptions<K, V>): Type<Map<K, V>>;
@@ -45,6 +46,7 @@ export declare const schema: {
     literal: typeof literal;
     mapOf: typeof mapOf;
     maybe: typeof maybe;
+    nullable: typeof nullable;
     never: typeof never;
     number: typeof number;
     object: typeof object;

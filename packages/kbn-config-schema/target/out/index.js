@@ -57,6 +57,9 @@ function never() {
 function maybe(type) {
     return new types_1.MaybeType(type);
 }
+function nullable(type) {
+    return new types_1.NullableType(type);
+}
 function object(props, options) {
     return new types_1.ObjectType(props, options);
 }
@@ -92,6 +95,7 @@ exports.schema = {
     literal,
     mapOf,
     maybe,
+    nullable,
     never,
     number,
     object,
