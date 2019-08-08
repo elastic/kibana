@@ -18,7 +18,7 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import { Config, Lifecycle } from '../../../src/functional_test_runner/lib';
+import { Config, Lifecycle } from '../src/functional_test_runner/lib';
 
 interface AsyncInstance<T> {
   /**
