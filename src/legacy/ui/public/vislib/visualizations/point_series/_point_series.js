@@ -19,6 +19,13 @@
 
 import _ from 'lodash';
 
+const thresholdLineDefaults = {
+  show: false,
+  value: 10,
+  width: 1,
+  style: 'full'
+};
+
 export class PointSeries {
   constructor(handler, seriesEl, seriesData, seriesConfig) {
     this.handler = handler;
@@ -26,7 +33,7 @@ export class PointSeries {
     this.chartEl = seriesEl;
     this.chartData = seriesData;
     this.seriesConfig = seriesConfig;
-    this.thresholdLineOptions = handler.visConfig._values.thresholdLine;
+    this.thresholdLineOptions = _.defaults(handler.visConfig.get('thresholdLine', {}), thresholdLineDefaults);
   }
 
   getGroupedCount() {
