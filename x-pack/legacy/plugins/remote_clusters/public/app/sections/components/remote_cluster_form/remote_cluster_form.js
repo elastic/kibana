@@ -38,6 +38,8 @@ import {
   transportPortUrl,
 } from '../../../services/documentation';
 
+import { RequestFlyout } from './request_flyout';
+
 import { validateName, validateSeeds, validateSeed } from './validators';
 
 const defaultFields = {
@@ -78,8 +80,15 @@ export class RemoteClusterForm extends Component {
       disabledFields,
       fieldsErrors: this.getFieldsErrors(fieldsState),
       areErrorsVisible: false,
+      isRequestVisible: false,
     };
   }
+
+  toggleRequest = () => {
+    this.setState(({ isRequestVisible }) => ({
+      isRequestVisible: !isRequestVisible,
+    }));
+  };
 
   getFieldsErrors(fields, seedInput = '') {
     const { name, seeds } = fields;
@@ -427,25 +436,40 @@ export class RemoteClusterForm extends Component {
     const isSaveDisabled = areErrorsVisible && this.hasErrors();
 
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="m">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="remoteClusterFormSaveButton"
-            color="secondary"
-            iconType="check"
-            onClick={this.save}
-            fill
-            disabled={isSaveDisabled}
-            aria-describedby={`${this.generateId(ERROR_TITLE_ID)} ${this.generateId(ERROR_LIST_ID)}`}
-          >
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
-              defaultMessage="Save"
-            />
-          </EuiButton>
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="remoteClusterFormSaveButton"
+                color="secondary"
+                iconType="check"
+                onClick={this.save}
+                fill
+                disabled={isSaveDisabled}
+                aria-describedby={`${this.generateId(ERROR_TITLE_ID)} ${this.generateId(ERROR_LIST_ID)}`}
+              >
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+
+            {cancelButton}
+          </EuiFlexGroup>
         </EuiFlexItem>
 
-        {cancelButton}
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            onClick={this.toggleRequest}
+          >
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.toggleRequestButtonLabel"
+              defaultMessage="Show request"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
@@ -593,6 +617,7 @@ export class RemoteClusterForm extends Component {
     } = this.props;
 
     const {
+      isRequestVisible,
       areErrorsVisible,
       fields: {
         name,
@@ -667,6 +692,14 @@ export class RemoteClusterForm extends Component {
         {this.renderActions()}
 
         {this.renderSavingFeedback()}
+
+        {isRequestVisible ? (
+          <RequestFlyout
+            name={name}
+            cluster={this.getAllFields()}
+            close={() => this.setState({ isRequestVisible: false })}
+          />
+        ) : null}
       </Fragment>
     );
   }
