@@ -81,8 +81,12 @@ export class CancellationSerivce {
       // 1. Use the cancellation token to pass cancel message to job
       token.cancel();
       // 2. waiting on the actual job promise to be resolved
-      // if jobPromise is rejected, is it safer to just throw the exception and let the caller retry?
-      await jobPromise;
+      try {
+        await jobPromise;
+      } catch (e) {
+        // the exception from the job also indicates the job is finished, and it should be the duty of the worker for
+        // the job to handle it, so it's safe to just ignore the exception here
+      }
     }
   }
 }

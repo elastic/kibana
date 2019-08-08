@@ -34,3 +34,25 @@ test('Register and cancel cancellation token', async () => {
 
   expect(cancelSpy.calledOnce).toBeTruthy();
 });
+
+test('Register and cancel cancellation token while an exception is thrown from the job', async () => {
+  const repoUri = 'github.com/elastic/code';
+  const service = new CancellationSerivce();
+  const token = {
+    cancel: (): void => {
+      return;
+    },
+  };
+  const cancelSpy = sinon.spy();
+  token.cancel = cancelSpy;
+
+  // make sure the promise won't be fulfilled immediately
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(reject, 100);
+  });
+  await service.registerCancelableIndexJob(repoUri, token as CancellationToken, promise);
+  // expect no exceptions are thrown when cancelling the job
+  await service.cancelIndexJob(repoUri);
+
+  expect(cancelSpy.calledOnce).toBeTruthy();
+});
