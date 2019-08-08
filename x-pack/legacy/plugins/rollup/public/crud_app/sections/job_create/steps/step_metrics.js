@@ -18,10 +18,10 @@ import {
   EuiText,
   EuiTitle,
   EuiPopover,
-  EuiContextMenuPanel,
   EuiLink,
   EuiButtonIcon,
   EuiToolTip,
+  EuiHorizontalRule
 } from '@elastic/eui';
 
 import { metricsDetailsUrl } from '../../../services';
@@ -145,7 +145,7 @@ export class StepMetricsUi extends Component {
     });
   };
 
-  renderMetricsSelectAllItems() {
+  renderMetricsSelectAllCheckboxes() {
     const {
       fields: { metrics },
       onFieldsChange,
@@ -205,16 +205,20 @@ export class StepMetricsUi extends Component {
         }
         data-test-subj={'rollupJobMetricsSelectAll'}
       >
-        <EuiContextMenuPanel>
-          <EuiText size={'s'}>
-            <EuiFlexGroup direction={'column'}>
-              <EuiFlexItem>
-                <b>{'Select All'}</b>
-              </EuiFlexItem>
-              {this.renderMetricsSelectAllItems().map((item, idx) => <EuiFlexItem key={idx}>{item}</EuiFlexItem>)}
-            </EuiFlexGroup>
-          </EuiText>
-        </EuiContextMenuPanel>
+        <EuiText size={'s'}>
+          <EuiFlexGroup direction={'column'}>
+            <EuiFlexItem align={'center'} style={{ marginBottom: '4px' }}>
+              <b>{'Select All'}</b>
+            </EuiFlexItem>
+
+            <EuiHorizontalRule margin={'xs'}/>
+
+            {
+              this.renderMetricsSelectAllCheckboxes()
+                .map((item, idx) => <EuiFlexItem key={idx}>{item}</EuiFlexItem>)
+            }
+          </EuiFlexGroup>
+        </EuiText>
       </EuiPopover>
     );
   }
@@ -403,10 +407,6 @@ export class StepMetricsUi extends Component {
                     const isSelected = hasSelectedItems ? types.length !== maxItemsToBeSelected : true;
                     const newMetrics = metricTypesConfig
                       .filter(config => config.fieldTypes[type])
-                      .map(c => {
-                        console.log(c);
-                        return c;
-                      })
                       .reduce((acc, { type: typeConfig }) => {
                         return this.setMetric(fieldName, typeConfig, isSelected);
                       }, null);
