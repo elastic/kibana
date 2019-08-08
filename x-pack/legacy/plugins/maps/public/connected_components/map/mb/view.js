@@ -467,6 +467,7 @@ export class MBMapContainer extends React.Component {
           showFilterButtons={!!this.props.addFilters && isLocked}
           isLocked={isLocked}
           addFilters={this.props.addFilters}
+          geoFields={this.props.geoFields}
         />
       </I18nProvider>
     ), this._tooltipContainer);

@@ -145,7 +145,7 @@ export class FeatureTooltip extends React.Component {
 
   _renderActions(feature) {
     // TODO support geo_distance filters for points
-    if (!this.props.isLocked || !feature
+    if (!this.props.isLocked || !feature || this.props.geoFields.length === 0
       || feature.geometry.type === GEO_JSON_TYPE.POINT
       || feature.geometry.type === GEO_JSON_TYPE.MULTI_POINT) {
       return null;
@@ -318,6 +318,7 @@ export class FeatureTooltip extends React.Component {
         <FeatureGeometryFilterForm
           onClose={this._showPropertiesView}
           feature={currentFeature}
+          geoFields={this.props.geoFields}
         />
       );
     }

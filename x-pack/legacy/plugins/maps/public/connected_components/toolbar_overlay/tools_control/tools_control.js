@@ -106,7 +106,7 @@ export class ToolsControl extends Component {
   _getIndexPatternSelectionPanel(id) {
     const options = this.props.geoFields.map((geoField) => {
       return {
-        label: `${geoField.indexPatternTitle} : ${geoField.geoField}`,
+        label: `${geoField.indexPatternTitle} : ${geoField.geoFieldName}`,
         value: geoField
       };
     });
@@ -121,7 +121,7 @@ export class ToolsControl extends Component {
           </EuiTextColor>
           <br />
           <EuiHighlight search={searchValue}>
-            {option.value.geoField}
+            {option.value.geoFieldName}
           </EuiHighlight>
         </Fragment>
       );

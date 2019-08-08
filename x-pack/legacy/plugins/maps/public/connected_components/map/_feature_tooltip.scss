@@ -13,3 +13,7 @@
 .mapFeatureTooltip__propertyValue {
   max-width: $euiSizeXL * 5;
 }
+
+.mapFeatureTooltip__geoFieldItem {
+  padding: $euiSizeXS;
+}

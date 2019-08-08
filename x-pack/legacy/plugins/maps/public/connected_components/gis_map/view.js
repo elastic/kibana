@@ -62,7 +62,7 @@ export class GisMap extends Component {
         indexPattern.fields.forEach(field => {
           if (field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
             geoFields.push({
-              geoField: field.name,
+              geoFieldName: field.name,
               geoFieldType: field.type,
               indexPatternTitle: indexPattern.title,
               indexPatternId: indexPattern.id
