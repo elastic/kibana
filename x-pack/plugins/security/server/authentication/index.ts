@@ -20,7 +20,7 @@ export { canRedirectRequest } from './can_redirect_request';
 export { Authenticator, ProviderLoginAttempt } from './authenticator';
 export { AuthenticationResult } from './authentication_result';
 export { DeauthenticationResult } from './deauthentication_result';
-export { BasicCredentials } from './providers';
+export { BasicCredentials, OIDCAuthenticationFlow } from './providers';
 
 interface SetupAuthenticationParams {
   core: CoreSetup;

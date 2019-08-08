@@ -5,21 +5,19 @@
  */
 
 import { resolve } from 'path';
-export default async function ({ readConfigFile }) {
-  const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { services } from './services';
+
+export default async function({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
   const plugin = resolve(__dirname, './fixtures/oidc_provider');
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
   const jwksPath = resolve(__dirname, './fixtures/jwks.json');
 
-
   return {
-    testFiles: [require.resolve('./apis')],
+    testFiles: [require.resolve('./apis/authorization_code_flow')],
     servers: xPackAPITestsConfig.get('servers'),
-    services: {
-      es: kibanaAPITestsConfig.get('services.es'),
-      supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
-    },
+    services,
     junit: {
       reportName: 'X-Pack OpenID Connect API Integration Tests',
     },
@@ -41,7 +39,7 @@ export default async function ({ readConfigFile }) {
         `xpack.security.authc.realms.oidc.oidc1.op.userinfo_endpoint=http://localhost:${kibanaPort}/api/oidc_provider/userinfo_endpoint`,
         `xpack.security.authc.realms.oidc.oidc1.op.issuer=https://test-op.elastic.co`,
         `xpack.security.authc.realms.oidc.oidc1.op.jwkset_path=${jwksPath}`,
-        `xpack.security.authc.realms.oidc.oidc1.claims.principal=sub`
+        `xpack.security.authc.realms.oidc.oidc1.claims.principal=sub`,
       ],
     },
 
@@ -50,11 +48,14 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${plugin}`,
-        '--xpack.security.authc.providers=[\"oidc\"]',
-        '--xpack.security.authc.oidc.realm=\"oidc1\"',
-        '--server.xsrf.whitelist', JSON.stringify(['/api/security/v1/oidc',
+        '--xpack.security.authc.providers=["oidc"]',
+        '--xpack.security.authc.oidc.realm="oidc1"',
+        '--server.xsrf.whitelist',
+        JSON.stringify([
+          '/api/security/v1/oidc',
           '/api/oidc_provider/token_endpoint',
-          '/api/oidc_provider/userinfo_endpoint'])
+          '/api/oidc_provider/userinfo_endpoint',
+        ]),
       ],
     },
   };
