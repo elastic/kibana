@@ -19,13 +19,13 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { VisState } from 'ui/vis';
+import { VisState } from '../../..';
 import { AggGroupNames } from '../agg_groups';
-import { DefaultEditorAgg, DefaultEditorAggProps } from './default_editor_agg';
+import { DefaultEditorAgg, DefaultEditorAggProps } from './agg';
 import { act } from 'react-dom/test-utils';
-import { DefaultEditorAggParams } from './default_editor_agg_params';
+import { DefaultEditorAggParams } from './agg_params';
 
-jest.mock('./default_editor_agg_params', () => ({
+jest.mock('./agg_params', () => ({
   DefaultEditorAggParams: () => null,
 }));
 

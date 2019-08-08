@@ -17,18 +17,16 @@
  * under the License.
  */
 
-import { AggParam } from '../../../../agg_types';
+import { AggParam, FieldParamType } from 'ui/agg_types';
 import { AggConfig } from '../../../agg_config';
-import { FieldParamType } from '../../../../agg_types/param_types';
 import { EditorConfig } from '../../config/types';
-import { VisState } from '../../../vis';
-import { SubAggParamsProp } from './default_editor_agg_params';
+import { VisState } from '../../..';
+import { SubAggParamsProp } from './agg_params';
 
 // NOTE: we cannot export the interface with export { InterfaceName }
 // as there is currently a bug on babel typescript transform plugin for it
 // https://github.com/babel/babel/issues/7641
 //
-
 export interface AggParamCommonProps<T> {
   agg: AggConfig;
   aggParam: AggParam;
