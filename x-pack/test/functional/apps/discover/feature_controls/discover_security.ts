@@ -22,6 +22,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const queryBar = getService('queryBar');
+  const savedQueryManager = getService('savedQueryManager');
 
   async function setDiscoverTimeRange() {
     const fromTime = '2015-09-19 06:31:44.000';
@@ -105,22 +106,23 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('show the save query button in the query bar in dirty state with no query loaded', async () => {
-        await queryBar.setQuery('response');
-        await testSubjects.existOrFail('savedQuerySaveNew');
+      it('allow saving via the saved query manager popover with no query loaded', async () => {
+        await savedQueryManager.saveNewQuery('foo', 'bar', true, false);
+        await savedQueryManager.savedQueryExistOrFail('foo');
       });
 
-      it('show the save as new query button in the query bar with non-dirty state and query loaded', async () => {
-        await queryBar.setQuery('response:200 ');
-        await queryBar.saveNewQuery('OK Responses', '200 OK', true, true);
-        await queryBar.openSuggestionsDropDown();
-        await testSubjects.existOrFail('savedQuerySaveAsNew');
+      it('allow saving a currently loaded saved query as a new query via the saved query manager ', async () => {
+        await savedQueryManager.saveCurrentlyLoadedAsNewQuery('foo2', 'bar2', true, false);
+        await savedQueryManager.savedQueryExistOrFail('foo2');
       });
 
-      it('show the save changes to existing and save as new buttons in the query bar with a dirty state and a query loaded', async () => {
-        await queryBar.setQuery('response:404 ');
-        await testSubjects.existOrFail('savedQuerySaveChanges');
-        await testSubjects.existOrFail('savedQuerySaveAsNew');
+      it('allow saving changes to a currently loaded query via the saved query manager', async () => {
+        await queryBar.setQuery('response:404');
+        await savedQueryManager.updateCurrentlyLoadedQuery('bar2', false, false);
+        await savedQueryManager.clearCurrentlyLoadedQuery();
+        await savedQueryManager.loadSavedQuery('foo2');
+        const queryString = await queryBar.getQueryString();
+        expect(queryString).to.eql('response:404');
       });
     });
 

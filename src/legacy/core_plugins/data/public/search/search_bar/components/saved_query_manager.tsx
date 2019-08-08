@@ -122,6 +122,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
       aria-label={i18n.translate('data.search.searchBar.savedQueryPopoverButtonText', {
         defaultMessage: 'See saved queries',
       })}
+      data-test-subj="saved-query-manager-popover-button"
     >
       #
     </EuiButtonEmpty>
@@ -140,6 +141,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
             setIsOpen(false);
           }}
           flush="left"
+          data-test-subj={`load-saved-query-${savedQuery.attributes.title}-button`}
         >
           <EuiScreenReaderOnly>
             <span>
@@ -196,6 +198,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
               values: { title: savedQuery.attributes.title },
             }
           )}
+          data-test-subj={`delete-saved-query-${savedQuery.attributes.title}-button`}
         />
       </li>
     ));
@@ -213,7 +216,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
         anchorPosition="downLeft"
         ownFocus
       >
-        <div className="saved-query-manager-popover">
+        <div className="saved-query-manager-popover" data-test-subj="saved-query-manager-popover">
           <EuiPopoverTitle id={'savedQueryManagerPopoverTitle'}>
             {savedQueryPopoverTitleText}
           </EuiPopoverTitle>
@@ -260,6 +263,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
                           defaultMessage: 'Save as a new saved query',
                         }
                       )}
+                      data-test-subj="saved-query-manager-save-as-new-button"
                     >
                       {i18n.translate(
                         'data.search.searchBar.savedQueryPopoverSaveAsNewButtonText',
@@ -281,6 +285,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
                           values: { title: loadedSavedQuery.attributes.title },
                         }
                       )}
+                      data-test-subj="saved-query-manager-save-changes-button"
                     >
                       {i18n.translate(
                         'data.search.searchBar.savedQueryPopoverSaveChangesButtonText',
@@ -302,6 +307,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
                     'data.search.searchBar.savedQueryPopoverSaveButtonAriaLabel',
                     { defaultMessage: 'Save a new saved query' }
                   )}
+                  data-test-subj="saved-query-manager-save-button"
                 >
                   {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
                     defaultMessage: 'Save',
@@ -318,6 +324,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
                     'data.search.searchBar.savedQueryPopoverClearButtonAriaLabel',
                     { defaultMessage: 'Clear current saved query' }
                   )}
+                  data-test-subj="saved-query-manager-clear-button"
                 >
                   {i18n.translate('data.search.searchBar.savedQueryPopoverClearButtonText', {
                     defaultMessage: 'Clear',
