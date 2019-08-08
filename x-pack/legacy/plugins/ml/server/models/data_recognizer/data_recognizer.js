@@ -282,7 +282,7 @@ export class DataRecognizer {
 
     // the module's jobs contain custom URLs which require an index patten id
     // but there is no corresponding index pattern, throw an error
-    if (false && this.indexPatternId === undefined && this.doJobUrlsContainIndexPatternId(moduleConfig)) {
+    if (this.indexPatternId === undefined && this.doJobUrlsContainIndexPatternId(moduleConfig)) {
       throw Boom.badRequest(
         `Module's jobs contain custom URLs which require a kibana index pattern (${this.indexPatternName}) which cannot be found.`
       );
@@ -290,7 +290,7 @@ export class DataRecognizer {
 
     // the module's saved objects require an index patten id
     // but there is no corresponding index pattern, throw an error
-    if (false && this.indexPatternId === undefined && this.doSavedObjectsContainIndexPatternId(moduleConfig)) {
+    if (this.indexPatternId === undefined && this.doSavedObjectsContainIndexPatternId(moduleConfig)) {
       throw Boom.badRequest(
         `Module's saved objects contain custom URLs which require a kibana index pattern (${this.indexPatternName}) which cannot be found.`
       );
