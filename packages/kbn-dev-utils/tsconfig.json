@@ -4,4 +4,7 @@
     "index.d.ts",
     "src/**/*.d.ts"
   ],
+  "compilerOptions": {
+    "declaration": true
+  },
 }
