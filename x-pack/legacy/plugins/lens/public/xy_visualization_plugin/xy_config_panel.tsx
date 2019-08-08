@@ -138,7 +138,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
             iconType="gear"
             size="s"
             data-test-subj="lnsXY_chart_settings"
-            onClick={() => setIsChartOptionsOpen(isChartOptionsOpen ? false : true)}
+            onClick={() => setIsChartOptionsOpen(!isChartOptionsOpen)}
             aria-label={i18n.translate('xpack.lens.xyChart.chartSettings', {
               defaultMessage: 'Chart Settings',
             })}
