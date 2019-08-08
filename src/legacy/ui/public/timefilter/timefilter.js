@@ -22,16 +22,14 @@ import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { calculateBounds, getTime } from './get_time';
 import { parseQueryString } from 'ui/timefilter/lib/parse_querystring';
-import { SimpleEmitter } from 'ui/utils/simple_emitter';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import uiRoutes from '../routes';
 import chrome from 'ui/chrome';
 import { areTimePickerValsDifferent } from './lib/diff_time_picker_vals';
 import { timeHistory } from './time_history';
 
-class Timefilter extends SimpleEmitter {
+class Timefilter {
   constructor() {
-    super();
 
     // Fired when isTimeRangeSelectorEnabled \ isAutoRefreshSelectorEnabled are toggled
     this.enabledUpdated$ = new BehaviorSubject();
