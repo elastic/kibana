@@ -142,15 +142,13 @@ export const DataFrameAnalyticsList: SFC = () => {
         // if the term has been negated, AND the matches
         if (bool === true) {
           ts = analytics.filter(
-            d =>
-              stringMatch(d.id, c.value) === bool ||
-              stringMatch(d.config.description, c.value) === bool
+            d => stringMatch(d.id, c.value) === bool // ||
+            // stringMatch(d.config.description, c.value) === bool
           );
         } else {
           ts = analytics.filter(
-            d =>
-              stringMatch(d.id, c.value) === bool &&
-              stringMatch(d.config.description, c.value) === bool
+            d => stringMatch(d.id, c.value) === bool // &&
+            // stringMatch(d.config.description, c.value) === bool
           );
         }
       } else {
@@ -211,7 +209,11 @@ export const DataFrameAnalyticsList: SFC = () => {
             </h2>
           }
           actions={[
-            <EuiButtonEmpty onClick={moveToAnalyticsWizard} isDisabled={disabled}>
+            <EuiButtonEmpty
+              onClick={moveToAnalyticsWizard}
+              isDisabled={disabled}
+              style={{ display: 'none' }}
+            >
               {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptButtonText', {
                 defaultMessage: 'Create your first data frame analytics',
               })}

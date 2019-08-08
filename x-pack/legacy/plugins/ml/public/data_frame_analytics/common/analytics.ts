@@ -22,7 +22,8 @@ export type IndexPattern = string;
 export type DataFrameAnalyticsId = string;
 
 export interface CreateRequestBody {
-  description?: string;
+  // Description attribute is not supported yet
+  // description?: string;
   dest: {
     index: IndexName;
     results_field: string;
