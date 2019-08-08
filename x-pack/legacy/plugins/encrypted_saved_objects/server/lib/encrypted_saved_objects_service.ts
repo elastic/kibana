@@ -108,6 +108,11 @@ export class EncryptedSavedObjectsService {
     return this.typeRegistrations.has(type);
   }
 
+  /**
+   * Checks whether specified saved object type supports predefined IDs. If the type isn't registered
+   * as an encrypted saved object type, this will return "true".
+   * @param type Saved object type.
+   */
   public allowPredefinedID(type: string) {
     const typeRegistration = this.typeRegistrations.get(type);
     if (typeRegistration === undefined) {
