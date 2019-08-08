@@ -4,5 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './log_analysis';
-export * from './metadata_api';
+import * as rt from 'io-ts';
+
+export const timeRangeRT = rt.type({
+  startTime: rt.number,
+  endTime: rt.number,
+});
