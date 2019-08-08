@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import { statSync } from 'fs';
 import { resolve } from 'path';
+import url from 'url';
 
 import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import { getConfig } from '../../legacy/server/path';
@@ -89,6 +90,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     if (opts.ssl) {
       // @kbn/dev-utils is part of devDependencies
       const { CA_CERT_PATH } = require('@kbn/dev-utils');
+      const customElasticsearchHosts = (opts.elasticsearch && opts.elasticsearch.split(',')) || get('elasticsearch.hosts');
 
       function ensureNotDefined(path) {
         if (has(path)) {
@@ -97,17 +99,20 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       }
       ensureNotDefined('server.ssl.certificate');
       ensureNotDefined('server.ssl.key');
-      ensureNotDefined('elasticsearch.hosts');
       ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
 
-      if (opts.elasticsearch) {
-        throw new Error(`Can't use --ssl when --elasticsearch configuration is specified.`);
-      }
+      const elasticsearchHosts = (customElasticsearchHosts || ['https://localhost:9200']).map(hostUrl => {
+        const parsedUrl = url.parse(hostUrl);
+        if (parsedUrl.hostname !== 'localhost') {
+          throw new Error(`Hostname "${parsedUrl.hostname}" can't be used with --ssl. Must be "localhost" to work with certificates.`);
+        }
+        return `https://localhost:${parsedUrl.port}`;
+      });
 
       set('server.ssl.enabled', true);
       set('server.ssl.certificate', DEV_SSL_CERT_PATH);
       set('server.ssl.key', DEV_SSL_KEY_PATH);
-      set('elasticsearch.hosts', 'https://localhost:9200');
+      set('elasticsearch.hosts', elasticsearchHosts);
       set('elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
     }
   }
