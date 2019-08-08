@@ -4,31 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import React from 'react';
-import {
-  EuiToolTip
-} from '@elastic/eui';
-
+import React, { FC } from 'react';
+import { EuiToolTip } from '@elastic/eui';
 
 const MAX_CHARS = 12;
 
-export function DisplayValue({ value }) {
+export const DisplayValue: FC<{ value: any }> = ({ value }) => {
   const length = String(value).length;
-  let formattedValue;
 
   if (length <= MAX_CHARS) {
-    formattedValue = value;
+    return value;
   } else {
-    formattedValue = (
+    return (
       <EuiToolTip content={value} anchorClassName="valueWrapper">
-        <span>
-          {value}
-        </span>
+        <span>{value}</span>
       </EuiToolTip>
     );
   }
-
-  return formattedValue;
-}
+};
