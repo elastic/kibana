@@ -1,5 +1,5 @@
 @import 'src/legacy/ui/public/styles/styling_constants';
 
 @import './css/variables';
-@import './css/embeddable_panel';
-@import './css/panel_options_menu_form';
+@import './np_ready/public/lib/panel/index';
+@import './np_ready/public/lib/panel/panel_header/index';
