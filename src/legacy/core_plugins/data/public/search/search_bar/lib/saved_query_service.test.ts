@@ -18,7 +18,12 @@
  */
 
 import { SavedQueryAttributes } from '../index';
-import { saveQuery, findSavedQueries, getSavedQuery } from './saved_query_service';
+import {
+  saveQuery,
+  findSavedQueries,
+  getSavedQuery,
+  deleteSavedQuery,
+} from './saved_query_service';
 import { FilterStateStore } from '@kbn/es-query';
 
 const savedQueryAttributes: SavedQueryAttributes = {
@@ -58,6 +63,7 @@ const mockSavedObjectsClient = {
   error: jest.fn(),
   find: jest.fn(),
   get: jest.fn(),
+  delete: jest.fn(),
 };
 
 jest.mock('ui/chrome', () => {
@@ -209,6 +215,13 @@ describe('saved query service', () => {
 
       await getSavedQuery('foo');
       expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('query', 'foo');
+    });
+  });
+
+  describe('deleteSavedQuery', function() {
+    it('should delete the saved query for the given ID', async () => {
+      await deleteSavedQuery('foo');
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('query', 'foo');
     });
   });
 });
