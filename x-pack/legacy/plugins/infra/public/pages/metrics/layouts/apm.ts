@@ -37,7 +37,7 @@ export const apmLayoutCreator: InfraMetricLayoutCreator = () => [
       {
         id: InfraMetric.apmMetrics,
         label: i18n.translate(
-          'xpack.infra.metricDetailPage.podMetricsLayout.networkTrafficSection.sectionLabel',
+          'xpack.infra.metricDetailPage.apmMetricsLayout.apmTransactionsSection.sectionLabel',
           {
             defaultMessage: 'APM Transactions',
           }
