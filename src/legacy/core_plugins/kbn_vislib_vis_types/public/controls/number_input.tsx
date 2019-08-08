@@ -20,7 +20,7 @@
 import React from 'react';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
-interface NumperInputOptionProps<ParamName extends string> {
+interface NumberInputOptionProps<ParamName extends string> {
   label?: React.ReactNode;
   max?: number;
   min?: number;
@@ -29,14 +29,14 @@ interface NumperInputOptionProps<ParamName extends string> {
   setValue: (paramName: ParamName, value: number | '') => void;
 }
 
-function NumperInputOption<ParamName extends string>({
+function NumberInputOption<ParamName extends string>({
   label,
   max,
   min,
   paramName,
   value = '',
   setValue,
-}: NumperInputOptionProps<ParamName>) {
+}: NumberInputOptionProps<ParamName>) {
   return (
     <EuiFormRow label={label} fullWidth compressed>
       <EuiFieldNumber
@@ -51,4 +51,4 @@ function NumperInputOption<ParamName extends string>({
   );
 }
 
-export { NumperInputOption };
+export { NumberInputOption };

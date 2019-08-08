@@ -27,7 +27,7 @@ import { FileLayerField, VectorLayer, ServiceSettings } from 'ui/vis/map/service
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { SelectOption } from '../../../kbn_vislib_vis_types/public/controls/select';
 import { SwitchOption } from '../../../kbn_vislib_vis_types/public/controls/switch';
-import { NumperInputOption } from '../../../kbn_vislib_vis_types/public/controls/number_input';
+import { NumberInputOption } from '../../../kbn_vislib_vis_types/public/controls/number_input';
 import { ORIGIN } from '../../../tile_map/common/origin';
 import { WmsOptions } from '../../../tile_map/public/components/wms_options';
 import { mapToLayerWithId } from '../util';
@@ -235,7 +235,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
           setValue={setValue}
         />
 
-        <NumperInputOption
+        <NumberInputOption
           label={i18n.translate('regionMap.visParams.outlineWeightLabel', {
             defaultMessage: 'Outline weight',
           })}
