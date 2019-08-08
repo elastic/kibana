@@ -36,7 +36,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { SwitchOption } from '../../kbn_vislib_vis_types/public/controls/switch';
 import { RangeOption } from '../../kbn_vislib_vis_types/public/controls/range';
-import { MarkdownVisParams } from './markdown_fn';
+import { MarkdownVisParams } from './types';
 
 function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisParams>) {
   const onMarkdownUpdate = useCallback(
