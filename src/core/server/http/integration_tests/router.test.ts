@@ -793,6 +793,58 @@ describe('Response factory', () => {
       });
     });
 
+    it('Custom error response for server error', async () => {
+      const router = new Router('/');
+
+      router.get({ path: '/', validate: false }, (req, res) => {
+        const error = new Error('some message');
+
+        return res.customError(error, {
+          statusCode: 500,
+        });
+      });
+
+      const { registerRouter, server: innerServer } = await server.setup(config);
+      registerRouter(router);
+      await server.start();
+
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .expect(500);
+
+      expect(result.body).toEqual({
+        error: 'Internal Server Error',
+        message: 'some message',
+        statusCode: 500,
+      });
+    });
+
+    it('Custom error response for Boom server error', async () => {
+      const router = new Router('/');
+
+      router.get({ path: '/', validate: false }, (req, res) => {
+        const error = new Error('some message');
+
+        return res.customError(Boom.boomify(error), {
+          statusCode: 500,
+        });
+      });
+
+      const { registerRouter, server: innerServer } = await server.setup(config);
+      registerRouter(router);
+      await server.start();
+
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .expect(500);
+
+      expect(result.body).toEqual({
+        error: 'Internal Server Error',
+        message: 'some message',
+        statusCode: 500,
+      });
+    });
+
     it('Custom error response requires error status code', async () => {
       const router = new Router('/');
 
