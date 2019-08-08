@@ -4,10 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface ApiResponseTimings {
-  [timing: string]: number;
-}
-
-export interface TimedApiResponse {
-  timings: ApiResponseTimings;
-}
+export * from './errors';
+export * from './log_analysis';

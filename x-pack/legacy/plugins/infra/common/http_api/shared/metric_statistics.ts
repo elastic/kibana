@@ -4,5 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './log_analysis';
-export * from './metadata_api';
+import * as rt from 'io-ts';
+
+export const metricStatisticsRT = rt.type({
+  avg: rt.union([rt.number, rt.null]),
+  count: rt.number,
+  max: rt.union([rt.number, rt.null]),
+  min: rt.union([rt.number, rt.null]),
+  sum: rt.number,
+});
