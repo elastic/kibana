@@ -71,6 +71,8 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
     };
   }
 
+  private dragTargetArea: SVGElement | null = null;
+
   public static getDerivedStateFromProps({ target }: LogMinimapProps, { drag }: LogMinimapState) {
     if (!drag) return { target };
     return null;
@@ -90,16 +92,18 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
   };
 
   private handleMouseDown: React.MouseEventHandler<SVGSVGElement> = event => {
-    const { clientY } = event;
-    const svgPosition = event.currentTarget.getBoundingClientRect();
-    this.setState({
-      drag: {
-        startY: clientY,
-        currentY: null,
-      },
-      svgPosition,
-    });
-    window.addEventListener('mousemove', this.handleDragMove);
+    const { clientY, target } = event;
+    if (target === this.dragTargetArea) {
+      const svgPosition = event.currentTarget.getBoundingClientRect();
+      this.setState({
+        drag: {
+          startY: clientY,
+          currentY: null,
+        },
+        svgPosition,
+      });
+      window.addEventListener('mousemove', this.handleDragMove);
+    }
     window.addEventListener('mouseup', this.handleMouseUp);
   };
 
@@ -220,6 +224,15 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
           />
         ) : null}
         <TimeCursor x1={width / 3} x2={width} y1={timeCursorY} y2={timeCursorY} />
+        <DragTargetArea
+          innerRef={node => {
+            this.dragTargetArea = node;
+          }}
+          x={0}
+          y={0}
+          width={width / 3}
+          height={height}
+        />
         {/* <g transform={`translate(${width * 0.5}, 0)`}>
           <SearchMarkers
             buckets={searchSummaryBuckets || []}
@@ -234,6 +247,11 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
     );
   }
 }
+
+const DragTargetArea = euiStyled.rect`
+  fill: transparent;
+  cursor: move;
+`;
 
 const MinimapBorder = euiStyled.line`
   stroke: ${props => props.theme.eui.euiColorMediumShade};

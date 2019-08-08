@@ -14,7 +14,7 @@ interface HighlightedIntervalProps {
   start: number;
   end: number;
   width: number;
-  target: number;
+  target: number | null;
 }
 
 export const HighlightedInterval: React.SFC<HighlightedIntervalProps> = ({
@@ -27,17 +27,19 @@ export const HighlightedInterval: React.SFC<HighlightedIntervalProps> = ({
 }) => {
   const yStart = getPositionOfTime(start);
   const yEnd = getPositionOfTime(end);
-  const yTarget = getPositionOfTime(target);
+  const yTarget = target && getPositionOfTime(target);
 
   return (
     <>
-      <HighlightTargetMarker
-        className={className}
-        x1={0}
-        x2={width / 3}
-        y1={yTarget}
-        y2={yTarget}
-      />
+      {yTarget && (
+        <HighlightTargetMarker
+          className={className}
+          x1={0}
+          x2={width / 3}
+          y1={yTarget}
+          y2={yTarget}
+        />
+      )}
       <HighlightPolygon
         className={className}
         points={` ${width / 3},${yStart} ${width},${yStart} ${width},${yEnd}  ${width / 3},${yEnd}`}
