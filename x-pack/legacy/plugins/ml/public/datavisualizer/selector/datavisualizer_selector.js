@@ -22,11 +22,8 @@ import {
 
 import { isFullLicense } from '../../license/check_license';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
 import { timefilter } from 'ui/timefilter';
-import { timeHistory } from 'ui/timefilter/time_history';
 
-import { NavigationMenuContext } from '../../util/context_utils';
 import { NavigationMenu } from '../../components/navigation_menu/navigation_menu';
 
 function startTrialDescription() {
@@ -57,7 +54,7 @@ export const DatavisualizerSelector = injectI18n(function (props) {
   const startTrialVisible = isFullLicense() === false;
 
   return (
-    <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
+    <Fragment>
       <NavigationMenu tabId="datavisualizer" />
       <EuiPage restrictWidth={1000}>
         <EuiPageBody>
@@ -149,6 +146,27 @@ export const DatavisualizerSelector = injectI18n(function (props) {
                 data-test-subj="mlDataVisualizerCardIndexData"
               />
             </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="dataVisualizer" />}
+                title="Select an index pattern NEW"
+                description={
+                  <FormattedMessage
+                    id="xpack.ml.datavisualizer.selector.selectIndexPatternDescription"
+                    defaultMessage="Visualize the data in an existing Elasticsearch index."
+                  />
+                }
+                footer={
+                  <EuiButton target="_self" href="#data_visualizer_index_select">
+                    <FormattedMessage
+                      id="xpack.ml.datavisualizer.selector.selectIndexButtonLabel"
+                      defaultMessage="Select index"
+                    />
+                  </EuiButton>
+                }
+                data-test-subj="mlDataVisualizerCardIndexData"
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
           {startTrialVisible === true && (
             <Fragment>
@@ -182,6 +200,6 @@ export const DatavisualizerSelector = injectI18n(function (props) {
           )}
         </EuiPageBody>
       </EuiPage>
-    </NavigationMenuContext.Provider>
+    </Fragment>
   );
 });

@@ -111,7 +111,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       indexPattern => typeof indexPattern !== 'string'
     ) as IndexPattern[];
 
-    const objectPatternsFromStrings = await fetchIndexPatterns(stringPatterns);
+    const objectPatternsFromStrings = (await fetchIndexPatterns(stringPatterns)) as IndexPattern[];
 
     this.setState({
       indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],

@@ -18,7 +18,7 @@
  */
 
 // /// Define plugin function
-import { DataPlugin as Plugin } from './plugin';
+import { DataPlugin as Plugin, DataSetup } from './plugin';
 
 export function plugin() {
   return new Plugin();
@@ -27,16 +27,11 @@ export function plugin() {
 // /// Export types & static code
 
 /** @public types */
+export type DataSetup = DataSetup;
 export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
 
 /** @public types */
-export {
-  IndexPattern,
-  IndexPatterns,
-  StaticIndexPattern,
-  StaticIndexPatternField,
-  Field,
-} from './index_patterns';
+export { IndexPattern, StaticIndexPattern, Field } from './index_patterns';
 export { Query, QueryBar, QueryBarInput } from './query';
 export { FilterBar, ApplyFiltersPopover } from './filter';
 export { SearchBar, SearchBarProps } from './search';

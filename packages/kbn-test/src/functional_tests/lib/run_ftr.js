@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FunctionalTestRunner, readConfigFile } from '../../../../../src/functional_test_runner';
+import { FunctionalTestRunner, readConfigFile } from '../../functional_test_runner';
 import { CliError } from './run_cli';
 
 async function createFtr({ configPath, options: { log, bail, grep, updateBaselines, suiteTags } }) {

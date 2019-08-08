@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -20,6 +19,7 @@ import {
 
 import { DataFrameTransformId } from '../../../../common';
 import {
+  getTransformProgress,
   DATA_FRAME_TASK_STATE,
   DataFrameTransformListColumn,
   DataFrameTransformListRow,
@@ -135,10 +135,10 @@ export const getColumns = (
     },
     {
       name: i18n.translate('xpack.ml.dataframe.mode', { defaultMessage: 'Mode' }),
-      sortable: (item: DataFrameTransformListRow) => item.config.mode,
+      sortable: (item: DataFrameTransformListRow) => item.mode,
       truncateText: true,
       render(item: DataFrameTransformListRow) {
-        const mode = item.config.mode;
+        const mode = item.mode;
         const color = 'hollow';
         return <EuiBadge color={color}>{mode}</EuiBadge>;
       },
@@ -146,13 +146,10 @@ export const getColumns = (
     },
     {
       name: i18n.translate('xpack.ml.dataframe.progress', { defaultMessage: 'Progress' }),
-      sortable: (item: DataFrameTransformListRow) =>
-        idx(item, _ => _.stats.checkpointing.next.checkpoint_progress.percent_complete) || 0,
+      sortable: getTransformProgress,
       truncateText: true,
       render(item: DataFrameTransformListRow) {
-        const progress = Math.round(
-          idx(item, _ => _.stats.checkpointing.next.checkpoint_progress.percent_complete) || 0
-        );
+        const progress = getTransformProgress(item);
 
         const isBatchTransform = typeof item.config.sync === 'undefined';
 
