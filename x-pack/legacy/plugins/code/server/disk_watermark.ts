@@ -9,15 +9,15 @@ import { CheckDiskSpaceResult } from 'check-disk-space';
 import { Logger } from './log';
 import { ServerOptions } from './server_options';
 
-export const DEFAULT_WATERMARK_LOW_MB = 2048;
+export const DEFAULT_WATERMARK_LOW_PERCENTAGE = 90;
 
 export type DiskCheckResult = CheckDiskSpaceResult;
 export type DiskSpaceChecker = (path: string) => Promise<DiskCheckResult>;
 
 export class DiskWatermarkService {
-  // True for percentage mode (e.g. 80%), false for absolute mode (e.g. 500mb)
-  private percentageMode: boolean = false;
-  private watermark: number = DEFAULT_WATERMARK_LOW_MB * Math.pow(1024, 2);
+  // True for percentage mode (e.g. 90%), false for absolute mode (e.g. 500mb)
+  private percentageMode: boolean = true;
+  private watermark: number = DEFAULT_WATERMARK_LOW_PERCENTAGE;
   private enabled: boolean = false;
 
   constructor(
@@ -72,7 +72,7 @@ export class DiskWatermarkService {
     // Including undefined, null and empty string.
     if (!diskWatermarkLow) {
       this.logger.error(
-        `Empty disk watermark config for Code. Fallback with default value (${DEFAULT_WATERMARK_LOW_MB}MB)`
+        `Empty disk watermark config for Code. Fallback with default value (${DEFAULT_WATERMARK_LOW_PERCENTAGE}%)`
       );
       return;
     }
@@ -99,7 +99,7 @@ export class DiskWatermarkService {
       }
     } catch (error) {
       this.logger.error(
-        `Invalid disk watermark config for Code. Fallback with default value (${DEFAULT_WATERMARK_LOW_MB}MB)`
+        `Invalid disk watermark config for Code. Fallback with default value (${DEFAULT_WATERMARK_LOW_PERCENTAGE}%)`
       );
     }
   }
