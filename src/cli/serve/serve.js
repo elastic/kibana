@@ -90,7 +90,9 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     if (opts.ssl) {
       // @kbn/dev-utils is part of devDependencies
       const { CA_CERT_PATH } = require('@kbn/dev-utils');
-      const customElasticsearchHosts = (opts.elasticsearch && opts.elasticsearch.split(',')) || get('elasticsearch.hosts');
+      const customElasticsearchHosts = opts.elasticsearch
+        ? opts.elasticsearch.split(',')
+        : get('elasticsearch.hosts');
 
       function ensureNotDefined(path) {
         if (has(path)) {
