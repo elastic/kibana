@@ -8,7 +8,7 @@ import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { getBuckets } from './get_buckets';
 import { getDistributionMax } from './get_distribution_max';
-import { roundNice } from '../../helpers/round_nice';
+import { roundToNearestFiveOrTen } from '../../helpers/round_to_nearest_five_or_ten';
 
 function getBucketSize(max: number, { config }: Setup) {
   const minBucketSize: number = config.get<number>(
@@ -16,7 +16,9 @@ function getBucketSize(max: number, { config }: Setup) {
   );
   const bucketTargetCount = config.get<number>('xpack.apm.bucketTargetCount');
   const bucketSize = max / bucketTargetCount;
-  return roundNice(bucketSize > minBucketSize ? bucketSize : minBucketSize);
+  return roundToNearestFiveOrTen(
+    bucketSize > minBucketSize ? bucketSize : minBucketSize
+  );
 }
 
 export type TransactionDistributionAPIResponse = PromiseReturnType<

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { roundNice } from './round_nice';
+import { roundToNearestFiveOrTen } from './round_to_nearest_five_or_ten';
 
-describe('roundNice', () => {
+describe('roundToNearestFiveOrTen', () => {
   [
     {
       input: 11,
@@ -46,7 +46,7 @@ describe('roundNice', () => {
     }
   ].forEach(({ input, output }) => {
     it(`should convert ${input} to ${output}`, () => {
-      expect(roundNice(input)).toBe(output);
+      expect(roundToNearestFiveOrTen(input)).toBe(output);
     });
   });
 });
