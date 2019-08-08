@@ -36,7 +36,6 @@ export const LogsPage = injectUICapabilities(
     const [sourceId] = useSourceId();
     const source = useSource({ sourceId });
     const { hasLogAnalysisCapabilites } = useLogAnalysisCapabilities();
-
     return (
       <Source.Context.Provider value={source}>
         <ColumnarPage>
@@ -65,7 +64,10 @@ export const LogsPage = injectUICapabilities(
             ]}
             readOnlyBadge={!uiCapabilities.logs.save}
           />
-          {source.isLoadingSource ? (
+          {source.isLoadingSource ||
+          (!source.isLoadingSource &&
+            !source.hasFailedLoadingSource &&
+            source.source === undefined) ? (
             <SourceLoadingPage />
           ) : source.hasFailedLoadingSource ? (
             <SourceErrorPage

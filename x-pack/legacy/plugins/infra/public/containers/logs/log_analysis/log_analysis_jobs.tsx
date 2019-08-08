@@ -5,12 +5,17 @@
  */
 
 import createContainer from 'constate-latest';
-import { useMemo, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { kfetch } from 'ui/kfetch';
-
-import { getJobIdPrefix } from '../../../../common/log_analysis';
+import { values } from 'lodash';
+import { getJobId, getJobIdPrefix } from '../../../../common/log_analysis';
+import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { setupMlModuleRequestPayloadRT } from './ml_api_types';
+import {
+  setupMlModuleRequestPayloadRT,
+  fetchJobStatusRequestPayloadRT,
+  fetchJobStatusResponsePayloadRT,
+} from './ml_api_types';
 
 type JobStatus = 'unknown' | 'querying' | 'missing' | 'creating' | 'running' | 'inconsistent';
 
@@ -53,17 +58,56 @@ export const useLogAnalysisJobs = ({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        kfetch({
+        const response = await kfetch({
           method: 'POST',
           pathname: '/api/ml/jobs/jobs_summary',
+          body: JSON.stringify(
+            fetchJobStatusRequestPayloadRT.encode({
+              jobIds: [getJobId(spaceId, sourceId, 'log-entry-rate')],
+            })
+          ),
         });
+        return fetchJobStatusResponsePayloadRT
+          .decode(response)
+          .getOrElseL(throwErrors(createPlainError));
+      },
+      onResolve: response => {
+        if (response && response.length) {
+          const logEntryRate = response.find(
+            job => job.id === getJobId(spaceId, sourceId, 'log-entry-rate')
+          );
+          setJobStatus({
+            logEntryRate: logEntryRate ? (logEntryRate.jobState as JobStatus) : 'unknown',
+          });
+        }
+      },
+      onReject: error => {
+        // TODO: Handle errors
       },
     },
     [indexPattern, spaceId, sourceId]
   );
 
+  useEffect(() => {
+    fetchJobStatus();
+  }, []);
+
+  const isSetupRequired = useMemo(() => {
+    const jobStates = values(jobStatus);
+    const badStates = jobStates.filter(state => {
+      return state === 'unknown' || state === 'missing' || state === 'inconsistent';
+    });
+    return badStates.length > 0;
+  }, [jobStatus]);
+
+  const isLoadingSetupStatus = useMemo(() => fetchJobStatusRequest.state === 'pending', [
+    fetchJobStatusRequest.state,
+  ]);
+
   return {
     jobStatus,
+    isSetupRequired,
+    isLoadingSetupStatus,
   };
 };
 
