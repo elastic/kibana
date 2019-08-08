@@ -59,11 +59,11 @@ export class VectorTileLayer extends TileLayer {
     if (!sourceDataRequest) {
       return null;
     }
-    const styleAndSprits = sourceDataRequest.getData();
-    if (!styleAndSprits) {
+    const vectorStyleAndSprites = sourceDataRequest.getData();
+    if (!vectorStyleAndSprites) {
       return null;
     }
-    return styleAndSprits.vectorStyleSheet;
+    return vectorStyleAndSprites.vectorStyleSheet;
   }
 
   _getSpriteMeta() {
@@ -71,8 +71,8 @@ export class VectorTileLayer extends TileLayer {
     if (!sourceDataRequest) {
       return null;
     }
-    const styleAndSprits = sourceDataRequest.getData();
-    return styleAndSprits.spriteMeta;
+    const vectorStyleAndSprites = sourceDataRequest.getData();
+    return vectorStyleAndSprites.spriteMeta;
   }
 
   getMbLayerIds() {
@@ -116,9 +116,10 @@ export class VectorTileLayer extends TileLayer {
       return;
     }
 
-    const sourceIds = Object.keys(vectorStyle.sources);
-
     let initialBootstrapCompleted = false;
+
+    //sync sources
+    const sourceIds = Object.keys(vectorStyle.sources);
     sourceIds.forEach(sourceId => {
       if (initialBootstrapCompleted) {
         return;
@@ -134,6 +135,8 @@ export class VectorTileLayer extends TileLayer {
     });
 
     if (!initialBootstrapCompleted) {
+
+      //sync spritesheet
       const spriteMeta = this._getSpriteMeta();
       const newJson = {};
       for (const imageId in spriteMeta.json) {
@@ -143,9 +146,8 @@ export class VectorTileLayer extends TileLayer {
         }
       }
       addSpritesheetToMap(newJson, spriteMeta.png, mbMap);
-    }
 
-    if (!initialBootstrapCompleted) {
+      //sync layers
       vectorStyle.layers.forEach(layer => {
         const mbLayerId = this._generateMbId(layer.id);
         const mbLayer = mbMap.getLayer(mbLayerId);
@@ -158,15 +160,12 @@ export class VectorTileLayer extends TileLayer {
           id: mbLayerId
         };
 
-        if (
-          newLayerObject.type === 'symbol' &&
-          newLayerObject.layout &&
-          typeof newLayerObject.layout['icon-image'] === 'string'
-        ) {
+        if (newLayerObject.type === 'symbol' && newLayerObject.layout && typeof newLayerObject.layout['icon-image'] === 'string') {
           newLayerObject.layout['icon-image'] = this._makeNamespacedImageId(newLayerObject.layout['icon-image']);
         }
         mbMap.addLayer(newLayerObject);
       });
+
     }
 
     this._setTileLayerProperties(mbMap);
@@ -187,7 +186,18 @@ export class VectorTileLayer extends TileLayer {
         mbMap.setPaintProperty(mbLayerId, opacityProp, this.getAlpha());
       }
     });
+  }
 
+  _setLayerZoomRange(mbMap, mbLayer, mbLayerId) {
+    let minZoom = this._descriptor.minZoom;
+    if (typeof mbLayer.minzoom === 'number') {
+      minZoom = Math.max(minZoom, mbLayer.minzoom);
+    }
+    let maxZoom = this._descriptor.maxZoom;
+    if (typeof mbLayer.maxzoom === 'number') {
+      maxZoom = Math.min(maxZoom, mbLayer.maxzoom);
+    }
+    mbMap.setLayerZoomRange(mbLayerId, minZoom, maxZoom);
   }
 
   _setTileLayerProperties(mbMap) {
@@ -198,23 +208,10 @@ export class VectorTileLayer extends TileLayer {
     }
 
     vectorStyle.layers.forEach(mbLayer => {
-
       const mbLayerId = this._generateMbId(mbLayer.id);
-
       mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-
-      let minZoom = this._descriptor.minZoom;
-      if (typeof mbLayer.minzoom === 'number') {
-        minZoom = Math.max(minZoom, mbLayer.minzoom);
-      }
-      let maxZoom = this._descriptor.maxZoom;
-      if (typeof mbLayer.maxzoom === 'number') {
-        maxZoom = Math.min(maxZoom, mbLayer.maxzoom);
-      }
-      mbMap.setLayerZoomRange(mbLayerId, minZoom, maxZoom);
-
+      this._setLayerZoomRange(mbMap, mbLayer, mbLayerId);
       this._setOpacityForType(mbMap, mbLayer, mbLayerId);
-
     });
 
   }

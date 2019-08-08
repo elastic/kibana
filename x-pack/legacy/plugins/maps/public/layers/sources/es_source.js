@@ -100,6 +100,7 @@ export class AbstractESSource extends AbstractVectorSource {
     try {
       indexPattern = await this._getIndexPattern();
     } catch(error) {
+      console.warn(`Unable to find Index pattern ${this._descriptor.indexPatternId}, values are not formatted`);
       return properties;
     }
 

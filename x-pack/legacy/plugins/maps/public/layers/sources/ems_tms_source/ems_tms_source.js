@@ -140,14 +140,10 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   async getVectorStyleSheetAndSpriteMeta() {
-
     const emsTMSService = await this._getEMSTMSService();
-    const vectorStyleSheet = await emsTMSService.getVectorStyleSheet();
-    const spriteMeta = await emsTMSService.getSpriteSheetMeta();
-
     return {
-      vectorStyleSheet: vectorStyleSheet,
-      spriteMeta: spriteMeta
+      vectorStyleSheet: await emsTMSService.getVectorStyleSheet(),
+      spriteMeta: await emsTMSService.getSpriteSheetMeta()
     };
   }
 

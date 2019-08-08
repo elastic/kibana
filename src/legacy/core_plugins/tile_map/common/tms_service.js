@@ -36,10 +36,10 @@ export class TMSService {
     const inlinedSources = {};
     for (const sourceName in vectorJson.sources) {
       if (vectorJson.sources.hasOwnProperty(sourceName)) {
+
         const sourceUrl = vectorJson.sources[sourceName].url;
         const extendedUrl = this._emsClient.extendUrlWithParams(sourceUrl);
         const sourceJson = await this._emsClient.getManifest(extendedUrl);
-
 
         const extendedTileUrls = sourceJson.tiles.map(tileUrl => this._emsClient.extendUrlWithParams(tileUrl));
         inlinedSources[sourceName] = {
@@ -59,25 +59,18 @@ export class TMSService {
     this._proxyPath = proxyPath;
   }
 
-  _getRasterFormats(locale) {
-    return this._config.formats.filter(format => {
-      return format.locale === locale && format.format === 'raster';
-    });
+  _getFormats(formatType, locale) {
+    return this._config.formats.filter(format => format.locale === locale && format.format === formatType);
   }
 
-  _getVectorFormats(locale) {
-    return this._config.formats.filter(format => {
-      return format.locale === locale && format.format === 'vector';
-    });
-  }
-
-  _getVectorStyleUrl() {
-    let vectorFormats = this._getVectorFormats(this._emsClient.getLocale());
+  _getStyleUrlForLocale(formatType) {
+    let vectorFormats = this._getFormats(formatType, this._emsClient.getLocale());
     if (!vectorFormats.length) {//fallback to default locale
-      vectorFormats = this._getVectorFormats(this._emsClient.getDefaultLocale());
+      vectorFormats = this._getFormats(formatType, this._emsClient.getDefaultLocale());
     }
     if (!vectorFormats.length) {
-      throw new Error(`Cannot find vector tile layer for locale ${this._emsClient.getLocale()} or ${this._emsClient.getDefaultLocale()}`);
+      // eslint-disable-next-line max-len
+      throw new Error(`Cannot find ${formatType} tile layer for locale ${this._emsClient.getLocale()} or ${this._emsClient.getDefaultLocale()}`);
     }
     const defaultStyle = vectorFormats[0];
     if (defaultStyle && defaultStyle.hasOwnProperty('url')) {
@@ -85,19 +78,12 @@ export class TMSService {
     }
   }
 
+  _getVectorStyleUrl() {
+    return this._getStyleUrlForLocale('vector');
+  }
 
   _getRasterStyleUrl() {
-    let rasterFormats = this._getRasterFormats(this._emsClient.getLocale());
-    if (!rasterFormats.length) {//fallback to default locale
-      rasterFormats = this._getRasterFormats(this._emsClient.getDefaultLocale());
-    }
-    if (!rasterFormats.length) {
-      throw new Error(`Cannot find raster tile layer for locale ${this._emsClient.getLocale()} or ${this._emsClient.getDefaultLocale()}`);
-    }
-    const defaultStyle = rasterFormats[0];
-    if (defaultStyle && defaultStyle.hasOwnProperty('url')) {
-      return defaultStyle.url;
-    }
+    return this._getStyleUrlForLocale('raster');
   }
 
   async getDefaultRasterStyle() {
@@ -115,10 +101,10 @@ export class TMSService {
   }
 
   async getSpriteSheetMeta() {
-    const vsjson = await this._getVectorStyleJson();
-    //hardcode to retina
-    const metaUrl = vsjson.sprite + '@2x.json';
-    const spritePngs =  vsjson.sprite + '@2x.png';
+    const vectorStyleJson = await this._getVectorStyleJson();
+    //todo: do not hardcode retina suffix
+    const metaUrl = vectorStyleJson.sprite + '@2x.json';
+    const spritePngs =  vectorStyleJson.sprite + '@2x.png';
     const metaUrlExtended = this._emsClient.extendUrlWithParams(metaUrl);
     const jsonMeta = await this._emsClient.getManifest(metaUrlExtended);
     return {
