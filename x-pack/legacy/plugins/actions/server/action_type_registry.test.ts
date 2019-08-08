@@ -28,6 +28,8 @@ const actionTypeRegistryParams = {
   getServices,
   taskManager: mockTaskManager,
   encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.create(),
+  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+  getBasePath: jest.fn().mockReturnValue(undefined),
 };
 
 beforeEach(() => jest.resetAllMocks());
