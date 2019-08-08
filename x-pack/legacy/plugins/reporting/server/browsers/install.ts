@@ -7,24 +7,31 @@
 import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
-import { BROWSERS_BY_TYPE } from './browsers';
+import { LevelLogger as Logger } from '../lib/level_logger';
+// @ts-ignore
 import { extract } from './extract';
+// @ts-ignore
 import { md5 } from './download/checksum';
 
 const chmod = promisify(fs.chmod);
 
+interface Package {
+  platforms: string[];
+}
+interface PathResponse {
+  binaryPath: string;
+}
+
 /**
  * "install" a browser by type into installs path by extracting the downloaded
  * archive. If there is an error extracting the archive an `ExtractError` is thrown
- * @param {LevelLogger} logger
- * @param {Object} browserConfig - configuration options for the given browser type.
- * @param  {String} browserType
- * @param  {String} installsPath
- * @return {Promise<undefined>}
  */
-export async function installBrowser(logger, browserConfig, browserType, installsPath, queueTimeout) {
-  const browser = BROWSERS_BY_TYPE[browserType];
-  const pkg = browser.paths.packages.find(p => p.platforms.includes(process.platform));
+export async function installBrowser(
+  logger: Logger,
+  browser: any,
+  installsPath: string
+): Promise<PathResponse> {
+  const pkg = browser.paths.packages.find((p: Package) => p.platforms.includes(process.platform));
 
   if (!pkg) {
     throw new Error(`Unsupported platform: ${JSON.stringify(browser, null, 2)}`);
@@ -40,5 +47,7 @@ export async function installBrowser(logger, browserConfig, browserType, install
     await chmod(binaryPath, '755');
   }
 
-  return browser.createDriverFactory(binaryPath, logger, browserConfig, queueTimeout);
+  return {
+    binaryPath,
+  };
 }

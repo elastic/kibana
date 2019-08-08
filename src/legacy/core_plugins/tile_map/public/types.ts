@@ -17,19 +17,28 @@
  * under the License.
  */
 
-import React from 'react';
-import { VisOptionsProps } from 'ui/vis/editors/default';
-import { ServiceSettings } from 'ui/vis/map/service_settings';
-
-export interface InjectedDependencies {
-  serviceSettings: ServiceSettings;
+export interface TileMapVisParams {
+  colorSchema: string;
+  mapType: 'Scaled Circle Markers' | 'Shaded Circle Markers' | 'Shaded geohash grid' | 'Heatmap';
+  isDesaturated: boolean;
+  addTooltip: boolean;
+  heatClusterSize: number;
+  legendPosition: 'bottomright' | 'bottomleft' | 'topright' | 'topleft';
+  mapZoom: number;
+  mapCenter: [number, number];
+  wms: {
+    selectedTmsLayer?: {
+      id: string;
+    };
+    enabled: boolean;
+    url?: string;
+    options: {
+      version?: string;
+      layers?: string;
+      format: string;
+      transparent: boolean;
+      attribution?: string;
+      styles?: string;
+    };
+  };
 }
-
-export type ExtendedVisOptionsProps = VisOptionsProps & InjectedDependencies;
-
-const withInjectedDependencies = (
-  Component: React.ComponentType<ExtendedVisOptionsProps>,
-  dependencies: InjectedDependencies
-) => (props: VisOptionsProps) => <Component {...props} {...dependencies} />;
-
-export { withInjectedDependencies };
