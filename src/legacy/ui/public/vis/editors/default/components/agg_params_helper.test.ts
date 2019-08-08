@@ -37,7 +37,7 @@ jest.mock('ui/agg_types', () => ({
     },
   },
 }));
-jest.mock('../default_editor_utils', () => ({
+jest.mock('../utils', () => ({
   groupAndSortBy: jest.fn(() => ['indexedFields']),
 }));
 
