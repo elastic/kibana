@@ -4,26 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IconType } from '@elastic/eui';
-import {
-  ASSET_TYPE_CONFIG,
-  ASSET_TYPE_DASHBOARD,
-  ASSET_TYPE_INDEX_PATTERN,
-  ASSET_TYPE_INGEST_PIPELINE,
-  ASSET_TYPE_SEARCH,
-  ASSET_TYPE_TIMELION_SHEET,
-  ASSET_TYPE_VISUALIZATION,
-} from '../common/constants';
 import { AssetType, ServiceName } from '../common/types';
 
 export const AssetTitleMap: Record<AssetType, string> = {
-  [ASSET_TYPE_CONFIG]: 'Config',
-  [ASSET_TYPE_DASHBOARD]: 'Dashboard',
-  [ASSET_TYPE_INDEX_PATTERN]: 'Index Pattern',
-  [ASSET_TYPE_SEARCH]: 'Saved Search',
-  [ASSET_TYPE_TIMELION_SHEET]: 'Timelion Sheet',
-  [ASSET_TYPE_VISUALIZATION]: 'Visualization',
-  [ASSET_TYPE_INDEX_PATTERN]: 'Index Pattern',
-  [ASSET_TYPE_INGEST_PIPELINE]: 'Ingest Pipeline',
+  config: 'Config',
+  dashboard: 'Dashboard',
+  'index-pattern': 'Index Pattern',
+  'ingest-pipeline': 'Ingest Pipeline',
+  search: 'Saved Search',
+  'timelion-sheet': 'Timelion Sheet',
+  visualization: 'Visualization',
 };
 
 export const ServiceTitleMap: Record<ServiceName, string> = {

@@ -5,16 +5,7 @@
  */
 
 import { ClusterClient, ScopedClusterClient } from 'src/core/server/';
-import {
-  ASSET_TYPE_CONFIG,
-  ASSET_TYPE_DASHBOARD,
-  ASSET_TYPE_INDEX_PATTERN,
-  ASSET_TYPE_SEARCH,
-  ASSET_TYPE_TIMELION_SHEET,
-  ASSET_TYPE_VISUALIZATION,
-  STATUS_INSTALLED,
-  STATUS_NOT_INSTALLED,
-} from '../../common/constants';
+import { STATUS_INSTALLED, STATUS_NOT_INSTALLED } from '../../common/constants';
 import { AssetType, Installable, Installation, Request } from '../../common/types';
 
 export * from './get';
@@ -24,21 +15,13 @@ export * from './handlers';
 
 export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
 
-export type SavedObjectTypes =
-  | typeof ASSET_TYPE_CONFIG
-  | typeof ASSET_TYPE_DASHBOARD
-  | typeof ASSET_TYPE_INDEX_PATTERN
-  | typeof ASSET_TYPE_SEARCH
-  | typeof ASSET_TYPE_TIMELION_SHEET
-  | typeof ASSET_TYPE_VISUALIZATION;
-
-export const SAVED_OBJECT_TYPES = new Set([
-  ASSET_TYPE_CONFIG,
-  ASSET_TYPE_DASHBOARD,
-  ASSET_TYPE_INDEX_PATTERN,
-  ASSET_TYPE_SEARCH,
-  ASSET_TYPE_TIMELION_SHEET,
-  ASSET_TYPE_VISUALIZATION,
+export const SAVED_OBJECT_TYPES = new Set<AssetType>([
+  'config',
+  'dashboard',
+  'index-pattern',
+  'search',
+  'timelion-sheet',
+  'visualization',
 ]);
 
 export function getClusterAccessor(esClient: ClusterClient, req: Request) {
