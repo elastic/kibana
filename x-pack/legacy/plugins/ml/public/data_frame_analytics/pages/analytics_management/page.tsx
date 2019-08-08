@@ -66,10 +66,12 @@ export const Page: FC = () => {
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
               <EuiFlexGroup alignItems="center">
-                <EuiFlexItem>
+                {/* grow={false} fixes IE11 issue with nested flex */}
+                <EuiFlexItem grow={false}>
                   {<RefreshAnalyticsListButton onClick={refresh} isLoading={isLoading} />}
                 </EuiFlexItem>
-                <EuiFlexItem>
+                {/* grow={false} fixes IE11 issue with nested flex */}
+                <EuiFlexItem grow={false}>
                   <CreateAnalyticsButton />
                 </EuiFlexItem>
               </EuiFlexGroup>
