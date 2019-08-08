@@ -20,6 +20,10 @@
 /**
  * The Kibana Core APIs for server-side plugins.
  *
+ * A plugin requires a `kibana.json` file at it's root directory that follows
+ * {@link PluginManifest | the manfiest schema} to define static plugin
+ * information required to load the plugin.
+ *
  * A plugin's `server/index` file must contain a named import, `plugin`, that
  * implements {@link PluginInitializer} which returns an object that implements
  * {@link Plugin}.
@@ -42,10 +46,12 @@ import {
   ElasticsearchServiceSetup,
 } from './elasticsearch';
 import { HttpServiceSetup, HttpServiceStart } from './http';
-import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
+import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
+import { ContextSetup } from './context';
 
 export { bootstrap } from './bootstrap';
-export { ConfigService } from './config';
+export { ConfigPath, ConfigService } from './config';
+export { CoreId } from './core_context';
 export {
   CallAPIOptions,
   ClusterClient,
@@ -72,6 +78,7 @@ export {
   IsAuthenticated,
   KibanaRequest,
   KibanaRequestRoute,
+  LifecycleResponseFactory,
   KnownHeaders,
   LegacyRequest,
   OnPreAuthHandler,
@@ -99,46 +106,52 @@ export {
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
+  PluginManifest,
   PluginName,
 } from './plugins';
 
 export {
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectReference,
-  SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
   SavedObjectsClient,
-  SavedObjectsClientContract,
-  SavedObjectsCreateOptions,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
+  SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
-  SavedObjectsFindOptions,
+  SavedObjectsExportOptions,
   SavedObjectsFindResponse,
-  SavedObjectsMigrationVersion,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportOptions,
+  SavedObjectsImportResponse,
+  SavedObjectsImportRetry,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
+  SavedObjectsResolveImportErrorsOptions,
   SavedObjectsSchema,
   SavedObjectsSerializer,
   SavedObjectsService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-  SavedObjectsExportOptions,
-  SavedObjectsImportError,
-  SavedObjectsImportConflictError,
-  SavedObjectsImportMissingReferencesError,
-  SavedObjectsImportUnknownError,
-  SavedObjectsImportUnsupportedTypeError,
-  SavedObjectsImportOptions,
-  SavedObjectsImportResponse,
-  SavedObjectsImportRetry,
-  SavedObjectsResolveImportErrorsOptions,
 } from './saved_objects';
 
 export { RecursiveReadonly } from '../utils';
+
+export {
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectReference,
+  SavedObjectsBaseOptions,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  SavedObjectsMigrationVersion,
+} from './types';
 
 /**
  * Context passed to the plugins `setup` method.
@@ -146,6 +159,9 @@ export { RecursiveReadonly } from '../utils';
  * @public
  */
 export interface CoreSetup {
+  context: {
+    createContextContainer: ContextSetup['createContextContainer'];
+  };
   elasticsearch: {
     adminClient$: Observable<ClusterClient>;
     dataClient$: Observable<ClusterClient>;
@@ -186,9 +202,11 @@ export interface InternalCoreStart {
 }
 
 export {
+  ContextSetup,
   HttpServiceSetup,
   HttpServiceStart,
   ElasticsearchServiceSetup,
   PluginsServiceSetup,
   PluginsServiceStart,
+  PluginOpaqueId,
 };

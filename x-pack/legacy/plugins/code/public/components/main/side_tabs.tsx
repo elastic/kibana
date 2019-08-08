@@ -79,7 +79,9 @@ class CodeSideTabs extends React.PureComponent<Props> {
         })
       );
     } else {
-      structureTabContent = <SymbolTree />;
+      const { resource, org, repo, revision, path } = this.props.match.params;
+      const uri = `git://${resource}/${org}/${repo}/blob/${revision}/${path}`;
+      structureTabContent = <SymbolTree uri={uri} />;
     }
     return [
       {

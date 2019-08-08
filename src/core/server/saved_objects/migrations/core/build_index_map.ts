@@ -17,8 +17,16 @@
  * under the License.
  */
 
+import { Config } from '../../../config';
 import { MappingProperties } from '../../mappings';
-import { SavedObjectsSchemaDefinition } from '../../schema';
+import { SavedObjectsSchema } from '../../schema';
+
+export interface CreateIndexMapOptions {
+  config: Config;
+  kibanaIndexName: string;
+  schema: SavedObjectsSchema;
+  indexMap: MappingProperties;
+}
 
 export interface IndexMap {
   [index: string]: {
@@ -30,16 +38,17 @@ export interface IndexMap {
 /*
  * This file contains logic to convert savedObjectSchemas into a dictonary of indexes and documents
  */
-export function createIndexMap(
-  defaultIndex: string,
-  savedObjectSchemas: SavedObjectsSchemaDefinition,
-  indexMap: MappingProperties
-) {
+export function createIndexMap({
+  config,
+  kibanaIndexName,
+  schema,
+  indexMap,
+}: CreateIndexMapOptions) {
   const map: IndexMap = {};
   Object.keys(indexMap).forEach(type => {
-    const schema = savedObjectSchemas[type] || {};
-    const script = schema.convertToAliasScript;
-    const indexPattern = schema.indexPattern || defaultIndex;
+    const script = schema.getConvertToAliasScript(type);
+    // Defaults to kibanaIndexName if indexPattern isn't defined
+    const indexPattern = schema.getIndexForType(config, type) || kibanaIndexName;
     if (!map.hasOwnProperty(indexPattern as string)) {
       map[indexPattern] = { typeMappings: {} };
     }
