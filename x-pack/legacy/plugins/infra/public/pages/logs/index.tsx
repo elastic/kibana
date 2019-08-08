@@ -20,6 +20,7 @@ import { Source } from '../../containers/source';
 import { StreamPage } from './stream';
 import { SettingsPage } from '../shared/settings';
 import { AppNavigation } from '../../components/navigation/app_navigation';
+import { AnalysisPage } from './analysis';
 
 interface LogsPageProps extends RouteComponentProps {
   intl: InjectedIntl;
@@ -68,6 +69,13 @@ export const LogsPage = injectUICapabilities(
               },
               {
                 title: intl.formatMessage({
+                  id: 'xpack.infra.logs.index.analysisTabTitle',
+                  defaultMessage: 'Analysis',
+                }),
+                path: `${match.path}/analysis`,
+              },
+              {
+                title: intl.formatMessage({
                   id: 'xpack.infra.logs.index.settingsTabTitle',
                   defaultMessage: 'Settings',
                 }),
@@ -79,6 +87,7 @@ export const LogsPage = injectUICapabilities(
 
         <Switch>
           <Route path={`${match.path}/stream`} component={StreamPage} />
+          <Route path={`${match.path}/analysis`} component={AnalysisPage} />
           <Route path={`${match.path}/settings`} component={SettingsPage} />
         </Switch>
       </ColumnarPage>
