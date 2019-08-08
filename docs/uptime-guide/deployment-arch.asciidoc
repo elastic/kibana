@@ -1,0 +1,13 @@
+[role="xpack"]
+[[uptime-deployment-arch]]
+== Deployment Architecture
+
+There are infinite ways to deploy Uptime and Heartbeat, some of which work better than others. A guiding principle in these recommendations is that an outage that takes down the service being monitored should not also take down Heartbeat. You will want Heartbeat to be functioning even when your site is not, so the guidelines that follow attempt to minimize this possibility.
+
+Heartbeat is generally run as a centralized service within a datacenter. While it is possible to run it as a separate "sidecar" process paired with each process/container we recommend against it. Running Heartbeat centrally ensures you will still be able to see monitoring data in the event of an overloaded, disconnected, or otherwise malfunctioning server. 
+
+For further redundancy, you may want to deploy multiple Heartbeats across geographic and/or network boundaries to provide more data. Specify Heartbeat's observer https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-observer-options.html[geo options] to do so. Some examples might be:
+
+* **A site served from a CDN with points of presence (POPs) around the globe:** In this case you may want to have multiple heartbeats at different data-centers around the world checking to see if your site is reachable via local CDN points of presence.
+* **A service within a single data center that is accessed across multiple VPNs:** Setup one heartbeat instance within the VPN the service operates from, and another within an additional VPN users access the server from. Having both will help pinpoint network errors in the event of an outage.
+* **A single service running primarily in a datacenter on the US east coast, with a hot failover located in a US west coast datacenter:** Run a Heartbeat instance in each datacenter checking both its local copy of the service and its counterpart across the country. You would have two monitors in each region, one for the local service, one for the remote. In the event of a datacenter failure it would be immediately obvious if the service had a connectivity issue to the outside world or if the failure was only internal.
