@@ -1,11 +1,15 @@
 [[TSVB]]
-== Visualizing your data with TSVB
+== TSVB
 
 TSVB is a time series data visualizer that allows you to use the full power of the 
 Elasticsearch aggregation framework. With TSVB, you can combine an infinite 
 number of aggregations to display complex data.
 
 NOTE: In Elasticsearch version 7.3.0 and later, the time series data visualizer is now referred to as TSVB instead of Time Series Visual Builder.
+
+[float]
+[[tsvb-visualization-types]]
+=== Types of TSVB visualizations
 
 TSVB comes with these types of visualizations:
 
@@ -49,7 +53,7 @@ To create a TSVB visualization, choose the data series you want to display, then
 
 [float]
 [[tsvb-data-series-options]]
-=== Configure the data series
+==== Configure the data series
 
 To create a single metric, add multiple data series with multiple aggregations.
 
@@ -87,7 +91,7 @@ By default, the data series are grouped by everything.
 
 [float]
 [[tsvb-panel-options]]
-=== Configure the panel
+==== Configure the panel
 
 Change the data that you want to display and choose the style options for the panel.
 
@@ -99,7 +103,7 @@ Change the data that you want to display and choose the style options for the pa
 
 [float]
 [[tsvb-add-annotations]]
-=== Add annotations
+==== Add annotations
 
 If you are using the Time Series visualization, add annotation data sources.
 
@@ -109,7 +113,7 @@ If you are using the Time Series visualization, add annotation data sources.
 
 [float]
 [[tsvb-enter-markdown]]
-=== Enter Markdown text
+==== Enter Markdown text
 
 Edit the source for the Markdown visualization. 
 
