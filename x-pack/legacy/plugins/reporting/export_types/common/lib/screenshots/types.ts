@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElementPosition } from '../../../../types';
+import { ElementPosition, ConditionalHeaders } from '../../../../types';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import { LayoutInstance } from '../../layouts/layout';
 
 export interface ScreenshotObservableOpts {
   url: string;
-  conditionalHeaders: any;
+  conditionalHeaders: ConditionalHeaders;
   layout: LayoutInstance;
   browserTimezone: string;
 }

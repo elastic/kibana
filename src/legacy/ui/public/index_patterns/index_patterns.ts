@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { idx } from '@kbn/elastic-idx';
 import { SavedObjectsClientContract, SimpleSavedObject, UiSettingsClient } from 'src/core/public';
 // @ts-ignore
 import { fieldFormats } from '../registry/field_formats';
@@ -33,7 +34,7 @@ export class IndexPatterns {
 
   private config: UiSettingsClient;
   private savedObjectsClient: SavedObjectsClientContract;
-  private savedObjectsCache?: Array<SimpleSavedObject<{}>> | null;
+  private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
 
   constructor(config: UiSettingsClient, savedObjectsClient: SavedObjectsClientContract) {
     this.config = config;
@@ -48,35 +49,38 @@ export class IndexPatterns {
     })).savedObjects;
   }
 
-  getIds = async (refresh: boolean) => {
+  getIds = async (refresh: boolean = false) => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
-    if (this.savedObjectsCache) {
-      return this.savedObjectsCache.map(obj => _.get(obj, 'id'));
+    if (!this.savedObjectsCache) {
+      return [];
     }
+    return this.savedObjectsCache.map(obj => idx(obj, _ => _.id));
   };
 
-  getTitles = async (refresh: boolean) => {
+  getTitles = async (refresh: boolean = false): Promise<string[]> => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
-    if (this.savedObjectsCache) {
-      return this.savedObjectsCache.map(obj => _.get(obj, 'attributes.title'));
+    if (!this.savedObjectsCache) {
+      return [];
     }
+    return this.savedObjectsCache.map(obj => idx(obj, _ => _.attributes.title));
   };
 
-  getFields = async (fields: string[], refresh: boolean) => {
+  getFields = async (fields: string[], refresh: boolean = false) => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
-    if (this.savedObjectsCache) {
-      return this.savedObjectsCache.map(obj => {
-        const result: Record<string, any> = {};
-        fields.forEach(f => (result[f] = _.get(obj, f) || _.get(obj, `attributes.${f}`)));
-        return result;
-      });
+    if (!this.savedObjectsCache) {
+      return [];
     }
+    return this.savedObjectsCache.map((obj: Record<string, any>) => {
+      const result: Record<string, any> = {};
+      fields.forEach((f: string) => (result[f] = obj[f] || idx(obj, _ => _.attributes[f])));
+      return result;
+    });
   };
 
   clearCache = (id?: string) => {

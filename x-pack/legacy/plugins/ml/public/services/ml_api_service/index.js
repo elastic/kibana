@@ -13,6 +13,7 @@ import { http } from '../../services/http_service';
 
 import { annotations } from './annotations';
 import { dataFrame } from './data_frame';
+import { dataFrameAnalytics } from './data_frame_analytics';
 import { filters } from './filters';
 import { results } from './results';
 import { jobs } from './jobs';
@@ -443,6 +444,7 @@ export const ml = {
 
   annotations,
   dataFrame,
+  dataFrameAnalytics,
   filters,
   results,
   jobs,
