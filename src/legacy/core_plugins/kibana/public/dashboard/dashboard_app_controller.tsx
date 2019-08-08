@@ -23,6 +23,7 @@ import React from 'react';
 import angular from 'angular';
 
 import chrome from 'ui/chrome';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { toastNotifications } from 'ui/notify';
 
 // @ts-ignore
@@ -431,9 +432,11 @@ export class DashboardAppController {
       refreshDashboardContainer();
     });
 
-    $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', () => {
-      updateState();
-      refreshDashboardContainer();
+    subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+      next: () => {
+        updateState();
+        refreshDashboardContainer();
+      },
     });
 
     function updateViewMode(newMode: ViewMode) {

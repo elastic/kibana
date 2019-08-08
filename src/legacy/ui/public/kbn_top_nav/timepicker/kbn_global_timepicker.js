@@ -19,6 +19,7 @@
 
 import { uiModules } from '../../modules';
 
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import toggleHtml from './kbn_global_timepicker.html';
 import { timefilter } from 'ui/timefilter';
 import { timeHistory } from 'ui/timefilter/time_history';
@@ -56,8 +57,16 @@ uiModules
       $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', () => {
         setTimefilterValues($scope);
       });
-      $scope.$listenAndDigestAsync(timefilter, 'enabledUpdated', () => {
-        setTimefilterValues($scope);
+
+      // subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+      //   next: () => {
+      //     setTimefilterValues($scope);
+      //   }
+
+      subscribeWithScope($scope, timefilter.getEnabledUpdated$(), {
+        next: () => {
+          setTimefilterValues($scope);
+        }
       });
     };
 

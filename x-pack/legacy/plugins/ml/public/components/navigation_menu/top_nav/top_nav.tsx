@@ -45,13 +45,15 @@ export const TopNav: FC = () => {
 
   useEffect(() => {
     timefilter.on('refreshIntervalUpdate', timefilterUpdateListener);
-    timefilter.on('timeUpdate', timefilterUpdateListener);
-    timefilter.on('enabledUpdated', timefilterUpdateListener);
+    const timeUpdateSubscription = timefilter.getTimeUpdate$().subscribe(timefilterUpdateListener);
+    const enabledUpdatedSubscription = timefilter
+      .getEnabledUpdated$()
+      .subscribe(timefilterUpdateListener);
 
     return function cleanup() {
       timefilter.off('refreshIntervalUpdate', timefilterUpdateListener);
-      timefilter.off('timeUpdate', timefilterUpdateListener);
-      timefilter.off('enabledUpdated', timefilterUpdateListener);
+      enabledUpdatedSubscription.unsubscribe();
+      timeUpdateSubscription.unsubscribe();
     };
   }, []);
 

@@ -18,10 +18,12 @@
  */
 
 import _ from 'lodash';
+import { Subject } from 'rxjs';
 import moment from 'moment';
 import { calculateBounds, getTime } from './get_time';
 import { parseQueryString } from 'ui/timefilter/lib/parse_querystring';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import uiRoutes from '../routes';
 import chrome from 'ui/chrome';
 import { areTimePickerValsDifferent } from './lib/diff_time_picker_vals';
@@ -30,10 +32,22 @@ import { timeHistory } from './time_history';
 class Timefilter extends SimpleEmitter {
   constructor() {
     super();
+
+    this.enabledUpdated$ = new Subject();
+    this.timeUpdate$ = new Subject();
+
     this.isTimeRangeSelectorEnabled = false;
     this.isAutoRefreshSelectorEnabled = false;
     this._time = chrome.getUiSettingsClient().get('timepicker:timeDefaults');
     this.setRefreshInterval(chrome.getUiSettingsClient().get('timepicker:refreshIntervalDefaults'));
+  }
+
+  getEnabledUpdated$ = () => {
+    return this.enabledUpdated$.asObservable();
+  }
+
+  getTimeUpdate$ = () => {
+    return this.timeUpdate$.asObservable();
   }
 
   getTime = () => {
@@ -61,7 +75,7 @@ class Timefilter extends SimpleEmitter {
         to: newTime.to,
       };
       timeHistory.add(this._time);
-      this.emit('timeUpdate');
+      this.timeUpdate$.next();
       this.emit('fetch');
     }
   }
@@ -138,7 +152,7 @@ class Timefilter extends SimpleEmitter {
    */
   enableTimeRangeSelector = () => {
     this.isTimeRangeSelectorEnabled = true;
-    this.emit('enabledUpdated');
+    this.enabledUpdated$.next();
   }
 
   /**
@@ -146,7 +160,7 @@ class Timefilter extends SimpleEmitter {
    */
   disableTimeRangeSelector = () => {
     this.isTimeRangeSelectorEnabled = false;
-    this.emit('enabledUpdated');
+    this.enabledUpdated$.next();
   }
 
   /**
@@ -154,7 +168,7 @@ class Timefilter extends SimpleEmitter {
    */
   enableAutoRefreshSelector = () => {
     this.isAutoRefreshSelectorEnabled = true;
-    this.emit('enabledUpdated');
+    this.enabledUpdated$.next();
   }
 
   /**
@@ -162,7 +176,7 @@ class Timefilter extends SimpleEmitter {
    */
   disableAutoRefreshSelector = () => {
     this.isAutoRefreshSelectorEnabled = false;
-    this.emit('enabledUpdated');
+    this.enabledUpdated$.next();
   }
 
 }
@@ -211,7 +225,8 @@ export const registerTimefilterWithGlobalState = _.once((globalState, $rootScope
 
   $rootScope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateGlobalStateWithTime);
 
-  $rootScope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateGlobalStateWithTime);
+  subscribeWithScope($rootScope, timefilter.getTimeUpdate$(), updateGlobalStateWithTime);
+
 });
 
 uiRoutes

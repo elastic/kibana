@@ -18,6 +18,7 @@
  */
 
 import { Moment } from 'moment';
+import { Observable } from 'rxjs';
 import { TimeRange } from './time_history';
 
 // NOTE: These types are somewhat guessed, they may be incorrect.
@@ -29,6 +30,8 @@ export interface RefreshInterval {
 
 export interface Timefilter {
   time: TimeRange;
+  getEnabledUpdated$: () => Observable<any>;
+  getTimeUpdate$: () => Observable<any>;
   getTime: () => TimeRange;
   setTime: (timeRange: TimeRange) => void;
   setRefreshInterval: (refreshInterval: RefreshInterval) => void;

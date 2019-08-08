@@ -16,12 +16,14 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { NoData } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
-import 'ui/directives/listen';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 
 const REACT_NODE_ID_NO_DATA = 'noDataReact';
 
 export class NoDataController {
+
   constructor($injector, $scope) {
+    this.timeUpdateSubscription = undefined;
     const $executor = $injector.get('$executor');
     this.enableTimefilter($executor, $scope);
     this.registerCleanup($scope, $executor);
@@ -105,7 +107,9 @@ export class NoDataController {
   enableTimefilter($executor, $scope) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
-    $scope.$listen(timefilter, 'timeUpdate', () => $executor.run()); // re-fetch if they change the time filter
+
+    // re-fetch if they change the time filter
+    this.timeUpdateSubscription = subscribeWithScope($scope, timefilter.getTimeUpdate$(), $executor.run);
   }
 
   registerCleanup($scope, $executor) {
@@ -113,6 +117,7 @@ export class NoDataController {
     $scope.$on('$destroy', () => {
       $executor.destroy();
       unmountComponentAtNode(document.getElementById(REACT_NODE_ID_NO_DATA));
+      this.timeUpdateSubscription.unsubscribe();
     });
   }
 }
