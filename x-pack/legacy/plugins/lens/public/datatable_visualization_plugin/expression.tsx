@@ -11,6 +11,7 @@ import { EuiBasicTable } from '@elastic/eui';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { KibanaDatatable, LensMultiTable } from '../types';
 import { RenderFunction } from '../interpreter_types';
+import { getFormat } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 
 export interface DatatableColumns {
   columnIds: string[];
@@ -121,6 +122,11 @@ export const datatableRenderer: RenderFunction<DatatableProps> = {
 
 function DatatableComponent(props: DatatableProps) {
   const [firstTable] = Object.values(props.data.tables);
+  const formatters: Record<string, ReturnType<typeof getFormat>> = {};
+
+  firstTable.columns.forEach(column => {
+    formatters[column.id] = getFormat(column.formatterMapping || undefined);
+  });
 
   return (
     <EuiBasicTable
@@ -133,7 +139,17 @@ function DatatableComponent(props: DatatableProps) {
           };
         })
         .filter(({ field }) => !!field)}
-      items={firstTable ? firstTable.rows : []}
+      items={
+        firstTable
+          ? firstTable.rows.map(row => {
+              const formattedRow: Record<string, unknown> = {};
+              Object.entries(formatters).forEach(([columnId, formatter]) => {
+                formattedRow[columnId] = formatter.convert(row[columnId]);
+              });
+              return formattedRow;
+            })
+          : []
+      }
     />
   );
 }

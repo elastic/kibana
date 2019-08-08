@@ -36,6 +36,7 @@ import chrome from 'ui/chrome';
 const courierRequestHandlerProvider = CourierRequestHandlerProvider;
 const courierRequestHandler = courierRequestHandlerProvider().handler;
 
+import { AggConfig } from 'ui/vis';
 import { ExpressionFunction } from '../../types';
 import { KibanaContext, KibanaDatatable } from '../../common';
 
@@ -52,14 +53,37 @@ interface Arguments {
 
 type Return = Promise<KibanaDatatable>;
 
-function getFormatter(aggConfig: any) {
-  if (aggConfig.params && aggConfig.params.field && aggConfig.params.field.format) {
-    return aggConfig.params.field.format.toJSON();
-  }
-  if (aggConfig.type && aggConfig.type.getFormat()) {
-    return aggConfig.type.getFormat().toJSON();
-  }
-}
+// TODO copied from build_pipeline, this should be unified
+const createFormat = (agg: AggConfig) => {
+  const format: any = agg.params.field ? agg.params.field.format.toJSON() : {};
+  const formats: any = {
+    date_range: () => ({ id: 'string' }),
+    percentile_ranks: () => ({ id: 'percent' }),
+    count: () => ({ id: 'number' }),
+    cardinality: () => ({ id: 'number' }),
+    date_histogram: () => ({
+      id: 'date',
+      params: {
+        pattern: agg.buckets.getScaledDateFormat(),
+      },
+    }),
+    terms: () => ({
+      id: 'terms',
+      params: {
+        id: format.id,
+        otherBucketLabel: agg.params.otherBucketLabel,
+        missingBucketLabel: agg.params.missingBucketLabel,
+        ...format.params,
+      },
+    }),
+    range: () => ({
+      id: 'range',
+      params: { id: format.id, ...format.params },
+    }),
+  };
+
+  return formats[agg.type.name] ? formats[agg.type.name]() : format;
+};
 
 export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
   name,
@@ -127,7 +151,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       columns: response.columns.map((column: any) => ({
         id: column.id,
         name: column.name,
-        formatterMapping: getFormatter(column.aggConfig),
+        formatterMapping: createFormat(column.aggConfig),
       })),
     };
 
