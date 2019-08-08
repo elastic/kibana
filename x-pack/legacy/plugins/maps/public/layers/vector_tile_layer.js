@@ -43,9 +43,7 @@ export class VectorTileLayer extends TileLayer {
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
     startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
     try {
-      console.log('need to load stly e ans prites');
       const styleAndSprites = await this._source.getVectorStyleSheetAndSpriteMeta();
-      console.log('sas', styleAndSprites);
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, styleAndSprites, {});
     } catch(error) {
       onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
@@ -138,7 +136,6 @@ export class VectorTileLayer extends TileLayer {
 
     if (!initialBootstrapCompleted) {
       //add the images.
-      console.log('shoulad add spriteshet');
       const spriteMeta = this._getSpriteMeta();
       const newJson = {};
       for (const imageId in spriteMeta.json) {
@@ -147,13 +144,7 @@ export class VectorTileLayer extends TileLayer {
           newJson[namespacedImageId] = spriteMeta.json[imageId];
         }
       }
-      console.log('sm', newJson);
       addSpritesheetToMap(newJson, spriteMeta.png, mbMap);
-
-
-      // addSpritesheetToMap(spriteMeta.json, spriteMeta.png, mbMap);
-    } else {
-      console.log('should not add spritesheet');
     }
 
     if (!initialBootstrapCompleted) {

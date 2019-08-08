@@ -143,9 +143,7 @@ export class EMSTMSSource extends AbstractTMSSource {
 
     const emsTMSService = await this._getEMSTMSService();
     const vectorStyleSheet = await emsTMSService.getVectorStyleSheet();
-    console.log('cvss', vectorStyleSheet);
     const spriteMeta = await emsTMSService.getSpriteSheetMeta();
-    console.log('sm', spriteMeta);
 
     return {
       vectorStyleSheet: vectorStyleSheet,
