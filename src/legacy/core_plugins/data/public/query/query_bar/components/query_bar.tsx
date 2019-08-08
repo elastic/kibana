@@ -315,7 +315,10 @@ export class QueryBarUI extends Component<Props, State> {
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiButton size="s" onClick={() => this.onLuceneSyntaxWarningOptOut(toast)}>
-                  Don't show again
+                  <FormattedMessage
+                    id="data.query.queryBar.luceneSyntaxWarningOptOutText"
+                    defaultMessage="Don't show again"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
