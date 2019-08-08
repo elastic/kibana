@@ -134,7 +134,15 @@ export const datatableVisualization: Visualization<
       const title = i18n.translate('xpack.lens.datatable.visualizationOf', {
         defaultMessage: 'Table: {operations}',
         values: {
-          operations: table.columns.map(col => col.operation.label).join(' & '),
+          operations: table.columns
+            .map(col => col.operation.label)
+            .join(
+              i18n.translate('xpack.lens.datatable.conjunctionSign', {
+                defaultMessage: ' & ',
+                description:
+                  'A character that can be used for conjunction of multiple enumarated items. Make sure to include spaces around it if needed.',
+              })
+            ),
         },
       });
 

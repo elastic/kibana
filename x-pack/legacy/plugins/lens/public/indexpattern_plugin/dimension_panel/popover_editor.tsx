@@ -317,7 +317,12 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   />
                 )}
                 {!incompatibleSelectedOperationType && selectedColumn && (
-                  <EuiFormRow label="Label">
+                  <EuiFormRow
+                    label={i18n.translate('xpack.lens.indexPattern.columnLabel', {
+                      defaultMessage: 'Label',
+                      description: 'Label of a column of data',
+                    })}
+                  >
                     <EuiFieldText
                       data-test-subj="indexPattern-label-edit"
                       value={selectedColumn.label}
