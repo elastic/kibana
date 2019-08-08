@@ -8,6 +8,7 @@
 
 import fs from 'fs';
 import Boom from 'boom';
+import { merge } from 'lodash';
 import { getLatestDataOrBucketTimestamp, prefixDatafeedId } from '../../../common/util/job_utils';
 import { mlLog } from '../../client/log';
 import { jobServiceProvider } from '../job_service';
@@ -261,6 +262,8 @@ export class DataRecognizer {
     startDatafeed,
     start,
     end,
+    jobOverrides,
+    datafeedOverrides,
     request
   ) {
 
@@ -279,7 +282,7 @@ export class DataRecognizer {
 
     // the module's jobs contain custom URLs which require an index patten id
     // but there is no corresponding index pattern, throw an error
-    if (this.indexPatternId === undefined && this.doJobUrlsContainIndexPatternId(moduleConfig)) {
+    if (false && this.indexPatternId === undefined && this.doJobUrlsContainIndexPatternId(moduleConfig)) {
       throw Boom.badRequest(
         `Module's jobs contain custom URLs which require a kibana index pattern (${this.indexPatternName}) which cannot be found.`
       );
@@ -287,7 +290,7 @@ export class DataRecognizer {
 
     // the module's saved objects require an index patten id
     // but there is no corresponding index pattern, throw an error
-    if (this.indexPatternId === undefined && this.doSavedObjectsContainIndexPatternId(moduleConfig)) {
+    if (false && this.indexPatternId === undefined && this.doSavedObjectsContainIndexPatternId(moduleConfig)) {
       throw Boom.badRequest(
         `Module's saved objects contain custom URLs which require a kibana index pattern (${this.indexPatternName}) which cannot be found.`
       );
@@ -300,6 +303,9 @@ export class DataRecognizer {
       datafeeds: [],
       savedObjects: []
     };
+
+    this.applyJobConfigOverrides(moduleConfig, jobOverrides, jobPrefix);
+    this.applyDatafeedConfigOverrides(moduleConfig, datafeedOverrides, jobPrefix);
     this.updateDatafeedIndices(moduleConfig);
     this.updateJobUrlIndexPatterns(moduleConfig);
 
@@ -752,6 +758,69 @@ export class DataRecognizer {
       }
     }
     return false;
+  }
+
+  applyJobConfigOverrides(moduleConfig, jobOverrides, jobPrefix = '') {
+    if(jobOverrides !== undefined) {
+      // jobOverrides could be a single object or an array of objects.
+      // if single, convert to an array
+      const overrides = Array.isArray(jobOverrides) ? jobOverrides : [jobOverrides];
+      const { jobs } = moduleConfig;
+
+      // first collect the overrides which don't contain a job id
+      // these will be applied to all jobs in the module
+      const generalOverrides = overrides.filter(o => o.job_id === undefined);
+      generalOverrides.forEach(o => {
+        jobs.forEach(({ config }) => merge(config, o));
+      });
+
+      // collect all job specific overrides
+      const jobSpecificOverrides = overrides.filter(o => o.job_id !== undefined);
+      jobSpecificOverrides.forEach(o => {
+        // for each override, find the relevant job.
+        // note, the job id already has the prefix prepended to it
+        const job = jobs.find(j => j.id === `${jobPrefix}${o.job_id}`);
+        if (job !== undefined) {
+          // delete the job_id in the override as this shouldn't be overridden
+          delete o.job_id;
+          merge(job.config, o);
+        }
+      });
+    }
+  }
+
+  applyDatafeedConfigOverrides(moduleConfig, datafeedOverrides, jobPrefix = '') {
+    if(datafeedOverrides !== undefined) {
+      // jobOverrides could be a single object or an array of objects.
+      // if single, convert to an array
+      const overrides = Array.isArray(datafeedOverrides) ? datafeedOverrides : [datafeedOverrides];
+      const { datafeeds } = moduleConfig;
+
+      // first collect the overrides which don't contain a datafeed id or a job id
+      // these will be applied to all jobs in the module
+      const generalOverrides = overrides.filter(o => o.datafeed_id === undefined && o.job_id === undefined);
+      generalOverrides.forEach(o => {
+        datafeeds.forEach(({ config }) => {
+          merge(config, o);
+        });
+      });
+
+      // collect all the overrides which contain either a job id or a datafeed id
+      const datafeedSpecificOverrides = overrides.filter(o => (o.datafeed_id !== undefined || o.job_id !== undefined));
+      datafeedSpecificOverrides.forEach(o => {
+        // either a job id or datafeed id has been specified, so create a new id
+        // containing either one plus the prefix
+        const tempId = o.datafeed_id !== undefined ? o.datafeed_id : o.job_id;
+        const dId = prefixDatafeedId(tempId, jobPrefix);
+
+        const datafeed = datafeeds.find(d => d.id === dId);
+        if (datafeed !== undefined) {
+          delete o.job_id;
+          delete o.datafeed_id;
+          merge(datafeed.config, o);
+        }
+      });
+    }
   }
 
 }
