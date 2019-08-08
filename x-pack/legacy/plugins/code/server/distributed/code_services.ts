@@ -28,6 +28,10 @@ export class CodeServices {
     return this.adapter.locator.locate(req, resource);
   }
 
+  public isResourceLocal(resource: string): Promise<boolean> {
+    return this.adapter.locator.isResourceLocal(resource);
+  }
+
   public serviceFor<def extends ServiceDefinition>(serviceDefinition: def): ServiceMethodMap<def> {
     return this.adapter.getService(serviceDefinition);
   }

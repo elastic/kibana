@@ -170,14 +170,6 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
 
   const fieldType = fieldMapping.type;
 
-  if (fieldType === 'multi_field') {
-    nestedFields = $.map(fieldMapping.fields, function (fieldMapping, fieldName) {
-      return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
-    });
-
-    return applyPathSettings(nestedFields);
-  }
-
   const ret = { name: fieldName, type: fieldType };
 
   if (fieldMapping.index_name) {
