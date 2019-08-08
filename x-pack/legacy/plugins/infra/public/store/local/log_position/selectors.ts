@@ -30,7 +30,9 @@ export const selectVisibleMidpointOrTarget = createSelector(
   selectTargetPosition,
   selectControlsShouldDisplayTargetPosition,
   (middleVisiblePosition, targetPosition, displayTargetPosition) => {
-    if (middleVisiblePosition) {
+    if (displayTargetPosition) {
+      return targetPosition;
+    } else if (middleVisiblePosition) {
       return middleVisiblePosition;
     } else if (targetPosition) {
       return targetPosition;

@@ -137,6 +137,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                               jumpToTarget={jumpToTargetPosition}
                               summaryBuckets={buckets}
                               target={visibleMidpointTime}
+                              isReloading={isReloading}
                             />
                           )}
                         </WithStreamItems>

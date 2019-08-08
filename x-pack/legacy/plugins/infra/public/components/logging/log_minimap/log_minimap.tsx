@@ -73,8 +73,13 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
 
   private dragTargetArea: SVGElement | null = null;
 
-  public static getDerivedStateFromProps({ target }: LogMinimapProps, { drag }: LogMinimapState) {
-    if (!drag) return { target };
+  public static getDerivedStateFromProps(
+    { target, isReloading }: LogMinimapProps,
+    { drag, target: currentTarget }: LogMinimapState
+  ) {
+    if (!drag) {
+      return { target };
+    }
     return null;
   }
 
@@ -194,7 +199,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
         width={width}
         onMouseDown={this.handleMouseDown}
         onMouseMove={this.updateTimeCursor}
-        showOverscanBoundaries={Boolean(height)}
+        showOverscanBoundaries={Boolean(height && summaryBuckets.length)}
       >
         <g transform={`translate(0, ${dragTransform + overscanTranslate})`}>
           <DensityChart
