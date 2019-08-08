@@ -1,10 +1,10 @@
 [role="xpack"]
 [[canvas-workpad]]
-== Create and build a workpad
+== Creating and building a workpad
 
-Description.
+To create a dynamic, multi-page, pixel perfect presentation, create and build your Canvas workpad.
 
-For workpad inspiration, go to the link:https://www.elastic.co/blog/[Elastic Blog]. 
+In need of some workpad inspiration? Check out the link:https://www.elastic.co/blog/[Elastic Blog]. 
 
 [float]
 [[create-canvas-workpad]]
@@ -40,6 +40,7 @@ For example, click *720p* for a traditional presentation layout.
 
 . Click the *Background color* picker, then select the background color for your workpad.
 +
+[role="screenshot"]
 image::images/canvas-background-color-picker.gif[]
 
 . Apply a set of styles to the entire workpad.
@@ -52,21 +53,24 @@ image::images/canvas-background-color-picker.gif[]
 [[element-intro]]
 == Showcase your data with elements
 
-Elements are the building blocks of your workpad. You can add and combine elements to create presentations of your data.
+Elements are the building blocks of your workpad. You can add and combine elements to create dynamic displays of your data.
 
 [float]
 [[add-canvas-element]]
 === Add elements
 
+Choose the elements that best display your brand and data.
+
 . Click *Add element*.
 
-. On the *Elements* window, then select the element you want to use. 
+. On the *Elements* window, select the element you want to use. 
 +
-//TODO add image
-+
-Elements come preconfigured with a small data set so that you can familiarize yourself with the element. Play around with the default settings and see what the element can do. 
+[role="screenshot"]
+image::images/canvas-element-select.gif[Canvas elements]
 
-TIP: Changed your mind? You can delete the element by selecting it, clicking the *Element options* icon in the top right corner, then selecting *Delete*.
+. Elements come preconfigured with a small data set so that you can familiarize yourself with the element. Play around with the default settings and see what the element can do. 
+
+TIP: Want to use a different element? You can delete the element by selecting it, clicking the *Element options* icon in the top right corner, then selecting *Delete*.
 
 [float]
 [[connect-element-data]]
@@ -89,16 +93,10 @@ Access your data in Elasticsearch using the Elasticsearch SQL syntax.
 . In the *Elasticearch SQL query* box, enter your query, then click *Preview*.
 
 . If everything looks correct, click *Save*. 
-+ 
-The element appears as a warning. 
 
-. Click *Display*
+//TODO add image
 
-. Change the data points to display in your element. 
-
-. In the *Label* field, enter a name for the data.
-
-Unfamiliar with writing Elasticsearch SQL queries? Go to {ref}/sql-spec.html[SQL language] for more information.
+Unfamiliar with writing Elasticsearch SQL queries? For more information, refer to {ref}/sql-spec.html[SQL language].
 
 [float]
 [[elasticsearch-raw-doc-data-source]]
@@ -108,27 +106,21 @@ Use the Lucene query syntax to use your raw data in Elasticsearch.
 
 . Click *Elasticsearch raw documents*.
 
-.. From the *Index* dropdown, select the index data that you want to display. 
+. From the *Index* dropdown, select the index data that you want to display. 
 
-.. From the *Fields* dropdown, select the associated fields you want to display.
+. From the *Fields* dropdown, select the associated fields you want to display.
 
-.. To sort the data, select an option from the *Sort Field* and *Sort Order* dropdowns.
+. To sort the data, select an option from the *Sort Field* and *Sort Order* dropdowns.
 
-.. For more targeted queries, enter a *Query* using the Lucene query string syntax. 
-+
-For for more information about the Lucene query string sytax, refer to <<lucene-query,Lucene Query Syntax>>.
+. For more targeted queries, enter a *Query* using the Lucene query string syntax. 
 
 . Click *Preview*. 
 
 . If your query looks correct, click *Save*. 
-+ 
-The element appears as a warning. 
 
-. Click *Display*
+//TODO add image
 
-.. Change the data points to display in your element. 
-
-.. In the *Label* field, enter a name for the data.
+For for more information about the Lucene query string sytax, refer to <<lucene-query,Lucene Query Syntax>>.
 
 [float]
 [[timelion-data-source]]
@@ -145,8 +137,16 @@ For for more information about the Lucene query string syntax, refer to <<lucene
 . Enter the *Interval*, then click *Preview*.
 
 . If your query looks correct, click *Save*. 
-+ 
-The element appears as a warning. 
+
+//TODO add image
+
+For more information about Timelion, refer to <<timelion,Timelion>>.
+
+[float]
+[[configure-display-options]]
+=== Change the display options
+
+When you connect your element to a data source, the element often appears as a warning. To remove the error, you must specify how to process and display the data. 
 
 . Click *Display*
 
@@ -154,37 +154,35 @@ The element appears as a warning.
 
 . In the *Label* field, enter a name for the data.
 
-For more information about Timelion, refer to <<timelion,Timelion>>.
-
 [float]
 [[configure-auto-refresh-interval]]
-=== Change the auto-refresh interval
+=== Change the data auto-refresh interval
 
-Choose the interval to refresh the data on your workpad.
+Choose the interval to refresh the data.
 
 . In the top left corner, click the *Control settings* icon.
 
 . Under *Change auto-refresh interval*, select the interval you want to use.
-+
+
+//TODO add image
+
 To manually refresh the data, click the *Refresh data* icon. 
 
 [float]
 [[element-display-options]]
 === Choose the advanced display options
 
-Choose how you want the element to appear on your workpad.
+Choose further define the appearance of the element, use the advanced display options.
 
 . Next to *Element style*, click *+*.
 
 . Choose one of these options:
 
-* To make small changes to the appearance of the element, click *Container style*.
+* To change the appearance and border of the element, click *Container style*, then change the settings.
 
-* To apply a CSS stylesheet to the element, click *CSS*.
+* To apply a CSS stylesheet to the element, click *CSS*, enter the CCS, then click *Apply stylesheet*.
 
 //For more advanced customization options, create Canvas plugins.
-
-//To further define the appearance and behavior of the element, use the <<canvas-expression-editor,expression editor>>.
 
 [float]
 [[organize-element]]
@@ -201,7 +199,9 @@ Move the element to a preferred location on your workpad.
 * Click and drag the element to your preferred location.
 
 * To move the element by 1 pixel, select the element, then use your arrow keys.
-+
+
+//TODO add image
+
 As you move the element, notice the alignment lines that appear to help you place the element exactly where you want it.
 
 [float]
@@ -213,6 +213,8 @@ Make your elements bigger or smaller than the default size.
 . Select the element.
 
 . Click and drag the resizing icon to the size you want.
+
+//TODO add image
 
 [float]
 [[alighn-canvas-elements]]
@@ -226,6 +228,8 @@ Align two or more elements on your workpad.
 
 . From the *Alignment* menu, how you want to align the elements on the workpad.
 
+//TODO add image
+
 [float]
 [[distribute-canvas-elements]]
 ==== Distribute elements
@@ -238,6 +242,8 @@ Distribute two or more elements on your workpad.
 
 . From the *Distribution* menu, how you want to distribute the elements on the workpad.
 
+//TODO add image
+
 [float]
 [[change-element-order]]
 ==== Change the element order
@@ -249,6 +255,8 @@ Change the order of how the elements are displayed on your workpad.
 . In the top right corder, click the *Element options* icon. 
 
 .. Select *Order*, then select the order that you want the element to appear.
+
+//TODO add image
 
 [float]
 [[element-save]]
@@ -265,12 +273,12 @@ To save a group of elements, press Shift, then select the elements you want to s
 . In the *Create new element* window, enter a *Name*.
 
 . Enter an optional *Description*, then click *Save*.
-+
+
 To access the element, click *Add element*, then select *My elements*.
 
 [float]
 [[add-more-pages]]
-=== Add more pages to the workpad
+=== Add more pages
 
 When you have run out of room on your workpad page, you can add more pages.
 
@@ -278,17 +286,21 @@ When you have run out of room on your workpad page, you can add more pages.
 
 . On the *Page* editor panel on the right, select the page transition from the *Transition* dropdown. 
 
-//TODO insert image
+//TODO add image
 
 [float]
 [[workpad-display-options]]
 === Change the workpad display options
 
-For a better view of the elements on your workpad, change the display options.
+To change the view of the elements on your workpad, change the display options.
 
 * To view your workpad in fullscreen mode, click the *Enter fullscreen mode* icon in the upper left corner.
 
+//TODO add image
+
 * To zoom in or out on the workpad, click the *Zoom controls* icon in the upper left corder, then select one of the options.
+
+//TODO add image
 
 [float]
 [[enable-autoplay]]
@@ -299,3 +311,5 @@ Automatically cycle through your workpads pages in fullscreen mode.
 . In the upper left corner, click the *Control settings* icon.
 
 . Under *Change cycling interval*, select the cycle interval you want to use.
+
+//TODO add image
