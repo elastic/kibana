@@ -19,10 +19,11 @@ import {
 
 import { DataFrameTransformId } from '../../../../common';
 import {
+  getTransformProgress,
   DATA_FRAME_TASK_STATE,
   DataFrameTransformListColumn,
   DataFrameTransformListRow,
-  DataFrameTransformState,
+  DataFrameTransformStats,
 } from './common';
 import { getActions } from './actions';
 
@@ -33,8 +34,8 @@ enum TASK_STATE_COLOR {
 }
 
 export const getTaskStateBadge = (
-  state: DataFrameTransformState['task_state'],
-  reason?: DataFrameTransformState['reason']
+  state: DataFrameTransformStats['task_state'],
+  reason?: DataFrameTransformStats['reason']
 ) => {
   const color = TASK_STATE_COLOR[state];
 
@@ -125,19 +126,19 @@ export const getColumns = (
     },
     {
       name: i18n.translate('xpack.ml.dataframe.status', { defaultMessage: 'Status' }),
-      sortable: (item: DataFrameTransformListRow) => item.state.task_state,
+      sortable: (item: DataFrameTransformListRow) => item.stats.task_state,
       truncateText: true,
       render(item: DataFrameTransformListRow) {
-        return getTaskStateBadge(item.state.task_state, item.state.reason);
+        return getTaskStateBadge(item.stats.task_state, item.stats.reason);
       },
       width: '100px',
     },
     {
       name: i18n.translate('xpack.ml.dataframe.mode', { defaultMessage: 'Mode' }),
-      sortable: (item: DataFrameTransformListRow) => item.config.mode,
+      sortable: (item: DataFrameTransformListRow) => item.mode,
       truncateText: true,
       render(item: DataFrameTransformListRow) {
-        const mode = item.config.mode;
+        const mode = item.mode;
         const color = 'hollow';
         return <EuiBadge color={color}>{mode}</EuiBadge>;
       },
@@ -145,15 +146,10 @@ export const getColumns = (
     },
     {
       name: i18n.translate('xpack.ml.dataframe.progress', { defaultMessage: 'Progress' }),
-      sortable: (item: DataFrameTransformListRow) =>
-        item.state.progress !== undefined ? item.state.progress.percent_complete : 0,
+      sortable: getTransformProgress,
       truncateText: true,
       render(item: DataFrameTransformListRow) {
-        let progress = 0;
-
-        if (item.state.progress !== undefined) {
-          progress = Math.round(item.state.progress.percent_complete);
-        }
+        const progress = getTransformProgress(item);
 
         const isBatchTransform = typeof item.config.sync === 'undefined';
 
@@ -174,10 +170,10 @@ export const getColumns = (
             {!isBatchTransform && (
               <Fragment>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
-                  {item.state.task_state === DATA_FRAME_TASK_STATE.STARTED && (
+                  {item.stats.task_state === DATA_FRAME_TASK_STATE.STARTED && (
                     <EuiProgress color="primary" size="m" />
                   )}
-                  {item.state.task_state !== DATA_FRAME_TASK_STATE.STOPPED && (
+                  {item.stats.task_state === DATA_FRAME_TASK_STATE.STOPPED && (
                     <EuiProgress value={0} max={100} color="primary" size="m" />
                   )}
                 </EuiFlexItem>

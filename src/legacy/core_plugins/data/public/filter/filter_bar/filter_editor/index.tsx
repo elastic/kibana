@@ -32,6 +32,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { FieldFilter, Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
@@ -293,7 +294,11 @@ class FilterEditorUI extends Component<Props, State> {
 
   private renderCustomEditor() {
     return (
-      <EuiFormRow label="Value">
+      <EuiFormRow
+        label={i18n.translate('data.filter.filterEditor.queryDslLabel', {
+          defaultMessage: 'Elasticsearch Query DSL',
+        })}
+      >
         <EuiCodeEditor
           value={this.state.queryDsl}
           onChange={this.onQueryDslChange}
@@ -449,12 +454,20 @@ class FilterEditorUI extends Component<Props, State> {
 
     if (isCustomEditorOpen) {
       const { index, disabled, negate } = this.props.filter.meta;
-      const newIndex = index || this.props.indexPatterns[0].id;
+      const newIndex = index || this.props.indexPatterns[0].id!;
       const body = JSON.parse(queryDsl);
       const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
       this.props.onSubmit(filter);
     } else if (indexPattern && field && operator) {
-      const filter = buildFilter(indexPattern, field, operator, params, alias, $state.store);
+      const filter = buildFilter(
+        indexPattern,
+        field,
+        operator,
+        this.props.filter.meta.disabled,
+        params,
+        alias,
+        $state.store
+      );
       this.props.onSubmit(filter);
     }
   };

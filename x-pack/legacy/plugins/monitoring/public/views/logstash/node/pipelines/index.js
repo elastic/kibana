@@ -22,6 +22,7 @@ import { MonitoringViewBaseEuiTableController } from '../../../';
 import { I18nContext } from 'ui/i18n';
 import { PipelineListing } from '../../../../components/logstash/pipeline_listing/pipeline_listing';
 import { DetailStatus } from '../../../../components/logstash/detail_status';
+import { CODE_PATH_LOGSTASH } from '../../../../../common/constants';
 
 const getPageData = ($injector) => {
   const $route = $injector.get('$route');
@@ -67,7 +68,7 @@ uiRoutes
     resolve: {
       clusters(Private) {
         const routeInit = Private(routeInitProvider);
-        return routeInit();
+        return routeInit({ codePaths: [CODE_PATH_LOGSTASH] });
       },
       pageData: getPageData
     },

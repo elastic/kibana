@@ -40,9 +40,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { Storage } from 'ui/storage';
-import { data } from 'plugins/data/setup';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-const { QueryBarInput } = data.query.ui;
+import { QueryBarInput } from 'plugins/data';
 const localStorage = new Storage(window.localStorage);
 
 export class MetricPanelConfig extends Component {

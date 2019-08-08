@@ -50,37 +50,37 @@ describe('Breadcrumbs', () => {
     expect(global.document.title).toMatchInlineSnapshot(`"APM"`);
   });
 
-  it('/:serviceName/errors/:groupId', () => {
-    expectBreadcrumbToMatchSnapshot('/opbeans-node/errors/myGroupId');
+  it('/services/:serviceName/errors/:groupId', () => {
+    expectBreadcrumbToMatchSnapshot('/services/opbeans-node/errors/myGroupId');
     expect(global.document.title).toMatchInlineSnapshot(`"myGroupId"`);
   });
 
-  it('/:serviceName/errors', () => {
-    expectBreadcrumbToMatchSnapshot('/opbeans-node/errors');
+  it('/services/:serviceName/errors', () => {
+    expectBreadcrumbToMatchSnapshot('/services/opbeans-node/errors');
     expect(global.document.title).toMatchInlineSnapshot(`"Errors"`);
   });
 
   it('/:serviceName', () => {
     expectBreadcrumbToMatchSnapshot('/opbeans-node');
-    expect(global.document.title).toMatchInlineSnapshot(`"opbeans-node"`);
+    expect(global.document.title).toMatchInlineSnapshot(`"APM"`);
   });
 
-  it('/:serviceName/transactions', () => {
-    expectBreadcrumbToMatchSnapshot('/opbeans-node/transactions');
+  it('/services/:serviceName/transactions', () => {
+    expectBreadcrumbToMatchSnapshot('/services/opbeans-node/transactions');
     expect(global.document.title).toMatchInlineSnapshot(`"Transactions"`);
   });
 
-  it('/:serviceName/transactions/:transactionType', () => {
-    expectBreadcrumbToMatchSnapshot('/opbeans-node/transactions/request');
-    expect(global.document.title).toMatchInlineSnapshot(`"Transactions"`);
-  });
-
-  it('/:serviceName/transactions/:transactionType/:transactionName', () => {
+  it('/services/:serviceName/transactions/:transactionType', () => {
     expectBreadcrumbToMatchSnapshot(
-      '/opbeans-node/transactions/request/my-transaction-name'
+      '/services/opbeans-node/transactions/request'
     );
-    expect(global.document.title).toMatchInlineSnapshot(
-      `"my-transaction-name"`
+    expect(global.document.title).toMatchInlineSnapshot(`"Transactions"`);
+  });
+
+  it('/services/:serviceName/transactions/:transactionType/:transactionName', () => {
+    expectBreadcrumbToMatchSnapshot(
+      '/services/opbeans-node/transactions/request/my-transaction-name'
     );
+    expect(global.document.title).toMatchInlineSnapshot(`"Transactions"`);
   });
 });

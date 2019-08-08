@@ -9,11 +9,11 @@ import { first, last } from 'lodash';
 
 import { waffleNodesQuery } from '../../../../legacy/plugins/infra/public/containers/waffle/waffle_nodes.gql_query';
 import { WaffleNodesQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { DATES } from './constants';
 
-const waffleTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
@@ -308,7 +308,4 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default waffleTests;
+}

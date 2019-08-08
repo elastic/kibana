@@ -188,7 +188,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   return schemas;
 };
 
-export const prepareJson = (variable: string, data: object): string => {
+export const prepareJson = (variable: string, data?: object): string => {
   if (data === undefined) {
     return '';
   }

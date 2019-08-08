@@ -8,13 +8,6 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { PrettyDuration } from '..';
 
-storiesOf('renderers/TimeFilter/components/PrettyDuration', module).add(
-  'with relative dates',
-  () => <PrettyDuration from="now-7d" to="now" />
-);
-
-/**
- * Disabling this test due to https://github.com/elastic/kibana/issues/41217
- * Re-enable when we have a better solution for mocking time used in format_duration
- */
-// .add('with absolute dates', () => <PrettyDuration from="01/01/2019" to="02/01/2019" />);
+storiesOf('renderers/TimeFilter/components/PrettyDuration', module)
+  .add('with relative dates', () => <PrettyDuration from="now-7d" to="now" />)
+  .add('with absolute dates', () => <PrettyDuration from="01/01/2019" to="02/01/2019" />);

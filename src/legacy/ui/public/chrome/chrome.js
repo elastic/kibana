@@ -27,7 +27,7 @@ import '../notify';
 import '../private';
 import '../promises';
 import '../storage';
-import '../watch_multi';
+import '../directives/watch_multi';
 import './services';
 import '../react_components';
 import '../i18n';

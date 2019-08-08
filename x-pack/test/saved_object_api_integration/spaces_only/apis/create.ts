@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { SPACES } from '../../common/lib/spaces';
-import { TestInvoker } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createTestSuiteFactory } from '../../common/suites/create';
 
 const expectNamespaceSpecifiedBadRequest = (resp: { [key: string]: any }) => {
@@ -21,8 +21,7 @@ const expectNamespaceSpecifiedBadRequest = (resp: { [key: string]: any }) => {
   });
 };
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: TestInvoker) {
+export default function({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
@@ -31,6 +30,7 @@ export default function({ getService }: TestInvoker) {
     createTest,
     createExpectSpaceAwareResults,
     expectNotSpaceAwareResults,
+    expectBadRequestForHiddenType,
   } = createTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
   describe('create', () => {
@@ -44,6 +44,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
+        },
+        hiddenType: {
+          statusCode: 400,
+          response: expectBadRequestForHiddenType,
         },
         custom: {
           description: 'when a namespace is specified on the saved object',
@@ -70,6 +74,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
+        },
+        hiddenType: {
+          statusCode: 400,
+          response: expectBadRequestForHiddenType,
         },
         custom: {
           description: 'when a namespace is specified on the saved object',

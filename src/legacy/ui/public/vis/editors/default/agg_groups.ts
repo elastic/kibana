@@ -17,7 +17,18 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export enum AggGroupNames {
   Buckets = 'buckets',
   Metrics = 'metrics',
 }
+
+export const aggGroupNamesMap = () => ({
+  [AggGroupNames.Metrics]: i18n.translate('common.ui.vis.editors.aggGroups.metricsText', {
+    defaultMessage: 'Metrics',
+  }),
+  [AggGroupNames.Buckets]: i18n.translate('common.ui.vis.editors.aggGroups.bucketsText', {
+    defaultMessage: 'Buckets',
+  }),
+});

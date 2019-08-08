@@ -29,6 +29,7 @@ describe('FeatureRegistry', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
+      excludeFromBasePrivileges: true,
       icon: 'addDataApp',
       navLinkId: 'someNavLink',
       app: ['app1', 'app2'],

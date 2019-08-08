@@ -34,6 +34,8 @@ jest.mock(
   { virtual: true }
 );
 
+jest.mock('ui/new_platform');
+
 import { migratePanelsTo730 } from './migrate_to_730_panels';
 import { SavedDashboardPanelTo60, SavedDashboardPanel730ToLatest } from '../types';
 import {
@@ -299,6 +301,28 @@ test('6.1 migrates uiState, sort, and scales', async () => {
 
   expect((newPanel.embeddableConfig as any).sort).toBe('sort');
   expect((newPanel.embeddableConfig as any).vis.defaultColors['0+-+100']).toBe('rgb(0,104,55)');
+});
+
+// https://github.com/elastic/kibana/issues/42519
+it('6.1 migrates when uiState={} and panels have sort / column override', () => {
+  const uiState = {};
+  const panels: RawSavedDashboardPanel610[] = [
+    {
+      panelIndex: 1,
+      sort: 'sort',
+      version: '6.1.0',
+      name: 'panel-123',
+      gridData: { h: 3, x: 0, y: 0, w: 6, i: '123' },
+    },
+    {
+      panelIndex: 2,
+      columns: ['hi'],
+      version: '6.1.0',
+      name: 'panel-123',
+      gridData: { h: 3, x: 0, y: 0, w: 6, i: '123' },
+    },
+  ];
+  expect(() => migratePanelsTo730(panels, '8.0.0', true, uiState)).not.toThrow();
 });
 
 test('6.2 migrates sort and scales', async () => {

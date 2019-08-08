@@ -12,20 +12,12 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
             Object {
               "items": Array [
                 Object {
+                  "description": "fq_date_histogram_1m_1441",
+                  "title": "id",
+                },
+                Object {
                   "description": "stopped",
                   "title": "task_state",
-                },
-                Object {
-                  "description": "stopped",
-                  "title": "indexer_state",
-                },
-                Object {
-                  "description": "{\\"date_histogram(@timestamp)\\":1549929540000}",
-                  "title": "current_position",
-                },
-                Object {
-                  "description": "1",
-                  "title": "checkpoint",
                 },
               ],
               "position": "left",
@@ -34,8 +26,12 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
             Object {
               "items": Array [
                 Object {
-                  "description": "{\\"timestamp\\":\\"2019-06-28T16:09:23.539Z\\",\\"timestamp_millis\\":1561738163539,\\"time_upper_bound\\":\\"2019-06-28T16:09:13.539Z\\",\\"time_upper_bound_millis\\":1561738153539}",
-                  "title": "current",
+                  "description": "{\\"checkpoint\\":1,\\"timestamp_millis\\":1564388281199}",
+                  "title": "last",
+                },
+                Object {
+                  "description": "{\\"checkpoint\\":2,\\"indexer_state\\":\\"stopped\\",\\"checkpoint_progress\\":{\\"total_docs\\":86274,\\"docs_remaining\\":0,\\"percent_complete\\":100}}",
+                  "title": "next",
                 },
                 Object {
                   "description": "0",
@@ -48,27 +44,27 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
             Object {
               "items": Array [
                 Object {
-                  "description": "0",
+                  "description": "16",
                   "title": "pages_processed",
                 },
                 Object {
-                  "description": "0",
+                  "description": "86274",
                   "title": "documents_processed",
                 },
                 Object {
-                  "description": "0",
+                  "description": "7200",
                   "title": "documents_indexed",
                 },
                 Object {
-                  "description": "0",
+                  "description": "1",
                   "title": "trigger_count",
                 },
                 Object {
-                  "description": "0",
+                  "description": "1310",
                   "title": "index_time_in_ms",
                 },
                 Object {
-                  "description": "0",
+                  "description": "15",
                   "title": "index_total",
                 },
                 Object {
@@ -76,11 +72,11 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
                   "title": "index_failures",
                 },
                 Object {
-                  "description": "0",
+                  "description": "463",
                   "title": "search_time_in_ms",
                 },
                 Object {
-                  "description": "0",
+                  "description": "16",
                   "title": "search_total",
                 },
                 Object {
@@ -109,20 +105,12 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
               Object {
                 "items": Array [
                   Object {
+                    "description": "fq_date_histogram_1m_1441",
+                    "title": "id",
+                  },
+                  Object {
                     "description": "stopped",
                     "title": "task_state",
-                  },
-                  Object {
-                    "description": "stopped",
-                    "title": "indexer_state",
-                  },
-                  Object {
-                    "description": "{\\"date_histogram(@timestamp)\\":1549929540000}",
-                    "title": "current_position",
-                  },
-                  Object {
-                    "description": "1",
-                    "title": "checkpoint",
                   },
                 ],
                 "position": "left",
@@ -131,8 +119,12 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
               Object {
                 "items": Array [
                   Object {
-                    "description": "{\\"timestamp\\":\\"2019-06-28T16:09:23.539Z\\",\\"timestamp_millis\\":1561738163539,\\"time_upper_bound\\":\\"2019-06-28T16:09:13.539Z\\",\\"time_upper_bound_millis\\":1561738153539}",
-                    "title": "current",
+                    "description": "{\\"checkpoint\\":1,\\"timestamp_millis\\":1564388281199}",
+                    "title": "last",
+                  },
+                  Object {
+                    "description": "{\\"checkpoint\\":2,\\"indexer_state\\":\\"stopped\\",\\"checkpoint_progress\\":{\\"total_docs\\":86274,\\"docs_remaining\\":0,\\"percent_complete\\":100}}",
+                    "title": "next",
                   },
                   Object {
                     "description": "0",
@@ -145,27 +137,27 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
               Object {
                 "items": Array [
                   Object {
-                    "description": "0",
+                    "description": "16",
                     "title": "pages_processed",
                   },
                   Object {
-                    "description": "0",
+                    "description": "86274",
                     "title": "documents_processed",
                   },
                   Object {
-                    "description": "0",
+                    "description": "7200",
                     "title": "documents_indexed",
                   },
                   Object {
-                    "description": "0",
+                    "description": "1",
                     "title": "trigger_count",
                   },
                   Object {
-                    "description": "0",
+                    "description": "1310",
                     "title": "index_time_in_ms",
                   },
                   Object {
-                    "description": "0",
+                    "description": "15",
                     "title": "index_total",
                   },
                   Object {
@@ -173,11 +165,11 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
                     "title": "index_failures",
                   },
                   Object {
-                    "description": "0",
+                    "description": "463",
                     "title": "search_time_in_ms",
                   },
                   Object {
-                    "description": "0",
+                    "description": "16",
                     "title": "search_total",
                   },
                   Object {
@@ -198,23 +190,25 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
         "content": <ExpandedRowJsonPane
           json={
             Object {
+              "create_time": 1564388146667,
               "dest": Object {
-                "index": "fq_data_histogram_1m_1441",
+                "index": "fq_date_histogram_1m_1441",
               },
               "id": "fq_date_histogram_1m_1441",
+              "mode": "batch",
               "pivot": Object {
                 "aggregations": Object {
-                  "avg(response)": Object {
+                  "responsetime.avg": Object {
                     "avg": Object {
                       "field": "responsetime",
                     },
                   },
                 },
                 "group_by": Object {
-                  "date_histogram(@timestamp)": Object {
+                  "@timestamp": Object {
                     "date_histogram": Object {
+                      "calendar_interval": "1m",
                       "field": "@timestamp",
-                      "interval": "1m",
                     },
                   },
                 },
@@ -227,6 +221,7 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
                   "match_all": Object {},
                 },
               },
+              "version": "8.0.0",
             }
           }
         />,
@@ -244,23 +239,25 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
         "content": <ExpandedRowPreviewPane
           transformConfig={
             Object {
+              "create_time": 1564388146667,
               "dest": Object {
-                "index": "fq_data_histogram_1m_1441",
+                "index": "fq_date_histogram_1m_1441",
               },
               "id": "fq_date_histogram_1m_1441",
+              "mode": "batch",
               "pivot": Object {
                 "aggregations": Object {
-                  "avg(response)": Object {
+                  "responsetime.avg": Object {
                     "avg": Object {
                       "field": "responsetime",
                     },
                   },
                 },
                 "group_by": Object {
-                  "date_histogram(@timestamp)": Object {
+                  "@timestamp": Object {
                     "date_histogram": Object {
+                      "calendar_interval": "1m",
                       "field": "@timestamp",
-                      "interval": "1m",
                     },
                   },
                 },
@@ -273,6 +270,7 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
                   "match_all": Object {},
                 },
               },
+              "version": "8.0.0",
             }
           }
         />,

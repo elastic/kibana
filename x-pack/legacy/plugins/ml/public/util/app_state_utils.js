@@ -50,12 +50,17 @@ export function initializeAppState(AppState, stateName, defaultState) {
   return appState;
 }
 
+// Some components like the show-chart-checkbox or severity/interval-dropdowns
+// emit their state change to an observable. This utility function can be used
+// to persist these state changes to AppState and save the state to the url.
+// distinctUntilChanged() makes sure the callback is only triggered upon changes
+// of the state and filters consecutive triggers of the same value.
 export function subscribeAppStateToObservable(AppState, appStateName, o$, callback) {
   const appState = initializeAppState(AppState, appStateName, o$.getValue());
 
   o$.next(appState[appStateName]);
 
-  o$.pipe(distinctUntilChanged()).subscribe(payload => {
+  const subscription = o$.pipe(distinctUntilChanged()).subscribe(payload => {
     appState.fetch();
     appState[appStateName] = payload;
     appState.save();
@@ -63,4 +68,6 @@ export function subscribeAppStateToObservable(AppState, appStateName, o$, callba
       callback(payload);
     }
   });
+
+  return subscription;
 }

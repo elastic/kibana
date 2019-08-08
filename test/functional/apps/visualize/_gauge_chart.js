@@ -57,7 +57,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show Split Gauges', async function () {
-      await PageObjects.visualize.clickMetricEditor();
       log.debug('Bucket = Split Group');
       await PageObjects.visualize.clickBucket('Split group');
       log.debug('Aggregation = Terms');
@@ -81,7 +80,6 @@ export default function ({ getService, getPageObjects }) {
     it('should show correct values for fields with fieldFormatters', async function () {
       const expectedTexts = [ '2,904', 'win 8: Count', '0B', 'win 8: Min bytes' ];
 
-      await PageObjects.visualize.clickMetricEditor();
       await PageObjects.visualize.selectAggregation('Terms');
       await PageObjects.visualize.selectField('machine.os.raw');
       await PageObjects.visualize.setSize('1');
