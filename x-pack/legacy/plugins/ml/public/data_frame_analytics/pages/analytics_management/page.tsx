@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useState } from 'react';
+import React, { Fragment, FC, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -24,37 +24,40 @@ import {
 } from '@elastic/eui';
 
 import { NavigationMenu } from '../../../components/navigation_menu/navigation_menu';
-import { useRefreshTransformList } from '../../common';
-import { CreateTransformButton } from './components/create_transform_button';
-import { DataFrameTransformList } from './components/transform_list';
-import { RefreshTransformListButton } from './components/refresh_transform_list_button';
+import { useRefreshAnalyticsList } from '../../common';
+import { CreateAnalyticsButton } from './components/create_analytics_button';
+import { DataFrameAnalyticsList } from './components/analytics_list';
+import { RefreshAnalyticsListButton } from './components/refresh_analytics_list_button';
 
 export const Page: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
+  const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
 
   return (
     <Fragment>
-      <NavigationMenu tabId="data_frames" />
-      <EuiPage data-test-subj="mlPageDataFrame">
+      <NavigationMenu tabId="data_frame_analytics" />
+      <EuiPage data-test-subj="mlPageDataFrameAnalytics">
         <EuiPageBody>
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
               <EuiTitle>
                 <h1>
                   <FormattedMessage
-                    id="xpack.ml.dataframe.transformList.dataFrameTitle"
-                    defaultMessage="Data frame transforms"
+                    id="xpack.ml.dataframe.analyticsList.title"
+                    defaultMessage="Analytics jobs"
                   />
                   <span>&nbsp;</span>
                   <EuiBetaBadge
-                    label={i18n.translate('xpack.ml.dataframe.transformList.betaBadgeLabel', {
-                      defaultMessage: `Beta`,
-                    })}
-                    tooltipContent={i18n.translate(
-                      'xpack.ml.dataframe.transformList.betaBadgeTooltipContent',
+                    label={i18n.translate(
+                      'xpack.ml.dataframe.analyticsList.experimentalBadgeLabel',
                       {
-                        defaultMessage: `Data frames are a beta feature. We'd love to hear your feedback.`,
+                        defaultMessage: 'Experimental',
+                      }
+                    )}
+                    tooltipContent={i18n.translate(
+                      'xpack.ml.dataframe.analyticsList.experimentalBadgeTooltipContent',
+                      {
+                        defaultMessage: `Data frame analytics are an experimental feature. We'd love to hear your feedback.`,
                       }
                     )}
                   />
@@ -65,11 +68,11 @@ export const Page: FC = () => {
               <EuiFlexGroup alignItems="center">
                 {/* grow={false} fixes IE11 issue with nested flex */}
                 <EuiFlexItem grow={false}>
-                  <RefreshTransformListButton onClick={refresh} isLoading={isLoading} />
+                  {<RefreshAnalyticsListButton onClick={refresh} isLoading={isLoading} />}
                 </EuiFlexItem>
                 {/* grow={false} fixes IE11 issue with nested flex */}
                 <EuiFlexItem grow={false}>
-                  <CreateTransformButton />
+                  <CreateAnalyticsButton />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageContentHeaderSection>
@@ -77,7 +80,7 @@ export const Page: FC = () => {
           <EuiPageContentBody>
             <EuiSpacer size="l" />
             <EuiPanel>
-              <DataFrameTransformList />
+              <DataFrameAnalyticsList />
             </EuiPanel>
           </EuiPageContentBody>
         </EuiPageBody>
