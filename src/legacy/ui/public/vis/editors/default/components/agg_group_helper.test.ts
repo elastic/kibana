@@ -18,12 +18,8 @@
  */
 
 import { AggConfig } from '../../../agg_config';
-import {
-  isAggRemovable,
-  calcAggIsTooLow,
-  isInvalidAggsTouched,
-} from './default_editor_agg_group_helper';
-import { AggsState } from './default_editor_agg_group_state';
+import { isAggRemovable, calcAggIsTooLow, isInvalidAggsTouched } from './agg_group_helper';
+import { AggsState } from './agg_group_state';
 
 describe('DefaultEditorGroup helpers', () => {
   let group: AggConfig;

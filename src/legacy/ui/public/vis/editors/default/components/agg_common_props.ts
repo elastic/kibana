@@ -18,7 +18,8 @@
  */
 
 import { AggType } from 'ui/agg_types';
-import { AggConfig, VisState, AggParams, VisParams } from '../../../';
+import { AggConfig, VisState, VisParams } from '../../..';
+import { AggParams } from '../agg_params';
 import { AggGroupNames } from '../agg_groups';
 
 export type OnAggParamsChange = (
