@@ -242,7 +242,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     try {
       let response;
       if (this.props.savedQuery && !saveAsNew) {
-        response = await saveQuery(savedQueryAttributes, this.props.savedQuery.id);
+        response = await saveQuery(savedQueryAttributes, { overwrite: true });
       } else {
         response = await saveQuery(savedQueryAttributes);
       }

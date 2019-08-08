@@ -78,27 +78,29 @@ describe('saved query service', () => {
   describe('saveQuery', function() {
     it('should create a saved object for the given attributes', async () => {
       mockSavedObjectsClient.create.mockReturnValue({
-        id: '1234',
+        id: 'foo',
         attributes: savedQueryAttributes,
       });
 
       const response = await saveQuery(savedQueryAttributes);
-      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith('query', savedQueryAttributes);
-      expect(response).toEqual({ id: '1234', attributes: savedQueryAttributes });
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith('query', savedQueryAttributes, {
+        id: 'foo',
+      });
+      expect(response).toEqual({ id: 'foo', attributes: savedQueryAttributes });
     });
 
-    it('should accept an explicit ID', async () => {
+    it('should allow overwriting an existing saved query', async () => {
       mockSavedObjectsClient.create.mockReturnValue({
-        id: '1234',
+        id: 'foo',
         attributes: savedQueryAttributes,
       });
 
-      const response = await saveQuery(savedQueryAttributes, '1234');
+      const response = await saveQuery(savedQueryAttributes, { overwrite: true });
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith('query', savedQueryAttributes, {
-        id: '1234',
+        id: 'foo',
         overwrite: true,
       });
-      expect(response).toEqual({ id: '1234', attributes: savedQueryAttributes });
+      expect(response).toEqual({ id: 'foo', attributes: savedQueryAttributes });
     });
 
     it('should optionally accept filters and timefilters in object format', async () => {
@@ -109,7 +111,7 @@ describe('saved query service', () => {
       };
 
       mockSavedObjectsClient.create.mockReturnValue({
-        id: '1234',
+        id: 'foo',
         attributes: serializedSavedQueryAttributesWithFilters,
       });
 
@@ -117,9 +119,10 @@ describe('saved query service', () => {
 
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         'query',
-        serializedSavedQueryAttributesWithFilters
+        serializedSavedQueryAttributesWithFilters,
+        { id: 'foo' }
       );
-      expect(response).toEqual({ id: '1234', attributes: savedQueryAttributesWithFilters });
+      expect(response).toEqual({ id: 'foo', attributes: savedQueryAttributesWithFilters });
     });
 
     it('should throw an error when saved objects client returns error', async () => {
@@ -142,16 +145,16 @@ describe('saved query service', () => {
   describe('findSavedQueries', function() {
     it('should find and return saved queries without search text', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
-        savedObjects: [{ id: '1234', attributes: savedQueryAttributes }],
+        savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
       });
 
       const response = await findSavedQueries();
-      expect(response).toEqual([{ id: '1234', attributes: savedQueryAttributes }]);
+      expect(response).toEqual([{ id: 'foo', attributes: savedQueryAttributes }]);
     });
 
     it('should find and return saved queries with search text matching the title field', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
-        savedObjects: [{ id: '1234', attributes: savedQueryAttributes }],
+        savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
       });
       const response = await findSavedQueries('foo');
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
@@ -160,7 +163,7 @@ describe('saved query service', () => {
         sortField: '_score',
         type: 'query',
       });
-      expect(response).toEqual([{ id: '1234', attributes: savedQueryAttributes }]);
+      expect(response).toEqual([{ id: 'foo', attributes: savedQueryAttributes }]);
     });
     it('should find and return parsed filters and timefilters items', async () => {
       const serializedSavedQueryAttributesWithFilters = {
@@ -169,14 +172,14 @@ describe('saved query service', () => {
         timefilter: JSON.stringify(savedQueryAttributesWithFilters.timefilter),
       };
       mockSavedObjectsClient.find.mockReturnValue({
-        savedObjects: [{ id: '1234', attributes: serializedSavedQueryAttributesWithFilters }],
+        savedObjects: [{ id: 'foo', attributes: serializedSavedQueryAttributesWithFilters }],
       });
       const response = await findSavedQueries('bar');
-      expect(response).toEqual([{ id: '1234', attributes: savedQueryAttributesWithFilters }]);
+      expect(response).toEqual([{ id: 'foo', attributes: savedQueryAttributesWithFilters }]);
     });
     it('should return an array of saved queries', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
-        savedObjects: [{ id: '1234', attributes: savedQueryAttributes }],
+        savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
       });
       const response = await findSavedQueries();
       expect(response).toEqual(
@@ -187,7 +190,7 @@ describe('saved query service', () => {
               query: { language: 'kuery', query: 'response:200' },
               title: 'foo',
             },
-            id: '1234',
+            id: 'foo',
           },
         ])
       );
@@ -196,16 +199,16 @@ describe('saved query service', () => {
 
   describe('getSavedQuery', function() {
     it('should retrieve a saved query by id', async () => {
-      mockSavedObjectsClient.get.mockReturnValue({ id: '1234', attributes: savedQueryAttributes });
+      mockSavedObjectsClient.get.mockReturnValue({ id: 'foo', attributes: savedQueryAttributes });
 
-      const response = await getSavedQuery('1234');
-      expect(response).toEqual({ id: '1234', attributes: savedQueryAttributes });
+      const response = await getSavedQuery('foo');
+      expect(response).toEqual({ id: 'foo', attributes: savedQueryAttributes });
     });
     it('should only return saved queries', async () => {
-      mockSavedObjectsClient.get.mockReturnValue({ id: '1234', attributes: savedQueryAttributes });
+      mockSavedObjectsClient.get.mockReturnValue({ id: 'foo', attributes: savedQueryAttributes });
 
-      await getSavedQuery('1234');
-      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('query', '1234');
+      await getSavedQuery('foo');
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('query', 'foo');
     });
   });
 });

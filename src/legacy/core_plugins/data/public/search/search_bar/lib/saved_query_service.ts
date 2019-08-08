@@ -32,7 +32,7 @@ interface SerializedSavedQueryAttributes extends SavedObjectAttributes {
   timefilter?: string;
 }
 
-export const saveQuery = async (attributes: SavedQueryAttributes, id?: string) => {
+export const saveQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
   const savedObjectsClient = chrome.getSavedObjectsClient();
 
   const query = {
@@ -67,13 +67,13 @@ export const saveQuery = async (attributes: SavedQueryAttributes, id?: string) =
   }
 
   let rawQueryResponse;
-  if (id === undefined) {
+  if (!overwrite) {
     rawQueryResponse = await savedObjectsClient.create('query', queryObject, {
       id: attributes.title,
     });
   } else {
     rawQueryResponse = await savedObjectsClient.create('query', queryObject, {
-      id,
+      id: attributes.title,
       overwrite: true,
     });
   }
