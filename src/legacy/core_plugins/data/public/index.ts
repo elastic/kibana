@@ -18,7 +18,7 @@
  */
 
 // /// Define plugin function
-import { DataPlugin as Plugin } from './plugin';
+import { DataPlugin as Plugin, DataSetup } from './plugin';
 
 export function plugin() {
   return new Plugin();
@@ -27,6 +27,7 @@ export function plugin() {
 // /// Export types & static code
 
 /** @public types */
+export type DataSetup = DataSetup;
 export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
 
 /** @public types */
