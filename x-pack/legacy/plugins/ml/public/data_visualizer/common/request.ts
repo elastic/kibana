@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE = 500;
-export const ANOMALIES_TABLE_DEFAULT_QUERY_SIZE = 500;
+import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 
-export enum SEARCH_QUERY_LANGUAGE {
-  KUERY = 'kuery',
-  LUCENE = 'lucene',
+export interface FieldRequestConfig {
+  fieldName?: string;
+  type: ML_JOB_FIELD_TYPES;
+  cardinality: number;
 }
