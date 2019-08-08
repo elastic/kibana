@@ -207,6 +207,7 @@ function discoverController(
   let filterUpdateSubscription;
   let filterFetchSubscription;
   let timeUpdateSubscription;
+  let refreshIntervalSubscription;
 
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
@@ -229,6 +230,7 @@ function discoverController(
     if (filterFetchSubscription) filterFetchSubscription.unsubscribe();
     if (filterUpdateSubscription) filterUpdateSubscription.unsubscribe();
     if (timeUpdateSubscription) timeUpdateSubscription.unsubscribe();
+    if (refreshIntervalSubscription) refreshIntervalSubscription.unsubscribe();
   });
 
   const $appStatus = $scope.appStatus = this.appStatus = {
@@ -550,9 +552,13 @@ function discoverController(
     $scope.updateDataSource()
       .then(function () {
         $scope.$listen(timefilter, 'autoRefreshFetch', $scope.fetch);
-        $scope.$listen(timefilter, 'refreshIntervalUpdate', $scope.updateRefreshInterval);
 
-        timeUpdateSubscription = subscribeWithScope($scope, timefilter.getTimeUpdate$(), $scope.updateTime);
+        refreshIntervalSubscription = subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
+          next: $scope.updateRefreshInterval
+        });
+        timeUpdateSubscription = subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+          next: $scope.updateTime
+        });
 
         $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;

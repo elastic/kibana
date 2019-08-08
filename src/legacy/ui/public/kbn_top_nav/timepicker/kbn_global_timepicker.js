@@ -51,22 +51,29 @@ uiModules
   .get('kibana')
   .directive('kbnGlobalTimepicker', (globalState, config) => {
     const listenForUpdates = ($scope) => {
-      $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
-        setTimefilterValues($scope);
-      });
-      $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', () => {
-        setTimefilterValues($scope);
-      });
-
-      // subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
-      //   next: () => {
-      //     setTimefilterValues($scope);
-      //   }
-
-      subscribeWithScope($scope, timefilter.getEnabledUpdated$(), {
+      const subscriptions = [];
+      subscriptions.push(subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
         next: () => {
           setTimefilterValues($scope);
         }
+      }));
+
+      subscriptions.push(subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+        next: () => {
+          setTimefilterValues($scope);
+        }
+      }));
+
+      subscriptions.push(subscribeWithScope($scope, timefilter.getEnabledUpdated$(), {
+        next: () => {
+          setTimefilterValues($scope);
+        }
+      }));
+
+      $scope.$on('$destroy', () => {
+        subscriptions.forEach(subscription => {
+          subscription.unsubscribe();
+        });
       });
     };
 

@@ -5,6 +5,7 @@
  */
 
 import { timefilter } from 'ui/timefilter';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 export function executorProvider(Promise, $timeout) {
 
   const queue = [];
@@ -93,7 +94,11 @@ export function executorProvider(Promise, $timeout) {
     register,
     start($scope) {
       $scope.$listenAndDigestAsync(timefilter, 'fetch', reFetch);
-      $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', killIfPaused);
+      subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
+        next: () => {
+          killIfPaused();
+        }
+      });
       start();
     },
     run,

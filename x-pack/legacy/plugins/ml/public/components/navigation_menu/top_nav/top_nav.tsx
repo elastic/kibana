@@ -44,16 +44,18 @@ export const TopNav: FC = () => {
   const dateFormat = chrome.getUiSettingsClient().get('dateFormat');
 
   useEffect(() => {
-    timefilter.on('refreshIntervalUpdate', timefilterUpdateListener);
+    const refreshIntervalSubscription = timefilter
+      .getRefreshIntervalUpdate$()
+      .subscribe(timefilterUpdateListener);
     const timeUpdateSubscription = timefilter.getTimeUpdate$().subscribe(timefilterUpdateListener);
     const enabledUpdatedSubscription = timefilter
       .getEnabledUpdated$()
       .subscribe(timefilterUpdateListener);
 
     return function cleanup() {
-      timefilter.off('refreshIntervalUpdate', timefilterUpdateListener);
       enabledUpdatedSubscription.unsubscribe();
       timeUpdateSubscription.unsubscribe();
+      refreshIntervalSubscription.unsubscribe();
     };
   }, []);
 

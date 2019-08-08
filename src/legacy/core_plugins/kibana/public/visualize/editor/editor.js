@@ -399,9 +399,12 @@ function VisEditor(
       $scope.refreshInterval = timefilter.getRefreshInterval();
     };
 
-    $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateRefreshInterval);
-
-    const timeUpdateSubscription = subscribeWithScope($scope, timefilter.getTimeUpdate$(), updateTimeRange);
+    const refreshIntervalSubscription = subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
+      next: updateRefreshInterval
+    });
+    const timeUpdateSubscription = subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+      next: updateTimeRange
+    });
 
     // update the searchSource when filters update
     const filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
@@ -428,6 +431,7 @@ function VisEditor(
       stateMonitor.destroy();
       filterUpdateSubscription.unsubscribe();
       timeUpdateSubscription.unsubscribe();
+      refreshIntervalSubscription.unsubscribe();
     });
 
     if (!$scope.chrome.getVisible()) {

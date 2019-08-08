@@ -427,12 +427,18 @@ export class DashboardAppController {
       courier.fetch();
     });
 
-    $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
-      updateState();
-      refreshDashboardContainer();
-    });
+    $scope.refreshInrevalUpdateSubscripton$ = subscribeWithScope(
+      $scope,
+      timefilter.getRefreshIntervalUpdate$(),
+      {
+        next: () => {
+          updateState();
+          refreshDashboardContainer();
+        },
+      }
+    );
 
-    subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+    $scope.timeUpdateSubscripton$ = subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
       next: () => {
         updateState();
         refreshDashboardContainer();
@@ -698,6 +704,9 @@ export class DashboardAppController {
 
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
+      $scope.timeUpdateSubscripton$.unsubscribe();
+      $scope.refreshInrevalUpdateSubscripton$.unsubscribe();
+
       dashboardStateManager.destroy();
       if (inputSubscription) {
         inputSubscription.unsubscribe();

@@ -40,6 +40,7 @@ import { TimeRange } from 'ui/timefilter/time_history';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
 import moment from 'moment';
+import { Subscription } from 'rxjs';
 import { StaticIndexPattern, Query } from '../../../data/public';
 
 import { ViewMode } from '../../../embeddable_api/public';
@@ -89,6 +90,8 @@ export interface DashboardAppScope extends ng.IScope {
   kbnTopNav: any;
   enterEditMode: () => void;
   $listen: any;
+  refreshInrevalUpdateSubscripton$: Subscription;
+  timeUpdateSubscripton$: Subscription;
 }
 
 const app = uiModules.get('app/dashboard', [

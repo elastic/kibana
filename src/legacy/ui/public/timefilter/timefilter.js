@@ -39,6 +39,9 @@ class Timefilter extends SimpleEmitter {
     // Fired when a user changes the timerange
     this.timeUpdate$ = new Subject();
 
+    // Fired when a user changes the the autorefresh settings
+    this.refreshIntervalUpdate$ = new Subject();
+
     this.isTimeRangeSelectorEnabled = false;
     this.isAutoRefreshSelectorEnabled = false;
     this._time = chrome.getUiSettingsClient().get('timepicker:timeDefaults');
@@ -51,6 +54,10 @@ class Timefilter extends SimpleEmitter {
 
   getTimeUpdate$ = () => {
     return this.timeUpdate$.asObservable();
+  }
+
+  getRefreshIntervalUpdate$ = () => {
+    return this.refreshIntervalUpdate$.asObservable();
   }
 
   getTime = () => {
@@ -108,7 +115,7 @@ class Timefilter extends SimpleEmitter {
     // Only send out an event if we already had a previous refresh interval (not for the initial set)
     // and the old and new refresh interval are actually different.
     if (prevRefreshInterval && areTimePickerValsDifferent(prevRefreshInterval, newRefreshInterval)) {
-      this.emit('refreshIntervalUpdate');
+      this.refreshIntervalUpdate$.next();
       if (!newRefreshInterval.pause && newRefreshInterval.value !== 0) {
         this.emit('fetch');
       }
@@ -226,9 +233,13 @@ export const registerTimefilterWithGlobalState = _.once((globalState, $rootScope
     globalState.save();
   };
 
-  $rootScope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateGlobalStateWithTime);
+  subscribeWithScope($rootScope, timefilter.getRefreshIntervalUpdate$(), {
+    next: updateGlobalStateWithTime
+  });
 
-  subscribeWithScope($rootScope, timefilter.getTimeUpdate$(), updateGlobalStateWithTime);
+  subscribeWithScope($rootScope, timefilter.getTimeUpdate$(), {
+    next: updateGlobalStateWithTime
+  });
 
 });
 

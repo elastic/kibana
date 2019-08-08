@@ -68,6 +68,7 @@ export class JobsListView extends Component {
     this.showCreateWatchFlyout = () => {};
 
     this.blockRefresh = false;
+    this.refreshIntervalSubscription = null;
   }
 
   componentDidMount() {
@@ -94,7 +95,7 @@ export class JobsListView extends Component {
   }
 
   componentWillUnmount() {
-    timefilter.off('refreshIntervalUpdate');
+    this.refreshIntervalSubscription.unsubscribe();
     deletingJobsRefreshTimeout = null;
     this.clearRefreshInterval();
   }
@@ -115,8 +116,8 @@ export class JobsListView extends Component {
 
   initAutoRefreshUpdate() {
     // update the interval if it changes
-    timefilter.on('refreshIntervalUpdate', () => {
-      this.setAutoRefresh();
+    this.refreshIntervalSubscription = timefilter.getRefreshIntervalUpdate$().subscribe({
+      next: this.setAutoRefresh
     });
   }
 

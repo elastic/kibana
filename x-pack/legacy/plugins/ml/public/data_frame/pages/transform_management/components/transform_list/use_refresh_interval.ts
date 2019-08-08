@@ -8,6 +8,7 @@ import React, { useEffect } from 'react';
 
 import { timefilter } from 'ui/timefilter';
 
+import { Subscription } from 'rxjs';
 import {
   DEFAULT_REFRESH_INTERVAL_MS,
   MINIMUM_REFRESH_INTERVAL_MS,
@@ -21,6 +22,7 @@ export const useRefreshInterval = (
   const { refresh } = useRefreshTransformList();
   useEffect(() => {
     let transformRefreshInterval: null | number = null;
+    let refreshIntervalSubscription: Subscription | undefined;
 
     timefilter.disableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
@@ -44,7 +46,7 @@ export const useRefreshInterval = (
 
     function initAutoRefreshUpdate() {
       // update the interval if it changes
-      timefilter.on('refreshIntervalUpdate', () => {
+      refreshIntervalSubscription = timefilter.getRefreshIntervalUpdate$().subscribe(() => {
         setAutoRefresh();
       });
     }
@@ -71,6 +73,9 @@ export const useRefreshInterval = (
     }
 
     function clearRefreshInterval() {
+      if (refreshIntervalSubscription) {
+        refreshIntervalSubscription.unsubscribe();
+      }
       setBlockRefresh(true);
       if (transformRefreshInterval !== null) {
         window.clearInterval(transformRefreshInterval);
