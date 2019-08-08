@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { EuiForm, EuiFormRow, EuiPanel } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { MultiColumnEditor } from '../multi_column_editor';
@@ -57,32 +57,31 @@ export function DataTableLayer({
 }: { layer: LayerState } & VisualizationProps<DatatableVisualizationState>) {
   const datasource = frame.datasourceLayers[layer.layerId];
   return (
-    <EuiPanel className="lnsConfigPanel">
-      <>
-        <NativeRenderer
-          render={datasource.renderLayerPanel}
-          nativeProps={{ layerId: layer.layerId }}
+    <EuiPanel className="lnsConfigPanel__panel" paddingSize="s">
+      <NativeRenderer
+        render={datasource.renderLayerPanel}
+        nativeProps={{ layerId: layer.layerId }}
+      />
+
+      <EuiSpacer size="s" />
+      <EuiFormRow
+        className="lnsConfigPanel__axis"
+        label={i18n.translate('xpack.lens.datatable.columns', { defaultMessage: 'Columns' })}
+      >
+        <MultiColumnEditor
+          accessors={layer.columns}
+          datasource={datasource}
+          dragDropContext={dragDropContext}
+          filterOperations={allOperations}
+          layerId={layer.layerId}
+          onAdd={() => setState(updateColumns(state, layer, columns => [...columns, generateId()]))}
+          onRemove={column =>
+            setState(updateColumns(state, layer, columns => columns.filter(c => c !== column)))
+          }
+          testSubj="datatable_columns"
+          data-test-subj="datatable_multicolumnEditor"
         />
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.datatable.columns', { defaultMessage: 'Columns' })}
-        >
-          <MultiColumnEditor
-            accessors={layer.columns}
-            datasource={datasource}
-            dragDropContext={dragDropContext}
-            filterOperations={allOperations}
-            layerId={layer.layerId}
-            onAdd={() =>
-              setState(updateColumns(state, layer, columns => [...columns, generateId()]))
-            }
-            onRemove={column =>
-              setState(updateColumns(state, layer, columns => columns.filter(c => c !== column)))
-            }
-            testSubj="datatable_columns"
-            data-test-subj="datatable_multicolumnEditor"
-          />
-        </EuiFormRow>
-      </>
+      </EuiFormRow>
     </EuiPanel>
   );
 }
@@ -105,7 +104,7 @@ export const datatableVisualization: Visualization<
 
   getDescription(state) {
     return {
-      icon: 'empty',
+      icon: 'visTable',
       label: i18n.translate('xpack.lens.datatable.label', {
         defaultMessage: 'Datatable',
       }),

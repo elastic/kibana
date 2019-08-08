@@ -198,7 +198,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           <EuiFormRow
             className="lnsConfigPanel__axis"
             label={i18n.translate('xpack.lens.xyChart.xAxisLabel', {
-              defaultMessage: 'X Axis',
+              defaultMessage: 'X-axis',
             })}
           >
             <NativeRenderer
@@ -215,26 +215,8 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           </EuiFormRow>
           <EuiFormRow
             className="lnsConfigPanel__axis"
-            label={i18n.translate('xpack.lens.xyChart.splitSeries', {
-              defaultMessage: 'Split series',
-            })}
-          >
-            <NativeRenderer
-              data-test-subj="lnsXY_splitDimensionPanel"
-              render={props.frame.datasourceLayers[layer.layerId].renderDimensionPanel}
-              nativeProps={{
-                columnId: layer.splitAccessor,
-                dragDropContext: props.dragDropContext,
-                filterOperations: isBucketed,
-                suggestedPriority: 0,
-                layerId: layer.layerId,
-              }}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            className="lnsConfigPanel__axis"
             label={i18n.translate('xpack.lens.xyChart.yAxisLabel', {
-              defaultMessage: 'Y Axis',
+              defaultMessage: 'Y-axis',
             })}
           >
             <MultiColumnEditor
@@ -269,6 +251,24 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
               data-test-subj="lensXY_yDimensionPanel"
               testSubj="lensXY_yDimensionPanel"
               layerId={layer.layerId}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            className="lnsConfigPanel__axis"
+            label={i18n.translate('xpack.lens.xyChart.splitSeries', {
+              defaultMessage: 'Split series',
+            })}
+          >
+            <NativeRenderer
+              data-test-subj="lnsXY_splitDimensionPanel"
+              render={props.frame.datasourceLayers[layer.layerId].renderDimensionPanel}
+              nativeProps={{
+                columnId: layer.splitAccessor,
+                dragDropContext: props.dragDropContext,
+                filterOperations: isBucketed,
+                suggestedPriority: 0,
+                layerId: layer.layerId,
+              }}
             />
           </EuiFormRow>
         </EuiPanel>
