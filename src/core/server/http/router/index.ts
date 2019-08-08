@@ -27,6 +27,7 @@ export {
   ensureRawRequest,
 } from './request';
 export { RouteMethod, RouteConfig, RouteConfigOptions } from './route';
+export { HapiResponseAdapter } from './response_adapter';
 export {
   CustomHttpResponseOptions,
   HttpResponseOptions,
@@ -34,6 +35,9 @@ export {
   RedirectResponseOptions,
   ResponseError,
   ResponseErrorMeta,
+  KibanaResponse,
   kibanaResponseFactory,
   KibanaResponseFactory,
+  lifecycleResponseFactory,
+  LifecycleResponseFactory,
 } from './response';
