@@ -16,6 +16,7 @@ import {
   getMapExtent,
   getRefreshConfig,
   getQuery,
+  getFilters,
 } from '../../selectors/map_selectors';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../selectors/ui_selectors';
 import { convertMapExtentToPolygon } from '../../elasticsearch_geo_utils';
@@ -102,6 +103,7 @@ module.factory('SavedGisMap', function (Private) {
       timeFilters: getTimeFilters(state),
       refreshConfig: getRefreshConfig(state),
       query: _.omit(getQuery(state), 'queryLastTriggeredAt'),
+      filters: getFilters(state),
     });
 
     this.uiStateJSON = JSON.stringify({
