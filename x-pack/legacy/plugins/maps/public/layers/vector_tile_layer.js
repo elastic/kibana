@@ -7,6 +7,7 @@
 import { TileLayer } from './tile_layer';
 import _ from 'lodash';
 import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import { isRetina } from '../meta';
 import { addSpritesheetToMap } from '../connected_components/map/mb/utils';//todo move this implementation
 
 const MB_STYLE_TYPE_TO_OPACITY = {
@@ -43,7 +44,7 @@ export class VectorTileLayer extends TileLayer {
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
     startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
     try {
-      const styleAndSprites = await this._source.getVectorStyleSheetAndSpriteMeta();
+      const styleAndSprites = await this._source.getVectorStyleSheetAndSpriteMeta(isRetina());
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, styleAndSprites, {});
     } catch(error) {
       onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);

@@ -139,11 +139,11 @@ export class EMSTMSSource extends AbstractTMSSource {
     return 'ems/' + this._getEmsTileLayerId();
   }
 
-  async getVectorStyleSheetAndSpriteMeta() {
+  async getVectorStyleSheetAndSpriteMeta(isRetina) {
     const emsTMSService = await this._getEMSTMSService();
     return {
       vectorStyleSheet: await emsTMSService.getVectorStyleSheet(),
-      spriteMeta: await emsTMSService.getSpriteSheetMeta()
+      spriteMeta: await emsTMSService.getSpriteSheetMeta(isRetina)
     };
   }
 

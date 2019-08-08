@@ -100,11 +100,11 @@ export class TMSService {
     return await this._getVectorStyleJson();
   }
 
-  async getSpriteSheetMeta() {
+  async getSpriteSheetMeta(isRetina = false) {
     const vectorStyleJson = await this._getVectorStyleJson();
-    //todo: do not hardcode retina suffix
-    const metaUrl = vectorStyleJson.sprite + '@2x.json';
-    const spritePngs =  vectorStyleJson.sprite + '@2x.png';
+    const suffix = isRetina ? '@2x' : '';
+    const metaUrl = vectorStyleJson.sprite + suffix + '.json';
+    const spritePngs =  vectorStyleJson.sprite + suffix + '.png';
     const metaUrlExtended = this._emsClient.extendUrlWithParams(metaUrl);
     const jsonMeta = await this._emsClient.getManifest(metaUrlExtended);
     return {

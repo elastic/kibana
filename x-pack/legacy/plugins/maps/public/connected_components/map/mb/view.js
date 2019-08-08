@@ -13,7 +13,7 @@ import {
   removeOrphanedSourcesAndLayers,
   addSpritesheetToMap
 } from './utils';
-import { getGlyphUrl } from '../../../meta';
+import { getGlyphUrl, isRetina } from '../../../meta';
 import {
   DECIMAL_DEGREES_PRECISION,
   FEATURE_ID_PROPERTY_NAME,
@@ -30,7 +30,6 @@ import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
 
-const isRetina = window.devicePixelRatio === 2;
 const mbDrawModes = MapboxDraw.modes;
 mbDrawModes.draw_rectangle = DrawRectangle;
 
@@ -446,8 +445,8 @@ export class MBMapContainer extends React.Component {
   }
 
   _loadMakiSprites() {
-    const sprites = isRetina ? sprites2 : sprites1;
-    const json = isRetina ? spritesheet[2] : spritesheet[1];
+    const sprites = isRetina() ? sprites2 : sprites1;
+    const json = isRetina() ? spritesheet[2] : spritesheet[1];
     addSpritesheetToMap(json, sprites, this._mbMap);
   }
 
