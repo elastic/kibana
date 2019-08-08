@@ -5,12 +5,10 @@
  */
 
 import { resolve } from 'path';
-import { KibanaFunctionalTestDefaultProviders } from '../types/providers';
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { services } from './services';
 
-export default async function({ readConfigFile }: KibanaFunctionalTestDefaultProviders) {
-  const kibanaAPITestsConfig = await readConfigFile(
-    require.resolve('../../../test/api_integration/config.js')
-  );
+export default async function({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
   const plugin = resolve(__dirname, './fixtures/oidc_provider');
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
@@ -19,10 +17,7 @@ export default async function({ readConfigFile }: KibanaFunctionalTestDefaultPro
   return {
     testFiles: [require.resolve('./apis/authorization_code_flow')],
     servers: xPackAPITestsConfig.get('servers'),
-    services: {
-      es: kibanaAPITestsConfig.get('services.es'),
-      supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
-    },
+    services,
     junit: {
       reportName: 'X-Pack OpenID Connect API Integration Tests',
     },

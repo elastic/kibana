@@ -8,10 +8,10 @@ import expect from '@kbn/expect';
 import { JSDOM } from 'jsdom';
 import request, { Cookie } from 'request';
 import { createTokens, getStateAndNonce } from '../../fixtures/oidc_tools';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
 
   describe('OpenID Connect Implicit Flow authentication', () => {
