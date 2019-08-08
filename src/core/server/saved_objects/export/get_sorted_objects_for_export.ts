@@ -19,7 +19,7 @@
 
 import Boom from 'boom';
 import { createListStream } from '../../../../legacy/utils/streams';
-import { SavedObjectsClientContract } from '../';
+import { SavedObjectsClientContract } from '../types';
 import { injectNestedDependencies } from './inject_nested_depdendencies';
 import { sortObjects } from './sort_objects';
 

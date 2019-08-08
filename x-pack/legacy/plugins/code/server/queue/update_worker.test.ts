@@ -20,7 +20,10 @@ import { UpdateWorker } from './update_worker';
 
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
 
-const esClient = {};
+const esClient = {
+  update: emptyAsyncFunc,
+  get: emptyAsyncFunc,
+};
 const esQueue = {};
 
 afterEach(() => {
@@ -212,4 +215,55 @@ test('Execute update job failed because of low disk watermark ', async () => {
     expect(newInstanceSpy.notCalled).toBeTruthy();
     expect(updateSpy.notCalled).toBeTruthy();
   }
+});
+
+test('On update job error or timeout will not persis error', async () => {
+  // Setup EsClient
+  const esUpdateSpy = sinon.spy();
+  esClient.update = esUpdateSpy;
+
+  // Setup CancellationService
+  const cancelUpdateJobSpy = sinon.spy();
+  const registerCancelableUpdateJobSpy = sinon.spy();
+  const cancellationService: any = {
+    cancelUpdateJob: emptyAsyncFunc,
+    registerCancelableUpdateJob: emptyAsyncFunc,
+  };
+  cancellationService.cancelUpdateJob = cancelUpdateJobSpy;
+  cancellationService.registerCancelableUpdateJob = registerCancelableUpdateJobSpy;
+
+  const updateWorker = new UpdateWorker(
+    esQueue as Esqueue,
+    log,
+    esClient as EsClient,
+    {
+      security: {
+        enableGitCertCheck: true,
+      },
+      disk: {
+        thresholdEnabled: true,
+        watermarkLowMb: 100,
+      },
+    } as ServerOptions,
+    {} as GitOperations,
+    {} as RepositoryServiceFactory,
+    cancellationService as CancellationSerivce,
+    {} as DiskWatermarkService
+  );
+
+  await updateWorker.onJobExecutionError({
+    job: {
+      payload: {
+        uri: 'mockrepo',
+      },
+      options: {},
+      timestamp: 0,
+    },
+    error: 'mock error message',
+  });
+
+  // The elasticsearch update will be called and the progress should be 'Completed'
+  expect(esUpdateSpy.calledOnce).toBeTruthy();
+  const updateBody = JSON.parse(esUpdateSpy.getCall(0).args[0].body);
+  expect(updateBody.doc.repository_git_status.progress).toBe(100);
 });
