@@ -175,7 +175,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
           size="s"
           color="warning"
           title={i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.isInternalCollectorStatusTitle', {
-            defaultMessage: `We have not detected any monitoring data coming from Metricbeat for this Kibana.
+            defaultMessage: `We have not detected any monitoring data coming from Metricbeat for this Kibana instance.
             We will continuously check in the background.`,
           })}
         />

@@ -175,7 +175,7 @@ export function getLogstashInstructionsForEnablingMetricbeat(product, _meta, {
           size="s"
           color="warning"
           title={i18n.translate('xpack.monitoring.metricbeatMigration.logstashInstructions.isInternalCollectorStatusTitle', {
-            defaultMessage: `We have not detected any monitoring data coming from Metricbeat for this Logstash.
+            defaultMessage: `We have not detected any monitoring data coming from Metricbeat for this Logstash node.
             We will continuously check n the background.`,
           })}
         />
