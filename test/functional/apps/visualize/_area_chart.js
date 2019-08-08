@@ -204,13 +204,21 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should hide side editor if embed is set to true in url', async () => {
-      const url = await browser.getCurrentUrl();
-      const embedUrl = url.split('/visualize/').pop().replace('?_g=', '?embed=true&_g=');
-      await PageObjects.common.navigateToUrl('visualize', embedUrl);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const sideEditorExists = await PageObjects.visualize.getSideEditorExists();
-      expect(sideEditorExists).to.be(false);
+    describe('embedded mode', () => {
+      it('should hide side editor if embed is set to true in url', async () => {
+        const url = await browser.getCurrentUrl();
+        const embedUrl = url.split('/visualize/').pop().replace('?_g=', '?embed=true&_g=');
+        await PageObjects.common.navigateToUrl('visualize', embedUrl);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const sideEditorExists = await PageObjects.visualize.getSideEditorExists();
+        expect(sideEditorExists).to.be(false);
+      });
+
+      after(async () => {
+        const url = await browser.getCurrentUrl();
+        const embedUrl = url.split('/visualize/').pop().replace('?embed=true&', '?');
+        await PageObjects.common.navigateToUrl('visualize', embedUrl);
+      });
     });
 
     describe.skip('switch between Y axis scale types', () => {
