@@ -67,7 +67,7 @@ export const apm: LegacyPluginInitializer = kibana => {
 
         // buckets
         minimumBucketSize: Joi.number().default(15),
-        bucketTargetCount: Joi.number().default(27)
+        bucketTargetCount: Joi.number().default(15)
       }).default();
     },
 

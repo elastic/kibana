@@ -93,16 +93,16 @@ declare module 'elasticsearch' {
         };
         extended_stats: {
           count: number;
-          min: number;
-          max: number;
-          avg: number;
+          min: number | null;
+          max: number | null;
+          avg: number | null;
           sum: number;
-          sum_of_squares: number;
-          variance: number;
-          std_deviation: number;
+          sum_of_squares: number | null;
+          variance: number | null;
+          std_deviation: number | null;
           std_deviation_bounds: {
-            upper: number;
-            lower: number;
+            upper: number | null;
+            lower: number | null;
           };
         };
       }[AggregationType & keyof AggregationOption[AggregationName]];

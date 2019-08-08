@@ -6,8 +6,20 @@
 
 import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
-import { calculateBucketSize } from './calculate_bucket_size';
 import { getBuckets } from './get_buckets';
+import { getDistributionMax } from './get_distribution_max';
+import { roundToNearestFiveOrTen } from '../../helpers/round_to_nearest_five_or_ten';
+
+function getBucketSize(max: number, { config }: Setup) {
+  const minBucketSize: number = config.get<number>(
+    'xpack.apm.minimumBucketSize'
+  );
+  const bucketTargetCount = config.get<number>('xpack.apm.bucketTargetCount');
+  const bucketSize = max / bucketTargetCount;
+  return roundToNearestFiveOrTen(
+    bucketSize > minBucketSize ? bucketSize : minBucketSize
+  );
+}
 
 export type ITransactionDistributionAPIResponse = PromiseReturnType<
   typeof getTransactionDistribution
@@ -27,19 +39,25 @@ export async function getTransactionDistribution({
   traceId: string;
   setup: Setup;
 }) {
-  const bucketSize = await calculateBucketSize(
+  const distributionMax = await getDistributionMax(
     serviceName,
     transactionName,
     transactionType,
     setup
   );
 
+  if (distributionMax == null) {
+    return { totalHits: 0, buckets: [], bucketSize: 0 };
+  }
+
+  const bucketSize = getBucketSize(distributionMax, setup);
   const { buckets, totalHits } = await getBuckets(
     serviceName,
     transactionName,
     transactionType,
     transactionId,
     traceId,
+    distributionMax,
     bucketSize,
     setup
   );
