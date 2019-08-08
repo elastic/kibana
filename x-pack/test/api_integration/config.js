@@ -6,25 +6,16 @@
 
 import path from 'path';
 import { services } from './services';
-import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 import { SLACK_ACTION_SIMULATOR_URI } from './fixtures/plugins/actions';
 
 export async function getApiIntegrationConfig({ readConfigFile }) {
   const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
-  const servers = {
-    ...xPackFunctionalTestsConfig.get('servers'),
-    elasticsearch: {
-      ...xPackFunctionalTestsConfig.get('servers').elasticsearch,
-      protocol: 'https',
-    },
-  };
-
   return {
     testFiles: [require.resolve('./apis')],
     services,
-    servers,
+    servers: xPackFunctionalTestsConfig.get('servers'),
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
       reportName: 'X-Pack API Integration Tests',
@@ -37,13 +28,10 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
         `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
         `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
         `--server.xsrf.whitelist=${JSON.stringify([SLACK_ACTION_SIMULATOR_URI])}`,
-        `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
-        `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
       ],
     },
     esTestCluster: {
       ...xPackFunctionalTestsConfig.get('esTestCluster'),
-      ssl: true,
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
         'node.attr.name=apiIntegrationTestNode'
