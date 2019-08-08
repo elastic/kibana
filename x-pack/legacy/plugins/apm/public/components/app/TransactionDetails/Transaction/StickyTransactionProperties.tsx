@@ -12,7 +12,8 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_RESULT,
   URL_FULL,
-  USER_ID
+  USER_ID,
+  TRANSACTION_PAGE_URL
 } from '../../../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
@@ -22,6 +23,7 @@ import {
   StickyProperties
 } from '../../../shared/StickyProperties';
 import { ErrorCountBadge } from './ErrorCountBadge';
+import { isRumAgentName } from '../../../../../common/agent_name';
 
 interface Props {
   transaction: Transaction;
@@ -35,10 +37,20 @@ export function StickyTransactionProperties({
   errorCount
 }: Props) {
   const timestamp = transaction['@timestamp'];
-  const url =
-    idx(transaction, _ => _.context.page.url) ||
-    idx(transaction, _ => _.url.full) ||
-    NOT_AVAILABLE_LABEL;
+
+  const isRumAgent = isRumAgentName(transaction.agent.name);
+  const url = isRumAgent
+    ? idx(transaction, _ => _.transaction.page.url)
+    : idx(transaction, _ => _.url.full);
+
+  const urlProperty = {
+    fieldName: isRumAgent ? TRANSACTION_PAGE_URL : URL_FULL,
+    label: 'URL',
+    val: url || NOT_AVAILABLE_LABEL,
+    truncated: true,
+    width: '50%'
+  };
+
   const duration = transaction.transaction.duration.us;
 
   const noErrorsText = i18n.translate(
@@ -58,13 +70,7 @@ export function StickyTransactionProperties({
       truncated: true,
       width: '50%'
     },
-    {
-      fieldName: URL_FULL,
-      label: 'URL',
-      val: url,
-      truncated: true,
-      width: '50%'
-    },
+    urlProperty,
     {
       label: i18n.translate('xpack.apm.transactionDetails.durationLabel', {
         defaultMessage: 'Duration'

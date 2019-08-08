@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Context {
-  page?: { url: string }; // only for RUM agent
+// only for RUM agent: shared by error and transaction
+export interface Page {
+  url: string;
 }
