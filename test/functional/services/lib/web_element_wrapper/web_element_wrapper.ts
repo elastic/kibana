@@ -25,6 +25,7 @@ import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
 import testSubjSelector from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/dev-utils';
+import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { Browsers } from '../../remote/browsers';
@@ -39,6 +40,10 @@ interface Driver {
 
 interface TypeOptions {
   charByChar: boolean;
+}
+
+interface ClearOptions {
+  withJS: boolean;
 }
 
 const RETRY_CLICK_MAX_ATTEMPTS = 3;
@@ -202,23 +207,39 @@ export class WebElementWrapper {
   }
 
   /**
+   * Focuses this element.
+   *
+   * @return {Promise<void>}
+   */
+  public async focus() {
+    await this.retryCall(async function focus(wrapper) {
+      await wrapper.scrollIntoViewIfNecessary();
+      await wrapper.driver.executeScript(`arguments[0].focus()`, wrapper._webElement);
+    });
+  }
+
+  /**
    * Clear the value of this element. This command has no effect if the underlying DOM element
    * is neither a text INPUT element nor a TEXTAREA element.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#clear
    *
-   * @return {Promise<void>}
+   * @param {{ withJS: boolean }} options option to clear input with JS: `arguments[0].value=''`
+   * @default { withJS: false }
    */
-  async clearValue() {
-    // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
-    // await wrapper.webElement.clear();
+  async clearValue(options: ClearOptions = { withJS: false }) {
     await this.retryCall(async function clearValue(wrapper) {
-      await wrapper.driver.executeScript(`arguments[0].value=''`, wrapper._webElement);
+      if (wrapper.browserType === Browsers.Chrome || options.withJS) {
+        // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
+        await wrapper.driver.executeScript(`arguments[0].value=''`, wrapper._webElement);
+      } else {
+        await wrapper._webElement.clear();
+      }
     });
   }
 
   /**
    * Clear the value of this element using Keyboard
-   * @param {{ charByChar: boolean }} options
+   * @param {{ charByChar: boolean }} options to input characters one by one
    * @default { charByChar: false }
    */
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }) {
@@ -630,24 +651,28 @@ export class WebElementWrapper {
    * Gets element innerHTML and wrap it up with cheerio
    *
    * @nonstandard
-   * @return {Promise<void>}
+   * @return {Promise<CustomCheerioStatic>}
    */
-  public async parseDomContent(): Promise<any> {
+  public async parseDomContent(): Promise<CustomCheerioStatic> {
     const htmlContent: any = await this.getAttribute('innerHTML');
     const $: any = cheerio.load(htmlContent, {
       normalizeWhitespace: true,
       xmlMode: true,
     });
 
-    $.findTestSubjects = function testSubjects(selector: string) {
+    $.findTestSubjects = function findTestSubjects(this: CustomCheerioStatic, selector: string) {
       return this(testSubjSelector(selector));
     };
 
-    $.fn.findTestSubjects = function testSubjects(selector: string) {
+    $.fn.findTestSubjects = function findTestSubjects(this: CustomCheerio, selector: string) {
       return this.find(testSubjSelector(selector));
     };
 
-    $.findTestSubject = $.fn.findTestSubject = function testSubjects(selector: string) {
+    $.findTestSubject = function findTestSubject(this: CustomCheerioStatic, selector: string) {
+      return this.findTestSubjects(selector).first();
+    };
+
+    $.fn.findTestSubject = function findTestSubject(this: CustomCheerio, selector: string) {
       return this.findTestSubjects(selector).first();
     };
 

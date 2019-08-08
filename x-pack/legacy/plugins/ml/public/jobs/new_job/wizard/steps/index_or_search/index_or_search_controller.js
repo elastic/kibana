@@ -14,12 +14,10 @@
 import uiRoutes from 'ui/routes';
 import { checkLicenseExpired, checkBasicLicense } from 'plugins/ml/license/check_license';
 import { getCreateJobBreadcrumbs, getDataVisualizerIndexOrSearchBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
-import { getDataFrameIndexOrSearchBreadcrumbs } from 'plugins/ml/data_frame/breadcrumbs';
 import { preConfiguredJobRedirect } from 'plugins/ml/jobs/new_job/wizard/preconfigured_job_redirect';
 import {
   checkCreateJobsPrivilege,
   checkFindFileStructurePrivilege,
-  checkCreateDataFrameJobsPrivilege
 } from 'plugins/ml/privilege/check_privilege';
 import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
@@ -31,11 +29,6 @@ import 'ui/directives/saved_object_finder';
 uiRoutes
   .when('/jobs/new_job', {
     redirectTo: '/jobs/new_job/step/index_or_search'
-  });
-
-uiRoutes
-  .when('/data_frames/new_job', {
-    redirectTo: '/data_frames/new_job/step/index_or_search'
   });
 
 uiRoutes
@@ -65,14 +58,14 @@ uiRoutes
   });
 
 uiRoutes
-  .when('/data_frames/new_job/step/index_or_search', {
+  .when('/data_visualizer_index_select', {
     template,
-    k7Breadcrumbs: getDataFrameIndexOrSearchBreadcrumbs,
+    k7Breadcrumbs: getDataVisualizerIndexOrSearchBreadcrumbs,
     resolve: {
       CheckLicense: checkBasicLicense,
-      privileges: checkCreateDataFrameJobsPrivilege,
+      privileges: checkFindFileStructurePrivilege,
       indexPatterns: loadIndexPatterns,
-      nextStepPath: () => '#data_frames/new_job/step/pivot',
+      nextStepPath: () => '#data_visualizer',
     }
   });
 
@@ -85,7 +78,7 @@ module.controller('MlNewJobStepIndexOrSearch',
     timefilter.disableTimeRangeSelector(); // remove time picker from top of page
     timefilter.disableAutoRefreshSelector(); // remove time picker from top of page
 
-    $scope.indexPatterns = getIndexPatterns().filter(indexPattern => !indexPattern.get('type'));
+    $scope.indexPatterns = getIndexPatterns().filter(indexPattern => indexPattern.type !== 'rollup');
 
     const path = $route.current.locals.nextStepPath;
 
@@ -103,3 +96,4 @@ module.controller('MlNewJobStepIndexOrSearch',
       return `${path}?savedSearchId=${encodeURIComponent(savedSearch.id)}`;
     };
   });
+

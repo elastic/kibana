@@ -35,7 +35,8 @@ export const getConfigTemplatesToInstall = (
  *
  * @param jobs to filter
  * @param embeddedJobIds jobIds as defined in the ConfigTemplates provided by the ML Team
- * @param showCustomJobs whether or not to show all Custom Jobs, or just the embedded Elastic Jobs
+ * @param showCustomJobs whether or not to show all Custom Jobs (Non-embedded Jobs in SIEM Group)
+ * @param showElasticJobs whether or not to show Elastic Jobs (Embedded ConfigTemplate Jobs)
  * @param filterQuery user-provided search string to filter for occurrence in job names/description
  */
 export const getJobsToDisplay = (

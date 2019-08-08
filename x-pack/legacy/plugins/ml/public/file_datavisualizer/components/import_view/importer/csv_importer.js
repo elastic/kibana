@@ -19,7 +19,6 @@ export class CsvImporter extends Importer {
     this.hasHeaderRow = results.has_header_row;
     this.columnNames = results.column_names;
     this.shouldTrimFields = (results.should_trim_fields || false);
-    this.mappings = results.mappings;
   }
 
   async read(csv) {

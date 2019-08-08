@@ -18,19 +18,31 @@ import {
   listActionTypesRoute,
   fireRoute,
 } from './routes';
-
 import { registerBuiltInActionTypes } from './builtin_action_types';
+import { SpacesPlugin } from '../../spaces';
+import { createOptionalPlugin } from '../../../server/lib/optional_plugin';
 
 export function init(server: Legacy.Server) {
+  const config = server.config();
+  const spaces = createOptionalPlugin<SpacesPlugin>(
+    config,
+    'xpack.spaces',
+    server.plugins,
+    'spaces'
+  );
+
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
     callWithInternalUser
   );
 
   // Encrypted attributes
+  // - `secrets` properties will be encrypted
+  // - `config` will be included in AAD
+  // - everything else excluded from AAD
   server.plugins.encrypted_saved_objects!.registerType({
     type: 'action',
-    attributesToEncrypt: new Set(['actionTypeConfigSecrets']),
+    attributesToEncrypt: new Set(['secrets']),
     attributesToExcludeFromAAD: new Set(['description']),
   });
 
@@ -55,6 +67,14 @@ export function init(server: Legacy.Server) {
     getServices,
     taskManager: taskManager!,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
+    getBasePath(...args) {
+      return spaces.isEnabled
+        ? spaces.getBasePath(...args)
+        : server.config().get('server.basePath');
+    },
+    spaceIdToNamespace(...args) {
+      return spaces.isEnabled ? spaces.spaceIdToNamespace(...args) : undefined;
+    },
   });
 
   registerBuiltInActionTypes(actionTypeRegistry);
@@ -75,6 +95,9 @@ export function init(server: Legacy.Server) {
   const fireFn = createFireFunction({
     taskManager: taskManager!,
     internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
+    spaceIdToNamespace(...args) {
+      return spaces.isEnabled ? spaces.spaceIdToNamespace(...args) : undefined;
+    },
   });
 
   // Expose functions to server

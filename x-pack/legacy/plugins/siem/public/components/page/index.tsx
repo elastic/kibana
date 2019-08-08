@@ -7,7 +7,6 @@
 import React from 'react';
 import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
 import styled, { injectGlobal } from 'styled-components';
-import { getOr } from 'lodash/fp';
 
 // SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
 // eslint-disable-next-line no-unused-expressions
@@ -119,20 +118,11 @@ export const MoreRowItems = styled(EuiIcon)`
 
 export const OverviewWrapper = styled(EuiFlexGroup)`
   position: relative;
+
   .euiButtonIcon {
     position: absolute;
-    top: -10px;
-    right: 10px;
+    right: ${props => props.theme.eui.euiSizeM};
+    top: 6px;
+    z-index: 2;
   }
-`;
-
-export const LoadingOverlay = styled.div`
-  background-color: ${props => getOr('#ffffff', 'theme.eui.euiColorLightShade', props)};
-  margin: -4px 5px;
-  height: 100%;
-  opacity: 0.7;
-  width: calc(100% - 10px);
-  position: absolute;
-  z-index: 3;
-  border-radius: 5px;
 `;

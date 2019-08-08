@@ -7,49 +7,20 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { NavigationMenu } from './navigation_menu';
-import { isFullLicense } from '../../license/check_license';
-import { timeHistory } from 'ui/timefilter/time_history';
+
 import { uiModules } from 'ui/modules';
-import { timefilter } from 'ui/timefilter';
-import { Subject } from 'rxjs';
 const module = uiModules.get('apps/ml');
 
 import 'ui/directives/kbn_href';
 
+import { NavigationMenu } from './navigation_menu';
 
-module.directive('mlNavMenu', function (config, mlTimefilterRefreshService) {
+module.directive('mlNavMenu', function () {
   return {
     restrict: 'E',
     transclude: true,
     link: function (scope, element, attrs) {
-      const { name } = attrs;
-      let showTabs = false;
-
-      if (name === 'jobs' ||
-        name === 'settings' ||
-        name === 'data_frames' ||
-        name === 'datavisualizer' ||
-        name === 'filedatavisualizer' ||
-        name === 'timeseriesexplorer' ||
-        name === 'access-denied' ||
-        name === 'explorer') {
-        showTabs = true;
-      }
-
-      const props = {
-        dateFormat: config.get('dateFormat'),
-        disableLinks: (isFullLicense() === false),
-        showTabs,
-        tabId: name,
-        timeHistory,
-        timefilter,
-        forceRefresh: () => mlTimefilterRefreshService.next()
-      };
-
-      ReactDOM.render(React.createElement(NavigationMenu, props),
-        element[0]
-      );
+      ReactDOM.render(<NavigationMenu tabId={attrs.name} />, element[0]);
 
       element.on('$destroy', () => {
         ReactDOM.unmountComponentAtNode(element[0]);
@@ -57,7 +28,4 @@ module.directive('mlNavMenu', function (config, mlTimefilterRefreshService) {
       });
     }
   };
-})
-  .service('mlTimefilterRefreshService', function () {
-    return new Subject();
-  });
+});

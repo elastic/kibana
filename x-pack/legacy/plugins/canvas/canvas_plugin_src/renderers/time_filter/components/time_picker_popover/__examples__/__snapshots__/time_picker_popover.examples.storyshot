@@ -19,7 +19,7 @@ exports[`Storyshots renderers/TimeFilter/components/TimePickerPopover default 1`
       onClick={[Function]}
     >
       <span>
-        ~ 2 months ago to ~ a month ago
+        ~ a month ago to ~ in 3 days
       </span>
     </button>
   </div>

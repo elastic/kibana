@@ -17,27 +17,11 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-import { EnvironmentMode } from '../config';
 import { CoreContext } from '../core_context';
-import { LoggerFactory } from '../logging';
-import { PluginWrapper, PluginManifest } from './plugin';
+import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
 import { CoreSetup, CoreStart } from '..';
-
-/**
- * Context that's available to plugins during initialization stage.
- *
- * @public
- */
-export interface PluginInitializerContext<ConfigSchema = unknown> {
-  env: { mode: EnvironmentMode };
-  logger: LoggerFactory;
-  config: {
-    create: <T = ConfigSchema>() => Observable<T>;
-    createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
-  };
-}
 
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin initializer.
@@ -54,9 +38,12 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
  */
 export function createPluginInitializerContext(
   coreContext: CoreContext,
+  opaqueId: PluginOpaqueId,
   pluginManifest: PluginManifest
 ): PluginInitializerContext {
   return {
+    opaqueId,
+
     /**
      * Environment information that is safe to expose to plugins and may be beneficial for them.
      */
@@ -112,17 +99,20 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreSetup {
   return {
+    context: {
+      createContextContainer: deps.context.createContextContainer,
+    },
     elasticsearch: {
       adminClient$: deps.elasticsearch.adminClient$,
       dataClient$: deps.elasticsearch.dataClient$,
       createClient: deps.elasticsearch.createClient,
     },
     http: {
+      createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
       registerOnPreAuth: deps.http.registerOnPreAuth,
       registerAuth: deps.http.registerAuth,
       registerOnPostAuth: deps.http.registerOnPostAuth,
       basePath: deps.http.basePath,
-      createNewServer: deps.http.createNewServer,
       isTlsEnabled: deps.http.isTlsEnabled,
     },
   };

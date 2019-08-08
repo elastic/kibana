@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsSerializer, SavedObjectsSchema } from '../../../../src/core/server';
 import { TaskManager } from './task_manager';
+import mappings from './mappings.json';
+import { migrations } from './migrations';
 
 export function taskManager(kibana) {
   return new kibana.Plugin({
@@ -16,7 +19,7 @@ export function taskManager(kibana) {
         enabled: Joi.boolean().default(true),
         max_attempts: Joi.number()
           .description('The maximum number of times a task will be attempted before being abandoned as failed')
-          .min(0) // no retries
+          .min(1)
           .default(3),
         poll_interval: Joi.number()
           .description('How often, in milliseconds, the task manager will look for more work.')
@@ -37,8 +40,35 @@ export function taskManager(kibana) {
     },
     init(server) {
       const config = server.config();
-      const taskManager = new TaskManager(this.kbnServer, server, config);
+      const schema = new SavedObjectsSchema(this.kbnServer.uiExports.savedObjectSchemas);
+      const serializer = new SavedObjectsSerializer(schema);
+      const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+      const savedObjectsRepository = server.savedObjects.getSavedObjectsRepository(
+        callWithInternalUser,
+        ['task']
+      );
+
+      const taskManager = new TaskManager({
+        kbnServer: this.kbnServer,
+        config,
+        savedObjectsRepository,
+        serializer,
+      });
       server.decorate('server', 'taskManager', taskManager);
+    },
+    uiExports: {
+      mappings,
+      migrations,
+      savedObjectSchemas: {
+        task: {
+          hidden: true,
+          isNamespaceAgnostic: true,
+          convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
+          indexPattern(config) {
+            return config.get('xpack.task_manager.index');
+          },
+        },
+      },
     },
   });
 }

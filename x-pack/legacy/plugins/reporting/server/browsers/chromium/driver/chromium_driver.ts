@@ -8,6 +8,7 @@ import open from 'opn';
 // @ts-ignore
 import * as puppeteer from 'puppeteer-core';
 import { parse as parseUrl } from 'url';
+import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
 import {
   ConditionalHeaders,
   ConditionalHeadersConditions,
@@ -16,7 +17,6 @@ import {
   EvalFn,
   EvaluateOptions,
   Logger,
-  ViewZoomWidthHeight,
 } from '../../../../types';
 
 export interface ChromiumDriverOptions {
@@ -61,7 +61,12 @@ export class HeadlessChromiumDriver {
           },
         });
       } else {
-        this.logger.debug(`No custom headers for ${interceptedRequest.url()}`);
+        let interceptedUrl = interceptedRequest.url();
+        if (interceptedUrl.startsWith('data:')) {
+          // `data:image/xyz;base64` can be very long URLs
+          interceptedUrl = interceptedUrl.substring(0, 100) + '[truncated]';
+        }
+        this.logger.debug(`No custom headers for ${interceptedUrl}`);
         interceptedRequest.continue();
       }
     });

@@ -40,7 +40,8 @@ export class QueryTemplate<
     tiebreaker?: string
   ) => FetchMoreOptionsArgs<TData, TVariables>;
 
-  public constructor(props: T) {
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor(props: T) {
     super(props);
   }
 

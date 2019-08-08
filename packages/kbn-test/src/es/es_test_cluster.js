@@ -37,6 +37,7 @@ export function createEsTestCluster(options = {}) {
     basePath = resolve(KIBANA_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
     dataArchive,
+    esArgs,
   } = options;
 
   const randomHash = Math.random()
@@ -50,9 +51,10 @@ export function createEsTestCluster(options = {}) {
     password,
     license,
     basePath,
+    esArgs,
   };
 
-  const cluster = new Cluster(log);
+  const cluster = new Cluster({ log });
 
   return new (class EsTestCluster {
     getStartTimeout() {

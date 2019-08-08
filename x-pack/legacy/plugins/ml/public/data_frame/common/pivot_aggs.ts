@@ -8,7 +8,7 @@ import { Dictionary } from '../../../common/types/common';
 import { KBN_FIELD_TYPES } from '../../../common/constants/field_types';
 
 import { AggName } from './aggregations';
-import { FieldName } from './fields';
+import { EsFieldName } from './fields';
 
 export enum PIVOT_SUPPORTED_AGGS {
   AVG = 'avg',
@@ -18,15 +18,6 @@ export enum PIVOT_SUPPORTED_AGGS {
   SUM = 'sum',
   VALUE_COUNT = 'value_count',
 }
-
-export const pivotSupportedAggs: PIVOT_SUPPORTED_AGGS[] = [
-  PIVOT_SUPPORTED_AGGS.AVG,
-  PIVOT_SUPPORTED_AGGS.CARDINALITY,
-  PIVOT_SUPPORTED_AGGS.MAX,
-  PIVOT_SUPPORTED_AGGS.MIN,
-  PIVOT_SUPPORTED_AGGS.SUM,
-  PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
-];
 
 export const pivotAggsFieldSupport = {
   [KBN_FIELD_TYPES.ATTACHMENT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
@@ -56,7 +47,7 @@ export const pivotAggsFieldSupport = {
 
 export type PivotAgg = {
   [key in PIVOT_SUPPORTED_AGGS]?: {
-    field: FieldName;
+    field: EsFieldName;
   };
 };
 
@@ -70,7 +61,7 @@ export interface PivotAggsConfigBase {
 }
 
 export interface PivotAggsConfigWithUiSupport extends PivotAggsConfigBase {
-  field: FieldName;
+  field: EsFieldName;
 }
 
 export function isPivotAggsConfigWithUiSupport(arg: any): arg is PivotAggsConfigWithUiSupport {
@@ -79,7 +70,7 @@ export function isPivotAggsConfigWithUiSupport(arg: any): arg is PivotAggsConfig
     arg.hasOwnProperty('aggName') &&
     arg.hasOwnProperty('dropDownName') &&
     arg.hasOwnProperty('field') &&
-    pivotSupportedAggs.includes(arg.agg)
+    Object.values(PIVOT_SUPPORTED_AGGS).includes(arg.agg)
   );
 }
 

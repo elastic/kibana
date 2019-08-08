@@ -7,9 +7,9 @@
 import expect from '@kbn/expect';
 import { monitorPageTitleQueryString } from '../../../../../legacy/plugins/uptime/public/queries/monitor_page_title_query';
 import monitorPageTitle from './fixtures/monitor_page_title.json';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: { getService: any }) {
+export default function({ getService }: FtrProviderContext) {
   describe('monitorPageTitle', () => {
     const supertest = getService('supertest');
 

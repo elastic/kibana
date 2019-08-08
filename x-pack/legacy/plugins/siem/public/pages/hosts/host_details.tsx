@@ -151,6 +151,11 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                             refetch={refetch}
                             setQuery={setQuery}
                             to={to}
+                            narrowDateRange={(min: number, max: number) => {
+                              setTimeout(() => {
+                                setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                              }, 500);
+                            }}
                           />
                         )}
                       </KpiHostDetailsQuery>
@@ -206,26 +211,30 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         type={type}
                       >
                         {({
-                          uncommonProcesses,
-                          totalCount,
-                          loading,
-                          pageInfo,
-                          loadMore,
                           id,
                           inspect,
+                          loading,
+                          loadPage,
+                          pageInfo,
                           refetch,
+                          totalCount,
+                          uncommonProcesses,
                         }) => (
                           <UncommonProcessTableManage
+                            data={uncommonProcesses}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                             id={id}
                             inspect={inspect}
+                            loading={loading}
+                            loadPage={loadPage}
                             refetch={refetch}
                             setQuery={setQuery}
-                            loading={loading}
-                            data={uncommonProcesses}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
                             totalCount={totalCount}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                            loadMore={loadMore}
                             type={type}
                           />
                         )}
@@ -261,26 +270,29 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                       >
                         {({
                           events,
-                          loading,
                           id,
                           inspect,
+                          loading,
+                          loadPage,
+                          pageInfo,
                           refetch,
                           totalCount,
-                          pageInfo,
-                          loadMore,
                         }) => (
                           <EventsTableManage
+                            data={events}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                             id={id}
                             inspect={inspect}
+                            loading={loading}
+                            loadPage={loadPage}
                             refetch={refetch}
                             setQuery={setQuery}
-                            data={events!}
-                            loading={loading}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
                             totalCount={totalCount}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                            tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                            loadMore={loadMore}
                             type={type}
                           />
                         )}

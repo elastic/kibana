@@ -27,7 +27,7 @@ import { NumberList } from '../number_list';
 function PercentilesEditor({
   agg,
   showValidation,
-  value,
+  value = [],
   setTouched,
   setValidity,
   setValue,

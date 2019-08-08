@@ -14,6 +14,7 @@ import {
   CloneWorkerResult,
   WorkerReservedProgress,
 } from '../../model';
+import { DiskWatermarkService } from '../disk_watermark';
 import { GitOperations } from '../git_operations';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -35,12 +36,15 @@ export class CloneWorker extends AbstractGitWorker {
     protected readonly gitOps: GitOperations,
     private readonly indexWorker: IndexWorker,
     private readonly repoServiceFactory: RepositoryServiceFactory,
-    private readonly cancellationService: CancellationSerivce
+    private readonly cancellationService: CancellationSerivce,
+    protected readonly watermarkService: DiskWatermarkService
   ) {
-    super(queue, log, client, serverOptions, gitOps);
+    super(queue, log, client, serverOptions, gitOps, watermarkService);
   }
 
   public async executeJob(job: Job) {
+    await super.executeJob(job);
+
     const { payload, cancellationToken } = job;
     const { url } = payload;
     try {
@@ -76,20 +80,31 @@ export class CloneWorker extends AbstractGitWorker {
       cancellationToken.on(() => {
         cancelled = true;
       });
-      this.cancellationService.registerCloneJobToken(repo.uri, cancellationToken);
     }
 
-    return await repoService.clone(repo, (progress: number, cloneProgress?: CloneProgress) => {
-      if (cancelled) {
-        // return false to stop the clone progress
-        return false;
+    const cloneJobPromise = repoService.clone(
+      repo,
+      (progress: number, cloneProgress?: CloneProgress) => {
+        if (cancelled) {
+          // return false to stop the clone progress
+          return false;
+        }
+        // For clone job payload, it only has the url. Populate back the
+        // repository uri before update progress.
+        job.payload.uri = repo.uri;
+        this.updateProgress(job, progress, undefined, cloneProgress);
+        return true;
       }
-      // For clone job payload, it only has the url. Populate back the
-      // repository uri before update progress.
-      job.payload.uri = repo.uri;
-      this.updateProgress(job, progress, undefined, cloneProgress);
-      return true;
-    });
+    );
+
+    if (cancellationToken) {
+      await this.cancellationService.registerCancelableCloneJob(
+        repo.uri,
+        cancellationToken,
+        cloneJobPromise
+      );
+    }
+    return await cloneJobPromise;
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {

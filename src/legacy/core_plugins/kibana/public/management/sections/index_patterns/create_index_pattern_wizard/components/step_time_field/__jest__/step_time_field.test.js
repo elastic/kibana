@@ -35,13 +35,16 @@ jest.mock('ui/chrome', () => ({
 
 const mockIndexPatternCreationType = {
   getIndexPatternType: () => 'default',
-  getIndexPatternName: () => 'name'
+  getIndexPatternName: () => 'name',
+  getFetchForWildcardOptions: () => {}
 };
 const noop = () => {};
 const indexPatternsService = {
-  fieldsFetcher: {
-    fetchForWildcard: noop,
-  }
+  make: async () => ({
+    fieldsFetcher: {
+      fetch: noop
+    }
+  })
 };
 
 describe('StepTimeField', () => {

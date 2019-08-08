@@ -12,6 +12,13 @@ export const eventsSchema = gql`
   type EventsData {
     edges: [EcsEdges!]!
     totalCount: Float!
+    pageInfo: PageInfoPaginated!
+    inspect: Inspect
+  }
+
+  type EventsTimelineData {
+    edges: [EcsEdges!]!
+    totalCount: Float!
     pageInfo: PageInfo!
     inspect: Inspect
   }
@@ -41,11 +48,7 @@ export const eventsSchema = gql`
   }
 
   type DetailItem {
-    category: String!
-    description: String
-    example: String
     field: String!
-    type: String!
     values: ToStringArray
     originalValue: EsValue
   }
@@ -75,7 +78,7 @@ export const eventsSchema = gql`
   extend type Source {
     "Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
     Events(
-      pagination: PaginationInput!
+      pagination: PaginationInputPaginated!
       sortField: SortField!
       timerange: TimerangeInput
       filterQuery: String

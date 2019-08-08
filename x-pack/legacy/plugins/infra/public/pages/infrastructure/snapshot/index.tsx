@@ -14,18 +14,20 @@ import { SnapshotToolbar } from './toolbar';
 
 import { DocumentTitle } from '../../../components/document_title';
 import { NoIndices } from '../../../components/empty_states/no_indices';
-import { Header } from '../../../components/header';
 import { ColumnarPage } from '../../../components/page';
 
-import { SourceConfigurationFlyout } from '../../../components/source_configuration';
-import { SourceConfigurationFlyoutState } from '../../../components/source_configuration';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
+import {
+  ViewSourceConfigurationButton,
+  ViewSourceConfigurationButtonHrefBase,
+} from '../../../components/source_configuration';
 import { Source } from '../../../containers/source';
 import { WithWaffleFilterUrlState } from '../../../containers/waffle/with_waffle_filters';
 import { WithWaffleOptionsUrlState } from '../../../containers/waffle/with_waffle_options';
 import { WithWaffleTimeUrlState } from '../../../containers/waffle/with_waffle_time';
 import { WithKibanaChrome } from '../../../containers/with_kibana_chrome';
+import { useTrackPageview } from '../../../hooks/use_track_metric';
 
 interface SnapshotPageProps {
   intl: InjectedIntl;
@@ -35,15 +37,17 @@ interface SnapshotPageProps {
 export const SnapshotPage = injectUICapabilities(
   injectI18n((props: SnapshotPageProps) => {
     const { intl, uiCapabilities } = props;
-    const { showIndicesConfiguration } = useContext(SourceConfigurationFlyoutState.Context);
     const {
-      derivedIndexPattern,
+      createDerivedIndexPattern,
       hasFailedLoadingSource,
       isLoading,
       loadSourceFailureMessage,
       loadSource,
       metricIndicesExist,
     } = useContext(Source.Context);
+
+    useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
+    useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
 
     return (
       <ColumnarPage>
@@ -60,27 +64,12 @@ export const SnapshotPage = injectUICapabilities(
             )
           }
         />
-        <Header
-          breadcrumbs={[
-            {
-              href: '#/',
-              text: intl.formatMessage({
-                id: 'xpack.infra.header.infrastructureTitle',
-                defaultMessage: 'Infrastructure',
-              }),
-            },
-          ]}
-          readOnlyBadge={!uiCapabilities.infrastructure.save}
-        />
-        <SourceConfigurationFlyout
-          shouldAllowEdit={uiCapabilities.infrastructure.configureSource as boolean}
-        />
         {isLoading ? (
           <SourceLoadingPage />
         ) : metricIndicesExist ? (
           <>
             <WithWaffleTimeUrlState />
-            <WithWaffleFilterUrlState indexPattern={derivedIndexPattern} />
+            <WithWaffleFilterUrlState indexPattern={createDerivedIndexPattern('metrics')} />
             <WithWaffleOptionsUrlState />
             <SnapshotToolbar />
             <SnapshotPageContent />
@@ -116,16 +105,15 @@ export const SnapshotPage = injectUICapabilities(
                     </EuiFlexItem>
                     {uiCapabilities.infrastructure.configureSource ? (
                       <EuiFlexItem>
-                        <EuiButton
+                        <ViewSourceConfigurationButton
                           data-test-subj="configureSourceButton"
-                          color="primary"
-                          onClick={showIndicesConfiguration}
+                          hrefBase={ViewSourceConfigurationButtonHrefBase.infrastructure}
                         >
                           {intl.formatMessage({
                             id: 'xpack.infra.configureSourceActionLabel',
                             defaultMessage: 'Change source configuration',
                           })}
-                        </EuiButton>
+                        </ViewSourceConfigurationButton>
                       </EuiFlexItem>
                     ) : null}
                   </EuiFlexGroup>

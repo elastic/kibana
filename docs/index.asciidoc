@@ -36,8 +36,6 @@ include::visualize.asciidoc[]
 
 include::dashboard.asciidoc[]
 
-include::timelion.asciidoc[]
-
 include::canvas.asciidoc[]
 
 include::ml/index.asciidoc[]
@@ -71,8 +69,6 @@ include::security/index.asciidoc[]
 include::management/watcher-ui/index.asciidoc[]
 
 include::management/upgrade-assistant/index.asciidoc[]
-
-include::management/dashboard_only_mode/index.asciidoc[]
 
 include::reporting/index.asciidoc[]
 

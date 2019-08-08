@@ -18,10 +18,8 @@
  */
 
 import React, { useEffect } from 'react';
-import { findLast } from 'lodash';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AggConfig } from 'ui/vis';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { safeMakeLabel, isCompatibleAggregation } from '../agg_utils';
 
@@ -32,13 +30,11 @@ const EMPTY_VALUE = 'EMPTY_VALUE';
 function MetricAggParamEditor({
   agg,
   value,
-  state,
   showValidation,
   setValue,
   setValidity,
   setTouched,
-  subAggParams,
-  responseValueAggs,
+  metricAggs,
 }: AggParamEditorProps<string>) {
   const label = i18n.translate('common.ui.aggTypes.metricLabel', {
     defaultMessage: 'Metric',
@@ -50,9 +46,9 @@ function MetricAggParamEditor({
   }, [isValid]);
 
   useEffect(() => {
-    if (responseValueAggs && value && value !== 'custom') {
+    if (metricAggs && value && value !== 'custom') {
       // ensure that metricAgg is set to a valid agg
-      const respAgg = responseValueAggs
+      const respAgg = metricAggs
         .filter(isCompatibleAgg)
         .find(aggregation => aggregation.id === value);
 
@@ -60,56 +56,10 @@ function MetricAggParamEditor({
         setValue();
       }
     }
-  }, [responseValueAggs]);
+  }, [metricAggs]);
 
-  useEffect(() => {
-    // check buckets
-    const lastBucket: AggConfig = findLast(
-      state.aggs,
-      aggr => aggr.type && aggr.type.type === 'buckets'
-    );
-    const bucketHasType = lastBucket && lastBucket.type;
-    const bucketIsHistogram =
-      bucketHasType && ['date_histogram', 'histogram'].includes(lastBucket.type.name);
-    const canUseAggregation = lastBucket && bucketIsHistogram;
-
-    // remove errors on all buckets
-    state.aggs.forEach((aggr: AggConfig) => {
-      if (aggr.error) {
-        subAggParams.onAggErrorChanged(aggr);
-      }
-    });
-
-    if (canUseAggregation) {
-      subAggParams.onAggParamsChange(
-        lastBucket.params,
-        'min_doc_count',
-        lastBucket.type.name === 'histogram' ? 1 : 0
-      );
-    } else {
-      if (lastBucket) {
-        subAggParams.onAggErrorChanged(
-          lastBucket,
-          i18n.translate('common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage', {
-            defaultMessage:
-              'Last bucket aggregation must be "Date Histogram" or "Histogram" when using "{type}" metric aggregation.',
-            values: { type: agg.type.title },
-            description: 'Date Histogram and Histogram should not be translated',
-          })
-        );
-      }
-    }
-
-    return () => {
-      // clear errors in last bucket before component destroyed
-      if (lastBucket && lastBucket.error) {
-        subAggParams.onAggErrorChanged(lastBucket);
-      }
-    };
-  }, [value, responseValueAggs]);
-
-  const options = responseValueAggs
-    ? responseValueAggs
+  const options = metricAggs
+    ? metricAggs
         .filter(respAgg => respAgg.type.name !== agg.type.name)
         .map(respAgg => ({
           text: i18n.translate('common.ui.aggTypes.definiteMetricLabel', {

@@ -2,7 +2,7 @@
 
 exports[`Storyshots renderers/TimeFilter/components/PrettyDuration with absolute dates 1`] = `
 <span>
-  ~ 6 months ago to ~ 5 months ago
+  ~ 5 months ago to ~ 4 months ago
 </span>
 `;
 

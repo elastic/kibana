@@ -32,9 +32,8 @@ import {
   RangeFilter,
 } from '@kbn/es-query';
 import { omit } from 'lodash';
-import { Field, IndexPattern } from 'ui/index_patterns';
-import { isFilterable } from 'ui/index_patterns/static_utils';
 import Ipv4Address from 'ui/utils/ipv4_address';
+import { Field, IndexPattern, utils as indexPatternUtils } from '../../../../index_patterns';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
 
 export function getIndexPatternFromFilter(
@@ -59,7 +58,7 @@ export function getQueryDslFromFilter(filter: Filter) {
 }
 
 export function getFilterableFields(indexPattern: IndexPattern) {
-  return indexPattern.fields.filter(isFilterable);
+  return indexPattern.fields.filter(indexPatternUtils.isFilterable);
 }
 
 export function getOperatorOptions(field: Field) {
@@ -131,6 +130,7 @@ export function buildFilter(
   indexPattern: IndexPattern,
   field: Field,
   operator: Operator,
+  disabled: boolean,
   params: any,
   alias: string | null,
   store: FilterStateStore
@@ -138,6 +138,7 @@ export function buildFilter(
   const filter = buildBaseFilter(indexPattern, field, operator, params);
   filter.meta.alias = alias;
   filter.meta.negate = operator.negate;
+  filter.meta.disabled = disabled;
   filter.$state = { store };
   return filter;
 }

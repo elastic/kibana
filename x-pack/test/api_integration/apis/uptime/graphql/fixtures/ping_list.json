@@ -1,14 +1,18 @@
 {
   "allPings": {
-    "total": 9231,
-    "locations": ["N/A"],
+    "total": 9234,
+    "locations": [
+      "N/A"
+    ],
     "pings": [
       {
         "timestamp": "2019-01-28T18:43:16.078Z",
         "http": null,
         "error": null,
         "monitor": {
-          "duration": { "us": 3328 },
+          "duration": {
+            "us": 3328
+          },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
@@ -26,7 +30,9 @@
           "type": "io"
         },
         "monitor": {
-          "duration": { "us": 3331 },
+          "duration": {
+            "us": 3331
+          },
           "id": "auto-http-0X3675F89EF0612091",
           "ip": "127.0.0.1",
           "name": "",
@@ -41,7 +47,9 @@
         "http": null,
         "error": null,
         "monitor": {
-          "duration": { "us": 3292 },
+          "duration": {
+            "us": 3292
+          },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
@@ -53,10 +61,16 @@
       },
       {
         "timestamp": "2019-01-28T18:43:15.077Z",
-        "http": { "response": { "status_code": 200 } },
+        "http": {
+          "response": {
+            "status_code": 200
+          }
+        },
         "error": null,
         "monitor": {
-          "duration": { "us": 118727 },
+          "duration": {
+            "us": 118727
+          },
           "id": "auto-http-0X970CBD2F2102BFA8",
           "ip": "172.217.12.132",
           "name": "",
@@ -68,10 +82,16 @@
       },
       {
         "timestamp": "2019-01-28T18:43:15.077Z",
-        "http": { "response": { "status_code": 200 } },
+        "http": {
+          "response": {
+            "status_code": 200
+          }
+        },
         "error": null,
         "monitor": {
-          "duration": { "us": 132169 },
+          "duration": {
+            "us": 132169
+          },
           "id": "auto-http-0X131221E73F825974",
           "ip": "172.217.12.132",
           "name": "",
@@ -83,10 +103,16 @@
       },
       {
         "timestamp": "2019-01-28T18:43:15.077Z",
-        "http": { "response": { "status_code": 200 } },
+        "http": {
+          "response": {
+            "status_code": 200
+          }
+        },
         "error": null,
         "monitor": {
-          "duration": { "us": 247244 },
+          "duration": {
+            "us": 247244
+          },
           "id": "auto-http-0X9CB71300ABD5A2A8",
           "ip": "192.30.253.112",
           "name": "",
@@ -101,7 +127,9 @@
         "http": null,
         "error": null,
         "monitor": {
-          "duration": { "us": 2080 },
+          "duration": {
+            "us": 2080
+          },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
@@ -116,7 +144,9 @@
         "http": null,
         "error": null,
         "monitor": {
-          "duration": { "us": 1921 },
+          "duration": {
+            "us": 1921
+          },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
@@ -128,10 +158,16 @@
       },
       {
         "timestamp": "2019-01-28T18:43:13.074Z",
-        "http": { "response": { "status_code": 301 } },
+        "http": {
+          "response": {
+            "status_code": 301
+          }
+        },
         "error": null,
         "monitor": {
-          "duration": { "us": 299586 },
+          "duration": {
+            "us": 299586
+          },
           "id": "auto-http-0XD9AE729FC1C1E04A",
           "ip": "151.101.249.140",
           "name": "",
@@ -143,10 +179,16 @@
       },
       {
         "timestamp": "2019-01-28T18:43:13.074Z",
-        "http": { "response": { "status_code": 200 } },
+        "http": {
+          "response": {
+            "status_code": 200
+          }
+        },
         "error": null,
         "monitor": {
-          "duration": { "us": 850870 },
+          "duration": {
+            "us": 850870
+          },
           "id": "auto-http-0XDD2D4E60FD4A61C3",
           "ip": "151.101.250.217",
           "name": "",

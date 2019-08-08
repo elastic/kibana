@@ -5,10 +5,9 @@
  */
 import expect from '@kbn/expect';
 import { SpacesService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService: SpacesService = getService('spaces');
   const PageObjects = getPageObjects([
@@ -63,7 +62,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('discover', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('discoverSaveButton', 10000);
+        await testSubjects.existOrFail('discoverSaveButton', { timeout: 10000 });
       });
 
       it('shows "visualize" field button', async () => {
@@ -117,7 +116,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
     });
 
-    describe('space with Visualize disabled', async () => {
+    describe('space with Visualize disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
@@ -144,7 +143,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
     });
 
-    describe('space with index pattern management disabled', async () => {
+    describe('space with index pattern management disabled', () => {
       before(async () => {
         await spacesService.create({
           id: 'custom_space',
@@ -162,7 +161,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
     });
   });

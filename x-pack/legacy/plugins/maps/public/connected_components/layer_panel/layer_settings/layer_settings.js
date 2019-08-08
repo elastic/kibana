@@ -18,7 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { ValidatedRange } from '../../../shared/components/validated_range';
+import { ValidatedRange } from '../../../components/validated_range';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ValidatedDualRange } from 'ui/validated_range';

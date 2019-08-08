@@ -20,7 +20,7 @@ import {
 import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import { AutoFollowPatternDeleteProvider } from '../../../../../components';
 import routing from '../../../../../services/routing';
-import { trackUiMetric } from '../../../../../services/track_ui_metric';
+import { trackUiMetric, METRIC_TYPE } from '../../../../../services/track_ui_metric';
 
 export class AutoFollowPatternTable extends PureComponent {
   static propTypes = {
@@ -77,7 +77,7 @@ export class AutoFollowPatternTable extends PureComponent {
         return (
           <EuiLink
             onClick={() => {
-              trackUiMetric(UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK);
+              trackUiMetric(METRIC_TYPE.CLICK, UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK);
               selectAutoFollowPattern(name);
             }}
             data-test-subj="autoFollowPatternLink"
@@ -133,6 +133,28 @@ export class AutoFollowPatternTable extends PureComponent {
       actions: [
         {
           render: ({ name }) => {
+            const label = i18n.translate('xpack.crossClusterReplication.autoFollowPatternList.table.actionEditDescription', {
+              defaultMessage: 'Edit auto-follow pattern',
+            });
+
+            return (
+              <EuiToolTip
+                content={label}
+                delay="long"
+              >
+                <EuiButtonIcon
+                  aria-label={label}
+                  iconType="pencil"
+                  color="primary"
+                  href={routing.getAutoFollowPatternPath(name)}
+                  data-test-subj="editButton"
+                />
+              </EuiToolTip>
+            );
+          },
+        },
+        {
+          render: ({ name }) => {
             const label = i18n.translate(
               'xpack.crossClusterReplication.autoFollowPatternList.table.actionDeleteDescription',
               {
@@ -156,28 +178,6 @@ export class AutoFollowPatternTable extends PureComponent {
                     />
                   )}
                 </AutoFollowPatternDeleteProvider>
-              </EuiToolTip>
-            );
-          },
-        },
-        {
-          render: ({ name }) => {
-            const label = i18n.translate('xpack.crossClusterReplication.autoFollowPatternList.table.actionEditDescription', {
-              defaultMessage: 'Edit auto-follow pattern',
-            });
-
-            return (
-              <EuiToolTip
-                content={label}
-                delay="long"
-              >
-                <EuiButtonIcon
-                  aria-label={label}
-                  iconType="pencil"
-                  color="primary"
-                  href={routing.getAutoFollowPatternPath(name)}
-                  data-test-subj="editButton"
-                />
               </EuiToolTip>
             );
           },

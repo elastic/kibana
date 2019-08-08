@@ -10,8 +10,12 @@ import { Job } from '../types';
 import { KibanaConfigContext } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { hasMlUserPermissions } from '../../ml/permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_provider';
+import { useStateToaster } from '../../toasters';
+import { errorToToaster } from '../../ml/api/error_to_toaster';
 
-type Return = [boolean, Job[]];
+import * as i18n from './translations';
+
+type Return = [boolean, Job[] | null];
 
 export const getSiemJobsFromJobsSummary = (data: Job[]) =>
   data.reduce((jobs: Job[], job: Job) => {
@@ -19,22 +23,27 @@ export const getSiemJobsFromJobsSummary = (data: Job[]) =>
   }, []);
 
 export const useJobSummaryData = (jobIds: string[] = [], refreshToggle = false): Return => {
-  const [jobSummaryData, setJobSummaryData] = useState<Job[]>([]);
+  const [jobSummaryData, setJobSummaryData] = useState<Job[] | null>(null);
   const [loading, setLoading] = useState(true);
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
   const userPermissions = hasMlUserPermissions(capabilities);
+  const [, dispatchToaster] = useStateToaster();
 
   const fetchFunc = async () => {
     if (userPermissions) {
-      const data: Job[] = await jobsSummary(jobIds, {
-        'kbn-version': config.kbnVersion,
-      });
+      try {
+        const data: Job[] = await jobsSummary(jobIds, {
+          'kbn-version': config.kbnVersion,
+        });
 
-      // TODO: API returns all jobs even though we specified jobIds -- jobsSummary call seems to match request in ML App?
-      const siemJobs = getSiemJobsFromJobsSummary(data);
+        // TODO: API returns all jobs even though we specified jobIds -- jobsSummary call seems to match request in ML App?
+        const siemJobs = getSiemJobsFromJobsSummary(data);
 
-      setJobSummaryData(siemJobs);
+        setJobSummaryData(siemJobs);
+      } catch (error) {
+        errorToToaster({ title: i18n.JOB_SUMMARY_FETCH_FAILURE, error, dispatchToaster });
+      }
     }
     setLoading(false);
   };

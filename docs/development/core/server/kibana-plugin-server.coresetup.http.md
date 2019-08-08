@@ -8,11 +8,11 @@
 
 ```typescript
 http: {
+        createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
         registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
         registerAuth: HttpServiceSetup['registerAuth'];
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         basePath: HttpServiceSetup['basePath'];
-        createNewServer: HttpServiceSetup['createNewServer'];
         isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
     };
 ```

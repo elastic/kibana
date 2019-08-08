@@ -13,7 +13,7 @@ export const domainsQuery = gql`
     $flowDirection: FlowDirection!
     $flowTarget: FlowTarget!
     $ip: String!
-    $pagination: PaginationInput!
+    $pagination: PaginationInputPaginated!
     $sort: DomainsSortField!
     $timerange: TimerangeInput!
     $defaultIndex: [String!]!
@@ -57,10 +57,9 @@ export const domainsQuery = gql`
           }
         }
         pageInfo {
-          endCursor {
-            value
-          }
-          hasNextPage
+          activePage
+          fakeTotalCount
+          showMorePagesIndicator
         }
         inspect @include(if: $inspect) {
           dsl
