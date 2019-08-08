@@ -13,7 +13,7 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
 
-export async function calculateBucketSize(
+export async function getDistributionMax(
   serviceName: string,
   transactionName: string,
   transactionType: string,
@@ -56,10 +56,5 @@ export async function calculateBucketSize(
   };
 
   const resp = await client.search(params);
-
-  const minBucketSize: number = config.get('xpack.apm.minimumBucketSize');
-  const bucketTargetCount: number = config.get('xpack.apm.bucketTargetCount');
-  const max = resp.aggregations.stats.max;
-  const bucketSize = Math.floor(max / bucketTargetCount);
-  return bucketSize > minBucketSize ? bucketSize : minBucketSize;
+  return resp.aggregations.stats.max;
 }
