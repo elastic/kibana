@@ -63,6 +63,9 @@ declare interface Ml {
     }>
   >;
 
+  getVisualizerFieldStats(obj: object): Promise<any>;
+  getVisualizerOverallStats(obj: object): Promise<any>;
+
   jobs: {
     jobsSummary(jobIds: string[]): Promise<object>;
     jobs(jobIds: string[]): Promise<object>;
