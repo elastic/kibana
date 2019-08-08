@@ -5,9 +5,9 @@
  */
 
 // @ts-ignore EuiSearchBar missing
-import { EuiSearchBar, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSearchBar, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink, EuiLinkType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment, useContext, useEffect } from 'react';
+import React, { Fragment, useContext, useEffect, FunctionComponent } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
   EmptyState,
@@ -21,7 +21,7 @@ import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
-import { CursorDirection, SortOrder, CursorPagination } from '../../common/graphql/types';
+import { CursorPagination } from '../../common/graphql/types';
 
 interface OverviewPageProps {
   basePath: string;
@@ -90,6 +90,18 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
     updateUrl({ search: queryText || '' });
     refreshApp();
   };
+
+  const paginationLink = (text: string, pagination: CursorPagination): any => {
+    const update: any = { 
+      cursorDirection: pagination.cursorDirection,
+      sortOrder: pagination.sortOrder
+    }
+    if (typeof(pagination.cursorKey) === "string") {
+      update.cursorKey = pagination.cursorKey;
+    }
+    const href = "?params"
+    return <EuiLink href={href}>{text}</EuiLink>
+  }
 
   const updateSearchAfter: UptimeSearchAfterChangeHandler = (pagination: CursorPagination) => {
     const update: any = { 

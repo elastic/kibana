@@ -114,11 +114,9 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     };
     if (searchAfter) {
       if (typeof(searchAfter) === "string") {
-        console.log("DECODE")
         // This is usually passed through from the browser as string encoded JSON
         searchAfter = JSON.parse(searchAfter);
       }
-      console.log("SA ", searchAfter, typeof(searchAfter))
       set(body, 'aggs.monitors.composite.after', searchAfter);
     }
     return body;

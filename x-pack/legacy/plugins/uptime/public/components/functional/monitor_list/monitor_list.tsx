@@ -37,6 +37,7 @@ import { MonitorBarSeries } from '../charts';
 import { MonitorPageLink } from '../monitor_page_link';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
 import { UptimeSearchAfterChangeHandler } from '../../../pages/overview';
+import { OverviewPageLink } from '../overview_page_link';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -71,9 +72,10 @@ export const MonitorListComponent = (props: Props) => {
 
   const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
 
-  const hasNextPage = items.length > 0;
-  
-  const nextPagination = (): CursorPagination => {
+  const nextPagination = (): CursorPagination | null => {
+    if (items.length < 1) {
+      return null;
+    }
     const lastItem = last(items);
     const lastLocations = get(lastItem.state, 'observer.geo.name', []);
     lastLocations.sort();
@@ -234,16 +236,7 @@ export const MonitorListComponent = (props: Props) => {
           ]}
         />
         <EuiFlexItem grow={false}>
-          <EuiPagination
-            pageCount={4}
-            activePage={2}
-            onPageClick={(p: number) => {
-              if (hasNextPage) {
-              updateSearchAfter(nextPagination());
-              }
-            }}
-            compressed={true}
-          />
+          <OverviewPageLink pagination={nextPagination()} linkParameters={linkParameters} location={"something"}>Next &gt;</OverviewPageLink>
         </EuiFlexItem>
       </EuiPanel>
     </Fragment>
