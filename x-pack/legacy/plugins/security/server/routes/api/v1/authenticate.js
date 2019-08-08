@@ -115,6 +115,7 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
 
   server.route({
     // POST is only allowed for Third Party initiated authentication
+    // Consider splitting this route into two (GET and POST) when it's migrated to New Platform.
     method: ['GET', 'POST'],
     path: '/api/security/v1/oidc',
     config: {
@@ -128,8 +129,9 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
           error: Joi.string(),
           error_description: Joi.string(),
           error_uri: Joi.string().uri(),
-          state: Joi.string()
-        }).unknown()
+          state: Joi.string(),
+          authenticationResponseURI: Joi.string(),
+        }).unknown(),
       }
     },
     async handler(request, h) {
