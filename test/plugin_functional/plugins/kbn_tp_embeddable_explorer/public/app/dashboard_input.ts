@@ -48,7 +48,8 @@ export const dashboardInput: DashboardContainerInput = {
       type: CONTACT_CARD_EMBEDDABLE,
       explicitInput: {
         id: '2',
-      },
+        firstName: 'Sue',
+      } as any,
     },
     '822cd0f0-ce7c-419d-aeaa-1171cf452745': {
       gridData: {
