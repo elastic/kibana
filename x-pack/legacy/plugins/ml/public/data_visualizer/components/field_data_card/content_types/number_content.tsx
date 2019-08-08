@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 import { ordinalSuffix } from 'ui/utils/ordinal_suffix';
 
 import { FieldDataCardProps } from '../field_data_card';
-// @ts-ignore
 import { DisplayValue } from '../../../../components/display_value';
 import { kibanaFieldFormat } from '../../../../formatters/kibana_field_format';
 // @ts-ignore
