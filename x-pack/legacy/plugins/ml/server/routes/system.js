@@ -100,11 +100,12 @@ export function systemRoutes({
       try {
         const ignoreSpaces = request.query && request.query.ignoreSpaces === 'true';
         const spacesFeature = xpackMainPlugin.info.feature('spaces');
-        const { isMlEnabledInSpace } = spacesFeature.isEnabled() ?
+        // if spaces is disabled or ignoreSpace is true force isMlEnabledInSpace to be true
+        const { isMlEnabledInSpace } = (spacesFeature.isEnabled() && ignoreSpaces === false) ?
           spacesUtilsProvider(spacesPlugin, request, config) :
-          { isMlEnabledInSpace: async () => true }; // if spaces is disabled force isMlEnabledInSpace to be true
+          { isMlEnabledInSpace: async () => true };
 
-        const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPlugin, isMlEnabledInSpace, ignoreSpaces);
+        const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPlugin, isMlEnabledInSpace);
         return await getPrivileges();
       } catch (error) {
         return wrapError(error);
