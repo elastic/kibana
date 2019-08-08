@@ -5,8 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { take, share, mapTo, delay, tap, ignoreElements } from 'rxjs/operators';
-import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
+import { take, share, mapTo, delay, tap } from 'rxjs/operators';
 import { Logger } from '../../types';
 
 interface IChild {
@@ -17,9 +16,8 @@ interface IChild {
 // kill the subprocess and then kill our process as long as the observer isn't cancelled
 export function safeChildProcess(
   logger: Logger,
-  childProcess: IChild,
-  observer: InnerSubscriber<any, any>
-): void {
+  childProcess: IChild
+): { terminate$: Rx.Observable<string> } {
   const ownTerminateSignal$ = Rx.merge(
     Rx.fromEvent(process as NodeJS.EventEmitter, 'SIGTERM').pipe(mapTo('SIGTERM')),
     Rx.fromEvent(process as NodeJS.EventEmitter, 'SIGINT').pipe(mapTo('SIGINT')),
@@ -29,35 +27,40 @@ export function safeChildProcess(
     share()
   );
 
-  // signals that will be sent to the child process as a result of the main process
-  // being sent these signals, or the exit being triggered
-  const signalForChildProcess$ = Rx.merge(
-    // SIGKILL when this process gets a terminal signal
-    ownTerminateSignal$.pipe(mapTo('SIGKILL')),
-
-    // SIGKILL when this process forcefully exits
-    Rx.fromEvent(process as NodeJS.EventEmitter, 'exit').pipe(
-      take(1),
-      mapTo('SIGKILL')
-    )
+  const ownTerminateMapToKill$ = ownTerminateSignal$.pipe(
+    tap(signal => {
+      logger.debug(`Kibana process received terminate signal: ${signal}`);
+    }),
+    mapTo('SIGKILL')
   );
+
+  const kibanaForceExit$ = Rx.fromEvent(process as NodeJS.EventEmitter, 'exit').pipe(
+    take(1),
+    tap(signal => {
+      logger.debug(`Kibana process forcefully exited with signal: ${signal}`);
+    }),
+    mapTo('SIGKILL')
+  );
+
+  const signalForChildProcess$ = Rx.merge(ownTerminateMapToKill$, kibanaForceExit$);
+
+  const logAndKillChildProcess = tap((signal: string) => {
+    logger.debug(`Child process terminate signal was: ${signal}. Closing the browser...`);
+    return childProcess.kill(signal);
+  });
 
   // send termination signals
   const terminate$ = Rx.merge(
-    signalForChildProcess$.pipe(tap(signal => childProcess.kill(signal))),
+    signalForChildProcess$.pipe(logAndKillChildProcess),
 
     ownTerminateSignal$.pipe(
       delay(1),
-      tap(signal => process.kill(process.pid, signal))
+      tap(signal => {
+        logger.debug(`Kibana process terminate signal was: ${signal}. Closing the browser...`);
+        return process.kill(process.pid, signal);
+      })
     )
   );
 
-  // this is adding unsubscribe logic to our observer
-  // so that if our observer unsubscribes, we terminate our child-process
-  observer.add(() => {
-    logger.debug(`The browser process observer has unsubscribed. Closing the browser...`);
-    childProcess.kill('SIGKILL');
-  });
-
-  observer.add(terminate$.pipe(ignoreElements()).subscribe(observer));
+  return { terminate$ };
 }

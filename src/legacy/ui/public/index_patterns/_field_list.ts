@@ -18,7 +18,7 @@
  */
 
 import { IndexedArray } from 'ui/indexed_array';
-import { IndexPattern } from 'ui/index_patterns/_index_pattern';
+import { IndexPattern } from 'ui/index_patterns';
 import { Field, FieldSpec } from './_field';
 
 export class FieldList extends IndexedArray<Field> {
