@@ -22,7 +22,7 @@ import { constant, once, compact, flatten } from 'lodash';
 
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
-import { Config } from './config';
+import { Config } from 'src/legacy/server/config';
 import loggingConfiguration from './logging/configuration';
 import configSetupMixin from './config/setup';
 import httpMixin from './http';
