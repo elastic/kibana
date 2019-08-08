@@ -92,7 +92,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       const { CA_CERT_PATH } = require('@kbn/dev-utils');
       const customElasticsearchHosts = opts.elasticsearch
         ? opts.elasticsearch.split(',')
-        : get('elasticsearch.hosts');
+        : [].concat(get('elasticsearch.hosts') || []);
 
       function ensureNotDefined(path) {
         if (has(path)) {
@@ -103,7 +103,10 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       ensureNotDefined('server.ssl.key');
       ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
 
-      const elasticsearchHosts = (customElasticsearchHosts || ['https://localhost:9200']).map(hostUrl => {
+      const elasticsearchHosts = (
+        (customElasticsearchHosts.length > 0 && customElasticsearchHosts) ||
+        ['https://localhost:9200']
+      ).map(hostUrl => {
         const parsedUrl = url.parse(hostUrl);
         if (parsedUrl.hostname !== 'localhost') {
           throw new Error(`Hostname "${parsedUrl.hostname}" can't be used with --ssl. Must be "localhost" to work with certificates.`);
