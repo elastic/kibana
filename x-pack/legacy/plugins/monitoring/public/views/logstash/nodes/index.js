@@ -11,13 +11,14 @@ import { getPageData } from './get_page_data';
 import template from './index.html';
 import { I18nContext } from 'ui/i18n';
 import { Listing } from '../../../components/logstash/listing';
+import { CODE_PATH_LOGSTASH } from '../../../../common/constants';
 
 uiRoutes.when('/logstash/nodes', {
   template,
   resolve: {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_LOGSTASH] });
     },
     pageData: getPageData
   },

@@ -14,13 +14,14 @@ import { MonitoringViewBaseEuiTableController } from '../../';
 import { ElasticsearchNodes } from '../../../components';
 import { I18nContext } from 'ui/i18n';
 import { SetupModeRenderer } from '../../../components/renderers';
+import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/nodes', {
   template,
   resolve: {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
     }
   },
   controllerAs: 'elasticsearchNodes',
