@@ -1,4 +1,3 @@
-csp.strict: false
 # Kibana is served by a back end server. This setting specifies the port to use.
 #server.port: 5601
 

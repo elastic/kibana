@@ -67,6 +67,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     public readonly isFirefox: boolean = browserType === Browsers.Firefox;
 
+    public readonly isInternetExplorer: boolean = browserType === Browsers.InternetExplorer;
+
     /**
      * Is WebDriver instance W3C compatible
      */

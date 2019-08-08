@@ -20,5 +20,5 @@
 export enum Browsers {
   Chrome = 'chrome',
   Firefox = 'firefox',
-  InternetExplorer = 'internet explorer'
+  InternetExplorer = 'internet explorer',
 }

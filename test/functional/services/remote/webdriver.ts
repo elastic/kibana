@@ -23,6 +23,7 @@ import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
 import { Builder, Capabilities, By, Key, logging, until } from 'selenium-webdriver';
+// import ieCapabilities from 'selenium-webdriver/lib/capabilities';
 // @ts-ignore types not available
 import chrome from 'selenium-webdriver/chrome';
 // @ts-ignore types not available
@@ -105,9 +106,22 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
           .build();
 
       case 'internet explorer':
+
+      // https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/ie_exports_Options.html
+        const ieOptions = new ie.Options();
+        ieOptions.ensureCleanSession(true); // this doesn't seem to be working
+        ieOptions.EnsureCleanSession = true; // this doesn't seem to be working
+
+        const ieCapabilities = Capabilities.ie();
+        // const ieCapabilities = new ie.Capabilities();
+        ieCapabilities.set('nativeEvents', false);
+        ieCapabilities.set("ie.ensureCleanSession", true); //also not working
+
         return new Builder()
-          .forBrowser(browserType)
-          .build();
+        .forBrowser(browserType)
+        .withCapabilities(ieCapabilities)
+        .setIeOptions(ieOptions)
+        .build();
 
       default:
         throw new Error(`${browserType} is not supported yet`);
@@ -115,6 +129,19 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
   };
 
   const session = await buildDriverInstance();
+
+  if (browserType === 'internet explorer') {
+    // does not seem to work
+    // session.getSessionStorage().clear();
+    // session.getLocalStorage().clear(); //ERROR TypeError: session.getLocalStorage is not a function
+
+    // does not seem to work
+    // session.get('javascript:localStorage.clear();')
+    // session.get('javascript:sessionStorage.clear();')
+    // session.execute('window.localStorage.clear();');
+    // session.execute_script('window.localStorage.clear();')
+    console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++');
+  }
 
   if (throttleOption === '1' && browserType === 'chrome') {
     // Only chrome supports this option.
