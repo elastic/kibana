@@ -10,6 +10,7 @@ import { AlertExecutorOptions } from '../types';
 import { ConcreteTaskInstance } from '../../../task_manager';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
+import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 
 let fakeTimer: sinon.SinonFakeTimers;
 let mockedTaskInstance: ConcreteTaskInstance;
@@ -53,7 +54,7 @@ const getCreateTaskRunnerFunctionParams = {
     executor: jest.fn(),
   },
   fireAction: jest.fn(),
-  savedObjectsRepositoryWithInternalUser: savedObjectsClient,
+  encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.create(),
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
 };

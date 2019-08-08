@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
 import { ActionsPlugin } from '../../../actions';
 import { AlertType, AlertServices, RawAlert, GetServicesFunction } from '../types';
 import { ConcreteTaskInstance } from '../../../task_manager';
@@ -14,12 +13,13 @@ import { AlertInstance } from './alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from './validate_alert_type_params';
 import { SpacesPlugin } from '../../../spaces';
+import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
 
 interface CreateTaskRunnerFunctionOptions {
   getServices: GetServicesFunction;
   alertType: AlertType;
   fireAction: ActionsPlugin['fire'];
-  savedObjectsRepositoryWithInternalUser: SavedObjectsClientContract;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
   spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
   getBasePath: SpacesPlugin['getBasePath'];
 }
@@ -32,31 +32,41 @@ export function getCreateTaskRunnerFunction({
   getServices,
   alertType,
   fireAction,
-  savedObjectsRepositoryWithInternalUser,
+  encryptedSavedObjectsPlugin,
   spaceIdToNamespace,
   getBasePath,
 }: CreateTaskRunnerFunctionOptions) {
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
       run: async () => {
+        const requestHeaders: Record<string, string> = {};
         const namespace = spaceIdToNamespace(taskInstance.params.spaceId);
-        // Only get attributes that are needed, we shouldn't pass around this saved object
-        // due to containing encrypted attributes which are returned from repository.
+        // Only fetch encrypted attributes here, we'll create a saved objects client
+        // scoped with the API key to fetch the remaining data.
         const {
-          attributes: { alertTypeParams, actions, interval },
-          references,
-        } = await savedObjectsRepositoryWithInternalUser.get<RawAlert>(
+          attributes: { apiKeyId, generatedApiKey },
+        } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAlert>(
           'alert',
           taskInstance.params.alertId,
           { namespace }
         );
 
+        if (apiKeyId && generatedApiKey) {
+          const key = Buffer.from(`${apiKeyId}:${generatedApiKey}`).toString('base64');
+          requestHeaders.authorization = `ApiKey ${key}`;
+        }
+
         const fakeRequest = {
-          headers: {} as any,
+          headers: requestHeaders,
           getBasePath: () => getBasePath(taskInstance.params.spaceId),
         };
 
         const services = getServices(fakeRequest);
+        // Ensure API key is still valid and user has access
+        const {
+          attributes: { alertTypeParams, actions, interval },
+          references,
+        } = await services.savedObjectsClient.get<RawAlert>('alert', taskInstance.params.alertId);
 
         // Validate
         const validatedAlertTypeParams = validateAlertTypeParams(alertType, alertTypeParams);

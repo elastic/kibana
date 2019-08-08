@@ -6,18 +6,18 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientContract } from 'src/core/server';
 import { AlertType, GetServicesFunction } from './types';
 import { TaskManager } from '../../task_manager';
 import { getCreateTaskRunnerFunction } from './lib';
 import { ActionsPlugin } from '../../actions';
 import { SpacesPlugin } from '../../spaces';
+import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 
 interface ConstructorOptions {
   getServices: GetServicesFunction;
   taskManager: TaskManager;
   fireAction: ActionsPlugin['fire'];
-  savedObjectsRepositoryWithInternalUser: SavedObjectsClientContract;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
   spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
   getBasePath: SpacesPlugin['getBasePath'];
 }
@@ -27,12 +27,12 @@ export class AlertTypeRegistry {
   private readonly taskManager: TaskManager;
   private readonly fireAction: ActionsPlugin['fire'];
   private readonly alertTypes: Map<string, AlertType> = new Map();
-  private readonly savedObjectsRepositoryWithInternalUser: SavedObjectsClientContract;
+  private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
   private readonly spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
   private readonly getBasePath: SpacesPlugin['getBasePath'];
 
   constructor({
-    savedObjectsRepositoryWithInternalUser,
+    encryptedSavedObjectsPlugin,
     fireAction,
     taskManager,
     getServices,
@@ -41,7 +41,7 @@ export class AlertTypeRegistry {
   }: ConstructorOptions) {
     this.taskManager = taskManager;
     this.fireAction = fireAction;
-    this.savedObjectsRepositoryWithInternalUser = savedObjectsRepositoryWithInternalUser;
+    this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
     this.getServices = getServices;
     this.getBasePath = getBasePath;
     this.spaceIdToNamespace = spaceIdToNamespace;
@@ -71,7 +71,7 @@ export class AlertTypeRegistry {
           alertType,
           getServices: this.getServices,
           fireAction: this.fireAction,
-          savedObjectsRepositoryWithInternalUser: this.savedObjectsRepositoryWithInternalUser,
+          encryptedSavedObjectsPlugin: this.encryptedSavedObjectsPlugin,
           getBasePath: this.getBasePath,
           spaceIdToNamespace: this.spaceIdToNamespace,
         }),
