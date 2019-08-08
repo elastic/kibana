@@ -77,11 +77,21 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
           <EuiHorizontalRule />
           {progress < 100 && (
             <Fragment>
-              <EuiButton onClick={start} isDisabled={progress > 0} disabled={isValid === false}>
+              <EuiButton
+                onClick={start}
+                isDisabled={progress > 0}
+                disabled={isValid === false}
+                data-test-subj="mlJobWizardButtonCreateJob"
+              >
                 Create job
               </EuiButton>
               &emsp;
-              <EuiButtonEmpty size="s" onClick={toggleJsonFlyout} isDisabled={progress > 0}>
+              <EuiButtonEmpty
+                size="s"
+                onClick={toggleJsonFlyout}
+                isDisabled={progress > 0}
+                data-test-subj="mlJobWizardButtonPreviewJobJson"
+              >
                 Preview job JSON
               </EuiButtonEmpty>
               {showJsonFlyout && (
@@ -92,7 +102,9 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
           )}
           {progress > 0 && (
             <Fragment>
-              <EuiButton onClick={viewResults}>View results</EuiButton>
+              <EuiButton onClick={viewResults} data-test-subj="mlJobWizardButtonViewResults">
+                View results
+              </EuiButton>
             </Fragment>
           )}
         </Fragment>

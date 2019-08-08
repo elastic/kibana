@@ -6,11 +6,18 @@
 
 import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
-import { ES_GEO_FIELD_TYPE, GEOJSON_FILE } from '../../../../common/constants';
+import {
+  ES_GEO_FIELD_TYPE,
+  GEOJSON_FILE,
+  ES_SIZE_LIMIT
+} from '../../../../common/constants';
 import { ClientFileCreateSourceEditor } from './create_client_file_source_editor';
 import { ESSearchSource } from '../es_search_source';
 import uuid from 'uuid/v4';
 import _ from 'lodash';
+import {
+  DEFAULT_APPLY_GLOBAL_QUERY
+} from './constants';
 
 export class GeojsonFileSource extends AbstractVectorSource {
 
@@ -20,6 +27,9 @@ export class GeojsonFileSource extends AbstractVectorSource {
   static icon = 'importAction';
   static isIndexingSource = true;
   static isBeta = true;
+  static layerDefaults = {
+    applyGlobalQuery: DEFAULT_APPLY_GLOBAL_QUERY
+  }
 
   static createDescriptor(geoJson, name) {
     // Wrap feature as feature collection if needed
@@ -56,12 +66,15 @@ export class GeojsonFileSource extends AbstractVectorSource {
       if (!indexPatternId || !geoField) {
         addAndViewSource(null);
       } else {
+        // Only turn on bounds filter for large doc counts
+        const filterByMapBounds = indexDataResp.docCount > ES_SIZE_LIMIT;
         const source = new ESSearchSource({
           id: uuid(),
           indexPatternId,
           geoField,
+          filterByMapBounds
         }, inspectorAdapters);
-        addAndViewSource(source);
+        addAndViewSource(source, this.layerDefaults);
         importSuccessHandler(indexResponses);
       }
     };

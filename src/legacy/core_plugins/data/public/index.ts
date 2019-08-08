@@ -33,6 +33,7 @@ export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from '.
 export { IndexPattern, IndexPatterns, StaticIndexPattern, Field } from './index_patterns';
 export { Query, QueryBar, QueryBarInput } from './query';
 export { FilterBar, ApplyFiltersPopover } from './filter';
+export { SearchBar, SearchBarProps } from './search';
 export {
   FilterManager,
   FilterStateManager,

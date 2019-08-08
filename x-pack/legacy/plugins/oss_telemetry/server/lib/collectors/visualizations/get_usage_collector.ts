@@ -19,7 +19,7 @@ async function fetch(server: HapiServer) {
   let docs;
   try {
     ({ docs } = await taskManager.fetch({
-      query: { bool: { filter: { term: { _id: `${PLUGIN_ID}-${VIS_TELEMETRY_TASK}` } } } },
+      query: { bool: { filter: { term: { _id: `task:${PLUGIN_ID}-${VIS_TELEMETRY_TASK}` } } } },
     }));
   } catch (err) {
     const errMessage = err && err.message ? err.message : err.toString();

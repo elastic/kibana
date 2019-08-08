@@ -12,7 +12,7 @@ export class SecureSavedObjectsClientWrapper {
       actions,
       auditLogger,
       baseClient,
-      checkPrivilegesDynamicallyWithRequest,
+      checkSavedObjectsPrivilegesWithRequest,
       errors,
       request,
       savedObjectTypes,
@@ -22,8 +22,7 @@ export class SecureSavedObjectsClientWrapper {
     this._actions = actions;
     this._auditLogger = auditLogger;
     this._baseClient = baseClient;
-    this._checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
-    this._request = request;
+    this._checkSavedObjectsPrivileges = checkSavedObjectsPrivilegesWithRequest(request);
     this._savedObjectTypes = savedObjectTypes;
   }
 
@@ -106,10 +105,10 @@ export class SecureSavedObjectsClientWrapper {
     return await this._baseClient.update(type, id, attributes, options);
   }
 
-  async _checkSavedObjectPrivileges(actions, namespace) {
+  async _checkPrivileges(actions, namespace) {
     try {
-      return await this._checkPrivileges(actions, namespace);
-    } catch(error) {
+      return await this._checkSavedObjectsPrivileges(actions, namespace);
+    } catch (error) {
       const { reason } = get(error, 'body.error', {});
       throw this.errors.decorateGeneralError(error, reason);
     }
@@ -119,7 +118,7 @@ export class SecureSavedObjectsClientWrapper {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actionsToTypesMap = new Map(types.map(type => [this._actions.savedObject.get(type, action), type]));
     const actions = Array.from(actionsToTypesMap.keys());
-    const { hasAllRequested, username, privileges } = await this._checkSavedObjectPrivileges(actions, namespace);
+    const { hasAllRequested, username, privileges } = await this._checkPrivileges(actions, namespace);
 
     if (hasAllRequested) {
       this._auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
