@@ -35,6 +35,8 @@ import {
 
 let dashboardContainer: DashboardContainer | undefined;
 
+const ExitFullScreenButton = () => <div data-test-subj="exitFullScreenModeText">EXIT</div>;
+
 function getProps(props?: Partial<DashboardViewportProps>): DashboardViewportProps {
   const viewportProps: ViewportProps = {
     getActions: (() => []) as any,
@@ -45,7 +47,7 @@ function getProps(props?: Partial<DashboardViewportProps>): DashboardViewportPro
     inspector: {} as any,
     landingPagePath: '/dashboard',
     SavedObjectFinder: () => null,
-    ExitFullScreenButton: () => null,
+    ExitFullScreenButton,
   };
 
   const __embeddableFactories = new Map<string, EmbeddableFactory>();
@@ -114,16 +116,24 @@ test('renders exit full screen button when in full screen mode', async () => {
       <DashboardViewport {...props} />
     </I18nProvider>
   );
-  let exitButton = findTestSubject(component, 'exitFullScreenModeText');
-  expect(exitButton.length).toBe(1);
+
+  expect(
+    (component
+      .find('.dshDashboardViewport')
+      .childAt(0)
+      .type() as any).name
+  ).toBe('ExitFullScreenButton');
 
   props.container.updateInput({ isFullScreenMode: false });
-
-  await nextTick();
   component.update();
+  await nextTick();
 
-  exitButton = findTestSubject(component, 'exitFullScreenModeText');
-  expect(exitButton.length).toBe(0);
+  expect(
+    (component
+      .find('.dshDashboardViewport')
+      .childAt(0)
+      .type() as any).name
+  ).not.toBe('ExitFullScreenButton');
 
   component.unmount();
 });
