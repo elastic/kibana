@@ -31,6 +31,7 @@ export {
   KibanaRequestRoute,
   KnownHeaders,
   LegacyRequest,
+  LifecycleResponseFactory,
   RedirectResponseOptions,
   RequestHandler,
   ResponseError,
