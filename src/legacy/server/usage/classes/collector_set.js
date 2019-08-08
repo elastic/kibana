@@ -120,6 +120,7 @@ export class CollectorSet {
 
     const responses = [];
     await collectorSet.asyncEach(async collector => {
+      this._log.debug(`Fetching data from ${collector.type} collector`);
       try {
         responses.push({
           type: collector.type,
