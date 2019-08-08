@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectAttributes, SavedObject } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets } from './lib';
 import { ActionResult } from './types';
@@ -37,6 +37,13 @@ interface FindOptions {
     };
     fields?: string[];
   };
+}
+
+interface FindResult {
+  page: number;
+  perPage: number;
+  total: number;
+  data: ActionResult[];
 }
 
 interface ConstructorOptions {
@@ -125,11 +132,18 @@ export class ActionsClient {
   /**
    * Find actions
    */
-  public async find({ options = {} }: FindOptions) {
-    return await this.savedObjectsClient.find({
+  public async find({ options = {} }: FindOptions): Promise<FindResult> {
+    const findResult = await this.savedObjectsClient.find({
       ...options,
       type: 'action',
     });
+
+    return {
+      page: findResult.page,
+      perPage: findResult.per_page,
+      total: findResult.total,
+      data: findResult.saved_objects.map(actionFromSavedObject),
+    };
   }
 
   /**
@@ -138,4 +152,11 @@ export class ActionsClient {
   public async delete({ id }: { id: string }) {
     return await this.savedObjectsClient.delete('action', id);
   }
+}
+
+function actionFromSavedObject(savedObject: SavedObject) {
+  return {
+    id: savedObject.id,
+    ...savedObject.attributes,
+  };
 }

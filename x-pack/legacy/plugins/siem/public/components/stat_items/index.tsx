@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScaleType, niceTimeFormatter } from '@elastic/charts';
+import { ScaleType, niceTimeFormatter, Rotation } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,10 +18,11 @@ import { get, getOr } from 'lodash/fp';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
+import { BrushEndListener, ElementClickListener } from '@elastic/charts/dist/state/chart_state';
 import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
 import { AreaChart } from '../charts/areachart';
 import { BarChart } from '../charts/barchart';
-import { ChartConfigsData, ChartData, ChartSeriesConfigs } from '../charts/common';
+import { ChartConfigsData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';
 import { getEmptyTagValue } from '../empty_value';
 
 import { InspectButton } from '../inspect';
@@ -62,22 +63,31 @@ export interface StatItemsProps extends StatItems {
   barChart?: ChartConfigsData[];
   from: number;
   id: string;
-
   to: number;
+  narrowDateRange: UpdateDateRange;
 }
 
 export const numberFormatter = (value: string | number): string => value.toLocaleString();
-export const areachartConfigs = (from: number, to: number) => ({
+const statItemBarchartRotation: Rotation = 90;
+
+export const areachartConfigs = (config?: {
+  xTickFormatter: (value: number) => string;
+  onBrushEnd?: BrushEndListener;
+}) => ({
   series: {
     xScaleType: ScaleType.Time,
     yScaleType: ScaleType.Linear,
   },
   axis: {
-    xTickFormatter: niceTimeFormatter([from, to]),
+    xTickFormatter: get('xTickFormatter', config),
     yTickFormatter: numberFormatter,
   },
+  settings: {
+    onBrushEnd: getOr(() => {}, 'onBrushEnd', config),
+  },
 });
-export const barchartConfigs = {
+
+export const barchartConfigs = (config?: { onElementClick?: ElementClickListener }) => ({
   series: {
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
@@ -85,7 +95,11 @@ export const barchartConfigs = {
   axis: {
     xTickFormatter: numberFormatter,
   },
-};
+  settings: {
+    onElementClick: getOr(() => {}, 'onElementClick', config),
+    rotation: statItemBarchartRotation,
+  },
+});
 
 export const addValueToFields = (
   fields: StatItem[],
@@ -137,7 +151,8 @@ export const useKpiMatrixStatus = (
   data: KpiHostsData | KpiNetworkData,
   id: string,
   from: number,
-  to: number
+  to: number,
+  narrowDateRange: UpdateDateRange
 ): StatItemsProps[] => {
   const [statItemsProps, setStatItemsProps] = useState(mappings as StatItemsProps[]);
 
@@ -153,6 +168,7 @@ export const useKpiMatrixStatus = (
           key: `kpi-summary-${stat.key}`,
           from,
           to,
+          narrowDateRange,
         };
       })
     );
@@ -174,6 +190,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     id,
     index,
     to,
+    narrowDateRange,
   }) => {
     const [isHover, setIsHover] = useState(false);
     const isBarChartDataAvailable =
@@ -235,13 +252,19 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
           <EuiFlexGroup>
             {enableBarChart && (
               <FlexItem>
-                <BarChart barChart={barChart} configs={barchartConfigs} />
+                <BarChart barChart={barChart} configs={barchartConfigs()} />
               </FlexItem>
             )}
 
             {enableAreaChart && from != null && to != null && (
               <FlexItem>
-                <AreaChart areaChart={areaChart} configs={areachartConfigs(from, to)} />
+                <AreaChart
+                  areaChart={areaChart}
+                  configs={areachartConfigs({
+                    xTickFormatter: niceTimeFormatter([from, to]),
+                    onBrushEnd: narrowDateRange,
+                  })}
+                />
               </FlexItem>
             )}
           </EuiFlexGroup>

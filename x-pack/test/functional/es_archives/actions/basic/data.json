@@ -48,3 +48,22 @@
     }
   }
 }
+
+{
+  "value": {
+    "id" : "space_1:action:6c7d0f6b-2fb5-4821-b182-624fc3ccc7a3",
+    "index" : ".kibana",
+    "source" : {
+      "action" : {
+        "description" : "My action",
+        "actionTypeId" : "test.index-record",
+        "config" : {
+          "unencrypted" : "This value shouldn't get encrypted"
+        },
+        "secrets" : "LEepwqGVUSkkAZSYCGDz3Y0DGoRgBGPRnu+Ta0jmEz+TiGUj3SBYWL6t2jqncBhsWgzSzwCusY+z5B/k+4wjaXW5t/KxNZP7bGpLQK0hL9IwKxqmRzRbEvX0nzeExxgfSaMRjjn2SnrE21MTw6qyBwGNqnuvmN7ILde4ZUbR9Jyjl8A6Y0GDcWvN"
+      },
+      "type": "action",
+      "namespace": "space_1"
+    }
+  }
+}
