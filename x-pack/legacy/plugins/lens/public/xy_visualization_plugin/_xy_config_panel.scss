@@ -7,6 +7,7 @@
   padding: $euiSizeS;
   border-radius: $euiBorderRadius;
 
+  // Add margin to the top of the next same panel
   & + & {
     margin-top: $euiSizeS;
   }
