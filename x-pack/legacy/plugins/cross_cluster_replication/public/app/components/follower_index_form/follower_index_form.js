@@ -45,6 +45,8 @@ import { extractQueryParams } from '../../services/query_params';
 import { getRemoteClusterName } from '../../services/get_remote_cluster_name';
 import { RemoteClustersFormField } from '../remote_clusters_form_field';
 
+import { FollowerIndexRequestFlyout } from './follower_index_request_flyout';
+
 const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 const fieldToValidatorMap = advancedSettingsFields.reduce((map, advancedSetting) => {
@@ -121,11 +123,18 @@ export class FollowerIndexForm extends PureComponent {
       areErrorsVisible: false,
       areAdvancedSettingsVisible,
       isValidatingIndexName: false,
+      isRequestVisible: false,
     };
 
     this.cachedAdvancedSettings = {};
     this.validateIndexName = debounce(this.validateIndexName, 500);
   }
+
+  toggleRequest = () => {
+    this.setState(({ isRequestVisible }) => ({
+      isRequestVisible: !isRequestVisible,
+    }));
+  };
 
   onFieldsChange = (fields) => {
     this.setState(updateFields(fields));
@@ -657,29 +666,42 @@ export class FollowerIndexForm extends PureComponent {
       const isSaveDisabled = areErrorsVisible && !this.isFormValid();
 
       return (
-        <EuiFlexGroup gutterSize="m" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="secondary"
-              iconType="check"
-              onClick={this.sendForm}
-              fill
-              disabled={isSaveDisabled}
-              data-test-subj="submitButton"
-            >
-              {saveButtonLabel}
-            </EuiButton>
-          </EuiFlexItem>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexGroup gutterSize="m" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="secondary"
+                iconType="check"
+                onClick={this.sendForm}
+                fill
+                disabled={isSaveDisabled}
+                data-test-subj="submitButton"
+              >
+                {saveButtonLabel}
+              </EuiButton>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="primary"
+                onClick={this.cancelForm}
+                data-test-subj="cancelButton"
+              >
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexForm.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              color="primary"
-              onClick={this.cancelForm}
-              data-test-subj="cancelButton"
+              onClick={this.toggleRequest}
             >
               <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexForm.cancelButtonLabel"
-                defaultMessage="Cancel"
+                id="xpack.crossClusterReplication.followerIndexForm.toggleRequestButtonLabel"
+                defaultMessage="Show request"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -718,10 +740,23 @@ export class FollowerIndexForm extends PureComponent {
   }
 
   render() {
+    const {
+      followerIndex,
+      isRequestVisible,
+    } = this.state;
+
     return (
       <Fragment>
         {this.renderForm()}
         {this.renderLoading()}
+
+        {isRequestVisible ? (
+          <FollowerIndexRequestFlyout
+            name={followerIndex.name}
+            followerIndex={this.getFields()}
+            close={() => this.setState({ isRequestVisible: false })}
+          />
+        ) : null}
       </Fragment>
     );
   }
