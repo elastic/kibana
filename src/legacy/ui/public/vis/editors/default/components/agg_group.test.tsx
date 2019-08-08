@@ -20,14 +20,13 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { VisState } from '../../../';
+import { VisState, AggConfig } from '../../../';
 import { Schema } from '../schemas';
 import { AggGroupNames } from '../agg_groups';
-import { AggConfig } from '../../../agg_config';
 import { AggConfigs } from '../../../agg_configs';
-import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './default_editor_agg_group';
-import { DefaultEditorAgg } from './default_editor_agg';
-import { DefaultEditorAggAdd } from './default_editor_agg_add';
+import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
+import { DefaultEditorAgg } from './agg';
+import { DefaultEditorAggAdd } from './agg_add';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',
@@ -38,11 +37,11 @@ jest.mock('@elastic/eui', () => ({
   EuiPanel: 'eui-panel',
 }));
 
-jest.mock('./default_editor_agg', () => ({
+jest.mock('./agg', () => ({
   DefaultEditorAgg: () => <div />,
 }));
 
-jest.mock('./default_editor_agg_add', () => ({
+jest.mock('./agg_add', () => ({
   DefaultEditorAggAdd: () => <div />,
 }));
 
