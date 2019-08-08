@@ -172,7 +172,7 @@ export interface LensMultiTable {
 export interface KibanaDatatable {
   type: 'kibana_datatable';
   rows: Array<Record<string, unknown>>;
-  columns: Array<{ id: string; name: string; formatterMapping: unknown; }>;
+  columns: Array<{ id: string; name: string; formatterMapping: unknown }>;
 }
 
 export interface VisualizationProps<T = unknown> {

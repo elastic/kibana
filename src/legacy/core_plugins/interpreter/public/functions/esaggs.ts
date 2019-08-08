@@ -48,6 +48,7 @@ interface Arguments {
   index: string | null;
   metricsAtAllLevels: boolean;
   partialRows: boolean;
+  includeFormats: boolean;
   aggConfigs: string;
 }
 
@@ -110,6 +111,11 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       default: false,
       help: '',
     },
+    includeFormats: {
+      types: ['boolean'],
+      default: false,
+      help: '',
+    },
     aggConfigs: {
       types: ['string'],
       default: '""',
@@ -148,11 +154,16 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
     const table: KibanaDatatable = {
       type: 'kibana_datatable',
       rows: response.rows,
-      columns: response.columns.map((column: any) => ({
-        id: column.id,
-        name: column.name,
-        formatterMapping: createFormat(column.aggConfig),
-      })),
+      columns: response.columns.map((column: any) => {
+        const cleanedColumn: KibanaDatatable['columns'][0] = {
+          id: column.id,
+          name: column.name,
+        };
+        if (args.includeFormats) {
+          cleanedColumn.formatterMapping = createFormat(column.aggConfig);
+        }
+        return cleanedColumn;
+      }),
     };
 
     return table;
