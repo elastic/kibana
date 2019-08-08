@@ -48,7 +48,6 @@ interface ScrollableLogTextStreamViewProps {
   loadNewerItems: () => void;
   setFlyoutItem: (id: string) => void;
   setFlyoutVisibility: (visible: boolean) => void;
-  showColumnConfiguration: () => void;
   intl: InjectedIntl;
   highlightedItem: string | null;
   currentHighlightKey: UniqueTimeKey | null;
@@ -109,7 +108,6 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
       items,
       lastLoadedTime,
       scale,
-      showColumnConfiguration,
       wrap,
     } = this.props;
     const { targetId } = this.state;
@@ -153,7 +151,6 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
                 <LogColumnHeaders
                   columnConfigurations={columnConfigurations}
                   columnWidths={columnWidths}
-                  showColumnConfiguration={showColumnConfiguration}
                 />
                 <AutoSizer bounds content detectAnyWindowResize="height">
                   {({ measureRef, bounds: { height = 0 }, content: { width = 0 } }) => (
