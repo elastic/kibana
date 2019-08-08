@@ -80,7 +80,9 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
         <EuiText color="subdued">{savedQueryDescriptionText}</EuiText>
       </EuiFormRow>
       <EuiFormRow
-        label="Name"
+        label={i18n.translate('data.search.searchBar.savedQueryNameLabelText', {
+          defaultMessage: 'Name',
+        })}
         helpText={i18n.translate('data.search.searchBar.savedQueryNameHelpText', {
           defaultMessage: 'Must be unique.',
         })}
@@ -96,7 +98,11 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
         />
       </EuiFormRow>
 
-      <EuiFormRow label="Description">
+      <EuiFormRow
+        label={i18n.translate('data.search.searchBar.savedQueryDescriptionLabelText', {
+          defaultMessage: 'Description',
+        })}
+      >
         <EuiFieldText
           value={description}
           name="description"
@@ -110,7 +116,9 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
         <EuiFormRow>
           <EuiSwitch
             name="shouldIncludeFilters"
-            label="Include filters"
+            label={i18n.translate('data.search.searchBar.savedQueryIncludeFiltersLabelText', {
+              defaultMessage: 'Include filters',
+            })}
             checked={shouldIncludeFilters}
             onChange={() => {
               setShouldIncludeFilters(!shouldIncludeFilters);
@@ -124,7 +132,9 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
         <EuiFormRow>
           <EuiSwitch
             name="shouldIncludeTimefilter"
-            label="Include time filter"
+            label={i18n.translate('data.search.searchBar.savedQueryIncludeTimeFilterLabelText', {
+              defaultMessage: 'Include time filter',
+            })}
             checked={shouldIncludeTimefilter}
             onChange={() => {
               setIncludeTimefilter(!shouldIncludeTimefilter);
@@ -140,13 +150,21 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
     <EuiOverlayMask>
       <EuiModal onClose={onClose} initialFocus="[name=title]">
         <EuiModalHeader>
-          <EuiModalHeaderTitle>Save query</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            {i18n.translate('data.search.searchBar.savedQueryFormTitle', {
+              defaultMessage: 'Save query',
+            })}
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>{saveQueryForm}</EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={onClose}>
+            {i18n.translate('data.search.searchBar.savedQueryFormCancelButtonText', {
+              defaultMessage: 'Cancel',
+            })}
+          </EuiButtonEmpty>
 
           <EuiButton
             onClick={() =>
@@ -160,7 +178,9 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
             fill
             data-test-subj="savedQueryFormSaveButton"
           >
-            Save
+            {i18n.translate('data.search.searchBar.savedQueryFormSaveButtonText', {
+              defaultMessage: 'Save',
+            })}
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
