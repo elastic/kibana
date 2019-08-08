@@ -168,9 +168,9 @@ export default function ({ getService, getPageObjects }) {
           [ '2015-09-20 19:00', '0.015' ],
         ];
 
-        await PageObjects.visualize.toggleOpenEditor(2, true);
-        await PageObjects.visualize.setInterval('Second');
         await PageObjects.visualize.toggleOpenEditor(2);
+        await PageObjects.visualize.setInterval('Second');
+        await PageObjects.visualize.toggleOpenEditor(2, 'false');
         await PageObjects.visualize.clickGo();
         await inspector.open();
         await inspector.expectTableData(expectedTableData);
