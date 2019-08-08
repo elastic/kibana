@@ -101,8 +101,9 @@ export function isDataFrameTransformStats(arg: any): arg is DataFrameTransformSt
 export interface DataFrameTransformListRow {
   id: DataFrameTransformId;
   checkpointing: object;
-  stats: DataFrameTransformStats;
   config: DataFrameTransformPivotConfig;
+  mode?: string; // added property on client side to allow filtering by this field
+  stats: DataFrameTransformStats;
 }
 
 // Used to pass on attribute names to table columns
