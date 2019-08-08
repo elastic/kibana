@@ -16,7 +16,7 @@ export class CancellationToken {
     }
 
     if (this.isCancelled) {
-      throw new Error('Cancellation token has already been cancelled');
+      return;
     }
 
     this._callbacks.push(callback);
