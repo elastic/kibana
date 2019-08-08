@@ -154,7 +154,7 @@ export const DataFrameTransformList: SFC = () => {
           // the status value is an array of string(s) e.g. ['failed', 'stopped']
           ts = transforms.filter(transform => c.value.includes(transform.stats.task_state));
         } else {
-          ts = transforms.filter(transform => transform.config.mode === c.value);
+          ts = transforms.filter(transform => transform.mode === c.value);
         }
       }
 
@@ -256,7 +256,7 @@ export const DataFrameTransformList: SFC = () => {
       },
       {
         type: 'field_value_selection',
-        field: 'config.mode',
+        field: 'mode',
         name: i18n.translate('xpack.ml.dataframe.modeFilter', { defaultMessage: 'Mode' }),
         multiSelect: false,
         options: Object.values(DATA_FRAME_MODE).map(val => ({

@@ -17,6 +17,7 @@ import { NoData } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 import 'ui/directives/listen';
+import { CODE_PATH_LICENSE } from '../../../common/constants';
 
 const REACT_NODE_ID_NO_DATA = 'noDataReact';
 
@@ -91,7 +92,7 @@ export class NoDataController {
 
     // register the monitoringClusters service.
     $executor.register({
-      execute: () => monitoringClusters(),
+      execute: () => monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE]),
       handleResponse: clusters => {
         if (clusters.length) {
           model.hasData = true; // use the control flag because we can't redirect from inside here
