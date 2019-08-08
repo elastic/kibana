@@ -1,3 +1,19 @@
-.lnsXyConfigPanel-layer {
-  border: 1px solid $euiColorLightestShade;
+.lnsConfigPanel__panel {
+  margin-bottom: $euiSizeS;
+}
+
+.lnsConfigPanel__axis {
+  background: $euiColorLightestShade;
+  padding: $euiSizeS;
+  border-radius: $euiBorderRadius;
+
+  & + & {
+    margin-top: $euiSizeS;
+  }
+}
+
+.lnsConfigPanel__addLayerBtn {
+  color: transparentize($euiColorMediumShade, .3);
+  box-shadow: none !important;
+  border: 1px dashed currentColor;
 }

@@ -30,6 +30,20 @@
   position: relative;
 }
 
+.lnsSidebar__header {
+  padding: $euiSizeS 0;
+
+  > * {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.lnsChartSwitch__summaryIcon {
+  margin-right: $euiSizeS;
+  transform: translateY(-2px);
+}
+
 .lnsSidebar--right {
   min-width: ($euiSize * 22);
   @include euiScrollBar;
@@ -106,8 +120,5 @@
   font-size: 1.2em;
 }
 
-.lnsConfigPanelWrapper {
-  padding: $euiSize 0;
-}
 
 @import './suggestion_panel.scss';

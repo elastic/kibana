@@ -17,7 +17,8 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiLink,
-  EuiButton,
+  EuiButtonIcon,
+  EuiTextColor,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import {
@@ -196,26 +197,46 @@ export function PopoverEditor(props: PopoverEditorProps) {
     <EuiPopover
       id={columnId}
       className="lnsConfigPanel__summaryPopover"
-      anchorClassName="lnsConfigPanel__summaryPopoverAnchor"
+      anchorClassName={
+        selectedColumn ? 'lnsConfigPanel__summaryPopoverAnchor' : 'lnsConfigPanel__summaryLink'
+      }
       button={
         selectedColumn ? (
           <EuiLink
             className="lnsConfigPanel__summaryLink"
             onClick={() => {
-              setPopoverOpen(true);
+              setPopoverOpen(isPopoverOpen ? false : true);
             }}
             data-test-subj="indexPattern-configure-dimension"
+            aria-label={i18n.translate('xpack.lens.configure.editConfig', {
+              defaultMessage: 'Edit configuration',
+            })}
+            title={i18n.translate('xpack.lens.configure.editConfig', {
+              defaultMessage: 'Edit configuration',
+            })}
           >
             {selectedColumn.label}
           </EuiLink>
         ) : (
-          <EuiButton
-            className="lnsConfigPanel__summaryLink"
-            data-test-subj="indexPattern-configure-dimension"
-            onClick={() => setPopoverOpen(true)}
-            iconType="plusInCircle"
-            size="s"
-          />
+          <>
+            <EuiButtonIcon
+              iconType="plusInCircleFilled"
+              data-test-subj="indexPattern-configure-dimension"
+              aria-label={i18n.translate('xpack.lens.configure.addConfig', {
+                defaultMessage: 'Add a configuration',
+              })}
+              title={i18n.translate('xpack.lens.configure.addConfig', {
+                defaultMessage: 'Add a configuration',
+              })}
+              onClick={() => setPopoverOpen(isPopoverOpen ? false : true)}
+            />{' '}
+            <EuiTextColor color="subdued">
+              <FormattedMessage
+                id="xpack.lens.configure.emptyConfig"
+                defaultMessage="Drop a field here"
+              />
+            </EuiTextColor>
+          </>
         )
       }
       isOpen={isPopoverOpen}

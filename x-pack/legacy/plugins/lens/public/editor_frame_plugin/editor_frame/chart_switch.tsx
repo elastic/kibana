@@ -8,10 +8,11 @@ import React, { useState, useMemo } from 'react';
 import {
   EuiIcon,
   EuiPopover,
-  EuiButton,
   EuiPopoverTitle,
   EuiKeyPadMenu,
   EuiKeyPadMenuItemButton,
+  EuiButtonEmpty,
+  EuiTitle,
 } from '@elastic/eui';
 import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -61,7 +62,9 @@ function VisualizationSummary(props: Props) {
 
   return (
     <>
-      {description.icon && <EuiIcon type={description.icon} />}
+      {description.icon && (
+        <EuiIcon className="lnsChartSwitch__summaryIcon" type={description.icon} />
+      )}
       {description.label}
     </>
   );
@@ -183,61 +186,68 @@ export function ChartSwitch(props: Props) {
     ]
   );
 
-  return (
-    <>
-      <EuiPopover
-        id="lnsChartSwitchPopover"
-        ownFocus
-        initialFocus=".lnsChartSwitchPopoverPanel"
-        panelClassName="lnsChartSwitchPopoverPanel"
-        button={
-          <EuiButton
-            iconType="arrowDown"
-            iconSide="right"
-            onClick={() => setFlyoutOpen(!flyoutOpen)}
-            data-test-subj="lnsChartSwitchPopover"
+  const popover = (
+    <EuiPopover
+      id="lnsChartSwitchPopover"
+      ownFocus
+      initialFocus=".lnsChartSwitchPopoverPanel"
+      panelClassName="lnsChartSwitchPopoverPanel"
+      button={
+        <EuiButtonEmpty
+          size="xs"
+          onClick={() => setFlyoutOpen(!flyoutOpen)}
+          data-test-subj="lnsChartSwitchPopover"
+        >
+          (change)
+        </EuiButtonEmpty>
+      }
+      isOpen={flyoutOpen}
+      closePopover={() => setFlyoutOpen(false)}
+      anchorPosition="leftUp"
+    >
+      <EuiPopoverTitle>
+        {i18n.translate('xpack.lens.configPanel.chooseVisualization', {
+          defaultMessage: 'Choose a visualization',
+        })}
+      </EuiPopoverTitle>
+      <EuiKeyPadMenu>
+        {(visualizationTypes || []).map(v => (
+          <EuiKeyPadMenuItemButton
+            key={`${v.visualizationId}:${v.id}`}
+            label={<span data-test-subj="visTypeTitle">{v.label}</span>}
+            role="menuitem"
+            data-test-subj={`lnsChartSwitchPopover_${v.id}`}
+            onClick={() => commitSelection(v.selection)}
+            betaBadgeLabel={
+              v.selection.dataLoss !== 'nothing'
+                ? i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
+                    defaultMessage: 'Data loss',
+                  })
+                : undefined
+            }
+            betaBadgeTooltipContent={
+              v.selection.dataLoss !== 'nothing'
+                ? i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
+                    defaultMessage: 'Switching to this chart will lose some of the configuration',
+                  })
+                : undefined
+            }
+            betaBadgeIconType={v.selection.dataLoss !== 'nothing' ? 'alert' : undefined}
           >
-            <VisualizationSummary {...props} />
-          </EuiButton>
-        }
-        isOpen={flyoutOpen}
-        closePopover={() => setFlyoutOpen(false)}
-        anchorPosition="leftUp"
-      >
-        <EuiPopoverTitle>
-          {i18n.translate('xpack.lens.configPanel.chooseVisualization', {
-            defaultMessage: 'Choose a visualization',
-          })}
-        </EuiPopoverTitle>
-        <EuiKeyPadMenu>
-          {(visualizationTypes || []).map(v => (
-            <EuiKeyPadMenuItemButton
-              key={`${v.visualizationId}:${v.id}`}
-              label={<span data-test-subj="visTypeTitle">{v.label}</span>}
-              role="menuitem"
-              data-test-subj={`lnsChartSwitchPopover_${v.id}`}
-              onClick={() => commitSelection(v.selection)}
-              betaBadgeLabel={
-                v.selection.dataLoss !== 'nothing'
-                  ? i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
-                      defaultMessage: 'Data loss',
-                    })
-                  : undefined
-              }
-              betaBadgeTooltipContent={
-                v.selection.dataLoss !== 'nothing'
-                  ? i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
-                      defaultMessage: 'Switching to this chart will lose some of the configuration',
-                    })
-                  : undefined
-              }
-              betaBadgeIconType={v.selection.dataLoss !== 'nothing' ? 'bolt' : undefined}
-            >
-              <EuiIcon type={v.icon || 'empty'} />
-            </EuiKeyPadMenuItemButton>
-          ))}
-        </EuiKeyPadMenu>
-      </EuiPopover>
-    </>
+            <EuiIcon type={v.icon || 'empty'} />
+          </EuiKeyPadMenuItemButton>
+        ))}
+      </EuiKeyPadMenu>
+    </EuiPopover>
+  );
+
+  return (
+    <div className="lnsSidebar__header">
+      <EuiTitle size="xs">
+        <h3>
+          <VisualizationSummary {...props} /> {popover}
+        </h3>
+      </EuiTitle>
+    </div>
   );
 }
