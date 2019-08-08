@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { format as formatUrl } from 'url';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import { LogService } from '../../../types/services';
+import { ToolingLog } from '@kbn/dev-utils';
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
 import { Role } from './role';
 import { User } from './user';
 
@@ -13,13 +13,13 @@ export class SecurityService {
   public role: Role;
   public user: User;
 
-  constructor(url: string, log: LogService) {
+  constructor(url: string, log: ToolingLog) {
     this.role = new Role(url, log);
     this.user = new User(url, log);
   }
 }
 
-export function SecurityServiceProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
+export function SecurityServiceProvider({ getService }: GenericFtrProviderContext<{}, {}>) {
   const log = getService('log');
   const config = getService('config');
   const url = formatUrl(config.get('servers.kibana'));
