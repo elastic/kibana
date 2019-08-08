@@ -762,6 +762,12 @@ export class DataRecognizer {
 
   applyJobConfigOverrides(moduleConfig, jobOverrides, jobPrefix = '') {
     if(jobOverrides !== undefined) {
+      if (typeof jobOverrides !== 'object') {
+        throw Boom.badRequest(
+          `Incompatible jobOverrides type (${typeof jobOverrides}). It needs to be an object or array of objects.`
+        );
+      }
+
       // jobOverrides could be a single object or an array of objects.
       // if single, convert to an array
       const overrides = Array.isArray(jobOverrides) ? jobOverrides : [jobOverrides];
@@ -791,6 +797,12 @@ export class DataRecognizer {
 
   applyDatafeedConfigOverrides(moduleConfig, datafeedOverrides, jobPrefix = '') {
     if(datafeedOverrides !== undefined) {
+      if (typeof datafeedOverrides !== 'object') {
+        throw Boom.badRequest(
+          `Incompatible datafeedOverrides type (${typeof datafeedOverrides}). It needs to be an object or array of objects.`
+        );
+      }
+
       // jobOverrides could be a single object or an array of objects.
       // if single, convert to an array
       const overrides = Array.isArray(datafeedOverrides) ? datafeedOverrides : [datafeedOverrides];
