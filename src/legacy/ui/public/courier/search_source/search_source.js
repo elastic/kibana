@@ -312,7 +312,12 @@ export function SearchSourceProvider(Promise, Private, config) {
       }
 
       fetchSoon.fetchSearchRequests([req]);
-      return req.getCompletePromise();
+      return new Promise((resolve, reject) => {
+        req.getCompleteOrAbortedPromise().then(result => {
+          if (result instanceof Error) return reject(result);
+          resolve(result);
+        });
+      });
     }
 
     /**

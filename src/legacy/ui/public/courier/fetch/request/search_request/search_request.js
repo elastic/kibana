@@ -170,7 +170,9 @@ export function SearchRequestProvider(Promise) {
       this._markStopped();
       this.defer = null;
       this.aborted = true;
-      this.abortedDefer.resolve();
+      const error = new Error('The expression was aborted.');
+      error.name = 'AbortError';
+      this.abortedDefer.resolve(error);
       this.abortedDefer = null;
     }
 
