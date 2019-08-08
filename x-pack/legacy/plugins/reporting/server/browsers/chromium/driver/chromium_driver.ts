@@ -8,6 +8,7 @@ import open from 'opn';
 // @ts-ignore
 import * as puppeteer from 'puppeteer-core';
 import { parse as parseUrl } from 'url';
+import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
 import {
   ConditionalHeaders,
   ConditionalHeadersConditions,
@@ -16,7 +17,6 @@ import {
   EvalFn,
   EvaluateOptions,
   Logger,
-  ViewZoomWidthHeight,
 } from '../../../../types';
 
 export interface ChromiumDriverOptions {
