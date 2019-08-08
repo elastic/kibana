@@ -71,6 +71,9 @@ export class ClusterClient {
     close(): void;
     }
 
+// @public (undocumented)
+export type ConfigPath = string | string[];
+
 // @internal (undocumented)
 export class ConfigService {
     // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
@@ -85,7 +88,6 @@ export class ConfigService {
     // (undocumented)
     isEnabledAtPath(path: ConfigPath): Promise<boolean>;
     optionalAtPath<TSchema>(path: ConfigPath): Observable<TSchema | undefined>;
-    // Warning: (ae-forgotten-export) The symbol "ConfigPath" needs to be exported by the entry point index.d.ts
     setSchema(path: ConfigPath, schema: Type<unknown>): Promise<void>;
     }
 
@@ -450,6 +452,18 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     logger: LoggerFactory;
     // (undocumented)
     opaqueId: PluginOpaqueId;
+}
+
+// @public
+export interface PluginManifest {
+    readonly configPath: ConfigPath;
+    readonly id: PluginName;
+    readonly kibanaVersion: string;
+    readonly optionalPlugins: readonly PluginName[];
+    readonly requiredPlugins: readonly PluginName[];
+    readonly server: boolean;
+    readonly ui: boolean;
+    readonly version: string;
 }
 
 // @public
@@ -1008,6 +1022,6 @@ export interface SessionStorageFactory<T> {
 // Warnings were encountered during analysis:
 // 
 // src/core/server/plugins/plugins_service.ts:39:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:156:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:162:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 
 ```

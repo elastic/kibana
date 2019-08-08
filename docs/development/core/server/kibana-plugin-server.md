@@ -6,6 +6,8 @@
 
 The Kibana Core APIs for server-side plugins.
 
+A plugin requires a `kibana.json` file at it's root directory that follows [the manfiest schema](./kibana-plugin-server.pluginmanifest.md) to define static plugin information required to load the plugin.
+
 A plugin's `server/index` file must contain a named import, `plugin`<!-- -->, that implements [PluginInitializer](./kibana-plugin-server.plugininitializer.md) which returns an object that implements [Plugin](./kibana-plugin-server.plugin.md)<!-- -->.
 
 The plugin integrates with the core system via lifecycle events: `setup`<!-- -->, `start`<!-- -->, and `stop`<!-- -->. In each lifecycle method, the plugin will receive the corresponding core services available (either [CoreSetup](./kibana-plugin-server.coresetup.md) or [CoreStart](./kibana-plugin-server.corestart.md)<!-- -->) and any interfaces returned by dependency plugins' lifecycle method. Anything returned by the plugin's lifecycle method will be exposed to downstream dependencies when their corresponding lifecycle methods are invoked.
@@ -57,6 +59,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
 |  [Plugin](./kibana-plugin-server.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-server.plugininitializercontext.md) | Context that's available to plugins during initialization stage. |
+|  [PluginManifest](./kibana-plugin-server.pluginmanifest.md) | Describes the set of required and optional properties plugin can define in its mandatory JSON manifest file. |
 |  [PluginsServiceSetup](./kibana-plugin-server.pluginsservicesetup.md) |  |
 |  [PluginsServiceStart](./kibana-plugin-server.pluginsservicestart.md) |  |
 |  [ResponseErrorMeta](./kibana-plugin-server.responseerrormeta.md) | Additional metadata to enhance error output or provide error details. |
@@ -107,6 +110,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [APICaller](./kibana-plugin-server.apicaller.md) |  |
 |  [AuthenticationHandler](./kibana-plugin-server.authenticationhandler.md) |  |
 |  [AuthHeaders](./kibana-plugin-server.authheaders.md) | Auth Headers map |
+|  [ConfigPath](./kibana-plugin-server.configpath.md) |  |
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
 |  [GetAuthState](./kibana-plugin-server.getauthstate.md) | Get authentication state for a request. Returned by <code>auth</code> interceptor. |
