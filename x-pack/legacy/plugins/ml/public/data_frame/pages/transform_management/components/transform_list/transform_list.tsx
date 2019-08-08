@@ -22,7 +22,7 @@ import {
   DataFrameTransformListColumn,
   DataFrameTransformListRow,
   ItemIdToExpandedRowMap,
-  DATA_FRAME_STATE,
+  DATA_FRAME_TRANSFORM_STATE,
   DATA_FRAME_MODE,
   Query,
   Clause,
@@ -248,7 +248,7 @@ export const DataFrameTransformList: SFC = () => {
         field: 'state.state',
         name: i18n.translate('xpack.ml.dataframe.statusFilter', { defaultMessage: 'Status' }),
         multiSelect: 'or',
-        options: Object.values(DATA_FRAME_STATE).map(val => ({
+        options: Object.values(DATA_FRAME_TRANSFORM_STATE).map(val => ({
           value: val,
           name: val,
           view: getTaskStateBadge(val),

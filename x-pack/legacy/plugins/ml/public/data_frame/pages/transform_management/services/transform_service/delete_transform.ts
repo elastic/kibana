@@ -11,18 +11,14 @@ import { ml } from '../../../../../services/ml_api_service';
 import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
 
 import {
-  DATA_FRAME_STATE,
+  DATA_FRAME_TRANSFORM_STATE,
   DataFrameTransformListRow,
 } from '../../components/transform_list/common';
 
 export const deleteTransform = async (d: DataFrameTransformListRow) => {
   try {
-    if (d.stats.state === DATA_FRAME_STATE.FAILED) {
-      await ml.dataFrame.stopDataFrameTransform(
-        d.config.id,
-        d.stats.state === DATA_FRAME_STATE.FAILED,
-        true
-      );
+    if (d.stats.state === DATA_FRAME_TRANSFORM_STATE.FAILED) {
+      await ml.dataFrame.stopDataFrameTransform(d.config.id, true, true);
     }
     await ml.dataFrame.deleteDataFrameTransform(d.config.id);
     toastNotifications.addSuccess(

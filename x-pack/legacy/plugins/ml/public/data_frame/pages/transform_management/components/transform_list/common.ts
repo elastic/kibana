@@ -11,7 +11,7 @@ import { Dictionary } from '../../../../../../common/types/common';
 import { DataFrameTransformId, DataFrameTransformPivotConfig } from '../../../../common';
 
 // reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/dataframe/transforms/DataFrameTransformStats.java#L243
-export enum DATA_FRAME_STATE {
+export enum DATA_FRAME_TRANSFORM_STATE {
   ABORTING = 'aborting',
   FAILED = 'failed',
   INDEXING = 'indexing',
@@ -69,7 +69,7 @@ export interface DataFrameTransformStats {
     trigger_count: number;
   };
   reason?: string;
-  state: DATA_FRAME_STATE;
+  state: DATA_FRAME_TRANSFORM_STATE;
 }
 
 export function getTransformProgress(item: DataFrameTransformListRow) {
@@ -87,7 +87,7 @@ export function isDataFrameTransformStats(arg: any): arg is DataFrameTransformSt
     typeof arg === 'object' &&
     arg !== null &&
     {}.hasOwnProperty.call(arg, 'state') &&
-    Object.values(DATA_FRAME_STATE).includes(arg.state)
+    Object.values(DATA_FRAME_TRANSFORM_STATE).includes(arg.state)
   );
 }
 
@@ -115,6 +115,6 @@ export function isCompletedBatchTransform(item: DataFrameTransformListRow) {
   return (
     item.stats.checkpointing.last.checkpoint === 1 &&
     item.config.sync === undefined &&
-    item.stats.state === DATA_FRAME_STATE.STOPPED
+    item.stats.state === DATA_FRAME_TRANSFORM_STATE.STOPPED
   );
 }

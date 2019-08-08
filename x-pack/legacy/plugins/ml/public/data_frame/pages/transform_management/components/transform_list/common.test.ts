@@ -6,7 +6,11 @@
 
 import mockDataFrameTransformListRow from './__mocks__/data_frame_transform_list_row.json';
 
-import { DataFrameTransformListRow, isCompletedBatchTransform, DATA_FRAME_STATE } from './common';
+import {
+  DataFrameTransformListRow,
+  isCompletedBatchTransform,
+  DATA_FRAME_TRANSFORM_STATE,
+} from './common';
 
 describe('Data Frame: isCompletedBatchTransform()', () => {
   test('isCompletedBatchTransform()', () => {
@@ -16,7 +20,7 @@ describe('Data Frame: isCompletedBatchTransform()', () => {
     const row = mockDataFrameTransformListRow as DataFrameTransformListRow;
     expect(row.stats.checkpointing.last.checkpoint === 1).toBe(true);
     expect(row.config.sync === undefined).toBe(true);
-    expect(row.stats.state === DATA_FRAME_STATE.STOPPED).toBe(true);
+    expect(row.stats.state === DATA_FRAME_TRANSFORM_STATE.STOPPED).toBe(true);
     expect(isCompletedBatchTransform(mockDataFrameTransformListRow)).toBe(true);
 
     // adapt the mock config to resemble a non-completed transform.

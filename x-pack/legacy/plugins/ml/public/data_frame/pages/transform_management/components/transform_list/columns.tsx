@@ -20,7 +20,7 @@ import {
 import { DataFrameTransformId } from '../../../../common';
 import {
   getTransformProgress,
-  DATA_FRAME_STATE,
+  DATA_FRAME_TRANSFORM_STATE,
   DataFrameTransformListColumn,
   DataFrameTransformListRow,
   DataFrameTransformStats,
@@ -30,6 +30,7 @@ import { getActions } from './actions';
 enum STATE_COLOR {
   aborting = 'warning',
   failed = 'danger',
+  indexing = 'primary',
   started = 'primary',
   stopped = 'hollow',
   stopping = 'hollow',
@@ -41,7 +42,7 @@ export const getTaskStateBadge = (
 ) => {
   const color = STATE_COLOR[state];
 
-  if (state === DATA_FRAME_STATE.FAILED && reason !== undefined) {
+  if (state === DATA_FRAME_TRANSFORM_STATE.FAILED && reason !== undefined) {
     return (
       <EuiToolTip content={reason}>
         <EuiBadge className="mlTaskStateBadge" color={color}>
@@ -172,10 +173,14 @@ export const getColumns = (
             {!isBatchTransform && (
               <Fragment>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
-                  {item.stats.state === DATA_FRAME_STATE.STARTED && (
-                    <EuiProgress color="primary" size="m" />
-                  )}
-                  {item.stats.state === DATA_FRAME_STATE.STOPPED && (
+                  {/* If not stopped or failed show the animated progress bar */}
+                  {item.stats.state !== DATA_FRAME_TRANSFORM_STATE.STOPPED &&
+                    item.stats.state !== DATA_FRAME_TRANSFORM_STATE.FAILED && (
+                      <EuiProgress color="primary" size="m" />
+                    )}
+                  {/* If stopped or failed show an empty (0%) progress bar */}
+                  {(item.stats.state === DATA_FRAME_TRANSFORM_STATE.STOPPED ||
+                    item.stats.state === DATA_FRAME_TRANSFORM_STATE.FAILED) && (
                     <EuiProgress value={0} max={100} color="primary" size="m" />
                   )}
                 </EuiFlexItem>
