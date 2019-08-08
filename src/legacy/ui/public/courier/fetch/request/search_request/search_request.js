@@ -168,12 +168,13 @@ export function SearchRequestProvider(Promise) {
 
     abort() {
       this._markStopped();
-      this.defer = null;
       this.aborted = true;
       const error = new Error('The request was aborted.');
       error.name = 'AbortError';
       this.abortedDefer.resolve(error);
       this.abortedDefer = null;
+      this.defer.reject(error);
+      this.defer = null;
     }
 
     whenAborted(cb) {

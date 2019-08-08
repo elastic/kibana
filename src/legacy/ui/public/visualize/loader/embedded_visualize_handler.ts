@@ -487,7 +487,7 @@ export class EmbeddedVisualizeHandler {
    */
   private handleDataLoaderError = (error: any): void => {
     // If the data loader was aborted then no need to surface this error in the UI
-    if (error.name === 'AbortError') return;
+    if (error && error.name === 'AbortError') return;
 
     // TODO: come up with a general way to cancel execution of pipeline expressions.
     if (this.dataLoaderParams.searchSource && this.dataLoaderParams.searchSource.cancelQueued) {
