@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@babel/core": "^7.4.4",
-    "@kbn/test": "1.0.0",
     "argv-split": "^2.0.1",
     "commander": "^2.9.0",
     "del": "^4.0.0",
