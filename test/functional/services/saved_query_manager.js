@@ -48,6 +48,12 @@ export function SavedQueryManagerProvider({ getService }) {
       await testSubjects.click(`load-saved-query-${title}-button`);
     }
 
+    async deleteSavedQuery(title) {
+      await this.openSavedQueryManager();
+      await testSubjects.click(`delete-saved-query-${title}-button`);
+      await testSubjects.click('confirmModalConfirmButton');
+    }
+
     async clearCurrentlyLoadedQuery() {
       await this.openSavedQueryManager();
       await testSubjects.click('saved-query-manager-clear-button');
@@ -76,8 +82,13 @@ export function SavedQueryManagerProvider({ getService }) {
     }
 
     async savedQueryExistOrFail(title) {
-      await testSubjects.click('saved-query-manager-popover-button');
+      await this.openSavedQueryManager();
       await testSubjects.existOrFail(`load-saved-query-${title}-button`);
+    }
+
+    async savedQueryMissingOrFail(title) {
+      await this.openSavedQueryManager();
+      await testSubjects.missingOrFail(`load-saved-query-${title}-button`);
     }
 
     async openSavedQueryManager() {

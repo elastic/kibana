@@ -124,6 +124,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         const queryString = await queryBar.getQueryString();
         expect(queryString).to.eql('response:404');
       });
+
+      it('allows deleting saved queries in the saved query manager ', async () => {
+        await savedQueryManager.deleteSavedQuery('foo2');
+        await savedQueryManager.savedQueryMissingOrFail('foo2');
+      });
     });
 
     describe('global discover read-only privileges', () => {
