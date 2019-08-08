@@ -44,7 +44,7 @@ export type ResponseError =
  * A response data object, expected to returned as a result of {@link RequestHandler} execution
  * @internal
  */
-export class KibanaResponse<T extends HttpResponsePayload | ResponseError> {
+export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any> {
   constructor(
     readonly status: number,
     readonly payload?: T,
@@ -85,6 +85,118 @@ export type RedirectResponseOptions = HttpResponseOptions & {
   };
 };
 
+const successResponseFactory = {
+  /**
+   * The request has succeeded.
+   * Status code: `200`.
+   * @param payload - {@link HttpResponsePayload} payload to send to the client
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
+  ok: (payload: HttpResponsePayload, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(200, payload, options),
+
+  /**
+   * The request has been accepted for processing.
+   * Status code: `202`.
+   * @param payload - {@link HttpResponsePayload} payload to send to the client
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
+  accepted: (payload?: HttpResponsePayload, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(202, payload, options),
+
+  /**
+   * The server has successfully fulfilled the request and that there is no additional content to send in the response payload body.
+   * Status code: `204`.
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
+  noContent: (options: HttpResponseOptions = {}) => new KibanaResponse(204, undefined, options),
+};
+
+const redirectionResponseFactory = {
+  /**
+   * Redirect to a different URI.
+   * Status code: `302`.
+   * @param payload - payload to send to the client
+   * @param options - {@link RedirectResponseOptions} configures HTTP response parameters.
+   * Expects `location` header to be set.
+   */
+  redirected: (payload: HttpResponsePayload, options: RedirectResponseOptions) =>
+    new KibanaResponse(302, payload, options),
+};
+
+const errorResponseFactory = {
+  /**
+   * The server cannot process the request due to something that is perceived to be a client error.
+   * Status code: `400`.
+   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
+  badRequest: (error: ResponseError = 'Bad Request', options: HttpResponseOptions = {}) =>
+    new KibanaResponse(400, error, options),
+
+  /**
+   * The request cannot be applied because it lacks valid authentication credentials for the target resource.
+   * Status code: `401`.
+   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
+  unauthorized: (error: ResponseError = 'Unauthorized', options: HttpResponseOptions = {}) =>
+    new KibanaResponse(401, error, options),
+
+  /**
+   * Server cannot grant access to a resource.
+   * Status code: `403`.
+   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
+  forbidden: (error: ResponseError = 'Forbidden', options: HttpResponseOptions = {}) =>
+    new KibanaResponse(403, error, options),
+
+  /**
+   * Server cannot find a current representation for the target resource.
+   * Status code: `404`.
+   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
+  notFound: (error: ResponseError = 'Not Found', options: HttpResponseOptions = {}) =>
+    new KibanaResponse(404, error, options),
+
+  /**
+   * The request could not be completed due to a conflict with the current state of the target resource.
+   * Status code: `409`.
+   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
+  conflict: (error: ResponseError = 'Conflict', options: HttpResponseOptions = {}) =>
+    new KibanaResponse(409, error, options),
+
+  // Server error
+  /**
+   * The server encountered an unexpected condition that prevented it from fulfilling the request.
+   * Status code: `500`.
+   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
+  internalError: (error: ResponseError = 'Internal Error', options: HttpResponseOptions = {}) =>
+    new KibanaResponse(500, error, options),
+
+  /**
+   * Creates an error response with defined status code and payload.
+   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
+   * @param options - {@link CustomHttpResponseOptions} configures HTTP response parameters.
+   */
+  customError: (error: ResponseError, options: CustomHttpResponseOptions) => {
+    if (!options || !options.statusCode) {
+      throw new Error(`options.statusCode is expected to be set. given options: ${options}`);
+    }
+    if (options.statusCode < 400 || options.statusCode >= 600) {
+      throw new Error(
+        `Unexpected Http status code. Expected from 400 to 599, but given: ${options.statusCode}`
+      );
+    }
+    return new KibanaResponse(options.statusCode, error, options);
+  },
+};
 /**
  * Set of helpers used to create `KibanaResponse` to form HTTP response on an incoming request.
  * Should be returned as a result of {@link RequestHandler} execution.
@@ -178,32 +290,9 @@ export type RedirectResponseOptions = HttpResponseOptions & {
  * @public
  */
 export const kibanaResponseFactory = {
-  // Success
-  /**
-   * The request has succeeded.
-   * Status code: `200`.
-   * @param payload - {@link HttpResponsePayload} payload to send to the client
-   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
-   */
-  ok: (payload: HttpResponsePayload, options: HttpResponseOptions = {}) =>
-    new KibanaResponse(200, payload, options),
-
-  /**
-   * The request has been accepted for processing.
-   * Status code: `202`.
-   * @param payload - {@link HttpResponsePayload} payload to send to the client
-   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
-   */
-  accepted: (payload?: HttpResponsePayload, options: HttpResponseOptions = {}) =>
-    new KibanaResponse(202, payload, options),
-
-  /**
-   * The server has successfully fulfilled the request and that there is no additional content to send in the response payload body.
-   * Status code: `204`.
-   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
-   */
-  noContent: (options: HttpResponseOptions = {}) => new KibanaResponse(204, undefined, options),
-
+  ...successResponseFactory,
+  ...redirectionResponseFactory,
+  ...errorResponseFactory,
   /**
    * Creates a response with defined status code and payload.
    * @param payload - {@link HttpResponsePayload} payload to send to the client
@@ -216,73 +305,11 @@ export const kibanaResponseFactory = {
     const { statusCode: code, ...rest } = options;
     return new KibanaResponse(code, payload, rest);
   },
+};
 
-  // Redirection
-  /**
-   * Redirect to a different URI.
-   * Status code: `302`.
-   * @param payload - payload to send to the client
-   * @param options - {@link RedirectResponseOptions} configures HTTP response parameters.
-   * Expects `location` header to be set.
-   */
-  redirected: (payload: HttpResponsePayload, options: RedirectResponseOptions) =>
-    new KibanaResponse(302, payload, options),
-
-  // Client error
-  /**
-   * The server cannot process the request due to something that is perceived to be a client error.
-   * Status code: `400`.
-   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
-   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
-   */
-  badRequest: (error: ResponseError = 'Bad Request', options: HttpResponseOptions = {}) =>
-    new KibanaResponse(400, error, options),
-
-  /**
-   * The request cannot be applied because it lacks valid authentication credentials for the target resource.
-   * Status code: `401`.
-   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
-   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
-   */
-  unauthorized: (error: ResponseError = 'Unauthorized', options: HttpResponseOptions = {}) =>
-    new KibanaResponse(401, error, options),
-
-  /**
-   * Server cannot grant access to a resource.
-   * Status code: `403`.
-   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
-   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
-   */
-  forbidden: (error: ResponseError = 'Forbidden', options: HttpResponseOptions = {}) =>
-    new KibanaResponse(403, error, options),
-
-  /**
-   * Server cannot find a current representation for the target resource.
-   * Status code: `404`.
-   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
-   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
-   */
-  notFound: (error: ResponseError = 'Not Found', options: HttpResponseOptions = {}) =>
-    new KibanaResponse(404, error, options),
-
-  /**
-   * The request could not be completed due to a conflict with the current state of the target resource.
-   * Status code: `409`.
-   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
-   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
-   */
-  conflict: (error: ResponseError = 'Conflict', options: HttpResponseOptions = {}) =>
-    new KibanaResponse(409, error, options),
-
-  // Server error
-  /**
-   * The server encountered an unexpected condition that prevented it from fulfilling the request.
-   * Status code: `500`.
-   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
-   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
-   */
-  internal: (error: ResponseError = 'Internal Error', options: HttpResponseOptions = {}) =>
-    new KibanaResponse(500, error, options),
+export const lifecycleResponseFactory = {
+  ...redirectionResponseFactory,
+  ...errorResponseFactory,
 };
 
 /**
@@ -290,3 +317,9 @@ export const kibanaResponseFactory = {
  * @public
  */
 export type KibanaResponseFactory = typeof kibanaResponseFactory;
+
+/**
+ * Creates an object containing redirection or error response with error details, HTTP headers, and other data transmitted to the client.
+ * @public
+ */
+export type LifecycleResponseFactory = typeof lifecycleResponseFactory;

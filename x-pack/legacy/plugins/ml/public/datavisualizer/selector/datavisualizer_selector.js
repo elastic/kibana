@@ -146,6 +146,27 @@ export const DatavisualizerSelector = injectI18n(function (props) {
                 data-test-subj="mlDataVisualizerCardIndexData"
               />
             </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="dataVisualizer" />}
+                title="Select an index pattern NEW"
+                description={
+                  <FormattedMessage
+                    id="xpack.ml.datavisualizer.selector.selectIndexPatternDescription"
+                    defaultMessage="Visualize the data in an existing Elasticsearch index."
+                  />
+                }
+                footer={
+                  <EuiButton target="_self" href="#data_visualizer_index_select">
+                    <FormattedMessage
+                      id="xpack.ml.datavisualizer.selector.selectIndexButtonLabel"
+                      defaultMessage="Select index"
+                    />
+                  </EuiButton>
+                }
+                data-test-subj="mlDataVisualizerCardIndexData"
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
           {startTrialVisible === true && (
             <Fragment>

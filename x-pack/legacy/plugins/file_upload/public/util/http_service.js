@@ -4,15 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 // service for interacting with the server
 
 import chrome from 'ui/chrome';
 import { addSystemApiHeader } from 'ui/system_api';
 import { i18n } from '@kbn/i18n';
-
-const FETCH_TIMEOUT = 10000;
 
 export async function http(options) {
   if(!(options && options.url)) {
@@ -40,38 +36,20 @@ export async function http(options) {
   if (body !== null) {
     payload.body = body;
   }
-  return await fetchWithTimeout(url, payload);
+  return await doFetch(url, payload);
 }
 
-async function fetchWithTimeout(url, payload) {
-  let timedOut = false;
-
-  return new Promise(function (resolve, reject) {
-    const timeout = setTimeout(function () {
-      timedOut = true;
-      reject(new Error(
-        i18n.translate('xpack.fileUpload.httpService.requestTimedOut',
-          { defaultMessage: 'Request timed out' }))
-      );
-    }, FETCH_TIMEOUT);
-
-    fetch(url, payload)
-      .then(resp => {
-        clearTimeout(timeout);
-        if (!timedOut) {
-          resolve(resp);
-        }
-      })
-      .catch(function (err) {
-        reject(err);
-        if (timedOut) return;
-      });
-  }).then(resp => resp.json())
-    .catch(function (err) {
-      console.error(
+async function doFetch(url, payload) {
+  try {
+    const resp = await fetch(url, payload);
+    return resp.json();
+  } catch(err) {
+    return {
+      failures: [
         i18n.translate('xpack.fileUpload.httpService.fetchError', {
           defaultMessage: 'Error performing fetch: {error}',
           values: { error: err.message }
-        }));
-    });
+        })]
+    };
+  }
 }

@@ -50,6 +50,11 @@ export interface InfraBackendFrameworkAdapter {
   ): Promise<InfraDatabaseGetIndicesResponse>;
   callWithRequest(
     req: InfraFrameworkRequest,
+    method: 'ml.getBuckets',
+    options?: object
+  ): Promise<InfraDatabaseGetIndicesResponse>;
+  callWithRequest(
+    req: InfraFrameworkRequest,
     method: string,
     options?: object
   ): Promise<InfraDatabaseSearchResponse>;
@@ -61,6 +66,7 @@ export interface InfraBackendFrameworkAdapter {
     method: 'POST' | 'GET' | 'PUT' | 'HEAD' | 'DELETE',
     payload?: T
   ): Promise<ServerInjectResponse>;
+  getSpaceId(request: InfraFrameworkRequest<any>): string;
   makeTSVBRequest(
     req: InfraFrameworkRequest,
     model: InfraMetricModel,
