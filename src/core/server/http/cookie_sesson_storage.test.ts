@@ -58,7 +58,7 @@ beforeEach(() => {
   logger = loggingServiceMock.create();
   env = Env.createDefault(getEnvOptions());
 
-  coreContext = { env, logger, configService: configService as any };
+  coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
   server = new HttpService(coreContext);
 });
 

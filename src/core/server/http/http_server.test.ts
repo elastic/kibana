@@ -83,7 +83,7 @@ test('log listening address after started', async () => {
   expect(loggingServiceMock.collect(loggingService).info).toMatchInlineSnapshot(`
     Array [
       Array [
-        "http server running on http://127.0.0.1:10002",
+        "http server running at http://127.0.0.1:10002",
       ],
     ]
   `);
@@ -99,7 +99,7 @@ test('log listening address after started when configured with BasePath and rewr
   expect(loggingServiceMock.collect(loggingService).info).toMatchInlineSnapshot(`
     Array [
       Array [
-        "http server running on http://127.0.0.1:10002",
+        "http server running at http://127.0.0.1:10002",
       ],
     ]
   `);
@@ -115,7 +115,7 @@ test('log listening address after started when configured with BasePath and rewr
   expect(loggingServiceMock.collect(loggingService).info).toMatchInlineSnapshot(`
     Array [
       Array [
-        "http server running on http://127.0.0.1:10002/bar",
+        "http server running at http://127.0.0.1:10002/bar",
       ],
     ]
   `);

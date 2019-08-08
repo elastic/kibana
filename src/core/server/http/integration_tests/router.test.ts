@@ -23,9 +23,9 @@ import supertest from 'supertest';
 import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 
-import { CoreContext } from '../../core_context';
 import { HttpService } from '../http_service';
 
+import { CoreContext } from '../../core_context';
 import { Env } from '../../config';
 import { getEnvOptions } from '../../config/__mocks__/env';
 import { configServiceMock } from '../../config/config_service.mock';
@@ -40,15 +40,11 @@ const configService = configServiceMock.create();
 
 configService.atPath.mockReturnValue(
   new BehaviorSubject({
-    hosts: ['http://1.2.3.4'],
+    hosts: ['localhost'],
     maxPayload: new ByteSizeValue(1024),
     autoListen: true,
-    healthCheck: {
-      delay: 2000,
-    },
     ssl: {
       enabled: false,
-      verificationMode: 'none',
     },
   } as any)
 );
@@ -57,7 +53,7 @@ beforeEach(() => {
   logger = loggingServiceMock.create();
   env = Env.createDefault(getEnvOptions());
 
-  coreContext = { env, logger, configService: configService as any };
+  coreContext = { coreId: Symbol('core'), env, logger, configService: configService as any };
   server = new HttpService(coreContext);
 });
 
@@ -787,16 +783,16 @@ describe('Response factory', () => {
     });
 
     it('Custom error response', async () => {
-      const router = new Router('/');
+      const { registerRouter, server: innerServer, createRouter } = await server.setup();
 
-      router.get({ path: '/', validate: false }, (req, res) => {
+      const router = createRouter('/');
+      router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('some message');
         return res.customError(error, {
           statusCode: 418,
         });
       });
 
-      const { registerRouter, server: innerServer } = await server.setup(config);
       registerRouter(router);
       await server.start();
 
@@ -812,9 +808,10 @@ describe('Response factory', () => {
     });
 
     it('Custom error response for server error', async () => {
-      const router = new Router('/');
+      const { registerRouter, server: innerServer, createRouter } = await server.setup();
+      const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (req, res) => {
+      router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('some message');
 
         return res.customError(error, {
@@ -822,7 +819,6 @@ describe('Response factory', () => {
         });
       });
 
-      const { registerRouter, server: innerServer } = await server.setup(config);
       registerRouter(router);
       await server.start();
 
@@ -838,9 +834,10 @@ describe('Response factory', () => {
     });
 
     it('Custom error response for Boom server error', async () => {
-      const router = new Router('/');
+      const { registerRouter, server: innerServer, createRouter } = await server.setup();
+      const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (req, res) => {
+      router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('some message');
 
         return res.customError(Boom.boomify(error), {
@@ -848,7 +845,6 @@ describe('Response factory', () => {
         });
       });
 
-      const { registerRouter, server: innerServer } = await server.setup(config);
       registerRouter(router);
       await server.start();
 
@@ -864,16 +860,16 @@ describe('Response factory', () => {
     });
 
     it('Custom error response requires error status code', async () => {
-      const router = new Router('/');
+      const { registerRouter, server: innerServer, createRouter } = await server.setup();
+      const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (req, res) => {
+      router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('some message');
         return res.customError(error, {
           statusCode: 200,
         });
       });
 
-      const { registerRouter, server: innerServer } = await server.setup(config);
       registerRouter(router);
       await server.start();
 
