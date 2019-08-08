@@ -37,9 +37,10 @@ export class DiskWatermarkService {
     }
 
     try {
-      const { free, size } = await this.diskSpaceChecker(this.serverOptions.repoPath);
+      const res = await this.diskSpaceChecker(this.serverOptions.repoPath);
+      const { free, size } = res;
       if (this.percentageMode) {
-        const percentage = (size - free) / size;
+        const percentage = ((size - free) * 100) / size;
         return percentage > this.watermark;
       } else {
         return free <= this.watermark;
@@ -67,7 +68,7 @@ export class DiskWatermarkService {
     }
   }
 
-  private async parseWatermarkConfigString(diskWatermarkLow: string) {
+  private parseWatermarkConfigString(diskWatermarkLow: string) {
     // Including undefined, null and empty string.
     if (!diskWatermarkLow) {
       this.logger.error(

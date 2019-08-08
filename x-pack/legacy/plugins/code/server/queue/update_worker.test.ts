@@ -71,7 +71,7 @@ test('Execute update job', async () => {
       },
       disk: {
         thresholdEnabled: true,
-        watermarkLowMb: 100,
+        watermarkLow: 100,
       },
     } as ServerOptions,
     {} as GitOperations,
