@@ -326,7 +326,7 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
           references.push({
             name: refName,
             type: 'index-pattern',
-            id: indexId,
+            id: indexId || searchSourceFields.index,
           });
           searchSourceFields = {
             ...searchSourceFields,
