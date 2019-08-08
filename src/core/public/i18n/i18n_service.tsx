@@ -50,7 +50,7 @@ export class I18nService {
         defaultMessage: 'Select this row',
         description: 'ARIA and displayed label on a checkbox to select a single table row',
       }),
-      '˜': ({ itemCount }: EuiValues) =>
+      'euiBasicTable.tableDescription': ({ itemCount }: EuiValues) =>
         i18n.translate('core.euiBasicTable.tableDescription', {
           defaultMessage: 'Below is a table of {itemCount} items.',
           values: { itemCount },

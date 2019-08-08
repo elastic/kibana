@@ -8,6 +8,7 @@ exports[`#start() returns \`Context\` component 1`] = `
         "mapping": Object {
           "euiBasicTable.selectAllRows": "Select all rows",
           "euiBasicTable.selectThisRow": "Select this row",
+          "euiBasicTable.tableDescription": [Function],
           "euiBottomBar.screenReaderAnnouncement": "There is a new menu opening with page level controls at the end of the document.",
           "euiCardSelect.select": "Select",
           "euiCardSelect.selected": "Selected",
@@ -67,7 +68,6 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiToast.dismissToast": "Dismiss toast",
           "euiToast.newNotification": "A new notification appears",
           "euiToast.notification": "Notification",
-          "˜": [Function],
         },
       }
     }
