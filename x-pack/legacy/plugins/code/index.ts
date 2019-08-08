@@ -14,6 +14,7 @@ import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { APP_TITLE } from './common/constants';
 import { LanguageServers, LanguageServersDeveloping } from './server/lsp/language_servers';
 import { codePlugin } from './server';
+import { DEFAULT_WATERMARK_LOW_MB } from './server/disk_watermark';
 
 export type RequestFacade = Legacy.Request;
 export type RequestQueryFacade = RequestQuery;
@@ -104,7 +105,7 @@ export const code = (kibana: any) =>
         }).default(),
         disk: Joi.object({
           thresholdEnabled: Joi.bool().default(true),
-          watermarkLowMb: Joi.number().default(2048),
+          watermarkLow: Joi.string().default(`${DEFAULT_WATERMARK_LOW_MB}mb`),
         }).default(),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now
