@@ -30,7 +30,7 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
                   "title": "last.checkpoint",
                 },
                 Object {
-                  "description": "July 29th 2019, 10:18:01",
+                  "description": "July 29th 2019, 04:18:01",
                   "title": "last.timestamp",
                 },
                 Object {
@@ -123,7 +123,7 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
                     "title": "last.checkpoint",
                   },
                   Object {
-                    "description": "July 29th 2019, 10:18:01",
+                    "description": "July 29th 2019, 04:18:01",
                     "title": "last.timestamp",
                   },
                   Object {
