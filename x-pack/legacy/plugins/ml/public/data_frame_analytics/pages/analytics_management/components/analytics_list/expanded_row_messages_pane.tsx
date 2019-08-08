@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, FC, useState } from 'react';
 
 import { EuiSpacer, EuiBasicTable } from '@elastic/eui';
 // @ts-ignore
@@ -23,7 +23,7 @@ interface Props {
   analyticsId: string;
 }
 
-export const ExpandedRowMessagesPane: React.SFC<Props> = ({ analyticsId }) => {
+export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId }) => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');

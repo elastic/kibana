@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useState } from 'react';
+import React, { Fragment, FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -27,7 +27,7 @@ interface DeleteActionProps {
   item: DataFrameAnalyticsListRow;
 }
 
-export const DeleteAction: SFC<DeleteActionProps> = ({ item }) => {
+export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
   const disabled = item.stats.state === DATA_FRAME_TASK_STATE.STARTED;
 
   const canDeleteDataFrame: boolean = checkPermission('canDeleteDataFrame');

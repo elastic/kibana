@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useState } from 'react';
+import React, { Fragment, FC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -63,7 +63,7 @@ function stringMatch(str: string | undefined, substr: string) {
   );
 }
 
-export const DataFrameAnalyticsList: SFC = () => {
+export const DataFrameAnalyticsList: FC = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [blockRefresh, setBlockRefresh] = useState(false);

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useState } from 'react';
+import React, { Fragment, FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -27,7 +27,7 @@ interface StartActionProps {
   item: DataFrameAnalyticsListRow;
 }
 
-export const StartAction: SFC<StartActionProps> = ({ item }) => {
+export const StartAction: FC<StartActionProps> = ({ item }) => {
   const canStartStopDataFrameAnalytics: boolean = checkPermission('canStartStopDataFrameAnalytics');
 
   const [isModalVisible, setModalVisible] = useState(false);

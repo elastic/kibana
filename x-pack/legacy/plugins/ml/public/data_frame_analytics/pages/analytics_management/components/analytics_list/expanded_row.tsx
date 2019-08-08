@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
+import React, { FC } from 'react';
 import moment from 'moment-timezone';
 
 import { EuiTabbedContent } from '@elastic/eui';
@@ -30,7 +30,7 @@ interface Props {
   item: DataFrameAnalyticsListRow;
 }
 
-export const ExpandedRow: SFC<Props> = ({ item }) => {
+export const ExpandedRow: FC<Props> = ({ item }) => {
   const stateValues = { ...item.stats };
 
   const state: SectionConfig = {
