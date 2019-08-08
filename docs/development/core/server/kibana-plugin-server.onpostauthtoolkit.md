@@ -17,6 +17,4 @@ export interface OnPostAuthToolkit
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [next](./kibana-plugin-server.onpostauthtoolkit.next.md) | <code>() =&gt; OnPostAuthResult</code> | To pass request to the next handler |
-|  [redirected](./kibana-plugin-server.onpostauthtoolkit.redirected.md) | <code>(url: string) =&gt; OnPostAuthResult</code> | To interrupt request handling and redirect to a configured url |
-|  [rejected](./kibana-plugin-server.onpostauthtoolkit.rejected.md) | <code>(error: Error, options?: {</code><br/><code>        statusCode?: number;</code><br/><code>    }) =&gt; OnPostAuthResult</code> | Fail the request with specified error. |
 

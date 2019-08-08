@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { groupAndSortBy } from './default_editor_utils';
+import { groupAndSortBy } from './utils';
 import { AggGroupNames } from './agg_groups';
 
 const aggs = [

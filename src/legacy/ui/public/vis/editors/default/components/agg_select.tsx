@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AggType } from 'ui/agg_types';
 import { IndexPattern } from 'ui/index_patterns';
 import { documentationLinks } from '../../../../documentation_links/documentation_links';
-import { ComboBoxGroupedOptions } from '../default_editor_utils';
+import { ComboBoxGroupedOptions } from '../utils';
 
 interface DefaultEditorAggSelectProps {
   aggError?: string;

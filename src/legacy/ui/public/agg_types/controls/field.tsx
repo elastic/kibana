@@ -24,9 +24,8 @@ import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from 'ui/vis';
 import { Field } from 'ui/index_patterns';
+import { AggParamEditorProps, ComboBoxGroupedOptions } from 'ui/vis/editors/default';
 import { formatListAsProse, parseCommaSeparatedList } from '../../../../utils';
-import { AggParamEditorProps } from '../../vis/editors/default';
-import { ComboBoxGroupedOptions } from '../../vis/editors/default/default_editor_utils';
 
 const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
 
