@@ -5,7 +5,6 @@
  */
 import React from 'react';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { STATUS_INSTALLED, STATUS_NOT_INSTALLED } from '../../common/constants';
 import {
   InstallationStatus,
   IntegrationsGroupedByStatus,
@@ -36,9 +35,9 @@ export function IntegrationsGridByStatus({ map }: GridProps) {
 }
 
 export function IntegrationListGrid({ status, list }: ListProps) {
-  const titles = {
-    [STATUS_INSTALLED]: 'Your Integrations',
-    [STATUS_NOT_INSTALLED]: 'Available Integrations',
+  const titles: Record<InstallationStatus, string> = {
+    installed: 'Your Integrations',
+    not_installed: 'Available Integrations',
   };
   return (
     <>

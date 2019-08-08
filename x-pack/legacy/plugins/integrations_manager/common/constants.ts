@@ -18,6 +18,3 @@ export const PLUGIN = {
 };
 
 export const SAVED_OBJECT_TYPE = 'integrations-manager';
-
-export const STATUS_INSTALLED = 'installed';
-export const STATUS_NOT_INSTALLED = 'not_installed';

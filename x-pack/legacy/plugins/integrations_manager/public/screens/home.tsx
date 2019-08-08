@@ -15,7 +15,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { PLUGIN, STATUS_INSTALLED, STATUS_NOT_INSTALLED } from '../../common/constants';
+import { PLUGIN } from '../../common/constants';
 import { IntegrationsGroupedByStatus } from '../../common/types';
 import { IntegrationsGridByStatus } from '../components/integration_list_grid';
 import { getIntegrationsGroupedByStatus } from '../data';
@@ -26,8 +26,8 @@ export function Home() {
   useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }]);
 
   const [map, setMap] = useState<IntegrationsGroupedByStatus>({
-    [STATUS_INSTALLED]: [],
-    [STATUS_NOT_INSTALLED]: [],
+    installed: [],
+    not_installed: [],
   });
 
   useEffect(() => {

@@ -5,7 +5,6 @@
  */
 
 import { ClusterClient, ScopedClusterClient } from 'src/core/server/';
-import { STATUS_INSTALLED, STATUS_NOT_INSTALLED } from '../../common/constants';
 import { AssetType, Installable, Installation, Request } from '../../common/types';
 
 export * from './get';
@@ -32,12 +31,12 @@ export function createInstallableFrom<T>(from: T, savedObject?: Installation): I
   return savedObject
     ? {
         ...from,
-        status: STATUS_INSTALLED,
+        status: 'installed',
         savedObject,
       }
     : {
         ...from,
-        status: STATUS_NOT_INSTALLED,
+        status: 'not_installed',
       };
 }
 
