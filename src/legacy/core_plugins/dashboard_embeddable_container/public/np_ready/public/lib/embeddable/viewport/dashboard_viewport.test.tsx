@@ -45,7 +45,6 @@ function getProps(props?: Partial<DashboardViewportProps>): DashboardViewportPro
     notifications: {} as any,
     overlays: {} as any,
     inspector: {} as any,
-    landingPagePath: '/dashboard',
     SavedObjectFinder: () => null,
     ExitFullScreenButton,
   };

@@ -40,7 +40,6 @@ const viewportProps: ViewportProps = {
   notifications: {} as any,
   overlays: {} as any,
   inspector: {} as any,
-  landingPagePath: '/dashboard',
   SavedObjectFinder: () => null,
   ExitFullScreenButton: () => null,
 };
