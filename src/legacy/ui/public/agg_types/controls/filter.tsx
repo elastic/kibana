@@ -29,10 +29,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from 'ui/vis';
 // @ts-ignore
-import { data } from 'plugins/data/setup';
-import { Query } from 'plugins/data';
-
-const { QueryBarInput } = data.query.ui;
+import { Query, QueryBarInput } from 'plugins/data';
 
 interface FilterRowProps {
   id: string;

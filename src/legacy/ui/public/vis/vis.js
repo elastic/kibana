@@ -38,7 +38,7 @@ import { SearchSourceProvider } from '../courier/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
 
 import { timefilter } from '../timefilter';
-import '../bind';
+import '../directives/bind';
 
 export function VisProvider(Private, indexPatterns, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);

@@ -8,7 +8,7 @@ import { DestinationOrSource, isDestinationOrSource } from '../types';
 import { getEntries } from '../get_entries';
 
 export const getNetworkFromInfluencers = (
-  influencers: Array<Record<string, string>>,
+  influencers: Array<Record<string, string>> = [],
   ip?: string
 ): { ip: string; type: DestinationOrSource } | null => {
   const recordFound = influencers.find(influencer => {

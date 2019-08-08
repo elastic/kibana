@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, useState, useEffect, useMemo } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiEmptyPrompt,
@@ -20,9 +21,19 @@ import { TemplatesTable } from './templates_table';
 import { loadIndexTemplates } from '../../../services/api';
 import { Template } from '../../../../common/types';
 import { trackUiMetric, METRIC_TYPE } from '../../../services/track_ui_metric';
-import { UIM_TEMPLATE_LIST_LOAD } from '../../../../common/constants';
+import { UIM_TEMPLATE_LIST_LOAD, BASE_PATH } from '../../../../common/constants';
+import { TemplateDetails } from './template_details';
 
-export const TemplatesList: React.FunctionComponent = () => {
+interface MatchParams {
+  templateName?: Template['name'];
+}
+
+export const TemplatesList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+  match: {
+    params: { templateName },
+  },
+  history,
+}) => {
   const { error, isLoading, data: templates, createRequest: reload } = loadIndexTemplates();
 
   let content;
@@ -35,6 +46,10 @@ export const TemplatesList: React.FunctionComponent = () => {
       templates ? templates.filter((template: Template) => !template.name.startsWith('.')) : [],
     [templates]
   );
+
+  const closeTemplateDetails = () => {
+    history.push(`${BASE_PATH}templates`);
+  };
 
   // Track component loaded
   useEffect(() => {
@@ -115,5 +130,16 @@ export const TemplatesList: React.FunctionComponent = () => {
     );
   }
 
-  return <section data-test-subj="templatesList">{content}</section>;
+  return (
+    <section data-test-subj="templatesList">
+      {content}
+      {templateName && (
+        <TemplateDetails
+          templateName={templateName}
+          onClose={closeTemplateDetails}
+          reload={reload}
+        />
+      )}
+    </section>
+  );
 };

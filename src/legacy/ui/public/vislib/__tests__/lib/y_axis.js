@@ -342,16 +342,6 @@ describe('Vislib yAxis Class Test Suite', function () {
       yAxis = buildYAxis();
     });
 
-    it('should use percentage format for percentages', function () {
-      yAxis = buildYAxis({
-        scale: {
-          mode: 'percentage'
-        }
-      });
-      const tickFormat = yAxis.getAxis().tickFormat();
-      expect(tickFormat(1)).to.be('100%');
-    });
-
     it('should use decimal format for small values', function () {
       yAxis.yMax = 1;
       const tickFormat = yAxis.getAxis().tickFormat();

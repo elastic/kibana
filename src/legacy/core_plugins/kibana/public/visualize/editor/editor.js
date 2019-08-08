@@ -130,7 +130,10 @@ function VisEditor(
   Promise,
   config,
   kbnBaseUrl,
-  localStorage
+  localStorage,
+  // unused but required to initialize auto refresh :-\
+  /* eslint-disable no-unused-vars */
+  courier,
 ) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);

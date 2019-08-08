@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { idx } from '@kbn/elastic-idx';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { fontSize } from '../../../../style/variables';
-import { APMLink } from '../../../shared/Links/APMLink';
+import { APMLink } from '../../../shared/Links/apm/APMLink';
 
 const LinkLabel = styled.span`
   font-size: ${fontSize};
@@ -52,7 +52,7 @@ export const ErrorCountBadge: React.SFC<Props> = ({
 
   return (
     <APMLink
-      path={`/${idx(transaction, _ => _.service.name)}/errors`}
+      path={`/services/${idx(transaction, _ => _.service.name)}/errors`}
       query={{
         kuery: encodeURIComponent(
           `trace.id : "${transaction.trace.id}" and transaction.id : "${transaction.transaction.id}"`

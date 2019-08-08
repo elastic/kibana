@@ -22,7 +22,6 @@ import { AggGroupNames } from './agg_groups';
 
 export interface Schema {
   aggFilter: string | string[];
-  deprecate: boolean;
   editor: boolean | string;
   group: AggGroupNames;
   max: number;

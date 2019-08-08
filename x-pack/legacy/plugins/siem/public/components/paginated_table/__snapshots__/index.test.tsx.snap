@@ -70,7 +70,6 @@ exports[`Paginated Table Component rendering it renders the default load more ta
   limit={1}
   loadPage={[Function]}
   loading={false}
-  loadingTitle="Hosts"
   pageOfItems={
     Array [
       Object {

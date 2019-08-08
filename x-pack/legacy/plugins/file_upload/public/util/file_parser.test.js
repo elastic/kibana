@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parseFile, jsonPreview } from './file_parser';
+import { parseFile } from './file_parser';
 
 describe('parse file', () => {
   const cleanAndValidate = jest.fn(a => a);
@@ -60,27 +60,5 @@ describe('parse file', () => {
     await parseFile(getFileRef(validJsonFileResult), transformDetails, previewFunction);
     // Confirm preview function called
     expect(previewFunction.mock.calls.length).toEqual(1);
-  });
-
-  it('should use object clone for preview function', () => {
-    const justFinalJson = {
-      'type': 'Feature',
-      'geometry': {
-        'type': 'Polygon',
-        'coordinates': [[
-          [-104.05, 78.99],
-          [-87.22,  78.98],
-          [-86.58,  75.94],
-          [-104.03, 75.94],
-          [-104.05, 78.99]
-        ]]
-      },
-    };
-
-    jsonPreview(justFinalJson, previewFunction);
-    // Confirm equal object passed
-    expect(previewFunction.mock.calls[0][0]).toEqual(justFinalJson);
-    // Confirm not the same object
-    expect(previewFunction.mock.calls[0][0]).not.toBe(justFinalJson);
   });
 });

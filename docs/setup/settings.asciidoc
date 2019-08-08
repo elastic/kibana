@@ -32,7 +32,7 @@ instances of `{nonce}` will be replaced with an automatically generated nonce
 at load time. We strongly recommend that you keep the default CSP rules that
 ship with Kibana.
 
-`csp.strict:`:: *Default: `false`* Blocks access to Kibana to any browser that
+`csp.strict:`:: *Default: `true`* Blocks access to Kibana to any browser that
 does not enforce even rudimentary CSP rules. In practice, this will disable
 support for older, less safe browsers like Internet Explorer.
 

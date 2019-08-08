@@ -51,7 +51,7 @@ export const LastEventTime = pure<LastEventTimeProps>(({ hostName, indexKey, ip 
                   <EuiToolTip data-test-subj="last_event_time" position="bottom" content={lastSeen}>
                     <FormattedMessage
                       id="xpack.siem.headerPage.pageSubtitle"
-                      defaultMessage="Last Event: {beat}"
+                      defaultMessage="Last event: {beat}"
                       values={{
                         beat: <FormattedRelative value={new Date(lastSeen)} />,
                       }}

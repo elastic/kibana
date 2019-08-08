@@ -6,13 +6,18 @@
       <div data-transclude-slot="bottomRow">
         <div ng-if="monitoringMain.inElasticsearch" class="euiTabs" role="navigation">
           <a
-            ng-if="!monitoringMain.instance"
+            ng-if="!monitoringMain.instance && !monitoringMain.isDisabledTab('elasticsearch')"
             kbn-href="#/elasticsearch"
             class="euiTab"
-            ng-class="{
-              'euiTab-isSelected': monitoringMain.isActiveTab('overview'),
-              'euiTab-isDisabled': monitoringMain.isDisabledTab('elasticsearch', 'overview')
-            }"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('overview')}"
+            i18n-id="xpack.monitoring.esNavigation.overviewLinkText"
+            i18n-default-message="Overview"
+          ></a>
+          <a
+            ng-if="!monitoringMain.instance && monitoringMain.isDisabledTab('elasticsearch')"
+            kbn-href=""
+            class="euiTab euiTab-isDisabled"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('overview')}"
             i18n-id="xpack.monitoring.esNavigation.overviewLinkText"
             i18n-default-message="Overview"
           ></a>
@@ -25,14 +30,18 @@
             i18n-default-message="Nodes"
           ></a>
           <a
-            ng-if="!monitoringMain.instance"
+            ng-if="!monitoringMain.instance && !monitoringMain.isDisabledTab('elasticsearch')"
             kbn-href="#/elasticsearch/indices"
             class="euiTab"
-            ng-disabled="true"
-            ng-class="{
-              'euiTab-isSelected': monitoringMain.isActiveTab('indices'),
-              'euiTab-isDisabled': monitoringMain.isDisabledTab('elasticsearch', 'indices')
-            }"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('indices')}"
+            i18n-id="xpack.monitoring.esNavigation.indicesLinkText"
+            i18n-default-message="Indices"
+          ></a>
+          <a
+            ng-if="!monitoringMain.instance && monitoringMain.isDisabledTab('elasticsearch')"
+            kbn-href=""
+            class="euiTab euiTab-isDisabled"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('indices')}"
             i18n-id="xpack.monitoring.esNavigation.indicesLinkText"
             i18n-default-message="Indices"
           ></a>
@@ -81,10 +90,20 @@
 
         <div ng-if="monitoringMain.inKibana" class="euiTabs" role="navigation">
           <a
-            ng-if="!monitoringMain.instance"
+            ng-if="!monitoringMain.instance && !monitoringMain.isDisabledTab('kibana')"
             kbn-href="#/kibana"
             class="euiTab"
             ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('overview')}"
+            i18n-id="xpack.monitoring.kibanaNavigation.overviewLinkText"
+            i18n-default-message="Overview"
+          ></a>
+          <a
+            ng-if="!monitoringMain.instance && monitoringMain.isDisabledTab('kibana')"
+            kbn-href=""
+            class="euiTab euiTab-isDisabled"
+            ng-class="{
+              'euiTab-isSelected': monitoringMain.isActiveTab('overview'),
+            }"
             i18n-id="xpack.monitoring.kibanaNavigation.overviewLinkText"
             i18n-default-message="Overview"
           ></a>
@@ -101,9 +120,17 @@
 
         <div ng-if="monitoringMain.inApm" class="euiTabs" role="navigation">
           <a
-            ng-if="!monitoringMain.instance"
+            ng-if="!monitoringMain.instance && !monitoringMain.isDisabledTab('apm')"
             kbn-href="#/apm"
             class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('overview')}"
+            i18n-id="xpack.monitoring.apmNavigation.overviewLinkText"
+            i18n-default-message="Overview"
+          ></a>
+          <a
+            ng-if="!monitoringMain.instance && monitoringMain.isDisabledTab('apm')"
+            kbn-href=""
+            class="euiTab euiTab-isDisabled"
             ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('overview')}"
             i18n-id="xpack.monitoring.apmNavigation.overviewLinkText"
             i18n-default-message="Overview"
@@ -121,11 +148,19 @@
 
         <div ng-if="monitoringMain.inBeats" class="euiTabs" role="navigation">
           <a
-            ng-if="!monitoringMain.instance"
+            ng-if="!monitoringMain.instance && !monitoringMain.isDisabledTab('beats')"
             kbn-href="#/beats"
             class="euiTab"
-            ng-class="{'euiTab-isSelected':
-            monitoringMain.isActiveTab('overview')}"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('overview')}"
+            i18n-id="xpack.monitoring.beatsNavigation.overviewLinkText"
+            i18n-default-message="Overview"
+          >
+          </a>
+          <a
+            ng-if="!monitoringMain.instance && monitoringMain.isDisabledTab('beats')"
+            kbn-href=""
+            class="euiTab euiTab-isDisabled"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('overview')}"
             i18n-id="xpack.monitoring.beatsNavigation.overviewLinkText"
             i18n-default-message="Overview"
           >
@@ -152,9 +187,18 @@
 
         <div ng-if="monitoringMain.inLogstash" class="euiTabs" role="navigation">
           <a
-            ng-if="!monitoringMain.instance && !monitoringMain.pipelineId"
+            ng-if="!monitoringMain.instance && !monitoringMain.pipelineId && !monitoringMain.isDisabledTab('logstash')"
             kbn-href="#/logstash"
             class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('overview')}"
+            i18n-id="xpack.monitoring.logstashNavigation.overviewLinkText"
+            i18n-default-message="Overview"
+          >
+          </a>
+          <a
+            ng-if="!monitoringMain.instance && !monitoringMain.pipelineId && monitoringMain.isDisabledTab('logstash')"
+            kbn-href=""
+            class="euiTab euiTab-isDisabled"
             ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('overview')}"
             i18n-id="xpack.monitoring.logstashNavigation.overviewLinkText"
             i18n-default-message="Overview"
@@ -170,9 +214,21 @@
           >
           </a>
           <a
-            ng-if="!monitoringMain.instance && !monitoringMain.pipelineId"
+            ng-if="!monitoringMain.instance && !monitoringMain.pipelineId && !monitoringMain.isDisabledTab('logstash')"
             kbn-href="#/logstash/pipelines"
             class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('pipelines')}"
+          >
+            <span
+              i18n-id="xpack.monitoring.logstashNavigation.pipelinesLinkText"
+              i18n-default-message="Pipelines"
+            ></span>
+            <span class="kuiIcon fa-flask monTabs--icon" tooltip="Beta feature" />
+          </a>
+          <a
+            ng-if="!monitoringMain.instance && !monitoringMain.pipelineId && monitoringMain.isDisabledTab('logstash')"
+            kbn-href=""
+            class="euiTab euiTab-isDisabled"
             ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('pipelines')}"
           >
             <span
