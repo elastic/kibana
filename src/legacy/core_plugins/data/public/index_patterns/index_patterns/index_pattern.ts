@@ -30,7 +30,8 @@ import { findObjectByTitle } from 'ui/saved_objects';
 import { SavedObjectsClientContract } from 'src/core/public';
 
 import { IndexPatternMissingIndices } from '../errors';
-import { createFieldsFetcher, Field, FieldList, FieldType } from '../fields';
+import { Field, FieldList, FieldType } from '../fields';
+import { createFieldsFetcher } from './_fields_fetcher';
 import { getRoutes } from '../utils';
 import { formatHitProvider } from './format_hit';
 // @ts-ignore

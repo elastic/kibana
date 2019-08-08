@@ -17,15 +17,6 @@
  * under the License.
  */
 
-export {
-  IndexPatternsService,
-  IndexPatterns,
-  fixtures,
-  utils,
-  // types
-  IndexPatternsSetup,
-  IndexPattern,
-  StaticIndexPattern,
-  Field,
-  FieldType,
-} from './index_patterns_service';
+export * from './index_patterns_service';
+
+export { mockFields, mockIndexPattern } from './mocks';
