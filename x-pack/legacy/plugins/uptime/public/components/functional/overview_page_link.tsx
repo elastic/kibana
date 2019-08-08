@@ -12,14 +12,12 @@ import queryString from 'querystring';
 
 interface OverviewPageLinkProps {
   pagination?: CursorPagination;
-  location: string | undefined;
   linkParameters: string | undefined;
 }
 
 export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
   children,
   pagination,
-  location,
   linkParameters,
 }) => {
   let params = {};

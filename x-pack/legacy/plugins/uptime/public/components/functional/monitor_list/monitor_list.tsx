@@ -38,6 +38,7 @@ import { MonitorPageLink } from '../monitor_page_link';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
 import { UptimeSearchAfterChangeHandler } from '../../../pages/overview';
 import { OverviewPageLink } from '../overview_page_link';
+import { locationsAreEqual } from 'history';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -72,23 +73,30 @@ export const MonitorListComponent = (props: Props) => {
 
   const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
 
-  const nextPagination = (): CursorPagination | null => {
-    if (items.length < 1) {
-      return null;
-    }
-    const lastItem = last(items);
-    const lastLocations = get(lastItem.state, 'observer.geo.name', []);
-    lastLocations.sort();
-
-    return {
+  const paginationLinkForSummary = (summary: MonitorSummary, cursorDirection: CursorDirection) => {
+    const location = get(summary.state, 'observer.geo.name', []).concat().sort()[0];
+    
+    const linkPagination = {
       cursorKey: JSON.stringify({
-        monitor_id: lastItem.monitor_id,
-        location: lastLocations[0],
+        monitor_id: summary.monitor_id,
+        location: location,
       }),
-      cursorDirection: CursorDirection.AFTER,
+      cursorDirection,
       sortOrder: SortOrder.ASC,
     };
-  };
+
+    console.log(linkPagination, cursorDirection);
+
+    return <OverviewPageLink pagination={linkPagination} linkParameters={linkParameters}>
+      {CursorDirection.BEFORE === cursorDirection ? "🡄 Prev" : "Next 🡆"}
+    </OverviewPageLink>
+  }
+
+
+  const paginationLinks = <Fragment>
+    {items.length > 0 && paginationLinkForSummary(items[0], CursorDirection.BEFORE)} |
+    {items.length > 1 && paginationLinkForSummary(last(items), CursorDirection.AFTER)}
+  </Fragment>
 
   return (
     <Fragment>
@@ -236,7 +244,7 @@ export const MonitorListComponent = (props: Props) => {
           ]}
         />
         <EuiFlexItem grow={false}>
-          <OverviewPageLink pagination={nextPagination()} linkParameters={linkParameters} location={"something"}>Next &gt;</OverviewPageLink>
+          {paginationLinks}
         </EuiFlexItem>
       </EuiPanel>
     </Fragment>
