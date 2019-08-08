@@ -104,6 +104,7 @@ export class EmbeddedVisualizeHandler {
   private actions: any = {};
   private events$: Rx.Observable<any>;
   private autoFetch: boolean;
+  private autoRefreshFetchSubscription: Rx.Subscription | undefined;
 
   constructor(
     private readonly element: HTMLElement,
@@ -166,7 +167,7 @@ export class EmbeddedVisualizeHandler {
     this.vis.on('reload', this.reload);
     this.uiState.on('change', this.onUiStateChange);
     if (autoFetch) {
-      timefilter.on('autoRefreshFetch', this.reload);
+      this.autoRefreshFetchSubscription = timefilter.getAutoRefreshFetch$().subscribe(this.reload);
     }
 
     // This is a hack to give maps visualizations access to data in the
@@ -262,7 +263,7 @@ export class EmbeddedVisualizeHandler {
     this.destroyed = true;
     this.debouncedFetchAndRender.cancel();
     if (this.autoFetch) {
-      timefilter.off('autoRefreshFetch', this.reload);
+      if (this.autoRefreshFetchSubscription) this.autoRefreshFetchSubscription.unsubscribe();
     }
     this.vis.removeListener('reload', this.reload);
     this.vis.removeListener('update', this.handleVisUpdate);

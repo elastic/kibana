@@ -82,7 +82,7 @@ export function SearchPollProvider(Private, Promise) {
       // We use resolve() here instead of try() because the latter won't trigger a $digest
       // when the promise resolves.
       this._searchPromise = Promise.resolve().then(() => {
-        timefilter.emit('autoRefreshFetch');
+        timefilter.notifyShouldFetch();
         const requests = searchRequestQueue.getInactive();
 
         // The promise returned from fetchSearchRequests() only resolves when the requests complete.

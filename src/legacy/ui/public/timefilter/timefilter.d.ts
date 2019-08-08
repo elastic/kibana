@@ -33,6 +33,7 @@ export interface Timefilter {
   getEnabledUpdated$: () => Observable<any>;
   getTimeUpdate$: () => Observable<any>;
   getRefreshIntervalUpdate$: () => Observable<any>;
+  getAutoRefreshFetch$: () => Observable<any>;
   getTime: () => TimeRange;
   setTime: (timeRange: TimeRange) => void;
   setRefreshInterval: (refreshInterval: RefreshInterval) => void;

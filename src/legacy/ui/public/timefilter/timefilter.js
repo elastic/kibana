@@ -42,6 +42,8 @@ class Timefilter extends SimpleEmitter {
     // Fired when a user changes the the autorefresh settings
     this.refreshIntervalUpdate$ = new Subject();
 
+    this.autoRefreshFetch$ = new Subject();
+
     this.isTimeRangeSelectorEnabled = false;
     this.isAutoRefreshSelectorEnabled = false;
     this._time = chrome.getUiSettingsClient().get('timepicker:timeDefaults');
@@ -58,6 +60,10 @@ class Timefilter extends SimpleEmitter {
 
   getRefreshIntervalUpdate$ = () => {
     return this.refreshIntervalUpdate$.asObservable();
+  }
+
+  getAutoRefreshFetch$ = () => {
+    return this.autoRefreshFetch$.asObservable();
   }
 
   getTime = () => {
@@ -187,6 +193,10 @@ class Timefilter extends SimpleEmitter {
   disableAutoRefreshSelector = () => {
     this.isAutoRefreshSelectorEnabled = false;
     this.enabledUpdated$.next();
+  }
+
+  notifyShouldFetch = () => {
+    this.autoRefreshFetch$.next();
   }
 
 }
