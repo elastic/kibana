@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import { statSync } from 'fs';
 import { resolve } from 'path';
-import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import { getConfig } from '../../legacy/server/path';
@@ -88,6 +87,9 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     }
 
     if (opts.ssl) {
+      // @kbn/dev-utils is part of devDependencies
+      const { CA_CERT_PATH } = require('@kbn/dev-utils');
+
       function ensureNotDefined(path) {
         if (has(path)) {
           throw new Error(`Can't use --ssl when "${path}" configuration is already defined.`);
