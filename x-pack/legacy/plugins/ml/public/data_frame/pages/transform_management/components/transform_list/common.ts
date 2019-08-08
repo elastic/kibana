@@ -56,6 +56,13 @@ export interface DataFrameTransformStats {
     };
     operations_behind: number;
   };
+  node?: {
+    id: string;
+    name: string;
+    ephemeral_id: string;
+    transport_address: string;
+    attributes: Record<string, any>;
+  };
   stats: {
     documents_indexed: number;
     documents_processed: number;
@@ -77,9 +84,9 @@ export function getTransformProgress(item: DataFrameTransformListRow) {
     return 100;
   }
 
-  return Math.round(
-    idx(item, _ => _.stats.checkpointing.next.checkpoint_progress.percent_complete) || 0
-  );
+  const progress = idx(item, _ => _.stats.checkpointing.next.checkpoint_progress.percent_complete);
+
+  return progress !== undefined ? Math.round(progress) : undefined;
 }
 
 export function isDataFrameTransformStats(arg: any): arg is DataFrameTransformStats {
@@ -93,7 +100,6 @@ export function isDataFrameTransformStats(arg: any): arg is DataFrameTransformSt
 
 export interface DataFrameTransformListRow {
   id: DataFrameTransformId;
-  checkpointing: object;
   config: DataFrameTransformPivotConfig;
   mode?: string; // added property on client side to allow filtering by this field
   stats: DataFrameTransformStats;

@@ -26,12 +26,16 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
             Object {
               "items": Array [
                 Object {
-                  "description": "{\\"checkpoint\\":1,\\"timestamp_millis\\":1564388281199}",
-                  "title": "last",
+                  "description": 1,
+                  "title": "last.checkpoint",
                 },
                 Object {
-                  "description": "0",
-                  "title": "operations_behind",
+                  "description": "July 29th 2019, 10:18:01",
+                  "title": "last.timestamp",
+                },
+                Object {
+                  "description": 1564388281199,
+                  "title": "last.timestamp_millis",
                 },
               ],
               "position": "left",
@@ -115,12 +119,16 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
               Object {
                 "items": Array [
                   Object {
-                    "description": "{\\"checkpoint\\":1,\\"timestamp_millis\\":1564388281199}",
-                    "title": "last",
+                    "description": 1,
+                    "title": "last.checkpoint",
                   },
                   Object {
-                    "description": "0",
-                    "title": "operations_behind",
+                    "description": "July 29th 2019, 10:18:01",
+                    "title": "last.timestamp",
+                  },
+                  Object {
+                    "description": 1564388281199,
+                    "title": "last.timestamp_millis",
                   },
                 ],
                 "position": "left",

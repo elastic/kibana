@@ -149,12 +149,16 @@ export const getColumns = (
     },
     {
       name: i18n.translate('xpack.ml.dataframe.progress', { defaultMessage: 'Progress' }),
-      sortable: getTransformProgress,
+      sortable: getTransformProgress || 0,
       truncateText: true,
       render(item: DataFrameTransformListRow) {
         const progress = getTransformProgress(item);
 
         const isBatchTransform = typeof item.config.sync === 'undefined';
+
+        if (progress === undefined && isBatchTransform === true) {
+          return null;
+        }
 
         return (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
