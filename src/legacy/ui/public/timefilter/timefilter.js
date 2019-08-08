@@ -42,7 +42,10 @@ class Timefilter extends SimpleEmitter {
     // Fired when a user changes the the autorefresh settings
     this.refreshIntervalUpdate$ = new Subject();
 
+    // Used when search poll triggers an auto refresh
     this.autoRefreshFetch$ = new Subject();
+
+    this.fetch$ = new Subject();
 
     this.isTimeRangeSelectorEnabled = false;
     this.isAutoRefreshSelectorEnabled = false;
@@ -65,6 +68,11 @@ class Timefilter extends SimpleEmitter {
   getAutoRefreshFetch$ = () => {
     return this.autoRefreshFetch$.asObservable();
   }
+
+  getFetch$ = () => {
+    return this.fetch$.asObservable();
+  }
+
 
   getTime = () => {
     const { from, to } = this._time;
@@ -92,7 +100,7 @@ class Timefilter extends SimpleEmitter {
       };
       timeHistory.add(this._time);
       this.timeUpdate$.next();
-      this.emit('fetch');
+      this.fetch$.next();
     }
   }
 
@@ -123,7 +131,7 @@ class Timefilter extends SimpleEmitter {
     if (prevRefreshInterval && areTimePickerValsDifferent(prevRefreshInterval, newRefreshInterval)) {
       this.refreshIntervalUpdate$.next();
       if (!newRefreshInterval.pause && newRefreshInterval.value !== 0) {
-        this.emit('fetch');
+        this.fetch$.next();
       }
     }
   }

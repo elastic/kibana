@@ -419,31 +419,37 @@ export class DashboardAppController {
       $scope.updateQueryAndFetch({ query });
     });
 
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
-      // The only reason this is here is so that search embeddables work on a dashboard with
-      // a refresh interval turned on. This kicks off the search poller. It should be
-      // refactored so no embeddables need to listen to the timefilter directly but instead
-      // the container tells it when to reload.
-      courier.fetch();
-    });
+    $scope.timefilterSubscriptions$ = new Subscription();
 
-    $scope.refreshInrevalUpdateSubscripton$ = subscribeWithScope(
-      $scope,
-      timefilter.getRefreshIntervalUpdate$(),
-      {
+    // The only reason this is here is so that search embeddables work on a dashboard with
+    // a refresh interval turned on. This kicks off the search poller. It should be
+    // refactored so no embeddables need to listen to the timefilter directly but instead
+    // the container tells it when to reload.
+    $scope.timefilterSubscriptions$.add(
+      subscribeWithScope($scope, timefilter.getFetch$(), {
+        next: () => {
+          courier.fetch();
+        },
+      })
+    );
+
+    $scope.timefilterSubscriptions$.add(
+      subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
         next: () => {
           updateState();
           refreshDashboardContainer();
         },
-      }
+      })
     );
 
-    $scope.timeUpdateSubscripton$ = subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
-      next: () => {
-        updateState();
-        refreshDashboardContainer();
-      },
-    });
+    $scope.timefilterSubscriptions$.add(
+      subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+        next: () => {
+          updateState();
+          refreshDashboardContainer();
+        },
+      })
+    );
 
     function updateViewMode(newMode: ViewMode) {
       $scope.topNavMenu = getTopNavConfig(
@@ -704,8 +710,7 @@ export class DashboardAppController {
 
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
-      $scope.timeUpdateSubscripton$.unsubscribe();
-      $scope.refreshInrevalUpdateSubscripton$.unsubscribe();
+      $scope.timefilterSubscriptions$.unsubscribe();
 
       dashboardStateManager.destroy();
       if (inputSubscription) {

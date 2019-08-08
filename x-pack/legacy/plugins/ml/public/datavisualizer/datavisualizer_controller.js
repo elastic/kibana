@@ -21,6 +21,7 @@ import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
 import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
 import { toastNotifications } from 'ui/notify';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 
 import { ML_JOB_FIELD_TYPES, KBN_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
 import { getDataVisualizerBreadcrumbs } from './breadcrumbs';
@@ -158,12 +159,15 @@ module
     }
 
     // Refresh the data when the time range is altered.
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', refresh);
+    const fetchSub$ = subscribeWithScope($scope, timefilter.getFetch$(), {
+      next: refresh
+    });
 
     const timefilterRefreshServiceSub = mlTimefilterRefresh$.subscribe(refresh);
 
     $scope.$on('$destroy', () => {
       timefilterRefreshServiceSub.unsubscribe();
+      fetchSub$.unsubscribe();
     });
 
     $scope.submitSearchQuery = function () {

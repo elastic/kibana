@@ -93,11 +93,11 @@ export function executorProvider(Promise, $timeout) {
   return {
     register,
     start($scope) {
-      $scope.$listenAndDigestAsync(timefilter, 'fetch', reFetch);
+      subscribeWithScope($scope, timefilter.getFetch$(), {
+        next: reFetch
+      });
       subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
-        next: () => {
-          killIfPaused();
-        }
+        next: killIfPaused
       });
       start();
     },

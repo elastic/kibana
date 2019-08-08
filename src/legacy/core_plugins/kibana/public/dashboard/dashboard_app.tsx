@@ -81,7 +81,6 @@ export interface DashboardAppScope extends ng.IScope {
     refreshInterval: any;
   }) => void;
   onFiltersUpdated: (filters: Filter[]) => void;
-  $listenAndDigestAsync: any;
   onCancelApplyFilters: () => void;
   onApplyFilters: (filters: Filter[]) => void;
   topNavMenu: any;
@@ -89,9 +88,7 @@ export interface DashboardAppScope extends ng.IScope {
   showAddPanel: any;
   kbnTopNav: any;
   enterEditMode: () => void;
-  $listen: any;
-  refreshInrevalUpdateSubscripton$: Subscription;
-  timeUpdateSubscripton$: Subscription;
+  timefilterSubscriptions$: Subscription;
 }
 
 const app = uiModules.get('app/dashboard', [
