@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FeatureProperties } from './feature_properties';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { GEO_JSON_TYPE } from '../../../common/constants';
+import { GEO_JSON_TYPE, ES_GEO_FIELD_TYPE } from '../../../common/constants';
 import { FeatureGeometryFilterForm } from './feature_geometry_filter_form';
 
 const ALL_LAYERS = '_ALL_LAYERS_';
@@ -143,11 +143,8 @@ export class FeatureTooltip extends React.Component {
     );
   }
 
-  _renderActions(feature) {
-    // TODO support geo_distance filters for points
-    if (!this.props.isLocked || !feature || this.props.geoFields.length === 0
-      || feature.geometry.type === GEO_JSON_TYPE.POINT
-      || feature.geometry.type === GEO_JSON_TYPE.MULTI_POINT) {
+  _renderActions(feature, geoFields) {
+    if (!this.props.isLocked || geoFields.length === 0) {
       return null;
     }
 
@@ -156,8 +153,8 @@ export class FeatureTooltip extends React.Component {
         onClick={this._showGeometryFilterView}
       >
         <FormattedMessage
-          id="xpack.maps.tooltip.createShapeFilterLabel"
-          defaultMessage="filter by shape"
+          id="xpack.maps.tooltip.showGeometryFilterViewLinkLabel"
+          defaultMessage="filter by geometry"
         />
       </EuiLink>
     );
@@ -262,6 +259,28 @@ export class FeatureTooltip extends React.Component {
     });
   }
 
+  _filterGeoFields(feature) {
+    if (!feature) {
+      return [];
+    }
+
+    // line geometry can only create filters for geo_shape fields.
+    if (feature.geometry.type === GEO_JSON_TYPE.LINE_STRING
+      || feature.geometry.type === GEO_JSON_TYPE.MULTI_LINE_STRING) {
+      return this.props.geoFields.filter(({ geoFieldType }) => {
+        return geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE;
+      });
+    }
+
+    // TODO support geo distance filters for points
+    if (feature.geometry.type === GEO_JSON_TYPE.POINT
+      || feature.geometry.type === GEO_JSON_TYPE.MULTI_POINT) {
+      return [];
+    }
+
+    return this.props.geoFields;
+  }
+
   _renderPagination(filteredFeatures) {
     const pageNumberReadout = (
       <EuiTextColor color="subdued">
@@ -312,13 +331,14 @@ export class FeatureTooltip extends React.Component {
   render() {
     const filteredFeatures = this._filterFeatures();
     const currentFeature = filteredFeatures[this.state.pageNumber];
+    const filteredGeoFields = this._filterGeoFields(currentFeature);
 
     if (this.state.view === GEOMETRY_FILTER_VIEW) {
       return (
         <FeatureGeometryFilterForm
           onClose={this._showPropertiesView}
           feature={currentFeature}
-          geoFields={this.props.geoFields}
+          geoFields={filteredGeoFields}
         />
       );
     }
@@ -327,7 +347,7 @@ export class FeatureTooltip extends React.Component {
       <Fragment>
         {this._renderHeader()}
         {this._renderProperties(currentFeature)}
-        {this._renderActions(currentFeature)}
+        {this._renderActions(currentFeature, filteredGeoFields)}
         {this._renderFooter(filteredFeatures)}
       </Fragment>
     );
