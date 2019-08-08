@@ -100,8 +100,9 @@ function updateScriptedFieldsTable($scope, $state) {
               getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
             }}
             onRemoveField={() => {
-              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.indexPatternListProvider);
+              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, $scope.indexPatternListProvider);
               $scope.refreshFilters();
+              $scope.$apply();
             }}
           />
         </I18nContext>,
