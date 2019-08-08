@@ -48,7 +48,9 @@
   min-width: ($euiSize * 22);
   @include euiScrollBar;
   overflow: hidden auto;
-  padding: $euiSize;
+  padding-top: $euiSize;
+  padding-right: $euiSize;
+  max-height: 100%;
 }
 
 .lnsSidebarContainer {
@@ -64,8 +66,6 @@
 
 .lnsPageBody {
   @include euiScrollBar;
-  padding-top: $euiSize;
-  padding-bottom: $euiSize;
   overflow: hidden auto;
 
   &:first-child {
@@ -74,6 +74,7 @@
 
   .lnsPageContent {
     padding: 0;
+    margin: $euiSize;
     display: flex;
     flex-direction: column;
 
@@ -99,6 +100,11 @@
       }
     }
   }
+}
+
+.lnsPageBody__inner {
+  display: flex;
+  flex-grow: 1;
 }
 
 .lnsExpressionOutput {

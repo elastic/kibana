@@ -1,18 +1,39 @@
-.lnsSidebar__suggestions {
-  > * {
-    margin-top: $euiSizeS;
+.lnsSuggestionsPanel {
+  @include euiBottomShadowFlat;
+  background-color: $euiColorLightestShade;
+}
+
+.lnsSuggestionsPanel__title {
+  margin: $euiSizeS $euiSize $euiSizeXS;
+}
+
+.lnsSuggestionsPanel__suggestions {
+  @include euiScrollBar;
+  padding: $euiSizeXS $euiSize $euiSize;
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+
+  // Add margin to the next of the same type
+  > * + * {
+    margin-left: $euiSizeS;
   }
 }
 
-$suggestionHeight: 120px;
+$suggestionHeight: 100px - $euiSize;
+
+.lnsSuggestionPanel__button {
+  flex: 0 0 auto;
+  width: 150px !important;
+  height: 100px;
+}
 
 .lnsSidebar__suggestionIcon {
   width: 100%;
-  height: $suggestionHeight;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: $euiSize;
 }
 
  .lnsSuggestionChartWrapper {

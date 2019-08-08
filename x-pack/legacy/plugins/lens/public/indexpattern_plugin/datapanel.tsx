@@ -162,7 +162,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
-      <EuiFlexGroup gutterSize="s" className="lnsIndexPatternDataPanel" direction="column">
+      <EuiFlexGroup gutterSize="none" className="lnsIndexPatternDataPanel" direction="column">
         <EuiFlexItem grow={null}>
           <div className="lnsIndexPatternDataPanel__header">
             {!showIndexPatternSwitcher ? (

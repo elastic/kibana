@@ -92,7 +92,7 @@ describe('suggestion_panel', () => {
     const wrapper = mount(<SuggestionPanel {...defaultProps} />);
 
     wrapper
-      .find('[data-test-subj="suggestion-title"]')
+      .find('[data-test-subj="lnsSuggestion"]')
       .first()
       .simulate('click');
 

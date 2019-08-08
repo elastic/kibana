@@ -1167,7 +1167,10 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find('[data-test-subj="suggestion-title"]').simulate('click');
+        instance
+          .find('[data-test-subj="lnsSuggestion"]')
+          .first()
+          .simulate('click');
       });
 
       expect(mockVisualization.renderConfigPanel).toHaveBeenCalledTimes(1);
