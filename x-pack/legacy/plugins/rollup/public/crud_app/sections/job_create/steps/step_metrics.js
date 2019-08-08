@@ -176,7 +176,7 @@ export class StepMetricsUi extends Component {
         <EuiFlexItem grow={false} key={`${idx}-select-all-flex-item`}>
           <EuiCheckbox
             id={`${idx}-select-all-checkbox`}
-            data-test-subj={`rollupJobMetricsCheckbox-${metricName}`}
+            data-test-subj={`rollupJobMetricsSelectAllCheckbox-${metricName}`}
             disabled={disabled}
             label={label}
             checked={!disabled && isChecked}
@@ -196,6 +196,7 @@ export class StepMetricsUi extends Component {
         id={'stepMetricsPopover'}
         isOpen={this.state.metricsPopoverOpen}
         closePopover={this.closeMetricsPopover}
+        data-test-subj={'rollupJobMetricsSelectAll'}
         button={
           <EuiLink onClick={this.openMetricsPopover}>
             <b>{'Metrics'}</b>
@@ -312,7 +313,7 @@ export class StepMetricsUi extends Component {
   };
 
   render() {
-    const { fields, metricsFields } = this.props;
+    const { fields, metricsFields, onFieldsChange } = this.props;
 
     const { metrics } = fields;
 
@@ -366,6 +367,22 @@ export class StepMetricsUi extends Component {
           fields={metrics}
           onRemoveField={this.onRemoveField}
           emptyMessage={<p>No metrics fields added</p>}
+          addActions={() => [
+            {
+              name: 'Select All',
+              isPrimary: true,
+              description: 'Select all of the metrics in this field.',
+              icon: 'check',
+              type: 'icon',
+              color: 'success',
+              onClick: ({ name: fieldName }) => {
+                const newMetrics = metricTypesConfig.reduce((acc, { type }) => {
+                  return this.setMetric(fieldName, type, true);
+                }, null);
+                onFieldsChange({metric: newMetrics});
+              },
+            }
+          ]}
           addButton={
             <FieldChooser
               buttonLabel={

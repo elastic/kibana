@@ -12,14 +12,6 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 
-const getActionsEntry = ({ name, actions }) => {
-  return {
-    name,
-    width: '80px',
-    actions
-  };
-};
-
 export const FieldList = ({
   columns,
   fields,
@@ -43,6 +35,8 @@ export const FieldList = ({
   let extendedColumns;
 
   const actions = [
+    addActions ? [ ...addActions() ] : [],
+    // Remove field should always be last
     onRemoveField ? [{
       name: 'Remove',
       isPrimary: true,
@@ -52,15 +46,14 @@ export const FieldList = ({
       color: 'danger',
       onClick: (field) => onRemoveField(field),
     }] : [],
-    addActions ? [ ...addActions() ] : [],
   ].flatMap(action => action);
 
   if (actions.length) {
-    const actionsEntry = getActionsEntry({
+    extendedColumns = columns.concat({
       name: addActions ? 'Actions' : 'Remove',
-      actions
+      width: addActions ? '80px' : '120px',
+      actions,
     });
-    extendedColumns = columns.concat(actionsEntry);
   } else {
     extendedColumns = columns;
   }
