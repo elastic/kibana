@@ -27,6 +27,8 @@ import { Builder, Capabilities, By, Key, logging, until } from 'selenium-webdriv
 import chrome from 'selenium-webdriver/chrome';
 // @ts-ignore types not available
 import firefox from 'selenium-webdriver/firefox';
+// @ts-ignore types not available
+import ie from 'selenium-webdriver/ie';
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 // @ts-ignore internal modules are not typed
@@ -89,6 +91,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
           .withCapabilities(chromeCapabilities)
           .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
           .build();
+
       case 'firefox':
         const firefoxOptions = new firefox.Options();
         if (headlessBrowser === '1') {
@@ -100,6 +103,12 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
           .setFirefoxOptions(firefoxOptions)
           .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path).enableVerboseLogging())
           .build();
+
+      case 'internet explorer':
+        return new Builder()
+          .forBrowser(browserType)
+          .build();
+
       default:
         throw new Error(`${browserType} is not supported yet`);
     }
