@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ConditionalHeaders } from '../../../../types';
 import { LevelLogger as Logger } from '../../../../server/lib/level_logger';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import { WAITFOR_SELECTOR } from '../../constants';
@@ -11,7 +12,7 @@ import { WAITFOR_SELECTOR } from '../../constants';
 export const openUrl = async (
   browser: HeadlessBrowser,
   url: string,
-  conditionalHeaders: any,
+  conditionalHeaders: ConditionalHeaders,
   logger: Logger
 ): Promise<void> => {
   logger.debug(`opening ${url}`);

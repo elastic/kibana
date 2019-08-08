@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('ui/new_platform');
+
 import {
   hitsToGeoJson,
   geoPointToGeometry,
@@ -12,7 +14,7 @@ import {
   convertMapExtentToPolygon,
 } from './elasticsearch_geo_utils';
 
-import { flattenHitWrapper } from 'ui/index_patterns/_flatten_hit';
+import { flattenHitWrapper } from 'ui/index_patterns';
 
 const geoFieldName = 'location';
 const mapExtent = {
