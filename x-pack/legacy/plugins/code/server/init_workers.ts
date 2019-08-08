@@ -40,7 +40,7 @@ export function initWorkers(
     [lspIndexerFactory],
     gitOps,
     cancellationService
-  ).bind();
+  ).bind(codeServices);
 
   const repoServiceFactory: RepositoryServiceFactory = new RepositoryServiceFactory();
 
@@ -58,7 +58,7 @@ export function initWorkers(
     repoServiceFactory,
     cancellationService,
     watermarkService
-  ).bind();
+  ).bind(codeServices);
   const deleteWorker = new DeleteWorker(
     queue,
     log,
@@ -68,7 +68,7 @@ export function initWorkers(
     cancellationService,
     lspService,
     repoServiceFactory
-  ).bind();
+  ).bind(codeServices);
   const updateWorker = new UpdateWorker(
     queue,
     log,
@@ -78,7 +78,7 @@ export function initWorkers(
     repoServiceFactory,
     cancellationService,
     watermarkService
-  ).bind();
+  ).bind(codeServices);
   codeServices.registerHandler(
     RepositoryServiceDefinition,
     getRepositoryHandler(cloneWorker, deleteWorker, indexWorker)
