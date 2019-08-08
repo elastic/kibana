@@ -178,7 +178,7 @@ export class StepMetricsUi extends Component {
       return (
         <EuiCheckbox
           id={`${idx}-select-all-checkbox`}
-          data-test-subj={`rollupJobMetricsSelectAllCheckbox-${metricType}`}
+          data-test-subj={`rollupJobMetricsCheckbox-${metricType}`}
           disabled={disabled}
           label={label}
           checked={!disabled && isChecked}

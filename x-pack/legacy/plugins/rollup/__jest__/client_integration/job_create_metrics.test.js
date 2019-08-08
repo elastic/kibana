@@ -169,6 +169,9 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       }
     };
 
+    const numericTypeMetrics = ['avg', 'max', 'min', 'sum', 'value_count'];
+    const dateTypeMetrics = ['max', 'min', 'value_count'];
+
     it('should have an empty field list', async () => {
       await goToStep(5);
 
@@ -183,7 +186,6 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       });
 
       it('should have "avg", "max", "min", "sum" & "value count" metrics for *numeric* fields', () => {
-        const numericTypeMetrics = ['avg', 'max', 'min', 'sum', 'value_count'];
         addFieldToList('numeric');
         numericTypeMetrics.forEach(type => {
           try {
@@ -201,7 +203,6 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       });
 
       it('should have "max", "min", & "value count" metrics for *date* fields', () => {
-        const dateTypeMetrics = ['max', 'min', 'value_count'];
         addFieldToList('date');
 
         dateTypeMetrics.forEach(type => {
@@ -241,7 +242,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
         const columnsFirstRow = fieldListRows[0].columns;
         // The last column is the eui "actions" column
-        const deleteButton = columnsFirstRow[columnsFirstRow.length - 1].reactWrapper.find('button');
+        const deleteButton = columnsFirstRow[columnsFirstRow.length - 1].reactWrapper.find('button').last();
         deleteButton.simulate('click');
 
         ({ rows: fieldListRows } = table.getMetaData('rollupJobMetricsFieldList'));
@@ -250,10 +251,175 @@ describe('Create Rollup Job, step 5: Metrics', () => {
     });
 
     describe('when using multi-selectors', () => {
-      it('should select all of the fields in a row',  () => {});
-      it('should deselect all of the fields in a row ',  () => {});
-      it('should select all of the metric types across rows',  () => {});
-      it('should correctly select across rows and columns',  () => {});
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields, dateFields });
+        await goToStep(5);
+        await addFieldToList('numeric');
+        await addFieldToList('date');
+      });
+
+      const getFieldListTableRows = () => {
+        const { rows } = table.getMetaData('rollupJobMetricsFieldList');
+        return rows;
+      };
+
+      const getFieldListTableRow = (row) => {
+        const rows = getFieldListTableRows();
+        return rows[row];
+      };
+
+      const getActionButtonForRow = (row, type = 'select') => {
+        const selectedRow = getFieldListTableRow(row);
+        const buttons = selectedRow.columns[selectedRow.columns.length - 1].reactWrapper.find('button');
+        if (type === 'select') {
+          return buttons.first();
+        }
+        return buttons.last();
+      };
+
+      const getFieldChooserColumnForRow = (row) => {
+        const selectedRow = getFieldListTableRow(row);
+        const [,, fieldChooserColumn] = selectedRow.columns;
+        return fieldChooserColumn;
+      };
+
+      const expectAllFieldChooserInputs = (fieldChooserColumn, expected) => {
+        const inputs = fieldChooserColumn.reactWrapper.find('input');
+        inputs.forEach((input) => {
+          expect(input.props().checked).toBe(expected);
+        });
+      };
+
+      it('should select all of the fields in a row',  async () => {
+        // The last column is the eui "actions" column
+        const selectAllButton = getActionButtonForRow(0);
+        selectAllButton.simulate('click');
+
+        const fieldChooserColumn = getFieldChooserColumnForRow(0);
+        expectAllFieldChooserInputs(fieldChooserColumn, true);
+      });
+
+      it('should deselect all of the fields in a row ',  async () => {
+        const selectAllButton = getActionButtonForRow(0);
+        selectAllButton.simulate('click');
+
+        let fieldChooserColumn = getFieldChooserColumnForRow(0);
+        expectAllFieldChooserInputs(fieldChooserColumn, true);
+
+
+        selectAllButton.simulate('click');
+        fieldChooserColumn = getFieldChooserColumnForRow(0);
+        expectAllFieldChooserInputs(fieldChooserColumn, false);
+      });
+
+      it('should select all of the metric types across rows',  () => {
+        const selectAllPopoverButton = find('rollupJobMetricsSelectAll').last();
+        selectAllPopoverButton.simulate('click');
+
+        find('rollupJobMetricsCheckbox-avg').simulate('change', { checked: true });
+
+        const rows = getFieldListTableRows();
+
+        rows.forEach((row, idx) => {
+          const [, metricTypeCol ] = row.columns;
+          if (metricTypeCol.value !== 'numeric') {
+            return;
+          }
+          const fieldChooser = getFieldChooserColumnForRow(idx);
+          fieldChooser.reactWrapper.find('input').forEach(input => {
+            const props = input.props();
+            if (props['data-test-subj'].endsWith('avg')) {
+              expect(props.checked).toBe(true);
+            } else {
+              expect(props.checked).toBe(false);
+            }
+          });
+        });
+      });
+
+      it('should deselect all of the metric types across rows',  () => {
+        const selectAllPopoverButton = find('rollupJobMetricsSelectAll').last();
+        selectAllPopoverButton.simulate('click');
+
+        find('rollupJobMetricsCheckbox-avg').last().simulate('change', { checked: true });
+        find('rollupJobMetricsCheckbox-avg').last().simulate('change', { checked: false });
+
+        const rows = getFieldListTableRows();
+
+        rows.forEach((row, idx) => {
+          const [, metricTypeCol ] = row.columns;
+          if (metricTypeCol.value !== 'numeric') {
+            return;
+          }
+          const fieldChooser = getFieldChooserColumnForRow(idx);
+          fieldChooser.reactWrapper.find('input').forEach(input => {
+            expect(input.props().checked).toBe(false);
+          });
+        });
+      });
+
+      it('should correctly select across rows and columns',  async () => {
+        /**
+         * Tricky test case where we want to determine that the column-wise and row-wise
+         * selection is interacting correctly.
+         *
+         * We will select avg (numeric) and max (numeric + date) to ensure that we are
+         * testing across metrics types too. The plan is:
+         *
+         * 1. Select all avg column-wise
+         * 2. Select all max column-wise
+         * 3. Select and deselect row-wise the first numeric metric row
+         * 4. Expect the avg and max popover checkboxes to be unchecked
+         * 5. Select all on the last date metric row-wise
+         * 6. Deselect all max column-wise
+         * 7. Expect all but max to be selected on the last date metric row
+         *
+         * Let's a go!
+         */
+
+        let selectAllPopoverButton = find('rollupJobMetricsSelectAll').last();
+        selectAllPopoverButton.simulate('click');
+        // 1.
+        find('rollupJobMetricsCheckbox-avg').last().simulate('change', { checked: true });
+        selectAllPopoverButton.simulate('click');
+        // 2.
+        find('rollupJobMetricsCheckbox-max').last().simulate('change', { checked: true });
+
+        const selectAllButtonFirstRow = getActionButtonForRow(0);
+
+        // 3.
+        // Select All
+        selectAllButtonFirstRow.simulate('click');
+        // Deselect All
+        selectAllButtonFirstRow.simulate('click');
+
+        selectAllPopoverButton = find('rollupJobMetricsSelectAll').last();
+        selectAllPopoverButton.simulate('click');
+        // 4.
+        expect(find('rollupJobMetricsCheckbox-avg').last().props().checked).toBe(false);
+        // expect(find('rollupJobMetricsCheckbox-max').last().props().checked).toBe(false);
+
+        let rows = getFieldListTableRows();
+        const selectAllButtonLastRow = getActionButtonForRow(rows.length - 1);
+        // 5.
+        selectAllButtonLastRow.simulate('click');
+
+        selectAllPopoverButton = find('rollupJobMetricsSelectAll').last();
+        selectAllPopoverButton.simulate('click');
+        find('rollupJobMetricsCheckbox-max').last().simulate('change', { checked: false });
+
+        rows = getFieldListTableRows();
+        // const lastRowFieldChooserColumn = getFieldChooserColumnForRow(rows.length - 1);
+        // 6.
+        // lastRowFieldChooserColumn.reactWrapper.find('input').forEach((input) => {
+        //   const props = input.props();
+        //   if (props['data-test-subj'].endsWith('max')) {
+        //     expect(props.checked).toBe(false);
+        //   } else {
+        //     expect(props.checked).toBe(true);
+        //   }
+        // });
+      });
     });
   });
 });
