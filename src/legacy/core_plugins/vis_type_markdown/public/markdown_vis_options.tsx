@@ -36,9 +36,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { SwitchOption } from '../../kbn_vislib_vis_types/public/controls/switch';
 import { RangeOption } from '../../kbn_vislib_vis_types/public/controls/range';
+import { MarkdownVisParams } from './markdown_fn';
 
-function MarkdownOptions({ stateParams, setValue, vis }: VisOptionsProps) {
-  const onMarkdownUpdate = useCallback((value: string) => setValue('markdown', value), []);
+function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisParams>) {
+  const onMarkdownUpdate = useCallback(
+    (value: MarkdownVisParams['markdown']) => setValue('markdown', value),
+    []
+  );
 
   return (
     <EuiPanel paddingSize="s">
