@@ -40,13 +40,18 @@ export async function http(options) {
 }
 
 async function doFetch(url, payload) {
-  return fetch(url, payload)
-    .then(resp => resp.json())
-    .catch(err => ({
+  let resp;
+  let failures;
+  try {
+    resp = await fetch(url, payload);
+  } catch(err) {
+    failures = {
       failures: [
         i18n.translate('xpack.fileUpload.httpService.fetchError', {
           defaultMessage: 'Error performing fetch: {error}',
           values: { error: err.message }
         })]
-    }));
+    };
+  }
+  return resp ? resp.json() : failures;
 }
