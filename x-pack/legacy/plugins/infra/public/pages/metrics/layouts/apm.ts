@@ -6,11 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { InfraMetric } from '../../../graphql/types';
-import { InfraMetricLayoutCreator, InfraMetricLayoutSectionType, InfraMetricLayout } from './types';
+import { InfraMetricLayoutSectionType, InfraMetricLayout } from './types';
 import { InfraMetricCombinedData } from '../../../containers/metrics/with_metrics';
 import { isInfraApmMetrics } from '../../../utils/is_infra_metric_data';
 
-export const apmLayoutCreator: InfraMetricLayoutCreator = () => [
+export const apmLayoutCreator = (): InfraMetricLayout[] => [
   {
     id: 'apm',
     label: 'APM',

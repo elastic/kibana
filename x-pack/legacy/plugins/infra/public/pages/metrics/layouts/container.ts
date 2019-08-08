@@ -9,13 +9,14 @@ import { InfraMetric } from '../../../graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 import { nginxLayoutCreator } from './nginx';
 import {
-  InfraMetricLayoutCreator,
   InfraMetricLayoutSectionType,
   InfraMetricLayoutVisualizationType,
+  InfraMetricLayout,
 } from './types';
 import { apmLayoutCreator } from './apm';
+import { EuiTheme } from '../../../../../../common/eui_styled_components';
 
-export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
+export const containerLayoutCreator = (theme: EuiTheme): InfraMetricLayout[] => [
   {
     id: 'containerOverview',
     label: i18n.translate('xpack.infra.metricDetailPage.containerMetricsLayout.layoutLabel', {
@@ -230,5 +231,5 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
     ],
   },
   ...nginxLayoutCreator(theme),
-  ...apmLayoutCreator(theme),
+  ...apmLayoutCreator(),
 ];

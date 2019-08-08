@@ -10,12 +10,13 @@ import { InfraFormatterType } from '../../../lib/lib';
 import { nginxLayoutCreator } from './nginx';
 import { apmLayoutCreator } from './apm';
 import {
-  InfraMetricLayoutCreator,
   InfraMetricLayoutSectionType,
   InfraMetricLayoutVisualizationType,
+  InfraMetricLayout,
 } from './types';
+import { EuiTheme } from '../../../../../../common/eui_styled_components';
 
-export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
+export const hostLayoutCreator = (theme: EuiTheme): InfraMetricLayout[] => [
   {
     id: 'hostOverview',
     label: i18n.translate('xpack.infra.metricDetailPage.hostMetricsLayout.layoutLabel', {
@@ -365,5 +366,5 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
     ],
   },
   ...nginxLayoutCreator(theme),
-  ...apmLayoutCreator(theme),
+  ...apmLayoutCreator(),
 ];

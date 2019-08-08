@@ -8,12 +8,13 @@ import { i18n } from '@kbn/i18n';
 import { InfraMetric } from '../../../graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 import {
-  InfraMetricLayoutCreator,
   InfraMetricLayoutSectionType,
   InfraMetricLayoutVisualizationType,
+  InfraMetricLayout,
 } from './types';
+import { EuiTheme } from '../../../../../../common/eui_styled_components';
 
-export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
+export const nginxLayoutCreator = (theme: EuiTheme): InfraMetricLayout[] => [
   {
     id: 'nginxOverview',
     label: 'Nginx',
