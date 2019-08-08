@@ -200,7 +200,7 @@ export class StepMetricsUi extends Component {
         ownFocus
         button={
           <EuiLink onClick={this.openMetricsPopover}>
-            <b>{'Metrics'}</b>
+            <b>{i18n.translate('xpack.rollupJobs.create.stepMetrics.metricsColumnHeader', { defaultMessage: 'Metrics' })}</b>
           </EuiLink>
         }
         data-test-subj={'rollupJobMetricsSelectAll'}
@@ -208,7 +208,7 @@ export class StepMetricsUi extends Component {
         <EuiText size={'s'}>
           <EuiFlexGroup direction={'column'}>
             <EuiFlexItem align={'center'} style={{ marginBottom: '4px' }}>
-              <b>{'Select All'}</b>
+              <b>{i18n.translate('xpack.rollupJobs.create.stepMetrics.popOverTitle', { defaultMessage: 'Select All' })}</b>
             </EuiFlexItem>
 
             <EuiHorizontalRule margin={'xs'}/>
@@ -376,7 +376,14 @@ export class StepMetricsUi extends Component {
           fields={metrics}
           onRemoveField={this.onRemoveField}
           emptyMessage={
-            <p>{i18n.translate('xpack.rollupJobs.create.stepMetrics.emptyListLabel', { defaultMessage: 'No metrics fields added' })}</p>
+            <p>
+              {
+                i18n.translate(
+                  'xpack.rollupJobs.create.stepMetrics.emptyListLabel',
+                  { defaultMessage: 'No metrics fields added' }
+                )
+              }
+            </p>
           }
           addActions={() => {
             return [
@@ -392,15 +399,27 @@ export class StepMetricsUi extends Component {
                   let description;
 
                   if (maxItemsToBeSelected === types.length) {
-                    name = 'Deselect All';
+                    name = i18n.translate(
+                      'xpack.rollupJobs.create.stepMetrics.deselectActionLabel',
+                      { defaultMessage: 'Deselect All' }
+                    );
                     icon = 'crossInACircleFilled';
                     color = 'primary';
-                    description = 'Deselect all of the metrics in this row.';
+                    description = i18n.translate(
+                      'xpack.rollupJobs.create.stepMetrics.deselectActionDescription',
+                      { defaultMessage: 'Deselect all of the metrics in this row.' },
+                    );
                   } else {
-                    name = 'Select All';
+                    name = i18n.translate(
+                      'xpack.rollupJobs.create.stepMetrics.selectActionLabel',
+                      { defaultMessage: 'Select All' },
+                    );
                     icon = 'checkInCircleFilled';
                     color = 'success';
-                    description = 'Select all of the metrics in this row.';
+                    description = i18n.translate(
+                      'xpack.rollupJobs.create.stepMetrics.selectActionDescription',
+                      { defaultMessage: 'Select all of the metrics in this row.' },
+                    );
                   }
 
                   const onClick = () => {

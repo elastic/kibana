@@ -248,5 +248,12 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         expect(fieldListRows[0].columns[0].value).toEqual('No metrics fields added');
       });
     });
+
+    describe('when using multi-selectors', () => {
+      it('should select all of the fields in a row',  () => {});
+      it('should deselect all of the fields in a row ',  () => {});
+      it('should select all of the metric types across rows',  () => {});
+      it('should correctly select across rows and columns',  () => {});
+    });
   });
 });
