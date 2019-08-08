@@ -228,7 +228,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
               title={i18n.translate('xpack.lens.configure.addConfig', {
                 defaultMessage: 'Add a configuration',
               })}
-              onClick={() => setPopoverOpen(isPopoverOpen ? false : true)}
+              onClick={() => setPopoverOpen(!isPopoverOpen)}
             />{' '}
             <EuiTextColor color="subdued">
               <FormattedMessage
