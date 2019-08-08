@@ -30,8 +30,3 @@ export interface RegionMapVisParams {
   selectedJoinField?: FileLayerField;
   wms: WMSOptions;
 }
-
-export interface RegionmapsConfig {
-  includeElasticMapsService: boolean;
-  layers: any[];
-}

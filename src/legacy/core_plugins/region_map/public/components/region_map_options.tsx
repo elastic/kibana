@@ -31,7 +31,8 @@ import { NumperInputOption } from '../../../kbn_vislib_vis_types/public/controls
 import { ORIGIN } from '../../../tile_map/common/origin';
 import { WmsOptions } from '../../../tile_map/public/components/wms_options';
 import { mapToLayerWithId } from '../util';
-import { RegionMapVisParams, RegionmapsConfig } from '../types';
+import { RegionMapVisParams } from '../types';
+import { RegionMapsConfig } from '../plugin';
 
 const mapLayerForOption = ({ layerId, name }: VectorLayer) => ({
   text: name,
@@ -45,7 +46,7 @@ const mapFieldForOption = ({ description, name }: FileLayerField) => ({
 
 export type RegionMapOptionsProps = {
   serviceSettings: ServiceSettings;
-  regionmapsConfig: RegionmapsConfig;
+  regionmapsConfig: RegionMapsConfig;
 } & VisOptionsProps<RegionMapVisParams>;
 
 function RegionMapOptions(props: RegionMapOptionsProps) {
