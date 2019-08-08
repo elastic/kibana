@@ -1046,7 +1046,7 @@ import { npStart: { core } } from 'ui/new_platform';
 _See also: [Public's CoreStart API Docs](/docs/development/core/public/kibana-plugin-public.corestart.md)_
 
 ##### Plugins for shared application services
-In client code, we have a series of plugins which house shared application services that are being built in the shape of the new platform, but still technically reside in the legacy world. If your plugin depends on any of the APIs below, you'll need to add a dependency on the new platform plugin which will house them moving forward.
+In client code, we have a series of plugins which house shared application services that are being built in the shape of the new platform, but for the time being, are only available in legacy. So if your plugin depends on any of the APIs below, you'll need build your plugin as a legacy plugin that shims the new platform. Once these API's have been moved to the new platform you can migrate your plugin and declare a dependency on the plugin that owns the API's you require.
 
 The contracts for these plugins are exposed for you to consume in your own plugin; we have created dedicated exports for the `setup` and `start` contracts in a file called `legacy`. By passing these contracts to your plugin's `setup` and `start` methods, you can mimic the functionality that will eventually be provided in the new platform.
 
