@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
 
-import url from 'url';
+import { services } from './services';
 
-export function getStateAndNonce(urlWithStateAndNonce) {
-  const parsedQuery = url.parse(urlWithStateAndNonce, true).query;
-  return { state: parsedQuery.state, nonce: parsedQuery.nonce };
-}
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
