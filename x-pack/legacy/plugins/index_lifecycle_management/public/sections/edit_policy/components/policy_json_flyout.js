@@ -35,8 +35,8 @@ export class PolicyJsonFlyout extends PureComponent {
 
   render() {
     const { lifecycle, close, policyName } = this.props;
-    const endpoint = `PUT _ilm/policy/${policyName || '{policyName}'}\n`;
-    const request = `${endpoint}${this.getEsJson(lifecycle)}`;
+    const endpoint = `PUT _ilm/policy/${policyName || '<policyName>'}`;
+    const request = `${endpoint}\n${this.getEsJson(lifecycle)}`;
 
     return (
       <EuiPortal>
