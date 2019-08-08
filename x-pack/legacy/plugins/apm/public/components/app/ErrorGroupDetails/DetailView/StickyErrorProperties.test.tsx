@@ -28,6 +28,7 @@ describe('StickyErrorProperties', () => {
 
     const error = {
       '@timestamp': 'myTimestamp',
+      agent: { name: 'nodejs' },
       http: { request: { method: 'GET' } },
       url: { full: 'myUrl' },
       service: { name: 'myService' },
@@ -58,19 +59,25 @@ describe('StickyErrorProperties', () => {
     }
 
     it('should should render "true"', () => {
-      const error = { error: { exception: [{ handled: true }] } } as APMError;
+      const error = {
+        agent: { name: 'nodejs' },
+        error: { exception: [{ handled: true }] }
+      } as APMError;
       const isHandledValue = getIsHandledValue(error);
       expect(isHandledValue).toBe('true');
     });
 
     it('should should render "false"', () => {
-      const error = { error: { exception: [{ handled: false }] } } as APMError;
+      const error = {
+        agent: { name: 'nodejs' },
+        error: { exception: [{ handled: false }] }
+      } as APMError;
       const isHandledValue = getIsHandledValue(error);
       expect(isHandledValue).toBe('false');
     });
 
     it('should should render "N/A"', () => {
-      const error = {} as APMError;
+      const error = { agent: { name: 'nodejs' } } as APMError;
       const isHandledValue = getIsHandledValue(error);
       expect(isHandledValue).toBe('N/A');
     });
