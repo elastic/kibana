@@ -67,13 +67,11 @@ export function taskManager(kibana: any) {
         serializer,
       });
       const exposedFunctions: TaskManager = {
-        fetch: taskManagerInstance.fetch.bind(taskManagerInstance),
-        remove: taskManagerInstance.remove.bind(taskManagerInstance),
-        schedule: taskManagerInstance.schedule.bind(taskManagerInstance),
-        addMiddleware: taskManagerInstance.addMiddleware.bind(taskManagerInstance),
-        registerTaskDefinitions: taskManagerInstance.registerTaskDefinitions.bind(
-          taskManagerInstance
-        ),
+        fetch: (...args) => taskManagerInstance.fetch(...args),
+        remove: (...args) => taskManagerInstance.remove(...args),
+        schedule: (...args) => taskManagerInstance.schedule(...args),
+        addMiddleware: (...args) => taskManagerInstance.addMiddleware(...args),
+        registerTaskDefinitions: (...args) => taskManagerInstance.registerTaskDefinitions(...args),
       };
       server.expose(exposedFunctions);
     },
