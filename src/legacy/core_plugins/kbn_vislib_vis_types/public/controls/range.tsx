@@ -19,20 +19,19 @@
 
 import React from 'react';
 import { EuiFormRow, EuiRange } from '@elastic/eui';
-import { VisOptionsSetValue } from 'ui/vis/editors/default';
 
-interface RangeOptionProps {
+interface RangeOptionProps<ParamName extends string> {
   label: string;
   max: number;
   min: number;
-  paramName: string;
+  paramName: ParamName;
   showInput?: boolean;
   step?: number;
-  value: string | number;
-  setValue: VisOptionsSetValue;
+  value: '' | number;
+  setValue: (paramName: ParamName, value: number) => void;
 }
 
-function RangeOption({
+function RangeOption<ParamName extends string>({
   label,
   max,
   min,
@@ -41,7 +40,7 @@ function RangeOption({
   paramName,
   value,
   setValue,
-}: RangeOptionProps) {
+}: RangeOptionProps<ParamName>) {
   return (
     <EuiFormRow label={label} fullWidth={true} compressed>
       <EuiRange
@@ -52,7 +51,7 @@ function RangeOption({
         showInput={showInput}
         step={step}
         value={value}
-        onChange={ev => setValue(paramName, ev.target.value)}
+        onChange={ev => setValue(paramName, ev.target.valueAsNumber)}
       />
     </EuiFormRow>
   );

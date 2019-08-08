@@ -11,6 +11,7 @@ import uiRoutes from 'ui/routes';
 import { I18nContext } from 'ui/i18n';
 import template from './index.html';
 import { toggleSetupMode, getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
+import { CODE_PATH_LICENSE } from '../../../common/constants';
 
 const REACT_DOM_ID = 'monitoringLoadingReactApp';
 
@@ -41,7 +42,7 @@ uiRoutes
           this.renderReact();
         });
 
-        monitoringClusters()
+        monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE])
           .then(clusters => {
             if (clusters && clusters.length) {
               kbnUrl.changePath('/home');
