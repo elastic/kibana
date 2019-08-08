@@ -1698,8 +1698,8 @@
 
 "@elastic/javascript-typescript-langserver@^0.2.2":
   version "0.2.2"
-  resolved "https://registry.npm.taobao.org/@elastic/javascript-typescript-langserver/download/@elastic/javascript-typescript-langserver-0.2.2.tgz#0dc126e35ead4016dcf8f318281578934436be27"
-  integrity sha1-DcEm416tQBbc+PMYKBV4k0Q2vic=
+  resolved "https://registry.yarnpkg.com/@elastic/javascript-typescript-langserver/-/javascript-typescript-langserver-0.2.2.tgz#0dc126e35ead4016dcf8f318281578934436be27"
+  integrity sha512-u7gnQGD1uSuIWlUpoT2m6jIb34gablwwtqxwe46wOYXh201m4KhBy6qjFkclWYT/czhwDuOQlS+cfaDhjM54qg==
   dependencies:
     "@elastic/lsp-extension" "^0.1.2"
     javascript-typescript-langserver "^2.11.3"
