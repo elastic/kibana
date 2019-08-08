@@ -26,7 +26,7 @@ export type CloneProgressHandler = (
   progress: number,
   cloneProgress?: CloneProgress
 ) => Promise<boolean>;
-export type UpdateProgressHandler = () => boolean;
+export type UpdateProgressHandler = () => Promise<boolean>;
 
 const GIT_FETCH_PROGRESS_CANCEL = -1;
 // TODO: Cannot directly access Git.Error.CODE.EUSER (-7). Investigate why.
@@ -130,10 +130,18 @@ export class RepositoryService {
     let repo: Git.Repository | undefined;
     try {
       repo = await Git.Repository.open(localPath);
+      let lastProgressUpdate = moment();
       const cbs: RemoteCallbacks = {
-        transferProgress: (_: any) => {
+        transferProgress: async (_: any) => {
+          // Update progress update throttling.
+          const now = moment();
+          if (now.diff(lastProgressUpdate) < this.PROGRESS_UPDATE_THROTTLING_FREQ_MS) {
+            return 0;
+          }
+          lastProgressUpdate = now;
+
           if (handler) {
-            const resumeUpdate = handler();
+            const resumeUpdate = await handler();
             if (!resumeUpdate) {
               return GIT_FETCH_PROGRESS_CANCEL;
             }

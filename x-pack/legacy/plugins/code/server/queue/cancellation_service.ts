@@ -14,7 +14,7 @@ interface CancellableJob {
 
 export enum CancellationReason {
   REPOSITORY_DELETE = 'Cancel job because of deleting the entire repository',
-  CLONE_OVER_DISK_WATERMARK = 'Cancel job because of low disk waterwark',
+  LOW_DISK_SPACE = 'Cancel job because of low available disk space',
   NEW_JOB_OVERRIDEN = 'Cancel job because of a new job of the same type has been registered',
 }
 
