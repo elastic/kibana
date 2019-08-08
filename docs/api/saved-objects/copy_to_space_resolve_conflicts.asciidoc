@@ -9,8 +9,6 @@ experimental[This functionality is *experimental* and may be changed or removed 
 
 Overwrites specific saved objects that were returned as errors from the <<saved-objects-api-copy-to-space, Copy to Space API>>.
 
-Note: You cannot access this endpoint via the Console in Kibana.
-
 ////
 Use the appropriate heading levels for your book.
 Add anchors for each section.
@@ -150,7 +148,7 @@ For example:
 ////
 
 `<space_id>`::
-  (object) An object describing the result of the copy operation for this particular space.
+  (object) Specifies the dynamic keys that are included in the response. An object describing the result of the copy operation for this particular space.
   `success`:::
     (boolean) Indicates if the copy operation was successful. Note that some objects may have been copied even if this is set to `false`. Consult the `successCount` and `errors` properties of the response for additional information.
   `successCount`:::
