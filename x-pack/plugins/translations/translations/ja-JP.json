@@ -8518,7 +8518,6 @@
     "xpack.monitoring.summaryStatus.statusDescription": "ステータス",
     "xpack.monitoring.summaryStatus.statusIconLabel": "ステータス: {status}",
     "xpack.monitoring.summaryStatus.statusIconTitle": "ステータス: {statusIcon}",
-    "xpack.monitoring.table.loadingTitle": "読み込み中…",
     "xpack.monitoring.uiExportsDescription": "Elastic Stack の監視です",
     "xpack.remoteClusters.addAction.clusterNameAlreadyExistsErrorMessage": "「{clusterName}」という名前のクラスターが既に存在します。",
     "xpack.remoteClusters.addAction.errorTitle": "クラスターの追加中にエラーが発生",

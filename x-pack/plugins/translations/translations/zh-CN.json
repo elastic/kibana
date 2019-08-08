@@ -8659,7 +8659,6 @@
     "xpack.monitoring.summaryStatus.statusDescription": "状态",
     "xpack.monitoring.summaryStatus.statusIconLabel": "状态：{status}",
     "xpack.monitoring.summaryStatus.statusIconTitle": "状态：{statusIcon}",
-    "xpack.monitoring.table.loadingTitle": "正在加载……",
     "xpack.monitoring.uiExportsDescription": "Elastic Stack 的 Monitoring 组件",
     "xpack.remoteClusters.addAction.clusterNameAlreadyExistsErrorMessage": "名为 “{clusterName}” 的集群已存在。",
     "xpack.remoteClusters.addAction.errorTitle": "添加集群时出错",
