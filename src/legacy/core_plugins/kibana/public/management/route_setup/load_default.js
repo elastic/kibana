@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { banners } from 'ui/notify';
-import { NoDefaultIndexPattern } from 'ui/index_patterns/errors';
+import { NoDefaultIndexPattern } from 'ui/index_patterns';
 import uiRoutes from 'ui/routes';
 import {
   EuiCallOut,
