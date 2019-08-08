@@ -198,7 +198,11 @@ export function ChartSwitch(props: Props) {
           onClick={() => setFlyoutOpen(!flyoutOpen)}
           data-test-subj="lnsChartSwitchPopover"
         >
-          (change)
+          (
+          {i18n.translate('xpack.lens.configPanel.changeVisualization', {
+            defaultMessage: 'Change',
+          })}
+          )
         </EuiButtonEmpty>
       }
       isOpen={flyoutOpen}
