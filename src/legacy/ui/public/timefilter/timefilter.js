@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { Subject } from 'rxjs';
+import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { calculateBounds, getTime } from './get_time';
 import { parseQueryString } from 'ui/timefilter/lib/parse_querystring';
@@ -33,7 +33,10 @@ class Timefilter extends SimpleEmitter {
   constructor() {
     super();
 
-    this.enabledUpdated$ = new Subject();
+    // Fired when isTimeRangeSelectorEnabled \ isAutoRefreshSelectorEnabled are toggled
+    this.enabledUpdated$ = new BehaviorSubject();
+
+    // Fired when a user changes the timerange
     this.timeUpdate$ = new Subject();
 
     this.isTimeRangeSelectorEnabled = false;
