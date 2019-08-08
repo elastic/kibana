@@ -58,9 +58,10 @@ function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisP
             <EuiLink
               href="https://help.github.com/articles/github-flavored-markdown/"
               target="_blank"
+              rel="noreferrer noopener"
             >
               <FormattedMessage id="visTypeMarkdown.params.helpLinkLabel" defaultMessage="Help" />{' '}
-              <EuiIcon type="popout" />
+              <EuiIcon type="popout" size="s" />
             </EuiLink>
           </EuiText>
         </EuiFlexItem>
