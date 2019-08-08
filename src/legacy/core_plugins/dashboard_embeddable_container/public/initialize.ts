@@ -17,9 +17,4 @@
  * under the License.
  */
 
-import { DashboardConstants } from './dashboard_constants';
-import { start } from '../../../dashboard_embeddable_container/public/np_ready/public/legacy';
-
-start.registerDashboardContainerFactory({
-  landingPagePath: DashboardConstants.LANDING_PAGE_PATH,
-});
+import './np_ready/public/legacy';

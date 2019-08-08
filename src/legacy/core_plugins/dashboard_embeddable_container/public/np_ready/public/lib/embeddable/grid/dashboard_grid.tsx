@@ -124,7 +124,6 @@ export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
-  landingPagePath: string;
   SavedObjectFinder: React.ComponentType<any>;
 }
 
@@ -180,7 +179,6 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         }),
         text: error.message,
       });
-      window.location.hash = this.props.landingPagePath;
     }
     this.setState({
       layout,

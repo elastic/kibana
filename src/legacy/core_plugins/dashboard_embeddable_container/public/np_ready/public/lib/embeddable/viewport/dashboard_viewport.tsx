@@ -38,7 +38,6 @@ export interface DashboardViewportProps {
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
-  landingPagePath: string;
   SavedObjectFinder: React.ComponentType<any>;
   ExitFullScreenButton: React.ComponentType<any>;
 }
@@ -117,7 +116,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           notifications={this.props.notifications}
           overlays={this.props.overlays}
           inspector={this.props.inspector}
-          landingPagePath={this.props.landingPagePath}
           SavedObjectFinder={this.props.SavedObjectFinder}
         />
       </div>

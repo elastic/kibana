@@ -36,10 +36,7 @@ interface StartDependencies {
 }
 
 export type Setup = void;
-
-export interface Start {
-  registerDashboardContainerFactory: (options: { landingPagePath: string }) => string;
-}
+export type Start = void;
 
 export class DashboardEmbeddableContainerPublicPlugin
   implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
@@ -55,33 +52,22 @@ export class DashboardEmbeddableContainerPublicPlugin
     const { application, notifications, overlays } = core;
     const { embeddable, inspector, __LEGACY } = plugins;
 
-    const registerDashboardContainerFactory: Start['registerDashboardContainerFactory'] = ({
-      landingPagePath,
-    }) => {
-      const dashboardOptions = {
-        capabilities: (application.capabilities.dashboard as unknown) as DashboardCapabilities,
-        getFactory: embeddable.getEmbeddableFactory,
-      };
-      const factory = new DashboardContainerFactory(dashboardOptions, {
-        getActions: embeddable.getTriggerCompatibleActions,
-        getAllEmbeddableFactories: embeddable.getEmbeddableFactories,
-        getEmbeddableFactory: embeddable.getEmbeddableFactory,
-        notifications,
-        overlays,
-        inspector,
-        landingPagePath,
-        SavedObjectFinder: __LEGACY.SavedObjectFinder,
-        ExitFullScreenButton: __LEGACY.ExitFullScreenButton,
-      });
-
-      embeddable.registerEmbeddableFactory(factory.type, factory);
-
-      return factory.type;
+    const dashboardOptions = {
+      capabilities: (application.capabilities.dashboard as unknown) as DashboardCapabilities,
+      getFactory: embeddable.getEmbeddableFactory,
     };
+    const factory = new DashboardContainerFactory(dashboardOptions, {
+      getActions: embeddable.getTriggerCompatibleActions,
+      getAllEmbeddableFactories: embeddable.getEmbeddableFactories,
+      getEmbeddableFactory: embeddable.getEmbeddableFactory,
+      notifications,
+      overlays,
+      inspector,
+      SavedObjectFinder: __LEGACY.SavedObjectFinder,
+      ExitFullScreenButton: __LEGACY.ExitFullScreenButton,
+    });
 
-    return {
-      registerDashboardContainerFactory,
-    };
+    embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 
   public stop() {}
