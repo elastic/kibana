@@ -78,6 +78,7 @@ export {
   IsAuthenticated,
   KibanaRequest,
   KibanaRequestRoute,
+  LifecycleResponseFactory,
   KnownHeaders,
   LegacyRequest,
   OnPreAuthHandler,

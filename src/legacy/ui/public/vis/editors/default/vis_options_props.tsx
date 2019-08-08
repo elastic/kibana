@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Vis } from 'ui/vis';
+import { Vis } from './../..';
 
 export interface VisOptionsProps<VisParamType = unknown> {
   stateParams: VisParamType;

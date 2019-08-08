@@ -8,5 +8,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type OnPreAuthHandler<Params = any, Query = any, Body = any> = (request: KibanaRequest<Params, Query, Body>, t: OnPreAuthToolkit) => OnPreAuthResult | Promise<OnPreAuthResult>;
+export declare type OnPreAuthHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: OnPreAuthToolkit) => OnPreAuthResult | KibanaResponse | Promise<OnPreAuthResult | KibanaResponse>;
 ```
