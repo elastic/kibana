@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE = 500;
-export const ANOMALIES_TABLE_DEFAULT_QUERY_SIZE = 500;
+// @ts-ignore
+import { ML_BREADCRUMB } from '../breadcrumbs';
 
-export enum SEARCH_QUERY_LANGUAGE {
-  KUERY = 'kuery',
-  LUCENE = 'lucene',
+export function getDataVisualizerBreadcrumbs() {
+  // Whilst top level nav menu with tabs remains,
+  // use root ML breadcrumb.
+  return [ML_BREADCRUMB];
 }
