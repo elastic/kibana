@@ -18,7 +18,13 @@
             "buckets_path": {
               "doc_count": "_count"
             },
-            "script": "params.doc_count / 15"
+            "script": {
+              "lang": "painless",
+              "params": {
+                "bucket_span_in_ms": 900000
+              },
+              "source": "60 * 1000 * params.doc_count / params.bucket_span_in_ms"
+            }
           }
         }
       }
