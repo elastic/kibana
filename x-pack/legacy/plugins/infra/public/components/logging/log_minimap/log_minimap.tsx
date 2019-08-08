@@ -73,10 +73,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
 
   private dragTargetArea: SVGElement | null = null;
 
-  public static getDerivedStateFromProps(
-    { target, isReloading }: LogMinimapProps,
-    { drag, target: currentTarget }: LogMinimapState
-  ) {
+  public static getDerivedStateFromProps({ target }: LogMinimapProps, { drag }: LogMinimapState) {
     if (!drag) {
       return { target };
     }
