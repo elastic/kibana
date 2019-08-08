@@ -88,19 +88,24 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     }
 
     if (opts.ssl) {
-      set('server.ssl.enabled', true);
-    }
+      function ensureNotDefined(path) {
+        if (has(path)) {
+          throw new Error(`Can't use --ssl when "${path}" configuration is already defined.`);
+        }
+      }
+      ensureNotDefined('server.ssl.certificate');
+      ensureNotDefined('server.ssl.key');
+      ensureNotDefined('elasticsearch.hosts');
+      ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
 
-    if (opts.ssl && !has('server.ssl.certificate') && !has('server.ssl.key')) {
+      if (opts.elasticsearch) {
+        throw new Error(`Can't use --ssl when --elasticsearch configuration is specified.`);
+      }
+
+      set('server.ssl.enabled', true);
       set('server.ssl.certificate', DEV_SSL_CERT_PATH);
       set('server.ssl.key', DEV_SSL_KEY_PATH);
-    }
-
-    if (opts.ssl && !opts.elasticsearch && !has('elasticsearch.hosts')) {
       set('elasticsearch.hosts', 'https://localhost:9200');
-    }
-
-    if (opts.ssl && !has('elasticsearch.ssl.certificateAuthorities')) {
       set('elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
     }
   }
