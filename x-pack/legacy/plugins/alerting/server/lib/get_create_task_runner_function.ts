@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { ActionsPlugin } from '../../../actions';
-import { AlertType, Services, AlertServices, RawAlert } from '../types';
+import { AlertType, AlertServices, RawAlert, GetServicesFunction } from '../types';
 import { ConcreteTaskInstance } from '../../../task_manager';
 import { createFireHandler } from './create_fire_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
@@ -16,7 +16,7 @@ import { validateAlertTypeParams } from './validate_alert_type_params';
 import { SpacesPlugin } from '../../../spaces';
 
 interface CreateTaskRunnerFunctionOptions {
-  getServices: (basePath: string) => Services;
+  getServices: GetServicesFunction;
   alertType: AlertType;
   fireAction: ActionsPlugin['fire'];
   savedObjectsRepositoryWithInternalUser: SavedObjectsClientContract;
@@ -51,6 +51,13 @@ export function getCreateTaskRunnerFunction({
           { namespace }
         );
 
+        const fakeRequest = {
+          headers: {} as any,
+          getBasePath: () => getBasePath(taskInstance.params.spaceId),
+        };
+
+        const services = getServices(fakeRequest);
+
         // Validate
         const validatedAlertTypeParams = validateAlertTypeParams(alertType, alertTypeParams);
 
@@ -81,7 +88,7 @@ export function getCreateTaskRunnerFunction({
         const alertInstanceFactory = createAlertInstanceFactory(alertInstances);
 
         const alertTypeServices: AlertServices = {
-          ...getServices(taskInstance.params.basePath),
+          ...services,
           alertInstanceFactory,
         };
 

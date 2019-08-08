@@ -9,7 +9,7 @@ import { ActionTypeRegistry } from './action_type_registry';
 import { FireOptions } from './create_fire_function';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
-export type GetServicesFunction = (basePath: string, overwrites?: Partial<Services>) => Services;
+export type GetServicesFunction = (request: any) => Services;
 export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
 
 export interface Services {

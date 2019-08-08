@@ -35,13 +35,20 @@ export function getCreateTaskRunnerFunction({
       run: async () => {
         const { spaceId, id, params } = taskInstance.params;
         const namespace = spaceIdToNamespace(spaceId);
-        const basePath = getBasePath(spaceId);
+
+        // Since we're using API keys and accessing elasticsearch can only be done
+        // via a request, we're faking one with the proper authorization headers.
+        const fakeRequest: any = {
+          headers: {},
+          getBasePath: () => getBasePath(taskInstance.params.spaceId),
+        };
+
         const executorResult = await execute({
           namespace,
           actionTypeRegistry,
           encryptedSavedObjectsPlugin,
           actionId: id,
-          services: getServices(basePath),
+          services: getServices(fakeRequest),
           params,
         });
         if (executorResult.status === 'error') {

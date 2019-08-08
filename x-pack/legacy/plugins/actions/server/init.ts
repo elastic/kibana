@@ -31,7 +31,7 @@ export function init(server: Legacy.Server) {
     'spaces'
   );
 
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+  const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
     callWithInternalUser
   );
@@ -46,19 +46,11 @@ export function init(server: Legacy.Server) {
     attributesToExcludeFromAAD: new Set(['description']),
   });
 
-  function getServices(basePath: string, overwrites: Partial<Services> = {}): Services {
-    // Fake request is here to allow creating a scoped saved objects client
-    // and use it when security is disabled. This will be replaced when the
-    // future phase of API tokens is complete.
-    const fakeRequest: any = {
-      headers: {},
-      getBasePath: () => basePath,
-    };
+  function getServices(request: any): Services {
     return {
-      log: server.log.bind(server),
-      callCluster: callWithInternalUser,
-      savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(fakeRequest),
-      ...overwrites,
+      log: (...args) => server.log(...args),
+      callCluster: (...args) => callWithRequest(request, ...args),
+      savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(request),
     };
   }
 

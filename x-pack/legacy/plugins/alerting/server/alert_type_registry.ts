@@ -7,14 +7,14 @@
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientContract } from 'src/core/server';
-import { AlertType, Services } from './types';
+import { AlertType, GetServicesFunction } from './types';
 import { TaskManager } from '../../task_manager';
 import { getCreateTaskRunnerFunction } from './lib';
 import { ActionsPlugin } from '../../actions';
 import { SpacesPlugin } from '../../spaces';
 
 interface ConstructorOptions {
-  getServices: (basePath: string) => Services;
+  getServices: GetServicesFunction;
   taskManager: TaskManager;
   fireAction: ActionsPlugin['fire'];
   savedObjectsRepositoryWithInternalUser: SavedObjectsClientContract;
@@ -23,7 +23,7 @@ interface ConstructorOptions {
 }
 
 export class AlertTypeRegistry {
-  private readonly getServices: (basePath: string) => Services;
+  private readonly getServices: GetServicesFunction;
   private readonly taskManager: TaskManager;
   private readonly fireAction: ActionsPlugin['fire'];
   private readonly alertTypes: Map<string, AlertType> = new Map();

@@ -60,7 +60,7 @@ export function fireRoute({ server, actionTypeRegistry, getServices }: FireRoute
         actionTypeRegistry,
         actionId: id,
         namespace: namespace === 'default' ? undefined : namespace,
-        services: getServices(request.getBasePath(), { savedObjectsClient }),
+        services: getServices(request),
         encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
       });
       return result;

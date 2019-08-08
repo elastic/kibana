@@ -38,7 +38,9 @@ export function init(server: Legacy.Server) {
     'security'
   );
 
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+  const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster(
+    'admin'
+  );
   const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
     callWithInternalUser
   );
@@ -56,15 +58,11 @@ export function init(server: Legacy.Server) {
     ]),
   });
 
-  function getServices(basePath: string): Services {
-    const fakeRequest: any = {
-      headers: {},
-      getBasePath: () => basePath,
-    };
+  function getServices(request: any): Services {
     return {
-      log: server.log.bind(server),
-      callCluster: callWithInternalUser,
-      savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(fakeRequest),
+      log: (...args) => server.log(...args),
+      callCluster: (...args) => callWithRequest(request, ...args),
+      savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(request),
     };
   }
 
