@@ -28,11 +28,16 @@ describe('#start()', () => {
     setup.registerApp({ id: 'app1' } as any);
     setup.registerLegacyApp({ id: 'app2' } as any);
     const injectedMetadata = injectedMetadataServiceMock.createStartContract();
-    expect((await service.start({ injectedMetadata })).availableApps).toMatchInlineSnapshot(`
+    const startContract = await service.start({ injectedMetadata });
+    expect(startContract.availableApps).toMatchInlineSnapshot(`
 Array [
   Object {
     "id": "app1",
   },
+]
+`);
+    expect(startContract.availableLegacyApps).toMatchInlineSnapshot(`
+Array [
   Object {
     "id": "app2",
   },
@@ -48,6 +53,7 @@ Array [
     await service.start({ injectedMetadata });
     expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
       apps: [{ id: 'app1' }],
+      legacyApps: [],
       injectedMetadata,
     });
   });
@@ -59,7 +65,8 @@ Array [
     const injectedMetadata = injectedMetadataServiceMock.createStartContract();
     await service.start({ injectedMetadata });
     expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
-      apps: [{ id: 'legacyApp1' }],
+      apps: [],
+      legacyApps: [{ id: 'legacyApp1' }],
       injectedMetadata,
     });
   });

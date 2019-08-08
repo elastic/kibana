@@ -5,13 +5,14 @@
  */
 
 import React from 'react';
-import { IndexPatternField } from './indexpattern';
+import { IndexPatternField, DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
 import { FieldIcon } from './field_icon';
 import { DataType } from '..';
 
 export interface FieldItemProps {
   field: IndexPatternField;
+  indexPatternId: string;
   highlight?: string;
 }
 
@@ -22,7 +23,7 @@ function wrapOnDot(str?: string) {
   return str ? str.replace(/\./g, '.\u200B') : undefined;
 }
 
-export function FieldItem({ field, highlight }: FieldItemProps) {
+export function FieldItem({ field, indexPatternId, highlight }: FieldItemProps) {
   const wrappableName = wrapOnDot(field.name)!;
   const wrappableHighlight = wrapOnDot(highlight);
   const highlightIndex = wrappableHighlight
@@ -41,7 +42,7 @@ export function FieldItem({ field, highlight }: FieldItemProps) {
 
   return (
     <DragDrop
-      value={field}
+      value={{ field, indexPatternId } as DraggedField}
       draggable
       className={`lnsFieldListPanel__field lnsFieldListPanel__field-btn-${field.type}`}
     >

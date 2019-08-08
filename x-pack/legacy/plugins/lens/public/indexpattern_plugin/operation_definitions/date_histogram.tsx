@@ -37,22 +37,33 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
   displayName: i18n.translate('xpack.lens.indexPattern.dateHistogram', {
     defaultMessage: 'Date Histogram',
   }),
-  isApplicableWithoutField: false,
-  isApplicableForField: ({ aggregationRestrictions, type }) => {
-    return Boolean(
-      type === 'date' && (!aggregationRestrictions || aggregationRestrictions.date_histogram)
-    );
+  getPossibleOperationsForDocument: () => [],
+  getPossibleOperationsForField: ({ aggregationRestrictions, aggregatable, type }) => {
+    if (
+      type === 'date' &&
+      aggregatable &&
+      (!aggregationRestrictions || aggregationRestrictions.date_histogram)
+    ) {
+      return [
+        {
+          dataType: 'date',
+          isBucketed: true,
+        },
+      ];
+    }
+    return [];
   },
-  buildColumn(
-    operationId: string,
-    columns: {},
-    suggestedOrder?: DimensionPriority,
-    field?: IndexPatternField
-  ): DateHistogramIndexPatternColumn {
+  buildColumn({
+    suggestedPriority,
+    field,
+  }: {
+    suggestedPriority: DimensionPriority | undefined;
+    field?: IndexPatternField;
+  }): DateHistogramIndexPatternColumn {
     if (!field) {
       throw new Error('Invariant error: date histogram operation requires field');
     }
-    let interval = 'h';
+    let interval = 'd';
     let timeZone: string | undefined;
     if (field.aggregationRestrictions && field.aggregationRestrictions.date_histogram) {
       interval = (field.aggregationRestrictions.date_histogram.calendar_interval ||
@@ -60,11 +71,10 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       timeZone = field.aggregationRestrictions.date_histogram.time_zone;
     }
     return {
-      operationId,
       label: ofName(field.name),
       dataType: 'date',
       operationType: 'date_histogram',
-      suggestedOrder,
+      suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
       params: {
@@ -80,11 +90,6 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     schema: 'segment',
     params: {
       field: column.sourceField,
-      // TODO: This range should be passed in from somewhere else
-      timeRange: {
-        from: 'now-1d',
-        to: 'now',
-      },
       time_zone: column.params.timeZone,
       useNormalizedEsInterval: true,
       interval: column.params.interval,
@@ -93,12 +98,12 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       extended_bounds: {},
     },
   }),
-  paramEditor: ({ state, setState, columnId }) => {
-    const column = state.columns[columnId] as DateHistogramIndexPatternColumn;
+  paramEditor: ({ state, setState, columnId, layerId }) => {
+    const column = state.layers[layerId].columns[columnId] as DateHistogramIndexPatternColumn;
 
     const field =
       column &&
-      state.indexPatterns[state.currentIndexPatternId].fields.find(
+      state.indexPatterns[state.layers[layerId].indexPatternId].fields.find(
         currentField => currentField.name === column.sourceField
       );
     const intervalIsRestricted =
@@ -140,6 +145,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                 setState(
                   updateColumnParam(
                     state,
+                    layerId,
                     column,
                     'interval',
                     numericToInterval(Number(e.target.value))

@@ -58,7 +58,7 @@ export const createRenderer = (run: ExpressionRunner): ExpressionRenderer => ({
         }
       });
     }
-  }, [expression, mountpoint.current]);
+  }, [expression, mountpoint.current, options.context, options.getInitialContext]);
 
   return (
     <div

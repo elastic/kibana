@@ -263,7 +263,8 @@
 }
 
 .codeBlame__item {
-  padding: 0 $euiSizeM 0 $euiSizeL;
+  padding-right: $euiSizeM;
+  padding-left: $euiSizeM;
   border-top: $euiBorderThin;
   &.codeBlame__item--first {
     border-top: none;
@@ -290,5 +291,5 @@
   border-right: $euiBorderThick;
   margin-left: $euiSize;
   border-left: $euiBorderThin;
-  width: 316px !important;
+  width: 300px !important;
 }

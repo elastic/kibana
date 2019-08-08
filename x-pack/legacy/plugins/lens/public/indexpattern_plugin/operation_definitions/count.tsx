@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { CountIndexPatternColumn } from '../indexpattern';
-import { DimensionPriority } from '../../types';
 import { OperationDefinition } from '../operations';
 
 export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
@@ -14,23 +13,23 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
     defaultMessage: 'Count',
   }),
-  isApplicableWithoutField: true,
-  isApplicableForField: ({ aggregationRestrictions, type }) => {
-    return false;
+  getPossibleOperationsForField: () => [],
+  getPossibleOperationsForDocument: () => {
+    return [
+      {
+        dataType: 'number',
+        isBucketed: false,
+      },
+    ];
   },
-  buildColumn(
-    operationId: string,
-    columns: {},
-    suggestedOrder?: DimensionPriority
-  ): CountIndexPatternColumn {
+  buildColumn({ suggestedPriority }) {
     return {
-      operationId,
       label: i18n.translate('xpack.lens.indexPattern.countOf', {
         defaultMessage: 'Count of documents',
       }),
       dataType: 'number',
       operationType: 'count',
-      suggestedOrder,
+      suggestedPriority,
       isBucketed: false,
     };
   },

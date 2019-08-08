@@ -108,16 +108,6 @@ function getError(agg: AggConfig, aggIsTooLow: boolean) {
       })
     );
   }
-  if (agg.schema.deprecate) {
-    errors.push(
-      agg.schema.deprecateMessage
-        ? agg.schema.deprecateMessage
-        : i18n.translate('common.ui.vis.editors.aggParams.errors.schemaIsDeprecatedErrorMessage', {
-            defaultMessage: '"{schema}" has been deprecated.',
-            values: { schema: agg.schema.title },
-          })
-    );
-  }
 
   return errors;
 }

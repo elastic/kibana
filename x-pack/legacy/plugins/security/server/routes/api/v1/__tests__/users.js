@@ -10,26 +10,28 @@ import sinon from 'sinon';
 
 import { serverFixture } from '../../../../lib/__tests__/__fixtures__/server';
 import { requestFixture } from '../../../../lib/__tests__/__fixtures__/request';
-import { AuthenticationResult } from '../../../../../server/lib/authentication/authentication_result';
-import { BasicCredentials } from '../../../../../server/lib/authentication/providers/basic';
+import { AuthenticationResult, BasicCredentials } from '../../../../../../../../plugins/security/server';
 import { initUsersApi } from '../users';
 import * as ClientShield from '../../../../../../../server/lib/get_client_shield';
+import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
 describe('User routes', () => {
   const sandbox = sinon.createSandbox();
 
   let clusterStub;
   let serverStub;
+  let loginStub;
 
   beforeEach(() => {
     serverStub = serverFixture();
+    loginStub = sinon.stub();
 
     // Cluster is returned by `getClient` function that is wrapped into `once` making cluster
     // a static singleton, so we should use sandbox to set/reset its behavior between tests.
     clusterStub = sinon.stub({ callWithRequest() {} });
     sandbox.stub(ClientShield, 'getClient').returns(clusterStub);
 
-    initUsersApi(serverStub);
+    initUsersApi({ authc: { login: loginStub }, config: { authc: { providers: ['basic'] } } }, serverStub);
   });
 
   afterEach(() => sandbox.restore());
@@ -98,13 +100,12 @@ describe('User routes', () => {
       it('returns 401 if user can authenticate with new password.', async () => {
         getUserStub.returns(Promise.resolve({}));
 
-        serverStub.plugins.security.authenticate
+        loginStub
           .withArgs(
-            sinon.match(BasicCredentials.decorateRequest(request, 'user', 'new-password'))
+            sinon.match.instanceOf(KibanaRequest),
+            { provider: 'basic', value: { username: 'user', password: 'new-password' } }
           )
-          .returns(
-            Promise.resolve(AuthenticationResult.failed(new Error('Something went wrong.')))
-          );
+          .resolves(AuthenticationResult.failed(new Error('Something went wrong.')));
 
         return changePasswordRoute
           .handler(request)
@@ -150,13 +151,12 @@ describe('User routes', () => {
       it('successfully changes own password if provided old password is correct.', async () => {
         getUserStub.returns(Promise.resolve({}));
 
-        serverStub.plugins.security.authenticate
+        loginStub
           .withArgs(
-            sinon.match(BasicCredentials.decorateRequest(request, 'user', 'new-password'))
+            sinon.match.instanceOf(KibanaRequest),
+            { provider: 'basic', value: { username: 'user', password: 'new-password' } }
           )
-          .returns(
-            Promise.resolve(AuthenticationResult.succeeded({}))
-          );
+          .resolves(AuthenticationResult.succeeded({}));
 
         const hResponseStub = { code: sinon.stub() };
         const hStub = { response: sinon.stub().returns(hResponseStub) };
@@ -190,7 +190,7 @@ describe('User routes', () => {
           .handler(request)
           .catch((response) => {
             sinon.assert.notCalled(serverStub.plugins.security.getUser);
-            sinon.assert.notCalled(serverStub.plugins.security.authenticate);
+            sinon.assert.notCalled(loginStub);
 
             expect(response.isBoom).to.be(true);
             expect(response.output.payload).to.eql({
@@ -208,7 +208,7 @@ describe('User routes', () => {
         await changePasswordRoute.handler(request, hStub);
 
         sinon.assert.notCalled(serverStub.plugins.security.getUser);
-        sinon.assert.notCalled(serverStub.plugins.security.authenticate);
+        sinon.assert.notCalled(loginStub);
 
         sinon.assert.calledOnce(clusterStub.callWithRequest);
         sinon.assert.calledWithExactly(

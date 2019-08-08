@@ -22,6 +22,7 @@ exports[`MonitorList component renders a no items message when no data is provid
       columns={
         Array [
           Object {
+            "align": "left",
             "field": "monitor_id",
             "name": "",
             "render": [Function],
@@ -29,17 +30,20 @@ exports[`MonitorList component renders a no items message when no data is provid
             "width": "40px",
           },
           Object {
+            "align": "left",
             "field": "state.monitor.status",
             "name": "Status",
             "render": [Function],
           },
           Object {
+            "align": "left",
             "field": "state.monitor.name",
             "name": "Name",
             "render": [Function],
             "sortable": true,
           },
           Object {
+            "align": "left",
             "field": "state.url.full",
             "name": "URL",
             "render": [Function],
@@ -92,6 +96,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
       columns={
         Array [
           Object {
+            "align": "left",
             "field": "monitor_id",
             "name": "",
             "render": [Function],
@@ -99,17 +104,20 @@ exports[`MonitorList component renders the monitor list 1`] = `
             "width": "40px",
           },
           Object {
+            "align": "left",
             "field": "state.monitor.status",
             "name": "Status",
             "render": [Function],
           },
           Object {
+            "align": "left",
             "field": "state.monitor.name",
             "name": "Name",
             "render": [Function],
             "sortable": true,
           },
           Object {
+            "align": "left",
             "field": "state.url.full",
             "name": "URL",
             "render": [Function],

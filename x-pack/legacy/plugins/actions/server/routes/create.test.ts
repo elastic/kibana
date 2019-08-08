@@ -19,42 +19,19 @@ it('creates an action with proper parameters', async () => {
     method: 'POST',
     url: '/api/action',
     payload: {
-      attributes: {
-        description: 'My description',
-        actionTypeId: 'abc',
-        actionTypeConfig: { foo: true },
-      },
-      migrationVersion: {
-        abc: '1.2.3',
-      },
-      references: [
-        {
-          name: 'ref_0',
-          type: 'bcd',
-          id: '234',
-        },
-      ],
+      description: 'My description',
+      actionTypeId: 'abc',
+      config: { foo: true },
+      secrets: {},
     },
   };
   const createResult = {
     id: '1',
     type: 'action',
-    attributes: {
-      description: 'My description',
-      actionTypeId: 'abc',
-      actionTypeConfig: { foo: true },
-      actionTypeConfigSecrets: {},
-    },
-    migrationVersion: {
-      abc: '1.2.3',
-    },
-    references: [
-      {
-        name: 'ref_0',
-        type: 'bcd',
-        id: '234',
-      },
-    ],
+    description: 'My description',
+    actionTypeId: 'abc',
+    config: { foo: true },
+    secrets: {},
   };
 
   actionsClient.create.mockResolvedValueOnce(createResult);
@@ -64,28 +41,17 @@ it('creates an action with proper parameters', async () => {
   expect(response).toEqual({ id: '1' });
   expect(actionsClient.create).toHaveBeenCalledTimes(1);
   expect(actionsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "attributes": Object {
-      "actionTypeConfig": Object {
-        "foo": true,
-      },
-      "actionTypeId": "abc",
-      "description": "My description",
-    },
-    "options": Object {
-      "migrationVersion": Object {
-        "abc": "1.2.3",
-      },
-      "references": Array [
-        Object {
-          "id": "234",
-          "name": "ref_0",
-          "type": "bcd",
+    Array [
+      Object {
+        "action": Object {
+          "actionTypeId": "abc",
+          "config": Object {
+            "foo": true,
+          },
+          "description": "My description",
+          "secrets": Object {},
         },
-      ],
-    },
-  },
-]
-`);
+      },
+    ]
+  `);
 });

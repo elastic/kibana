@@ -9,56 +9,92 @@ import React, { memo, useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
-import { DataSetup } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { DatasourceDimensionPanelProps } from '../../types';
 import {
   IndexPatternColumn,
   IndexPatternPrivateState,
-  columnToOperation,
   IndexPatternField,
+  OperationType,
 } from '../indexpattern';
 
-import { getPotentialColumns } from '../operations';
+import { getAvailableOperationsByMetadata, buildColumn } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
-import { hasField } from '../utils';
+import { isDraggedField } from '../utils';
+import { DataPluginDependencies } from '..';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
   setState: (newState: IndexPatternPrivateState) => void;
   dragDropContext: DragContextState;
-  dataPlugin: DataSetup;
+  dataPluginDependencies: DataPluginDependencies;
   storage: Storage;
+  layerId: string;
 };
+
+export interface OperationFieldSupportMatrix {
+  operationByField: Partial<Record<string, OperationType[]>>;
+  fieldByOperation: Partial<Record<OperationType, string[]>>;
+  operationByDocument: OperationType[];
+}
 
 export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPanel(
   props: IndexPatternDimensionPanelProps
 ) {
-  const columns = useMemo(
-    () =>
-      getPotentialColumns(
-        props.state.indexPatterns[props.state.currentIndexPatternId].fields,
-        props.suggestedPriority
-      ),
-    [props.state.indexPatterns[props.state.currentIndexPatternId].fields, props.suggestedPriority]
-  );
+  const layerId = props.layerId;
+  const currentIndexPattern = props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
 
-  const filteredColumns = columns.filter(col => {
-    return props.filterOperations(columnToOperation(col));
-  });
+  const operationFieldSupportMatrix = useMemo(() => {
+    const filteredOperationsByMetadata = getAvailableOperationsByMetadata(
+      currentIndexPattern
+    ).filter(operation => props.filterOperations(operation.operationMetaData));
 
-  const selectedColumn: IndexPatternColumn | null = props.state.columns[props.columnId] || null;
+    const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
+    const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
+    const supportedOperationsByDocument: OperationType[] = [];
+    filteredOperationsByMetadata.forEach(({ operations }) => {
+      operations.forEach(operation => {
+        if (operation.type === 'field') {
+          if (supportedOperationsByField[operation.field]) {
+            supportedOperationsByField[operation.field]!.push(operation.operationType);
+          } else {
+            supportedOperationsByField[operation.field] = [operation.operationType];
+          }
 
-  function findColumnByField(field: IndexPatternField) {
-    return filteredColumns.find(col => hasField(col) && col.sourceField === field.name);
+          if (supportedFieldsByOperation[operation.operationType]) {
+            supportedFieldsByOperation[operation.operationType]!.push(operation.field);
+          } else {
+            supportedFieldsByOperation[operation.operationType] = [operation.field];
+          }
+        } else {
+          supportedOperationsByDocument.push(operation.operationType);
+        }
+      });
+    });
+    return {
+      operationByField: _.mapValues(supportedOperationsByField, _.uniq),
+      fieldByOperation: _.mapValues(supportedFieldsByOperation, _.uniq),
+      operationByDocument: _.uniq(supportedOperationsByDocument),
+    };
+  }, [currentIndexPattern, props.filterOperations]);
+
+  const selectedColumn: IndexPatternColumn | null =
+    props.state.layers[layerId].columns[props.columnId] || null;
+
+  function hasOperationForField(field: IndexPatternField) {
+    return Boolean(operationFieldSupportMatrix.operationByField[field.name]);
   }
 
   function canHandleDrop() {
     const { dragging } = props.dragDropContext;
-    const field = dragging as IndexPatternField;
+    const layerIndexPatternId = props.state.layers[props.layerId].indexPatternId;
 
-    return !!field && !!field.type && !!findColumnByField(field as IndexPatternField);
+    return (
+      isDraggedField(dragging) &&
+      layerIndexPatternId === dragging.indexPatternId &&
+      Boolean(hasOperationForField(dragging.field))
+    );
   }
 
   return (
@@ -67,23 +103,35 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
         className="lnsConfigPanel__summary"
         data-test-subj="indexPattern-dropTarget"
         droppable={canHandleDrop()}
-        onDrop={field => {
-          const column = findColumnByField(field as IndexPatternField);
-
-          if (!column) {
+        onDrop={droppedItem => {
+          if (!isDraggedField(droppedItem) || !hasOperationForField(droppedItem.field)) {
             // TODO: What do we do if we couldn't find a column?
             return;
           }
 
-          props.setState(changeColumn(props.state, props.columnId, column));
+          props.setState(
+            changeColumn({
+              state: props.state,
+              layerId,
+              columnId: props.columnId,
+              newColumn: buildColumn({
+                columns: props.state.layers[props.layerId].columns,
+                indexPattern: currentIndexPattern,
+                layerId,
+                suggestedPriority: props.suggestedPriority,
+                field: droppedItem.field,
+              }),
+            })
+          );
         }}
       >
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={true}>
             <PopoverEditor
               {...props}
+              currentIndexPattern={currentIndexPattern}
               selectedColumn={selectedColumn}
-              filteredColumns={filteredColumns}
+              operationFieldSupportMatrix={operationFieldSupportMatrix}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={null}>
@@ -93,12 +141,22 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
                   data-test-subj="indexPattern-dimensionPopover-remove"
                   iconType="cross"
                   iconSize="s"
+                  size="s"
                   color="danger"
                   aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
                     defaultMessage: 'Remove',
                   })}
                   onClick={() => {
-                    props.setState(deleteColumn(props.state, props.columnId));
+                    props.setState(
+                      deleteColumn({
+                        state: props.state,
+                        layerId,
+                        columnId: props.columnId,
+                      })
+                    );
+                    if (props.onRemove) {
+                      props.onRemove(props.columnId);
+                    }
                   }}
                 />
               </EuiFlexItem>

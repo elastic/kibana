@@ -16,6 +16,7 @@
 
 .lnsConfigPanel__summaryPopoverAnchor {
   max-width: 100%;
+  display: block;
 }
 
 .lnsConfigPanel__summaryIcon {
@@ -23,7 +24,7 @@
 }
 
 .lnsConfigPanel__summaryLink {
-  max-width: 100%;
+  width: 100%;
   display: flex;
 }
 

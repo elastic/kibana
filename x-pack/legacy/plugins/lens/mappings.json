@@ -7,10 +7,13 @@
       "visualizationType": {
         "type": "keyword"
       },
-      "datasourceType": {
+      "activeDatasourceId": {
         "type": "keyword"
       },
       "state": {
+        "type": "text"
+      },
+      "expression": {
         "type": "text"
       }
     }

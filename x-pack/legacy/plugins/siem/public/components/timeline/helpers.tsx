@@ -77,7 +77,7 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
       const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
       return dataProvider.enabled
         ? `${prepend(query)}(
-        ${buildQueryMatch(dataProvider, browserFields)}
+          ${buildQueryMatch(dataProvider, browserFields)}
         ${
           dataProvider.and.length > 0
             ? ` and ${buildQueryForAndProvider(dataProvider.and, browserFields)}`
@@ -118,9 +118,9 @@ export const combineQueries = (
   }
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
   const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
-  const globalQuery = `((${buildGlobalQuery(dataProviders, browserFields)}${postpend(
+  const globalQuery = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
     kqlQuery
-  )}) and @timestamp >= ${start} and @timestamp <= ${end})`;
+  )} and @timestamp >= ${start} and @timestamp <= ${end})`;
   return {
     filterQuery: convertKueryToElasticSearchQuery(globalQuery, indexPattern),
   };

@@ -54,7 +54,7 @@ export interface Anomaly {
   detectorIndex: number;
   entityName: string;
   entityValue: string;
-  influencers: Array<Record<string, string>>;
+  influencers?: Array<Record<string, string>>;
   jobId: string;
   rowId: string;
   severity: number;
@@ -120,11 +120,11 @@ export interface MlCapabilities {
     canCreateFilter: boolean;
     canDeleteFilter: boolean;
     canFindFileStructure: boolean;
-    canGetDataFrameJobs: boolean;
-    canDeleteDataFrameJob: boolean;
-    canPreviewDataFrameJob: boolean;
-    canCreateDataFrameJob: boolean;
-    canStartStopDataFrameJob: boolean;
+    canGetDataFrame: boolean;
+    canDeleteDataFrame: boolean;
+    canPreviewDataFrame: boolean;
+    canCreateDataFrame: boolean;
+    canStartStopDataFrame: boolean;
   };
   isPlatinumOrTrialLicense: boolean;
   mlFeatureEnabledInSpace: boolean;
@@ -135,3 +135,12 @@ const sourceOrDestination = ['source.ip', 'destination.ip'];
 
 export const isDestinationOrSource = (value: string | null): value is DestinationOrSource =>
   value != null && sourceOrDestination.includes(value);
+
+export interface MlError {
+  msg: string;
+  response: string;
+  statusCode: number;
+  path?: string;
+  query?: {};
+  body?: string;
+}

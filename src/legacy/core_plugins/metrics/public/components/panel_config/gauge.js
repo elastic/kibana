@@ -44,8 +44,7 @@ import {
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
-import { data } from 'plugins/data/setup';
-const { QueryBarInput } = data.query.ui;
+import { QueryBarInput } from 'plugins/data';
 const localStorage = new Storage(window.localStorage);
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 
@@ -116,7 +115,6 @@ class GaugePanelConfigUi extends Component {
           limit={1}
           model={this.props.model}
           name={this.props.name}
-          visData$={this.props.visData$}
           onChange={this.props.onChange}
         />
       );
@@ -349,7 +347,6 @@ GaugePanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  visData$: PropTypes.object,
 };
 
 export const GaugePanelConfig = injectI18n(GaugePanelConfigUi);

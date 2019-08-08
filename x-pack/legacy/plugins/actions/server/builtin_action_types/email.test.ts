@@ -12,11 +12,11 @@ import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
-import { validateActionTypeConfig, validateActionTypeParams } from '../lib';
+import { validateParams, validateConfig, validateSecrets } from '../lib';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { registerBuiltInActionTypes } from './index';
 import { sendEmail } from './lib/send_email';
-import { ActionParamsType, ActionTypeConfigType } from './email';
+import { ActionParamsType, ActionTypeConfigType, ActionTypeSecretsType } from './email';
 
 const sendEmailMock = sendEmail as jest.Mock;
 
@@ -43,6 +43,8 @@ beforeAll(() => {
     getServices,
     taskManager: taskManagerMock.create(),
     encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
+    spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+    getBasePath: jest.fn().mockReturnValue(undefined),
   });
 
   registerBuiltInActionTypes(actionTypeRegistry);
@@ -71,11 +73,9 @@ describe('config validation', () => {
   test('config validation succeeds when config is valid', () => {
     const config: Record<string, any> = {
       service: 'gmail',
-      user: 'bob',
-      password: 'supersecret',
       from: 'bob@example.com',
     };
-    expect(validateActionTypeConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config)).toEqual({
       ...config,
       host: null,
       port: null,
@@ -85,7 +85,7 @@ describe('config validation', () => {
     delete config.service;
     config.host = 'elastic.co';
     config.port = 8080;
-    expect(validateActionTypeConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config)).toEqual({
       ...config,
       service: null,
       secure: null,
@@ -101,37 +101,58 @@ describe('config validation', () => {
 
     // empty object
     expect(() => {
-      validateActionTypeConfig(actionType, {});
+      validateConfig(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionTypeConfig is invalid: [user]: expected value of type [string] but got [undefined]"`
+      `"error validating action type config: [from]: expected value of type [string] but got [undefined]"`
     );
 
     // no service or host/port
     expect(() => {
-      validateActionTypeConfig(actionType, baseConfig);
+      validateConfig(actionType, baseConfig);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionTypeConfig is invalid: either [service] or [host]/[port] is required"`
+      `"error validating action type config: [user]: definition for this key is missing"`
     );
 
     // host but no port
     expect(() => {
-      validateActionTypeConfig(actionType, { ...baseConfig, host: 'elastic.co' });
+      validateConfig(actionType, { ...baseConfig, host: 'elastic.co' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionTypeConfig is invalid: [port] is required if [service] is not provided"`
+      `"error validating action type config: [user]: definition for this key is missing"`
     );
 
     // port but no host
     expect(() => {
-      validateActionTypeConfig(actionType, { ...baseConfig, port: 8080 });
+      validateConfig(actionType, { ...baseConfig, port: 8080 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionTypeConfig is invalid: [host] is required if [service] is not provided"`
+      `"error validating action type config: [user]: definition for this key is missing"`
     );
 
     // invalid service
     expect(() => {
-      validateActionTypeConfig(actionType, { ...baseConfig, service: 'bad-nodemailer-service' });
+      validateConfig(actionType, {
+        ...baseConfig,
+        service: 'bad-nodemailer-service',
+      });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionTypeConfig is invalid: [service] value \\"bad-nodemailer-service\\" is not valid"`
+      `"error validating action type config: [user]: definition for this key is missing"`
+    );
+  });
+});
+
+describe('secrets validation', () => {
+  test('secrets validation succeeds when secrets is valid', () => {
+    const secrets: Record<string, any> = {
+      user: 'bob',
+      password: 'supersecret',
+    };
+    expect(validateSecrets(actionType, secrets)).toEqual(secrets);
+  });
+
+  test('secrets validation fails when secrets is not valid', () => {
+    expect(() => {
+      validateSecrets(actionType, {});
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type secrets: [user]: expected value of type [string] but got [undefined]"`
     );
   });
 });
@@ -143,7 +164,7 @@ describe('params validation', () => {
       subject: 'this is a test',
       message: 'this is the message',
     };
-    expect(validateActionTypeParams(actionType, params)).toMatchInlineSnapshot(`
+    expect(validateParams(actionType, params)).toMatchInlineSnapshot(`
 Object {
   "bcc": Array [],
   "cc": Array [],
@@ -159,9 +180,9 @@ Object {
   test('params validation fails when params is not valid', () => {
     // empty object
     expect(() => {
-      validateActionTypeParams(actionType, {});
+      validateParams(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: [subject]: expected value of type [string] but got [undefined]"`
+      `"error validating action params: [subject]: expected value of type [string] but got [undefined]"`
     );
   });
 });
@@ -173,9 +194,11 @@ describe('execute()', () => {
       host: 'a host',
       port: 42,
       secure: true,
+      from: 'bob@example.com',
+    };
+    const secrets: ActionTypeSecretsType = {
       user: 'bob',
       password: 'supersecret',
-      from: 'bob@example.com',
     };
     const params: ActionParamsType = {
       to: ['jim@example.com'],
@@ -185,7 +208,8 @@ describe('execute()', () => {
       message: 'a message to you',
     };
 
-    const executorOptions: ActionTypeExecutorOptions = { config, params, services };
+    const id = 'some-id';
+    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
     sendEmailMock.mockReset();
     await actionType.executor(executorOptions);
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`

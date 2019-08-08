@@ -4,19 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export const IndexManagementPageProvider = ({
-  getService,
-}: KibanaFunctionalTestDefaultProviders) => {
+export function IndexManagementPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {
     async sectionHeadingText() {
-      return await testSubjects.getVisibleText('sectionHeading');
+      return await testSubjects.getVisibleText('appTitle');
     },
     async reloadIndicesButton() {
       return await testSubjects.find('reloadIndicesButton');
     },
   };
-};
+}

@@ -68,11 +68,11 @@ export const InfrastructurePage = injectI18n(({ match, intl }: InfrastructurePag
             path={`${match.path}/metrics-explorer`}
             render={props => (
               <WithSource>
-                {({ configuration, derivedIndexPattern }) => (
+                {({ configuration, createDerivedIndexPattern }) => (
                   <MetricsExplorerOptionsContainer.Provider>
                     <WithMetricsExplorerOptionsUrlState />
                     <MetricsExplorerPage
-                      derivedIndexPattern={derivedIndexPattern}
+                      derivedIndexPattern={createDerivedIndexPattern('metrics')}
                       source={configuration}
                       {...props}
                     />

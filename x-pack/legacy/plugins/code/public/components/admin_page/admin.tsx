@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { parse as parseQuery } from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -19,9 +20,8 @@ import { LanguageSeverTab } from './language_server_tab';
 import { ProjectTab } from './project_tab';
 
 enum AdminTabs {
-  projects = 'Repos',
-  roles = 'Roles',
-  languageServers = 'LanguageServers',
+  projects = '0',
+  languageServers = '1',
 }
 
 interface Props extends RouteComponentProps {
@@ -56,12 +56,14 @@ class AdminPage extends React.PureComponent<Props, State> {
   public tabs = [
     {
       id: AdminTabs.projects,
-      name: AdminTabs.projects,
+      name: i18n.translate('xpack.code.adminPage.repoTabLabel', { defaultMessage: 'Repositories' }),
       disabled: false,
     },
     {
       id: AdminTabs.languageServers,
-      name: 'Language servers',
+      name: i18n.translate('xpack.code.adminPage.langserverTabLabel', {
+        defaultMessage: 'Language servers',
+      }),
       disabled: false,
     },
   ];

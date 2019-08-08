@@ -26,10 +26,18 @@ describe('LensStore', () => {
       const doc = await store.save({
         title: 'Hello',
         visualizationType: 'bar',
-        datasourceType: 'indexpattern',
+        expression: '',
+        activeDatasourceId: 'indexpattern',
         state: {
-          datasource: { type: 'index_pattern', indexPattern: '.kibana_test' },
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
+          datasourceStates: {
+            indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
+          },
           visualization: { x: 'foo', y: 'baz' },
+          query: { query: '', language: 'lucene' },
+          filters: [],
         },
       });
 
@@ -37,21 +45,36 @@ describe('LensStore', () => {
         id: 'FOO',
         title: 'Hello',
         visualizationType: 'bar',
-        datasourceType: 'indexpattern',
+        expression: '',
+        activeDatasourceId: 'indexpattern',
         state: {
-          datasource: { type: 'index_pattern', indexPattern: '.kibana_test' },
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
+          datasourceStates: {
+            indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
+          },
           visualization: { x: 'foo', y: 'baz' },
+          query: { query: '', language: 'lucene' },
+          filters: [],
         },
       });
 
       expect(client.create).toHaveBeenCalledTimes(1);
       expect(client.create).toHaveBeenCalledWith('lens', {
-        datasourceType: 'indexpattern',
         title: 'Hello',
         visualizationType: 'bar',
+
+        expression: '',
+        activeDatasourceId: 'indexpattern',
         state: JSON.stringify({
-          datasource: { type: 'index_pattern', indexPattern: '.kibana_test' },
+          datasourceMetaData: { filterableIndexPatterns: [] },
+          datasourceStates: {
+            indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
+          },
           visualization: { x: 'foo', y: 'baz' },
+          query: { query: '', language: 'lucene' },
+          filters: [],
         }),
       });
     });
@@ -62,10 +85,14 @@ describe('LensStore', () => {
         id: 'Gandalf',
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
-        datasourceType: 'indexpattern',
+        expression: '',
+        activeDatasourceId: 'indexpattern',
         state: {
-          datasource: { type: 'index_pattern', indexPattern: 'lotr' },
+          datasourceMetaData: { filterableIndexPatterns: [] },
+          datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
           visualization: { gear: ['staff', 'pointy hat'] },
+          query: { query: '', language: 'lucene' },
+          filters: [],
         },
       });
 
@@ -73,10 +100,14 @@ describe('LensStore', () => {
         id: 'Gandalf',
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
-        datasourceType: 'indexpattern',
+        expression: '',
+        activeDatasourceId: 'indexpattern',
         state: {
-          datasource: { type: 'index_pattern', indexPattern: 'lotr' },
+          datasourceMetaData: { filterableIndexPatterns: [] },
+          datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
           visualization: { gear: ['staff', 'pointy hat'] },
+          query: { query: '', language: 'lucene' },
+          filters: [],
         },
       });
 
@@ -84,10 +115,14 @@ describe('LensStore', () => {
       expect(client.update).toHaveBeenCalledWith('lens', 'Gandalf', {
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
-        datasourceType: 'indexpattern',
+        expression: '',
+        activeDatasourceId: 'indexpattern',
         state: JSON.stringify({
-          datasource: { type: 'index_pattern', indexPattern: 'lotr' },
+          datasourceMetaData: { filterableIndexPatterns: [] },
+          datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
           visualization: { gear: ['staff', 'pointy hat'] },
+          query: { query: '', language: 'lucene' },
+          filters: [],
         }),
       });
     });

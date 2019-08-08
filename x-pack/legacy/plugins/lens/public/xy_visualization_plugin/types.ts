@@ -10,6 +10,7 @@ import {
   ExpressionFunction,
   ArgumentType,
 } from '../../../../../../src/legacy/core_plugins/interpreter/public';
+import { VisualizationType } from '..';
 
 export interface LegendConfig {
   isVisible: boolean;
@@ -56,8 +57,6 @@ export const legendConfig: ExpressionFunction<
 
 interface AxisConfig {
   title: string;
-  showGridlines: boolean;
-  position: Position;
   hide?: boolean;
 }
 
@@ -66,19 +65,6 @@ const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } =
     types: ['string'],
     help: i18n.translate('xpack.lens.xyChart.title.help', {
       defaultMessage: 'The axis title',
-    }),
-  },
-  showGridlines: {
-    types: ['boolean'],
-    help: i18n.translate('xpack.lens.xyChart.showGridlines.help', {
-      defaultMessage: 'Show / hide axis grid lines.',
-    }),
-  },
-  position: {
-    types: ['string'],
-    options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
-    help: i18n.translate('xpack.lens.xyChart.axisPosition.help', {
-      defaultMessage: 'The position of the axis',
     }),
   },
   hide: {
@@ -91,44 +77,6 @@ const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } =
 export interface YState extends AxisConfig {
   accessors: string[];
 }
-
-export type YConfig = AxisConfig &
-  YState & {
-    labels: string[];
-  };
-
-type YConfigResult = YConfig & { type: 'lens_xy_yConfig' };
-
-export const yConfig: ExpressionFunction<'lens_xy_yConfig', null, YConfig, YConfigResult> = {
-  name: 'lens_xy_yConfig',
-  aliases: [],
-  type: 'lens_xy_yConfig',
-  help: `Configure the xy chart's y axis`,
-  context: {
-    types: ['null'],
-  },
-  args: {
-    ...axisConfig,
-    accessors: {
-      types: ['string'],
-      help: i18n.translate('xpack.lens.xyChart.accessors.help', {
-        defaultMessage: 'The columns to display on the y axis.',
-      }),
-      multi: true,
-    },
-    labels: {
-      types: ['string'],
-      help: '',
-      multi: true,
-    },
-  },
-  fn: function fn(_context: unknown, args: YConfig) {
-    return {
-      type: 'lens_xy_yConfig',
-      ...args,
-    };
-  },
-};
 
 export interface XConfig extends AxisConfig {
   accessor: string;
@@ -148,9 +96,7 @@ export const xConfig: ExpressionFunction<'lens_xy_xConfig', null, XConfig, XConf
     ...axisConfig,
     accessor: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.xyChart.accessor.help', {
-        defaultMessage: 'The column to display on the x axis.',
-      }),
+      help: 'The column to display on the x axis.',
     },
   },
   fn: function fn(_context: unknown, args: XConfig) {
@@ -161,30 +107,127 @@ export const xConfig: ExpressionFunction<'lens_xy_xConfig', null, XConfig, XConf
   },
 };
 
-export type SeriesType =
-  | 'bar'
-  | 'horizontal_bar'
-  | 'line'
-  | 'area'
-  | 'bar_stacked'
-  | 'horizontal_bar_stacked'
-  | 'area_stacked';
+type LayerConfigResult = LayerArgs & { type: 'lens_xy_layer' };
 
-export interface XYArgs {
+export const layerConfig: ExpressionFunction<
+  'lens_xy_layer',
+  null,
+  LayerArgs,
+  LayerConfigResult
+> = {
+  name: 'lens_xy_layer',
+  aliases: [],
+  type: 'lens_xy_layer',
+  help: `Configure a layer in the xy chart`,
+  context: {
+    types: ['null'],
+  },
+  args: {
+    ...axisConfig,
+    layerId: {
+      types: ['string'],
+      help: '',
+    },
+    xAccessor: {
+      types: ['string'],
+      help: '',
+    },
+    seriesType: {
+      types: ['string'],
+      options: ['bar', 'line', 'area', 'bar_stacked', 'area_stacked'],
+      help: 'The type of chart to display.',
+    },
+    splitAccessor: {
+      types: ['string'],
+      help: 'The column to split by',
+      multi: false,
+    },
+    accessors: {
+      types: ['string'],
+      help: 'The columns to display on the y axis.',
+      multi: true,
+    },
+    columnToLabel: {
+      types: ['string'],
+      help: 'JSON key-value pairs of column ID to label',
+    },
+  },
+  fn: function fn(_context: unknown, args: LayerArgs) {
+    return {
+      type: 'lens_xy_layer',
+      ...args,
+    };
+  },
+};
+
+export type SeriesType = 'bar' | 'line' | 'area' | 'bar_stacked' | 'area_stacked';
+
+export type LayerConfig = AxisConfig & {
+  layerId: string;
+  xAccessor: string;
+  accessors: string[];
   seriesType: SeriesType;
+  splitAccessor: string;
+};
+
+export type LayerArgs = LayerConfig & {
+  columnToLabel?: string; // Actually a JSON key-value pair
+};
+
+// Arguments to XY chart expression, with computed properties
+export interface XYArgs {
+  xTitle: string;
+  yTitle: string;
   legend: LegendConfig;
-  y: YConfig;
-  x: XConfig;
-  splitSeriesAccessors: string[];
+  layers: LayerArgs[];
+  isHorizontal: boolean;
 }
 
+// Persisted parts of the state
 export interface XYState {
-  seriesType: SeriesType;
+  preferredSeriesType: SeriesType;
   legend: LegendConfig;
-  y: YState;
-  x: XConfig;
-  splitSeriesAccessors: string[];
+  layers: LayerConfig[];
+  isHorizontal: boolean;
 }
 
 export type State = XYState;
 export type PersistableState = XYState;
+
+export const visualizationTypes: VisualizationType[] = [
+  {
+    id: 'bar',
+    icon: 'visBarVertical',
+    label: i18n.translate('xpack.lens.xyVisualization.barLabel', {
+      defaultMessage: 'Bar',
+    }),
+  },
+  {
+    id: 'bar_stacked',
+    icon: 'visBarVertical',
+    label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
+      defaultMessage: 'Stacked Bar',
+    }),
+  },
+  {
+    id: 'line',
+    icon: 'visLine',
+    label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
+      defaultMessage: 'Line',
+    }),
+  },
+  {
+    id: 'area',
+    icon: 'visArea',
+    label: i18n.translate('xpack.lens.xyVisualization.areaLabel', {
+      defaultMessage: 'Area',
+    }),
+  },
+  {
+    id: 'area_stacked',
+    icon: 'visArea',
+    label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
+      defaultMessage: 'Stacked Area',
+    }),
+  },
+];

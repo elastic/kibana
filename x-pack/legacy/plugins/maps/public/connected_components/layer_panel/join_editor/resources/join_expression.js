@@ -17,9 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
-import { SingleFieldSelect } from '../../../../shared/components/single_field_select';
+import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getTermsFields } from '../../../../shared/utils/get_terms_fields';
+import { getTermsFields } from '../../../../index_pattern_util';
 
 import {
   indexPatternService,

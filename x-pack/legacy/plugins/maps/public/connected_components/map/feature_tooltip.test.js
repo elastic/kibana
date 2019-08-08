@@ -9,16 +9,13 @@ import { shallow } from 'enzyme';
 import { FeatureTooltip } from './feature_tooltip';
 
 class MockLayer {
-
   constructor(id) {
     this._id = id;
   }
   async getDisplayName() {
     return `display + ${this._id}`;
   }
-
 }
-
 
 const MULTI_FEATURE_MULTI_LAYER = [
   {
@@ -52,7 +49,7 @@ const defaultProps = {
   isLocked: false
 };
 
-describe('FeatureTooltip (single)', async () => {
+describe('FeatureTooltip (single)', () => {
 
   test('should not show close button', async () => {
     const component = shallow(
@@ -88,10 +85,9 @@ describe('FeatureTooltip (single)', async () => {
     expect(component)
       .toMatchSnapshot();
   });
-
 });
 
-describe('FeatureTooltip (multi)', async () => {
+describe('FeatureTooltip (multi)', () => {
 
   test('should not show close button / should show count', async () => {
     const component = shallow(
@@ -145,7 +141,4 @@ describe('FeatureTooltip (multi)', async () => {
     expect(component)
       .toMatchSnapshot();
   });
-
-
-
 });

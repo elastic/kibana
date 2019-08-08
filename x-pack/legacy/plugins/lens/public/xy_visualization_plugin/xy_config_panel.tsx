@@ -4,102 +4,84 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import _ from 'lodash';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Position } from '@elastic/charts';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFieldText,
+  EuiButton,
   EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiPanel,
+  EuiButtonIcon,
+  EuiPopover,
   EuiSwitch,
-  IconType,
 } from '@elastic/eui';
-import { State, SeriesType } from './types';
-import { VisualizationProps } from '../types';
+import { State, SeriesType, LayerConfig, visualizationTypes } from './types';
+import { VisualizationProps, OperationMetadata } from '../types';
 import { NativeRenderer } from '../native_renderer';
-import { MultiColumnEditor } from './multi_column_editor';
+import { MultiColumnEditor } from '../multi_column_editor';
+import { generateId } from '../id_generator';
 
-const chartTypeIcons: Array<{ id: SeriesType; label: string; iconType: IconType }> = [
-  {
-    id: 'line',
-    label: i18n.translate('xpack.lens.xyVisualization.lineChartLabel', {
-      defaultMessage: 'Line',
-    }),
-    iconType: 'visLine',
-  },
-  {
-    id: 'area',
-    label: i18n.translate('xpack.lens.xyVisualization.areaChartLabel', {
-      defaultMessage: 'Area',
-    }),
-    iconType: 'visArea',
-  },
-  {
-    id: 'bar',
-    label: i18n.translate('xpack.lens.xyVisualization.barChartLabel', {
-      defaultMessage: 'Bar',
-    }),
-    iconType: 'visBarVertical',
-  },
-  {
-    id: 'horizontal_bar',
-    label: i18n.translate('xpack.lens.xyVisualization.horizontalBarChartLabel', {
-      defaultMessage: 'Horizontal Bar',
-    }),
-    iconType: 'visBarHorizontal',
-  },
-  {
-    id: 'area_stacked',
-    label: i18n.translate('xpack.lens.xyVisualization.stackedAreaChartLabel', {
-      defaultMessage: 'Stacked Area',
-    }),
-    iconType: 'visArea',
-  },
-  {
-    id: 'bar_stacked',
-    label: i18n.translate('xpack.lens.xyVisualization.stackedBarChartLabel', {
-      defaultMessage: 'Stacked Bar',
-    }),
-    iconType: 'visBarVertical',
-  },
-  {
-    id: 'horizontal_bar_stacked',
-    label: i18n.translate('xpack.lens.xyVisualization.stackedHorizontalBarChartLabel', {
-      defaultMessage: 'Stacked Horizontal Bar',
-    }),
-    iconType: 'visBarHorizontal',
-  },
-];
+const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
+const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
-const positionIcons = [
-  {
-    id: Position.Left,
-    label: 'Left',
-    iconType: 'arrowLeft',
-  },
-  {
-    id: Position.Top,
-    label: 'Top',
-    iconType: 'arrowUp',
-  },
-  {
-    id: Position.Bottom,
-    label: 'Bottom',
-    iconType: 'arrowDown',
-  },
-  {
-    id: Position.Right,
-    label: 'Right',
-    iconType: 'arrowRight',
-  },
-];
+type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
-export function XYConfigPanel(props: VisualizationProps<State>) {
-  const { state, datasource, setState } = props;
+function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: number): State {
+  const newLayers = [...state.layers];
+  newLayers[index] = layer;
+
+  return {
+    ...state,
+    layers: newLayers,
+  };
+}
+
+function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
+  return {
+    layerId,
+    seriesType,
+    xAccessor: generateId(),
+    accessors: [generateId()],
+    title: '',
+    splitAccessor: generateId(),
+  };
+}
+
+function LayerSettings({
+  layer,
+  setSeriesType,
+  removeLayer,
+}: {
+  layer: LayerConfig;
+  setSeriesType: (seriesType: SeriesType) => void;
+  removeLayer: () => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const { icon } = visualizationTypes.find(c => c.id === layer.seriesType)!;
 
   return (
-    <EuiForm className="lnsConfigPanel">
+    <EuiPopover
+      id={`lnsXYSeriesTypePopover_${layer.layerId}`}
+      ownFocus
+      button={
+        <EuiButtonIcon
+          iconType={icon || 'lnsBarVertical'}
+          aria-label={i18n.translate('xpack.lens.xyChart.layerSettings', {
+            defaultMessage: 'Edit layer settings',
+          })}
+          onClick={() => setIsOpen(!isOpen)}
+          data-test-subj="lnsXY_layer_advanced"
+        />
+      }
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      anchorPosition="leftUp"
+    >
       <EuiFormRow
         label={i18n.translate('xpack.lens.xyChart.chartTypeLabel', {
           defaultMessage: 'Chart type',
@@ -112,218 +94,205 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           name="chartType"
           className="eui-displayInlineBlock"
           data-test-subj="lnsXY_seriesType"
-          options={chartTypeIcons.map(type =>
-            type.id.includes('stacked') && state.splitSeriesAccessors.length === 0
-              ? { ...type, isDisabled: true }
-              : type
-          )}
-          idSelected={state.seriesType}
-          onChange={seriesType => {
-            const isHorizontal = seriesType === 'horizontal_bar';
-            setState({
-              ...state,
-              seriesType: seriesType as SeriesType,
-              x: {
-                ...state.x,
-                position: isHorizontal ? Position.Left : Position.Bottom,
-              },
-              y: {
-                ...state.y,
-                position: isHorizontal ? Position.Bottom : Position.Left,
-              },
-            });
-          }}
+          options={visualizationTypes.map(t => ({
+            ...t,
+            iconType: t.icon || 'empty',
+          }))}
+          idSelected={layer.seriesType}
+          onChange={seriesType => setSeriesType(seriesType as SeriesType)}
           isIconOnly
         />
       </EuiFormRow>
+      <EuiFormRow>
+        <EuiButton
+          iconType="trash"
+          color="danger"
+          data-test-subj="lnsXY_layer_remove"
+          onClick={removeLayer}
+        >
+          {i18n.translate('xpack.lens.xyChart.removeLayer', {
+            defaultMessage: 'Remove layer',
+          })}
+        </EuiButton>
+      </EuiFormRow>
+    </EuiPopover>
+  );
+}
+
+export function XYConfigPanel(props: VisualizationProps<State>) {
+  const { state, setState, frame } = props;
+  const [isChartOptionsOpen, setIsChartOptionsOpen] = useState(false);
+
+  return (
+    <EuiForm className="lnsConfigPanel">
+      <EuiFormRow>
+        <EuiPopover
+          id="lnsXY_chartConfig"
+          isOpen={isChartOptionsOpen}
+          closePopover={() => setIsChartOptionsOpen(false)}
+          button={
+            <EuiFormRow>
+              <>
+                <EuiButton
+                  iconType="gear"
+                  size="s"
+                  data-test-subj="lnsXY_chart_settings"
+                  onClick={() => setIsChartOptionsOpen(true)}
+                >
+                  <FormattedMessage
+                    id="xpack.lens.xyChart.chartSettings"
+                    defaultMessage="Chart Settings"
+                  />
+                </EuiButton>
+              </>
+            </EuiFormRow>
+          }
+        >
+          <>
+            <EuiFormRow>
+              <EuiSwitch
+                label={i18n.translate('xpack.lens.xyChart.isHorizontalSwitch', {
+                  defaultMessage: 'Rotate chart 90º',
+                })}
+                checked={state.isHorizontal}
+                onChange={() => {
+                  setState({
+                    ...state,
+                    isHorizontal: !state.isHorizontal,
+                  });
+                }}
+                data-test-subj="lnsXY_chart_horizontal"
+              />
+            </EuiFormRow>
+          </>
+        </EuiPopover>
+      </EuiFormRow>
+
+      {state.layers.map((layer, index) => (
+        <EuiFormRow key={layer.layerId} data-test-subj={`lnsXY_layer_${layer.layerId}`}>
+          <EuiPanel>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFormRow>
+                  <LayerSettings
+                    layer={layer}
+                    setSeriesType={seriesType =>
+                      setState(updateLayer(state, { ...layer, seriesType }, index))
+                    }
+                    removeLayer={() => {
+                      frame.removeLayers([layer.layerId]);
+                      setState({ ...state, layers: state.layers.filter(l => l !== layer) });
+                    }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <NativeRenderer
+                  data-test-subj="lnsXY_layerHeader"
+                  render={props.frame.datasourceLayers[layer.layerId].renderLayerPanel}
+                  nativeProps={{ layerId: layer.layerId }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFormRow
+              label={i18n.translate('xpack.lens.xyChart.xAxisLabel', {
+                defaultMessage: 'X Axis',
+              })}
+            >
+              <NativeRenderer
+                data-test-subj="lnsXY_xDimensionPanel"
+                render={props.frame.datasourceLayers[layer.layerId].renderDimensionPanel}
+                nativeProps={{
+                  columnId: layer.xAccessor,
+                  dragDropContext: props.dragDropContext,
+                  filterOperations: isBucketed,
+                  suggestedPriority: 1,
+                  layerId: layer.layerId,
+                }}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label={i18n.translate('xpack.lens.xyChart.splitSeries', {
+                defaultMessage: 'Split series',
+              })}
+            >
+              <NativeRenderer
+                data-test-subj="lnsXY_splitDimensionPanel"
+                render={props.frame.datasourceLayers[layer.layerId].renderDimensionPanel}
+                nativeProps={{
+                  columnId: layer.splitAccessor,
+                  dragDropContext: props.dragDropContext,
+                  filterOperations: isBucketed,
+                  suggestedPriority: 0,
+                  layerId: layer.layerId,
+                }}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label={i18n.translate('xpack.lens.xyChart.yAxisLabel', {
+                defaultMessage: 'Y Axis',
+              })}
+            >
+              <MultiColumnEditor
+                accessors={layer.accessors}
+                datasource={frame.datasourceLayers[layer.layerId]}
+                dragDropContext={props.dragDropContext}
+                onAdd={() =>
+                  setState(
+                    updateLayer(
+                      state,
+                      {
+                        ...layer,
+                        accessors: [...layer.accessors, generateId()],
+                      },
+                      index
+                    )
+                  )
+                }
+                onRemove={accessor =>
+                  setState(
+                    updateLayer(
+                      state,
+                      {
+                        ...layer,
+                        accessors: layer.accessors.filter(col => col !== accessor),
+                      },
+                      index
+                    )
+                  )
+                }
+                filterOperations={isNumericMetric}
+                data-test-subj="lensXY_yDimensionPanel"
+                testSubj="lensXY_yDimensionPanel"
+                layerId={layer.layerId}
+              />
+            </EuiFormRow>
+          </EuiPanel>
+        </EuiFormRow>
+      ))}
 
       <EuiFormRow>
-        <EuiSwitch
-          label={i18n.translate('xpack.lens.xyChart.showLegendLabel', {
-            defaultMessage: 'Show legend',
-          })}
-          checked={state.legend.isVisible}
-          data-test-subj="lnsXY_legendIsVisible"
-          onChange={() =>
+        <EuiButton
+          size="s"
+          data-test-subj={`lnsXY_layer_add`}
+          onClick={() => {
+            const usedSeriesTypes = _.uniq(state.layers.map(layer => layer.seriesType));
             setState({
               ...state,
-              legend: { ...state.legend, isVisible: !state.legend.isVisible },
-            })
-          }
-        />
-      </EuiFormRow>
-
-      {state.legend.isVisible && (
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
-            defaultMessage: 'Legend position',
-          })}
+              layers: [
+                ...state.layers,
+                newLayerState(
+                  usedSeriesTypes.length === 1 ? usedSeriesTypes[0] : state.preferredSeriesType,
+                  frame.addNewLayer()
+                ),
+              ],
+            });
+          }}
+          iconType="plusInCircle"
         >
-          <EuiButtonGroup
-            legend={i18n.translate('xpack.lens.xyChart.legendPositionButtonLabel', {
-              defaultMessage: 'Legend position',
-            })}
-            data-test-subj="lnsXY_legendPosition"
-            name="legendPosition"
-            options={positionIcons}
-            idSelected={state.legend.position}
-            onChange={position =>
-              setState({ ...state, legend: { ...state.legend, position: position as Position } })
-            }
-            isIconOnly
-          />
-        </EuiFormRow>
-      )}
-
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.xyChart.splitSeries', {
-          defaultMessage: 'Split series',
-        })}
-      >
-        <MultiColumnEditor
-          accessors={state.splitSeriesAccessors}
-          datasource={datasource}
-          dragDropContext={props.dragDropContext}
-          onAdd={accessor =>
-            setState({ ...state, splitSeriesAccessors: [...state.splitSeriesAccessors, accessor] })
-          }
-          onRemove={accessor =>
-            setState({
-              ...state,
-              splitSeriesAccessors: state.splitSeriesAccessors.filter(col => col !== accessor),
-            })
-          }
-          filterOperations={op => op.isBucketed && op.dataType !== 'date'}
-          suggestedPriority={0}
-          testSubj="splitSeriesDimensionPanel"
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.xyChart.xAxisLabel', {
-          defaultMessage: 'X Axis',
-        })}
-      >
-        <>
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.xyChart.xTitleLabel', {
-              defaultMessage: 'Title',
-            })}
-          >
-            <EuiFieldText
-              placeholder={i18n.translate('xpack.lens.xyChart.xTitlePlaceholder', {
-                defaultMessage: 'Title',
-              })}
-              data-test-subj="lnsXY_xTitle"
-              value={state.x.title}
-              onChange={e => setState({ ...state, x: { ...state.x, title: e.target.value } })}
-              aria-label={i18n.translate('xpack.lens.xyChart.xTitleAriaLabel', {
-                defaultMessage: 'Title',
-              })}
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.xyChart.xValueLabel', {
-              defaultMessage: 'Value',
-            })}
-          >
-            <NativeRenderer
-              data-test-subj="lnsXY_xDimensionPanel"
-              render={datasource.renderDimensionPanel}
-              nativeProps={{
-                columnId: state.x.accessor,
-                dragDropContext: props.dragDropContext,
-                // TODO: Filter out invalid x-dimension operations
-                filterOperations: () => true,
-              }}
-            />
-          </EuiFormRow>
-
-          <EuiFormRow>
-            <EuiSwitch
-              label={i18n.translate('xpack.lens.xyChart.xShowGridlinesLabel', {
-                defaultMessage: 'Show gridlines',
-              })}
-              data-test-subj="lnsXY_xShowGridlines"
-              checked={state.x.showGridlines}
-              onChange={() =>
-                setState({ ...state, x: { ...state.x, showGridlines: !state.x.showGridlines } })
-              }
-            />
-          </EuiFormRow>
-        </>
-      </EuiFormRow>
-
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.xyChart.yAxisLabel', {
-          defaultMessage: 'Y Axis',
-        })}
-      >
-        <>
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.xyChart.yTitleLabel', {
-              defaultMessage: 'Title',
-            })}
-          >
-            <EuiFieldText
-              placeholder={i18n.translate('xpack.lens.xyChart.yTitlePlaceholder', {
-                defaultMessage: 'Title',
-              })}
-              data-test-subj="lnsXY_yTitle"
-              value={state.y.title}
-              onChange={e => setState({ ...state, y: { ...state.y, title: e.target.value } })}
-              aria-label={i18n.translate('xpack.lens.xyChart.yTitleAriaLabel', {
-                defaultMessage: 'Title',
-              })}
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.xyChart.yValueLabel', {
-              defaultMessage: 'Value',
-            })}
-          >
-            <MultiColumnEditor
-              accessors={state.y.accessors}
-              datasource={datasource}
-              dragDropContext={props.dragDropContext}
-              onAdd={accessor =>
-                setState({
-                  ...state,
-                  y: {
-                    ...state.y,
-                    accessors: [...state.y.accessors, accessor],
-                  },
-                })
-              }
-              onRemove={accessor =>
-                setState({
-                  ...state,
-                  y: {
-                    ...state.y,
-                    accessors: state.y.accessors.filter(col => col !== accessor),
-                  },
-                })
-              }
-              filterOperations={op => !op.isBucketed && op.dataType === 'number'}
-              testSubj="yDimensionPanel"
-            />
-          </EuiFormRow>
-
-          <EuiFormRow>
-            <EuiSwitch
-              label={i18n.translate('xpack.lens.xyChart.yShowGridlinesLabel', {
-                defaultMessage: 'Show gridlines',
-              })}
-              data-test-subj="lnsXY_yShowGridlines"
-              checked={state.y.showGridlines}
-              onChange={() =>
-                setState({ ...state, y: { ...state.y, showGridlines: !state.y.showGridlines } })
-              }
-            />
-          </EuiFormRow>
-        </>
+          <FormattedMessage id="xpack.lens.xyChart.addLayerButton" defaultMessage="Add layer" />
+        </EuiButton>
       </EuiFormRow>
     </EuiForm>
   );

@@ -6,6 +6,7 @@
 
 import { createMockServer } from './_mock_server';
 import { updateRoute } from './update';
+import { ActionResult } from '../types';
 
 const { server, actionsClient } = createMockServer();
 updateRoute(server);
@@ -19,35 +20,15 @@ it('calls the update function with proper parameters', async () => {
     method: 'PUT',
     url: '/api/action/1',
     payload: {
-      attributes: {
-        description: 'My description',
-        actionTypeConfig: { foo: true },
-      },
-      version: '2',
-      references: [
-        {
-          name: 'ref_0',
-          type: 'bcd',
-          id: '234',
-        },
-      ],
+      description: 'My description',
+      config: { foo: true },
     },
   };
-  const updateResult = {
+  const updateResult: ActionResult = {
     id: '1',
-    type: 'action',
-    attributes: {
-      description: 'My description',
-      actionTypeConfig: { foo: true },
-    },
-    version: '2',
-    references: [
-      {
-        name: 'ref_0',
-        type: 'bcd',
-        id: '234',
-      },
-    ],
+    actionTypeId: 'my-action-type-id',
+    description: 'My description',
+    config: { foo: true },
   };
 
   actionsClient.update.mockResolvedValueOnce(updateResult);
@@ -57,26 +38,17 @@ it('calls the update function with proper parameters', async () => {
   expect(response).toEqual({ id: '1' });
   expect(actionsClient.update).toHaveBeenCalledTimes(1);
   expect(actionsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "attributes": Object {
-      "actionTypeConfig": Object {
-        "foo": true,
-      },
-      "description": "My description",
-    },
-    "id": "1",
-    "options": Object {
-      "references": Array [
-        Object {
-          "id": "234",
-          "name": "ref_0",
-          "type": "bcd",
+    Array [
+      Object {
+        "action": Object {
+          "config": Object {
+            "foo": true,
+          },
+          "description": "My description",
+          "secrets": Object {},
         },
-      ],
-      "version": "2",
-    },
-  },
-]
-`);
+        "id": "1",
+      },
+    ]
+  `);
 });

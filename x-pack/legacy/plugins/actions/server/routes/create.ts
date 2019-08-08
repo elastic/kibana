@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 import Hapi from 'hapi';
-import { WithoutQueryAndParams, SavedObjectReference } from '../types';
+import { WithoutQueryAndParams } from '../types';
 
 interface CreateRequest extends WithoutQueryAndParams<Hapi.Request> {
   query: {
@@ -16,13 +16,10 @@ interface CreateRequest extends WithoutQueryAndParams<Hapi.Request> {
     id?: string;
   };
   payload: {
-    attributes: {
-      description: string;
-      actionTypeId: string;
-      actionTypeConfig: Record<string, any>;
-    };
-    migrationVersion?: Record<string, any>;
-    references: SavedObjectReference[];
+    description: string;
+    actionTypeId: string;
+    config: Record<string, any>;
+    secrets: Record<string, any>;
   };
 }
 
@@ -35,37 +32,21 @@ export function createRoute(server: Hapi.Server) {
         options: {
           abortEarly: false,
         },
-        payload: Joi.object().keys({
-          attributes: Joi.object()
-            .keys({
-              description: Joi.string().required(),
-              actionTypeId: Joi.string().required(),
-              actionTypeConfig: Joi.object().required(),
-            })
-            .required(),
-          migrationVersion: Joi.object().optional(),
-          references: Joi.array()
-            .items(
-              Joi.object().keys({
-                name: Joi.string().required(),
-                type: Joi.string().required(),
-                id: Joi.string().required(),
-              })
-            )
-            .default([]),
-        }),
+        payload: Joi.object()
+          .keys({
+            description: Joi.string().required(),
+            actionTypeId: Joi.string().required(),
+            config: Joi.object().default({}),
+            secrets: Joi.object().default({}),
+          })
+          .required(),
       },
     },
     async handler(request: CreateRequest) {
       const actionsClient = request.getActionsClient!();
 
-      const createdAction = await actionsClient.create({
-        attributes: request.payload.attributes,
-        options: {
-          migrationVersion: request.payload.migrationVersion,
-          references: request.payload.references,
-        },
-      });
+      const action = request.payload;
+      const createdAction = await actionsClient.create({ action });
 
       return { id: createdAction.id };
     },

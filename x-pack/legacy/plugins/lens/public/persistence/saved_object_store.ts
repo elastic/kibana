@@ -5,20 +5,28 @@
  */
 
 import { SavedObjectAttributes } from 'target/types/server';
+import { Filter } from '@kbn/es-query';
+import { Query } from 'src/plugins/data/common';
 
 export interface Document {
   id?: string;
   type?: string;
   visualizationType: string | null;
-  datasourceType: string | null;
   title: string;
+  activeDatasourceId: string;
+  expression: string;
   state: {
-    datasource: unknown;
+    datasourceMetaData: {
+      filterableIndexPatterns: Array<{ id: string; title: string }>;
+    };
+    datasourceStates: Record<string, unknown>;
     visualization: unknown;
+    query: Query;
+    filters: Filter[];
   };
 }
 
-const DOC_TYPE = 'lens';
+export const DOC_TYPE = 'lens';
 
 interface SavedObjectClient {
   create: (type: string, object: SavedObjectAttributes) => Promise<{ id: string }>;
@@ -30,7 +38,7 @@ interface SavedObjectClient {
     id: string;
     type: string;
     attributes: SavedObjectAttributes;
-    error?: { message: string };
+    error?: { statusCode: number; message: string };
   }>;
 }
 

@@ -15,15 +15,20 @@ import {
   getSpecId,
   AreaSeries,
   BarSeries,
+  Position,
+  ScaleType,
 } from '@elastic/charts';
+import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, IconType } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { XYArgs } from './types';
-import { KibanaDatatable } from '../types';
+import { LensMultiTable } from '../types';
+import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { RenderFunction } from '../interpreter_types';
 
 export interface XYChartProps {
-  data: KibanaDatatable;
+  data: LensMultiTable;
   args: XYArgs;
 }
 
@@ -33,28 +38,20 @@ export interface XYRender {
   value: XYChartProps;
 }
 
-export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArgs, XYRender> = ({
+export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs, XYRender> = ({
   name: 'lens_xy_chart',
   type: 'render',
   help: i18n.translate('xpack.lens.xyChart.help', {
     defaultMessage: 'An X/Y chart',
   }),
   args: {
-    seriesType: {
+    xTitle: {
       types: ['string'],
-      options: [
-        'bar',
-        'line',
-        'area',
-        'horizontal_bar',
-        'bar_stacked',
-        'line_stacked',
-        'area_stacked',
-        'horizontal_bar_stacked',
-      ],
-      help: i18n.translate('xpack.lens.xyChart.seriesType.help', {
-        defaultMessage: 'The type of chart to display.',
-      }),
+      help: 'X axis title',
+    },
+    yTitle: {
+      types: ['string'],
+      help: 'Y axis title',
     },
     legend: {
       types: ['lens_xy_legendConfig'],
@@ -62,30 +59,20 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArg
         defaultMessage: 'Configure the chart legend.',
       }),
     },
-    y: {
-      types: ['lens_xy_yConfig'],
-      help: i18n.translate('xpack.lens.xyChart.yConfig.help', {
-        defaultMessage: 'The y axis configuration',
-      }),
-    },
-    x: {
-      types: ['lens_xy_xConfig'],
-      help: i18n.translate('xpack.lens.xyChart.xConfig.help', {
-        defaultMessage: 'The x axis configuration',
-      }),
-    },
-    splitSeriesAccessors: {
-      types: ['string'],
+    layers: {
+      types: ['lens_xy_layer'],
+      help: 'Layers of visual series',
       multi: true,
-      help: i18n.translate('xpack.lens.xyChart.splitSeriesAccessors.help', {
-        defaultMessage: 'The columns used to split the series.',
-      }),
+    },
+    isHorizontal: {
+      types: ['boolean'],
+      help: 'Render horizontally',
     },
   },
   context: {
-    types: ['kibana_datatable'],
+    types: ['lens_multitable'],
   },
-  fn(data: KibanaDatatable, args: XYArgs) {
+  fn(data: LensMultiTable, args: XYArgs) {
     return {
       type: 'render',
       as: 'lens_xy_chart_renderer',
@@ -96,10 +83,10 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArg
     };
   },
   // TODO the typings currently don't support custom type args. As soon as they do, this can be removed
-} as unknown) as ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArgs, XYRender>;
+} as unknown) as ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs, XYRender>;
 
 export interface XYChartProps {
-  data: KibanaDatatable;
+  data: LensMultiTable;
   args: XYArgs;
 }
 
@@ -112,35 +99,40 @@ export const xyChartRenderer: RenderFunction<XYChartProps> = {
   validate: () => {},
   reuseDomNode: true,
   render: async (domNode: Element, config: XYChartProps, _handlers: unknown) => {
-    ReactDOM.render(<XYChart {...config} />, domNode);
+    ReactDOM.render(
+      <I18nProvider>
+        <XYChart {...config} />
+      </I18nProvider>,
+      domNode
+    );
   },
 };
 
-export function XYChart({ data, args }: XYChartProps) {
-  const { legend, x, y, splitSeriesAccessors, seriesType } = args;
-  // TODO: Stop mapping data once elastic-charts allows axis naming
-  // https://github.com/elastic/elastic-charts/issues/245
-  const seriesProps = {
-    splitSeriesAccessors,
-    stackAccessors: seriesType.includes('stacked') ? [x.accessor] : [],
-    id: getSpecId(y.labels.join(',')),
-    xAccessor: x.accessor,
-    yAccessors: y.labels,
-    data: data.rows.map(row => {
-      const newRow: typeof row = {};
+function getIconForSeriesType(seriesType: SeriesType): IconType {
+  return visualizationTypes.find(c => c.id === seriesType)!.icon || 'empty';
+}
 
-      // Remap data to { 'Count of documents': 5 }
-      Object.keys(row).forEach(key => {
-        const labelIndex = y.accessors.indexOf(key);
-        if (labelIndex > -1) {
-          newRow[y.labels[labelIndex]] = row[key];
-        } else {
-          newRow[key] = row[key];
-        }
-      });
-      return newRow;
-    }),
-  };
+export function XYChart({ data, args }: XYChartProps) {
+  const { legend, layers, isHorizontal } = args;
+
+  if (Object.values(data.tables).every(table => table.rows.length === 0)) {
+    const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
+    return (
+      <EuiFlexGroup gutterSize="s" direction="column" alignItems="center" justifyContent="center">
+        <EuiFlexItem>
+          <EuiIcon type={icon} color="subdued" size="l" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText color="subdued" size="xs">
+            <FormattedMessage
+              id="xpack.lens.xyVisualization.noDataLabel"
+              defaultMessage="No results found"
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   return (
     <Chart className="lnsChart">
@@ -148,34 +140,72 @@ export function XYChart({ data, args }: XYChartProps) {
         showLegend={legend.isVisible}
         legendPosition={legend.position}
         showLegendDisplayValue={false}
-        rotation={seriesType.includes('horizontal') ? 90 : 0}
+        rotation={isHorizontal ? 90 : 0}
       />
 
       <Axis
         id={getAxisId('x')}
-        position={x.position}
-        title={x.title}
-        showGridLines={x.showGridlines}
-        hide={x.hide}
+        position={Position.Bottom}
+        title={args.xTitle}
+        showGridLines={false}
+        hide={layers[0].hide}
       />
 
       <Axis
         id={getAxisId('y')}
-        position={y.position}
-        title={y.title}
-        showGridLines={y.showGridlines}
-        hide={y.hide}
+        position={Position.Left}
+        title={args.yTitle}
+        showGridLines={false}
+        hide={layers[0].hide}
       />
 
-      {seriesType === 'line' ? (
-        <LineSeries {...seriesProps} />
-      ) : seriesType === 'bar' ||
-        seriesType === 'bar_stacked' ||
-        seriesType === 'horizontal_bar' ||
-        seriesType === 'horizontal_bar_stacked' ? (
-        <BarSeries {...seriesProps} />
-      ) : (
-        <AreaSeries {...seriesProps} />
+      {layers.map(
+        ({ splitAccessor, seriesType, accessors, xAccessor, layerId, columnToLabel }, index) => {
+          if (!data.tables[layerId] || data.tables[layerId].rows.length === 0) {
+            return;
+          }
+
+          const columnToLabelMap = columnToLabel ? JSON.parse(columnToLabel) : {};
+
+          const rows = data.tables[layerId].rows.map(row => {
+            const newRow: typeof row = {};
+
+            // Remap data to { 'Count of documents': 5 }
+            Object.keys(row).forEach(key => {
+              if (columnToLabelMap[key]) {
+                newRow[columnToLabelMap[key]] = row[key];
+              } else {
+                newRow[key] = row[key];
+              }
+            });
+            return newRow;
+          });
+
+          const splitAccessorLabel = columnToLabelMap[splitAccessor];
+          const yAccessors = accessors.map(accessor => columnToLabelMap[accessor] || accessor);
+          const idForLegend = splitAccessorLabel || yAccessors;
+
+          const seriesProps = {
+            key: index,
+            splitSeriesAccessors: [splitAccessorLabel || splitAccessor],
+            stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
+            id: getSpecId(idForLegend),
+            xAccessor,
+            yAccessors,
+            data: rows,
+            xScaleType:
+              typeof rows[0][xAccessor] === 'number' ? ScaleType.Linear : ScaleType.Ordinal,
+            yScaleType: ScaleType.Linear,
+          };
+
+          return seriesType === 'line' ? (
+            <LineSeries {...seriesProps} />
+          ) : seriesType === 'bar' || seriesType === 'bar_stacked' ? (
+            <BarSeries {...seriesProps} />
+          ) : (
+            <AreaSeries {...seriesProps} />
+          );
+        }
       )}
     </Chart>
   );

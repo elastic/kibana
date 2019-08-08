@@ -38,7 +38,7 @@ The following table describes the properties of the `options` object.
 |---|---|---|
 |id|Unique identifier for the alert type. For convention purposes, ids starting with `.` are reserved for built in alert types. We recommend using a convention like `<plugin_id>.mySpecialAlert` for your alert types to avoid conflicting with another plugin.|string|
 |name|A user-friendly name for the alert type. These will be displayed in dropdowns when choosing alert types.|string|
-|validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `executor` function or created as an alert saved object. In order to do this, provide a joi schema that we will use to validate the `params` attribute.|Joi schema|
+|validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `executor` function or created as an alert saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.|@kbn/config-schema|
 |executor|This is where the code of the alert type lives. This is a function to be called when executing an alert on an interval basis. For full details, see executor section below.|Function|
 
 ### Executor
@@ -52,8 +52,8 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 |services.callCluster(path, opts)|Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana.<br><br>**NOTE**: This currently authenticates as the Kibana internal user, but will change in a future PR.|
 |services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>**NOTE**: This currently only works when security is disabled. A future PR will add support for enabled security using Elasticsearch API tokens.|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
-|scheduledRunAt|The date and time the alert type execution was scheduled to be called.|
-|previousScheduledRunAt|The previous date and time the alert type was scheduled to be called.|
+|startedAt|The date and time the alert type started execution.|
+|previousStartedAt|The previous date and time the alert type started a successful execution.|
 |params|Parameters for the execution. This is where the parameters you require will be passed in. (example threshold). Use alert type validation to ensure values are set before execution.|
 |state|State returned from previous execution. This is the alert level state. What the executor returns will be serialized and provided here at the next execution.|
 
@@ -62,20 +62,20 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 This example receives server and threshold as parameters. It will read the CPU usage of the server and fire actions if the reading is greater than the threshold.
 
 ```
+import { schema } from '@kbn/config-schema';
+...
 server.plugins.alerting.registerType({
 	id: 'my-alert-type',
 	name: 'My alert type',
 	validate: {
-		params: Joi.object()
-			.keys({
-				server: Joi.string().required(),
-				threshold: Joi.number().min(0).max(1).required(),
-			})
-			.required(),
+		params: schema.object({
+			server: schema.string(),
+			threshold: schema.number({ min: 0, max: 1 }),
+		}),
 	},
 	async executor({
-		scheduledRunAt,
-		previousScheduledRunAt,
+		startedAt,
+		previousStartedAt,
 		services,
 		params,
 		state,
@@ -126,15 +126,13 @@ server.plugins.alerting.registerType({
 	id: 'my-alert-type',
 	name: 'My alert type',
 	validate: {
-		params: Joi.object()
-			.keys({
-				threshold: Joi.number().min(0).max(1).required(),
-			})
-			.required(),
+		params: schema.object({
+			threshold: schema.number({ min: 0, max: 1 }),
+		}),
 	},
 	async executor({
-		scheduledRunAt,
-		previousScheduledRunAt,
+		startedAt,
+		previousStartedAt,
 		services,
 		params,
 		state,

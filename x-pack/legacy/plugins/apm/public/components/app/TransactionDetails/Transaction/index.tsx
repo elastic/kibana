@@ -18,7 +18,7 @@ import { Location } from 'history';
 import React from 'react';
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { TransactionLink } from '../../../shared/Links/TransactionLink';
+import { TransactionLink } from '../../../shared/Links/apm/TransactionLink';
 import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/TransactionActionMenu';
 import { StickyTransactionProperties } from './StickyTransactionProperties';
 import { TransactionTabs } from './TransactionTabs';

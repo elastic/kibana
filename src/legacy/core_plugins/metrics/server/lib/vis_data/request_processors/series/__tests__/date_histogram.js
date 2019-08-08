@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { dateHistogram } from '../date_histogram';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { DefaultSearchCapabilities } from '../../../../search_strategies/default_search_capabilities';
+import { dateHistogram } from '../date_histogram';
 
 describe('dateHistogram(req, panel, series)', () => {
   let panel;
@@ -161,6 +161,50 @@ describe('dateHistogram(req, panel, series)', () => {
           },
         },
       },
+    });
+  });
+
+  describe('dateHistogram for entire time range mode', () => {
+    it('should ignore entire range mode for timeseries', () => {
+      panel.time_range_mode = 'entire_time_range';
+      panel.type = 'timeseries';
+
+      const next = doc => doc;
+      const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
+        {}
+      );
+
+      expect(doc.aggs.test.aggs.timeseries.auto_date_histogram).to.eql(undefined);
+      expect(doc.aggs.test.aggs.timeseries.date_histogram).to.exist;
+    });
+
+    it('should returns valid date histogram for entire range mode', () => {
+      panel.time_range_mode = 'entire_time_range';
+
+      const next = doc => doc;
+      const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
+        {}
+      );
+      expect(doc).to.eql({
+        aggs: {
+          test: {
+            aggs: {
+              timeseries: {
+                auto_date_histogram: {
+                  field: '@timestamp',
+                  buckets: 1,
+                },
+              },
+            },
+            meta: {
+              timeField: '@timestamp',
+              seriesId: 'test',
+              bucketSize: 10,
+              intervalString: '10s',
+            },
+          },
+        },
+      });
     });
   });
 });

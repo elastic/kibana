@@ -5,42 +5,18 @@
  */
 
 import React, { useMemo, useContext, memo } from 'react';
-import { EuiSelect } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
-import { Visualization, DatasourcePublicAPI } from '../../types';
+import { Visualization, FramePublicAPI } from '../../types';
 import { DragContext } from '../../drag_drop';
+import { ChartSwitch } from './chart_switch';
 
 interface ConfigPanelWrapperProps {
   visualizationState: unknown;
   visualizationMap: Record<string, Visualization>;
   activeVisualizationId: string | null;
   dispatch: (action: Action) => void;
-  datasourcePublicAPI: DatasourcePublicAPI;
-}
-
-function getSuggestedVisualizationState(
-  visualization: Visualization,
-  datasource: DatasourcePublicAPI
-) {
-  const suggestions = visualization.getSuggestions({
-    tables: [
-      {
-        datasourceSuggestionId: 0,
-        isMultiRow: true,
-        columns: datasource.getTableSpec().map(col => ({
-          ...col,
-          operation: datasource.getOperationForColumnId(col.columnId)!,
-        })),
-      },
-    ],
-  });
-
-  if (!suggestions.length) {
-    return visualization.initialize(datasource);
-  }
-
-  return visualization.initialize(datasource, suggestions[0].state);
+  framePublicAPI: FramePublicAPI;
 }
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
@@ -57,35 +33,26 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
 
   return (
     <>
-      <EuiSelect
-        data-test-subj="visualization-switch"
-        options={Object.keys(props.visualizationMap).map(visualizationId => ({
-          value: visualizationId,
-          text: visualizationId,
-        }))}
-        value={props.activeVisualizationId || undefined}
-        onChange={e => {
-          const newState = getSuggestedVisualizationState(
-            props.visualizationMap[e.target.value],
-            props.datasourcePublicAPI
-          );
-          props.dispatch({
-            type: 'SWITCH_VISUALIZATION',
-            newVisualizationId: e.target.value,
-            initialState: newState,
-          });
-        }}
+      <ChartSwitch
+        data-test-subj="lnsChartSwitcher"
+        visualizationMap={props.visualizationMap}
+        visualizationId={props.activeVisualizationId}
+        visualizationState={props.visualizationState}
+        dispatch={props.dispatch}
+        framePublicAPI={props.framePublicAPI}
       />
       {props.activeVisualizationId && props.visualizationState !== null && (
-        <NativeRenderer
-          render={props.visualizationMap[props.activeVisualizationId].renderConfigPanel}
-          nativeProps={{
-            dragDropContext: context,
-            state: props.visualizationState,
-            setState: setVisualizationState,
-            datasource: props.datasourcePublicAPI,
-          }}
-        />
+        <div className="lnsConfigPanelWrapper">
+          <NativeRenderer
+            render={props.visualizationMap[props.activeVisualizationId].renderConfigPanel}
+            nativeProps={{
+              dragDropContext: context,
+              state: props.visualizationState,
+              setState: setVisualizationState,
+              frame: props.framePublicAPI,
+            }}
+          />
+        </div>
       )}
     </>
   );

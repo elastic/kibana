@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import { KibanaTilemapSource } from '../shared/layers/sources/kibana_tilemap_source';
-import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
+import { KibanaTilemapSource } from '../layers/sources/kibana_tilemap_source';
+import { EMSTMSSource } from '../layers/sources/ems_tms_source';
 import chrome from 'ui/chrome';
 import { getKibanaTileMap } from '../meta';
 

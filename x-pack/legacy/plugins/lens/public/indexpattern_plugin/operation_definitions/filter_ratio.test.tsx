@@ -9,12 +9,24 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { act } from 'react-dom/test-utils';
 import { filterRatioOperation } from './filter_ratio';
 import { FilterRatioIndexPatternColumn, IndexPatternPrivateState } from '../indexpattern';
+import { Storage } from 'ui/storage';
+import { DataPluginDependencies } from '../plugin';
 
 describe('filter_ratio', () => {
   let state: IndexPatternPrivateState;
-  let storageMock: any;
-  let dataMock: any;
+  let storageMock: Storage;
+  let mockedDependencies: DataPluginDependencies;
   const InlineOptions = filterRatioOperation.paramEditor!;
+
+  class MockQueryBarInput {
+    props: {};
+    constructor(props: {}) {
+      this.props = props;
+    }
+    render() {
+      return <></>;
+    }
+  }
 
   beforeEach(() => {
     state = {
@@ -26,45 +38,41 @@ describe('filter_ratio', () => {
         },
       },
       currentIndexPatternId: '1',
-      columnOrder: ['col1'],
-      columns: {
-        col1: {
-          operationId: 'op1',
-          label: 'Filter Ratio',
-          dataType: 'number',
-          isBucketed: false,
+      layers: {
+        first: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              label: 'Filter Ratio',
+              dataType: 'number',
+              isBucketed: false,
 
-          // Private
-          operationType: 'filter_ratio',
-          params: {
-            numerator: { query: '', language: 'kuery' },
-            denominator: { query: '', language: 'kuery' },
+              // Private
+              operationType: 'filter_ratio',
+              params: {
+                numerator: { query: '', language: 'kuery' },
+                denominator: { query: '', language: 'kuery' },
+              },
+            },
           },
         },
       },
     };
 
-    class QueryBarInput {
-      props: any;
-      constructor(props: any) {
-        this.props = props;
-      }
-      render() {
-        return <></>;
-      }
-    }
-
-    storageMock = {
-      getItem() {},
-    };
-    dataMock = {
-      query: { ui: { QueryBarInput } },
-    };
+    storageMock = {} as Storage;
+    mockedDependencies = ({
+      components: { QueryBarInput: MockQueryBarInput },
+    } as unknown) as DataPluginDependencies;
   });
 
   describe('buildColumn', () => {
     it('should create column object with default params', () => {
-      const column = filterRatioOperation.buildColumn('op', {}, 0);
+      const column = filterRatioOperation.buildColumn({
+        layerId: 'first',
+        columns: {},
+        suggestedPriority: undefined,
+      });
       expect(column.params.numerator).toEqual({ query: '', language: 'kuery' });
       expect(column.params.denominator).toEqual({ query: '', language: 'kuery' });
     });
@@ -73,7 +81,7 @@ describe('filter_ratio', () => {
   describe('toEsAggsConfig', () => {
     it('should reflect params correctly', () => {
       const esAggsConfig = filterRatioOperation.toEsAggsConfig(
-        state.columns.col1 as FilterRatioIndexPatternColumn,
+        state.layers.first.columns.col1 as FilterRatioIndexPatternColumn,
         'col1'
       );
       expect(esAggsConfig).toEqual(
@@ -100,11 +108,12 @@ describe('filter_ratio', () => {
       expect(() => {
         shallowWithIntl(
           <InlineOptions
+            layerId="first"
             state={state}
             setState={jest.fn()}
             columnId="col1"
             storage={storageMock}
-            dataPlugin={dataMock}
+            dataPluginDependencies={mockedDependencies}
           />
         );
       }).not.toThrow();
@@ -113,43 +122,51 @@ describe('filter_ratio', () => {
     it('should show only the numerator by default', () => {
       const wrapper = shallowWithIntl(
         <InlineOptions
+          layerId="first"
           state={state}
           setState={jest.fn()}
           columnId="col1"
           storage={storageMock}
-          dataPlugin={dataMock}
+          dataPluginDependencies={mockedDependencies}
         />
       );
 
-      expect(wrapper.find('QueryBarInput')).toHaveLength(1);
-      expect(wrapper.find('QueryBarInput').prop('indexPatterns')).toEqual(['1']);
+      expect(wrapper.find(MockQueryBarInput)).toHaveLength(1);
+      expect(wrapper.find(MockQueryBarInput).prop('indexPatterns')).toEqual(['Mock Indexpattern']);
     });
 
     it('should update the state when typing into the query bar', () => {
       const setState = jest.fn();
       const wrapper = shallowWithIntl(
         <InlineOptions
+          layerId="first"
           state={state}
           setState={setState}
           columnId="col1"
           storage={storageMock}
-          dataPlugin={dataMock}
+          dataPluginDependencies={mockedDependencies}
         />
       );
 
-      wrapper.find('QueryBarInput').prop('onChange')!({
+      wrapper.find(MockQueryBarInput).prop('onChange')!({
         query: 'geo.src : "US"',
         language: 'kuery',
-      } as any);
+      });
 
       expect(setState).toHaveBeenCalledWith({
         ...state,
-        columns: {
-          col1: {
-            ...state.columns.col1,
-            params: {
-              numerator: { query: 'geo.src : "US"', language: 'kuery' },
-              denominator: { query: '', language: 'kuery' },
+        layers: {
+          ...state.layers,
+          first: {
+            ...state.layers.first,
+            columns: {
+              col1: {
+                ...state.layers.first.columns.col1,
+                params: {
+                  numerator: { query: 'geo.src : "US"', language: 'kuery' },
+                  denominator: { query: '', language: 'kuery' },
+                },
+              },
             },
           },
         },
@@ -160,11 +177,12 @@ describe('filter_ratio', () => {
       const setState = jest.fn();
       const wrapper = shallowWithIntl(
         <InlineOptions
+          layerId="first"
           state={state}
           setState={setState}
           columnId="col1"
           storage={storageMock}
-          dataPlugin={dataMock}
+          dataPluginDependencies={mockedDependencies}
         />
       );
 
@@ -175,24 +193,30 @@ describe('filter_ratio', () => {
           .simulate('click');
       });
 
-      expect(wrapper.find('QueryBarInput')).toHaveLength(2);
+      expect(wrapper.find(MockQueryBarInput)).toHaveLength(2);
 
       wrapper
-        .find('QueryBarInput')
+        .find(MockQueryBarInput)
         .at(1)
         .prop('onChange')!({
         query: 'geo.src : "US"',
         language: 'kuery',
-      } as any);
+      });
 
       expect(setState).toHaveBeenCalledWith({
         ...state,
-        columns: {
-          col1: {
-            ...state.columns.col1,
-            params: {
-              numerator: { query: '', language: 'kuery' },
-              denominator: { query: 'geo.src : "US"', language: 'kuery' },
+        layers: {
+          ...state.layers,
+          first: {
+            ...state.layers.first,
+            columns: {
+              col1: {
+                ...state.layers.first.columns.col1,
+                params: {
+                  numerator: { query: '', language: 'kuery' },
+                  denominator: { query: 'geo.src : "US"', language: 'kuery' },
+                },
+              },
             },
           },
         },

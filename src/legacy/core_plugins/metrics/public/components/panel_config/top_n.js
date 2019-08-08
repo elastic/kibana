@@ -43,9 +43,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
-import { data } from 'plugins/data/setup';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-const { QueryBarInput } = data.query.ui;
+import { QueryBarInput } from 'plugins/data';
 const localStorage = new Storage(window.localStorage);
 
 export class TopNPanelConfig extends Component {
@@ -84,7 +83,6 @@ export class TopNPanelConfig extends Component {
           fields={this.props.fields}
           model={this.props.model}
           name={this.props.name}
-          visData$={this.props.visData$}
           onChange={this.props.onChange}
         />
       );
@@ -249,5 +247,4 @@ TopNPanelConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  visData$: PropTypes.object,
 };

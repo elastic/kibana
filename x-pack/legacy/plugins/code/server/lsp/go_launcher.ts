@@ -16,7 +16,7 @@ import { InitializeOptions, RequestExpander } from './request_expander';
 const GO_LANG_DETACH_PORT = 2091;
 
 export class GoServerLauncher extends AbstractLauncher {
-  public constructor(
+  constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
     readonly loggerFactory: LoggerFactory

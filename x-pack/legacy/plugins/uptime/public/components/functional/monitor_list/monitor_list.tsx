@@ -134,6 +134,7 @@ export const MonitorListComponent = (props: Props) => {
           // sorting={sorting}
           columns={[
             {
+              align: 'left',
               field: 'monitor_id',
               name: '',
               sortable: true,
@@ -165,6 +166,7 @@ export const MonitorListComponent = (props: Props) => {
               },
             },
             {
+              align: 'left',
               field: 'state.monitor.status',
               name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
                 defaultMessage: 'Status',
@@ -174,6 +176,7 @@ export const MonitorListComponent = (props: Props) => {
               },
             },
             {
+              align: 'left',
               field: 'state.monitor.name',
               name: i18n.translate('xpack.uptime.monitorList.nameColumnLabel', {
                 defaultMessage: 'Name',
@@ -190,6 +193,7 @@ export const MonitorListComponent = (props: Props) => {
               sortable: true,
             },
             {
+              align: 'left',
               field: 'state.url.full',
               name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
                 defaultMessage: 'URL',

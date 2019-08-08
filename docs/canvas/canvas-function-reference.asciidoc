@@ -567,7 +567,7 @@ Default: `"-_index:.kibana"`
 |`number`
 |The number of documents to retrieve. For better performance, use a smaller data set.
 
-Default: `100`
+Default: `1000`
 
 |`fields`
 |`string`
@@ -1161,7 +1161,7 @@ Default: `""`
 |`style`
 |The CSS font properties for the content. For example, `font-family` or `font-weight`.
 
-Default: `{<<font_fn>>}`
+Default: `{font}`
 |===
 
 *Returns:* `render`
@@ -1213,13 +1213,13 @@ Default: `""`
 |`style`
 |The CSS font properties for the metric. For example, `font-family` or `font-weight`.
 
-Default: `{<<font_fn>> size=48 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center lHeight=48}`.
+Default: `{font size=48 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center lHeight=48}`.
 
 |`labelFont`
 |`style`
 |The CSS font properties for the label. For example, `font-family` or `font-weight`.
 
-Default: `{<<font_fn>> size=14 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}`.
+Default: `{font size=14 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}`.
 |===
 
 *Returns:* `render`
@@ -1305,7 +1305,7 @@ Configures a pie chart element.
 |`style`
 |The CSS font properties for the labels. For example, `font-family` or `font-weight`.
 
-Default: `{<<font_fn>>}`
+Default: `{font}`
 
 |`hole`
 |`number`
@@ -1335,7 +1335,7 @@ Default: `false`
 |`palette`
 |A `palette` object for describing the colors to use in this pie chart 
 
-Default: `{<<palette_fn>>}`
+Default: `{palette}`
 
 |`radius`
 |`string`, `number`
@@ -1373,13 +1373,13 @@ Configures a plot element.
 |`seriesStyle`
 |The default style to use for every series.
 
-Default: `{<<seriesStyle_fn>> points=5}`
+Default: `{seriesStyle points=5}`
 
 |`font`
 |`style`
 |The CSS font properties for the labels. For example, `font-family` or `font-weight`.
 
-Default: `{<<font_fn>>}`
+Default: `{font}`
 
 |`legend`
 |`string`, `boolean`
@@ -1391,7 +1391,7 @@ Default: `"ne"`
 |`palette`
 |A `palette` object for describing the colors to use in this chart 
 
-Default: `{<<palette_fn>>}`
+Default: `{palette}`
 
 |`seriesStyle` †
 |`seriesStyle`
@@ -1512,7 +1512,7 @@ Default: `20`
 |`style`
 |The CSS font properties for the label. For example, `font-family` or `font-weight`.
 
-Default: `{<<font_fn>> size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}`
+Default: `{font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}`
 
 |`label`
 |`boolean`, `string`
@@ -1572,7 +1572,7 @@ Default: `".canvasRenderEl{\n\n}"`
 |`containerStyle`
 |The style for the container, including background, border, and opacity.
 
-Default: `{<<containerStyle_fn>>}`
+Default: `{containerStyle}`
 |===
 
 *Returns:* `render`
@@ -1726,7 +1726,7 @@ Alias: `format`
 [[rowCount_fn]]
 === `rowCount`
 
-Returns the number of rows. Pairs with `<<ply_fn>>` to get the count of unique column values, or combinations of unique column values.
+Returns the number of rows. Pairs with <<ply_fn>> to get the count of unique column values, or combinations of unique column values.
 
 *Accepts:* `datatable`
 
@@ -1964,7 +1964,7 @@ Configures a table element.
 |`style`
 |The CSS font properties for the contents of the table. For example, `font-family` or `font-weight`.
 
-Default: `{<<font_fn>>}`
+Default: `{font}`
 
 |`paginate`
 |`boolean`

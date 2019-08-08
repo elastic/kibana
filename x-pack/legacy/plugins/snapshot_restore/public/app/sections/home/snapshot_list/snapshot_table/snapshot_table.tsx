@@ -16,9 +16,9 @@ import {
 } from '@elastic/eui';
 
 import { SnapshotDetails } from '../../../../../../common/types';
-import { BASE_PATH, SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
+import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
-import { linkToRepository } from '../../../../services/navigation';
+import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
 import { uiMetricService } from '../../../../services/ui_metric';
 import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
 
@@ -28,6 +28,7 @@ interface Props {
   reload: () => Promise<void>;
   openSnapshotDetailsUrl: (repositoryName: string, snapshotId: string) => string;
   repositoryFilter?: string;
+  policyFilter?: string;
   onSnapshotDeleted: (snapshotsDeleted: Array<{ snapshot: string; repository: string }>) => void;
 }
 
@@ -38,6 +39,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   openSnapshotDetailsUrl,
   onSnapshotDeleted,
   repositoryFilter,
+  policyFilter,
 }) => {
   const {
     core: { i18n },
@@ -181,7 +183,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
                   iconType="importAction"
                   color="primary"
                   data-test-subj="srsnapshotListRestoreActionButton"
-                  href={`#${BASE_PATH}/restore/${repository}/${snapshot}`}
+                  href={linkToRestoreSnapshot(repository, snapshot)}
                   isDisabled={!canRestore}
                 />
               </EuiToolTip>
@@ -251,6 +253,9 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   const searchSchema = {
     fields: {
       repository: {
+        type: 'string',
+      },
+      policyName: {
         type: 'string',
       },
     },
@@ -336,8 +341,15 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
         })),
       },
     ],
-    defaultQuery: repositoryFilter
-      ? Query.parse(`repository:'${repositoryFilter}'`, {
+    defaultQuery: policyFilter
+      ? Query.parse(`policyName="${policyFilter}"`, {
+          schema: {
+            ...searchSchema,
+            strict: true,
+          },
+        })
+      : repositoryFilter
+      ? Query.parse(`repository="${repositoryFilter}"`, {
           schema: {
             ...searchSchema,
             strict: true,
@@ -359,7 +371,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       rowProps={() => ({
         'data-test-subj': 'row',
       })}
-      cellProps={(item: any, column: any) => ({
+      cellProps={() => ({
         'data-test-subj': 'cell',
       })}
       data-test-subj="snapshotTable"

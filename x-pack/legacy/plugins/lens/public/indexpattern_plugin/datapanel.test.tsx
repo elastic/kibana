@@ -8,9 +8,8 @@ import { shallow } from 'enzyme';
 import React, { ChangeEvent, ReactElement } from 'react';
 import { EuiComboBox, EuiFieldSearch, EuiContextMenuPanel } from '@elastic/eui';
 import { IndexPatternPrivateState } from './indexpattern';
-import { DatasourceDataPanelProps } from '../types';
 import { createMockedDragDropContext } from './mocks';
-import { IndexPatternDataPanel } from './datapanel';
+import { InnerIndexPatternDataPanel } from './datapanel';
 import { FieldItem } from './field_item';
 import { act } from 'react-dom/test-utils';
 
@@ -18,20 +17,24 @@ jest.mock('./loader');
 
 const initialState: IndexPatternPrivateState = {
   currentIndexPatternId: '1',
-  columnOrder: ['col1'],
-  columns: {
-    col1: {
-      operationId: 'op1',
-      label: 'My Op',
-      dataType: 'string',
-      isBucketed: true,
-      operationType: 'terms',
-      sourceField: 'op',
-      params: {
-        size: 5,
-        orderDirection: 'asc',
-        orderBy: {
-          type: 'alphabetical',
+  layers: {
+    first: {
+      indexPatternId: '1',
+      columnOrder: ['col1'],
+      columns: {
+        col1: {
+          label: 'My Op',
+          dataType: 'string',
+          isBucketed: true,
+          operationType: 'terms',
+          sourceField: 'op',
+          params: {
+            size: 5,
+            orderDirection: 'asc',
+            orderBy: {
+              type: 'alphabetical',
+            },
+          },
         },
       },
     },
@@ -133,30 +136,34 @@ const initialState: IndexPatternPrivateState = {
   },
 };
 describe('IndexPattern Data Panel', () => {
-  let defaultProps: DatasourceDataPanelProps<IndexPatternPrivateState>;
+  let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0];
 
   beforeEach(() => {
     defaultProps = {
-      state: initialState,
-      setState: jest.fn(),
       dragDropContext: createMockedDragDropContext(),
+      currentIndexPatternId: '1',
+      indexPatterns: initialState.indexPatterns,
+      showIndexPatternSwitcher: false,
+      setShowIndexPatternSwitcher: jest.fn(),
+      onChangeIndexPattern: jest.fn(),
     };
   });
 
   it('should render a warning if there are no index patterns', () => {
     const wrapper = shallow(
-      <IndexPatternDataPanel
-        {...defaultProps}
-        state={{ ...initialState, currentIndexPatternId: '', indexPatterns: {} }}
-      />
+      <InnerIndexPatternDataPanel {...defaultProps} currentIndexPatternId="" indexPatterns={{}} />
     );
     expect(wrapper.find('[data-test-subj="indexPattern-no-indexpatterns"]')).toHaveLength(1);
   });
 
   it('should call setState when the index pattern is switched', async () => {
-    const wrapper = shallow(<IndexPatternDataPanel {...defaultProps} />);
+    const wrapper = shallow(<InnerIndexPatternDataPanel {...defaultProps} />);
 
     wrapper.find('[data-test-subj="indexPattern-switch-link"]').simulate('click');
+
+    expect(defaultProps.setShowIndexPatternSwitcher).toHaveBeenCalledWith(true);
+
+    wrapper.setProps({ showIndexPatternSwitcher: true });
 
     const comboBox = wrapper.find(EuiComboBox);
 
@@ -167,14 +174,11 @@ describe('IndexPattern Data Panel', () => {
       },
     ]);
 
-    expect(defaultProps.setState).toHaveBeenCalledWith({
-      ...initialState,
-      currentIndexPatternId: '2',
-    });
+    expect(defaultProps.onChangeIndexPattern).toHaveBeenCalledWith('2');
   });
 
   it('should list all supported fields in the pattern sorted alphabetically', async () => {
-    const wrapper = shallow(<IndexPatternDataPanel {...defaultProps} />);
+    const wrapper = shallow(<InnerIndexPatternDataPanel {...defaultProps} />);
 
     expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
       'bytes',
@@ -185,7 +189,7 @@ describe('IndexPattern Data Panel', () => {
   });
 
   it('should filter down by name', async () => {
-    const wrapper = shallow(<IndexPatternDataPanel {...defaultProps} />);
+    const wrapper = shallow(<InnerIndexPatternDataPanel {...defaultProps} />);
 
     act(() => {
       wrapper.find(EuiFieldSearch).prop('onChange')!({ target: { value: 'mem' } } as ChangeEvent<
@@ -199,7 +203,7 @@ describe('IndexPattern Data Panel', () => {
   });
 
   it('should filter down by type', async () => {
-    const wrapper = shallow(<IndexPatternDataPanel {...defaultProps} />);
+    const wrapper = shallow(<InnerIndexPatternDataPanel {...defaultProps} />);
 
     act(() => {
       (wrapper
@@ -217,7 +221,7 @@ describe('IndexPattern Data Panel', () => {
   });
 
   it('should toggle type if clicked again', async () => {
-    const wrapper = shallow(<IndexPatternDataPanel {...defaultProps} />);
+    const wrapper = shallow(<InnerIndexPatternDataPanel {...defaultProps} />);
 
     act(() => {
       (wrapper
@@ -246,7 +250,7 @@ describe('IndexPattern Data Panel', () => {
   });
 
   it('should filter down by type and by name', async () => {
-    const wrapper = shallow(<IndexPatternDataPanel {...defaultProps} />);
+    const wrapper = shallow(<InnerIndexPatternDataPanel {...defaultProps} />);
 
     act(() => {
       wrapper.find(EuiFieldSearch).prop('onChange')!({ target: { value: 'mem' } } as ChangeEvent<

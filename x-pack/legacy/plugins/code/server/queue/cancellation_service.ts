@@ -7,62 +7,79 @@
 import { RepositoryUri } from '../../model';
 import { CancellationToken } from '../lib/esqueue';
 
+interface CancellableJob {
+  token: CancellationToken;
+  jobPromise: Promise<any>;
+}
+
 export class CancellationSerivce {
-  private cloneCancellationMap: Map<RepositoryUri, CancellationToken>;
-  private updateCancellationMap: Map<RepositoryUri, CancellationToken>;
-  private indexCancellationMap: Map<RepositoryUri, CancellationToken>;
+  private cloneCancellationMap: Map<RepositoryUri, CancellableJob>;
+  private updateCancellationMap: Map<RepositoryUri, CancellableJob>;
+  private indexCancellationMap: Map<RepositoryUri, CancellableJob>;
 
   constructor() {
-    this.cloneCancellationMap = new Map<RepositoryUri, CancellationToken>();
-    this.updateCancellationMap = new Map<RepositoryUri, CancellationToken>();
-    this.indexCancellationMap = new Map<RepositoryUri, CancellationToken>();
+    this.cloneCancellationMap = new Map<RepositoryUri, CancellableJob>();
+    this.updateCancellationMap = new Map<RepositoryUri, CancellableJob>();
+    this.indexCancellationMap = new Map<RepositoryUri, CancellableJob>();
   }
 
-  public cancelCloneJob(repoUri: RepositoryUri) {
-    const token = this.cloneCancellationMap.get(repoUri);
-    if (token) {
-      token.cancel();
-      this.cloneCancellationMap.delete(repoUri);
-    }
+  public async cancelCloneJob(repoUri: RepositoryUri) {
+    await this.cancelJob(this.cloneCancellationMap, repoUri);
   }
 
-  public cancelUpdateJob(repoUri: RepositoryUri) {
-    const token = this.updateCancellationMap.get(repoUri);
-    if (token) {
-      token.cancel();
-      this.updateCancellationMap.delete(repoUri);
-    }
+  public async cancelUpdateJob(repoUri: RepositoryUri) {
+    await this.cancelJob(this.updateCancellationMap, repoUri);
   }
 
-  public cancelIndexJob(repoUri: RepositoryUri) {
-    const token = this.indexCancellationMap.get(repoUri);
-    if (token) {
-      token.cancel();
-      this.indexCancellationMap.delete(repoUri);
-    }
+  public async cancelIndexJob(repoUri: RepositoryUri) {
+    await this.cancelJob(this.indexCancellationMap, repoUri);
   }
 
-  public registerCloneJobToken(repoUri: RepositoryUri, cancellationToken: CancellationToken) {
-    const token = this.cloneCancellationMap.get(repoUri);
-    if (token) {
-      token.cancel();
-    }
-    this.cloneCancellationMap.set(repoUri, cancellationToken);
+  public async registerCancelableCloneJob(
+    repoUri: RepositoryUri,
+    token: CancellationToken,
+    jobPromise: Promise<any>
+  ) {
+    await this.registerCancelableJob(this.cloneCancellationMap, repoUri, token, jobPromise);
   }
 
-  public registerUpdateJobToken(repoUri: RepositoryUri, cancellationToken: CancellationToken) {
-    const token = this.updateCancellationMap.get(repoUri);
-    if (token) {
-      token.cancel();
-    }
-    this.updateCancellationMap.set(repoUri, cancellationToken);
+  public async registerCancelableUpdateJob(
+    repoUri: RepositoryUri,
+    token: CancellationToken,
+    jobPromise: Promise<any>
+  ) {
+    await this.registerCancelableJob(this.updateCancellationMap, repoUri, token, jobPromise);
   }
 
-  public registerIndexJobToken(repoUri: RepositoryUri, cancellationToken: CancellationToken) {
-    const token = this.indexCancellationMap.get(repoUri);
-    if (token) {
+  public async registerCancelableIndexJob(
+    repoUri: RepositoryUri,
+    token: CancellationToken,
+    jobPromise: Promise<any>
+  ) {
+    await this.registerCancelableJob(this.indexCancellationMap, repoUri, token, jobPromise);
+  }
+
+  private async registerCancelableJob(
+    jobMap: Map<RepositoryUri, CancellableJob>,
+    repoUri: RepositoryUri,
+    token: CancellationToken,
+    jobPromise: Promise<any>
+  ) {
+    // Try to cancel the job first.
+    await this.cancelJob(jobMap, repoUri);
+    jobMap.set(repoUri, { token, jobPromise });
+  }
+
+  private async cancelJob(jobMap: Map<RepositoryUri, CancellableJob>, repoUri: RepositoryUri) {
+    const payload = jobMap.get(repoUri);
+    if (payload) {
+      const { token, jobPromise } = payload;
+      // 1. Use the cancellation token to pass cancel message to job
       token.cancel();
+      // 2. waiting on the actual job promise to be resolved
+      await jobPromise;
+      // 3. remove the record from the cancellation service
+      jobMap.delete(repoUri);
     }
-    this.indexCancellationMap.set(repoUri, cancellationToken);
   }
 }

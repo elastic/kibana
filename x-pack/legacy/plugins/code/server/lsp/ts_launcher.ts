@@ -17,7 +17,7 @@ import { InitializeOptions, RequestExpander } from './request_expander';
 const TS_LANG_DETACH_PORT = 2089;
 
 export class TypescriptServerLauncher extends AbstractLauncher {
-  public constructor(
+  constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
     readonly loggerFactory: LoggerFactory

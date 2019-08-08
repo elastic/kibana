@@ -38,18 +38,6 @@ const throwErrorIfNamespaceSpecified = (options: any) => {
   }
 };
 
-const throwErrorIfTypeIsSpace = (type: string) => {
-  if (type === 'space') {
-    throw new Error('Spaces can not be accessed using the SavedObjectsClient');
-  }
-};
-
-const throwErrorIfTypesContainsSpace = (types: string[]) => {
-  for (const type of types) {
-    throwErrorIfTypeIsSpace(type);
-  }
-};
-
 export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   private readonly client: SavedObjectsClientContract;
   private readonly spaceId: string;
@@ -81,7 +69,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     attributes: T = {} as T,
     options: SavedObjectsCreateOptions = {}
   ) {
-    throwErrorIfTypeIsSpace(type);
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.create(type, attributes, {
@@ -103,7 +90,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     objects: SavedObjectsBulkCreateObject[],
     options: SavedObjectsBaseOptions = {}
   ) {
-    throwErrorIfTypesContainsSpace(objects.map(object => object.type));
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.bulkCreate(objects, {
@@ -122,7 +108,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @returns {promise}
    */
   public async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
-    throwErrorIfTypeIsSpace(type);
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.delete(type, id, {
@@ -148,10 +133,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   public async find(options: SavedObjectsFindOptions = {}) {
-    if (options.type) {
-      throwErrorIfTypesContainsSpace(coerceToArray(options.type));
-    }
-
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.find({
@@ -181,7 +162,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ) {
-    throwErrorIfTypesContainsSpace(objects.map(object => object.type));
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.bulkGet(objects, {
@@ -200,7 +180,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @returns {promise} - { id, type, version, attributes }
    */
   public async get(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
-    throwErrorIfTypeIsSpace(type);
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.get(type, id, {
@@ -225,7 +204,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     attributes: Partial<T>,
     options: SavedObjectsUpdateOptions = {}
   ) {
-    throwErrorIfTypeIsSpace(type);
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.update(type, id, attributes, {

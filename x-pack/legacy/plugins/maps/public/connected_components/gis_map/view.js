@@ -83,6 +83,7 @@ export class GisMap extends Component {
 
   render() {
     const {
+      addFilters,
       layerDetailsVisible,
       addLayerVisible,
       noFlyoutVisible,
@@ -139,8 +140,8 @@ export class GisMap extends Component {
         data-shared-item
       >
         <EuiFlexItem className="mapMapWrapper">
-          <MBMapContainer/>
-          <ToolbarOverlay />
+          <MBMapContainer addFilters={addFilters}/>
+          <ToolbarOverlay addFilters={addFilters}/>
           <WidgetOverlay/>
         </EuiFlexItem>
 

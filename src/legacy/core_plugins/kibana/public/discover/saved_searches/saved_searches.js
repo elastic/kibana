@@ -22,9 +22,7 @@ import 'ui/notify';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-const module = uiModules.get('discover/saved_searches', [
-  'kibana/notify'
-]);
+const module = uiModules.get('discover/saved_searches');
 
 // Register this service with the saved object registry so it can be
 // edited by the object editor.

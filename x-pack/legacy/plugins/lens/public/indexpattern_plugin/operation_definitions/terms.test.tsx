@@ -9,6 +9,7 @@ import { termsOperation } from './terms';
 import { shallow } from 'enzyme';
 import { IndexPatternPrivateState, TermsIndexPatternColumn } from '../indexpattern';
 import { EuiRange, EuiSelect } from '@elastic/eui';
+import { DataPluginDependencies } from '..';
 
 describe('terms', () => {
   let state: IndexPatternPrivateState;
@@ -18,31 +19,34 @@ describe('terms', () => {
     state = {
       indexPatterns: {},
       currentIndexPatternId: '1',
-      columnOrder: ['col1', 'col2'],
-      columns: {
-        col1: {
-          operationId: 'op1',
-          label: 'Top value of category',
-          dataType: 'string',
-          isBucketed: true,
+      layers: {
+        first: {
+          indexPatternId: '1',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: {
+              label: 'Top value of category',
+              dataType: 'string',
+              isBucketed: true,
 
-          // Private
-          operationType: 'terms',
-          params: {
-            orderBy: { type: 'alphabetical' },
-            size: 5,
-            orderDirection: 'asc',
+              // Private
+              operationType: 'terms',
+              params: {
+                orderBy: { type: 'alphabetical' },
+                size: 3,
+                orderDirection: 'asc',
+              },
+              sourceField: 'category',
+            },
+            col2: {
+              label: 'Count',
+              dataType: 'number',
+              isBucketed: false,
+
+              // Private
+              operationType: 'count',
+            },
           },
-          sourceField: 'category',
-        },
-        col2: {
-          operationId: 'op1',
-          label: 'Count',
-          dataType: 'number',
-          isBucketed: false,
-
-          // Private
-          operationType: 'count',
         },
       },
     };
@@ -51,7 +55,7 @@ describe('terms', () => {
   describe('toEsAggsConfig', () => {
     it('should reflect params correctly', () => {
       const esAggsConfig = termsOperation.toEsAggsConfig(
-        state.columns.col1 as TermsIndexPatternColumn,
+        state.layers.first.columns.col1 as TermsIndexPatternColumn,
         'col1'
       );
       expect(esAggsConfig).toEqual(
@@ -59,24 +63,106 @@ describe('terms', () => {
           params: expect.objectContaining({
             orderBy: '_key',
             field: 'category',
-            size: 5,
+            size: 3,
           }),
         })
       );
     });
   });
 
-  describe('buildColumn', () => {
-    it('should use existing metric column as order column', () => {
-      const termsColumn = termsOperation.buildColumn('abc', {
-        col1: {
-          operationId: 'op1',
-          label: 'Count',
-          dataType: 'number',
-          isBucketed: false,
+  describe('getPossibleOperationsForField', () => {
+    it('should return operation with the right type', () => {
+      expect(
+        termsOperation.getPossibleOperationsForField({
+          aggregatable: true,
+          searchable: true,
+          name: 'test',
+          type: 'string',
+          aggregationRestrictions: {
+            terms: {
+              agg: 'terms',
+            },
+          },
+        })
+      ).toEqual([
+        {
+          dataType: 'string',
+          isBucketed: true,
+        },
+      ]);
 
-          // Private
-          operationType: 'count',
+      expect(
+        termsOperation.getPossibleOperationsForField({
+          aggregatable: true,
+          searchable: true,
+          name: 'test',
+          type: 'boolean',
+        })
+      ).toEqual([
+        {
+          dataType: 'boolean',
+          isBucketed: true,
+        },
+      ]);
+    });
+
+    it('should not return an operation if restrictions prevent terms', () => {
+      expect(
+        termsOperation.getPossibleOperationsForField({
+          aggregatable: false,
+          searchable: true,
+          name: 'test',
+          type: 'string',
+        })
+      ).toEqual([]);
+
+      expect(
+        termsOperation.getPossibleOperationsForField({
+          aggregatable: true,
+          aggregationRestrictions: {},
+          searchable: true,
+          name: 'test',
+          type: 'string',
+        })
+      ).toEqual([]);
+    });
+  });
+
+  describe('buildColumn', () => {
+    it('should use type from the passed field', () => {
+      const termsColumn = termsOperation.buildColumn({
+        layerId: 'first',
+        suggestedPriority: undefined,
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+        },
+        columns: {},
+      });
+      expect(termsColumn.dataType).toEqual('boolean');
+    });
+
+    it('should use existing metric column as order column', () => {
+      const termsColumn = termsOperation.buildColumn({
+        layerId: 'first',
+        suggestedPriority: undefined,
+        columns: {
+          col1: {
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+
+            // Private
+            operationType: 'count',
+          },
+        },
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
         },
       });
       expect(termsColumn.params).toEqual(
@@ -90,7 +176,6 @@ describe('terms', () => {
   describe('onOtherColumnChanged', () => {
     it('should keep the column if order by column still exists and is metric', () => {
       const initialColumn: TermsIndexPatternColumn = {
-        operationId: 'op1',
         label: 'Top value of category',
         dataType: 'string',
         isBucketed: true,
@@ -99,14 +184,13 @@ describe('terms', () => {
         operationType: 'terms',
         params: {
           orderBy: { type: 'column', columnId: 'col1' },
-          size: 5,
+          size: 3,
           orderDirection: 'asc',
         },
         sourceField: 'category',
       };
       const updatedColumn = termsOperation.onOtherColumnChanged!(initialColumn, {
         col1: {
-          operationId: 'op1',
           label: 'Count',
           dataType: 'number',
           isBucketed: false,
@@ -121,7 +205,6 @@ describe('terms', () => {
     it('should switch to alphabetical ordering if the order column is removed', () => {
       const termsColumn = termsOperation.onOtherColumnChanged!(
         {
-          operationId: 'op1',
           label: 'Top value of category',
           dataType: 'string',
           isBucketed: true,
@@ -130,7 +213,7 @@ describe('terms', () => {
           operationType: 'terms',
           params: {
             orderBy: { type: 'column', columnId: 'col1' },
-            size: 5,
+            size: 3,
             orderDirection: 'asc',
           },
           sourceField: 'category',
@@ -147,7 +230,6 @@ describe('terms', () => {
     it('should switch to alphabetical ordering if the order column is not a metric anymore', () => {
       const termsColumn = termsOperation.onOtherColumnChanged!(
         {
-          operationId: 'op1',
           label: 'Top value of category',
           dataType: 'string',
           isBucketed: true,
@@ -156,14 +238,13 @@ describe('terms', () => {
           operationType: 'terms',
           params: {
             orderBy: { type: 'column', columnId: 'col1' },
-            size: 5,
+            size: 3,
             orderDirection: 'asc',
           },
           sourceField: 'category',
         },
         {
           col1: {
-            operationId: 'op1',
             label: 'Value of timestamp',
             dataType: 'date',
             isBucketed: true,
@@ -189,7 +270,13 @@ describe('terms', () => {
     it('should render current order by value and options', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       const select = instance.find('[data-test-subj="indexPattern-terms-orderBy"]').find(EuiSelect);
@@ -208,25 +295,31 @@ describe('terms', () => {
         <InlineOptions
           state={{
             ...state,
-            columns: {
-              ...state.columns,
-              col2: {
-                operationId: 'op1',
-                label: 'Count',
-                dataType: 'number',
-                isBucketed: false,
+            layers: {
+              first: {
+                ...state.layers.first,
+                columns: {
+                  ...state.layers.first.columns,
+                  col2: {
+                    label: 'Count',
+                    dataType: 'number',
+                    isBucketed: false,
 
-                // Private
-                operationType: 'filter_ratio',
-                params: {
-                  numerator: { query: '', language: 'kuery' },
-                  denominator: { query: '', language: 'kuery' },
+                    // Private
+                    operationType: 'filter_ratio',
+                    params: {
+                      numerator: { query: '', language: 'kuery' },
+                      denominator: { query: '', language: 'kuery' },
+                    },
+                  },
                 },
               },
             },
           }}
           setState={setStateSpy}
           columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
         />
       );
 
@@ -238,7 +331,13 @@ describe('terms', () => {
     it('should update state with the order by value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       instance
@@ -252,15 +351,20 @@ describe('terms', () => {
 
       expect(setStateSpy).toHaveBeenCalledWith({
         ...state,
-        columns: {
-          ...state.columns,
-          col1: {
-            ...state.columns.col1,
-            params: {
-              ...(state.columns.col1 as TermsIndexPatternColumn).params,
-              orderBy: {
-                type: 'column',
-                columnId: 'col2',
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: {
+                ...state.layers.first.columns.col1,
+                params: {
+                  ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                  orderBy: {
+                    type: 'column',
+                    columnId: 'col2',
+                  },
+                },
               },
             },
           },
@@ -271,7 +375,13 @@ describe('terms', () => {
     it('should render current order direction value and options', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       const select = instance
@@ -285,7 +395,13 @@ describe('terms', () => {
     it('should update state with the order direction value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       instance
@@ -299,13 +415,18 @@ describe('terms', () => {
 
       expect(setStateSpy).toHaveBeenCalledWith({
         ...state,
-        columns: {
-          ...state.columns,
-          col1: {
-            ...state.columns.col1,
-            params: {
-              ...(state.columns.col1 as TermsIndexPatternColumn).params,
-              orderDirection: 'desc',
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: {
+                ...state.layers.first.columns.col1,
+                params: {
+                  ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                  orderDirection: 'desc',
+                },
+              },
             },
           },
         },
@@ -315,16 +436,28 @@ describe('terms', () => {
     it('should render current size value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
-      expect(instance.find(EuiRange).prop('value')).toEqual(5);
+      expect(instance.find(EuiRange).prop('value')).toEqual(3);
     });
 
     it('should update state with the size value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       instance.find(EuiRange).prop('onChange')!({
@@ -334,13 +467,18 @@ describe('terms', () => {
       } as React.ChangeEvent<HTMLInputElement>);
       expect(setStateSpy).toHaveBeenCalledWith({
         ...state,
-        columns: {
-          ...state.columns,
-          col1: {
-            ...state.columns.col1,
-            params: {
-              ...(state.columns.col1 as TermsIndexPatternColumn).params,
-              size: 7,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: {
+                ...state.layers.first.columns.col1,
+                params: {
+                  ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                  size: 7,
+                },
+              },
             },
           },
         },

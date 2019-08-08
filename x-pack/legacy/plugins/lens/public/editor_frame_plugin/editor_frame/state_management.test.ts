@@ -16,22 +16,20 @@ describe('editor_frame state management', () => {
     beforeEach(() => {
       props = {
         onError: jest.fn(),
-        redirectTo: jest.fn(),
-        store: {
-          load: jest.fn(),
-          save: jest.fn(),
-        },
         datasourceMap: { testDatasource: ({} as unknown) as Datasource },
         visualizationMap: { testVis: ({ initialize: jest.fn() } as unknown) as Visualization },
         initialDatasourceId: 'testDatasource',
         initialVisualizationId: 'testVis',
         ExpressionRenderer: createExpressionRendererMock(),
+        onChange: jest.fn(),
+        dateRange: { fromDate: 'now-7d', toDate: 'now' },
+        query: { query: '', language: 'lucene' },
       };
     });
 
     it('should store initial datasource and visualization', () => {
       const initialState = getInitialState(props);
-      expect(initialState.datasource.activeId).toEqual('testDatasource');
+      expect(initialState.activeDatasourceId).toEqual('testDatasource');
       expect(initialState.visualization.activeId).toEqual('testVis');
     });
 
@@ -41,6 +39,53 @@ describe('editor_frame state management', () => {
       expect(initialState.visualization.state).toBe(null);
       expect(initialState.visualization.activeId).toBe('testVis');
       expect(props.visualizationMap.testVis.initialize).not.toHaveBeenCalled();
+    });
+
+    it('should prefill state if doc is passed in', () => {
+      const initialState = getInitialState({
+        ...props,
+        doc: {
+          activeDatasourceId: 'testDatasource',
+          expression: '',
+          state: {
+            datasourceStates: {
+              testDatasource: { internalState1: '' },
+              testDatasource2: { internalState2: '' },
+            },
+            visualization: {},
+            datasourceMetaData: {
+              filterableIndexPatterns: [],
+            },
+            query: { query: '', language: 'lucene' },
+            filters: [],
+          },
+          title: '',
+          visualizationType: 'testVis',
+        },
+      });
+
+      expect(initialState.datasourceStates).toMatchInlineSnapshot(`
+        Object {
+          "testDatasource": Object {
+            "isLoading": true,
+            "state": Object {
+              "internalState1": "",
+            },
+          },
+          "testDatasource2": Object {
+            "isLoading": true,
+            "state": Object {
+              "internalState2": "",
+            },
+          },
+        }
+      `);
+      expect(initialState.visualization).toMatchInlineSnapshot(`
+        Object {
+          "activeId": "testVis",
+          "state": null,
+        }
+      `);
     });
 
     it('should not set active id if no initial visualization is passed in', () => {
@@ -57,12 +102,13 @@ describe('editor_frame state management', () => {
       const newVisState = {};
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'testDatasource',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            testDatasource: {
+              state: {},
+              isLoading: false,
+            },
           },
-          saving: false,
+          activeDatasourceId: 'testDatasource',
           title: 'aaa',
           visualization: {
             activeId: 'testVis',
@@ -82,12 +128,13 @@ describe('editor_frame state management', () => {
       const newDatasourceState = {};
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'testDatasource',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            testDatasource: {
+              state: {},
+              isLoading: false,
+            },
           },
-          saving: false,
+          activeDatasourceId: 'testDatasource',
           title: 'bbb',
           visualization: {
             activeId: 'testVis',
@@ -97,10 +144,40 @@ describe('editor_frame state management', () => {
         {
           type: 'UPDATE_DATASOURCE_STATE',
           newState: newDatasourceState,
+          datasourceId: 'testDatasource',
         }
       );
 
-      expect(newState.datasource.state).toBe(newDatasourceState);
+      expect(newState.datasourceStates.testDatasource.state).toBe(newDatasourceState);
+    });
+
+    it('should update the datasource state with passed in reducer', () => {
+      const layerReducer = jest.fn((_state, layerId) => ({ inserted: layerId }));
+      const newState = reducer(
+        {
+          datasourceStates: {
+            testDatasource: {
+              state: {},
+              isLoading: false,
+            },
+          },
+          activeDatasourceId: 'testDatasource',
+          title: 'bbb',
+          visualization: {
+            activeId: 'testVis',
+            state: {},
+          },
+        },
+        {
+          type: 'UPDATE_LAYER',
+          layerId: 'abc',
+          updater: layerReducer,
+          datasourceId: 'testDatasource',
+        }
+      );
+
+      expect(newState.datasourceStates.testDatasource.state).toEqual({ inserted: 'abc' });
+      expect(layerReducer).toHaveBeenCalledTimes(1);
     });
 
     it('should should switch active visualization', () => {
@@ -108,12 +185,13 @@ describe('editor_frame state management', () => {
       const newVisState = {};
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'testDatasource',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            testDatasource: {
+              state: {},
+              isLoading: false,
+            },
           },
-          saving: false,
+          activeDatasourceId: 'testDatasource',
           title: 'ccc',
           visualization: {
             activeId: 'testVis',
@@ -136,12 +214,13 @@ describe('editor_frame state management', () => {
       const newDatasourceState = {};
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'testDatasource',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            testDatasource: {
+              state: {},
+              isLoading: false,
+            },
           },
-          saving: false,
+          activeDatasourceId: 'testDatasource',
           title: 'ddd',
           visualization: {
             activeId: 'testVis',
@@ -157,18 +236,19 @@ describe('editor_frame state management', () => {
       );
 
       expect(newState.visualization.state).toBe(newVisState);
-      expect(newState.datasource.state).toBe(newDatasourceState);
+      expect(newState.datasourceStates.testDatasource.state).toBe(newDatasourceState);
     });
 
-    it('should should switch active datasource and purge visualization state', () => {
+    it('should should switch active datasource and initialize new state', () => {
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'testDatasource',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            testDatasource: {
+              state: {},
+              isLoading: false,
+            },
           },
-          saving: false,
+          activeDatasourceId: 'testDatasource',
           title: 'eee',
           visualization: {
             activeId: 'testVis',
@@ -181,93 +261,51 @@ describe('editor_frame state management', () => {
         }
       );
 
-      expect(newState.visualization.state).toEqual(null);
-      expect(newState.visualization.activeId).toBe(null);
-      expect(newState.datasource.activeId).toBe('testDatasource2');
-      expect(newState.datasource.state).toBe(null);
+      expect(newState.activeDatasourceId).toEqual('testDatasource2');
+      expect(newState.datasourceStates.testDatasource2.isLoading).toEqual(true);
     });
 
-    it('should mark as saving', () => {
+    it('not initialize already initialized datasource on switch', () => {
+      const datasource2State = {};
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'a',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            testDatasource: {
+              state: {},
+              isLoading: false,
+            },
+            testDatasource2: {
+              state: datasource2State,
+              isLoading: false,
+            },
           },
-          saving: false,
-          title: 'fff',
+          activeDatasourceId: 'testDatasource',
+          title: 'eee',
           visualization: {
-            activeId: 'b',
+            activeId: 'testVis',
             state: {},
           },
         },
         {
-          type: 'SAVING',
-          isSaving: true,
+          type: 'SWITCH_DATASOURCE',
+          newDatasourceId: 'testDatasource2',
         }
       );
 
-      expect(newState.saving).toBeTruthy();
-    });
-
-    it('should mark as saved', () => {
-      const newState = reducer(
-        {
-          datasource: {
-            activeId: 'a',
-            state: {},
-            isLoading: false,
-          },
-          saving: false,
-          title: 'hhh',
-          visualization: {
-            activeId: 'b',
-            state: {},
-          },
-        },
-        {
-          type: 'SAVING',
-          isSaving: false,
-        }
-      );
-
-      expect(newState.saving).toBeFalsy();
-    });
-
-    it('should change the persisted id', () => {
-      const newState = reducer(
-        {
-          datasource: {
-            activeId: 'a',
-            state: {},
-            isLoading: false,
-          },
-          saving: false,
-          title: 'iii',
-          visualization: {
-            activeId: 'b',
-            state: {},
-          },
-        },
-        {
-          type: 'UPDATE_PERSISTED_ID',
-          id: 'baz',
-        }
-      );
-
-      expect(newState.persistedId).toEqual('baz');
+      expect(newState.activeDatasourceId).toEqual('testDatasource2');
+      expect(newState.datasourceStates.testDatasource2.state).toBe(datasource2State);
     });
 
     it('should reset the state', () => {
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'a',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            a: {
+              state: {},
+              isLoading: false,
+            },
           },
-          saving: false,
+          activeDatasourceId: 'a',
           title: 'jjj',
           visualization: {
             activeId: 'b',
@@ -277,13 +315,14 @@ describe('editor_frame state management', () => {
         {
           type: 'RESET',
           state: {
-            datasource: {
-              activeId: 'z',
-              isLoading: false,
-              state: { hola: 'muchacho' },
+            datasourceStates: {
+              z: {
+                isLoading: false,
+                state: { hola: 'muchacho' },
+              },
             },
+            activeDatasourceId: 'z',
             persistedId: 'bar',
-            saving: false,
             title: 'lll',
             visualization: {
               activeId: 'q',
@@ -294,13 +333,14 @@ describe('editor_frame state management', () => {
       );
 
       expect(newState).toMatchObject({
-        datasource: {
-          activeId: 'z',
-          isLoading: false,
-          state: { hola: 'muchacho' },
+        datasourceStates: {
+          z: {
+            isLoading: false,
+            state: { hola: 'muchacho' },
+          },
         },
+        activeDatasourceId: 'z',
         persistedId: 'bar',
-        saving: false,
         visualization: {
           activeId: 'q',
           state: { my: 'viz' },
@@ -311,12 +351,13 @@ describe('editor_frame state management', () => {
     it('should load the state from the doc', () => {
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'a',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            a: {
+              state: {},
+              isLoading: false,
+            },
           },
-          saving: false,
+          activeDatasourceId: 'a',
           title: 'mmm',
           visualization: {
             activeId: 'b',
@@ -326,11 +367,15 @@ describe('editor_frame state management', () => {
         {
           type: 'VISUALIZATION_LOADED',
           doc: {
-            datasourceType: 'a',
             id: 'b',
+            expression: '',
+            activeDatasourceId: 'a',
             state: {
-              datasource: { foo: 'c' },
+              datasourceMetaData: { filterableIndexPatterns: [] },
+              datasourceStates: { a: { foo: 'c' } },
               visualization: { bar: 'd' },
+              query: { query: '', language: 'lucene' },
+              filters: [],
             },
             title: 'heyo!',
             type: 'lens',
@@ -340,15 +385,16 @@ describe('editor_frame state management', () => {
       );
 
       expect(newState).toEqual({
-        datasource: {
-          activeId: 'a',
-          isLoading: true,
-          state: {
-            foo: 'c',
+        activeDatasourceId: 'a',
+        datasourceStates: {
+          a: {
+            isLoading: true,
+            state: {
+              foo: 'c',
+            },
           },
         },
         persistedId: 'b',
-        saving: false,
         title: 'heyo!',
         visualization: {
           activeId: 'line',

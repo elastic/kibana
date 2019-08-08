@@ -82,7 +82,7 @@ export class JobCreateUi extends Component {
     createJob: PropTypes.func,
     isSaving: PropTypes.bool,
     createJobError: PropTypes.node,
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -105,6 +105,7 @@ export class JobCreateUi extends Component {
       indexPatternTermsFields: [],
       indexPatternHistogramFields: [],
       indexPatternMetricsFields: [],
+      startJobAfterCreation: false,
     };
 
     this.lastIndexPatternValidationTime = 0;
@@ -231,6 +232,8 @@ export class JobCreateUi extends Component {
         ...formattedNumericFields,
         ...formattedDateFields,
       ].sort(sortFields);
+
+      indexPatternDateFields.sort();
 
       this.setState({
         indexPatternAsyncErrors,
@@ -422,7 +425,9 @@ export class JobCreateUi extends Component {
         [STEP_METRICS]: {
           metrics,
         },
+        [STEP_REVIEW]: {}
       },
+      startJobAfterCreation,
     } = this.state;
 
     return {
@@ -439,6 +444,7 @@ export class JobCreateUi extends Component {
       histogram,
       histogramInterval,
       metrics,
+      startJobAfterCreation,
     };
   }
 
@@ -614,6 +620,8 @@ export class JobCreateUi extends Component {
       case STEP_REVIEW:
         return (
           <StepReview
+            fields={currentStepFields}
+            onFieldsChange={this.onFieldsChange}
             job={this.getAllFields()}
           />
         );
@@ -623,12 +631,17 @@ export class JobCreateUi extends Component {
     }
   }
 
+  onToggleStartAfterCreate = (eve) => {
+    this.setState({ startJobAfterCreation: eve.target.checked });
+  };
+
   renderNavigation() {
     const {
       isValidatingIndexPattern,
       nextStepId,
       previousStepId,
       areStepErrorsVisible,
+      startJobAfterCreation
     } = this.state;
 
     const { isSaving } = this.props;
@@ -650,6 +663,8 @@ export class JobCreateUi extends Component {
         goToPreviousStep={this.goToPreviousStep}
         canGoToNextStep={canGoToNextStep}
         save={this.save}
+        onClickToggleStart={this.onToggleStartAfterCreate}
+        startJobAfterCreation={startJobAfterCreation}
       />
     );
   }

@@ -42,9 +42,9 @@ export class DeleteWorker extends AbstractWorker {
     const { uri } = job.payload;
 
     // 1. Cancel running workers
-    this.cancellationService.cancelCloneJob(uri);
-    this.cancellationService.cancelUpdateJob(uri);
-    this.cancellationService.cancelIndexJob(uri);
+    await this.cancellationService.cancelCloneJob(uri);
+    await this.cancellationService.cancelUpdateJob(uri);
+    await this.cancellationService.cancelIndexJob(uri);
 
     // 2. Delete git repository and all related data.
     const repoService = this.repoServiceFactory.newInstance(

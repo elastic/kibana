@@ -67,6 +67,7 @@ describe('Timeline', () => {
           onToggleDataProviderEnabled={jest.fn()}
           onToggleDataProviderExcluded={jest.fn()}
           show={true}
+          showCallOutUnauthorizedMsg={false}
           start={startDate}
           sort={sort}
         />
@@ -100,6 +101,7 @@ describe('Timeline', () => {
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
               show={true}
+              showCallOutUnauthorizedMsg={false}
               start={startDate}
               sort={sort}
             />
@@ -136,6 +138,7 @@ describe('Timeline', () => {
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
               show={true}
+              showCallOutUnauthorizedMsg={false}
               start={startDate}
               sort={sort}
             />
@@ -172,6 +175,7 @@ describe('Timeline', () => {
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
               show={true}
+              showCallOutUnauthorizedMsg={false}
               start={startDate}
               sort={sort}
             />
@@ -213,6 +217,7 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
               />
@@ -256,6 +261,7 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
               />
@@ -307,6 +313,7 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
               />
@@ -362,6 +369,7 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
                 show={true}
+                showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
               />
@@ -420,6 +428,7 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
               />
@@ -468,6 +477,7 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
               />
@@ -522,6 +532,7 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
               />
@@ -580,6 +591,7 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
                 show={true}
+                showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
               />

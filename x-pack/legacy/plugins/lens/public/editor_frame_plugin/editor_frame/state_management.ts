@@ -10,17 +10,13 @@ import { Document } from '../../persistence/saved_object_store';
 
 export interface EditorFrameState {
   persistedId?: string;
-  saving: boolean;
   title: string;
   visualization: {
     activeId: string | null;
     state: unknown;
   };
-  datasource: {
-    activeId: string | null;
-    state: unknown;
-    isLoading: boolean;
-  };
+  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>;
+  activeDatasourceId: string | null;
 }
 
 export type Action =
@@ -29,24 +25,23 @@ export type Action =
       state: EditorFrameState;
     }
   | {
-      type: 'SAVING';
-      isSaving: boolean;
-    }
-  | {
       type: 'UPDATE_TITLE';
       title: string;
     }
   | {
-      type: 'UPDATE_PERSISTED_ID';
-      id: string;
-    }
-  | {
       type: 'UPDATE_DATASOURCE_STATE';
       newState: unknown;
+      datasourceId: string;
     }
   | {
       type: 'UPDATE_VISUALIZATION_STATE';
       newState: unknown;
+    }
+  | {
+      type: 'UPDATE_LAYER';
+      layerId: string;
+      datasourceId: string;
+      updater: (state: unknown, layerId: string) => unknown;
     }
   | {
       type: 'VISUALIZATION_LOADED';
@@ -64,14 +59,23 @@ export type Action =
     };
 
 export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
-  return {
-    saving: false,
-    title: i18n.translate('xpack.lens.chartTitle', { defaultMessage: 'New visualization' }),
-    datasource: {
+  const datasourceStates: EditorFrameState['datasourceStates'] = {};
+
+  if (props.doc) {
+    Object.entries(props.doc.state.datasourceStates).forEach(([datasourceId, state]) => {
+      datasourceStates[datasourceId] = { isLoading: true, state };
+    });
+  } else if (props.initialDatasourceId) {
+    datasourceStates[props.initialDatasourceId] = {
       state: null,
-      isLoading: Boolean(props.initialDatasourceId),
-      activeId: props.initialDatasourceId,
-    },
+      isLoading: true,
+    };
+  }
+
+  return {
+    title: i18n.translate('xpack.lens.chartTitle', { defaultMessage: 'New visualization' }),
+    datasourceStates,
+    activeDatasourceId: props.initialDatasourceId ? props.initialDatasourceId : null,
     visualization: {
       state: null,
       activeId: props.initialVisualizationId,
@@ -81,25 +85,40 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
 
 export const reducer = (state: EditorFrameState, action: Action): EditorFrameState => {
   switch (action.type) {
-    case 'SAVING':
-      return { ...state, saving: action.isSaving };
     case 'RESET':
       return action.state;
-    case 'UPDATE_PERSISTED_ID':
-      return { ...state, persistedId: action.id };
     case 'UPDATE_TITLE':
       return { ...state, title: action.title };
+    case 'UPDATE_LAYER':
+      return {
+        ...state,
+        datasourceStates: {
+          ...state.datasourceStates,
+          [action.datasourceId]: {
+            ...state.datasourceStates[action.datasourceId],
+            state: action.updater(
+              state.datasourceStates[action.datasourceId].state,
+              action.layerId
+            ),
+          },
+        },
+      };
     case 'VISUALIZATION_LOADED':
       return {
         ...state,
         persistedId: action.doc.id,
         title: action.doc.title,
-        datasource: {
-          ...state.datasource,
-          activeId: action.doc.datasourceType || null,
-          isLoading: true,
-          state: action.doc.state.datasource,
-        },
+        datasourceStates: Object.entries(action.doc.state.datasourceStates).reduce(
+          (stateMap, [datasourceId, datasourceState]) => ({
+            ...stateMap,
+            [datasourceId]: {
+              isLoading: true,
+              state: datasourceState,
+            },
+          }),
+          {}
+        ),
+        activeDatasourceId: action.doc.activeDatasourceId,
         visualization: {
           ...state.visualization,
           activeId: action.doc.visualizationType,
@@ -109,40 +128,40 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
     case 'SWITCH_DATASOURCE':
       return {
         ...state,
-        datasource: {
-          ...state.datasource,
-          isLoading: true,
-          state: null,
-          activeId: action.newDatasourceId,
+        datasourceStates: {
+          ...state.datasourceStates,
+          [action.newDatasourceId]: state.datasourceStates[action.newDatasourceId] || {
+            state: null,
+            isLoading: true,
+          },
         },
-        visualization: {
-          ...state.visualization,
-          // purge visualization on datasource switch
-          state: null,
-          activeId: null,
-        },
+        activeDatasourceId: action.newDatasourceId,
       };
     case 'SWITCH_VISUALIZATION':
       return {
         ...state,
+        datasourceStates:
+          state.activeDatasourceId && action.datasourceState
+            ? {
+                ...state.datasourceStates,
+                [state.activeDatasourceId]: { state: action.datasourceState, isLoading: false },
+              }
+            : state.datasourceStates,
         visualization: {
           ...state.visualization,
           activeId: action.newVisualizationId,
           state: action.initialState,
         },
-        datasource: {
-          ...state.datasource,
-          state: action.datasourceState ? action.datasourceState : state.datasource.state,
-        },
       };
     case 'UPDATE_DATASOURCE_STATE':
       return {
         ...state,
-        datasource: {
-          ...state.datasource,
-          // when the datasource state is updated, the initialization is complete
-          isLoading: false,
-          state: action.newState,
+        datasourceStates: {
+          ...state.datasourceStates,
+          [action.datasourceId]: {
+            state: action.newState,
+            isLoading: false,
+          },
         },
       };
     case 'UPDATE_VISUALIZATION_STATE':

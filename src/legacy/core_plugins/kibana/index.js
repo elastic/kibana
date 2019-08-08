@@ -235,9 +235,22 @@ export default function (kibana) {
       },
 
       injectDefaultVars(server, options) {
+        const mapConfig = server.config().get('map');
+        const tilemap = mapConfig.tilemap;
+
         return {
           kbnIndex: options.index,
           kbnBaseUrl,
+
+          // required on all pages due to hacks that use these values
+          mapConfig,
+          tilemapsConfig: {
+            deprecated: {
+              // If url is set, old settings must be used for backward compatibility
+              isOverridden: typeof tilemap.url === 'string' && tilemap.url !== '',
+              config: tilemap,
+            },
+          },
         };
       },
 

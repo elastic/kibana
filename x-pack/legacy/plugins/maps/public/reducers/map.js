@@ -114,7 +114,6 @@ const INITIAL_STATE = {
 };
 
 
-
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
     case UPDATE_DRAW_STATE:
@@ -192,7 +191,7 @@ export function map(state = INITIAL_STATE, action) {
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
     case LAYER_DATA_LOAD_ERROR:
-      return resetDataRequest(state, action);
+      return updateWithDataResponse(state, action);
     case LAYER_DATA_LOAD_ENDED:
       return updateWithDataResponse(state, action);
     case TOUCH_LAYER:

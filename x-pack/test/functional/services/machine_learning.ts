@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function MachineLearningProvider({
-  getService,
-  getPageObjects,
-}: KibanaFunctionalTestDefaultProviders) {
+export function MachineLearningProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
@@ -69,7 +66,7 @@ export function MachineLearningProvider({
     },
 
     async assertDataFrameEmptyListMessageExists() {
-      await testSubjects.existOrFail('mlNoDataFrameJobsFound');
+      await testSubjects.existOrFail('mlNoDataFrameTransformsFound');
     },
 
     async assertDataVisualizerImportDataCardExists() {

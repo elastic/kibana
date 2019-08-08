@@ -4,46 +4,64 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Action, EditorFrameState } from './state_management';
+import _ from 'lodash';
+import { toExpression } from '@kbn/interpreter/target/common';
+import { EditorFrameState } from './state_management';
 import { Document } from '../../persistence/saved_object_store';
+import { buildExpression } from './expression_helpers';
+import { Datasource, Visualization, FramePublicAPI } from '../../types';
 
 export interface Props {
-  datasource: { getPersistableState: (state: unknown) => unknown };
-  dispatch: (value: Action) => void;
-  redirectTo: (path: string) => void;
+  activeDatasources: Record<string, Datasource>;
   state: EditorFrameState;
-  store: { save: (doc: Document) => Promise<{ id: string }> };
-  visualization: { getPersistableState: (state: unknown) => unknown };
+  visualization: Visualization;
+  framePublicAPI: FramePublicAPI;
+  activeDatasourceId: string;
 }
 
-export async function save({
-  datasource,
-  dispatch,
-  redirectTo,
+export function getSavedObjectFormat({
+  activeDatasources,
   state,
-  store,
   visualization,
-}: Props) {
-  try {
-    dispatch({ type: 'SAVING', isSaving: true });
+  framePublicAPI,
+  activeDatasourceId,
+}: Props): Document {
+  const expression = buildExpression({
+    visualization,
+    visualizationState: state.visualization.state,
+    datasourceMap: activeDatasources,
+    datasourceStates: state.datasourceStates,
+    framePublicAPI,
+    removeDateRange: true,
+  });
 
-    const doc = await store.save({
-      id: state.persistedId,
-      title: state.title,
-      type: 'lens',
-      visualizationType: state.visualization.activeId,
-      datasourceType: state.datasource.activeId,
-      state: {
-        datasource: datasource.getPersistableState(state.datasource.state),
-        visualization: visualization.getPersistableState(state.visualization.state),
+  const datasourceStates: Record<string, unknown> = {};
+  Object.entries(activeDatasources).forEach(([id, datasource]) => {
+    datasourceStates[id] = datasource.getPersistableState(state.datasourceStates[id].state);
+  });
+
+  const filterableIndexPatterns: Array<{ id: string; title: string }> = [];
+  Object.entries(activeDatasources).forEach(([id, datasource]) => {
+    filterableIndexPatterns.push(
+      ...datasource.getMetaData(state.datasourceStates[id].state).filterableIndexPatterns
+    );
+  });
+
+  return {
+    id: state.persistedId,
+    title: state.title,
+    type: 'lens',
+    visualizationType: state.visualization.activeId,
+    expression: expression ? toExpression(expression) : '',
+    activeDatasourceId,
+    state: {
+      datasourceStates,
+      datasourceMetaData: {
+        filterableIndexPatterns: _.uniq(filterableIndexPatterns, 'id'),
       },
-    });
-
-    if (doc.id !== state.persistedId) {
-      dispatch({ type: 'UPDATE_PERSISTED_ID', id: doc.id });
-      redirectTo(`/edit/${doc.id}`);
-    }
-  } finally {
-    dispatch({ type: 'SAVING', isSaving: false });
-  }
+      visualization: visualization.getPersistableState(state.visualization.state),
+      query: framePublicAPI.query,
+      filters: [], // TODO: Support filters
+    },
+  };
 }

@@ -7,47 +7,34 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
+import { Registry } from '@kbn/interpreter/target/common';
 import { CoreSetup } from 'src/core/public';
-import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
-import chrome from 'ui/chrome';
+import chrome, { Chrome } from 'ui/chrome';
 import {
-  DataSetup,
-  ExpressionRenderer,
-} from '../../../../../../src/legacy/core_plugins/data/public';
-import { data } from '../../../../../../src/legacy/core_plugins/data/public/setup';
-import {
-  Datasource,
-  Visualization,
-  EditorFrameSetup,
-  EditorFrameInstance,
-  ErrorCallback,
-} from '../types';
+  EmbeddablePlugin,
+  embeddablePlugin,
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public';
+import { ExpressionRenderer } from '../../../../../../src/legacy/core_plugins/data/public';
+import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
+import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
+import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
 import { EditorFrame } from './editor_frame';
-import { SavedObjectIndexStore, SavedObjectStore, Document } from '../persistence';
-import { InitializableComponent } from './initializable_component';
+import { mergeTables } from './merge_tables';
+import { EmbeddableFactory } from './embeddable/embeddable_factory';
 
 export interface EditorFrameSetupPlugins {
-  data: DataSetup;
+  data: typeof data;
+  chrome: Chrome;
+  embeddables: EmbeddablePlugin;
+  interpreter: InterpreterSetup;
 }
 
-interface InitializationResult {
-  doc?: Document;
-  error?: { message: string };
-}
-
-interface InitializationProps {
-  persistedId?: string;
-  store: SavedObjectStore;
-  onError: ErrorCallback;
-}
-
-interface RenderProps extends InitializationResult {
-  routeProps: { history: { push: (path: string) => void } };
-  store: SavedObjectStore;
-  onError: ErrorCallback;
-  datasources: Record<string, Datasource>;
-  visualizations: Record<string, Visualization>;
-  expressionRenderer: ExpressionRenderer;
+export interface InterpreterSetup {
+  functionsRegistry: Registry<
+    ExpressionFunction<string, unknown, unknown, unknown>,
+    ExpressionFunction<string, unknown, unknown, unknown>
+  >;
 }
 
 export class EditorFramePlugin {
@@ -59,68 +46,60 @@ export class EditorFramePlugin {
 
   private createInstance(): EditorFrameInstance {
     let domElement: Element;
-
-    const store = new SavedObjectIndexStore(chrome.getSavedObjectsClient());
-
-    function unmount() {
-      if (domElement) {
-        unmountComponentAtNode(domElement);
-      }
-    }
-
     return {
-      mount: (element, { onError }) => {
+      mount: (element, { doc, onError, dateRange, query, onChange }) => {
         domElement = element;
-
-        const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
-          const persistedId = routeProps.match.params.id;
-
-          return (
-            <InitializableComponent
-              watch={[persistedId]}
-              init={async () => init({ persistedId, store, onError })}
-              render={({ doc, error }) => (
-                <InitializedEditor
-                  doc={doc}
-                  error={error}
-                  routeProps={routeProps}
-                  onError={onError}
-                  store={store}
-                  datasources={this.datasources}
-                  visualizations={this.visualizations}
-                  expressionRenderer={this.ExpressionRenderer!}
-                />
-              )}
-            />
-          );
-        };
+        const firstDatasourceId = Object.keys(this.datasources)[0];
+        const firstVisualizationId = Object.keys(this.visualizations)[0];
 
         render(
           <I18nProvider>
-            <HashRouter>
-              <Switch>
-                <Route exact path="/edit/:id" render={renderEditor} />
-                <Route exact path="/" render={renderEditor} />
-                <Route component={NotFound} />
-              </Switch>
-            </HashRouter>
+            <EditorFrame
+              data-test-subj="lnsEditorFrame"
+              onError={onError}
+              datasourceMap={this.datasources}
+              visualizationMap={this.visualizations}
+              initialDatasourceId={(doc && doc.activeDatasourceId) || firstDatasourceId || null}
+              initialVisualizationId={
+                (doc && doc.visualizationType) || firstVisualizationId || null
+              }
+              ExpressionRenderer={this.ExpressionRenderer!}
+              doc={doc}
+              dateRange={dateRange}
+              query={query}
+              onChange={onChange}
+            />
           </I18nProvider>,
           domElement
         );
       },
-      unmount,
+      unmount() {
+        if (domElement) {
+          unmountComponentAtNode(domElement);
+        }
+      },
     };
   }
 
   public setup(_core: CoreSetup | null, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
+    plugins.interpreter.functionsRegistry.register(() => mergeTables);
+
     this.ExpressionRenderer = plugins.data.expressions.ExpressionRenderer;
+    plugins.embeddables.addEmbeddableFactory(
+      new EmbeddableFactory(
+        plugins.chrome,
+        this.ExpressionRenderer,
+        plugins.data.indexPatterns.indexPatterns
+      )
+    );
+
     return {
       createInstance: this.createInstance.bind(this),
       registerDatasource: (name, datasource) => {
         this.datasources[name] = datasource as Datasource<unknown, unknown>;
       },
-      registerVisualization: (name, visualization) => {
-        this.visualizations[name] = visualization as Visualization<unknown, unknown>;
+      registerVisualization: visualization => {
+        this.visualizations[visualization.id] = visualization as Visualization<unknown, unknown>;
       },
     };
   }
@@ -135,67 +114,11 @@ const editorFrame = new EditorFramePlugin();
 export const editorFrameSetup = () =>
   editorFrame.setup(null, {
     data,
+    chrome,
+    embeddables: embeddablePlugin,
+    interpreter: {
+      functionsRegistry,
+    },
   });
 
 export const editorFrameStop = () => editorFrame.stop();
-
-function NotFound() {
-  return <h1>TODO: 404 Page</h1>;
-}
-
-function is404(error?: unknown) {
-  return error && (error as { statusCode: number }).statusCode === 404;
-}
-
-export async function init({
-  persistedId,
-  store,
-  onError,
-}: InitializationProps): Promise<InitializationResult> {
-  if (!persistedId) {
-    return {};
-  } else {
-    return store
-      .load(persistedId)
-      .then(doc => ({ doc }))
-      .catch((error: Error) => {
-        if (!is404(error)) {
-          onError(error);
-        }
-        return { error };
-      });
-  }
-}
-
-export function InitializedEditor({
-  doc,
-  error,
-  routeProps,
-  onError,
-  store,
-  datasources,
-  visualizations,
-  expressionRenderer,
-}: RenderProps) {
-  const firstDatasourceId = Object.keys(datasources)[0];
-  const firstVisualizationId = Object.keys(visualizations)[0];
-
-  if (is404(error)) {
-    return <NotFound />;
-  }
-
-  return (
-    <EditorFrame
-      data-test-subj="lnsEditorFrame"
-      onError={onError}
-      store={store}
-      datasourceMap={datasources}
-      visualizationMap={visualizations}
-      initialDatasourceId={(doc && doc.datasourceType) || firstDatasourceId || null}
-      initialVisualizationId={(doc && doc.visualizationType) || firstVisualizationId || null}
-      ExpressionRenderer={expressionRenderer}
-      redirectTo={path => routeProps.history.push(path)}
-      doc={doc}
-    />
-  );
-}

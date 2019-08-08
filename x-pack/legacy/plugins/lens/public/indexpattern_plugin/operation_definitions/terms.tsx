@@ -7,10 +7,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
-import { IndexPatternField, TermsIndexPatternColumn, IndexPatternColumn } from '../indexpattern';
-import { DimensionPriority } from '../../types';
+import { TermsIndexPatternColumn, IndexPatternColumn } from '../indexpattern';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
+import { DataType } from '../../types';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -35,37 +35,43 @@ function isSortableByColumn(column: IndexPatternColumn) {
   return !column.isBucketed && column.operationType !== 'filter_ratio';
 }
 
+const DEFAULT_SIZE = 3;
+
 export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   type: 'terms',
   displayName: i18n.translate('xpack.lens.indexPattern.terms', {
     defaultMessage: 'Top Values',
   }),
-  isApplicableWithoutField: false,
-  isApplicableForField: ({ aggregationRestrictions, type }) => {
-    return Boolean(
-      type === 'string' && (!aggregationRestrictions || aggregationRestrictions.terms)
-    );
+  getPossibleOperationsForDocument: () => [],
+  getPossibleOperationsForField: ({ aggregationRestrictions, aggregatable, type }) => {
+    if (
+      (type === 'string' || type === 'boolean') &&
+      aggregatable &&
+      (!aggregationRestrictions || aggregationRestrictions.terms)
+    ) {
+      return [
+        {
+          dataType: type,
+          isBucketed: true,
+        },
+      ];
+    }
+    return [];
   },
-  buildColumn(
-    operationId: string,
-    columns: Partial<Record<string, IndexPatternColumn>>,
-    suggestedOrder?: DimensionPriority,
-    field?: IndexPatternField
-  ): TermsIndexPatternColumn {
+  buildColumn({ suggestedPriority, columns, field }) {
     const existingMetricColumn = Object.entries(columns)
       .filter(([_columnId, column]) => column && isSortableByColumn(column))
       .map(([id]) => id)[0];
 
     return {
-      operationId,
       label: ofName(field ? field.name : ''),
-      dataType: 'string',
+      dataType: field!.type as DataType,
       operationType: 'terms',
-      suggestedOrder,
+      suggestedPriority,
       sourceField: field ? field.name : '',
       isBucketed: true,
       params: {
-        size: 5,
+        size: DEFAULT_SIZE,
         orderBy: existingMetricColumn
           ? { type: 'column', columnId: existingMetricColumn }
           : { type: 'alphabetical' },
@@ -107,8 +113,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     }
     return currentColumn;
   },
-  paramEditor: ({ state, setState, columnId: currentColumnId }) => {
-    const currentColumn = state.columns[currentColumnId] as TermsIndexPatternColumn;
+  paramEditor: ({ state, setState, columnId: currentColumnId, layerId }) => {
+    const currentColumn = state.layers[layerId].columns[currentColumnId] as TermsIndexPatternColumn;
     const SEPARATOR = '$$$';
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
       if (orderBy.type === 'alphabetical') {
@@ -128,7 +134,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       };
     }
 
-    const orderOptions = Object.entries(state.columns)
+    const orderOptions = Object.entries(state.layers[layerId].columns)
       .filter(([_columnId, column]) => isSortableByColumn(column))
       .map(([columnId, column]) => {
         return {
@@ -156,7 +162,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             value={currentColumn.params.size}
             showInput
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setState(updateColumnParam(state, currentColumn, 'size', Number(e.target.value)))
+              setState(
+                updateColumnParam(state, layerId, currentColumn, 'size', Number(e.target.value))
+              )
             }
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.size', {
               defaultMessage: 'Number of values',
@@ -174,7 +182,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             value={toValue(currentColumn.params.orderBy)}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               setState(
-                updateColumnParam(state, currentColumn, 'orderBy', fromValue(e.target.value))
+                updateColumnParam(
+                  state,
+                  layerId,
+                  currentColumn,
+                  'orderBy',
+                  fromValue(e.target.value)
+                )
               )
             }
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
@@ -206,9 +220,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             value={currentColumn.params.orderDirection}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               setState(
-                updateColumnParam(state, currentColumn, 'orderDirection', e.target.value as
-                  | 'asc'
-                  | 'desc')
+                updateColumnParam(state, layerId, currentColumn, 'orderDirection', e.target
+                  .value as 'asc' | 'desc')
               )
             }
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {

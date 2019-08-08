@@ -70,3 +70,8 @@ export const FetchRepoFileStatusSuccess = createAction<{
   statusReport: StatusReport;
 }>('FETCH REPO FILE STATUS SUCCESS');
 export const FetchRepoFileStatusFailed = createAction<any>('FETCH REPO FILE STATUS FAILED');
+
+export const StatusChanged = createAction<{
+  prevStatus: StatusReport;
+  currentStatus: StatusReport;
+}>('STATUS CHANGED');

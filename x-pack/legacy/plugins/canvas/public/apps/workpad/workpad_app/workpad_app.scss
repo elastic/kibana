@@ -37,6 +37,10 @@ $canvasLayoutFontSize: $euiFontSizeS;
   user-select: none;
 }
 
+.canvasLayout__stageHeaderInner {
+  height: ($euiSizeL * 2);
+}
+
 .canvasLayout__stageContent {
   flex-grow: 1;
   flex-basis: 0%;
