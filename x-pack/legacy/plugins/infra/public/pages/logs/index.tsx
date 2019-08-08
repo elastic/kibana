@@ -16,11 +16,15 @@ import { HelpCenterContent } from '../../components/help_center_content';
 import { Header } from '../../components/header';
 import { RoutedTabs } from '../../components/navigation/routed_tabs';
 import { ColumnarPage } from '../../components/page';
-import { Source } from '../../containers/source';
+import { SourceLoadingPage } from '../../components/source_loading_page';
+import { SourceErrorPage } from '../../components/source_error_page';
+import { Source, useSource } from '../../containers/source';
 import { StreamPage } from './stream';
 import { SettingsPage } from '../shared/settings';
 import { AppNavigation } from '../../components/navigation/app_navigation';
 import { AnalysisPage } from './analysis';
+import { useLogAnalysisCapabilities } from '../../containers/logs/log_analysis';
+import { useSourceId } from '../../containers/source_id';
 
 interface LogsPageProps extends RouteComponentProps {
   intl: InjectedIntl;
@@ -28,69 +32,89 @@ interface LogsPageProps extends RouteComponentProps {
 }
 
 export const LogsPage = injectUICapabilities(
-  injectI18n(({ match, intl, uiCapabilities }: LogsPageProps) => (
-    <Source.Provider sourceId="default">
-      <ColumnarPage>
-        <DocumentTitle
-          title={intl.formatMessage({
-            id: 'xpack.infra.logs.index.documentTitle',
-            defaultMessage: 'Logs',
-          })}
-        />
+  injectI18n(({ match, intl, uiCapabilities }: LogsPageProps) => {
+    const [sourceId] = useSourceId();
+    const source = useSource({ sourceId });
+    const { hasLogAnalysisCapabilites } = useLogAnalysisCapabilities();
 
-        <HelpCenterContent
-          feedbackLink="https://discuss.elastic.co/c/logs"
-          feedbackLinkText={intl.formatMessage({
-            id: 'xpack.infra.logsPage.logsHelpContent.feedbackLinkText',
-            defaultMessage: 'Provide feedback for Logs',
-          })}
-        />
+    return (
+      <Source.Context.Provider value={source}>
+        <ColumnarPage>
+          <DocumentTitle
+            title={intl.formatMessage({
+              id: 'xpack.infra.logs.index.documentTitle',
+              defaultMessage: 'Logs',
+            })}
+          />
 
-        <Header
-          breadcrumbs={[
-            {
-              text: i18n.translate('xpack.infra.header.logsTitle', {
-                defaultMessage: 'Logs',
-              }),
-            },
-          ]}
-          readOnlyBadge={!uiCapabilities.logs.save}
-        />
+          <HelpCenterContent
+            feedbackLink="https://discuss.elastic.co/c/logs"
+            feedbackLinkText={intl.formatMessage({
+              id: 'xpack.infra.logsPage.logsHelpContent.feedbackLinkText',
+              defaultMessage: 'Provide feedback for Logs',
+            })}
+          />
 
-        <AppNavigation>
-          <RoutedTabs
-            tabs={[
+          <Header
+            breadcrumbs={[
               {
-                title: intl.formatMessage({
-                  id: 'xpack.infra.logs.index.streamTabTitle',
-                  defaultMessage: 'Stream',
+                text: i18n.translate('xpack.infra.header.logsTitle', {
+                  defaultMessage: 'Logs',
                 }),
-                path: `${match.path}/stream`,
-              },
-              {
-                title: intl.formatMessage({
-                  id: 'xpack.infra.logs.index.analysisTabTitle',
-                  defaultMessage: 'Analysis',
-                }),
-                path: `${match.path}/analysis`,
-              },
-              {
-                title: intl.formatMessage({
-                  id: 'xpack.infra.logs.index.settingsTabTitle',
-                  defaultMessage: 'Settings',
-                }),
-                path: `${match.path}/settings`,
               },
             ]}
+            readOnlyBadge={!uiCapabilities.logs.save}
           />
-        </AppNavigation>
+          {source.isLoadingSource ? (
+            <SourceLoadingPage />
+          ) : source.hasFailedLoadingSource ? (
+            <SourceErrorPage
+              errorMessage={source.loadSourceFailureMessage || ''}
+              retry={source.loadSource}
+            />
+          ) : (
+            <>
+              <AppNavigation>
+                <RoutedTabs
+                  tabs={[
+                    {
+                      title: intl.formatMessage({
+                        id: 'xpack.infra.logs.index.streamTabTitle',
+                        defaultMessage: 'Stream',
+                      }),
+                      path: `${match.path}/stream`,
+                    },
+                    ...(hasLogAnalysisCapabilites
+                      ? [
+                          {
+                            title: intl.formatMessage({
+                              id: 'xpack.infra.logs.index.analysisTabTitle',
+                              defaultMessage: 'Analysis',
+                            }),
+                            path: `${match.path}/analysis`,
+                          },
+                        ]
+                      : []),
+                    {
+                      title: intl.formatMessage({
+                        id: 'xpack.infra.logs.index.settingsTabTitle',
+                        defaultMessage: 'Settings',
+                      }),
+                      path: `${match.path}/settings`,
+                    },
+                  ]}
+                />
+              </AppNavigation>
 
-        <Switch>
-          <Route path={`${match.path}/stream`} component={StreamPage} />
-          <Route path={`${match.path}/analysis`} component={AnalysisPage} />
-          <Route path={`${match.path}/settings`} component={SettingsPage} />
-        </Switch>
-      </ColumnarPage>
-    </Source.Provider>
-  ))
+              <Switch>
+                <Route path={`${match.path}/stream`} component={StreamPage} />
+                <Route path={`${match.path}/analysis`} component={AnalysisPage} />
+                <Route path={`${match.path}/settings`} component={SettingsPage} />
+              </Switch>
+            </>
+          )}
+        </ColumnarPage>
+      </Source.Context.Provider>
+    );
+  })
 );
