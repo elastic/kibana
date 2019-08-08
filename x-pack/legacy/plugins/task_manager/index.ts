@@ -7,7 +7,7 @@
 import { Root } from 'joi';
 import { Legacy } from 'kibana';
 import { SavedObjectsSerializer, SavedObjectsSchema } from '../../../../src/core/server';
-import { TaskManager as TaskMaangerClass } from './task_manager';
+import { TaskManager as TaskManagerClass } from './task_manager';
 import mappings from './mappings.json';
 import { migrations } from './migrations';
 import { TaskManager } from './types';
@@ -60,7 +60,7 @@ export function taskManager(kibana: any) {
         ['task']
       );
 
-      const taskManagerInstance = new TaskMaangerClass({
+      const taskManagerInstance = new TaskManagerClass({
         kbnServer: this.kbnServer,
         config,
         savedObjectsRepository,
