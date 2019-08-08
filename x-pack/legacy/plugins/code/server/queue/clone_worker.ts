@@ -5,6 +5,7 @@
  */
 
 import { delay } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 import { validateGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
@@ -21,7 +22,7 @@ import { Logger } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { ServerOptions } from '../server_options';
 import { AbstractGitWorker } from './abstract_git_worker';
-import { CancellationSerivce } from './cancellation_service';
+import { CancellationReason, CancellationSerivce } from './cancellation_service';
 import { IndexWorker } from './index_worker';
 import { Job } from './job';
 
@@ -73,22 +74,48 @@ export class CloneWorker extends AbstractGitWorker {
     const repo = RepositoryUtils.buildRepository(url);
 
     // Try to cancel any existing clone job for this repository.
-    this.cancellationService.cancelCloneJob(repo.uri);
+    this.cancellationService.cancelCloneJob(repo.uri, CancellationReason.NEW_JOB_OVERRIDEN);
 
     let cancelled = false;
+    let cancelledReason;
     if (cancellationToken) {
-      cancellationToken.on(() => {
+      cancellationToken.on((reason: string) => {
         cancelled = true;
+        cancelledReason = reason;
       });
     }
 
+    const { thresholdEnabled, watermarkLowMb } = this.serverOptions.disk;
+
     const cloneJobPromise = repoService.clone(
       repo,
-      (progress: number, cloneProgress?: CloneProgress) => {
+      async (progress: number, cloneProgress?: CloneProgress) => {
         if (cancelled) {
           // return false to stop the clone progress
           return false;
         }
+
+        // Keep an eye on the disk usage during clone in case it goes above the
+        // disk watermark config.
+        if (thresholdEnabled) {
+          const isLowWatermark = await this.watermarkService.isLowWatermark();
+          if (isLowWatermark) {
+            const msg = i18n.translate('xpack.code.git.diskWatermarkLowMessage', {
+              defaultMessage: `Disk watermark level lower than {watermarkLowMb} MB`,
+              values: {
+                watermarkLowMb,
+              },
+            });
+            this.log.error(msg);
+            // Cancel this clone job
+            if (cancellationToken) {
+              cancellationToken.cancel(CancellationReason.CLONE_OVER_DISK_WATERMARK);
+            }
+            // return false to stop the clone progress
+            return false;
+          }
+        }
+
         // For clone job payload, it only has the url. Populate back the
         // repository uri before update progress.
         job.payload.uri = repo.uri;
@@ -104,11 +131,33 @@ export class CloneWorker extends AbstractGitWorker {
         cloneJobPromise
       );
     }
-    return await cloneJobPromise;
+    const res = await cloneJobPromise;
+    return {
+      ...res,
+      cancelled,
+      cancelledReason,
+    };
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
     if (res.cancelled) {
+      // If the clone job is cancelled because of the disk watermark, manually
+      // trigger onJobExecutionError to persist the clone error message.
+      if (
+        res.cancelledReason &&
+        res.cancelledReason === CancellationReason.CLONE_OVER_DISK_WATERMARK
+      ) {
+        const { watermarkLowMb } = this.serverOptions.disk;
+        const error = new Error(
+          i18n.translate('xpack.code.git.diskWatermarkLowMessage', {
+            defaultMessage: `Disk watermark level lower than {watermarkLowMb} MB`,
+            values: {
+              watermarkLowMb,
+            },
+          })
+        );
+        await this.onJobExecutionError({ job, error });
+      }
       // Skip updating job progress if the job is done because of cancellation.
       return;
     }

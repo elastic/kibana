@@ -16,15 +16,14 @@ export class CancellationToken {
     }
 
     if (this.isCancelled) {
-      callback();
-      return;
+      throw new Error('Cancellation token has already been cancelled');
     }
 
     this._callbacks.push(callback);
   };
 
-  cancel = () => {
+  cancel = (reason) => {
     this.isCancelled = true;
-    this._callbacks.forEach(callback => callback());
+    this._callbacks.forEach(callback => callback(reason));
   };
 }

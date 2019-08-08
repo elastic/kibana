@@ -12,7 +12,7 @@ import { Logger } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { ServerOptions } from '../server_options';
 import { AbstractGitWorker } from './abstract_git_worker';
-import { CancellationSerivce } from './cancellation_service';
+import { CancellationReason, CancellationSerivce } from './cancellation_service';
 import { Job } from './job';
 
 export class UpdateWorker extends AbstractGitWorker {
@@ -45,7 +45,7 @@ export class UpdateWorker extends AbstractGitWorker {
     );
 
     // Try to cancel any existing update job for this repository.
-    this.cancellationService.cancelUpdateJob(repo.uri);
+    this.cancellationService.cancelUpdateJob(repo.uri, CancellationReason.NEW_JOB_OVERRIDEN);
 
     let cancelled = false;
     if (cancellationToken) {

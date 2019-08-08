@@ -22,7 +22,10 @@ import {
 import { Logger } from './log';
 
 // Return false to stop the clone progress. Return true to keep going;
-export type CloneProgressHandler = (progress: number, cloneProgress?: CloneProgress) => boolean;
+export type CloneProgressHandler = (
+  progress: number,
+  cloneProgress?: CloneProgress
+) => Promise<boolean>;
 export type UpdateProgressHandler = () => boolean;
 
 const GIT_FETCH_PROGRESS_CANCEL = -1;
@@ -219,6 +222,7 @@ export class RepositoryService {
     throw SSH_AUTH_ERROR;
   }
 
+  private PROGRESS_UPDATE_THROTTLING_FREQ_MS = 1000;
   private async doClone(
     repo: Repository,
     localPath: string,
@@ -228,10 +232,10 @@ export class RepositoryService {
     try {
       let lastProgressUpdate = moment();
       const cbs: RemoteCallbacks = {
-        transferProgress: (stats: any) => {
+        transferProgress: async (stats: any) => {
           // Clone progress update throttling.
           const now = moment();
-          if (now.diff(lastProgressUpdate) < 1000) {
+          if (now.diff(lastProgressUpdate) < this.PROGRESS_UPDATE_THROTTLING_FREQ_MS) {
             return 0;
           }
           lastProgressUpdate = now;
@@ -250,7 +254,7 @@ export class RepositoryService {
               indexedDeltas: stats.indexedDeltas(),
               receivedBytes: stats.receivedBytes(),
             };
-            const resumeClone = handler(progress, cloneProgress);
+            const resumeClone = await handler(progress, cloneProgress);
             if (!resumeClone) {
               return GIT_FETCH_PROGRESS_CANCEL;
             }

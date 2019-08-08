@@ -5,6 +5,7 @@
  */
 
 import { IndexRequest } from './search';
+import { CancellationReason } from '../server/queue/cancellation_service';
 
 export type RepositoryUri = string;
 
@@ -86,6 +87,7 @@ export enum FileTreeItemType {
 export interface WorkerResult {
   uri: string;
   cancelled?: boolean;
+  cancelledReason?: CancellationReason;
 }
 
 // TODO(mengwei): create a AbstractGitWorkerResult since we now have an
