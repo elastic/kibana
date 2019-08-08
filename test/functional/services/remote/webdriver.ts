@@ -106,8 +106,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
           .build();
 
       case 'internet explorer':
-
-      // https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/ie_exports_Options.html
+        // https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/ie_exports_Options.html
         const ieOptions = new ie.Options();
         ieOptions.ensureCleanSession(true); // this doesn't seem to be working
         ieOptions.EnsureCleanSession = true; // this doesn't seem to be working
@@ -115,13 +114,13 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
         const ieCapabilities = Capabilities.ie();
         // const ieCapabilities = new ie.Capabilities();
         ieCapabilities.set('nativeEvents', false);
-        ieCapabilities.set("ie.ensureCleanSession", true); //also not working
+        ieCapabilities.set('ie.ensureCleanSession', true); // also not working
 
         return new Builder()
-        .forBrowser(browserType)
-        .withCapabilities(ieCapabilities)
-        .setIeOptions(ieOptions)
-        .build();
+          .forBrowser(browserType)
+          .withCapabilities(ieCapabilities)
+          .setIeOptions(ieOptions)
+          .build();
 
       default:
         throw new Error(`${browserType} is not supported yet`);
@@ -140,7 +139,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
     // session.get('javascript:sessionStorage.clear();')
     // session.execute('window.localStorage.clear();');
     // session.execute_script('window.localStorage.clear();')
-    console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++');
+    log.debug('+++++++++++++++ clear storage for IE here ??????? +++++++++++++++++++++++++');
   }
 
   if (throttleOption === '1' && browserType === 'chrome') {

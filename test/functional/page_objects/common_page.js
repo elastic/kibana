@@ -41,7 +41,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     static async navigateToUrlAndHandleAlert(url, shouldAcceptAlert) {
       log.debug('Navigate to: ' + url);
       try {
-        await browser.execute('javascript:localStorage.clear();'); // only needed for IE11, move somewhere?
+        // await browser.execute('javascript:localStorage.clear();'); // only needed for IE11, move somewhere?
         await browser.get(url);
       } catch(navigationError) {
         log.debug('Error navigating to url');
