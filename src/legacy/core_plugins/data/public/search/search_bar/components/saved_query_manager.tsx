@@ -88,7 +88,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
   );
 
   const noSavedQueriesDescriptionText =
-    i18n.translate('data.search.searchBar.savedQueryDescriptionText', {
+    i18n.translate('data.search.searchBar.savedQueryNoSavedQueriesText', {
       defaultMessage: 'There are no saved queries.',
     }) +
     ' ' +
