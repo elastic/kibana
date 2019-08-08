@@ -18,30 +18,26 @@
  */
 
 import _ from 'lodash';
-import { IndexedArray } from '../../indexed_array';
-import { IndexPattern } from '../_index_pattern';
-import { createFieldsFetcher } from '../fields_fetcher';
-import mockLogstashFields from '../../../../../fixtures/logstash_fields';
-import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
+import mockLogstashFields from '../../../../../../fixtures/logstash_fields';
+import { stubbedSavedObjectIndexPattern } from '../../../../../../fixtures/stubbed_saved_object_index_pattern';
+import { IndexedArray } from 'ui/indexed_array';
 
-jest.mock('../../errors', () => ({
+import { createFieldsFetcher } from '../fields';
+import { IndexPattern } from './index_pattern';
+
+jest.mock('../errors', () => ({
   SavedObjectNotFound: jest.fn(),
   DuplicateField: jest.fn(),
   IndexPatternMissingIndices: jest.fn(),
 }));
 
-jest.mock('../errors', () => ({
-  IndexPatternMissingIndices: jest.fn(),
-}));
-
-
-jest.mock('../../registry/field_formats', () => ({
+jest.mock('ui/registry/field_formats', () => ({
   fieldFormats: {
     getDefaultInstance: jest.fn(),
   }
 }));
 
-jest.mock('../../utils/mapping_setup', () => ({
+jest.mock('ui/utils/mapping_setup', () => ({
   expandShorthand: jest.fn().mockImplementation(() => ({
     id: true,
     title: true,
@@ -51,21 +47,21 @@ jest.mock('../../utils/mapping_setup', () => ({
   }))
 }));
 
-jest.mock('../../notify', () => ({
+jest.mock('ui/notify', () => ({
   toastNotifications: {
     addDanger: jest.fn(),
     addError: jest.fn(),
   }
 }));
 
-jest.mock('../../saved_objects', () => {
+jest.mock('ui/saved_objects', () => {
   return {
     findObjectByTitle: jest.fn(),
   };
 });
 
 let fields = [];
-jest.mock('../fields_fetcher');
+jest.mock('../fields');
 
 createFieldsFetcher.mockImplementation(() => ({
   fetch: jest.fn().mockImplementation(() => {

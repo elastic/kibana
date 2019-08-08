@@ -17,18 +17,4 @@
  * under the License.
  */
 
-import { IndexedArray } from 'ui/indexed_array';
-import { IndexPattern } from 'ui/index_patterns';
-import { Field, FieldSpec } from './_field';
-
-export class FieldList extends IndexedArray<Field> {
-  constructor(indexPattern: IndexPattern, specs: FieldSpec[], shortDotsEnable = false) {
-    super({
-      index: ['name'],
-      group: ['type'],
-      initialSet: specs.map(function(field) {
-        return new Field(indexPattern, field, shortDotsEnable);
-      }),
-    });
-  }
-}
+export * from './index_pattern_select';

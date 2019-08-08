@@ -17,8 +17,6 @@
  * under the License.
  */
 
-export {
-  ILLEGAL_CHARACTERS,
-  CONTAINS_SPACES,
-  validateIndexPattern,
-} from './validate_index_pattern';
+export * from './field_list';
+export * from './field';
+export * from './fields_fetcher';

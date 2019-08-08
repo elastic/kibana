@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { FieldType } from '../_field';
-import { StaticIndexPattern } from '../_index_pattern';
+import { FieldType } from './fields';
+import { StaticIndexPattern } from './index_patterns';
 
 export const mockFields: FieldType[] = [
   {

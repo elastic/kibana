@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-describe('get computed fields', function () {
+describe('IndexPatterns#getComputedFields', function () {
 
   let indexPattern;
   let fn;

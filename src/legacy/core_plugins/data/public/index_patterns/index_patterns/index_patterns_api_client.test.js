@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { http } from './_index_patterns_api_client.test.mock';
-import { IndexPatternsApiClient } from '../index_patterns_api_client';
+import { http } from './index_patterns_api_client.test.mock';
+import { IndexPatternsApiClient } from './index_patterns_api_client';
 
 jest.mock('../../errors', () => ({
   SavedObjectNotFound: jest.fn(),

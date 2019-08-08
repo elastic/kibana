@@ -17,12 +17,11 @@
  * under the License.
  */
 
-export function getRoutes() {
-  return {
-    edit: '/management/kibana/index_patterns/{{id}}',
-    addField: '/management/kibana/index_patterns/{{id}}/create-field',
-    indexedFields: '/management/kibana/index_patterns/{{id}}?_a=(tab:indexedFields)',
-    scriptedFields: '/management/kibana/index_patterns/{{id}}?_a=(tab:scriptedFields)',
-    sourceFilters: '/management/kibana/index_patterns/{{id}}?_a=(tab:sourceFilters)',
-  };
-}
+
+import { setup } from '../../../../../../test_utils/public/http_test_setup';
+
+export const { http } = setup(injectedMetadata => {
+  injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
+});
+
+jest.doMock('ui/new_platform', () => ({ npSetup: { core: { http } } }));

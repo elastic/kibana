@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export const INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE = ['\\', '/', '?', '"', '<', '>', '|'];
-export const INDEX_PATTERN_ILLEGAL_CHARACTERS = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.concat(
-  ' '
-);
+export * from './format_hit';
+export * from './index_pattern';
+export * from './index_patterns';
+export * from './index_patterns_api_client';

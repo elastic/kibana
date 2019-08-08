@@ -17,10 +17,18 @@
  * under the License.
  */
 
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../constants';
+// @ts-ignore
+import { get } from 'lodash';
+// @ts-ignore
+import { KBN_FIELD_TYPES } from '../../../../utils/kbn_field_types';
+import { Field } from './fields';
 
 export const ILLEGAL_CHARACTERS = 'ILLEGAL_CHARACTERS';
 export const CONTAINS_SPACES = 'CONTAINS_SPACES';
+export const INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE = ['\\', '/', '?', '"', '<', '>', '|'];
+export const INDEX_PATTERN_ILLEGAL_CHARACTERS = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.concat(
+  ' '
+);
 
 function findIllegalCharacters(indexPattern: string): string[] {
   const illegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce(
@@ -54,4 +62,38 @@ export function validateIndexPattern(indexPattern: string) {
   }
 
   return errors;
+}
+
+const filterableTypes = KBN_FIELD_TYPES.filter((type: any) => type.filterable).map(
+  (type: any) => type.name
+);
+
+export function isFilterable(field: Field): boolean {
+  return (
+    field.name === '_id' ||
+    field.scripted ||
+    (field.searchable && filterableTypes.includes(field.type))
+  );
+}
+
+export function getFromSavedObject(savedObject: any) {
+  if (get(savedObject, 'attributes.fields') === undefined) {
+    return;
+  }
+
+  return {
+    id: savedObject.id,
+    fields: JSON.parse(savedObject.attributes.fields),
+    title: savedObject.attributes.title,
+  };
+}
+
+export function getRoutes() {
+  return {
+    edit: '/management/kibana/index_patterns/{{id}}',
+    addField: '/management/kibana/index_patterns/{{id}}/create-field',
+    indexedFields: '/management/kibana/index_patterns/{{id}}?_a=(tab:indexedFields)',
+    scriptedFields: '/management/kibana/index_patterns/{{id}}?_a=(tab:scriptedFields)',
+    sourceFilters: '/management/kibana/index_patterns/{{id}}?_a=(tab:sourceFilters)',
+  };
 }

@@ -17,11 +17,18 @@
  * under the License.
  */
 
+import { IndexedArray } from 'ui/indexed_array';
+import { IndexPattern } from '../index_patterns';
+import { Field, FieldSpec } from './field';
 
-import { setup } from '../../../../../test_utils/public/http_test_setup';
-
-export const { http } = setup(injectedMetadata => {
-  injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
-});
-
-jest.doMock('ui/new_platform', () => ({ npSetup: { core: { http } } }));
+export class FieldList extends IndexedArray<Field> {
+  constructor(indexPattern: IndexPattern, specs: FieldSpec[], shortDotsEnable = false) {
+    super({
+      index: ['name'],
+      group: ['type'],
+      initialSet: specs.map(function(field) {
+        return new Field(indexPattern, field, shortDotsEnable);
+      }),
+    });
+  }
+}

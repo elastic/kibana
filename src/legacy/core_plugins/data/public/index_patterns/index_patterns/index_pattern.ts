@@ -28,16 +28,14 @@ import { expandShorthand } from 'ui/utils/mapping_setup';
 import { toastNotifications } from 'ui/notify';
 import { findObjectByTitle } from 'ui/saved_objects';
 import { SavedObjectsClientContract } from 'src/core/public';
-import { IndexPatternsApiClient } from './index_patterns_api_client';
-import { IndexPatternMissingIndices } from './errors';
-import { getRoutes } from './get_routes';
-import { FieldList } from './_field_list';
-import { createFieldsFetcher } from './fields_fetcher';
-import { Field, FieldType } from './_field';
+
+import { IndexPatternMissingIndices } from '../errors';
+import { createFieldsFetcher, Field, FieldList, FieldType } from '../fields';
+import { getRoutes } from '../utils';
+import { formatHitProvider } from './format_hit';
 // @ts-ignore
 import { flattenHitWrapper } from './_flatten_hit';
-// @ts-ignore
-import { formatHitProvider } from './_format_hit';
+import { IndexPatternsApiClient } from './index_patterns_api_client';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';

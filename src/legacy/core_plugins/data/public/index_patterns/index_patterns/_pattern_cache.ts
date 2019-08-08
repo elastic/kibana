@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexPattern } from './index';
+import { IndexPattern } from './index_pattern';
 
 export interface PatternCache {
   get: (id: string) => IndexPattern;

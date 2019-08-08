@@ -24,12 +24,12 @@ import { fieldFormats } from 'ui/registry/field_formats';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { FieldFormat } from '../../field_formats/field_format';
+import { getKbnFieldType } from '../../../../../utils/kbn_field_types';
 // @ts-ignore
-import { getKbnFieldType } from '../../../utils';
+import { FieldFormat } from '../../../../../ui/field_formats/field_format';
 // @ts-ignore
-import { shortenDottedString } from '../../../core_plugins/kibana/common/utils/shorten_dotted_string';
-import { IndexPattern } from './_index_pattern';
+import { shortenDottedString } from '../../../../../core_plugins/kibana/common/utils/shorten_dotted_string';
+import { IndexPattern } from '../index_patterns';
 
 export type FieldSpec = Record<string, any>;
 export interface FieldType {

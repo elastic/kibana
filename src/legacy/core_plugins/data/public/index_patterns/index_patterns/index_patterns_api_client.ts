@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { kfetch, KFetchQuery } from '../kfetch';
+import { kfetch, KFetchQuery } from 'ui/kfetch';
 
-import { IndexPatternMissingIndices } from './errors';
+import { IndexPatternMissingIndices } from '../errors';
 
 function request(url: string, query: KFetchQuery) {
   return kfetch({
