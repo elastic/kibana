@@ -89,8 +89,11 @@ describe('RegionMapsVisualizationTests', function () {
   let getManifestStub;
   beforeEach(ngMock.inject((Private, $injector) => {
     const serviceSettings = $injector.get('serviceSettings');
-    const regionmapsConfig = $injector.get('regionmapsConfig');
     const uiSettings = $injector.get('config');
+    const regionmapsConfig = {
+      includeElasticMapsService: true,
+      layers: []
+    };
 
     dependencies = {
       serviceSettings,
