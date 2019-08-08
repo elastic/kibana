@@ -20,6 +20,8 @@ import {
   EuiPopover,
   EuiContextMenuPanel,
   EuiLink,
+  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { metricsDetailsUrl } from '../../../services';
@@ -27,6 +29,7 @@ import { metricsDetailsUrl } from '../../../services';
 import { FieldList } from '../../components';
 
 import { FieldChooser, StepError } from './components';
+import { i18n } from '@kbn/i18n';
 
 const whiteListedMetricByFieldType = {
   numeric: {
@@ -44,8 +47,8 @@ const whiteListedMetricByFieldType = {
   },
 };
 
-const checkWhiteListedMetricByFieldType = (fieldType, metricName) => {
-  return !!get(whiteListedMetricByFieldType, [fieldType, metricName]);
+const checkWhiteListedMetricByFieldType = (fieldType, metricType) => {
+  return !!get(whiteListedMetricByFieldType, [fieldType, metricType]);
 };
 
 // We use an IFFE to associate metricType configs with their
@@ -148,7 +151,7 @@ export class StepMetricsUi extends Component {
       onFieldsChange,
     } = this.props;
 
-    return metricTypesConfig.map(({ label, type: metricName, fieldTypes }, idx) => {
+    return metricTypesConfig.map(({ label, type: metricType, fieldTypes }, idx) => {
       let isIndeterminate = false;
       let checkedCount = 0;
 
@@ -159,7 +162,7 @@ export class StepMetricsUi extends Component {
 
       applicableMetrics
         .forEach(({ types }) => {
-          const metricSelected = types.some(type => type === metricName);
+          const metricSelected = types.some(type => type === metricType);
           if (metricSelected && !isIndeterminate) {
             isIndeterminate = true;
           }
@@ -170,22 +173,20 @@ export class StepMetricsUi extends Component {
 
       const isChecked = checkedCount === applicableMetrics.length;
       const disabled = !metrics.some(({ type: fieldType }) =>
-        checkWhiteListedMetricByFieldType(fieldType, metricName)
+        checkWhiteListedMetricByFieldType(fieldType, metricType)
       );
       return (
-        <EuiFlexItem grow={false} key={`${idx}-select-all-flex-item`}>
-          <EuiCheckbox
-            id={`${idx}-select-all-checkbox`}
-            data-test-subj={`rollupJobMetricsSelectAllCheckbox-${metricName}`}
-            disabled={disabled}
-            label={label}
-            checked={!disabled && isChecked}
-            indeterminate={!isChecked && isIndeterminate}
-            onChange={() =>
-              onFieldsChange({ metrics: this.setMetrics(metricName, !isChecked) })
-            }
-          />
-        </EuiFlexItem>
+        <EuiCheckbox
+          id={`${idx}-select-all-checkbox`}
+          data-test-subj={`rollupJobMetricsSelectAllCheckbox-${metricType}`}
+          disabled={disabled}
+          label={label}
+          checked={!disabled && isChecked}
+          indeterminate={!isChecked && isIndeterminate}
+          onChange={() => {
+            onFieldsChange({ metrics: this.setMetrics(metricType, !isChecked) });
+          }}
+        />
       );
     });
   }
@@ -196,12 +197,13 @@ export class StepMetricsUi extends Component {
         id={'stepMetricsPopover'}
         isOpen={this.state.metricsPopoverOpen}
         closePopover={this.closeMetricsPopover}
-        data-test-subj={'rollupJobMetricsSelectAll'}
+        ownFocus
         button={
           <EuiLink onClick={this.openMetricsPopover}>
             <b>{'Metrics'}</b>
           </EuiLink>
         }
+        data-test-subj={'rollupJobMetricsSelectAll'}
       >
         <EuiContextMenuPanel>
           <EuiText size={'s'}>
@@ -209,7 +211,7 @@ export class StepMetricsUi extends Component {
               <EuiFlexItem>
                 <b>{'Select All'}</b>
               </EuiFlexItem>
-              {this.renderMetricsSelectAllItems()}
+              {this.renderMetricsSelectAllItems().map((item, idx) => <EuiFlexItem key={idx}>{item}</EuiFlexItem>)}
             </EuiFlexGroup>
           </EuiText>
         </EuiContextMenuPanel>
@@ -225,7 +227,7 @@ export class StepMetricsUi extends Component {
         const { onFieldsChange } = this.props;
         const checkboxes = metricTypesConfig
           .map(({ type, label }) => {
-            const isAllowed = whiteListedMetricByFieldType[fieldType][type];
+            const isAllowed = checkWhiteListedMetricByFieldType(fieldType, type);
 
             if (!isAllowed) {
               return;
@@ -285,11 +287,14 @@ export class StepMetricsUi extends Component {
 
   setMetrics(metricType, isSelected) {
     const {
-      fields: { metrics },
+      fields: { metrics: fields },
     } = this.props;
-    return metrics.reduce((acc, metric) => {
-      return this.setMetric(metric.name, metricType, isSelected);
-    }, []);
+
+    return fields
+      .filter(field => checkWhiteListedMetricByFieldType(field.type, metricType))
+      .reduce((acc, metric) => {
+        return this.setMetric(metric.name, metricType, isSelected);
+      }, []);
   }
 
   setMetric = (fieldName, metricType, isSelected) => {
@@ -366,23 +371,63 @@ export class StepMetricsUi extends Component {
           columns={this.getListColumns()}
           fields={metrics}
           onRemoveField={this.onRemoveField}
-          emptyMessage={<p>No metrics fields added</p>}
-          addActions={() => [
-            {
-              name: 'Select All',
-              isPrimary: true,
-              description: 'Select all of the metrics in this field.',
-              icon: 'check',
-              type: 'icon',
-              color: 'success',
-              onClick: ({ name: fieldName }) => {
-                const newMetrics = metricTypesConfig.reduce((acc, { type }) => {
-                  return this.setMetric(fieldName, type, true);
-                }, null);
-                onFieldsChange({ metric: newMetrics });
+          emptyMessage={
+            <p>{i18n.translate('xpack.rollupJobs.create.stepMetrics.emptyListLabel', { defaultMessage: 'No metrics fields added' })}</p>
+          }
+          addActions={() => {
+            return [
+              {
+                isPrimary: false,
+                render: ({ types, name: fieldName, type }) => {
+                  const hasSelectedItems = Boolean(types.length);
+                  const maxItemsToBeSelected = Object.keys(whiteListedMetricByFieldType[type]).length;
+
+                  let name;
+                  let icon;
+                  let color;
+                  let description;
+
+                  if (maxItemsToBeSelected === types.length) {
+                    name = 'Deselect All';
+                    icon = 'crossInACircleFilled';
+                    color = 'primary';
+                    description = 'Deselect all of the metrics in this row.';
+                  } else {
+                    name = 'Select All';
+                    icon = 'checkInCircleFilled';
+                    color = 'success';
+                    description = 'Select all of the metrics in this row.';
+                  }
+
+                  const onClick = () => {
+                    const isSelected = hasSelectedItems ? types.length !== maxItemsToBeSelected : true;
+                    const newMetrics = metricTypesConfig
+                      .filter(config => config.fieldTypes[type])
+                      .map(c => {
+                        console.log(c);
+                        return c;
+                      })
+                      .reduce((acc, { type: typeConfig }) => {
+                        return this.setMetric(fieldName, typeConfig, isSelected);
+                      }, null);
+                    onFieldsChange({ metric: newMetrics });
+                  };
+
+                  return (
+                    <EuiToolTip content={description} delay="long">
+                      <EuiButtonIcon
+                        aria-label={name}
+                        isDisabled={false}
+                        color={color}
+                        iconType={icon}
+                        onClick={onClick}
+                      />
+                    </EuiToolTip>
+                  );
+                }
               },
-            }
-          ]}
+            ];
+          }}
           addButton={
             <FieldChooser
               buttonLabel={
