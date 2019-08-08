@@ -96,7 +96,7 @@ export class UpdateWorker extends AbstractGitWorker {
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
     if (res.cancelled) {
-      await this.onJobCancelled(job);
+      await this.onJobCancelled(job, res.cancelledReason);
       // Skip updating job progress if the job is done because of cancellation.
       return;
     }

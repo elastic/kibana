@@ -93,7 +93,7 @@ export interface WorkerResult {
 // TODO(mengwei): create a AbstractGitWorkerResult since we now have an
 // AbstractGitWorker now.
 export interface CloneWorkerResult extends WorkerResult {
-  repo: Repository;
+  repo?: Repository;
 }
 
 export interface DeleteWorkerResult extends WorkerResult {

@@ -61,9 +61,7 @@ export class CloneWorker extends AbstractGitWorker {
       this.log.error(error);
       return {
         uri: url,
-        // Return a null repo for invalid git url.
-        repo: null,
-      };
+      } as CloneWorkerResult;
     }
 
     this.log.info(`Execute clone job for ${url}`);
