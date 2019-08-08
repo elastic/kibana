@@ -26,9 +26,7 @@ jest.spyOn(hooks, 'useCore').mockReturnValue(coreMock);
 
 jest
   .spyOn(savedObjects, 'getAPMIndexPattern')
-  .mockReturnValue(
-    Promise.resolve({ id: 'apm-index-pattern-id' } as savedObjects.ISavedObject)
-  );
+  .mockReturnValue(Promise.resolve({ id: 'apm-index-pattern-id' } as any));
 
 beforeAll(() => {
   jest.spyOn(console, 'error').mockImplementation(() => null);

@@ -6,7 +6,6 @@
 
 import { flatten } from 'lodash';
 import { InternalCoreSetup } from 'src/core/server';
-import { initErrorsApi } from '../errors';
 import { initServicesApi } from '../services';
 import { initTracesApi } from '../traces';
 
@@ -63,10 +62,6 @@ describe('route handlers should fail with a Boom error', () => {
 
   afterEach(() => {
     consoleErrorSpy.mockRestore();
-  });
-
-  describe('error routes', () => {
-    testRouteFailures(initErrorsApi);
   });
 
   describe('service routes', () => {
