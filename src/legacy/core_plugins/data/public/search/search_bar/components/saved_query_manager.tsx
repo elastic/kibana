@@ -165,54 +165,56 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
               </EuiFlexItem>
 
               <EuiFlexItem>
-                <EuiButtonEmpty
-                  onClick={() => {
-                    setConfirmDeletionModal(
-                      <EuiOverlayMask>
-                        <EuiConfirmModal
-                          title={i18n.translate(
-                            'data.search.searchBar.savedQueryPopoverConfirmDeletionTitle',
-                            {
-                              defaultMessage: 'Delete {savedQueryName}?',
-                              values: {
-                                savedQueryName: savedQuery.attributes.title,
-                              },
-                            }
-                          )}
-                          confirmButtonText={i18n.translate(
-                            'data.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
-                            {
-                              defaultMessage: 'Delete',
-                            }
-                          )}
-                          cancelButtonText={i18n.translate(
-                            'data.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText',
-                            {
-                              defaultMessage: 'Cancel',
-                            }
-                          )}
-                          onConfirm={() => {
-                            onDeleteSavedQuery(savedQuery);
-                            setConfirmDeletionModal(null);
-                          }}
-                          onCancel={() => {
-                            setConfirmDeletionModal(null);
-                          }}
-                        />
-                      </EuiOverlayMask>
-                    );
-                  }}
-                  iconType="trash"
-                  color="danger"
-                  aria-label={i18n.translate(
-                    'data.search.searchBar.savedQueryPopoverDeleteButtonAriaLabel',
-                    {
-                      defaultMessage: 'Delete saved query {title}',
-                      values: { title: savedQuery.attributes.title },
-                    }
-                  )}
-                  data-test-subj={`delete-saved-query-${savedQuery.attributes.title}-button`}
-                />
+                {showSaveQuery && (
+                  <EuiButtonEmpty
+                    onClick={() => {
+                      setConfirmDeletionModal(
+                        <EuiOverlayMask>
+                          <EuiConfirmModal
+                            title={i18n.translate(
+                              'data.search.searchBar.savedQueryPopoverConfirmDeletionTitle',
+                              {
+                                defaultMessage: 'Delete {savedQueryName}?',
+                                values: {
+                                  savedQueryName: savedQuery.attributes.title,
+                                },
+                              }
+                            )}
+                            confirmButtonText={i18n.translate(
+                              'data.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
+                              {
+                                defaultMessage: 'Delete',
+                              }
+                            )}
+                            cancelButtonText={i18n.translate(
+                              'data.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText',
+                              {
+                                defaultMessage: 'Cancel',
+                              }
+                            )}
+                            onConfirm={() => {
+                              onDeleteSavedQuery(savedQuery);
+                              setConfirmDeletionModal(null);
+                            }}
+                            onCancel={() => {
+                              setConfirmDeletionModal(null);
+                            }}
+                          />
+                        </EuiOverlayMask>
+                      );
+                    }}
+                    iconType="trash"
+                    color="danger"
+                    aria-label={i18n.translate(
+                      'data.search.searchBar.savedQueryPopoverDeleteButtonAriaLabel',
+                      {
+                        defaultMessage: 'Delete saved query {title}',
+                        values: { title: savedQuery.attributes.title },
+                      }
+                    )}
+                    data-test-subj={`delete-saved-query-${savedQuery.attributes.title}-button`}
+                  />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
