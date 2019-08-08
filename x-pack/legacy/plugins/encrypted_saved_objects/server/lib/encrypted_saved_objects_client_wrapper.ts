@@ -52,7 +52,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     // Saved objects with encrypted attributes should have IDs that are hard to guess especially
     // since IDs are part of the AAD used during encryption. Types can opt-out of this restriction,
     // when necessary, but it's much safer for this wrapper to generate them.
-    if (!this.options.service.allowPredefinedID(type) && options.id) {
+    if (options.id && !this.options.service.allowPredefinedID(type)) {
       throw new Error(`Predefined IDs are not allowed for the "${type}" type.`);
     }
 
@@ -85,7 +85,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
         // Saved objects with encrypted attributes should have IDs that are hard to guess especially
         // since IDs are part of the AAD used during encryption. Types can opt-out of this restriction,
         // when necessary, but it's much safer for this wrapper to generate them.
-        if (!this.options.service.allowPredefinedID(object.type) && object.id) {
+        if (object.id && !this.options.service.allowPredefinedID(object.type)) {
           throw new Error(`Predefined IDs are not allowed for the "${object.type}" type.`);
         }
 
