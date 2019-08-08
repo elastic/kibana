@@ -6,7 +6,7 @@
 
 Use the Infrastructure UI in {kib} to monitor your infrastructure and identify problems in real time.
 You can explore metrics for hosts, containers and services.
-You can also drill down to view more detailed metrics, or seamlessly switch to view the corresponding logs, application traces and uptime information for a component.
+You can also drill down to view more detailed metrics, or seamlessly switch to view the corresponding logs, application traces and uptime information.
 
 Initially, the *Inventory* tab shows an overview of the hosts in of your infrastructure and the current CPU usage for each host.
 From here, you can drill down into areas of interest.
@@ -21,7 +21,8 @@ image::infrastructure/images/infra-sysmon.png[Infrastructure Overview in Kibana]
 Select the high-level view from *Hosts*, *Kubernetes*, or *Docker*.
 When you change views, you see the same data through the perspective of a different category.
 
-If the view you select has a large number of components, you can hover over the component to see the the details for that component. Alternatively, if you would prefer to see your infrastructure in tabular format, rather than in a waffle map, click *Table view*.
+The default representation is the *Map view*, which shows your components in a _waffle map_ of one or more rectangular grids.
+If the view you select has a large number of components, you can hover over a component to see the the details for that component. Alternatively, if you would prefer to see your infrastructure as a table, click *Table view*.
 
 [float]
 [[infra-metric]]
@@ -36,7 +37,7 @@ The available metrics are those that are most relevant for the high level view y
 
 Select the way you want to group the infrastructure components from the *Group By* dropdown list.
 The available options are specific to your physical, virtual, or container-based infrastructure.
-Examples of grouping options include Availability Zone, Machine Type, Project ID, and Cloud Provider for Hosts, and Namespace and Node for Kubernetes.
+Examples of grouping options include *Availability Zone*, *Machine Type*, *Project ID*, and *Cloud Provider* for hosts, and *Namespace* and *Node* for Kubernetes.
 
 [float]
 [[infra-search]]
@@ -62,33 +63,34 @@ Select *Auto-refresh* to keep up-to-date metrics information coming in, or *Stop
 [[infra-configure-source]]
 === Configure the data to use for your metrics
 
-The default source configuration for metrics is specified in the {kibana-ref}/settings.html[Kibana configuration file].
-The `metricbeat-*` index pattern is used to query the data and default field settings are also defined.
+The default source configuration for metrics is specified in the {kibana-ref}/infrastructure-ui-settings-kb.html[Infrastructure UI settings] in the {kibana-ref}/settings.html[Kibana configuration file].
+The default configuration uses the `metricbeat-*` index pattern to query the data.
+The default configuration also defines field settings for things like timestamps and container names.
 
-If your metrics have custom index patterns, or use non-default field settings for things like timestamps or container names, you can override the default settings.
+If your metrics have custom index patterns, or use non-default field settings, you can override the default settings.
 Click *Configuration* to change the settings.
 This opens the *Configure source* fly-out dialog.
 
-NOTE: The settings here are shared with logs. Changes you make here also affect the settings used by the *Logs* tab.
+NOTE: These settings are shared with logs. Changes you make here may also affect the settings used in the *Logs* tab.
 
 In the *Configure source* dialog, you can change the following values:
 
-* *Name*: the name of the source configuration.
+* *Name*: the name of the source configuration
 * *Indices*: the index pattern or patterns in the Elasticsearch indices to read metrics data and log data
-  from.
-* *Fields*: the names of specific fields in the indices that need are used to query and interpret the data correctly.
+  from
+* *Fields*: the names of specific fields in the indices that need are used to query and interpret the data correctly
 
-TIP: If <<xpack-spaces>> are enabled in your Kibana instance, any configuration changes you make using Configure source are specific to the current space.
+TIP: If <<xpack-spaces>> are enabled in your Kibana instance, any configuration changes you make here are specific to the current space.
 You can make different subsets of data available by creating multiple spaces with different data source configurations.
 
 TIP: If you don't see the *Configuration* option, you may not have sufficient privileges to change the source configuration.
-For more information on granting access to Kibana see <<xpack-security-authorization>>.
+For more information see <<xpack-security-authorization>>.
 
 [float]
 [[infra-metrics-explorer]]
 === Visualize multiple metrics in Metrics Explorer
 
-<<metrics-explorer, Metrics Explorer>> allows you to visualise and analyze metrics for multiple components in a powerful and configurable way. Click the *Metrics Explorer* tab to get started.
+<<metrics-explorer, Metrics Explorer>> allows you to visualize and analyze metrics for multiple components in a powerful and configurable way. Click the *Metrics Explorer* tab to get started.
 
 [float]
 [[infra-drill-down]]
@@ -97,15 +99,15 @@ For more information on granting access to Kibana see <<xpack-security-authoriza
 Hover over a component to see more information about that component.
 
 Click a component to see the other actions available for that component.
-You can select:
+You can:
 
-* *View Metrics* to <<xpack-view-metrics, view detailed metrics for the selected component>>.
+* select *View Metrics* to <<xpack-view-metrics, view detailed infrastructure metrics for that component>>.
 
-* *View Logs* to <<xpack-logs-using, view the logs for the selected component>> in the *Logs* tab.
+* select *View Logs* to <<xpack-logs-using, view the logs for that component>> in the *Logs* tab.
 
-Depending on the features you have installed and configured, you may also be able to select:
+Depending on the features you have installed and configured, you may also be able to:
 
-* *View APM* to <<traces, view APM traces for the selected component>> in the *APM* tab.
+* select *View APM* to <<traces, view APM traces for the selected component>> in the *APM* tab.
 
-* *View Uptime* to <<uptime-overview, view uptime information for the selected component>> in the *Uptime* tab.
+* select *View Uptime* to <<uptime-overview, view uptime information for the selected component>> in the *Uptime* tab.
 

@@ -2,8 +2,9 @@
 [[metrics-explorer]]
 == Metrics Explorer
 
-Metrics Explorer allows you to visualize metrics data collected by Metricbeat and group it in various ways to visualize multiple metrics.
-It can be a starting point for further investigations.
+Metrics Explorer allows you to group and visualise multiple customisable metrics for one or more components in a graphical format.
+This can be a starting point for further investigations.
+You can also save your views and add them to {kibana-ref}/dashboard.html[dashboards].
 
 [role="screenshot"]
 image::infrastructure/images/metrics-explorer-screen.png[Metrics Explorer in Kibana]
