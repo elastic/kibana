@@ -26,7 +26,8 @@ interface Response {
 export function privilegesProvider(
   callWithRequest: callWithRequestType,
   xpackMainPlugin: XPackMainPlugin,
-  isMlEnabledInSpace: () => Promise<boolean>
+  isMlEnabledInSpace: () => Promise<boolean>,
+  ignoreSpaces: boolean = false
 ) {
   const { isUpgradeInProgress } = upgradeCheckProvider(callWithRequest);
   async function getPrivileges(): Promise<Response> {
@@ -37,7 +38,13 @@ export function privilegesProvider(
     const securityDisabled = isSecurityDisabled(xpackMainPlugin);
     const license = checkLicense(xpackMainPlugin.info);
     const isPlatinumOrTrialLicense = license.licenseType === LICENSE_TYPE.FULL;
-    const mlFeatureEnabledInSpace = await isMlEnabledInSpace();
+    let mlFeatureEnabledInSpace;
+
+    if (ignoreSpaces) {
+      mlFeatureEnabledInSpace = true;
+    } else {
+      mlFeatureEnabledInSpace = await isMlEnabledInSpace();
+    }
 
     const setGettingPrivileges = isPlatinumOrTrialLicense
       ? setFullGettingPrivileges
