@@ -25,12 +25,18 @@ test('Register and cancel cancellation token', async () => {
   const cancelSpy = sinon.spy();
   token.cancel = cancelSpy;
 
-  // make sure the promise won't be fulfilled immediately
+  // create a promise and defer its fulfillment
+  let promiseResolve: () => void = () => {};
   const promise = new Promise(resolve => {
-    setTimeout(resolve, 100);
+    promiseResolve = resolve;
   });
   await service.registerCancelableIndexJob(repoUri, token as CancellationToken, promise);
-  await service.cancelIndexJob(repoUri);
+  // do not wait on the promise, or there will be a dead lock
+  const cancelPromise = service.cancelIndexJob(repoUri);
+  // resolve the promise now
+  promiseResolve();
+
+  await cancelPromise;
 
   expect(cancelSpy.calledOnce).toBeTruthy();
 });
@@ -46,13 +52,19 @@ test('Register and cancel cancellation token while an exception is thrown from t
   const cancelSpy = sinon.spy();
   token.cancel = cancelSpy;
 
-  // make sure the promise won't be fulfilled immediately
+  // create a promise and defer its rejection
+  let promiseReject: () => void = () => {};
   const promise = new Promise((resolve, reject) => {
-    setTimeout(reject, 100);
+    promiseReject = reject;
   });
   await service.registerCancelableIndexJob(repoUri, token as CancellationToken, promise);
   // expect no exceptions are thrown when cancelling the job
-  await service.cancelIndexJob(repoUri);
+  // do not wait on the promise, or there will be a dead lock
+  const cancelPromise = service.cancelIndexJob(repoUri);
+  // reject the promise now
+  promiseReject();
+
+  await cancelPromise;
 
   expect(cancelSpy.calledOnce).toBeTruthy();
 });
