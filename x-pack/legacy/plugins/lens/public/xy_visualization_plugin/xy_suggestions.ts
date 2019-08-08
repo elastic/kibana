@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import {
@@ -95,13 +96,31 @@ function getSuggestion(
   splitBy?: TableSuggestionColumn,
   currentState?: State
 ): VisualizationSuggestion<State> {
-  const yTitle = yValues.map(col => col.operation.label).join(' & ');
+  const yTitle = yValues
+    .map(col => col.operation.label)
+    .join(
+      i18n.translate('xpack.lens.xySuggestions.yAxixConjunctionSign', {
+        defaultMessage: ' & ',
+        description:
+          'A character that can be used for conjunction of multiple enumarated items. Make sure to include spaces around it if needed.',
+      })
+    );
   const xTitle = xValue.operation.label;
   const isDate = xValue.operation.dataType === 'date';
 
-  // TODO: Localize the title, label, etc
-  const preposition = isDate ? 'over' : 'of';
-  const title = `${yTitle} ${preposition} ${xTitle}`;
+  const title = isDate
+    ? i18n.translate('xpack.lens.xySuggestions.dateSuggestion', {
+        defaultMessage: '{yTitle} over {xTitle}',
+        description:
+          'Chart description for charts over time, like "Transfered bytes over log.timestamp"',
+        values: { xTitle, yTitle },
+      })
+    : i18n.translate('xpack.lens.xySuggestions.nonDateSuggestion', {
+        defaultMessage: '{yTitle} of {xTitle}',
+        description:
+          'Chart description for a value of some groups, like "Top URLs of top 5 countries"',
+        values: { xTitle, yTitle },
+      });
   const seriesType: SeriesType =
     (currentState && currentState.preferredSeriesType) || (splitBy && isDate ? 'line' : 'bar');
   const state: State = {
