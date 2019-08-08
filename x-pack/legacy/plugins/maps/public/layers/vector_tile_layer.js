@@ -105,8 +105,7 @@ export class VectorTileLayer extends TileLayer {
   }
 
   _makeNamespacedImageId(imageId) {
-    // const prefix = this._source.getSpriteNamespacePrefix() + '/';
-    const prefix = '';
+    const prefix = this._source.getSpriteNamespacePrefix() + '/';
     return prefix + imageId;
   }
 
@@ -135,7 +134,6 @@ export class VectorTileLayer extends TileLayer {
     });
 
     if (!initialBootstrapCompleted) {
-      //add the images.
       const spriteMeta = this._getSpriteMeta();
       const newJson = {};
       for (const imageId in spriteMeta.json) {
@@ -159,6 +157,14 @@ export class VectorTileLayer extends TileLayer {
           source: this._generateMbId(layer.source),
           id: mbLayerId
         };
+
+        if (
+          newLayerObject.type === 'symbol' &&
+          newLayerObject.layout &&
+          typeof newLayerObject.layout['icon-image'] === 'string'
+        ) {
+          newLayerObject.layout['icon-image'] = this._makeNamespacedImageId(newLayerObject.layout['icon-image']);
+        }
         mbMap.addLayer(newLayerObject);
       });
     }
