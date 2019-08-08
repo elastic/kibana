@@ -17,7 +17,8 @@
  * under the License.
  */
 
-const { join, dirname, extname } = require('path');
+const { join, dirname, extname, resolve } = require('path');
+const { readdirSync } = require('fs');
 
 const webpackResolver = require('eslint-import-resolver-webpack');
 const nodeResolver = require('eslint-import-resolver-node');
@@ -31,6 +32,11 @@ const {
   getIsPathRequest,
   resolveWebpackAlias,
 } = require('./lib');
+
+const REPO_ROOT = resolve(__dirname, '..', '..');
+const ROOT_DIRECTORIES = readdirSync(REPO_ROOT, { withFileTypes: true })
+  .filter(file => file.isDirectory())
+  .map(file => file.name);
 
 // cache context, it shouldn't change
 let context;
@@ -68,6 +74,14 @@ function tryNodeResolver(importRequest, file, config) {
 
 exports.resolve = function resolveKibanaPath(importRequest, file, config) {
   config = config || {};
+
+  const rootImport = ROOT_DIRECTORIES.find(
+    dirName => importRequest === dirName || importRequest.startsWith(`${dirName}/`)
+  );
+  if (rootImport) {
+    const path = resolve(REPO_ROOT, importRequest);
+    return tryNodeResolver(path, file, config);
+  }
 
   if (config.forceNode) {
     return tryNodeResolver(importRequest, file, config);
