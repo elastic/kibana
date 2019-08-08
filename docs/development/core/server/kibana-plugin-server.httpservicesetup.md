@@ -8,5 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type HttpServiceSetup = HttpServerSetup;
+export declare type HttpServiceSetup = HttpServerSetup & {
+    createRouter: (path: string) => IRouter;
+};
 ```

@@ -34,6 +34,10 @@ interface RouterRoute {
   handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject | Boom<any>>;
 }
 
+/**
+ * Registers route handlers for specified resource path and method.
+ * @public
+ */
 export interface IRouter {
   /**
    * Resulted path
@@ -49,6 +53,7 @@ export interface IRouter {
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) => void;
+
   /**
    * Register a route handler for `POST` request.
    * @param route {@link RouteConfig} - a route configuration.
@@ -58,6 +63,7 @@ export interface IRouter {
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) => void;
+
   /**
    * Register a route handler for `PUT` request.
    * @param route {@link RouteConfig} - a route configuration.
@@ -77,6 +83,7 @@ export interface IRouter {
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) => void;
+
   /**
    * Returns all routes registered with the this router.
    * @returns List of registered routes.
