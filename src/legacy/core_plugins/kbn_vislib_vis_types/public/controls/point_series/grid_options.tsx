@@ -57,7 +57,6 @@ function GridOptions({ stateParams, setValue }: VisOptionsProps<BasicVislibParam
           />
         </h2>
       </EuiTitle>
-      <EuiSpacer size="s" />
 
       <SwitchOption
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.gridAxis.xAxisLinesLabel', {
