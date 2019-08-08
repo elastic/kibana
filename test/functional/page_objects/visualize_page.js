@@ -559,6 +559,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await comboBox.setElement(fieldEl, fieldValue);
     }
 
+    async selectAggregateWith(fieldValue) {
+      const sortSelect = await testSubjects.find(`visDefaultEditorAggregateWith`);
+      const sortMetric = await sortSelect.findByCssSelector(`option[value="${fieldValue}"]`);
+      await sortMetric.click();
+    }
+
     async selectFieldById(fieldValue, id) {
       await find.clickByCssSelector(`#${id} > option[label="${fieldValue}"]`);
     }
