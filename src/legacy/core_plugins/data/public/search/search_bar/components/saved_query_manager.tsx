@@ -311,18 +311,19 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
             )}
             <EuiFlexItem />
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={() => onClearSavedQuery()}
-                aria-label={i18n.translate(
-                  'data.search.searchBar.savedQueryPopoverClearButtonAriaLabel',
-                  { defaultMessage: 'Clear current saved query' }
-                )}
-              >
-                {loadedSavedQuery &&
-                  i18n.translate('data.search.searchBar.savedQueryPopoverClearButtonText', {
+              {loadedSavedQuery && (
+                <EuiButtonEmpty
+                  onClick={() => onClearSavedQuery()}
+                  aria-label={i18n.translate(
+                    'data.search.searchBar.savedQueryPopoverClearButtonAriaLabel',
+                    { defaultMessage: 'Clear current saved query' }
+                  )}
+                >
+                  {i18n.translate('data.search.searchBar.savedQueryPopoverClearButtonText', {
                     defaultMessage: 'Clear',
                   })}
-              </EuiButtonEmpty>
+                </EuiButtonEmpty>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
