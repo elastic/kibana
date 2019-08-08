@@ -39,17 +39,15 @@ export function StickyTransactionProperties({
   const timestamp = transaction['@timestamp'];
 
   const isRumAgent = isRumAgentName(transaction.agent.name);
-  const url = isRumAgent
-    ? idx(transaction, _ => _.transaction.page.url)
-    : idx(transaction, _ => _.url.full);
-
-  const urlProperty = {
-    fieldName: isRumAgent ? TRANSACTION_PAGE_URL : URL_FULL,
-    label: 'URL',
-    val: url || NOT_AVAILABLE_LABEL,
-    truncated: true,
-    width: '50%'
-  };
+  const { urlFieldName, urlValue } = isRumAgent
+    ? {
+        urlFieldName: TRANSACTION_PAGE_URL,
+        urlValue: idx(transaction, _ => _.transaction.page.url)
+      }
+    : {
+        urlFieldName: URL_FULL,
+        urlValue: idx(transaction, _ => _.url.full)
+      };
 
   const duration = transaction.transaction.duration.us;
 
@@ -70,7 +68,13 @@ export function StickyTransactionProperties({
       truncated: true,
       width: '50%'
     },
-    urlProperty,
+    {
+      fieldName: urlFieldName,
+      label: 'URL',
+      val: urlValue || NOT_AVAILABLE_LABEL,
+      truncated: true,
+      width: '50%'
+    },
     {
       label: i18n.translate('xpack.apm.transactionDetails.durationLabel', {
         defaultMessage: 'Duration'

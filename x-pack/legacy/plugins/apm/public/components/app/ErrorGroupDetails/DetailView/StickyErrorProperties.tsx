@@ -52,17 +52,16 @@ function TransactionLinkWrapper({
 export function StickyErrorProperties({ error, transaction }: Props) {
   const isHandled = idx(error, _ => _.error.exception[0].handled);
   const isRumAgent = isRumAgentName(error.agent.name);
-  const url = isRumAgent
-    ? idx(error, _ => _.error.page.url)
-    : idx(error, _ => _.url.full);
 
-  const urlProperty = {
-    fieldName: isRumAgent ? ERROR_PAGE_URL : URL_FULL,
-    label: 'URL',
-    val: url || NOT_AVAILABLE_LABEL,
-    truncated: true,
-    width: '50%'
-  };
+  const { urlFieldName, urlValue } = isRumAgent
+    ? {
+        urlFieldName: ERROR_PAGE_URL,
+        urlValue: idx(error, _ => _.error.page.url)
+      }
+    : {
+        urlFieldName: URL_FULL,
+        urlValue: idx(error, _ => _.url.full)
+      };
 
   const stickyProperties = [
     {
@@ -73,7 +72,13 @@ export function StickyErrorProperties({ error, transaction }: Props) {
       val: error['@timestamp'],
       width: '50%'
     },
-    urlProperty,
+    {
+      fieldName: urlFieldName,
+      label: 'URL',
+      val: urlValue || NOT_AVAILABLE_LABEL,
+      truncated: true,
+      width: '50%'
+    },
     {
       fieldName: HTTP_REQUEST_METHOD,
       label: i18n.translate('xpack.apm.errorGroupDetails.requestMethodLabel', {
