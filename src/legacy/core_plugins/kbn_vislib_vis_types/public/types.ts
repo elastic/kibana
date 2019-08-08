@@ -17,7 +17,31 @@
  * under the License.
  */
 
+export enum LegendPositions {
+  RIGHT = 'right',
+  LEFT = 'left',
+  TOP = 'top',
+  BOTTOM = 'bottom',
+}
 export interface CommonVislibParams {
   addTooltip: boolean;
-  legendPosition: 'right' | 'left' | 'top' | 'bottom';
+  legendPosition: LegendPositions;
+}
+
+export interface ValueAxis {
+  id: string;
+  name: string;
+}
+
+export interface BasicVislibParams extends CommonVislibParams {
+  addTimeMarker: boolean;
+  orderBucketsBySum?: boolean;
+  labels: {
+    show: boolean;
+  };
+  valueAxes: ValueAxis[];
+  grid: {
+    categoryLines: boolean;
+    valueAxis?: string;
+  };
 }

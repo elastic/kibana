@@ -18,31 +18,32 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { LegendPositions } from '../types';
 
 const legendPositions = [
   {
     text: i18n.translate('kbnVislibVisTypes.legendPositions.topText', {
       defaultMessage: 'Top',
     }),
-    value: 'top',
+    value: LegendPositions.TOP,
   },
   {
     text: i18n.translate('kbnVislibVisTypes.legendPositions.leftText', {
       defaultMessage: 'Left',
     }),
-    value: 'left',
+    value: LegendPositions.LEFT,
   },
   {
     text: i18n.translate('kbnVislibVisTypes.legendPositions.rightText', {
       defaultMessage: 'Right',
     }),
-    value: 'right',
+    value: LegendPositions.RIGHT,
   },
   {
     text: i18n.translate('kbnVislibVisTypes.legendPositions.bottomText', {
       defaultMessage: 'Bottom',
     }),
-    value: 'bottom',
+    value: LegendPositions.BOTTOM,
   },
 ];
 

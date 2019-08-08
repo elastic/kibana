@@ -20,17 +20,20 @@ import React, { useMemo } from 'react';
 import { EuiFormRow, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { VisOptionsProps, VisOptionsSetValue } from 'ui/vis/editors/default';
+import { VisOptionsProps } from 'ui/vis/editors/default';
 import { SwitchOption } from '../switch';
 import { SelectOption } from '../select';
+import { BasicVislibParams, ValueAxis } from '../../types';
 
-function GridOptions({ stateParams, setValue, vis }: VisOptionsProps) {
-  const setGrid: VisOptionsSetValue = (paramName, value) =>
-    setValue('grid', { ...stateParams.grid, [paramName]: value });
+function GridOptions({ stateParams, setValue }: VisOptionsProps<BasicVislibParams>) {
+  const setGrid = <T extends keyof BasicVislibParams['grid']>(
+    paramName: T,
+    value: BasicVislibParams['grid'][T]
+  ) => setValue('grid', { ...stateParams.grid, [paramName]: value });
 
   const options = useMemo(
     () => [
-      ...stateParams.valueAxes.map(({ id, name }: { id: string; name: string }) => ({
+      ...stateParams.valueAxes.map(({ id, name }: ValueAxis) => ({
         text: name,
         value: id,
       })),
@@ -41,7 +44,7 @@ function GridOptions({ stateParams, setValue, vis }: VisOptionsProps) {
         value: '',
       },
     ],
-    [stateParams.valueAxes.map(({ id }: { id: string }) => id)]
+    [stateParams.valueAxes.map(({ id }: ValueAxis) => id)]
   );
   return (
     <EuiFormRow>

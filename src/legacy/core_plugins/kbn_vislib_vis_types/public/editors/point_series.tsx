@@ -26,8 +26,9 @@ import { SwitchOption } from '../controls/switch';
 import { SelectOption } from '../controls/select';
 import { GridOptions } from '../controls/point_series/grid_options';
 import { legendPositions } from '../utils/legend_positions';
+import { BasicVislibParams } from '../types';
 
-function PointSeriesOptions(props: VisOptionsProps) {
+function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue, vis } = props;
 
   return (
