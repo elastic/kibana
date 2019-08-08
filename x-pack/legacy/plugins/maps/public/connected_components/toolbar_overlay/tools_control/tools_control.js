@@ -64,7 +64,7 @@ export class ToolsControl extends Component {
 
   _getDrawPanels() {
 
-    const needsIndexPatternSelectionPanel = this.props.uniqueIndexPatternsAndGeoFields.length > 1;
+    const needsIndexPatternSelectionPanel = this.props.geoFields.length > 1;
 
     const drawPolygonAction = {
       name: i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
@@ -73,7 +73,7 @@ export class ToolsControl extends Component {
       onClick: needsIndexPatternSelectionPanel
         ? this._selectPolygonDrawType
         : () => {
-          this._initiateDraw(DRAW_TYPE.POLYGON, this.props.uniqueIndexPatternsAndGeoFields[0]);
+          this._initiateDraw(DRAW_TYPE.POLYGON, this.props.geoFields[0]);
         },
       panel: needsIndexPatternSelectionPanel
         ? this._getIndexPatternSelectionPanel(1)
@@ -87,7 +87,7 @@ export class ToolsControl extends Component {
       onClick: needsIndexPatternSelectionPanel
         ? this._selectBoundsDrawType
         : () => {
-          this._initiateDraw(DRAW_TYPE.BOUNDS, this.props.uniqueIndexPatternsAndGeoFields[0]);
+          this._initiateDraw(DRAW_TYPE.BOUNDS, this.props.geoFields[0]);
         },
       panel: needsIndexPatternSelectionPanel
         ? this._getIndexPatternSelectionPanel(2)
@@ -104,10 +104,10 @@ export class ToolsControl extends Component {
   }
 
   _getIndexPatternSelectionPanel(id) {
-    const options = this.props.uniqueIndexPatternsAndGeoFields.map((indexPatternAndGeoField) => {
+    const options = this.props.geoFields.map((geoField) => {
       return {
-        label: `${indexPatternAndGeoField.indexPatternTitle} : ${indexPatternAndGeoField.geoField}`,
-        value: indexPatternAndGeoField
+        label: `${geoField.indexPatternTitle} : ${geoField.geoField}`,
+        value: geoField
       };
     });
 

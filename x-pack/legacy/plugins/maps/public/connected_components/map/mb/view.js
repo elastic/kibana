@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ResizeChecker } from 'ui/resize_checker';
+import { I18nProvider } from '@kbn/i18n/react';
 import {
   syncLayerOrderForSingleLayer,
   removeOrphanedSourcesAndLayers,
@@ -155,7 +156,8 @@ export class MBMapContainer extends React.Component {
       if (!match) {
         uniqueFeatures.push({
           id: featureId,
-          layerId: layerId
+          layerId: layerId,
+          geometry: mbFeature.geometry,
         });
       }
     }
@@ -456,15 +458,17 @@ export class MBMapContainer extends React.Component {
     }
     const isLocked = this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED;
     ReactDOM.render((
-      <FeatureTooltip
-        features={this.props.tooltipState.features}
-        loadFeatureProperties={this._loadFeatureProperties}
-        findLayerById={this._findLayerById}
-        closeTooltip={this._onTooltipClose}
-        showFilterButtons={!!this.props.addFilters && isLocked}
-        isLocked={isLocked}
-        addFilters={this.props.addFilters}
-      />
+      <I18nProvider>
+        <FeatureTooltip
+          features={this.props.tooltipState.features}
+          loadFeatureProperties={this._loadFeatureProperties}
+          findLayerById={this._findLayerById}
+          closeTooltip={this._onTooltipClose}
+          showFilterButtons={!!this.props.addFilters && isLocked}
+          isLocked={isLocked}
+          addFilters={this.props.addFilters}
+        />
+      </I18nProvider>
     ), this._tooltipContainer);
 
     this._mbPopup.setLngLat(this.props.tooltipState.location)

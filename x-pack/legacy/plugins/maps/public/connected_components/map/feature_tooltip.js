@@ -7,6 +7,7 @@
 import React, { Fragment } from 'react';
 import {
   EuiButtonIcon,
+  EuiLink,
   EuiPagination,
   EuiSelect,
   EuiIconTip,
@@ -18,16 +19,22 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FeatureProperties } from './feature_properties';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { GEO_JSON_TYPE } from '../../../common/constants';
+import { FeatureGeometryFilterForm } from './feature_geometry_filter_form';
 
 const ALL_LAYERS = '_ALL_LAYERS_';
 const DEFAULT_PAGE_NUMBER = 0;
+
+const PROPERTIES_VIEW = 'propertiesView';
+const GEOMETRY_FILTER_VIEW = 'geometryFilterView';
 
 export class FeatureTooltip extends React.Component {
 
   state = {
     uniqueLayers: [],
     pageNumber: DEFAULT_PAGE_NUMBER,
-    layerIdFilter: ALL_LAYERS
+    layerIdFilter: ALL_LAYERS,
+    view: PROPERTIES_VIEW,
   };
 
   constructor() {
@@ -112,8 +119,15 @@ export class FeatureTooltip extends React.Component {
     }
   };
 
-  _renderProperties(features) {
-    const feature = features[this.state.pageNumber];
+  _showGeometryFilterView = () => {
+    this.setState({ view: GEOMETRY_FILTER_VIEW });
+  }
+
+  _showPropertiesView = () => {
+    this.setState({ view: PROPERTIES_VIEW });
+  }
+
+  _renderProperties(feature) {
     if (!feature) {
       return null;
     }
@@ -126,6 +140,26 @@ export class FeatureTooltip extends React.Component {
         onCloseTooltip={this._onCloseTooltip}
         addFilters={this.props.addFilters}
       />
+    );
+  }
+
+  _renderActions(feature) {
+    // TODO support geo_distance filters for points
+    if (!this.props.isLocked || !feature
+      || feature.geometry.type === GEO_JSON_TYPE.POINT
+      || feature.geometry.type === GEO_JSON_TYPE.MULTI_POINT) {
+      return null;
+    }
+
+    return (
+      <EuiLink
+        onClick={this._showGeometryFilterView}
+      >
+        <FormattedMessage
+          id="xpack.maps.tooltip.createShapeFilterLabel"
+          defaultMessage="filter by shape"
+        />
+      </EuiLink>
     );
   }
 
@@ -154,7 +188,7 @@ export class FeatureTooltip extends React.Component {
       <EuiSelect
         options={options}
         onChange={this._onLayerChange}
-        valueOfSelected={this.state.layerIdFilter}
+        value={this.state.layerIdFilter}
         compressed
         fullWidth
         aria-label={i18n.translate('xpack.maps.tooltip.layerFilterLabel', {
@@ -277,10 +311,22 @@ export class FeatureTooltip extends React.Component {
 
   render() {
     const filteredFeatures = this._filterFeatures();
+    const currentFeature = filteredFeatures[this.state.pageNumber];
+
+    if (this.state.view === GEOMETRY_FILTER_VIEW) {
+      return (
+        <FeatureGeometryFilterForm
+          onClose={this._showPropertiesView}
+          feature={currentFeature}
+        />
+      );
+    }
+
     return (
       <Fragment>
         {this._renderHeader()}
-        {this._renderProperties(filteredFeatures)}
+        {this._renderProperties(currentFeature)}
+        {this._renderActions(currentFeature)}
         {this._renderFooter(filteredFeatures)}
       </Fragment>
     );
