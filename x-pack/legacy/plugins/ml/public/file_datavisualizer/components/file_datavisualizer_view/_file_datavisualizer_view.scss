@@ -1,10 +1,8 @@
 .file-datavisualizer-file-picker {
-  .euiFilePicker__wrap{
-    max-width: inherit;
-  }
+  max-width: inherit;
+
   .euiFilePicker__prompt {
     background-color: $euiColorEmptyShade;
-    padding: $euiSizeXXL;
     box-shadow: none;
 
     .euiFilePicker__icon {
