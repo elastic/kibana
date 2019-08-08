@@ -148,14 +148,17 @@ export function deleteFeatureBranch(
   });
 }
 
+export function getRemoteName(options: BackportOptions) {
+  return options.fork ? options.username : options.repoOwner;
+}
+
 export function pushFeatureBranch(
   options: BackportOptions,
   featureBranch: string
 ) {
+  const remoteName = getRemoteName(options);
   return exec(
-    `git push ${options.username} ${featureBranch}:${featureBranch} --force`,
-    {
-      cwd: getRepoPath(options)
-    }
+    `git push ${remoteName} ${featureBranch}:${featureBranch} --force`,
+    { cwd: getRepoPath(options) }
   );
 }

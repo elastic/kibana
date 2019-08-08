@@ -25,8 +25,6 @@ export async function maybeSetupRepo(options: BackportOptions) {
         spinner.text = `${progress}% ${spinnerCloneText}`;
       });
 
-      // delete default "origin" remote to avoid confusion
-      await deleteRemote(options, 'origin');
       spinner.succeed(`100% ${spinnerCloneText}`);
     } catch (e) {
       spinner.fail();
@@ -34,6 +32,9 @@ export async function maybeSetupRepo(options: BackportOptions) {
       throw e;
     }
   }
+
+  // delete default "origin" remote to avoid confusion
+  await deleteRemote(options, 'origin');
 
   // ensure remote are setup with latest accessToken
   await deleteRemote(options, options.username);

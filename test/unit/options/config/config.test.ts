@@ -17,6 +17,7 @@ describe('getOptionsFromConfigFiles', () => {
         { checked: false, name: '6.0' },
         { checked: false, name: '5.9' }
       ],
+      fork: true,
       gitHostname: 'github.com',
       labels: [],
       multiple: false,

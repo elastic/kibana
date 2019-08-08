@@ -11,6 +11,7 @@ export interface Config {
   // project config
   branches?: (string | BranchChoice)[];
   upstream?: string;
+  fork?: boolean;
 
   // both
   all?: boolean;

@@ -10,6 +10,7 @@ export function getOptionsFromCliArgs(
     .usage('$0 [args]')
     .wrap(Math.max(100, Math.min(120, yargs.terminalWidth())))
     .option('accessToken', {
+      alias: 'accesstoken',
       default: configOptions.accessToken,
       description: 'Github access token',
       type: 'string'
@@ -40,6 +41,11 @@ export function getOptionsFromCliArgs(
       default: configOptions.commitsCount,
       description: 'Number of commits to choose from',
       type: 'number'
+    })
+    .option('fork', {
+      default: configOptions.fork,
+      description: 'Create backports in fork or origin repo',
+      type: 'boolean'
     })
     .option('gitHostname', {
       default: configOptions.gitHostname,
@@ -103,6 +109,7 @@ export function getOptionsFromCliArgs(
     commitsCount: cliArgs.commitsCount,
     branchChoices: configOptions.branchChoices,
     branches: cliArgs.branches,
+    fork: cliArgs.fork,
     gitHostname: cliArgs.gitHostname,
     labels: cliArgs.labels,
     multiple: cliArgs.multiple,

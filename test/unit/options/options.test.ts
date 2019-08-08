@@ -9,6 +9,7 @@ const validOptions: OptionsFromCliArgs = {
   branchChoices: [],
   branches: ['branchA'],
   commitsCount: 10,
+  fork: true,
   gitHostname: 'github.com',
   labels: [],
   multiple: false,

@@ -35,13 +35,14 @@ describe('doBackportVersion', () => {
 
       await doBackportVersion(
         {
-          repoOwner: 'elastic',
-          repoName: 'kibana',
-          username: 'sqren',
+          apiHostname: 'api.github.com',
+          fork: true,
           labels: ['backport'],
-          prTitle: '[{baseBranch}] {commitMessages}',
           prDescription: 'myPrSuffix',
-          apiHostname: 'api.github.com'
+          prTitle: '[{baseBranch}] {commitMessages}',
+          repoName: 'kibana',
+          repoOwner: 'elastic',
+          username: 'sqren'
         } as BackportOptions,
         {
           commits: [
@@ -99,12 +100,13 @@ myPrSuffix`
     beforeEach(async () => {
       await doBackportVersion(
         {
-          repoOwner: 'elastic',
-          repoName: 'kibana',
-          username: 'sqren',
+          apiHostname: 'api.github.com',
+          fork: true,
           labels: ['backport'],
           prTitle: '[{baseBranch}] {commitMessages}',
-          apiHostname: 'api.github.com'
+          repoName: 'kibana',
+          repoOwner: 'elastic',
+          username: 'sqren'
         } as BackportOptions,
         {
           commits: [{ sha: 'mySha', message: 'myCommitMessage (mySha)' }],
@@ -159,12 +161,13 @@ myPrSuffix`
 
       const promise = doBackportVersion(
         {
-          repoOwner: 'elastic',
-          repoName: 'kibana',
-          username: 'sqren',
+          apiHostname: 'api.github.com',
+          fork: true,
           labels: ['backport'],
           prTitle: '[{baseBranch}] {commitMessages}',
-          apiHostname: 'api.github.com'
+          repoName: 'kibana',
+          repoOwner: 'elastic',
+          username: 'sqren'
         } as BackportOptions,
         {
           commits: [{ sha: 'mySha', message: 'myCommitMessage' }],

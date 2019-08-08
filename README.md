@@ -82,24 +82,25 @@ The above commands will start an interactive prompt. You can use the `arrow keys
 
 ### CLI arguments
 
-| Option          | Description                             | Default                         | Type    |
-| --------------- | --------------------------------------- | ------------------------------- | ------- |
-| --accessToken   | Github access token                     |                                 | string  |
-| --all           | Show commits from other than me         | false                           | boolean |
-| --apiHostname   | Hostname for the Github API             | api.github.com                  | string  |
-| --author        | Filter commits by author                | _Current user_                  | string  |
-| --branch        | Branch to backport to                   |                                 | string  |
-| --commitsCount  | Number of commits to choose from        | 10                              | number  |
-| --gitHostname   | Hostname for Git remotes                | github.com                      | string  |
-| --labels        | Pull request labels                     |                                 | string  |
-| --multiple      | Select multiple branches and/or commits | false                           | boolean |
-| --prDescription | Pull request description suffix         |                                 | string  |
-| --prTitle       | Pull request title pattern              | [{baseBranch}] {commitMessages} | string  |
-| --sha           | Sha of commit to backport               |                                 | string  |
-| --upstream      | Name of organization and repository     |                                 | string  |
-| --username      | Github username                         |                                 | string  |
-| --help          | Show help                               |                                 |         |
-| -v, --version   | Show version number                     |                                 |         |
+| Option           | Description                                            | Default                         | Type    |
+| ---------------- | ------------------------------------------------------ | ------------------------------- | ------- |
+| --accesstoken    | Github access token                                    |                                 | string  |
+| --all            | Show commits from other than me                        | false                           | boolean |
+| --api-hostname   | Hostname for the Github API                            | api.github.com                  | string  |
+| --author         | Filter commits by author                               | _Current user_                  | string  |
+| --branch         | Branch to backport to                                  |                                 | string  |
+| --commits-count  | Number of commits to choose from                       | 10                              | number  |
+| --git-hostname   | Hostname for Git remotes                               | github.com                      | string  |
+| --labels         | Pull request labels                                    |                                 | string  |
+| --multiple       | Select multiple commits/branches                       | false                           | boolean |
+| --fork           | Create backports in fork (true) or origin repo (false) | true                            | boolean |
+| --pr-description | Pull request description suffix                        |                                 | string  |
+| --pr-title       | Pull request title pattern                             | [{baseBranch}] {commitMessages} | string  |
+| --sha            | Sha of commit to backport                              |                                 | string  |
+| --upstream       | Name of organization and repository                    |                                 | string  |
+| --username       | Github username                                        |                                 | string  |
+| --help           | Show help                                              |                                 |         |
+| -v, --version    | Show version number                                    |                                 |         |
 
 All of the CLI arguments can also be configured via the [configuration options](https://github.com/sqren/backport/blob/master/docs/configuration.md) in the config files.
 

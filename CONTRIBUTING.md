@@ -22,6 +22,7 @@ node dist/index.js --branch 6.1 --upstream sqren/backport-demo --all
 yarn global remove backport
 npm -g uninstall backport
 yarn unlink backport
+yarn unlink
 yarn link
 sudo chmod +x dist/index.js
 yarn tsc --watch

@@ -78,6 +78,16 @@ Default: `false`
 
 CLI: `--all`
 
+#### `fork`
+
+`true`: Create backport branch in users own fork
+
+`false`: Create backport branch in the origin repository
+
+Default: `true`
+
+CLI: `--fork=false`
+
 #### `multipleCommits`
 
 `true`: you will be able to select multiple commits to backport. You will use `<space>` to select, and `<enter>` to confirm you selection.

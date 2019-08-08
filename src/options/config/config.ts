@@ -20,6 +20,7 @@ export async function getOptionsFromConfigFiles() {
 
   return {
     // defaults
+    fork: true,
     multiple: false,
     multipleCommits: false,
     multipleBranches: true,

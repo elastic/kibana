@@ -79,5 +79,15 @@ export function createSpies({ commitCount }: { commitCount: number }) {
       return { promptResult: args[0].choices[0].name };
     });
 
-  return { axiosPostSpy };
+  return {
+    getAxiosCalls: () => {
+      const [
+        getAuthorPayload,
+        getCommitsPayload,
+        createPullRequestPayload
+      ] = axiosPostSpy.mock.calls.map(call => call[1]);
+
+      return { getAuthorPayload, getCommitsPayload, createPullRequestPayload };
+    }
+  };
 }

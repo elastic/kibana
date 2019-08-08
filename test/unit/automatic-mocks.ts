@@ -1,4 +1,4 @@
-import last from 'lodash.last';
+import { last } from 'lodash';
 import os from 'os';
 
 jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
