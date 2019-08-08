@@ -205,7 +205,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
           <EuiLink
             className="lnsConfigPanel__summaryLink"
             onClick={() => {
-              setPopoverOpen(isPopoverOpen ? false : true);
+              setPopoverOpen(!isPopoverOpen);
             }}
             data-test-subj="indexPattern-configure-dimension"
             aria-label={i18n.translate('xpack.lens.configure.editConfig', {
