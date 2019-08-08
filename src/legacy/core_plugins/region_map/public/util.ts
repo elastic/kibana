@@ -18,15 +18,10 @@
  */
 
 // TODO: reference to TILE_MAP plugin should be removed
-import { FileLayer } from 'ui/vis/map/service_settings';
+import { FileLayer, VectorLayer } from 'ui/vis/map/service_settings';
 import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
 
-export interface ExtendedFileLayer extends FileLayer {
-  layerId: string;
-  isEMS: boolean;
-}
-
-export const mapToLayerWithId = (prefix: string, layer: FileLayer): ExtendedFileLayer => ({
+export const mapToLayerWithId = (prefix: string, layer: FileLayer): VectorLayer => ({
   ...layer,
   layerId: `${prefix}.${layer.name}`,
   isEMS: ORIGIN.EMS === prefix,

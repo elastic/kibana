@@ -19,7 +19,7 @@
 
 import chrome from 'ui/chrome';
 import { CoreStart, Plugin } from 'kibana/public';
-import { initTileMapLegacyModule } from './region_map_legacy_module';
+import 'ui/vis/map/service_settings';
 
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
@@ -31,8 +31,6 @@ export interface LegacyDependenciesPluginSetup {
 export class LegacyDependenciesPlugin
   implements Plugin<Promise<LegacyDependenciesPluginSetup>, void> {
   public async setup() {
-    initTileMapLegacyModule();
-
     const $injector = await chrome.dangerouslyGetActiveInjector();
 
     return {

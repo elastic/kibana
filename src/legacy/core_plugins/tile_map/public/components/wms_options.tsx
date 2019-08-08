@@ -26,17 +26,23 @@ import { toastNotifications } from 'ui/notify';
 import { TmsLayer } from 'ui/vis/map/service_settings';
 import { SelectOption } from '../../../kbn_vislib_vis_types/public/controls/select';
 import { SwitchOption } from '../../../kbn_vislib_vis_types/public/controls/switch';
+import { RegionMapOptionsProps } from '../../../region_map/public/components/region_map_options';
 import { WmsInternalOptions } from './wms_internal_options';
 import { TileMapOptionsProps } from './tile_map_options';
 import { TileMapVisParams } from '../types';
 
 const mapLayerForOption = ({ id }: TmsLayer) => ({ text: id, value: id });
 
-function WmsOptions({ serviceSettings, stateParams, setValue, vis }: TileMapOptionsProps) {
+function WmsOptions({
+  serviceSettings,
+  stateParams,
+  setValue,
+  vis,
+}: TileMapOptionsProps | RegionMapOptionsProps) {
   const { wms } = stateParams;
   const { tmsLayers } = vis.type.editorConfig.collections;
   const [tmsLayerOptions, setTmsLayersOptions] = useState<Array<{ text: string; value: string }>>(
-    vis.type.editorConfig.collections.tmsLayers.map(mapLayerForOption)
+    tmsLayers.map(mapLayerForOption)
   );
   const [layers, setLayers] = useState<TmsLayer[]>([]);
 
@@ -60,7 +66,7 @@ function WmsOptions({ serviceSettings, stateParams, setValue, vis }: TileMapOpti
     serviceSettings
       .getTMSServices()
       .then(services => {
-        const newBaseLayers = [
+        const newBaseLayers: TmsLayer[] = [
           ...tmsLayers,
           ...services.filter(service => !tmsLayers.some(({ id }: TmsLayer) => service.id === id)),
         ];
@@ -78,12 +84,12 @@ function WmsOptions({ serviceSettings, stateParams, setValue, vis }: TileMapOpti
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
-        <div>
+        <h2>
           <FormattedMessage
             id="tileMap.wmsOptions.baseLayerSettingsTitle"
             defaultMessage="Base layer settings"
           />
-        </div>
+        </h2>
       </EuiTitle>
       <EuiSpacer size="s" />
 

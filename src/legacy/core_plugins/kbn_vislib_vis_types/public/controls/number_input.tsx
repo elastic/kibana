@@ -17,35 +17,38 @@
  * under the License.
  */
 
-export interface TmsLayer {
-  id: string;
-  origin: string;
-  minZoom: string;
-  maxZoom: number;
-  attribution: string;
+import React from 'react';
+import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+
+interface NumperInputOptionProps<ParamName extends string> {
+  label?: React.ReactNode;
+  max?: number;
+  min?: number;
+  paramName: ParamName;
+  value?: number | '';
+  setValue: (paramName: ParamName, value: number | '') => void;
 }
 
-export interface FileLayer {
-  name: string;
-  origin: string;
-  id: string;
-  format: string | { type: string };
-  fields: FileLayerField[];
+function NumperInputOption<ParamName extends string>({
+  label,
+  max,
+  min,
+  paramName,
+  value = '',
+  setValue,
+}: NumperInputOptionProps<ParamName>) {
+  return (
+    <EuiFormRow label={label} fullWidth compressed>
+      <EuiFieldNumber
+        max={max}
+        min={min}
+        value={value}
+        onChange={ev =>
+          setValue(paramName, isNaN(ev.target.valueAsNumber) ? '' : ev.target.valueAsNumber)
+        }
+      />
+    </EuiFormRow>
+  );
 }
 
-export interface FileLayerField {
-  name: string;
-  description: string;
-  type: string;
-}
-
-export interface VectorLayer extends FileLayer {
-  layerId: string;
-  isEMS: boolean;
-}
-
-export interface ServiceSettings {
-  getEMSHotLink(layer: FileLayer): Promise<string>;
-  getTMSServices(): Promise<TmsLayer[]>;
-  getFileLayers(): Promise<FileLayer[]>;
-}
+export { NumperInputOption };

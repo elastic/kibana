@@ -17,23 +17,21 @@
  * under the License.
  */
 
-import { once } from 'lodash';
-// @ts-ignore
-import { uiModules } from 'ui/modules';
+import { VectorLayer, FileLayerField } from 'ui/vis/map/service_settings';
+import { WMSOptions } from '../../tile_map/public/types';
 
-import 'ui/vis/map/service_settings';
+export interface RegionMapVisParams {
+  colorSchema: string;
+  emsHotLink?: string | null;
+  outlineWeight: number | '';
+  isDisplayWarning: boolean;
+  showAllShapes: boolean;
+  selectedLayer?: VectorLayer;
+  selectedJoinField?: FileLayerField;
+  wms: WMSOptions;
+}
 
-// @ts-ignore
-import { RegionMapVisParams } from '../region_map_vis_params';
-// @ts-ignore
-import { WmsOptions } from '../wms_options';
-
-/** @internal */
-export const initTileMapLegacyModule = once((): void => {
-  uiModules
-    // TODO: Region Map Plugin uses wmsOptions directive from the kibana/tile_map module.
-    // in future this reference should be removed
-    .get('kibana/region_map', ['kibana'])
-    .directive('regionMapVisParams', RegionMapVisParams)
-    .directive('wmsOptions', WmsOptions);
-});
+export interface RegionmapsConfig {
+  includeElasticMapsService: boolean;
+  layers: any[];
+}
