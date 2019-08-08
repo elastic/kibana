@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiFormRow, EuiRange } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface RangeOptionProps<ParamName extends string> {
   label: string;
@@ -41,8 +42,27 @@ function RangeOption<ParamName extends string>({
   value,
   setValue,
 }: RangeOptionProps<ParamName>) {
+  const [stateValue, setStateValue] = useState(value);
+  const [isValidState, setIsValidState] = useState(true);
+
+  const error = i18n.translate('kbnVislibVisTypes.controls.rangeErrorMessage', {
+    defaultMessage: 'Values must be on or between {min} and {max}',
+    values: { min, max },
+  });
+
+  const onChangeHandler = (
+    { target: { valueAsNumber } }: React.ChangeEvent<HTMLInputElement>,
+    isValid: boolean
+  ) => {
+    setStateValue(valueAsNumber);
+    setIsValidState(isValid);
+
+    if (isValid) {
+      setValue(paramName, valueAsNumber);
+    }
+  };
   return (
-    <EuiFormRow label={label} fullWidth={true} compressed>
+    <EuiFormRow label={label} fullWidth={true} isInvalid={!isValidState} error={error} compressed>
       <EuiRange
         fullWidth
         showValue
@@ -50,8 +70,9 @@ function RangeOption<ParamName extends string>({
         min={min}
         showInput={showInput}
         step={step}
-        value={value}
-        onChange={ev => setValue(paramName, ev.target.valueAsNumber)}
+        value={stateValue}
+        // @ts-ignore
+        onChange={onChangeHandler}
       />
     </EuiFormRow>
   );
