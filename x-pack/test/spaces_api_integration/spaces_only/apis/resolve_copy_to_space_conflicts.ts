@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { resolveCopyToSpaceConflictsSuite } from '../../common/suites/resolve_copy_to_space_conflicts';
 
 // eslint-disable-next-line import/no-default-export
-export default function resolveCopyToSpaceConflictsTestSuite({
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
+export default function resolveCopyToSpaceConflictsTestSuite({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertestWithAuth = getService('supertest');
   const esArchiver = getService('esArchiver');
