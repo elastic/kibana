@@ -25,11 +25,11 @@ import {
 } from './content_types';
 import { LoadingIndicator } from './loading_indicator';
 
-interface Props {
+export interface FieldDataCardProps {
   config: FieldVisConfig;
 }
 
-export const FieldDataCard: FC<Props> = ({ config }) => {
+export const FieldDataCard: FC<FieldDataCardProps> = ({ config }) => {
   const { fieldName, loading, type, existsInDocs } = config;
 
   function getCardContent() {

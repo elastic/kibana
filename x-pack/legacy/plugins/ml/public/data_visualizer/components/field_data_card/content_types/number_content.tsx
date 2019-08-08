@@ -13,10 +13,9 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { ordinalSuffix } from 'ui/utils/ordinal_suffix';
 
-import { FieldVisConfig } from '../../../common';
+import { FieldDataCardProps } from '../field_data_card';
 // @ts-ignore
 import { DisplayValue } from '../../../../components/display_value';
-// @ts-ignore
 import { kibanaFieldFormat } from '../../../../formatters/kibana_field_format';
 // @ts-ignore
 import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
@@ -27,10 +26,6 @@ import {
 } from '../metric_distribution_chart';
 import { TopValues } from '../top_values';
 
-interface Props {
-  config: FieldVisConfig;
-}
-
 enum DETAILS_MODE {
   DISTRIBUTION = 'distribution',
   TOP_VALUES = 'top_values',
@@ -40,7 +35,7 @@ const METRIC_DISTRIBUTION_CHART_WIDTH = 325;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 210;
 const DEFAULT_TOP_VALUES_THRESHOLD = 100;
 
-export const NumberContent: FC<Props> = ({ config }) => {
+export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats, fieldFormat } = config;
   if (stats === undefined) {
     return null;

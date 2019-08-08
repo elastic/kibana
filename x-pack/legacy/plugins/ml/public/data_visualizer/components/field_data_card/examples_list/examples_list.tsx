@@ -6,38 +6,24 @@
 
 import React, { FC } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { Example } from './example';
+
 interface Props {
-  examples: any[];
-}
-
-function getExamples(examples: any[]) {
-  // Use 95% width for each example so that the truncation ellipses show up when
-  // wrapped inside a tooltip.
-  return examples.map((example, i) => {
-    const exampleStr = typeof example === 'string' ? example : JSON.stringify(example);
-
-    return (
-      <EuiFlexGroup key={`example_${i}`} gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false} style={{ width: '95%' }} className="eui-textTruncate">
-          <EuiToolTip content={exampleStr}>
-            <EuiText size="s" className="eui-textTruncate">
-              {exampleStr}
-            </EuiText>
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  });
+  examples: Array<string | object>;
 }
 
 export const ExamplesList: FC<Props> = ({ examples }) => {
   if (examples === undefined || examples === null || examples.length === 0) {
     return null;
   }
+
+  const examplesContent = examples.map((example, i) => {
+    return <Example key={`example_${i}`} example={example} />;
+  });
 
   return (
     <div>
@@ -51,7 +37,7 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
         />
       </EuiText>
       <EuiSpacer size="s" />
-      {getExamples(examples)}
+      {examplesContent}
     </div>
   );
 };

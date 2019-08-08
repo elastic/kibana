@@ -10,14 +10,10 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { FieldVisConfig } from '../../../common';
+import { FieldDataCardProps } from '../field_data_card';
 import { ExamplesList } from '../examples_list';
 
-interface Props {
-  config: FieldVisConfig;
-}
-
-export const TextContent: FC<Props> = ({ config }) => {
+export const TextContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats } = config;
   if (stats === undefined) {
     return null;

@@ -9,16 +9,12 @@ import { EuiIcon, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { FieldVisConfig } from '../../../common';
+import { FieldDataCardProps } from '../field_data_card';
 // @ts-ignore
 import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 import { ExamplesList } from '../examples_list';
 
-interface Props {
-  config: FieldVisConfig;
-}
-
-export const GeoPointContent: FC<Props> = ({ config }) => {
+export const GeoPointContent: FC<FieldDataCardProps> = ({ config }) => {
   // TODO - adjust server-side query to get examples using:
 
   // GET /filebeat-apache-2019.01.30/_search

@@ -9,17 +9,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { FieldVisConfig } from '../../../common';
+import { FieldDataCardProps } from '../field_data_card';
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
-
-interface Props {
-  config: FieldVisConfig;
-}
 
 const CHART_WIDTH = 325;
 const CHART_HEIGHT = 350;
 
-export const DocumentCountContent: FC<Props> = ({ config }) => {
+export const DocumentCountContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats } = config;
   if (stats === undefined) {
     return null;

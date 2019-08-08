@@ -397,7 +397,7 @@ export const Page: FC = () => {
     let allMetricFields = indexPatternFields.filter(f => {
       return (
         f.type === KBN_FIELD_TYPES.NUMBER &&
-        (f.displayName !== undefined && !DataLoader.OMIT_FIELDS.includes(f.displayName))
+        (f.displayName !== undefined && dataLoader.isDisplayField(f.displayName) === true)
       );
     });
     if (metricFieldQuery !== undefined) {
@@ -471,7 +471,7 @@ export const Page: FC = () => {
       allNonMetricFields = indexPatternFields.filter(f => {
         return (
           f.type !== KBN_FIELD_TYPES.NUMBER &&
-          (f.displayName !== undefined && !DataLoader.OMIT_FIELDS.includes(f.displayName))
+          (f.displayName !== undefined && dataLoader.isDisplayField(f.displayName) === true)
         );
       });
     } else {
@@ -484,7 +484,7 @@ export const Page: FC = () => {
         allNonMetricFields = indexPatternFields.filter(f => {
           return (
             f.displayName !== undefined &&
-            !DataLoader.OMIT_FIELDS.includes(f.displayName) &&
+            dataLoader.isDisplayField(f.displayName) === true &&
             f.type === KBN_FIELD_TYPES.STRING &&
             f.aggregatable === aggregatableCheck
           );
@@ -494,7 +494,7 @@ export const Page: FC = () => {
           return (
             f.type === nonMetricShowFieldType &&
             f.displayName !== undefined &&
-            !DataLoader.OMIT_FIELDS.includes(f.displayName)
+            dataLoader.isDisplayField(f.displayName) === true
           );
         });
       }

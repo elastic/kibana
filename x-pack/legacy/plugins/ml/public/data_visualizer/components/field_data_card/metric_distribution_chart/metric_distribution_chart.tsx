@@ -28,7 +28,6 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
 import { useUiChromeContext } from '../../../../contexts/ui/use_ui_chrome_context';
-// @ts-ignore
 import { kibanaFieldFormat } from '../../../../formatters/kibana_field_format';
 
 export interface MetricDistributionChartData {
@@ -83,10 +82,6 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
     );
   };
 
-  const tooltipProps = {
-    headerFormatter,
-  };
-
   return (
     <div style={{ width, height }}>
       <Chart>
@@ -106,7 +101,7 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
               area: { fill: 'red', visible: true, opacity: 1 },
             },
           }}
-          tooltip={tooltipProps}
+          tooltip={{ headerFormatter }}
         />
         <Axis
           id={getAxisId('bottom')}

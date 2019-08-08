@@ -17,29 +17,19 @@ import { IndexPatternTitle } from '../../../common/types/kibana';
 import { ml } from '../../services/ml_api_service';
 import { FieldRequestConfig } from '../common';
 
+// List of system fields we don't want to display.
+const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
+// Maximum number of examples to obtain for text type fields.
+const MAX_EXAMPLES_DEFAULT: number = 10;
+
 export class DataLoader {
-  // List of system fields we don't want to display.
-  public static readonly OMIT_FIELDS: string[] = [
-    '_source',
-    '_type',
-    '_index',
-    '_id',
-    '_version',
-    '_score',
-  ];
-
-  public static MAX_EXAMPLES_DEFAULT: number = 10;
-
-  protected _indexPattern: IndexPattern;
-  protected _indexPatternTitle: IndexPatternTitle = '';
-  protected _kibanaConfig: any;
-  protected _maxExamples: number = DataLoader.MAX_EXAMPLES_DEFAULT; // Maximum number of examples to obtain for text type fields.
+  private _indexPattern: IndexPattern;
+  private _indexPatternTitle: IndexPatternTitle = '';
+  private _maxExamples: number = MAX_EXAMPLES_DEFAULT;
 
   constructor(indexPattern: IndexPattern, kibanaConfig: any) {
     this._indexPattern = indexPattern;
     this._indexPatternTitle = indexPattern.title;
-    this._kibanaConfig = kibanaConfig;
-    this._maxExamples = DataLoader.MAX_EXAMPLES_DEFAULT;
   }
 
   async loadOverallData(
@@ -52,7 +42,7 @@ export class DataLoader {
     const nonAggregatableFields: string[] = [];
     this._indexPattern.fields.forEach(field => {
       const fieldName = field.displayName !== undefined ? field.displayName : field.name;
-      if (DataLoader.OMIT_FIELDS.indexOf(fieldName) === -1) {
+      if (this.isDisplayField(fieldName) === true) {
         if (field.aggregatable === true) {
           aggregatableFields.push(fieldName);
         } else {
@@ -135,5 +125,11 @@ export class DataLoader {
 
   public get maxExamples(): number {
     return this._maxExamples;
+  }
+
+  // Returns whether the field with the specified name should be displayed,
+  // as certain fields such as _id and _source should be omitted from the view.
+  public isDisplayField(fieldName: string): boolean {
+    return !OMIT_FIELDS.includes(fieldName);
   }
 }

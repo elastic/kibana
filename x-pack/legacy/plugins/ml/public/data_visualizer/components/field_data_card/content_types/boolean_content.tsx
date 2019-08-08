@@ -9,13 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiProgress, EuiSpacer, EuiText } f
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { FieldVisConfig } from '../../../common';
+import { FieldDataCardProps } from '../field_data_card';
 // @ts-ignore
 import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
-
-interface Props {
-  config: FieldVisConfig;
-}
 
 function getPercentLabel(valueCount: number, totalCount: number): string {
   if (valueCount === 0) {
@@ -30,7 +26,7 @@ function getPercentLabel(valueCount: number, totalCount: number): string {
   }
 }
 
-export const BooleanContent: FC<Props> = ({ config }) => {
+export const BooleanContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats } = config;
   if (stats === undefined) {
     return null;
