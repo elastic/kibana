@@ -70,7 +70,7 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
         agg.getIndexPattern().fields
       );
       fields = aggTypeFieldFilters.filter(availableFields, agg);
-      indexedFields = groupAndSortBy(fields, 'type', 'displayName');
+      indexedFields = groupAndSortBy(fields, 'type', 'name');
 
       if (fields && !indexedFields.length && index > 0) {
         // don't draw the rest of the options if there are no indexed fields and it's an extra param (index > 0).

@@ -23,7 +23,6 @@ import { StaticIndexPattern } from '../_index_pattern';
 export const mockFields: FieldType[] = [
   {
     name: 'machine.os',
-    displayName: 'machine.os',
     esTypes: ['text'],
     type: 'string',
     aggregatable: false,
@@ -32,7 +31,6 @@ export const mockFields: FieldType[] = [
   },
   {
     name: 'machine.os.raw',
-    displayName: 'machine.os.raw',
     type: 'string',
     esTypes: ['keyword'],
     aggregatable: true,
@@ -41,7 +39,6 @@ export const mockFields: FieldType[] = [
   },
   {
     name: 'not.filterable',
-    displayName: 'not.filterable',
     type: 'string',
     esTypes: ['text'],
     aggregatable: true,
@@ -50,7 +47,6 @@ export const mockFields: FieldType[] = [
   },
   {
     name: 'bytes',
-    displayName: 'bytes',
     type: 'number',
     esTypes: ['long'],
     aggregatable: true,
@@ -59,7 +55,6 @@ export const mockFields: FieldType[] = [
   },
   {
     name: '@timestamp',
-    displayName: '@timestamp',
     type: 'date',
     esTypes: ['date'],
     aggregatable: true,
@@ -68,7 +63,6 @@ export const mockFields: FieldType[] = [
   },
   {
     name: 'clientip',
-    displayName: 'clientip',
     type: 'ip',
     esTypes: ['ip'],
     aggregatable: true,
@@ -77,7 +71,6 @@ export const mockFields: FieldType[] = [
   },
   {
     name: 'bool.field',
-    displayName: 'bool.field',
     type: 'boolean',
     esTypes: ['boolean'],
     aggregatable: true,
