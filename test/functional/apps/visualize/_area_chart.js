@@ -132,15 +132,7 @@ export default function ({ getService, getPageObjects }) {
       await inspector.open();
       await inspector.setTablePageSize(50);
       await inspector.expectTableData(expectedTableData);
-    });
-
-    it('should hide side editor if embed is set to true in url', async () => {
-      const url = await browser.getCurrentUrl();
-      const embedUrl = url.split('/visualize/').pop().replace('?_g=', '?embed=true&_g=');
-      await PageObjects.common.navigateToUrl('visualize', embedUrl);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const sideEditorExists = await PageObjects.visualize.getSideEditorExists();
-      expect(sideEditorExists).to.be(false);
+      await inspector.close();
     });
 
     describe('axis scaling', () => {
@@ -177,7 +169,7 @@ export default function ({ getService, getPageObjects }) {
         await inspector.close();
       });
 
-      it('doesnt scale top hit agg', async () => {
+      it('does not scale top hit agg', async () => {
         const expectedTableData = [
           [ '2015-09-20 00:00', '6', '9.035KB' ],
           [ '2015-09-20 01:00', '9', '5.854KB' ],
@@ -208,7 +200,17 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickGo();
         await inspector.open();
         await inspector.expectTableData(expectedTableData);
+        await inspector.close();
       });
+    });
+
+    it('should hide side editor if embed is set to true in url', async () => {
+      const url = await browser.getCurrentUrl();
+      const embedUrl = url.split('/visualize/').pop().replace('?_g=', '?embed=true&_g=');
+      await PageObjects.common.navigateToUrl('visualize', embedUrl);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const sideEditorExists = await PageObjects.visualize.getSideEditorExists();
+      expect(sideEditorExists).to.be(false);
     });
 
     describe.skip('switch between Y axis scale types', () => {
