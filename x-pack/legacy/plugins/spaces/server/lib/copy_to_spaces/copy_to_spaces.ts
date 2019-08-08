@@ -38,7 +38,7 @@ export function copySavedObjectsToSpacesFactory(
       objects: options.objects,
       savedObjectsClient,
       types: eligibleTypes,
-      exportSizeLimit: 10000,
+      exportSizeLimit: importExport.objectLimit,
     });
     return objectStream;
   };
@@ -61,7 +61,7 @@ export function copySavedObjectsToSpacesFactory(
 
       const importResponse = await importExport.importSavedObjects({
         namespace: spaceIdToNamespace(spaceId),
-        objectLimit: 10000,
+        objectLimit: importExport.objectLimit,
         overwrite: options.overwrite,
         savedObjectsClient,
         supportedTypes: eligibleTypes,

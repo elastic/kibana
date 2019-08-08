@@ -32,7 +32,7 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
       objects: options.objects,
       savedObjectsClient,
       types: eligibleTypes,
-      exportSizeLimit: 10000,
+      exportSizeLimit: importExport.objectLimit,
     });
     return objectStream;
   };
@@ -60,7 +60,7 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
 
       const importResponse = await importExport.resolveImportErrors({
         namespace: spaceIdToNamespace(spaceId),
-        objectLimit: 10000,
+        objectLimit: importExport.objectLimit,
         savedObjectsClient,
         supportedTypes: eligibleTypes,
         readStream: objectsStream,
