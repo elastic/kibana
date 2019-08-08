@@ -11,16 +11,16 @@ import { ml } from '../../../../../services/ml_api_service';
 import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
 
 import {
-  DATA_FRAME_TASK_STATE,
+  DATA_FRAME_STATE,
   DataFrameTransformListRow,
 } from '../../components/transform_list/common';
 
 export const deleteTransform = async (d: DataFrameTransformListRow) => {
   try {
-    if (d.stats.task_state === DATA_FRAME_TASK_STATE.FAILED) {
+    if (d.stats.state === DATA_FRAME_STATE.FAILED) {
       await ml.dataFrame.stopDataFrameTransform(
         d.config.id,
-        d.stats.task_state === DATA_FRAME_TASK_STATE.FAILED,
+        d.stats.state === DATA_FRAME_STATE.FAILED,
         true
       );
     }

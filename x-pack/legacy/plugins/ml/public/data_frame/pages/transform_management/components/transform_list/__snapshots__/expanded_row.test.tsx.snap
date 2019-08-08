@@ -17,7 +17,7 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
                 },
                 Object {
                   "description": "stopped",
-                  "title": "task_state",
+                  "title": "state",
                 },
               ],
               "position": "left",
@@ -110,7 +110,7 @@ exports[`Data Frame: Transform List <ExpandedRow /> Minimal initialization 1`] =
                   },
                   Object {
                     "description": "stopped",
-                    "title": "task_state",
+                    "title": "state",
                   },
                 ],
                 "position": "left",

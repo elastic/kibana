@@ -13,7 +13,7 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { DataFrameTransformListRow, DATA_FRAME_TASK_STATE } from './common';
+import { DataFrameTransformListRow, DATA_FRAME_STATE } from './common';
 import { stopTransform } from '../../services/transform_service';
 
 import { StartAction } from './action_start';
@@ -26,7 +26,7 @@ export const getActions = () => {
     {
       isPrimary: true,
       render: (item: DataFrameTransformListRow) => {
-        if (item.stats.task_state !== DATA_FRAME_TASK_STATE.STARTED) {
+        if (item.stats.state !== DATA_FRAME_STATE.STARTED) {
           return <StartAction item={item} />;
         }
 

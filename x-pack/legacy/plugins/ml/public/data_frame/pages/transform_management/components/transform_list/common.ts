@@ -10,16 +10,14 @@ import { Dictionary } from '../../../../../../common/types/common';
 
 import { DataFrameTransformId, DataFrameTransformPivotConfig } from '../../../../common';
 
-export enum DATA_FRAME_INDEXER_STATE {
+// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/dataframe/transforms/DataFrameTransformStats.java#L243
+export enum DATA_FRAME_STATE {
+  ABORTING = 'aborting',
   FAILED = 'failed',
+  INDEXING = 'indexing',
   STARTED = 'started',
   STOPPED = 'stopped',
-}
-
-export enum DATA_FRAME_TASK_STATE {
-  FAILED = 'failed',
-  STARTED = 'started',
-  STOPPED = 'stopped',
+  STOPPING = 'stopping',
 }
 
 export enum DATA_FRAME_MODE {
@@ -50,9 +48,6 @@ export interface DataFrameTransformStats {
     };
     next?: {
       checkpoint: number;
-      // indexer_state is a backend internal attribute
-      // and should not be considered in the UI.
-      indexer_state: DATA_FRAME_INDEXER_STATE;
       checkpoint_progress?: {
         total_docs: number;
         docs_remaining: number;
@@ -74,9 +69,7 @@ export interface DataFrameTransformStats {
     trigger_count: number;
   };
   reason?: string;
-  // task_state is the attribute to check against if a transform
-  // is running or not.
-  task_state: DATA_FRAME_TASK_STATE;
+  state: DATA_FRAME_STATE;
 }
 
 export function getTransformProgress(item: DataFrameTransformListRow) {
@@ -93,8 +86,8 @@ export function isDataFrameTransformStats(arg: any): arg is DataFrameTransformSt
   return (
     typeof arg === 'object' &&
     arg !== null &&
-    {}.hasOwnProperty.call(arg, 'task_state') &&
-    Object.values(DATA_FRAME_TASK_STATE).includes(arg.task_state)
+    {}.hasOwnProperty.call(arg, 'state') &&
+    Object.values(DATA_FRAME_STATE).includes(arg.state)
   );
 }
 
@@ -122,6 +115,6 @@ export function isCompletedBatchTransform(item: DataFrameTransformListRow) {
   return (
     item.stats.checkpointing.last.checkpoint === 1 &&
     item.config.sync === undefined &&
-    item.stats.task_state === DATA_FRAME_TASK_STATE.STOPPED
+    item.stats.state === DATA_FRAME_STATE.STOPPED
   );
 }

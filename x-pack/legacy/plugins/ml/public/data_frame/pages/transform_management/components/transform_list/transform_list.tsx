@@ -22,7 +22,7 @@ import {
   DataFrameTransformListColumn,
   DataFrameTransformListRow,
   ItemIdToExpandedRowMap,
-  DATA_FRAME_TASK_STATE,
+  DATA_FRAME_STATE,
   DATA_FRAME_MODE,
   Query,
   Clause,
@@ -152,7 +152,7 @@ export const DataFrameTransformList: SFC = () => {
         // filter other clauses, i.e. the mode and status filters
         if (Array.isArray(c.value)) {
           // the status value is an array of string(s) e.g. ['failed', 'stopped']
-          ts = transforms.filter(transform => c.value.includes(transform.stats.task_state));
+          ts = transforms.filter(transform => c.value.includes(transform.stats.state));
         } else {
           ts = transforms.filter(transform => transform.mode === c.value);
         }
@@ -245,10 +245,10 @@ export const DataFrameTransformList: SFC = () => {
     filters: [
       {
         type: 'field_value_selection',
-        field: 'state.task_state',
+        field: 'state.state',
         name: i18n.translate('xpack.ml.dataframe.statusFilter', { defaultMessage: 'Status' }),
         multiSelect: 'or',
-        options: Object.values(DATA_FRAME_TASK_STATE).map(val => ({
+        options: Object.values(DATA_FRAME_STATE).map(val => ({
           value: val,
           name: val,
           view: getTaskStateBadge(val),

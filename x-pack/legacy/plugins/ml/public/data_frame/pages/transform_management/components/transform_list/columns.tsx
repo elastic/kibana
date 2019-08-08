@@ -20,26 +20,28 @@ import {
 import { DataFrameTransformId } from '../../../../common';
 import {
   getTransformProgress,
-  DATA_FRAME_TASK_STATE,
+  DATA_FRAME_STATE,
   DataFrameTransformListColumn,
   DataFrameTransformListRow,
   DataFrameTransformStats,
 } from './common';
 import { getActions } from './actions';
 
-enum TASK_STATE_COLOR {
+enum STATE_COLOR {
+  aborting = 'warning',
   failed = 'danger',
   started = 'primary',
   stopped = 'hollow',
+  stopping = 'hollow',
 }
 
 export const getTaskStateBadge = (
-  state: DataFrameTransformStats['task_state'],
+  state: DataFrameTransformStats['state'],
   reason?: DataFrameTransformStats['reason']
 ) => {
-  const color = TASK_STATE_COLOR[state];
+  const color = STATE_COLOR[state];
 
-  if (state === DATA_FRAME_TASK_STATE.FAILED && reason !== undefined) {
+  if (state === DATA_FRAME_STATE.FAILED && reason !== undefined) {
     return (
       <EuiToolTip content={reason}>
         <EuiBadge className="mlTaskStateBadge" color={color}>
@@ -126,10 +128,10 @@ export const getColumns = (
     },
     {
       name: i18n.translate('xpack.ml.dataframe.status', { defaultMessage: 'Status' }),
-      sortable: (item: DataFrameTransformListRow) => item.stats.task_state,
+      sortable: (item: DataFrameTransformListRow) => item.stats.state,
       truncateText: true,
       render(item: DataFrameTransformListRow) {
-        return getTaskStateBadge(item.stats.task_state, item.stats.reason);
+        return getTaskStateBadge(item.stats.state, item.stats.reason);
       },
       width: '100px',
     },
@@ -170,10 +172,10 @@ export const getColumns = (
             {!isBatchTransform && (
               <Fragment>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
-                  {item.stats.task_state === DATA_FRAME_TASK_STATE.STARTED && (
+                  {item.stats.state === DATA_FRAME_STATE.STARTED && (
                     <EuiProgress color="primary" size="m" />
                   )}
-                  {item.stats.task_state === DATA_FRAME_TASK_STATE.STOPPED && (
+                  {item.stats.state === DATA_FRAME_STATE.STOPPED && (
                     <EuiProgress value={0} max={100} color="primary" size="m" />
                   )}
                 </EuiFlexItem>
