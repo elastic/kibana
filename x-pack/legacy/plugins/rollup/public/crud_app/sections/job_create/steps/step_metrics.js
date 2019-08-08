@@ -379,7 +379,7 @@ export class StepMetricsUi extends Component {
                 const newMetrics = metricTypesConfig.reduce((acc, { type }) => {
                   return this.setMetric(fieldName, type, true);
                 }, null);
-                onFieldsChange({metric: newMetrics});
+                onFieldsChange({ metric: newMetrics });
               },
             }
           ]}
