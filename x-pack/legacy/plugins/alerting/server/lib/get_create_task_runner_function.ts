@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { ActionsPlugin } from '../../../actions';
-import { AlertType, Services, AlertServices } from '../types';
+import { AlertType, Services, AlertServices, RawAlert } from '../types';
 import { ConcreteTaskInstance } from '../../../task_manager';
 import { createFireHandler } from './create_fire_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
@@ -19,7 +19,7 @@ interface CreateTaskRunnerFunctionOptions {
   getServices: (basePath: string) => Services;
   alertType: AlertType;
   fireAction: ActionsPlugin['fire'];
-  internalSavedObjectsRepository: SavedObjectsClientContract;
+  savedObjectsRepositoryWithInternalUser: SavedObjectsClientContract;
   spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
   getBasePath: SpacesPlugin['getBasePath'];
 }
@@ -32,7 +32,7 @@ export function getCreateTaskRunnerFunction({
   getServices,
   alertType,
   fireAction,
-  internalSavedObjectsRepository,
+  savedObjectsRepositoryWithInternalUser,
   spaceIdToNamespace,
   getBasePath,
 }: CreateTaskRunnerFunctionOptions) {
@@ -40,21 +40,37 @@ export function getCreateTaskRunnerFunction({
     return {
       run: async () => {
         const namespace = spaceIdToNamespace(taskInstance.params.spaceId);
-        const alertSavedObject = await internalSavedObjectsRepository.get(
+        // Only get attributes that are needed, we shouldn't pass around this saved object
+        // due to containing encrypted attributes which are returned from repository.
+        const {
+          attributes: { alertTypeParams, actions, interval },
+          references,
+        } = await savedObjectsRepositoryWithInternalUser.get<RawAlert>(
           'alert',
           taskInstance.params.alertId,
           { namespace }
         );
 
         // Validate
-        const validatedAlertTypeParams = validateAlertTypeParams(
-          alertType,
-          alertSavedObject.attributes.alertTypeParams
-        );
+        const validatedAlertTypeParams = validateAlertTypeParams(alertType, alertTypeParams);
+
+        // Inject ids into actions
+        const actionsWithIds = actions.map(action => {
+          const actionReference = references.find(obj => obj.name === action.actionRef);
+          if (!actionReference) {
+            throw new Error(
+              `Action reference "${action.actionRef}" not found in alert id: ${taskInstance.params.alertId}`
+            );
+          }
+          return {
+            ...action,
+            id: actionReference.id,
+          };
+        });
 
         const fireHandler = createFireHandler({
-          alertSavedObject,
           fireAction,
+          actions: actionsWithIds,
           spaceId: taskInstance.params.spaceId,
         });
         const alertInstances: Record<string, AlertInstance> = {};
@@ -94,10 +110,7 @@ export function getCreateTaskRunnerFunction({
           })
         );
 
-        const nextRunAt = getNextRunAt(
-          new Date(taskInstance.startedAt!),
-          alertSavedObject.attributes.interval
-        );
+        const nextRunAt = getNextRunAt(new Date(taskInstance.startedAt!), interval);
 
         return {
           state: {

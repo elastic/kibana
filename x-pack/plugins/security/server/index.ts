@@ -18,6 +18,7 @@ export {
   AuthenticationResult,
   BasicCredentials,
   DeauthenticationResult,
+  CreateAPIKeyResult,
 } from './authentication';
 
 export { PluginSetupContract } from './plugin';

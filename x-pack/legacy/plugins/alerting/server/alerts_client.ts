@@ -9,6 +9,16 @@ import { SavedObjectsClientContract, SavedObjectReference } from 'src/core/serve
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Log } from './types';
 import { TaskManager } from '../../task_manager';
 import { validateAlertTypeParams } from './lib';
+import { CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult } from '../../../../plugins/security/server';
+
+interface FailedCreateAPIKeyResult {
+  created: false;
+}
+interface SuccessCreateAPIKeyResult {
+  created: true;
+  result: SecurityPluginCreateAPIKeyResult;
+}
+export type CreateAPIKeyResult = FailedCreateAPIKeyResult | SuccessCreateAPIKeyResult;
 
 interface ConstructorOptions {
   log: Log;
@@ -17,6 +27,7 @@ interface ConstructorOptions {
   alertTypeRegistry: AlertTypeRegistry;
   spaceId?: string;
   getUserName: () => Promise<string | null>;
+  createAPIKey: () => Promise<CreateAPIKeyResult>;
 }
 
 interface FindOptions {
@@ -43,7 +54,7 @@ interface FindResult {
 }
 
 interface CreateOptions {
-  data: Pick<Alert, Exclude<keyof Alert, 'createdBy'>>;
+  data: Pick<Alert, Exclude<keyof Alert, 'createdBy' | 'apiKeyId' | 'generatedApiKey'>>;
   options?: {
     migrationVersion?: Record<string, string>;
   };
@@ -66,6 +77,7 @@ export class AlertsClient {
   private readonly taskManager: TaskManager;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly alertTypeRegistry: AlertTypeRegistry;
+  private readonly createAPIKey: () => Promise<CreateAPIKeyResult>;
 
   constructor({
     alertTypeRegistry,
@@ -74,6 +86,7 @@ export class AlertsClient {
     log,
     spaceId,
     getUserName,
+    createAPIKey,
   }: ConstructorOptions) {
     this.log = log;
     this.getUserName = getUserName;
@@ -81,15 +94,19 @@ export class AlertsClient {
     this.taskManager = taskManager;
     this.alertTypeRegistry = alertTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
+    this.createAPIKey = createAPIKey;
   }
 
   public async create({ data, options }: CreateOptions) {
     // Throws an error if alert type isn't registered
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.alertTypeParams);
+    const apiKey = await this.createAPIKey();
     const { alert: rawAlert, references } = this.getRawAlert({
       ...data,
       createdBy: await this.getUserName(),
+      apiKeyId: apiKey.created ? apiKey.result.id : null,
+      generatedApiKey: apiKey.created ? apiKey.result.api_key : null,
       alertTypeParams: validatedAlertTypeParams,
     });
     const createdAlert = await this.savedObjectsClient.create('alert', rawAlert, {

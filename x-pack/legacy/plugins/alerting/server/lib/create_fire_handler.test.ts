@@ -11,35 +11,17 @@ const createFireHandlerParams = {
   spaceId: 'default',
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
-  alertSavedObject: {
-    id: '1',
-    type: 'alert',
-    attributes: {
-      alertTypeId: '123',
-      interval: '10s',
-      alertTypeParams: {
-        bar: true,
+  actions: [
+    {
+      id: '1',
+      group: 'default',
+      params: {
+        foo: true,
+        contextVal: 'My {{context.value}} goes here',
+        stateVal: 'My {{state.value}} goes here',
       },
-      actions: [
-        {
-          group: 'default',
-          actionRef: 'action_0',
-          params: {
-            foo: true,
-            contextVal: 'My {{context.value}} goes here',
-            stateVal: 'My {{state.value}} goes here',
-          },
-        },
-      ],
     },
-    references: [
-      {
-        name: 'action_0',
-        type: 'action',
-        id: '1',
-      },
-    ],
-  },
+  ],
 };
 
 beforeEach(() => jest.resetAllMocks());
@@ -105,40 +87,4 @@ test('state attribute gets parameterized', async () => {
       },
     ]
   `);
-});
-
-test('throws error if reference not found', async () => {
-  const params = {
-    spaceId: 'default',
-    fireAction: jest.fn(),
-    alertSavedObject: {
-      id: '1',
-      type: 'alert',
-      attributes: {
-        alertTypeId: '123',
-        interval: '10s',
-        alertTypeParams: {
-          bar: true,
-        },
-        actions: [
-          {
-            group: 'default',
-            actionRef: 'action_0',
-            params: {
-              foo: true,
-              contextVal: 'My {{context.value}} goes here',
-              stateVal: 'My {{state.value}} goes here',
-            },
-          },
-        ],
-      },
-      references: [],
-    },
-  };
-  const fireHandler = createFireHandler(params);
-  await expect(
-    fireHandler('default', {}, { value: 'state-val' })
-  ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Action reference \\"action_0\\" not found in alert id: 1"`
-  );
 });

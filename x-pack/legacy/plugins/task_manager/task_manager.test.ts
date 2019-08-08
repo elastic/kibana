@@ -36,7 +36,7 @@ describe('TaskManager', () => {
     const client = new TaskManager({
       kbnServer: opts.kbnServer,
       config: opts.config,
-      savedObjectsRepository: savedObjectsClient,
+      savedObjectsRepositoryWithInternalUser: savedObjectsClient,
       serializer,
     });
     const task = {
@@ -52,7 +52,7 @@ describe('TaskManager', () => {
     const client = new TaskManager({
       kbnServer: opts.kbnServer,
       config: opts.config,
-      savedObjectsRepository: savedObjectsClient,
+      savedObjectsRepositoryWithInternalUser: savedObjectsClient,
       serializer,
     });
     await expect(client.fetch({})).rejects.toThrow(/^NotInitialized: .*/i);
@@ -63,7 +63,7 @@ describe('TaskManager', () => {
     const client = new TaskManager({
       kbnServer: opts.kbnServer,
       config: opts.config,
-      savedObjectsRepository: savedObjectsClient,
+      savedObjectsRepositoryWithInternalUser: savedObjectsClient,
       serializer,
     });
     await expect(client.remove('23')).rejects.toThrow(/^NotInitialized: .*/i);
@@ -74,7 +74,7 @@ describe('TaskManager', () => {
     const client = new TaskManager({
       kbnServer: opts.kbnServer,
       config: opts.config,
-      savedObjectsRepository: savedObjectsClient,
+      savedObjectsRepositoryWithInternalUser: savedObjectsClient,
       serializer,
     });
     const middleware = {
@@ -89,7 +89,7 @@ describe('TaskManager', () => {
     const client = new TaskManager({
       kbnServer: opts.kbnServer,
       config: opts.config,
-      savedObjectsRepository: savedObjectsClient,
+      savedObjectsRepositoryWithInternalUser: savedObjectsClient,
       serializer,
     });
     const middleware = {

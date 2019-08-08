@@ -17,7 +17,7 @@ interface ConstructorOptions {
   getServices: (basePath: string) => Services;
   taskManager: TaskManager;
   fireAction: ActionsPlugin['fire'];
-  internalSavedObjectsRepository: SavedObjectsClientContract;
+  savedObjectsRepositoryWithInternalUser: SavedObjectsClientContract;
   spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
   getBasePath: SpacesPlugin['getBasePath'];
 }
@@ -27,12 +27,12 @@ export class AlertTypeRegistry {
   private readonly taskManager: TaskManager;
   private readonly fireAction: ActionsPlugin['fire'];
   private readonly alertTypes: Map<string, AlertType> = new Map();
-  private readonly internalSavedObjectsRepository: SavedObjectsClientContract;
+  private readonly savedObjectsRepositoryWithInternalUser: SavedObjectsClientContract;
   private readonly spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
   private readonly getBasePath: SpacesPlugin['getBasePath'];
 
   constructor({
-    internalSavedObjectsRepository,
+    savedObjectsRepositoryWithInternalUser,
     fireAction,
     taskManager,
     getServices,
@@ -41,7 +41,7 @@ export class AlertTypeRegistry {
   }: ConstructorOptions) {
     this.taskManager = taskManager;
     this.fireAction = fireAction;
-    this.internalSavedObjectsRepository = internalSavedObjectsRepository;
+    this.savedObjectsRepositoryWithInternalUser = savedObjectsRepositoryWithInternalUser;
     this.getServices = getServices;
     this.getBasePath = getBasePath;
     this.spaceIdToNamespace = spaceIdToNamespace;
@@ -71,7 +71,7 @@ export class AlertTypeRegistry {
           alertType,
           getServices: this.getServices,
           fireAction: this.fireAction,
-          internalSavedObjectsRepository: this.internalSavedObjectsRepository,
+          savedObjectsRepositoryWithInternalUser: this.savedObjectsRepositoryWithInternalUser,
           getBasePath: this.getBasePath,
           spaceIdToNamespace: this.spaceIdToNamespace,
         }),

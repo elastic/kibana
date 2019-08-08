@@ -17,9 +17,10 @@ import {
 } from './routes';
 import { AlertingPlugin, Services } from './types';
 import { AlertTypeRegistry } from './alert_type_registry';
-import { AlertsClient } from './alerts_client';
+import { AlertsClient, CreateAPIKeyResult } from './alerts_client';
 import { SpacesPlugin } from '../../spaces';
-import { SecurityPlugin } from '../../security';
+import { KibanaRequest } from '../../../../../src/core/server';
+import { PluginSetupContract as SecurityPluginSetupContract } from '../../../../plugins/security/server';
 import { createOptionalPlugin } from '../../../server/lib/optional_plugin';
 
 export function init(server: Legacy.Server) {
@@ -30,10 +31,10 @@ export function init(server: Legacy.Server) {
     server.plugins,
     'spaces'
   );
-  const security = createOptionalPlugin<SecurityPlugin>(
+  const security = createOptionalPlugin<SecurityPluginSetupContract>(
     config,
     'xpack.security',
-    server.plugins,
+    server.newPlatform.setup.plugins,
     'security'
   );
 
@@ -72,7 +73,7 @@ export function init(server: Legacy.Server) {
     getServices,
     taskManager: taskManager!,
     fireAction: server.plugins.actions!.fire,
-    internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
+    savedObjectsRepositoryWithInternalUser,
     getBasePath(...args) {
       return spaces.isEnabled ? spaces.getBasePath(...args) : config.get('server.basePath');
     },
@@ -106,8 +107,20 @@ export function init(server: Legacy.Server) {
         if (!security.isEnabled) {
           return null;
         }
-        const user = await security.getUser(request);
+        const user = await security.authc.getCurrentUser(KibanaRequest.from(request));
         return user ? user.username : null;
+      },
+      async createAPIKey(): Promise<CreateAPIKeyResult> {
+        if (!security.isEnabled) {
+          return { created: false };
+        }
+        return {
+          created: true,
+          result: (await security.authc.createAPIKey(KibanaRequest.from(request), {
+            name: Date.now().toString(),
+            role_descriptors: {},
+          }))!,
+        };
       },
     });
 

@@ -53,7 +53,7 @@ const getCreateTaskRunnerFunctionParams = {
     executor: jest.fn(),
   },
   fireAction: jest.fn(),
-  internalSavedObjectsRepository: savedObjectsClient,
+  savedObjectsRepositoryWithInternalUser: savedObjectsClient,
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
 };
@@ -194,4 +194,8 @@ test('validates params before executing the alert type', async () => {
   await expect(runner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
     `"alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]"`
   );
+});
+
+test('throws error if reference not found', async () => {
+  // TODO
 });

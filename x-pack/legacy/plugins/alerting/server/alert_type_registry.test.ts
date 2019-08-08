@@ -24,9 +24,9 @@ const alertTypeRegistryParams = {
   },
   taskManager,
   fireAction: jest.fn(),
-  internalSavedObjectsRepository: SavedObjectsClientMock.create(),
-  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
+  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+  savedObjectsRepositoryWithInternalUser: SavedObjectsClientMock.create(),
 };
 
 beforeEach(() => jest.resetAllMocks());
@@ -80,7 +80,7 @@ Object {
   "name": "Test",
 }
 `);
-    expect(firstCall.internalSavedObjectsRepository).toBeTruthy();
+    expect(firstCall.savedObjectsRepositoryWithInternalUser).toBeTruthy();
     expect(firstCall.getBasePath).toBeTruthy();
     expect(firstCall.spaceIdToNamespace).toBeTruthy();
     expect(firstCall.fireAction).toMatchInlineSnapshot(`[MockFunction]`);
