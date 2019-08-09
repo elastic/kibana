@@ -79,6 +79,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   VisualizationAttributes
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
+  private readonly visTypes: VisTypesRegistry;
 
   static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
     const $injector = await chrome.dangerouslyGetActiveInjector();
@@ -88,32 +89,31 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     return new VisualizeEmbeddableFactory(visTypes);
   }
 
-  constructor(private visTypes: VisTypesRegistry) {
+  constructor(visTypes: VisTypesRegistry) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
         type: 'visualization',
         getIconForSavedObject: savedObject => {
-          if (!this.visTypes) {
+          if (!visTypes) {
             return 'visualizeApp';
           }
           return (
-            this.visTypes.byName[JSON.parse(savedObject.attributes.visState).type].icon ||
-            'visualizeApp'
+            visTypes.byName[JSON.parse(savedObject.attributes.visState).type].icon || 'visualizeApp'
           );
         },
         getTooltipForSavedObject: savedObject => {
-          if (!this.visTypes) {
+          if (!visTypes) {
             return '';
           }
-          return `${savedObject.attributes.title} (${this.visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title})`;
+          return `${savedObject.attributes.title} (${visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title})`;
         },
         showSavedObject: savedObject => {
-          if (!this.visTypes) {
+          if (!visTypes) {
             return false;
           }
           const typeName: string = JSON.parse(savedObject.attributes.visState).type;
-          const visType = this.visTypes.byName[typeName];
+          const visType = visTypes.byName[typeName];
           if (!visType) {
             return false;
           }
@@ -124,6 +124,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
         },
       },
     });
+
+    this.visTypes = visTypes;
   }
 
   public isEditable() {
