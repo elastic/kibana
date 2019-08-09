@@ -140,7 +140,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
         <EuiSpacer size="s" />
 
         <SelectOption
-          id="regionMap"
+          id="regionMapOptionsSelectLayer"
           label={i18n.translate('regionMap.visParams.vectorMapLabel', {
             defaultMessage: 'Vector map',
           })}
@@ -175,7 +175,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
         />
 
         <SelectOption
-          id="joinField"
+          id="regionMapOptionsSelectJoinField"
           label={i18n.translate('regionMap.visParams.joinFieldLabel', {
             defaultMessage: 'Join field',
           })}

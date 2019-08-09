@@ -109,6 +109,7 @@ function WmsOptions({
         <>
           <EuiSpacer size="s" />
           <SelectOption
+            id="wmsOptionsSelectTmsLayer"
             label={i18n.translate('tileMap.wmsOptions.layersLabel', {
               defaultMessage: 'Layers',
             })}

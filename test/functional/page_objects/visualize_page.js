@@ -565,10 +565,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await sortMetric.click();
     }
 
-    async selectFieldById(fieldValue, id) {
-      await find.clickByCssSelector(`#${id} > option[label="${fieldValue}"]`);
-    }
-
     async getInterval() {
       return await comboBox.getComboBoxSelectedOptions('visEditorInterval');
     }
