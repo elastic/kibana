@@ -14,7 +14,7 @@ import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
 import { OrientationEditor } from './orientation/orientation_editor';
 import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../../vector_style_defaults';
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
-import { SYMBOLIZE_AS_CIRCLE } from '../../vector_constants';
+import { SYMBOLIZE_AS_ICON } from '../../vector_constants';
 import { i18n } from '@kbn/i18n';
 import { SYMBOL_OPTIONS } from '../../symbol_utils';
 
@@ -140,23 +140,20 @@ export class VectorStyleEditor extends Component {
   }
 
   _renderPointProperties() {
-    let lineColor;
-    let lineWidth;
     let iconOrientation;
-    if (this.props.styleProperties.symbol.options.symbolizeAs === SYMBOLIZE_AS_CIRCLE)  {
-      lineColor = (
-        <Fragment>
-          {this._renderLineColor()}
-          <EuiSpacer size="m" />
-        </Fragment>
-      );
-      lineWidth = (
-        <Fragment>
-          {this._renderLineWidth()}
-          <EuiSpacer size="m" />
-        </Fragment>
-      );
-    } else {
+    const lineColor = (
+      <Fragment>
+        {this._renderLineColor()}
+        <EuiSpacer size="m" />
+      </Fragment>
+    );
+    const lineWidth = (
+      <Fragment>
+        {this._renderLineWidth()}
+        <EuiSpacer size="m" />
+      </Fragment>
+    );
+    if (this.props.styleProperties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON)  {
       iconOrientation = (
         <Fragment>
           <OrientationEditor
