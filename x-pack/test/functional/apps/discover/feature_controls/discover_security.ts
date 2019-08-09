@@ -217,6 +217,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       it('does not allow deleting a saved query from the saved query manager', async () => {
         await savedQueryManager.deleteSavedQueryMissingOrFail('OKJpgs');
       });
+
+      it('allows clearing the currently loaded saved query', async () => {
+        await savedQueryManager.loadSavedQuery('OKJpgs');
+        await savedQueryManager.clearCurrentlyLoadedQuery();
+      });
     });
 
     describe('discover and visualize privileges', () => {
