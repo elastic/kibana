@@ -159,6 +159,7 @@ export async function resolveIndexPatternConflicts(
       if (!(filter.meta && filter.meta.index)) {
         return filter;
       }
+
       resolution = resolutions.find(({ oldId }) => oldId === filter.meta.index);
       return resolution ? ({ ...filter, ...{ meta: { ...filter.meta, index: resolution.newId } } }) : filter;
     });
