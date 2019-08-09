@@ -67,7 +67,7 @@ describe('LensStore', () => {
 
         expression: '',
         activeDatasourceId: 'indexpattern',
-        state: JSON.stringify({
+        state: {
           datasourceMetaData: { filterableIndexPatterns: [] },
           datasourceStates: {
             indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
@@ -75,7 +75,7 @@ describe('LensStore', () => {
           visualization: { x: 'foo', y: 'baz' },
           query: { query: '', language: 'lucene' },
           filters: [],
-        }),
+        },
       });
     });
 
@@ -117,45 +117,18 @@ describe('LensStore', () => {
         visualizationType: 'line',
         expression: '',
         activeDatasourceId: 'indexpattern',
-        state: JSON.stringify({
+        state: {
           datasourceMetaData: { filterableIndexPatterns: [] },
           datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
           visualization: { gear: ['staff', 'pointy hat'] },
           query: { query: '', language: 'lucene' },
           filters: [],
-        }),
+        },
       });
     });
   });
 
   describe('load', () => {
-    test('parses the visState', async () => {
-      const { client, store } = testStore();
-      client.get = jest.fn(async () => ({
-        id: 'Paul',
-        type: 'lens',
-        attributes: {
-          title: 'Hope clouds observation.',
-          visualizationType: 'dune',
-          state: '{ "datasource": { "giantWorms": true } }',
-        },
-      }));
-      const doc = await store.load('Paul');
-
-      expect(doc).toEqual({
-        id: 'Paul',
-        type: 'lens',
-        title: 'Hope clouds observation.',
-        visualizationType: 'dune',
-        state: {
-          datasource: { giantWorms: true },
-        },
-      });
-
-      expect(client.get).toHaveBeenCalledTimes(1);
-      expect(client.get).toHaveBeenCalledWith('lens', 'Paul');
-    });
-
     test('throws if an error is returned', async () => {
       const { client, store } = testStore();
       client.get = jest.fn(async () => ({

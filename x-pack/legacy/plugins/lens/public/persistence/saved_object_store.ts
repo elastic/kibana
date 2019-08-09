@@ -61,18 +61,17 @@ export class SavedObjectIndexStore implements SavedObjectStore {
 
   async save(vis: Document) {
     const { id, type, ...rest } = vis;
-    const attributes = {
-      ...rest,
-      state: JSON.stringify(rest.state),
-    };
+
+    // Any is the most straighforward way out here, since the saved
+    // object client doesn't allow unknowns, and we have them in
+    // our object.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const attributes: any = rest;
     const result = await (id
       ? this.client.update(DOC_TYPE, id, attributes)
       : this.client.create(DOC_TYPE, attributes));
 
-    return {
-      ...vis,
-      id: result.id,
-    };
+    return { ...vis, id: result.id };
   }
 
   async load(id: string): Promise<Document> {
@@ -86,7 +85,6 @@ export class SavedObjectIndexStore implements SavedObjectStore {
       ...attributes,
       id,
       type,
-      state: JSON.parse(((attributes as unknown) as { state: string }).state as string),
     } as Document;
   }
 }

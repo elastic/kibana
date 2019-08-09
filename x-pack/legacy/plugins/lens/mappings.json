@@ -11,7 +11,8 @@
         "type": "keyword"
       },
       "state": {
-        "type": "text"
+        "enabled": false,
+        "type": "object"
       },
       "expression": {
         "type": "text"
