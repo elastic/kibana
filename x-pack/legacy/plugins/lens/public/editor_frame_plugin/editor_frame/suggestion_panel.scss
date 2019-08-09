@@ -1,18 +1,29 @@
-.lnsSuggestionsPanel {
-  @include euiBottomShadowFlat;
-  background-color: $euiColorLightestShade;
+ // SASSTODO: Create this in EUI
+ @mixin lnsOverflowShadowHorizontal {
+  $hideHeight: $euiScrollBarCorner * 1.25;
+    mask-image: linear-gradient(to right,
+                  transparentize(red, .9) 0%,
+                  transparentize(red, 0) $hideHeight,
+                  transparentize(red, 0) calc(100% - #{$hideHeight}),
+                  transparentize(red, .9) 100%
+                );
 }
 
 .lnsSuggestionsPanel__title {
-  margin: $euiSizeS $euiSize $euiSizeXS;
+  margin: $euiSizeS 0 $euiSizeXS;
 }
 
 .lnsSuggestionsPanel__suggestions {
   @include euiScrollBar;
-  padding: $euiSizeXS $euiSize $euiSize;
+  @include lnsOverflowShadowHorizontal;
+  padding-top: $euiSizeXS;
   overflow-x: auto;
   overflow-y: hidden;
   display: flex;
+
+  // Padding / negative margins to make room for overflow shadow
+  padding-left: $euiSizeXS;
+  margin-left: -$euiSizeXS;
 
   // Add margin to the next of the same type
   > * + * {
@@ -25,7 +36,9 @@ $suggestionHeight: 100px - $euiSize;
 .lnsSuggestionPanel__button {
   flex: 0 0 auto;
   width: 150px !important;
-  height: 100px;
+  height: $suggestionHeight;
+  // Allows the scrollbar to stay flush to window
+  margin-bottom: $euiSize;
 }
 
 .lnsSidebar__suggestionIcon {
@@ -36,7 +49,7 @@ $suggestionHeight: 100px - $euiSize;
   justify-content: center;
 }
 
- .lnsSuggestionChartWrapper {
-   height: $suggestionHeight;
-   pointer-events: none;
- }
+.lnsSuggestionChartWrapper {
+  height: $suggestionHeight - $euiSize;
+  pointer-events: none;
+}

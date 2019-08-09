@@ -22,14 +22,12 @@ export function FrameLayout(props: FrameLayoutProps) {
         <div className="lnsPageMainContent">
           <EuiPageSideBar className="lnsSidebar">{props.dataPanel}</EuiPageSideBar>
           <EuiPageBody className="lnsPageBody" restrictWidth={false}>
-            <div className="lnsPageBody__inner">
-              {props.workspacePanel}
-              <EuiPageSideBar className="lnsSidebar lnsSidebar--right">
-                {props.configPanel}
-              </EuiPageSideBar>
-            </div>
+            {props.workspacePanel}
             {props.suggestionsPanel}
           </EuiPageBody>
+          <EuiPageSideBar className="lnsSidebar lnsSidebar--right">
+            {props.configPanel}
+          </EuiPageSideBar>
         </div>
       </EuiPage>
     </RootDragDropProvider>

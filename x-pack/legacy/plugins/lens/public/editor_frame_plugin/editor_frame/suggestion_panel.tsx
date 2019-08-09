@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip, EuiToolTip } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import { Action } from './state_management';
