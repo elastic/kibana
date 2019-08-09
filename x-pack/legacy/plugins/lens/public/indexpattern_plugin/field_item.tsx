@@ -20,11 +20,11 @@ function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows
   // the browser to efficiently word-wrap right after the dot
   // without us having to draw a lot of extra DOM elements, etc
-  return str ? str.replace(/\./g, '.\u200B') : undefined;
+  return str ? str.replace(/\./g, '.\u200B') : '';
 }
 
 export function FieldItem({ field, indexPatternId, highlight }: FieldItemProps) {
-  const wrappableName = wrapOnDot(field.name)!;
+  const wrappableName = wrapOnDot(field.name);
   const wrappableHighlight = wrapOnDot(highlight);
   const highlightIndex = wrappableHighlight
     ? wrappableName.toLowerCase().indexOf(wrappableHighlight.toLowerCase())
@@ -35,8 +35,8 @@ export function FieldItem({ field, indexPatternId, highlight }: FieldItemProps) 
     ) : (
       <span>
         <span>{wrappableName.substr(0, highlightIndex)}</span>
-        <strong>{wrappableName.substr(highlightIndex, wrappableHighlight!.length)}</strong>
-        <span>{wrappableName.substr(highlightIndex + wrappableHighlight!.length)}</span>
+        <strong>{wrappableName.substr(highlightIndex, wrappableHighlight.length)}</strong>
+        <span>{wrappableName.substr(highlightIndex + wrappableHighlight.length)}</span>
       </span>
     );
 

@@ -40,61 +40,59 @@ export interface InterpreterSetup {
 export class EditorFramePlugin {
   constructor() {}
 
-  private ExpressionRenderer: ExpressionRenderer | null = null;
   private readonly datasources: Record<string, Datasource> = {};
   private readonly visualizations: Record<string, Visualization> = {};
-
-  private createInstance(): EditorFrameInstance {
-    let domElement: Element;
-    return {
-      mount: (element, { doc, onError, dateRange, query, onChange }) => {
-        domElement = element;
-        const firstDatasourceId = Object.keys(this.datasources)[0];
-        const firstVisualizationId = Object.keys(this.visualizations)[0];
-
-        render(
-          <I18nProvider>
-            <EditorFrame
-              data-test-subj="lnsEditorFrame"
-              onError={onError}
-              datasourceMap={this.datasources}
-              visualizationMap={this.visualizations}
-              initialDatasourceId={(doc && doc.activeDatasourceId) || firstDatasourceId || null}
-              initialVisualizationId={
-                (doc && doc.visualizationType) || firstVisualizationId || null
-              }
-              ExpressionRenderer={this.ExpressionRenderer!}
-              doc={doc}
-              dateRange={dateRange}
-              query={query}
-              onChange={onChange}
-            />
-          </I18nProvider>,
-          domElement
-        );
-      },
-      unmount() {
-        if (domElement) {
-          unmountComponentAtNode(domElement);
-        }
-      },
-    };
-  }
 
   public setup(_core: CoreSetup | null, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
     plugins.interpreter.functionsRegistry.register(() => mergeTables);
 
-    this.ExpressionRenderer = plugins.data.expressions.ExpressionRenderer;
     plugins.embeddables.addEmbeddableFactory(
       new EmbeddableFactory(
         plugins.chrome,
-        this.ExpressionRenderer,
+        plugins.data.expressions.ExpressionRenderer,
         plugins.data.indexPatterns.indexPatterns
       )
     );
 
+    const createInstance = (): EditorFrameInstance => {
+      let domElement: Element;
+      return {
+        mount: (element, { doc, onError, dateRange, query, onChange }) => {
+          domElement = element;
+          const firstDatasourceId = Object.keys(this.datasources)[0];
+          const firstVisualizationId = Object.keys(this.visualizations)[0];
+
+          render(
+            <I18nProvider>
+              <EditorFrame
+                data-test-subj="lnsEditorFrame"
+                onError={onError}
+                datasourceMap={this.datasources}
+                visualizationMap={this.visualizations}
+                initialDatasourceId={(doc && doc.activeDatasourceId) || firstDatasourceId || null}
+                initialVisualizationId={
+                  (doc && doc.visualizationType) || firstVisualizationId || null
+                }
+                ExpressionRenderer={plugins.data.expressions.ExpressionRenderer}
+                doc={doc}
+                dateRange={dateRange}
+                query={query}
+                onChange={onChange}
+              />
+            </I18nProvider>,
+            domElement
+          );
+        },
+        unmount() {
+          if (domElement) {
+            unmountComponentAtNode(domElement);
+          }
+        },
+      };
+    };
+
     return {
-      createInstance: this.createInstance.bind(this),
+      createInstance,
       registerDatasource: (name, datasource) => {
         this.datasources[name] = datasource as Datasource<unknown, unknown>;
       },
