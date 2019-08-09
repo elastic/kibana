@@ -6,17 +6,17 @@
 
 import {
   EuiBasicTable,
+  EuiFlexGroup,
   EuiPanel,
   EuiTitle,
   EuiButtonIcon,
   EuiIcon,
   EuiLink,
-  EuiPagination,
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { get, last, max } from 'lodash';
+import { get, last } from 'lodash';
 import React, { useState, Fragment } from 'react';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { monitorStatesQuery } from '../../../queries/monitor_states_query';
@@ -36,9 +36,7 @@ import { CLIENT_DEFAULTS } from '../../../../common/constants';
 import { MonitorBarSeries } from '../charts';
 import { MonitorPageLink } from '../monitor_page_link';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
-import { UptimeSearchAfterChangeHandler } from '../../../pages/overview';
 import { OverviewPageLink } from '../overview_page_link';
-import { locationsAreEqual } from 'history';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -50,7 +48,6 @@ interface MonitorListProps {
   dangerColor: string;
   successColor: string;
   linkParameters?: string;
-  updateSearchAfter: UptimeSearchAfterChangeHandler;
   pagination: CursorPagination;
 }
 
@@ -66,37 +63,51 @@ export const MonitorListComponent = (props: Props) => {
     errors,
     linkParameters,
     loading,
-    updateSearchAfter,
-    pagination,
   } = props;
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
   const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
 
   const paginationLinkForSummary = (summary: MonitorSummary, cursorDirection: CursorDirection) => {
-    const location = get(summary.state, 'observer.geo.name', []).concat().sort()[0];
-    
+    const location = get(summary.state, 'observer.geo.name', [])
+      .concat()
+      .sort()[0];
+
     const linkPagination = {
       cursorKey: JSON.stringify({
         monitor_id: summary.monitor_id,
-        location: location,
+        location
       }),
       cursorDirection,
       sortOrder: SortOrder.ASC,
     };
 
-    console.log(linkPagination, cursorDirection);
+    if (CursorDirection.BEFORE === cursorDirection) {
+      return (
+        <OverviewPageLink pagination={linkPagination} linkParameters={linkParameters}>
+          <EuiIcon type={'arrowLeft'} />
+        </OverviewPageLink>
+      );
+    }
 
-    return <OverviewPageLink pagination={linkPagination} linkParameters={linkParameters}>
-      {CursorDirection.BEFORE === cursorDirection ? "🡄 Prev" : "Next 🡆"}
-    </OverviewPageLink>
-  }
+    return (
+      <OverviewPageLink pagination={linkPagination} linkParameters={linkParameters}>
+        <EuiIcon type={'arrowRight'} />
+      </OverviewPageLink>
+    );
+  };
 
-
-  const paginationLinks = <Fragment>
-    {items.length > 0 && paginationLinkForSummary(items[0], CursorDirection.BEFORE)} |
-    {items.length > 1 && paginationLinkForSummary(last(items), CursorDirection.AFTER)}
-  </Fragment>
+  // TODO This should be a new EUI component and get some additional help
+  const paginationLinks = (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <span>
+          {items.length > 0 && paginationLinkForSummary(items[0], CursorDirection.BEFORE)}
+          {items.length > 1 && paginationLinkForSummary(last(items), CursorDirection.AFTER)}
+        </span>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 
   return (
     <Fragment>
@@ -243,9 +254,7 @@ export const MonitorListComponent = (props: Props) => {
             },
           ]}
         />
-        <EuiFlexItem grow={false}>
-          {paginationLinks}
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{paginationLinks}</EuiFlexItem>
       </EuiPanel>
     </Fragment>
   );

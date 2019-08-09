@@ -31,7 +31,7 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
     params = Object.assign(params, pagination);
   }
 
-  const to = `/?${queryString.encode(params)}`;
+  const to = `/?${queryString.stringify(params)}`;
   return (
     <EuiLink>
       <Link data-test-subj={`overview-page-link`} to={to}>

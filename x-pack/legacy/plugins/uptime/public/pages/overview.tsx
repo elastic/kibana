@@ -5,9 +5,14 @@
  */
 
 // @ts-ignore EuiSearchBar missing
-import { EuiSearchBar, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink, EuiLinkType } from '@elastic/eui';
+import {
+  EuiSearchBar,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment, useContext, useEffect, FunctionComponent } from 'react';
+import React, { Fragment, useContext, useEffect } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
   EmptyState,
@@ -40,10 +45,6 @@ export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
   query?: { text: string };
   queryText?: string;
 }) => void;
-
-export type UptimeSearchAfterChangeHandler = (
-  pagination: CursorPagination
-) => void;
 
 export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
   const { absoluteStartDate, absoluteEndDate, colors, refreshApp, setHeadingText } = useContext(
@@ -91,29 +92,6 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
     refreshApp();
   };
 
-  const paginationLink = (text: string, pagination: CursorPagination): any => {
-    const update: any = { 
-      cursorDirection: pagination.cursorDirection,
-      sortOrder: pagination.sortOrder
-    }
-    if (typeof(pagination.cursorKey) === "string") {
-      update.cursorKey = pagination.cursorKey;
-    }
-    const href = "?params"
-    return <EuiLink href={href}>{text}</EuiLink>
-  }
-
-  const updateSearchAfter: UptimeSearchAfterChangeHandler = (pagination: CursorPagination) => {
-    const update: any = { 
-      cursorDirection: pagination.cursorDirection,
-      sortOrder: pagination.sortOrder
-    }
-    if (typeof(pagination.cursorKey) === "string") {
-      update.cursorKey = pagination.cursorKey;
-    }
-    updateUrl(update);
-  };
-
   const linkParameters = stringifyUrlParams(params);
 
   const pagination: CursorPagination = {
@@ -121,7 +99,6 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
     cursorDirection,
     sortOrder,
   };
-  console.log("Using pagination", pagination)
 
   return (
     <Fragment>
@@ -155,7 +132,6 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           implementsCustomErrorState={true}
           linkParameters={linkParameters}
           successColor={colors.success}
-          updateSearchAfter={updateSearchAfter}
           pagination={pagination}
           variables={{
             ...sharedProps,
