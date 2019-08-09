@@ -118,17 +118,21 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('allow saving via the saved query manager popover with no query loaded', async () => {
+      it('allow saving via the saved query manager popover with no saved query loaded', async () => {
+        await queryBar.setQuery('response:200');
         await savedQueryManager.saveNewQuery('foo', 'bar', true, false);
         await savedQueryManager.savedQueryExistOrFail('foo');
+        await savedQueryManager.closeSavedQueryManager();
       });
 
       it('allow saving a currently loaded saved query as a new query via the saved query manager ', async () => {
         await savedQueryManager.saveCurrentlyLoadedAsNewQuery('foo2', 'bar2', true, false);
         await savedQueryManager.savedQueryExistOrFail('foo2');
+        await savedQueryManager.closeSavedQueryManager();
       });
 
       it('allow saving changes to a currently loaded query via the saved query manager', async () => {
+        await savedQueryManager.loadSavedQuery('foo2');
         await queryBar.setQuery('response:404');
         await savedQueryManager.updateCurrentlyLoadedQuery('bar2', false, false);
         await savedQueryManager.clearCurrentlyLoadedQuery();
