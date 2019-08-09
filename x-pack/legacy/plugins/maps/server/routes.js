@@ -366,7 +366,6 @@ export function initRoutes(server, licenseUid) {
     }
   });
 
-
   server.route({
 
     method: 'GET',
@@ -375,7 +374,7 @@ export function initRoutes(server, licenseUid) {
 
       checkEMSProxyConfig();
 
-      const fontUrl = 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'
+      const fontUrl = mapConfig.emsFontLibraryUrl
         .replace('{fontstack}', request.params.fontstack)
         .replace('{range}', request.params.range);
 

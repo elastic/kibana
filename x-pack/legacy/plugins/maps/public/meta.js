@@ -84,7 +84,7 @@ export function getGlyphUrl() {
     return '';
   }
   return (chrome.getInjected('proxyElasticMapsServiceInMaps', false)) ?
-    (relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_GLYPHS_PATH}`) + `/{fontstack}/{range}`) : 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf';
+    (relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_GLYPHS_PATH}`) + `/{fontstack}/{range}`) : chrome.getInjected('emsFontLibraryUrl', true);
 
 }
 
