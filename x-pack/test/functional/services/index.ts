@@ -46,7 +46,7 @@ import { UserMenuProvider } from './user_menu';
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
 import { InfraLogStreamProvider } from './infra_log_stream';
-import { MachineLearningProvider } from './machine_learning';
+import { MachineLearningProvider } from './ml';
 
 import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/services';
 
