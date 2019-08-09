@@ -21,9 +21,14 @@ interface Props {
 export const ExpandedRowJsonPane: SFC<Props> = ({ json }) => {
   return (
     <EuiFlexGroup>
-      <EuiFlexItem style={{ width: '100%' }}>
+      <EuiFlexItem>
         <EuiSpacer size="s" />
-        <EuiCodeEditor value={JSON.stringify(json, null, 2)} readOnly={true} mode="json" />
+        <EuiCodeEditor
+          value={JSON.stringify(json, null, 2)}
+          readOnly={true}
+          mode="json"
+          style={{ width: '100%' }}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>&nbsp;</EuiFlexItem>
     </EuiFlexGroup>

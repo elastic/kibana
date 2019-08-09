@@ -6,10 +6,10 @@
 
 import { APMBaseDoc } from './APMBaseDoc';
 import { Container } from './fields/Container';
-import { Context } from './fields/Context';
 import { Host } from './fields/Host';
 import { Http } from './fields/Http';
 import { Kubernetes } from './fields/Kubernetes';
+import { Page } from './fields/Page';
 import { Process } from './fields/Process';
 import { Service } from './fields/Service';
 import { IStackframe } from './fields/Stackframe';
@@ -47,12 +47,12 @@ export interface ErrorRaw extends APMBaseDoc {
     grouping_key: string;
     // either exception or log are given
     exception?: Exception[];
+    page?: Page; // special property for RUM: shared by error and transaction
     log?: Log;
   };
 
   // Shared by errors and transactions
   container?: Container;
-  context?: Context;
   host?: Host;
   http?: Http;
   kubernetes?: Kubernetes;

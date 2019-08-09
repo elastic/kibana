@@ -21,6 +21,11 @@ const buildRequest = (telemetryOptedIn = null, path = '/app/kibana') => {
   return {
     path,
     route: { settings: {} },
+    raw: {
+      req: {
+        socket: {}
+      }
+    },
     getSavedObjectsClient: () => {
       return {
         get,

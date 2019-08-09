@@ -15,6 +15,7 @@ import {
   Visualization,
   VisualizationProps,
   VisualizationSuggestion,
+  Operation,
 } from '../types';
 import { generateId } from '../id_generator';
 import { NativeRenderer } from '../native_renderer';
@@ -179,7 +180,7 @@ export const datatableVisualization: Visualization<
     const datasource = frame.datasourceLayers[layer.layerId];
     const operations = layer.columns
       .map(columnId => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
-      .filter(o => o.operation);
+      .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
 
     return {
       type: 'expression',
@@ -199,7 +200,7 @@ export const datatableVisualization: Visualization<
                       columnIds: operations.map(o => o.columnId),
                       labels: operations.map(
                         o =>
-                          o.operation!.label ||
+                          o.operation.label ||
                           i18n.translate('xpack.lens.datatable.na', {
                             defaultMessage: 'N/A',
                           })
