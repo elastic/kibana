@@ -68,6 +68,10 @@ export class CancellationSerivce {
     // Try to cancel the job first.
     await this.cancelJob(jobMap, repoUri);
     jobMap.set(repoUri, { token, jobPromise });
+    // remove the record from the cancellation service when the promise is fulfilled or rejected.
+    jobPromise.finally(() => {
+      jobMap.delete(repoUri);
+    });
   }
 
   private async cancelJob(jobMap: Map<RepositoryUri, CancellableJob>, repoUri: RepositoryUri) {
@@ -77,9 +81,12 @@ export class CancellationSerivce {
       // 1. Use the cancellation token to pass cancel message to job
       token.cancel();
       // 2. waiting on the actual job promise to be resolved
-      await jobPromise;
-      // 3. remove the record from the cancellation service
-      jobMap.delete(repoUri);
+      try {
+        await jobPromise;
+      } catch (e) {
+        // the exception from the job also indicates the job is finished, and it should be the duty of the worker for
+        // the job to handle it, so it's safe to just ignore the exception here
+      }
     }
   }
 }
