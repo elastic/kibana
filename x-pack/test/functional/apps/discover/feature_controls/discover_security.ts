@@ -208,6 +208,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await savedQueryManager.saveNewQueryMissingOrFail();
       });
 
+      it('does not allow saving changes to saved query from the saved query manager', async () => {
+        await savedQueryManager.loadSavedQuery('OKJpgs');
+        await queryBar.setQuery('response:404');
+        await savedQueryManager.updateCurrentlyLoadedQueryMissingOrFail();
+      });
+
       it('does not allow deleting a saved query from the saved query manager', async () => {
         await savedQueryManager.deleteSavedQueryMissingOrFail('OKJpgs');
       });
