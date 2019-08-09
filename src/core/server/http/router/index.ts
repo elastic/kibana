@@ -41,3 +41,5 @@ export {
   lifecycleResponseFactory,
   LifecycleResponseFactory,
 } from './response';
+
+export { IKibanaSocket } from './socket';

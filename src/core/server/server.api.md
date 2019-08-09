@@ -7,10 +7,12 @@
 import Boom from 'boom';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { ConfigOptions } from 'elasticsearch';
+import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
 import { IncomingHttpHeaders } from 'http';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { PeerCertificate } from 'tls';
 import { Readable } from 'stream';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
@@ -249,6 +251,15 @@ export interface HttpServiceStart {
     isListening: (port: number) => boolean;
 }
 
+// @public
+export interface IKibanaSocket {
+    // (undocumented)
+    getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
+    // (undocumented)
+    getPeerCertificate(detailed: false): PeerCertificate | null;
+    getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
+}
+
 // @internal (undocumented)
 export interface InternalCoreSetup {
     // (undocumented)
@@ -298,6 +309,8 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     // (undocumented)
     readonly query: Query;
     readonly route: RecursiveReadonly<KibanaRequestRoute>;
+    // (undocumented)
+    readonly socket: IKibanaSocket;
     readonly url: Url;
     }
 

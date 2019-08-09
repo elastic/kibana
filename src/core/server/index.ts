@@ -75,6 +75,7 @@ export {
   HttpResponseOptions,
   HttpResponsePayload,
   HttpServerSetup,
+  IKibanaSocket,
   IsAuthenticated,
   KibanaRequest,
   KibanaRequestRoute,
