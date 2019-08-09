@@ -40,11 +40,14 @@ export class TMSService {
     const inlinedSources = {};
     for (const sourceName in vectorJson.sources) {
       if (vectorJson.sources.hasOwnProperty(sourceName)) {
-        const sourceUrl = vectorJson.sources[sourceName].url;
-        const extendedUrl = this._emsClient.extendUrlWithParams(sourceUrl);
+        const sourceUrl = this._proxyPath + vectorJson.sources[sourceName].url;
+        const extendedUrl =  this._emsClient.extendUrlWithParams(sourceUrl);
         const sourceJson = await this._emsClient.getManifest(extendedUrl);
 
-        const extendedTileUrls = sourceJson.tiles.map(tileUrl => this._emsClient.extendUrlWithParams(tileUrl));
+        const extendedTileUrls = sourceJson.tiles.map(tileUrl => {
+          const url = this._proxyPath + tileUrl;
+          return this._emsClient.extendUrlWithParams(url);
+        });
         inlinedSources[sourceName] = {
           type: 'vector',
           ...sourceJson,
@@ -96,6 +99,15 @@ export class TMSService {
   async getUrlTemplate() {
     const tileJson = await this._getRasterStyleJson();
     const directUrl = this._proxyPath + tileJson.tiles[0];
+    return this._emsClient.extendUrlWithParams(directUrl);
+  }
+
+  async getUrlTemplateForVector(sourceId) {
+    const tileJson = await this._getVectorStyleJsonInlined();
+    if (!tileJson.sources[sourceId] || !tileJson.sources[sourceId].tiles) {
+      return null;
+    }
+    const directUrl = this._proxyPath + tileJson.sources[sourceId].tiles[0];
     return this._emsClient.extendUrlWithParams(directUrl);
   }
 

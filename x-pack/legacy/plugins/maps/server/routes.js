@@ -11,9 +11,10 @@ import {
   EMS_FILES_DEFAULT_JSON_PATH,
   EMS_TILES_CATALOGUE_PATH,
   EMS_TILES_RASTER_STYLE_PATH,
+  EMS_TILES_RASTER_TILE_PATH,
   EMS_TILES_VECTOR_STYLE_PATH,
   EMS_TILES_VECTOR_SOURCE_PATH,
-  EMS_TILES_RASTER_TILE_PATH,
+  EMS_TILES_VECTOR_TILE_PATH,
   GIS_API_PATH
 } from '../common/constants';
 import fetch from 'node-fetch';
@@ -100,7 +101,7 @@ export function initRoutes(server, licenseUid) {
         typeof parseInt(request.query.y, 10) !== 'number' ||
         typeof parseInt(request.query.z, 10) !== 'number'
       ) {
-        server.log('warning', 'Must supply id/x/y/z parameters to retrieve EMS tile');
+        server.log('warning', 'Must supply id/x/y/z parameters to retrieve EMS raster tile');
         return null;
       }
 
@@ -262,7 +263,7 @@ export function initRoutes(server, licenseUid) {
       checkEMSProxyConfig();
 
       if (!request.query.id) {
-        server.log('warning', 'Must supply id parameter to retrieve EMS raster style');
+        server.log('warning', 'Must supply id parameter to retrieve EMS vector style');
         return null;
       }
 
@@ -271,14 +272,21 @@ export function initRoutes(server, licenseUid) {
       if (!tmsService) {
         return null;
       }
-      const style = await tmsService.getVectorStyleSheetRaw();
 
-      return style;
-      // const newUrl = `${GIS_API_PATH}/${EMS_TILES_RASTER_TILE_PATH}?id=${request.query.id}&x={x}&y={y}&z={z}`;
-      // return {
-      //   ...style,
-      //   tiles: [newUrl]
-      // };
+      const vectorStyle = await tmsService.getVectorStyleSheetRaw();
+      const newSources = {};
+      for (const sourceId in vectorStyle.sources) {
+        if (vectorStyle.sources.hasOwnProperty(sourceId)) {
+          newSources[sourceId] = {
+            type: 'vector',
+            url: `${GIS_API_PATH}/${EMS_TILES_VECTOR_SOURCE_PATH}?id=${request.query.id}&sourceId=${sourceId}`
+          };
+        }
+      }
+      return {
+        ...vectorStyle,
+        sources: newSources
+      };
     }
   });
 
@@ -299,21 +307,63 @@ export function initRoutes(server, licenseUid) {
       if (!tmsService) {
         return null;
       }
-      const style = await tmsService.getVectorStyleSheetRaw();
 
-      return style;
-      // const newUrl = `${GIS_API_PATH}/${EMS_TILES_RASTER_TILE_PATH}?id=${request.query.id}&x={x}&y={y}&z={z}`;
-      // return {
-      //   ...style,
-      //   tiles: [newUrl]
-      // };
+      const vectorStyle = await tmsService.getVectorStyleSheet();
+      const sourceManifest = vectorStyle.sources[request.query.sourceId];
+      // eslint-disable-next-line max-len
+      const newUrl = `${GIS_API_PATH}/${EMS_TILES_VECTOR_TILE_PATH}?id=${request.query.id}&sourceId=${request.query.sourceId}&x={x}&y={y}&z={z}`;
+      return {
+        ...sourceManifest,
+        tiles: [newUrl]
+      };
     }
   });
 
+  server.route({
+    method: 'GET',
+    path: `${ROOT}/${EMS_TILES_VECTOR_TILE_PATH}`,
+    handler: async (request, h) => {
 
+      checkEMSProxyConfig();
 
+      if (!request.query.id ||
+        !request.query.sourceId ||
+        typeof parseInt(request.query.x, 10) !== 'number' ||
+        typeof parseInt(request.query.y, 10) !== 'number' ||
+        typeof parseInt(request.query.z, 10) !== 'number'
+      ) {
+        server.log('warning', 'Must supply id/sourceId/x/y/z parameters to retrieve EMS vector tile');
+        return null;
+      }
 
+      const tmsServices = await emsClient.getTMSServices();
+      const tmsService = tmsServices.find(layer => layer.getId() === request.query.id);
+      if (!tmsService) {
+        return null;
+      }
 
+      const urlTemplate = await tmsService.getUrlTemplateForVector(request.query.sourceId);
+      const url = urlTemplate
+        .replace('{x}', request.query.x)
+        .replace('{y}', request.query.y)
+        .replace('{z}', request.query.z);
+
+      try {
+        const tile = await fetch(url);
+        const arrayBuffer = await tile.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        let response = h.response(buffer);
+        response = response.bytes(buffer.length);
+        response = response.header('Content-Disposition', 'inline');
+        // response = response.header('Content-type', 'image/png');
+        response = response.encoding('binary');
+        return response;
+      } catch(e) {
+        server.log('warning', `Cannot connect to EMS for vector tile, error: ${e.message}`);
+        throw Boom.badRequest(`Cannot connect to EMS`);
+      }
+    }
+  });
 
   function checkEMSProxyConfig() {
     if (!mapConfig.proxyElasticMapsServiceInMaps) {
