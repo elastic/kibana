@@ -4,120 +4,85 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
-import { EuiTitle, EuiSpacer, EuiForm } from '@elastic/eui';
-import {
-  useForm,
-  UseField,
-} from '../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
-import {
-  FormRow,
-  Field,
-} from '../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
+import React, { useState, useEffect, useRef } from 'react';
 
-import { schema } from './form.schema';
-import { PropertiesManager } from './components';
-import { propertiesArrayToObject, propertiesObjectToArray } from './helpers';
-import { dataTypesDefinition, getTypeFromSubType } from './config';
-import { DYNAMIC_SETTING_OPTIONS } from './constants';
+import {
+  ConfigurationForm,
+  PropertiesProvider,
+  DocumentFields,
+  DocumentFieldsState,
+} from './components';
 
 interface Props {
-  setGetDataHandler: (handler: () => Promise<{ isValid: boolean; data: Mappings }>) => void;
-  defaultValue?: Mappings;
-  areErrorsVisible?: boolean;
+  setGetDataHandler: (
+    handler: () => Promise<{ isValid: boolean; data: Record<string, any> }>
+  ) => void;
+  onStateUpdate: (state: State) => void;
+  defaultValue?: Record<string, any>;
 }
 
-export interface Mappings {
-  [key: string]: any;
+export interface State {
+  isValid: boolean;
+  isEditingProperty: boolean;
+  properties: Record<string, any>;
 }
 
-const sanitizePropParameters = (parameters: Record<string, any>): Record<string, any> =>
-  Object.entries(parameters).reduce(
-    (acc, [param, value]) => {
-      // IF a prop value is "index_default", we remove it
-      if (value !== 'index_default') {
-        acc[param] = value;
-      }
-      return acc;
-    },
-    {} as any
+export type Mappings = Record<string, any>;
+
+type GetFormDataHandler = () => Promise<{ isValid: boolean; data: Record<string, any> }>;
+
+export const MappingsEditor = ({ setGetDataHandler, onStateUpdate, defaultValue = {} }: Props) => {
+  const [state, setState] = useState<State>({
+    isValid: true,
+    isEditingProperty: false,
+    properties: {},
+  });
+
+  const getConfigurationFormData = useRef<GetFormDataHandler>(() =>
+    Promise.resolve({
+      isValid: true,
+      data: {},
+    })
   );
 
-const serializeProperties = (properties: any[]) =>
-  properties.map(prop => {
-    // If a subType is present, use it as type for ES
-    if ({}.hasOwnProperty.call(prop, 'subType')) {
-      prop.type = prop.subType;
-      delete prop.subType;
-    }
-
-    return sanitizePropParameters(prop);
-  });
-
-const deSerializeProperties = (properties: { [key: string]: any }) => {
-  Object.entries(properties).forEach(([name, prop]: [string, any]) => {
-    // Check if the type provided is a subType (e.g: "float" is a subType of the "numeric" type in the UI)
-    if (!(dataTypesDefinition as any)[prop.type]) {
-      const type = getTypeFromSubType(prop.type);
-      if (!type) {
-        throw new Error(
-          `Property type "${prop.type}" not recognized and no subType was found for it.`
-        );
-      }
-      prop.subType = prop.type;
-      prop.type = type;
-    }
-  });
-
-  return properties;
-};
-
-const serializer = (data: Record<string, unknown>): Record<string, unknown> => ({
-  ...data,
-  properties: propertiesArrayToObject(serializeProperties(data.properties as any[])),
-});
-
-const deSerializer = (data: Record<string, unknown>): Record<string, unknown> => ({
-  ...data,
-  properties: propertiesObjectToArray(
-    deSerializeProperties(data.properties as { [key: string]: any })
-  ),
-});
-
-export const MappingsEditor = ({
-  setGetDataHandler,
-  areErrorsVisible = true,
-  defaultValue,
-}: Props) => {
-  const { form } = useForm({ schema, serializer, deSerializer, defaultValue });
+  useEffect(() => {
+    setGetDataHandler(async () => {
+      const { isValid, data } = await getConfigurationFormData.current();
+      return {
+        isValid,
+        data: { ...data, properties: state.properties },
+      };
+    });
+  }, []);
 
   useEffect(() => {
-    setGetDataHandler(form.onSubmit);
-  }, [form]);
+    onStateUpdate(state);
+  }, [state]);
+
+  const setGetConfigurationFormDataHandler = (handler: GetFormDataHandler) =>
+    (getConfigurationFormData.current = handler);
+
+  const onDocumentFieldsUpdate = (docFieldsState: DocumentFieldsState) => {
+    setState(prev => ({
+      ...prev,
+      isEditingProperty: docFieldsState.isEditing,
+      properties: docFieldsState.properties,
+    }));
+  };
 
   return (
-    <EuiForm className="mappings-editor">
+    <div className="mappings-editor">
       {/* Global Mappings configuration */}
-      <FormRow title="Configuration" description="Global settings for the index mappings">
-        <UseField
-          path="dynamic"
-          form={form}
-          componentProps={{
-            fieldProps: { options: DYNAMIC_SETTING_OPTIONS },
-          }}
-          component={Field}
-        />
-        <UseField path="date_detection" form={form} component={Field} />
-        <UseField path="numeric_detection" form={form} component={Field} />
-        <UseField path="dynamic_date_formats" form={form} component={Field} />
-      </FormRow>
+      <ConfigurationForm
+        setGetDataHandler={setGetConfigurationFormDataHandler}
+        onFormValidChange={(isValid: boolean) => setState(prev => ({ ...prev, isValid }))}
+        defaultValue={defaultValue}
+      />
 
       {/* Document fields */}
-      <EuiTitle size="s">
-        <h4>Document fields</h4>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <PropertiesManager form={form} />
-    </EuiForm>
+      <PropertiesProvider defaultProperties={defaultValue.properties}>
+        <DocumentFields onUpdate={onDocumentFieldsUpdate} />
+      </PropertiesProvider>
+    </div>
   );
 };

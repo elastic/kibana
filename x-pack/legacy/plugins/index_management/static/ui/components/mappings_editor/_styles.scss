@@ -1,20 +1,30 @@
 .mappings-editor {
-  .euiAccordion__childWrapper {
-    transition: none;
-  }
-
-  .euiAccordion__padding--l {
-    padding-right: 0;
-  }
+  $gutter: 12px;
+  $border-tree: 1px dotted #aaa;
 
   .property-editor {
-    border-bottom: 1px solid #eee;
-    margin: -12px;
-    padding: 12px;
+    background-color: #fafbfd;
+    box-shadow: inset 0px 1px 3px 1px rgba(0,0,0,0.2);
+    margin-top: $gutter;
+    padding: $gutter;
+    position: relative;
+    padding-bottom: $gutter;
+    z-index: 1;
 
-    &:hover {
-      background-color: #fafbfd;
+    .action-buttons {
+      position: absolute;
+      top: -38px;
+      right: 0;
     }
+  }
+
+  .property-list-item__overlay {
+    position: absolute;
+    top: 0;
+    left: 1px;
+    right: 0;
+    height: 48px;
+    background-color: rgba(255, 255, 255, 0.65);
   }
 
   .tree,
@@ -34,15 +44,15 @@
     top:0;
     bottom:0;
     left:0;
-    border-left:1px dotted #aaa;
+    border-left: $border-tree;
   }
 
   .tree li {
     margin:0;
-    padding-left: 1.5em;
+    padding-left: $gutter * 2;
     line-height:2em;
     position:relative;
-    margin-bottom: 12px;
+    margin-bottom: $gutter;
 
     &:last-child {
       .property-editor {
@@ -56,16 +66,17 @@
     display:block;
     height:0;
     border-top:1px dotted #aaa;
-    margin-top:-1px;
     position:absolute;
-    top: 64px;
-    left:0;
+    top: 24px;
+    left: 1px;
+    width: $gutter;
   }
 
   .tree li:last-child:before {
     background:white;
     height:auto;
-    top: 64px;
+    top: $gutter * 2;
     bottom:0;
+    left: 0;
   }
 }

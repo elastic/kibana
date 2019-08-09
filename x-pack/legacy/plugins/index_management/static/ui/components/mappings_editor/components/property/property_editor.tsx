@@ -8,39 +8,57 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
+  EuiForm,
   EuiFormRow,
   EuiSelect,
 } from '@elastic/eui';
+
 import {
+  useForm,
   UseField,
-  Form,
   FormDataProvider,
   FieldConfig,
-} from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
-import { Field } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
+  ValidationConfig,
+} from '../../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
+import { Field } from '../../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
 
+import { nameConflictError } from '../../errors';
 import {
   parametersDefinition,
   dataTypesDefinition,
+  getTypeFromSubType,
   ParameterName,
   DataType,
   SubType,
-} from '../config';
-import { hasNestedProperties } from '../helpers';
-import { PropertyBasicParameters } from './property_basic_parameters';
-import { PropertiesManager } from './properties_manager';
-import { getComponentForParameter } from './parameters';
-import { getAdvancedSettingsCompForType } from './advanced_settings';
+} from '../../config';
+import { PropertyBasicParameters } from '../property_basic_parameters';
+import { getComponentForParameter } from '../parameters';
+import { getAdvancedSettingsCompForType } from '../advanced_settings';
 
 interface Props {
-  form: Form;
-  onRemove?: () => void;
-  fieldPathPrefix?: string;
-  isDeletable?: boolean;
-  isEditMode?: boolean;
+  onSubmit: (property: Record<string, any>) => void;
+  onCancel: () => void;
+  defaultValue?: Record<string, any>;
+  parentObject: Record<string, any>;
+  [key: string]: any;
 }
+
+// We need to dynamically add the "nameValidation" as it validates
+// that the field name value provided does not already exist on the parent object.
+const updateNameParameterValidations = (
+  fieldConfig: FieldConfig,
+  parentObject: Record<string, any>,
+  initialValue = ''
+): ValidationConfig[] => {
+  const nameValidation: ValidationConfig['validator'] = ({ path, value, form, formData }) => {
+    if (Object.keys(parentObject).some(key => key !== initialValue && key === value)) {
+      return nameConflictError();
+    }
+  };
+  return [...fieldConfig.validations!, { validator: nameValidation }];
+};
 
 const fieldConfig = (param: ParameterName): FieldConfig =>
   parametersDefinition[param].fieldConfig || {};
@@ -48,26 +66,64 @@ const fieldConfig = (param: ParameterName): FieldConfig =>
 const defaultValueParam = (param: ParameterName): unknown =>
   typeof fieldConfig(param).defaultValue !== 'undefined' ? fieldConfig(param).defaultValue : '';
 
+const sanitizePropParameters = (parameters: Record<string, any>): Record<string, any> =>
+  Object.entries(parameters).reduce(
+    (acc, [param, value]) => {
+      // IF a prop value is "index_default", we remove it
+      if (value !== 'index_default') {
+        acc[param] = value;
+      }
+      return acc;
+    },
+    {} as any
+  );
+
+const serializer = (property: Record<string, any>) => {
+  // If a subType is present, use it as type for ES
+  if ({}.hasOwnProperty.call(property, 'subType')) {
+    property.type = property.subType;
+    delete property.subType;
+  }
+  return sanitizePropParameters(property);
+};
+
+const deSerializer = (property: Record<string, any>) => {
+  if (!(dataTypesDefinition as any)[property.type]) {
+    const type = getTypeFromSubType(property.type);
+    if (!type) {
+      throw new Error(
+        `Property type "${property.type}" not recognized and no subType was found for it.`
+      );
+    }
+    property.subType = property.type;
+    property.type = type;
+  }
+
+  return property;
+};
+
 export const PropertyEditor = ({
-  form,
-  fieldPathPrefix = '',
-  onRemove = () => undefined,
-  isDeletable = true,
-  isEditMode = false,
+  onSubmit,
+  onCancel,
+  defaultValue,
+  parentObject,
+  ...rest
 }: Props) => {
   const [isAdvancedSettingsVisible, setIsAdvancedSettingsVisible] = useState<boolean>(false);
-  const renderNestedProperties = (selectedType: DataType, fieldName: string) =>
-    hasNestedProperties(selectedType) ? (
-      <Fragment>
-        <EuiSpacer size="l" />
-        <PropertiesManager
-          form={form}
-          parentType={selectedType}
-          path={fieldPathPrefix}
-          fieldName={fieldName}
-        />
-      </Fragment>
-    ) : null;
+
+  const { form } = useForm({ defaultValue, serializer, deSerializer });
+  const isEditMode = typeof defaultValue !== 'undefined';
+
+  const submitForm = async () => {
+    const { isValid, data: formData } = await form.onSubmit();
+    if (isValid) {
+      const data =
+        defaultValue && defaultValue.properties
+          ? { ...formData, properties: defaultValue.properties }
+          : formData;
+      onSubmit(data);
+    }
+  };
 
   const toggleAdvancedSettings = () => {
     setIsAdvancedSettingsVisible(previous => !previous);
@@ -83,40 +139,44 @@ export const PropertyEditor = ({
       <Fragment>
         <EuiSpacer size="m" />
         <div style={{ backgroundColor: '#F5F7FA', padding: '12px' }}>
-          <AdvancedSettingsComponent
-            fieldPathPrefix={fieldPathPrefix}
-            form={form}
-            isEditMode={isEditMode}
-          />
+          <AdvancedSettingsComponent form={form} />
         </div>
       </Fragment>
     );
   };
 
   return (
-    <FormDataProvider form={form} pathsToWatch={[`${fieldPathPrefix}type`]}>
+    <FormDataProvider form={form} pathsToWatch="type">
       {formData => {
-        const selectedDatatype = formData[`${fieldPathPrefix}type`] as DataType;
+        const selectedDatatype = formData.type as DataType;
         const typeDefinition = dataTypesDefinition[selectedDatatype];
 
         return (
-          <div className="property-editor ">
-            <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiForm className="property-editor" {...rest}>
+            <EuiFlexGroup>
               {/* Field name */}
               <EuiFlexItem grow={false}>
                 <UseField
-                  path={`${fieldPathPrefix}name`}
+                  path="name"
                   form={form}
                   defaultValue={isEditMode ? undefined : defaultValueParam('name')} // "undefined" means: look into the "defaultValue" object passed to the form
-                  config={fieldConfig('name')}
+                  config={{
+                    ...fieldConfig('name'),
+                    validations: updateNameParameterValidations(
+                      fieldConfig('name'),
+                      parentObject,
+                      form.getFieldDefaultValue('name') as string
+                    ),
+                  }}
                   component={getComponentForParameter('name')}
+                  componentProps={{ parentObject }}
                 />
               </EuiFlexItem>
 
               {/* Field type */}
               <EuiFlexItem grow={false}>
                 <UseField
-                  path={`${fieldPathPrefix}type`}
+                  path="type"
                   form={form}
                   config={fieldConfig('type')}
                   defaultValue={isEditMode ? undefined : defaultValueParam('type')}
@@ -146,9 +206,13 @@ export const PropertyEditor = ({
               {typeDefinition && typeDefinition.subTypes && (
                 <EuiFlexItem grow={false}>
                   <UseField
-                    path={`${fieldPathPrefix}subType`}
+                    path="subType"
                     form={form}
-                    defaultValue={isEditMode ? undefined : typeDefinition.subTypes.types[0]}
+                    defaultValue={
+                      isEditMode && selectedDatatype === defaultValue!.type
+                        ? undefined
+                        : typeDefinition.subTypes.types[0]
+                    }
                     config={{
                       ...fieldConfig('type'),
                       label: typeDefinition.subTypes.label,
@@ -166,20 +230,6 @@ export const PropertyEditor = ({
                   />
                 </EuiFlexItem>
               )}
-              {/* Empty flex item to fill the space in between */}
-              <EuiFlexItem />
-
-              {/* Delete field button */}
-              {isDeletable && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    color="danger"
-                    iconType="trash"
-                    onClick={onRemove}
-                    aria-label="Remove property"
-                  />
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
 
             {((typeDefinition && typeDefinition.basicParameters) ||
@@ -193,7 +243,6 @@ export const PropertyEditor = ({
                       <PropertyBasicParameters
                         form={form}
                         typeDefinition={typeDefinition}
-                        fieldPathPrefix={fieldPathPrefix}
                         isEditMode={isEditMode}
                       />
                     </EuiFlexItem>
@@ -211,13 +260,26 @@ export const PropertyEditor = ({
 
             {renderAdvancedSettings(selectedDatatype)}
 
-            <FormDataProvider form={form} pathsToWatch={[`${fieldPathPrefix}name`]}>
-              {_formData => {
-                const nameValue = _formData[`${fieldPathPrefix}name`] as string;
-                return renderNestedProperties(selectedDatatype, nameValue);
-              }}
-            </FormDataProvider>
-          </div>
+            <EuiSpacer size="l" />
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty color="primary" onClick={onCancel}>
+                  Cancel
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="secondary"
+                  fill
+                  size="s"
+                  onClick={submitForm}
+                  isDisabled={form.isSubmitted && !form.isValid}
+                >
+                  {isEditMode ? 'Done' : 'Add'}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiForm>
         );
       }}
     </FormDataProvider>

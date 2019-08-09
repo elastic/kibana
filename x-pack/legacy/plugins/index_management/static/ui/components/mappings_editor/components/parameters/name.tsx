@@ -13,11 +13,12 @@ import { ERROR_CODES } from '../../constants';
 
 interface Props {
   field: FieldType;
+  parentObject: Record<string, any>;
   fieldProps?: Record<string, any>;
 }
 
-export const Name = ({ field, fieldProps = {} }: Props) => {
-  const { form, errors } = field;
+export const Name = ({ field, parentObject, fieldProps = {} }: Props) => {
+  const { errors } = field;
 
   // All validation messages, except name conflict
   const errorMessagesField = errors
@@ -30,9 +31,7 @@ export const Name = ({ field, fieldProps = {} }: Props) => {
     errorCode: ERROR_CODES.NAME_CONFLICT,
   });
 
-  const isInvalid = field.errors.length
-    ? form.isSubmitted || errorMessagesNameConflict !== null
-    : false;
+  const isInvalid = field.errors.length ? !field.isUpdating : false;
 
   // Concatenate error messages.
   const errorMessage: string | null =
