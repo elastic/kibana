@@ -68,6 +68,7 @@ const TimeRulerTickLabel = euiStyled.text`
   line-height: ${props => props.theme.eui.euiLineHeight};
   fill: ${props => props.theme.eui.textColors.subdued};
   user-select: none;
+  pointer-events: none;
 `;
 
 const TimeRulerGridLine = euiStyled.line<{ isDark: boolean }>`
