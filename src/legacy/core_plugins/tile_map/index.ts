@@ -21,7 +21,7 @@ import { resolve } from 'path';
 import { Legacy } from 'kibana';
 
 // @ts-ignore
-import emsClient from './common/ems_client';
+import { EMSClient } from './common/ems_client';
 
 import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy/types';
 
@@ -36,9 +36,7 @@ const tileMapPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPlu
       injectDefaultVars: server => ({}),
     },
     init: (server: Legacy.Server) => {
-      server.expose({
-        ems_client: emsClient,
-      });
+      server.expose('EMSClient', EMSClient);
     },
     config(Joi: any) {
       return Joi.object({

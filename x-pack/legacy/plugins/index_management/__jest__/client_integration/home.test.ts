@@ -80,7 +80,7 @@ describe.skip('<IndexManagementHome />', () => {
 
         httpRequestsMockHelpers.setLoadTemplatesResponse([]);
 
-        actions.selectTab('index templates');
+        actions.selectHomeTab('index templates');
 
         // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
@@ -100,7 +100,7 @@ describe.skip('<IndexManagementHome />', () => {
 
           httpRequestsMockHelpers.setLoadTemplatesResponse([]);
 
-          actions.selectTab('index templates');
+          actions.selectHomeTab('index templates');
 
           // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
@@ -146,7 +146,7 @@ describe.skip('<IndexManagementHome />', () => {
 
           httpRequestsMockHelpers.setLoadTemplatesResponse(templates);
 
-          actions.selectTab('index templates');
+          actions.selectHomeTab('index templates');
 
           // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
@@ -218,6 +218,16 @@ describe.skip('<IndexManagementHome />', () => {
 
           const { rows: updatedRows } = table.getMetaData('templatesTable');
           expect(updatedRows.length).toEqual(templates.length);
+        });
+
+        test('each row should have a link to the template', async () => {
+          const { find, exists, actions } = testBed;
+
+          await actions.clickTemplateAt(0);
+
+          expect(exists('templatesList')).toBe(true);
+          expect(exists('templateDetails')).toBe(true);
+          expect(find('templateDetails.title').text()).toBe(template1.name);
         });
 
         describe('delete index template', () => {
@@ -296,6 +306,221 @@ describe.skip('<IndexManagementHome />', () => {
 
             expect(latestRequest.method).toBe('DELETE');
             expect(latestRequest.url).toBe(`${API_PATH}/templates/${template1.name}`);
+          });
+        });
+
+        describe('detail flyout', () => {
+          it('should have a close button and be able to close flyout', async () => {
+            const template = fixtures.getTemplate({
+              name: `a${getRandomString()}`,
+              indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
+            });
+
+            const { actions, component, exists } = testBed;
+
+            httpRequestsMockHelpers.setLoadTemplateResponse(template);
+
+            await actions.clickTemplateAt(0);
+
+            // @ts-ignore (remove when react 16.9.0 is released)
+            await act(async () => {
+              await nextTick();
+              component.update();
+            });
+
+            expect(exists('closeDetailsButton')).toBe(true);
+            expect(exists('summaryTab')).toBe(true);
+
+            actions.clickCloseDetailsButton();
+
+            // @ts-ignore (remove when react 16.9.0 is released)
+            await act(async () => {
+              await nextTick();
+              component.update();
+            });
+
+            expect(exists('summaryTab')).toBe(false);
+          });
+
+          it('should have a delete button', async () => {
+            const template = fixtures.getTemplate({
+              name: `a${getRandomString()}`,
+              indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
+            });
+
+            const { actions, component, exists } = testBed;
+
+            httpRequestsMockHelpers.setLoadTemplateResponse(template);
+
+            await actions.clickTemplateAt(0);
+
+            // @ts-ignore (remove when react 16.9.0 is released)
+            await act(async () => {
+              await nextTick();
+              component.update();
+            });
+
+            expect(exists('templateDetails.deleteTemplateButton')).toBe(true);
+          });
+
+          it('should render an error if error fetching template details', async () => {
+            const { actions, component, exists } = testBed;
+            const error = {
+              status: 404,
+              error: 'Not found',
+              message: 'Template not found',
+            };
+
+            httpRequestsMockHelpers.setLoadTemplateResponse(undefined, { body: error });
+
+            await actions.clickTemplateAt(0);
+
+            // @ts-ignore (remove when react 16.9.0 is released)
+            await act(async () => {
+              await nextTick();
+              component.update();
+            });
+
+            expect(exists('sectionError')).toBe(true);
+            // Delete button should not render if error
+            expect(exists('templateDetails.deleteTemplateButton')).toBe(false);
+          });
+
+          describe('tabs', () => {
+            test('should have 4 tabs if template has mappings, settings and aliases data', async () => {
+              const template = fixtures.getTemplate({
+                name: `a${getRandomString()}`,
+                indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
+                settings: {
+                  index: {
+                    number_of_shards: '1',
+                  },
+                },
+                mappings: {
+                  _source: {
+                    enabled: false,
+                  },
+                  properties: {
+                    created_at: {
+                      type: 'date',
+                      format: 'EEE MMM dd HH:mm:ss Z yyyy',
+                    },
+                  },
+                },
+                aliases: {
+                  alias1: {},
+                },
+              });
+
+              const { find, actions, exists, component } = testBed;
+
+              httpRequestsMockHelpers.setLoadTemplateResponse(template);
+
+              await actions.clickTemplateAt(0);
+
+              expect(find('templateDetails.tab').length).toBe(4);
+              expect(find('templateDetails.tab').map(t => t.text())).toEqual([
+                'Summary',
+                'Settings',
+                'Mappings',
+                'Aliases',
+              ]);
+
+              // Summary tab should be initial active tab
+              expect(exists('summaryTab')).toBe(true);
+
+              // Navigate and verify all tabs
+              actions.selectDetailsTab('settings');
+
+              // @ts-ignore (remove when react 16.9.0 is released)
+              await act(async () => {
+                await nextTick();
+                component.update();
+              });
+
+              expect(exists('summaryTab')).toBe(false);
+              expect(exists('settingsTab')).toBe(true);
+
+              actions.selectDetailsTab('aliases');
+
+              // @ts-ignore (remove when react 16.9.0 is released)
+              await act(async () => {
+                await nextTick();
+                component.update();
+              });
+
+              expect(exists('summaryTab')).toBe(false);
+              expect(exists('settingsTab')).toBe(false);
+              expect(exists('aliasesTab')).toBe(true);
+
+              actions.selectDetailsTab('mappings');
+
+              // @ts-ignore (remove when react 16.9.0 is released)
+              await act(async () => {
+                await nextTick();
+                component.update();
+              });
+
+              expect(exists('summaryTab')).toBe(false);
+              expect(exists('settingsTab')).toBe(false);
+              expect(exists('aliasesTab')).toBe(false);
+              expect(exists('mappingsTab')).toBe(true);
+            });
+
+            it('should not show tabs if mappings, settings and aliases data is not present', async () => {
+              const templateWithNoTabs = fixtures.getTemplate({
+                name: `a${getRandomString()}`,
+                indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
+              });
+
+              const { actions, find, exists, component } = testBed;
+
+              httpRequestsMockHelpers.setLoadTemplateResponse(templateWithNoTabs);
+
+              await actions.clickTemplateAt(0);
+
+              // @ts-ignore (remove when react 16.9.0 is released)
+              await act(async () => {
+                await nextTick();
+                component.update();
+              });
+
+              expect(find('templateDetails.tab').length).toBe(0);
+              expect(exists('summaryTab')).toBe(true);
+              expect(exists('summaryTitle')).toBe(true);
+            });
+
+            it('should not show all tabs if mappings, settings or aliases data is not present', async () => {
+              const templateWithSomeTabs = fixtures.getTemplate({
+                name: `a${getRandomString()}`,
+                indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
+                settings: {
+                  index: {
+                    number_of_shards: '1',
+                  },
+                },
+              });
+
+              const { actions, find, exists, component } = testBed;
+
+              httpRequestsMockHelpers.setLoadTemplateResponse(templateWithSomeTabs);
+
+              await actions.clickTemplateAt(0);
+
+              // @ts-ignore (remove when react 16.9.0 is released)
+              await act(async () => {
+                await nextTick();
+                component.update();
+              });
+
+              expect(find('templateDetails.tab').length).toBe(2);
+              expect(exists('summaryTab')).toBe(true);
+              // Template does not contain aliases or mappings, so tabs will not render
+              expect(find('templateDetails.tab').map(t => t.text())).toEqual([
+                'Summary',
+                'Settings',
+              ]);
+            });
           });
         });
       });

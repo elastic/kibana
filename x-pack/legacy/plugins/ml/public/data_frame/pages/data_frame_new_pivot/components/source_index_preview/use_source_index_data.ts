@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
-
 import React, { useEffect, useState } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
 
-import { IndexPattern } from 'ui/index_patterns';
+import { idx } from '@kbn/elastic-idx';
+
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { ml } from '../../../../../services/ml_api_service';
 
@@ -39,7 +39,7 @@ export interface UseSourceIndexDataReturnType {
 }
 
 export const useSourceIndexData = (
-  indexPattern: IndexPattern,
+  indexPattern: StaticIndexPattern,
   query: PivotQuery,
   selectedFields: EsFieldName[],
   setSelectedFields: React.Dispatch<React.SetStateAction<EsFieldName[]>>
@@ -82,7 +82,7 @@ export const useSourceIndexData = (
           [key: string]: any;
         };
         flattenedFields.forEach(ff => {
-          item[ff] = get(doc._source, ff);
+          item[ff] = idx(doc._source, _ => _[ff]);
           if (item[ff] === undefined) {
             item[ff] = doc._source[`"${ff}"`];
           }

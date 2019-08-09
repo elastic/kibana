@@ -6,26 +6,18 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LOADING = i18n.translate('xpack.siem.loadingMoreTable.loadingDescription', {
-  defaultMessage: 'Loading…',
-});
-
-export const LOAD_MORE = i18n.translate('xpack.siem.loadingMoreTable.loadMoreDescription', {
-  defaultMessage: 'Load More',
-});
-
-export const SHOWING = i18n.translate('xpack.siem.loadingMoreTable.showing', {
+export const SHOWING = i18n.translate('xpack.siem.paginatedTable.showingSubtitle', {
   defaultMessage: 'Showing',
 });
 
-export const ROWS = i18n.translate('xpack.siem.loadingMoreTable.rows', {
-  defaultMessage: 'Rows',
+export const ROWS = i18n.translate('xpack.siem.paginatedTable.rowsButtonLabel', {
+  defaultMessage: 'Rows per page',
 });
 
-export const TOAST_TITLE = i18n.translate('xpack.siem.unableToLoadMoreResults.title', {
+export const TOAST_TITLE = i18n.translate('xpack.siem.paginatedTable.tooManyResultsToastTitle', {
   defaultMessage: ' - too many results',
 });
 
-export const TOAST_TEXT = i18n.translate('xpack.siem.unableToLoadMoreResults.text', {
+export const TOAST_TEXT = i18n.translate('xpack.siem.paginatedTable.tooManyResultsToastText', {
   defaultMessage: 'Narrow your query to better filter the results',
 });

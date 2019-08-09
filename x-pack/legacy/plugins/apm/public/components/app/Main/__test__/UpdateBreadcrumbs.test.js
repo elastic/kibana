@@ -7,35 +7,18 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import chrome from 'ui/chrome';
 import { UpdateBreadcrumbs } from '../UpdateBreadcrumbs';
+import * as hooks from '../../../../hooks/useCore';
 
 jest.mock('ui/kfetch');
 
-jest.mock(
-  'ui/chrome',
-  () => ({
-    breadcrumbs: {
-      set: jest.fn()
-    },
-    getBasePath: () => `/some/base/path`,
-    getUiSettingsClient: () => {
-      return {
-        get: key => {
-          switch (key) {
-            case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now', mode: 'quick' };
-            case 'timepicker:refreshIntervalDefaults':
-              return { pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        }
-      };
-    }
-  }),
-  { virtual: true }
-);
+const coreMock = {
+  chrome: {
+    setBreadcrumbs: jest.fn()
+  }
+};
+
+jest.spyOn(hooks, 'useCore').mockReturnValue(coreMock);
 
 function expectBreadcrumbToMatchSnapshot(route) {
   mount(
@@ -43,8 +26,8 @@ function expectBreadcrumbToMatchSnapshot(route) {
       <UpdateBreadcrumbs />
     </MemoryRouter>
   );
-  expect(chrome.breadcrumbs.set).toHaveBeenCalledTimes(1);
-  expect(chrome.breadcrumbs.set.mock.calls[0][0]).toMatchSnapshot();
+  expect(coreMock.chrome.setBreadcrumbs).toHaveBeenCalledTimes(1);
+  expect(coreMock.chrome.setBreadcrumbs.mock.calls[0][0]).toMatchSnapshot();
 }
 
 describe('Breadcrumbs', () => {
@@ -55,7 +38,7 @@ describe('Breadcrumbs', () => {
     global.document = {
       title: 'Kibana'
     };
-    chrome.breadcrumbs.set.mockReset();
+    coreMock.chrome.setBreadcrumbs.mockReset();
   });
 
   afterEach(() => {
@@ -67,37 +50,37 @@ describe('Breadcrumbs', () => {
     expect(global.document.title).toMatchInlineSnapshot(`"APM"`);
   });
 
-  it('/:serviceName/errors/:groupId', () => {
-    expectBreadcrumbToMatchSnapshot('/opbeans-node/errors/myGroupId');
+  it('/services/:serviceName/errors/:groupId', () => {
+    expectBreadcrumbToMatchSnapshot('/services/opbeans-node/errors/myGroupId');
     expect(global.document.title).toMatchInlineSnapshot(`"myGroupId"`);
   });
 
-  it('/:serviceName/errors', () => {
-    expectBreadcrumbToMatchSnapshot('/opbeans-node/errors');
+  it('/services/:serviceName/errors', () => {
+    expectBreadcrumbToMatchSnapshot('/services/opbeans-node/errors');
     expect(global.document.title).toMatchInlineSnapshot(`"Errors"`);
   });
 
   it('/:serviceName', () => {
     expectBreadcrumbToMatchSnapshot('/opbeans-node');
-    expect(global.document.title).toMatchInlineSnapshot(`"opbeans-node"`);
+    expect(global.document.title).toMatchInlineSnapshot(`"APM"`);
   });
 
-  it('/:serviceName/transactions', () => {
-    expectBreadcrumbToMatchSnapshot('/opbeans-node/transactions');
+  it('/services/:serviceName/transactions', () => {
+    expectBreadcrumbToMatchSnapshot('/services/opbeans-node/transactions');
     expect(global.document.title).toMatchInlineSnapshot(`"Transactions"`);
   });
 
-  it('/:serviceName/transactions/:transactionType', () => {
-    expectBreadcrumbToMatchSnapshot('/opbeans-node/transactions/request');
-    expect(global.document.title).toMatchInlineSnapshot(`"Transactions"`);
-  });
-
-  it('/:serviceName/transactions/:transactionType/:transactionName', () => {
+  it('/services/:serviceName/transactions/:transactionType', () => {
     expectBreadcrumbToMatchSnapshot(
-      '/opbeans-node/transactions/request/my-transaction-name'
+      '/services/opbeans-node/transactions/request'
     );
-    expect(global.document.title).toMatchInlineSnapshot(
-      `"my-transaction-name"`
+    expect(global.document.title).toMatchInlineSnapshot(`"Transactions"`);
+  });
+
+  it('/services/:serviceName/transactions/:transactionType/:transactionName', () => {
+    expectBreadcrumbToMatchSnapshot(
+      '/services/opbeans-node/transactions/request/my-transaction-name'
     );
+    expect(global.document.title).toMatchInlineSnapshot(`"Transactions"`);
   });
 });

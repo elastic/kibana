@@ -12,6 +12,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./alerting'));
     loadTestFile(require.resolve('./es'));
     loadTestFile(require.resolve('./security'));
+    loadTestFile(require.resolve('./spaces'));
     loadTestFile(require.resolve('./monitoring'));
     loadTestFile(require.resolve('./xpack_main'));
     loadTestFile(require.resolve('./telemetry'));

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, SFC, useEffect, useState } from 'react';
+import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
@@ -30,14 +31,11 @@ import {
 } from '@elastic/eui';
 
 import { ml } from '../../../../../services/ml_api_service';
+import { useKibanaContext } from '../../../../../contexts/kibana/use_kibana_context';
+import { useUiChromeContext } from '../../../../../contexts/ui/use_ui_chrome_context';
 import { PROGRESS_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 
-import {
-  isKibanaContext,
-  KibanaContext,
-  moveToDataFrameTransformList,
-  moveToDiscover,
-} from '../../../../common';
+import { moveToDataFrameTransformList, moveToDiscover } from '../../../../common';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -72,11 +70,8 @@ export const StepCreateForm: SFC<Props> = React.memo(
       undefined
     );
 
-    const kibanaContext = useContext(KibanaContext);
-
-    if (!isKibanaContext(kibanaContext)) {
-      return null;
-    }
+    const kibanaContext = useKibanaContext();
+    const baseUrl = useUiChromeContext().addBasePath(kibanaContext.kbnBaseUrl);
 
     useEffect(() => {
       onChange({ created, started, indexPatternId });
@@ -155,6 +150,18 @@ export const StepCreateForm: SFC<Props> = React.memo(
 
         const id = await newIndexPattern.create();
 
+        // id returns false if there's a duplicate index pattern.
+        if (id === false) {
+          toastNotifications.addDanger(
+            i18n.translate('xpack.ml.dataframe.stepCreateForm.duplicateIndexPatternErrorMessage', {
+              defaultMessage:
+                'An error occurred creating the Kibana index pattern {indexPatternName}: The index pattern already exists.',
+              values: { indexPatternName },
+            })
+          );
+          return;
+        }
+
         // check if there's a default index pattern, if not,
         // set the newly created one as the default index pattern.
         if (!kibanaContext.kibanaConfig.get('defaultIndex')) {
@@ -162,7 +169,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
         }
 
         toastNotifications.addSuccess(
-          i18n.translate('xpack.ml.dataframe.stepCreateForm.reateIndexPatternSuccessMessage', {
+          i18n.translate('xpack.ml.dataframe.stepCreateForm.createIndexPatternSuccessMessage', {
             defaultMessage: 'Kibana index pattern {indexPatternName} created successfully.',
             values: { indexPatternName },
           })
@@ -191,7 +198,12 @@ export const StepCreateForm: SFC<Props> = React.memo(
           try {
             const stats = await ml.dataFrame.getDataFrameTransformsStats(transformId);
             if (stats && Array.isArray(stats.transforms) && stats.transforms.length > 0) {
-              const percent = Math.round(stats.transforms[0].state.progress.percent_complete);
+              const percent = Math.round(
+                idx(
+                  stats,
+                  _ => _.transforms[0].checkpointing.next.checkpoint_progress.percent_complete
+                ) || 0
+              );
               setProgressPercentComplete(percent);
               if (percent >= 100) {
                 clearInterval(interval);
@@ -385,7 +397,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
                         defaultMessage: 'Use Discover to explore the data frame pivot.',
                       }
                     )}
-                    onClick={() => moveToDiscover(indexPatternId, kibanaContext.kbnBaseUrl)}
+                    onClick={() => moveToDiscover(indexPatternId, baseUrl)}
                   />
                 </EuiFlexItem>
               )}

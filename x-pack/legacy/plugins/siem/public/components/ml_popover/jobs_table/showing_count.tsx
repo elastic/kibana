@@ -25,7 +25,7 @@ export const ShowingCount = React.memo<ShowingCountProps>(({ filterResultsLength
       <FormattedMessage
         data-test-subj="query-message"
         id="xpack.siem.components.mlPopup.showingLabel"
-        defaultMessage="Showing: {filterResultsLength} {filterResultsLength, plural, one {Job} other {Jobs}}"
+        defaultMessage="Showing: {filterResultsLength} {filterResultsLength, plural, one {job} other {jobs}}"
         values={{
           filterResultsLength,
         }}

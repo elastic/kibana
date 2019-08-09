@@ -4,7 +4,7 @@
 
 ## Router.delete() method
 
-Register a `DELETE` request with the router
+Register a route handler for `DELETE` request.
 
 <b>Signature:</b>
 

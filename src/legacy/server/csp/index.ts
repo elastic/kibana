@@ -28,7 +28,7 @@ export const DEFAULT_CSP_RULES = Object.freeze([
   'child-src blob:',
 ]);
 
-export const DEFAULT_CSP_STRICT = false;
+export const DEFAULT_CSP_STRICT = true;
 
 export const DEFAULT_CSP_WARN_LEGACY_BROWSERS = true;
 

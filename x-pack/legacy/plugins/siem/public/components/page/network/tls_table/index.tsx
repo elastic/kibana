@@ -90,7 +90,6 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadingTitle={i18n.TRANSPORT_LAYER_SECURITY}
         loadPage={newActivePage => loadPage(newActivePage)}
         onChange={this.onChange}
         pageOfItems={data}

@@ -11,9 +11,9 @@ import {
   GetNetworkDnsQuery,
   NetworkDnsFields,
 } from '../../../../legacy/plugins/siem/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-const networkDnsTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('Network DNS', () => {
@@ -93,7 +93,4 @@ const networkDnsTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default networkDnsTests;
+}

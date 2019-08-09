@@ -8,7 +8,7 @@ exports[`ServiceOverview -> List should render columns correctly 1`] = `
   position="top"
 >
   <Styled(APMLink)
-    path="/opbeans-python/transactions"
+    path="/services/opbeans-python/transactions"
   >
     opbeans-python
   </Styled(APMLink)>

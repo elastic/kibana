@@ -10,6 +10,7 @@ import { callApi } from './callApi';
 export interface ISavedObject {
   attributes: {
     title: string;
+    fields: string;
   };
   id: string;
   type: string;
