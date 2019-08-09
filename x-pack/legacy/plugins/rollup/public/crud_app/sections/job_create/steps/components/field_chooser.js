@@ -135,7 +135,6 @@ export class FieldChooser extends Component {
         </EuiFlyout>
       );
     };
-
     return (
       <Fragment>
         <EuiButton

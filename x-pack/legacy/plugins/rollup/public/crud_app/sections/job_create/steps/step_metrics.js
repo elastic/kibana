@@ -17,11 +17,8 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiPopover,
-  EuiLink,
   EuiButtonIcon,
   EuiToolTip,
-  EuiHorizontalRule
 } from '@elastic/eui';
 
 import { metricsDetailsUrl } from '../../../services';
@@ -152,7 +149,6 @@ export class StepMetricsUi extends Component {
     } = this.props;
 
     return metricTypesConfig.map(({ label, type: metricType, fieldTypes }, idx) => {
-      let isIndeterminate = false;
       let checkedCount = 0;
 
       const applicableMetrics = metrics
@@ -163,9 +159,6 @@ export class StepMetricsUi extends Component {
       applicableMetrics
         .forEach(({ types }) => {
           const metricSelected = types.some(type => type === metricType);
-          if (metricSelected && !isIndeterminate) {
-            isIndeterminate = true;
-          }
           if (metricSelected) {
             ++checkedCount;
           }
@@ -173,16 +166,15 @@ export class StepMetricsUi extends Component {
 
       const isChecked = checkedCount === applicableMetrics.length;
       const disabled = !metrics.some(({ type: fieldType }) =>
-        checkWhiteListedMetricByFieldType(fieldType, metricType)
+        checkWhiteListedMetricByFieldType(fieldType, metricType),
       );
       return (
         <EuiCheckbox
           id={`${idx}-select-all-checkbox`}
           data-test-subj={`rollupJobMetricsCheckbox-${metricType}`}
           disabled={disabled}
-          label={label}
+          label={<span style={{ whiteSpace: 'nowrap' }}>{label}</span>}
           checked={!disabled && isChecked}
-          indeterminate={!isChecked && isIndeterminate}
           onChange={() => {
             onFieldsChange({ metrics: this.setMetrics(metricType, !isChecked) });
           }}
@@ -191,42 +183,23 @@ export class StepMetricsUi extends Component {
     });
   }
 
-  getMetricsSelectAllMenu() {
+  getMetricsSelectAllMenu = () => {
     return (
-      <EuiPopover
-        id={'stepMetricsPopover'}
-        isOpen={this.state.metricsPopoverOpen}
-        closePopover={this.closeMetricsPopover}
-        ownFocus
-        button={
-          <EuiLink onClick={this.openMetricsPopover}>
-            <b>{i18n.translate('xpack.rollupJobs.create.stepMetrics.metricsColumnHeader', { defaultMessage: 'Metrics' })}</b>
-          </EuiLink>
-        }
-        data-test-subj={'rollupJobMetricsSelectAll'}
-      >
-        <EuiText size={'s'}>
-          <EuiFlexGroup direction={'column'}>
-            <EuiFlexItem align={'center'} style={{ marginBottom: '4px' }}>
-              <b>{i18n.translate('xpack.rollupJobs.create.stepMetrics.popOverTitle', { defaultMessage: 'Select All' })}</b>
-            </EuiFlexItem>
-
-            <EuiHorizontalRule margin={'xs'}/>
-
-            {
-              this.renderMetricsSelectAllCheckboxes()
-                .map((item, idx) => <EuiFlexItem key={idx}>{item}</EuiFlexItem>)
-            }
-          </EuiFlexGroup>
-        </EuiText>
-      </EuiPopover>
+      <Fragment>
+        <EuiFlexGroup alignItems={'center'} direction={'row'}>
+          {
+            this.renderMetricsSelectAllCheckboxes()
+              .map((item, idx) => <EuiFlexItem key={idx}>{item}</EuiFlexItem>)
+          }
+        </EuiFlexGroup>
+      </Fragment>
     );
-  }
+  };
 
   getListColumns() {
     return StepMetricsUi.chooserColumns.concat({
       type: 'metrics',
-      name: this.getMetricsSelectAllMenu(),
+      name: i18n.translate('xpack.rollupJobs.create.stepMetrics.metricsColumnHeader', { defaultMessage: 'Metrics' }),
       render: ({ name: fieldName, type: fieldType, types }) => {
         const { onFieldsChange } = this.props;
         const checkboxes = metricTypesConfig
@@ -339,7 +312,7 @@ export class StepMetricsUi extends Component {
               </h3>
             </EuiTitle>
 
-            <EuiSpacer size="s" />
+            <EuiSpacer size="s"/>
 
             <EuiText>
               <p>
@@ -369,7 +342,7 @@ export class StepMetricsUi extends Component {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer />
+        <EuiSpacer/>
 
         <FieldList
           columns={this.getListColumns()}
@@ -380,11 +353,12 @@ export class StepMetricsUi extends Component {
               {
                 i18n.translate(
                   'xpack.rollupJobs.create.stepMetrics.emptyListLabel',
-                  { defaultMessage: 'No metrics fields added' }
+                  { defaultMessage: 'No metrics fields added' },
                 )
               }
             </p>
           }
+
           addActions={() => {
             return [
               {
@@ -401,7 +375,7 @@ export class StepMetricsUi extends Component {
                   if (maxItemsToBeSelected === types.length) {
                     name = i18n.translate(
                       'xpack.rollupJobs.create.stepMetrics.deselectActionLabel',
-                      { defaultMessage: 'Deselect All' }
+                      { defaultMessage: 'Deselect All' },
                     );
                     icon = 'crossInACircleFilled';
                     color = 'primary';
@@ -443,25 +417,34 @@ export class StepMetricsUi extends Component {
                       />
                     </EuiToolTip>
                   );
-                }
+                },
               },
             ];
           }}
           addButton={
-            <FieldChooser
-              buttonLabel={
-                <FormattedMessage
-                  id="xpack.rollupJobs.create.stepMetrics.fieldsChooserLabel"
-                  defaultMessage="Add metrics fields"
+            <EuiFlexGroup justifyContent={'flexStart'} alignItems={'center'}>
+              <EuiFlexItem grow={false}>
+                <FieldChooser
+                  key={'stepMetricsFieldChooser'}
+                  buttonLabel={
+                    <FormattedMessage
+                      id="xpack.rollupJobs.create.stepMetrics.fieldsChooserLabel"
+                      defaultMessage="Add metrics fields"
+                    />
+                  }
+                  columns={StepMetricsUi.chooserColumns}
+                  fields={metricsFields}
+                  selectedFields={metrics}
+                  onSelectField={this.onSelectField}
+                  dataTestSubj="rollupJobMetricsFieldChooser"
                 />
-              }
-              columns={StepMetricsUi.chooserColumns}
-              fields={metricsFields}
-              selectedFields={metrics}
-              onSelectField={this.onSelectField}
-              dataTestSubj="rollupJobMetricsFieldChooser"
-            />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {this.getMetricsSelectAllMenu()}
+              </EuiFlexItem>
+            </EuiFlexGroup>
           }
+
           dataTestSubj="rollupJobMetricsFieldList"
         />
 
@@ -480,7 +463,7 @@ export class StepMetricsUi extends Component {
       return null;
     }
 
-    return <StepError title={errorMetrics} />;
+    return <StepError title={errorMetrics}/>;
   };
 
   static chooserColumns = [
