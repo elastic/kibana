@@ -29,7 +29,7 @@ describe('BucketNestingEditor', () => {
     return result as IndexPatternColumn;
   }
 
-  it('should display a checked switch if there are two buckets and it is the root', () => {
+  it('should display an unchecked switch if there are two buckets and it is the root', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
@@ -50,7 +50,7 @@ describe('BucketNestingEditor', () => {
     expect(control.prop('checked')).toBeFalsy();
   });
 
-  it('should display an unchecked switch if there are two buckets and it is not the root', () => {
+  it('should display a checked switch if there are two buckets and it is not the root', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
@@ -96,27 +96,23 @@ describe('BucketNestingEditor', () => {
   });
 
   it('should display nothing if there are no buckets', () => {
-    const setColumns = jest.fn();
     const component = mount(
       <BucketNestingEditor
         columnId="a"
         layer={{
-          columnOrder: ['b', 'a', 'c'],
+          columnOrder: ['a', 'b', 'c'],
           columns: {
-            a: mockCol({ suggestedPriority: 0 }),
-            b: mockCol({ suggestedPriority: 1 }),
+            a: mockCol({ suggestedPriority: 0, operationType: 'avg', isBucketed: false }),
+            b: mockCol({ suggestedPriority: 1, operationType: 'max', isBucketed: false }),
             c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: false }),
           },
           indexPatternId: 'foo',
         }}
-        setColumns={setColumns}
+        setColumns={jest.fn()}
       />
     );
-    const control = component.find('[data-test-subj="indexPattern-nesting-switch"]').first();
 
-    (control.prop('onChange') as () => {})();
-
-    expect(setColumns).toHaveBeenCalledWith(['a', 'b', 'c']);
+    expect(component.children().length).toBe(0);
   });
 
   it('should display nothing if there is one bucket', () => {
