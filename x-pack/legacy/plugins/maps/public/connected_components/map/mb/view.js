@@ -23,11 +23,16 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw-unminified';
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import { FeatureTooltip } from '../feature_tooltip';
 import { DRAW_TYPE } from '../../../actions/map_actions';
-import { createShapeFilterWithMeta, createExtentFilterWithMeta } from '../../../elasticsearch_geo_utils';
+import {
+  createGeometryFilterWithMeta,
+  getBoundingBoxGeometry,
+  setPrecision
+} from '../../../elasticsearch_geo_utils';
 import chrome from 'ui/chrome';
 import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
+import { i18n } from '@kbn/i18n';
 
 const isRetina = window.devicePixelRatio === 2;
 const mbDrawModes = MapboxDraw.modes;
@@ -84,40 +89,43 @@ export class MBMapContainer extends React.Component {
     this.props.setTooltipState(null);
   };
 
-  _onDraw = async (e) => {
-
+  _onDraw = (e) => {
     if (!e.features.length) {
       return;
     }
-    const { geoField, geoFieldType, indexPatternId, drawType } = this.props.drawState;
-    this.props.disableDrawState();
 
+    const isBoundingBox = this.props.drawState.drawType === DRAW_TYPE.BOUNDS;
+    const geometry = e.features[0].geometry;
+    // MapboxDraw returns coordinates with 12 decimals. Round to a more reasonable number
+    setPrecision(geometry.coordinates);
 
-    let filter;
-    if (drawType === DRAW_TYPE.POLYGON) {
-      filter = createShapeFilterWithMeta(e.features[0].geometry, indexPatternId, geoField, geoFieldType);
-    } else if (drawType === DRAW_TYPE.BOUNDS) {
-      const coordinates = e.features[0].geometry.coordinates[0];
-      const extent = {
-        minLon: coordinates[0][0],
-        minLat: coordinates[0][1],
-        maxLon: coordinates[0][0],
-        maxLat: coordinates[0][1]
-      };
-      for (let i  = 1; i < coordinates.length; i++) {
-        extent.minLon = Math.min(coordinates[i][0], extent.minLon);
-        extent.minLat = Math.min(coordinates[i][1], extent.minLat);
-        extent.maxLon = Math.max(coordinates[i][0], extent.maxLon);
-        extent.maxLat = Math.max(coordinates[i][1], extent.maxLat);
-      }
-      filter = createExtentFilterWithMeta(extent, indexPatternId, geoField, geoFieldType);
+    // TODO allow user to set geojson label when initiating draw
+    const geometryLabel = isBoundingBox
+      ? i18n.translate('xpack.maps.drawControl.defaultEnvelopeLabel', {
+        defaultMessage: 'extent'
+      })
+      : i18n.translate('xpack.maps.drawControl.defaultShapeLabel', {
+        defaultMessage: 'shape'
+      });
+
+    try {
+      const filter = createGeometryFilterWithMeta({
+        geometry: isBoundingBox
+          ? getBoundingBoxGeometry(geometry)
+          : geometry,
+        geometryLabel,
+        indexPatternId: this.props.drawState.indexPatternId,
+        geoFieldName: this.props.drawState.geoField,
+        geoFieldType: this.props.drawState.geoFieldType,
+        isBoundingBox,
+      });
+      this.props.addFilters([filter]);
+    } catch (error) {
+      // TODO notify user why filter was not created
+      console.log(error);
+    } finally {
+      this.props.disableDrawState();
     }
-
-    if (!filter) {
-      return;
-    }
-
-    this.props.addFilters([filter]);
   };
 
   _debouncedSync = _.debounce(() => {
