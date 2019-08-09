@@ -6,5 +6,4 @@
 
 export * from './log_analysis';
 export * from './metadata_api';
-export * from './timed_api';
 export * from './apm_metrics_api';
