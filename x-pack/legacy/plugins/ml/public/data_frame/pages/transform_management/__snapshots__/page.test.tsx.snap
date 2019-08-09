@@ -37,13 +37,17 @@ exports[`Data Frame: Job List <Page /> Minimal initialization 1`] = `
           <EuiFlexGroup
             alignItems="center"
           >
-            <EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
               <RefreshTransformListButton
                 isLoading={false}
                 onClick={[Function]}
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
               <CreateTransformButton />
             </EuiFlexItem>
           </EuiFlexGroup>
