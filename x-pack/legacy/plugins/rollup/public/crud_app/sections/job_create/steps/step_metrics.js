@@ -194,7 +194,7 @@ export class StepMetricsUi extends Component {
       return (
         <EuiCheckbox
           id={`${idx}-select-all-checkbox`}
-          data-test-subj={`rollupJobMetricsCheckbox-${metricType}`}
+          data-test-subj={`rollupJobMetricsSelectAllCheckbox-${metricType}`}
           disabled={isDisabled}
           label={<span style={{ whiteSpace: 'nowrap' }}>{label}</span>}
           checked={!isDisabled && isChecked}
@@ -247,15 +247,13 @@ export class StepMetricsUi extends Component {
     };
 
     return (
-      <EuiFlexItem grow={false} key={`${fieldName}-selectAll-checkbox`}>
-        <EuiCheckbox
-          id={`${fieldName}-selectAll-checkbox`}
-          data-test-subj={`rollupJobMetricsCheckbox-selectAll`}
-          label={label}
-          checked={allSelected}
-          onChange={onChange}
-        />
-      </EuiFlexItem>
+      <EuiCheckbox
+        id={`${fieldName}-selectAll-checkbox`}
+        data-test-subj={`rollupJobMetricsCheckbox-selectAll`}
+        label={label}
+        checked={allSelected}
+        onChange={onChange}
+      />
     );
   }
 
@@ -293,7 +291,9 @@ export class StepMetricsUi extends Component {
 
         return (
           <EuiFlexGroup wrap gutterSize="m">
-            {this.renderRowSelectAll({ fieldName, fieldType, types })}
+            <EuiFlexItem grow={false} key={`${fieldName}-selectAll-checkbox`}>
+              {this.renderRowSelectAll({ fieldName, fieldType, types })}
+            </EuiFlexItem>
             {checkboxes}
           </EuiFlexGroup>
         );

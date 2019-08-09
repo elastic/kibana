@@ -199,7 +199,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         const { rows: [firstRow] } = table.getMetaData('rollupJobMetricsFieldList');
         const columnWithMetricsCheckboxes = 2;
         const metricsCheckboxes = firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find('input');
-        expect(metricsCheckboxes.length).toBe(numericTypeMetrics.length);
+        expect(metricsCheckboxes.length).toBe(numericTypeMetrics.length + 1 /* add one for select all */);
       });
 
       it('should have "max", "min", & "value count" metrics for *date* fields', () => {
@@ -217,7 +217,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         const { rows: [firstRow] } = table.getMetaData('rollupJobMetricsFieldList');
         const columnWithMetricsCheckboxes = 2;
         const metricsCheckboxes = firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find('input');
-        expect(metricsCheckboxes.length).toBe(dateTypeMetrics.length);
+        expect(metricsCheckboxes.length).toBe(dateTypeMetrics.length + 1 /* add one for select all */);
       });
 
       it('should not allow to go to the next step if at least one metric type is not selected', () => {
@@ -308,7 +308,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       });
 
       it('should select all of the metric types across rows',  () => {
-        const selectAllAvgCheckbox = find('rollupJobMetricsCheckbox-avg');
+        const selectAllAvgCheckbox = find('rollupJobMetricsSelectAllCheckbox-avg');
         selectAllAvgCheckbox.first().simulate('change', { checked: true });
 
         const rows = getFieldListTableRows();
@@ -331,7 +331,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       });
 
       it('should deselect all of the metric types across rows',  () => {
-        const selectAllAvgCheckbox = find('rollupJobMetricsCheckbox-avg');
+        const selectAllAvgCheckbox = find('rollupJobMetricsSelectAllCheckbox-avg');
         selectAllAvgCheckbox.last().simulate('change', { checked: true });
         selectAllAvgCheckbox.last().simulate('change', { checked: false });
 
@@ -360,18 +360,18 @@ describe('Create Rollup Job, step 5: Metrics', () => {
          * 1. Select all avg column-wise
          * 2. Select all max column-wise
          * 3. Select and deselect row-wise the first numeric metric row
-         * 4. Expect the avg and max popover checkboxes to be unchecked
+         * 4. Expect the avg and max select all checkboxes to be unchecked
          * 5. Select all on the last date metric row-wise
-         * 6. Deselect all max column-wise
+         * 6. Select then deselect all max column-wise
          * 7. Expect everything but all and max to be selected on the last date metric row
          *
          * Let's a go!
          */
 
         // 1.
-        find('rollupJobMetricsCheckbox-avg').first().simulate('change', { checked: true });
+        find('rollupJobMetricsSelectAllCheckbox-avg').first().simulate('change', { checked: true });
         // 2.
-        find('rollupJobMetricsCheckbox-max').first().simulate('change', { checked: true });
+        find('rollupJobMetricsSelectAllCheckbox-max').first().simulate('change', { checked: true });
 
         const selectAllCheckbox = getSelectAllInputForRow(0);
 
@@ -382,15 +382,16 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         selectAllCheckbox.simulate('change', { checked: false });
 
         // 4.
-        expect(find('rollupJobMetricsCheckbox-avg').first().props().checked).toBe(false);
-        expect(find('rollupJobMetricsCheckbox-max').first().props().checked).toBe(false);
+        expect(find('rollupJobMetricsSelectAllCheckbox-avg').first().props().checked).toBe(false);
+        expect(find('rollupJobMetricsSelectAllCheckbox-max').first().props().checked).toBe(false);
 
         let rows = getFieldListTableRows();
         // 5.
         getSelectAllInputForRow(rows.length - 1).simulate('change', { checked: true });
 
         // 6.
-        find('rollupJobMetricsCheckbox-max').last().simulate('change', { checked: false });
+        find('rollupJobMetricsSelectAllCheckbox-max').first().simulate('change', { checked: true });
+        find('rollupJobMetricsSelectAllCheckbox-max').first().simulate('change', { checked: false });
 
         rows = getFieldListTableRows();
         const lastRowFieldChooserColumn = getFieldChooserColumnForRow(rows.length - 1);
