@@ -33,7 +33,6 @@ export const fetchJobStatusRequestPayloadRT = rt.type({
 
 export type FetchJobStatusRequestPayload = rt.TypeOf<typeof fetchJobStatusRequestPayloadRT>;
 
-// TODO: Get types aligned properly with response
 // export const fetchJobStatusResponsePayloadRT = rt.array(rt.type({
 //   datafeedId: rt.string,
 //   datafeedIndices: rt.array(rt.string),
@@ -48,8 +47,11 @@ export type FetchJobStatusRequestPayload = rt.TypeOf<typeof fetchJobStatusReques
 //   latestResultsTimestampMs: rt.number,
 //   latestTimestampMs: rt.number,
 //   memory_status: rt.string,
-//   nodeName: rt.string,
-//   processed_record_count: rt.number
+//   nodeName: rt.union([rt.string, rt.undefined]),
+//   processed_record_count: rt.number,
+//   fullJob: rt.any,
+//   auditMessage: rt.any,
+//   deleting: rt.union([rt.boolean, rt.undefined]),
 // }));
 
 export const fetchJobStatusResponsePayloadRT = rt.any;

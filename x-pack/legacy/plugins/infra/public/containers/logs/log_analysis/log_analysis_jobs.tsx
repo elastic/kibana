@@ -8,16 +8,13 @@ import createContainer from 'constate-latest';
 import { useMemo, useEffect, useState } from 'react';
 import { kfetch } from 'ui/kfetch';
 import { values } from 'lodash';
-import { getJobId, getJobIdPrefix } from '../../../../common/log_analysis';
+import { getJobId } from '../../../../common/log_analysis';
 import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import {
-  setupMlModuleRequestPayloadRT,
-  fetchJobStatusRequestPayloadRT,
-  fetchJobStatusResponsePayloadRT,
-} from './ml_api_types';
+import { fetchJobStatusRequestPayloadRT, fetchJobStatusResponsePayloadRT } from './ml_api_types';
 
-type JobStatus = 'unknown' | 'querying' | 'missing' | 'creating' | 'running' | 'inconsistent';
+type JobStatus = 'unknown' | 'closed' | 'closing' | 'failed' | 'opened' | 'opening' | 'deleted';
+// type DatafeedStatus = 'unknown' | 'started' | 'starting' | 'stopped' | 'stopping' | 'deleted';
 
 export const useLogAnalysisJobs = ({
   indexPattern,
@@ -74,10 +71,10 @@ export const useLogAnalysisJobs = ({
       onResolve: response => {
         if (response && response.length) {
           const logEntryRate = response.find(
-            job => job.id === getJobId(spaceId, sourceId, 'log-entry-rate')
+            (job: any) => job.id === getJobId(spaceId, sourceId, 'log-entry-rate')
           );
           setJobStatus({
-            logEntryRate: logEntryRate ? (logEntryRate.jobState as JobStatus) : 'unknown',
+            logEntryRate: logEntryRate ? logEntryRate.jobState : 'unknown',
           });
         }
       },
@@ -94,10 +91,9 @@ export const useLogAnalysisJobs = ({
 
   const isSetupRequired = useMemo(() => {
     const jobStates = values(jobStatus);
-    const badStates = jobStates.filter(state => {
-      return state === 'unknown' || state === 'missing' || state === 'inconsistent';
-    });
-    return badStates.length > 0;
+    return (
+      jobStates.filter(state => state === 'opened' || state === 'opening').length < jobStates.length
+    );
   }, [jobStatus]);
 
   const isLoadingSetupStatus = useMemo(() => fetchJobStatusRequest.state === 'pending', [

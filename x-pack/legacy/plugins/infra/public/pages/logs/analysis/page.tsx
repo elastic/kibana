@@ -5,7 +5,6 @@
  */
 
 import React, { useContext } from 'react';
-import { last } from 'lodash';
 import chrome from 'ui/chrome';
 import { ColumnarPage } from '../../../components/page';
 import { LoadingPage } from '../../../components/loading_page';
@@ -17,11 +16,9 @@ import { Source } from '../../../containers/source';
 
 export const AnalysisPage = () => {
   const { sourceId, source } = useContext(Source.Context);
-  // TODO: Find out the proper Kibana way to derive the space ID client side
-  const basePath = chrome.getBasePath();
-  const spaceId = basePath.includes('s/') ? last(basePath.split('/')) : 'default';
+  const spaceId = chrome.getInjected('activeSpace').space.id;
   const { isSetupRequired, isLoadingSetupStatus } = useLogAnalysisJobs({
-    indexPattern: source.configuration.logAlias,
+    indexPattern: source ? source.configuration.logAlias : '',
     sourceId,
     spaceId,
   });
