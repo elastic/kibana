@@ -125,6 +125,10 @@ export interface MlCapabilities {
     canPreviewDataFrame: boolean;
     canCreateDataFrame: boolean;
     canStartStopDataFrame: boolean;
+    canGetDataFrameAnalytics: boolean;
+    canDeleteDataFrameAnalytics: boolean;
+    canCreateDataFrameAnalytics: boolean;
+    canStartStopDataFrameAnalytics: boolean;
   };
   isPlatinumOrTrialLicense: boolean;
   mlFeatureEnabledInSpace: boolean;

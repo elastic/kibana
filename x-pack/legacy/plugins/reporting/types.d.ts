@@ -50,17 +50,6 @@ export interface ConfigObject {
   get: (path?: string) => any;
 }
 
-export interface Size {
-  width: number;
-  height: number;
-}
-
-export interface ViewZoomWidthHeight {
-  zoom: number;
-  width: number;
-  height: number;
-}
-
 export type EvalArgs = any[];
 export type EvalFn<T> = (...evalArgs: EvalArgs) => T;
 
