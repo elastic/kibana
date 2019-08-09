@@ -1,3 +1,4 @@
+$lnsPanelMinWidth: $euiSize * 18;
 
 .lnsPage {
   padding: 0;
@@ -24,7 +25,7 @@
 .lnsSidebar {
   margin: 0;
   flex: 1 0 18%;
-  min-width: ($euiSize * 22);
+  min-width: $lnsPanelMinWidth + $euiSize;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -45,10 +46,13 @@
 }
 
 .lnsSidebar--right {
-  min-width: ($euiSize * 22);
   @include euiScrollBar;
-  overflow: hidden auto;
-  padding: $euiSize;
+  min-width: $lnsPanelMinWidth + $euiSize;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-top: $euiSize;
+  padding-right: $euiSize;
+  max-height: 100%;
 }
 
 .lnsSidebarContainer {
@@ -64,31 +68,37 @@
 
 .lnsPageBody {
   @include euiScrollBar;
-  padding-top: $euiSize;
-  padding-bottom: $euiSize;
-  overflow: hidden auto;
+  min-width: $lnsPanelMinWidth + $euiSizeXL;
+  overflow: hidden;
+  // Leave out bottom padding so the suggestions scrollbar stays flush to window edge
+  // This also means needing to add same amount of margin to page content and suggestion items
+  padding: $euiSize $euiSize 0;
 
   &:first-child {
     padding-left: $euiSize;
   }
 
   .lnsPageContent {
+    @include euiScrollBar;
+    overflow: hidden;
     padding: 0;
+    margin-bottom: $euiSize;
     display: flex;
     flex-direction: column;
 
     .lnsPageContentHeader {
-      padding: $euiSize;
+      padding: $euiSizeS;
       border-bottom: $euiBorderThin;
       margin-bottom: 0;
     }
 
     .lnsPageContentBody {
+      @include euiScrollBar;
       flex-grow: 1;
-      padding: $euiSizeXL;
       display: flex;
       align-items: stretch;
       justify-content: stretch;
+      overflow: auto;
 
       > * {
         flex: 1 1 100%;
@@ -108,6 +118,7 @@
   align-items: center;
   justify-content: center;
   overflow-x: hidden;
+  padding: $euiSize;
 }
 
 .lnsTitleInput {
