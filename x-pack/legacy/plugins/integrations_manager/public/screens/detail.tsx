@@ -139,13 +139,9 @@ function Header(props: HeaderProps) {
   );
 }
 
-type ContentProps = IntegrationInfo & Pick<DetailProps, 'panel'> & { hasLogoPanel: boolean };
-function Content(props: ContentProps) {
-  const { assets, description, hasLogoPanel, name, panel, requirement, version } = props;
-  const marginTop = ICON_HEIGHT_PANEL / 2 + ICON_HEIGHT_NATURAL / 2;
-  const leftStyles = hasLogoPanel ? { marginTop: `${marginTop}px` } : {};
-  const isOverviewPanel = panel === 'overview';
-  const panelContent = isOverviewPanel ? (
+function OverviewPanel(props: IntegrationInfo) {
+  const { description } = props;
+  return (
     <>
       <EuiTitle size="xs">
         <span>About</span>
@@ -154,16 +150,37 @@ function Content(props: ContentProps) {
         <p>{description}</p>
       </EuiText>
     </>
-  ) : (
-    <AssetAccordion assets={assets} />
   );
+}
+type ContentPanelProps = IntegrationInfo & Pick<DetailProps, 'panel'>;
+function ContentPanel(props: ContentPanelProps) {
+  const { assets, panel } = props;
+  switch (panel) {
+    case 'assets':
+      return <AssetAccordion assets={assets} />;
+    case 'data-sources':
+      return <EuiPanel />;
+    case 'overview':
+    default:
+      return <OverviewPanel {...props} />;
+  }
+}
+
+type ContentProps = IntegrationInfo & Pick<DetailProps, 'panel'> & { hasLogoPanel: boolean };
+function Content(props: ContentProps) {
+  const { assets, hasLogoPanel, name, panel, requirement, version } = props;
+  const marginTop = ICON_HEIGHT_PANEL / 2 + ICON_HEIGHT_NATURAL / 2;
+  const leftStyles = hasLogoPanel ? { marginTop: `${marginTop}px` } : {};
+  const isOverviewPanel = panel === 'overview';
 
   return (
     <EuiFlexGroup>
       <LeftColumn style={leftStyles}>
         <NavLinks name={name} version={version} active={panel || DEFAULT_PANEL} />
       </LeftColumn>
-      <CenterColumn>{panelContent}</CenterColumn>
+      <CenterColumn>
+        <ContentPanel {...props} />
+      </CenterColumn>
       <RightColumn>
         {isOverviewPanel && (
           <EuiFlexGroup direction="column" gutterSize="none">
