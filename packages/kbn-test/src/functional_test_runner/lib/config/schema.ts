@@ -178,6 +178,7 @@ export const schema = Joi.object()
         serverArgs: Joi.array(),
         serverEnvVars: Joi.object(),
         dataArchive: Joi.string(),
+        ssl: Joi.boolean().default(false),
       })
       .default(),
 

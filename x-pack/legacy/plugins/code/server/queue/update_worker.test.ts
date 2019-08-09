@@ -71,7 +71,7 @@ test('Execute update job', async () => {
       },
       disk: {
         thresholdEnabled: true,
-        watermarkLowMb: 100,
+        watermarkLow: '80%',
       },
     } as ServerOptions,
     {} as GitOperations,
@@ -117,7 +117,7 @@ test('On update job completed because of cancellation ', async () => {
       },
       disk: {
         thresholdEnabled: true,
-        watermarkLowMb: 100,
+        watermarkLow: '80%',
       },
     } as ServerOptions,
     {} as GitOperations,
@@ -190,7 +190,7 @@ test('Execute update job failed because of low disk watermark ', async () => {
       },
       disk: {
         thresholdEnabled: true,
-        watermarkLowMb: 100,
+        watermarkLow: '80%',
       },
     } as ServerOptions,
     {} as GitOperations,
@@ -242,7 +242,7 @@ test('On update job error or timeout will not persis error', async () => {
       },
       disk: {
         thresholdEnabled: true,
-        watermarkLowMb: 100,
+        watermarkLow: '80%',
       },
     } as ServerOptions,
     {} as GitOperations,
