@@ -9,6 +9,8 @@ import { createFireHandler } from './create_fire_handler';
 const createFireHandlerParams = {
   fireAction: jest.fn(),
   spaceId: 'default',
+  apiKeyId: '123',
+  generatedApiKey: 'abc',
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
   actions: [

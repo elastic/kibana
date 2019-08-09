@@ -4,36 +4,59 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
 import { TaskManager } from '../../task_manager';
 import { SpacesPlugin } from '../../spaces';
 
 interface CreateFireFunctionOptions {
   taskManager: TaskManager;
-  internalSavedObjectsRepository: SavedObjectsClientContract;
   spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
+  getScopedSavedObjectsClient: any;
+  getBasePath: SpacesPlugin['getBasePath'];
 }
 
 export interface FireOptions {
   id: string;
   params: Record<string, any>;
   spaceId: string;
+  apiKeyId: string | null;
+  generatedApiKey: string | null;
 }
 
 export function createFireFunction({
+  getBasePath,
+  getScopedSavedObjectsClient,
   taskManager,
-  internalSavedObjectsRepository,
   spaceIdToNamespace,
 }: CreateFireFunctionOptions) {
-  return async function fire({ id, params, spaceId }: FireOptions) {
+  return async function fire({ id, params, spaceId, apiKeyId, generatedApiKey }: FireOptions) {
+    const requestHeaders: Record<string, string> = {};
+    if (apiKeyId && generatedApiKey) {
+      const key = Buffer.from(`${apiKeyId}:${generatedApiKey}`).toString('base64');
+      requestHeaders.authorization = `ApiKey ${key}`;
+    }
+
+    // Since we're using API keys and accessing elasticsearch can only be done
+    // via a request, we're faking one with the proper authorization headers.
+    const fakeRequest: any = {
+      headers: requestHeaders,
+      getBasePath: () => getBasePath(spaceId),
+    };
+
+    const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
+
     const namespace = spaceIdToNamespace(spaceId);
-    const actionSavedObject = await internalSavedObjectsRepository.get('action', id, { namespace });
+    const actionSavedObject = await savedObjectsClient.get('action', id, { namespace });
+    const firedActionRecord = await savedObjectsClient.create('fired_action', {
+      actionId: id,
+      params,
+      apiKeyId,
+      generatedApiKey,
+    });
     await taskManager.schedule({
       taskType: `actions:${actionSavedObject.attributes.actionTypeId}`,
       params: {
-        id,
         spaceId,
-        params,
+        firedActionId: firedActionRecord,
       },
       state: {},
       scope: ['actions'],

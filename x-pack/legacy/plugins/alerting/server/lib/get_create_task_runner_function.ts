@@ -87,6 +87,8 @@ export function getCreateTaskRunnerFunction({
 
         const fireHandler = createFireHandler({
           fireAction,
+          apiKeyId,
+          generatedApiKey,
           actions: actionsWithIds,
           spaceId: taskInstance.params.spaceId,
         });

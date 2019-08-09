@@ -12,12 +12,16 @@ interface CreateFireHandlerOptions {
   fireAction: ActionsPlugin['fire'];
   actions: AlertAction[];
   spaceId: string;
+  apiKeyId: string | null;
+  generatedApiKey: string | null;
 }
 
 export function createFireHandler({
   fireAction,
   actions: alertActions,
   spaceId,
+  apiKeyId,
+  generatedApiKey,
 }: CreateFireHandlerOptions) {
   return async (actionGroup: string, context: Context, state: State) => {
     const actions = alertActions
@@ -33,6 +37,8 @@ export function createFireHandler({
         id: action.id,
         params: action.params,
         spaceId,
+        apiKeyId,
+        generatedApiKey,
       });
     }
   };

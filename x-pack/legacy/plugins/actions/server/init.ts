@@ -31,10 +31,7 @@ export function init(server: Legacy.Server) {
     'spaces'
   );
 
-  const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-  const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
-    callWithInternalUser
-  );
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
 
   // Encrypted attributes
   // - `secrets` properties will be encrypted
@@ -44,6 +41,10 @@ export function init(server: Legacy.Server) {
     type: 'action',
     attributesToEncrypt: new Set(['secrets']),
     attributesToExcludeFromAAD: new Set(['description']),
+  });
+  server.plugins.encrypted_saved_objects!.registerType({
+    type: 'fired_action',
+    attributesToEncrypt: new Set(['apiKeyId', 'generatedApiKey']),
   });
 
   function getServices(request: any): Services {
@@ -86,9 +87,14 @@ export function init(server: Legacy.Server) {
 
   const fireFn = createFireFunction({
     taskManager: taskManager!,
-    internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
+    getScopedSavedObjectsClient: server.savedObjects.getScopedSavedObjectsClient,
     spaceIdToNamespace(...args) {
       return spaces.isEnabled ? spaces.spaceIdToNamespace(...args) : undefined;
+    },
+    getBasePath(...args) {
+      return spaces.isEnabled
+        ? spaces.getBasePath(...args)
+        : server.config().get('server.basePath');
     },
   });
 

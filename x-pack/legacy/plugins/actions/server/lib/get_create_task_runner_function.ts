@@ -6,7 +6,7 @@
 
 import { execute } from './execute';
 import { ExecutorError } from './executor_error';
-import { ActionTypeRegistryContract, GetServicesFunction } from '../types';
+import { ActionTypeRegistryContract, FiredAction, GetServicesFunction } from '../types';
 import { TaskInstance } from '../../../task_manager';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
 import { SpacesPlugin } from '../../../spaces';
@@ -33,13 +33,27 @@ export function getCreateTaskRunnerFunction({
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
       run: async () => {
-        const { spaceId, id, params } = taskInstance.params;
+        const { spaceId, firedActionId } = taskInstance.params;
         const namespace = spaceIdToNamespace(spaceId);
+
+        const {
+          attributes: { actionId, params, apiKeyId, generatedApiKey },
+        } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<FiredAction>(
+          'fired_action',
+          firedActionId,
+          { namespace }
+        );
+
+        const requestHeaders: Record<string, string> = {};
+        if (apiKeyId && generatedApiKey) {
+          const key = Buffer.from(`${apiKeyId}:${generatedApiKey}`).toString('base64');
+          requestHeaders.authorization = `ApiKey ${key}`;
+        }
 
         // Since we're using API keys and accessing elasticsearch can only be done
         // via a request, we're faking one with the proper authorization headers.
         const fakeRequest: any = {
-          headers: {},
+          headers: requestHeaders,
           getBasePath: () => getBasePath(taskInstance.params.spaceId),
         };
 
@@ -47,7 +61,7 @@ export function getCreateTaskRunnerFunction({
           namespace,
           actionTypeRegistry,
           encryptedSavedObjectsPlugin,
-          actionId: id,
+          actionId,
           services: getServices(fakeRequest),
           params,
         });

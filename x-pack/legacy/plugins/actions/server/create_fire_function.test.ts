@@ -11,14 +11,16 @@ import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
 const mockTaskManager = taskManagerMock.create();
 const savedObjectsClient = SavedObjectsClientMock.create();
 const spaceIdToNamespace = jest.fn();
+const getBasePath = jest.fn();
 
 beforeEach(() => jest.resetAllMocks());
 
 describe('fire()', () => {
   test('schedules the action with all given parameters', async () => {
     const fireFn = createFireFunction({
+      getBasePath,
       taskManager: mockTaskManager,
-      internalSavedObjectsRepository: savedObjectsClient,
+      getScopedSavedObjectsClient: () => savedObjectsClient,
       spaceIdToNamespace,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -34,6 +36,8 @@ describe('fire()', () => {
       id: '123',
       params: { baz: false },
       spaceId: 'default',
+      apiKeyId: '123',
+      generatedApiKey: 'abc',
     });
     expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
     expect(mockTaskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`

@@ -15,5 +15,22 @@
         "type": "binary"
       }
     }
+  },
+  "fired_action": {
+    "properties": {
+      "actionId": {
+        "type": "keyword"
+      },
+      "params": {
+        "enabled": false,
+        "type": "object"
+      },
+      "apiKeyId": {
+        "type": "binary"
+      },
+      "generatedApiKey": {
+        "type": "binary"
+      }
+    }
   }
 }

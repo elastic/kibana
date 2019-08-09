@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 import { FireOptions } from './create_fire_function';
 
@@ -67,4 +67,11 @@ export interface ActionType {
     secrets?: ValidatorType;
   };
   executor: ExecutorType;
+}
+
+export interface FiredAction extends SavedObjectAttributes {
+  actionId: string;
+  params: Record<string, any>;
+  apiKeyId: string | null;
+  generatedApiKey: string | null;
 }
