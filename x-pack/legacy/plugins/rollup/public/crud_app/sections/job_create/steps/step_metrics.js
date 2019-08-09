@@ -231,37 +231,14 @@ export class StepMetricsUi extends Component {
     const { onFieldsChange } = this.props;
     const hasSelectedItems = Boolean(types.length);
     const maxItemsToBeSelected = Object.keys(whiteListedMetricByFieldType[fieldType]).length;
+    const allSelected = maxItemsToBeSelected === types.length;
 
-    let name;
-    let icon;
-    let color;
-    let description;
+    const label = i18n.translate(
+      'xpack.rollupJobs.create.stepMetrics.selectAllRowLabel',
+      { defaultMessage: 'All' },
+    );
 
-    if (maxItemsToBeSelected === types.length) {
-      name = i18n.translate(
-        'xpack.rollupJobs.create.stepMetrics.deselectActionLabel',
-        { defaultMessage: 'Deselect All' },
-      );
-      icon = 'crossInACircleFilled';
-      color = 'primary';
-      description = i18n.translate(
-        'xpack.rollupJobs.create.stepMetrics.deselectActionDescription',
-        { defaultMessage: 'Deselect all of the metrics in this row.' },
-      );
-    } else {
-      name = i18n.translate(
-        'xpack.rollupJobs.create.stepMetrics.selectActionLabel',
-        { defaultMessage: 'Select All' },
-      );
-      icon = 'checkInCircleFilled';
-      color = 'success';
-      description = i18n.translate(
-        'xpack.rollupJobs.create.stepMetrics.selectActionDescription',
-        { defaultMessage: 'Select all of the metrics in this row.' },
-      );
-    }
-
-    const onClick = () => {
+    const onChange = () => {
       const isSelected = hasSelectedItems ? types.length !== maxItemsToBeSelected : true;
       const newMetrics = metricTypesConfig
         .filter(config => config.fieldTypes[fieldType])
@@ -272,15 +249,15 @@ export class StepMetricsUi extends Component {
     };
 
     return (
-      <EuiToolTip content={description} delay="long">
-        <EuiButtonIcon
-          aria-label={name}
-          isDisabled={false}
-          color={color}
-          iconType={icon}
-          onClick={onClick}
+      <EuiFlexItem grow={false} key={`${fieldName}-selectAll-checkbox`}>
+        <EuiCheckbox
+          id={`${fieldName}-selectAll-checkbox`}
+          data-test-subj={`rollupJobMetricsCheckbox-selectAll`}
+          label={label}
+          checked={allSelected}
+          onChange={onChange}
         />
-      </EuiToolTip>
+      </EuiFlexItem>
     );
   }
 
