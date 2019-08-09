@@ -37,14 +37,16 @@ import { AssetIcons, AssetTitleMap, ServiceIcons, ServiceTitleMap } from '../con
 import { VersionBadge } from '../components/version_badge';
 import { getIntegrationInfoByKey } from '../data';
 import { useBreadcrumbs, useLinks } from '../hooks';
+import { DetailViewPanelName } from '..';
 
-type DetailViewPanelName = 'overview' | 'assets' | 'data-sources';
 export interface DetailProps {
   pkgkey: string;
   panel?: DetailViewPanelName;
 }
 
-export function Detail({ pkgkey, panel = 'overview' }: DetailProps) {
+const DEFAULT_PANEL: DetailViewPanelName = 'overview';
+
+export function Detail({ pkgkey, panel = DEFAULT_PANEL }: DetailProps) {
   const [info, setInfo] = useState<IntegrationInfo | null>(null);
   useEffect(() => {
     getIntegrationInfoByKey(pkgkey).then(response => {
@@ -139,7 +141,7 @@ function Header(props: HeaderProps) {
 
 type ContentProps = IntegrationInfo & Pick<DetailProps, 'panel'> & { hasLogoPanel: boolean };
 function Content(props: ContentProps) {
-  const { assets, description, hasLogoPanel, panel, requirement } = props;
+  const { assets, description, hasLogoPanel, name, panel, requirement, version } = props;
   const marginTop = ICON_HEIGHT_PANEL / 2 + ICON_HEIGHT_NATURAL / 2;
   const leftStyles = hasLogoPanel ? { marginTop: `${marginTop}px` } : {};
   const isOverviewPanel = panel === 'overview';
@@ -159,9 +161,7 @@ function Content(props: ContentProps) {
   return (
     <EuiFlexGroup>
       <LeftColumn style={leftStyles}>
-        <EuiTitle>
-          <span>Vertical Tabs</span>
-        </EuiTitle>
+        <NavLinks name={name} version={version} active={panel || DEFAULT_PANEL} />
       </LeftColumn>
       <CenterColumn>{panelContent}</CenterColumn>
       <RightColumn>
@@ -180,6 +180,41 @@ function Content(props: ContentProps) {
         )}
       </RightColumn>
     </EuiFlexGroup>
+  );
+}
+
+type NavLinkProps = Pick<IntegrationInfo, 'name' | 'version'> & { active: DetailViewPanelName };
+function NavLinks({ name, version, active }: NavLinkProps) {
+  const { toDetailView } = useLinks();
+  const overviewLink = toDetailView({ name, version, panel: 'overview' });
+  const assetsLink = toDetailView({ name, version, panel: 'assets' });
+  const sourcesLink = toDetailView({ name, version, panel: 'data-sources' });
+  const activeStyles = { fontWeight: 600 };
+
+  return (
+    <Fragment>
+      <EuiButtonEmpty
+        href={overviewLink}
+        contentProps={{ style: { justifyContent: 'start' } }}
+        style={active === 'overview' ? activeStyles : {}}
+      >
+        Overview
+      </EuiButtonEmpty>
+      <EuiButtonEmpty
+        href={assetsLink}
+        contentProps={{ style: { justifyContent: 'start' } }}
+        style={active === 'assets' ? activeStyles : {}}
+      >
+        Assets
+      </EuiButtonEmpty>
+      <EuiButtonEmpty
+        href={sourcesLink}
+        contentProps={{ style: { justifyContent: 'start' } }}
+        style={active === 'data-sources' ? activeStyles : {}}
+      >
+        Data Sources
+      </EuiButtonEmpty>
+    </Fragment>
   );
 }
 

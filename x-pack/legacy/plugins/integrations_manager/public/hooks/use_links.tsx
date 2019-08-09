@@ -7,13 +7,15 @@
 import { generatePath } from 'react-router-dom';
 import { PLUGIN } from '../../common/constants';
 import { patterns } from '../routes';
-import { useCore } from './index';
+import { useCore } from '.';
+import { DetailViewPanelName } from '..';
 
 // TODO: get this from server/integrations/handlers.ts (move elsewhere?)
 // seems like part of the name@version change
 interface DetailParams {
   name: string;
   version: string;
+  panel?: DetailViewPanelName;
 }
 
 function addBasePath(path: string) {
@@ -30,7 +32,11 @@ export function useLinks() {
   return {
     toAssets: (path: string) => addBasePath(`/plugins/${PLUGIN.ID}/assets/${path}`),
     toListView: () => appRoot(patterns.LIST_VIEW),
-    toDetailView: ({ name, version }: DetailParams) =>
-      appRoot(generatePath(patterns.DETAIL_VIEW, { pkgkey: `${name}-${version}` })),
+    toDetailView: ({ name, version, panel }: DetailParams) => {
+      // panel is optional, but `generatePath` won't accept `path: undefined`
+      // so use this to pass `{ pkgkey }` or `{ pkgkey, panel }`
+      const params = Object.assign({ pkgkey: `${name}-${version}` }, panel ? { panel } : {});
+      return appRoot(generatePath(patterns.DETAIL_VIEW, params));
+    },
   };
 }
