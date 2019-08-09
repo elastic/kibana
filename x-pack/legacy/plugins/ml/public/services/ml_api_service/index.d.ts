@@ -61,6 +61,7 @@ declare interface Ml {
   hasPrivileges(obj: object): Promise<any>;
 
   checkMlPrivileges(): Promise<PrivilegesResponse>;
+  checkManageMLPrivileges(): Promise<PrivilegesResponse>;
   getJobStats(obj: object): Promise<any>;
   getDatafeedStats(obj: object): Promise<any>;
   esSearch(obj: object): any;
