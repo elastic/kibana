@@ -21,11 +21,11 @@ const formatMap = {
   LOCAL_TIME_WITH_SECONDS: 'LTS',
 };
 
-const now = new Date();
+const now = moment();
 
 const dateFormats = Object.values(formatMap).map(format => ({
   value: format,
-  text: moment(now).format(format),
+  text: moment.utc(now).format(format),
 }));
 
 export const DateFormatArgInput = compose<ComponentProps, null>(withProps({ dateFormats }))(
