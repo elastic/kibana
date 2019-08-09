@@ -17,11 +17,18 @@
  * under the License.
  */
 
-import {
-  getFieldCapabilities,
-  resolveTimePattern,
-  createNoMatchingIndicesError,
-} from './lib';
+import { getFieldCapabilities, resolveTimePattern, createNoMatchingIndicesError } from './lib';
+
+export interface FieldDescriptor {
+  aggregatable: boolean;
+  name: string;
+  readFromDocValues: boolean;
+  searchable: boolean;
+  type: string;
+  esTypes: string[];
+  parent?: string;
+  subType?: string;
+}
 
 export class IndexPatternsService {
   constructor(callDataCluster) {
@@ -37,7 +44,7 @@ export class IndexPatternsService {
    *                                        be left in the field list (all others are removed).
    *  @return {Promise<Array<Fields>>}
    */
-  async getFieldsForWildcard(options = {}) {
+  async getFieldsForWildcard(options = {}): Promise<FieldDescriptor[]> {
     const { pattern, metaFields } = options;
     return await getFieldCapabilities(this._callDataCluster, pattern, metaFields);
   }
@@ -61,5 +68,4 @@ export class IndexPatternsService {
     }
     return await getFieldCapabilities(this._callDataCluster, indices, metaFields);
   }
-
 }

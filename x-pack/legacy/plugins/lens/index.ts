@@ -5,13 +5,42 @@
  */
 
 import * as Joi from 'joi';
-import { Server } from 'hapi';
+import { ServerRoute } from 'hapi';
 import { resolve } from 'path';
+import { Legacy } from 'kibana';
 import { LegacyPluginInitializer } from 'src/legacy/types';
+import {
+  CoreSetup,
+  PluginInitializerContext,
+  Logger,
+  HttpServiceSetup,
+  ElasticsearchServiceSetup,
+} from 'src/core/server';
+import { npStart } from 'ui/new_platform';
+import KbnServer, { Server, KibanaConfig } from 'src/legacy/server/kbn_server';
 import mappings from './mappings.json';
 import { PLUGIN_ID, getEditPath } from './common';
+import {
+  lensServerPlugin,
+  LensInitializerContext,
+  LensHttpServiceSetup,
+  LensCoreSetup,
+} from './server';
 
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
+
+// export interface LensInitializerContext extends PluginInitializerContext {
+//   legacyConfig: KibanaConfig;
+// }
+
+// export interface LensHttpServiceSetup extends HttpServiceSetup {
+//   route(route: ServerRoute | ServerRoute[]): void;
+// }
+
+// export interface LensCoreSetup {
+//   http: LensHttpServiceSetup;
+//   elasticsearch: ElasticsearchServiceSetup;
+// }
 
 export const lens: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -49,7 +78,9 @@ export const lens: LegacyPluginInitializer = kibana => {
       }).default();
     },
 
-    init(server: Server) {
+    async init(server: Server) {
+      const kbnServer = (server as unknown) as KbnServer;
+
       server.plugins.xpack_main.registerFeature({
         id: PLUGIN_ID,
         name: NOT_INTERNATIONALIZED_PRODUCT_NAME,
@@ -76,6 +107,37 @@ export const lens: LegacyPluginInitializer = kibana => {
             ui: ['show'],
           },
         },
+      });
+
+      const initializerContext = ({
+        legacyConfig: server.config(),
+        config: {},
+        logger: {
+          get(...contextParts: string[]) {
+            return kbnServer.newPlatform.coreContext.logger.get('plugins', 'lens', ...contextParts);
+          },
+        },
+      } as unknown) as LensInitializerContext;
+
+      const lensHttpService: LensHttpServiceSetup = {
+        ...kbnServer.newPlatform.setup.core.http,
+        route: server.route.bind(server),
+      };
+
+      const core: LensCoreSetup = {
+        http: lensHttpService,
+        elasticsearch: kbnServer.newPlatform.setup.core.elasticsearch,
+      };
+
+      // Set up with the new platform plugin lifecycle API.
+      const plugin = lensServerPlugin(initializerContext);
+      await plugin.setup(core, {});
+
+      // await plugin.start(coreSetup);
+      // await plugin.start(core, {});
+
+      server.events.on('stop', async () => {
+        await plugin.stop();
       });
     },
   });

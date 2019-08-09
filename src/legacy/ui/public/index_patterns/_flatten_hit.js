@@ -26,6 +26,7 @@ const flattenedCache = new WeakMap();
 
 function flattenHit(indexPattern, hit, deep) {
   const flat = {};
+  console.log(indexPattern, hit);
 
   // recursively merge _source
   const fields = indexPattern.fields.byName;
