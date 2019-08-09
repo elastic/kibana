@@ -112,22 +112,12 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     if (reason && reason === CancellationReason.LOW_DISK_SPACE) {
       // If the clone/update job is cancelled because of the disk watermark, manually
       // trigger onJobExecutionError.
-      await this.handleLowDiskSpaceCancellation(job);
+      const msg = this.watermarkService.diskWatermarkViolationMessage();
+      this.log.error(
+        'Git clone/update job completed because of low disk space. Move forward as error.'
+      );
+      const error = new Error(msg);
+      await this.onJobExecutionError({ job, error });
     }
-  }
-
-  private async handleLowDiskSpaceCancellation(job: Job) {
-    const { watermarkLowMb } = this.serverOptions.disk;
-    const msg = i18n.translate('xpack.code.git.diskWatermarkLowMessage', {
-      defaultMessage: `Disk watermark level lower than {watermarkLowMb} MB`,
-      values: {
-        watermarkLowMb,
-      },
-    });
-    this.log.error(
-      'Git clone/update job completed because of low disk space. Move forward as error.'
-    );
-    const error = new Error(msg);
-    await this.onJobExecutionError({ job, error });
   }
 }
