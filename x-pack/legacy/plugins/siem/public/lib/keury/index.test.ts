@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { escapeKuery } from '.';
+import { convertKueryToElasticSearchQuery, escapeKuery } from '.';
 
 describe('Kuery escape', () => {
   it('should not remove white spaces quotes', () => {
@@ -60,5 +60,18 @@ describe('Kuery escape', () => {
     const value = 'This\nhas\tnewlines\r\nwith\ttabs';
     const expected = 'This\\nhas\\tnewlines\\r\\nwith\\ttabs';
     expect(escapeKuery(value)).to.be(expected);
+  });
+
+  it('should return JSON that is not escaped for the final ES search', () => {
+    const kueryExpression =
+      '(host.name : siem-windows and event.action : "Registry value set \\(rule\\: RegistryEvent\\)") and @timestamp >= 1565274377369 and @timestamp <= 1565360777369';
+    const expected =
+      '{"bool":{"filter":[{"bool":{"filter":[{"bool":{"should":[{"match":{"host.name":"siem-windows"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"event.action":"Registry value set (rule: RegistryEvent)"}}],"minimum_should_match":1}}]}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1565274377369}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1565360777369}}}],"minimum_should_match":1}}]}}]}}';
+    expect(
+      convertKueryToElasticSearchQuery(kueryExpression, {
+        fields: [],
+        title: 'auditbeat-*,filebeat-*,packetbeat-*,winlogbeat-*',
+      })
+    ).to.be(expected);
   });
 });

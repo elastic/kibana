@@ -16,7 +16,9 @@ export const convertKueryToElasticSearchQuery = (
 ) => {
   try {
     return kueryExpression
-      ? JSON.stringify(toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern))
+      ? JSON.stringify(
+          toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern)
+        ).replace(/\\\\/g, '')
       : '';
   } catch (err) {
     return '';
