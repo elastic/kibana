@@ -122,7 +122,7 @@ export function isFullLicense() {
 export function xpackFeatureAvailable(feature) {
   // each plugin can register their own set of features.
   // so we need specific checks for each one.
-  // this list can grow if we need to check other features.
+  // this list can grow if we need to check other plugin's features.
   switch (feature) {
     case 'watcher':
       // watcher only has a license status feature
