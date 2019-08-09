@@ -60,7 +60,6 @@ export const DensityChart: React.SFC<DensityChartProps> = ({
       />
       <DensityChartPositiveBackground width={width * (2 / 3)} height={highestPathCoord} />
       <PositiveAreaPath d={pathData || ''} />
-      {/* <NegativeAreaPath transform="scale(-1, 1)" d={pathData || ''} /> */}
     </g>
   );
 };
@@ -82,11 +81,4 @@ const PositiveAreaPath = euiStyled.path`
     props.theme.darkMode
       ? props.theme.eui.euiColorMediumShade
       : props.theme.eui.euiColorLightShade};
-`;
-
-const NegativeAreaPath = euiStyled.path`
-  fill: ${props =>
-    props.theme.darkMode
-      ? props.theme.eui.euiColorLightShade
-      : props.theme.eui.euiColorLightestShade};
 `;
