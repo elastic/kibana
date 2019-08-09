@@ -38,16 +38,8 @@ const TOOLTIP_TYPE = {
   LOCKED: 'LOCKED'
 };
 
-
-
-// const emptyImageCanvas = document.createElement('canvas');
-// emptyImageCanvas.width = 1;
-// emptyImageCanvas.height = 1;
-// const emptyImageBase64Url = emptyImageCanvas.toDataURL();
-
-
-// eslint-disable-next-line max-len
-const transparent1x1Base64Url = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=';
+// eslint-disable-next-line max-len,camelcase
+const TRANSPARENT_1x1_BASE64_URI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=';
 
 export class MBMapContainer extends React.Component {
 
@@ -403,7 +395,7 @@ export class MBMapContainer extends React.Component {
         }
       });
       mbMap.on('load', () => {
-        mbMap.loadImage(transparent1x1Base64Url, (error, data) => {
+        mbMap.loadImage(TRANSPARENT_1x1_BASE64_URI, (error, data) => {
           emptyImage = data;
           resolve(mbMap);
         });
