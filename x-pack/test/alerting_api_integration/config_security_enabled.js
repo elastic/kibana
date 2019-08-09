@@ -6,6 +6,7 @@
 
 import { join, resolve } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { services } from './services';
 import { SLACK_ACTION_SIMULATOR_URI } from './fixtures/plugins/actions';
 
 export async function getApiIntegrationConfig({ readConfigFile }) {
@@ -21,7 +22,7 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
 
   return {
     testFiles: [require.resolve('./apis')],
-    services: xPackApiIntegrationTestsConfig.get('services'),
+    services,
     servers,
     esArchiver: {
       directory: resolve(__dirname, 'es_archives'),
