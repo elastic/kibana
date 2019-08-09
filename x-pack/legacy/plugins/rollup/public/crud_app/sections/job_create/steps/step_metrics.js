@@ -227,6 +227,63 @@ export class StepMetricsUi extends Component {
     );
   };
 
+  renderRowSelectAll({ fieldName, fieldType, types }) {
+    const { onFieldsChange } = this.props;
+    const hasSelectedItems = Boolean(types.length);
+    const maxItemsToBeSelected = Object.keys(whiteListedMetricByFieldType[fieldType]).length;
+
+    let name;
+    let icon;
+    let color;
+    let description;
+
+    if (maxItemsToBeSelected === types.length) {
+      name = i18n.translate(
+        'xpack.rollupJobs.create.stepMetrics.deselectActionLabel',
+        { defaultMessage: 'Deselect All' },
+      );
+      icon = 'crossInACircleFilled';
+      color = 'primary';
+      description = i18n.translate(
+        'xpack.rollupJobs.create.stepMetrics.deselectActionDescription',
+        { defaultMessage: 'Deselect all of the metrics in this row.' },
+      );
+    } else {
+      name = i18n.translate(
+        'xpack.rollupJobs.create.stepMetrics.selectActionLabel',
+        { defaultMessage: 'Select All' },
+      );
+      icon = 'checkInCircleFilled';
+      color = 'success';
+      description = i18n.translate(
+        'xpack.rollupJobs.create.stepMetrics.selectActionDescription',
+        { defaultMessage: 'Select all of the metrics in this row.' },
+      );
+    }
+
+    const onClick = () => {
+      const isSelected = hasSelectedItems ? types.length !== maxItemsToBeSelected : true;
+      const newMetrics = metricTypesConfig
+        .filter(config => config.fieldTypes[fieldType])
+        .reduce((acc, { type: typeConfig }) => {
+          return this.setMetric(fieldName, typeConfig, isSelected);
+        }, null);
+      onFieldsChange({ metric: newMetrics });
+    };
+
+    return (
+      <EuiToolTip content={description} delay="long">
+        <EuiButtonIcon
+          aria-label={name}
+          isDisabled={false}
+          color={color}
+          iconType={icon}
+          onClick={onClick}
+        />
+      </EuiToolTip>
+    );
+  }
+
   getListColumns() {
     return StepMetricsUi.chooserColumns.concat({
       type: 'metrics',
@@ -261,6 +318,7 @@ export class StepMetricsUi extends Component {
 
         return (
           <EuiFlexGroup wrap gutterSize="m">
+            {this.renderRowSelectAll({ fieldName, fieldType, types })}
             {checkboxes}
           </EuiFlexGroup>
         );
@@ -326,7 +384,7 @@ export class StepMetricsUi extends Component {
   };
 
   render() {
-    const { fields, metricsFields, onFieldsChange } = this.props;
+    const { fields, metricsFields } = this.props;
 
     const { metrics } = fields;
 
@@ -390,68 +448,6 @@ export class StepMetricsUi extends Component {
             </p>
           }
 
-          addActions={() => {
-            return [
-              {
-                isPrimary: false,
-                render: ({ types, name: fieldName, type }) => {
-                  const hasSelectedItems = Boolean(types.length);
-                  const maxItemsToBeSelected = Object.keys(whiteListedMetricByFieldType[type]).length;
-
-                  let name;
-                  let icon;
-                  let color;
-                  let description;
-
-                  if (maxItemsToBeSelected === types.length) {
-                    name = i18n.translate(
-                      'xpack.rollupJobs.create.stepMetrics.deselectActionLabel',
-                      { defaultMessage: 'Deselect All' },
-                    );
-                    icon = 'crossInACircleFilled';
-                    color = 'primary';
-                    description = i18n.translate(
-                      'xpack.rollupJobs.create.stepMetrics.deselectActionDescription',
-                      { defaultMessage: 'Deselect all of the metrics in this row.' },
-                    );
-                  } else {
-                    name = i18n.translate(
-                      'xpack.rollupJobs.create.stepMetrics.selectActionLabel',
-                      { defaultMessage: 'Select All' },
-                    );
-                    icon = 'checkInCircleFilled';
-                    color = 'success';
-                    description = i18n.translate(
-                      'xpack.rollupJobs.create.stepMetrics.selectActionDescription',
-                      { defaultMessage: 'Select all of the metrics in this row.' },
-                    );
-                  }
-
-                  const onClick = () => {
-                    const isSelected = hasSelectedItems ? types.length !== maxItemsToBeSelected : true;
-                    const newMetrics = metricTypesConfig
-                      .filter(config => config.fieldTypes[type])
-                      .reduce((acc, { type: typeConfig }) => {
-                        return this.setMetric(fieldName, typeConfig, isSelected);
-                      }, null);
-                    onFieldsChange({ metric: newMetrics });
-                  };
-
-                  return (
-                    <EuiToolTip content={description} delay="long">
-                      <EuiButtonIcon
-                        aria-label={name}
-                        isDisabled={false}
-                        color={color}
-                        iconType={icon}
-                        onClick={onClick}
-                      />
-                    </EuiToolTip>
-                  );
-                },
-              },
-            ];
-          }}
           addButton={
             <EuiFlexGroup justifyContent={'flexStart'} alignItems={'center'}>
               <EuiFlexItem grow={false}>

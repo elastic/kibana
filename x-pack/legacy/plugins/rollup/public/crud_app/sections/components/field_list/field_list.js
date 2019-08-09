@@ -19,7 +19,6 @@ export const FieldList = ({
   addButton,
   emptyMessage,
   dataTestSubj,
-  addActions,
 }) => {
   let message;
 
@@ -34,25 +33,19 @@ export const FieldList = ({
 
   let extendedColumns;
 
-  const actions = [
-    addActions ? [ ...addActions() ] : [],
-    // Remove field should always be last
-    onRemoveField ? [{
-      name: 'Remove',
-      isPrimary: true,
-      description: 'Remove this field',
-      icon: 'trash',
-      type: 'icon',
-      color: 'danger',
-      onClick: (field) => onRemoveField(field),
-    }] : [],
-  ].flatMap(action => action);
-
-  if (actions.length) {
+  if (onRemoveField) {
     extendedColumns = columns.concat({
-      name: addActions ? 'Actions' : 'Remove',
-      width: addActions ? '80px' : '120px',
-      actions,
+      name: 'Remove',
+      width: '80px',
+      actions: [{
+        name: 'Remove',
+        isPrimary: true,
+        description: 'Remove this field',
+        icon: 'trash',
+        type: 'icon',
+        color: 'danger',
+        onClick: (field) => onRemoveField(field),
+      }],
     });
   } else {
     extendedColumns = columns;
