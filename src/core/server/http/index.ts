@@ -24,6 +24,7 @@ export { GetAuthHeaders } from './auth_headers_storage';
 export { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_storage';
 export {
   CustomHttpResponseOptions,
+  IKibanaSocket,
   isRealRequest,
   HttpResponseOptions,
   HttpResponsePayload,
