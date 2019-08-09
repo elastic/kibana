@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { IndexPatternPrivateState } from './indexpattern';
 import { act } from 'react-dom/test-utils';
 import { IndexPatternLayerPanelProps, LayerPanel } from './layerpanel';
 import { updateLayerIndexPattern } from './state_helpers';
+import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { ReactWrapper } from 'enzyme';
 
 jest.mock('./state_helpers');
 
@@ -174,14 +175,20 @@ describe('Layer Data Panel', () => {
     };
   });
 
-  it('should list all index patterns but the current one', () => {
-    const instance = shallow(<LayerPanel {...defaultProps} />);
+  function clickLabel(instance: ReactWrapper) {
     act(() => {
       instance
         .find('[data-test-subj="lns_layerIndexPatternLabel"]')
         .first()
         .simulate('click');
     });
+
+    instance.update();
+  }
+
+  it('should list all index patterns but the current one', () => {
+    const instance = mount(<LayerPanel {...defaultProps} />);
+    clickLabel(instance);
 
     expect(
       instance
@@ -192,13 +199,8 @@ describe('Layer Data Panel', () => {
   });
 
   it('should indicate whether the switch can be made without lossing data', () => {
-    const instance = shallow(<LayerPanel {...defaultProps} />);
-    act(() => {
-      instance
-        .find('[data-test-subj="lns_layerIndexPatternLabel"]')
-        .first()
-        .simulate('click');
-    });
+    const instance = mount(<LayerPanel {...defaultProps} />);
+    clickLabel(instance);
 
     expect(
       instance
@@ -209,13 +211,8 @@ describe('Layer Data Panel', () => {
   });
 
   it('should switch data panel to target index pattern', () => {
-    const instance = shallow(<LayerPanel {...defaultProps} />);
-    act(() => {
-      instance
-        .find('[data-test-subj="lns_layerIndexPatternLabel"]')
-        .first()
-        .simulate('click');
-    });
+    const instance = mount(<LayerPanel {...defaultProps} />);
+    clickLabel(instance);
 
     act(() => {
       instance.find(EuiComboBox).prop('onChange')!([
@@ -234,13 +231,8 @@ describe('Layer Data Panel', () => {
   });
 
   it('should switch using updateLayerIndexPattern', () => {
-    const instance = shallow(<LayerPanel {...defaultProps} />);
-    act(() => {
-      instance
-        .find('[data-test-subj="lns_layerIndexPatternLabel"]')
-        .first()
-        .simulate('click');
-    });
+    const instance = mount(<LayerPanel {...defaultProps} />);
+    clickLabel(instance);
 
     act(() => {
       instance.find(EuiComboBox).prop('onChange')!([

@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   EuiComboBox,
   // @ts-ignore
@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { DatasourceLayerPanelProps } from '../types';
-import { IndexPatternPrivateState } from './indexpattern';
+import { IndexPatternPrivateState, IndexPatternLayer } from './indexpattern';
 import { isLayerTransferable, updateLayerIndexPattern } from './state_helpers';
 
 export interface IndexPatternLayerPanelProps extends DatasourceLayerPanelProps {
@@ -27,81 +27,103 @@ export interface IndexPatternLayerPanelProps extends DatasourceLayerPanelProps {
   setState: (newState: IndexPatternPrivateState) => void;
 }
 
+function LayerPanelChooser({
+  indexPatterns,
+  layer,
+  onChangeIndexPattern,
+  onExitChooser,
+}: {
+  indexPatterns: IndexPatternPrivateState['indexPatterns'];
+  layer: IndexPatternLayer;
+  onChangeIndexPattern: (newId: string) => void;
+  onExitChooser: () => void;
+}) {
+  const currentIndexPatternId = layer.indexPatternId;
+  const indexPatternList = Object.values(indexPatterns)
+    .filter(indexPattern => indexPattern.id !== layer.indexPatternId)
+    .map(indexPattern => ({
+      ...indexPattern,
+      isTransferable: isLayerTransferable(layer, indexPattern),
+    }));
+  return (
+    <EuiComboBox
+      fullWidth
+      data-test-subj="lns_layerIndexPatternSwitcher"
+      options={indexPatternList.map(indexPattern => ({
+        label: indexPattern.title,
+        value: indexPattern,
+      }))}
+      inputRef={el => {
+        if (el) {
+          el.focus();
+        }
+      }}
+      selectedOptions={[
+        {
+          label: indexPatterns[currentIndexPatternId].title,
+          value: indexPatterns[currentIndexPatternId].id,
+        },
+      ]}
+      singleSelection={{ asPlainText: true }}
+      isClearable={false}
+      onBlur={onExitChooser}
+      onChange={choices => {
+        onChangeIndexPattern(choices[0].value!.id);
+      }}
+      renderOption={(option, searchValue, contentClassName) => {
+        const { label, value } = option;
+        return (
+          <span className={contentClassName}>
+            {value && value.isTransferable ? (
+              <EuiIcon type="empty" />
+            ) : (
+              <EuiIconTip
+                type="bolt"
+                content={i18n.translate(
+                  'xpack.lens.indexPattern.lossyIndexPatternSwitchDescription',
+                  {
+                    defaultMessage:
+                      'Not all operations are compatible with this index pattern and will be removed on switching.',
+                  }
+                )}
+              />
+            )}
+            <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+          </span>
+        );
+      }}
+    />
+  );
+}
+
 export function LayerPanel({ state, setState, layerId }: IndexPatternLayerPanelProps) {
   const [isChooserOpen, setChooserOpen] = useState(false);
-  const indexPatterns = useMemo(
-    () =>
-      Object.values(state.indexPatterns)
-        .filter(indexPattern => indexPattern.id !== state.layers[layerId].indexPatternId)
-        .map(indexPattern => ({
-          ...indexPattern,
-          isTransferable: isLayerTransferable(state.layers[layerId], indexPattern),
-        })),
-    [state.indexPatterns, layerId, state.layers[layerId]]
-  );
-  const currentIndexPatternId = state.layers[layerId].indexPatternId;
 
   return (
     <I18nProvider>
       <EuiFlexGroup justifyContent="flexEnd">
         {isChooserOpen ? (
           <EuiFlexItem>
-            <EuiComboBox
-              fullWidth
-              data-test-subj="lns_layerIndexPatternSwitcher"
-              options={indexPatterns.map(indexPattern => ({
-                label: indexPattern.title,
-                value: indexPattern,
-              }))}
-              inputRef={el => {
-                if (el) {
-                  el.focus();
-                }
-              }}
-              selectedOptions={[
-                {
-                  label: state.indexPatterns[currentIndexPatternId].title,
-                  value: state.indexPatterns[currentIndexPatternId].id,
-                },
-              ]}
-              singleSelection={{ asPlainText: true }}
-              isClearable={false}
-              onBlur={() => {
+            <LayerPanelChooser
+              indexPatterns={state.indexPatterns}
+              layer={state.layers[layerId]}
+              onExitChooser={() => {
                 setChooserOpen(false);
               }}
-              onChange={choices => {
+              onChangeIndexPattern={newId => {
                 setState({
                   ...state,
-                  currentIndexPatternId: choices[0].value!.id,
+                  currentIndexPatternId: newId,
                   layers: {
                     ...state.layers,
-                    [layerId]: updateLayerIndexPattern(state.layers[layerId], choices[0].value!),
+                    [layerId]: updateLayerIndexPattern(
+                      state.layers[layerId],
+                      state.indexPatterns[newId]
+                    ),
                   },
                 });
 
                 setChooserOpen(false);
-              }}
-              renderOption={(option, searchValue, contentClassName) => {
-                const { label, value } = option;
-                return (
-                  <span className={contentClassName}>
-                    {value && value.isTransferable ? (
-                      <EuiIcon type="empty" />
-                    ) : (
-                      <EuiIconTip
-                        type="bolt"
-                        content={i18n.translate(
-                          'xpack.lens.indexPattern.lossyIndexPatternSwitchDescription',
-                          {
-                            defaultMessage:
-                              'Not all operations are compatible with this index pattern and will be removed on switching.',
-                          }
-                        )}
-                      />
-                    )}
-                    <EuiHighlight search={searchValue}>{label}</EuiHighlight>
-                  </span>
-                );
               }}
             />
           </EuiFlexItem>
