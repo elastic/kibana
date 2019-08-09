@@ -23,8 +23,12 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
     type,
     displayName,
     getPossibleOperationsForDocument: () => [],
-    getPossibleOperationsForField: ({ aggregationRestrictions, type: fieldType }) => {
-      if (fieldType === 'number' && (!aggregationRestrictions || aggregationRestrictions[type])) {
+    getPossibleOperationsForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
+      if (
+        fieldType === 'number' &&
+        aggregatable &&
+        (!aggregationRestrictions || aggregationRestrictions[type])
+      ) {
         return [
           {
             dataType: 'number',
@@ -33,6 +37,16 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
         ];
       }
       return [];
+    },
+    isTransferable: (column, newIndexPattern) => {
+      const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+
+      return Boolean(
+        newField &&
+          newField.type === 'number' &&
+          newField.aggregatable &&
+          (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
+      );
     },
     buildColumn({ suggestedPriority, field }): T {
       if (!field) {
