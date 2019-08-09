@@ -227,6 +227,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
         ) : null}
         <TimeCursor x1={width / 3} x2={width} y1={timeCursorY} y2={timeCursorY} />
         <DragTargetArea
+          isGrabbing={Boolean(drag)}
           innerRef={node => {
             this.dragTargetArea = node;
           }}
@@ -250,9 +251,9 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
   }
 }
 
-const DragTargetArea = euiStyled.rect`
+const DragTargetArea = euiStyled.rect<{ isGrabbing: boolean }>`
   fill: transparent;
-  cursor: move;
+  cursor: ${({ isGrabbing }) => (isGrabbing ? 'grabbing' : 'grab')};
 `;
 
 const MinimapBorder = euiStyled.line`

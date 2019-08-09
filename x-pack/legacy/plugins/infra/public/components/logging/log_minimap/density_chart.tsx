@@ -66,7 +66,6 @@ export const DensityChart: React.SFC<DensityChartProps> = ({
 
 const DensityChartNegativeBackground = euiStyled.rect`
   fill: white;
-  cursor: move;
 `;
 
 const DensityChartPositiveBackground = euiStyled.rect`
