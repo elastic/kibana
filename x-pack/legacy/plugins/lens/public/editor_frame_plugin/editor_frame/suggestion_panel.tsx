@@ -60,9 +60,6 @@ const SuggestionPreview = ({
           dispatch(toSwitchAction(suggestion));
         }}
       >
-        {/* <EuiText size="xs">
-        <h4 data-test-subj="suggestion-title">{suggestion.title}</h4>
-      </EuiText> */}
         {expressionError ? (
           <div className="lnsSidebar__suggestionIcon">
             <EuiIconTip
