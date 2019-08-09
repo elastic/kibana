@@ -6,7 +6,11 @@
 
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
-import { MonitorSummaryResult } from '../../../../../common/graphql/types';
+import {
+  MonitorSummaryResult,
+  CursorDirection,
+  SortOrder,
+} from '../../../../../common/graphql/types';
 import { MonitorListComponent } from '../monitor_list';
 
 describe('MonitorList component', () => {
@@ -90,6 +94,7 @@ describe('MonitorList component', () => {
         data={{ monitorStates: result }}
         loading={false}
         successColor="primary"
+        pagination={{ cursorDirection: CursorDirection.AFTER, sortOrder: SortOrder.ASC }}
       />
     );
 
@@ -105,6 +110,7 @@ describe('MonitorList component', () => {
         data={{}}
         loading={false}
         successColor="primary"
+        pagination={{ cursorDirection: CursorDirection.AFTER, sortOrder: SortOrder.ASC }}
       />
     );
     expect(component).toMatchSnapshot();

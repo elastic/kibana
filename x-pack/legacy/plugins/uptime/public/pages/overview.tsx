@@ -5,8 +5,9 @@
  */
 
 // @ts-ignore EuiSearchBar missing
+import { EuiSearchBar } from '@elastic/eui';
+
 import {
-  EuiSearchBar,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,6 +28,7 @@ import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
 import { CursorPagination } from '../../common/graphql/types';
+import { CONTEXT_DEFAULTS } from '../../common/constants';
 
 interface OverviewPageProps {
   basePath: string;
@@ -96,8 +98,8 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
 
   const pagination: CursorPagination = {
     cursorKey,
-    cursorDirection,
-    sortOrder,
+    cursorDirection: cursorDirection || CONTEXT_DEFAULTS.CURSOR_PAGINATION.cursorDirection,
+    sortOrder: sortOrder || CONTEXT_DEFAULTS.CURSOR_PAGINATION.sortOrder,
   };
 
   return (

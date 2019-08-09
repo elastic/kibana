@@ -17,8 +17,8 @@ export interface UptimeUrlParams {
   search: string;
   selectedPingStatus: string;
   cursorKey?: string;
-  cursorDirection: CursorDirection;
-  sortOrder: SortOrder;
+  cursorDirection?: CursorDirection;
+  sortOrder?: SortOrder;
 }
 
 const {
@@ -85,7 +85,8 @@ export const getSupportedUrlParams = (params: {
     selectedPingStatus:
       selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,
     cursorKey,
-    cursorDirection: cursorDirection === CursorDirection.BEFORE ? CursorDirection.BEFORE : CursorDirection.AFTER,
+    cursorDirection:
+      cursorDirection === CursorDirection.BEFORE ? CursorDirection.BEFORE : CursorDirection.AFTER,
     sortOrder: sortOrder === SortOrder.DESC ? SortOrder.DESC : SortOrder.ASC,
   };
 };

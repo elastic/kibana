@@ -76,7 +76,7 @@ export const MonitorListComponent = (props: Props) => {
     const linkPagination = {
       cursorKey: JSON.stringify({
         monitor_id: summary.monitor_id,
-        location
+        location,
       }),
       cursorDirection,
       sortOrder: SortOrder.ASC,
