@@ -18,13 +18,14 @@
  */
 
 import { map } from 'lodash';
+import { SerializedFieldFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 
 const name = 'kibana_datatable';
 
 interface Column {
   id: string;
   name: string;
-  formatterMapping?: unknown;
+  formatHint?: SerializedFieldFormat;
 }
 
 interface Row {

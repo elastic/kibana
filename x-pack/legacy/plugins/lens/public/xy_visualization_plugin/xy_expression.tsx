@@ -22,7 +22,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, IconType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getFormat } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
+import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { RenderFunction } from '../interpreter_types';
@@ -86,7 +86,7 @@ export interface XYChartProps {
   args: XYArgs;
 }
 
-export const xyChartRenderer: RenderFunction<XYChartProps> = {
+export const getXyChartRenderer = (formatFactory: FormatFactory): RenderFunction<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY Chart',
   help: 'X/Y Chart Renderer',
@@ -95,18 +95,24 @@ export const xyChartRenderer: RenderFunction<XYChartProps> = {
   render: async (domNode: Element, config: XYChartProps, _handlers: unknown) => {
     ReactDOM.render(
       <I18nProvider>
-        <XYChart {...config} />
+        <XYChart {...config} formatFactory={formatFactory} />
       </I18nProvider>,
       domNode
     );
   },
-};
+});
 
 function getIconForSeriesType(seriesType: SeriesType): IconType {
   return visualizationTypes.find(c => c.id === seriesType)!.icon || 'empty';
 }
 
-export function XYChart({ data, args }: XYChartProps) {
+export function XYChart({
+  data,
+  args,
+  formatFactory,
+}: XYChartProps & {
+  formatFactory: FormatFactory;
+}) {
   const { legend, layers, isHorizontal } = args;
 
   if (Object.values(data.tables).every(table => table.rows.length === 0)) {
@@ -130,18 +136,18 @@ export function XYChart({ data, args }: XYChartProps) {
 
   const xAxisColumn = Object.values(data.tables)[0].columns.find(
     ({ id }) => id === layers[0].xAccessor
-  )!;
-  const xAxisFormatter = getFormat(xAxisColumn ? xAxisColumn.formatterMapping : undefined);
+  );
+  const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.formatHint);
 
-  let yAxisFormatter: ReturnType<typeof getFormat>;
+  let yAxisFormatter: ReturnType<FormatFactory>;
   if (layers.length === 1 && layers[0].accessors.length === 1) {
     const firstYAxisColumn = Object.values(data.tables)[0].columns.find(
       ({ id }) => id === layers[0].accessors[0]
     );
-    yAxisFormatter = getFormat(firstYAxisColumn ? firstYAxisColumn.formatterMapping : undefined);
+    yAxisFormatter = formatFactory(firstYAxisColumn && firstYAxisColumn.formatHint);
   } else {
     // TODO if there are multiple y axes, try to merge the formatters for the axis
-    yAxisFormatter = getFormat({ id: 'number' });
+    yAxisFormatter = formatFactory({ id: 'number' });
   }
 
   return (

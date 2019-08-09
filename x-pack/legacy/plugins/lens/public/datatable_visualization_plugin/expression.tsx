@@ -8,10 +8,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable } from '@elastic/eui';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
-import { KibanaDatatable, LensMultiTable } from '../types';
+import { ExpressionFunction, KibanaDatatable } from 'src/legacy/core_plugins/interpreter/types';
+import { LensMultiTable } from '../types';
 import { RenderFunction } from '../interpreter_types';
-import { getFormat } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
+import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 
 export interface DatatableColumns {
   columnIds: string[];
@@ -107,7 +107,9 @@ export const datatableColumns: ExpressionFunction<
   },
 };
 
-export const datatableRenderer: RenderFunction<DatatableProps> = {
+export const getDatatableRenderer = (
+  formatFactory: FormatFactory
+): RenderFunction<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
     defaultMessage: 'Datatable',
@@ -116,16 +118,16 @@ export const datatableRenderer: RenderFunction<DatatableProps> = {
   validate: () => {},
   reuseDomNode: true,
   render: async (domNode: Element, config: DatatableProps, _handlers: unknown) => {
-    ReactDOM.render(<DatatableComponent {...config} />, domNode);
+    ReactDOM.render(<DatatableComponent {...config} formatFactory={formatFactory} />, domNode);
   },
-};
+});
 
-function DatatableComponent(props: DatatableProps) {
+function DatatableComponent(props: DatatableProps & { formatFactory: FormatFactory }) {
   const [firstTable] = Object.values(props.data.tables);
-  const formatters: Record<string, ReturnType<typeof getFormat>> = {};
+  const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
   firstTable.columns.forEach(column => {
-    formatters[column.id] = getFormat(column.formatterMapping || undefined);
+    formatters[column.id] = props.formatFactory(column.formatHint);
   });
 
   return (

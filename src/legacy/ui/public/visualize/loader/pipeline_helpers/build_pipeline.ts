@@ -23,11 +23,7 @@ import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
 import moment from 'moment';
-
-interface SchemaFormat {
-  id: string;
-  params?: any;
-}
+import { SerializedFieldFormat, createFormat } from './utilities';
 
 interface SchemaConfigParams {
   precision?: number;
@@ -36,7 +32,7 @@ interface SchemaConfigParams {
 
 export interface SchemaConfig {
   accessor: number;
-  format: SchemaFormat | {};
+  format: SerializedFieldFormat | {};
   params: SchemaConfigParams;
   aggType: string;
 }
@@ -78,37 +74,6 @@ const vislibCharts: string[] = [
 ];
 
 export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
-  const createFormat = (agg: AggConfig): SchemaFormat => {
-    const format: SchemaFormat = agg.params.field ? agg.params.field.format.toJSON() : {};
-    const formats: any = {
-      date_range: () => ({ id: 'string' }),
-      percentile_ranks: () => ({ id: 'percent' }),
-      count: () => ({ id: 'number' }),
-      cardinality: () => ({ id: 'number' }),
-      date_histogram: () => ({
-        id: 'date',
-        params: {
-          pattern: agg.buckets.getScaledDateFormat(),
-        },
-      }),
-      terms: () => ({
-        id: 'terms',
-        params: {
-          id: format.id,
-          otherBucketLabel: agg.params.otherBucketLabel,
-          missingBucketLabel: agg.params.missingBucketLabel,
-          ...format.params,
-        },
-      }),
-      range: () => ({
-        id: 'range',
-        params: { id: format.id, ...format.params },
-      }),
-    };
-
-    return formats[agg.type.name] ? formats[agg.type.name]() : format;
-  };
-
   const createSchemaConfig = (accessor: number, agg: AggConfig): SchemaConfig => {
     if (agg.type.name === 'date_histogram') {
       agg.params.timeRange = timeRange;

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes } from 'target/types/server';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/common';
+import { SavedObjectAttributes } from 'src/core/server';
 
 export interface Document {
   id?: string;
