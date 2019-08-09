@@ -57,18 +57,6 @@ uiRoutes
     }
   });
 
-uiRoutes
-  .when('/data_visualizer_index_select', {
-    template,
-    k7Breadcrumbs: getDataVisualizerIndexOrSearchBreadcrumbs,
-    resolve: {
-      CheckLicense: checkBasicLicense,
-      privileges: checkFindFileStructurePrivilege,
-      indexPatterns: loadIndexPatterns,
-      nextStepPath: () => '#data_visualizer',
-    }
-  });
-
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
