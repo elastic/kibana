@@ -282,6 +282,11 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   public async type(value: string | string[], options: TypeOptions = { charByChar: false }) {
+    // if (this.browserType === Browsers.InternetExplorer) {
+    //   console.log('========= InternetExplorer ===========');
+    //   // return await this.driver.executeScript(`arguments[0].setAttribute('value', 'arguments[1]');`, this._webElement, value);
+    //   await this.driver.executeScript(`arguments[0].setAttribute('value', '${value}');`, this._webElement);
+    // }
     if (options.charByChar) {
       for (const char of value) {
         await this.retryCall(async function type(wrapper) {
@@ -290,6 +295,7 @@ export class WebElementWrapper {
         });
       }
     } else {
+      debugger;
       await this.retryCall(async function type(wrapper) {
         await wrapper._webElement.sendKeys(...value);
       });

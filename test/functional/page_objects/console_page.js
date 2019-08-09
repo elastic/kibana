@@ -19,9 +19,10 @@
 
 import Bluebird from 'bluebird';
 
-export function ConsolePageProvider({ getService }) {
+export function ConsolePageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const PageObjects = getPageObjects(['common']);
 
   async function getVisibleTextFromAceEditor(editor) {
     const lines = await editor.findAllByClassName('ace_line_group');
@@ -61,12 +62,17 @@ export function ConsolePageProvider({ getService }) {
 
       // while the settings form opens/loads this may fail, so retry for a while
       await retry.try(async () => {
+        debugger;
         const fontSizeInput = await testSubjects.find('setting-font-size-input');
         await fontSizeInput.clearValue({ withJS: true });
         await fontSizeInput.click();
+        // await fontSizeInput.type(String(newSize), {charByChar: true});
         await fontSizeInput.type(String(newSize));
       });
 
+      await PageObjects.common.sleep(6000);
+      // await testSubjects.click('autocompletePolling');
+      // await PageObjects.common.sleep(3000);
       await testSubjects.click('settings-save-button');
     }
 

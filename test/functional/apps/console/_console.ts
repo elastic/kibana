@@ -58,7 +58,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('default request response should include `"timed_out" : false`', async () => {
+    it.skip('default request response should include `"timed_out" : false`', async () => {
       const expectedResponseContains = '"timed_out" : false,';
       await PageObjects.console.clickPlay();
       await retry.try(async () => {

@@ -30,6 +30,7 @@ import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
 // @ts-ignore types not available
 import ie from 'selenium-webdriver/ie';
+import { Options } from 'selenium-webdriver/ie';
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 // @ts-ignore internal modules are not typed
@@ -107,19 +108,22 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
 
       case 'internet explorer':
         // https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/ie_exports_Options.html
-        const ieOptions = new ie.Options();
-        ieOptions.ensureCleanSession(true); // this doesn't seem to be working
-        ieOptions.EnsureCleanSession = true; // this doesn't seem to be working
+        // console.log(`${process.env['PATH']}`);
+        process.env['PATH']='node_modules\\iedriver\\lib\\iedriver\\;' + process.env['PATH'];
+        console.log(`${process.env['PATH']}`);
 
         const ieCapabilities = Capabilities.ie();
-        // const ieCapabilities = new ie.Capabilities();
-        ieCapabilities.set('nativeEvents', false);
-        ieCapabilities.set('ie.ensureCleanSession', true); // also not working
+        ieCapabilities.set('se:ieOptions', { 'ie.ensureCleanSession': true,
+        'ignoreProtectedModeSettings': true,
+        'ignoreZoomSetting': true,
+        'nativeEvents': false,
+        'requireWindowFocus': true,
+        'logLevel': 'TRACE'
+       });
 
         return new Builder()
           .forBrowser(browserType)
           .withCapabilities(ieCapabilities)
-          .setIeOptions(ieOptions)
           .build();
 
       default:
@@ -128,19 +132,6 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
   };
 
   const session = await buildDriverInstance();
-
-  if (browserType === 'internet explorer') {
-    // does not seem to work
-    // session.getSessionStorage().clear();
-    // session.getLocalStorage().clear(); //ERROR TypeError: session.getLocalStorage is not a function
-
-    // does not seem to work
-    // session.get('javascript:localStorage.clear();')
-    // session.get('javascript:sessionStorage.clear();')
-    // session.execute('window.localStorage.clear();');
-    // session.execute_script('window.localStorage.clear();')
-    log.debug('+++++++++++++++ clear storage for IE here ??????? +++++++++++++++++++++++++');
-  }
 
   if (throttleOption === '1' && browserType === 'chrome') {
     // Only chrome supports this option.
