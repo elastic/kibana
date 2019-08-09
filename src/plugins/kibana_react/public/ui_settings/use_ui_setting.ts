@@ -40,7 +40,7 @@ type Setter<T> = (newValue: T) => Promise<boolean>;
  *       object, but I assume it will be available on *start* `core` object, too,
  *       thus postfix assertion is used `core.uiSetting!`.
  */
-export const useUiSetting = <T>(key: string, defaultValue: T): [T, Setter<T>] => {
+export const useUiSetting = <T>(key: string, defaultValue?: T): [T, Setter<T>] => {
   const { core } = useKibana();
   const observable$ = useMemo(() => core.uiSettings!.get$(key, defaultValue), [key, defaultValue]);
   const value = useObservable<T>(observable$, core.uiSettings!.get(key, defaultValue));

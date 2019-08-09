@@ -19,6 +19,8 @@
 
 import { CoreStart } from '../../../../core/public';
 
+export { CoreStart };
+
 export type KibanaReactCore = Partial<CoreStart>;
 
 export interface KibanaReactContextValue {
