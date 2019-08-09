@@ -7,13 +7,14 @@
 <b>Signature:</b>
 
 ```typescript
-getIndexForType(type: string): string | undefined;
+getIndexForType(config: Config, type: string): string | undefined;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
+|  config | <code>Config</code> |  |
 |  type | <code>string</code> |  |
 
 <b>Returns:</b>
