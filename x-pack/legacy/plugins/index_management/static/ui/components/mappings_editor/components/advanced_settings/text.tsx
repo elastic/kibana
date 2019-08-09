@@ -17,7 +17,6 @@ import { parametersDefinition, ParameterName } from '../../config';
 import { ANALYZERS_OPTIONS, INDEX_OPTIONS, SIMILARITY_ALGORITHM_OPTIONS } from '../../constants';
 
 interface Props {
-  fieldPathPrefix: string;
   isEditMode: boolean;
   form: Form;
 }
@@ -28,14 +27,14 @@ const fieldConfig = (param: ParameterName): FieldConfig =>
 const defaultValueParam = (param: ParameterName): unknown =>
   typeof fieldConfig(param).defaultValue !== 'undefined' ? fieldConfig(param).defaultValue : '';
 
-export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Props) => {
+export const TextAdvancedSettings = ({ form, isEditMode }: Props) => {
   return (
     <Fragment>
       <div>
         <EuiFlexGroup>
           <EuiFlexItem>
             <UseField
-              path={`${fieldPathPrefix}analyzer`}
+              path="analyzer"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('analyzer')}
               config={fieldConfig('analyzer')}
@@ -49,7 +48,7 @@ export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Prop
           </EuiFlexItem>
           <EuiFlexItem>
             <UseField
-              path={`${fieldPathPrefix}search_analyzer`}
+              path="search_analyzer"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('search_analyzer')}
               config={fieldConfig('search_analyzer')}
@@ -63,7 +62,7 @@ export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Prop
           </EuiFlexItem>
           <EuiFlexItem>
             <UseField
-              path={`${fieldPathPrefix}search_quote_analyzer`}
+              path="search_quote_analyzer"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('search_quote_analyzer')}
               config={fieldConfig('search_quote_analyzer')}
@@ -77,7 +76,7 @@ export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Prop
           </EuiFlexItem>
           <EuiFlexItem>
             <UseField
-              path={`${fieldPathPrefix}index_options`}
+              path="index_options"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('index_options')}
               config={fieldConfig('index_options')}
@@ -95,7 +94,7 @@ export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Prop
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <UseField
-              path={`${fieldPathPrefix}eager_global_ordinals`}
+              path="eager_global_ordinals"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('eager_global_ordinals')}
               config={fieldConfig('eager_global_ordinals')}
@@ -104,7 +103,7 @@ export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Prop
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <UseField
-              path={`${fieldPathPrefix}index_phrases`}
+              path="index_phrases"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('index_phrases')}
               config={fieldConfig('index_phrases')}
@@ -113,7 +112,7 @@ export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Prop
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <UseField
-              path={`${fieldPathPrefix}norms`}
+              path="norms"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('norms')}
               config={fieldConfig('norms')}
@@ -122,7 +121,7 @@ export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Prop
           </EuiFlexItem>
           <EuiFlexItem>
             <UseField
-              path={`${fieldPathPrefix}term_vector`}
+              path="term_vector"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('term_vector')}
               config={fieldConfig('term_vector')}
@@ -135,7 +134,7 @@ export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Prop
         <EuiFlexGroup>
           <EuiFlexItem>
             <UseField
-              path={`${fieldPathPrefix}boost`}
+              path="boost"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('boost')}
               config={fieldConfig('boost')}
@@ -147,7 +146,7 @@ export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Prop
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <UseField
-                    path={`${fieldPathPrefix}index_prefixes.min_chars`}
+                    path="index_prefixes.min_chars"
                     form={form}
                     defaultValue={
                       isEditMode
@@ -158,8 +157,8 @@ export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Prop
                     config={{
                       ...(parametersDefinition.index_prefixes.fieldConfig! as any).min_chars,
                       fieldsToValidateOnChange: [
-                        `${fieldPathPrefix}index_prefixes.min_chars`,
-                        `${fieldPathPrefix}index_prefixes.max_chars`,
+                        'index_prefixes.min_chars',
+                        'index_prefixes.max_chars',
                       ],
                     }}
                     component={Field}
@@ -167,7 +166,7 @@ export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Prop
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <UseField
-                    path={`${fieldPathPrefix}index_prefixes.max_chars`}
+                    path="index_prefixes.max_chars"
                     form={form}
                     defaultValue={
                       isEditMode
@@ -178,8 +177,8 @@ export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Prop
                     config={{
                       ...(parametersDefinition.index_prefixes.fieldConfig! as any).max_chars,
                       fieldsToValidateOnChange: [
-                        `${fieldPathPrefix}index_prefixes.min_chars`,
-                        `${fieldPathPrefix}index_prefixes.max_chars`,
+                        'index_prefixes.min_chars',
+                        'index_prefixes.max_chars',
                       ],
                     }}
                     component={Field}
@@ -190,7 +189,7 @@ export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Prop
           </EuiFlexItem>
           <EuiFlexItem>
             <UseField
-              path={`${fieldPathPrefix}position_increment_gap`}
+              path="position_increment_gap"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('position_increment_gap')}
               config={fieldConfig('position_increment_gap')}
@@ -199,7 +198,7 @@ export const TextAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Prop
           </EuiFlexItem>
           <EuiFlexItem>
             <UseField
-              path={`${fieldPathPrefix}similarity`}
+              path="similarity"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('similarity')}
               config={fieldConfig('similarity')}

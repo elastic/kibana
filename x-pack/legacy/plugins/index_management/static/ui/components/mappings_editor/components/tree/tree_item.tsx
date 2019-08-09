@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './tree';
-export * from './property';
-export * from './configuration_form';
-export * from './document_fields';
-export * from './properties_contex';
-export { getComponentForParameter } from './parameters';
+import React from 'react';
+
+interface Props {
+  children: React.ReactNode;
+}
+
+export const TreeItem = ({ children }: Props) => {
+  return <li>{children}</li>;
+};

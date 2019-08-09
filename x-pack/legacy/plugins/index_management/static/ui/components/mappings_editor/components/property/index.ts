@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './tree';
-export * from './property';
-export * from './configuration_form';
-export * from './document_fields';
-export * from './properties_contex';
-export { getComponentForParameter } from './parameters';
+export * from './property_list_item';
+export * from './property_editor';
+export * from './save_property_provider';
+export * from './delete_property_provider';

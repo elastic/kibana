@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import {
   UseField,
@@ -14,10 +14,10 @@ import {
 import { Field } from '../../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
 
 import { parametersDefinition, ParameterName } from '../../config';
-import { ANALYZERS_OPTIONS, INDEX_OPTIONS, SIMILARITY_ALGORITHM_OPTIONS } from '../../constants';
+import { INDEX_OPTIONS, SIMILARITY_ALGORITHM_OPTIONS } from '../../constants';
 
 interface Props {
-  fieldPathPrefix: string;
+  // fieldPathPrefix: string;
   isEditMode: boolean;
   form: Form;
 }
@@ -28,14 +28,14 @@ const fieldConfig = (param: ParameterName): FieldConfig =>
 const defaultValueParam = (param: ParameterName): unknown =>
   typeof fieldConfig(param).defaultValue !== 'undefined' ? fieldConfig(param).defaultValue : '';
 
-export const KeywordAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: Props) => {
+export const KeywordAdvancedSettings = ({ form, isEditMode }: Props) => {
   return (
     <Fragment>
       <div>
         <EuiFlexGroup>
           <EuiFlexItem>
             <UseField
-              path={`${fieldPathPrefix}normalizer`}
+              path="normalizer"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('normalizer')}
               config={fieldConfig('normalizer')}
@@ -44,7 +44,7 @@ export const KeywordAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: P
           </EuiFlexItem>
           <EuiFlexItem>
             <UseField
-              path={`${fieldPathPrefix}null_value`}
+              path="null_value"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('null_value')}
               config={fieldConfig('null_value')}
@@ -53,7 +53,7 @@ export const KeywordAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: P
           </EuiFlexItem>
           <EuiFlexItem>
             <UseField
-              path={`${fieldPathPrefix}boost`}
+              path="boost"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('boost')}
               config={fieldConfig('boost')}
@@ -62,7 +62,7 @@ export const KeywordAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: P
           </EuiFlexItem>
           <EuiFlexItem>
             <UseField
-              path={`${fieldPathPrefix}ignore_above`}
+              path="ignore_above"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('ignore_above')}
               config={fieldConfig('ignore_above')}
@@ -75,7 +75,7 @@ export const KeywordAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: P
         <EuiFlexGroup>
           <EuiFlexItem>
             <UseField
-              path={`${fieldPathPrefix}index_options`}
+              path="index_options"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('index_options')}
               config={fieldConfig('index_options')}
@@ -89,7 +89,7 @@ export const KeywordAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: P
           </EuiFlexItem>
           <EuiFlexItem>
             <UseField
-              path={`${fieldPathPrefix}similarity`}
+              path="similarity"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('similarity')}
               config={fieldConfig('similarity')}
@@ -107,7 +107,7 @@ export const KeywordAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: P
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <UseField
-              path={`${fieldPathPrefix}eager_global_ordinals`}
+              path="eager_global_ordinals"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('eager_global_ordinals')}
               config={fieldConfig('eager_global_ordinals')}
@@ -116,7 +116,7 @@ export const KeywordAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: P
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <UseField
-              path={`${fieldPathPrefix}index_phrases`}
+              path="index_phrases"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('index_phrases')}
               config={fieldConfig('index_phrases')}
@@ -125,7 +125,7 @@ export const KeywordAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: P
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <UseField
-              path={`${fieldPathPrefix}norms`}
+              path="norms"
               form={form}
               defaultValue={isEditMode ? undefined : defaultValueParam('norms')}
               config={fieldConfig('norms')}
@@ -134,7 +134,7 @@ export const KeywordAdvancedSettings = ({ fieldPathPrefix, form, isEditMode }: P
           </EuiFlexItem>
           <EuiFlexItem>
             <UseField
-              path={`${fieldPathPrefix}split_queries_on_whitespace`}
+              path="split_queries_on_whitespace"
               form={form}
               defaultValue={
                 isEditMode ? undefined : defaultValueParam('split_queries_on_whitespace')

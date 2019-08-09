@@ -12,8 +12,7 @@ import { ERROR_CODES } from './constants';
  *  Error creators
  */
 
-export const nameConflictError = (conflictPaths: string[]): ValidationError => ({
+export const nameConflictError = (): ValidationError => ({
   code: ERROR_CODES.NAME_CONFLICT,
   message: 'A field with the same name already exists.',
-  conflictPaths,
 });
