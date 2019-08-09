@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { FunctionComponent, ReactNode, useState, useEffect } from 'react';
+import React, { Fragment, FunctionComponent, ReactNode, useState, useEffect } from 'react';
 import {
+  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiFacetButton,
@@ -13,6 +14,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiNotificationBadge,
   EuiPage,
   EuiPageBody,
   EuiPageWidthProps,
@@ -22,6 +24,7 @@ import {
   EuiTitle,
   ICON_TYPES,
   IconType,
+  EuiSpacer,
 } from '@elastic/eui';
 
 const ICON_HEIGHT_PANEL = 164;
@@ -116,7 +119,7 @@ function Header(props: HeaderProps) {
 
 type ContentProps = IntegrationInfo & { hasLogoPanel: boolean };
 function Content(props: ContentProps) {
-  const { description, hasLogoPanel } = props;
+  const { assets, description, hasLogoPanel, requirement } = props;
   const marginTop = ICON_HEIGHT_PANEL / 2 + ICON_HEIGHT_NATURAL / 2;
   const leftStyles = hasLogoPanel ? { marginTop: `${marginTop}px` } : {};
   const headerGlobalNav = 49;
@@ -140,18 +143,19 @@ function Content(props: ContentProps) {
           <EuiText>
             <p>{description}</p>
           </EuiText>
+          <AssetAccordion assets={assets} />
         </>
       </CenterColumn>
       <RightColumn>
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <Requirements requirements={props.requirement} />
+            <Requirements requirements={requirement} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiHorizontalRule margin="xl" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <Assets assets={props.assets} />
+            <AssetsFacetGroup assets={assets} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </RightColumn>
@@ -227,7 +231,7 @@ function Requirements(props: RequirementsProps) {
         <span style={{ paddingBottom: '16px' }}>Compatibility</span>
       </EuiTitle>
       {entries(requirements).map(([service, requirement]) => (
-        <EuiFlexGroup>
+        <EuiFlexGroup key={service}>
           <EuiFlexItem grow={true}>
             <EuiTextColor color="subdued" key={service}>
               {ServiceTitleMap[service]}:
@@ -250,19 +254,30 @@ interface AssetsProps {
   assets: AssetsGroupedByServiceByType;
 }
 
-function Assets(props: AssetsProps) {
+function AssetsFacetGroup(props: AssetsProps) {
   const { assets } = props;
   return (
-    <>
+    <Fragment>
       {entries(assets).map(([service, typeToParts], index) => {
         return (
-          <>
-            <div style={{ padding: index === 0 ? '0 0 8px 0' : '8px 0' }}>
-              <EuiIcon type={ServiceIcons[service]} />
-              <EuiTitle key={service} size="xs">
-                <span style={{ paddingLeft: '8px' }}>{ServiceTitleMap[service]} Assets</span>
-              </EuiTitle>
-            </div>
+          <Fragment key={service}>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              style={{ padding: index === 0 ? '0 0 1em 0' : '1em 0' }}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={ServiceIcons[service]} />
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <EuiTitle key={service} size="xs">
+                  <EuiText>
+                    <h4>{ServiceTitleMap[service]} Assets</h4>
+                  </EuiText>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
             <EuiFacetGroup style={{ flexGrow: 0 }}>
               {entries(typeToParts).map(([type, parts]) => {
@@ -270,10 +285,11 @@ function Assets(props: AssetsProps) {
                 const iconNode = iconType ? <EuiIcon type={iconType} size="s" /> : '';
                 return (
                   <EuiFacetButton
+                    key={type}
                     style={{ padding: '4px 0', height: 'unset' }}
                     quantity={parts.length}
                     icon={iconNode}
-                    // using noop buttonRef to avoid `'buttonRef' ... required in type 'EuiFacetButtonProps'.` error
+                    // https://github.com/elastic/eui/issues/2216
                     buttonRef={() => {}}
                   >
                     <EuiTextColor color="subdued">{AssetTitleMap[type]}</EuiTextColor>
@@ -281,9 +297,78 @@ function Assets(props: AssetsProps) {
                 );
               })}
             </EuiFacetGroup>
-          </>
+          </Fragment>
         );
       })}
-    </>
+    </Fragment>
+  );
+}
+
+function AssetAccordion(props: AssetsProps) {
+  const { assets } = props;
+
+  return (
+    <Fragment>
+      {entries(assets).map(([service, typeToParts], assetIndex) => {
+        return (
+          <Fragment key={service}>
+            <EuiPanel grow={false} paddingSize="none">
+              <EuiFlexGroup gutterSize="s" alignItems="center" style={{ margin: '12px ' }}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={ServiceIcons[service]} />
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EuiTitle key={service}>
+                    <EuiText>
+                      <h4>{ServiceTitleMap[service]} Assets</h4>
+                    </EuiText>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiHorizontalRule margin="none" />
+
+              {entries(typeToParts).map(([type, parts], typeIndex, typeEntries) => {
+                const iconType = AssetIcons[type];
+
+                return (
+                  <Fragment key={type}>
+                    <EuiAccordion
+                      style={{ margin: '12px ' }}
+                      id={type}
+                      buttonContent={
+                        <EuiFlexGroup gutterSize="s" alignItems="center">
+                          <EuiFlexItem grow={false}>
+                            {iconType ? <EuiIcon type={iconType} size="s" /> : ''}
+                          </EuiFlexItem>
+
+                          <EuiFlexItem>
+                            <EuiText color="secondary">{AssetTitleMap[type]}</EuiText>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      }
+                      paddingSize="m"
+                      extraAction={
+                        <EuiNotificationBadge color="subdued" size="m">
+                          {parts.length}
+                        </EuiNotificationBadge>
+                      }
+                    >
+                      <EuiText>
+                        <span role="img" aria-label="woman shrugging">
+                          🤷
+                        </span>
+                      </EuiText>
+                    </EuiAccordion>
+                    {typeIndex < typeEntries.length - 1 ? <EuiHorizontalRule margin="none" /> : ''}
+                  </Fragment>
+                );
+              })}
+            </EuiPanel>
+            <EuiSpacer size="l" />
+          </Fragment>
+        );
+      })}
+    </Fragment>
   );
 }
