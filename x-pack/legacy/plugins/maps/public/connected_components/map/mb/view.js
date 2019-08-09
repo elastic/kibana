@@ -25,7 +25,8 @@ import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import { FeatureTooltip } from '../feature_tooltip';
 import { DRAW_TYPE } from '../../../actions/map_actions';
 import {
-  createGeometryFilterWithMeta,
+  createSpatialFilterWithBoundingBox,
+  createSpatialFilterWithGeometry,
   getBoundingBoxGeometry,
   roundCoordinates
 } from '../../../elasticsearch_geo_utils';
@@ -100,26 +101,27 @@ export class MBMapContainer extends React.Component {
     // MapboxDraw returns coordinates with 12 decimals. Round to a more reasonable number
     roundCoordinates(geometry.coordinates);
 
-    // TODO allow user to set geojson label when initiating draw
-    const geometryLabel = isBoundingBox
-      ? i18n.translate('xpack.maps.drawControl.defaultEnvelopeLabel', {
-        defaultMessage: 'extent'
-      })
-      : i18n.translate('xpack.maps.drawControl.defaultShapeLabel', {
-        defaultMessage: 'shape'
-      });
-
     try {
-      const filter = createGeometryFilterWithMeta({
-        geometry: isBoundingBox
-          ? getBoundingBoxGeometry(geometry)
-          : geometry,
-        geometryLabel,
+      const options = {
         indexPatternId: this.props.drawState.indexPatternId,
         geoFieldName: this.props.drawState.geoField,
         geoFieldType: this.props.drawState.geoFieldType,
-        isBoundingBox,
-      });
+      };
+      const filter = isBoundingBox
+        ? createSpatialFilterWithBoundingBox({
+          ...options,
+          geometryLabel: i18n.translate('xpack.maps.drawControl.defaultEnvelopeLabel', {
+            defaultMessage: 'extent'
+          }),
+          geometry: getBoundingBoxGeometry(geometry)
+        })
+        : createSpatialFilterWithGeometry({
+          ...options,
+          geometryLabel: i18n.translate('xpack.maps.drawControl.defaultShapeLabel', {
+            defaultMessage: 'shape'
+          }),
+          geometry
+        });
       this.props.addFilters([filter]);
     } catch (error) {
       // TODO notify user why filter was not created

@@ -271,7 +271,15 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   };
 }
 
-export function createGeometryFilterWithMeta({
+export function createSpatialFilterWithBoundingBox(options) {
+  return createGeometryFilterWithMeta({ ...options, isBoundingBox: true });
+}
+
+export function createSpatialFilterWithGeometry(options) {
+  return createGeometryFilterWithMeta(options);
+}
+
+function createGeometryFilterWithMeta({
   geometry,
   geometryLabel,
   indexPatternId,
