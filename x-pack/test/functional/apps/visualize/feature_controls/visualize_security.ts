@@ -22,6 +22,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
   const queryBar = getService('queryBar');
+  const savedQueryManager = getService('savedQueryManager');
 
   describe('feature controls security', () => {
     before(async () => {
@@ -117,22 +118,30 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('show the save query button in the query bar in dirty state with no query loaded', async () => {
-        await queryBar.setQuery('response');
-        await testSubjects.existOrFail('savedQuerySaveNew');
+      it('allow saving via the saved query manager popover with no query loaded', async () => {
+        await savedQueryManager.saveNewQuery('foo', 'bar', true, false);
+        await savedQueryManager.savedQueryExistOrFail('foo');
       });
 
-      it('show the save as new query button in the query bar with non-dirty state and query loaded', async () => {
-        await queryBar.setQuery('response:200 ');
-        await queryBar.saveNewQuery('OK Responses', '200 OK', true, true);
-        await queryBar.openSuggestionsDropDown();
-        await testSubjects.existOrFail('savedQuerySaveAsNew');
+      it('allow saving a currently loaded saved query as a new query via the saved query manager ', async () => {
+        await savedQueryManager.saveCurrentlyLoadedAsNewQuery('foo2', 'bar2', true, false);
+        await savedQueryManager.savedQueryExistOrFail('foo2');
       });
 
-      it('show the save changes to existing and save as new buttons in the query bar with a dirty state and a query loaded', async () => {
-        await queryBar.setQuery('response:404 ');
-        await testSubjects.existOrFail('savedQuerySaveChanges');
-        await testSubjects.existOrFail('savedQuerySaveAsNew');
+      it('allow saving changes to a currently loaded query via the saved query manager', async () => {
+        await queryBar.setQuery('response:404');
+        await savedQueryManager.updateCurrentlyLoadedQuery('bar2', false, false);
+        await savedQueryManager.clearCurrentlyLoadedQuery();
+        await savedQueryManager.loadSavedQuery('foo2');
+        const queryString = await queryBar.getQueryString();
+        expect(queryString).to.eql('response:404');
+      });
+
+      it('allows deleting saved queries in the saved query manager ', async () => {
+        await savedQueryManager.deleteSavedQuery('foo2');
+        // add a manual delay
+        await queryBar.setQuery('response:503');
+        await savedQueryManager.savedQueryMissingOrFail('foo2');
       });
     });
 
@@ -215,24 +224,33 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       it(`Permalinks doesn't show create short-url button`, async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlMissingOrFail();
+        // close the menu
+        await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('does not show the save query button in the query bar in dirty state with no query loaded', async () => {
-        await queryBar.setQuery('response');
-        await testSubjects.missingOrFail('savedQuerySaveNew');
+      it('allows loading a saved query via the saved query manager', async () => {
+        await savedQueryManager.loadSavedQuery('OKJpgs');
+        const queryString = await queryBar.getQueryString();
+        expect(queryString).to.eql('response:200');
       });
 
-      it('does not show the save as new query button in the query bar with non-dirty state and query loaded', async () => {
-        await queryBar.setQuery('OK Jpgs');
-        await testSubjects.click('autocompleteSuggestion-savedQuery-OK-Jpgs');
-        await queryBar.openSuggestionsDropDown();
-        await testSubjects.missingOrFail('savedQuerySaveAsNew');
+      it('does not allow saving via the saved query manager popover with no query loaded', async () => {
+        await savedQueryManager.saveNewQueryMissingOrFail();
       });
 
-      it('does not show the save changes to existing or save as new button in the query bar with a dirty state and a query loaded', async () => {
-        await queryBar.setQuery('response:404 ');
-        await testSubjects.missingOrFail('savedQuerySaveChanges');
-        await testSubjects.missingOrFail('savedQuerySaveAsNew');
+      it('does not allow saving changes to saved query from the saved query manager', async () => {
+        await savedQueryManager.loadSavedQuery('OKJpgs');
+        await queryBar.setQuery('response:404');
+        await savedQueryManager.updateCurrentlyLoadedQueryMissingOrFail();
+      });
+
+      it('does not allow deleting a saved query from the saved query manager', async () => {
+        await savedQueryManager.deleteSavedQueryMissingOrFail('OKJpgs');
+      });
+
+      it('allows clearing the currently loaded saved query', async () => {
+        await savedQueryManager.loadSavedQuery('OKJpgs');
+        await savedQueryManager.clearCurrentlyLoadedQuery();
       });
     });
 
