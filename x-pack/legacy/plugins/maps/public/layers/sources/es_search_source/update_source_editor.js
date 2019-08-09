@@ -191,6 +191,23 @@ export class UpdateSourceEditor extends Component {
   }
 
   render() {
+    let useTopHitsCheckbox;
+    if (this.state.dateFields && this.state.dateFields.length) {
+      useTopHitsCheckbox = (
+        <EuiFormRow>
+          <EuiSwitch
+            label={
+              i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
+                defaultMessage: `Show most recent documents by entity`
+              })
+            }
+            checked={this.props.useTopHits}
+            onChange={this.onUseTopHitsChange}
+          />
+        </EuiFormRow>
+      );
+    }
+
     return (
       <Fragment>
         <TooltipSelector
@@ -212,17 +229,7 @@ export class UpdateSourceEditor extends Component {
           />
         </EuiFormRow>
 
-        <EuiFormRow>
-          <EuiSwitch
-            label={
-              i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
-                defaultMessage: `Show most recent documents by entity`
-              })
-            }
-            checked={this.props.useTopHits}
-            onChange={this.onUseTopHitsChange}
-          />
-        </EuiFormRow>
+        {useTopHitsCheckbox}
 
         {this.renderTopHitsForm()}
       </Fragment>
