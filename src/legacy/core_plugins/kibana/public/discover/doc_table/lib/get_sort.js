@@ -44,9 +44,6 @@ export function getSort(sort, indexPattern, defaultSortOrder = 'desc') {
 
   let sortObjects;
   if (Array.isArray(sort)) {
-    if (sort.length > 0 && !Array.isArray(sort[0])) {
-      sort = [sort];
-    }
     sortObjects = _.compact(sort.map((sortPair) => createSortObject(sortPair, indexPattern)));
   }
 
