@@ -8,12 +8,13 @@ import { i18n } from '@kbn/i18n';
 import { InfraMetric } from '../../../graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 import {
-  InfraMetricLayoutCreator,
   InfraMetricLayoutSectionType,
   InfraMetricLayoutVisualizationType,
+  InfraMetricLayout,
 } from './types';
+import { EuiTheme } from '../../../../../../common/eui_styled_components';
 
-export const awsLayoutCreator: InfraMetricLayoutCreator = theme => [
+export const awsLayoutCreator = (theme: EuiTheme): InfraMetricLayout[] => [
   {
     id: 'awsOverview',
     label: 'AWS',
@@ -40,7 +41,6 @@ export const awsLayoutCreator: InfraMetricLayoutCreator = theme => [
               ),
               color: theme.eui.euiColorFullShade,
               formatter: InfraFormatterType.percent,
-              gaugeMax: 1,
             },
             'status-check-failed': {
               name: i18n.translate(
