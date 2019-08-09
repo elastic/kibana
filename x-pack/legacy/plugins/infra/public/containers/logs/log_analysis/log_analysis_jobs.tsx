@@ -6,12 +6,10 @@
 
 import createContainer from 'constate-latest';
 import { useMemo, useEffect, useState } from 'react';
-import { kfetch } from 'ui/kfetch';
 import { values } from 'lodash';
 import { getJobId } from '../../../../common/log_analysis';
-import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { fetchJobStatusRequestPayloadRT, fetchJobStatusResponsePayloadRT } from './ml_api_types';
+import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
 
 type JobStatus = 'unknown' | 'closed' | 'closing' | 'failed' | 'opened' | 'opening' | 'deleted';
 // type DatafeedStatus = 'unknown' | 'started' | 'starting' | 'stopped' | 'stopping' | 'deleted';
@@ -55,18 +53,7 @@ export const useLogAnalysisJobs = ({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        const response = await kfetch({
-          method: 'POST',
-          pathname: '/api/ml/jobs/jobs_summary',
-          body: JSON.stringify(
-            fetchJobStatusRequestPayloadRT.encode({
-              jobIds: [getJobId(spaceId, sourceId, 'log-entry-rate')],
-            })
-          ),
-        });
-        return fetchJobStatusResponsePayloadRT
-          .decode(response)
-          .getOrElseL(throwErrors(createPlainError));
+        return callJobsSummaryAPI(spaceId, sourceId);
       },
       onResolve: response => {
         if (response && response.length) {
