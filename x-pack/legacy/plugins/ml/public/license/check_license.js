@@ -120,10 +120,17 @@ export function isFullLicense() {
 }
 
 export function xpackFeatureAvailable(feature) {
+  // each plugin can register their own set of features.
+  // so we need specific checks for each one.
+  // this list can grow if we need to check other features.
   switch (feature) {
     case 'watcher':
+      // watcher only has a license status feature
+      // if watcher is disabled in kibana.yml, the feature is completely missing from xpackInfo
       return xpackInfo.get(`features.${feature}.status`, false) === LICENSE_STATUS_VALID;
     default:
+      // historically plugins have used `isAvailable` as a catch all for
+      // license and feature enabled checks
       return xpackInfo.get(`features.${feature}.isAvailable`, false);
   }
 }
