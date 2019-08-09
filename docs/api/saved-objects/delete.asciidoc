@@ -6,8 +6,6 @@
 
 Remove a Kibana saved object. Once you delete a saved object, _it cannot be recovered_.
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
-
 [[saved-objects-api-delete-request]]
 ==== Request
 
@@ -25,7 +23,8 @@ experimental[This functionality is *experimental* and may be changed or removed 
 [[saved-objects-api-delete-response-codes]]
 ==== Response code
 
-`200`:: Indicates a successful call.
+`200`:: 
+  Indicates a successful call.
 
 ==== Examples
 

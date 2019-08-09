@@ -7,11 +7,12 @@
 Resolve errors from the import API. 
 
 To resolve errors, you can: 
-* Retry certain saved objects
-* Overwrite specific saved objects
-* Change references to different saved objects
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+* Retry certain saved objects
+
+* Overwrite specific saved objects
+
+* Change references to different saved objects
 
 [[saved-objects-api-resolve-import-errors-request]]
 ==== Request
@@ -27,7 +28,7 @@ The request body must include the multipart/form-data type.
   The same file given to the import API.
 
 `retries`::
-  (array) A list of `type`, `id`, `replaceReferences`, and `overwrite` objects to retry importing. The property `replaceReferences` is a list of `type`, `from`, and `to` used to change the object references.
+  (array) A list of `type`, `id`, `replaceReferences`, and `overwrite` objects to retry. The property `replaceReferences` is a list of `type`, `from`, and `to` used to change the object references.
 
 [[saved-objects-api-resolve-import-errors-response-body]]
 ==== Response body

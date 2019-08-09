@@ -5,10 +5,6 @@ experimental[This API is *experimental* and may be changed or removed completely
 
 Retrieves all {kib} features.
 
-Note: You cannot access this endpoint via the Console in {kib}.
-
-==== Get all {kib} features
-
 [[features-api-get-request]]
 ==== Request
 
@@ -21,11 +17,16 @@ GET /api/features/v1
 --------------------------------------------------
 // KIBANA
 
-[[features-api-get-response]]
-==== Response body
+[[features-api-get-codes]]
+==== Response code
 
-A successful call returns a response code of `200` and a response body containing a JSON 
-representation of the features.
+`200`::
+  Indicates a successful call.
+
+[[features-api-get-example]]
+==== Example
+
+The API returns the following:
 
 [source,js]
 --------------------------------------------------

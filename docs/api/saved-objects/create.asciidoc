@@ -6,10 +6,6 @@
 
 Create a Kibana saved object.
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
-
-NOTE: You cannot access the endpoint via the Console in Kibana.
-
 [[saved-objects-api-create-request]]
 ==== Request
 
@@ -38,8 +34,8 @@ NOTE: You cannot access the endpoint via the Console in Kibana.
 `attributes`::
   (Required, object) The data that you want to create.
 +
-WARNING: Attributes are not validated at creation time, which allows you to pass
-arbitrary and ill-formed data into the API that can break Kibana. Make sure
+WARNING: When you create saved objects, attributes are not validated, which allows you to pass
+arbitrary and ill-formed data into the API that can break {kib}. Make sure
 any data that you send to the API is properly formed.
 
 `references`::
