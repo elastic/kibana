@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Core } from './types';
+import { KibanaReactCore } from './types';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<any> = {
@@ -39,12 +39,12 @@ const createSetupContractMock = () => {
   return setupContract as any;
 };
 
-export const createMock = (): Core => {
+export const createMock = (): KibanaReactCore => {
   const uiSettings = createSetupContractMock();
 
-  const core: Partial<Core> = {
+  const core: Partial<KibanaReactCore> = {
     uiSettings,
   };
 
-  return core as Core;
+  return core as KibanaReactCore;
 };

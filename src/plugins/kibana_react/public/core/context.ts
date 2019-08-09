@@ -18,13 +18,13 @@
  */
 
 import * as React from 'react';
-import { KibanaReactContextValue, Core } from './types';
+import { KibanaReactContextValue, KibanaReactCore } from './types';
 
 export const context = React.createContext<KibanaReactContextValue>({
   core: {},
 });
 
-export const createContext = (core: Core, plugins?: any) => {
+export const createContext = (core: KibanaReactCore, plugins?: any) => {
   const value: KibanaReactContextValue = { core };
   const Provider: React.FC = ({ children }) =>
     React.createElement(context.Provider, { value, children });

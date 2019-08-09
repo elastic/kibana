@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart } from '../../../../core/public';
+import { CoreStart } from '../../../../core/public';
 
-export { CoreSetup, CoreStart };
-
-export type Core = Partial<CoreSetup> & Partial<CoreStart>;
+export type KibanaReactCore = Partial<CoreStart>;
 
 export interface KibanaReactContextValue {
-  core: Core;
+  core: KibanaReactCore;
 }

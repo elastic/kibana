@@ -22,19 +22,19 @@ import * as ReactDOM from 'react-dom';
 import { act, Simulate } from 'react-dom/test-utils';
 import { useUiSetting } from './use_ui_setting';
 import { createContext } from '../core';
-import { Core } from '../core/types';
-import { createMock } from '../core/mock';
+import { KibanaReactCore } from '../core/types';
 import { Subject } from 'rxjs';
 import { useObservable } from '../util/use_observable';
+import { coreMock } from '../../../../core/public/mocks';
 
 jest.mock('../util/use_observable');
 const useObservableSpy = (useObservable as any) as jest.SpyInstance;
 useObservableSpy.mockImplementation((observable, def) => def);
 
-const mock = (): [Core, Subject<any>] => {
-  const core = createMock() as Core;
-  const get = (core.uiSettings!.get as any) as jest.SpyInstance;
-  const get$ = (core.uiSettings!.get$ as any) as jest.SpyInstance;
+const mock = (): [KibanaReactCore, Subject<any>] => {
+  const core = coreMock.createStart();
+  const get = core.uiSettings.get;
+  const get$ = core.uiSettings.get$;
   const subject = new Subject();
 
   get.mockImplementation(() => 'bar');
@@ -88,7 +88,7 @@ test('synchronously renders setting value', async () => {
 });
 
 test('calls Core with correct arguments', async () => {
-  const core = createMock();
+  const core = coreMock.createStart();
   const { Provider } = createContext(core);
 
   ReactDOM.render(
