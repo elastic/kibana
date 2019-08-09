@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  HttpInterceptor,
-  HttpSetup,
-  HttpErrorResponse,
-  HttpInterceptController,
-} from 'src/core/public';
+import { HttpInterceptor, HttpErrorResponse, HttpInterceptController } from 'src/core/public';
 
 import { AnonymousPaths } from './anonymous_paths';
+import { SessionExpired } from './session_expired';
 
 export class UnauthorizedResponseInterceptor implements HttpInterceptor {
-  constructor(private basePath: HttpSetup['basePath'], private anonymousPaths: AnonymousPaths) {}
+  constructor(private sessionExpired: SessionExpired, private anonymousPaths: AnonymousPaths) {}
 
   responseError(httpErrorResponse: HttpErrorResponse, controller: HttpInterceptController) {
     if (this.anonymousPaths.isAnonymous(window.location.pathname)) {
@@ -37,17 +33,8 @@ export class UnauthorizedResponseInterceptor implements HttpInterceptor {
     }
 
     if (response.status === 401) {
-      this.logout();
+      this.sessionExpired.logout();
       controller.halt();
     }
-  }
-
-  private logout() {
-    const next = this.basePath.remove(
-      `${window.location.pathname}${window.location.search}${window.location.hash}`
-    );
-    window.location.href = this.basePath.prepend(
-      `/logout?next=${encodeURIComponent(next)}&msg=SESSION_EXPIRED`
-    );
   }
 }

@@ -24,3 +24,5 @@ MutationObserver.prototype.observe = function observe(target, options) {
   Function.prototype.call(_observe, this, target, options);
 };
 Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
+
+require('whatwg-fetch');
