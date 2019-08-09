@@ -16,9 +16,9 @@ const formatMap = {
   NANOS: AdvancedSettings.get('dateNanosFormat'),
   ISO8601: '',
   LOCAL_LONG: 'LLLL',
-  LOCAL_SHORT: 'L',
+  LOCAL_SHORT: 'LLL',
+  LOCAL_DATE: 'l',
   LOCAL_TIME_WITH_SECONDS: 'LTS',
-  UNIX: 'x',
 };
 
 const now = new Date();
