@@ -18,9 +18,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LegendPositions } from '../types';
 
-const legendPositions = [
+export enum LegendPositions {
+  RIGHT = 'right',
+  LEFT = 'left',
+  TOP = 'top',
+  BOTTOM = 'bottom',
+}
+
+const getLegendPositions = () => [
   {
     text: i18n.translate('kbnVislibVisTypes.legendPositions.topText', {
       defaultMessage: 'Top',
@@ -47,4 +53,4 @@ const legendPositions = [
   },
 ];
 
-export { legendPositions };
+export { getLegendPositions };

@@ -17,28 +17,35 @@
  * under the License.
  */
 
-export enum LegendPositions {
-  RIGHT = 'right',
-  LEFT = 'left',
-  TOP = 'top',
-  BOTTOM = 'bottom',
-}
+import { LegendPositions } from './utils/legend_positions';
+
 export interface CommonVislibParams {
   addTooltip: boolean;
   legendPosition: LegendPositions;
 }
 
+interface Labels {
+  filter: boolean;
+  rotate?: number;
+  show: boolean;
+  truncate: number;
+}
 export interface ValueAxis {
   id: string;
+  labels: Labels;
   name: string;
+  position: LegendPositions;
+  scale: { type: string };
+  show: boolean;
+  style: object;
+  title: { text: string };
+  type: string;
 }
 
 export interface BasicVislibParams extends CommonVislibParams {
   addTimeMarker: boolean;
   orderBucketsBySum?: boolean;
-  labels: {
-    show: boolean;
-  };
+  labels: Labels;
   valueAxes: ValueAxis[];
   grid: {
     categoryLines: boolean;

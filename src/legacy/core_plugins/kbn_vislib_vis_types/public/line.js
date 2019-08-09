@@ -21,6 +21,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { PointSeriesOptions } from './editors/point_series';
+import { getLegendPositions } from './utils/legend_positions';
 
 export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -101,6 +102,7 @@ export default function PointSeriesVisType(Private) {
     },
     editorConfig: {
       collections: {
+        legendPositions: getLegendPositions(),
         positions: ['top', 'left', 'right', 'bottom'],
         chartTypes: [{
           value: 'line',

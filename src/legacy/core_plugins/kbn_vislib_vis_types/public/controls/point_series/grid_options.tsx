@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useMemo } from 'react';
-import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
