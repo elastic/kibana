@@ -7,6 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import get from 'lodash/object/get';
 
 import {
@@ -21,12 +22,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+
 import { metricsDetailsUrl } from '../../../services';
-
 import { FieldList } from '../../components';
-
 import { FieldChooser, StepError } from './components';
-import { i18n } from '@kbn/i18n';
 
 const whiteListedMetricByFieldType = {
   numeric: {
@@ -148,35 +147,67 @@ export class StepMetricsUi extends Component {
       onFieldsChange,
     } = this.props;
 
-    return metricTypesConfig.map(({ label, type: metricType, fieldTypes }, idx) => {
-      let checkedCount = 0;
+    /**
+     * Look at all the metric configs and include the special "All" checkbox which adds the ability
+     * to select a all the checkboxes across columns and rows.
+     */
+    return [{
+      label: i18n.translate('xpack.rollupJobs.create.stepMetrics.allCheckbox', { defaultMessage: 'All' }),
+      type: 'all',
+    }].concat(metricTypesConfig).map(({ label, type: metricType, fieldTypes }, idx) => {
+      const isAllMetricTypes = metricType === 'all';
+      // For this config we are either considering all user selected metrics or a subset.
+      const applicableMetrics = isAllMetricTypes
+        ? metrics
+        : metrics
+          .filter(({ type }) => {
+            return fieldTypes[type];
+          });
 
-      const applicableMetrics = metrics
-        .filter(({ type }) => {
-          return fieldTypes[type];
+      let checkedCount = 0;
+      let isChecked = false;
+      let isDisabled = false;
+
+      if (isAllMetricTypes) {
+        applicableMetrics.forEach(({ types, type }) => {
+          const whiteListedSubset = Object.keys(whiteListedMetricByFieldType[type]);
+          if (whiteListedSubset.every(metricName => types.some(type => type === metricName))) {
+            ++checkedCount;
+          }
         });
 
-      applicableMetrics
-        .forEach(({ types }) => {
+        isDisabled = metrics.length === 0;
+      } else {
+        applicableMetrics.forEach(({ types }) => {
           const metricSelected = types.some(type => type === metricType);
           if (metricSelected) {
             ++checkedCount;
           }
         });
 
-      const isChecked = checkedCount === applicableMetrics.length;
-      const disabled = !metrics.some(({ type: fieldType }) =>
-        checkWhiteListedMetricByFieldType(fieldType, metricType),
-      );
+        isDisabled = !metrics.some(({ type: fieldType }) =>
+          checkWhiteListedMetricByFieldType(fieldType, metricType),
+        );
+      }
+
+      // Determine if a select all checkbox is checked.
+      isChecked = checkedCount === applicableMetrics.length;
+
       return (
         <EuiCheckbox
           id={`${idx}-select-all-checkbox`}
           data-test-subj={`rollupJobMetricsCheckbox-${metricType}`}
-          disabled={disabled}
+          disabled={isDisabled}
           label={<span style={{ whiteSpace: 'nowrap' }}>{label}</span>}
-          checked={!disabled && isChecked}
+          checked={!isDisabled && isChecked}
           onChange={() => {
-            onFieldsChange({ metrics: this.setMetrics(metricType, !isChecked) });
+            if (isAllMetricTypes) {
+              const newMetrics = metricTypesConfig
+                .reduce((acc, { type }) => this.setMetrics(type, !isChecked), null);
+              onFieldsChange({ metrics: newMetrics });
+            } else {
+              onFieldsChange({ metrics: this.setMetrics(metricType, !isChecked) });
+            }
           }}
         />
       );
