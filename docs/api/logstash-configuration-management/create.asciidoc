@@ -2,8 +2,6 @@
 [[logstash-configuration-management-api-create]]
 === Create Pipeline
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
-
 [[logstash-configuration-management-api-create-request]]
 ==== Request
 
@@ -12,28 +10,30 @@ experimental[This functionality is *experimental* and may be changed or removed 
 [[logstash-configuration-management-api-create-params]]
 ==== Path parameters
 
-`id` (required)::
-  (string) ID for pipeline. Only alphanumeric characters, hyphens, and underscores may be used.
+`id`::
+  (Required, string) The pipeline ID. Only alphanumeric characters, hyphens, and underscores are supported.
 
 [[logstash-configuration-management-api-create-request-body]]
 ==== Request body
 
-[float]
-==== Request Body
+`description`::
+  (Optional, string) The pipeline description.
 
-`description` (optional)::
-  (string) Description for the pipeline
+`pipeline`::
+  (Required, string) The pipeline definition.
 
-`pipeline` (required)::
-  (string) Pipeline definition
+`settings`::
+  (Optional, object) The pipeline settings. Supported settings, represented as object keys, are `pipeline.workers`, `pipeline.batch.size`, `pipeline.batch.delay`, `queue.type`, `queue.max_bytes`, and `queue.checkpoint.writes`.
 
-[[logstash-configuration-management-api-create-response-body]]
-==== Response body
+[[logstash-configuration-management-api-create-codes]]
+==== Response code
 
+`204 No Content`::
+    Indicates a successful call.
 
 [float]
 [[logstash-configuration-management-api-create-example]]
-==== Examples
+==== Example
 
 [source,js]
 --------------------------------------------------

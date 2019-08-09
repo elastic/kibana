@@ -6,8 +6,6 @@
 
 Retrieves multiple Kibana saved objects by ID.
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
-
 [[saved-objects-api-bulk-get-request]]
 ==== Request
 
@@ -15,8 +13,6 @@ experimental[This functionality is *experimental* and may be changed or removed 
 
 [[saved-objects-api-bulk-get-request-body]]
 ==== Request Body
-
-The request body must be a JSON array that contains objects and includes the following properties:
 
 `type`::
   (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
@@ -33,7 +29,7 @@ The request body must be a JSON array that contains objects and includes the fol
 `saved_objects`:: 
   (array) Top-level property the contains objects that represent the response for each of the requested objects. The order of the objects in the response is identical to the order of the objects in the request.
 
-Saved objects that cannot be created (persisted) are replaced with an error object.
+Saved objects that cannot be persisted are replaced with an error object.
 
 [[saved-objects-api-bulk-get-body-codes]]
 ==== Response code
@@ -62,7 +58,7 @@ POST api/saved_objects/_bulk_get
 --------------------------------------------------
 // KIBANA
 
-The API returns the following result:
+The API returns the following:
 
 [source,js]
 --------------------------------------------------

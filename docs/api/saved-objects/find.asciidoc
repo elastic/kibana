@@ -4,9 +4,7 @@
 <titleabbrev>Find objects</titleabbrev>
 ++++
 
-Retrieve a paginated set of Kibana saved objects by various conditions.
-
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+Retrieve a paginated set of {kib} saved objects by various conditions.
 
 [[saved-objects-api-find-request]]
 ==== Request
@@ -26,7 +24,7 @@ experimental[This functionality is *experimental* and may be changed or removed 
   (Optional, number) The page of objects to return.
   
 `search`::
-  (Optional, string) A {ref}/query-dsl-simple-query-string-query.html[simple_query_string] Elasticsearch query to filter the objects in the response.
+  (Optional, string) An Elasticsearch {ref}/query-dsl-simple-query-string-query.html[simple_query_string] query that filters the objects in the response.
   
 `default_search_operator`::
   (Optional, string) The default operator to use for the `simple_query_string`.

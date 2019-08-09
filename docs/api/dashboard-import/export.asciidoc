@@ -1,14 +1,10 @@
-[[dashboard-import-api-export]]
-=== Dashboard export API
+[[dashboard-api-export]]
+=== Export dashboard API
 ++++
 <titleabbrev>Dashboard export</titleabbrev>
 ++++
 
-Export dashboards and corresponding saved objects, such as visualizations, saved searches, and index patterns.
-
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
-
-NOTE: You cannot access the endpoint via the Console in Kibana.
+Export dashboards and corresponding saved objects.
 
 [[dashboard-api-export-request]]
 ==== Request
@@ -18,17 +14,24 @@ NOTE: You cannot access the endpoint via the Console in Kibana.
 [[dashboard-api-export-params]]
 ==== Query parameters
 
-`dashboard` (Required)::
-  (array|string) The IDs of the dashboards that you want to export.
+`dashboard`::
+  (Required, array|string) The IDs of the dashboards that you want to export.
 
 [[dashboard-api-export-response-body]]
 ==== Response body
 
-The response body includes a top level `objects` property that contains an array of saved objects. The order of the objects is not guaranteed. Use the exact response body as the request body for the corresponding <<dashboard-import-api-import, Import Dashboard API>>.
+`objects`:: 
+  (array) A top level property that includes the saved objects. The order of the objects is not guaranteed. Use the exact response body as the request body for the corresponding <<dashboard-import-api-import, Import dashboard API>>.
+  
+[[dashboard-api-export-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
 
 [float]
 [[dashboard-api-export-example]]
-==== Examples
+==== Example
 
 [source,js]
 --------------------------------------------------

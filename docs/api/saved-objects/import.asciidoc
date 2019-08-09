@@ -6,8 +6,6 @@
 
 Create a set of Kibana saved objects from a file created by the export API.
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
-
 [[saved-objects-api-import-request]]
 ==== Request
 

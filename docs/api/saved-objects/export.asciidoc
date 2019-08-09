@@ -6,8 +6,6 @@
 
 Retrieve a set of saved objects that you want to import into {kib}.
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
-
 [[saved-objects-api-export-request]]
 ==== Request
 
@@ -25,7 +23,7 @@ experimental[This functionality is *experimental* and may be changed or removed 
 `includeReferencesDeep`::
   (Optional, boolean) Includes all of the referenced objects in the exported objects.
 
-NOTE: You must include `type` or `objects` in the request body.
+TIP: You must include `type` or `objects` in the request body.
 
 [[saved-objects-api-export-request-response-body]]
 ==== Response body
@@ -51,7 +49,6 @@ POST api/saved_objects/_export
 }
 --------------------------------------------------
 // KIBANA
-
 
 Export a specific saved object:
 

@@ -1,13 +1,10 @@
 [[dashboard-import-api-import]]
-=== Import Dashboard
+=== Import dashboard API
+++++
+<titleabbrev>Import dashboard</titleabbrev>
+++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
-
-The dashboard import API allows people to import dashboards along with all of
-their corresponding saved objects such as visualizations, saved searches, and
-index patterns.
-
-Note: You cannot access this endpoint via the Console in Kibana.
+Import dashboards and corresponding saved objects.
 
 [[dashboard-api-import-request]]
 ==== Request
@@ -17,29 +14,31 @@ Note: You cannot access this endpoint via the Console in Kibana.
 [[dashboard-api-import-params]]
 ==== Query parameters
 
-`force` (optional)::
-  (boolean) Overwrite any existing objects on id conflict
-`exclude` (optional)::
-  (array) Saved object types that should not be imported
+`force`::
+  (Optional, boolean) Overwrite any existing objects on ID conflict.
+  
+`exclude`::
+  (Optional, array) Saved object types that you want to exclude from the import.
 
 [[dashboard-api-import-request-body]]
 ==== Request body
 
-The request body is JSON, but you should not manually construct a payload to
-this endpoint. Instead, use the complete response body from the
-<<dashboard-import-api-export, Export Dashboard API>> as the request body to
-this import API.
+Use the complete response body from the <<dashboard-api-export, Export dashboard API>> as the request body. Do not manually construct a payload to the endpoint.
 
 [[dashboard-api-import-response-body]]
 ==== Response body
 
-The response body will have a top level `objects` property that contains an
-array of the saved objects that were created.
+`objects`:: 
+  (array) A top level property that includes the saved objects. 
 
-==== Examples
+[[dashboard-api-import-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call, even if there are errors importing individual saved objects. If there ar errors, the error information is returned in the response body on an object-by-object basis.
 
 [[dashboard-api-import-example]]
-==== Examples
+==== Example
 
 [source,js]
 --------------------------------------------------
