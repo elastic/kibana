@@ -8,6 +8,7 @@ import React, { useContext } from 'react';
 import { last } from 'lodash';
 import chrome from 'ui/chrome';
 import { ColumnarPage } from '../../../components/page';
+import { LoadingPage } from '../../../components/loading_page';
 import { AnalysisPageProviders } from './page_providers';
 import { AnalysisResultsContent } from './page_results_content';
 import { AnalysisSetupContent } from './page_setup_content';
@@ -29,7 +30,7 @@ export const AnalysisPage = () => {
     <AnalysisPageProviders>
       <ColumnarPage data-test-subj="infraLogsAnalysisPage">
         {isLoadingSetupStatus ? (
-          <div>Checking status...</div>
+          <LoadingPage message="Checking status of analysis jobs..." />
         ) : isSetupRequired ? (
           <AnalysisSetupContent />
         ) : (
