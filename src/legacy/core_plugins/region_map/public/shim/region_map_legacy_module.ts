@@ -28,12 +28,15 @@ import { RegionMapVisParams } from '../region_map_vis_params';
 // @ts-ignore
 import { WmsOptions } from '../wms_options';
 
+import { RegionMapsConfig } from '../plugin';
+
 /** @internal */
-export const initTileMapLegacyModule = once((): void => {
+export const initTileMapLegacyModule = once((regionmapsConfig: RegionMapsConfig): void => {
   uiModules
     // TODO: Region Map Plugin uses wmsOptions directive from the kibana/tile_map module.
     // in future this reference should be removed
     .get('kibana/region_map', ['kibana'])
+    .constant('regionmapsConfig', regionmapsConfig)
     .directive('regionMapVisParams', RegionMapVisParams)
     .directive('wmsOptions', WmsOptions);
 });
