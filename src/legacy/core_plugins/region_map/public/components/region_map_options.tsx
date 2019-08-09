@@ -59,24 +59,16 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
     ((stateParams.selectedLayer && stateParams.selectedLayer.fields) || []).map(mapFieldForOption)
   );
 
-  useEffect(() => {
-    async function onLayerChange() {
-      if (!stateParams.selectedLayer) {
-        return;
-      }
+  const onLayerChange = useCallback(async (selectedLayer: VectorLayer) => {
+    setFieldOptions(selectedLayer.fields.map(mapFieldForOption));
+    setValue('selectedJoinField', selectedLayer.fields[0]);
+    setValue('emsHotLink', null);
 
-      setFieldOptions(stateParams.selectedLayer.fields.map(mapFieldForOption));
-      setValue('selectedJoinField', stateParams.selectedLayer.fields[0]);
-      setValue('emsHotLink', null);
-
-      if (stateParams.selectedLayer.isEMS) {
-        const emsHotLink = await serviceSettings.getEMSHotLink(stateParams.selectedLayer);
-        setValue('emsHotLink', emsHotLink);
-      }
+    if (selectedLayer.isEMS) {
+      const emsHotLink = await serviceSettings.getEMSHotLink(selectedLayer);
+      setValue('emsHotLink', emsHotLink);
     }
-
-    onLayerChange();
-  }, [stateParams.selectedLayer]);
+  }, []);
 
   useEffect(() => {
     if (regionmapsConfig.includeElasticMapsService) {
@@ -104,6 +96,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
 
           if (newVectorLayers[0] && !stateParams.selectedLayer) {
             setValue('selectedLayer', newVectorLayers[0]);
+            onLayerChange(newVectorLayers[0]);
           }
         })
         .catch((error: Error) => toastNotifications.addWarning(error.message));
@@ -112,7 +105,12 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
 
   const setLayer = useCallback(
     (paramName: 'selectedLayer', value: VectorLayer['layerId']) => {
-      setValue(paramName, vectorLayers.find(({ layerId }: VectorLayer) => layerId === value));
+      const newLayer = vectorLayers.find(({ layerId }: VectorLayer) => layerId === value);
+
+      if (newLayer) {
+        setValue(paramName, newLayer);
+        onLayerChange(newLayer);
+      }
     },
     [vectorLayers]
   );
