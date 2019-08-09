@@ -78,7 +78,7 @@ export const AreaChart = ({ id, color, series, name, type, stack, ignoreGaps }: 
 
 export const BarChart = ({ id, color, series, name, stack, ignoreGaps }: Props) => {
   const style: RecursivePartial<BarSeriesStyle> = {
-    border: {
+    rectBorder: {
       visible: false,
       strokeWidth: 2,
       stroke: color || '',
