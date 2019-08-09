@@ -128,6 +128,8 @@ export const EventsCount = pure<{
   </h5>
 ));
 
+EventsCount.displayName = 'EventsCount';
+
 export const PagingControl = pure<{
   hasNextPage: boolean;
   isLoading: boolean;
@@ -146,6 +148,8 @@ export const PagingControl = pure<{
     )}
   </>
 ));
+
+PagingControl.displayName = 'PagingControl';
 
 /** Renders a loading indicator and paging controls */
 export class Footer extends React.PureComponent<FooterProps, FooterState> {

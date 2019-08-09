@@ -72,3 +72,5 @@ export const EventsSelect = pure<Props>(({ checkState, timelineId }) => {
     </div>
   );
 });
+
+EventsSelect.displayName = 'EventsSelect';

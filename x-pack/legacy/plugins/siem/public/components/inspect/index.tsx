@@ -135,6 +135,8 @@ const InspectButtonComponent = pure<InspectButtonProps>(
   )
 );
 
+InspectButtonComponent.displayName = 'InspectButtonComponent';
+
 const makeMapStateToProps = () => {
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();

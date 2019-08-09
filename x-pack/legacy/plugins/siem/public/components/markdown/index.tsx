@@ -67,3 +67,5 @@ export const Markdown = pure<{ raw?: string; size?: 'xs' | 's' | 'm' }>(({ raw, 
     />
   );
 });
+
+Markdown.displayName = 'Markdown';

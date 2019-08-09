@@ -36,6 +36,8 @@ export const CancelButton = pure<{ onCancelAddNote: () => void }>(({ onCancelAdd
   </EuiButtonEmpty>
 ));
 
+CancelButton.displayName = 'CancelButton';
+
 /** Displays an input for entering a new note, with an adjacent "Add" button */
 export const AddNote = pure<{
   associateNote: AssociateNote;
@@ -77,3 +79,5 @@ export const AddNote = pure<{
     </ButtonsContainer>
   </AddNotesContainer>
 ));
+
+AddNote.displayName = 'AddNote';

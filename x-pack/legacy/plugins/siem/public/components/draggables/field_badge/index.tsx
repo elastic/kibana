@@ -47,3 +47,5 @@ export const DraggableFieldBadge = pure<{ fieldId: string }>(({ fieldId }) => (
     </FieldBadgeFlexGroup>
   </EuiBadge>
 ));
+
+DraggableFieldBadge.displayName = 'DraggableFieldBadge';

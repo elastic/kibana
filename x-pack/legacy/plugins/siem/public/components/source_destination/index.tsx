@@ -91,3 +91,5 @@ export const SourceDestination = pure<SourceDestinationProps>(
     </EuiFlexGroup>
   )
 );
+
+SourceDestination.displayName = 'SourceDestination';

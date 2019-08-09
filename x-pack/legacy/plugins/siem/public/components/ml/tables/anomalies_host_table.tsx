@@ -93,3 +93,5 @@ const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
     overflow: hidden;
   `}
 `;
+
+AnomaliesHostTable.displayName = 'AnomaliesHostTable';

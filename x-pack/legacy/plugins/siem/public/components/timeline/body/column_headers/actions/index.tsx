@@ -59,6 +59,8 @@ export const CloseButton = pure<{
   </WrappedCloseButton>
 ));
 
+CloseButton.displayName = 'CloseButton';
+
 export const Actions = pure<Props>(({ header, isLoading, onColumnRemoved, show, sort }) => (
   <ActionsContainer
     alignItems="center"
@@ -84,3 +86,5 @@ export const Actions = pure<Props>(({ header, isLoading, onColumnRemoved, show, 
     )}
   </ActionsContainer>
 ));
+
+Actions.displayName = 'Actions';

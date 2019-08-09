@@ -31,3 +31,5 @@ export const UpgradeContents = React.memo(() => {
     </PopoverContentsDiv>
   );
 });
+
+UpgradeContents.displayName = 'UpgradeContents';

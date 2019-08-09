@@ -63,6 +63,8 @@ export const LoadingPanel = pure<LoadingProps>(
   )
 );
 
+LoadingPanel.displayName = 'LoadingPanel';
+
 export const LoadingStaticPanel = styled.div<{
   height: number | string;
   position: string;

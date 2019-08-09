@@ -9,7 +9,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
     <styled.div
       width={100}
     >
-      <pure(Component)
+      <SystemGenericFileDetails
         browserFields={Object {}}
         contextId="user_login"
         data={
@@ -112,7 +112,7 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
     <styled.div
       width={100}
     >
-      <pure(Component)
+      <SystemGenericDetails
         browserFields={Object {}}
         contextId="process_started"
         data={

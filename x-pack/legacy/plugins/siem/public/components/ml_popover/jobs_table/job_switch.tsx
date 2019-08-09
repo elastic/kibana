@@ -64,3 +64,5 @@ export const JobSwitch = React.memo<JobSwitchProps>(
     );
   }
 );
+
+JobSwitch.displayName = 'JobSwitch';

@@ -28,3 +28,5 @@ export const ZeekDetails = pure<{ browserFields: BrowserFields; data: Ecs }>(({ 
     </Details>
   ) : null
 );
+
+ZeekDetails.displayName = 'ZeekDetails';

@@ -32,3 +32,5 @@ export const Duration = pure<{
     <FormattedDuration maybeDurationNanoseconds={value} tooltipTitle={fieldName} />
   </DefaultDraggable>
 ));
+
+Duration.displayName = 'Duration';

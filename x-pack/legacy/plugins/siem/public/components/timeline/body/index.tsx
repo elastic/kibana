@@ -161,3 +161,5 @@ export const Body = pure<Props>(
     );
   }
 );
+
+Body.displayName = 'Body';

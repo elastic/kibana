@@ -81,6 +81,8 @@ const CountRow = pure<Pick<Props, 'filteredBrowserFields'>>(({ filteredBrowserFi
   </CountsFlexGroup>
 ));
 
+CountRow.displayName = 'CountRow';
+
 const TitleRow = pure<{ onOutsideClick: () => void; onUpdateColumns: OnUpdateColumns }>(
   ({ onOutsideClick, onUpdateColumns }) => (
     <EuiFlexGroup
@@ -109,6 +111,8 @@ const TitleRow = pure<{ onOutsideClick: () => void; onUpdateColumns: OnUpdateCol
   )
 );
 
+TitleRow.displayName = 'TitleRow';
+
 export const Header = pure<Props>(
   ({
     isSearching,
@@ -134,3 +138,5 @@ export const Header = pure<Props>(
     </HeaderContainer>
   )
 );
+
+Header.displayName = 'Header';

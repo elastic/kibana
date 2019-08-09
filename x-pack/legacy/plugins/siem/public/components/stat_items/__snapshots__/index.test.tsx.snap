@@ -12,7 +12,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
     }
   }
 >
-  <Memo()
+  <StatItemsComponent
     description="HOSTS"
     fields={
       Array [
@@ -77,13 +77,13 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                     <div
                       className="euiFlexItem euiFlexItem--flexGrowZero"
                     >
-                      <Connect(pure(Component))
+                      <Connect(InspectButtonComponent)
                         inspectIndex={0}
                         queryId="statItems"
                         show={false}
                         title="KPI HOSTS"
                       >
-                        <pure(Component)
+                        <InspectButtonComponent
                           id=""
                           inspect={null}
                           inspectIndex={0}
@@ -171,8 +171,8 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                               </div>
                             </styled.div>
                           </Component>
-                        </pure(Component)>
-                      </Connect(pure(Component))>
+                        </InspectButtonComponent>
+                      </Connect(InspectButtonComponent)>
                     </div>
                   </EuiFlexItem>
                 </div>
@@ -238,7 +238,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
         </div>
       </EuiFlexItem>
     </Styled(EuiFlexItem)>
-  </Memo()>
+  </StatItemsComponent>
 </Provider>
 `;
 
@@ -254,7 +254,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
     }
   }
 >
-  <Memo()
+  <StatItemsComponent
     areaChart={Array []}
     barChart={Array []}
     description="HOSTS"
@@ -321,13 +321,13 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                     <div
                       className="euiFlexItem euiFlexItem--flexGrowZero"
                     >
-                      <Connect(pure(Component))
+                      <Connect(InspectButtonComponent)
                         inspectIndex={0}
                         queryId="statItems"
                         show={false}
                         title="KPI HOSTS"
                       >
-                        <pure(Component)
+                        <InspectButtonComponent
                           id=""
                           inspect={null}
                           inspectIndex={0}
@@ -415,8 +415,8 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                               </div>
                             </styled.div>
                           </Component>
-                        </pure(Component)>
-                      </Connect(pure(Component))>
+                        </InspectButtonComponent>
+                      </Connect(InspectButtonComponent)>
                     </div>
                   </EuiFlexItem>
                 </div>
@@ -483,7 +483,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
         </div>
       </EuiFlexItem>
     </Styled(EuiFlexItem)>
-  </Memo()>
+  </StatItemsComponent>
 </Provider>
 `;
 
@@ -499,7 +499,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
     }
   }
 >
-  <Memo()
+  <StatItemsComponent
     areaChart={
       Array [
         Object {
@@ -638,13 +638,13 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                     <div
                       className="euiFlexItem euiFlexItem--flexGrowZero"
                     >
-                      <Connect(pure(Component))
+                      <Connect(InspectButtonComponent)
                         inspectIndex={0}
                         queryId="statItems"
                         show={false}
                         title="KPI UNIQUE_PRIVATE_IPS"
                       >
-                        <pure(Component)
+                        <InspectButtonComponent
                           id=""
                           inspect={null}
                           inspectIndex={0}
@@ -732,8 +732,8 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               </div>
                             </styled.div>
                           </Component>
-                        </pure(Component)>
-                      </Connect(pure(Component))>
+                        </InspectButtonComponent>
+                      </Connect(InspectButtonComponent)>
                     </div>
                   </EuiFlexItem>
                 </div>
@@ -942,7 +942,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                       <div
                         className="euiFlexItem sc-bZQynM kpuYFd"
                       >
-                        <Memo()
+                        <BarChart
                           barChart={
                             Array [
                               Object {
@@ -993,7 +993,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               <div
                                 className="sc-bwzfXH ffMqh"
                               >
-                                <Memo()
+                                <BarChartWithCustomPrompt
                                   configs={
                                     Object {
                                       "axis": Object {
@@ -1034,7 +1034,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                     ]
                                   }
                                 >
-                                  <Memo()
+                                  <BarChartBaseComponent
                                     configs={
                                       Object {
                                         "axis": Object {
@@ -1075,11 +1075,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                       ]
                                     }
                                   />
-                                </Memo()>
+                                </BarChartWithCustomPrompt>
                               </div>
                             </styled.div>
                           </AutoSizer>
-                        </Memo()>
+                        </BarChart>
                       </div>
                     </EuiFlexItem>
                   </Styled(EuiFlexItem)>
@@ -1090,7 +1090,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                       <div
                         className="euiFlexItem sc-bZQynM kpuYFd"
                       >
-                        <Memo()
+                        <AreaChart
                           areaChart={
                             Array [
                               Object {
@@ -1157,7 +1157,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               <div
                                 className="sc-bwzfXH ffMqh"
                               >
-                                <Memo()
+                                <AreaChartWithCustomPrompt
                                   configs={
                                     Object {
                                       "axis": Object {
@@ -1214,7 +1214,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                     ]
                                   }
                                 >
-                                  <Memo()
+                                  <AreaChartBaseComponent
                                     configs={
                                       Object {
                                         "axis": Object {
@@ -1271,11 +1271,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                       ]
                                     }
                                   />
-                                </Memo()>
+                                </AreaChartWithCustomPrompt>
                               </div>
                             </styled.div>
                           </AutoSizer>
-                        </Memo()>
+                        </AreaChart>
                       </div>
                     </EuiFlexItem>
                   </Styled(EuiFlexItem)>
@@ -1286,6 +1286,6 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
         </div>
       </EuiFlexItem>
     </Styled(EuiFlexItem)>
-  </Memo()>
+  </StatItemsComponent>
 </Provider>
 `;

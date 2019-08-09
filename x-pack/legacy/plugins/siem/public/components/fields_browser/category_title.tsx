@@ -52,3 +52,5 @@ export const CategoryTitle = pure<Props>(({ filteredBrowserFields, categoryId, t
     </EuiFlexItem>
   </EuiFlexGroup>
 ));
+
+CategoryTitle.displayName = 'CategoryTitle';

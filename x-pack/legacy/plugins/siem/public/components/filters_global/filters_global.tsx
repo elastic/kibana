@@ -70,3 +70,5 @@ export const FiltersGlobal = pure<FiltersGlobalProps>(({ children }) => (
     )}
   </Sticky>
 ));
+
+FiltersGlobal.displayName = 'FiltersGlobal';

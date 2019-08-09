@@ -33,3 +33,5 @@ export const ShowingCount = React.memo<ShowingCountProps>(({ filterResultsLength
     </EuiText>
   </ShowingContainer>
 ));
+
+ShowingCount.displayName = 'ShowingCount';

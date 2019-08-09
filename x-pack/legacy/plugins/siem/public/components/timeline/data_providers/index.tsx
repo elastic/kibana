@@ -108,3 +108,5 @@ export const DataProviders = pure<Props>(
     </DropTargetDataProviders>
   )
 );
+
+DataProviders.displayName = 'DataProviders';

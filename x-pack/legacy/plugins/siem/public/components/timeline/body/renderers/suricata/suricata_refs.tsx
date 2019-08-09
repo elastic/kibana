@@ -31,3 +31,5 @@ export const SuricataRefs = pure<{ signatureId: number }>(({ signatureId }) => {
     </EuiFlexGroup>
   );
 });
+
+SuricataRefs.displayName = 'SuricataRefs';

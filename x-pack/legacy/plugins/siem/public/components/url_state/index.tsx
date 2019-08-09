@@ -34,6 +34,8 @@ export const UrlStateContainer = React.memo<UrlStateContainerPropTypes>(
     isEqual(prevProps.urlState, nextProps.urlState)
 );
 
+UrlStateContainer.displayName = 'UrlStateContainer';
+
 const makeMapStateToProps = () => {
   const getInputsSelector = inputsSelectors.inputsSelector();
   const getHostsFilterQueryAsKuery = hostsSelectors.hostsFilterQueryAsKuery();

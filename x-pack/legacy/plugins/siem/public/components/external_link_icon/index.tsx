@@ -40,3 +40,5 @@ export const ExternalLinkIcon = pure<{
     <LinkIcon color={color} data-test-subj="external-link-icon" size={iconSize} type={iconType} />
   )
 );
+
+ExternalLinkIcon.displayName = 'ExternalLinkIcon';

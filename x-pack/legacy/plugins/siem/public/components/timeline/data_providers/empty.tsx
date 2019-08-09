@@ -103,3 +103,5 @@ export const Empty = pure<Props>(({ showSmallMsg = false }) => (
     {showSmallMsg && <AndOrBadge type="or" />}
   </EmptyContainer>
 ));
+
+Empty.displayName = 'Empty';

@@ -42,3 +42,5 @@ export const NoteCardHeader = pure<{ created: Date; user: string }>(({ created, 
     </HeaderContainer>
   </EuiPanel>
 ));
+
+NoteCardHeader.displayName = 'NoteCardHeader';

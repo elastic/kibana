@@ -49,6 +49,8 @@ export const Tokens = pure<{ tokens: string[] }>(({ tokens }) => (
   </>
 ));
 
+Tokens.displayName = 'Tokens';
+
 export const DraggableSignatureId = pure<{ id: string; signatureId: number }>(
   ({ id, signatureId }) => (
     <SignatureFlexItem grow={false}>
@@ -87,6 +89,8 @@ export const DraggableSignatureId = pure<{ id: string; signatureId: number }>(
   )
 );
 
+DraggableSignatureId.displayName = 'DraggableSignatureId';
+
 export const SuricataSignature = pure<{
   contextId: string;
   id: string;
@@ -120,3 +124,5 @@ export const SuricataSignature = pure<{
     </EuiFlexGroup>
   );
 });
+
+SuricataSignature.displayName = 'SuricataSignature';

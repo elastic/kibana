@@ -26,7 +26,7 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
           direction="row"
           gutterSize="none"
         >
-          <pure(Component)
+          <EventsCount
             closePopover={[Function]}
             isOpen={false}
             items={
@@ -75,7 +75,7 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
         data-test-subj="paging-control-container"
         grow={false}
       >
-        <pure(Component)
+        <PagingControl
           data-test-subj="paging-control"
           hasNextPage={true}
           isLoading={false}

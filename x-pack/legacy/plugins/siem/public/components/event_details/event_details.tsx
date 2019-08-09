@@ -70,3 +70,5 @@ export const EventDetails = pure<Props>(
     );
   }
 );
+
+EventDetails.displayName = 'EventDetails';

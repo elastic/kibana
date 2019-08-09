@@ -24,3 +24,5 @@ export const NoteCard = pure<{ created: Date; rawNote: string; user: string }>(
     </NoteCardContainer>
   )
 );
+
+NoteCard.displayName = 'NoteCard';

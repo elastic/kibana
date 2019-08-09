@@ -273,3 +273,5 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     );
   }
 );
+
+StatItemsComponent.displayName = 'StatItemsComponent';

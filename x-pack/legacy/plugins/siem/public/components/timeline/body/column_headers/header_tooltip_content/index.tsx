@@ -73,3 +73,5 @@ export const HeaderToolTipContent = pure<{ header: ColumnHeader }>(({ header }) 
     ) : null}
   </>
 ));
+
+HeaderToolTipContent.displayName = 'HeaderToolTipContent';

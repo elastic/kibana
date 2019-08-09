@@ -64,3 +64,5 @@ export const HeaderPanel = pure<HeaderPanelProps>(
     </Header>
   )
 );
+
+HeaderPanel.displayName = 'HeaderPanel';

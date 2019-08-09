@@ -69,3 +69,5 @@ export const MarkdownHint = pure<{ show: boolean }>(({ show }) => (
     <ImageUrl>{i18n.MARKDOWN_HINT_IMAGE_URL}</ImageUrl>
   </MarkdownHintContainer>
 ));
+
+MarkdownHint.displayName = 'MarkdownHint';

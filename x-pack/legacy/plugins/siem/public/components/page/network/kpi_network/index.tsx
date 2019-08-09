@@ -192,3 +192,5 @@ export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
     );
   }
 );
+
+KpiNetworkComponent.displayName = 'KpiNetworkComponent';

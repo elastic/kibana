@@ -63,3 +63,5 @@ export const CertificateFingerprint = pure<{
     </DraggableBadge>
   );
 });
+
+CertificateFingerprint.displayName = 'CertificateFingerprint';

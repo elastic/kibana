@@ -68,6 +68,8 @@ const Content = pure<{
   )
 );
 
+Content.displayName = 'Content';
+
 /**
  * Draggable text (or an arbitrary visualization specified by `children`)
  * that's only displayed when the specified value is non-`null`.
@@ -115,6 +117,8 @@ export const DefaultDraggable = pure<DefaultDraggableType>(
       />
     ) : null
 );
+
+DefaultDraggable.displayName = 'DefaultDraggable';
 
 // Ref: https://github.com/elastic/eui/issues/1655
 // const Badge = styled(EuiBadge)`
@@ -174,3 +178,5 @@ export const DraggableBadge = pure<BadgeDraggableType>(
       </DefaultDraggable>
     ) : null
 );
+
+DraggableBadge.displayName = 'DraggableBadge';

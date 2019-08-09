@@ -158,3 +158,5 @@ export const TimelinesTable = pure<TimelinesTableProps>(
     );
   }
 );
+
+TimelinesTable.displayName = 'TimelinesTable';

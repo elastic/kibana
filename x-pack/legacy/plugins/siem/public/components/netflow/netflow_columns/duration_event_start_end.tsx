@@ -104,3 +104,5 @@ export const DurationEventStartEnd = pure<{
       : null}
   </EuiFlexGroup>
 ));
+
+DurationEventStartEnd.displayName = 'DurationEventStartEnd';

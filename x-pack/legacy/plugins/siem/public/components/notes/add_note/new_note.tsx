@@ -68,3 +68,5 @@ export const NewNote = pure<{
 
   return <NewNoteTabs data-test-subj="new-note-tabs" tabs={tabs} initialSelectedTab={tabs[0]} />;
 });
+
+NewNote.displayName = 'NewNote';

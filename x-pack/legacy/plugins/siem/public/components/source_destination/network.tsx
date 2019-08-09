@@ -133,3 +133,5 @@ export const Network = pure<{
       : null}
   </EuiFlexGroup>
 ));
+
+Network.displayName = 'Network';

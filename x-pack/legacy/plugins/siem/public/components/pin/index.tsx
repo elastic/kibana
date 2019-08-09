@@ -38,3 +38,5 @@ export const Pin = pure<Props>(({ allowUnpinning, pinned, onClick = noop }) => (
     type="pin"
   />
 ));
+
+Pin.displayName = 'Pin';

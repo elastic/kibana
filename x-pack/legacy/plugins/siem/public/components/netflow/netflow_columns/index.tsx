@@ -122,3 +122,5 @@ export const NetflowColumns = pure<NetflowColumnsProps>(
     </EuiFlexGroup>
   )
 );
+
+NetflowColumns.displayName = 'NetflowColumns';

@@ -64,3 +64,5 @@ export const AnomalyScore = React.memo<Args>(
     );
   }
 );
+
+AnomalyScore.displayName = 'AnomalyScore';

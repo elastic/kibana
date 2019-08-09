@@ -57,3 +57,5 @@ export const HeaderPage = pure<HeaderPageProps>(
     </Header>
   )
 );
+
+HeaderPage.displayName = 'HeaderPage';

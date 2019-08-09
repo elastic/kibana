@@ -31,6 +31,8 @@ export const FormattedDurationTooltipContent = pure<{
   </>
 ));
 
+FormattedDurationTooltipContent.displayName = 'FormattedDurationTooltipContent';
+
 export const FormattedDurationTooltip = pure<{
   children: JSX.Element;
   maybeDurationNanoseconds: string | number | object | undefined | null;
@@ -48,3 +50,5 @@ export const FormattedDurationTooltip = pure<{
     <>{children}</>
   </EuiToolTip>
 ));
+
+FormattedDurationTooltip.displayName = 'FormattedDurationTooltip';

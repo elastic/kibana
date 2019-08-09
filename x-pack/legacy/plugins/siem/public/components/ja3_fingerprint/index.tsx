@@ -46,3 +46,5 @@ export const Ja3Fingerprint = pure<{
     <ExternalLinkIcon />
   </DraggableBadge>
 ));
+
+Ja3Fingerprint.displayName = 'Ja3Fingerprint';

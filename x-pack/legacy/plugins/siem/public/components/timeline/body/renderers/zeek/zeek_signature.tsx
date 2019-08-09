@@ -98,6 +98,8 @@ export const DraggableZeekElement = pure<{
   ) : null
 );
 
+DraggableZeekElement.displayName = 'DraggableZeekElement';
+
 export const Link = pure<{ value: string | null | undefined; link?: string | null }>(
   ({ value, link }) => {
     if (value != null) {
@@ -126,6 +128,8 @@ export const Link = pure<{ value: string | null | undefined; link?: string | nul
   }
 );
 
+Link.displayName = 'Link';
+
 export const TotalVirusLinkSha = pure<{ value: string | null | undefined }>(({ value }) =>
   value != null ? (
     <LinkFlexItem grow={false}>
@@ -136,6 +140,8 @@ export const TotalVirusLinkSha = pure<{ value: string | null | undefined }>(({ v
     </LinkFlexItem>
   ) : null
 );
+
+TotalVirusLinkSha.displayName = 'TotalVirusLinkSha';
 
 // English Text for these codes are shortened from
 // https://docs.zeek.org/en/stable/scripts/base/protocols/conn/main.bro.html
@@ -252,3 +258,5 @@ export const ZeekSignature = pure<{ data: Ecs }>(({ data }) => {
     </>
   );
 });
+
+ZeekSignature.displayName = 'ZeekSignature';

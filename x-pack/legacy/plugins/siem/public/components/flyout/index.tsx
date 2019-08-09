@@ -107,6 +107,8 @@ export const FlyoutComponent = pure<Props>(
   )
 );
 
+FlyoutComponent.displayName = 'FlyoutComponent';
+
 const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
   const timelineById = defaultTo({}, timelineSelectors.timelineByIdSelector(state));
   const dataProviders = getOr([], `${timelineId}.dataProviders`, timelineById);

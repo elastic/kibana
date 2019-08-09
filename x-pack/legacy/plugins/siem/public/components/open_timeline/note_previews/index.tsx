@@ -46,3 +46,5 @@ export const NotePreviews = pure<{
     </NotePreviewsContainer>
   );
 });
+
+NotePreviews.displayName = 'NotePreviews';

@@ -139,6 +139,8 @@ const StatValue = pure<{ isLoading: boolean; value: React.ReactNode | null | und
   )
 );
 
+StatValue.displayName = 'StatValue';
+
 export const OverviewHostStats = pure<OverviewHostProps>(({ data, loading }) => (
   <EuiDescriptionList type="column">
     {overviewHostStats(data).map((item, index) => (
@@ -151,3 +153,5 @@ export const OverviewHostStats = pure<OverviewHostProps>(({ data, loading }) => 
     ))}
   </EuiDescriptionList>
 ));
+
+OverviewHostStats.displayName = 'OverviewHostStats';

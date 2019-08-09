@@ -44,3 +44,5 @@ export const NoteCardBody = pure<{ rawNote: string }>(({ rawNote }) => (
     />
   </BodyContainer>
 ));
+
+NoteCardBody.displayName = 'NoteCardBody';

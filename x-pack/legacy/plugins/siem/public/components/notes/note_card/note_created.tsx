@@ -22,3 +22,5 @@ export const NoteCreated = pure<{ created: Date }>(({ created }) => (
     </LocalizedDateTooltip>
   </NoteCreatedContainer>
 ));
+
+NoteCreated.displayName = 'NoteCreated';

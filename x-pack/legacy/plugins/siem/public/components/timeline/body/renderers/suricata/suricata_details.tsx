@@ -42,3 +42,5 @@ export const SuricataDetails = pure<{ browserFields: BrowserFields; data: Ecs }>
     return null;
   }
 });
+
+SuricataDetails.displayName = 'SuricataDetails';

@@ -9,7 +9,7 @@ exports[`suricata_row_renderer renders correctly against snapshot 1`] = `
     <styled.div
       width={100}
     >
-      <pure(Component)
+      <SuricataDetails
         browserFields={
           Object {
             "agent": Object {

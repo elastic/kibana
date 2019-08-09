@@ -111,6 +111,8 @@ const SourceArrow = pure<{
   );
 });
 
+SourceArrow.displayName = 'SourceArrow';
+
 /**
  * Visualizes the communication from a destination as an arrow with draggable
  * badges
@@ -185,6 +187,8 @@ const DestinationArrow = pure<{
   );
 });
 
+DestinationArrow.displayName = 'DestinationArrow';
+
 /**
  * Visualizes the communication between a source and a destination using arrows
  * that grow in thickness based on the percentage of bytes transferred, and stats badges
@@ -256,3 +260,5 @@ export const SourceDestinationArrows = pure<{
     </SourceDestinationArrowsContainer>
   );
 });
+
+SourceDestinationArrows.displayName = 'SourceDestinationArrows';

@@ -202,3 +202,5 @@ export const HostOverview = React.memo<HostSummaryProps>(
     );
   }
 );
+
+HostOverview.displayName = 'HostOverview';

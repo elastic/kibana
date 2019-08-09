@@ -89,3 +89,5 @@ export const CategoriesPane = pure<Props>(
     </>
   )
 );
+
+CategoriesPane.displayName = 'CategoriesPane';

@@ -51,3 +51,5 @@ export const TextFilter = pure<Props>(
     );
   }
 );
+
+TextFilter.displayName = 'TextFilter';

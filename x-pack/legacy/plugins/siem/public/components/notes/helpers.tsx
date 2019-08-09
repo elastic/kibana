@@ -73,6 +73,8 @@ export const NotesCount = pure<{
   </EuiFlexGroup>
 ));
 
+NotesCount.displayName = 'NotesCount';
+
 /** Creates a new instance of a `note` */
 export const createNote = ({
   newNote,

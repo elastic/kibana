@@ -96,3 +96,5 @@ export const SearchOrFilter = pure<Props>(
     </SearchOrFilterContainer>
   )
 );
+
+SearchOrFilter.displayName = 'SearchOrFilter';

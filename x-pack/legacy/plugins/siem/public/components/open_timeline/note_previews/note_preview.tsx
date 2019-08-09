@@ -63,3 +63,5 @@ export const NotePreview = pure<Pick<TimelineResultNote, 'note' | 'updated' | 'u
     </NotePreviewGroup>
   )
 );
+
+NotePreview.displayName = 'NotePreview';

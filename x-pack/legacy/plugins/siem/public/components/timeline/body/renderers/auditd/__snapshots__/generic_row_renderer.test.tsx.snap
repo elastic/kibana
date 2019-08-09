@@ -9,7 +9,7 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
     <styled.div
       width={100}
     >
-      <pure(Component)
+      <AuditdGenericDetails
         browserFields={Object {}}
         contextId="connected-to"
         data={
@@ -135,7 +135,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
     <styled.div
       width={100}
     >
-      <pure(Component)
+      <AuditdGenericFileDetails
         browserFields={Object {}}
         contextId="opened-file"
         data={

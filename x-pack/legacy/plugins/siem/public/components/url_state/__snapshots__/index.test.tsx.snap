@@ -353,7 +353,7 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                         }
                       }
                     >
-                      <withRouter(Connect(Component))
+                      <withRouter(Connect(UrlStateContainer))
                         indexPattern={
                           Object {
                             "fields": Array [
@@ -369,7 +369,7 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                         }
                       >
                         <Route>
-                          <Connect(Component)
+                          <Connect(UrlStateContainer)
                             history={
                               Object {
                                 "action": "POP",
@@ -588,9 +588,9 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                             >
                               <span />
                             </Component>
-                          </Connect(Component)>
+                          </Connect(UrlStateContainer)>
                         </Route>
-                      </withRouter(Connect(Component))>
+                      </withRouter(Connect(UrlStateContainer))>
                     </Router>
                   </DragDropContext>
                 </ThemeProvider>

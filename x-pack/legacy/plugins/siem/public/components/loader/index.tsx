@@ -72,3 +72,5 @@ export const Loader = pure<LoaderProps>(({ children, overlay, overlayBackground,
     </FlexGroup>
   </Aside>
 ));
+
+Loader.displayName = 'Loader';

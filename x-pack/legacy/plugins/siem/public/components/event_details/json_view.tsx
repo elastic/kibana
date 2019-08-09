@@ -40,5 +40,7 @@ export const JsonView = pure<Props>(({ data }) => (
   </JsonEditor>
 ));
 
+JsonView.displayName = 'JsonView';
+
 export const buildJsonView = (data: DetailItem[]) =>
   data.reduce((accumulator, item) => set(item.field, item.originalValue, accumulator), {});

@@ -171,3 +171,5 @@ export const IpOverview = pure<IpOverviewProps>(
     );
   }
 );
+
+IpOverview.displayName = 'IpOverview';

@@ -43,6 +43,8 @@ const HoverActionsPanel = pure<{ children: JSX.Element; show: boolean }>(({ chil
   </HoverActionsPanelContainer>
 ));
 
+HoverActionsPanel.displayName = 'HoverActionsPanel';
+
 const WithHoverActionsContainer = styled.div`
   display: flex;
   flex-direction: row;

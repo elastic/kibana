@@ -253,3 +253,5 @@ export const MlPopover = React.memo(() => {
     return null;
   }
 });
+
+MlPopover.displayName = 'MlPopover';

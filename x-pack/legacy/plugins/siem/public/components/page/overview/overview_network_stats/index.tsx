@@ -152,6 +152,8 @@ const StatValue = pure<{ isLoading: boolean; value: React.ReactNode | null | und
   )
 );
 
+StatValue.displayName = 'StatValue';
+
 export const OverviewNetworkStats = pure<OverviewNetworkProps>(({ data, loading }) => (
   <EuiDescriptionList type="column">
     {overviewNetworkStats(data).map((item, index) => (
@@ -164,3 +166,5 @@ export const OverviewNetworkStats = pure<OverviewNetworkProps>(({ data, loading 
     ))}
   </EuiDescriptionList>
 ));
+
+OverviewNetworkStats.displayName = 'OverviewNetworkStats';

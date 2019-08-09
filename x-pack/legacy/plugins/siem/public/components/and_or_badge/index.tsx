@@ -45,3 +45,5 @@ export const AndOrBadge = pure<{ type: AndOr }>(({ type }) => {
     </RoundedBadge>
   );
 });
+
+AndOrBadge.displayName = 'AndOrBadge';

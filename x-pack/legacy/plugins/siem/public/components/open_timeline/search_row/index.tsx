@@ -87,3 +87,5 @@ export const SearchRow = pure<Props>(
     </SearchRowContainer>
   )
 );
+
+SearchRow.displayName = 'SearchRow';

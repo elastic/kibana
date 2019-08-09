@@ -124,3 +124,5 @@ export const ProviderItemAndDragDrop = pure<ProviderItemDropProps>(
     );
   }
 );
+
+ProviderItemAndDragDrop.displayName = 'ProviderItemAndDragDrop';

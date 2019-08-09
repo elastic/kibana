@@ -45,3 +45,5 @@ export const RangePicker = pure<Props>(({ selected, onRangeSelected }) => {
     </SelectContainer>
   );
 });
+
+RangePicker.displayName = 'RangePicker';

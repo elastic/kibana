@@ -104,3 +104,5 @@ export const FieldsPane = pure<Props>(
     </>
   )
 );
+
+FieldsPane.displayName = 'FieldsPane';

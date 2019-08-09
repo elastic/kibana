@@ -87,3 +87,5 @@ export const TimelineHeader = pure<Props>(
     </TimelineHeaderContainer>
   )
 );
+
+TimelineHeader.displayName = 'TimelineHeader';

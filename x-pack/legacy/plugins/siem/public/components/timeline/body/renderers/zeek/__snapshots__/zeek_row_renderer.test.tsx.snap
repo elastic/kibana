@@ -9,7 +9,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
     <styled.div
       width={100}
     >
-      <pure(Component)
+      <ZeekDetails
         browserFields={
           Object {
             "agent": Object {

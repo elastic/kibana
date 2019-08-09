@@ -197,3 +197,5 @@ export const Providers = pure<Props>(
     </PanelProviders>
   )
 );
+
+Providers.displayName = 'Providers';

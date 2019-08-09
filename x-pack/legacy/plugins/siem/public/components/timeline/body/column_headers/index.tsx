@@ -188,3 +188,5 @@ export const ColumnHeaders = pure<Props>(
     );
   }
 );
+
+ColumnHeaders.displayName = 'ColumnHeaders';

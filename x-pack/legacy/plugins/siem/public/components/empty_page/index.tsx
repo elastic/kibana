@@ -74,3 +74,5 @@ export const EmptyPage = pure<EmptyPageProps>(
     />
   )
 );
+
+EmptyPage.displayName = 'EmptyPage';

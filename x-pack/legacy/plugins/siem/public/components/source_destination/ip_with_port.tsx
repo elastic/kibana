@@ -44,6 +44,8 @@ const PortWithSeparator = pure<{
   ) : null;
 });
 
+PortWithSeparator.displayName = 'PortWithSeparator';
+
 /**
  * Renders a draggable, hyperlinked IP address, and if provided, an associated
  * draggable, hyperlinked port (with a separator between the IP address and port)
@@ -78,3 +80,5 @@ export const IpWithPort = pure<{
     </EuiFlexGroup>
   );
 });
+
+IpWithPort.displayName = 'IpWithPort';

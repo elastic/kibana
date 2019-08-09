@@ -88,3 +88,5 @@ export const OpenTimelineModal = pure<OpenTimelineProps>(
     </>
   )
 );
+
+OpenTimelineModal.displayName = 'OpenTimelineModal';

@@ -286,6 +286,8 @@ export const PaginatedTable = memo<SiemTables>(
   }
 );
 
+PaginatedTable.displayName = 'PaginatedTable';
+
 const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
   position: relative;
 

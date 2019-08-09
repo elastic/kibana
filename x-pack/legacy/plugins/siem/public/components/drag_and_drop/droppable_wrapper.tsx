@@ -93,3 +93,5 @@ export const DroppableWrapper = pure<Props>(
     </Droppable>
   )
 );
+
+DroppableWrapper.displayName = 'DroppableWrapper';

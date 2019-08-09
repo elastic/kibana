@@ -107,3 +107,5 @@ export const FieldName = pure<{
     )}
   />
 ));
+
+FieldName.displayName = 'FieldName';

@@ -50,6 +50,8 @@ const FlowTargetSelectComponent = pure<FlowTargetSelectProps>(
   )
 );
 
+FlowTargetSelectComponent.displayName = 'FlowTargetSelectComponent';
+
 const makeMapStateToProps = () => {
   const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
   return (state: State) => {

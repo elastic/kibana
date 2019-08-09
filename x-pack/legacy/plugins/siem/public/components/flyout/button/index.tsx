@@ -108,3 +108,5 @@ export const FlyoutButton = pure<FlyoutButtonProps>(({ onOpen, show, dataProvide
     </Container>
   ) : null
 );
+
+FlyoutButton.displayName = 'FlyoutButton';

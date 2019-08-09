@@ -37,3 +37,5 @@ export const WithCopyToClipboard = pure<{ text: string; titleSummary?: string }>
     </WithCopyToClipboardContainer>
   )
 );
+
+WithCopyToClipboard.displayName = 'WithCopyToClipboard';

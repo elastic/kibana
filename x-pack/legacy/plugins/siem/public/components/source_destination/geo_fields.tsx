@@ -102,6 +102,8 @@ const GeoFieldValues = pure<{
   ) : null
 );
 
+GeoFieldValues.displayName = 'GeoFieldValues';
+
 /**
  * Renders a row of draggable text containing geographic fields, such as:
  * - `source|destination.geo.continent_name`
@@ -128,3 +130,5 @@ export const GeoFields = pure<GeoFieldsProps>(props => {
     </EuiFlexGroup>
   );
 });
+
+GeoFields.displayName = 'GeoFields';

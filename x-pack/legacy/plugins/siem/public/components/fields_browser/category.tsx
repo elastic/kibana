@@ -51,3 +51,5 @@ export const Category = pure<Props>(
     </>
   )
 );
+
+Category.displayName = 'Category';

@@ -104,3 +104,5 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
     );
   }
 );
+
+ProviderBadge.displayName = 'ProviderBadge';

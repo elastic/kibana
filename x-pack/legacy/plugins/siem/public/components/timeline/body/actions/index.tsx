@@ -166,3 +166,5 @@ export const Actions = pure<Props>(
     </ActionsContainer>
   )
 );
+
+Actions.displayName = 'Actions';

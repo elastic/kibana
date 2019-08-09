@@ -47,6 +47,8 @@ export const DropdownDisplay = pure<{ text: string }>(({ text }) => (
   </EuiText>
 ));
 
+DropdownDisplay.displayName = 'DropdownDisplay';
+
 export const getEventsSelectOptions = (): EventsSelectOption[] => [
   {
     inputDisplay: <InputDisplay />,

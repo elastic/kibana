@@ -205,3 +205,5 @@ export const Timeline = pure<Props>(
     );
   }
 );
+
+Timeline.displayName = 'Timeline';

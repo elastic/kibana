@@ -99,6 +99,8 @@ const FlyoutHeaderWithCloseButton = pure<{
   </FlyoutHeaderContainer>
 ));
 
+FlyoutHeaderWithCloseButton.displayName = 'FlyoutHeaderWithCloseButton';
+
 class FlyoutPaneComponent extends React.PureComponent<Props> {
   public render() {
     const {

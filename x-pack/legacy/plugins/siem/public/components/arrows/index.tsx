@@ -24,3 +24,5 @@ export const ArrowHead = pure<{
 }>(({ direction }) => (
   <EuiIcon color="subdued" data-test-subj="arrow-icon" size="s" type={direction} />
 ));
+
+ArrowHead.displayName = 'ArrowHead';
