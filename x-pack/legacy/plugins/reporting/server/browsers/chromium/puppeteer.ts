@@ -10,7 +10,9 @@ import puppeteerCore from 'puppeteer-core';
 
 // We export a set of types and other methods since we use puppeteer-core, which has an outdated @types package.
 // However, @types/puppeteer _is_ up-to-date, and this module merges them together.
-export const launch: (opts?: puppeteer.LaunchOptions) => Promise<puppeteer.Browser> =
-  puppeteerCore.launch;
 export type Browser = puppeteer.Browser;
 export type Page = puppeteer.Page;
+
+export const launch: (
+  opts?: puppeteer.LaunchOptions
+) => Promise<puppeteer.Browser> = puppeteerCore.launch.bind(puppeteerCore);
