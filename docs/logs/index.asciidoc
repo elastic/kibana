@@ -4,8 +4,11 @@
 
 [partintro]
 --
-Use the Logs UI to explore logs for common servers, containers, and services.  
-{kib} provides a compact, console-like display that you can customize.
+The Logs application enables you to explore logs for common servers, containers, and services.
+It has a compact, console-like display that you can customize.
+
+// +++ add a bit about what it does and the kind of things you can see.
+// ++ also state that you can get in from infrastructure with specific log settings
 
 * <<xpack-logs-getting-started>>
 * <<xpack-logs-using>>
