@@ -203,6 +203,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         const queryString = await queryBar.getQueryString();
         expect(queryString).to.eql('response:200');
       });
+
+      it('does not allow saving via the saved query manager popover with no query loaded', async () => {
+        await savedQueryManager.saveNewQueryMissingOrFail();
+      });
+
+      it('does not allow deleting a saved query from the saved query manager', async () => {
+        await savedQueryManager.deleteSavedQueryMissingOrFail('OKJpgs');
+      });
     });
 
     describe('discover and visualize privileges', () => {
