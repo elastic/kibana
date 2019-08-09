@@ -38,6 +38,16 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
       }
       return [];
     },
+    isTransferable: (column, newIndexPattern) => {
+      const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+
+      return Boolean(
+        newField &&
+          newField.type === 'number' &&
+          newField.aggregatable &&
+          (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
+      );
+    },
     buildColumn({ suggestedPriority, field }): T {
       if (!field) {
         throw new Error(`Invariant: A ${type} operation can only be built with a field`);

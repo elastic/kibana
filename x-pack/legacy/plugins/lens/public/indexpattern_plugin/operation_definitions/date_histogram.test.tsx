@@ -146,6 +146,85 @@ describe('date_histogram', () => {
     });
   });
 
+  describe('transfer', () => {
+    it('should adjust interval and time zone params if that is necessary due to restrictions', () => {
+      const transferedColumn = dateHistogramOperation.transfer!(
+        {
+          dataType: 'date',
+          isBucketed: true,
+          label: '',
+          operationType: 'date_histogram',
+          sourceField: 'dateField',
+          params: {
+            interval: 'd',
+          },
+        },
+        {
+          title: '',
+          id: '',
+          fields: [
+            {
+              name: 'dateField',
+              type: 'date',
+              aggregatable: true,
+              searchable: true,
+              aggregationRestrictions: {
+                date_histogram: {
+                  agg: 'date_histogram',
+                  time_zone: 'CET',
+                  calendar_interval: 'w',
+                },
+              },
+            },
+          ],
+        }
+      );
+      expect(transferedColumn).toEqual(
+        expect.objectContaining({
+          params: {
+            interval: 'w',
+            timeZone: 'CET',
+          },
+        })
+      );
+    });
+
+    it('should remove time zone param and normalize interval param', () => {
+      const transferedColumn = dateHistogramOperation.transfer!(
+        {
+          dataType: 'date',
+          isBucketed: true,
+          label: '',
+          operationType: 'date_histogram',
+          sourceField: 'dateField',
+          params: {
+            interval: '20s',
+          },
+        },
+        {
+          title: '',
+          id: '',
+          fields: [
+            {
+              name: 'dateField',
+              type: 'date',
+              aggregatable: true,
+              searchable: true,
+            },
+          ],
+        }
+      );
+      expect(transferedColumn).toEqual(
+        expect.objectContaining({
+          params: {
+            interval: 'M',
+            timeZone: undefined,
+          },
+        })
+      );
+    });
+  });
+
   describe('param editor', () => {
     it('should render current value', () => {
       const setStateSpy = jest.fn();

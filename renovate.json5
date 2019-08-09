@@ -617,6 +617,14 @@
         ],
       },
       {
+        groupSlug: 'jsdom',
+        groupName: 'jsdom related packages',
+        packageNames: [
+          'jsdom',
+          '@types/jsdom',
+        ],
+      },
+      {
         groupSlug: 'jsonwebtoken',
         groupName: 'jsonwebtoken related packages',
         packageNames: [

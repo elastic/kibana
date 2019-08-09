@@ -58,17 +58,30 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     }
     return [];
   },
+  isTransferable: (column, newIndexPattern) => {
+    const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+
+    return Boolean(
+      newField &&
+        newField.type === 'string' &&
+        newField.aggregatable &&
+        (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms)
+    );
+  },
   buildColumn({ suggestedPriority, columns, field }) {
+    if (!field) {
+      throw new Error('Invariant error: terms operation requires field');
+    }
     const existingMetricColumn = Object.entries(columns)
       .filter(([_columnId, column]) => column && isSortableByColumn(column))
       .map(([id]) => id)[0];
 
     return {
-      label: ofName(field ? field.name : ''),
-      dataType: field!.type as DataType,
+      label: ofName(field.name),
+      dataType: field.type as DataType,
       operationType: 'terms',
       suggestedPriority,
-      sourceField: field ? field.name : '',
+      sourceField: field.name,
       isBucketed: true,
       params: {
         size: DEFAULT_SIZE,
