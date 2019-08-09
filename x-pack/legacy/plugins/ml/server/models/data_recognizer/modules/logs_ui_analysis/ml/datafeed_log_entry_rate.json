@@ -8,11 +8,6 @@
         "fixed_interval": "900000ms"
       },
       "aggregations": {
-        "@timestamp": {
-          "max": {
-            "field": "@timestamp"
-          }
-        },
         "doc_count_per_minute": {
           "bucket_script": {
             "buckets_path": {
