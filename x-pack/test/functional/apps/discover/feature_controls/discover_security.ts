@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { Driver } from 'selenium-webdriver/firefox';
 import { SecurityService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -127,6 +128,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('allows deleting saved queries in the saved query manager ', async () => {
         await savedQueryManager.deleteSavedQuery('foo2');
+        // add a manual delay
+        await queryBar.setQuery('');
         await savedQueryManager.savedQueryMissingOrFail('foo2');
       });
     });
