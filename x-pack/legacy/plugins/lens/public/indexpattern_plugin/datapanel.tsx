@@ -333,4 +333,4 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   );
 };
 
-const MemoizedDataPanel = memo(InnerIndexPatternDataPanel);
+export const MemoizedDataPanel = memo(InnerIndexPatternDataPanel);

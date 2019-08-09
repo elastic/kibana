@@ -15,6 +15,8 @@ import { updateColumnParam } from '../state_helpers';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
+const supportedIntervals = ['M', 'w', 'd', 'h'];
+
 // Add ticks to EuiRange component props
 const FixedEuiRange = (EuiRange as unknown) as React.ComponentType<
   PropType<typeof EuiRange> & {
@@ -83,6 +85,51 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       },
     };
   },
+  isTransferable: (column, newIndexPattern) => {
+    const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+
+    return Boolean(
+      newField &&
+        newField.type === 'date' &&
+        newField.aggregatable &&
+        (!newField.aggregationRestrictions || newField.aggregationRestrictions.date_histogram)
+    );
+  },
+  transfer: (column, newIndexPattern) => {
+    const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+    if (
+      newField &&
+      newField.aggregationRestrictions &&
+      newField.aggregationRestrictions.date_histogram
+    ) {
+      const restrictions = newField.aggregationRestrictions.date_histogram;
+      return {
+        ...column,
+        params: {
+          ...column.params,
+          timeZone: restrictions.time_zone,
+          // TODO this rewrite logic is simplified - if the current interval is a multiple of
+          // the restricted interval, we could carry it over directly. However as the current
+          // UI does not allow to select multiples of an interval anyway, this is not included yet.
+          // If the UI allows to pick more complicated intervals, this should be re-visited.
+          interval: (newField.aggregationRestrictions.date_histogram.calendar_interval ||
+            newField.aggregationRestrictions.date_histogram.fixed_interval) as string,
+        },
+      };
+    } else {
+      return {
+        ...column,
+        params: {
+          ...column.params,
+          // TODO remove this once it's possible to specify free intervals instead of picking from a list
+          interval: supportedIntervals.includes(column.params.interval)
+            ? column.params.interval
+            : supportedIntervals[0],
+          timeZone: undefined,
+        },
+      };
+    }
+  },
   toEsAggsConfig: (column, columnId) => ({
     id: columnId,
     enabled: true,
@@ -109,14 +156,12 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
 
-    const intervals = ['M', 'w', 'd', 'h'];
-
     function intervalToNumeric(interval: string) {
-      return intervals.indexOf(interval);
+      return supportedIntervals.indexOf(interval);
     }
 
     function numericToInterval(i: number) {
-      return intervals[i];
+      return supportedIntervals[i];
     }
     return (
       <EuiForm>
@@ -136,11 +181,14 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
           ) : (
             <FixedEuiRange
               min={0}
-              max={intervals.length - 1}
+              max={supportedIntervals.length - 1}
               step={1}
               value={intervalToNumeric(column.params.interval)}
               showTicks
-              ticks={intervals.map((interval, index) => ({ label: interval, value: index }))}
+              ticks={supportedIntervals.map((interval, index) => ({
+                label: interval,
+                value: index,
+              }))}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setState(
                   updateColumnParam(
