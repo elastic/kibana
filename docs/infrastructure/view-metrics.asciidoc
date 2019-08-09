@@ -3,7 +3,7 @@
 
 == Viewing infrastructure metrics
 
-When you select *View Metrics* for a component in your infrastructure from the <<infra-ui, Infrastructure tab in Kibana>>, you can view detailed metrics for that component, and for any related components.
+When you select *View Metrics* for a component in your infrastructure from the <<infra-ui, Infrastructure application in Kibana>>, you can view detailed metrics for that component, and for any related components.
 
 [role="screenshot"]
 image::infrastructure/images/infra-view-metrics.png[Infrastructure View Metrics in Kibana]
@@ -14,7 +14,7 @@ image::infrastructure/images/infra-view-metrics.png[Infrastructure View Metrics 
 
 Use the time filter to select the time and date range for the metrics.
 
-To quickly select some popular time range options, click the calendar dropdown image:infrastructure/images/time-filter-calendar.png[]. In this dialog you can choose from:
+To quickly select some popular time range options, click the calendar dropdown image:infrastructure/images/time-filter-calendar.png[]. In this popup you can choose from:
 
 * *Quick select* to choose a recent time range, and use the back and forward arrows to move through the time ranges
 * *Commonly used* to choose a time range from some commonly used options such as *Last 15 minutes*, *Today*, or *Week to date*
@@ -22,7 +22,7 @@ To quickly select some popular time range options, click the calendar dropdown i
 
 NOTE: When you start auto-refresh from within this dialog, the calendar dropdown changes to a clock image:infrastructure/images/time-filter-clock.png[].
 
-For complete control over the start and end times, click the start time or end time shown in the bar beside the calendar dropdown. In this dialog, you can choose from the *Absolute*, *Relative* or *Now* tabs, then specify the required options.
+For complete control over the start and end times, click the start time or end time shown in the bar beside the calendar dropdown. In this popup, you can choose from the *Absolute*, *Relative* or *Now* tabs, then specify the required options.
 
 [float]
 [[infra-view-refresh-metrics-date]]

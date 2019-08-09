@@ -4,10 +4,9 @@
 
 [partintro]
 --
-The Infrastructure UI enables you to monitor your infrastructure and identify problems in real time.
+The Infrastructure application enables you to monitor your infrastructure and identify problems in real time.
 You start with a visual summary of your infrastructure where you can view basic metrics for common servers, containers, and services.
-Then you can drill down to view more detailed metrics.
-Alternatively, you can select a single component and view the metrics for that component, or seamlessly switch to view the corresponding logs, application traces or uptime information for that component.
+Then you can drill down to view more detailed metrics or other information for that component.
 
 You can:
 
@@ -25,7 +24,7 @@ You can optionally save these views and add them to {kibana-ref}/dashboard.html[
 [role="screenshot"]
 image::infrastructure/images/infra-sysmon.png[Infrastructure Overview in Kibana]
 
-To get started, you need to <<xpack-metrics-getting-started, start collecting metrics data from your infrastructure>>. Then you can <<infra-ui, use the Infrastructure UI to inspect and analyze your data>>.
+To get started, you need to <<xpack-metrics-getting-started, start collecting metrics data from your infrastructure>>. Then you can <<infra-ui, use the Infrastructure application to inspect and analyze your data>>.
 
 --
 

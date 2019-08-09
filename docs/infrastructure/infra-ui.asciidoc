@@ -1,12 +1,10 @@
 [role="xpack"]
 [[infra-ui]]
-== Using the Infrastructure UI
+== Using the Infrastructure application
 
-// +++ Gail provides this as an example of a good document. Leave it as is!
-
-Use the Infrastructure UI in {kib} to monitor your infrastructure and identify problems in real time.
-You can explore metrics for hosts, containers and services.
-You can also drill down to view more detailed metrics, or seamlessly switch to view the corresponding logs, application traces and uptime information.
+Use the Infrastructure application in {kib} to monitor your infrastructure and identify problems in real time.
+You can explore metrics for hosts, containers, and services.
+You can also drill down to view more detailed metrics, or seamlessly switch to view the corresponding logs, application traces, and uptime information.
 
 Initially, the *Inventory* tab shows an overview of the hosts in of your infrastructure and the current CPU usage for each host.
 From here, you can drill down into areas of interest.
@@ -22,14 +20,14 @@ Select the high-level view from *Hosts*, *Kubernetes*, or *Docker*.
 When you change views, you see the same data through the perspective of a different category.
 
 The default representation is the *Map view*, which shows your components in a _waffle map_ of one or more rectangular grids.
-If the view you select has a large number of components, you can hover over a component to see the the details for that component. Alternatively, if you would prefer to see your infrastructure as a table, click *Table view*.
+If the view you select has a large number of components, you can hover over a component to see the details for that component. Alternatively, if you would prefer to see your infrastructure as a table, click *Table view*.
 
 [float]
 [[infra-metric]]
 === Select the metric to view
 
 Select the metric to view from the *Metric* dropdown list.
-The available metrics are those that are most relevant for the high level view you selected.
+The available metrics are those that are most relevant for the high-level view you selected.
 
 [float]
 [[infra-group]]
@@ -63,7 +61,7 @@ Select *Auto-refresh* to keep up-to-date metrics information coming in, or *Stop
 [[infra-configure-source]]
 === Configure the data to use for your metrics
 
-The default source configuration for metrics is specified in the {kibana-ref}/infrastructure-ui-settings-kb.html[Infrastructure UI settings] in the {kibana-ref}/settings.html[Kibana configuration file].
+The default source configuration for metrics is specified in the {kibana-ref}/infrastructure-ui-settings-kb.html[Infrastructure application settings] in the {kibana-ref}/settings.html[Kibana configuration file].
 The default configuration uses the `metricbeat-*` index pattern to query the data.
 The default configuration also defines field settings for things like timestamps and container names.
 
@@ -101,13 +99,13 @@ Hover over a component to see more information about that component.
 Click a component to see the other actions available for that component.
 You can:
 
-* select *View Metrics* to <<xpack-view-metrics, view detailed infrastructure metrics for that component>>.
+* Select *View Metrics* to <<xpack-view-metrics, view detailed infrastructure metrics for that component>>.
 
-* select *View Logs* to <<xpack-logs-using, view the logs for that component>> in the *Logs* tab.
+* Select *View Logs* to <<xpack-logs-using, view the logs for that component>> in the *Logs* application.
 
 Depending on the features you have installed and configured, you may also be able to:
 
-* select *View APM* to <<traces, view APM traces for the selected component>> in the *APM* tab.
+* Select *View APM* to <<traces, view APM traces for the selected component>> in the *APM* application.
 
-* select *View Uptime* to <<uptime-overview, view uptime information for the selected component>> in the *Uptime* tab.
+* Select *View Uptime* to <<uptime-overview, view uptime information for the selected component>> in the *Uptime* application.
 
