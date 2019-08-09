@@ -50,7 +50,7 @@ interface Props {
   title: string;
   options: Array<{
     name: string;
-    count: string;
+    count: number;
   }>;
   onChange: (value: string[]) => void;
   value: string[];
@@ -157,7 +157,12 @@ const Filter = ({
       </Popover>
       {value.length ? (
         <>
-          <FilterBadgeList onChange={onChange} value={value} />
+          <FilterBadgeList
+            onRemove={val => {
+              onChange(value.filter(v => val !== v));
+            }}
+            value={value}
+          />
           <EuiSpacer size="s"></EuiSpacer>
         </>
       ) : null}

@@ -8,7 +8,7 @@ import { Server } from 'hapi';
 import { Projection } from '../../../../public/projections/typings';
 import { UIFilters } from '../../../../typings/ui-filters';
 import { getUiFiltersES } from '../../helpers/convert_ui_filters/get_ui_filters_es';
-import { localUIFilters, LocalUIFilterName, TERM_COUNT_LIMIT } from './config';
+import { localUIFilters, LocalUIFilterName } from './config';
 
 export const getFilterAggregations = async ({
   server,
@@ -50,13 +50,11 @@ export const getFilterAggregations = async ({
               nestedAggregationKey in projection.body.aggs
                 ? {
                     aggs: {
-                      count: {
-                        terms: {
-                          ...projection.body.aggs[nestedAggregationKey].terms,
-                          order: {
-                            _count: 'desc'
-                          },
-                          size: TERM_COUNT_LIMIT
+                      bucket_count: {
+                        cardinality: {
+                          field:
+                            projection.body.aggs[nestedAggregationKey].terms
+                              .field
                         }
                       }
                     }

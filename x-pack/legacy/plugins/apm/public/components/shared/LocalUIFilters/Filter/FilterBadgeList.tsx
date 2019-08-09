@@ -19,17 +19,17 @@ const BadgeText = styled.div`
 
 interface Props {
   value: string[];
-  onChange: (value: string[]) => void;
+  onRemove: (val: string) => void;
 }
 
-const FilterBadgeList = ({ onChange, value }: Props) => (
+const FilterBadgeList = ({ onRemove, value }: Props) => (
   <EuiFlexGrid gutterSize="s">
     {value.map(val => (
       <EuiFlexItem key={val} grow={false}>
         <button
           type="button"
           onClick={() => {
-            onChange(value.filter(v => val !== v));
+            onRemove(val);
           }}
         >
           <EuiBadge color="hollow">

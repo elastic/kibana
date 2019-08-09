@@ -27,7 +27,8 @@ declare module 'elasticsearch' {
     | 'sum'
     | 'extended_stats'
     | 'filter'
-    | 'filters';
+    | 'filters'
+    | 'cardinality';
 
   type AggOptions = AggregationOptionMap & {
     [key: string]: any;
@@ -124,6 +125,9 @@ declare module 'elasticsearch' {
         };
         filter: FilterAggregation<AggregationOption[AggregationName]>;
         filters: FiltersAggregation<AggregationOption[AggregationName]>;
+        cardinality: {
+          value: number;
+        };
       }[AggregationType & keyof AggregationOption[AggregationName]];
     }
   >;

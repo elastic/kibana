@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
+import {
+  TRANSACTION_DURATION,
+  TRANSACTION_SAMPLED
+} from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
 import { Setup } from '../helpers/setup_request';
 import { getTracesProjection } from '../../../public/projections/traces';
@@ -39,6 +42,12 @@ export function transactionGroupsFetcher(options: Options, setup: Setup) {
   const params = mergeProjection(projection, {
     body: {
       size: 0,
+      query: {
+        bool: {
+          // prefer sampled transactions
+          should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
+        }
+      },
       aggs: {
         transactions: {
           terms: {

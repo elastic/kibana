@@ -8,13 +8,9 @@ Object {
         "aggs": Object {
           "by_terms": Object {
             "aggs": Object {
-              "count": Object {
-                "terms": Object {
+              "bucket_count": Object {
+                "cardinality": Object {
                   "field": "service.name",
-                  "order": Object {
-                    "_count": "desc",
-                  },
-                  "size": 10,
                 },
               },
             },
@@ -44,13 +40,9 @@ Object {
         "aggs": Object {
           "by_terms": Object {
             "aggs": Object {
-              "count": Object {
-                "terms": Object {
+              "bucket_count": Object {
+                "cardinality": Object {
                   "field": "service.name",
-                  "order": Object {
-                    "_count": "desc",
-                  },
-                  "size": 10,
                 },
               },
             },
