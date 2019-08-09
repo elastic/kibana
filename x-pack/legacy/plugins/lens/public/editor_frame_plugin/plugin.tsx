@@ -14,7 +14,6 @@ import {
   EmbeddablePlugin,
   embeddablePlugin,
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public';
-import { ExpressionRenderer } from '../../../../../../src/legacy/core_plugins/data/public';
 import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
 import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
