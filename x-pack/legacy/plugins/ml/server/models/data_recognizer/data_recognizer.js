@@ -761,7 +761,7 @@ export class DataRecognizer {
   }
 
   applyJobConfigOverrides(moduleConfig, jobOverrides, jobPrefix = '') {
-    if(jobOverrides !== undefined) {
+    if(jobOverrides !== undefined && jobOverrides !== null) {
       if (typeof jobOverrides !== 'object') {
         throw Boom.badRequest(
           `Incompatible jobOverrides type (${typeof jobOverrides}). It needs to be an object or array of objects.`
@@ -773,15 +773,22 @@ export class DataRecognizer {
       const overrides = Array.isArray(jobOverrides) ? jobOverrides : [jobOverrides];
       const { jobs } = moduleConfig;
 
-      // first collect the overrides which don't contain a job id
-      // these will be applied to all jobs in the module
-      const generalOverrides = overrides.filter(o => o.job_id === undefined);
+      // separate all the overrides.
+      // the overrides which don't contain a job id will be applied to all jobs in the module
+      const generalOverrides = [];
+      const jobSpecificOverrides = [];
+      overrides.forEach(o => {
+        if (o.job_id === undefined) {
+          generalOverrides.push(o);
+        } else {
+          jobSpecificOverrides.push(o);
+        }
+      });
+
       generalOverrides.forEach(o => {
         jobs.forEach(({ config }) => merge(config, o));
       });
 
-      // collect all job specific overrides
-      const jobSpecificOverrides = overrides.filter(o => o.job_id !== undefined);
       jobSpecificOverrides.forEach(o => {
         // for each override, find the relevant job.
         // note, the job id already has the prefix prepended to it
@@ -796,7 +803,7 @@ export class DataRecognizer {
   }
 
   applyDatafeedConfigOverrides(moduleConfig, datafeedOverrides, jobPrefix = '') {
-    if(datafeedOverrides !== undefined) {
+    if(datafeedOverrides !== undefined && datafeedOverrides !== null) {
       if (typeof datafeedOverrides !== 'object') {
         throw Boom.badRequest(
           `Incompatible datafeedOverrides type (${typeof datafeedOverrides}). It needs to be an object or array of objects.`
@@ -808,9 +815,18 @@ export class DataRecognizer {
       const overrides = Array.isArray(datafeedOverrides) ? datafeedOverrides : [datafeedOverrides];
       const { datafeeds } = moduleConfig;
 
-      // first collect the overrides which don't contain a datafeed id or a job id
-      // these will be applied to all jobs in the module
-      const generalOverrides = overrides.filter(o => o.datafeed_id === undefined && o.job_id === undefined);
+      // separate all the overrides.
+      // the overrides which don't contain a datafeed id or a job id will be applied to all jobs in the module
+      const generalOverrides = [];
+      const datafeedSpecificOverrides = [];
+      overrides.forEach(o => {
+        if (o.datafeed_id === undefined && o.job_id === undefined) {
+          generalOverrides.push(o);
+        } else {
+          datafeedSpecificOverrides.push(o);
+        }
+      });
+
       generalOverrides.forEach(o => {
         datafeeds.forEach(({ config }) => {
           merge(config, o);
@@ -818,7 +834,6 @@ export class DataRecognizer {
       });
 
       // collect all the overrides which contain either a job id or a datafeed id
-      const datafeedSpecificOverrides = overrides.filter(o => (o.datafeed_id !== undefined || o.job_id !== undefined));
       datafeedSpecificOverrides.forEach(o => {
         // either a job id or datafeed id has been specified, so create a new id
         // containing either one plus the prefix
