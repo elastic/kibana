@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { Driver } from 'selenium-webdriver/firefox';
 import { SecurityService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -199,22 +198,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.createShortUrlMissingOrFail();
       });
 
-      it('does not show the save query button in the query bar in dirty state with no query loaded', async () => {
-        await queryBar.setQuery('response');
-        await testSubjects.missingOrFail('savedQuerySaveNew');
-      });
-
-      it('does not show the save as new query button in the query bar with non-dirty state and query loaded', async () => {
-        await queryBar.setQuery('OK Jpgs');
-        await testSubjects.click('autocompleteSuggestion-savedQuery-OK-Jpgs');
-        await queryBar.openSuggestionsDropDown();
-        await testSubjects.missingOrFail('savedQuerySaveAsNew');
-      });
-
-      it('does not show the save changes to existing or save as new button in the query bar with a dirty state and a query loaded', async () => {
-        await queryBar.setQuery('response:404 ');
-        await testSubjects.missingOrFail('savedQuerySaveChanges');
-        await testSubjects.missingOrFail('savedQuerySaveAsNew');
+      it('allows loading a saved query via the saved query manager', async () => {
+        await savedQueryManager.loadSavedQuery('OKJpgs');
+        const queryString = await queryBar.getQueryString();
+        expect(queryString).to.eql('response:200');
       });
     });
 

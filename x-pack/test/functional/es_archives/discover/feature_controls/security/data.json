@@ -44,7 +44,7 @@
     "id": "query:okjpgs",
     "source": {
       "query": {
-        "title": "OK Jpgs",
+        "title": "OKJpgs",
         "description": "Ok responses for jpg files",
         "query": {
           "query": "response:200",
