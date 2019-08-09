@@ -5,9 +5,10 @@
  */
 
 import {
+  Logger,
   CoreSetup,
   CoreStart,
-  Logger,
+  PluginName,
   PluginInitializerContext,
 } from '../../../../src/core/server';
 
@@ -21,20 +22,20 @@ export class Plugin {
   private readonly logger: Logger;
   private readonly pluginAPI: IAuditLogPluginAPI;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.logger = this.initializerContext.logger.get();
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
     this.logger.info('constructing plugin');
 
     this.pluginAPI = new PluginAPI(this.logger);
   }
 
-  setup(core: CoreSetup): IAuditLogPluginAPI {
-    this.logger.info('setting up plugin');
+  setup(core: CoreSetup, deps: Record<PluginName, unknown>): IAuditLogPluginAPI {
+    this.logger.info(`setup:[${Object.keys(core)}] deps:[${Object.keys(deps)}]`);
     return this.pluginAPI;
   }
 
-  start(core: CoreStart): IAuditLogPluginAPI {
-    this.logger.info('starting plugin');
+  start(core: CoreStart, deps: Record<PluginName, unknown>): IAuditLogPluginAPI {
+    this.logger.info(`start:[${Object.keys(core)}] deps:[${Object.keys(deps)}]`);
     return this.pluginAPI;
   }
 

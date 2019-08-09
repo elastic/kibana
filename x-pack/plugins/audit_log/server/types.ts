@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ObjectType } from '@kbn/config-schema';
+import { ObjectType, TypeOf } from '@kbn/config-schema';
 
-export type IAuditRecord = ObjectType;
+export type IAuditRecord = TypeOf<ObjectType>;
 
 export interface IAuditLog {
-  log(data: any): Promise<void>;
+  log(data: IAuditRecord): Promise<void>;
   search(): Promise<IAuditRecord[]>;
 }
 

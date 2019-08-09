@@ -34,7 +34,7 @@ class Plugin {
   private readonly log: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.log = this.initializerContext.logger.get();
+    this.log = this.initializerContext.logger.get('audit_log');
   }
 
   public setup(core: CoreSetup, deps: Record<PluginName, unknown>) {

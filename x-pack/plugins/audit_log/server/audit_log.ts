@@ -5,7 +5,7 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { IAuditLog } from './types';
+import { IAuditLog, IAuditRecord } from './types';
 
 import { Logger } from '../../../../src/core/server';
 
@@ -26,7 +26,7 @@ export class AuditLog implements IAuditLog {
     this.recordSchema = options.recordSchema;
   }
 
-  async log(record: any) {
+  async log(record: IAuditRecord): Promise<void> {
     try {
       this.recordSchema.validate(record);
     } catch (err) {
@@ -38,7 +38,7 @@ export class AuditLog implements IAuditLog {
     this.logger.info(`audit_log: ${this.id}: ${JSON.stringify(record)}`);
   }
 
-  async search() {
+  async search(): Promise<IAuditRecord[]> {
     // TODO: eventually, this return a search over saved objects
     return [];
   }
