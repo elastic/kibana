@@ -13,7 +13,7 @@ import React, {
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { JobGroup } from '../job_group';
-import { getSelectedJobIdFromUrl } from '../utils';
+import { getSelectedJobIdFromUrl, clearSelectedJobIdFromUrl } from '../utils';
 
 import {
   EuiSearchBar,
@@ -57,6 +57,8 @@ class JobFilterBarUI extends Component {
     this.setFilters = props.setFilters;
   }
 
+  urlFilterIdCleared = false;
+
   componentDidMount() {
     // If job id is selected in url, filter table to that id
     const selectedId = getSelectedJobIdFromUrl(window.location.href);
@@ -75,6 +77,10 @@ class JobFilterBarUI extends Component {
     if (error) {
       this.setState({ error });
     } else {
+      if (query.text === '' && this.urlFilterIdCleared === false) {
+        this.urlFilterIdCleared = true;
+        clearSelectedJobIdFromUrl(window.location.href);
+      }
       let clauses = [];
       if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
         clauses = query.ast.clauses;

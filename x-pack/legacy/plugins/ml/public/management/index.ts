@@ -11,26 +11,27 @@
  */
 
 import { management } from 'ui/management';
+// @ts-ignore No declaration file for module
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { i18n } from '@kbn/i18n';
 import { JOBS_LIST_PATH } from './management_urls';
 import 'plugins/ml/management/jobs_list';
 
-
-management.register('ml', {
-  display: i18n.translate(
-    'xpack.ml.management.mlTitle', {
+if (xpackInfo.get('features.ml.showLinks', false) === true) {
+  management.register('ml', {
+    display: i18n.translate('xpack.ml.management.mlTitle', {
       defaultMessage: 'Machine Learning',
     }),
-  order: 100,
-  icon: 'machineLearningApp',
-});
+    order: 100,
+    icon: 'machineLearningApp',
+  });
 
-management.getSection('ml').register('jobsList', {
-  name: 'jobsListLink',
-  order: 10,
-  display: i18n.translate(
-    'xpack.ml.management.jobsListTitle', {
+  management.getSection('ml').register('jobsList', {
+    name: 'jobsListLink',
+    order: 10,
+    display: i18n.translate('xpack.ml.management.jobsListTitle', {
       defaultMessage: 'Jobs list',
     }),
-  url: `#${JOBS_LIST_PATH}`,
-});
+    url: `#${JOBS_LIST_PATH}`,
+  });
+}

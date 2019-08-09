@@ -314,3 +314,11 @@ export function getSelectedJobIdFromUrl(url) {
   }
 }
 
+export function clearSelectedJobIdFromUrl(url) {
+  if (typeof (url) === 'string' && url.includes('mlManagement') && url.includes('jobId')) {
+    const urlParams = getUrlVars(url);
+    const clearedParams = `ml#/jobs?_g=${urlParams._g}`;
+    window.history.replaceState({}, document.title, clearedParams);
+  }
+}
+

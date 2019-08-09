@@ -14,16 +14,13 @@ import { getPrivileges, getManageMlPrivileges } from './get_privileges';
 import { ACCESS_DENIED_PATH } from '../management/management_urls';
 
 let privileges: Privileges = getDefaultPrivileges();
-type PrivilageKey = keyof typeof privileges;
 // manage_ml requires all monitor and admin cluster privileges: https://github.com/elastic/elasticsearch/blob/664a29c8905d8ce9ba8c18aa1ed5c5de93a0eabc/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/security/authz/privilege/ClusterPrivilege.java#L53
 export function canGetManagementMlJobs(kbnUrl: any) {
   return new Promise((resolve, reject) => {
     getManageMlPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
       privileges = capabilities;
       // Loop through all privilages to ensure they are all set to true.
-      const isManageML = Object.keys(privileges).every(
-        privilegeType => privileges[privilegeType as PrivilageKey] === true
-      );
+      const isManageML = Object.values(privileges).every(p => p === true);
 
       if (isManageML === true && isPlatinumOrTrialLicense === true) {
         return resolve();

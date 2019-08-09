@@ -174,7 +174,7 @@ export class JobsListView extends Component {
             job={this.state.fullJobsList[jobId]}
             addYourself={this.addUpdateFunction}
             removeYourself={this.removeUpdateFunction}
-            fullDetails={this.props.isManagementTable !== true}
+            showFullDetails={this.props.isManagementTable !== true}
           />
         );
       } else {
@@ -183,7 +183,7 @@ export class JobsListView extends Component {
             jobId={jobId}
             addYourself={this.addUpdateFunction}
             removeYourself={this.removeUpdateFunction}
-            fullDetails={this.props.isManagementTable !== true}
+            showFullDetails={this.props.isManagementTable !== true}
           />
         );
       }
@@ -205,7 +205,7 @@ export class JobsListView extends Component {
                     job={job}
                     addYourself={this.addUpdateFunction}
                     removeYourself={this.removeUpdateFunction}
-                    fullDetails={this.props.isManagementTable !== true}
+                    showFullDetails={this.props.isManagementTable !== true}
                   />
                 );
               }

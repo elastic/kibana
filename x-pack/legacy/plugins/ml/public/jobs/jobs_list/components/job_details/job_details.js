@@ -71,7 +71,7 @@ class JobDetailsUI extends Component {
         datafeedTimingStats
       } = extractJobDetails(job);
 
-      const { intl, fullDetails } = this.props;
+      const { intl, showFullDetails } = this.props;
 
       const tabs = [{
         id: 'job-settings',
@@ -112,7 +112,7 @@ class JobDetailsUI extends Component {
       },
       ];
 
-      if (fullDetails) {
+      if (showFullDetails) {
         // Datafeed should be at index 2 in tabs array for full details
         tabs.splice(2, 0,  {
           id: 'datafeed',
@@ -140,7 +140,7 @@ class JobDetailsUI extends Component {
         });
       }
 
-      if (mlAnnotationsEnabled && fullDetails) {
+      if (mlAnnotationsEnabled && showFullDetails) {
         tabs.push({
           id: 'annotations',
           name: intl.formatMessage({
@@ -173,7 +173,7 @@ JobDetailsUI.propTypes = {
   job: PropTypes.object,
   addYourself: PropTypes.func.isRequired,
   removeYourself: PropTypes.func.isRequired,
-  fullDetails: PropTypes.bool
+  showFullDetails: PropTypes.bool
 };
 
 export const JobDetails = injectI18n(JobDetailsUI);
