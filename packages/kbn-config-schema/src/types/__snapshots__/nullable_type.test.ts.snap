@@ -17,3 +17,9 @@ exports[`validates contained type 1`] = `
 - [0]: value is [foo] but it must have a maximum length of [1].
 - [1]: expected value to equal [null] but got [foo]"
 `;
+
+exports[`validates type errors in object 1`] = `
+"[foo]: types that failed validation:
+- [foo.0]: value is [ab] but it must have a maximum length of [1].
+- [foo.1]: expected value to equal [null] but got [ab]"
+`;
