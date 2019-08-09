@@ -21,6 +21,7 @@ export function PointSeriesPageProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const find = getService('find');
+  const comboBox = getService('comboBox');
 
   class PointSeriesVis {
     async clickOptions() {
@@ -78,7 +79,8 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     async setGridValueAxis(axis) {
-      return await find.clickByCssSelector(`select#gridAxis option[value="${axis}"]`);
+      log.debug(`setGridValueAxis(${axis})`);
+      return await comboBox.set('gridAxis', axis);
     }
 
     async toggleCollapsibleTitle(title) {
