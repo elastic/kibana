@@ -367,7 +367,12 @@ function replaceMovAvgToMovFn(doc, logger) {
 
 function migrateSearchSortToNestedArray(doc) {
   const sort = get(doc, 'attributes.sort');
-  if (!sort) return;
+  if (!sort) return doc;
+
+  // Don't do anything if we already have a two dimensional array
+  if (Array.isArray(sort) && sort.length > 0 && Array.isArray(sort[0])) {
+    return doc;
+  }
 
   return {
     ...doc,
