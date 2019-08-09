@@ -83,7 +83,7 @@ function DetailLayout(props: LayoutProps) {
   const styles = panel === 'overview' ? overviewContentStyles() : {};
 
   return (
-    <>
+    <Fragment>
       <EuiPage restrictWidth={restrictWidth} style={{ padding: '16px 16px 0 0' }}>
         <NavButtonBack />
       </EuiPage>
@@ -97,7 +97,7 @@ function DetailLayout(props: LayoutProps) {
           <Content hasLogoPanel={!!iconType} {...props} />
         </EuiPageBody>
       </EuiPage>
-    </>
+    </Fragment>
   );
 }
 
@@ -142,14 +142,14 @@ function Header(props: HeaderProps) {
 function OverviewPanel(props: IntegrationInfo) {
   const { description } = props;
   return (
-    <>
+    <Fragment>
       <EuiTitle size="xs">
         <span>About</span>
       </EuiTitle>
       <EuiText>
         <p>{description}</p>
       </EuiText>
-    </>
+    </Fragment>
   );
 }
 type ContentPanelProps = IntegrationInfo & Pick<DetailProps, 'panel'>;
@@ -298,7 +298,7 @@ function Requirements(props: RequirementsProps) {
   const { requirements } = props;
 
   return (
-    <>
+    <Fragment>
       <EuiTitle size="xs">
         <span style={{ paddingBottom: '16px' }}>Compatibility</span>
       </EuiTitle>
@@ -318,7 +318,7 @@ function Requirements(props: RequirementsProps) {
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}
-    </>
+    </Fragment>
   );
 }
 

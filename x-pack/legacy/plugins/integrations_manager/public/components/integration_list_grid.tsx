@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { Fragment } from 'react';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import {
   InstallationStatus,
@@ -26,11 +26,11 @@ interface ListProps {
 export function IntegrationsGridByStatus({ map }: GridProps) {
   if (!map) return null;
   return (
-    <>
+    <Fragment>
       {entries(map).map(([status, list]) => (
         <IntegrationListGrid key={status} status={status} list={list} />
       ))}
-    </>
+    </Fragment>
   );
 }
 
@@ -40,7 +40,7 @@ export function IntegrationListGrid({ status, list }: ListProps) {
     not_installed: 'Available Integrations',
   };
   return (
-    <>
+    <Fragment>
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
@@ -57,7 +57,7 @@ export function IntegrationListGrid({ status, list }: ListProps) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-    </>
+    </Fragment>
   );
 }
 

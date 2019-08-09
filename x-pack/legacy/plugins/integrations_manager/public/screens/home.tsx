@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -43,7 +43,7 @@ type LayoutProps = {
 function HomeLayout(props: LayoutProps) {
   const { map, restrictWidth } = props;
   return (
-    <>
+    <Fragment>
       <EuiPage style={{ borderBottom: '1px solid #D3DAE6', paddingBottom: '7px' }}>
         <EuiPageBody restrictWidth={restrictWidth}>
           <Header />
@@ -54,7 +54,7 @@ function HomeLayout(props: LayoutProps) {
           <IntegrationsGridByStatus map={map} />
         </EuiPageBody>
       </EuiPage>
-    </>
+    </Fragment>
   );
 }
 
