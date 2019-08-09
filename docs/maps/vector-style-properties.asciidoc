@@ -28,6 +28,11 @@ Use *Icon* to symbolize Points as icons.
 
 *Symbol size*:: The radius of the symbol size, in pixels.
 
+Available icons
+
+[role="screenshot"]
+image::maps/images/maki-icons.png[]
+
 
 [float]
 [[polygon-style-properties]]
