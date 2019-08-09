@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { idx } from '@kbn/elastic-idx';
+
 import { Dictionary } from '../../../../../../common/types/common';
 
 import { DataFrameTransformId, DataFrameTransformPivotConfig } from '../../../../common';
@@ -77,6 +79,16 @@ export interface DataFrameTransformStats {
   task_state: DATA_FRAME_TASK_STATE;
 }
 
+export function getTransformProgress(item: DataFrameTransformListRow) {
+  if (isCompletedBatchTransform(item)) {
+    return 100;
+  }
+
+  return Math.round(
+    idx(item, _ => _.stats.checkpointing.next.checkpoint_progress.percent_complete) || 0
+  );
+}
+
 export function isDataFrameTransformStats(arg: any): arg is DataFrameTransformStats {
   return (
     typeof arg === 'object' &&
@@ -89,8 +101,9 @@ export function isDataFrameTransformStats(arg: any): arg is DataFrameTransformSt
 export interface DataFrameTransformListRow {
   id: DataFrameTransformId;
   checkpointing: object;
-  stats: DataFrameTransformStats;
   config: DataFrameTransformPivotConfig;
+  mode?: string; // added property on client side to allow filtering by this field
+  stats: DataFrameTransformStats;
 }
 
 // Used to pass on attribute names to table columns

@@ -30,7 +30,7 @@ import { buildActiveMappings } from './build_active_mappings';
 import { CallCluster } from './call_cluster';
 import { VersionedTransformer } from './document_migrator';
 import { fetchInfo, FullIndexInfo } from './elastic_index';
-import { LogFn, Logger, MigrationLogger } from './migration_logger';
+import { LogFn, SavedObjectsMigrationLogger, MigrationLogger } from './migration_logger';
 
 export interface MigrationOpts {
   batchSize: number;
@@ -57,7 +57,7 @@ export interface Context {
   source: FullIndexInfo;
   dest: FullIndexInfo;
   documentMigrator: VersionedTransformer;
-  log: Logger;
+  log: SavedObjectsMigrationLogger;
   batchSize: number;
   pollInterval: number;
   scrollDuration: string;
