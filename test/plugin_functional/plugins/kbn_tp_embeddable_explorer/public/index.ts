@@ -30,34 +30,21 @@ import {
 import { Plugin as EmbeddableExplorer } from './plugin';
 import { createShim } from './shim';
 
-const onCoreReady = (callback: () => void) => {
-  if (npStart.core) {
-    console.log('CORE READY'); // eslint-disable-line
-    callback();
-    return;
-  }
+const helloWorldAction = new HelloWorldAction(npStart.core.overlays);
+const sayHelloAction = new SayHelloAction(alert);
+const sendMessageAction = new SendMessageAction(npStart.core.overlays);
+const helloWorldEmbeddableFactory = new HelloWorldEmbeddableFactory();
+const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
+  {},
+  start.executeTriggerActions,
+  npStart.core.overlays
+);
 
-  console.log('WAITING FOR CORE'); // eslint-disable-line
-  setTimeout(() => onCoreReady(callback), 10);
-};
+start.registerAction(helloWorldAction);
+start.registerAction(sayHelloAction);
+start.registerAction(sendMessageAction);
+start.registerEmbeddableFactory(helloWorldEmbeddableFactory.type, helloWorldEmbeddableFactory);
+start.registerEmbeddableFactory(contactCardEmbeddableFactory.type, contactCardEmbeddableFactory);
 
-onCoreReady(() => {
-  const helloWorldAction = new HelloWorldAction(npStart.core.overlays);
-  const sayHelloAction = new SayHelloAction(alert);
-  const sendMessageAction = new SendMessageAction(npStart.core.overlays);
-  const helloWorldEmbeddableFactory = new HelloWorldEmbeddableFactory();
-  const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
-    {},
-    start.executeTriggerActions,
-    npStart.core.overlays
-  );
-
-  start.registerAction(helloWorldAction);
-  start.registerAction(sayHelloAction);
-  start.registerAction(sendMessageAction);
-  start.registerEmbeddableFactory(helloWorldEmbeddableFactory.type, helloWorldEmbeddableFactory);
-  start.registerEmbeddableFactory(contactCardEmbeddableFactory.type, contactCardEmbeddableFactory);
-
-  const embeddableExplorer = new EmbeddableExplorer();
-  embeddableExplorer.start(createShim());
-});
+const embeddableExplorer = new EmbeddableExplorer();
+embeddableExplorer.start(createShim());
