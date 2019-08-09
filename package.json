@@ -143,7 +143,7 @@
     "chalk": "^2.4.1",
     "check-disk-space": "^2.1.0",
     "color": "1.0.3",
-    "commander": "2.20.0",
+    "commander": "3.0.0",
     "compare-versions": "3.4.0",
     "core-js": "2.6.9",
     "css-loader": "2.1.1",
