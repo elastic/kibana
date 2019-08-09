@@ -20,6 +20,10 @@
 /**
  * The Kibana Core APIs for server-side plugins.
  *
+ * A plugin requires a `kibana.json` file at it's root directory that follows
+ * {@link PluginManifest | the manfiest schema} to define static plugin
+ * information required to load the plugin.
+ *
  * A plugin's `server/index` file must contain a named import, `plugin`, that
  * implements {@link PluginInitializer} which returns an object that implements
  * {@link Plugin}.
@@ -46,7 +50,7 @@ import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plug
 import { ContextSetup } from './context';
 
 export { bootstrap } from './bootstrap';
-export { ConfigService } from './config';
+export { ConfigPath, ConfigService } from './config';
 export { CoreId } from './core_context';
 export {
   CallAPIOptions,
@@ -71,9 +75,11 @@ export {
   HttpResponseOptions,
   HttpResponsePayload,
   HttpServerSetup,
+  IKibanaSocket,
   IsAuthenticated,
   KibanaRequest,
   KibanaRequestRoute,
+  LifecycleResponseFactory,
   KnownHeaders,
   LegacyRequest,
   OnPreAuthHandler,
@@ -101,6 +107,7 @@ export {
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
+  PluginManifest,
   PluginName,
 } from './plugins';
 
