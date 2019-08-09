@@ -9,6 +9,7 @@ import React from 'react';
 import { xpackInfo } from '../../../xpack_main/public/services/xpack_info';
 import { banners, addAppRedirectMessageToUrl } from 'ui/notify';
 import { LICENSE_TYPE } from '../../common/constants/license';
+import { LICENSE_STATUS_VALID } from '../../../../common/constants/license_status';
 
 import chrome from 'ui/chrome';
 import { EuiCallOut } from '@elastic/eui';
@@ -119,5 +120,10 @@ export function isFullLicense() {
 }
 
 export function xpackFeatureAvailable(feature) {
-  return xpackInfo.get(`features.${feature}.isAvailable`, false);
+  switch (feature) {
+    case 'watcher':
+      return xpackInfo.get(`features.${feature}.status`, false) === LICENSE_STATUS_VALID;
+    default:
+      return xpackInfo.get(`features.${feature}.isAvailable`, false);
+  }
 }
