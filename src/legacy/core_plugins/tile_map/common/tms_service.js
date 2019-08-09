@@ -28,15 +28,18 @@ export class TMSService {
     return this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
   });
 
-  _getVectorStyleJson = _.once(async () => {
+  _getVectorStyleJsonRaw = _.once(async () => {
     const vectorUrl = this._getVectorStyleUrl();
     const url = this._proxyPath + vectorUrl;
     const vectorJson =  await this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
+    return { ...vectorJson };
+  });
 
+  _getVectorStyleJsonInlined = _.once(async () => {
+    const vectorJson = await this._getVectorStyleJsonRaw();
     const inlinedSources = {};
     for (const sourceName in vectorJson.sources) {
       if (vectorJson.sources.hasOwnProperty(sourceName)) {
-
         const sourceUrl = vectorJson.sources[sourceName].url;
         const extendedUrl = this._emsClient.extendUrlWithParams(sourceUrl);
         const sourceJson = await this._emsClient.getManifest(extendedUrl);
@@ -97,11 +100,15 @@ export class TMSService {
   }
 
   async getVectorStyleSheet() {
-    return await this._getVectorStyleJson();
+    return await this._getVectorStyleJsonInlined();
+  }
+
+  async getVectorStyleSheetRaw() {
+    return await this._getVectorStyleJsonRaw();
   }
 
   async getSpriteSheetMeta(isRetina = false) {
-    const vectorStyleJson = await this._getVectorStyleJson();
+    const vectorStyleJson = await this._getVectorStyleJsonInlined();
     const suffix = isRetina ? '@2x' : '';
     const metaUrl = vectorStyleJson.sprite + suffix + '.json';
     const spritePngs =  vectorStyleJson.sprite + suffix + '.png';

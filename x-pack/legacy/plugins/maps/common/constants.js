@@ -5,12 +5,18 @@
  */
 
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
+
 export const EMS_FILES_CATALOGUE_PATH = 'ems/files';
 export const EMS_FILES_DEFAULT_JSON_PATH = 'ems/files/file';
 
 export const EMS_TILES_CATALOGUE_PATH = 'ems/tiles';
+
 export const EMS_TILES_RASTER_TILE_PATH = 'ems/tiles/raster/tile';
 export const EMS_TILES_RASTER_STYLE_PATH = 'ems/tiles/raster/style';
+
+export const EMS_TILES_VECTOR_STYLE_PATH = 'ems/tiles/vector/style';
+export const EMS_TILES_VECTOR_SOURCE_PATH = 'ems/tiles/vector/source';
+
 
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';

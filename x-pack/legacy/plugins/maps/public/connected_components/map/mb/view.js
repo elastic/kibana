@@ -38,6 +38,17 @@ const TOOLTIP_TYPE = {
   LOCKED: 'LOCKED'
 };
 
+
+
+// const emptyImageCanvas = document.createElement('canvas');
+// emptyImageCanvas.width = 1;
+// emptyImageCanvas.height = 1;
+// const emptyImageBase64Url = emptyImageCanvas.toDataURL();
+
+
+// eslint-disable-next-line max-len
+const transparent1x1Base64Url = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=';
+
 export class MBMapContainer extends React.Component {
 
   state = {
@@ -384,8 +395,18 @@ export class MBMapContainer extends React.Component {
       mbMap.addControl(
         new mapboxgl.NavigationControl({ showCompass: false }), 'top-left'
       );
+
+      let emptyImage;
+      mbMap.on('styleimagemissing', (e) => {
+        if (emptyImage) {
+          mbMap.addImage(e.id, emptyImage);
+        }
+      });
       mbMap.on('load', () => {
-        resolve(mbMap);
+        mbMap.loadImage(transparent1x1Base64Url, (error, data) => {
+          emptyImage = data;
+          resolve(mbMap);
+        });
       });
     });
   }

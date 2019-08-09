@@ -11,6 +11,8 @@ import {
   EMS_FILES_DEFAULT_JSON_PATH,
   EMS_TILES_CATALOGUE_PATH,
   EMS_TILES_RASTER_STYLE_PATH,
+  EMS_TILES_VECTOR_STYLE_PATH,
+  EMS_TILES_VECTOR_SOURCE_PATH,
   EMS_TILES_RASTER_TILE_PATH,
   GIS_API_PATH
 } from '../common/constants';
@@ -196,12 +198,22 @@ export function initRoutes(server, licenseUid) {
         const newService = {
           ...service
         };
-        const rasterFormats = service.formats.filter(format => format.format === 'raster');
+
         newService.formats = [];
+        const rasterFormats = service.formats.filter(format => format.format === 'raster');
         if (rasterFormats.length) {
           const newUrl = `${GIS_API_PATH}/${EMS_TILES_RASTER_STYLE_PATH}?id=${service.id}`;
           newService.formats.push({
             ...rasterFormats[0],
+            url: newUrl
+          });
+        }
+
+        const vectorFormats = service.formats.filter(format => format.format === 'vector');
+        if (vectorFormats.length) {
+          const newUrl = `${GIS_API_PATH}/${EMS_TILES_VECTOR_STYLE_PATH}?id=${service.id}`;
+          newService.formats.push({
+            ...vectorFormats[0],
             url: newUrl
           });
         }
@@ -240,6 +252,67 @@ export function initRoutes(server, licenseUid) {
       };
     }
   });
+
+
+  server.route({
+    method: 'GET',
+    path: `${ROOT}/${EMS_TILES_VECTOR_STYLE_PATH}`,
+    handler: async (request) => {
+
+      checkEMSProxyConfig();
+
+      if (!request.query.id) {
+        server.log('warning', 'Must supply id parameter to retrieve EMS raster style');
+        return null;
+      }
+
+      const tmsServices = await emsClient.getTMSServices();
+      const tmsService = tmsServices.find(layer => layer.getId() === request.query.id);
+      if (!tmsService) {
+        return null;
+      }
+      const style = await tmsService.getVectorStyleSheetRaw();
+
+      return style;
+      // const newUrl = `${GIS_API_PATH}/${EMS_TILES_RASTER_TILE_PATH}?id=${request.query.id}&x={x}&y={y}&z={z}`;
+      // return {
+      //   ...style,
+      //   tiles: [newUrl]
+      // };
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: `${ROOT}/${EMS_TILES_VECTOR_SOURCE_PATH}`,
+    handler: async (request) => {
+
+      checkEMSProxyConfig();
+
+      if (!request.query.id || !request.query.sourceId) {
+        server.log('warning', 'Must supply id and sourceId parameter to retrieve EMS vector source');
+        return null;
+      }
+
+      const tmsServices = await emsClient.getTMSServices();
+      const tmsService = tmsServices.find(layer => layer.getId() === request.query.id);
+      if (!tmsService) {
+        return null;
+      }
+      const style = await tmsService.getVectorStyleSheetRaw();
+
+      return style;
+      // const newUrl = `${GIS_API_PATH}/${EMS_TILES_RASTER_TILE_PATH}?id=${request.query.id}&x={x}&y={y}&z={z}`;
+      // return {
+      //   ...style,
+      //   tiles: [newUrl]
+      // };
+    }
+  });
+
+
+
+
 
 
   function checkEMSProxyConfig() {
