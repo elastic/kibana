@@ -47,7 +47,7 @@ export function getMetricAggs(listingMetrics, bucketSize) {
       date_histogram: {
         field: 'timestamp',
         min_doc_count: 1,
-        interval: bucketSize + 's'
+        fixed_interval: bucketSize + 's'
       },
       aggs: metric.aggs || metricAgg
     };
