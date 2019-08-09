@@ -23,7 +23,6 @@ import 'plugins/ml/services/calendar_service';
 import 'plugins/ml/components/messagebar';
 import 'plugins/ml/data_frame';
 import 'plugins/ml/data_frame_analytics';
-import 'plugins/ml/data_visualizer';
 import 'plugins/ml/datavisualizer';
 import 'plugins/ml/explorer';
 import 'plugins/ml/timeseriesexplorer';
@@ -34,7 +33,6 @@ import 'plugins/ml/components/confirm_modal';
 import 'plugins/ml/components/navigation_menu';
 import 'plugins/ml/components/loading_indicator';
 import 'plugins/ml/settings';
-import 'plugins/ml/file_datavisualizer';
 import 'uiExports/autocompleteProviders';
 
 import uiRoutes from 'ui/routes';
