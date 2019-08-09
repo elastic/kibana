@@ -12,7 +12,7 @@ import {
   geoShapeToGeometry,
   createExtentFilter,
   convertMapExtentToPolygon,
-  setPrecision,
+  roundCoordinates,
 } from './elasticsearch_geo_utils';
 
 import { flattenHitWrapper } from 'ui/index_patterns';
@@ -441,14 +441,14 @@ describe('convertMapExtentToPolygon', () => {
   });
 });
 
-describe('setPrecision', () => {
+describe('roundCoordinates', () => {
   it('should set coordinates precision', () => {
     const coordinates  = [
       [110.21515290475513, 40.23193047044205],
       [-105.30620093073654, 40.23193047044205],
       [-105.30620093073654, 30.647128842617803]
     ];
-    setPrecision(coordinates);
+    roundCoordinates(coordinates);
     expect(coordinates).toEqual([
       [110.21515, 40.23193],
       [-105.30620, 40.23193],

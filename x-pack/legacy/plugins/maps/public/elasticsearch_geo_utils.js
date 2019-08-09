@@ -331,10 +331,10 @@ export function createGeometryFilterWithMeta({
   };
 }
 
-export function setPrecision(coordinates, precision = DECIMAL_DEGREES_PRECISION) {
+export function roundCoordinates(coordinates, precision = DECIMAL_DEGREES_PRECISION) {
   coordinates.forEach((value, index) => {
     if (Array.isArray(value)) {
-      setPrecision(value);
+      roundCoordinates(value);
     } else if (!isNaN(value)) {
       coordinates[index] = _.round(value, precision);
     }

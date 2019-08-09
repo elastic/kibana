@@ -26,7 +26,7 @@ import { DRAW_TYPE } from '../../../actions/map_actions';
 import {
   createGeometryFilterWithMeta,
   getBoundingBoxGeometry,
-  setPrecision
+  roundCoordinates
 } from '../../../elasticsearch_geo_utils';
 import chrome from 'ui/chrome';
 import { spritesheet } from '@elastic/maki';
@@ -97,7 +97,7 @@ export class MBMapContainer extends React.Component {
     const isBoundingBox = this.props.drawState.drawType === DRAW_TYPE.BOUNDS;
     const geometry = e.features[0].geometry;
     // MapboxDraw returns coordinates with 12 decimals. Round to a more reasonable number
-    setPrecision(geometry.coordinates);
+    roundCoordinates(geometry.coordinates);
 
     // TODO allow user to set geojson label when initiating draw
     const geometryLabel = isBoundingBox
