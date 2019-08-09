@@ -31,12 +31,14 @@
   }
 }
 
-$suggestionHeight: 100px;
+// These sizes also match canvas' page thumbnails for consistency
+$lnsSuggestionHeight: 100px;
+$lnsSuggestionWidth: 150px;
 
 .lnsSuggestionPanel__button {
   flex: 0 0 auto;
-  width: 150px !important;
-  height: $suggestionHeight;
+  width: $lnsSuggestionWidth !important;
+  height: $lnsSuggestionHeight;
   // Allows the scrollbar to stay flush to window
   margin-bottom: $euiSize;
 }
@@ -52,6 +54,6 @@ $suggestionHeight: 100px;
 }
 
 .lnsSuggestionChartWrapper {
-  height: $suggestionHeight - $euiSize;
+  height: $lnsSuggestionHeight - $euiSize;
   pointer-events: none;
 }
