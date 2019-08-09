@@ -47,6 +47,7 @@ interface State {
  */
 
 class EmbeddableChildPanelUi extends React.Component<EmbeddableChildPanelUiProps, State> {
+  [panel: string]: any;
   public mounted: boolean;
   public embeddable!: IEmbeddable | ErrorEmbeddable;
   private subscription?: Subscription;

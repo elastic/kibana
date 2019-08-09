@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import React from 'react';
+import { npStart } from 'ui/new_platform';
+import { EuiFlyoutBody } from '@elastic/eui';
 import { triggerRegistry, CONTEXT_MENU_TRIGGER, attachAction } from '../../triggers';
 import { Action, ActionContext, actionRegistry, IncompatibleActionError } from '../../actions';
 import { EmbeddableInput, Embeddable, EmbeddableOutput, IEmbeddable } from '../../embeddables';
@@ -36,13 +38,17 @@ export function hasFullNameOutput(
   );
 }
 
+function openSayHelloFlyout(hello: string) {
+  npStart.core.overlays.openFlyout(<EuiFlyoutBody>{hello}</EuiFlyoutBody>);
+}
+
 export class SayHelloAction extends Action {
   public readonly type = SAY_HELLO_ACTION;
   private sayHello: (name: string) => void;
 
   // Taking in a function, instead of always directly interacting with the dom,
   // can make testing the execute part of the action easier.
-  constructor(sayHello: (name: string) => void) {
+  constructor(sayHello: (name: string) => void = openSayHelloFlyout) {
     super(SAY_HELLO_ACTION);
     this.sayHello = sayHello;
   }
@@ -83,11 +89,5 @@ export class SayHelloAction extends Action {
   }
 }
 
-// eslint-disable-next-line
-import { npStart } from 'ui/new_platform';
-import { openFlyoutPure } from '../../../../../../plugins/kibana_react/public';
-
-const openFlyout = openFlyoutPure(npStart.core);
-
-actionRegistry.set(SAY_HELLO_ACTION, new SayHelloAction(openFlyout));
+actionRegistry.set(SAY_HELLO_ACTION, new SayHelloAction());
 attachAction(triggerRegistry, { triggerId: CONTEXT_MENU_TRIGGER, actionId: SAY_HELLO_ACTION });
