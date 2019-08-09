@@ -31,7 +31,7 @@
   }
 }
 
-$suggestionHeight: 100px - $euiSize;
+$suggestionHeight: 100px;
 
 .lnsSuggestionPanel__button {
   flex: 0 0 auto;
@@ -42,11 +42,13 @@ $suggestionHeight: 100px - $euiSize;
 }
 
 .lnsSidebar__suggestionIcon {
+  color: $euiColorDarkShade;
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: $euiSizeS;
 }
 
 .lnsSuggestionChartWrapper {

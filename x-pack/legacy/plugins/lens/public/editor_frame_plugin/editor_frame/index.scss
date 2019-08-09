@@ -79,6 +79,8 @@ $lnsPanelMinWidth: $euiSize * 18;
   }
 
   .lnsPageContent {
+    @include euiScrollBar;
+    overflow: hidden;
     padding: 0;
     margin-bottom: $euiSize;
     display: flex;
@@ -91,12 +93,12 @@ $lnsPanelMinWidth: $euiSize * 18;
     }
 
     .lnsPageContentBody {
+      @include euiScrollBar;
       flex-grow: 1;
-      padding: $euiSize;
       display: flex;
       align-items: stretch;
       justify-content: stretch;
-      overflow: hidden;
+      overflow: auto;
 
       > * {
         flex: 1 1 100%;
@@ -116,6 +118,7 @@ $lnsPanelMinWidth: $euiSize * 18;
   align-items: center;
   justify-content: center;
   overflow-x: hidden;
+  padding: $euiSize;
 }
 
 .lnsTitleInput {

@@ -54,7 +54,7 @@ const SuggestionPreview = ({
     <EuiToolTip content={suggestion.title}>
       <EuiPanel
         className="lnsSuggestionPanel__button"
-        paddingSize="s"
+        paddingSize="none"
         data-test-subj="lnsSuggestion"
         onClick={() => {
           dispatch(toSwitchAction(suggestion));
@@ -89,7 +89,7 @@ const SuggestionPreview = ({
           />
         ) : (
           <div className="lnsSidebar__suggestionIcon">
-            <EuiIcon size="xxl" color="subdued " type={suggestion.previewIcon} />
+            <EuiIcon size="xxl" type={suggestion.previewIcon} />
           </div>
         )}
       </EuiPanel>
