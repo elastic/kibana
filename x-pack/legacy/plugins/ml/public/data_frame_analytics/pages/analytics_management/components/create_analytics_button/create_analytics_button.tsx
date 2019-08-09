@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment, FC } from 'react';
+import React, { Fragment, FC } from 'react';
 
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 
@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
 import { useKibanaContext } from '../../../../../contexts/kibana';
-import { isValidIndexName } from '../../../../../../common/util/es_utils';
 import {
   checkPermission,
   createPermissionFailureMessage,
@@ -21,73 +20,36 @@ import {
 import { ml } from '../../../../../services/ml_api_service';
 
 import {
-  DataFrameAnalyticsOutlierConfig,
   refreshAnalyticsList$,
+  useRefreshAnalyticsList,
+  DataFrameAnalyticsOutlierConfig,
   REFRESH_ANALYTICS_LIST_STATE,
-  isAnalyticsIdValid,
-  DataFrameAnalyticsId,
 } from '../../../../common';
+
+import { useCreateAnalyticsForm, IndexPatternTitle } from '../../hooks/use_create_analytics_form';
 
 import { CreateAnalyticsForm } from '../create_analytics_form';
 import { CreateAnalyticsModal } from '../create_analytics_modal';
 
-type EsIndexName = string;
-type IndexPatternTitle = string;
-
-// List of system fields we want to ignore.
+// List of system fields we want to ignore for the numeric field check.
 const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
 
 export const CreateAnalyticsButton: FC = () => {
   const kibanaContext = useKibanaContext();
+  const { refresh } = useRefreshAnalyticsList();
 
-  const [isJobCreated, setJobCreated] = useState(false);
-  const [isJobStarted, setJobStarted] = useState(false);
-  const [isModalButtonDisabled, setModalButtonDisabled] = useState(false);
-  const [isModalVisible, setModalVisible] = useState(false);
+  const { state, actions } = useCreateAnalyticsForm();
+
+  const { destinationIndex, isModalVisible, jobId, sourceIndex } = state;
+
+  const { reset, setFormState } = actions;
 
   const disabled =
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics');
 
-  const [jobIds, setJobIds] = useState<DataFrameAnalyticsId[]>([]);
-  const [jobId, setJobId] = useState<DataFrameAnalyticsId>('');
-  const jobIdExists = jobIds.some(id => jobId === id);
-  const jobIdEmpty = jobId === '';
-  const jobIdValid = isAnalyticsIdValid(jobId);
-
-  const [indexNames, setIndexNames] = useState<EsIndexName[]>([]);
-  const [indexPatternTitles, setIndexPatternTitles] = useState<IndexPatternTitle[]>([]);
-  const [indexPatternTitlesWithNumericFields, setIndexPatternTitlesWithNumericfields] = useState<
-    IndexPatternTitle[]
-  >([]);
-
-  const [sourceIndex, setSourceIndex] = useState<EsIndexName>('');
-  const sourceIndexNameExists = indexNames.some(name => sourceIndex === name);
-  const sourceIndexNameEmpty = sourceIndex === '';
-  const sourceIndexNameValid = isValidIndexName(sourceIndex);
-
-  const [destinationIndex, setDestinationIndex] = useState<EsIndexName>('');
-  const destinationIndexNameExists = indexNames.some(name => destinationIndex === name);
-  const destinationIndexNameEmpty = destinationIndex === '';
-  const destinationIndexNameValid = isValidIndexName(destinationIndex);
-
-  const [createIndexPattern, setCreateIndexPattern] = useState(false);
-  const destinationIndexPatternTitleExists = indexPatternTitles.some(
-    name => destinationIndex === name
-  );
-
-  const valid =
-    !jobIdEmpty &&
-    jobIdValid &&
-    !jobIdExists &&
-    !sourceIndexNameEmpty &&
-    sourceIndexNameValid &&
-    !destinationIndexNameEmpty &&
-    destinationIndexNameValid &&
-    (!destinationIndexPatternTitleExists || !createIndexPattern);
-
   const createAnalyticsJob = async () => {
-    setModalButtonDisabled(true);
+    setFormState({ isModalButtonDisabled: true });
 
     const analyticsJobConfig = {
       source: {
@@ -102,13 +64,9 @@ export const CreateAnalyticsButton: FC = () => {
     };
 
     try {
-      const response = await ml.dataFrameAnalytics.createDataFrameAnalytics(
-        jobId,
-        analyticsJobConfig
-      );
-
-      setJobCreated(true);
-      setModalButtonDisabled(false);
+      await ml.dataFrameAnalytics.createDataFrameAnalytics(jobId, analyticsJobConfig);
+      setFormState({ isJobCreated: true, isModalButtonDisabled: false });
+      refresh();
     } catch (e) {
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob', {
@@ -116,19 +74,19 @@ export const CreateAnalyticsButton: FC = () => {
           values: { error: JSON.stringify(e) },
         })
       );
-      setModalButtonDisabled(false);
+      setFormState({ isModalButtonDisabled: false });
     }
   };
 
   const startAnalyticsJob = async () => {
-    setModalButtonDisabled(true);
+    setFormState({ isModalButtonDisabled: true });
     try {
       const response = await ml.dataFrameAnalytics.startDataFrameAnalytics(jobId);
       if (response.acknowledged !== true) {
         throw new Error(response);
       }
-      setJobStarted(true);
-      setModalButtonDisabled(false);
+      setFormState({ isJobStarted: true, isModalButtonDisabled: false });
+      refresh();
     } catch (e) {
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob', {
@@ -136,31 +94,21 @@ export const CreateAnalyticsButton: FC = () => {
           values: { error: JSON.stringify(e) },
         })
       );
-      setModalButtonDisabled(false);
+      setFormState({ isModalButtonDisabled: false });
     }
   };
 
-  const closeModal = () => setModalVisible(false);
+  const closeModal = () => setFormState({ isModalVisible: false });
   const openModal = async () => {
-    setModalButtonDisabled(false);
-    setJobCreated(false);
-    setJobStarted(false);
-    setJobIds([]);
-    setJobId('');
-    setIndexNames([]);
-    setIndexPatternTitles([]);
-    setIndexPatternTitlesWithNumericfields([]);
-    setSourceIndex('');
-    setDestinationIndex('');
-    setCreateIndexPattern(false);
+    reset();
 
     // re-fetch existing analytics job IDs and indices for form validation
     try {
-      setJobIds(
-        (await ml.dataFrameAnalytics.getDataFrameAnalytics()).data_frame_analytics.map(
+      setFormState({
+        jobIds: (await ml.dataFrameAnalytics.getDataFrameAnalytics()).data_frame_analytics.map(
           (job: DataFrameAnalyticsOutlierConfig) => job.id
-        )
-      );
+        ),
+      });
     } catch (e) {
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.dataframe.analytics.create.errorGettingDataFrameAnalyticsList', {
@@ -172,7 +120,7 @@ export const CreateAnalyticsButton: FC = () => {
     }
 
     try {
-      setIndexNames((await ml.getIndices()).map(index => index.name));
+      setFormState({ indexNames: (await ml.getIndices()).map(index => index.name) });
     } catch (e) {
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.dataframe.stepDetailsForm.errorGettingDataFrameIndexNames', {
@@ -184,12 +132,12 @@ export const CreateAnalyticsButton: FC = () => {
 
     try {
       // Set the index pattern titles which the user can choose as the source.
-      setIndexPatternTitles(await kibanaContext.indexPatterns.getTitles());
+      setFormState({ indexPatternTitles: await kibanaContext.indexPatterns.getTitles() });
       // Find out which index patterns contain numeric fields.
       // This will be used to provide a hint in the form that an analytics jobs is not
       // able to identify outliers if there are no numeric fields present.
       const ids = await kibanaContext.indexPatterns.getIds();
-      const newIndexPatternTitlesWithNumericFields: IndexPatternTitle[] = [];
+      const newIndexPatternsWithNumericFields: IndexPatternTitle[] = [];
       ids.forEach(async id => {
         const indexPattern = await kibanaContext.indexPatterns.get(id);
         if (
@@ -198,10 +146,12 @@ export const CreateAnalyticsButton: FC = () => {
             .map(f => f.type)
             .includes('number')
         ) {
-          newIndexPatternTitlesWithNumericFields.push(indexPattern.title);
+          newIndexPatternsWithNumericFields.push(indexPattern.title);
         }
       });
-      setIndexPatternTitlesWithNumericfields(newIndexPatternTitlesWithNumericFields);
+      setFormState({
+        indexPatternsWithNumericFields: newIndexPatternsWithNumericFields,
+      });
     } catch (e) {
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.dataframe.stepDetailsForm.errorGettingIndexPatternTitles', {
@@ -211,7 +161,7 @@ export const CreateAnalyticsButton: FC = () => {
       );
     }
 
-    setModalVisible(true);
+    setFormState({ isModalVisible: true });
   };
 
   const button = (
@@ -240,42 +190,22 @@ export const CreateAnalyticsButton: FC = () => {
     );
   }
 
+  const createAnalyticsModalProps = {
+    closeModal,
+    createAnalyticsJob,
+    isJobCreated: state.isJobCreated,
+    isJobStarted: state.isJobStarted,
+    isModalButtonDisabled: state.isModalButtonDisabled,
+    isValid: state.isValid,
+    startAnalyticsJob,
+  };
+
   return (
     <Fragment>
       {button}
       {isModalVisible && (
-        <CreateAnalyticsModal
-          closeModal={closeModal}
-          createAnalyticsJob={createAnalyticsJob}
-          isJobCreated={isJobCreated}
-          isJobStarted={isJobStarted}
-          isModalButtonDisabled={isModalButtonDisabled}
-          startAnalyticsJob={startAnalyticsJob}
-          valid={valid}
-        >
-          <CreateAnalyticsForm
-            createIndexPattern={createIndexPattern}
-            destinationIndex={destinationIndex}
-            destinationIndexNameEmpty={destinationIndexNameEmpty}
-            destinationIndexNameExists={destinationIndexNameExists}
-            destinationIndexNameValid={destinationIndexNameValid}
-            destinationIndexPatternTitleExists={destinationIndexPatternTitleExists}
-            indexPatternTitles={indexPatternTitles}
-            indexPatternTitlesWithNumericFields={indexPatternTitlesWithNumericFields}
-            isJobCreated={isJobCreated}
-            jobId={jobId}
-            jobIdEmpty={jobIdEmpty}
-            jobIdValid={jobIdValid}
-            jobIdExists={jobIdExists}
-            setCreateIndexPattern={setCreateIndexPattern}
-            setDestinationIndex={setDestinationIndex}
-            setJobId={setJobId}
-            setSourceIndex={setSourceIndex}
-            sourceIndex={sourceIndex}
-            sourceIndexNameEmpty={sourceIndexNameEmpty}
-            sourceIndexNameExists={sourceIndexNameExists}
-            sourceIndexNameValid={sourceIndexNameValid}
-          />
+        <CreateAnalyticsModal {...createAnalyticsModalProps}>
+          <CreateAnalyticsForm actions={actions} formState={state} />
         </CreateAnalyticsModal>
       )}
     </Fragment>

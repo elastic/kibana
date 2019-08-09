@@ -26,7 +26,7 @@ interface CreateAnalyticsModalProps {
   isJobStarted: boolean;
   isModalButtonDisabled: boolean;
   startAnalyticsJob: () => void;
-  valid: boolean;
+  isValid: boolean;
 }
 
 export const CreateAnalyticsModal: FC<CreateAnalyticsModalProps> = ({
@@ -37,7 +37,7 @@ export const CreateAnalyticsModal: FC<CreateAnalyticsModalProps> = ({
   isJobStarted,
   isModalButtonDisabled,
   startAnalyticsJob,
-  valid,
+  isValid,
 }) => (
   <EuiOverlayMask>
     <EuiModal onClose={closeModal} initialFocus="[name=popswitch]">
@@ -55,7 +55,7 @@ export const CreateAnalyticsModal: FC<CreateAnalyticsModalProps> = ({
         <EuiButtonEmpty onClick={closeModal}>Cancel</EuiButtonEmpty>
 
         {!isJobCreated && (
-          <EuiButton disabled={!valid || isModalButtonDisabled} onClick={createAnalyticsJob} fill>
+          <EuiButton disabled={!isValid || isModalButtonDisabled} onClick={createAnalyticsJob} fill>
             Create
           </EuiButton>
         )}
