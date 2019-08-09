@@ -7,10 +7,12 @@
 import Boom from 'boom';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { ConfigOptions } from 'elasticsearch';
+import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
 import { IncomingHttpHeaders } from 'http';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { PeerCertificate } from 'tls';
 import { Readable } from 'stream';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
@@ -25,9 +27,10 @@ import { Url } from 'url';
 export type APICaller = (endpoint: string, clientParams: Record<string, any>, options?: CallAPIOptions) => Promise<unknown>;
 
 // Warning: (ae-forgotten-export) The symbol "AuthResult" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type AuthenticationHandler = (request: KibanaRequest, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
+export type AuthenticationHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: AuthToolkit) => AuthResult | KibanaResponse | Promise<AuthResult | KibanaResponse>;
 
 // @public
 export type AuthHeaders = Record<string, string | string[]>;
@@ -49,10 +52,6 @@ export enum AuthStatus {
 // @public
 export interface AuthToolkit {
     authenticated: (data?: AuthResultParams) => AuthResult;
-    redirected: (url: string) => AuthResult;
-    rejected: (error: Error, options?: {
-        statusCode?: number;
-    }) => AuthResult;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
@@ -249,6 +248,15 @@ export interface HttpServiceStart {
     isListening: (port: number) => boolean;
 }
 
+// @public
+export interface IKibanaSocket {
+    // (undocumented)
+    getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
+    // (undocumented)
+    getPeerCertificate(detailed: false): PeerCertificate | null;
+    getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
+}
+
 // @internal (undocumented)
 export interface InternalCoreSetup {
     // (undocumented)
@@ -285,6 +293,8 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     // (undocumented)
     readonly query: Query;
     readonly route: RecursiveReadonly<KibanaRequestRoute>;
+    // (undocumented)
+    readonly socket: IKibanaSocket;
     readonly url: Url;
     }
 
@@ -303,9 +313,6 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 
 // @public
 export const kibanaResponseFactory: {
-    ok: (payload: HttpResponsePayload, options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
-    accepted: (payload?: HttpResponsePayload, options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
-    noContent: (options?: HttpResponseOptions) => KibanaResponse<undefined>;
     custom: (payload: string | Error | Record<string, any> | Buffer | Stream | {
         message: string | Error;
         meta?: ResponseErrorMeta | undefined;
@@ -313,13 +320,17 @@ export const kibanaResponseFactory: {
         message: string | Error;
         meta?: ResponseErrorMeta | undefined;
     }>;
-    redirected: (payload: HttpResponsePayload, options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     badRequest: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
     unauthorized: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
     forbidden: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
     notFound: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
     conflict: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
-    internal: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
+    internalError: (error?: ResponseError, options?: HttpResponseOptions) => KibanaResponse<ResponseError>;
+    customError: (error: ResponseError, options: CustomHttpResponseOptions) => KibanaResponse<ResponseError>;
+    redirected: (payload: HttpResponsePayload, options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
+    ok: (payload: HttpResponsePayload, options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
+    accepted: (payload?: HttpResponsePayload, options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
+    noContent: (options?: HttpResponseOptions) => KibanaResponse<undefined>;
 };
 
 // Warning: (ae-forgotten-export) The symbol "KnownKeys" needs to be exported by the entry point index.d.ts
@@ -330,6 +341,11 @@ export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 // @public @deprecated (undocumented)
 export interface LegacyRequest extends Request {
 }
+
+// Warning: (ae-forgotten-export) The symbol "lifecycleResponseFactory" needs to be exported by the entry point index.d.ts
+// 
+// @public
+export type LifecycleResponseFactory = typeof lifecycleResponseFactory;
 
 // @public
 export interface Logger {
@@ -403,31 +419,22 @@ export interface LogRecord {
 // Warning: (ae-forgotten-export) The symbol "OnPostAuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type OnPostAuthHandler<Params = any, Query = any, Body = any> = (request: KibanaRequest<Params, Query, Body>, t: OnPostAuthToolkit) => OnPostAuthResult | Promise<OnPostAuthResult>;
+export type OnPostAuthHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: OnPostAuthToolkit) => OnPostAuthResult | KibanaResponse | Promise<OnPostAuthResult | KibanaResponse>;
 
 // @public
 export interface OnPostAuthToolkit {
     next: () => OnPostAuthResult;
-    redirected: (url: string) => OnPostAuthResult;
-    rejected: (error: Error, options?: {
-        statusCode?: number;
-    }) => OnPostAuthResult;
 }
 
 // Warning: (ae-forgotten-export) The symbol "OnPreAuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type OnPreAuthHandler<Params = any, Query = any, Body = any> = (request: KibanaRequest<Params, Query, Body>, t: OnPreAuthToolkit) => OnPreAuthResult | Promise<OnPreAuthResult>;
+export type OnPreAuthHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: OnPreAuthToolkit) => OnPreAuthResult | KibanaResponse | Promise<OnPreAuthResult | KibanaResponse>;
 
 // @public
 export interface OnPreAuthToolkit {
     next: () => OnPreAuthResult;
-    redirected: (url: string, options?: {
-        forward: boolean;
-    }) => OnPreAuthResult;
-    rejected: (error: Error, options?: {
-        statusCode?: number;
-    }) => OnPreAuthResult;
+    rewriteUrl: (url: string) => OnPreAuthResult;
 }
 
 // @public
@@ -549,16 +556,14 @@ export class Router {
     constructor(path: string);
     delete<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
     get<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
+    // Warning: (ae-forgotten-export) The symbol "RouterRoute" needs to be exported by the entry point index.d.ts
+    // 
     // @internal
     getRoutes(): Readonly<RouterRoute>[];
     // (undocumented)
     readonly path: string;
     post<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
     put<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
-    // Warning: (ae-forgotten-export) The symbol "RouterRoute" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    routes: Array<Readonly<RouterRoute>>;
     }
 
 // @public (undocumented)
@@ -1029,7 +1034,6 @@ export interface SessionStorageFactory<T> {
 
 // Warnings were encountered during analysis:
 // 
-// src/core/server/http/router/response.ts:188:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:39:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:162:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 

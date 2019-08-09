@@ -29,7 +29,6 @@ export function RegionMapVisParams(serviceSettings, regionmapsConfig) {
     restrict: 'E',
     template: regionMapVisParamsTemplate,
     link: function ($scope) {
-
       $scope.collections = $scope.vis.type.editorConfig.collections;
       $scope.onLayerChange = onLayerChange;
 
