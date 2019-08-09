@@ -96,7 +96,7 @@ function DefaultEditorAggParams({
 
   const editorConfig = useMemo(
     () => editorConfigProviders.getConfigForAgg(aggTypes.byType[groupName], indexPattern, agg),
-    [groupName, agg]
+    [groupName, agg.type]
   );
   const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
   const allParams = [...params.basic, ...params.advanced];

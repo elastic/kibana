@@ -93,8 +93,8 @@ function DefaultEditorAgg({
     try {
       aggDescription = agg.type.makeLabel(agg);
     } catch (e) {
-      // Date Histogram's `makeLabel` implementation invokes 'write' method for each param, including FieldParamType's 'write',
-      // which throws an error when field isn't defined.
+      // Date Histogram's `makeLabel` implementation invokes 'write' method for each param, including interval's 'write',
+      // which throws an error when interval is undefined.
       aggDescription = '';
     }
   }
