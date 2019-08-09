@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import { AbortSignal } from 'abort-controller';
+import { AbortSignal } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
 import { abortableRequestHandler } from './abortable_request_handler';
 
 describe('abortableRequestHandler', () => {
+  jest.useFakeTimers();
+
   it('should call abort if disconnected', () => {
     const eventHandlers = new Map();
     const mockRequest = {
@@ -47,6 +49,7 @@ describe('abortableRequestHandler', () => {
 
     expect(eventHandlers.has('disconnect')).toBe(true);
     eventHandlers.get('disconnect')();
+    jest.runAllTimers();
 
     // Should be aborted and call onAborted after disconnecting
     expect(signal.aborted).toBe(true);
