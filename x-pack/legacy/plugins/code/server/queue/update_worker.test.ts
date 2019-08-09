@@ -179,6 +179,7 @@ test('Execute update job failed because of low available disk space', async () =
   const isLowWatermarkSpy = sinon.stub().resolves(true);
   const diskWatermarkService: any = {
     isLowWatermark: isLowWatermarkSpy,
+    diskWatermarkViolationMessage: sinon.stub().returns('No enough disk space'),
   };
 
   const updateWorker = new UpdateWorker(

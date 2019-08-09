@@ -428,6 +428,7 @@ describe('clone_worker_tests', () => {
     const isLowWatermarkSpy = sinon.stub().resolves(true);
     const diskWatermarkService: any = {
       isLowWatermark: isLowWatermarkSpy,
+      diskWatermarkViolationMessage: sinon.stub().returns('No enough disk space'),
     };
 
     // Setup EsClient
