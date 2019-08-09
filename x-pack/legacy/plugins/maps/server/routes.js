@@ -355,7 +355,6 @@ export function initRoutes(server, licenseUid) {
         let response = h.response(buffer);
         response = response.bytes(buffer.length);
         response = response.header('Content-Disposition', 'inline');
-        // response = response.header('Content-type', 'image/png');
         response = response.encoding('binary');
         return response;
       } catch(e) {
