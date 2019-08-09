@@ -78,7 +78,7 @@ function LayerPanelChooser({
               <EuiIcon type="empty" />
             ) : (
               <EuiIconTip
-                type="bolt"
+                type="minusInCircle"
                 content={i18n.translate(
                   'xpack.lens.indexPattern.lossyIndexPatternSwitchDescription',
                   {
