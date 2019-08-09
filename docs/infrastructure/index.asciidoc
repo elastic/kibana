@@ -21,10 +21,10 @@ You can optionally save these views and add them to {kibana-ref}/dashboard.html[
 
 * Seamlessly switch to view the corresponding logs, application traces or uptime information for a component.
 
+To get started, you need to <<xpack-metrics-getting-started, start collecting metrics data from your infrastructure>>. Then you can <<infra-ui, use the Infrastructure application to inspect and analyze your data>>.
+
 [role="screenshot"]
 image::infrastructure/images/infra-sysmon.png[Infrastructure Overview in Kibana]
-
-To get started, you need to <<xpack-metrics-getting-started, start collecting metrics data from your infrastructure>>. Then you can <<infra-ui, use the Infrastructure application to inspect and analyze your data>>.
 
 --
 
