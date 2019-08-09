@@ -16,11 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  mockDataLoaderFetch,
-  mockDataLoaderCancel,
-  timefilter,
-} from './embedded_visualize_handler.test.mocks';
+import { mockDataLoaderFetch, timefilter } from './embedded_visualize_handler.test.mocks';
 
 // @ts-ignore
 import MockState from '../../../../../fixtures/mock_state';
@@ -157,21 +153,30 @@ describe('EmbeddedVisualizeHandler', () => {
       const params = { timeRange: { foo: 'bar' } };
       handler.update(params);
       jest.runAllTimers();
-      expect(mockDataLoaderFetch).toHaveBeenCalledWith({ ...dataLoaderParams, ...params });
+      expect(mockDataLoaderFetch).toHaveBeenCalled();
+      const { abortSignal, ...otherParams } = mockDataLoaderFetch.mock.calls[0][0];
+      expect(abortSignal).toBeInstanceOf(AbortSignal);
+      expect(otherParams).toEqual({ ...dataLoaderParams, ...params });
     });
 
     it('should call dataLoader.render with updated filters', () => {
       const params = { filters: [{ meta: { disabled: false } }] };
       handler.update(params);
       jest.runAllTimers();
-      expect(mockDataLoaderFetch).toHaveBeenCalledWith({ ...dataLoaderParams, ...params });
+      expect(mockDataLoaderFetch).toHaveBeenCalled();
+      const { abortSignal, ...otherParams } = mockDataLoaderFetch.mock.calls[0][0];
+      expect(abortSignal).toBeInstanceOf(AbortSignal);
+      expect(otherParams).toEqual({ ...dataLoaderParams, ...params });
     });
 
     it('should call dataLoader.render with updated query', () => {
       const params = { query: { foo: 'bar' } };
       handler.update(params);
       jest.runAllTimers();
-      expect(mockDataLoaderFetch).toHaveBeenCalledWith({ ...dataLoaderParams, ...params });
+      expect(mockDataLoaderFetch).toHaveBeenCalled();
+      const { abortSignal, ...otherParams } = mockDataLoaderFetch.mock.calls[0][0];
+      expect(abortSignal).toBeInstanceOf(AbortSignal);
+      expect(otherParams).toEqual({ ...dataLoaderParams, ...params });
     });
   });
 
@@ -202,9 +207,11 @@ describe('EmbeddedVisualizeHandler', () => {
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
-    it('should call cancel on data loader', () => {
+    it('should call abort on controller', () => {
+      handler.abortController = new AbortController();
+      const spy = jest.spyOn(handler.abortController, 'abort');
       handler.destroy();
-      expect(mockDataLoaderCancel).toHaveBeenCalled();
+      expect(spy).toHaveBeenCalled();
     });
   });
 
