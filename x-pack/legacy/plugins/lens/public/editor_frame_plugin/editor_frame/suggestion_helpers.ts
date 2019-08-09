@@ -51,12 +51,9 @@ export function getSuggestions(
       }));
   });
 
-  return _(suggestions)
-    .flatten()
-    .sortBy(({ score }) => score)
-    .reverse()
-    .uniq(({ visualizationId }) => visualizationId)
-    .value() as Suggestion[];
+  return _.flatten(suggestions).sort((a, b) => {
+    return b.score - a.score;
+  });
 }
 
 export function toSwitchAction(suggestion: Suggestion): Action {

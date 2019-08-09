@@ -13,146 +13,9 @@ import {
   IndexPatternLayer,
   IndexPatternPrivateState,
   IndexPattern,
-  IndexPatternColumn,
 } from './indexpattern';
 import { buildColumn, getOperationTypesForField } from './operations';
 import { hasField } from './utils';
-
-// A layer structure that makes suggestion generation a bit cleaner
-interface Layer {
-  id: string;
-  columns: IndexPatternColumn[];
-  indexPatternId: string;
-  columnMap: Record<string, IndexPatternColumn>;
-}
-
-// The options passed into the suggestion generation functions.
-interface SuggestionContext {
-  indexPatterns: Record<string, IndexPattern>;
-  layers: Layer[];
-  datasourceSuggestionId: number;
-}
-
-function isMetric(column: IndexPatternColumn) {
-  return !column.isBucketed && column.dataType === 'number';
-}
-
-// Generate a single metric suggestion, if there isn't one already in the layers
-function suggestMetric({
-  indexPatterns,
-  layers,
-  datasourceSuggestionId,
-}: SuggestionContext): DatasourceSuggestion<IndexPatternPrivateState> | undefined {
-  // If we already have something like a metric, we don't need
-  // to suggest a new one.
-  if (layers.some(l => l.columns.length === 1 && isMetric(Object.values(l.columns)[0]))) {
-    return;
-  }
-
-  const layer = layers.find(l => !!l.columns.some(isMetric));
-
-  if (!layer) {
-    return;
-  }
-
-  const column = layer.columns.find(isMetric)!;
-  const columnId = 'metric';
-
-  return {
-    table: {
-      layerId: layer.id,
-      datasourceSuggestionId,
-      columns: [
-        {
-          columnId,
-          operation: columnToOperation(column),
-        },
-      ],
-      isMultiRow: false,
-    },
-    state: {
-      currentIndexPatternId: layer.indexPatternId,
-      indexPatterns,
-      layers: {
-        [layer.id]: {
-          columnOrder: [columnId],
-          columns: { metric: column },
-          indexPatternId: layer.indexPatternId,
-        },
-      },
-    },
-  };
-}
-
-// Generate a histogram suggestion, if there isn't one already in the layers
-function suggestHistogram({
-  indexPatterns,
-  layers,
-  datasourceSuggestionId,
-}: SuggestionContext): DatasourceSuggestion<IndexPatternPrivateState> | undefined {
-  // If we already have something like a histogram, we don't need
-  // to suggest a new one.
-  if (layers.some(l => l.columns.length > 1 && l.columns.some(c => c.isBucketed))) {
-    return;
-  }
-
-  const findDateField = (l: Layer) =>
-    indexPatterns[l.indexPatternId].fields.find(f => f.aggregatable && f.type === 'date');
-
-  const layer = layers.find(l => l.columns.find(isMetric) && findDateField(l));
-
-  if (!layer) {
-    return;
-  }
-
-  const column = layer.columns.find(isMetric)!;
-  const bucketableField = findDateField(layer);
-
-  if (!column || !bucketableField) {
-    return;
-  }
-
-  const bucketColumn = buildColumn({
-    op: getOperationTypesForField(bucketableField)[0],
-    columns: layer.columnMap,
-    layerId: layer.id,
-    indexPattern: indexPatterns[layer.indexPatternId],
-    suggestedPriority: undefined,
-    field: bucketableField,
-  });
-
-  return {
-    table: {
-      datasourceSuggestionId,
-      columns: [
-        {
-          columnId: 'histogram',
-          operation: columnToOperation(bucketColumn),
-        },
-        {
-          columnId: 'metric',
-          operation: columnToOperation(column),
-        },
-      ],
-      isMultiRow: true,
-      layerId: layer.id,
-    },
-    state: {
-      indexPatterns,
-      currentIndexPatternId: layer.indexPatternId,
-      layers: {
-        [layer.id]: {
-          columnOrder: ['histogram', 'metric'],
-          columns: {
-            histogram: bucketColumn,
-            metric: column,
-          },
-          indexPatternId: layer.indexPatternId,
-        },
-      },
-    },
-  };
-}
 
 function buildSuggestion({
   state,
@@ -215,7 +78,7 @@ export function getDatasourceSuggestionsForField(
   }
 }
 
-function getBucketOperationTypes(field: IndexPatternField) {
+function getBucketOperation(field: IndexPatternField) {
   return getOperationTypesForField(field).find(op => op === 'date_histogram' || op === 'terms');
 }
 
@@ -227,7 +90,7 @@ function getExistingLayerSuggestionsForField(
   const layer = state.layers[layerId];
   const indexPattern = state.indexPatterns[layer.indexPatternId];
   const operations = getOperationTypesForField(field);
-  const usableAsBucketOperation = getBucketOperationTypes(field);
+  const usableAsBucketOperation = getBucketOperation(field);
   const fieldInUse = Object.values(layer.columns).some(
     column => hasField(column) && column.sourceField === field.name
   );
@@ -294,7 +157,7 @@ function addFieldAsBucketOperation(
   indexPattern: IndexPattern,
   field: IndexPatternField
 ) {
-  const applicableBucketOperation = getBucketOperationTypes(field);
+  const applicableBucketOperation = getBucketOperation(field);
   const newColumn = buildColumn({
     op: applicableBucketOperation,
     columns: layer.columns,
@@ -345,7 +208,7 @@ function getEmptyLayerSuggestionsForField(
 ) {
   const indexPattern = state.indexPatterns[indexPatternId];
   let newLayer: IndexPatternLayer | undefined;
-  if (getBucketOperationTypes(field)) {
+  if (getBucketOperation(field)) {
     newLayer = createNewLayerWithBucketAggregation(layerId, indexPattern, field);
   } else if (indexPattern.timeFieldName && getOperationTypesForField(field).length > 0) {
     newLayer = createNewLayerWithMetricAggregation(layerId, indexPattern, field);
@@ -377,7 +240,7 @@ function createNewLayerWithBucketAggregation(
   // let column know about count column
   const column = buildColumn({
     layerId,
-    op: getBucketOperationTypes(field),
+    op: getBucketOperation(field),
     indexPattern,
     columns: {
       col2: countColumn,
@@ -432,46 +295,20 @@ function createNewLayerWithMetricAggregation(
   };
 }
 
-export function getDatasourceSuggestionsFromCurrentState(state: IndexPatternPrivateState) {
-  const layers = Object.entries(state.layers).map(([id, layer]) => ({
-    id,
-    indexPatternId: layer.indexPatternId,
-    columnMap: layer.columns,
-    columns: Object.values(layer.columns),
-  }));
-  const [firstLayer] = layers.filter(({ columns }) => columns.length > 0);
-  const suggestions: Array<DatasourceSuggestion<IndexPatternPrivateState>> = [];
+export function getDatasourceSuggestionsFromCurrentState(
+  state: IndexPatternPrivateState
+): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
+  const layers = Object.entries(state.layers);
 
-  const histogramSuggestion = suggestHistogram({
-    layers,
-    indexPatterns: state.indexPatterns,
-    datasourceSuggestionId: 1,
-  });
+  return layers
+    .map(([layerId, layer], index) => {
+      if (layer.columnOrder.length === 0) {
+        return;
+      }
 
-  const metricSuggestion = suggestMetric({
-    layers,
-    indexPatterns: state.indexPatterns,
-    datasourceSuggestionId: 2,
-  });
-
-  if (firstLayer) {
-    suggestions.push(
-      buildSuggestion({
-        state,
-        layerId: firstLayer.id,
-        isMultiRow: true,
-        datasourceSuggestionId: 3,
-      })
-    );
-  }
-
-  if (histogramSuggestion) {
-    suggestions.push(histogramSuggestion);
-  }
-
-  if (metricSuggestion) {
-    suggestions.push(metricSuggestion);
-  }
-
-  return suggestions;
+      return buildSuggestion({ state, layerId, isMultiRow: true, datasourceSuggestionId: index });
+    })
+    .reduce((prev, current) => (current ? prev.concat([current]) : prev), [] as Array<
+      DatasourceSuggestion<IndexPatternPrivateState>
+    >);
 }

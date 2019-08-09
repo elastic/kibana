@@ -1120,7 +1120,12 @@ describe('editor_frame', () => {
       // TODO why is this necessary?
       instance.update();
       const suggestions = instance.find('[data-test-subj="suggestion-title"]');
-      expect(suggestions.map(el => el.text())).toEqual(['Suggestion1', 'Suggestion3']);
+      expect(suggestions.map(el => el.text())).toEqual([
+        'Suggestion1',
+        'Suggestion2',
+        'Suggestion3',
+        'Suggestion4',
+      ]);
     });
 
     it('should switch to suggested visualization', async () => {

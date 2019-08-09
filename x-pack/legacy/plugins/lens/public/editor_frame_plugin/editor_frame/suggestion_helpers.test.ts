@@ -85,8 +85,7 @@ describe('suggestion helpers', () => {
       'vis1',
       {}
     );
-    expect(suggestions).toHaveLength(2);
-    expect(suggestions.map(s => s.visualizationId)).toEqual(['vis2', 'vis1']);
+    expect(suggestions).toHaveLength(3);
   });
 
   it('should rank the visualizations by score', () => {
@@ -130,9 +129,10 @@ describe('suggestion helpers', () => {
       'vis1',
       {}
     );
-    expect(suggestions.length).toEqual(2);
+    expect(suggestions.length).toEqual(3);
     expect(suggestions[0].score).toBe(0.8);
     expect(suggestions[1].score).toBe(0.6);
+    expect(suggestions[2].score).toBe(0.2);
   });
 
   it('should call all suggestion getters with all available data tables', () => {
