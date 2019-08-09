@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
@@ -20,20 +19,13 @@ import {
   LogEntryColumnContent,
   LogEntryColumnWidth,
   LogEntryColumnWidths,
-  iconColumnId,
 } from './log_entry_column';
 import { ASSUMED_SCROLLBAR_WIDTH } from './vertical_scroll_panel';
 
 export const LogColumnHeaders = injectI18n<{
   columnConfigurations: LogColumnConfiguration[];
   columnWidths: LogEntryColumnWidths;
-  showColumnConfiguration: () => void;
-}>(({ columnConfigurations, columnWidths, intl, showColumnConfiguration }) => {
-  const showColumnConfigurationLabel = intl.formatMessage({
-    id: 'xpack.infra.logColumnHeaders.configureColumnsLabel',
-    defaultMessage: 'Configure source',
-  });
-
+}>(({ columnConfigurations, columnWidths, intl }) => {
   return (
     <LogColumnHeadersWrapper>
       {columnConfigurations.map(columnConfiguration => {
@@ -69,19 +61,6 @@ export const LogColumnHeaders = injectI18n<{
           );
         }
       })}
-      <LogColumnHeader
-        columnWidth={columnWidths[iconColumnId]}
-        data-test-subj="logColumnHeader iconLogColumnHeader"
-        key="iconColumnHeader"
-      >
-        <EuiButtonIcon
-          aria-label={showColumnConfigurationLabel}
-          color="text"
-          iconType="gear"
-          onClick={showColumnConfiguration}
-          title={showColumnConfigurationLabel}
-        />
-      </LogColumnHeader>
     </LogColumnHeadersWrapper>
   );
 });

@@ -90,9 +90,9 @@ Find the Chromium revision (run in kibana's working directory):
 
 - `cat node_modules/puppeteer-core/package.json | grep chromium_revision`
 - Take the revision number from that, and tack it to the end of this URL: https://crrev.com
-  - (For example: https://crrev.com/672088)
+  - (For example, puppeteer@1.19.0 has rev (674921): https://crrev.com/674921)
 - Grab the SHA from there
-  - (For example, rev 637110 has sha 312d84c8ce62810976feda0d3457108a6dfff9e6)
+  - (For example, rev 674921 has sha 312d84c8ce62810976feda0d3457108a6dfff9e6)
 
 Note: In Linux, you should run the build command in tmux so that if your ssh session disconnects, the build can keep going. To do this, just type `tmux` into your terminal to hop into a tmux session. If you get disconnected, you can hop back in like so:
 

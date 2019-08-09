@@ -6,7 +6,7 @@
 
 import open from 'opn';
 import { parse as parseUrl } from 'url';
-
+import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
 import {
   ConditionalHeaders,
   ConditionalHeadersConditions,
@@ -15,7 +15,6 @@ import {
   EvalFn,
   EvaluateOptions,
   Logger,
-  ViewZoomWidthHeight,
 } from '../../../../types';
 import { Page } from '../puppeteer';
 

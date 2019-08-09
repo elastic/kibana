@@ -8,7 +8,7 @@ import os from 'os';
 import path from 'path';
 import rimraf from 'rimraf';
 import * as Rx from 'rxjs';
-import { map, share, mergeMap, filter, partition } from 'rxjs/operators';
+import { map, share, mergeMap, filter, partition, ignoreElements, tap } from 'rxjs/operators';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 
 import { launch, Browser, Page } from '../puppeteer';
@@ -126,14 +126,32 @@ export class HeadlessChromiumDriverFactory {
         throw err;
       }
 
-      safeChildProcess(
-        this.callerLogger,
-        {
-          async kill() {
-            await browser.close();
-          },
+      const childProcess = {
+        async kill() {
+          await browser.close();
         },
-        observer
+      };
+      const { terminate$ } = safeChildProcess(this.callerLogger, childProcess);
+
+      // this is adding unsubscribe logic to our observer
+      // so that if our observer unsubscribes, we terminate our child-process
+      observer.add(() => {
+        this.callerLogger.debug(
+          `The browser process observer has unsubscribed. Closing the browser...`
+        );
+        childProcess.kill(); // ignore async
+      });
+
+      // make the observer subscribe to terminate$
+      observer.add(
+        terminate$
+          .pipe(
+            tap(signal => {
+              this.callerLogger.debug(`Observer got signal: ${signal}`);
+            }),
+            ignoreElements()
+          )
+          .subscribe(observer)
       );
 
       // Register with a few useful puppeteer event handlers:
