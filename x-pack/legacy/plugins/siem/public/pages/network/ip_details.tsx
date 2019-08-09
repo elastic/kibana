@@ -155,7 +155,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           totalCount,
                           pageInfo,
                           loading,
-                          loadMore,
+                          loadPage,
                           refetch,
                         }) => (
                           <DomainsTableManage
@@ -164,11 +164,15 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                             id={id}
                             inspect={inspect}
                             flowTarget={flowTarget}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                             ip={ip}
                             loading={loading}
-                            loadMore={loadMore}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                            loadPage={loadPage}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
                             refetch={refetch}
                             setQuery={setQuery}
                             totalCount={totalCount}
@@ -196,7 +200,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           totalCount,
                           pageInfo,
                           loading,
-                          loadMore,
+                          loadPage,
                           refetch,
                         }) => (
                           <UsersTableManage
@@ -204,10 +208,14 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                             id={id}
                             inspect={inspect}
                             flowTarget={flowTarget}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                             loading={loading}
-                            loadMore={loadMore}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                            loadPage={loadPage}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
                             refetch={refetch}
                             setQuery={setQuery}
                             totalCount={totalCount}
@@ -235,17 +243,21 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           totalCount,
                           pageInfo,
                           loading,
-                          loadMore,
+                          loadPage,
                           refetch,
                         }) => (
                           <TlsTableManage
                             data={tls}
                             id={id}
                             inspect={inspect}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo) || false}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                             loading={loading}
-                            loadMore={loadMore}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                            loadPage={loadPage}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
                             refetch={refetch}
                             setQuery={setQuery}
                             totalCount={totalCount}

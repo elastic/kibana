@@ -9,13 +9,14 @@ import {
   InfraMetricModelMetricType,
   InfraMetricModel,
 } from '../../adapter_types';
+import { InfraMetric } from '../../../../../graphql/types';
 
 export const nginxRequestsPerConnection: InfraMetricModelCreator = (
   timeField,
   indexPattern,
   interval
 ): InfraMetricModel => ({
-  id: 'nginxRequestsPerConnection',
+  id: InfraMetric.nginxRequestsPerConnection,
   requires: ['nginx.stubstatus'],
   index_pattern: indexPattern,
   interval,

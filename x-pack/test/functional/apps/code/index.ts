@@ -3,10 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TestInvoker } from './lib/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function codeApp({ loadTestFile }: TestInvoker) {
+export default function codeApp({ loadTestFile }: FtrProviderContext) {
   describe('Code', function codeAppTestSuite() {
     this.tags('ciGroup2');
     loadTestFile(require.resolve('./manage_repositories'));
@@ -15,5 +14,6 @@ export default function codeApp({ loadTestFile }: TestInvoker) {
     loadTestFile(require.resolve('./code_intelligence'));
     loadTestFile(require.resolve('./with_security'));
     loadTestFile(require.resolve('./history'));
+    loadTestFile(require.resolve('./file_tree'));
   });
 }

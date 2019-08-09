@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import chrome from 'ui/chrome';
-import 'ui/listen';
+import 'ui/directives/listen';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -332,7 +332,8 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
   timefilter.disableAutoRefreshSelector();
   $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
   $scope.topNavMenu = [{
-    key: i18n.translate('xpack.maps.mapController.fullScreenButtonLabel', {
+    id: 'full-screen',
+    label: i18n.translate('xpack.maps.mapController.fullScreenButtonLabel', {
       defaultMessage: `full screen`
     }),
     description: i18n.translate('xpack.maps.mapController.fullScreenDescription', {
@@ -343,7 +344,8 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
       store.dispatch(enableFullScreen());
     }
   }, {
-    key: i18n.translate('xpack.maps.mapController.openInspectorButtonLabel', {
+    id: 'inspect',
+    label: i18n.translate('xpack.maps.mapController.openInspectorButtonLabel', {
       defaultMessage: `inspect`
     }),
     description: i18n.translate('xpack.maps.mapController.openInspectorDescription', {
@@ -355,7 +357,8 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
       Inspector.open(inspectorAdapters, {});
     }
   }, ...(capabilities.get().maps.save ? [{
-    key: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
+    id: 'save',
+    label: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
       defaultMessage: `save`
     }),
     description: i18n.translate('xpack.maps.mapController.saveMapDescription', {

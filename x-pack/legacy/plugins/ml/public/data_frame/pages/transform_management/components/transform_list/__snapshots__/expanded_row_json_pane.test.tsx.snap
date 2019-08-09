@@ -27,25 +27,28 @@ exports[`Data Frame: Transform List Expanded Row <ExpandedRowJsonPane /> Minimal
     }
   },
   \\"dest\\": {
-    \\"index\\": \\"fq_data_histogram_1m_1441\\"
+    \\"index\\": \\"fq_date_histogram_1m_1441\\"
   },
   \\"pivot\\": {
     \\"group_by\\": {
-      \\"date_histogram(@timestamp)\\": {
+      \\"@timestamp\\": {
         \\"date_histogram\\": {
           \\"field\\": \\"@timestamp\\",
-          \\"interval\\": \\"1m\\"
+          \\"calendar_interval\\": \\"1m\\"
         }
       }
     },
     \\"aggregations\\": {
-      \\"avg(response)\\": {
+      \\"responsetime.avg\\": {
         \\"avg\\": {
           \\"field\\": \\"responsetime\\"
         }
       }
     }
-  }
+  },
+  \\"version\\": \\"8.0.0\\",
+  \\"create_time\\": 1564388146667,
+  \\"mode\\": \\"batch\\"
 }"
     />
   </EuiFlexItem>

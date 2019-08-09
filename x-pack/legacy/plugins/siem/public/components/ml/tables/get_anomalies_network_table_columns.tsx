@@ -21,6 +21,7 @@ import { createExplorerLink } from '../links/create_explorer_link';
 import { LocalizedDateTooltip } from '../../localized_date_tooltip';
 import { PreferenceFormattedDate } from '../../formatted_date';
 import { NetworkType } from '../../../store/network/model';
+import { escapeDataProviderId } from '../../drag_and_drop/helpers';
 
 export const getAnomaliesNetworkTableColumns = (
   startDate: number,
@@ -66,7 +67,9 @@ export const getAnomaliesNetworkTableColumns = (
     sortable: true,
     render: (_, anomaliesByNetwork) => (
       <DraggableScore
-        id={`anomalies-network-table-severity-${createCompoundNetworkKey(anomaliesByNetwork)}`}
+        id={escapeDataProviderId(
+          `anomalies-network-table-severity-${createCompoundNetworkKey(anomaliesByNetwork)}`
+        )}
         score={anomaliesByNetwork.anomaly}
       />
     ),
@@ -90,25 +93,26 @@ export const getAnomaliesNetworkTableColumns = (
     field: 'anomaly.influencers',
     render: (influencers, anomaliesByNetwork) => (
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-        {influencers.map(influencer => {
-          const [key, value] = getEntries(influencer);
-          const entityName = key != null ? key : '';
-          const entityValue = value != null ? value : '';
-          return (
-            <EuiFlexItem
-              key={`${entityName}-${entityValue}-${createCompoundNetworkKey(anomaliesByNetwork)}`}
-              grow={false}
-            >
-              <EntityDraggable
-                idPrefix={`anomalies-network-table-influencers-${entityName}-${entityValue}-${createCompoundNetworkKey(
-                  anomaliesByNetwork
-                )}`}
-                entityName={entityName}
-                entityValue={entityValue}
-              />
-            </EuiFlexItem>
-          );
-        })}
+        {influencers &&
+          influencers.map(influencer => {
+            const [key, value] = getEntries(influencer);
+            const entityName = key != null ? key : '';
+            const entityValue = value != null ? value : '';
+            return (
+              <EuiFlexItem
+                key={`${entityName}-${entityValue}-${createCompoundNetworkKey(anomaliesByNetwork)}`}
+                grow={false}
+              >
+                <EntityDraggable
+                  idPrefix={`anomalies-network-table-influencers-${entityName}-${entityValue}-${createCompoundNetworkKey(
+                    anomaliesByNetwork
+                  )}`}
+                  entityName={entityName}
+                  entityValue={entityValue}
+                />
+              </EuiFlexItem>
+            );
+          })}
       </EuiFlexGroup>
     ),
   },

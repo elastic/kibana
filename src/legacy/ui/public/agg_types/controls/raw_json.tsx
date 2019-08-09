@@ -28,7 +28,7 @@ import { isValidJson } from '../utils';
 function RawJsonParamEditor({
   agg,
   showValidation,
-  value,
+  value = '',
   setValidity,
   setValue,
   setTouched,
@@ -68,7 +68,7 @@ function RawJsonParamEditor({
       <EuiTextArea
         id={`visEditorRawJson${agg.id}`}
         isInvalid={showValidation ? !isValid : false}
-        value={value || ''}
+        value={value}
         onChange={onChange}
         rows={2}
         fullWidth={true}

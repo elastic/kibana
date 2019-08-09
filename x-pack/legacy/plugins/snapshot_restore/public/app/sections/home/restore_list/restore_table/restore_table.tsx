@@ -227,8 +227,8 @@ export const RestoreTable: React.FunctionComponent<Props> = ({ restores }) => {
         'data-test-subj': 'row',
         onClick: () => toggleIndexRestoreDetails(restore),
       })}
-      cellProps={(item: any, column: any) => ({
-        'data-test-subj': `cell`,
+      cellProps={() => ({
+        'data-test-subj': 'cell',
       })}
       data-test-subj="restoresTable"
     />

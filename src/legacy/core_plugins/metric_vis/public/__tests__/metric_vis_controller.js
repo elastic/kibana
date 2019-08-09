@@ -18,9 +18,9 @@
  */
 
 import expect from '@kbn/expect';
-import { MetricVisComponent } from '../metric_vis_controller';
+import { MetricVisComponent } from '../components/metric_vis_controller';
 
-describe('metric vis controller', function () {
+describe('metric_vis - controller', function () {
 
   const vis = {
     params: {

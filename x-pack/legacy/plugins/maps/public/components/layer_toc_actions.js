@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 
 import {
   EuiButtonEmpty,
   EuiPopover,
   EuiContextMenu,
   EuiIcon,
-  EuiToolTip,
+  EuiToolTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -51,12 +51,18 @@ export class LayerTocActions extends Component {
   };
 
   _renderPopoverToggleButton() {
-    const { icon, tooltipContent } = this.props.layer.getIconAndTooltipContent(this.props.zoom);
+    const { icon, tooltipContent, areResultsTrimmed } = this.props.layer.getIconAndTooltipContent(this.props.zoom);
+    const infoButton = areResultsTrimmed ? (<EuiIcon
+      color="subdued"
+      type="iInCircle"
+    />) : null;
+    const tooltip = <Fragment>{infoButton} {tooltipContent}</Fragment>;
     return (
       <EuiToolTip
+        anchorClassName="mapLayTocActions__tooltipAnchor"
         position="top"
         title={this.props.displayName}
-        content={tooltipContent}
+        content={tooltip}
       >
         <EuiButtonEmpty
           className="mapTocEntry__layerName eui-textLeft"
@@ -67,8 +73,9 @@ export class LayerTocActions extends Component {
           data-test-subj={`layerTocActionsPanelToggleButton${this.props.escapedDisplayName}`}
         >
           <span className="mapTocEntry__layerNameIcon">{icon}</span>
-          {this.props.displayName}
+          {this.props.displayName}{infoButton}
         </EuiButtonEmpty>
+
       </EuiToolTip>
     );
   }

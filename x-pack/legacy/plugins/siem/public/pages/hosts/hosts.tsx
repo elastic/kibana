@@ -59,223 +59,245 @@ interface HostsComponentReduxProps {
 
 type HostsComponentProps = HostsComponentReduxProps;
 
-const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRangeDatePicker }) => (
-  <WithSource sourceId="default">
-    {({ indicesExist, indexPattern }) =>
-      indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-        <StickyContainer>
-          <FiltersGlobal>
-            <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
-          </FiltersGlobal>
+const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRangeDatePicker }) => {
+  return (
+    <WithSource sourceId="default">
+      {({ indicesExist, indexPattern }) =>
+        indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+          <StickyContainer>
+            <FiltersGlobal>
+              <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
+            </FiltersGlobal>
 
-          <HeaderPage
-            subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
-            title={i18n.PAGE_TITLE}
-          />
+            <HeaderPage
+              subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
+              title={i18n.PAGE_TITLE}
+            />
 
-          <GlobalTime>
-            {({ to, from, setQuery }) => (
-              <UseUrlState indexPattern={indexPattern}>
-                {({ isInitializing }) => (
-                  <>
-                    <KpiHostsQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      skip={isInitializing}
-                      sourceId="default"
-                      startDate={from}
-                    >
-                      {({ kpiHosts, loading, id, inspect, refetch }) => (
-                        <KpiHostsComponentManage
-                          data={kpiHosts}
-                          from={from}
-                          id={id}
-                          inspect={inspect}
-                          loading={loading}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          to={to}
-                        />
-                      )}
-                    </KpiHostsQuery>
+            <GlobalTime>
+              {({ to, from, setQuery }) => (
+                <UseUrlState indexPattern={indexPattern}>
+                  {({ isInitializing }) => (
+                    <>
+                      <KpiHostsQuery
+                        endDate={to}
+                        filterQuery={filterQuery}
+                        skip={isInitializing}
+                        sourceId="default"
+                        startDate={from}
+                      >
+                        {({ kpiHosts, loading, id, inspect, refetch }) => (
+                          <KpiHostsComponentManage
+                            data={kpiHosts}
+                            from={from}
+                            id={id}
+                            inspect={inspect}
+                            loading={loading}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            to={to}
+                            narrowDateRange={(min: number, max: number) => {
+                              setTimeout(() => {
+                                setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                              }, 500);
+                            }}
+                          />
+                        )}
+                      </KpiHostsQuery>
 
-                    <EuiSpacer />
+                      <EuiSpacer />
 
-                    <HostsQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      skip={isInitializing}
-                      sourceId="default"
-                      startDate={from}
-                      type={hostsModel.HostsType.page}
-                    >
-                      {({
-                        hosts,
-                        totalCount,
-                        loading,
-                        pageInfo,
-                        loadMore,
-                        id,
-                        inspect,
-                        refetch,
-                      }) => (
-                        <HostsTableManage
-                          id={id}
-                          inspect={inspect}
-                          indexPattern={indexPattern}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          loading={loading}
-                          data={hosts}
-                          totalCount={totalCount}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                          loadMore={loadMore}
-                          type={hostsModel.HostsType.page}
-                        />
-                      )}
-                    </HostsQuery>
+                      <HostsQuery
+                        endDate={to}
+                        filterQuery={filterQuery}
+                        skip={isInitializing}
+                        sourceId="default"
+                        startDate={from}
+                        type={hostsModel.HostsType.page}
+                      >
+                        {({
+                          hosts,
+                          totalCount,
+                          loading,
+                          pageInfo,
+                          loadPage,
+                          id,
+                          inspect,
+                          refetch,
+                        }) => (
+                          <HostsTableManage
+                            data={hosts}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                            id={id}
+                            indexPattern={indexPattern}
+                            inspect={inspect}
+                            loading={loading}
+                            loadPage={loadPage}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
+                            totalCount={totalCount}
+                            type={hostsModel.HostsType.page}
+                          />
+                        )}
+                      </HostsQuery>
 
-                    <EuiSpacer />
+                      <EuiSpacer />
 
-                    <AuthenticationsQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      skip={isInitializing}
-                      sourceId="default"
-                      startDate={from}
-                      type={hostsModel.HostsType.page}
-                    >
-                      {({
-                        authentications,
-                        totalCount,
-                        loading,
-                        pageInfo,
-                        loadPage,
-                        id,
-                        inspect,
-                        refetch,
-                      }) => (
-                        <AuthenticationTableManage
-                          data={authentications}
-                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                          id={id}
-                          inspect={inspect}
-                          loading={loading}
-                          loadPage={loadPage}
-                          refetch={refetch}
-                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-                          setQuery={setQuery}
-                          totalCount={totalCount}
-                          type={hostsModel.HostsType.page}
-                        />
-                      )}
-                    </AuthenticationsQuery>
+                      <AuthenticationsQuery
+                        endDate={to}
+                        filterQuery={filterQuery}
+                        skip={isInitializing}
+                        sourceId="default"
+                        startDate={from}
+                        type={hostsModel.HostsType.page}
+                      >
+                        {({
+                          authentications,
+                          totalCount,
+                          loading,
+                          pageInfo,
+                          loadPage,
+                          id,
+                          inspect,
+                          refetch,
+                        }) => (
+                          <AuthenticationTableManage
+                            data={authentications}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                            id={id}
+                            inspect={inspect}
+                            loading={loading}
+                            loadPage={loadPage}
+                            refetch={refetch}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
+                            setQuery={setQuery}
+                            totalCount={totalCount}
+                            type={hostsModel.HostsType.page}
+                          />
+                        )}
+                      </AuthenticationsQuery>
 
-                    <EuiSpacer />
+                      <EuiSpacer />
 
-                    <UncommonProcessesQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      skip={isInitializing}
-                      sourceId="default"
-                      startDate={from}
-                      type={hostsModel.HostsType.page}
-                    >
-                      {({
-                        uncommonProcesses,
-                        totalCount,
-                        loading,
-                        pageInfo,
-                        loadMore,
-                        id,
-                        inspect,
-                        refetch,
-                      }) => (
-                        <UncommonProcessTableManage
-                          id={id}
-                          inspect={inspect}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          loading={loading}
-                          data={uncommonProcesses}
-                          totalCount={totalCount}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          loadMore={loadMore}
-                          type={hostsModel.HostsType.page}
-                        />
-                      )}
-                    </UncommonProcessesQuery>
+                      <UncommonProcessesQuery
+                        endDate={to}
+                        filterQuery={filterQuery}
+                        skip={isInitializing}
+                        sourceId="default"
+                        startDate={from}
+                        type={hostsModel.HostsType.page}
+                      >
+                        {({
+                          uncommonProcesses,
+                          totalCount,
+                          loading,
+                          pageInfo,
+                          loadPage,
+                          id,
+                          inspect,
+                          refetch,
+                        }) => (
+                          <UncommonProcessTableManage
+                            data={uncommonProcesses}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                            id={id}
+                            inspect={inspect}
+                            loading={loading}
+                            loadPage={loadPage}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
+                            totalCount={totalCount}
+                            type={hostsModel.HostsType.page}
+                          />
+                        )}
+                      </UncommonProcessesQuery>
 
-                    <EuiSpacer />
+                      <EuiSpacer />
 
-                    <AnomaliesHostTable
-                      startDate={from}
-                      endDate={to}
-                      skip={isInitializing}
-                      type={hostsModel.HostsType.page}
-                      narrowDateRange={(score, interval) => {
-                        const fromTo = scoreIntervalToDateTime(score, interval);
-                        setAbsoluteRangeDatePicker({
-                          id: 'global',
-                          from: fromTo.from,
-                          to: fromTo.to,
-                        });
-                      }}
-                    />
+                      <AnomaliesHostTable
+                        startDate={from}
+                        endDate={to}
+                        skip={isInitializing}
+                        type={hostsModel.HostsType.page}
+                        narrowDateRange={(score, interval) => {
+                          const fromTo = scoreIntervalToDateTime(score, interval);
+                          setAbsoluteRangeDatePicker({
+                            id: 'global',
+                            from: fromTo.from,
+                            to: fromTo.to,
+                          });
+                        }}
+                      />
 
-                    <EuiSpacer />
+                      <EuiSpacer />
 
-                    <EventsQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      skip={isInitializing}
-                      sourceId="default"
-                      startDate={from}
-                      type={hostsModel.HostsType.page}
-                    >
-                      {({
-                        events,
-                        loading,
-                        id,
-                        inspect,
-                        refetch,
-                        totalCount,
-                        pageInfo,
-                        loadMore,
-                      }) => (
-                        <EventsTableManage
-                          id={id}
-                          inspect={inspect}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          data={events!}
-                          loading={loading}
-                          totalCount={totalCount}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                          tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          loadMore={loadMore}
-                          type={hostsModel.HostsType.page}
-                        />
-                      )}
-                    </EventsQuery>
-                  </>
-                )}
-              </UseUrlState>
-            )}
-          </GlobalTime>
-        </StickyContainer>
-      ) : (
-        <>
-          <HeaderPage title={i18n.PAGE_TITLE} />
-          <HostsEmptyPage />
-        </>
-      )
-    }
-  </WithSource>
-));
+                      <EventsQuery
+                        endDate={to}
+                        filterQuery={filterQuery}
+                        skip={isInitializing}
+                        sourceId="default"
+                        startDate={from}
+                        type={hostsModel.HostsType.page}
+                      >
+                        {({
+                          events,
+                          loading,
+                          id,
+                          inspect,
+                          refetch,
+                          totalCount,
+                          pageInfo,
+                          loadPage,
+                        }) => (
+                          <EventsTableManage
+                            data={events}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                            id={id}
+                            inspect={inspect}
+                            loading={loading}
+                            loadPage={loadPage}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
+                            totalCount={totalCount}
+                            type={hostsModel.HostsType.page}
+                          />
+                        )}
+                      </EventsQuery>
+                    </>
+                  )}
+                </UseUrlState>
+              )}
+            </GlobalTime>
+          </StickyContainer>
+        ) : (
+          <>
+            <HeaderPage title={i18n.PAGE_TITLE} />
+            <HostsEmptyPage />
+          </>
+        )
+      }
+    </WithSource>
+  );
+});
 
 const makeMapStateToProps = () => {
   const getHostsFilterQueryAsJson = hostsSelectors.hostsFilterQueryAsJson();

@@ -5,12 +5,15 @@
  */
 
 import { NetworkDirectionEcs, NetworkDnsData, NetworkTopNFlowData } from '../../graphql/types';
-import { FrameworkRequest, RequestOptions } from '../framework';
+import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { SearchHit } from '../types';
 
 export interface NetworkAdapter {
-  getNetworkTopNFlow(req: FrameworkRequest, options: RequestOptions): Promise<NetworkTopNFlowData>;
-  getNetworkDns(req: FrameworkRequest, options: RequestOptions): Promise<NetworkDnsData>;
+  getNetworkTopNFlow(
+    req: FrameworkRequest,
+    options: RequestOptionsPaginated
+  ): Promise<NetworkTopNFlowData>;
+  getNetworkDns(req: FrameworkRequest, options: RequestOptionsPaginated): Promise<NetworkDnsData>;
 }
 
 export interface GenericBuckets {

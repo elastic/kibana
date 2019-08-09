@@ -8,6 +8,7 @@ import sinon from 'sinon';
 
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Repository } from '../../model';
+import { DiskWatermarkService } from '../disk_watermark';
 import { GitOperations } from '../git_operations';
 import { Logger } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
@@ -43,13 +44,19 @@ test('Execute update job', async () => {
 
   // Setup CancellationService
   const cancelUpdateJobSpy = sinon.spy();
-  const registerUpdateJobTokenSpy = sinon.spy();
+  const registerCancelableUpdateJobSpy = sinon.spy();
   const cancellationService: any = {
     cancelUpdateJob: emptyAsyncFunc,
-    registerUpdateJobToken: emptyAsyncFunc,
+    registerCancelableUpdateJob: emptyAsyncFunc,
   };
   cancellationService.cancelUpdateJob = cancelUpdateJobSpy;
-  cancellationService.registerUpdateJobToken = registerUpdateJobTokenSpy;
+  cancellationService.registerCancelableUpdateJob = registerCancelableUpdateJobSpy;
+
+  // Setup DiskWatermarkService
+  const isLowWatermarkSpy = sinon.stub().resolves(false);
+  const diskWatermarkService: any = {
+    isLowWatermark: isLowWatermarkSpy,
+  };
 
   const updateWorker = new UpdateWorker(
     esQueue as Esqueue,
@@ -59,10 +66,15 @@ test('Execute update job', async () => {
       security: {
         enableGitCertCheck: true,
       },
+      disk: {
+        thresholdEnabled: true,
+        watermarkLowMb: 100,
+      },
     } as ServerOptions,
     {} as GitOperations,
     (repoServiceFactory as any) as RepositoryServiceFactory,
-    cancellationService as CancellationSerivce
+    cancellationService as CancellationSerivce,
+    diskWatermarkService as DiskWatermarkService
   );
 
   await updateWorker.executeJob({
@@ -73,6 +85,7 @@ test('Execute update job', async () => {
     timestamp: 0,
   });
 
+  expect(isLowWatermarkSpy.calledOnce).toBeTruthy();
   expect(newInstanceSpy.calledOnce).toBeTruthy();
   expect(updateSpy.calledOnce).toBeTruthy();
 });
@@ -83,13 +96,13 @@ test('On update job completed because of cancellation ', async () => {
 
   // Setup CancellationService
   const cancelUpdateJobSpy = sinon.spy();
-  const registerUpdateJobTokenSpy = sinon.spy();
+  const registerCancelableUpdateJobSpy = sinon.spy();
   const cancellationService: any = {
     cancelUpdateJob: emptyAsyncFunc,
-    registerUpdateJobToken: emptyAsyncFunc,
+    registerCancelableUpdateJob: emptyAsyncFunc,
   };
   cancellationService.cancelUpdateJob = cancelUpdateJobSpy;
-  cancellationService.registerUpdateJobToken = registerUpdateJobTokenSpy;
+  cancellationService.registerCancelableUpdateJob = registerCancelableUpdateJobSpy;
 
   const updateWorker = new UpdateWorker(
     esQueue as Esqueue,
@@ -99,10 +112,15 @@ test('On update job completed because of cancellation ', async () => {
       security: {
         enableGitCertCheck: true,
       },
+      disk: {
+        thresholdEnabled: true,
+        watermarkLowMb: 100,
+      },
     } as ServerOptions,
     {} as GitOperations,
     {} as RepositoryServiceFactory,
-    cancellationService as CancellationSerivce
+    cancellationService as CancellationSerivce,
+    {} as DiskWatermarkService
   );
 
   await updateWorker.onJobCompleted(
@@ -126,4 +144,72 @@ test('On update job completed because of cancellation ', async () => {
   // The elasticsearch update won't be called for the sake of
   // cancellation.
   expect(updateSpy.notCalled).toBeTruthy();
+});
+
+test('Execute update job failed because of low disk watermark ', async () => {
+  // Setup RepositoryService
+  const updateSpy = sinon.spy();
+  const repoService = {
+    update: emptyAsyncFunc,
+  };
+  repoService.update = updateSpy;
+  const repoServiceFactory = {
+    newInstance: (): void => {
+      return;
+    },
+  };
+  const newInstanceSpy = sinon.fake.returns(repoService);
+  repoServiceFactory.newInstance = newInstanceSpy;
+
+  // Setup CancellationService
+  const cancelUpdateJobSpy = sinon.spy();
+  const registerCancelableUpdateJobSpy = sinon.spy();
+  const cancellationService: any = {
+    cancelUpdateJob: emptyAsyncFunc,
+    registerCancelableUpdateJob: emptyAsyncFunc,
+  };
+  cancellationService.cancelUpdateJob = cancelUpdateJobSpy;
+  cancellationService.registerCancelableUpdateJob = registerCancelableUpdateJobSpy;
+
+  // Setup DiskWatermarkService
+  const isLowWatermarkSpy = sinon.stub().resolves(true);
+  const diskWatermarkService: any = {
+    isLowWatermark: isLowWatermarkSpy,
+  };
+
+  const updateWorker = new UpdateWorker(
+    esQueue as Esqueue,
+    log,
+    esClient as EsClient,
+    {
+      security: {
+        enableGitCertCheck: true,
+      },
+      disk: {
+        thresholdEnabled: true,
+        watermarkLowMb: 100,
+      },
+    } as ServerOptions,
+    {} as GitOperations,
+    {} as RepositoryServiceFactory,
+    cancellationService as CancellationSerivce,
+    diskWatermarkService as DiskWatermarkService
+  );
+
+  try {
+    await updateWorker.executeJob({
+      payload: {
+        uri: 'mockrepo',
+      },
+      options: {},
+      timestamp: 0,
+    });
+    // This step should not be touched.
+    expect(false).toBeTruthy();
+  } catch (error) {
+    // Exception should be thrown.
+    expect(isLowWatermarkSpy.calledOnce).toBeTruthy();
+    expect(newInstanceSpy.notCalled).toBeTruthy();
+    expect(updateSpy.notCalled).toBeTruthy();
+  }
 });

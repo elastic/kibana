@@ -14,7 +14,7 @@ afterEach(() => {
   sinon.restore();
 });
 
-test('Register and cancel cancellation token', () => {
+test('Register and cancel cancellation token', async () => {
   const repoUri = 'github.com/elastic/code';
   const service = new CancellationSerivce();
   const token = {
@@ -25,8 +25,12 @@ test('Register and cancel cancellation token', () => {
   const cancelSpy = sinon.spy();
   token.cancel = cancelSpy;
 
-  service.registerIndexJobToken(repoUri, token as CancellationToken);
-  service.cancelIndexJob(repoUri);
+  await service.registerCancelableIndexJob(
+    repoUri,
+    token as CancellationToken,
+    Promise.resolve('resolved')
+  );
+  await service.cancelIndexJob(repoUri);
 
   expect(cancelSpy.calledOnce).toBeTruthy();
 });

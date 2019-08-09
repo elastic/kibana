@@ -22,3 +22,9 @@ export * from './service';
 export { SavedObjectsSchema } from './schema';
 
 export { SavedObjectsManagement } from './management';
+
+export * from './import';
+
+export { getSortedObjectsForExport, SavedObjectsExportOptions } from './export';
+
+export { SavedObjectsSerializer, RawDoc as SavedObjectsRawDoc } from './serialization';

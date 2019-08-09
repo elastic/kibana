@@ -10,7 +10,6 @@ export const OPEN_SET_VIEW = 'OPEN_SET_VIEW';
 export const SET_IS_LAYER_TOC_OPEN = 'SET_IS_LAYER_TOC_OPEN';
 export const SET_FULL_SCREEN = 'SET_FULL_SCREEN';
 export const SET_READ_ONLY = 'SET_READ_ONLY';
-export const SET_FILTERABLE = 'IS_FILTERABLE';
 export const SET_OPEN_TOC_DETAILS = 'SET_OPEN_TOC_DETAILS';
 export const SHOW_TOC_DETAILS = 'SHOW_TOC_DETAILS';
 export const HIDE_TOC_DETAILS = 'HIDE_TOC_DETAILS';
@@ -54,13 +53,6 @@ export function setReadOnly(isReadOnly) {
   return {
     type: SET_READ_ONLY,
     isReadOnly
-  };
-}
-
-export function setFilterable(isFilterable) {
-  return {
-    type: SET_FILTERABLE,
-    isFilterable
   };
 }
 

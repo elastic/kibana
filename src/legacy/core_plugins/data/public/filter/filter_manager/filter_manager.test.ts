@@ -26,6 +26,7 @@ import { Filter, FilterStateStore } from '@kbn/es-query';
 import { FilterStateManager } from './filter_state_manager';
 import { FilterManager } from './filter_manager';
 
+import { IndexPatterns } from 'ui/index_patterns';
 import { getFilter } from './test_helpers/get_stub_filter';
 import { StubIndexPatterns } from './test_helpers/stub_index_pattern';
 import { StubState } from './test_helpers/stub_state';
@@ -78,7 +79,7 @@ describe('filter_manager', () => {
     appStateStub = new StubState();
     globalStateStub = new StubState();
     indexPatterns = new StubIndexPatterns();
-    filterManager = new FilterManager(indexPatterns);
+    filterManager = new FilterManager(indexPatterns as IndexPatterns);
     readyFilters = getFiltersArray();
 
     // FilterStateManager is tested indirectly.
@@ -216,6 +217,30 @@ describe('filter_manager', () => {
       // listener should be called just once
       expect(updateListener.called).toBeTruthy();
       expect(updateListener.callCount).toBe(2);
+    });
+
+    test('changing a disabled filter should fire only update event', async function() {
+      const updateStub = jest.fn();
+      const fetchStub = jest.fn();
+      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, true, false, 'age', 34);
+
+      await filterManager.setFilters([f1]);
+
+      filterManager.getUpdates$().subscribe({
+        next: updateStub,
+      });
+
+      filterManager.getFetches$().subscribe({
+        next: fetchStub,
+      });
+
+      const f2 = _.cloneDeep(f1);
+      f2.meta.negate = true;
+      await filterManager.setFilters([f2]);
+
+      // this time, events should be emitted
+      expect(fetchStub).toBeCalledTimes(0);
+      expect(updateStub).toBeCalledTimes(1);
     });
   });
 
@@ -398,8 +423,8 @@ describe('filter_manager', () => {
     });
 
     test('should fire the update and fetch events', async function() {
-      const updateStub = sinon.stub();
-      const fetchStub = sinon.stub();
+      const updateStub = jest.fn();
+      const fetchStub = jest.fn();
 
       filterManager.getUpdates$().subscribe({
         next: updateStub,
@@ -416,8 +441,8 @@ describe('filter_manager', () => {
       expect(globalStateStub.save.callCount).toBe(1);
 
       // this time, events should be emitted
-      expect(fetchStub.called);
-      expect(updateStub.called);
+      expect(fetchStub).toBeCalledTimes(1);
+      expect(updateStub).toBeCalledTimes(1);
     });
   });
 
@@ -595,8 +620,8 @@ describe('filter_manager', () => {
     });
 
     test('should fire the update and fetch events', async function() {
-      const updateStub = sinon.stub();
-      const fetchStub = sinon.stub();
+      const updateStub = jest.fn();
+      const fetchStub = jest.fn();
 
       await filterManager.addFilters(readyFilters, false);
 
@@ -611,8 +636,8 @@ describe('filter_manager', () => {
       filterManager.removeFilter(readyFilters[0]);
 
       // this time, events should be emitted
-      expect(fetchStub.called);
-      expect(updateStub.called);
+      expect(fetchStub).toBeCalledTimes(1);
+      expect(updateStub).toBeCalledTimes(1);
     });
 
     test('should remove matching filters', async function() {
@@ -664,19 +689,12 @@ describe('filter_manager', () => {
   });
 
   describe('invert', () => {
-    test('invert to disabled', async () => {
-      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-      filterManager.invertFilter(f1);
-      expect(f1.meta.negate).toBe(true);
-      filterManager.invertFilter(f1);
-      expect(f1.meta.negate).toBe(false);
-    });
+    test('should fire the update and fetch events', async function() {
+      await filterManager.addFilters(readyFilters);
+      expect(filterManager.getFilters()).toHaveLength(3);
 
-    test('should fire the update and fetch events', function() {
-      const updateStub = sinon.stub();
-      const fetchStub = sinon.stub();
-
-      filterManager.addFilters(readyFilters);
+      const updateStub = jest.fn();
+      const fetchStub = jest.fn();
       filterManager.getUpdates$().subscribe({
         next: updateStub,
       });
@@ -685,9 +703,11 @@ describe('filter_manager', () => {
         next: fetchStub,
       });
 
-      filterManager.invertFilter(readyFilters[1]);
-      expect(fetchStub.called);
-      expect(updateStub.called);
+      readyFilters[1].meta.negate = !readyFilters[1].meta.negate;
+      await filterManager.addFilters(readyFilters[1]);
+      expect(filterManager.getFilters()).toHaveLength(3);
+      expect(fetchStub).toBeCalledTimes(1);
+      expect(updateStub).toBeCalledTimes(1);
     });
   });
 

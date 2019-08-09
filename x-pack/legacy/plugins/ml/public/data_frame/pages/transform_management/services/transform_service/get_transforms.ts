@@ -7,23 +7,16 @@
 import { ml } from '../../../../../services/ml_api_service';
 import {
   DataFrameTransformPivotConfig,
-  DataFrameTransformId,
   refreshTransformList$,
   REFRESH_TRANSFORM_LIST_STATE,
 } from '../../../../common';
 
 import {
   DataFrameTransformListRow,
-  DataFrameTransformState,
   DataFrameTransformStats,
+  DATA_FRAME_MODE,
+  isDataFrameTransformStats,
 } from '../../components/transform_list/common';
-
-interface DataFrameTransformStateStats {
-  id: DataFrameTransformId;
-  checkpointing: object;
-  state: DataFrameTransformState;
-  stats: DataFrameTransformStats;
-}
 
 interface GetDataFrameTransformsResponse {
   count: number;
@@ -33,7 +26,7 @@ interface GetDataFrameTransformsResponse {
 interface GetDataFrameTransformsStatsResponseOk {
   node_failures?: object;
   count: number;
-  transforms: DataFrameTransformStateStats[];
+  transforms: DataFrameTransformStats[];
 }
 
 const isGetDataFrameTransformsStatsResponseOk = (
@@ -89,16 +82,21 @@ export const getTransformsFactory = (
 
             // A newly created transform might not have corresponding stats yet.
             // If that's the case we just skip the transform and don't add it to the transform list yet.
-            if (stats === undefined) {
+            if (!isDataFrameTransformStats(stats)) {
               return reducedtableRows;
             }
+
+            config.mode =
+              typeof config.sync !== 'undefined'
+                ? DATA_FRAME_MODE.CONTINUOUS
+                : DATA_FRAME_MODE.BATCH;
+
             // Table with expandable rows requires `id` on the outer most level
             reducedtableRows.push({
               config,
               id: config.id,
               checkpointing: stats.checkpointing,
-              state: stats.state,
-              stats: stats.stats,
+              stats,
             });
             return reducedtableRows;
           },

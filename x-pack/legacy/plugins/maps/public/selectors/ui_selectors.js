@@ -10,5 +10,4 @@ export const getIsLayerTOCOpen = ({ ui }) => ui.isLayerTOCOpen;
 export const getOpenTOCDetails = ({ ui }) => ui.openTOCDetails;
 export const getIsFullScreen = ({ ui }) => ui.isFullScreen;
 export const getIsReadOnly = ({ ui }) => ui.isReadOnly;
-export const getIsFilterable = ({ ui }) => ui.isFilterable;
 export const getIndexingStage = ({ ui }) => ui.importIndexingStage;

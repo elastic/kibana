@@ -387,8 +387,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       return await tableView.getVisibleText();
     }
 
-    public async clickMetricPanelOptions() {
-      await testSubjects.click('metricEditorPanelOptionsBtn');
+    public async clickPanelOptions(tabName: string) {
+      await testSubjects.click(`${tabName}EditorPanelOptionsBtn`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -446,7 +446,16 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async clickColorPicker(): Promise<void> {
-      await testSubjects.click('tvbColorPicker');
+      const picker = await find.byCssSelector('.tvbColorPicker button');
+      await browser.clickMouseButton(picker);
+    }
+
+    public async setBackgroundColor(colorHex: string): Promise<void> {
+      await this.clickColorPicker();
+      await this.checkColorPickerPopUpIsPresent();
+      await find.setValue('.tvbColorPickerPopUp input', colorHex);
+      await this.clickColorPicker();
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async checkColorPickerPopUpIsPresent(): Promise<void> {

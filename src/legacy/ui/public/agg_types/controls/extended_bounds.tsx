@@ -38,7 +38,7 @@ function areBoundsValid({ min, max }: Bounds): boolean {
 }
 
 function ExtendedBoundsParamEditor({
-  value,
+  value = {} as Bounds,
   setValue,
   setValidity,
   showValidation,

@@ -31,7 +31,7 @@ export const LogColumnHeaders = injectI18n<{
 }>(({ columnConfigurations, columnWidths, intl, showColumnConfiguration }) => {
   const showColumnConfigurationLabel = intl.formatMessage({
     id: 'xpack.infra.logColumnHeaders.configureColumnsLabel',
-    defaultMessage: 'Configure columns',
+    defaultMessage: 'Configure source',
   });
 
   return (

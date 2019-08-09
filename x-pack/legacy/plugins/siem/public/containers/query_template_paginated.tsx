@@ -37,7 +37,8 @@ export class QueryTemplatePaginated<
 
   private fetchMoreOptions!: (newActivePage: number) => FetchMoreOptionsArgs<TData, TVariables>;
 
-  public constructor(props: T) {
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor(props: T) {
     super(props);
   }
 

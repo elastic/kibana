@@ -19,7 +19,7 @@ export const startTransform = async (d: DataFrameTransformListRow) => {
   try {
     await ml.dataFrame.startDataFrameTransform(
       d.config.id,
-      d.state.task_state === DATA_FRAME_TASK_STATE.FAILED
+      d.stats.task_state === DATA_FRAME_TASK_STATE.FAILED
     );
     toastNotifications.addSuccess(
       i18n.translate('xpack.ml.dataframe.transformList.startTransformSuccessMessage', {

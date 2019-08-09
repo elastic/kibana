@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import xPackage from '../../../package.json';
-import { getTemplateVersion } from './lib/get_template_version';
-
-export const TASK_MANAGER_API_VERSION = 1;
-export const TASK_MANAGER_TEMPLATE_VERSION = getTemplateVersion(xPackage.version);
+export const TASK_MANAGER_INDEX = '.kibana_task_manager';

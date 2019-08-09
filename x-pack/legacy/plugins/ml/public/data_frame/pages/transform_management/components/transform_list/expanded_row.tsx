@@ -29,9 +29,13 @@ interface Props {
 }
 
 export const ExpandedRow: SFC<Props> = ({ item }) => {
+  const stateValues = { ...item.stats };
+  delete stateValues.stats;
+  delete stateValues.checkpointing;
+
   const state: SectionConfig = {
     title: 'State',
-    items: Object.entries(item.state).map(s => {
+    items: Object.entries(stateValues).map(s => {
       return { title: s[0].toString(), description: getItemDescription(s[1]) };
     }),
     position: 'left',
@@ -47,7 +51,7 @@ export const ExpandedRow: SFC<Props> = ({ item }) => {
 
   const stats: SectionConfig = {
     title: 'Stats',
-    items: Object.entries(item.stats).map(s => {
+    items: Object.entries(item.stats.stats).map(s => {
       return { title: s[0].toString(), description: getItemDescription(s[1]) };
     }),
     position: 'right',

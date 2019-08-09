@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useRef, useState } from 'react';
+import React, { Fragment, SFC, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { isKibanaContext, getCreateRequestBody, KibanaContext } from '../../../../common';
+import { useKibanaContext } from '../../../../../contexts/kibana';
+
+import { getCreateRequestBody } from '../../../../common';
 
 import {
   StepDefineExposedState,
@@ -61,11 +63,7 @@ const StepDefine: SFC<DefinePivotStepProps> = ({
 };
 
 export const Wizard: SFC = React.memo(() => {
-  const kibanaContext = useContext(KibanaContext);
-
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
+  const kibanaContext = useKibanaContext();
 
   const indexPattern = kibanaContext.currentIndexPattern;
 
