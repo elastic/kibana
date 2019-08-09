@@ -15,12 +15,14 @@ import {
   LIGHT_THEME,
   DARK_THEME,
   ScaleType,
+  TickFormatter,
+  SettingSpecProps,
+  Rotation,
+  Rendering,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { TickFormatter, Rotation, Rendering } from '@elastic/charts/dist/lib/series/specs';
 import chrome from 'ui/chrome';
 import moment from 'moment-timezone';
-import { SettingSpecProps } from '@elastic/charts/dist/specs/settings';
 
 const chartHeight = 74;
 const chartDefaultRotation: Rotation = 0;

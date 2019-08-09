@@ -44,37 +44,6 @@ describe('Mappings', () => {
     return { name: name, type: type || 'string' };
   }
 
-  test('Multi fields', function () {
-    mappings.loadMappings({
-      index: {
-        properties: {
-          first_name: {
-            type: 'multi_field',
-            path: 'just_name',
-            fields: {
-              first_name: { type: 'string', index: 'analyzed' },
-              any_name: { type: 'string', index: 'analyzed' },
-            },
-          },
-          last_name: {
-            type: 'multi_field',
-            path: 'just_name',
-            fields: {
-              last_name: { type: 'string', index: 'analyzed' },
-              any_name: { type: 'string', index: 'analyzed' },
-            },
-          },
-        },
-      },
-    });
-
-    expect(mappings.getFields('index').sort(fc)).toEqual([
-      f('any_name', 'string'),
-      f('first_name', 'string'),
-      f('last_name', 'string'),
-    ]);
-  });
-
   test('Multi fields 1.0 style', function () {
     mappings.loadMappings({
       index: {

@@ -35,6 +35,7 @@ import { ApplicationService } from './application';
 import { mapToObject } from '../utils/';
 import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
+import { SavedObjectsService } from './saved_objects/saved_objects_service';
 import { ContextService } from './context';
 
 interface Params {
@@ -64,6 +65,7 @@ export class CoreSystem {
   private readonly legacyPlatform: LegacyPlatformService;
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
+  private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
   private readonly chrome: ChromeService;
   private readonly i18n: I18nService;
@@ -101,6 +103,7 @@ export class CoreSystem {
 
     this.notifications = new NotificationsService();
     this.http = new HttpService();
+    this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.overlay = new OverlayService();
     this.application = new ApplicationService();
@@ -166,6 +169,7 @@ export class CoreSystem {
       const injectedMetadata = await this.injectedMetadata.start();
       const docLinks = await this.docLinks.start({ injectedMetadata });
       const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
+      const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
       const application = await this.application.start({ injectedMetadata });
 
@@ -201,6 +205,7 @@ export class CoreSystem {
         chrome,
         docLinks,
         http,
+        savedObjects,
         i18n,
         injectedMetadata,
         notifications,

@@ -336,7 +336,7 @@ export class EditPolicy extends Component {
                   <EuiButtonEmpty onClick={this.showPolicyJsonFlyout}>
                     <FormattedMessage
                       id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButton"
-                      defaultMessage="Show JSON"
+                      defaultMessage="Show request"
                     />
                   </EuiButtonEmpty>
                 </EuiFlexItem>

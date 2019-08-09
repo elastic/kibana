@@ -17,6 +17,8 @@
  * under the License.
  */
 
-export { AggParamEditorProps } from './components/default_editor_agg_param_props';
-export { DefaultEditorAggParams } from './components/default_editor_agg_params';
+export { AggParamEditorProps } from './components/agg_param_props';
+export { DefaultEditorAggParams, SubAggParamsProp } from './components/agg_params';
 export * from './vis_options_props';
+export * from './utils';
+export * from './agg_groups';
