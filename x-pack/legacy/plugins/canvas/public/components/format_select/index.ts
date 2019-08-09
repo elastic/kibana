@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sort } from './sort';
-import { formatdate } from './formatdate';
-import { formatnumber } from './formatnumber';
-
-export const transformSpecs = [formatdate, formatnumber, sort];
+export { FormatSelect } from './format_select';

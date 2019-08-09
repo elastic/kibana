@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sort } from './sort';
-import { formatdate } from './formatdate';
-import { formatnumber } from './formatnumber';
-
-export const transformSpecs = [formatdate, formatnumber, sort];
+export const formatnumber = () => ({
+  name: 'formatnumber',
+  displayName: 'Number format',
+  args: [
+    {
+      name: '_',
+      displayName: 'Format',
+      argType: 'numberformat',
+    },
+  ],
+});
