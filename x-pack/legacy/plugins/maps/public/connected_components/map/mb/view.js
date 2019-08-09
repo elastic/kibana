@@ -16,7 +16,8 @@ import {
 import {
   DECIMAL_DEGREES_PRECISION,
   FEATURE_ID_PROPERTY_NAME,
-  ZOOM_PRECISION
+  ZOOM_PRECISION,
+  LON_INDEX
 } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw-unminified';
@@ -241,8 +242,8 @@ export class MBMapContainer extends React.Component {
       // Ensure that if the map is zoomed out such that multiple
       // copies of the feature are visible, the popup appears
       // over the copy being pointed to.
-      while (Math.abs(mbLngLat.lng - coordinates[0]) > 180) {
-        coordinates[0] += mbLngLat.lng > coordinates[0] ? 360 : -360;
+      while (Math.abs(mbLngLat.lng - coordinates[LON_INDEX]) > 180) {
+        coordinates[0] += mbLngLat.lng > coordinates[LON_INDEX] ? 360 : -360;
       }
 
       popupAnchorLocation = coordinates;

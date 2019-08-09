@@ -137,8 +137,8 @@ export function geoPointToGeometry(value, accumulator) {
   if (value.length === 2
       && typeof value[0] === 'number'
       && typeof value[1] === 'number') {
-    const lat = value[1];
-    const lon = value[0];
+    const lat = value[LAT_INDEX];
+    const lon = value[LON_INDEX];
     accumulator.push(pointGeometryFactory(lat, lon));
     return;
   }
@@ -331,14 +331,15 @@ export function createGeometryFilterWithMeta({
   };
 }
 
-export function roundCoordinates(coordinates, precision = DECIMAL_DEGREES_PRECISION) {
-  coordinates.forEach((value, index) => {
+export function roundCoordinates(coordinates) {
+  for (let i = 0; i < coordinates.length; i++) {
+    const value = coordinates[i];
     if (Array.isArray(value)) {
       roundCoordinates(value);
     } else if (!isNaN(value)) {
-      coordinates[index] = _.round(value, precision);
+      coordinates[i] = _.round(value, DECIMAL_DEGREES_PRECISION);
     }
-  });
+  }
 }
 
 /*
@@ -354,7 +355,7 @@ export function getBoundingBoxGeometry(geometry) {
     maxLon: exterior[0][LON_INDEX],
     maxLat: exterior[0][LAT_INDEX]
   };
-  for (let i  = 1; i < exterior.length; i++) {
+  for (let i = 1; i < exterior.length; i++) {
     extent.minLon = Math.min(exterior[i][LON_INDEX], extent.minLon);
     extent.minLat = Math.min(exterior[i][LAT_INDEX], extent.minLat);
     extent.maxLon = Math.max(exterior[i][LON_INDEX], extent.maxLon);
