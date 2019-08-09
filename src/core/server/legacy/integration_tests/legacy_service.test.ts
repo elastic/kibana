@@ -34,7 +34,7 @@ describe('legacy service', () => {
       router.get({ path: '/new-platform', validate: false }, (context, req, res) =>
         res.ok({ content: 'from-new-platform' })
       );
-      http.registerRouter(router);
+
       await root.start();
 
       const legacyPlatformUrl = `${rootUrl}/legacy-platform`;
@@ -58,7 +58,7 @@ describe('legacy service', () => {
       router.get({ path: '', validate: false }, (context, req, res) =>
         res.ok({ content: 'from-new-platform' })
       );
-      http.registerRouter(router);
+
       await root.start();
 
       const kbnServer = kbnTestServer.getKbnServer(root);

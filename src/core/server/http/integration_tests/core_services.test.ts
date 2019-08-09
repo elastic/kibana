@@ -253,7 +253,7 @@ describe('http service', () => {
     it('rewrites authorization header via authHeaders to make a request to Elasticsearch', async () => {
       const authHeaders = { authorization: 'Basic: user:password' };
       const { http, elasticsearch } = await root.setup();
-      const { registerAuth, registerRouter, createRouter } = http;
+      const { registerAuth, createRouter } = http;
 
       await registerAuth((req, res, toolkit) =>
         toolkit.authenticated({ requestHeaders: authHeaders })
@@ -265,7 +265,6 @@ describe('http service', () => {
         client.asScoped(req);
         return res.ok({ header: 'ok' });
       });
-      registerRouter(router);
 
       await root.start();
 
@@ -279,7 +278,7 @@ describe('http service', () => {
     it('passes request authorization header to Elasticsearch if registerAuth was not set', async () => {
       const authorizationHeader = 'Basic: username:password';
       const { http, elasticsearch } = await root.setup();
-      const { registerRouter, createRouter } = http;
+      const { createRouter } = http;
 
       const router = createRouter('/new-platform');
       router.get({ path: '/', validate: false }, async (context, req, res) => {
@@ -287,7 +286,6 @@ describe('http service', () => {
         client.asScoped(req);
         return res.ok({ header: 'ok' });
       });
-      registerRouter(router);
 
       await root.start();
 

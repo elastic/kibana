@@ -66,7 +66,6 @@ function createCoreSetupMock() {
     registerOnPostAuth: httpService.registerOnPostAuth,
     basePath: httpService.basePath,
     isTlsEnabled: httpService.isTlsEnabled,
-    registerRouter: httpService.registerRouter,
     createRouter: jest.fn(),
   };
   httpMock.createRouter.mockImplementation(() => httpService.createRouter(''));

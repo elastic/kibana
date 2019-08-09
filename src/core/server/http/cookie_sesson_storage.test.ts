@@ -98,7 +98,7 @@ const cookieOptions = {
 describe('Cookie based SessionStorage', () => {
   describe('#set()', () => {
     it('Should write to session storage & set cookies', async () => {
-      const { registerRouter, server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup();
       const router = createRouter('');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -106,7 +106,6 @@ describe('Cookie based SessionStorage', () => {
         sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
         return res.ok({});
       });
-      registerRouter(router);
 
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
@@ -133,7 +132,7 @@ describe('Cookie based SessionStorage', () => {
   });
   describe('#get()', () => {
     it('reads from session storage', async () => {
-      const { registerRouter, server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup();
       const router = createRouter('');
 
       router.get({ path: '/', validate: false }, async (context, req, res) => {
@@ -145,8 +144,6 @@ describe('Cookie based SessionStorage', () => {
         }
         return res.ok({ value: sessionValue.value });
       });
-
-      registerRouter(router);
 
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
@@ -171,7 +168,7 @@ describe('Cookie based SessionStorage', () => {
         .expect(200, { value: userData });
     });
     it('returns null for empty session', async () => {
-      const { registerRouter, server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup();
 
       const router = createRouter('');
       router.get({ path: '/', validate: false }, async (context, req, res) => {
@@ -179,8 +176,6 @@ describe('Cookie based SessionStorage', () => {
         const sessionValue = await sessionStorage.get();
         return res.ok({ value: sessionValue });
       });
-
-      registerRouter(router);
 
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
@@ -198,7 +193,7 @@ describe('Cookie based SessionStorage', () => {
     });
 
     it('returns null for invalid session & clean cookies', async () => {
-      const { registerRouter, server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup();
 
       const router = createRouter('');
 
@@ -213,8 +208,6 @@ describe('Cookie based SessionStorage', () => {
         const sessionValue = await sessionStorage.get();
         return res.ok({ value: sessionValue });
       });
-
-      registerRouter(router);
 
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
@@ -333,7 +326,7 @@ describe('Cookie based SessionStorage', () => {
 
   describe('#clear()', () => {
     it('clears session storage & remove cookies', async () => {
-      const { registerRouter, server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup();
 
       const router = createRouter('');
 
@@ -346,8 +339,6 @@ describe('Cookie based SessionStorage', () => {
         sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
         return res.ok({});
       });
-
-      registerRouter(router);
 
       const factory = await createCookieSessionStorageFactory(
         logger.get(),

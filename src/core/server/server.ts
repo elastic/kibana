@@ -123,7 +123,6 @@ export class Server {
     router.get({ path: '/', validate: false }, async (context, req, res) =>
       res.ok({ version: '0.0.1' })
     );
-    httpSetup.registerRouter(router);
   }
 
   public async setupConfigSchemas() {

@@ -20,7 +20,6 @@
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { IRouter } from '../http';
 import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
 import { CoreSetup, CoreStart } from '..';
 
@@ -111,7 +110,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
       createRouter: () => deps.http.createRouter(`/${plugin.name}`),
-      registerRouter: (router: IRouter) => deps.http.registerRouter(router),
       registerOnPreAuth: deps.http.registerOnPreAuth,
       registerAuth: deps.http.registerAuth,
       registerOnPostAuth: deps.http.registerOnPostAuth,

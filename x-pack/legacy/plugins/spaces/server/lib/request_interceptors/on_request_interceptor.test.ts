@@ -90,8 +90,6 @@ describe('onRequestInterceptor', () => {
           });
         }
       );
-
-      http.registerRouter(router);
     }
   }
 

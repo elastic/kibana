@@ -46,13 +46,16 @@ const createRouterMock = (): jest.Mocked<IRouter> => ({
 
 const createSetupContractMock = () => {
   const setupContract: ServiceSetupMockType = {
-    // we can mock some hapi server method when we need it
-    server: {} as Server,
+    // we can mock other hapi server methods when we need it
+    server: ({
+      route: jest.fn(),
+      start: jest.fn(),
+      stop: jest.fn(),
+    } as unknown) as Server,
     createCookieSessionStorageFactory: jest.fn(),
     registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
-    registerRouter: jest.fn(),
     createRouter: jest.fn(),
     basePath: createBasePathMock(),
     auth: {

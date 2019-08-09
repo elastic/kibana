@@ -87,7 +87,7 @@ test('spins up notReady server until started if configured with `autoListen:true
   const configService = createConfigService();
   const httpServer = {
     isListening: () => false,
-    setup: jest.fn(),
+    setup: jest.fn().mockReturnValue({}),
     start: jest.fn(),
     stop: jest.fn(),
   };
@@ -216,10 +216,8 @@ test('register route handler', async () => {
 
   const service = new HttpService({ coreId, configService, env, logger });
 
-  const { registerRouter, createRouter } = await service.setup();
+  const { createRouter } = await service.setup();
   const router = createRouter('/foo');
-
-  registerRouter(router);
 
   expect(registerRouterMock).toHaveBeenCalledTimes(1);
   expect(registerRouterMock).toHaveBeenLastCalledWith(router);
@@ -247,7 +245,7 @@ test('does not start http server if process is dev cluster master', async () => 
   const configService = createConfigService();
   const httpServer = {
     isListening: () => false,
-    setup: noop,
+    setup: jest.fn().mockReturnValue({}),
     start: jest.fn(),
     stop: noop,
   };
@@ -272,7 +270,7 @@ test('does not start http server if configured with `autoListen:false`', async (
   });
   const httpServer = {
     isListening: () => false,
-    setup: noop,
+    setup: jest.fn().mockReturnValue({}),
     start: jest.fn(),
     stop: noop,
   };

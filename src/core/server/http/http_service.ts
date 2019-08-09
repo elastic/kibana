@@ -33,7 +33,7 @@ import { HttpServer, HttpServerSetup } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 
 /** @public */
-export type HttpServiceSetup = HttpServerSetup & {
+export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
   /**
    * Provides ability to declare a handler function for a particular path and HTTP request method.
    * Each route can have only one handler functions, which is executed when the route is matched.
@@ -97,12 +97,14 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
       await this.runNotReadyServer(config);
     }
 
-    const serverContract = await this.httpServer.setup(config);
+    const { registerRouter, ...serverContract } = await this.httpServer.setup(config);
     const contract: HttpServiceSetup = {
       ...serverContract,
 
       createRouter: (path: string) => {
-        return new Router(path, this.log);
+        const router = new Router(path, this.log);
+        registerRouter(router);
+        return router;
       },
     };
 
