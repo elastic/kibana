@@ -268,19 +268,15 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         return rows[row];
       };
 
-      const getActionButtonForRow = (row, type = 'select') => {
-        const selectedRow = getFieldListTableRow(row);
-        const buttons = selectedRow.columns[selectedRow.columns.length - 1].reactWrapper.find('button');
-        if (type === 'select') {
-          return buttons.first();
-        }
-        return buttons.last();
-      };
-
       const getFieldChooserColumnForRow = (row) => {
         const selectedRow = getFieldListTableRow(row);
         const [,, fieldChooserColumn] = selectedRow.columns;
         return fieldChooserColumn;
+      };
+
+      const getSelectAllInputForRow = (row) => {
+        const fieldChooser = getFieldChooserColumnForRow(row);
+        return fieldChooser.reactWrapper.find('input').first();
       };
 
       const expectAllFieldChooserInputs = (fieldChooserColumn, expected) => {
@@ -292,31 +288,28 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
       it('should select all of the fields in a row',  async () => {
         // The last column is the eui "actions" column
-        const selectAllButton = getActionButtonForRow(0);
-        selectAllButton.simulate('click');
-
+        const selectAllCheckbox = getSelectAllInputForRow(0);
+        selectAllCheckbox.simulate('change', { checked: true });
         const fieldChooserColumn = getFieldChooserColumnForRow(0);
         expectAllFieldChooserInputs(fieldChooserColumn, true);
       });
 
       it('should deselect all of the fields in a row ',  async () => {
-        const selectAllButton = getActionButtonForRow(0);
-        selectAllButton.simulate('click');
+        const selectAllCheckbox = getSelectAllInputForRow(0);
+        selectAllCheckbox.simulate('change', { checked: true });
 
         let fieldChooserColumn = getFieldChooserColumnForRow(0);
         expectAllFieldChooserInputs(fieldChooserColumn, true);
 
 
-        selectAllButton.simulate('click');
+        selectAllCheckbox.simulate('change', { checked: false });
         fieldChooserColumn = getFieldChooserColumnForRow(0);
         expectAllFieldChooserInputs(fieldChooserColumn, false);
       });
 
       it('should select all of the metric types across rows',  () => {
-        const selectAllPopoverButton = find('rollupJobMetricsSelectAll').last();
-        selectAllPopoverButton.simulate('click');
-
-        find('rollupJobMetricsCheckbox-avg').simulate('change', { checked: true });
+        const selectAllAvgCheckbox = find('rollupJobMetricsCheckbox-avg');
+        selectAllAvgCheckbox.first().simulate('change', { checked: true });
 
         const rows = getFieldListTableRows();
 
@@ -338,11 +331,9 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       });
 
       it('should deselect all of the metric types across rows',  () => {
-        const selectAllPopoverButton = find('rollupJobMetricsSelectAll').last();
-        selectAllPopoverButton.simulate('click');
-
-        find('rollupJobMetricsCheckbox-avg').last().simulate('change', { checked: true });
-        find('rollupJobMetricsCheckbox-avg').last().simulate('change', { checked: false });
+        const selectAllAvgCheckbox = find('rollupJobMetricsCheckbox-avg');
+        selectAllAvgCheckbox.last().simulate('change', { checked: true });
+        selectAllAvgCheckbox.last().simulate('change', { checked: false });
 
         const rows = getFieldListTableRows();
 
@@ -361,7 +352,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       it('should correctly select across rows and columns',  async () => {
         /**
          * Tricky test case where we want to determine that the column-wise and row-wise
-         * selection is interacting correctly.
+         * selections are interacting correctly with each other.
          *
          * We will select avg (numeric) and max (numeric + date) to ensure that we are
          * testing across metrics types too. The plan is:
@@ -372,53 +363,49 @@ describe('Create Rollup Job, step 5: Metrics', () => {
          * 4. Expect the avg and max popover checkboxes to be unchecked
          * 5. Select all on the last date metric row-wise
          * 6. Deselect all max column-wise
-         * 7. Expect all but max to be selected on the last date metric row
+         * 7. Expect everything but all and max to be selected on the last date metric row
          *
          * Let's a go!
          */
 
-        let selectAllPopoverButton = find('rollupJobMetricsSelectAll').last();
-        selectAllPopoverButton.simulate('click');
         // 1.
-        find('rollupJobMetricsCheckbox-avg').last().simulate('change', { checked: true });
-        selectAllPopoverButton.simulate('click');
+        find('rollupJobMetricsCheckbox-avg').first().simulate('change', { checked: true });
         // 2.
-        find('rollupJobMetricsCheckbox-max').last().simulate('change', { checked: true });
+        find('rollupJobMetricsCheckbox-max').first().simulate('change', { checked: true });
 
-        const selectAllButtonFirstRow = getActionButtonForRow(0);
+        const selectAllCheckbox = getSelectAllInputForRow(0);
 
         // 3.
         // Select All
-        selectAllButtonFirstRow.simulate('click');
+        selectAllCheckbox.simulate('change', { checked: true });
         // Deselect All
-        selectAllButtonFirstRow.simulate('click');
+        selectAllCheckbox.simulate('change', { checked: false });
 
-        selectAllPopoverButton = find('rollupJobMetricsSelectAll').last();
-        selectAllPopoverButton.simulate('click');
         // 4.
-        expect(find('rollupJobMetricsCheckbox-avg').last().props().checked).toBe(false);
-        // expect(find('rollupJobMetricsCheckbox-max').last().props().checked).toBe(false);
+        expect(find('rollupJobMetricsCheckbox-avg').first().props().checked).toBe(false);
+        expect(find('rollupJobMetricsCheckbox-max').first().props().checked).toBe(false);
 
         let rows = getFieldListTableRows();
-        const selectAllButtonLastRow = getActionButtonForRow(rows.length - 1);
         // 5.
-        selectAllButtonLastRow.simulate('click');
+        getSelectAllInputForRow(rows.length - 1).simulate('change', { checked: true });
 
-        selectAllPopoverButton = find('rollupJobMetricsSelectAll').last();
-        selectAllPopoverButton.simulate('click');
+        // 6.
         find('rollupJobMetricsCheckbox-max').last().simulate('change', { checked: false });
 
         rows = getFieldListTableRows();
-        // const lastRowFieldChooserColumn = getFieldChooserColumnForRow(rows.length - 1);
-        // 6.
-        // lastRowFieldChooserColumn.reactWrapper.find('input').forEach((input) => {
-        //   const props = input.props();
-        //   if (props['data-test-subj'].endsWith('max')) {
-        //     expect(props.checked).toBe(false);
-        //   } else {
-        //     expect(props.checked).toBe(true);
-        //   }
-        // });
+        const lastRowFieldChooserColumn = getFieldChooserColumnForRow(rows.length - 1);
+        // 7.
+        lastRowFieldChooserColumn.reactWrapper.find('input').forEach((input) => {
+          const props = input.props();
+          if (
+            props['data-test-subj'].endsWith('max') ||
+            props['data-test-subj'].endsWith('All')
+          ) {
+            expect(props.checked).toBe(false);
+          } else {
+            expect(props.checked).toBe(true);
+          }
+        });
       });
     });
   });

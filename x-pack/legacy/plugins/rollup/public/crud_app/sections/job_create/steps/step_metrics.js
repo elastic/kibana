@@ -18,8 +18,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiButtonIcon,
-  EuiToolTip,
 } from '@elastic/eui';
 
 
