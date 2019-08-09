@@ -18,19 +18,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DefaultEditorSize } from 'ui/vis/editor_size';
 import { Status } from 'ui/vis/update_status';
+// @ts-ignore
+import { DefaultEditorSize } from 'ui/vis/editor_size';
+// @ts-ignore
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 
-import { createVegaRequestHandler } from './vega_request_handler';
-import { createVegaVisualization } from './vega_visualization';
-
 import vegaEditorTemplate from './vega_editor_template.html';
+import { visFactory } from '../../visualizations/public';
+import { VegaVisualizationDependencies } from './plugin';
+
+import { createVegaRequestHandler } from './vega_request_handler';
+// @ts-ignore
+import { createVegaVisualization } from './vega_visualization';
+// @ts-ignore
 import defaultSpec from '!!raw-loader!./default.spec.hjson';
 
-import { visFactory } from '../../visualizations/public';
-
-export const createVegaTypeDefinition = (dependencies) => {
+export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependencies) => {
   const requestHandler = createVegaRequestHandler(dependencies);
   const visualization = createVegaVisualization(dependencies);
 
