@@ -20,15 +20,15 @@
 import { resolve } from 'path';
 
 export interface IProjectPathOptions {
-  'skip-kibana-extra'?: boolean;
+  'skip-kibana-plugins'?: boolean;
   oss?: boolean;
 }
 
 /**
  * Returns all the paths where plugins are located
  */
-export function getProjectPaths(rootPath: string, options: IProjectPathOptions) {
-  const skipKibanaExtra = Boolean(options['skip-kibana-extra']);
+export function getProjectPaths(rootPath: string, options: IProjectPathOptions = {}) {
+  const skipKibanaPlugins = Boolean(options['skip-kibana-plugins']);
   const ossOnly = Boolean(options.oss);
 
   const projectPaths = [rootPath, resolve(rootPath, 'packages/*')];
@@ -43,16 +43,20 @@ export function getProjectPaths(rootPath: string, options: IProjectPathOptions) 
   // In anyway, have a plugin declaring their own dependencies is the
   // correct and the expect behavior.
   projectPaths.push(resolve(rootPath, 'test/plugin_functional/plugins/*'));
+  projectPaths.push(resolve(rootPath, 'test/interpreter_functional/plugins/*'));
 
   if (!ossOnly) {
     projectPaths.push(resolve(rootPath, 'x-pack'));
-    projectPaths.push(resolve(rootPath, 'x-pack/plugins/*'));
+    projectPaths.push(resolve(rootPath, 'x-pack/legacy/plugins/*'));
   }
 
-  if (!skipKibanaExtra) {
+  if (!skipKibanaPlugins) {
     projectPaths.push(resolve(rootPath, '../kibana-extra/*'));
     projectPaths.push(resolve(rootPath, '../kibana-extra/*/packages/*'));
     projectPaths.push(resolve(rootPath, '../kibana-extra/*/plugins/*'));
+    projectPaths.push(resolve(rootPath, 'plugins/*'));
+    projectPaths.push(resolve(rootPath, 'plugins/*/packages/*'));
+    projectPaths.push(resolve(rootPath, 'plugins/*/plugins/*'));
   }
 
   return projectPaths;

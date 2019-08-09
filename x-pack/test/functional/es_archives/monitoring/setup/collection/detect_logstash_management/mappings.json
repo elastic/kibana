@@ -1,0 +1,54 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": ".logstash",
+    "mappings": {
+      "_meta": {
+        "logstash-version": "8.0.0"
+      },
+      "dynamic": "strict",
+      "properties": {
+        "description": {
+          "type": "text"
+        },
+        "last_modified": {
+          "type": "date"
+        },
+        "metadata": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "pipeline": {
+          "type": "text"
+        },
+        "pipeline_metadata": {
+          "properties": {
+            "type": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "short"
+            }
+          }
+        },
+        "pipeline_settings": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "username": {
+          "type": "keyword"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "codec": "best_compression",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

@@ -25,7 +25,6 @@ const callWithRequestFactory = (server, request) => {
 
   return callWithRequest;
 };
-const batchRequestsSupport = true;
 
 export class DefaultSearchStrategy extends AbstractSearchStrategy {
   name = 'default';
@@ -37,7 +36,7 @@ export class DefaultSearchStrategy extends AbstractSearchStrategy {
   checkForViability(req) {
     return {
       isViable: true,
-      capabilities: new DefaultSearchCapabilities(req, batchRequestsSupport)
+      capabilities: new DefaultSearchCapabilities(req),
     };
   }
 }

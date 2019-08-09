@@ -22,7 +22,6 @@ import _ from 'lodash';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import { uiModules } from 'ui/modules';
 import contextAppTemplate from './app.html';
-import 'ui/filter_bar';
 import './components/loading_button';
 import './components/size_picker/size_picker';
 import { getFirstSortableField } from './api/utils/sorting';
@@ -39,11 +38,13 @@ import {
 } from './query';
 import { timefilter } from 'ui/timefilter';
 
+// load directives
+import '../../../data/public/legacy';
+
 const module = uiModules.get('apps/context', [
   'elasticsearch',
   'kibana',
   'kibana/config',
-  'kibana/notify',
   'ngRoute',
 ]);
 

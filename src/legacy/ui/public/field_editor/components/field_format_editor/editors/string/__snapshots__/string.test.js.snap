@@ -15,6 +15,7 @@ exports[`StringFormatEditor should render normally 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiSelect
       compressed={false}

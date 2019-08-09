@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
 import { ascending, pairs } from 'd3-array';
-import expect from 'expect.js';
 import gql from 'graphql-tag';
 
-import { InfraTimeKey } from '../../../../plugins/infra/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { sharedFragments } from '../../../../legacy/plugins/infra/common/graphql/shared';
+import { InfraTimeKey } from '../../../../legacy/plugins/infra/public/graphql/types';
 
 const KEY_WITHIN_DATA_RANGE = {
   time: new Date('2019-01-06T00:00:00.000Z').valueOf(),
@@ -24,7 +25,7 @@ const LATEST_KEY_WITH_DATA = {
   tiebreaker: 2,
 };
 
-const logsWithoutMillisTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
@@ -96,10 +97,7 @@ const logsWithoutMillisTests: KbnTestProvider = ({ getService }) => {
       ).to.have.length(2);
     });
   });
-};
-
-// tslint:disable-next-line no-default-export
-export default logsWithoutMillisTests;
+}
 
 const logEntriesAroundQuery = gql`
   query LogEntriesAroundQuery(
@@ -117,34 +115,22 @@ const logEntriesAroundQuery = gql`
         filterQuery: $filterQuery
       ) {
         start {
-          time
-          tiebreaker
+          ...InfraTimeKeyFields
         }
         end {
-          time
-          tiebreaker
+          ...InfraTimeKeyFields
         }
         hasMoreBefore
         hasMoreAfter
         entries {
-          gid
-          key {
-            time
-            tiebreaker
-          }
-          message {
-            ... on InfraLogMessageFieldSegment {
-              field
-              value
-            }
-            ... on InfraLogMessageConstantSegment {
-              constant
-            }
-          }
+          ...InfraLogEntryFields
         }
       }
     }
   }
+
+  ${sharedFragments.InfraTimeKey}
+  ${sharedFragments.InfraLogEntryFields}
 `;
 
 const logEntriesBetweenQuery = gql`
@@ -157,34 +143,22 @@ const logEntriesBetweenQuery = gql`
       id
       logEntriesBetween(startKey: $startKey, endKey: $endKey, filterQuery: $filterQuery) {
         start {
-          time
-          tiebreaker
+          ...InfraTimeKeyFields
         }
         end {
-          time
-          tiebreaker
+          ...InfraTimeKeyFields
         }
         hasMoreBefore
         hasMoreAfter
         entries {
-          gid
-          key {
-            time
-            tiebreaker
-          }
-          message {
-            ... on InfraLogMessageFieldSegment {
-              field
-              value
-            }
-            ... on InfraLogMessageConstantSegment {
-              constant
-            }
-          }
+          ...InfraLogEntryFields
         }
       }
     }
   }
+
+  ${sharedFragments.InfraTimeKey}
+  ${sharedFragments.InfraLogEntryFields}
 `;
 
 const logSummaryBetweenQuery = gql`

@@ -45,7 +45,7 @@ export const ScriptingSyntax = () => (
           values={{
             painless: (
               <EuiLink
-                target="_window"
+                target="_blank"
                 href={getDocLink('scriptedFields.painless')}
               >
                 <FormattedMessage id="common.ui.fieldEditor.syntax.defaultLabel.painlessLink" defaultMessage="Painless" />
@@ -68,7 +68,7 @@ export const ScriptingSyntax = () => (
           values={{
             javaAPIs: (
               <EuiLink
-                target="_window"
+                target="_blank"
                 href={getDocLink('scriptedFields.painlessApi')}
               >
                 <FormattedMessage id="common.ui.fieldEditor.syntax.painlessLabel.javaAPIsLink" defaultMessage="native Java APIs" />&nbsp;
@@ -77,7 +77,7 @@ export const ScriptingSyntax = () => (
             ),
             syntax: (
               <EuiLink
-                target="_window"
+                target="_blank"
                 href={getDocLink('scriptedFields.painlessSyntax')}
               >
                 <FormattedMessage id="common.ui.fieldEditor.syntax.painlessLabel.syntaxLink" defaultMessage="syntax" />&nbsp;
@@ -102,7 +102,7 @@ export const ScriptingSyntax = () => (
           values={{
             lucene: (
               <EuiLink
-                target="_window"
+                target="_blank"
                 href={getDocLink('scriptedFields.luceneExpressions')}
               >
                 <FormattedMessage id="common.ui.fieldEditor.syntax.lucene.commonLabel.luceneLink" defaultMessage="Lucene Expressions" />

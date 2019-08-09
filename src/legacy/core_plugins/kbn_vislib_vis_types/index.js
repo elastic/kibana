@@ -24,6 +24,10 @@ export default function (kibana) {
     uiExports: {
       visTypes: [
         'plugins/kbn_vislib_vis_types/kbn_vislib_vis_types'
+      ],
+      interpreter: [
+        'plugins/kbn_vislib_vis_types/pie_fn',
+        'plugins/kbn_vislib_vis_types/vislib_fn',
       ]
     }
 

@@ -17,33 +17,95 @@
  * under the License.
  */
 
+import _ from 'lodash';
 import { ORIGIN } from './origin';
 
 export class TMSService {
 
-  constructor(config,  emsClient) {
+  _getRasterStyleJson = _.once(async () => {
+    const rasterUrl = this._getRasterStyleUrl();
+    const url = this._proxyPath + rasterUrl;
+    return this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
+  });
+
+  constructor(config, emsClient, proxyPath) {
     this._config = config;
     this._emsClient = emsClient;
+    this._proxyPath = proxyPath;
   }
 
-  getUrlTemplate() {
-    return this._emsClient.extendUrlWithParams(this._config.url);
+  _getRasterFormats(locale) {
+    return this._config.formats.filter(format => {
+      return format.locale === locale && format.format === 'raster';
+    });
+  }
+
+  _getRasterStyleUrl() {
+    let rasterFormats = this._getRasterFormats(this._emsClient.getLocale());
+    if (!rasterFormats.length) {//fallback to default locale
+      rasterFormats = this._getRasterFormats(this._emsClient.getDefaultLocale());
+    }
+    if (!rasterFormats.length) {
+      throw new Error(`Cannot find raster tile layer for locale ${this._emsClient.getLocale()} or ${this._emsClient.getDefaultLocale()}`);
+    }
+    const defaultStyle = rasterFormats[0];
+    if (defaultStyle && defaultStyle.hasOwnProperty('url')) {
+      return defaultStyle.url;
+    }
+  }
+
+  async getDefaultRasterStyle() {
+    return await this._getRasterStyleJson();
+  }
+
+  async getUrlTemplate() {
+    const tileJson = await this._getRasterStyleJson();
+    const directUrl = this._proxyPath + tileJson.tiles[0];
+    return this._emsClient.extendUrlWithParams(directUrl);
+  }
+
+  getDisplayName() {
+    return this._emsClient.getValueInLanguage(this._config.name);
+  }
+
+  getAttributions() {
+    return this._config.attribution.map(attribution => {
+      const url = this._emsClient.getValueInLanguage(attribution.url);
+      const label = this._emsClient.getValueInLanguage(attribution.label);
+      return {
+        url: url,
+        label: label
+      };
+    });
   }
 
   getHTMLAttribution() {
-    return this._emsClient.sanitizeMarkdown(this._config.attribution);
+    const attributions = this._config.attribution.map(attribution => {
+      const url = this._emsClient.getValueInLanguage(attribution.url);
+      const label = this._emsClient.getValueInLanguage(attribution.label);
+      const html = url ? `<a rel="noreferrer noopener" href="${url}">${label}</a>` : label;
+      return this._emsClient.sanitizeHtml(`${html}`);
+    });
+    return `<p>${attributions.join(' | ')}</p>`;//!!!this is the current convention used in Kibana
   }
 
   getMarkdownAttribution() {
-    return this._config.attribution;
+    const attributions = this._config.attribution.map(attribution => {
+      const url = this._emsClient.getValueInLanguage(attribution.url);
+      const label = this._emsClient.getValueInLanguage(attribution.label);
+      return `[${label}](${url})`;
+    });
+    return attributions.join('|');
   }
 
-  getMinZoom() {
-    return this._config.minZoom;
+  async getMinZoom() {
+    const tileJson = await this._getRasterStyleJson();
+    return tileJson.minzoom;
   }
 
-  getMaxZoom() {
-    return this._config.maxZoom;
+  async getMaxZoom() {
+    const tileJson = await this._getRasterStyleJson();
+    return tileJson.maxzoom;
   }
 
   getId() {
@@ -57,5 +119,4 @@ export class TMSService {
   getOrigin() {
     return ORIGIN.EMS;
   }
-
 }

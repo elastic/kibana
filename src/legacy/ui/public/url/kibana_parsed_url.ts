@@ -19,7 +19,7 @@
 
 import { parse } from 'url';
 
-import { modifyUrl } from '../../../../core/public/utils';
+import { modifyUrl } from '../../../../core/utils';
 import { prependPath } from './prepend_path';
 
 interface Options {
@@ -106,7 +106,7 @@ export class KibanaParsedUrl {
     return query._g || '';
   }
 
-  public setGlobalState(newGlobalState: string) {
+  public setGlobalState(newGlobalState: string | string[]) {
     if (!this.appPath) {
       return;
     }

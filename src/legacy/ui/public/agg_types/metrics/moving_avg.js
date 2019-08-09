@@ -28,13 +28,34 @@ const movingAvgLabel = i18n.translate('common.ui.aggTypes.metrics.movingAvgLabel
 
 export const movingAvgMetricAgg = new MetricAggType({
   name: 'moving_avg',
+  dslName: 'moving_fn',
   title: i18n.translate('common.ui.aggTypes.metrics.movingAvgTitle', {
     defaultMessage: 'Moving Avg'
   }),
   subtype: parentPipelineAggHelper.subtype,
   makeLabel: agg => makeNestedLabel(agg, movingAvgLabel),
   params: [
-    ...parentPipelineAggHelper.params()
+    ...parentPipelineAggHelper.params(),
+    {
+      name: 'window',
+      default: 5,
+    },
+    {
+      name: 'script',
+      default: 'MovingFunctions.unweightedAvg(values)'
+    }
   ],
+  getValue(agg, bucket) {
+    /**
+     * The previous implementation using `moving_avg` did not
+     * return any bucket in case there are no documents or empty window.
+     * The `moving_fn` aggregation returns buckets with the value null if the
+     * window is empty or doesn't return any value if the sibiling metric
+     * is null. Since our generic MetricAggType.getValue implementation
+     * would return the value 0 for null buckets, we need a specific
+     * implementation here, that preserves the null value.
+     */
+    return bucket[agg.id] ? bucket[agg.id].value : null;
+  },
   getFormat: parentPipelineAggHelper.getFormat
 });

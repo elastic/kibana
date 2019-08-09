@@ -8,8 +8,7 @@ export default function ({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
   const archive = 'uptime/full_heartbeat';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/31242
-  describe.skip('graphql', () => {
+  describe('graphql', () => {
     before('load heartbeat data', () => esArchiver.load(archive));
     after('unload heartbeat index', () => esArchiver.unload(archive));
     // each of these test files imports a GQL query from
@@ -21,8 +20,11 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./filter_bar'));
     loadTestFile(require.resolve('./monitor_charts'));
     loadTestFile(require.resolve('./monitor_list'));
+    loadTestFile(require.resolve('./monitor_page_title'));
+    loadTestFile(require.resolve('./monitor_states'));
     loadTestFile(require.resolve('./monitor_status_bar'));
     loadTestFile(require.resolve('./ping_list'));
     loadTestFile(require.resolve('./snapshot'));
+    loadTestFile(require.resolve('./snapshot_histogram'));
   });
 }

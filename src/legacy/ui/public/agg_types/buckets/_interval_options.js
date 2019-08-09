@@ -77,11 +77,5 @@ export const intervalOptions = [
       defaultMessage: 'Yearly',
     }),
     val: 'y'
-  },
-  {
-    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.customDisplayName', {
-      defaultMessage: 'Custom',
-    }),
-    val: 'custom'
   }
 ];

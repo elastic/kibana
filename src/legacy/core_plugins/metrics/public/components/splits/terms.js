@@ -19,93 +19,155 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import GroupBySelect from './group_by_select';
-import createTextHandler from '../lib/create_text_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import FieldSelect from '../aggs/field_select';
-import MetricSelect from '../aggs/metric_select';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSpacer } from '@elastic/eui';
+import { get, find } from 'lodash';
+import { GroupBySelect } from './group_by_select';
+import { createTextHandler } from '../lib/create_text_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { FieldSelect } from '../aggs/field_select';
+import { MetricSelect } from '../aggs/metric_select';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFieldNumber,
+  EuiComboBox,
+  EuiFieldText,
+} from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FIELD_TYPES } from '../../../common/field_types';
 
-const SplitByTermsUi = props => {
+const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
+
+export const SplitByTermsUI = ({
+  onChange,
+  indexPattern,
+  intl,
+  model: seriesModel,
+  fields,
+  uiRestrictions,
+}) => {
   const htmlId = htmlIdGenerator();
-  const handleTextChange = createTextHandler(props.onChange);
-  const handleSelectChange = createSelectHandler(props.onChange);
-  const { indexPattern, intl } = props;
-  const defaults = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
-  const model = { ...defaults, ...props.model };
+  const handleTextChange = createTextHandler(onChange);
+  const handleSelectChange = createSelectHandler(onChange);
+  const model = { ...DEFAULTS, ...seriesModel };
   const { metrics } = model;
   const defaultCount = {
     value: '_count',
-    label: intl.formatMessage({ id: 'tsvb.splits.terms.defaultCountLabel', defaultMessage: 'Doc Count (default)' })
+    label: intl.formatMessage({
+      id: 'tsvb.splits.terms.defaultCountLabel',
+      defaultMessage: 'Doc Count (default)',
+    }),
   };
   const terms = {
-    value: '_term',
-    label: intl.formatMessage({ id: 'tsvb.splits.terms.termsLabel', defaultMessage: 'Terms' })
+    value: '_key',
+    label: intl.formatMessage({ id: 'tsvb.splits.terms.termsLabel', defaultMessage: 'Terms' }),
   };
 
   const dirOptions = [
     {
       value: 'desc',
-      label: intl.formatMessage({ id: 'tsvb.splits.terms.dirOptions.descendingLabel', defaultMessage: 'Descending' })
+      label: intl.formatMessage({
+        id: 'tsvb.splits.terms.dirOptions.descendingLabel',
+        defaultMessage: 'Descending',
+      }),
     },
     {
       value: 'asc',
-      label: intl.formatMessage({ id: 'tsvb.splits.terms.dirOptions.ascendingLabel', defaultMessage: 'Ascending' })
+      label: intl.formatMessage({
+        id: 'tsvb.splits.terms.dirOptions.ascendingLabel',
+        defaultMessage: 'Ascending',
+      }),
     },
   ];
   const selectedDirectionOption = dirOptions.find(option => {
     return model.terms_direction === option.value;
   });
+  const selectedField = find(fields[indexPattern], ({ name }) => name === model.terms_field);
+  const selectedFieldType = get(selectedField, 'type');
 
   return (
     <div>
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('group')}
-            label={(<FormattedMessage
-              id="tsvb.splits.terms.groupByLabel"
-              defaultMessage="Group by"
-            />)}
+            label={
+              <FormattedMessage id="tsvb.splits.terms.groupByLabel" defaultMessage="Group by" />
+            }
           >
             <GroupBySelect
               value={model.split_mode}
               onChange={handleSelectChange('split_mode')}
+              uiRestrictions={uiRestrictions}
             />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('by')}
-            label={(<FormattedMessage
-              id="tsvb.splits.terms.byLabel"
-              defaultMessage="By"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.splits.terms.byLabel"
+                defaultMessage="By"
+                description="This labels a field selector allowing the user to chose 'by' which field to group."
+              />
+            }
           >
             <FieldSelect
               indexPattern={indexPattern}
               onChange={handleSelectChange('terms_field')}
               value={model.terms_field}
-              fields={props.fields}
+              fields={fields}
+              uiRestrictions={uiRestrictions}
+              type={'terms'}
             />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer />
+      {selectedFieldType === FIELD_TYPES.STRING && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              id={htmlId('include')}
+              label={
+                <FormattedMessage id="tsvb.splits.terms.includeLabel" defaultMessage="Include" />
+              }
+            >
+              <EuiFieldText
+                value={model.terms_include}
+                onChange={handleTextChange('terms_include')}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow
+              id={htmlId('exclude')}
+              label={
+                <FormattedMessage id="tsvb.splits.terms.excludeLabel" defaultMessage="Exclude" />
+              }
+            >
+              <EuiFieldText
+                value={model.terms_exclude}
+                onChange={handleTextChange('terms_exclude')}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
 
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('top')}
-            label={(<FormattedMessage
-              id="tsvb.splits.terms.topLabel"
-              defaultMessage="Top"
-            />)}
+            label={<FormattedMessage id="tsvb.splits.terms.topLabel" defaultMessage="Top" />}
           >
             <EuiFieldNumber
-              placeholder={intl.formatMessage({ id: 'tsvb.splits.terms.sizePlaceholder', defaultMessage: 'Size' })}
+              placeholder={intl.formatMessage({
+                id: 'tsvb.splits.terms.sizePlaceholder',
+                defaultMessage: 'Size',
+              })}
               value={Number(model.terms_size)}
               onChange={handleTextChange('terms_size')}
             />
@@ -114,10 +176,9 @@ const SplitByTermsUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('order')}
-            label={(<FormattedMessage
-              id="tsvb.splits.terms.orderByLabel"
-              defaultMessage="Order by"
-            />)}
+            label={
+              <FormattedMessage id="tsvb.splits.terms.orderByLabel" defaultMessage="Order by" />
+            }
           >
             <MetricSelect
               metrics={metrics}
@@ -132,10 +193,9 @@ const SplitByTermsUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('direction')}
-            label={(<FormattedMessage
-              id="tsvb.splits.terms.directionLabel"
-              defaultMessage="Direction"
-            />)}
+            label={
+              <FormattedMessage id="tsvb.splits.terms.directionLabel" defaultMessage="Direction" />
+            }
           >
             <EuiComboBox
               isClearable={false}
@@ -151,11 +211,13 @@ const SplitByTermsUi = props => {
   );
 };
 
-SplitByTermsUi.propTypes = {
+SplitByTermsUI.propTypes = {
+  intl: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
   indexPattern: PropTypes.string,
-  fields: PropTypes.object
+  fields: PropTypes.object,
+  uiRestrictions: PropTypes.object,
 };
 
-export const SplitByTerms = injectI18n(SplitByTermsUi);
+export const SplitByTerms = injectI18n(SplitByTermsUI);

@@ -21,12 +21,12 @@ import { AbstractSearchRequest } from './abstract_request';
 const SEARCH_METHOD = 'search';
 
 export class SingleSearchRequest extends AbstractSearchRequest {
-  async search(options) {
+  async search([{ body, index }]) {
     const includeFrozen = await this.req.getUiSettingsService().get('search:includeFrozen');
     const resp = await this.callWithRequest(this.req, SEARCH_METHOD, {
-      ...options,
-      index: this.indexPattern,
       ignore_throttled: !includeFrozen,
+      body,
+      index,
     });
 
     return [resp];

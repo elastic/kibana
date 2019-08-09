@@ -29,4 +29,7 @@ export interface FieldDescriptor {
   readFromDocValues: boolean;
   searchable: boolean;
   type: string;
+  esTypes: string[];
+  parent?: string;
+  subType?: string;
 }

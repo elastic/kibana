@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { shortenDottedString } from '../shorten_dotted_string';
 
 describe('shortenDottedString', () => {

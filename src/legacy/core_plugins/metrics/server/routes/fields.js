@@ -19,15 +19,15 @@
 
 import { getFields } from '../lib/get_fields';
 import { getIndexPatternService } from '../lib/get_index_pattern_service';
-export default (server) => {
 
+export const fieldsRoutes = server => {
   server.route({
     config: {
-      pre: [getIndexPatternService]
+      pre: [getIndexPatternService],
     },
     path: '/api/metrics/fields',
     method: 'GET',
-    handler: async (req) => {
+    handler: async req => {
       try {
         return await getFields(req);
       } catch (err) {
@@ -37,7 +37,6 @@ export default (server) => {
 
         return [];
       }
-    }
+    },
   });
-
 };

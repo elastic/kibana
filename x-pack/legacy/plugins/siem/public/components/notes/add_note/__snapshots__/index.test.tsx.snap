@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddNote renders correctly 1`] = `
+<Component
+  associateNote={[MockFunction]}
+  getNewNoteId={[MockFunction]}
+  newNote="The contents of a new note"
+  onCancelAddNote={[MockFunction]}
+  updateNewNote={[MockFunction]}
+  updateNote={[MockFunction]}
+/>
+`;

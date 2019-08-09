@@ -25,6 +25,7 @@ export async function getFunctionalConfig({ readConfigFile }) {
       ...xPackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
+        '--xpack.reporting.csv.enablePanelActionDownload=true',
         '--logging.events.log', JSON.stringify(['info', 'warning', 'error', 'fatal', 'optimize', 'reporting'])
       ],
     },

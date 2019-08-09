@@ -18,16 +18,10 @@
  */
 
 import { distinctUntilChanged } from 'rxjs/operators';
+import { npStart } from 'ui/new_platform';
 import { uiModules } from '../../modules';
 
-let newPlatformChrome;
-export function __newPlatformInit__(instance) {
-  if (newPlatformChrome) {
-    throw new Error('ui/chrome/global_nav_state is already initialized');
-  }
-
-  newPlatformChrome = instance;
-}
+const newPlatformChrome = npStart.core.chrome;
 
 uiModules.get('kibana')
   .service('globalNavState', ($rootScope) => {

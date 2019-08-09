@@ -37,7 +37,7 @@ import { createFailError } from '../run';
 import { I18nConfig } from './config';
 import { serializeToJson } from './serializers';
 
-interface IntegrateOptions {
+export interface IntegrateOptions {
   sourceFileName: string;
   targetFileName?: string;
   dryRun: boolean;

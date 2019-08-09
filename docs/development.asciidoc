@@ -15,6 +15,10 @@ include::development/core-development.asciidoc[]
 
 include::development/plugin-development.asciidoc[]
 
+include::development/visualize/development-visualize-index.asciidoc[]
+
+include::development/add-data-guide.asciidoc[]
+
 include::development/security/index.asciidoc[]
 
 include::development/pr-review.asciidoc[]

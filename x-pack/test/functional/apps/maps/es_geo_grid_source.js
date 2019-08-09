@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
 
@@ -30,7 +30,7 @@ export default function ({ getPageObjects, getService }) {
 
     function makeRequestTestsForGeoPrecision(LAYER_ID) {
 
-      describe('geoprecision - requests', async () => {
+      describe('geoprecision - requests', () => {
         let beforeTimestamp;
         beforeEach(async () => {
           await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
@@ -58,7 +58,7 @@ export default function ({ getPageObjects, getService }) {
         });
       });
 
-      describe('geotile grid precision - data', async ()=> {
+      describe('geotile grid precision - data', ()=> {
 
         beforeEach(async () => {
           await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);

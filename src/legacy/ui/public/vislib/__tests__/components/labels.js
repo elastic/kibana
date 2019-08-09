@@ -18,19 +18,17 @@
  */
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { VislibComponentsLabelsLabelsProvider } from '../../components/labels/labels';
-import { VislibComponentsLabelsDataArrayProvider } from '../../components/labels/data_array';
-import { VislibComponentsLabelsUniqLabelsProvider } from '../../components/labels/uniq_labels';
-import { VislibComponentsLabelsFlattenSeriesProvider } from '../../components/labels/flatten_series';
+import { labels } from '../../components/labels/labels';
+import { dataArray } from '../../components/labels/data_array';
+import { uniqLabels } from '../../components/labels/uniq_labels';
+import { flattenSeries as getSeries } from '../../components/labels/flatten_series';
 
-let getLabels;
 let seriesLabels;
 let rowsLabels;
 let seriesArr;
 let rowsArr;
-let uniqLabels;
 
 const seriesData = {
   'label': '',
@@ -125,16 +123,15 @@ const columnsData = {
 };
 
 describe('Vislib Labels Module Test Suite', function () {
-
+  let uniqSeriesLabels;
   describe('Labels (main)', function () {
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      getLabels = Private(VislibComponentsLabelsLabelsProvider);
-      seriesLabels = getLabels(seriesData);
-      rowsLabels = getLabels(rowsData);
+    beforeEach(ngMock.inject(function () {
+      seriesLabels = labels(seriesData);
+      rowsLabels = labels(rowsData);
       seriesArr = Array.isArray(seriesLabels);
       rowsArr = Array.isArray(rowsLabels);
-      uniqLabels = _.chain(rowsData.rows)
+      uniqSeriesLabels = _.chain(rowsData.rows)
         .pluck('series')
         .flattenDeep()
         .pluck('label')
@@ -143,7 +140,7 @@ describe('Vislib Labels Module Test Suite', function () {
     }));
 
     it('should be a function', function () {
-      expect(typeof getLabels).to.be('function');
+      expect(typeof labels).to.be('function');
     });
 
     it('should return an array if input is data.series', function () {
@@ -156,14 +153,14 @@ describe('Vislib Labels Module Test Suite', function () {
 
     it('should throw an error if input is not an object', function () {
       expect(function () {
-        getLabels('string not object');
+        labels('string not object');
       }).to.throwError();
     });
 
     it('should return unique label values', function () {
-      expect(rowsLabels[0]).to.equal(uniqLabels[0]);
-      expect(rowsLabels[1]).to.equal(uniqLabels[1]);
-      expect(rowsLabels[2]).to.equal(uniqLabels[2]);
+      expect(rowsLabels[0]).to.equal(uniqSeriesLabels[0]);
+      expect(rowsLabels[1]).to.equal(uniqSeriesLabels[1]);
+      expect(rowsLabels[2]).to.equal(uniqSeriesLabels[2]);
     });
 
   });
@@ -187,13 +184,11 @@ describe('Vislib Labels Module Test Suite', function () {
     const emptyArray = [];
     const nullValue = null;
     let notAValue;
-    let dataArray;
     let testSeries;
     let testRows;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      dataArray = Private(VislibComponentsLabelsDataArrayProvider);
+    beforeEach(ngMock.inject(function () {
       seriesLabels = dataArray(seriesData);
       rowsLabels = dataArray(rowsData);
       testSeries = Array.isArray(seriesLabels);
@@ -283,7 +278,6 @@ describe('Vislib Labels Module Test Suite', function () {
   });
 
   describe('Unique labels', function () {
-    let uniqLabels;
     const arrObj = [
       { 'label': 'a' },
       { 'label': 'b' },
@@ -304,8 +298,7 @@ describe('Vislib Labels Module Test Suite', function () {
     let testArr;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      uniqLabels = Private(VislibComponentsLabelsUniqLabelsProvider);
+    beforeEach(ngMock.inject(function () {
       uniq = uniqLabels(arrObj, function (d) { return d; });
       testArr = Array.isArray(uniq);
     }));
@@ -370,15 +363,13 @@ describe('Vislib Labels Module Test Suite', function () {
     const emptyObject = {};
     const emptyArray = [];
     let notAValue;
-    let getSeries;
     let columnsLabels;
     let rowsLabels;
     let columnsArr;
     let rowsArr;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      getSeries = Private(VislibComponentsLabelsFlattenSeriesProvider);
+    beforeEach(ngMock.inject(function () {
       columnsLabels = getSeries(columnsData);
       rowsLabels = getSeries(rowsData);
       columnsArr = Array.isArray(columnsLabels);

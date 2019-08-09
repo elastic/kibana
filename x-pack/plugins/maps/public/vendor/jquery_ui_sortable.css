@@ -1,9 +1,0 @@
-/*! jQuery UI - v1.12.1 - 2018-06-01
-* http://jqueryui.com
-* Includes: sortable.css
-* Copyright jQuery Foundation and other contributors; Licensed MIT */
-
-.ui-sortable-handle {
-	-ms-touch-action: none;
-	touch-action: none;
-}

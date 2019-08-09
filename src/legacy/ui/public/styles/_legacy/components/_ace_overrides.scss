@@ -32,8 +32,7 @@
     }
 
     .ace_indent-guide {
-      background: none;
-      border-right: 1px solid $euiColorMediumShade;
+      background: linear-gradient(to left, $euiColorMediumShade 0%, $euiColorMediumShade 1px, transparent 1px, transparent 100%);
     }
 
     .ace_search {
@@ -42,10 +41,6 @@
 
     .ace_layer.ace_marker-layer {
       overflow: visible;
-    }
-
-    .ace_scroller {
-      border-left: $euiBorderThin;
     }
 
     .ace_warning {
@@ -70,6 +65,7 @@
     .ace_gutter {
       background-color: $euiColorEmptyShade;
       color: $euiColorDarkShade;
+      border-left: 1px solid $aceBackground;
     }
 
     .ace_print-margin {

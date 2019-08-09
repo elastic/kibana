@@ -19,13 +19,22 @@
 
 import { IndexedArray, IndexedArrayConfig } from '../indexed_array';
 
-interface UIRegistry<T> extends IndexedArray<T> {
-  register<T>(privateModule: T): UIRegistry<T>;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface UIRegistry<T> extends IndexedArray<T> {}
 
 interface UIRegistrySpec<T> extends IndexedArrayConfig<T> {
   name: string;
   filter?(item: T): boolean;
 }
 
-declare function uiRegistry<T>(spec: UIRegistrySpec<T>): UIRegistry<T>;
+/**
+ * Creates a new UiRegistry (See js method for detailed documentation)
+ * The generic type T is the type of objects which are stored in the registry.
+ * The generic type A is an interface of accessors which depend on the
+ * fields of the objects stored in the registry.
+ * Example: if there is a string field "name" in type T, then A should be
+ * `{ byName: { [typeName: string]: T }; }`
+ */
+declare function uiRegistry<T, A = {}>(
+  spec: UIRegistrySpec<T>
+): { (): UIRegistry<T> & A; register<T>(privateModule: T): UIRegistry<T> & A };

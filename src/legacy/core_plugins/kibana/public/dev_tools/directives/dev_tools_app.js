@@ -20,7 +20,6 @@
 import { uiModules } from 'ui/modules';
 import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
 import template from '../partials/dev_tools_app.html';
-import 'ui/kbn_top_nav';
 
 uiModules
   .get('apps/dev_tools')

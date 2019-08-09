@@ -1,0 +1,82 @@
+{
+    "data": {
+    },
+    "_values": {
+        "addLegend": true,
+        "addTooltip": true,
+        "colorSchema": "Greens",
+        "colorsNumber": 4,
+        "colorsRange": [],
+        "type": "point_series",
+        "valueAxes": [
+            {
+                "id": "ValueAxis-1",
+                "labels": {
+                    "color": "black",
+                    "overwriteColor": false,
+                    "rotate": 0,
+                    "show": false
+                },
+                "scale": {
+                    "defaultYExtents": false,
+                    "type": "linear"
+                },
+                "show": false,
+                "type": "value"
+            }
+        ],
+        "chartTitle": {},
+        "mode": "normal",
+        "tooltip": {
+            "show": true
+        },
+        "categoryAxes": [
+            {
+                "id": "CategoryAxis-1",
+                "type": "category",
+                "labels": {},
+                "scale": {},
+                "title": {
+                    "text": "products.category.keyword: Descending"
+                },
+                "style": {
+                    "rangePadding": 0,
+                    "rangeOuterPadding": 0
+                }
+            },
+            {
+                "id": "CategoryAxis-2",
+                "type": "category",
+                "position": "left",
+                "values": [
+                    "Thursday",
+                    "Friday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Saturday"
+                ],
+                "scale": {
+                    "inverted": true
+                },
+                "labels": {
+                    "filter": false
+                },
+                "style": {
+                    "rangePadding": 0,
+                    "rangeOuterPadding": 0
+                },
+                "title": {
+                    "text": ""
+                }
+            }
+        ],
+        "charts": [
+            {
+                "type": "point_series",
+                "series":[],
+                "width": 610,
+                "height": 124
+            }
+        ]
+    }
+}

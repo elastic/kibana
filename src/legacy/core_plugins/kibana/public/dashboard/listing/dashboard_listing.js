@@ -46,14 +46,13 @@ class DashboardListingUi extends React.Component {
   render() {
     return (
       <TableListView
-        createItem={this.props.createItem}
+        createItem={this.props.hideWriteControls ? null : this.props.createItem}
         findItems={this.props.findItems}
-        deleteItems={this.props.deleteItems}
-        editItem={this.props.editItem}
+        deleteItems={this.props.hideWriteControls ? null : this.props.deleteItems}
+        editItem={this.props.hideWriteControls ? null : this.props.editItem}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
         initialFilter={this.props.initialFilter}
-        hideWriteControls={this.props.hideWriteControls}
         noItemsFragment={this.getNoItemsMessage()}
         entityName={
           i18n.translate('kbn.dashboard.listing.table.entityName', {

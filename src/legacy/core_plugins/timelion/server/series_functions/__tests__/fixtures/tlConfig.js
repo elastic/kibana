@@ -25,6 +25,9 @@ import esResponse from './es_response';
 
 export default function () {
   const functions = require('../../../lib/load_functions')('series_functions');
+  const kibanaServerConfigs = {
+    'timelion.graphiteUrls': ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
+  };
   const server = {
     plugins: {
       timelion: {
@@ -41,16 +44,21 @@ export default function () {
         })
       }
     },
-    core: {
-      elasticsearch: {
-        legacy: { config$: of({ shardTimeout: moment.duration(30000) }) }
+    newPlatform: {
+      setup: {
+        core: {
+          elasticsearch: {
+            legacy: { config$: of({ shardTimeout: moment.duration(30000) }) }
+          }
+        }
       }
     },
+    config: () => ({ get: (key) => kibanaServerConfigs[key] })
   };
 
   const tlConfig = require('../../../handlers/lib/tl_config.js')({
-    server: server,
-    request: {}
+    server,
+    request: {},
   });
 
   tlConfig.time = {
@@ -60,7 +68,7 @@ export default function () {
     timezone: 'Etc/UTC'
   };
 
-  tlConfig.settings = timelionDefaults;
+  tlConfig.settings = timelionDefaults();
 
   tlConfig.setTargetSeries();
 

@@ -20,8 +20,11 @@
 export class IndexPatternListConfig {
   static key = 'default';
 
-  getIndexPatternTags = () => {
-    return [];
+  getIndexPatternTags = (indexPattern, isDefault) => {
+    return isDefault ? [{
+      key: 'default',
+      name: 'Default',
+    }] : [];
   }
 
   getFieldInfo = () => {

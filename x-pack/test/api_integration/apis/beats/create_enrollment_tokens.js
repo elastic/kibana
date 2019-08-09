@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import moment from 'moment';
 import { ES_INDEX_NAME } from './constants';
 
@@ -20,7 +20,7 @@ export default function ({ getService }) {
         .send()
         .expect(200);
 
-      const tokensFromApi = apiResponse.tokens;
+      const tokensFromApi = apiResponse.results.map(r => r.item);
 
       const esResponse = await es.search({
         index: ES_INDEX_NAME,
@@ -44,7 +44,7 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      const tokensFromApi = apiResponse.tokens;
+      const tokensFromApi = apiResponse.results.map(r => r.item);
 
       const esResponse = await es.search({
         index: ES_INDEX_NAME,

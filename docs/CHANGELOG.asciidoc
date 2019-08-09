@@ -1,8 +1,5 @@
 [[release-notes]]
-= {kib} Release Notes
-++++
-<titleabbrev>Release Notes</titleabbrev>
-++++
+= Release Notes
 
 [partintro]
 --

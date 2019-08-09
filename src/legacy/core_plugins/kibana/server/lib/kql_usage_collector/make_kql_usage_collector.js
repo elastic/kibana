@@ -25,6 +25,7 @@ export function makeKQLUsageCollector(server) {
   const kqlUsageCollector = server.usage.collectorSet.makeUsageCollector({
     type: 'kql',
     fetch,
+    isReady: () => true,
   });
 
   server.usage.collectorSet.register(kqlUsageCollector);

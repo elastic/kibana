@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Modal all errors rendering it renders the default all errors modal when isShowing is positive 1`] = `
+<EuiOverlayMask>
+  <EuiModal
+    maxWidth={true}
+    onClose={[Function]}
+  >
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>
+        Your visualization has error(s)
+      </EuiModalHeaderTitle>
+    </EuiModalHeader>
+    <EuiModalBody>
+      <EuiCallOut
+        color="danger"
+        iconType="alert"
+        size="s"
+        title="Test & Test"
+      />
+      <EuiSpacer
+        size="s"
+      />
+      <EuiAccordion
+        buttonContent="Error 1, Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt u ..."
+        data-test-subj="modal-all-errors-accordion"
+        id="accordion1"
+        initialIsOpen={true}
+        key="id-super-id-0"
+        paddingSize="none"
+      >
+        <Styled(EuiCodeBlock)>
+          Error 1, Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </Styled(EuiCodeBlock)>
+      </EuiAccordion>
+    </EuiModalBody>
+    <EuiModalFooter>
+      <EuiButton
+        color="primary"
+        data-test-subj="modal-all-errors-close"
+        fill={true}
+        iconSide="left"
+        onClick={[Function]}
+        size="m"
+        type="button"
+      >
+        Close
+      </EuiButton>
+    </EuiModalFooter>
+  </EuiModal>
+</EuiOverlayMask>
+`;

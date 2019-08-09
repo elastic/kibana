@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StatementListHeading component renders title and icon type 1`] = `
+<EuiFlexGroup
+  alignItems="baseline"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiIcon
+      type="logstashInput"
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiTitle
+      size="s"
+    >
+      <h4>
+        Filters
+      </h4>
+    </EuiTitle>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

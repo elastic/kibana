@@ -9,9 +9,6 @@ import {
   EsProvider,
 } from './services';
 
-// Temporary until https://github.com/elastic/kibana/pull/29184 is merged
-delete process.env.TEST_ES_SNAPSHOT_VERSION;
-
 export default async function ({ readConfigFile }) {
 
   // Read the Kibana API integration tests config file so that we can utilize its services.

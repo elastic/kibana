@@ -240,7 +240,11 @@ export function init(newTranslation?: Translation) {
  * @param translationsUrl URL pointing to the JSON bundle with translations.
  */
 export async function load(translationsUrl: string) {
-  const response = await fetch(translationsUrl);
+  // Once this package is integrated into core Kibana we should switch to an abstraction
+  // around `fetch` provided by the platform, e.g. `kfetch`.
+  const response = await fetch(translationsUrl, {
+    credentials: 'same-origin',
+  });
 
   if (response.status >= 300) {
     throw new Error(`Translations request failed with status code: ${response.status}`);

@@ -18,17 +18,15 @@
  */
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { VislibLibErrorHandlerProvider } from '../../lib/_error_handler';
+import { ErrorHandler } from '../../lib/_error_handler';
 
 describe('Vislib ErrorHandler Test Suite', function () {
-  let ErrorHandler;
   let errorHandler;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    ErrorHandler = Private(VislibLibErrorHandlerProvider);
+  beforeEach(ngMock.inject(function () {
     errorHandler = new ErrorHandler();
   }));
 

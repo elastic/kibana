@@ -27,15 +27,11 @@ export function runMochaCli() {
     alias: {
       t: 'timeout',
     },
-    boolean: [
-      'no-timeouts'
-    ],
+    boolean: ['no-timeouts'],
   });
 
-  const runInBand = (
-    process.execArgv.includes('--inspect') ||
-    process.execArgv.includes('--inspect-brk')
-  );
+  const runInBand =
+    process.execArgv.includes('--inspect') || process.execArgv.includes('--inspect-brk');
 
   // ensure that mocha exits when test have completed
   process.argv.push('--exit');
@@ -43,7 +39,7 @@ export function runMochaCli() {
   // check that we aren't leaking any globals
   process.argv.push('--check-leaks');
   // prevent globals injected from canvas plugins from triggering leak check
-  process.argv.push('--globals', 'core,regeneratorRuntime,_');
+  process.argv.push('--globals', '__core-js_shared__,core,_, ');
 
   // ensure that mocha requires the setup_node_env script
   process.argv.push('--require', require.resolve('../../setup_node_env'));
@@ -69,24 +65,26 @@ export function runMochaCli() {
 
   // set default test files
   if (!opts._.length) {
-    globby.sync([
-      'src/**/__tests__/**/*.js',
-      'packages/elastic-datemath/test/**/*.js',
-      'packages/kbn-dev-utils/src/**/__tests__/**/*.js',
-      'packages/kbn-es-query/src/**/__tests__/**/*.js',
-      'tasks/**/__tests__/**/*.js',
-    ], {
-      cwd: resolve(__dirname, '../../..'),
-      onlyFiles: true,
-      absolute: true,
-      ignore: [
-        '**/__tests__/fixtures/**',
-        'src/**/public/**',
-        '**/_*.js'
-      ]
-    }).forEach(file => {
-      process.argv.push(file);
-    });
+    globby
+      .sync(
+        [
+          'src/**/__tests__/**/*.js',
+          'packages/elastic-datemath/test/**/*.js',
+          'packages/kbn-dev-utils/src/**/__tests__/**/*.js',
+          'packages/kbn-es-query/src/**/__tests__/**/*.js',
+          'packages/kbn-eslint-plugin-eslint/**/__tests__/**/*.js',
+          'tasks/**/__tests__/**/*.js',
+        ],
+        {
+          cwd: resolve(__dirname, '../../..'),
+          onlyFiles: true,
+          absolute: true,
+          ignore: ['**/__tests__/fixtures/**', 'src/**/public/**', '**/_*.js'],
+        }
+      )
+      .forEach(file => {
+        process.argv.push(file);
+      });
   }
 
   if (runInBand) {

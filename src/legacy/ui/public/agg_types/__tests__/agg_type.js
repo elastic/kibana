@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import '../../private';
 import { AggParams } from '../agg_params';
@@ -93,7 +93,6 @@ describe('AggType Class', function () {
           const aggType = new AggType({});
 
           let vis = new Vis(indexPattern, {
-            type: 'histogram',
             aggs: [
               {
                 type: 'date_histogram',
@@ -107,7 +106,6 @@ describe('AggType Class', function () {
           expect(aggType.getFormat(aggConfig)).to.be(fieldFormats.getDefaultInstance('date'));
 
           vis = new Vis(indexPattern, {
-            type: 'metric',
             aggs: [
               {
                 type: 'count',

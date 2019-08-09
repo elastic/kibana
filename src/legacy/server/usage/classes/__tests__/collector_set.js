@@ -19,9 +19,10 @@
 
 import { noop } from 'lodash';
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { Collector } from '../collector';
 import { CollectorSet } from '../collector_set';
+import { UsageCollector } from '../usage_collector';
 
 describe('CollectorSet', () => {
   describe('registers a collector set and runs lifecycle events', () => {
@@ -69,6 +70,24 @@ describe('CollectorSet', () => {
         type: 'MY_TEST_COLLECTOR',
         result: { passTest: 1000 }
       }]);
+    });
+
+    it('should gracefully handle a collector fetch method throwing an error', async () => {
+      const mockCallCluster = () => Promise.resolve({ passTest: 1000 });
+      const collectors = new CollectorSet(server);
+      collectors.register(new Collector(server, {
+        type: 'MY_TEST_COLLECTOR',
+        fetch: () => new Promise((_resolve, reject) => reject())
+      }));
+
+      let result;
+      try {
+        result = await collectors.bulkFetch(mockCallCluster);
+      } catch (err) {
+        // Do nothing
+      }
+      // This must return an empty object instead of null/undefined
+      expect(result).to.eql([]);
     });
   });
 
@@ -138,6 +157,26 @@ describe('CollectorSet', () => {
           { day_index: 3, day_name: 'wednesday' },
         ],
       });
+    });
+  });
+
+  describe('isUsageCollector', () => {
+    const server = { };
+    const collectorOptions = { type: 'MY_TEST_COLLECTOR', fetch: () => {} };
+
+    it('returns true only for UsageCollector instances', () => {
+      const collectors = new CollectorSet(server);
+
+      const usageCollector = new UsageCollector(server, collectorOptions);
+      const collector = new Collector(server, collectorOptions);
+      const randomClass = new (class Random {});
+      expect(collectors.isUsageCollector(usageCollector)).to.be(true);
+      expect(collectors.isUsageCollector(collector)).to.be(false);
+      expect(collectors.isUsageCollector(randomClass)).to.be(false);
+      expect(collectors.isUsageCollector({})).to.be(false);
+      expect(collectors.isUsageCollector(null)).to.be(false);
+      expect(collectors.isUsageCollector('')).to.be(false);
+      expect(collectors.isUsageCollector()).to.be(false);
     });
   });
 });

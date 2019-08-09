@@ -18,20 +18,20 @@
  */
 
 import 'ui/directives/css_truncate';
+import { i18n } from '@kbn/i18n';
 import 'ui/directives/field_name';
-import 'ui/filters/unique';
 import './discover_field';
 import 'ui/angular_ui_select';
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
 import { fieldCalculator } from './lib/field_calculator';
-import { FieldList } from 'ui/index_patterns/_field_list';
+import { FieldList } from 'ui/index_patterns';
 import { uiModules } from 'ui/modules';
 import fieldChooserTemplate from './field_chooser.html';
 const app = uiModules.get('apps/discover');
 
-app.directive('discFieldChooser', function ($location, globalState, config, $route, i18n) {
+app.directive('discFieldChooser', function ($location, config, $route) {
   return {
     restrict: 'E',
     scope: {
@@ -49,10 +49,10 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
     link: function ($scope) {
       $scope.$parent.$watch('showFilter', () =>{
         $scope.toggleFieldFilterButtonAriaLabel = $scope.$parent.showFilter
-          ? i18n('kbn.discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
+          ? i18n.translate('kbn.discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
             defaultMessage: 'Hide field settings',
           })
-          : i18n('kbn.discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel', {
+          : i18n.translate('kbn.discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel', {
             defaultMessage: 'Show field settings',
           });
       });

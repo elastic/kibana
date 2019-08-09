@@ -19,16 +19,17 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import { SavedObjectsClient } from '../';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { Prerequisites } from './types';
 
 interface BulkGetRequest extends Hapi.Request {
   pre: {
-    savedObjectsClient: SavedObjectsClient;
+    savedObjectsClient: SavedObjectsClientContract;
   };
   payload: Array<{
     type: string;
     id: string;
+    fields?: string[];
   }>;
 }
 
@@ -42,6 +43,7 @@ export const createBulkGetRoute = (prereqs: Prerequisites) => ({
         Joi.object({
           type: Joi.string().required(),
           id: Joi.string().required(),
+          fields: Joi.array().items(Joi.string()),
         }).required()
       ),
     },

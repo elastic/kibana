@@ -4,20 +4,13 @@
   "version": "1.0.0",
   "license": "Apache-2.0",
   "dependencies": {
-    "@babel/core": "^7.3.4",
-    "@babel/plugin-proposal-async-generator-functions": "^7.2.0",
-    "@babel/plugin-proposal-class-properties": "^7.3.4",
-    "@babel/plugin-proposal-object-rest-spread": "^7.3.4",
-    "@babel/preset-env": "^7.3.4",
-    "@babel/preset-react": "^7.0.0",
-    "@babel/preset-typescript": "^7.3.3",
-    "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-plugin-transform-async-generator-functions": "^6.24.1",
-    "babel-plugin-transform-class-properties": "^6.24.1",
-    "babel-plugin-transform-define": "^1.3.1",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-react": "^6.24.1",
-    "babel7-plugin-add-module-exports": "npm:babel-plugin-add-module-exports@^1.0.0"
+    "@babel/plugin-proposal-class-properties": "7.4.4",
+    "@babel/preset-react":"7.0.0",
+    "@babel/preset-env": "7.4.5",
+    "@babel/preset-typescript": "7.3.3",
+    "@kbn/elastic-idx": "1.0.0",
+    "babel-plugin-add-module-exports": "1.0.2",
+    "babel-plugin-transform-define": "1.3.1",
+    "babel-plugin-typescript-strip-namespaces": "1.1.1"
   }
 }

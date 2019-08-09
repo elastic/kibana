@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function InspectorProvider({ getService }) {
   const log = getService('log');
@@ -30,8 +30,7 @@ export function InspectorProvider({ getService }) {
 
   return new class Inspector {
     async getIsEnabled() {
-      const button = await testSubjects.find('openInspectorButton');
-      const ariaDisabled = await button.getAttribute('aria-disabled');
+      const ariaDisabled = await testSubjects.getAttribute('openInspectorButton', 'disabled');
       return ariaDisabled !== 'true';
     }
 
@@ -86,7 +85,7 @@ export function InspectorProvider({ getService }) {
       // The buttons for setting table page size are in a popover element. This popover
       // element appears as if it's part of the inspectorPanel but it's really attached
       // to the body element by a portal.
-      const tableSizesPopover = await find.byCssSelector('.euiPanel');
+      const tableSizesPopover = await find.byCssSelector('.euiPanel .euiContextMenuPanel');
       await find.clickByButtonText(`${size} rows`, tableSizesPopover);
     }
 
@@ -96,7 +95,17 @@ export function InspectorProvider({ getService }) {
       const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
       const $ = await tableBody.parseDomContent();
       return $('tr').toArray().map(tr => {
-        return $(tr).find('td').toArray().map(cell => $(cell).text().trim());
+        return $(tr).find('td').toArray().map(cell => {
+          // if this is an EUI table, filter down to the specific cell content
+          // otherwise this will include mobile-specific header information
+          const euiTableCellContent = $(cell).find('.euiTableCellContent');
+
+          if (euiTableCellContent.length > 0) {
+            return $(cell).find('.euiTableCellContent').text().trim();
+          } else {
+            return $(cell).text().trim();
+          }
+        });
       });
     }
 

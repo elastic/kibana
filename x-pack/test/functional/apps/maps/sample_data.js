@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService, updateBaselines }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
@@ -34,7 +34,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('ecommerce');
         await PageObjects.maps.loadSavedMap('[eCommerce] Orders by Country');
-        await PageObjects.maps.toggleLayerVisibility('road_map');
+        await PageObjects.maps.toggleLayerVisibility('Road map');
         await PageObjects.maps.toggleLayerVisibility('United Kingdom');
         await PageObjects.maps.toggleLayerVisibility('France');
         await PageObjects.maps.toggleLayerVisibility('United States');
@@ -62,7 +62,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('flights');
         await PageObjects.maps.loadSavedMap('[Flights] Origin and Destination Flight Time');
-        await PageObjects.maps.toggleLayerVisibility('road_map');
+        await PageObjects.maps.toggleLayerVisibility('Road map');
         await setTimerangeToCoverAllSampleData();
         await PageObjects.maps.enterFullScreen();
       });
@@ -87,7 +87,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('logs');
         await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
-        await PageObjects.maps.toggleLayerVisibility('road_map');
+        await PageObjects.maps.toggleLayerVisibility('Road map');
         await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
         await setTimerangeToCoverAllSampleData();
         await PageObjects.maps.enterFullScreen();

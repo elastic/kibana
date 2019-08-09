@@ -24,7 +24,7 @@ import { isErrorLogged, markErrorLogged } from './errors';
 import { createBuild } from './build';
 
 export function createRunner({ config, log, buildOssDist, buildDefaultDist }) {
-  async function execTask(desc, fn, ...args) {
+  async function execTask(desc, task, ...args) {
     log.info(desc);
     log.indent(4);
 
@@ -37,7 +37,7 @@ export function createRunner({ config, log, buildOssDist, buildDefaultDist }) {
     };
 
     try {
-      await fn(config, log, ...args);
+      await task.run(config, log, ...args);
       log.success(chalk.green('✓'), time());
     } catch (error) {
       if (!isErrorLogged(error)) {
@@ -82,10 +82,10 @@ export function createRunner({ config, log, buildOssDist, buildDefaultDist }) {
    */
   return async function run(task) {
     if (task.global) {
-      await execTask(chalk`{dim [  global  ]} ${task.description}`, task.run, builds);
+      await execTask(chalk`{dim [  global  ]} ${task.description}`, task, builds);
     } else {
       for (const build of builds) {
-        await execTask(`${build.getLogTag()} ${task.description}`, task.run, build);
+        await execTask(`${build.getLogTag()} ${task.description}`, task, build);
       }
     }
   };

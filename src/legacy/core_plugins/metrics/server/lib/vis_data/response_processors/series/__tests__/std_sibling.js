@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import stdSibling from '../std_sibling';
+import { stdSibling } from '../std_sibling';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
@@ -27,7 +27,7 @@ describe('stdSibling(resp, panel, series)', () => {
   let resp;
   beforeEach(() => {
     panel = {
-      time_field: 'timestamp'
+      time_field: 'timestamp',
     };
     series = {
       chart_type: 'line',
@@ -42,35 +42,35 @@ describe('stdSibling(resp, panel, series)', () => {
         {
           id: 'avgcpu',
           type: 'avg',
-          field: 'cpu'
+          field: 'cpu',
         },
         {
           id: 'sib',
           type: 'std_deviation_bucket',
-          field: 'avgcpu'
-        }
-      ]
+          field: 'avgcpu',
+        },
+      ],
     };
     resp = {
       aggregations: {
         test: {
           sib: {
-            std_deviation: 0.23
+            std_deviation: 0.23,
           },
           timeseries: {
             buckets: [
               {
                 key: 1,
-                avgcpu: { value: 0.23 }
+                avgcpu: { value: 0.23 },
               },
               {
                 key: 2,
-                avgcpu: { value: 0.22 }
-              }
-            ]
-          }
-        }
-      }
+                avgcpu: { value: 0.22 },
+              },
+            ],
+          },
+        },
+      },
     };
   });
 
@@ -101,15 +101,7 @@ describe('stdSibling(resp, panel, series)', () => {
       lines: { show: true, fill: 0, lineWidth: 1, steps: false },
       points: { show: true, radius: 1, lineWidth: 1 },
       bars: { fill: 0, lineWidth: 1, show: false },
-      data: [
-        [ 1, 0.23 ],
-        [ 2, 0.23 ]
-      ]
+      data: [[1, 0.23], [2, 0.23]],
     });
-
   });
-
 });
-
-
-

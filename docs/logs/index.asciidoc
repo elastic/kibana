@@ -4,27 +4,20 @@
 
 [partintro]
 --
-
-beta[]
 Use the Logs UI to explore logs for common servers, containers, and services.  
 {kib} provides a compact, console-like display that you can customize.
+
+* <<xpack-logs-getting-started>>
+* <<xpack-logs-using>>
+* <<xpack-logs-configuring>>
 
 [role="screenshot"]
 image::logs/images/logs-console.png[Log Console in Kibana]
 
-
-[float]
-== Add data sources
-
-Kibana provides step-by-step instructions to help you add your data sources.
-The {infra-guide}[Infrastructure Monitoring Guide] is a good source for more detailed information and
-instructions.
-
-[float]
-== Configure data sources 
-
-By default the Logs UI uses the `filebeat-*` index pattern to query the data. If your logs are located in a different set of indices, you will need to set `xpack.infra.sources.default.logAlias` in `config/kibana.yml` to match your log's index pattern. You can also configure the timestamp field by overriding `xpack.infra.sources.default.fields.timestamp`, by default it is set to `@timestamp`. See <<logs-ui-settings-kb>> for a complete list.
-
 --
 
-include::logs-ui.asciidoc[]
+include::getting-started.asciidoc[]
+
+include::using.asciidoc[]
+
+include::configuring.asciidoc[]

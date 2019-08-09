@@ -154,6 +154,7 @@ describe('AdvancedSettings', () => {
     const component = shallow(
       <AdvancedSettings
         config={config}
+        enableSaving={true}
       />
     );
 
@@ -165,6 +166,19 @@ describe('AdvancedSettings', () => {
       <AdvancedSettings
         config={config}
         query="test:string:setting"
+        enableSaving={true}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render read-only when saving is disabled', async () => {
+    const component = shallow(
+      <AdvancedSettings
+        config={config}
+        query="test:string:setting"
+        enableSaving={false}
       />
     );
 

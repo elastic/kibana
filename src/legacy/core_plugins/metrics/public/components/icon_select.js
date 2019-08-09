@@ -19,9 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import {
-  EuiComboBox,
-} from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 function renderOption(option) {
@@ -35,7 +33,7 @@ function renderOption(option) {
   );
 }
 
-function IconSelect(props) {
+export function IconSelect(props) {
   const selectedIcon = props.icons.find(option => {
     return props.value === option.value;
   });
@@ -54,35 +52,76 @@ function IconSelect(props) {
 
 IconSelect.defaultProps = {
   icons: [
-    { value: 'fa-asterisk', label: i18n.translate('tsvb.iconSelect.asteriskLabel', { defaultMessage: 'Asterisk' }) },
-    { value: 'fa-bell', label: i18n.translate('tsvb.iconSelect.bellLabel', { defaultMessage: 'Bell' }) },
-    { value: 'fa-bolt', label: i18n.translate('tsvb.iconSelect.boltLabel', { defaultMessage: 'Bolt' }) },
-    { value: 'fa-bomb', label: i18n.translate('tsvb.iconSelect.bombLabel', { defaultMessage: 'Bomb' }) },
-    { value: 'fa-bug', label: i18n.translate('tsvb.iconSelect.bugLabel', { defaultMessage: 'Bug' }) },
-    { value: 'fa-comment', label: i18n.translate('tsvb.iconSelect.commentLabel', { defaultMessage: 'Comment' }) },
+    {
+      value: 'fa-asterisk',
+      label: i18n.translate('tsvb.iconSelect.asteriskLabel', { defaultMessage: 'Asterisk' }),
+    },
+    {
+      value: 'fa-bell',
+      label: i18n.translate('tsvb.iconSelect.bellLabel', { defaultMessage: 'Bell' }),
+    },
+    {
+      value: 'fa-bolt',
+      label: i18n.translate('tsvb.iconSelect.boltLabel', { defaultMessage: 'Bolt' }),
+    },
+    {
+      value: 'fa-bomb',
+      label: i18n.translate('tsvb.iconSelect.bombLabel', { defaultMessage: 'Bomb' }),
+    },
+    {
+      value: 'fa-bug',
+      label: i18n.translate('tsvb.iconSelect.bugLabel', { defaultMessage: 'Bug' }),
+    },
+    {
+      value: 'fa-comment',
+      label: i18n.translate('tsvb.iconSelect.commentLabel', { defaultMessage: 'Comment' }),
+    },
     {
       value: 'fa-exclamation-circle',
-      label: i18n.translate('tsvb.iconSelect.exclamationCircleLabel', { defaultMessage: 'Exclamation Circle' })
+      label: i18n.translate('tsvb.iconSelect.exclamationCircleLabel', {
+        defaultMessage: 'Exclamation Circle',
+      }),
     },
     {
       value: 'fa-exclamation-triangle',
-      label: i18n.translate('tsvb.iconSelect.exclamationTriangleLabel', { defaultMessage: 'Exclamation Triangle' })
+      label: i18n.translate('tsvb.iconSelect.exclamationTriangleLabel', {
+        defaultMessage: 'Exclamation Triangle',
+      }),
     },
-    { value: 'fa-fire', label: i18n.translate('tsvb.iconSelect.fireLabel', { defaultMessage: 'Fire' }) },
-    { value: 'fa-flag', label: i18n.translate('tsvb.iconSelect.flagLabel', { defaultMessage: 'Flag' }) },
-    { value: 'fa-heart', label: i18n.translate('tsvb.iconSelect.heartLabel', { defaultMessage: 'Heart' }) },
-    { value: 'fa-map-marker', label: i18n.translate('tsvb.iconSelect.mapMarkerLabel', { defaultMessage: 'Map Marker' }) },
-    { value: 'fa-map-pin', label: i18n.translate('tsvb.iconSelect.mapPinLabel', { defaultMessage: 'Map Pin' }) },
-    { value: 'fa-star', label: i18n.translate('tsvb.iconSelect.starLabel', { defaultMessage: 'Star' }) },
-    { value: 'fa-tag', label: i18n.translate('tsvb.iconSelect.tagLabel', { defaultMessage: 'Tag' }) },
-  ]
+    {
+      value: 'fa-fire',
+      label: i18n.translate('tsvb.iconSelect.fireLabel', { defaultMessage: 'Fire' }),
+    },
+    {
+      value: 'fa-flag',
+      label: i18n.translate('tsvb.iconSelect.flagLabel', { defaultMessage: 'Flag' }),
+    },
+    {
+      value: 'fa-heart',
+      label: i18n.translate('tsvb.iconSelect.heartLabel', { defaultMessage: 'Heart' }),
+    },
+    {
+      value: 'fa-map-marker',
+      label: i18n.translate('tsvb.iconSelect.mapMarkerLabel', { defaultMessage: 'Map Marker' }),
+    },
+    {
+      value: 'fa-map-pin',
+      label: i18n.translate('tsvb.iconSelect.mapPinLabel', { defaultMessage: 'Map Pin' }),
+    },
+    {
+      value: 'fa-star',
+      label: i18n.translate('tsvb.iconSelect.starLabel', { defaultMessage: 'Star' }),
+    },
+    {
+      value: 'fa-tag',
+      label: i18n.translate('tsvb.iconSelect.tagLabel', { defaultMessage: 'Tag' }),
+    },
+  ],
 };
 
 IconSelect.propTypes = {
   icons: PropTypes.array,
   id: PropTypes.string,
   onChange: PropTypes.func,
-  value: PropTypes.string.isRequired
+  value: PropTypes.string.isRequired,
 };
-
-export default IconSelect;

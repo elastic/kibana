@@ -255,7 +255,33 @@
               i18n-default-message="Scale to Data Bounds"
             ></label>
             <div class="visEditorSidebar__formControl">
-              <input class="kuiCheckBox" id="{ 'defaultYExtents' + $index }" type="checkbox" ng-model="axis.scale.defaultYExtents">
+              <input class="kuiCheckBox" id="{ 'defaultYExtents' + $index }" type="checkbox" ng-model="axis.scale.defaultYExtents" ng-change="updateBoundsMargin(axis)">
+            </div>
+          </div>
+
+          <div ng-if="axis.scale.defaultYExtents">
+            <div class="visEditorSidebar__formRow">
+              <label
+                class="visEditorSidebar__formLabel"
+                i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.boundsMargin"
+                i18n-default-message="Bounds Margin"
+              ></label>
+              <div class="visEditorSidebar__formControl">
+                <input
+                  name="yBoundsMargin"
+                  class="kuiInput visEditorSidebar__input"
+                  type="number"
+                  step="0.1"
+                  greater-or-equal-than="0"
+                  ng-model="axis.scale.boundsMargin">
+              </div>
+            </div>
+            <div ng-show="axis.scale.boundsMargin < 0">
+              <span
+                class="text-danger"
+                i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.minNeededBoundsMargin"
+                i18n-default-message="Bounds Margin must be greater than or equal to 0"
+              ></span>
             </div>
           </div>
 
@@ -284,6 +310,7 @@
                   class="kuiInput visEditorSidebar__input"
                   type="number"
                   step="0.1"
+                  greater-than="axis.scale.min"
                   ng-model="axis.scale.max"
                 >
               </div>
@@ -301,7 +328,8 @@
                   class="kuiInput visEditorSidebar__input"
                   type="number"
                   step="0.1"
-                  greater-than="{{axis.scale.type === 'log' ? 0 : ''}}"
+                  greater-than="axis.scale.type === 'log' ? 0 : undefined"
+                  less-than="axis.scale.max"
                   ng-model="axis.scale.min"
                 >
               </div>

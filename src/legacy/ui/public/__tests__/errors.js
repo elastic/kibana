@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import {
   RequestFailure,
   FetchFailure,
@@ -28,9 +28,6 @@ import {
   FieldNotFoundInCache,
   DuplicateField,
   SavedObjectNotFound,
-  IndexPatternMissingIndices,
-  NoDefinedIndexPatterns,
-  NoDefaultIndexPattern,
   PersistedStateError,
   VislibError,
   ContainerTooSmall,
@@ -53,9 +50,6 @@ describe('ui/errors', () => {
     new FieldNotFoundInCache('aname'),
     new DuplicateField('dupfield'),
     new SavedObjectNotFound('dashboard', '123'),
-    new IndexPatternMissingIndices(),
-    new NoDefinedIndexPatterns(),
-    new NoDefaultIndexPattern(),
     new PersistedStateError(),
     new VislibError('err'),
     new ContainerTooSmall(),

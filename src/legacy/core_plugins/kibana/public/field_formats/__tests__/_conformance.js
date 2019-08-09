@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import chrome from 'ui/chrome';
 import { fieldFormats } from 'ui/registry/field_formats';
 import { FieldFormat } from '../../../../../ui/field_formats/field_format';
@@ -29,6 +29,7 @@ const config = chrome.getUiSettingsClient();
 const formatIds = [
   'bytes',
   'date',
+  'date_nanos',
   'duration',
   'ip',
   'number',
@@ -43,7 +44,7 @@ const formatIds = [
   'static_lookup'
 ];
 
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default describe('conformance', function () {
 
   const getConfig = (...args) => config.get(...args);

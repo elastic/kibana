@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { ReactVisTypeProvider } from '../../vis_types/react_vis_type';
+import { ReactVisType } from '../../vis_types/react_vis_type';
 
 describe('React Vis Type', function () {
-
-  let ReactVisType;
 
   const visConfig = {
     name: 'test',
@@ -35,9 +33,6 @@ describe('React Vis Type', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    ReactVisType = Private(ReactVisTypeProvider);
-  }));
 
   describe('initialization', () => {
     it('should throw if component is not set', () => {

@@ -25,13 +25,13 @@ export function buildNodeParams(children) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern) {
+export function toElasticsearchQuery(node, indexPattern, config) {
   const children = node.arguments || [];
 
   return {
     bool: {
       should: children.map((child) => {
-        return ast.toElasticsearchQuery(child, indexPattern);
+        return ast.toElasticsearchQuery(child, indexPattern, config);
       }),
       minimum_should_match: 1,
     },

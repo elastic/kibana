@@ -199,7 +199,8 @@ export class SampleDataSetCards extends React.Component {
                   id={sampleDataSet.id}
                   description={sampleDataSet.description}
                   name={sampleDataSet.name}
-                  launchUrl={this.props.addBasePath(`/app/kibana#/dashboard/${sampleDataSet.overviewDashboard}`)}
+                  overviewDashboard={sampleDataSet.overviewDashboard}
+                  appLinks={sampleDataSet.appLinks}
                   status={sampleDataSet.status}
                   isProcessing={_.get(this.state.processingStatus, sampleDataSet.id, false)}
                   statusMsg={sampleDataSet.statusMsg}

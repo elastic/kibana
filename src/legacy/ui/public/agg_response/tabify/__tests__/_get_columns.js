@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { tabifyGetColumns } from '../_get_columns';
 import { VisProvider } from '../../../vis';
@@ -48,7 +48,7 @@ describe('get columns', function () {
     const vis = new Vis(indexPattern, {
       type: 'pie',
       aggs: [
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } }
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } }
       ]
     });
 
@@ -63,10 +63,10 @@ describe('get columns', function () {
     const vis = new Vis(indexPattern, {
       type: 'pie',
       aggs: [
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } }
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } }
       ]
     });
 
@@ -83,12 +83,12 @@ describe('get columns', function () {
     const vis = new Vis(indexPattern, {
       type: 'pie',
       aggs: [
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
         { type: 'avg',            schema: 'metric',   params: { field: 'bytes' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
         { type: 'sum',            schema: 'metric',   params: { field: 'bytes' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } }
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } }
       ]
     });
 
@@ -119,12 +119,12 @@ describe('get columns', function () {
     const vis = new Vis(indexPattern, {
       type: 'histogram',
       aggs: [
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
         { type: 'avg',            schema: 'metric',   params: { field: 'bytes' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
         { type: 'sum',            schema: 'metric',   params: { field: 'bytes' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } }
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } }
       ]
     });
 

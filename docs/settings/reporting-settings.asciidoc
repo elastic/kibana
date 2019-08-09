@@ -68,8 +68,8 @@ security is enabled, `xpack.security.encryptionKey`.
 ============
 
 `xpack.reporting.queue.pollInterval`::
-Specifies the number of milliseconds that idle workers wait between polling the
-index for pending jobs. Defaults to `3000` (3 seconds).
+Specifies the number of milliseconds that the reporting poller waits between polling the
+index for any pending Reporting jobs. Defaults to `3000` (3 seconds).
 
 [[xpack-reporting-q-timeout]]`xpack.reporting.queue.timeout`::
 How long each worker has to produce a report. If your machine is slow or under

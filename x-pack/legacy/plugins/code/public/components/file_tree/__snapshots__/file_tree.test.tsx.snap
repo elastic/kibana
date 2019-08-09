@@ -1,0 +1,1092 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render correctly 1`] = `
+<nav
+  className="euiSideNav codeContainer__sideTabTree euiSideNav-isOpenMobile"
+>
+  <button
+    className="euiSideNav__mobileToggle euiLink"
+    type="button"
+  >
+    <span
+      className="euiSideNav__mobileWrap"
+    >
+      <span
+        className="euiSideNav__mobileTitle"
+      />
+      <svg
+        aria-hidden="true"
+        className="euiIcon euiIcon--medium euiIcon-isLoading euiSideNav__mobileIcon"
+        focusable="false"
+        height={16}
+        style={null}
+        viewBox="0 0 16 16"
+        width={16}
+        xmlns="http://www.w3.org/2000/svg"
+      />
+    </span>
+  </button>
+  <div
+    className="euiSideNav__content"
+    role="menubar"
+  >
+    <div
+      className="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems"
+    >
+      <div
+        aria-label={
+          <span
+            className="euiSideNavItemButton__content"
+          >
+            <span
+              className="euiSideNavItemButton__label"
+            >
+              
+            </span>
+          </span>
+        }
+        className="euiSideNavItemButton"
+      >
+        <span
+          className="euiSideNavItemButton__content"
+        >
+          <span
+            className="euiSideNavItemButton__label"
+          >
+            
+          </span>
+        </span>
+      </div>
+      <div
+        className="euiSideNavItem__items"
+      >
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState"
+              data-test-subj="codeFileTreeNode-Directory-android"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--small euiIcon-isLoading codeFileTree__icon"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                data-test-subj="codeFileTreeNode-Directory-Icon-android-closed"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  android
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState"
+              data-test-subj="codeFileTreeNode-Directory-futures"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--small euiIcon-isLoading codeFileTree__icon"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                data-test-subj="codeFileTreeNode-Directory-Icon-futures-closed"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  futures
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState"
+              data-test-subj="codeFileTreeNode-Directory-guava"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--small euiIcon-isLoading codeFileTree__icon"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                data-test-subj="codeFileTreeNode-Directory-Icon-guava-open"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  guava
+                </div>
+              </span>
+            </div>
+          </div>
+          <div
+            className="euiSideNavItem__items"
+          >
+            <div
+              className="euiSideNavItem euiSideNavItem--branch"
+            >
+              <div
+                className="codeFileTree__node"
+              >
+                <div
+                  className="codeFileTree__item kbn-resetFocusState"
+                  data-test-subj="codeFileTreeNode-Directory-guava/javadoc-link"
+                  onClick={[Function]}
+                  onKeyDown={[Function]}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <svg
+                    className="euiIcon euiIcon--small euiIcon-isLoading codeFileTree__icon"
+                    focusable="false"
+                    height={16}
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                  <svg
+                    className="euiIcon euiIcon--medium euiIcon-isLoading"
+                    data-test-subj="codeFileTreeNode-Directory-Icon-guava/javadoc-link-closed"
+                    focusable="false"
+                    height={16}
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                  <span
+                    className="codeFileTree__directory"
+                  >
+                    <div
+                      className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                    >
+                      javadoc-link
+                    </div>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              className="euiSideNavItem euiSideNavItem--branch"
+            >
+              <div
+                className="codeFileTree__node"
+              >
+                <div
+                  className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
+                  data-test-subj="codeFileTreeNode-File-guava/pom.xml"
+                  onClick={[Function]}
+                  onKeyDown={[Function]}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <svg
+                    className="euiIcon euiIcon--medium euiIcon-isLoading"
+                    focusable="false"
+                    height={16}
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                  <span
+                    className="codeFileTree__directory"
+                  >
+                    <div
+                      className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                    >
+                      <div
+                        className="euiTextColor euiTextColor--default"
+                      >
+                        pom.xml
+                      </div>
+                    </div>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              className="euiSideNavItem euiSideNavItem--branch euiSideNavItem--hasChildItems"
+            >
+              <div
+                className="codeFileTree__node"
+              >
+                <div
+                  className="codeFileTree__item kbn-resetFocusState"
+                  data-test-subj="codeFileTreeNode-Directory-guava/src/com/google"
+                  onClick={[Function]}
+                  onKeyDown={[Function]}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <svg
+                    className="euiIcon euiIcon--small euiIcon-isLoading codeFileTree__icon"
+                    focusable="false"
+                    height={16}
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                  <svg
+                    className="euiIcon euiIcon--medium euiIcon-isLoading"
+                    data-test-subj="codeFileTreeNode-Directory-Icon-guava/src/com/google-open"
+                    focusable="false"
+                    height={16}
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                  <span
+                    className="codeFileTree__directory"
+                  >
+                    <div
+                      className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                    >
+                      src/com/google
+                    </div>
+                  </span>
+                </div>
+                <div
+                  className="codeFileTree__node--fullWidth"
+                />
+              </div>
+              <div
+                className="euiSideNavItem__items"
+              >
+                <div
+                  className="euiSideNavItem euiSideNavItem--branch"
+                >
+                  <div
+                    className="codeFileTree__node"
+                  >
+                    <div
+                      className="codeFileTree__item kbn-resetFocusState"
+                      data-test-subj="codeFileTreeNode-Directory-guava/src/com/google/common"
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <svg
+                        className="euiIcon euiIcon--small euiIcon-isLoading codeFileTree__icon"
+                        focusable="false"
+                        height={16}
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                      <svg
+                        className="euiIcon euiIcon--medium euiIcon-isLoading"
+                        data-test-subj="codeFileTreeNode-Directory-Icon-guava/src/com/google/common-closed"
+                        focusable="false"
+                        height={16}
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                      <span
+                        className="codeFileTree__directory"
+                      >
+                        <div
+                          className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                        >
+                          common
+                        </div>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="euiSideNavItem euiSideNavItem--branch"
+                >
+                  <div
+                    className="codeFileTree__node"
+                  >
+                    <div
+                      className="codeFileTree__item kbn-resetFocusState"
+                      data-test-subj="codeFileTreeNode-Directory-guava/src/com/google/thirdparty/publicsuffix"
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <svg
+                        className="euiIcon euiIcon--small euiIcon-isLoading codeFileTree__icon"
+                        focusable="false"
+                        height={16}
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                      <svg
+                        className="euiIcon euiIcon--medium euiIcon-isLoading"
+                        data-test-subj="codeFileTreeNode-Directory-Icon-guava/src/com/google/thirdparty/publicsuffix-closed"
+                        focusable="false"
+                        height={16}
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                      <span
+                        className="codeFileTree__directory"
+                      >
+                        <div
+                          className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                        >
+                          thirdparty/publicsuffix
+                        </div>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState"
+              data-test-subj="codeFileTreeNode-Directory-guava-bom"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--small euiIcon-isLoading codeFileTree__icon"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                data-test-subj="codeFileTreeNode-Directory-Icon-guava-bom-closed"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  guava-bom
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState"
+              data-test-subj="codeFileTreeNode-Directory-guava-gwt"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--small euiIcon-isLoading codeFileTree__icon"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                data-test-subj="codeFileTreeNode-Directory-Icon-guava-gwt-closed"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  guava-gwt
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState"
+              data-test-subj="codeFileTreeNode-Directory-guava-testlib"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--small euiIcon-isLoading codeFileTree__icon"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                data-test-subj="codeFileTreeNode-Directory-Icon-guava-testlib-closed"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  guava-testlib
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState"
+              data-test-subj="codeFileTreeNode-Directory-guava-tests"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--small euiIcon-isLoading codeFileTree__icon"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                data-test-subj="codeFileTreeNode-Directory-Icon-guava-tests-closed"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  guava-tests
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState"
+              data-test-subj="codeFileTreeNode-Directory-refactorings"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--small euiIcon-isLoading codeFileTree__icon"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                data-test-subj="codeFileTreeNode-Directory-Icon-refactorings-closed"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  refactorings
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState"
+              data-test-subj="codeFileTreeNode-Directory-util"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--small euiIcon-isLoading codeFileTree__icon"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                data-test-subj="codeFileTreeNode-Directory-Icon-util-closed"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  util
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
+              data-test-subj="codeFileTreeNode-File-.gitattributes"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    .gitattributes
+                  </div>
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
+              data-test-subj="codeFileTreeNode-File-.gitignore"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    .gitignore
+                  </div>
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
+              data-test-subj="codeFileTreeNode-File-.travis.yml"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    .travis.yml
+                  </div>
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
+              data-test-subj="codeFileTreeNode-File-CONTRIBUTING.md"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    CONTRIBUTING.md
+                  </div>
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
+              data-test-subj="codeFileTreeNode-File-CONTRIBUTORS"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    CONTRIBUTORS
+                  </div>
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
+              data-test-subj="codeFileTreeNode-File-COPYING"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    COPYING
+                  </div>
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
+              data-test-subj="codeFileTreeNode-File-README.md"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    README.md
+                  </div>
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
+              data-test-subj="codeFileTreeNode-File-cycle_whitelist.txt"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    cycle_whitelist.txt
+                  </div>
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
+              data-test-subj="codeFileTreeNode-File-javadoc-stylesheet.css"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    javadoc-stylesheet.css
+                  </div>
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="codeFileTree__node"
+          >
+            <div
+              className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
+              data-test-subj="codeFileTreeNode-File-pom.xml"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            >
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                className="codeFileTree__directory"
+              >
+                <div
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
+                >
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    pom.xml
+                  </div>
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+`;

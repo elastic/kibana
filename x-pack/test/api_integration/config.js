@@ -4,35 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EsProvider,
-  EsSupertestWithoutAuthProvider,
-  SupertestWithoutAuthProvider,
-  UsageAPIProvider,
-  InfraOpsGraphQLProvider
-} from './services';
+import path from 'path';
+import { services } from './services';
 
-export default async function ({ readConfigFile }) {
+import { SLACK_ACTION_SIMULATOR_URI } from './fixtures/plugins/actions';
 
-  const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
+export async function getApiIntegrationConfig({ readConfigFile }) {
   const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
-  const kibanaCommonConfig = await readConfigFile(require.resolve('../../../test/common/config.js'));
 
   return {
     testFiles: [require.resolve('./apis')],
+    services,
     servers: xPackFunctionalTestsConfig.get('servers'),
-    services: {
-      supertest: kibanaAPITestsConfig.get('services.supertest'),
-      esSupertest: kibanaAPITestsConfig.get('services.esSupertest'),
-      supertestWithoutAuth: SupertestWithoutAuthProvider,
-      esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
-      infraOpsGraphQLClient: InfraOpsGraphQLProvider,
-      es: EsProvider,
-      esArchiver: kibanaCommonConfig.get('services.esArchiver'),
-      usageAPI: UsageAPIProvider,
-      kibanaServer: kibanaCommonConfig.get('services.kibanaServer'),
-      chance: kibanaAPITestsConfig.get('services.chance'),
-    },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
       reportName: 'X-Pack API Integration Tests',
@@ -42,8 +25,19 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
+        `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
+        `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
+        `--server.xsrf.whitelist=${JSON.stringify([SLACK_ACTION_SIMULATOR_URI])}`,
       ],
     },
-    esTestCluster: xPackFunctionalTestsConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...xPackFunctionalTestsConfig.get('esTestCluster'),
+      serverArgs: [
+        ...xPackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
+        'node.attr.name=apiIntegrationTestNode'
+      ],
+    },
   };
 }
+
+export default getApiIntegrationConfig;

@@ -20,12 +20,11 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import getLastValue from '../../../common/get_last_value';
+import { getLastValue } from '../../../common/get_last_value';
 import reactcss from 'reactcss';
-import calculateCoordinates from '../lib/calculate_coordinates';
+import { calculateCoordinates } from '../lib/calculate_coordinates';
 
-class Metric extends Component {
-
+export class Metric extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -33,7 +32,7 @@ class Metric extends Component {
       left: 0,
       top: 0,
       translateX: 1,
-      translateY: 1
+      translateY: 1,
     };
     this.handleResize = this.handleResize.bind(this);
   }
@@ -67,36 +66,35 @@ class Metric extends Component {
 
   render() {
     const { metric, secondary } = this.props;
-    const {
-      scale,
-      translateX,
-      translateY
-    } = this.state;
-    const primaryFormatter = metric && (metric.tickFormatter || metric.formatter) || (n => n);
-    const primaryValue = primaryFormatter(getLastValue(metric && metric.data || 0));
-    const styles = reactcss({
-      default: {
-        container: {},
-        inner: {
-          top: this.state.top || 0,
-          left: this.state.left || 0,
-          transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`
+    const { scale, translateX, translateY } = this.state;
+    const primaryFormatter = (metric && (metric.tickFormatter || metric.formatter)) || (n => n);
+    const primaryValue = primaryFormatter(getLastValue((metric && metric.data) || 0));
+    const styles = reactcss(
+      {
+        default: {
+          container: {},
+          inner: {
+            top: this.state.top || 0,
+            left: this.state.left || 0,
+            transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`,
+          },
+          primary_value: {},
+          secondary_value: {},
         },
-        primary_value: {},
-        secondary_value: {}
+        reversed: {
+          primary_value: {},
+          secondary_value: {},
+        },
       },
-      reversed: {
-        primary_value: {},
-        secondary_value: {}
-      }
-    }, this.props);
+      this.props
+    );
 
     if (this.props.backgroundColor) styles.container.backgroundColor = this.props.backgroundColor;
     if (metric && metric.color) styles.primary_value.color = metric.color;
 
     let primaryLabel;
     if (metric && metric.label) {
-      primaryLabel = (<div className="tvbVisMetric__label--primary">{ metric.label }</div>);
+      primaryLabel = <div className="tvbVisMetric__label--primary">{metric.label}</div>;
     }
 
     let secondarySnippet;
@@ -106,12 +104,14 @@ class Metric extends Component {
       if (secondary.color) styles.secondary_value.color = secondary.color;
       let secondaryLabel;
       if (secondary.label) {
-        secondaryLabel = (<div className="tvbVisMetric__label--secondary">{ secondary.label }</div>);
+        secondaryLabel = <div className="tvbVisMetric__label--secondary">{secondary.label}</div>;
       }
       secondarySnippet = (
         <div className="tvbVisMetric__secondary">
-          { secondaryLabel }
-          <div style={styles.secondary_value} className="tvbVisMetric__value--secondary">{ secondaryValue }</div>
+          {secondaryLabel}
+          <div style={styles.secondary_value} className="tvbVisMetric__value--secondary">
+            {secondaryValue}
+          </div>
         </div>
       );
     }
@@ -119,9 +119,7 @@ class Metric extends Component {
     let additionalLabel;
     if (this.props.additionalLabel) {
       additionalLabel = (
-        <div className="tvbVisMetric__label--additional">
-          {this.props.additionalLabel}
-        </div>
+        <div className="tvbVisMetric__label--additional">{this.props.additionalLabel}</div>
       );
     }
 
@@ -135,29 +133,25 @@ class Metric extends Component {
 
     return (
       <div className={className} style={styles.container}>
-        <div
-          ref={(el) => this.resize = el}
-          className="tvbVisMetric__resize"
-        >
-          <div ref={(el) => this.inner = el} className="tvbVisMetric__inner" style={styles.inner}>
+        <div ref={el => (this.resize = el)} className="tvbVisMetric__resize">
+          <div ref={el => (this.inner = el)} className="tvbVisMetric__inner" style={styles.inner}>
             <div className="tvbVisMetric__primary">
-              { primaryLabel }
+              {primaryLabel}
               <div
                 style={styles.primary_value}
                 data-test-subj="tsvbMetricValue"
                 className="tvbVisMetric__value--primary"
               >
-                { primaryValue }
+                {primaryValue}
               </div>
             </div>
-            { secondarySnippet }
+            {secondarySnippet}
             {additionalLabel}
           </div>
         </div>
       </div>
     );
   }
-
 }
 
 Metric.propTypes = {
@@ -165,7 +159,5 @@ Metric.propTypes = {
   metric: PropTypes.object,
   secondary: PropTypes.object,
   reversed: PropTypes.bool,
-  additionalLabel: PropTypes.string
+  additionalLabel: PropTypes.string,
 };
-
-export default Metric;

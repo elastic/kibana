@@ -18,8 +18,8 @@
  */
 
 import sinon from 'sinon';
-import expect from 'expect.js';
-import { SimpleSavedObject } from '../simple_saved_object';
+import expect from '@kbn/expect';
+import { SimpleSavedObject } from '../../../../../core/public';
 
 describe('SimpleSavedObject', () => {
   it('persists type and id', () => {

@@ -16,15 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-const mockFatalError = jest.fn();
-jest.mock('ui/notify/fatal_error', () => ({
-  fatalError: mockFatalError,
-}));
+import { mockFatalError } from './subscribe_with_scope.test.mocks';
 
 import * as Rx from 'rxjs';
 import { subscribeWithScope } from './subscribe_with_scope';
 
+// eslint-disable-next-line prefer-const
 let $rootScope: Scope;
 
 class Scope {
@@ -151,4 +148,26 @@ Array [
   ],
 ]
 `);
+});
+
+it('preserves the context of the observer functions', () => {
+  const $scope = new Scope();
+  const observer = {
+    next() {
+      expect(this).toBe(observer);
+    },
+    complete() {
+      expect(this).toBe(observer);
+    },
+  };
+
+  subscribeWithScope($scope as any, Rx.of([1, 2, 3]), observer);
+
+  const observer2 = {
+    error() {
+      expect(this).toBe(observer);
+    },
+  };
+
+  subscribeWithScope($scope as any, Rx.throwError(new Error('foo')), observer2);
 });

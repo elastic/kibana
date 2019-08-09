@@ -21,13 +21,13 @@ import angular from 'angular';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import $ from 'jquery';
 import 'ui/private';
 import '../../components/field_chooser/field_chooser';
 import FixturesHitsProvider from 'fixtures/hits';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { SimpleSavedObject } from 'ui/saved_objects';
+import { SimpleSavedObject } from '../../../../../../../core/public';
 
 // Load the kibana app dependencies.
 

@@ -17,19 +17,19 @@
  * under the License.
  */
 import { buildEsQuery } from '@kbn/es-query';
-import getTimerange from '../../helpers/get_timerange';
-import getIntervalAndTimefield from '../../get_interval_and_timefield';
+import { getTimerange } from '../../helpers/get_timerange';
+import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 
-export default function query(req, panel, esQueryConfig, indexPattern) {
+export function query(req, panel, esQueryConfig, indexPatternObject) {
   return next => doc => {
-    const { timeField } = getIntervalAndTimefield(panel);
+    const { timeField } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const { from, to } = getTimerange(req);
 
     doc.size = 0;
 
     const queries = !panel.ignore_global_filter ? req.payload.query : [];
     const filters = !panel.ignore_global_filter ? req.payload.filters : [];
-    doc.query = buildEsQuery(indexPattern, queries, filters, esQueryConfig);
+    doc.query = buildEsQuery(indexPatternObject, queries, filters, esQueryConfig);
 
     const timerange = {
       range: {
@@ -41,14 +41,8 @@ export default function query(req, panel, esQueryConfig, indexPattern) {
       },
     };
     doc.query.bool.must.push(timerange);
-
     if (panel.filter) {
-      doc.query.bool.must.push({
-        query_string: {
-          query: panel.filter,
-          analyze_wildcard: true,
-        },
-      });
+      doc.query.bool.must.push(buildEsQuery(indexPatternObject, [panel.filter], [], esQueryConfig));
     }
 
     return next(doc);

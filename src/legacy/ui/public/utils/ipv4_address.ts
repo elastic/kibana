@@ -30,8 +30,7 @@ function isIntegerInRange(integer: number, min: number, max: number) {
   );
 }
 
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default class Ipv4Address {
   private value: number;
 

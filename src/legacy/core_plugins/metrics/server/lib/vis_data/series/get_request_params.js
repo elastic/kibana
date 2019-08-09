@@ -21,23 +21,24 @@ import { getEsShardTimeout } from '../helpers/get_es_shard_timeout';
 import { getIndexPatternObject } from '../helpers/get_index_pattern';
 
 export async function getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities) {
-  const bodies = [];
-  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const indexPattern =
+    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
   const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
-  const request = buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject, capabilities);
+  const request = buildRequestBody(
+    req,
+    panel,
+    series,
+    esQueryConfig,
+    indexPatternObject,
+    capabilities
+  );
   const esShardTimeout = await getEsShardTimeout(req);
 
-  if (capabilities.batchRequestsSupport) {
-    bodies.push({
-      index: indexPatternString,
-    });
-  }
-
-  if (esShardTimeout > 0) {
-    request.timeout = `${esShardTimeout}ms`;
-  }
-
-  bodies.push(request);
-
-  return bodies;
+  return {
+    index: indexPatternString,
+    body: {
+      ...request,
+      timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
+    },
+  };
 }

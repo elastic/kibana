@@ -18,12 +18,13 @@
  */
 
 import React from 'react';
-import AggRow from './agg_row';
-import AggSelect from './agg_select';
-import FieldSelect from './field_select';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import { AggRow } from './agg_row';
+import { AggSelect } from './agg_select';
+import { FieldSelect } from './field_select';
+import { i18n } from '@kbn/i18n';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -34,60 +35,112 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { ES_TYPES } from '../../../common/es_types';
+import { PANEL_TYPES } from '../../../common/panel_types';
+
+const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
+  fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
+
+const getAggWithOptions = (field = {}, fieldTypesRestriction) => {
+  if (isFieldTypeEnabled(fieldTypesRestriction, field.type)) {
+    switch (field.type) {
+      case ES_TYPES.NUMBER:
+        return [
+          {
+            label: i18n.translate('tsvb.topHit.aggWithOptions.averageLabel', {
+              defaultMessage: 'Avg',
+            }),
+            value: 'avg',
+          },
+          {
+            label: i18n.translate('tsvb.topHit.aggWithOptions.maxLabel', {
+              defaultMessage: 'Max',
+            }),
+            value: 'max',
+          },
+          {
+            label: i18n.translate('tsvb.topHit.aggWithOptions.minLabel', {
+              defaultMessage: 'Min',
+            }),
+            value: 'min',
+          },
+          {
+            label: i18n.translate('tsvb.topHit.aggWithOptions.sumLabel', {
+              defaultMessage: 'Sum',
+            }),
+            value: 'sum',
+          },
+        ];
+      case ES_TYPES.KEYWORD:
+      case ES_TYPES.STRING:
+        return [
+          {
+            label: i18n.translate('tsvb.topHit.aggWithOptions.concatenate', {
+              defaultMessage: 'Concatenate',
+            }),
+            value: 'concat',
+          },
+        ];
+    }
+  }
+
+  return [];
+};
+
+const getOrderOptions = () => [
+  {
+    label: i18n.translate('tsvb.topHit.orderOptions.ascLabel', {
+      defaultMessage: 'Asc',
+    }),
+    value: 'asc',
+  },
+  {
+    label: i18n.translate('tsvb.topHit.orderOptions.descLabel', {
+      defaultMessage: 'Desc',
+    }),
+    value: 'desc',
+  },
+];
+
+const ORDER_DATE_RESTRICT_FIELDS = [ES_TYPES.DATE];
 
 const TopHitAggUi = props => {
-  const { fields, series, panel, intl } = props;
+  const { fields, series, panel } = props;
   const defaults = {
-    agg_with: 'avg',
     size: 1,
+    agg_with: 'noop',
     order: 'desc',
   };
   const model = { ...defaults, ...props.model };
   const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) ||
-    panel.index_pattern;
+    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
+
+  const aggWithOptionsRestrictFields = [
+    PANEL_TYPES.TABLE,
+    PANEL_TYPES.METRIC,
+    PANEL_TYPES.MARKDOWN,
+  ].includes(panel.type)
+    ? [ES_TYPES.NUMBER, ES_TYPES.KEYWORD, ES_TYPES.STRING]
+    : [ES_TYPES.NUMBER];
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
 
-  const aggWithOptions = [
-    {
-      label: intl.formatMessage({ id: 'tsvb.topHit.aggWithOptions.averageLabel', defaultMessage: 'Avg' }),
-      value: 'avg',
-    },
-    {
-      label: intl.formatMessage({ id: 'tsvb.topHit.aggWithOptions.maxLabel', defaultMessage: 'Max' }),
-      value: 'max'
-    },
-    {
-      label: intl.formatMessage({ id: 'tsvb.topHit.aggWithOptions.minLabel', defaultMessage: 'Min' }),
-      value: 'min'
-    },
-    {
-      label: intl.formatMessage({ id: 'tsvb.topHit.aggWithOptions.sumLabel', defaultMessage: 'Sum' }),
-      value: 'sum'
-    },
-  ];
-
-  const orderOptions = [
-    {
-      label: intl.formatMessage({ id: 'tsvb.topHit.orderOptions.ascLabel', defaultMessage: 'Asc' }),
-      value: 'asc'
-    },
-    {
-      label: intl.formatMessage({ id: 'tsvb.topHit.orderOptions.descLabel', defaultMessage: 'Desc' }),
-      value: 'desc'
-    },
-  ];
+  const field = fields[indexPattern].find(f => f.name === model.field);
+  const aggWithOptions = getAggWithOptions(field, aggWithOptionsRestrictFields);
+  const orderOptions = getOrderOptions();
 
   const htmlId = htmlIdGenerator();
+
   const selectedAggWithOption = aggWithOptions.find(option => {
     return model.agg_with === option.value;
   });
+
   const selectedOrderOption = orderOptions.find(option => {
     return model.order === option.value;
   });
+
   return (
     <AggRow
       disableDelete={props.disableDelete}
@@ -95,14 +148,12 @@ const TopHitAggUi = props => {
       onAdd={props.onAdd}
       onDelete={props.onDelete}
       siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage
-              id="tsvb.topHit.aggregationLabel"
-              defaultMessage="Aggregation"
-            />
+            <FormattedMessage id="tsvb.topHit.aggregationLabel" defaultMessage="Aggregation" />
           </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
@@ -115,15 +166,12 @@ const TopHitAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('field')}
-            label={(<FormattedMessage
-              id="tsvb.topHit.fieldLabel"
-              defaultMessage="Field"
-            />)}
+            label={<FormattedMessage id="tsvb.topHit.fieldLabel" defaultMessage="Field" />}
           >
             <FieldSelect
               fields={fields}
               type={model.type}
-              restrict="numeric"
+              restrict={aggWithOptionsRestrictFields}
               indexPattern={indexPattern}
               value={model.field}
               onChange={handleSelectChange('field')}
@@ -138,10 +186,7 @@ const TopHitAggUi = props => {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('size')}
-            label={(<FormattedMessage
-              id="tsvb.topHit.sizeLabel"
-              defaultMessage="Size"
-            />)}
+            label={<FormattedMessage id="tsvb.topHit.sizeLabel" defaultMessage="Size" />}
           >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.
@@ -157,14 +202,18 @@ const TopHitAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('agg_with')}
-            label={(<FormattedMessage
-              id="tsvb.topHit.aggregateWithLabel"
-              defaultMessage="Aggregate with"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.topHit.aggregateWithLabel"
+                defaultMessage="Aggregate with"
+              />
+            }
           >
             <EuiComboBox
               isClearable={false}
-              placeholder={intl.formatMessage({ id: 'tsvb.topHit.aggregateWith.selectPlaceholder', defaultMessage: 'Select…' })}
+              placeholder={i18n.translate('tsvb.topHit.aggregateWith.selectPlaceholder', {
+                defaultMessage: 'Select...',
+              })}
               options={aggWithOptions}
               selectedOptions={selectedAggWithOption ? [selectedAggWithOption] : []}
               onChange={handleSelectChange('agg_with')}
@@ -175,13 +224,10 @@ const TopHitAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('order_by')}
-            label={(<FormattedMessage
-              id="tsvb.topHit.orderByLabel"
-              defaultMessage="Order by"
-            />)}
+            label={<FormattedMessage id="tsvb.topHit.orderByLabel" defaultMessage="Order by" />}
           >
             <FieldSelect
-              restrict="date"
+              restrict={ORDER_DATE_RESTRICT_FIELDS}
               value={model.order_by}
               onChange={handleSelectChange('order_by')}
               indexPattern={indexPattern}
@@ -192,14 +238,13 @@ const TopHitAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('order')}
-            label={(<FormattedMessage
-              id="tsvb.topHit.orderLabel"
-              defaultMessage="Order"
-            />)}
+            label={<FormattedMessage id="tsvb.topHit.orderLabel" defaultMessage="Order" />}
           >
             <EuiComboBox
               isClearable={false}
-              placeholder={intl.formatMessage({ id: 'tsvb.topHit.order.selectPlaceholder', defaultMessage: 'Select…' })}
+              placeholder={i18n.translate('tsvb.topHit.order.selectPlaceholder', {
+                defaultMessage: 'Select...',
+              })}
               options={orderOptions}
               selectedOptions={selectedOrderOption ? [selectedOrderOption] : []}
               onChange={handleSelectChange('order')}

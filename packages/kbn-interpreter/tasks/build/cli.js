@@ -27,7 +27,6 @@ const { ToolingLog, withProcRunner, pickLevelFromFlags } = require('@kbn/dev-uti
 const {
   ROOT_DIR,
   BUILD_DIR,
-  WEBPACK_CONFIG_PATH
 } = require('./paths');
 
 const unknownFlags = [];
@@ -75,7 +74,7 @@ withProcRunner(log, async (proc) => {
     env.FORCE_COLOR = 'true';
   }
 
-  log.info(`Starting babel and webpack${flags.watch ? ' in watch mode' : ''}`);
+  log.info(`Starting babel ${flags.watch ? ' in watch mode' : ''}`);
   await Promise.all([
     proc.run('babel  ', {
       cmd: 'babel',
@@ -86,18 +85,6 @@ withProcRunner(log, async (proc) => {
         '--copy-files',
         ...(flags.dev ? ['--source-maps', 'inline'] : []),
         ...(flags.watch ? ['--watch'] : ['--quiet'])
-      ],
-      wait: true,
-      env,
-      cwd
-    }),
-
-    proc.run('webpack', {
-      cmd: 'webpack',
-      args: [
-        '--config', relative(cwd, WEBPACK_CONFIG_PATH),
-        '--env.sourceMaps', String(Boolean(flags.dev)),
-        ...(flags.watch ? ['--watch'] : []),
       ],
       wait: true,
       env,

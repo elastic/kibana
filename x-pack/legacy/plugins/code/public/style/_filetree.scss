@@ -1,0 +1,56 @@
+%extendCodeNode__item {
+  padding: $euiSizeXS $euiSizeXS $euiSizeXS $euiSize;
+  cursor: pointer;
+  white-space: nowrap;
+  margin-left: $euiSizeS;
+  z-index: 2;
+}
+
+.codeFileTree__container .euiSideNavItem--branch {
+  padding-left: $euiSize;
+}
+
+.codeFileTree__node {
+  display: flex;
+  flex-direction: row;
+}
+
+.codeFileTree__item {
+  @extend %extendCodeNode__item;
+}
+
+.codeFileTree__file {
+  margin-left: calc(28rem / 16);
+}
+
+.codeFileTree__directory {
+  margin-left: $euiSizeS;
+  vertical-align: middle;
+}
+
+.codeFileTree__node--fullWidth {
+  position: absolute;
+  width: 100%;
+  background: $euiColorLightShade;
+  left: 0;
+  height: 1.665rem;
+  // Use box shadows instead of tricky absolute positioning to set the active state
+  box-shadow: -10rem 0 0 $euiColorLightShade, 10rem 0 0 $euiColorLightShade;
+}
+
+.codeFileTree__container {
+  .euiSideNavItem__items {
+    margin: 0;
+  }
+}
+
+@include euiBreakpoint('xs', 's') {
+  .codeFileTree__container {
+    margin-left: -$euiSizeXL;
+    margin-top: -$euiSizeL;
+
+    .euiSideNav__mobileToggle {
+      display: none;
+    }
+  }
+}

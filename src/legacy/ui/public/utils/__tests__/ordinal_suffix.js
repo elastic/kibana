@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { ordinalSuffix } from '../ordinal_suffix';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('ordinal suffix util', function () {
   const checks = {

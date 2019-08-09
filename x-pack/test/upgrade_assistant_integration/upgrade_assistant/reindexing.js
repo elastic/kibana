@@ -5,9 +5,9 @@
  */
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-import { ReindexStatus, REINDEX_OP_TYPE } from '../../../plugins/upgrade_assistant/common/types';
+import { ReindexStatus, REINDEX_OP_TYPE } from '../../../legacy/plugins/upgrade_assistant/common/types';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

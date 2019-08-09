@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UpgradeFailureTitle component renders component as expected 1`] = `
+<EuiFlexGroup>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiIcon
+      size="xl"
+      type="alert"
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiTitle>
+      <h2>
+        the Title
+      </h2>
+    </EuiTitle>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

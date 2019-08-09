@@ -11,7 +11,7 @@
 
     <div class="kuiLocalMenu kbnTopNav__mainMenu" ng-if="kbnTopNav.menuItems.length">
       <button
-        class="kuiLocalMenuItem {{menuItem.className}}"
+        class="kuiLocalMenuItem kbn-resetFocusState {{menuItem.className}}"
         ng-repeat="menuItem in kbnTopNav.menuItems"
         aria-label="{{::menuItem.description}}"
         aria-haspopup="{{!menuItem.hasFunction}}"

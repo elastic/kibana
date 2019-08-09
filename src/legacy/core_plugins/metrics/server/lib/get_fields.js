@@ -23,11 +23,16 @@ import { getIndexPatternObject } from './vis_data/helpers/get_index_pattern';
 export async function getFields(req) {
   const indexPattern = req.query.index;
   const { indexPatternString } = await getIndexPatternObject(req, indexPattern);
-  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, indexPatternString);
+  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(
+    req,
+    indexPatternString
+  );
 
-  const fields = (await searchStrategy
-    .getFieldsForWildcard(req, indexPatternString, capabilities))
-    .filter(field => field.aggregatable);
+  const fields = (await searchStrategy.getFieldsForWildcard(
+    req,
+    indexPatternString,
+    capabilities
+  )).filter(field => field.aggregatable);
 
   return uniq(fields, field => field.name);
 }

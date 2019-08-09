@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should render source settings editor 1`] = `
+<Fragment>
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="m"
+  >
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiTitle
+          size="xs"
+        >
+          <h5>
+            <FormattedMessage
+              defaultMessage="Source Settings"
+              id="xpack.maps.layerPanel.sourceSettingsTitle"
+              values={Object {}}
+            />
+          </h5>
+        </EuiTitle>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer
+      size="m"
+    />
+    <div>
+      mockSourceEditor
+    </div>
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;
+
+exports[`should render nothing when source has no editor 1`] = `""`;

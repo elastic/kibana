@@ -18,29 +18,31 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import angular from 'angular';
+import moment from 'moment';
 import chrome from 'ui/chrome';
-import { getSort } from 'ui/doc_table/lib/get_sort';
-import * as columnActions from 'ui/doc_table/actions/columns';
-import * as filterActions from 'ui/doc_table/actions/filter';
 import dateMath from '@elastic/datemath';
-import 'ui/doc_table';
+
+// doc table
+import '../doc_table';
+import { getSort } from '../doc_table/lib/get_sort';
+import * as columnActions from '../doc_table/actions/columns';
+import * as filterActions from '../doc_table/actions/filter';
+
+import 'ui/directives/listen';
 import 'ui/visualize';
 import 'ui/fixed_scroll';
-import 'ui/directives/validate_json';
-import 'ui/filters/moment';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
-import 'ui/search_bar';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
-import { VislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
-import { DocTitleProvider } from 'ui/doc_title';
-import PluginsKibanaDiscoverHitSortFnProvider from '../_hit_sort_fn';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
+import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
+import { docTitle } from 'ui/doc_title';
 import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
@@ -48,7 +50,8 @@ import { uiModules } from 'ui/modules';
 import indexTemplate from '../index.html';
 import { StateProvider } from 'ui/state_management/state';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-import { FilterManagerProvider } from 'ui/filter_manager';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
+import { getFilterGenerator } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisualizeLoaderProvider } from 'ui/visualize/loader/visualize_loader';
 import { recentlyAccessed } from 'ui/persisted_log';
@@ -66,9 +69,15 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+import 'ui/capabilities/route_setup';
+
+const fetchStatuses = {
+  UNINITIALIZED: 'uninitialized',
+  LOADING: 'loading',
+  COMPLETE: 'complete',
+};
 
 const app = uiModules.get('apps/discover', [
-  'kibana/notify',
   'kibana/courier',
   'kibana/url',
   'kibana/index_patterns'
@@ -77,18 +86,34 @@ const app = uiModules.get('apps/discover', [
 uiRoutes
   .defaults(/^\/discover(\/|$)/, {
     requireDefaultIndex: true,
+    requireUICapability: 'discover.show',
     k7Breadcrumbs: ($route, $injector) =>
       $injector.invoke(
         $route.current.params.id
           ? getSavedSearchBreadcrumbs
           : getRootBreadcrumbs
-      )
+      ),
+    badge: uiCapabilities => {
+      if (uiCapabilities.discover.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n.translate('kbn.discover.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n.translate('kbn.discover.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save searches',
+        }),
+        iconType: 'glasses'
+      };
+    }
   })
   .when('/discover/:id?', {
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      ip: function (Promise, indexPatterns, config, $location, Private) {
+      ip: function (Promise, indexPatterns, config, Private) {
         const State = Private(StateProvider);
         const savedObjectsClient = Private(SavedObjectsClientProvider);
 
@@ -157,31 +182,30 @@ function discoverController(
   $timeout,
   $window,
   AppState,
-  Notifier,
   Private,
   Promise,
   config,
   courier,
   kbnUrl,
   localStorage,
-  i18n,
+  uiCapabilities
 ) {
   const visualizeLoader = Private(VisualizeLoaderProvider);
   let visualizeHandler;
   const Vis = Private(VisProvider);
-  const docTitle = Private(DocTitleProvider);
-  const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
-  const queryFilter = Private(FilterBarQueryFilterProvider);
-  const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
-  const filterManager = Private(FilterManagerProvider);
-  const notify = new Notifier({
-    location: 'Discover'
-  });
+  const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
+
+  const queryFilter = Private(FilterBarQueryFilterProvider);
+  const filterGen = getFilterGenerator(queryFilter);
+
   const inspectorAdapters = {
     requests: new RequestAdapter()
   };
+
+  let filterUpdateSubscription;
+  let filterFetchSubscription;
 
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
@@ -190,6 +214,8 @@ function discoverController(
   $scope.intervalOptions = intervalOptions;
   $scope.showInterval = false;
   $scope.minimumVisibleRows = 50;
+  $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
+  $scope.refreshInterval = timefilter.getRefreshInterval();
 
   $scope.intervalEnabled = function (interval) {
     return interval.val !== 'custom';
@@ -197,116 +223,141 @@ function discoverController(
 
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
-  $scope.$on('$destroy', savedSearch.destroy);
+  $scope.$on('$destroy', () => {
+    savedSearch.destroy();
+    if (filterFetchSubscription) filterFetchSubscription.unsubscribe();
+    if (filterUpdateSubscription) filterUpdateSubscription.unsubscribe();
+  });
 
   const $appStatus = $scope.appStatus = this.appStatus = {
     dirty: !savedSearch.id
   };
 
-  $scope.topNavMenu = [{
-    key: 'new',
-    label: i18n('kbn.discover.localMenu.localMenu.newSearchTitle', {
-      defaultMessage: 'New',
-    }),
-    description: i18n('kbn.discover.localMenu.newSearchDescription', {
-      defaultMessage: 'New Search',
-    }),
-    run: function () { kbnUrl.change('/discover'); },
-    testId: 'discoverNewButton',
-  }, {
-    key: 'save',
-    label: i18n('kbn.discover.localMenu.saveTitle', {
-      defaultMessage: 'Save',
-    }),
-    description: i18n('kbn.discover.localMenu.saveSearchDescription', {
-      defaultMessage: 'Save Search',
-    }),
-    testId: 'discoverSaveButton',
-    run: async () => {
-      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
-        const currentTitle = savedSearch.title;
-        savedSearch.title = newTitle;
-        savedSearch.copyOnSave = newCopyOnSave;
-        const saveOptions = {
-          confirmOverwrite: false,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-        };
-        return saveDataSource(saveOptions).then(({ id, error }) => {
-          // If the save wasn't successful, put the original values back.
-          if (!id || error) {
-            savedSearch.title = currentTitle;
-          }
-          return { id, error };
-        });
-      };
+  const getTopNavLinks = () => {
+    const newSearch = {
+      id: 'new',
+      label: i18n.translate('kbn.discover.localMenu.localMenu.newSearchTitle', {
+        defaultMessage: 'New',
+      }),
+      description: i18n.translate('kbn.discover.localMenu.newSearchDescription', {
+        defaultMessage: 'New Search',
+      }),
+      run: function () { kbnUrl.change('/discover'); },
+      testId: 'discoverNewButton',
+    };
 
-      const saveModal = (
-        <SavedObjectSaveModal
-          onSave={onSave}
-          onClose={() => {}}
-          title={savedSearch.title}
-          showCopyOnSave={savedSearch.id ? true : false}
-          objectType="search"
-        />);
-      showSaveModal(saveModal);
-    }
-  }, {
-    key: 'open',
-    label: i18n('kbn.discover.localMenu.openTitle', {
-      defaultMessage: 'Open',
-    }),
-    description: i18n('kbn.discover.localMenu.openSavedSearchDescription', {
-      defaultMessage: 'Open Saved Search',
-    }),
-    testId: 'discoverOpenButton',
-    run: () => {
-      showOpenSearchPanel({
-        makeUrl: (searchId) => {
-          return kbnUrl.eval('#/discover/{{id}}', { id: searchId });
-        }
-      });
-    }
-  }, {
-    key: 'share',
-    label: i18n('kbn.discover.localMenu.shareTitle', {
-      defaultMessage: 'Share',
-    }),
-    description: i18n('kbn.discover.localMenu.shareSearchDescription', {
-      defaultMessage: 'Share Search',
-    }),
-    testId: 'shareTopNavButton',
-    run: async (menuItem, navController, anchorElement) => {
-      const sharingData = await this.getSharingData();
-      showShareContextMenu({
-        anchorElement,
-        allowEmbed: false,
-        getUnhashableStates,
-        objectId: savedSearch.id,
-        objectType: 'search',
-        shareContextMenuExtensions,
-        sharingData: {
-          ...sharingData,
-          title: savedSearch.title,
-        },
-        isDirty: $appStatus.dirty,
-      });
-    }
-  }, {
-    key: 'inspect',
-    label: i18n('kbn.discover.localMenu.inspectTitle', {
-      defaultMessage: 'Inspect',
-    }),
-    description: i18n('kbn.discover.localMenu.openInspectorForSearchDescription', {
-      defaultMessage: 'Open Inspector for search',
-    }),
-    testId: 'openInspectorButton',
-    run() {
-      Inspector.open(inspectorAdapters, {
-        title: savedSearch.title
-      });
-    }
-  }];
+    const saveSearch = {
+      id: 'save',
+      label: i18n.translate('kbn.discover.localMenu.saveTitle', {
+        defaultMessage: 'Save',
+      }),
+      description: i18n.translate('kbn.discover.localMenu.saveSearchDescription', {
+        defaultMessage: 'Save Search',
+      }),
+      testId: 'discoverSaveButton',
+      run: async () => {
+        const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+          const currentTitle = savedSearch.title;
+          savedSearch.title = newTitle;
+          savedSearch.copyOnSave = newCopyOnSave;
+          const saveOptions = {
+            confirmOverwrite: false,
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+          };
+          return saveDataSource(saveOptions).then(({ id, error }) => {
+            // If the save wasn't successful, put the original values back.
+            if (!id || error) {
+              savedSearch.title = currentTitle;
+            }
+            return { id, error };
+          });
+        };
+
+        const saveModal = (
+          <SavedObjectSaveModal
+            onSave={onSave}
+            onClose={() => { }}
+            title={savedSearch.title}
+            showCopyOnSave={savedSearch.id ? true : false}
+            objectType="search"
+          />);
+        showSaveModal(saveModal);
+      }
+    };
+
+    const openSearch = {
+      id: 'open',
+      label: i18n.translate('kbn.discover.localMenu.openTitle', {
+        defaultMessage: 'Open',
+      }),
+      description: i18n.translate('kbn.discover.localMenu.openSavedSearchDescription', {
+        defaultMessage: 'Open Saved Search',
+      }),
+      testId: 'discoverOpenButton',
+      run: () => {
+        showOpenSearchPanel({
+          makeUrl: (searchId) => {
+            return kbnUrl.eval('#/discover/{{id}}', { id: searchId });
+          }
+        });
+      }
+    };
+
+    const shareSearch = {
+      id: 'share',
+      label: i18n.translate('kbn.discover.localMenu.shareTitle', {
+        defaultMessage: 'Share',
+      }),
+      description: i18n.translate('kbn.discover.localMenu.shareSearchDescription', {
+        defaultMessage: 'Share Search',
+      }),
+      testId: 'shareTopNavButton',
+      run: async (anchorElement) => {
+        const sharingData = await this.getSharingData();
+        showShareContextMenu({
+          anchorElement,
+          allowEmbed: false,
+          allowShortUrl: uiCapabilities.discover.createShortUrl,
+          getUnhashableStates,
+          objectId: savedSearch.id,
+          objectType: 'search',
+          shareContextMenuExtensions,
+          sharingData: {
+            ...sharingData,
+            title: savedSearch.title,
+          },
+          isDirty: $appStatus.dirty,
+        });
+      }
+    };
+
+    const inspectSearch = {
+      id: 'inspect',
+      label: i18n.translate('kbn.discover.localMenu.inspectTitle', {
+        defaultMessage: 'Inspect',
+      }),
+      description: i18n.translate('kbn.discover.localMenu.openInspectorForSearchDescription', {
+        defaultMessage: 'Open Inspector for search',
+      }),
+      testId: 'openInspectorButton',
+      run() {
+        Inspector.open(inspectorAdapters, {
+          title: savedSearch.title
+        });
+      }
+    };
+
+    return [
+      newSearch,
+      ...(uiCapabilities.discover.save ? [saveSearch] : []),
+      openSearch,
+      shareSearch,
+      inspectSearch,
+    ];
+  };
+
+  $scope.topNavMenu = getTopNavLinks();
 
   // the actual courier.SearchSource
   $scope.searchSource = savedSearch.searchSource;
@@ -333,7 +384,7 @@ function discoverController(
 
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
   docTitle.change(`Discover${pageTitleSuffix}`);
-  const discoverBreadcrumbsTitle = i18n('kbn.discover.discoverBreadcrumbTitle', {
+  const discoverBreadcrumbsTitle = i18n.translate('kbn.discover.discoverBreadcrumbTitle', {
     defaultMessage: 'Discover',
   });
 
@@ -353,6 +404,7 @@ function discoverController(
   const $state = $scope.state = new AppState(getStateDefaults());
 
   $scope.filters = queryFilter.getFilters();
+  $scope.screenTitle = savedSearch.title;
 
   $scope.onFiltersUpdated = filters => {
     // The filters will automatically be set when the queryFilter emits an update event (see below)
@@ -373,18 +425,16 @@ function discoverController(
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
     // so we wait for the fetch to be done before proceeding
-    if (!$scope.fetchStatus) {
+    if ($scope.fetchStatus === fetchStatuses.COMPLETE) {
       return $scope.fieldCounts;
     }
 
     return await new Promise(resolve => {
       const unwatch = $scope.$watch('fetchStatus', (newValue) => {
-        if (newValue) {
-          return;
+        if (newValue === fetchStatuses.COMPLETE) {
+          unwatch();
+          resolve($scope.fieldCounts);
         }
-
-        unwatch();
-        resolve($scope.fieldCounts);
       });
     });
   };
@@ -452,22 +502,20 @@ function discoverController(
   $state.sort = getSort.array($state.sort, $scope.indexPattern);
 
   $scope.getBucketIntervalToolTipText = () => {
-    return (
-      i18n('kbn.discover.bucketIntervalTooltip', {
-        // eslint-disable-next-line max-len
-        defaultMessage: 'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}',
-        values: {
-          bucketsDescription: $scope.bucketInterval.scale > 1
-            ? i18n('kbn.discover.bucketIntervalTooltip.tooLargeBucketsText', {
-              defaultMessage: 'buckets that are too large',
-            })
-            : i18n('kbn.discover.bucketIntervalTooltip.tooManyBucketsText', {
-              defaultMessage: 'too many buckets',
-            }),
-          bucketIntervalDescription: $scope.bucketInterval.description,
-        },
-      })
-    );
+    return i18n.translate('kbn.discover.bucketIntervalTooltip', {
+      // eslint-disable-next-line max-len
+      defaultMessage: 'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}',
+      values: {
+        bucketsDescription: $scope.bucketInterval.scale > 1
+          ? i18n.translate('kbn.discover.bucketIntervalTooltip.tooLargeBucketsText', {
+            defaultMessage: 'buckets that are too large',
+          })
+          : i18n.translate('kbn.discover.bucketIntervalTooltip.tooManyBucketsText', {
+            defaultMessage: 'too many buckets',
+          }),
+        bucketIntervalDescription: $scope.bucketInterval.description,
+      },
+    });
   };
 
   $scope.$watchCollection('state.columns', function () {
@@ -482,6 +530,14 @@ function discoverController(
     indexPatternList: $route.current.locals.ip.list,
   };
 
+  const shouldSearchOnPageLoad = () => {
+    // A saved search is created on every page load, so we check the ID to see if we're loading a
+    // previously saved search or if it is just transient
+    return config.get('discover:searchOnPageLoad')
+      || savedSearch.id !== undefined
+      || _.get($scope, 'refreshInterval.pause') === false;
+  };
+
   const init = _.once(function () {
     stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
     stateMonitor.onChange((status) => {
@@ -491,32 +547,33 @@ function discoverController(
 
     $scope.updateDataSource()
       .then(function () {
-        $scope.$listen(timefilter, 'fetch', function () {
-          $scope.fetch();
-        });
-        $scope.$listen(timefilter, 'refreshIntervalUpdate', () => {
-          $scope.updateRefreshInterval();
-        });
-        $scope.$listen(timefilter, 'timeUpdate', () => {
-          $scope.updateTime();
-        });
+        $scope.$listen(timefilter, 'autoRefreshFetch', $scope.fetch);
+        $scope.$listen(timefilter, 'refreshIntervalUpdate', $scope.updateRefreshInterval);
+        $scope.$listen(timefilter, 'timeUpdate', $scope.updateTime);
 
         $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;
 
-          // get the current sort from {key: val} to ["key", "val"];
-          const currentSort = _.pairs($scope.searchSource.getField('sort')).pop();
+          // get the current sort from searchSource as array of arrays
+          const currentSort = getSort.array($scope.searchSource.getField('sort'), $scope.indexPattern);
 
           // if the searchSource doesn't know, tell it so
           if (!angular.equals(sort, currentSort)) $scope.fetch();
         });
 
         // update data source when filters update
-        $scope.$listen(queryFilter, 'update', function () {
-          $scope.filters = queryFilter.getFilters();
-          return $scope.updateDataSource().then(function () {
-            $state.save();
-          });
+        filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+          next: () => {
+            $scope.filters = queryFilter.getFilters();
+            $scope.updateDataSource().then(function () {
+              $state.save();
+            });
+          }
+        });
+
+        // fetch data when filters fire fetch event
+        filterFetchSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+          next: $scope.fetch
         });
 
         // update data source when hitting forward/back and the query changes
@@ -524,15 +581,14 @@ function discoverController(
           if (diff.indexOf('query') >= 0) $scope.fetch();
         });
 
-        // fetch data when filters fire fetch event
-        $scope.$listen(queryFilter, 'fetch', $scope.fetch);
-
         $scope.$watch('opts.timefield', function (timefield) {
           $scope.enableTimeRangeSelector = !!timefield;
         });
 
-        $scope.$watch('state.interval', function () {
-          $scope.fetch();
+        $scope.$watch('state.interval', function (newInterval, oldInterval) {
+          if (newInterval !== oldInterval) {
+            $scope.fetch();
+          }
         });
 
         $scope.$watch('vis.aggs', function () {
@@ -546,8 +602,11 @@ function discoverController(
           }
         });
 
-        $scope.$watch('state.query', (query) => {
-          $scope.updateQueryAndFetch({ query });
+        $scope.$watch('state.query', (newQuery, oldQuery) => {
+          if (!_.isEqual(newQuery, oldQuery)) {
+            const query = migrateLegacyQuery(newQuery);
+            $scope.updateQueryAndFetch({ query });
+          }
         });
 
         $scope.$watchMulti([
@@ -556,23 +615,25 @@ function discoverController(
         ], (function updateResultState() {
           let prev = {};
           const status = {
+            UNINITIALIZED: 'uninitialized',
             LOADING: 'loading', // initial data load
             READY: 'ready', // results came back
             NO_RESULTS: 'none' // no results came back
           };
 
           function pick(rows, oldRows, fetchStatus) {
-            // initial state, pretend we are loading
-            if (rows == null && oldRows == null) return status.LOADING;
+            // initial state, pretend we're already loading if we're about to execute a search so
+            // that the uninitilized message doesn't flash on screen
+            if (rows == null && oldRows == null && shouldSearchOnPageLoad()) {
+              return status.LOADING;
+            }
+
+            if (fetchStatus === fetchStatuses.UNINITIALIZED) {
+              return status.UNINITIALIZED;
+            }
 
             const rowsEmpty = _.isEmpty(rows);
-            // An undefined fetchStatus means the requests are still being
-            // prepared to be sent. When all requests are completed,
-            // fetchStatus is set to null, so it's important that we
-            // specifically check for undefined to determine a loading status.
-            const preparingForFetch = _.isUndefined(fetchStatus);
-            if (preparingForFetch) return status.LOADING;
-            else if (rowsEmpty && fetchStatus) return status.LOADING;
+            if (rowsEmpty && fetchStatus === fetchStatuses.LOADING) return status.LOADING;
             else if (!rowsEmpty) return status.READY;
             else return status.NO_RESULTS;
           }
@@ -601,6 +662,10 @@ function discoverController(
 
         init.complete = true;
         $state.replace();
+
+        if (shouldSearchOnPageLoad()) {
+          $scope.fetch();
+        }
       });
   });
 
@@ -616,7 +681,7 @@ function discoverController(
         stateMonitor.setInitialState($state.toJSON());
         if (id) {
           toastNotifications.addSuccess({
-            title: i18n('kbn.discover.notifications.savedSearchTitle', {
+            title: i18n.translate('kbn.discover.notifications.savedSearchTitle', {
               defaultMessage: `Search '{savedSearchTitle}' was saved`,
               values: {
                 savedSearchTitle: savedSearch.title,
@@ -637,7 +702,7 @@ function discoverController(
       return { id };
     } catch(saveError) {
       toastNotifications.addDanger({
-        title: i18n('kbn.discover.notifications.notSavedSearchTitle', {
+        title: i18n.translate('kbn.discover.notifications.notSavedSearchTitle', {
           defaultMessage: `Search '{savedSearchTitle}' was not saved.`,
           values: {
             savedSearchTitle: savedSearch.title,
@@ -657,204 +722,99 @@ function discoverController(
 
     $scope.updateTime();
 
+    // Abort any in-progress requests before fetching again
+    $scope.searchSource.cancelQueued();
+
     $scope.updateDataSource()
       .then(setupVisualization)
       .then(function () {
         $state.save();
-        return courier.fetch();
+        $scope.fetchStatus = fetchStatuses.LOADING;
+        logInspectorRequest();
+        return $scope.searchSource.fetch();
       })
-      .catch(notify.error);
-  };
-
-  $scope.updateQueryAndFetch = function ({ query, dateRange }) {
-    timefilter.setTime(dateRange);
-    $state.query = migrateLegacyQuery(query);
-    $scope.fetch();
-  };
-
-
-  function handleSegmentedFetch(segmented) {
-    function flushResponseData() {
-      $scope.fetchError = undefined;
-      $scope.hits = 0;
-      $scope.failures = [];
-      $scope.rows = [];
-      $scope.fieldCounts = {};
-    }
-
-    if (!$scope.rows) flushResponseData();
-
-    const sort = $state.sort;
-    const timeField = $scope.indexPattern.timeFieldName;
-
-    /**
-     * Basically an emum.
-     *
-     * opts:
-     *   "time" - sorted by the timefield
-     *   "non-time" - explicitly sorted by a non-time field, NOT THE SAME AS `sortBy !== "time"`
-     *   "implicit" - no sorting set, NOT THE SAME AS "non-time"
-     *
-     * @type {String}
-     */
-    const sortBy = (function () {
-      if (!Array.isArray(sort)) return 'implicit';
-      else if (sort[0] === '_score') return 'implicit';
-      else if (sort[0] === timeField) return 'time';
-      else return 'non-time';
-    }());
-
-    let sortFn = null;
-    if (sortBy !== 'implicit') {
-      sortFn = new HitSortFn(sort[1]);
-    }
-
-    $scope.updateTime();
-
-    if (sort[0] === '_score') {
-      segmented.setMaxSegments(1);
-    }
-
-    segmented.setDirection(sortBy === 'time' ? (sort[1] || 'desc') : 'desc');
-    segmented.setSortFn(sortFn);
-    segmented.setSize($scope.opts.sampleSize);
-
-    let inspectorRequests = [];
-    function logResponseInInspector(resp) {
-      if (inspectorRequests.length > 0) {
-        const inspectorRequest = inspectorRequests.shift();
-        inspectorRequest
-          .stats(getResponseInspectorStats($scope.searchSource, resp))
-          .ok({ json: resp });
-      }
-    }
-
-    // triggered when the status updated
-    segmented.on('status', function (status) {
-      $scope.fetchStatus = status;
-      if (status.complete === 0) {
-        // starting new segmented search request
-        inspectorAdapters.requests.reset();
-        inspectorRequests = [];
-      }
-
-      if (status.remaining > 0) {
-        const inspectorRequest = inspectorAdapters.requests.start(
-          i18n('kbn.discover.inspectorRequest.segmentFetchCompleteStatusTitle', {
-            defaultMessage: 'Segment {fetchCompleteStatus}',
-            values: {
-              fetchCompleteStatus: $scope.fetchStatus.complete,
-            }
-          }),
-          {
-            description: i18n('kbn.discover.inspectorRequest.segmentFetchCompleteStatusDescription', {
-              defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
-            }),
-          });
-        inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
-        $scope.searchSource.getSearchRequestBody().then(body => {
-          inspectorRequest.json(body);
-        });
-        inspectorRequests.push(inspectorRequest);
-      }
-
-    });
-
-    segmented.on('first', function () {
-      flushResponseData();
-    });
-
-    segmented.on('segment', (resp) => {
-      logResponseInInspector(resp);
-      if (resp._shards.failed > 0) {
-        $scope.failures = _.union($scope.failures, resp._shards.failures);
-        $scope.failures = _.uniq($scope.failures, false, function (failure) {
-          return failure.index + failure.shard + failure.reason;
-        });
-      }
-    });
-
-    segmented.on('emptySegment', function (resp) {
-      logResponseInInspector(resp);
-    });
-
-    segmented.on('mergedSegment', function (merged) {
-      $scope.mergedEsResp = merged;
-
-      if ($scope.opts.timefield) {
-        const tabifiedData = tabifyAggResponse($scope.vis.aggs, merged);
-        $scope.searchSource.rawResponse = merged;
-        Promise
-          .resolve(responseHandler(tabifiedData, buildVislibDimensions($scope.vis, $scope.timeRange)))
-          .then(resp => {
-            visualizeHandler.render({
-              as: 'visualization',
-              value: {
-                visType: $scope.vis.type.name,
-                visData: resp,
-                visConfig: $scope.vis.params,
-                params: {},
-              }
-            });
-          });
-      }
-
-      $scope.hits = merged.hits.total;
-
-      const indexPattern = $scope.searchSource.getField('index');
-
-      // the merge rows, use a new array to help watchers
-      $scope.rows = merged.hits.hits.slice();
-
-      let counts = $scope.fieldCounts;
-
-      // if we haven't counted yet, or need a fresh count because we are sorting, reset the counts
-      if (!counts || sortFn) counts = $scope.fieldCounts = {};
-
-      $scope.rows.forEach(function (hit) {
-        // skip this work if we have already done it
-        if (hit.$$_counted) return;
-
-        // when we are sorting results, we need to redo the counts each time because the
-        // "top 500" may change with each response, so don't mark this as counted
-        if (!sortFn) hit.$$_counted = true;
-
-        const fields = _.keys(indexPattern.flattenHit(hit));
-        let n = fields.length;
-        let field;
-        while (field = fields[--n]) {
-          if (counts[field]) counts[field] += 1;
-          else counts[field] = 1;
-        }
-      });
-    });
-
-    segmented.on('complete', function () {
-      if ($scope.fetchStatus.hitCount === 0) {
-        flushResponseData();
-      }
-
-      $scope.fetchStatus = null;
-    });
-  }
-
-
-  function beginSegmentedFetch() {
-    $scope.searchSource.onBeginSegmentedFetch(handleSegmentedFetch)
+      .then(onResults)
       .catch((error) => {
         const fetchError = getPainlessError(error);
 
         if (fetchError) {
           $scope.fetchError = fetchError;
         } else {
-          notify.error(error);
+          toastNotifications.addError(error, {
+            title: i18n.translate('kbn.discover.errorLoadingData', {
+              defaultMessage: 'Error loading data',
+            }),
+          });
         }
-
-        // Restart. This enables auto-refresh functionality.
-        beginSegmentedFetch();
       });
+  };
+
+  $scope.updateQueryAndFetch = function ({ query, dateRange }) {
+    timefilter.setTime(dateRange);
+    $state.query = query;
+    $scope.fetch();
+  };
+
+  function onResults(resp) {
+    logInspectorResponse(resp);
+
+    if ($scope.opts.timefield) {
+      const tabifiedData = tabifyAggResponse($scope.vis.aggs, resp);
+      $scope.searchSource.rawResponse = resp;
+      Promise
+        .resolve(buildVislibDimensions($scope.vis, { timeRange: $scope.timeRange, searchSource: $scope.searchSource }))
+        .then(resp => responseHandler(tabifiedData, resp))
+        .then(resp => {
+          visualizeHandler.render({
+            as: 'visualization',
+            value: {
+              visType: $scope.vis.type.name,
+              visData: resp,
+              visConfig: $scope.vis.params,
+              params: {},
+            }
+          });
+        });
+    }
+
+    $scope.hits = resp.hits.total;
+    $scope.rows = resp.hits.hits;
+
+    // if we haven't counted yet, reset the counts
+    const counts = $scope.fieldCounts = $scope.fieldCounts || {};
+
+    $scope.rows.forEach(hit => {
+      const fields = Object.keys($scope.indexPattern.flattenHit(hit));
+      fields.forEach(fieldName => {
+        counts[fieldName] = (counts[fieldName] || 0) + 1;
+      });
+    });
+
+    $scope.fetchStatus = fetchStatuses.COMPLETE;
   }
-  beginSegmentedFetch();
+
+  let inspectorRequest;
+
+  function logInspectorRequest() {
+    inspectorAdapters.requests.reset();
+    const title = i18n.translate('kbn.discover.inspectorRequestDataTitle', {
+      defaultMessage: 'Data',
+    });
+    const description = i18n.translate('kbn.discover.inspectorRequestDescription', {
+      defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
+    });
+    inspectorRequest = inspectorAdapters.requests.start(title, { description });
+    inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
+    $scope.searchSource.getSearchRequestBody().then(body => {
+      inspectorRequest.json(body);
+    });
+  }
+
+  function logInspectorResponse(resp) {
+    inspectorRequest
+      .stats(getResponseInspectorStats($scope.searchSource, resp))
+      .ok({ json: resp });
+  }
 
   $scope.updateTime = function () {
     $scope.timeRange = {
@@ -864,8 +824,19 @@ function discoverController(
     $scope.time = timefilter.getTime();
   };
 
+  $scope.toMoment = function (datetime) {
+    return moment(datetime).format(config.get('dateFormat'));
+  };
+
   $scope.updateRefreshInterval = function () {
-    $scope.refreshInterval = timefilter.getRefreshInterval();
+    const newInterval = timefilter.getRefreshInterval();
+    const shouldFetch = _.get($scope, 'refreshInterval.pause') === true && newInterval.pause === false;
+
+    $scope.refreshInterval = newInterval;
+
+    if (shouldFetch) {
+      $scope.fetch();
+    }
   };
 
   $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
@@ -891,14 +862,14 @@ function discoverController(
       .setField('filter', queryFilter.getFilters());
   });
 
-  $scope.setSortOrder = function setSortOrder(columnName, direction) {
-    $scope.state.sort = [columnName, direction];
+  $scope.setSortOrder = function setSortOrder(sortPair) {
+    $scope.state.sort = sortPair;
   };
 
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
-    filterActions.addFilter(field, values, operation, $scope.indexPattern.id, $scope.state, filterManager);
+    filterActions.addFilter(field, values, operation, $scope.indexPattern.id, $scope.state, filterGen);
   };
 
   $scope.addColumn = function addColumn(columnName) {
@@ -1008,7 +979,7 @@ function discoverController(
     }
 
     if (stateVal && !stateValFound) {
-      const warningTitle = i18n('kbn.discover.valueIsNotConfiguredIndexPatternIDWarningTitle', {
+      const warningTitle = i18n.translate('kbn.discover.valueIsNotConfiguredIndexPatternIDWarningTitle', {
         defaultMessage: '{stateVal} is not a configured index pattern ID',
         values: {
           stateVal: `"${stateVal}"`,
@@ -1018,7 +989,7 @@ function discoverController(
       if (ownIndexPattern) {
         toastNotifications.addWarning({
           title: warningTitle,
-          text: i18n('kbn.discover.showingSavedIndexPatternWarningDescription', {
+          text: i18n.translate('kbn.discover.showingSavedIndexPatternWarningDescription', {
             defaultMessage: 'Showing the saved index pattern: "{ownIndexPatternTitle}" ({ownIndexPatternId})',
             values: {
               ownIndexPatternTitle: ownIndexPattern.title,
@@ -1031,7 +1002,7 @@ function discoverController(
 
       toastNotifications.addWarning({
         title: warningTitle,
-        text: i18n('kbn.discover.showingDefaultIndexPatternWarningDescription', {
+        text: i18n.translate('kbn.discover.showingDefaultIndexPatternWarningDescription', {
           defaultMessage: 'Showing the default index pattern: "{loadedIndexPatternTitle}" ({loadedIndexPatternId})',
           values: {
             loadedIndexPatternTitle: loadedIndexPattern.title,

@@ -17,12 +17,14 @@
  * under the License.
  */
 
-// @ts-ignore untyped dependency
-import { registries } from '@kbn/interpreter/public';
 import { EventEmitter } from 'events';
-import { debounce, forEach, get } from 'lodash';
+import { debounce, forEach, get, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
+import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
+// @ts-ignore untyped dependency
+import { registries } from '../../../../core_plugins/interpreter/public/registries';
 import { Inspector } from '../../inspector';
 import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
@@ -31,9 +33,12 @@ import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { RequestHandlerParams, Vis } from '../../vis';
+// @ts-ignore untyped dependency
+import { VisFiltersProvider } from '../../vis/vis_filters';
 import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
 import { VisualizeDataLoader } from './visualize_data_loader';
+import { onlyDisabledFiltersChanged } from '../../../../core_plugins/data/public';
 
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
@@ -46,16 +51,15 @@ import {
 } from './types';
 import { queryGeohashBounds } from './utils';
 
-import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
-
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
   queryFilter: any;
   autoFetch?: boolean;
+  pipelineDataLoader?: boolean;
 }
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
+const DATA_SHARED_ITEM = 'data-shared-item';
 const LOADING_ATTRIBUTE = 'data-loading';
 const RENDERING_COUNT_ATTRIBUTE = 'data-rendering-count';
 
@@ -71,13 +75,13 @@ export class EmbeddedVisualizeHandler {
    * This should not be used by any plugin.
    * @ignore
    */
-  public static readonly __ENABLE_PIPELINE_DATA_LOADER__: boolean = false;
   public readonly data$: Rx.Observable<any>;
   public readonly inspectorAdapters: Adapters = {};
   private vis: Vis;
   private handlers: any;
   private loaded: boolean = false;
   private destroyed: boolean = false;
+  private pipelineDataLoader: boolean = false;
 
   private listeners = new EventEmitter();
   private firstRenderComplete: Promise<void>;
@@ -117,6 +121,7 @@ export class EmbeddedVisualizeHandler {
       filters,
       query,
       autoFetch = true,
+      pipelineDataLoader = false,
       Private,
     } = params;
 
@@ -131,13 +136,17 @@ export class EmbeddedVisualizeHandler {
       forceFetch: false,
     };
 
+    this.pipelineDataLoader = pipelineDataLoader;
+
     // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
     this.firstRenderComplete = new Promise(resolve => {
       this.listeners.once(RENDER_COMPLETE_EVENT, resolve);
     });
 
     element.setAttribute(LOADING_ATTRIBUTE, '');
+    element.setAttribute(DATA_SHARED_ITEM, '');
     element.setAttribute(RENDERING_COUNT_ATTRIBUTE, '0');
+
     element.addEventListener('renderComplete', this.onRenderCompleteListener);
 
     this.autoFetch = autoFetch;
@@ -171,9 +180,10 @@ export class EmbeddedVisualizeHandler {
       });
     };
 
-    this.dataLoader = EmbeddedVisualizeHandler.__ENABLE_PIPELINE_DATA_LOADER__
+    this.dataLoader = pipelineDataLoader
       ? new PipelineDataLoader(vis)
       : new VisualizeDataLoader(vis, Private);
+    const visFilters: any = Private(VisFiltersProvider);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
     this.inspectorAdapters = this.getActiveInspectorAdapters();
     this.vis.openInspector = this.openInspector;
@@ -194,7 +204,8 @@ export class EmbeddedVisualizeHandler {
     this.events$.subscribe(event => {
       if (this.actions[event.name]) {
         event.data.aggConfigs = getTableAggs(this.vis);
-        this.actions[event.name](event.data);
+        const newFilters = this.actions[event.name](event.data) || [];
+        visFilters.pushFilters(newFilters);
       }
     });
 
@@ -226,15 +237,21 @@ export class EmbeddedVisualizeHandler {
     }
 
     let fetchRequired = false;
-    if (params.hasOwnProperty('timeRange')) {
+    if (
+      params.hasOwnProperty('timeRange') &&
+      !isEqual(this.dataLoaderParams.timeRange, params.timeRange)
+    ) {
       fetchRequired = true;
       this.dataLoaderParams.timeRange = params.timeRange;
     }
-    if (params.hasOwnProperty('filters')) {
+    if (
+      params.hasOwnProperty('filters') &&
+      !onlyDisabledFiltersChanged(this.dataLoaderParams.filters, params.filters)
+    ) {
       fetchRequired = true;
       this.dataLoaderParams.filters = params.filters;
     }
-    if (params.hasOwnProperty('query')) {
+    if (params.hasOwnProperty('query') && !isEqual(this.dataLoaderParams.query, params.query)) {
       fetchRequired = true;
       this.dataLoaderParams.query = params.query;
     }
@@ -481,7 +498,7 @@ export class EmbeddedVisualizeHandler {
     let renderer: any = null;
     let args: any[] = [];
 
-    if (EmbeddedVisualizeHandler.__ENABLE_PIPELINE_DATA_LOADER__) {
+    if (this.pipelineDataLoader) {
       renderer = registries.renderers.get(get(response || {}, 'as', 'visualization'));
       args = [this.element, get(response, 'value', { visType: this.vis.type.name }), this.handlers];
     } else {

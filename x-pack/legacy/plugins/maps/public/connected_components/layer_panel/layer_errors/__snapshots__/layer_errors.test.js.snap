@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should render errors when layer has errors 1`] = `
+<Fragment>
+  <EuiCallOut
+    color="warning"
+    size="m"
+    title="Unable to load layer"
+  >
+    <p
+      data-test-subj="layerErrorMessage"
+    >
+      simulated layer error
+    </p>
+  </EuiCallOut>
+  <EuiSpacer
+    size="m"
+  />
+</Fragment>
+`;
+
+exports[`should render nothing when layer has no errors 1`] = `""`;

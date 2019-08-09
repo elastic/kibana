@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-import monitorList from './fixtures/monitor_list';
-import monitorListDownFiltered from './fixtures/monitor_list_down_filtered';
-import monitorListUpFiltered from './fixtures/monitor_list_up_filtered';
-import { getMonitorListQueryString } from '../../../../../plugins/uptime/public/components/queries/monitor_list/get_monitor_list';
+import { monitorListQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
+import { expectFixtureEql } from './expect_fixture_eql';
 
 export default function ({ getService }) {
   describe('monitorList query', () => {
@@ -17,7 +14,7 @@ export default function ({ getService }) {
     it('will fetch a list of all the monitors', async () => {
       const getMonitorListQuery = {
         operationName: 'MonitorList',
-        query: getMonitorListQueryString,
+        query: monitorListQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',
@@ -29,13 +26,14 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorListQuery });
-      expect(data).to.eql(monitorList);
+
+      expectFixtureEql(data, 'monitor_list');
     });
 
     it('will fetch a filtered list of all down monitors', async () => {
       const getMonitorListQuery = {
         operationName: 'MonitorList',
-        query: getMonitorListQueryString,
+        query: monitorListQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',
@@ -48,13 +46,14 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorListQuery });
-      expect(data).to.eql(monitorListDownFiltered);
+
+      expectFixtureEql(data, 'monitor_list_down_filtered');
     });
 
     it('will fetch a filtered list of all up monitors', async () => {
       const getMonitorListQuery = {
         operationName: 'MonitorList',
-        query: getMonitorListQueryString,
+        query: monitorListQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',
@@ -67,7 +66,7 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorListQuery });
-      expect(data).to.eql(monitorListUpFiltered);
+      expectFixtureEql(data, 'monitor_list_up_filtered');
     });
 
     // TODO: add filters for host and port

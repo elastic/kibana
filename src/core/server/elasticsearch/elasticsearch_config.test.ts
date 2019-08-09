@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { ElasticsearchConfig } from './elasticsearch_config';
+import { ElasticsearchConfig, config } from './elasticsearch_config';
 
 test('set correct defaults', () => {
-  const config = new ElasticsearchConfig(ElasticsearchConfig.schema.validate({}));
-  expect(config).toMatchInlineSnapshot(`
+  const configValue = new ElasticsearchConfig(config.schema.validate({}));
+  expect(configValue).toMatchInlineSnapshot(`
 ElasticsearchConfig {
   "apiVersion": "master",
   "customHeaders": Object {},
@@ -51,58 +51,58 @@ ElasticsearchConfig {
 });
 
 test('#hosts accepts both string and array of strings', () => {
-  let config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({ hosts: 'http://some.host:1234' })
+  let configValue = new ElasticsearchConfig(
+    config.schema.validate({ hosts: 'http://some.host:1234' })
   );
-  expect(config.hosts).toEqual(['http://some.host:1234']);
+  expect(configValue.hosts).toEqual(['http://some.host:1234']);
 
-  config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({ hosts: ['http://some.host:1234'] })
+  configValue = new ElasticsearchConfig(
+    config.schema.validate({ hosts: ['http://some.host:1234'] })
   );
-  expect(config.hosts).toEqual(['http://some.host:1234']);
+  expect(configValue.hosts).toEqual(['http://some.host:1234']);
 
-  config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({
+  configValue = new ElasticsearchConfig(
+    config.schema.validate({
       hosts: ['http://some.host:1234', 'https://some.another.host'],
     })
   );
-  expect(config.hosts).toEqual(['http://some.host:1234', 'https://some.another.host']);
+  expect(configValue.hosts).toEqual(['http://some.host:1234', 'https://some.another.host']);
 });
 
 test('#requestHeadersWhitelist accepts both string and array of strings', () => {
-  let config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({ requestHeadersWhitelist: 'token' })
+  let configValue = new ElasticsearchConfig(
+    config.schema.validate({ requestHeadersWhitelist: 'token' })
   );
-  expect(config.requestHeadersWhitelist).toEqual(['token']);
+  expect(configValue.requestHeadersWhitelist).toEqual(['token']);
 
-  config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({ requestHeadersWhitelist: ['token'] })
+  configValue = new ElasticsearchConfig(
+    config.schema.validate({ requestHeadersWhitelist: ['token'] })
   );
-  expect(config.requestHeadersWhitelist).toEqual(['token']);
+  expect(configValue.requestHeadersWhitelist).toEqual(['token']);
 
-  config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({
+  configValue = new ElasticsearchConfig(
+    config.schema.validate({
       requestHeadersWhitelist: ['token', 'X-Forwarded-Proto'],
     })
   );
-  expect(config.requestHeadersWhitelist).toEqual(['token', 'X-Forwarded-Proto']);
+  expect(configValue.requestHeadersWhitelist).toEqual(['token', 'X-Forwarded-Proto']);
 });
 
 test('#ssl.certificateAuthorities accepts both string and array of strings', () => {
-  let config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({ ssl: { certificateAuthorities: 'some-path' } })
+  let configValue = new ElasticsearchConfig(
+    config.schema.validate({ ssl: { certificateAuthorities: 'some-path' } })
   );
-  expect(config.ssl.certificateAuthorities).toEqual(['some-path']);
+  expect(configValue.ssl.certificateAuthorities).toEqual(['some-path']);
 
-  config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({ ssl: { certificateAuthorities: ['some-path'] } })
+  configValue = new ElasticsearchConfig(
+    config.schema.validate({ ssl: { certificateAuthorities: ['some-path'] } })
   );
-  expect(config.ssl.certificateAuthorities).toEqual(['some-path']);
+  expect(configValue.ssl.certificateAuthorities).toEqual(['some-path']);
 
-  config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({
+  configValue = new ElasticsearchConfig(
+    config.schema.validate({
       ssl: { certificateAuthorities: ['some-path', 'another-path'] },
     })
   );
-  expect(config.ssl.certificateAuthorities).toEqual(['some-path', 'another-path']);
+  expect(configValue.ssl.certificateAuthorities).toEqual(['some-path', 'another-path']);
 });

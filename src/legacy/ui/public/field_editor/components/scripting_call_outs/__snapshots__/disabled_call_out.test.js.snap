@@ -9,6 +9,7 @@ exports[`ScriptingDisabledCallOut should render normally 1`] = `
     title={
       <FormattedMessage
         defaultMessage="Scripting disabled"
+        description="Showing the status that scripting is disabled in Elasticsearch. Not an update message, that it JUST got disabled."
         id="common.ui.fieldEditor.disabledCallOutHeader"
         values={Object {}}
       />

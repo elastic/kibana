@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import getBucketSize from '../../helpers/get_bucket_size';
-import getTimerange from '../../helpers/get_timerange';
+import { getBucketSize } from '../../helpers/get_bucket_size';
+import { getTimerange } from '../../helpers/get_timerange';
 import { buildEsQuery } from '@kbn/es-query';
 
-export default function query(req, panel, annotation, esQueryConfig, indexPattern, capabilities) {
+export function query(req, panel, annotation, esQueryConfig, indexPattern, capabilities) {
   return next => doc => {
     const timeField = annotation.time_field;
     const { bucketSize } = getBucketSize(req, 'auto', capabilities);
@@ -43,21 +43,13 @@ export default function query(req, panel, annotation, esQueryConfig, indexPatter
     doc.query.bool.must.push(timerange);
 
     if (annotation.query_string) {
-      doc.query.bool.must.push({
-        query_string: {
-          query: annotation.query_string,
-          analyze_wildcard: true,
-        },
-      });
+      doc.query.bool.must.push(
+        buildEsQuery(indexPattern, [annotation.query_string], [], esQueryConfig)
+      );
     }
 
     if (!annotation.ignore_panel_filters && panel.filter) {
-      doc.query.bool.must.push({
-        query_string: {
-          query: panel.filter,
-          analyze_wildcard: true,
-        },
-      });
+      doc.query.bool.must.push(buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
     }
 
     if (annotation.fields) {

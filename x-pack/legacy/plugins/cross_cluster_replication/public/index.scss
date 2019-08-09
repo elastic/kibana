@@ -1,0 +1,13 @@
+// Import the EUI global scope so we can use EUI constants
+@import 'src/legacy/ui/public/styles/_styling_constants';
+
+// Cross-Cluster Replication plugin styles
+
+// Prefix all styles with "ccr" to avoid conflicts.
+// Examples
+//   ccrChart
+//   ccrChart__legend
+//   ccrChart__legend--small
+//   ccrChart__legend-isLoading
+
+@import 'app/app';

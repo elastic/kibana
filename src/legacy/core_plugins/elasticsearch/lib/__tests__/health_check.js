@@ -19,7 +19,7 @@
 
 import Promise from 'bluebird';
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 const NoConnections = require('elasticsearch').errors.NoConnections;
 
@@ -115,38 +115,8 @@ describe('plugins/elasticsearch', () => {
           sinon.assert.calledOnce(plugin.status.yellow);
           sinon.assert.calledWithExactly(plugin.status.yellow, 'Waiting for Elasticsearch');
 
-          sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('ping'));
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.notCalled(plugin.status.red);
-          sinon.assert.calledOnce(plugin.status.green);
-          sinon.assert.calledWithExactly(plugin.status.green, 'Ready');
-        });
-    });
-
-    it('should set the cluster red if the ping fails, then to green', async () => {
-      const ping = cluster.callWithInternalUser.withArgs('ping');
-      ping.onCall(0).returns(Promise.reject(new NoConnections()));
-      ping.onCall(1).returns(Promise.resolve());
-
-      const healthRunPromise = health.run();
-
-      // Exhaust micro-task queue, to make sure that next health check is rescheduled.
-      await Promise.resolve();
-      sandbox.clock.runAll();
-
-      return healthRunPromise
-        .then(() => {
-          sinon.assert.calledOnce(plugin.status.yellow);
-          sinon.assert.calledWithExactly(plugin.status.yellow, 'Waiting for Elasticsearch');
-
-          sinon.assert.calledOnce(plugin.status.red);
-          sinon.assert.calledWithExactly(
-            plugin.status.red,
-            `Unable to connect to Elasticsearch.`
-          );
-
-          sinon.assert.calledTwice(ping);
-          sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.calledOnce(plugin.status.green);
           sinon.assert.calledWithExactly(plugin.status.green, 'Ready');
         });

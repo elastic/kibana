@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders without crashing 1`] = `
+<form
+  onSubmit={[Function]}
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFormRow
+      describedByIds={Array []}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      label="Initials (2 max)"
+      labelType="label"
+    >
+      <EuiFieldText
+        compressed={false}
+        fullWidth={false}
+        inputRef={[Function]}
+        isLoading={false}
+        name="spaceInitials"
+        onChange={[Function]}
+        value=""
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={true}
+  >
+    <EuiFormRow
+      describedByIds={Array []}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      isInvalid={false}
+      label="Color"
+      labelType="label"
+    >
+      <EuiColorPicker
+        color="#BFA180"
+        isInvalid={false}
+        onChange={[Function]}
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</form>
+`;

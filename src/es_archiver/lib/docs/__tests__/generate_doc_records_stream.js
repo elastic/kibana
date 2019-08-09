@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { delay } from 'bluebird';
 
 import {
@@ -28,6 +28,7 @@ import {
 } from '../../../../legacy/utils';
 
 import { createGenerateDocRecordsStream } from '../generate_doc_records_stream';
+import { Progress } from '../../progress';
 import {
   createStubStats,
   createStubClient,
@@ -50,10 +51,14 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       }
     ]);
 
+    const progress = new Progress();
     await createPromiseFromStreams([
       createListStream(['logstash-*']),
-      createGenerateDocRecordsStream(client, stats)
+      createGenerateDocRecordsStream(client, stats, progress)
     ]);
+
+    expect(progress.getTotal()).to.be(0);
+    expect(progress.getComplete()).to.be(0);
   });
 
   it('uses a 1 minute scroll timeout', async () => {
@@ -73,10 +78,14 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       }
     ]);
 
+    const progress = new Progress();
     await createPromiseFromStreams([
       createListStream(['logstash-*']),
-      createGenerateDocRecordsStream(client, stats)
+      createGenerateDocRecordsStream(client, stats, progress)
     ]);
+
+    expect(progress.getTotal()).to.be(0);
+    expect(progress.getComplete()).to.be(0);
   });
 
   it('consumes index names and scrolls completely before continuing', async () => {
@@ -110,12 +119,13 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       }
     ]);
 
+    const progress = new Progress();
     const docRecords = await createPromiseFromStreams([
       createListStream([
         'index1',
         'index2',
       ]),
-      createGenerateDocRecordsStream(client, stats),
+      createGenerateDocRecordsStream(client, stats, progress),
       createConcatStream([])
     ]);
 
@@ -140,5 +150,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       },
     ]);
     sinon.assert.calledTwice(stats.archivedDoc);
+    expect(progress.getTotal()).to.be(2);
+    expect(progress.getComplete()).to.be(2);
   });
 });

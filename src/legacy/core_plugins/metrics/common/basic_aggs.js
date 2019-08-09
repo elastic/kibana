@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default [
+export const basicAggs = [
   'count',
   'avg',
   'max',
@@ -27,5 +27,5 @@ export default [
   'variance',
   'sum_of_squares',
   'value_count',
-  'cardinality'
+  'cardinality',
 ];

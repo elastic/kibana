@@ -22,27 +22,25 @@ import React, { Component } from 'react';
 import moment from 'moment';
 import reactcss from 'reactcss';
 import { EuiToolTip } from '@elastic/eui';
-class Annotation extends Component {
 
+export class Annotation extends Component {
   constructor(props) {
     super(props);
   }
 
   renderTooltip() {
-    const [ timestamp, messageSource ] = this.props.series;
+    const [timestamp, messageSource] = this.props.series;
     const messages = messageSource.map((message, i) => {
       return (
-        <div
-          key={`${message}-${i}`}
-          className="tvbVisAnnotation__message"
-        >{ message }
+        <div key={`${message}-${i}`} className="tvbVisAnnotation__message">
+          {message}
         </div>
       );
     });
     return (
       <div>
-        <div className="tvbTooltip__timestamp">{ moment(timestamp).format('lll') }</div>
-        { messages }
+        <div className="tvbTooltip__timestamp">{moment(timestamp).format('lll')}</div>
+        {messages}
       </div>
     );
   }
@@ -56,15 +54,15 @@ class Annotation extends Component {
         container: {
           left: offset.left - 6,
           bottom: 0,
-          top: 5
+          top: 5,
         },
         line: {
-          backgroundColor: color
+          backgroundColor: color,
         },
-        icon: { color }
-      }
+        icon: { color },
+      },
     });
-    return(
+    return (
       <div className="tvbVisAnnotation" style={style.container}>
         <div className="tvbVisAnnotation__line" style={style.line} />
         <EuiToolTip className="tvbVisAnnotation__tooltip" content={tooltip} position="top">
@@ -73,7 +71,6 @@ class Annotation extends Component {
       </div>
     );
   }
-
 }
 
 Annotation.propTypes = {
@@ -82,5 +79,3 @@ Annotation.propTypes = {
   color: PropTypes.string,
   plot: PropTypes.object,
 };
-
-export default Annotation;

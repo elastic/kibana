@@ -4,12 +4,15 @@
     "paths": {
       // Allows for importing from `kibana` package for the exported types.
       "kibana": ["./kibana"],
+      "kibana/public": ["src/core/public"],
+      "kibana/server": ["src/core/server"],
+      "plugins/*": ["src/legacy/core_plugins/*/public/"],
       "ui/*": [
         "src/legacy/ui/public/*"
       ],
       "test_utils/*": [
         "src/test_utils/public/*"
-      ]
+      ],
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
@@ -17,8 +20,9 @@
     "strict": true,
     // enables "core language features"
     "lib": [
-      // ESNext auto includes previous versions all the way back to es5
-      "esnext",
+      // ES2018 includes previous versions all the way back to es5
+      // We are not using esnext because @babel/polyfill is on core-js 2, not 3
+      "es2018",
       // includes support for browser APIs
       "dom"
     ],
@@ -39,8 +43,6 @@
     "moduleResolution": "node",
     // Disallow inconsistently-cased references to the same file.
     "forceConsistentCasingInFileNames": true,
-    // Disable the breaking keyof behaviour introduced in TS 2.9.2 until EUI is updated to support that too
-    "keyofStringsOnly": true,
     // Forbid unused local variables as the rule was deprecated by ts-lint
     "noUnusedLocals": true,
     // Provide full support for iterables in for..of, spread and destructuring when targeting ES5 or ES3.
@@ -51,8 +53,7 @@
     "types": [
       "node",
       "jest",
-      "react",
-      "@kbn/test/types/expect.js"
+      "react"
     ]
   },
   "include": [

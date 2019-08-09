@@ -1,6 +1,12 @@
 {
   "cluster.health": {
     "url_params": {
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ],
       "level": [
         "cluster",
         "indices",

@@ -30,14 +30,19 @@ import { REPO_ROOT } from '../constants';
  * @param  {Array<File>} files
  * @return {undefined}
  */
-export function lintFiles(log, files) {
+export function lintFiles(log, files, { fix } = {}) {
   const cli = new CLIEngine({
     cache: true,
     cwd: REPO_ROOT,
+    fix
   });
 
   const paths = files.map(file => file.getRelativePath());
   const report = cli.executeOnFiles(paths);
+
+  if (fix) {
+    CLIEngine.outputFixes(report);
+  }
 
   const failTypes = [];
   if (report.errorCount > 0) failTypes.push('errors');
@@ -49,5 +54,5 @@ export function lintFiles(log, files) {
   }
 
   log.error(cli.getFormatter()(report.results));
-  throw createFailError(`[eslint] ${failTypes.join(' & ')}`, 1);
+  throw createFailError(`[eslint] ${failTypes.join(' & ')}`);
 }

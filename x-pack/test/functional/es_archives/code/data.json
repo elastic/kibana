@@ -1,0 +1,215 @@
+{
+  "type": "_doc",
+  "value": {
+    "index": ".code-symbol-github.com-microsoft-typescript-node-starter-1",
+    "id": "F8yKqGgBtHAfrz5Oylh2",
+    "source": {
+      "qname": "user",
+      "symbolInformation": {
+        "name": "user",
+        "kind": 14,
+        "location": {
+          "uri": "git://github.com/Microsoft/TypeScript-Node-Starter/blob/master/src/config/passport.ts",
+          "range": {
+            "start": {
+              "line": 103,
+              "character": 16
+            },
+            "end": {
+              "line": 103,
+              "character": 38
+            }
+          }
+        }
+      },
+      "contents": [
+        {
+          "language": "",
+          "value": ""
+        }
+      ],
+      "package": {
+        "name": "express-typescript-starter",
+        "repoUri": "https://github.com/Microsoft/TypeScript-Node-Starter",
+        "version": "0.1.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "index": ".code-symbol-github.com-microsoft-typescript-node-starter-1",
+    "type": "_doc",
+    "id": "JMyKqGgBtHAfrz5Oylh2",
+    "source": {
+      "qname": "passport.User",
+      "symbolInformation": {
+        "name": "User",
+        "kind": 13,
+        "location": {
+          "uri": "git://github.com/Microsoft/TypeScript-Node-Starter/blob/master/src/config/passport.ts",
+          "range": {
+            "start": {
+              "line": 7,
+              "character": 9
+            },
+            "end": {
+              "line": 7,
+              "character": 24
+            }
+          }
+        },
+        "containerName": "\"passport\""
+      },
+      "contents": [
+        {
+          "language": "",
+          "value": ""
+        }
+      ],
+      "package": {
+        "name": "express-typescript-starter",
+        "repoUri": "https://github.com/Microsoft/TypeScript-Node-Starter",
+        "version": "0.1.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "_doc",
+  "value":       {
+    "index": ".code-document-github.com-microsoft-typescript-node-starter-1",
+    "type": "_doc",
+    "id": "bsyKqGgBtHAfrz5Oylh2",
+    "source": {
+      "repoUri": "github.com/Microsoft/TypeScript-Node-Starter",
+      "path": "src/controllers/user.ts",
+      "content": "import async from \"async\";\nimport crypto from \"crypto\";\nimport nodemailer from \"nodemailer\";\nimport passport from \"passport\";\nimport { default as User, UserModel, AuthToken } from \"../models/User\";\nimport { Request, Response, NextFunction } from \"express\";\nimport { IVerifyOptions } from \"passport-local\";\nimport { WriteError } from \"mongodb\";\nimport \"../config/passport\";\nconst request = require(\"express-validator\");\n\n\n/**\n * GET /login\n * Login page.\n */\nexport let getLogin = (req: Request, res: Response) => {\n  if (req.user) {\n    return res.redirect(\"/\");\n  }\n  res.render(\"account/login\", {\n    title: \"Login\"\n  });\n};\n\n/**\n * POST /login\n * Sign in using email and password.\n */\nexport let postLogin = (req: Request, res: Response, next: NextFunction) => {\n  req.assert(\"email\", \"Email is not valid\").isEmail();\n  req.assert(\"password\", \"Password cannot be blank\").notEmpty();\n  req.sanitize(\"email\").normalizeEmail({ gmail_remove_dots: false });\n\n  const errors = req.validationErrors();\n\n  if (errors) {\n    req.flash(\"errors\", errors);\n    return res.redirect(\"/login\");\n  }\n\n  passport.authenticate(\"local\", (err: Error, user: UserModel, info: IVerifyOptions) => {\n    if (err) { return next(err); }\n    if (!user) {\n      req.flash(\"errors\", info.message);\n      return res.redirect(\"/login\");\n    }\n    req.logIn(user, (err) => {\n      if (err) { return next(err); }\n      req.flash(\"success\", { msg: \"Success! You are logged in.\" });\n      res.redirect(req.session.returnTo || \"/\");\n    });\n  })(req, res, next);\n};\n\n/**\n * GET /logout\n * Log out.\n */\nexport let logout = (req: Request, res: Response) => {\n  req.logout();\n  res.redirect(\"/\");\n};\n\n/**\n * GET /signup\n * Signup page.\n */\nexport let getSignup = (req: Request, res: Response) => {\n  if (req.user) {\n    return res.redirect(\"/\");\n  }\n  res.render(\"account/signup\", {\n    title: \"Create Account\"\n  });\n};\n\n/**\n * POST /signup\n * Create a new local account.\n */\nexport let postSignup = (req: Request, res: Response, next: NextFunction) => {\n  req.assert(\"email\", \"Email is not valid\").isEmail();\n  req.assert(\"password\", \"Password must be at least 4 characters long\").len({ min: 4 });\n  req.assert(\"confirmPassword\", \"Passwords do not match\").equals(req.body.password);\n  req.sanitize(\"email\").normalizeEmail({ gmail_remove_dots: false });\n\n  const errors = req.validationErrors();\n\n  if (errors) {\n    req.flash(\"errors\", errors);\n    return res.redirect(\"/signup\");\n  }\n\n  const user = new User({\n    email: req.body.email,\n    password: req.body.password\n  });\n\n  User.findOne({ email: req.body.email }, (err, existingUser) => {\n    if (err) { return next(err); }\n    if (existingUser) {\n      req.flash(\"errors\", { msg: \"Account with that email address already exists.\" });\n      return res.redirect(\"/signup\");\n    }\n    user.save((err) => {\n      if (err) { return next(err); }\n      req.logIn(user, (err) => {\n        if (err) {\n          return next(err);\n        }\n        res.redirect(\"/\");\n      });\n    });\n  });\n};\n\n/**\n * GET /account\n * Profile page.\n */\nexport let getAccount = (req: Request, res: Response) => {\n  res.render(\"account/profile\", {\n    title: \"Account Management\"\n  });\n};\n\n/**\n * POST /account/profile\n * Update profile information.\n */\nexport let postUpdateProfile = (req: Request, res: Response, next: NextFunction) => {\n  req.assert(\"email\", \"Please enter a valid email address.\").isEmail();\n  req.sanitize(\"email\").normalizeEmail({ gmail_remove_dots: false });\n\n  const errors = req.validationErrors();\n\n  if (errors) {\n    req.flash(\"errors\", errors);\n    return res.redirect(\"/account\");\n  }\n\n  User.findById(req.user.id, (err, user: UserModel) => {\n    if (err) { return next(err); }\n    user.email = req.body.email || \"\";\n    user.profile.name = req.body.name || \"\";\n    user.profile.gender = req.body.gender || \"\";\n    user.profile.location = req.body.location || \"\";\n    user.profile.website = req.body.website || \"\";\n    user.save((err: WriteError) => {\n      if (err) {\n        if (err.code === 11000) {\n          req.flash(\"errors\", { msg: \"The email address you have entered is already associated with an account.\" });\n          return res.redirect(\"/account\");\n        }\n        return next(err);\n      }\n      req.flash(\"success\", { msg: \"Profile information has been updated.\" });\n      res.redirect(\"/account\");\n    });\n  });\n};\n\n/**\n * POST /account/password\n * Update current password.\n */\nexport let postUpdatePassword = (req: Request, res: Response, next: NextFunction) => {\n  req.assert(\"password\", \"Password must be at least 4 characters long\").len({ min: 4 });\n  req.assert(\"confirmPassword\", \"Passwords do not match\").equals(req.body.password);\n\n  const errors = req.validationErrors();\n\n  if (errors) {\n    req.flash(\"errors\", errors);\n    return res.redirect(\"/account\");\n  }\n\n  User.findById(req.user.id, (err, user: UserModel) => {\n    if (err) { return next(err); }\n    user.password = req.body.password;\n    user.save((err: WriteError) => {\n      if (err) { return next(err); }\n      req.flash(\"success\", { msg: \"Password has been changed.\" });\n      res.redirect(\"/account\");\n    });\n  });\n};\n\n/**\n * POST /account/delete\n * Delete user account.\n */\nexport let postDeleteAccount = (req: Request, res: Response, next: NextFunction) => {\n  User.remove({ _id: req.user.id }, (err) => {\n    if (err) { return next(err); }\n    req.logout();\n    req.flash(\"info\", { msg: \"Your account has been deleted.\" });\n    res.redirect(\"/\");\n  });\n};\n\n/**\n * GET /account/unlink/:provider\n * Unlink OAuth provider.\n */\nexport let getOauthUnlink = (req: Request, res: Response, next: NextFunction) => {\n  const provider = req.params.provider;\n  User.findById(req.user.id, (err, user: any) => {\n    if (err) { return next(err); }\n    user[provider] = undefined;\n    user.tokens = user.tokens.filter((token: AuthToken) => token.kind !== provider);\n    user.save((err: WriteError) => {\n      if (err) { return next(err); }\n      req.flash(\"info\", { msg: `${provider} account has been unlinked.` });\n      res.redirect(\"/account\");\n    });\n  });\n};\n\n/**\n * GET /reset/:token\n * Reset Password page.\n */\nexport let getReset = (req: Request, res: Response, next: NextFunction) => {\n  if (req.isAuthenticated()) {\n    return res.redirect(\"/\");\n  }\n  User\n    .findOne({ passwordResetToken: req.params.token })\n    .where(\"passwordResetExpires\").gt(Date.now())\n    .exec((err, user) => {\n      if (err) { return next(err); }\n      if (!user) {\n        req.flash(\"errors\", { msg: \"Password reset token is invalid or has expired.\" });\n        return res.redirect(\"/forgot\");\n      }\n      res.render(\"account/reset\", {\n        title: \"Password Reset\"\n      });\n    });\n};\n\n/**\n * POST /reset/:token\n * Process the reset password request.\n */\nexport let postReset = (req: Request, res: Response, next: NextFunction) => {\n  req.assert(\"password\", \"Password must be at least 4 characters long.\").len({ min: 4 });\n  req.assert(\"confirm\", \"Passwords must match.\").equals(req.body.password);\n\n  const errors = req.validationErrors();\n\n  if (errors) {\n    req.flash(\"errors\", errors);\n    return res.redirect(\"back\");\n  }\n\n  async.waterfall([\n    function resetPassword(done: Function) {\n      User\n        .findOne({ passwordResetToken: req.params.token })\n        .where(\"passwordResetExpires\").gt(Date.now())\n        .exec((err, user: any) => {\n          if (err) { return next(err); }\n          if (!user) {\n            req.flash(\"errors\", { msg: \"Password reset token is invalid or has expired.\" });\n            return res.redirect(\"back\");\n          }\n          user.password = req.body.password;\n          user.passwordResetToken = undefined;\n          user.passwordResetExpires = undefined;\n          user.save((err: WriteError) => {\n            if (err) { return next(err); }\n            req.logIn(user, (err) => {\n              done(err, user);\n            });\n          });\n        });\n    },\n    function sendResetPasswordEmail(user: UserModel, done: Function) {\n      const transporter = nodemailer.createTransport({\n        service: \"SendGrid\",\n        auth: {\n          user: process.env.SENDGRID_USER,\n          pass: process.env.SENDGRID_PASSWORD\n        }\n      });\n      const mailOptions = {\n        to: user.email,\n        from: \"express-ts@starter.com\",\n        subject: \"Your password has been changed\",\n        text: `Hello,\\n\\nThis is a confirmation that the password for your account ${user.email} has just been changed.\\n`\n      };\n      transporter.sendMail(mailOptions, (err) => {\n        req.flash(\"success\", { msg: \"Success! Your password has been changed.\" });\n        done(err);\n      });\n    }\n  ], (err) => {\n    if (err) { return next(err); }\n    res.redirect(\"/\");\n  });\n};\n\n/**\n * GET /forgot\n * Forgot Password page.\n */\nexport let getForgot = (req: Request, res: Response) => {\n  if (req.isAuthenticated()) {\n    return res.redirect(\"/\");\n  }\n  res.render(\"account/forgot\", {\n    title: \"Forgot Password\"\n  });\n};\n\n/**\n * POST /forgot\n * Create a random token, then the send user an email with a reset link.\n */\nexport let postForgot = (req: Request, res: Response, next: NextFunction) => {\n  req.assert(\"email\", \"Please enter a valid email address.\").isEmail();\n  req.sanitize(\"email\").normalizeEmail({ gmail_remove_dots: false });\n\n  const errors = req.validationErrors();\n\n  if (errors) {\n    req.flash(\"errors\", errors);\n    return res.redirect(\"/forgot\");\n  }\n\n  async.waterfall([\n    function createRandomToken(done: Function) {\n      crypto.randomBytes(16, (err, buf) => {\n        const token = buf.toString(\"hex\");\n        done(err, token);\n      });\n    },\n    function setRandomToken(token: AuthToken, done: Function) {\n      User.findOne({ email: req.body.email }, (err, user: any) => {\n        if (err) { return done(err); }\n        if (!user) {\n          req.flash(\"errors\", { msg: \"Account with that email address does not exist.\" });\n          return res.redirect(\"/forgot\");\n        }\n        user.passwordResetToken = token;\n        user.passwordResetExpires = Date.now() + 3600000; // 1 hour\n        user.save((err: WriteError) => {\n          done(err, token, user);\n        });\n      });\n    },\n    function sendForgotPasswordEmail(token: AuthToken, user: UserModel, done: Function) {\n      const transporter = nodemailer.createTransport({\n        service: \"SendGrid\",\n        auth: {\n          user: process.env.SENDGRID_USER,\n          pass: process.env.SENDGRID_PASSWORD\n        }\n      });\n      const mailOptions = {\n        to: user.email,\n        from: \"hackathon@starter.com\",\n        subject: \"Reset your password on Hackathon Starter\",\n        text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\\n\\n\n          Please click on the following link, or paste this into your browser to complete the process:\\n\\n\n          http://${req.headers.host}/reset/${token}\\n\\n\n          If you did not request this, please ignore this email and your password will remain unchanged.\\n`\n      };\n      transporter.sendMail(mailOptions, (err) => {\n        req.flash(\"info\", { msg: `An e-mail has been sent to ${user.email} with further instructions.` });\n        done(err);\n      });\n    }\n  ], (err) => {\n    if (err) { return next(err); }\n    res.redirect(\"/forgot\");\n  });\n};\n",
+      "language": "typescript",
+      "qnames": [
+        "\"user\"",
+        "async",
+        "AuthToken",
+        "crypto",
+        "getAccount",
+        "getForgot",
+        "getLogin",
+        "getOauthUnlink",
+        "provider",
+        "getReset",
+        "getSignup",
+        "IVerifyOptions",
+        "logout",
+        "NextFunction",
+        "nodemailer",
+        "passport",
+        "postDeleteAccount",
+        "postForgot",
+        "createRandomToken",
+        "token",
+        "errors",
+        "sendForgotPasswordEmail",
+        "mailOptions",
+        "transporter",
+        "setRandomToken",
+        "postLogin",
+        "postReset",
+        "resetPassword",
+        "sendResetPasswordEmail",
+        "postSignup",
+        "user",
+        "postUpdatePassword",
+        "postUpdateProfile",
+        "request",
+        "Request",
+        "Response",
+        "User",
+        "UserModel",
+        "WriteError"
+      ]
+    }
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "index": ".code-document-github.com-microsoft-typescript-node-starter-1",
+    "type": "_doc",
+    "id": "fcyKqGgBtHAfrz5Oylh2",
+    "source": {
+      "repoUri": "github.com/Microsoft/TypeScript-Node-Starter",
+      "path": "src/models/User.ts",
+      "content": "import bcrypt from \"bcrypt-nodejs\";\nimport crypto from \"crypto\";\nimport mongoose from \"mongoose\";\n\nexport type UserModel = mongoose.Document & {\n  email: string,\n  password: string,\n  passwordResetToken: string,\n  passwordResetExpires: Date,\n\n  facebook: string,\n  tokens: AuthToken[],\n\n  profile: {\n    name: string,\n    gender: string,\n    location: string,\n    website: string,\n    picture: string\n  },\n\n  comparePassword: comparePasswordFunction,\n  gravatar: (size: number) => string\n};\n\ntype comparePasswordFunction = (candidatePassword: string, cb: (err: any, isMatch: any) => {}) => void;\n\nexport type AuthToken = {\n  accessToken: string,\n  kind: string\n};\n\nconst userSchema = new mongoose.Schema({\n  email: { type: String, unique: true },\n  password: String,\n  passwordResetToken: String,\n  passwordResetExpires: Date,\n\n  facebook: String,\n  twitter: String,\n  google: String,\n  tokens: Array,\n\n  profile: {\n    name: String,\n    gender: String,\n    location: String,\n    website: String,\n    picture: String\n  }\n}, { timestamps: true });\n\n/**\n * Password hash middleware.\n */\nuserSchema.pre(\"save\", function save(next) {\n  const user = this;\n  if (!user.isModified(\"password\")) { return next(); }\n  bcrypt.genSalt(10, (err, salt) => {\n    if (err) { return next(err); }\n    bcrypt.hash(user.password, salt, undefined, (err: mongoose.Error, hash) => {\n      if (err) { return next(err); }\n      user.password = hash;\n      next();\n    });\n  });\n});\n\nconst comparePassword: comparePasswordFunction = function (candidatePassword, cb) {\n  bcrypt.compare(candidatePassword, this.password, (err: mongoose.Error, isMatch: boolean) => {\n    cb(err, isMatch);\n  });\n};\n\nuserSchema.methods.comparePassword = comparePassword;\n\n/**\n * Helper method for getting user's gravatar.\n */\nuserSchema.methods.gravatar = function (size: number) {\n  if (!size) {\n    size = 200;\n  }\n  if (!this.email) {\n    return `https://gravatar.com/avatar/?s=${size}&d=retro`;\n  }\n  const md5 = crypto.createHash(\"md5\").update(this.email).digest(\"hex\");\n  return `https://gravatar.com/avatar/${md5}?s=${size}&d=retro`;\n};\n\n// export const User: UserType = mongoose.model<UserType>('User', userSchema);\nconst User = mongoose.model(\"User\", userSchema);\nexport default User;\n",
+      "language": "typescript",
+      "qnames": [
+        "\"User\"",
+        "AuthToken",
+        "bcrypt",
+        "comparePassword",
+        "comparePasswordFunction",
+        "crypto",
+        "gravatar",
+        "md5",
+        "mongoose",
+        "save",
+        "user",
+        "User",
+        "UserModel",
+        "userSchema"
+      ]
+    }
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "index": ".code-document-github.com-microsoft-typescript-node-starter-1",
+    "type": "_doc",
+    "id": "JcyKqGgBtHAfrz5Oylh2",
+    "source": {
+      "repoUri": "github.com/Microsoft/TypeScript-Node-Starter",
+      "path": "src/config/passport.js",
+      "content": "import passport from \"passport\";\nimport request from \"request\";\nimport passportLocal from \"passport-local\";\nimport passportFacebook from \"passport-facebook\";\nimport _ from \"lodash\";\n\n// import { User, UserType } from '../models/User';\nimport { default as User } from \"../models/User\";\nimport { Request, Response, NextFunction } from \"express\";\n\nconst LocalStrategy = passportLocal.Strategy;\nconst FacebookStrategy = passportFacebook.Strategy;\n\npassport.serializeUser<any, any>((user, done) => {\n  done(undefined, user.id);\n});\n\npassport.deserializeUser((id, done) => {\n  User.findById(id, (err, user) => {\n    done(err, user);\n  });\n});\n\n\n/**\n * Sign in using Email and Password.\n */\npassport.use(new LocalStrategy({ usernameField: \"email\" }, (email, password, done) => {\n  User.findOne({ email: email.toLowerCase() }, (err, user: any) => {\n    if (err) { return done(err); }\n    if (!user) {\n      return done(undefined, false, { message: `Email ${email} not found.` });\n    }\n    user.comparePassword(password, (err: Error, isMatch: boolean) => {\n      if (err) { return done(err); }\n      if (isMatch) {\n        return done(undefined, user);\n      }\n      return done(undefined, false, { message: \"Invalid email or password.\" });\n    });\n  });\n}));\n\n\n/**\n * OAuth Strategy Overview\n *\n * - User is already logged in.\n *   - Check if there is an existing account with a provider id.\n *     - If there is, return an error message. (Account merging not supported)\n *     - Else link new OAuth account with currently logged-in user.\n * - User is not logged in.\n *   - Check if it's a returning user.\n *     - If returning user, sign in and we are done.\n *     - Else check if there is an existing account with user's email.\n *       - If there is, return an error message.\n *       - Else create a new account.\n */\n\n\n/**\n * Sign in with Facebook.\n */\npassport.use(new FacebookStrategy({\n  clientID: process.env.FACEBOOK_ID,\n  clientSecret: process.env.FACEBOOK_SECRET,\n  callbackURL: \"/auth/facebook/callback\",\n  profileFields: [\"name\", \"email\", \"link\", \"locale\", \"timezone\"],\n  passReqToCallback: true\n}, (req: any, accessToken, refreshToken, profile, done) => {\n  if (req.user) {\n    User.findOne({ facebook: profile.id }, (err, existingUser) => {\n      if (err) { return done(err); }\n      if (existingUser) {\n        req.flash(\"errors\", { msg: \"There is already a Facebook account that belongs to you. Sign in with that account or delete it, then link it with your current account.\" });\n        done(err);\n      } else {\n        User.findById(req.user.id, (err, user: any) => {\n          if (err) { return done(err); }\n          user.facebook = profile.id;\n          user.tokens.push({ kind: \"facebook\", accessToken });\n          user.profile.name = user.profile.name || `${profile.name.givenName} ${profile.name.familyName}`;\n          user.profile.gender = user.profile.gender || profile._json.gender;\n          user.profile.picture = user.profile.picture || `https://graph.facebook.com/${profile.id}/picture?type=large`;\n          user.save((err: Error) => {\n            req.flash(\"info\", { msg: \"Facebook account has been linked.\" });\n            done(err, user);\n          });\n        });\n      }\n    });\n  } else {\n    User.findOne({ facebook: profile.id }, (err, existingUser) => {\n      if (err) { return done(err); }\n      if (existingUser) {\n        return done(undefined, existingUser);\n      }\n      User.findOne({ email: profile._json.email }, (err, existingEmailUser) => {\n        if (err) { return done(err); }\n        if (existingEmailUser) {\n          req.flash(\"errors\", { msg: \"There is already an account using this email address. Sign in to that account and link it with Facebook manually from Account Settings.\" });\n          done(err);\n        } else {\n          const user: any = new User();\n          user.email = profile._json.email;\n          user.facebook = profile.id;\n          user.tokens.push({ kind: \"facebook\", accessToken });\n          user.profile.name = `${profile.name.givenName} ${profile.name.familyName}`;\n          user.profile.gender = profile._json.gender;\n          user.profile.picture = `https://graph.facebook.com/${profile.id}/picture?type=large`;\n          user.profile.location = (profile._json.location) ? profile._json.location.name : \"\";\n          user.save((err: Error) => {\n            done(err, user);\n          });\n        }\n      });\n    });\n  }\n}));\n\n/**\n * Login Required middleware.\n */\nexport let isAuthenticated = (req: Request, res: Response, next: NextFunction) => {\n  if (req.isAuthenticated()) {\n    return next();\n  }\n  res.redirect(\"/login\");\n};\n\n/**\n * Authorization Required middleware.\n */\nexport let isAuthorized = (req: Request, res: Response, next: NextFunction) => {\n  const provider = req.path.split(\"/\").slice(-1)[0];\n\n  if (_.find(req.user.tokens, { kind: provider })) {\n    next();\n  } else {\n    res.redirect(`/auth/${provider}`);\n  }\n};\n",
+      "language": "javascript",
+      "qnames": [
+        "\"passport\"",
+        "_",
+        "user",
+        "FacebookStrategy",
+        "isAuthenticated",
+        "isAuthorized",
+        "provider",
+        "LocalStrategy",
+        "NextFunction",
+        "passport",
+        "passportFacebook",
+        "passportLocal",
+        "request",
+        "Request",
+        "Response",
+        "User"
+      ]
+    }
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "index": ".code-document-github.com-microsoft-typescript-node-starter-1",
+    "type": "_doc",
+    "id": "4SdMKGsBCG9E0p-YOgIC",
+    "source": {
+      "repoUri": "github.com/Microsoft/TypeScript-Node-Starter",
+      "path": "LICENSE",
+      "content": "    MIT License\r\n\r\n    Copyright (c) Microsoft Corporation. All rights reserved.\r\n\r\n    Permission is hereby granted, free of charge, to any person obtaining a copy\r\n    of this software and associated documentation files (the \"Software\"), to deal\r\n    in the Software without restriction, including without limitation the rights\r\n    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\r\n    copies of the Software, and to permit persons to whom the Software is\r\n    furnished to do so, subject to the following conditions:\r\n\r\n    The above copyright notice and this permission notice shall be included in all\r\n    copies or substantial portions of the Software.\r\n\r\n    THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\r\n    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\r\n    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\r\n    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\r\n    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\r\n    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\r\n    SOFTWARE\r\n",
+      "language": "other",
+      "qnames": []
+    }
+  }
+}

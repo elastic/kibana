@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './timefilter.test.mocks';
+
 jest.mock('ui/chrome',
   () => ({
     getBasePath: () => `/some/base/path`,
@@ -47,7 +49,7 @@ jest.mock('ui/timefilter/lib/parse_querystring',
   }), { virtual: true });
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import moment from 'moment';
 import { timefilter } from './timefilter';
 

@@ -68,14 +68,17 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
       port: configValue.port,
       rewriteBasePath: configValue.rewriteBasePath,
       ssl: configValue.ssl,
+      keepaliveTimeout: configValue.keepaliveTimeout,
+      socketTimeout: configValue.socketTimeout,
     };
   }
 
   private static transformPlugins(configValue: Record<string, any>) {
-    // This property is the only one we use from the existing `plugins` config node
-    // since `scanDirs` and `paths` aren't respected by new platform plugin discovery.
+    // These properties are the only ones we use from the existing `plugins` config node
+    // since `scanDirs` isn't respected by new platform plugin discovery.
     return {
       initialize: configValue.initialize,
+      paths: configValue.paths,
     };
   }
 
@@ -83,11 +86,11 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
     const configValue = super.get(configPath);
     switch (configPath) {
       case 'logging':
-        return LegacyObjectToConfigAdapter.transformLogging(configValue);
+        return LegacyObjectToConfigAdapter.transformLogging(configValue as LegacyLoggingConfig);
       case 'server':
         return LegacyObjectToConfigAdapter.transformServer(configValue);
       case 'plugins':
-        return LegacyObjectToConfigAdapter.transformPlugins(configValue);
+        return LegacyObjectToConfigAdapter.transformPlugins(configValue as Record<string, any>);
       default:
         return configValue;
     }

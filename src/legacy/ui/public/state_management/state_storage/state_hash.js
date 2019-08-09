@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Sha256 } from '../../crypto';
+import { Sha256 } from '../../../../../core/public/utils/';
 
 // This prefix is used to identify hash strings that have been encoded in the URL.
 const HASH_PREFIX = 'h@';

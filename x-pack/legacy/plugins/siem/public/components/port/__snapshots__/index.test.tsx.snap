@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Port renders correctly against snapshot 1`] = `
+<Component>
+  <pure(Component)
+    contextId="test"
+    eventId="abcd"
+    fieldName="destination.port"
+    value="443"
+  />
+</Component>
+`;

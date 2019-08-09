@@ -53,7 +53,7 @@ export const KBN_FIELD_TYPES = [
     name: 'date',
     sortable: true,
     filterable: true,
-    esTypes: ['date'],
+    esTypes: ['date', 'date_nanos'],
   }),
   new KbnFieldType({
     name: 'ip',

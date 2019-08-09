@@ -37,6 +37,8 @@ export function createEsTestCluster(options = {}) {
     basePath = resolve(KIBANA_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
     dataArchive,
+    esArgs,
+    ssl,
   } = options;
 
   const randomHash = Math.random()
@@ -50,11 +52,12 @@ export function createEsTestCluster(options = {}) {
     password,
     license,
     basePath,
+    esArgs,
   };
 
-  const cluster = new Cluster(log);
+  const cluster = new Cluster({ log, ssl });
 
-  return new class EsTestCluster {
+  return new (class EsTestCluster {
     getStartTimeout() {
       const second = 1000;
       const minute = second * 60;
@@ -62,7 +65,7 @@ export function createEsTestCluster(options = {}) {
       return esFrom === 'snapshot' ? 3 * minute : 6 * minute;
     }
 
-    async start(esArgs = []) {
+    async start(esArgs = [], esEnvVars) {
       let installPath;
 
       if (esFrom === 'source') {
@@ -80,12 +83,14 @@ export function createEsTestCluster(options = {}) {
       }
 
       await cluster.start(installPath, {
+        password: config.password,
         esArgs: [
           `cluster.name=${clusterName}`,
           `http.port=${port}`,
           'discovery.type=single-node',
           ...esArgs,
         ],
+        esEnvVars,
       });
     }
 
@@ -119,7 +124,7 @@ export function createEsTestCluster(options = {}) {
 
       return format(parts);
     }
-  }();
+  })();
 }
 
 /**

@@ -27,10 +27,10 @@ import {
   GuideText,
 } from '../../components';
 
-const infoHtml = require('./info_panel_info.html');
-const successHtml = require('./info_panel_success.html');
-const warningHtml = require('./info_panel_warning.html');
-const errorHtml = require('./info_panel_error.html');
+import infoHtml from './info_panel_info.html';
+import successHtml from './info_panel_success.html';
+import warningHtml from './info_panel_warning.html';
+import errorHtml from './info_panel_error.html';
 
 export default props => (
   <GuidePage title={props.route.name}>

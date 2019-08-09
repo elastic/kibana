@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 
-import { waffleNodesQuery } from '../../../../plugins/infra/public/containers/waffle/waffle_nodes.gql_query';
-import { WaffleNodesQuery } from '../../../../plugins/infra/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { waffleNodesQuery } from '../../../../legacy/plugins/infra/public/containers/waffle/waffle_nodes.gql_query';
+import { WaffleNodesQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { DATES } from './constants';
 
-const waffleTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
@@ -35,14 +35,15 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
                 interval: '1m',
               },
               metric: { type: 'cpu' },
-              path: [{ type: 'containers' }],
+              type: 'container',
+              groupBy: [],
             },
           })
           .then(resp => {
-            const { map } = resp.data.source;
-            expect(map).to.have.property('nodes');
-            if (map) {
-              const { nodes } = map;
+            const { snapshot } = resp.data.source;
+            expect(snapshot).to.have.property('nodes');
+            if (snapshot) {
+              const { nodes } = snapshot;
               expect(nodes.length).to.equal(5);
               const firstNode = first(nodes);
               expect(firstNode).to.have.property('path');
@@ -61,8 +62,87 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
                 value: 0,
                 max: 0,
                 avg: 0,
-                __typename: 'InfraNodeMetric',
+                __typename: 'InfraSnapshotNodeMetric',
               });
+            }
+          });
+      });
+    });
+
+    describe('8.0.0', () => {
+      const { min, max } = DATES['8.0.0'].logs_and_metrics;
+      before(() => esArchiver.load('infra/8.0.0/logs_and_metrics'));
+      after(() => esArchiver.unload('infra/8.0.0/logs_and_metrics'));
+
+      it("should use the id for the label when the name doesn't exist", () => {
+        return client
+          .query<WaffleNodesQuery.Query>({
+            query: waffleNodesQuery,
+            variables: {
+              sourceId: 'default',
+              timerange: {
+                to: max,
+                from: min,
+                interval: '1m',
+              },
+              metric: { type: 'cpu' },
+              type: 'pod',
+              groupBy: [],
+            },
+          })
+          .then(resp => {
+            const { snapshot } = resp.data.source;
+            expect(snapshot).to.have.property('nodes');
+            if (snapshot) {
+              const { nodes } = snapshot;
+              expect(nodes.length).to.equal(65);
+              const firstNode = first(nodes);
+              expect(firstNode).to.have.property('path');
+              expect(firstNode.path.length).to.equal(1);
+              expect(first(firstNode.path)).to.have.property(
+                'value',
+                '00597dd7-a348-11e9-9a96-42010a84004d'
+              );
+              expect(first(firstNode.path)).to.have.property(
+                'label',
+                '00597dd7-a348-11e9-9a96-42010a84004d'
+              );
+            }
+          });
+      });
+      it('should have an id and label', () => {
+        return client
+          .query<WaffleNodesQuery.Query>({
+            query: waffleNodesQuery,
+            variables: {
+              sourceId: 'default',
+              timerange: {
+                to: max,
+                from: min,
+                interval: '1m',
+              },
+              metric: { type: 'cpu' },
+              type: 'container',
+              groupBy: [],
+            },
+          })
+          .then(resp => {
+            const { snapshot } = resp.data.source;
+            expect(snapshot).to.have.property('nodes');
+            if (snapshot) {
+              const { nodes } = snapshot;
+              expect(nodes.length).to.equal(136);
+              const firstNode = first(nodes);
+              expect(firstNode).to.have.property('path');
+              expect(firstNode.path.length).to.equal(1);
+              expect(first(firstNode.path)).to.have.property(
+                'value',
+                '01078c21eef4194b0b96253c7c6c32796aba66e3f3f37e26ac97d1dff3e2e91a'
+              );
+              expect(first(firstNode.path)).to.have.property(
+                'label',
+                'k8s_prometheus-to-sd-exporter_fluentd-gcp-v3.2.0-wcmm4_kube-system_b214d17a-9ae0-11e9-9a96-42010a84004d_0'
+              );
             }
           });
       });
@@ -85,14 +165,15 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
                 interval: '1m',
               },
               metric: { type: 'cpu' },
-              path: [{ type: 'hosts' }],
+              type: 'host',
+              groupBy: [],
             },
           })
           .then(resp => {
-            const { map } = resp.data.source;
-            expect(map).to.have.property('nodes');
-            if (map) {
-              const { nodes } = map;
+            const { snapshot } = resp.data.source;
+            expect(snapshot).to.have.property('nodes');
+            if (snapshot) {
+              const { nodes } = snapshot;
               expect(nodes.length).to.equal(1);
               const firstNode = first(nodes);
               expect(firstNode).to.have.property('path');
@@ -102,10 +183,10 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
               expect(firstNode).to.have.property('metric');
               expect(firstNode.metric).to.eql({
                 name: 'cpu',
-                value: 0.0035,
-                avg: 0.009066666666666666,
-                max: 0.0684,
-                __typename: 'InfraNodeMetric',
+                value: 0.003666666666666667,
+                avg: 0.00809090909090909,
+                max: 0.057833333333333334,
+                __typename: 'InfraSnapshotNodeMetric',
               });
             }
           });
@@ -123,14 +204,15 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
                 interval: '1m',
               },
               metric: { type: 'cpu' },
-              path: [{ type: 'terms', field: 'cloud.availability_zone' }, { type: 'hosts' }],
+              type: 'host',
+              groupBy: [{ field: 'cloud.availability_zone' }],
             },
           })
           .then(resp => {
-            const { map } = resp.data.source;
-            expect(map).to.have.property('nodes');
-            if (map) {
-              const { nodes } = map;
+            const { snapshot } = resp.data.source;
+            expect(snapshot).to.have.property('nodes');
+            if (snapshot) {
+              const { nodes } = snapshot;
               expect(nodes.length).to.equal(1);
               const firstNode = first(nodes);
               expect(firstNode).to.have.property('path');
@@ -141,7 +223,7 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
           });
       });
 
-      it('should basically work with 2 grouping', () => {
+      it('should basically work with 2 groupings', () => {
         return client
           .query<WaffleNodesQuery.Query>({
             query: waffleNodesQuery,
@@ -153,18 +235,15 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
                 interval: '1m',
               },
               metric: { type: 'cpu' },
-              path: [
-                { type: 'terms', field: 'cloud.provider' },
-                { type: 'terms', field: 'cloud.availability_zone' },
-                { type: 'hosts' },
-              ],
+              type: 'host',
+              groupBy: [{ field: 'cloud.provider' }, { field: 'cloud.availability_zone' }],
             },
           })
           .then(resp => {
-            const { map } = resp.data.source;
-            expect(map).to.have.property('nodes');
-            if (map) {
-              const { nodes } = map;
+            const { snapshot } = resp.data.source;
+            expect(snapshot).to.have.property('nodes');
+            if (snapshot) {
+              const { nodes } = snapshot;
               expect(nodes.length).to.equal(1);
               const firstNode = first(nodes);
               expect(firstNode).to.have.property('path');
@@ -175,9 +254,58 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
             }
           });
       });
+
+      it('should show metrics for all nodes when grouping by service type', () => {
+        return client
+          .query<WaffleNodesQuery.Query>({
+            query: waffleNodesQuery,
+            variables: {
+              sourceId: 'default',
+              timerange: {
+                to: max,
+                from: min,
+                interval: '1m',
+              },
+              metric: { type: 'cpu' },
+              type: 'host',
+              groupBy: [{ field: 'service.type' }],
+            },
+          })
+          .then(resp => {
+            const { snapshot } = resp.data.source;
+            expect(snapshot).to.have.property('nodes');
+            if (snapshot) {
+              const { nodes } = snapshot;
+              expect(nodes.length).to.equal(2);
+              const firstNode = nodes[0];
+              expect(firstNode).to.have.property('path');
+              expect(firstNode.path.length).to.equal(2);
+              expect(firstNode.path[0]).to.have.property('value', 'mysql');
+              expect(firstNode.path[1]).to.have.property('value', 'demo-stack-mysql-01');
+              expect(firstNode).to.have.property('metric');
+              expect(firstNode.metric).to.eql({
+                name: 'cpu',
+                value: 0.003666666666666667,
+                avg: 0.00809090909090909,
+                max: 0.057833333333333334,
+                __typename: 'InfraSnapshotNodeMetric',
+              });
+              const secondNode = nodes[1];
+              expect(secondNode).to.have.property('path');
+              expect(secondNode.path.length).to.equal(2);
+              expect(secondNode.path[0]).to.have.property('value', 'system');
+              expect(secondNode.path[1]).to.have.property('value', 'demo-stack-mysql-01');
+              expect(secondNode).to.have.property('metric');
+              expect(secondNode.metric).to.eql({
+                name: 'cpu',
+                value: 0.003666666666666667,
+                avg: 0.00809090909090909,
+                max: 0.057833333333333334,
+                __typename: 'InfraSnapshotNodeMetric',
+              });
+            }
+          });
+      });
     });
   });
-};
-
-// tslint:disable-next-line no-default-export
-export default waffleTests;
+}

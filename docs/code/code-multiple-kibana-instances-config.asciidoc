@@ -1,0 +1,10 @@
+[[code-multiple-kibana-instances-config]]
+== Config for multiple {kib} instances
+If you are using multiple instances of {kib}, you must manually assign at least one {kib} instance as a *Code* `node`. Add the following line of code to your `kibana.yml` file for each {kib} instance you wish to use and restart the instances:
+
+[source,yaml]
+----
+xpack.code.codeNodeUrl: 'http://$YourCodeNodeAddress'
+----
+
+`$YourCodeNoteAddress` is the URL of your assigned *Code* node accessible by other {kib} instances.

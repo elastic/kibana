@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import calculateFillColor from '../calculate_fill_color';
+import { calculateFillColor } from '../calculate_fill_color';
 
 describe('calculateFillColor(color, fill)', () => {
   it('should return "fill" and "fillColor" properties', () => {

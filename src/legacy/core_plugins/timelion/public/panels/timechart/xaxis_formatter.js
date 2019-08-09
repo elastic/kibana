@@ -19,14 +19,16 @@
 
 import moment from 'moment';
 
-export default function xaxisFormatterProvider(config, i18n) {
+import { i18n } from '@kbn/i18n';
+
+export default function xaxisFormatterProvider(config) {
 
   function getFormat(esInterval) {
     const parts = esInterval.match(/(\d+)(ms|s|m|h|d|w|M|y|)/);
 
     if (parts == null || parts[1] == null || parts[2] == null) {
       throw new Error (
-        i18n('timelion.panels.timechart.unknownIntervalErrorMessage', {
+        i18n.translate('timelion.panels.timechart.unknownIntervalErrorMessage', {
           defaultMessage: 'Unknown interval',
         })
       );

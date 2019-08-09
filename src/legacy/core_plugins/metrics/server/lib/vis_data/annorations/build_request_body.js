@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import buildProcessorFunction from '../build_processor_function';
-import processors from '../request_processors/annotations';
+import { buildProcessorFunction } from '../build_processor_function';
+import { processors } from '../request_processors/annotations';
 
 /**
  * Builds annotation request body

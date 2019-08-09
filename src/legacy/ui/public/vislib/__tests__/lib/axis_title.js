@@ -21,18 +21,14 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
-import { VislibLibAxisTitleProvider } from '../../lib/axis/axis_title';
-import { VislibLibAxisConfigProvider } from '../../lib/axis/axis_config';
-import { VislibVisConfigProvider } from '../../lib/vis_config';
-import { VislibLibDataProvider } from '../../lib/data';
+import expect from '@kbn/expect';
+import { AxisTitle } from '../../lib/axis/axis_title';
+import { AxisConfig } from '../../lib/axis/axis_config';
+import { VisConfig } from '../../lib/vis_config';
+import { Data } from '../../lib/data';
 import '../../../persisted_state';
 
 describe('Vislib AxisTitle Class Test Suite', function () {
-  let AxisTitle;
-  let AxisConfig;
-  let VisConfig;
-  let Data;
   let PersistedState;
   let el;
   let dataObj;
@@ -99,11 +95,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
-    AxisTitle = Private(VislibLibAxisTitleProvider);
-    AxisConfig = Private(VislibLibAxisConfigProvider);
-    VisConfig = Private(VislibVisConfigProvider);
-    Data = Private(VislibLibDataProvider);
+  beforeEach(ngMock.inject(function ($injector) {
     PersistedState = $injector.get('PersistedState');
 
     el = d3.select('body').append('div')

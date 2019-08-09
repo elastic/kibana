@@ -29,7 +29,7 @@ export function natsLogsSpecProvider(server, context) {
   return {
     id: 'natsLogs',
     name: i18n.translate('kbn.server.tutorials.natsLogs.nameTitle', {
-      defaultMessage: 'Nats logs',
+      defaultMessage: 'NATS logs',
     }),
     category: TUTORIAL_CATEGORY.LOGGING,
     isBeta: true,
@@ -43,20 +43,23 @@ export function natsLogsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-nats.html',
       },
     }),
-    euiIconType: 'logoNats',
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/nats.svg',
     artifacts: {
-      application: {
-        label: i18n.translate('kbn.server.tutorials.natsLogs.artifacts.application.label', {
-          defaultMessage: 'Discover',
-        }),
-        path: '/app/kibana#/discover'
-      },
-      dashboards: [],
+      dashboards: [
+        {
+          id: 'Filebeat-nats-overview-ecs',
+          linkLabel: i18n.translate('kbn.server.tutorials.natsLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'NATS logs dashboard',
+          }),
+          isOverview: true
+        }
+      ],
       exportedFields: {
         documentationUrl: '{config.docs.beats.filebeat}/exported-fields-nats.html'
       }
     },
     completionTimeMinutes: 10,
+    previewImagePath: '/plugins/kibana/home/tutorial_resources/nats_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)

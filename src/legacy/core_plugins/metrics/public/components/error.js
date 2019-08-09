@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 const guidPattern = /\[[[a-f\d-\\]{36}\]/g;
 
-function ErrorComponent(props) {
+export function ErrorComponent(props) {
   const { error } = props;
   let additionalInfo;
   const type = _.get(error, 'error.caused_by.type') || _.get(error, 'error.type');
@@ -50,11 +50,7 @@ function ErrorComponent(props) {
       </div>
     );
   } else if (reason) {
-    additionalInfo = (
-      <div className="tvbError__additional">
-        {reason}
-      </div>
-    );
+    additionalInfo = <div className="tvbError__additional">{reason}</div>;
   }
 
   return (
@@ -64,11 +60,12 @@ function ErrorComponent(props) {
 
         <EuiSpacer size="s" />
 
-        {title ||
-        <FormattedMessage
-          id="tsvb.error.requestForPanelFailedErrorMessage"
-          defaultMessage="The request for this panel failed"
-        />}
+        {title || (
+          <FormattedMessage
+            id="tsvb.error.requestForPanelFailedErrorMessage"
+            defaultMessage="The request for this panel failed"
+          />
+        )}
 
         {additionalInfo}
       </EuiText>
@@ -77,7 +74,5 @@ function ErrorComponent(props) {
 }
 
 ErrorComponent.propTypes = {
-  error: PropTypes.object
+  error: PropTypes.object,
 };
-
-export default ErrorComponent;

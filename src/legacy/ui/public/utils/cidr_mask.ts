@@ -35,14 +35,14 @@ export class CidrMask {
     }
     this.initialAddress = new Ipv4Address(splits[0]);
     this.prefixLength = Number(splits[1]);
-    if (this.prefixLength < 1 || this.prefixLength > NUM_BITS) {
+    if (isNaN(this.prefixLength) || this.prefixLength < 1 || this.prefixLength > NUM_BITS) {
       throwError(mask);
     }
   }
 
   public getRange() {
     const variableBits = NUM_BITS - this.prefixLength;
-    // tslint:disable-next-line:no-bitwise
+    // eslint-disable-next-line no-bitwise
     const fromAddress = ((this.initialAddress.valueOf() >> variableBits) << variableBits) >>> 0; // >>> 0 coerces to unsigned
     const numAddresses = Math.pow(2, variableBits);
     return {

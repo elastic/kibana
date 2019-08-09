@@ -7,3 +7,11 @@
 coming[8.0.0]
 
 See also <<breaking-changes-8.0,breaking changes>> and <<release-notes>>.
+
+
+//NOTE: The notable-highlights tagged regions are re-used in the
+//Installation and Upgrade Guide
+
+// tag::notable-highlights[]
+
+// end::notable-highlights[]

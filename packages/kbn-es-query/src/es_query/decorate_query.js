@@ -18,16 +18,22 @@
  */
 
 import _ from 'lodash';
+import { getTimeZoneFromSettings } from '../utils/get_time_zone_from_settings';
 
 /**
  * Decorate queries with default parameters
  * @param query object
  * @param queryStringOptions query:queryString:options from UI settings
+ * @param dateFormatTZ dateFormat:tz from UI settings
  * @returns {object}
  */
-export function decorateQuery(query, queryStringOptions) {
+
+export function decorateQuery(query, queryStringOptions, dateFormatTZ = null) {
   if (_.has(query, 'query_string.query')) {
     _.extend(query.query_string, queryStringOptions);
+    if (dateFormatTZ) {
+      _.defaults(query.query_string, { time_zone: getTimeZoneFromSettings(dateFormatTZ) });
+    }
   }
 
   return query;

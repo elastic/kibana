@@ -21,6 +21,8 @@ import { AbstractSearchRequest } from './searh_requests/abstract_request';
 import { DefaultSearchStrategy } from './strategies/default_search_strategy';
 import { DefaultSearchCapabilities } from './default_search_capabilities';
 
+import { extractIndexPatterns } from '../../../common/extract_index_patterns';
+
 const strategies = [];
 
 const addStrategy = searchStrategy => {
@@ -51,5 +53,11 @@ export class SearchStrategiesRegister {
         };
       }
     }
+  }
+
+  static async getViableStrategyForPanel(req, panel) {
+    const indexPattern = extractIndexPatterns(panel).join(',');
+
+    return SearchStrategiesRegister.getViableStrategy(req, indexPattern);
   }
 }

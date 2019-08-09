@@ -18,17 +18,9 @@
  */
 
 import * as Rx from 'rxjs';
-import { ChromeStart } from '../../../../../core/public/chrome';
+import { npStart } from 'ui/new_platform';
 
-let newPlatformChrome: ChromeStart;
-
-export function __newPlatformInit__(instance: ChromeStart) {
-  if (newPlatformChrome) {
-    throw new Error('ui/chrome/api/controls is already initialized');
-  }
-
-  newPlatformChrome = instance;
-}
+const newPlatformChrome = npStart.core.chrome;
 
 export function initChromeControlsApi(chrome: { [key: string]: any }) {
   // cache of chrome visibility state

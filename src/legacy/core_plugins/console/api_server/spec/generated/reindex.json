@@ -6,7 +6,9 @@
       "wait_for_active_shards": "",
       "wait_for_completion": "__flag__",
       "requests_per_second": "",
-      "slices": ""
+      "scroll": "",
+      "slices": "",
+      "max_docs": "all documents"
     },
     "methods": [
       "POST"

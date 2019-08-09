@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
@@ -27,7 +27,7 @@ import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import { VisProvider } from '../../../vis';
 import '../../../persisted_state';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { VislibSlicesResponseHandlerProvider } from '../../../vis/response_handlers/vislib';
+import { vislibSlicesResponseHandlerProvider } from '../../../vis/response_handlers/vislib';
 import { tabifyAggResponse } from '../../../agg_response/tabify';
 
 const rowAgg = [
@@ -126,7 +126,7 @@ describe('No global chart settings', function () {
     Vis = Private(VisProvider);
     persistedState = new ($injector.get('PersistedState'))();
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    responseHandler = Private(VislibSlicesResponseHandlerProvider).handler;
+    responseHandler = vislibSlicesResponseHandlerProvider().handler;
 
     let id1 = 1;
     stubVis1 = new Vis(indexPattern, {
@@ -216,7 +216,7 @@ describe('Vislib PieChart Class Test Suite', function () {
         Vis = Private(VisProvider);
         persistedState = new ($injector.get('PersistedState'))();
         indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-        responseHandler = Private(VislibSlicesResponseHandlerProvider).handler;
+        responseHandler = vislibSlicesResponseHandlerProvider().handler;
 
         let id = 1;
         stubVis = new Vis(indexPattern, {

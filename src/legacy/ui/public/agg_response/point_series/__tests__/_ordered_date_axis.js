@@ -19,7 +19,7 @@
 
 import moment from 'moment';
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { orderedDateAxis } from '../_ordered_date_axis';
 
 describe('orderedDateAxis', function () {

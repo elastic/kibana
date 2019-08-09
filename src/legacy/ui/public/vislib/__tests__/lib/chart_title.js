@@ -20,14 +20,12 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
-import { VislibLibChartTitleProvider } from '../../lib/chart_title';
-import { VislibVisConfigProvider } from '../../lib/vis_config';
+import expect from '@kbn/expect';
+import { ChartTitle } from '../../lib/chart_title';
+import { VisConfig } from '../../lib/vis_config';
 import '../../../persisted_state';
 
 describe('Vislib ChartTitle Class Test Suite', function () {
-  let ChartTitle;
-  let VisConfig;
   let persistedState;
   let chartTitle;
   let el;
@@ -91,9 +89,7 @@ describe('Vislib ChartTitle Class Test Suite', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
-    ChartTitle = Private(VislibLibChartTitleProvider);
-    VisConfig = Private(VislibVisConfigProvider);
+  beforeEach(ngMock.inject(function ($injector) {
     persistedState = new ($injector.get('PersistedState'))();
 
     el = d3.select('body').append('div')

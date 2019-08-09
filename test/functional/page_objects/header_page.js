@@ -21,7 +21,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const log = getService('log');
   const retry = getService('retry');
-  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
@@ -63,21 +62,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async clickManagement() {
       await appsMenu.clickLink('Management');
       await this.awaitGlobalLoadingIndicatorHidden();
-    }
-
-    async getToastMessage(findTimeout = defaultFindTimeout) {
-      const toastMessage = await find.displayedByCssSelector(
-        'kbn-truncated.kbnToast__message',
-        findTimeout
-      );
-      const messageText = await toastMessage.getVisibleText();
-      log.debug(`getToastMessage: ${messageText}`);
-      return messageText;
-    }
-
-    async clickToastOK() {
-      log.debug('clickToastOK');
-      await find.clickByCssSelector('button[ng-if="notif.accept"]');
     }
 
     async waitUntilLoadingHasFinished() {

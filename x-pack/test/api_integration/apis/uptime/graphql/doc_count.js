@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-import { getDocCountQueryString } from '../../../../../plugins/uptime/public/components/queries/empty_state/get_doc_count';
+import expect from '@kbn/expect';
+import { docCountQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
 import docCount from './fixtures/doc_count';
 
 export default function ({ getService }) {
@@ -15,8 +15,11 @@ export default function ({ getService }) {
     it(`will fetch the index's count`, async () => {
       const getDocCountQuery = {
         operationName: null,
-        query: getDocCountQueryString,
-        variables: {},
+        query: docCountQueryString,
+        variables: {
+          dateRangeStart: '2019-01-28T17:40:08.078Z',
+          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+        },
       };
       const {
         body: { data },

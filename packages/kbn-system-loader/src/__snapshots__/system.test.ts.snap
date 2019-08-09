@@ -1,5 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`throws if start returns a promise 1`] = `"A promise was returned when starting [foo], but systems must start synchronously and return either return undefined or the contract they expose to other systems."`;
-
-exports[`throws if stop returns a promise 1`] = `"A promise was returned when stopping [foo], but systems must stop synchronously."`;

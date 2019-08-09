@@ -17,9 +17,6 @@
  * under the License.
  */
 
-export function vislibGaugeProvider() {
-
-  return function (config) {
-    return config;
-  };
+export function vislibGaugeConfig(config) {
+  return config;
 }

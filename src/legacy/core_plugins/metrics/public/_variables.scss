@@ -9,3 +9,5 @@ $tvbValueColorReversed: transparentize($euiColorEmptyShade, .2);
 
 $tvbHoverBackgroundColor: transparentize($euiColorFullShade, .9);
 $tvbHoverBackgroundColorReversed: transparentize($euiColorEmptyShade, .9);
+
+$tvbSplitBlockVisMinSize: $euiSize * 12;

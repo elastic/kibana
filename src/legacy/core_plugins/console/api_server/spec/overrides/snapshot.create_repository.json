@@ -4,7 +4,7 @@
       "__template": { "type": "" },
 
       "type": {
-        "__one_of": ["fs", "url", "s3", "hdfs"]
+        "__one_of": ["fs", "url", "s3", "hdfs", "azure"]
       },
       "settings": {
         "__one_of": [{
@@ -57,6 +57,21 @@
             "load_defaults": { "__one_of": [true, false] },
             "conf_location": "cfg.xml",
             "concurrent_streams": 5,
+            "compress": { "__one_of": [true, false] },
+            "chunk_size": "10m"
+          },
+          {
+            "__condition": {
+              "lines_regex": "type[\"']\\s*:\\s*[\"']azure"
+            },
+            "__template": {
+              "path": ""
+            },
+            "container": "",
+            "base_path": "",
+            "client": "default",
+            "location_mode": { "__one_of": ["primary_only", "secondary_only"] },
+            "readonly": { "__one_of": [true, false] },
             "compress": { "__one_of": [true, false] },
             "chunk_size": "10m"
           }

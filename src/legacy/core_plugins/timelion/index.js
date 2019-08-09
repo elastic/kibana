@@ -34,39 +34,47 @@ export default function (kibana) {
         ui: Joi.object({
           enabled: Joi.boolean().default(false),
         }).default(),
+        graphiteUrls: Joi.array().items(
+          Joi.string().uri({ scheme: ['http', 'https'] }),
+        ).default([]),
       }).default();
+    },
+
+    uiCapabilities() {
+      return {
+        timelion: {
+          save: true,
+        }
+      };
     },
 
     uiExports: {
       app: {
         title: 'Timelion',
         order: -1000,
-        description: i18n.translate('timelion.appDescription', {
-          defaultMessage: 'Time series expressions for everything'
-        }),
         icon: 'plugins/timelion/icon.svg',
         euiIconType: 'timelionApp',
         main: 'plugins/timelion/app',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      injectDefaultVars(server) {
-        return {
-          timelionUiEnabled: server.config().get('timelion.ui.enabled'),
-        };
-      },
       hacks: [
         'plugins/timelion/hacks/toggle_app_link_in_nav',
         'plugins/timelion/lib/panel_registry',
         'plugins/timelion/panels/timechart/timechart'
       ],
+      injectDefaultVars(server) {
+        return {
+          timelionUiEnabled: server.config().get('timelion.ui.enabled'),
+        };
+      },
       visTypes: [
         'plugins/timelion/vis'
       ],
+      interpreter: ['plugins/timelion/timelion_vis_fn'],
       home: [
         'plugins/timelion/register_feature'
       ],
       mappings: require('./mappings.json'),
-
       uiSettingDefaults: {
         'timelion:showTutorial': {
           name: i18n.translate('timelion.uiSettings.showTutorialLabel', {
@@ -153,13 +161,23 @@ export default function (kibana) {
         },
         'timelion:graphite.url': {
           name: i18n.translate('timelion.uiSettings.graphiteURLLabel', {
-            defaultMessage: 'Graphite URL'
+            defaultMessage: 'Graphite URL',
+            description: 'The URL should be in the form of https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'
           }),
-          value: 'https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
+          value: (server) => {
+            const urls = server.config().get('timelion.graphiteUrls');
+            if (urls.length === 0) {
+              return null;
+            } else {
+              return urls[0];
+            }
+          },
           description: i18n.translate('timelion.uiSettings.graphiteURLDescription', {
-            defaultMessage: '{experimentalLabel} The URL of your graphite host',
+            defaultMessage: '{experimentalLabel} The <a href="https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite" target="_blank" rel="noopener">URL</a> of your graphite host',
             values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` }
           }),
+          type: 'select',
+          options: (server) => (server.config().get('timelion.graphiteUrls')),
           category: ['timelion'],
         },
         'timelion:quandl.key': {

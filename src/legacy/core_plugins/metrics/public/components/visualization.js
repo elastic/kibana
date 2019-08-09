@@ -21,25 +21,25 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
 
-import timeseries from './vis_types/timeseries/vis';
-import metric from './vis_types/metric/vis';
-import topN from './vis_types/top_n/vis';
-import table from './vis_types/table/vis';
-import gauge from './vis_types/gauge/vis';
-import markdown from './vis_types/markdown/vis';
-import ErrorComponent from './error';
-import NoData from './no_data';
+import { TimeseriesVisualization } from './vis_types/timeseries/vis';
+import { metric } from './vis_types/metric/vis';
+import { TopNVisualization as topN } from './vis_types/top_n/vis';
+import { TableVis as table } from './vis_types/table/vis';
+import { gauge } from './vis_types/gauge/vis';
+import { MarkdownVisualization as markdown } from './vis_types/markdown/vis';
+import { ErrorComponent } from './error';
+import { NoDataComponent } from './no_data';
 
 const types = {
-  timeseries,
+  timeseries: TimeseriesVisualization,
   metric,
   top_n: topN,
   table,
   gauge,
-  markdown
+  markdown,
 };
 
-function Visualization(props) {
+export function Visualization(props) {
   const { visData, model } = props;
   // Show the error panel
   const error = _.get(visData, `${model.id}.error`);
@@ -56,26 +56,24 @@ function Visualization(props) {
   if (noData) {
     return (
       <div className={props.className}>
-        <NoData />
+        <NoDataComponent />
       </div>
     );
   }
 
   const component = types[model.type];
   if (component) {
-    return (
-      React.createElement(component, {
-        dateFormat: props.dateFormat,
-        backgroundColor: props.backgroundColor,
-        model: props.model,
-        onBrush: props.onBrush,
-        onChange: props.onChange,
-        onUiState: props.onUiState,
-        uiState: props.uiState,
-        visData: visData.type === model.type ? visData : {},
-        getConfig: props.getConfig
-      })
-    );
+    return React.createElement(component, {
+      dateFormat: props.dateFormat,
+      backgroundColor: props.backgroundColor,
+      model: props.model,
+      onBrush: props.onBrush,
+      onChange: props.onChange,
+      onUiState: props.onUiState,
+      uiState: props.uiState,
+      visData: visData.type === model.type ? visData : {},
+      getConfig: props.getConfig,
+    });
   }
   return <div className={props.className} />;
 }
@@ -90,11 +88,9 @@ Visualization.propTypes = {
   uiState: PropTypes.object,
   visData: PropTypes.object,
   dateFormat: PropTypes.string,
-  getConfig: PropTypes.func
+  getConfig: PropTypes.func,
 };
 
 Visualization.defaultProps = {
-  className: 'tvbVis'
+  className: 'tvbVis',
 };
-
-export default Visualization;

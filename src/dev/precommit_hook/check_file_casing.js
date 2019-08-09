@@ -119,14 +119,14 @@ async function checkForSnakeCase(log, files) {
 
     const ignored = matchesAnyGlob(path, IGNORE_FILE_GLOBS);
     if (ignored) {
-      log.debug('%j ignored', file);
+      log.debug('[casing] %j ignored', file);
       return;
     }
 
     const pathToValidate = getPathWithoutIgnoredParents(file);
     const invalid = NON_SNAKE_CASE_RE.test(pathToValidate);
     if (!invalid) {
-      log.debug('%j uses valid casing', file);
+      log.debug('[casing] %j uses valid casing', file);
     } else {
       const ignoredParent = file.getRelativePath().slice(0, -pathToValidate.length);
       errorPaths.push(`${dim(ignoredParent)}${pathToValidate}`);

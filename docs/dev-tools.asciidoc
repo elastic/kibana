@@ -6,6 +6,12 @@
 --
 The *Dev Tools* page contains development tools that you can use to interact
 with your data in Kibana.
+
+* <<console-kibana, Console>>
+* <<xpack-profiler, Search Profiler>>
+* <<xpack-grokdebugger, Grok Debugger>>
+
+
 --
 
 include::dev-tools/console/console.asciidoc[]

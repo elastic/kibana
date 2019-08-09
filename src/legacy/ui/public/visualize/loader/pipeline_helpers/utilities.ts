@@ -30,21 +30,21 @@ import { fieldFormats } from '../../../registry/field_formats';
 
 const config = chrome.getUiSettingsClient();
 
-const defaultFormat = { convert: identity };
-const getConfig = (...args: any[]): any => (config.get as any)(...args);
+const getConfig = (...args: any[]): any => config.get(...args);
+const getDefaultFieldFormat = () => ({ convert: identity });
 
 const getFieldFormat = (id: string, params: object) => {
   const Format = fieldFormats.byId[id];
   if (Format) {
     return new Format(params, getConfig);
   } else {
-    return defaultFormat;
+    return getDefaultFieldFormat();
   }
 };
 
 export const getFormat = (mapping: any) => {
   if (!mapping) {
-    return defaultFormat;
+    return getDefaultFieldFormat();
   }
   const { id } = mapping;
   if (id === 'range') {

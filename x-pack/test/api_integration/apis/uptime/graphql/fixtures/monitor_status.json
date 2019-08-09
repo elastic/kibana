@@ -3,51 +3,61 @@
     {
       "timestamp": "2019-01-28T18:43:16.078Z",
       "monitor": { "status": "up", "duration": { "us": 3328 } },
+      "observer": null,
       "url": { "full": "tcp://localhost:9200" }
     },
     {
       "timestamp": "2019-01-28T18:43:13.074Z",
       "monitor": { "status": "up", "duration": { "us": 299586 } },
+      "observer": null,
       "url": { "full": "http://www.reddit.com/" }
     },
     {
       "timestamp": "2019-01-28T18:43:13.074Z",
       "monitor": { "status": "up", "duration": { "us": 850870 } },
+      "observer": null,
       "url": { "full": "https://www.elastic.co" }
     },
     {
       "timestamp": "2019-01-28T18:43:15.077Z",
       "monitor": { "status": "down", "duration": { "us": 3331 } },
+      "observer": null,
       "url": { "full": "http://localhost:12349/" }
     },
     {
       "timestamp": "2019-01-28T18:43:15.077Z",
       "monitor": { "status": "up", "duration": { "us": 132169 } },
+      "observer": null,
       "url": { "full": "https://www.google.com/" }
     },
     {
       "timestamp": "2019-01-28T18:43:15.077Z",
       "monitor": { "status": "up", "duration": { "us": 247244 } },
+      "observer": null,
       "url": { "full": "https://www.github.com/" }
     },
     {
       "timestamp": "2019-01-28T18:43:15.077Z",
       "monitor": { "status": "up", "duration": { "us": 118727 } },
+      "observer": null,
       "url": { "full": "http://www.google.com/" }
     },
     {
       "timestamp": "2019-01-28T18:43:07.078Z",
       "monitor": { "status": "down", "duration": { "us": 4751074 } },
+      "observer": null,
       "url": { "full": "http://www.example.com/" }
     },
     {
       "timestamp": "2019-01-28T18:42:55.074Z",
       "monitor": { "status": "up", "duration": { "us": 1164812 } },
+      "observer": null,
       "url": { "full": "https://www.wikipedia.org/" }
     },
     {
       "timestamp": "2019-01-28T18:42:55.074Z",
       "monitor": { "status": "up", "duration": { "us": 2059606 } },
+      "observer": null,
       "url": { "full": "https://news.google.com/" }
     }
   ]

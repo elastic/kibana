@@ -1,12 +1,12 @@
 [[role-management-api-put]]
 === Create or Update Role
 
-experimental[This API is experimental and may be changed or removed completely in a future release. Although the underlying mechanism of enforcing role-based access control is stable, the APIs for managing the roles are currently experimental.]
+experimental["This API is experimental and may be changed or removed completely in a future release. Although the underlying mechanism of enforcing role-based access control is stable, the APIs for managing the roles are currently experimental."]
 
 Creates a new {kib} role or updates the attributes of an existing role. {kib} roles are stored in the
 {es} native realm.
 
-Note: You cannot access this endpoint via the Console in Kibana.
+NOTE: You cannot access this endpoint via the Console in Kibana.
 
 ==== Authorization
 
@@ -14,7 +14,7 @@ To use this API, you must have at least the `manage_security` cluster privilege.
 
 ==== Request
 
-To create or update a role, issue a PUT request to the 
+To create or update a role, issue a PUT request to the
 `/api/security/role/<rolename>` endpoint.
 
 [source,js]
@@ -29,12 +29,24 @@ The following parameters can be specified in the body of a PUT request to add or
 `metadata`:: (object) Optional meta-data. Within the `metadata` object, keys
 that begin with `_` are reserved for system usage.
 
-`elasticsearch`:: (object) Optional {es} cluster and index privileges, valid keys are 
+`elasticsearch`:: (object) Optional {es} cluster and index privileges, valid keys are
 `cluster`, `indices` and `run_as`. For more information, see {xpack-ref}/defining-roles.html[Defining Roles].
 
-`kibana`:: (object) An object that specifies the <<kibana-privileges>>. Valid keys are `global` and `space`. Privileges defined in the `global` key will apply to all spaces within Kibana, and will take precedent over any privileges defined in the `space` key. For example, specifying `global: ["all"]` will grant full access to all spaces within Kibana, even if the role indicates that a specific space should only have `read` privileges. 
+`kibana`:: (list) A list of objects that specifies the <<kibana-privileges>> for this role:
+`base` ::: (list) An optional base privilege. If specified, must either be `["all"]` or `["read"]`.
+The `feature` section cannot be used if a base privilege is specified here. You must use one or the other.
+"all" grants read/write access to all Kibana features for the specified spaces.
+"read" grants read-only access to all Kibana features for the specified spaces.
 
-===== Example
+`feature` ::: (object) Object containing privileges for specific features.
+The `base` section cannot be used if feature privileges are specified here. You must use one or the other.
+Use the <<features-api, Features API>> to retrieve a list of available features.
+
+`spaces` ::: (list) The spaces these privileges should be applied to.
+To grant access to all spaces, set this to `["*"]`, or omit the value.
+
+===== Example 1
+Granting access to various features in all spaces.
 
 [source,js]
 --------------------------------------------------
@@ -44,32 +56,159 @@ PUT /api/security/role/my_kibana_role
     "version" : 1
   },
   "elasticsearch": {
-    "cluster" : [ "all" ],
-    "indices" : [ {
-      "names" : [ "index1", "index2" ],
-      "privileges" : [ "all" ],
-      "field_security" : {
-        "grant" : [ "title", "body" ]
-      },
-      "query" : "{\"match\": {\"title\": \"foo\"}}"
-    } ]
+    "cluster" : [ ],
+    "indices" : [ ]
   },
-  "kibana": {
-    "global": ["all"]
-  }
+  "kibana": [
+    {
+      "base": [],
+      "feature": {
+       "discover": [
+          "all"
+        ],
+        "visualize": [
+          "all"
+        ],
+        "dashboard": [
+          "all"
+        ],
+        "dev_tools": [
+          "read"
+        ],
+        "advancedSettings": [
+          "read"
+        ],
+        "indexPatterns": [
+          "read"
+        ],
+        "timelion": [
+          "all"
+        ],
+        "graph": [
+          "all"
+        ],
+        "apm": [
+          "read"
+        ],
+        "maps": [
+          "read"
+        ],
+        "canvas": [
+          "read"
+        ],
+        "infrastructure": [
+          "all"
+        ],
+        "logs": [
+          "all"
+        ],
+        "uptime": [
+          "all"
+        ]
+      },
+      "spaces": [
+        "*"
+      ]
+    }
+  ]
 }
 --------------------------------------------------
 // KIBANA
 
-==== Response
+===== Example 2
+Granting "dashboard only" access to only the Marketing space.
 
-A successful call returns a response code of `204` and no response body.
+[source,js]
+--------------------------------------------------
+PUT /api/security/role/my_kibana_role
+{
+  "metadata" : {
+    "version" : 1
+  },
+  "elasticsearch": {
+    "cluster" : [ ],
+    "indices" : [ ]
+  },
+  "kibana": [
+    {
+      "base": [],
+      "feature": {
+        "dashboard": ["read"]
+      },
+      "spaces": [
+        "marketing"
+      ]
+    }
+  ]
+}
+--------------------------------------------------
+
+===== Example 3
+Granting full access to all features in the Default space.
+
+[source,js]
+--------------------------------------------------
+PUT /api/security/role/my_kibana_role
+{
+  "metadata" : {
+    "version" : 1
+  },
+  "elasticsearch": {
+    "cluster" : [ ],
+    "indices" : [ ]
+  },
+  "kibana": [
+    {
+      "base": ["all"],
+      "feature": {
+      },
+      "spaces": [
+        "default"
+      ]
+    }
+  ]
+}
+--------------------------------------------------
+
+===== Example 4
+Granting different access to different spaces.
+
+[source,js]
+--------------------------------------------------
+PUT /api/security/role/my_kibana_role
+{
+  "metadata" : {
+    "version" : 1
+  },
+  "elasticsearch": {
+    "cluster" : [ ],
+    "indices" : [ ]
+  },
+  "kibana": [
+    {
+      "base": [],
+      "feature": {
+        "discover": ["all"],
+        "dashboard": ["all"]
+      },
+      "spaces": [
+        "default"
+      ]
+    },
+    {
+      "base": ["read"],
+      "spaces": [
+        "marketing",
+        "sales"
+      ]
+    }
+  ]
+}
+--------------------------------------------------
 
 
-==== Granting access to specific spaces
-To grant access to individual spaces within {kib}, specify the space identifier within the `kibana` object.
-
-Note: granting access 
+===== Example 5
+Granting access to both Kibana and Elasticsearch.
 
 [source,js]
 --------------------------------------------------
@@ -89,12 +228,19 @@ PUT /api/security/role/my_kibana_role
       "query" : "{\"match\": {\"title\": \"foo\"}}"
     } ]
   },
-  "kibana": {
-    "global": [],
-    "space": {
-      "marketing": ["all"],
-      "engineering": ["read"] 
+  "kibana": [
+    {
+      "base": ["all"],
+      "feature": {
+      },
+      "spaces": [
+        "default"
+      ]
     }
-  }
+  ]
 }
 --------------------------------------------------
+
+==== Response
+
+A successful call returns a response code of `204` and no response body.

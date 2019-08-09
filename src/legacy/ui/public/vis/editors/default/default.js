@@ -17,7 +17,10 @@
  * under the License.
  */
 
+import 'ui/angular-bootstrap';
+import './fancy_forms';
 import './sidebar';
+import { i18n } from '@kbn/i18n';
 import './vis_options';
 import './vis_editor_resizer';
 import './vis_type_agg_filter';
@@ -27,13 +30,14 @@ import _ from 'lodash';
 import angular from 'angular';
 import defaultEditorTemplate from './default.html';
 import { keyCodes } from '@elastic/eui';
+import { parentPipelineAggHelper } from 'ui/agg_types/metrics/lib/parent_pipeline_agg_helper';
 import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
 import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
+import { AggGroupNames } from './agg_groups';
 
-
-const defaultEditor = function ($rootScope, $compile, i18n) {
+const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
     static key = 'default';
 
@@ -46,7 +50,7 @@ const defaultEditor = function ($rootScope, $compile, i18n) {
         this.vis.type.editorConfig.optionTabs = [
           {
             name: 'options',
-            title: i18n('common.ui.vis.editors.sidebar.tabs.optionsLabel', { defaultMessage: 'Options' }),
+            title: i18n.translate('common.ui.vis.editors.sidebar.tabs.optionsLabel', { defaultMessage: 'Options' }),
             editor: this.vis.type.editorConfig.optionsTemplate,
           }
         ];
@@ -122,16 +126,10 @@ const defaultEditor = function ($rootScope, $compile, i18n) {
             return $scope.vis.getSerializableState($scope.state);
           }, function (newState) {
             $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
-            $scope.responseValueAggs = null;
-            try {
-              $scope.responseValueAggs = $scope.state.aggs.getResponseAggs().filter(function (agg) {
-                return _.get(agg, 'schema.group') === 'metrics';
-              });
-            }
-            // this can fail when the agg.type is changed but the
-            // params have not been set yet. watcher will trigger again
-            // when the params update
-            catch (e) {} // eslint-disable-line no-empty
+            $scope.metricAggs = $scope.state.aggs.getResponseAggs().filter(agg =>
+              _.get(agg, 'schema.group') === AggGroupNames.Metrics);
+            const lastParentPipelineAgg = _.findLast($scope.metricAggs, ({ type }) => type.subtype === parentPipelineAggHelper.subtype);
+            $scope.lastParentPipelineAggTitle = lastParentPipelineAgg && lastParentPipelineAgg.type.title;
           }, true);
 
           // fires when visualization state changes, and we need to copy changes to editorState

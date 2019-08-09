@@ -22,7 +22,6 @@ import { management } from 'ui/management';
 import './_view';
 import './_objects';
 import 'ace';
-import 'ui/directives/confirm_click';
 import { uiModules } from 'ui/modules';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 

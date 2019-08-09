@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import './index_header';
 import './create_edit_field';
+import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import { fatalError, toastNotifications } from 'ui/notify';
@@ -57,7 +58,7 @@ function updateSourceFiltersTable($scope, $state) {
             filterFilter={$scope.fieldFilter}
             fieldWildcardMatcher={$scope.fieldWildcardMatcher}
             onAddOrRemoveFilter={() => {
-              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.indexPatternListProvider);
+              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, $scope.indexPatternListProvider);
               $scope.refreshFilters();
               $scope.$apply();
             }}
@@ -99,8 +100,9 @@ function updateScriptedFieldsTable($scope, $state) {
               getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
             }}
             onRemoveField={() => {
-              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.indexPatternListProvider);
+              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, $scope.indexPatternListProvider);
               $scope.refreshFilters();
+              $scope.$apply();
             }}
           />
         </I18nContext>,
@@ -160,9 +162,8 @@ uiRoutes
     template,
     k7Breadcrumbs: getEditBreadcrumbs,
     resolve: {
-      indexPattern: function ($route, redirectWhenMissing, indexPatterns) {
-        return indexPatterns
-          .get($route.current.params.indexPatternId)
+      indexPattern: function ($route, Promise, redirectWhenMissing, indexPatterns) {
+        return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId))
           .catch(redirectWhenMissing('/management/kibana/index_patterns'));
       }
     },
@@ -170,7 +171,7 @@ uiRoutes
 
 uiModules.get('apps/management')
   .controller('managementIndexPatternsEdit', function (
-    $scope, $location, $route, config, indexPatterns, Private, AppState, docTitle, confirmModal) {
+    $scope, $location, $route, Promise, config, indexPatterns, Private, AppState, confirmModal) {
     const $state = $scope.state = new AppState();
     const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
     const indexPatternListProvider = Private(IndexPatternListFactory)();
@@ -180,7 +181,10 @@ uiModules.get('apps/management')
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;
     $scope.indexPatternListProvider = indexPatternListProvider;
-    $scope.indexPattern.tags = indexPatternListProvider.getIndexPatternTags($scope.indexPattern);
+    $scope.indexPattern.tags = indexPatternListProvider.getIndexPatternTags(
+      $scope.indexPattern,
+      $scope.indexPattern.id === config.get('defaultIndex')
+    );
     $scope.getFieldInfo = indexPatternListProvider.getFieldInfo;
     docTitle.change($scope.indexPattern.title);
 
@@ -189,7 +193,7 @@ uiModules.get('apps/management')
     });
 
     $scope.$watch('indexPattern.fields', function () {
-      $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, indexPatternListProvider);
+      $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, indexPatternListProvider);
       $scope.refreshFilters();
       $scope.fields = $scope.indexPattern.getNonScriptedFields();
       updateIndexedFieldsTable($scope, $state);
@@ -260,7 +264,7 @@ uiModules.get('apps/management')
           }
         }
 
-        indexPatterns.delete($scope.indexPattern)
+        Promise.resolve($scope.indexPattern.destroy())
           .then(function () {
             $location.url('/management/kibana/index_patterns');
           })
@@ -292,6 +296,7 @@ uiModules.get('apps/management')
     };
 
     $scope.$watch('fieldFilter', () => {
+      $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, indexPatternListProvider);
       if ($scope.fieldFilter === undefined) {
         return;
       }

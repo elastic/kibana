@@ -19,16 +19,20 @@
 const { set, get, isEmpty } = require('lodash');
 
 const isEmptyFilter = (filter = {}) => Boolean(filter.match_all) && isEmpty(filter.match_all);
+const hasSiblingPipelineAggregation = (aggs = {}) => Object.keys(aggs).length > 1;
 
 /* For grouping by the 'Everything', the splitByEverything request processor
  * creates fake .filter.match_all filter (see split_by_everything.js) to simplify the request processors code.
  * But “filters” are not supported by all of available search strategies (e.g. Rollup search).
  * This method removes that aggregation.
+ *
+ * Important: for Sibling Pipeline aggregation we cannot apply this logic
+ *
  */
 function removeEmptyTopLevelAggregation(doc, series) {
   const filter = get(doc, `aggs.${series.id}.filter`);
 
-  if (isEmptyFilter(filter)) {
+  if (isEmptyFilter(filter) && !hasSiblingPipelineAggregation(doc.aggs[series.id].aggs)) {
     const meta = get(doc, `aggs.${series.id}.meta`);
     set(doc, `aggs`, doc.aggs[series.id].aggs);
     set(doc, `aggs.timeseries.meta`, meta);
@@ -40,7 +44,7 @@ function removeEmptyTopLevelAggregation(doc, series) {
 /* Last query handler in the chain. You can use this handler
  * as the last place where you can modify the "doc" (request body) object before sending it to ES.
  */
-export default function normalizeQuery(req, panel, series) {
+export function normalizeQuery(req, panel, series) {
   return next => doc => {
     return next(removeEmptyTopLevelAggregation(doc, series));
   };

@@ -44,6 +44,12 @@ const dataIndexSchema = Joi.object({
   preserveDayOfWeekTimeOfDay: Joi.boolean().default(false),
 });
 
+const appLinkSchema = Joi.object({
+  path: Joi.string().required(),
+  label: Joi.string().required(),
+  icon: Joi.string().required(),
+});
+
 export const sampleDataSchema = {
   id: Joi.string().regex(/^[a-zA-Z0-9-]+$/).required(),
   name: Joi.string().required(),
@@ -53,6 +59,7 @@ export const sampleDataSchema = {
 
   // saved object id of main dashboard for sample data set
   overviewDashboard: Joi.string().required(),
+  appLinks: Joi.array().items(appLinkSchema).default([]),
 
   // saved object id of default index-pattern for sample data set
   defaultIndex: Joi.string().required(),

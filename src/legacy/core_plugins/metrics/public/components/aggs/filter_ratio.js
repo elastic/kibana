@@ -19,12 +19,12 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import AggSelect from './agg_select';
-import FieldSelect from './field_select';
-import AggRow from './agg_row';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import { AggSelect } from './agg_select';
+import { FieldSelect } from './field_select';
+import { AggRow } from './agg_row';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -35,29 +35,28 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ES_TYPES } from '../../../common/es_types';
+import { METRIC_TYPES } from '../../../common/metric_types';
 
 export const FilterRatioAgg = props => {
-  const {
-    series,
-    fields,
-    panel
-  } = props;
+  const { series, fields, panel } = props;
 
   const handleChange = createChangeHandler(props.onChange, props.model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
-  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const indexPattern =
+    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
 
   const defaults = {
     numerator: '*',
     denominator: '*',
-    metric_agg: 'count'
+    metric_agg: 'count',
   };
 
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
 
-  const restrictMode = model.metric_agg === 'cardinality' ? 'none' : 'numeric';
+  const restrictFields = model.metric_agg === METRIC_TYPES.CARDINALITY ? [] : [ES_TYPES.NUMBER];
 
   return (
     <AggRow
@@ -66,15 +65,12 @@ export const FilterRatioAgg = props => {
       onAdd={props.onAdd}
       onDelete={props.onDelete}
       siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
     >
       <EuiFlexGroup gutterSize="s">
-
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage
-              id="tsvb.filterRatio.aggregationLabel"
-              defaultMessage="Aggregation"
-            />
+            <FormattedMessage id="tsvb.filterRatio.aggregationLabel" defaultMessage="Aggregation" />
           </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
@@ -88,39 +84,32 @@ export const FilterRatioAgg = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('numerator')}
-            label={(<FormattedMessage
-              id="tsvb.filterRatio.numeratorLabel"
-              defaultMessage="Numerator"
-            />)}
+            label={
+              <FormattedMessage id="tsvb.filterRatio.numeratorLabel" defaultMessage="Numerator" />
+            }
           >
-            <EuiFieldText
-              onChange={handleTextChange('numerator')}
-              value={model.numerator}
-            />
+            <EuiFieldText onChange={handleTextChange('numerator')} value={model.numerator} />
           </EuiFormRow>
         </EuiFlexItem>
 
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('denominator')}
-            label={(<FormattedMessage
-              id="tsvb.filterRatio.denominatorLabel"
-              defaultMessage="Denominator"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.filterRatio.denominatorLabel"
+                defaultMessage="Denominator"
+              />
+            }
           >
-            <EuiFieldText
-              onChange={handleTextChange('denominator')}
-              value={model.denominator}
-            />
+            <EuiFieldText onChange={handleTextChange('denominator')} value={model.denominator} />
           </EuiFormRow>
         </EuiFlexItem>
-
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
       <EuiFlexGroup gutterSize="s">
-
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('metric')}>
             <FormattedMessage
@@ -137,26 +126,23 @@ export const FilterRatioAgg = props => {
           />
         </EuiFlexItem>
 
-        { model.metric_agg !== 'count' ? (
+        {model.metric_agg !== 'count' ? (
           <EuiFlexItem>
             <EuiFormRow
               id={htmlId('aggField')}
-              label={(<FormattedMessage
-                id="tsvb.filterRatio.fieldLabel"
-                defaultMessage="Field"
-              />)}
+              label={<FormattedMessage id="tsvb.filterRatio.fieldLabel" defaultMessage="Field" />}
             >
               <FieldSelect
                 fields={fields}
                 type={model.metric_agg}
-                restrict={restrictMode}
+                restrict={restrictFields}
                 indexPattern={indexPattern}
                 value={model.field}
                 onChange={handleSelectChange('field')}
               />
             </EuiFormRow>
-          </EuiFlexItem>) : null }
-
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </AggRow>
   );

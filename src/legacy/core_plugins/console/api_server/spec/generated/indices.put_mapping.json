@@ -1,7 +1,7 @@
 {
-  "put_mapping": {
+  "indices.put_mapping": {
     "url_params": {
-      "include_type_name": "",
+      "include_type_name": "__flag__",
       "timeout": "",
       "master_timeout": "",
       "ignore_unavailable": "__flag__",
@@ -18,13 +18,6 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/{type}/_mapping",
-      "{indices}/_mapping/{type}",
-      "_mapping/{type}",
-      "{indices}/{type}/_mappings",
-      "{indices}/_mappings/{type}",
-      "_mappings/{type}",
-      "{indices}/_mappings",
       "{indices}/_mapping"
     ],
     "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-put-mapping.html"

@@ -18,8 +18,8 @@
  */
 
 import sinon from 'sinon';
-import expect from 'expect.js';
-import { SavedObjectsClient } from '../../../../server/saved_objects';
+import expect from '@kbn/expect';
+import { SavedObjectsClient } from '../../../../../core/server';
 
 export const savedObjectsClientErrors = SavedObjectsClient.errors;
 

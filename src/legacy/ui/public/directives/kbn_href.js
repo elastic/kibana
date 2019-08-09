@@ -25,7 +25,7 @@ export function kbnUrlDirective(name) {
 
   uiModules
     .get('kibana')
-    .directive(name, function (Private, chrome) {
+    .directive(name, function (chrome) {
       return {
         restrict: 'A',
         link: function ($scope, $el, $attr) {

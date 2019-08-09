@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getSeries } from '../_get_series';
 
 
@@ -67,6 +67,41 @@ describe('getSeries', function () {
         .to.have.property('x', 1)
         .and.property('y', 2)
         .and.property('z', 3);
+    });
+  });
+
+  it('adds the seriesId to each point', function () {
+    const table = {
+      columns: [{ id: '0' }, { id: '1' }, { id: '3' }],
+      rows: [
+        { '0': 1, '1': 2, '2': 3 },
+        { '0': 1, '1': 2, '2': 3 },
+        { '0': 1, '1': 2, '2': 3 },
+        { '0': 1, '1': 2, '2': 3 },
+        { '0': 1, '1': 2, '2': 3 },
+      ]
+    };
+
+    const chart = {
+      aspects: {
+        x: [{ accessor: 0 }],
+        y: [
+          { accessor: 1, title: '0' },
+          { accessor: 2, title: '1' },
+        ]
+      }
+    };
+
+    const series = getSeries(table, chart);
+
+    series[0].values.forEach(function (point) {
+      expect(point)
+        .to.have.property('seriesId', 1);
+    });
+
+    series[1].values.forEach(function (point) {
+      expect(point)
+        .to.have.property('seriesId', 2);
     });
   });
 

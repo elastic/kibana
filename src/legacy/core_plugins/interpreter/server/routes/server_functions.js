@@ -18,8 +18,7 @@
  */
 
 import Boom from 'boom';
-import { serializeProvider } from '@kbn/interpreter/common';
-import { API_ROUTE } from '../../common/constants';
+import { serializeProvider, API_ROUTE } from '../../common';
 import { createHandlers } from '../lib/create_handlers';
 import Joi from 'joi';
 
@@ -55,7 +54,7 @@ function runServerFunctions(server) {
                 id: Joi.number().required(),
                 functionName: Joi.string().required(),
                 args: Joi.object().default({}),
-                context: Joi.object().allow(null).default({}),
+                context: Joi.any().default(null),
               }),
           ).required(),
         }).required(),
@@ -90,15 +89,19 @@ function runServerFunctions(server) {
         try {
           const result = await runFunction(server, handlers, fnCall);
 
-          if (result != null) {
-            return { id, statusCode: 200, result };
+          if (typeof result === 'undefined') {
+            return batchError(id, `Function ${fnCall.functionName} did not return anything.`);
           }
 
-          return batchError(id, `Function ${fnCall.functionName} did not return anything.`);
+          return { id, statusCode: 200, result };
         } catch (err) {
           if (Boom.isBoom(err)) {
             return batchError(id, err.output.payload, err.statusCode);
+          } else if (err instanceof Error) {
+            return batchError(id, err.message);
           }
+
+          server.log(['interpreter', 'error'], err);
           return batchError(id, 'See server logs for details.');
         }
       };

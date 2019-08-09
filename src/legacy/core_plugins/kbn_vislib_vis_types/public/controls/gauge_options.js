@@ -18,11 +18,12 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import gaugeOptionsTemplate from './gauge_options.html';
 import _ from 'lodash';
 const module = uiModules.get('kibana');
 
-module.directive('gaugeOptions', function (i18n) {
+module.directive('gaugeOptions', function () {
   return {
     restrict: 'E',
     template: gaugeOptionsTemplate,
@@ -81,7 +82,7 @@ module.directive('gaugeOptions', function (i18n) {
       };
 
       $scope.getGreaterThan = function (index) {
-        if (index === 0) return 0;
+        if (index === 0) return -Infinity;
         return $scope.editorState.params.gauge.colorsRange[index - 1].to;
       };
 
@@ -107,7 +108,7 @@ module.directive('gaugeOptions', function (i18n) {
         $scope.customColors = true;
       });
 
-      $scope.requiredText = i18n('kbnVislibVisTypes.controls.gaugeOptions.requiredText', {
+      $scope.requiredText = i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.requiredText', {
         defaultMessage: 'Required:'
       });
 

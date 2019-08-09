@@ -41,10 +41,10 @@ export function decodeGeoHash(geohash: number[]): Coordinates {
       const mask: number = BITS[j];
       if (isEven) {
         lonErr = lonErr /= 2;
-        refine_interval(lon, cd, mask);
+        refineInterval(lon, cd, mask);
       } else {
         latErr = latErr /= 2;
-        refine_interval(lat, cd, mask);
+        refineInterval(lat, cd, mask);
       }
       isEven = !isEven;
     }
@@ -57,8 +57,8 @@ export function decodeGeoHash(geohash: number[]): Coordinates {
   } as Coordinates;
 }
 
-function refine_interval(interval: number[], cd: number, mask: number) {
-  if (cd & mask) { /* tslint:disable-line */
+function refineInterval(interval: number[], cd: number, mask: number) {
+  if (cd & mask) { /* eslint-disable-line */
     interval[0] = (interval[0] + interval[1]) / 2;
   } else {
     interval[1] = (interval[0] + interval[1]) / 2;
@@ -75,7 +75,7 @@ function refine_interval(interval: number[], cd: number, mask: number) {
 function geohashCells(precision: number, axis: number) {
   let cells = 1;
   for (let i = 1; i <= precision; i += 1) {
-    /*On odd precisions, rows divide by 4 and columns by 8. Vice-versa on even precisions */
+    /* On odd precisions, rows divide by 4 and columns by 8. Vice-versa on even precisions */
     cells *= i % 2 === axis ? 4 : 8;
   }
   return cells;

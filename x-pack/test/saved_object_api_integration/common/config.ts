@@ -6,10 +6,9 @@
 
 // @ts-ignore
 import { resolveKibanaPath } from '@kbn/plugin-helpers';
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import path from 'path';
-import { TestInvoker } from './lib/types';
-// @ts-ignore
-import { EsProvider } from './services/es';
+import { services } from './services';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -19,7 +18,7 @@ interface CreateTestConfigOptions {
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [] } = options;
 
-  return async ({ readConfigFile }: TestInvoker) => {
+  return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const config = {
       kibana: {
         api: await readConfigFile(resolveKibanaPath('test/api_integration/config.js')),
@@ -33,14 +32,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     return {
       testFiles: [require.resolve(`../${name}/apis/`)],
       servers: config.xpack.api.get('servers'),
-      services: {
-        es: EsProvider,
-        esSupertestWithoutAuth: config.xpack.api.get('services.esSupertestWithoutAuth'),
-        supertest: config.kibana.api.get('services.supertest'),
-        supertestWithoutAuth: config.xpack.api.get('services.supertestWithoutAuth'),
-        esArchiver: config.kibana.functional.get('services.esArchiver'),
-        kibanaServer: config.kibana.functional.get('services.kibanaServer'),
-      },
+      services,
       junit: {
         reportName: 'X-Pack Saved Object API Integration Tests -- ' + name,
       },
@@ -54,7 +46,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         license,
         serverArgs: [
           `xpack.license.self_generated.type=${license}`,
-          `xpack.security.enabled=${!disabledPlugins.includes('security') && license === 'trial'}`,
+          `xpack.security.enabled=${!disabledPlugins.includes('security')}`,
         ],
       },
 
@@ -65,6 +57,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--optimize.enabled=false',
           '--server.xsrf.disableProtection=true',
           `--plugin-path=${path.join(__dirname, 'fixtures', 'namespace_agnostic_type_plugin')}`,
+          `--plugin-path=${path.join(__dirname, 'fixtures', 'hidden_type_plugin')}`,
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
         ],
       },

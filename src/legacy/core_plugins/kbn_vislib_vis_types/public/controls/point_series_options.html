@@ -17,7 +17,7 @@
                class="form-control"
                type="number"
                step="0.1"
-               greater-than="{{editorState.params.yAxis.min}}"
+               greater-than="editorState.params.yAxis.min"
                ng-model="editorState.params.yAxis.max"
                ng-required="editorState.params.setYExtents">
       </label>
@@ -30,8 +30,8 @@
                class="form-control"
                type="number"
                step="0.1"
-               less-than="{{editorState.params.yAxis.max}}"
-               greater-than="{{editorState.params.scale === 'log' ? 0 : ''}}"
+               less-than="editorState.params.yAxis.max"
+               greater-than="editorState.params.scale === 'log' ? 0 : undefined"
                ng-model="editorState.params.yAxis.min"
                ng-required="editorState.params.setYExtents">
       </label>

@@ -17,13 +17,16 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import url from 'url';
 
 import EMS_CATALOGUE from './ems_mocks/sample_manifest.json';
 import EMS_FILES from './ems_mocks/sample_files.json';
 import EMS_TILES from './ems_mocks/sample_tiles.json';
+import EMS_STYLE_ROAD_MAP_BRIGHT from './ems_mocks/sample_style_bright';
+import EMS_STYLE_ROAD_MAP_DESATURATED from './ems_mocks/sample_style_desaturated';
+import EMS_STYLE_DARK_MAP from './ems_mocks/sample_style_dark';
 import { ORIGIN } from '../../../../../core_plugins/tile_map/common/origin';
 
 describe('service_settings (FKA tilemaptest)', function () {
@@ -40,7 +43,12 @@ describe('service_settings (FKA tilemaptest)', function () {
     $provide.decorator('mapConfig', () => {
       return {
         manifestServiceUrl: manifestUrl,
-        includeElasticMapsService: true
+        includeElasticMapsService: true,
+        emsTileLayerId: {
+          bright: 'road_map',
+          desaturated: 'road_map_desaturated',
+          dark: 'dark_map',
+        },
       };
     });
   }));
@@ -60,6 +68,14 @@ describe('service_settings (FKA tilemaptest)', function () {
         return EMS_TILES;
       } else if (url.startsWith('https://files.foobar')) {
         return EMS_FILES;
+      } else if (url.startsWith('https://raster-style.foobar')) {
+        if (url.includes('osm-bright-desaturated')) {
+          return EMS_STYLE_ROAD_MAP_DESATURATED;
+        } else if (url.includes('osm-bright')) {
+          return EMS_STYLE_ROAD_MAP_BRIGHT;
+        } else if (url.includes('dark-matter')) {
+          return EMS_STYLE_DARK_MAP;
+        }
       }
     });
     mapConfig = $injector.get('mapConfig');
@@ -90,13 +106,13 @@ describe('service_settings (FKA tilemaptest)', function () {
       const tmsService = tmsServices[0];
       expect(typeof tmsService.url === 'undefined').to.equal(true);
 
-      const mapUrl = await serviceSettings.getUrlTemplateForTMSLayer(tmsService);
-      expect(mapUrl).to.contain('{x}');
-      expect(mapUrl).to.contain('{y}');
-      expect(mapUrl).to.contain('{z}');
+      const attrs = await serviceSettings.getAttributesForTMSLayer(tmsService);
+      expect(attrs.url).to.contain('{x}');
+      expect(attrs.url).to.contain('{y}');
+      expect(attrs.url).to.contain('{z}');
 
-      const urlObject = url.parse(mapUrl, true);
-      expect(urlObject.hostname).to.be('tiles-stage.elastic.co');
+      const urlObject = url.parse(attrs.url, true);
+      expect(urlObject.hostname).to.be('raster-style.foobar');
       expect(urlObject.query).to.have.property('my_app_name', 'kibana');
       expect(urlObject.query).to.have.property('elastic_tile_service_tos', 'agree');
       expect(urlObject.query).to.have.property('my_app_version');
@@ -107,7 +123,7 @@ describe('service_settings (FKA tilemaptest)', function () {
       const tmsService = tmsServices[0];
       expect(tmsService).to.have.property('minZoom');
       expect(tmsService).to.have.property('maxZoom');
-      expect(tmsService).to.have.property('attribution').contain('&#169;');
+      expect(tmsService).to.have.property('attribution').contain('OpenStreetMap');
     });
 
     describe('modify - url', function () {
@@ -115,8 +131,8 @@ describe('service_settings (FKA tilemaptest)', function () {
       let tilemapServices;
 
       async function assertQuery(expected) {
-        const mapUrl = await serviceSettings.getUrlTemplateForTMSLayer(tilemapServices[0]);
-        const urlObject = url.parse(mapUrl, true);
+        const attrs = await serviceSettings.getAttributesForTMSLayer(tilemapServices[0]);
+        const urlObject = url.parse(attrs.url, true);
         Object.keys(expected).forEach(key => {
           expect(urlObject.query).to.have.property(key, expected[key]);
         });
@@ -172,10 +188,11 @@ describe('service_settings (FKA tilemaptest)', function () {
           },
           {
             'id': 'road_map',
-            'url': 'https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3',
+            'name': 'Road Map - Bright',
+            'url': 'https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3',
             'minZoom': 0,
             'maxZoom': 10,
-            'attribution': '<p>&#169; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>&#10;',
+            'attribution': '<p><a rel="noreferrer noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a rel="noreferrer noopener" href="https://openmaptiles.org">OpenMapTiles</a> | <a rel="noreferrer noopener" href="https://www.maptiler.com">MapTiler</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>',
             'subdomains': []
           }
         ];
@@ -185,14 +202,34 @@ describe('service_settings (FKA tilemaptest)', function () {
           const expectedService = expected[index];
           expect(actualService.id).to.equal(expectedService.id);
           expect(actualService.attribution).to.equal(expectedService.attribution);
-          const url = await serviceSettings.getUrlTemplateForTMSLayer(actualService);
-          expect(url).to.equal(expectedService.url);
+          const attrs = await serviceSettings.getAttributesForTMSLayer(actualService);
+          expect(attrs.url).to.equal(expectedService.url);
         });
 
         return Promise.all(assertions);
 
       });
 
+      it('should load appropriate EMS attributes for desaturated and dark theme', async () => {
+
+        tilemapServices = await serviceSettings.getTMSServices();
+        const roadMapService = tilemapServices.find(service => service.id === 'road_map');
+
+        const desaturationFalse = await serviceSettings.getAttributesForTMSLayer(roadMapService, false, false);
+        const desaturationTrue = await serviceSettings.getAttributesForTMSLayer(roadMapService, true, false);
+        const darkThemeDesaturationFalse = await serviceSettings.getAttributesForTMSLayer(roadMapService, false, true);
+        const darkThemeDesaturationTrue = await serviceSettings.getAttributesForTMSLayer(roadMapService, true, true);
+
+        expect(desaturationFalse.url).to.equal('https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
+        expect(desaturationFalse.maxZoom).to.equal(10);
+        expect(desaturationTrue.url).to.equal('https://raster-style.foobar/styles/osm-bright-desaturated/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
+        expect(desaturationTrue.maxZoom).to.equal(18);
+        expect(darkThemeDesaturationFalse.url).to.equal('https://raster-style.foobar/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
+        expect(darkThemeDesaturationFalse.maxZoom).to.equal(22);
+        expect(darkThemeDesaturationTrue.url).to.equal('https://raster-style.foobar/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
+        expect(darkThemeDesaturationTrue.maxZoom).to.equal(22);
+
+      });
 
       it('should exclude EMS', async () => {
 
@@ -216,8 +253,8 @@ describe('service_settings (FKA tilemaptest)', function () {
         expect(tilemapServices.length).to.eql(1);
         expect(tilemapServices[0].attribution).to.eql(expected[0].attribution);
         expect(tilemapServices[0].id).to.eql(expected[0].id);
-        const url = await serviceSettings.getUrlTemplateForTMSLayer(tilemapServices[0]);
-        expect(url).to.equal(expected[0].url);
+        const attrs = await serviceSettings.getAttributesForTMSLayer(tilemapServices[0]);
+        expect(attrs.url).to.equal(expected[0].url);
 
       });
 

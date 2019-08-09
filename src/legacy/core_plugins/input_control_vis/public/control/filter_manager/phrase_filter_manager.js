@@ -47,6 +47,7 @@ export class PhraseFilterManager extends FilterManager {
         phrases,
         this.indexPattern);
     }
+    newFilter.meta.key = this.fieldName;
     newFilter.meta.controlledBy = this.controlId;
     return newFilter;
   }

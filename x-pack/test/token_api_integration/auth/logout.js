@@ -36,7 +36,7 @@ export default function ({ getService }) {
         .get('/api/security/v1/logout')
         .set('cookie', cookie.cookieString())
         .expect(302)
-        .expect('location', '/login');
+        .expect('location', '/login?msg=LOGGED_OUT');
     });
 
     it('unsets the session cookie', async () => {

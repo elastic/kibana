@@ -18,7 +18,7 @@
  */
 
 import Chance from 'chance';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import {
   createListStream,

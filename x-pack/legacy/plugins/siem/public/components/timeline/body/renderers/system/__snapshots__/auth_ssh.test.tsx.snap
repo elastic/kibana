@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AuthSsh rendering it renders against shallow snapshot 1`] = `
+<Component>
+  <pure(Component)
+    contextId="[context-123]"
+    eventId="[event-123]"
+    sshMethod="[ssh-method]"
+    sshSignature="[ssh-signature]"
+  />
+</Component>
+`;

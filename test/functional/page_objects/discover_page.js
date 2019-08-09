@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function DiscoverPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -28,6 +28,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['header', 'common']);
   const browser = getService('browser');
   const globalNav = getService('globalNav');
+  const config = getService('config');
+  const defaultFindTimeout = config.get('timeouts.find');
 
   class DiscoverPage {
     async getQueryField() {
@@ -39,7 +41,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getChartTimespan() {
-      const el = await find.byCssSelector('.small > span:nth-child(1)');
+      const el = await find.byCssSelector('.small > label[for="dscResultsIntervalSelector"]');
       return await el.getVisibleText();
     }
 
@@ -58,6 +60,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         const name = await this.getCurrentQueryName();
         expect(name).to.be(searchName);
       });
+    }
+
+    async waitUntilSearchingHasFinished() {
+      const spinner = await testSubjects.find('loadingSpinner');
+      await find.waitForElementHidden(spinner, defaultFindTimeout * 10);
     }
 
     async getColumnHeaders() {
@@ -86,13 +93,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async hasSavedSearch(searchName) {
-      const searchLink = await find.byPartialLinkText(searchName);
+      const searchLink = await find.byButtonText(searchName);
       return searchLink.isDisplayed();
     }
 
     async loadSavedSearch(searchName) {
       await this.openLoadSavedSearchPanel();
-      const searchLink = await find.byPartialLinkText(searchName);
+      const searchLink = await find.byButtonText(searchName);
       await searchLink.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -154,7 +161,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getChartInterval() {
-      const selectedValue = await testSubjects.getProperty('discoverIntervalSelect', 'value');
+      const selectedValue = await testSubjects.getAttribute('discoverIntervalSelect', 'value');
       const selectedOption = await find.byCssSelector('option[value="' + selectedValue + '"]');
       return selectedOption.getVisibleText();
     }
@@ -210,7 +217,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getSidebarWidth() {
       const sidebar = await find.byCssSelector('.sidebar-list');
-      return await sidebar.getProperty('clientWidth');
+      return await sidebar.getAttribute('clientWidth');
     }
 
     async hasNoResults() {
@@ -234,6 +241,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await retry.try(async () => {
         await testSubjects.click(`fieldVisualize-${field}`);
       });
+    }
+
+    async expectFieldListItemVisualize(field) {
+      await testSubjects.existOrFail(`fieldVisualize-${field}`);
+    }
+
+    async expectMissingFieldListItemVisualize(field) {
+      await testSubjects.missingOrFail(`fieldVisualize-${field}`, { allowHidden: true });
     }
 
     async clickFieldListPlusFilter(field, value) {
@@ -273,7 +288,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
       if (fieldFilterFormExists) {
         await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.missingOrFail('discoverFieldFilter');
+        await testSubjects.missingOrFail('discoverFieldFilter', { allowHidden: true });
       }
     }
 

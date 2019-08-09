@@ -43,7 +43,6 @@ exports[`EmptyState should render normally 1`] = `
             </EuiLink>,
             "needToIndex": <EuiTextColor
               color="subdued"
-              component="span"
             >
               <FormattedMessage
                 defaultMessage="You'll need to index some data into Elasticsearch before you can create an index pattern."
@@ -62,6 +61,7 @@ exports[`EmptyState should render normally 1`] = `
       iconSide="left"
       iconType="refresh"
       onClick={[Function]}
+      size="m"
       type="button"
     >
       <FormattedMessage

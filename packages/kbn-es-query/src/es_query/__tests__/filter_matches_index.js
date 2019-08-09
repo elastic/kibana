@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { filterMatchesIndex } from '../filter_matches_index';
 
 describe('filterMatchesIndex', function () {

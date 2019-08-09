@@ -27,7 +27,6 @@ export class UiApp {
       main,
       title,
       order = 0,
-      description,
       icon,
       euiIconType,
       hidden,
@@ -44,7 +43,6 @@ export class UiApp {
     this._main = main;
     this._title = title;
     this._order = order;
-    this._description = description;
     this._icon = icon;
     this._euiIconType = euiIconType;
     this._linkToLastSubUrl = linkToLastSubUrl;
@@ -66,7 +64,6 @@ export class UiApp {
         id: this._id,
         title: this._title,
         order: this._order,
-        description: this._description,
         icon: this._icon,
         euiIconType: this._euiIconType,
         url: this._url,
@@ -118,7 +115,6 @@ export class UiApp {
     return {
       id: this._id,
       title: this._title,
-      description: this._description,
       icon: this._icon,
       euiIconType: this._euiIconType,
       main: this._main,

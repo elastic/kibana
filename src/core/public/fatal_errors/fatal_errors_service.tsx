@@ -23,90 +23,104 @@ import * as Rx from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 
 import { I18nStart } from '../i18n';
-import { InjectedMetadataService } from '../injected_metadata';
+import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsScreen } from './fatal_errors_screen';
-import { ErrorInfo, getErrorInfo } from './get_error_info';
-
-export interface FatalErrorsParams {
-  rootDomElement: HTMLElement;
-  injectedMetadata: InjectedMetadataService;
-  stopCoreSystem: () => void;
-}
+import { FatalErrorInfo, getErrorInfo } from './get_error_info';
 
 interface Deps {
   i18n: I18nStart;
+  injectedMetadata: InjectedMetadataSetup;
 }
 
-export class FatalErrorsService {
-  private readonly errorInfo$ = new Rx.ReplaySubject<ErrorInfo>();
-  private i18n?: I18nStart;
+/**
+ * FatalErrors stop the Kibana Public Core and displays a fatal error screen
+ * with details about the Kibana build and the error.
+ *
+ * @public
+ */
+export interface FatalErrorsSetup {
+  /**
+   * Add a new fatal error. This will stop the Kibana Public Core and display
+   * a fatal error screen with details about the Kibana build and the error.
+   *
+   * @param error - The error to display
+   * @param source - Adds a prefix of the form `${source}: ` to the error message
+   */
+  add: (error: string | Error, source?: string) => never;
 
-  constructor(private params: FatalErrorsParams) {
+  /**
+   * An Observable that will emit whenever a fatal error is added with `add()`
+   */
+  get$: () => Rx.Observable<FatalErrorInfo>;
+}
+
+/** @interal */
+export class FatalErrorsService {
+  private readonly errorInfo$ = new Rx.ReplaySubject<FatalErrorInfo>();
+
+  /**
+   *
+   * @param rootDomElement
+   * @param onFirstErrorCb - Callback function that gets executed after the first error,
+   *   but before the FatalErrorsService renders the error to the DOM.
+   */
+  constructor(private rootDomElement: HTMLElement, private onFirstErrorCb: () => void) {}
+
+  public setup({ i18n, injectedMetadata }: Deps) {
     this.errorInfo$
       .pipe(
         first(),
-        tap(() => this.onFirstError())
+        tap(() => {
+          this.onFirstErrorCb();
+          this.renderError(injectedMetadata, i18n);
+        })
       )
       .subscribe({
         error: error => {
-          // tslint:disable-next-line no-console
-          console.error('Uncaught error in fatal error screen internals', error);
+          // eslint-disable-next-line no-console
+          console.error('Uncaught error in fatal error service internals', error);
         },
       });
-  }
 
-  public add = (error: Error | string, source?: string) => {
-    const errorInfo = getErrorInfo(error, source);
+    const fatalErrorsSetup: FatalErrorsSetup = {
+      add: (error, source?) => {
+        const errorInfo = getErrorInfo(error, source);
 
-    this.errorInfo$.next(errorInfo);
+        this.errorInfo$.next(errorInfo);
 
-    if (error instanceof Error) {
-      // make stack traces clickable by putting whole error in the console
-      // tslint:disable-next-line no-console
-      console.error(error);
-    }
+        if (error instanceof Error) {
+          // make stack traces clickable by putting whole error in the console
+          // eslint-disable-next-line no-console
+          console.error(error);
+        }
 
-    throw error;
-  };
-
-  public start({ i18n }: Deps) {
-    this.i18n = i18n;
-
-    return {
-      add: this.add,
+        throw error;
+      },
       get$: () => {
         return this.errorInfo$.asObservable();
       },
     };
+
+    return fatalErrorsSetup;
   }
 
-  private onFirstError() {
-    // stop the core systems so that things like the legacy platform are stopped
-    // and angular/react components are unmounted;
-    this.params.stopCoreSystem();
-
+  private renderError(injectedMetadata: InjectedMetadataSetup, i18n: I18nStart) {
     // delete all content in the rootDomElement
-    this.params.rootDomElement.textContent = '';
+    this.rootDomElement.textContent = '';
 
     // create and mount a container for the <FatalErrorScreen>
     const container = document.createElement('div');
-    this.params.rootDomElement.appendChild(container);
-
-    // If error occurred before I18nService has been started we don't have any
-    // i18n context to provide.
-    const I18nContext = this.i18n ? this.i18n.Context : React.Fragment;
+    this.rootDomElement.appendChild(container);
 
     render(
-      <I18nContext>
+      <i18n.Context>
         <FatalErrorsScreen
-          buildNumber={this.params.injectedMetadata.getKibanaBuildNumber()}
-          kibanaVersion={this.params.injectedMetadata.getKibanaVersion()}
+          buildNumber={injectedMetadata.getKibanaBuildNumber()}
+          kibanaVersion={injectedMetadata.getKibanaVersion()}
           errorInfo$={this.errorInfo$}
         />
-      </I18nContext>,
+      </i18n.Context>,
       container
     );
   }
 }
-
-export type FatalErrorsStart = ReturnType<FatalErrorsService['start']>;

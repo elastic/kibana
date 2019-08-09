@@ -1,12 +1,7 @@
 {
   "indices.analyze": {
     "url_params": {
-      "index": "",
-      "prefer_local": "__flag__",
-      "format": [
-        "detailed",
-        "text"
-      ]
+      "index": ""
     },
     "methods": [
       "GET",

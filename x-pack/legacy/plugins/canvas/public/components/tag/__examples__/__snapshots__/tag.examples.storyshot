@@ -1,0 +1,111 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Tags/Tag as badge 1`] = `
+<span
+  className="euiBadge euiBadge--iconLeft"
+  style={
+    Object {
+      "backgroundColor": "#666666",
+      "color": "#FFFFFF",
+    }
+  }
+>
+  <span
+    className="euiBadge__content"
+  >
+    <span
+      className="euiBadge__text"
+    >
+      tag
+    </span>
+  </span>
+</span>
+`;
+
+exports[`Storyshots components/Tags/Tag as badge with color 1`] = `
+<span
+  className="euiBadge euiBadge--iconLeft"
+  style={
+    Object {
+      "backgroundColor": "#327b53",
+      "color": "#FFFFFF",
+    }
+  }
+>
+  <span
+    className="euiBadge__content"
+  >
+    <span
+      className="euiBadge__text"
+    >
+      tag
+    </span>
+  </span>
+</span>
+`;
+
+exports[`Storyshots components/Tags/Tag as health 1`] = `
+<div
+  className="euiHealth"
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <svg
+        className="euiIcon euiIcon--medium euiIcon-isLoading"
+        focusable="false"
+        height={16}
+        style={
+          Object {
+            "fill": "#666666",
+          }
+        }
+        viewBox="0 0 16 16"
+        width={16}
+        xmlns="http://www.w3.org/2000/svg"
+      />
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      tag
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/Tags/Tag as health with color 1`] = `
+<div
+  className="euiHealth"
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <svg
+        className="euiIcon euiIcon--medium euiIcon-isLoading"
+        focusable="false"
+        height={16}
+        style={
+          Object {
+            "fill": "#9b3067",
+          }
+        }
+        viewBox="0 0 16 16"
+        width={16}
+        xmlns="http://www.w3.org/2000/svg"
+      />
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      tag
+    </div>
+  </div>
+</div>
+`;

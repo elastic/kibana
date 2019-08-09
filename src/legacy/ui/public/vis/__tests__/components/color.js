@@ -17,21 +17,22 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
 import d3 from 'd3';
-import { seedColors } from '../../components/color/seed_colors';
-import { VislibComponentsColorColorProvider } from '../../components/color/color';
-import { VisColorMappedColorsProvider } from '../../components/color/mapped_colors';
+import chrome from '../../../chrome';
+import { seedColors } from '../../../vis/components/color/seed_colors';
+import { vislibColor as getColors } from '../../components/color/color';
+import { mappedColors } from '../../components/color/mapped_colors';
 import { createColorPalette } from '../../components/color/color_palette';
 
+const config = chrome.getUiSettingsClient();
+
 describe('Vislib Color Module Test Suite', function () {
-  let mappedColors;
 
   describe('Color (main)', function () {
     let previousConfig;
-    let getColors;
     const arr = ['good', 'better', 'best', 'never', 'let', 'it', 'rest'];
     const arrayOfNumbers = [1, 2, 3, 4, 5];
     const arrayOfUndefinedValues = [undefined, undefined, undefined];
@@ -44,17 +45,15 @@ describe('Vislib Color Module Test Suite', function () {
     let color;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject((Private, config) => {
+    beforeEach(() => {
       previousConfig = config.get('visualization:colorMapping');
       config.set('visualization:colorMapping', {});
-      getColors = Private(VislibComponentsColorColorProvider);
-      mappedColors = Private(VisColorMappedColorsProvider);
       color = getColors(arr, {});
-    }));
+    });
 
-    afterEach(ngMock.inject((config) => {
+    afterEach(() => {
       config.set('visualization:colorMapping', previousConfig);
-    }));
+    });
 
     it('should throw an error if input is not an array', function () {
       expect(function () {
@@ -146,25 +145,24 @@ describe('Vislib Color Module Test Suite', function () {
     let previousConfig;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject((Private, config) => {
+    beforeEach(() => {
       previousConfig = config.get('visualization:colorMapping');
-      mappedColors = Private(VisColorMappedColorsProvider);
       mappedColors.mapping = {};
-    }));
+    });
 
-    afterEach(ngMock.inject((config) => {
+    afterEach(() => {
       config.set('visualization:colorMapping', previousConfig);
-    }));
+    });
 
-    it('should properly map keys to unique colors', ngMock.inject((config) => {
+    it('should properly map keys to unique colors', () => {
       config.set('visualization:colorMapping', {});
 
       const arr = [1, 2, 3, 4, 5];
       mappedColors.mapKeys(arr);
       expect(_(mappedColors.mapping).values().uniq().size()).to.be(arr.length);
-    }));
+    });
 
-    it('should not include colors used by the config', ngMock.inject((config) => {
+    it('should not include colors used by the config', () => {
       const newConfig = { bar: seedColors[0] };
       config.set('visualization:colorMapping', newConfig);
 
@@ -174,9 +172,9 @@ describe('Vislib Color Module Test Suite', function () {
       const colorValues = _(mappedColors.mapping).values();
       expect(colorValues.contains(seedColors[0])).to.be(false);
       expect(colorValues.uniq().size()).to.be(arr.length);
-    }));
+    });
 
-    it('should create a unique array of colors even when config is set', ngMock.inject((config) => {
+    it('should create a unique array of colors even when config is set', () => {
       const newConfig = { bar: seedColors[0] };
       config.set('visualization:colorMapping', newConfig);
 
@@ -186,9 +184,9 @@ describe('Vislib Color Module Test Suite', function () {
       const expectedSize = _(arr).difference(_.keys(newConfig)).size();
       expect(_(mappedColors.mapping).values().uniq().size()).to.be(expectedSize);
       expect(mappedColors.get(arr[0])).to.not.be(seedColors[0]);
-    }));
+    });
 
-    it('should treat different formats of colors as equal', ngMock.inject((config) => {
+    it('should treat different formats of colors as equal', () => {
       const color = d3.rgb(seedColors[0]);
       const rgb = `rgb(${color.r}, ${color.g}, ${color.b})`;
       const newConfig = { bar: rgb };
@@ -201,7 +199,7 @@ describe('Vislib Color Module Test Suite', function () {
       expect(_(mappedColors.mapping).values().uniq().size()).to.be(expectedSize);
       expect(mappedColors.get(arr[0])).to.not.be(seedColors[0]);
       expect(mappedColors.get('bar')).to.be(seedColors[0]);
-    }));
+    });
 
     it('should have a flush method that moves the current map to the old map', function () {
       const arr = [1, 2, 3, 4, 5];

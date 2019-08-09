@@ -21,16 +21,16 @@ import _ from 'lodash';
 import { AggConfig } from '../../../vis/agg_config';
 import { Schemas } from '../../../vis/editors/default/schemas';
 
-import { siblingPipelineAggController } from './sibling_pipeline_agg_controller';
 import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
-import metricAggTemplate from '../../controls/sub_metric.html';
+import { SubMetricParamEditor } from '../../controls/sub_metric';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { i18n } from '@kbn/i18n';
 
 const metricAggFilter = [
   '!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev',
   '!sum_bucket', '!avg_bucket', '!min_bucket', '!max_bucket',
-  '!derivative', '!moving_avg', '!serial_diff', '!cumulative_sum'
+  '!derivative', '!moving_avg', '!serial_diff', '!cumulative_sum',
+  '!geo_bounds', '!geo_centroid',
 ];
 
 const metricAggSchema = (new Schemas([
@@ -38,7 +38,7 @@ const metricAggSchema = (new Schemas([
     group: 'none',
     name: 'metricAgg',
     title: i18n.translate('common.ui.aggTypes.metrics.metricAggTitle', {
-      defaultMessage: 'Metric Agg'
+      defaultMessage: 'Metric agg'
     }),
     aggFilter: metricAggFilter
   }
@@ -49,7 +49,7 @@ const bucketAggSchema = (new Schemas([
   {
     group: 'none',
     title: i18n.translate('common.ui.aggTypes.metrics.bucketAggTitle', {
-      defaultMessage: 'Bucket Agg'
+      defaultMessage: 'Bucket agg'
     }),
     name: 'bucketAgg',
     aggFilter: bucketAggFilter
@@ -58,7 +58,7 @@ const bucketAggSchema = (new Schemas([
 
 const siblingPipelineAggHelper = {
   subtype: i18n.translate('common.ui.aggTypes.metrics.siblingPipelineAggregationsSubtypeTitle', {
-    defaultMessage: 'Sibling Pipeline Aggregations'
+    defaultMessage: 'Sibling pipeline aggregations'
   }),
   params: function () {
     return [
@@ -79,8 +79,7 @@ const siblingPipelineAggHelper = {
           orderAgg.id = agg.id + '-bucket';
           return orderAgg;
         },
-        editor: metricAggTemplate,
-        controller: siblingPipelineAggController('customBucket'),
+        editorComponent: SubMetricParamEditor,
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart('customBucket'),
         write: _.noop
       },
@@ -101,8 +100,7 @@ const siblingPipelineAggHelper = {
           orderAgg.id = agg.id + '-metric';
           return orderAgg;
         },
-        editor: metricAggTemplate,
-        controller: siblingPipelineAggController('customMetric'),
+        editorComponent: SubMetricParamEditor,
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart('customMetric'),
         write: siblingPipelineAggWriter
       }

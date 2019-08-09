@@ -27,12 +27,13 @@ import { linkProjectExecutables } from '../utils/link_project_executables';
 import { IPackageJson } from '../utils/package_json';
 import { Project } from '../utils/project';
 import { buildProjectGraph } from '../utils/projects';
-import { installInDir, runScriptInPackageStreaming } from '../utils/scripts';
+import { installInDir, runScriptInPackageStreaming, yarnWorkspacesInfo } from '../utils/scripts';
 import { BootstrapCommand } from './bootstrap';
 
 const mockInstallInDir = installInDir as jest.Mock;
 const mockRunScriptInPackageStreaming = runScriptInPackageStreaming as jest.Mock;
 const mockLinkProjectExecutables = linkProjectExecutables as jest.Mock;
+const mockYarnWorkspacesInfo = yarnWorkspacesInfo as jest.Mock;
 
 const createProject = (packageJson: IPackageJson, path = '.') => {
   const project = new Project(
@@ -56,6 +57,10 @@ expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 const noop = () => {
   // noop
 };
+
+beforeEach(() => {
+  mockYarnWorkspacesInfo.mockResolvedValue({});
+});
 
 afterEach(() => {
   jest.resetAllMocks();

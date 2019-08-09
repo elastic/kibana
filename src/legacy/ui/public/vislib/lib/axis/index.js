@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { VislibLibAxisProvider } from './axis';
+export { Axis } from './axis';

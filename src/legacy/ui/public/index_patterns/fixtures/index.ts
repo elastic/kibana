@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import { Field, IndexPattern } from '../index';
+import { FieldType } from '../_field';
+import { StaticIndexPattern } from '../_index_pattern';
 
-export const mockFields: Field[] = [
+export const mockFields: FieldType[] = [
   {
     name: 'machine.os',
+    esTypes: ['text'],
     type: 'string',
     aggregatable: false,
     searchable: false,
@@ -30,6 +32,7 @@ export const mockFields: Field[] = [
   {
     name: 'machine.os.raw',
     type: 'string',
+    esTypes: ['keyword'],
     aggregatable: true,
     searchable: true,
     filterable: true,
@@ -37,6 +40,7 @@ export const mockFields: Field[] = [
   {
     name: 'not.filterable',
     type: 'string',
+    esTypes: ['text'],
     aggregatable: true,
     searchable: false,
     filterable: false,
@@ -44,6 +48,7 @@ export const mockFields: Field[] = [
   {
     name: 'bytes',
     type: 'number',
+    esTypes: ['long'],
     aggregatable: true,
     searchable: true,
     filterable: true,
@@ -51,6 +56,7 @@ export const mockFields: Field[] = [
   {
     name: '@timestamp',
     type: 'date',
+    esTypes: ['date'],
     aggregatable: true,
     searchable: true,
     filterable: true,
@@ -58,6 +64,7 @@ export const mockFields: Field[] = [
   {
     name: 'clientip',
     type: 'ip',
+    esTypes: ['ip'],
     aggregatable: true,
     searchable: true,
     filterable: true,
@@ -65,13 +72,14 @@ export const mockFields: Field[] = [
   {
     name: 'bool.field',
     type: 'boolean',
+    esTypes: ['boolean'],
     aggregatable: true,
     searchable: true,
     filterable: true,
   },
 ];
 
-export const mockIndexPattern: IndexPattern = {
+export const mockIndexPattern: StaticIndexPattern = {
   id: 'logstash-*',
   fields: mockFields,
   title: 'logstash-*',

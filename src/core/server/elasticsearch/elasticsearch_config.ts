@@ -24,47 +24,51 @@ const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
 export const DEFAULT_API_VERSION = 'master';
 
-const configSchema = schema.object({
-  sniffOnStart: schema.boolean({ defaultValue: false }),
-  sniffInterval: schema.oneOf([schema.duration(), schema.literal(false)], { defaultValue: false }),
-  sniffOnConnectionFault: schema.boolean({ defaultValue: false }),
-  hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
-    defaultValue: 'http://localhost:9200',
-  }),
-  preserveHost: schema.boolean({ defaultValue: true }),
-  username: schema.maybe(schema.string()),
-  password: schema.maybe(schema.string()),
-  requestHeadersWhitelist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-    defaultValue: ['authorization'],
-  }),
-  customHeaders: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
-  shardTimeout: schema.duration({ defaultValue: '30s' }),
-  requestTimeout: schema.duration({ defaultValue: '30s' }),
-  pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
-  startupTimeout: schema.duration({ defaultValue: '5s' }),
-  logQueries: schema.boolean({ defaultValue: false }),
-  ssl: schema.object({
-    verificationMode: schema.oneOf(
-      [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-      { defaultValue: 'full' }
-    ),
-    certificateAuthorities: schema.maybe(
-      schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
-    ),
-    certificate: schema.maybe(schema.string()),
-    key: schema.maybe(schema.string()),
-    keyPassphrase: schema.maybe(schema.string()),
-    alwaysPresentCertificate: schema.boolean({ defaultValue: true }),
-  }),
-  apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
-  healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
-});
+export type ElasticsearchConfigType = TypeOf<typeof config.schema>;
+type SslConfigSchema = ElasticsearchConfigType['ssl'];
 
-type SslConfigSchema = TypeOf<typeof configSchema>['ssl'];
+export const config = {
+  path: 'elasticsearch',
+  schema: schema.object({
+    sniffOnStart: schema.boolean({ defaultValue: false }),
+    sniffInterval: schema.oneOf([schema.duration(), schema.literal(false)], {
+      defaultValue: false,
+    }),
+    sniffOnConnectionFault: schema.boolean({ defaultValue: false }),
+    hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
+      defaultValue: 'http://localhost:9200',
+    }),
+    preserveHost: schema.boolean({ defaultValue: true }),
+    username: schema.maybe(schema.string()),
+    password: schema.maybe(schema.string()),
+    requestHeadersWhitelist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+      defaultValue: ['authorization'],
+    }),
+    customHeaders: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
+    shardTimeout: schema.duration({ defaultValue: '30s' }),
+    requestTimeout: schema.duration({ defaultValue: '30s' }),
+    pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
+    startupTimeout: schema.duration({ defaultValue: '5s' }),
+    logQueries: schema.boolean({ defaultValue: false }),
+    ssl: schema.object({
+      verificationMode: schema.oneOf(
+        [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+        { defaultValue: 'full' }
+      ),
+      certificateAuthorities: schema.maybe(
+        schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+      ),
+      certificate: schema.maybe(schema.string()),
+      key: schema.maybe(schema.string()),
+      keyPassphrase: schema.maybe(schema.string()),
+      alwaysPresentCertificate: schema.boolean({ defaultValue: true }),
+    }),
+    apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
+    healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
+  }),
+};
 
 export class ElasticsearchConfig {
-  public static schema = configSchema;
-
   /**
    * The interval between health check requests Kibana sends to the Elasticsearch.
    */
@@ -154,34 +158,34 @@ export class ElasticsearchConfig {
    * headers cannot be overwritten by client-side headers and aren't affected by
    * `requestHeadersWhitelist` configuration.
    */
-  public readonly customHeaders: TypeOf<typeof configSchema>['customHeaders'];
+  public readonly customHeaders: ElasticsearchConfigType['customHeaders'];
 
-  constructor(config: TypeOf<typeof configSchema>) {
-    this.apiVersion = config.apiVersion;
-    this.logQueries = config.logQueries;
-    this.hosts = Array.isArray(config.hosts) ? config.hosts : [config.hosts];
-    this.requestHeadersWhitelist = Array.isArray(config.requestHeadersWhitelist)
-      ? config.requestHeadersWhitelist
-      : [config.requestHeadersWhitelist];
-    this.pingTimeout = config.pingTimeout;
-    this.requestTimeout = config.requestTimeout;
-    this.shardTimeout = config.shardTimeout;
-    this.sniffOnStart = config.sniffOnStart;
-    this.sniffOnConnectionFault = config.sniffOnConnectionFault;
-    this.sniffInterval = config.sniffInterval;
-    this.healthCheckDelay = config.healthCheck.delay;
-    this.username = config.username;
-    this.password = config.password;
-    this.customHeaders = config.customHeaders;
+  constructor(rawConfig: ElasticsearchConfigType) {
+    this.apiVersion = rawConfig.apiVersion;
+    this.logQueries = rawConfig.logQueries;
+    this.hosts = Array.isArray(rawConfig.hosts) ? rawConfig.hosts : [rawConfig.hosts];
+    this.requestHeadersWhitelist = Array.isArray(rawConfig.requestHeadersWhitelist)
+      ? rawConfig.requestHeadersWhitelist
+      : [rawConfig.requestHeadersWhitelist];
+    this.pingTimeout = rawConfig.pingTimeout;
+    this.requestTimeout = rawConfig.requestTimeout;
+    this.shardTimeout = rawConfig.shardTimeout;
+    this.sniffOnStart = rawConfig.sniffOnStart;
+    this.sniffOnConnectionFault = rawConfig.sniffOnConnectionFault;
+    this.sniffInterval = rawConfig.sniffInterval;
+    this.healthCheckDelay = rawConfig.healthCheck.delay;
+    this.username = rawConfig.username;
+    this.password = rawConfig.password;
+    this.customHeaders = rawConfig.customHeaders;
 
-    const certificateAuthorities = Array.isArray(config.ssl.certificateAuthorities)
-      ? config.ssl.certificateAuthorities
-      : typeof config.ssl.certificateAuthorities === 'string'
-      ? [config.ssl.certificateAuthorities]
+    const certificateAuthorities = Array.isArray(rawConfig.ssl.certificateAuthorities)
+      ? rawConfig.ssl.certificateAuthorities
+      : typeof rawConfig.ssl.certificateAuthorities === 'string'
+      ? [rawConfig.ssl.certificateAuthorities]
       : undefined;
 
     this.ssl = {
-      ...config.ssl,
+      ...rawConfig.ssl,
       certificateAuthorities,
     };
   }

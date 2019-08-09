@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, has } from 'lodash';
+import { has } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { VisRequestHandlersRegistryProvider } from '../../registry/vis_request_handlers';
 import { calculateObjectHash } from '../lib/calculate_object_hash';
@@ -38,11 +38,10 @@ const CourierRequestHandlerProvider = function () {
       filters,
       forceFetch,
       partialRows,
-      isHierarchical,
+      metricsAtAllLevels,
       inspectorAdapters,
       queryFilter
     }) {
-
       // Create a new search source that inherits the original search source
       // but has the appropriate timeRange applied via a filter.
       // This is a temporary solution until we properly pass down all required
@@ -67,7 +66,7 @@ const CourierRequestHandlerProvider = function () {
       });
 
       requestSearchSource.setField('aggs', function () {
-        return aggs.toDsl(isHierarchical);
+        return aggs.toDsl(metricsAtAllLevels);
       });
 
       requestSearchSource.onRequestStart((searchSource, searchRequest) => {
@@ -123,7 +122,10 @@ const CourierRequestHandlerProvider = function () {
         }
       }
 
-      let resp = cloneDeep(searchSource.rawResponse);
+      // Note that rawResponse is not deeply cloned here, so downstream applications using courier
+      // must take care not to mutate it, or it could have unintended side effects, e.g. displaying
+      // response data incorrectly in the inspector.
+      let resp = searchSource.rawResponse;
       for (const agg of aggs) {
         if (has(agg, 'type.postFlightRequest')) {
           resp = await agg.type.postFlightRequest(
@@ -140,7 +142,7 @@ const CourierRequestHandlerProvider = function () {
 
       const parsedTimeRange = timeRange ? getTime(aggs.indexPattern, timeRange) : null;
       const tabifyParams = {
-        metricsAtAllLevels: isHierarchical,
+        metricsAtAllLevels,
         partialRows,
         timeRange: parsedTimeRange ? parsedTimeRange.range : undefined,
       };

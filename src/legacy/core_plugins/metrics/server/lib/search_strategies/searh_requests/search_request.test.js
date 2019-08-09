@@ -24,7 +24,6 @@ describe('SearchRequest', () => {
   let searchRequest;
   let req;
   let callWithRequest;
-  let indexPattern;
   let getServiceMock;
   let includeFrozen;
 
@@ -32,23 +31,21 @@ describe('SearchRequest', () => {
     includeFrozen = false;
     getServiceMock = jest.fn().mockResolvedValue(includeFrozen);
     req = {
-      getUiSettingsService: jest.fn().mockReturnValue({ get: getServiceMock })
+      getUiSettingsService: jest.fn().mockReturnValue({ get: getServiceMock }),
     };
     callWithRequest = jest.fn().mockReturnValue({ responses: [] });
-    indexPattern = 'indexPattern';
-    searchRequest = new SearchRequest(req, callWithRequest, indexPattern);
+    searchRequest = new SearchRequest(req, callWithRequest);
   });
 
   test('should init an AbstractSearchRequest instance', () => {
     expect(searchRequest.req).toBe(req);
     expect(searchRequest.callWithRequest).toBe(callWithRequest);
-    expect(searchRequest.indexPattern).toBe(indexPattern);
     expect(searchRequest.search).toBeDefined();
   });
 
   test('should return search value', async () => {
     const concreteSearchRequest = {
-      search: jest.fn().mockReturnValue('concreteSearchRequest')
+      search: jest.fn().mockReturnValue('concreteSearchRequest'),
     };
     const options = {};
     searchRequest.getSearchRequestType = jest.fn().mockReturnValue(concreteSearchRequest);
@@ -58,20 +55,18 @@ describe('SearchRequest', () => {
     expect(result).toBe('concreteSearchRequest');
   });
 
-  test('should return a MultiSearchRequest if options has body as an array', () => {
-    const options = {
-      body: []
-    };
+  test('should return a MultiSearchRequest for multi searches', () => {
+    const searches = [{ index: 'index', body: 'body' }, { index: 'index', body: 'body' }];
 
-    const result = searchRequest.getSearchRequestType(options);
+    const result = searchRequest.getSearchRequestType(searches);
 
     expect(result instanceof MultiSearchRequest).toBe(true);
   });
 
-  test('should return a SingleSearchRequest if options has body', () => {
-    const options = {};
+  test('should return a SingleSearchRequest for single search', () => {
+    const searches = [{ index: 'index', body: 'body' }];
 
-    const result = searchRequest.getSearchRequestType(options);
+    const result = searchRequest.getSearchRequestType(searches);
 
     expect(result instanceof SingleSearchRequest).toBe(true);
   });

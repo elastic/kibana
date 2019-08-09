@@ -1,12 +1,14 @@
 {
   "errorList": [
     {
-      "latestMessage": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
-      "monitorId": "auto-http-0X3675F89EF0612091",
-      "type": "io",
       "count": 843,
+      "latestMessage": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
+      "location": null,
+      "monitorId": "auto-http-0X3675F89EF0612091",
+      "name": null,
       "statusCode": null,
-      "timestamp": "2019-01-28T18:43:15.077Z"
+      "timestamp": "2019-01-28T18:43:15.077Z",
+      "type": "io"
     }
   ]
 }

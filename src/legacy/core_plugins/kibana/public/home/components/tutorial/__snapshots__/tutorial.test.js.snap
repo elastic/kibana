@@ -12,15 +12,11 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
         description="tutorial used to drive jest tests"
         title="jest test tutorial"
       />
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <div
         className="eui-textCenter"
       />
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <EuiPanel
         grow={true}
         hasShadow={false}
@@ -67,23 +63,14 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
         iconType="logoApache"
         title="jest test tutorial"
       />
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <div
         className="eui-textCenter"
       >
         <EuiFlexGroup
-          alignItems="stretch"
-          component="div"
-          direction="row"
-          gutterSize="l"
           justifyContent="center"
-          responsive={true}
-          wrap={false}
         >
           <EuiFlexItem
-            component="div"
             grow={false}
           >
             <EuiButtonGroup
@@ -109,9 +96,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <EuiPanel
         grow={true}
         hasShadow={false}
@@ -158,15 +143,11 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
         iconType="logoApache"
         title="jest test tutorial"
       />
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <div
         className="eui-textCenter"
       />
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <EuiPanel
         grow={true}
         hasShadow={false}

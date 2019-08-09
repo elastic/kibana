@@ -22,16 +22,9 @@ import React from 'react';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { I18nStart } from '../../../../core/public/i18n';
+import { npStart } from 'ui/new_platform';
 
-export let I18nContext: I18nStart['Context'] = null!;
-export function __newPlatformInit__(context: typeof I18nContext) {
-  if (I18nContext) {
-    throw new Error('ui/i18n already initialized with new platform apis');
-  }
-
-  I18nContext = context;
-}
+export const I18nContext = npStart.core.i18n.Context;
 
 export function wrapInI18nContext<P>(ComponentToWrap: React.ComponentType<P>) {
   const ContextWrapper: React.SFC<P> = props => {

@@ -1,0 +1,207 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly against snapshot 1`] = `
+<span>
+  <styled.div>
+    <span>
+      some children
+    </span>
+    <styled.div
+      width={100}
+    >
+      <pure(Component)
+        browserFields={Object {}}
+        contextId="user_login"
+        data={
+          Object {
+            "_id": "29",
+            "auditd": null,
+            "destination": null,
+            "event": Object {
+              "action": Array [
+                "user_login",
+              ],
+              "category": null,
+              "created": null,
+              "dataset": Array [
+                "login",
+              ],
+              "duration": null,
+              "end": null,
+              "hash": null,
+              "id": null,
+              "kind": Array [
+                "event",
+              ],
+              "module": Array [
+                "system",
+              ],
+              "original": null,
+              "outcome": Array [
+                "failure",
+              ],
+              "risk_score": null,
+              "risk_score_norm": null,
+              "severity": null,
+              "start": null,
+              "timezone": null,
+              "type": null,
+            },
+            "file": null,
+            "geo": null,
+            "host": Object {
+              "id": Array [
+                "7c21f5ed03b04d0299569d221fe18bbc",
+              ],
+              "ip": Array [
+                "46.101.3.136",
+                "10.16.0.5",
+                "fe80::4066:42ff:fe19:b3b9",
+              ],
+              "name": Array [
+                "zeek-london",
+              ],
+            },
+            "http": null,
+            "network": null,
+            "process": Object {
+              "args": null,
+              "executable": null,
+              "name": null,
+              "pid": Array [
+                6278,
+              ],
+              "ppid": null,
+              "title": null,
+              "working_directory": null,
+            },
+            "source": Object {
+              "bytes": null,
+              "geo": null,
+              "ip": Array [
+                "128.199.212.120",
+              ],
+              "packets": null,
+              "port": null,
+            },
+            "suricata": null,
+            "system": null,
+            "tls": null,
+            "url": null,
+            "user": Object {
+              "name": Array [
+                "Braden",
+              ],
+            },
+            "zeek": null,
+          }
+        }
+        text="some text"
+      />
+    </styled.div>
+  </styled.div>
+</span>
+`;
+
+exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly against snapshot 1`] = `
+<span>
+  <styled.div>
+    <span>
+      some children
+    </span>
+    <styled.div
+      width={100}
+    >
+      <pure(Component)
+        browserFields={Object {}}
+        contextId="process_started"
+        data={
+          Object {
+            "_id": "30",
+            "auditd": null,
+            "destination": null,
+            "event": Object {
+              "action": Array [
+                "process_started",
+              ],
+              "category": null,
+              "created": null,
+              "dataset": Array [
+                "login",
+              ],
+              "duration": null,
+              "end": null,
+              "hash": null,
+              "id": null,
+              "kind": Array [
+                "event",
+              ],
+              "module": Array [
+                "system",
+              ],
+              "original": null,
+              "outcome": Array [
+                "failure",
+              ],
+              "risk_score": null,
+              "risk_score_norm": null,
+              "severity": null,
+              "start": null,
+              "timezone": null,
+              "type": null,
+            },
+            "file": null,
+            "geo": null,
+            "host": Object {
+              "id": Array [
+                "7c21f5ed03b04d0299569d221fe18bbc",
+              ],
+              "ip": Array [
+                "46.101.3.136",
+                "10.16.0.5",
+                "fe80::4066:42ff:fe19:b3b9",
+              ],
+              "name": Array [
+                "zeek-london",
+              ],
+            },
+            "http": null,
+            "network": null,
+            "process": Object {
+              "args": null,
+              "executable": null,
+              "name": null,
+              "pid": Array [
+                6278,
+              ],
+              "ppid": null,
+              "title": null,
+              "working_directory": null,
+            },
+            "source": Object {
+              "bytes": null,
+              "geo": null,
+              "ip": Array [
+                "128.199.212.120",
+              ],
+              "packets": null,
+              "port": null,
+            },
+            "suricata": null,
+            "system": null,
+            "tls": null,
+            "url": null,
+            "user": Object {
+              "name": Array [
+                "Evan",
+              ],
+            },
+            "zeek": null,
+          }
+        }
+        text="some text"
+      />
+    </styled.div>
+  </styled.div>
+</span>
+`;

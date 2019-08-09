@@ -18,7 +18,7 @@
  */
 
 /* eslint import/no-duplicates: 0 */
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import sinon from 'sinon';
 
 import * as shouldReadFieldFromDocValuesNS from './should_read_field_from_doc_values';
@@ -37,23 +37,23 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
     describe('conflicts', () => {
       it('returns a field for each in response, no filtering', () => {
         const fields = readFieldCapsResponse(esResponse);
-        expect(fields).toHaveLength(19);
+        expect(fields).toHaveLength(22);
       });
 
-      it('includes only name, type, searchable, aggregatable, readFromDocValues, and maybe conflictDescriptions of each field', () => {
+      it('includes only name, type, esTypes, searchable, aggregatable, readFromDocValues, and maybe conflictDescriptions, parent, ' +
+        'and subType of each field', () => {
         const responseClone = cloneDeep(esResponse);
         // try to trick it into including an extra field
         responseClone.fields['@timestamp'].date.extraCapability = true;
         const fields = readFieldCapsResponse(responseClone);
 
         fields.forEach(field => {
-          if (field.conflictDescriptions) {
-            delete field.conflictDescriptions;
-          }
+          const fieldWithoutOptionalKeys = omit(field, 'conflictDescriptions', 'parent', 'subType');
 
-          expect(Object.keys(field)).toEqual([
+          expect(Object.keys(fieldWithoutOptionalKeys)).toEqual([
             'name',
             'type',
+            'esTypes',
             'searchable',
             'aggregatable',
             'readFromDocValues'
@@ -65,7 +65,8 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         sandbox.spy(shouldReadFieldFromDocValuesNS, 'shouldReadFieldFromDocValues');
         const fields = readFieldCapsResponse(esResponse);
         const conflictCount = fields.filter(f => f.type === 'conflict').length;
-        sinon.assert.callCount(shouldReadFieldFromDocValues, fields.length - conflictCount);
+        // +1 is for the object field which gets filtered out of the final return value from readFieldCapsResponse
+        sinon.assert.callCount(shouldReadFieldFromDocValues, fields.length - conflictCount + 1);
       });
 
       it('converts es types to kibana types', () => {
@@ -76,6 +77,14 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         });
       });
 
+      it('should include the original ES types found for each field across indices', () => {
+        const fields = readFieldCapsResponse(esResponse);
+        fields.forEach((field) => {
+          const fixtureTypes = Object.keys(esResponse.fields[field.name]);
+          expect(field.esTypes).toEqual(fixtureTypes);
+        });
+      });
+
       it('returns fields with multiple types as conflicts', () => {
         const fields = readFieldCapsResponse(esResponse);
         const conflicts = fields.filter(f => f.type === 'conflict');
@@ -83,6 +92,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
           {
             name: 'success',
             type: 'conflict',
+            esTypes: ['boolean', 'keyword'],
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
@@ -120,6 +130,23 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         const mixSearchableOther = fields.find(f => f.name === 'mix_searchable_other');
         expect(mixSearchable.searchable).toBe(true);
         expect(mixSearchableOther.searchable).toBe(true);
+      });
+
+      it('returns multi fields with parent and subType keys describing the relationship', () => {
+        const fields = readFieldCapsResponse(esResponse);
+        const child = fields.find(f => f.name === 'multi_parent.child');
+        expect(child).toHaveProperty('parent', 'multi_parent');
+        expect(child).toHaveProperty('subType', 'multi');
+      });
+
+      it('should not confuse object children for multi field children', () => {
+        // We detect multi fields by finding fields that have a dot in their name and then looking
+        // to see if their parents are *not* object or nested fields. In the future we may want to
+        // add parent and subType info for object and nested fields but for now we don't need it.
+        const fields = readFieldCapsResponse(esResponse);
+        const child = fields.find(f => f.name === 'object_parent.child');
+        expect(child).not.toHaveProperty('parent');
+        expect(child).not.toHaveProperty('subType');
       });
     });
   });

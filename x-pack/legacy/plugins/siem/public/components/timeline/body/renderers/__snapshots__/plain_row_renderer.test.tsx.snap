@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`plain_row_renderer renders correctly against snapshot 1`] = `
+<span>
+  <styled.div>
+    <span>
+      some children
+    </span>
+  </styled.div>
+</span>
+`;

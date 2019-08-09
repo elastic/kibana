@@ -1,0 +1,117 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Columns it renders the expected columns 1`] = `
+<Component>
+  <DataDrivenColumns
+    _id="1"
+    columnHeaders={
+      Array [
+        Object {
+          "columnHeaderType": "not-filtered",
+          "id": "message",
+          "width": 180,
+        },
+        Object {
+          "columnHeaderType": "not-filtered",
+          "id": "event.category",
+          "width": 180,
+        },
+        Object {
+          "columnHeaderType": "not-filtered",
+          "id": "event.action",
+          "width": 180,
+        },
+        Object {
+          "columnHeaderType": "not-filtered",
+          "id": "host.name",
+          "width": 180,
+        },
+        Object {
+          "columnHeaderType": "not-filtered",
+          "id": "source.ip",
+          "width": 180,
+        },
+        Object {
+          "columnHeaderType": "not-filtered",
+          "id": "destination.ip",
+          "width": 180,
+        },
+        Object {
+          "columnHeaderType": "not-filtered",
+          "id": "user.name",
+          "width": 180,
+        },
+      ]
+    }
+    columnRenderers={
+      Array [
+        Object {
+          "isInstance": [Function],
+          "renderColumn": [Function],
+        },
+        Object {
+          "isInstance": [Function],
+          "renderColumn": [Function],
+        },
+        Object {
+          "isInstance": [Function],
+          "renderColumn": [Function],
+        },
+      ]
+    }
+    data={
+      Array [
+        Object {
+          "field": "@timestamp",
+          "value": Array [
+            "2018-11-05T19:03:25.937Z",
+          ],
+        },
+        Object {
+          "field": "event.severity",
+          "value": Array [
+            "3",
+          ],
+        },
+        Object {
+          "field": "event.category",
+          "value": Array [
+            "Access",
+          ],
+        },
+        Object {
+          "field": "event.action",
+          "value": Array [
+            "Action",
+          ],
+        },
+        Object {
+          "field": "host.name",
+          "value": Array [
+            "apache",
+          ],
+        },
+        Object {
+          "field": "source.ip",
+          "value": Array [
+            "192.168.0.1",
+          ],
+        },
+        Object {
+          "field": "destination.ip",
+          "value": Array [
+            "192.168.0.3",
+          ],
+        },
+        Object {
+          "field": "user.name",
+          "value": Array [
+            "john.dee",
+          ],
+        },
+      ]
+    }
+    onColumnResized={[MockFunction]}
+  />
+</Component>
+`;

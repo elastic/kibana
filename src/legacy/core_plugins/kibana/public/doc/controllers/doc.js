@@ -19,16 +19,15 @@
 
 import 'ui/notify';
 import 'ui/courier';
-import 'ui/doc_viewer';
 import 'ui/index_patterns';
 import html from '../index.html';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
-import { getRootBreadcrumbs } from '../../discover/breadcrumbs';
+import 'plugins/kibana/doc_viewer';
+import { getRootBreadcrumbs } from 'plugins/kibana/discover/breadcrumbs';
 
 const app = uiModules.get('apps/doc', [
-  'kibana/notify',
   'kibana/courier',
   'kibana/index_patterns'
 ]);
@@ -48,12 +47,15 @@ const k7Breadcrumbs = ($route) => [
 ];
 
 uiRoutes
-  .when('/doc/:indexPattern/:index/:type/:id', {
+  // the old, pre 8.0 route, no longer used, keep it to stay compatible
+  // somebody might have bookmarked his favorite log messages
+  .when('/doc/:indexPattern/:index/:type', {
     template: html,
     resolve: resolveIndexPattern,
     k7Breadcrumbs
   })
-  .when('/doc/:indexPattern/:index/:type', {
+  //the new route, es 7 deprecated types, es 8 removed them
+  .when('/doc/:indexPattern/:index', {
     template: html,
     resolve: resolveIndexPattern,
     k7Breadcrumbs
@@ -73,7 +75,6 @@ app.controller('doc', function ($scope, $route, es) {
     body: {
       query: {
         ids: {
-          type: $route.current.params.type,
           values: [$route.current.params.id]
         }
       },

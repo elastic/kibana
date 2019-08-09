@@ -22,14 +22,18 @@ import { getType } from './get_type';
 
 describe('ast fromExpression', () => {
   describe('invalid expression', () => {
-    it('throws when empty', () => {
-      const check = () => fromExpression('');
-      expect(check).toThrowError(/Unable to parse expression/i);
-    });
-
     it('throws with invalid expression', () => {
       const check = () => fromExpression('wat!');
       expect(check).toThrowError(/Unable to parse expression/i);
+    });
+  });
+
+  describe('zero-item expression', () => {
+    it('yields a zero-length chain when empty', () => {
+      const expression = '';
+      const astObject = fromExpression(expression);
+      expect(astObject).toHaveProperty('chain');
+      expect(astObject.chain).toEqual([]);
     });
   });
 

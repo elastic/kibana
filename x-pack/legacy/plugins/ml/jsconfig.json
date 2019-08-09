@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "baseUrl": "../../../.",
+    "paths": {
+      "ui/*": [
+        "src/legacy/ui/public/*"
+      ],
+      "plugins/ml/*": [
+        "x-pack/legacy/plugins/ml/public/*"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "build"
+  ]
+}

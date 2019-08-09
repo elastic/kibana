@@ -17,19 +17,14 @@
  * under the License.
  */
 
-import { __newPlatformInit__, initChromeInjectedVarsApi } from './injected_vars';
+import { newPlatformInjectedMetadata } from './injected_vars.test.mocks';
+import { initChromeInjectedVarsApi } from './injected_vars';
 
 function initChrome() {
   const chrome: any = {};
   initChromeInjectedVarsApi(chrome);
   return chrome;
 }
-
-const newPlatformInjectedMetadata: any = {
-  getInjectedVars: jest.fn(),
-  getInjectedVar: jest.fn(),
-};
-__newPlatformInit__(newPlatformInjectedMetadata);
 
 beforeEach(() => {
   jest.resetAllMocks();

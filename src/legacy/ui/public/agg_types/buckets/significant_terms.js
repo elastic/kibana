@@ -17,10 +17,11 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+import { SizeParamEditor } from '../controls/size';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterTerms } from './create_filter/terms';
-import orderAndSizeTemplate from '../controls/order_and_size.html';
-import { i18n } from '@kbn/i18n';
+import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 
 export const significantTermsBucketAgg = new BucketAggType({
   name: 'significant_terms',
@@ -46,17 +47,28 @@ export const significantTermsBucketAgg = new BucketAggType({
     },
     {
       name: 'size',
-      editor: orderAndSizeTemplate,
+      editorComponent: SizeParamEditor,
+      default: '',
     },
     {
       name: 'exclude',
-      type: 'regex',
-      advanced: true
+      displayName: i18n.translate('common.ui.aggTypes.buckets.significantTerms.excludeLabel', {
+        defaultMessage: 'Exclude'
+      }),
+      type: 'string',
+      advanced: true,
+      shouldShow: isStringType,
+      ...migrateIncludeExcludeFormat
     },
     {
       name: 'include',
-      type: 'regex',
-      advanced: true
+      displayName: i18n.translate('common.ui.aggTypes.buckets.significantTerms.includeLabel', {
+        defaultMessage: 'Include'
+      }),
+      type: 'string',
+      advanced: true,
+      shouldShow: isStringType,
+      ...migrateIncludeExcludeFormat
     }
   ]
 });

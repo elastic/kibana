@@ -22,13 +22,13 @@ import PropTypes from 'prop-types';
 import { findDOMNode } from 'react-dom';
 import _ from 'lodash';
 import $ from 'ui/flot-charts';
-import eventBus from '../lib/events';
-import Resize from './resize';
-import calculateBarWidth from '../lib/calculate_bar_width';
-import calculateFillColor from '../lib/calculate_fill_color';
-import colors from '../lib/colors';
+import { eventBus } from '../lib/events';
+import { Resize } from './resize';
+import { calculateBarWidth } from '../lib/calculate_bar_width';
+import { calculateFillColor } from '../lib/calculate_fill_color';
+import { COLORS } from '../lib/colors';
 
-class FlotChart extends Component {
+export class FlotChart extends Component {
   constructor(props) {
     super(props);
     this.handleResize = this.handleResize.bind(this);
@@ -128,7 +128,7 @@ class FlotChart extends Component {
         }
         return {
           color: '#990000',
-          data: set
+          data: set,
         };
       })
       .reverse()
@@ -154,8 +154,8 @@ class FlotChart extends Component {
   getOptions(props) {
     const yaxes = props.yaxes || [{}];
 
-    const lineColor = colors.lineColor;
-    const textColor = props.reversed ? colors.textColorReversed : colors.textColor;
+    const lineColor = COLORS.lineColor;
+    const textColor = props.reversed ? COLORS.textColorReversed : COLORS.textColor;
 
     const borderWidth = { bottom: 1, top: 0, left: 0, right: 0 };
 
@@ -177,7 +177,7 @@ class FlotChart extends Component {
       yaxis: {
         color: lineColor,
         font: { color: textColor, size: 11 },
-        tickFormatter: props.tickFormatter
+        tickFormatter: props.tickFormatter,
       },
       xaxis: {
         tickLength: props.showGrid ? null : 0,
@@ -185,25 +185,25 @@ class FlotChart extends Component {
         timezone: 'browser',
         mode: 'time',
         font: { color: textColor, size: 11 },
-        ticks: this.calculateTicks()
+        ticks: this.calculateTicks(),
       },
       series: {
-        shadowSize: 0
+        shadowSize: 0,
       },
       grid: {
         margin: 0,
         borderWidth,
         borderColor: lineColor,
         hoverable: true,
-        mouseActiveRadius: 200
-      }
+        mouseActiveRadius: 200,
+      },
     };
 
     if (props.crosshair) {
       _.set(opts, 'crosshair', {
         mode: 'x',
         color: '#C66',
-        lineWidth: 1
+        lineWidth: 1,
       });
     }
 
@@ -223,7 +223,9 @@ class FlotChart extends Component {
     const sample = this.props.xAxisFormatter(new Date());
     const tickLetterWidth = 7;
     const tickPadding = 45;
-    const ticks = Math.floor(this.target.clientWidth / ((sample.length * tickLetterWidth) + tickPadding));
+    const ticks = Math.floor(
+      this.target.clientWidth / (sample.length * tickLetterWidth + tickPadding)
+    );
     return ticks;
   }
 
@@ -277,7 +279,8 @@ class FlotChart extends Component {
           }
         };
 
-        this.handlePlotover = (e, pos, item) => eventBus.trigger('thorPlotover', [pos, item, this.plot]);
+        this.handlePlotover = (e, pos, item) =>
+          eventBus.trigger('thorPlotover', [pos, item, this.plot]);
         this.handlePlotleave = () => eventBus.trigger('thorPlotleave');
         this.handleThorPlotleave = e => {
           if (this.plot) this.plot.clearCrosshair();
@@ -313,20 +316,17 @@ class FlotChart extends Component {
     return (
       <Resize
         onResize={this.handleResize}
-        ref={(el) => this.resize = el}
+        ref={el => (this.resize = el)}
         className="tvbVisTimeSeries__container"
       >
-        <div
-          ref={(el) => this.target = el}
-          className="tvbVisTimeSeries__container"
-        />
+        <div ref={el => (this.target = el)} className="tvbVisTimeSeries__container" />
       </Resize>
     );
   }
 }
 
 FlotChart.defaultProps = {
-  showGrid: true
+  showGrid: true,
 };
 
 FlotChart.propTypes = {
@@ -342,7 +342,5 @@ FlotChart.propTypes = {
   show: PropTypes.array,
   tickFormatter: PropTypes.func,
   showGrid: PropTypes.bool,
-  yaxes: PropTypes.array
+  yaxes: PropTypes.array,
 };
-
-export default FlotChart;

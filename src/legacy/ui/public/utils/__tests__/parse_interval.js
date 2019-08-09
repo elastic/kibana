@@ -18,7 +18,7 @@
  */
 
 import { parseInterval } from '../parse_interval';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('parseInterval', function () {
   it('should correctly parse an interval containing unit and value', function () {

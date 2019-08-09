@@ -4,7 +4,7 @@
     "dist"
   ],
   "include": [
-    "./src/**/*.ts"
+    "./src/**/*.ts",
   ],
   "compilerOptions": {
     "types": [

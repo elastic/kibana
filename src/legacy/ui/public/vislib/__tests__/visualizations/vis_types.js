@@ -17,18 +17,16 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
-import { VislibVisualizationsVisTypesProvider } from '../../visualizations/vis_types';
+import { visTypes } from '../../visualizations/vis_types';
 
 describe('Vislib Vis Types Test Suite', function () {
-  let visTypes;
   let visFunc;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    visTypes = Private(VislibVisualizationsVisTypesProvider);
+  beforeEach(ngMock.inject(function () {
     visFunc = visTypes.point_series;
   }));
 

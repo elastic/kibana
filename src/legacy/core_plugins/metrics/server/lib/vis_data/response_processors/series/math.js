@@ -19,10 +19,10 @@
 
 const percentileValueMatch = /\[([0-9\.]+)\]$/;
 import { startsWith, flatten, values, first, last } from 'lodash';
-import getDefaultDecoration from '../../helpers/get_default_decoration';
-import getSiblingAggValue from '../../helpers/get_sibling_agg_value';
-import getSplits from '../../helpers/get_splits';
-import mapBucket from '../../helpers/map_bucket';
+import { getDefaultDecoration } from '../../helpers/get_default_decoration';
+import { getSiblingAggValue } from '../../helpers/get_sibling_agg_value';
+import { getSplits } from '../../helpers/get_splits';
+import { mapBucket } from '../../helpers/map_bucket';
 import { evaluate } from 'tinymath';
 
 export function mathAgg(resp, panel, series, meta) {
@@ -52,9 +52,7 @@ export function mathAgg(resp, panel, series, meta) {
             });
           } else {
             const percentileMatch = v.field.match(percentileValueMatch);
-            const m = percentileMatch
-              ? { ...metric, percent: percentileMatch[1] }
-              : { ...metric };
+            const m = percentileMatch ? { ...metric, percent: percentileMatch[1] } : { ...metric };
             acc[v.name] = split.timeseries.buckets.map(mapBucket(m));
           }
           return acc;

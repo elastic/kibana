@@ -18,17 +18,22 @@
  */
 
 import _ from 'lodash';
-export default function splitByEverything(req, panel) {
+import { buildEsQuery } from '@kbn/es-query';
+export function splitByEverything(req, panel, esQueryConfig, indexPattern) {
   return next => doc => {
-    panel.series.filter(c => !(c.aggregate_by && c.aggregate_function)).forEach(column => {
-      if (column.filter) {
-        _.set(doc, `aggs.pivot.aggs.${column.id}.filter.query_string.query`, column.filter);
-        _.set(doc, `aggs.pivot.aggs.${column.id}.filter.query_string.analyze_wildcard`, true);
-      } else {
-        _.set(doc, `aggs.pivot.aggs.${column.id}.filter.match_all`, {});
-      }
-    });
+    panel.series
+      .filter(c => !(c.aggregate_by && c.aggregate_function))
+      .forEach(column => {
+        if (column.filter) {
+          _.set(
+            doc,
+            `aggs.pivot.aggs.${column.id}.filter`,
+            buildEsQuery(indexPattern, [column.filter], [], esQueryConfig)
+          );
+        } else {
+          _.set(doc, `aggs.pivot.aggs.${column.id}.filter.match_all`, {});
+        }
+      });
     return next(doc);
   };
 }
-

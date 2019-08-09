@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const indicesList = getService('monitoringElasticsearchIndices');
   const nodesList = getService('monitoringElasticsearchNodes');
   const shards = getService('monitoringElasticsearchShards');
+  const retry = getService('retry');
 
   describe('Elasticsearch shard legends', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
@@ -153,38 +154,39 @@ export default function ({ getService, getPageObjects }) {
       it('yellow status index with single unallocated shard', async () => {
         await indicesList.clickRowByName('phone-home');
 
-        expect(await shards.getUnassignedIndexAllocation()).to.eql([
-          { classification: 'shard replica unassigned 1', tooltip: 'Unassigned', },
-        ]);
+        await retry.try(async () => {
+          expect(await shards.getUnassignedIndexAllocation()).to.eql([
+            { classification: 'shard replica unassigned 1', tooltip: 'Unassigned', },
+          ]);
 
-        expect(await shards.getAssignedIndexAllocationByNode('jUT5KdxfRbORSCWkb5zjmA')).to.eql({
-          visibleText: 'whatever-01 | 0 | 2 | 3 | 4',
-          shards: [
-            { classification: 'shard primary started 0', tooltip: 'Started', },
-            { classification: 'shard primary started 2', tooltip: 'Started', },
-            { classification: 'shard primary started 3', tooltip: 'Started', },
-            { classification: 'shard primary started 4', tooltip: 'Started', },
-          ]
-        });
+          expect(await shards.getAssignedIndexAllocationByNode('jUT5KdxfRbORSCWkb5zjmA')).to.eql({
+            visibleText: 'whatever-01 | 0 | 2 | 3 | 4',
+            shards: [
+              { classification: 'shard primary started 0', tooltip: 'Started', },
+              { classification: 'shard primary started 2', tooltip: 'Started', },
+              { classification: 'shard primary started 3', tooltip: 'Started', },
+              { classification: 'shard primary started 4', tooltip: 'Started', },
+            ]
+          });
 
-        expect(await shards.getAssignedIndexAllocationByNode('xcP6ue7eRCieNNitFTT0EA')).to.eql({
-          visibleText: 'whatever-02 | 1 | 2 | 3 | 4',
-          shards: [
-            { classification: 'shard primary started 1', tooltip: 'Started', },
-            { classification: 'shard replica started 2', tooltip: 'Started', },
-            { classification: 'shard replica started 3', tooltip: 'Started', },
-            { classification: 'shard replica started 4', tooltip: 'Started', },
-          ]
-        });
+          expect(await shards.getAssignedIndexAllocationByNode('xcP6ue7eRCieNNitFTT0EA')).to.eql({
+            visibleText: 'whatever-02 | 1 | 2 | 3 | 4',
+            shards: [
+              { classification: 'shard primary started 1', tooltip: 'Started', },
+              { classification: 'shard replica started 2', tooltip: 'Started', },
+              { classification: 'shard replica started 3', tooltip: 'Started', },
+              { classification: 'shard replica started 4', tooltip: 'Started', },
+            ]
+          });
 
-        expect(await shards.getAssignedIndexAllocationByNode('bwQWH-7IQY-mFPpfoaoFXQ')).to.eql({
-          visibleText: 'whatever-03 | 0',
-          shards: [
-            { classification: 'shard replica started 0', tooltip: 'Started', },
-          ]
+          expect(await shards.getAssignedIndexAllocationByNode('bwQWH-7IQY-mFPpfoaoFXQ')).to.eql({
+            visibleText: 'whatever-03 | 0',
+            shards: [
+              { classification: 'shard replica started 0', tooltip: 'Started', },
+            ]
+          });
         });
       });
     });
-
   });
 }

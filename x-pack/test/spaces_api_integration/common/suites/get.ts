@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperAgent } from 'superagent';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
@@ -54,16 +54,19 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
         name: 'Default Space',
         description: 'This is the default space',
         _reserved: true,
+        disabledFeatures: [],
       },
       {
         id: 'space_1',
         name: 'Space 1',
         description: 'This is the first test space',
+        disabledFeatures: [],
       },
       {
         id: 'space_2',
         name: 'Space 2',
         description: 'This is the second test space',
+        disabledFeatures: [],
       },
     ];
     expect(resp.body).to.eql(allSpaces.find(space => space.id === spaceId));

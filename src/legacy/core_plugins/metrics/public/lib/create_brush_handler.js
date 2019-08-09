@@ -18,7 +18,8 @@
  */
 
 import moment from 'moment';
-export default (timefilter) => ranges => {
+
+export const brushHandler = timefilter => ranges => {
   timefilter.setTime({
     from: moment(ranges.xaxis.from).toISOString(),
     to: moment(ranges.xaxis.to).toISOString(),

@@ -20,12 +20,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { EuiWrappingPopover } from '@elastic/eui';
+import { I18nContext } from 'ui/i18n';
 import { ShareContextMenu } from './components/share_context_menu';
 import { ShareActionProvider } from './share_action';
-
-import { EuiWrappingPopover } from '@elastic/eui';
-
-import { I18nContext } from 'ui/i18n';
 
 let isOpen = false;
 
@@ -39,6 +37,7 @@ const onClose = () => {
 interface ShowProps {
   anchorElement: any;
   allowEmbed: boolean;
+  allowShortUrl: boolean;
   getUnhashableStates: () => object[];
   objectId?: string;
   objectType: string;
@@ -50,6 +49,7 @@ interface ShowProps {
 export function showShareContextMenu({
   anchorElement,
   allowEmbed,
+  allowShortUrl,
   getUnhashableStates,
   objectId,
   objectType,
@@ -78,6 +78,7 @@ export function showShareContextMenu({
       >
         <ShareContextMenu
           allowEmbed={allowEmbed}
+          allowShortUrl={allowShortUrl}
           getUnhashableStates={getUnhashableStates}
           objectId={objectId}
           objectType={objectType}

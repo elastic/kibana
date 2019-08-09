@@ -79,7 +79,7 @@ import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_value
  */
 export function readFieldCapsResponse(fieldCapsResponse) {
   const capsByNameThenType = fieldCapsResponse.fields;
-  return Object.keys(capsByNameThenType).map(fieldName => {
+  const kibanaFormattedCaps = Object.keys(capsByNameThenType).map(fieldName => {
     const capsByType = capsByNameThenType[fieldName];
     const types = Object.keys(capsByType);
 
@@ -102,6 +102,7 @@ export function readFieldCapsResponse(fieldCapsResponse) {
       return {
         name: fieldName,
         type: 'conflict',
+        esTypes: types,
         searchable: isSearchable,
         aggregatable: isAggregatable,
         readFromDocValues: false,
@@ -116,11 +117,31 @@ export function readFieldCapsResponse(fieldCapsResponse) {
     return {
       name: fieldName,
       type: castEsToKbnFieldTypeName(esType),
+      esTypes: types,
       searchable: isSearchable,
       aggregatable: isAggregatable,
       readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),
     };
-  }).filter(field => {
+  });
+
+  // Get all types of sub fields. These could be multi fields or children of nested/object types
+  const subFields = kibanaFormattedCaps.filter(field => {
+    return field.name.includes('.');
+  });
+
+  // Discern which sub fields are multi fields. If the parent field is not an object or nested field
+  // the child must be a multi field.
+  subFields.forEach(field => {
+    const parentFieldName = field.name.split('.').slice(0, -1).join('.');
+    const parentFieldCaps = kibanaFormattedCaps.find(caps => caps.name === parentFieldName);
+
+    if (parentFieldCaps && !['object', 'nested'].includes(parentFieldCaps.type)) {
+      field.parent = parentFieldName;
+      field.subType = 'multi';
+    }
+  });
+
+  return kibanaFormattedCaps.filter(field => {
     return !['object', 'nested'].includes(field.type);
   });
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 const HIGH_ALERT_MESSAGE = 'High severity alert';
@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('alert actions take you to the elasticsearch indices listing', async () => {
+    describe('alert actions take you to the elasticsearch indices listing', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {

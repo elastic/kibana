@@ -18,6 +18,7 @@ export default async function ({ readConfigFile }) {
     servers: xPackAPITestsConfig.get('servers'),
     services: {
       chance: kibanaAPITestsConfig.get('services.chance'),
+      es: kibanaAPITestsConfig.get('services.es'),
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
     },
     junit: {
@@ -46,7 +47,8 @@ export default async function ({ readConfigFile }) {
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
         '--server.xsrf.whitelist=[\"/api/security/v1/saml\"]',
-        '--xpack.security.authProviders=[\"saml\"]',
+        `--xpack.security.authc.providers=${JSON.stringify(['saml', 'basic'])}`,
+        '--xpack.security.authc.saml.realm=saml1',
       ],
     },
   };
