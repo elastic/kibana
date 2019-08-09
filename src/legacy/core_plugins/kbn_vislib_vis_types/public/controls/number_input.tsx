@@ -40,6 +40,7 @@ function NumberInputOption<ParamName extends string>({
   return (
     <EuiFormRow label={label} fullWidth compressed>
       <EuiFieldNumber
+        fullWidth
         max={max}
         min={min}
         value={value}
