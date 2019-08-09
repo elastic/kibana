@@ -9,6 +9,7 @@ import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { BASE_PATH, UIM_APP_LOAD } from '../common/constants';
 import { IndexManagementHome } from './sections/home';
 import { trackUiMetric } from './services';
+import { CreateIndex } from './sections/create_index';
 
 export const App = () => {
   useEffect(() => trackUiMetric('loaded', UIM_APP_LOAD), []);
@@ -23,6 +24,7 @@ export const App = () => {
 // Exoprt this so we can test it with a different router.
 export const AppWithoutRouter = () => (
   <Switch>
+    <Route exact path={`${BASE_PATH}create-index`} component={CreateIndex} />
     <Route path={`${BASE_PATH}:section(indices|templates)`} component={IndexManagementHome} />
     <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}indices`}/>
   </Switch>
