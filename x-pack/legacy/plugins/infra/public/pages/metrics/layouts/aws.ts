@@ -17,7 +17,6 @@ export const awsLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'awsOverview',
     label: 'AWS',
-    requires: ['aws'],
     sections: [
       {
         id: InfraMetric.awsOverview,
