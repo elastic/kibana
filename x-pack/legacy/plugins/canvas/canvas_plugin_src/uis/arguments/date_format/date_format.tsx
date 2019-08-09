@@ -37,7 +37,7 @@ export const DateFormatArgInput: FunctionComponent<Props> = ({
     argValue={argValue}
     formatOptions={dateFormats}
     onValueChange={onValueChange}
-    defaultCustomFormat="LLL z"
+    defaultCustomFormat="M/D/YY h:ma"
   />
 );
 
