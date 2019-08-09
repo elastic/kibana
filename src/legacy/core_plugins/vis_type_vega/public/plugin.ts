@@ -27,13 +27,11 @@ import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim'
 import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 
-// @ts-ignore
 import { createVegaFn } from './vega_fn';
-// @ts-ignore
 import { createVegaTypeDefinition } from './vega_type';
 
-/** @private */
-interface VegaVisualizationDependencies extends LegacyDependenciesPluginSetup {
+/** @internal */
+export interface VegaVisualizationDependencies extends LegacyDependenciesPluginSetup {
   uiSettings: UiSettingsClientContract;
 }
 

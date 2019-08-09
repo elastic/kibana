@@ -16,18 +16,38 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { timefilter } from 'ui/timefilter';
-import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
+import { timefilter, TimeRange } from 'ui/timefilter';
+import { Query } from 'src/legacy/core_plugins/data/public';
 
+// @ts-ignore
+import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
+// @ts-ignore
 import { VegaParser } from './data_model/vega_parser';
+// @ts-ignore
 import { SearchCache } from './data_model/search_cache';
+// @ts-ignore
 import { TimeCache } from './data_model/time_cache';
 
-export function createVegaRequestHandler({ uiSettings, es, serviceSettings }) {
+import { VegaVisualizationDependencies } from './plugin';
+import { VisParams } from './vega_fn';
+
+interface VegaRequestHandlerParams {
+  query: Query;
+  filters: Filter;
+  timeRange: TimeRange;
+  visParams: VisParams;
+}
+
+export function createVegaRequestHandler({
+  es,
+  uiSettings,
+  serviceSettings,
+}: VegaVisualizationDependencies) {
   const searchCache = new SearchCache(es, { max: 10, maxAge: 4 * 1000 });
   const timeCache = new TimeCache(timefilter, 3 * 1000);
 
-  return ({ timeRange, filters, query, visParams }) => {
+  return ({ timeRange, filters, query, visParams }: VegaRequestHandlerParams) => {
     timeCache.setTimeRange(timeRange);
 
     const esQueryConfigs = getEsQueryConfig(uiSettings);
