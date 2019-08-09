@@ -41,24 +41,24 @@ export function createProxy(server) {
     }
   });
 
-  server.route({
-    method: 'POST',
-    path: '/elasticsearch/{index}/_search',
-    config: {
-      validate: {
-        params: Joi.object().keys({
-          index: Joi.string().required()
-        })
-      }
-    },
-    handler(req, h) {
-      const { query, payload: body } = req;
-      return callWithRequest(req, 'transport.request', {
-        path: `/${encodeURIComponent(req.params.index)}/_search`,
-        method: 'POST',
-        query,
-        body
-      }).finally(r => h.response(r));
-    }
-  });
+  // server.route({
+  //   method: 'POST',
+  //   path: '/elasticsearch/{index}/_search',
+  //   config: {
+  //     validate: {
+  //       params: Joi.object().keys({
+  //         index: Joi.string().required()
+  //       })
+  //     }
+  //   },
+  //   handler(req, h) {
+  //     const { query, payload: body } = req;
+  //     return callWithRequest(req, 'transport.request', {
+  //       path: `/${encodeURIComponent(req.params.index)}/_search`,
+  //       method: 'POST',
+  //       query,
+  //       body
+  //     }).finally(r => h.response(r));
+  //   }
+  // });
 }
