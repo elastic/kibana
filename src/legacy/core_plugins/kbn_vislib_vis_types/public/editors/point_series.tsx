@@ -23,8 +23,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { SwitchOption } from '../controls/switch';
-import { SelectOption } from '../controls/select';
 import { GridOptions } from '../controls/point_series/grid_options';
+import { BasicOptions } from '../controls/basic_options';
 import { BasicVislibParams } from '../types';
 
 function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
@@ -43,24 +43,7 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
         </EuiTitle>
         <EuiSpacer size="s" />
 
-        <SelectOption
-          label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.legendPositionLabel', {
-            defaultMessage: 'Legend position',
-          })}
-          options={vis.type.editorConfig.collections.legendPositions}
-          paramName="legendPosition"
-          value={stateParams.legendPosition}
-          setValue={setValue}
-        />
-
-        <SwitchOption
-          label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.showTooltipLabel', {
-            defaultMessage: 'Show tooltip',
-          })}
-          paramName="addTooltip"
-          value={stateParams.addTooltip}
-          setValue={setValue}
-        />
+        <BasicOptions {...props} />
 
         {vis.hasSchemaAgg('segment', 'date_histogram') ? (
           <SwitchOption
