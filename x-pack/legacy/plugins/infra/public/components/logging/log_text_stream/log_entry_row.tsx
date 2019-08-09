@@ -33,6 +33,7 @@ interface LogEntryRowProps {
   columnConfigurations: LogColumnConfiguration[];
   columnWidths: LogEntryColumnWidths;
   highlights: LogEntryHighlight[];
+  isActiveHighlight: boolean;
   isHighlighted: boolean;
   logEntry: LogEntry;
   openFlyoutWithItem: (id: string) => void;
@@ -45,6 +46,7 @@ export const LogEntryRow = ({
   columnConfigurations,
   columnWidths,
   highlights,
+  isActiveHighlight,
   isHighlighted,
   logEntry,
   openFlyoutWithItem,
@@ -144,6 +146,7 @@ export const LogEntryRow = ({
                   columnValue={column}
                   highlights={highlightsByColumnId[column.columnId] || []}
                   isHighlighted={isHighlighted}
+                  isActiveHighlight={isActiveHighlight}
                   isHovered={isHovered}
                   isWrapped={wrap}
                 />
@@ -164,6 +167,7 @@ export const LogEntryRow = ({
                 <LogEntryFieldColumn
                   columnValue={column}
                   highlights={highlightsByColumnId[column.columnId] || []}
+                  isActiveHighlight={isActiveHighlight}
                   isHighlighted={isHighlighted}
                   isHovered={isHovered}
                   isWrapped={wrap}

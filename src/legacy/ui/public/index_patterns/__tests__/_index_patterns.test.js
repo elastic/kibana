@@ -31,19 +31,9 @@ jest.mock('../../registry/field_formats', () => ({
 }));
 
 jest.mock('../../notify', () => ({
-  Notifier: jest.fn().mockImplementation(() => ({
-    error: jest.fn(),
-  })),
   toastNotifications: {
     addDanger: jest.fn(),
   }
-}));
-
-
-jest.mock('../_get', () => ({
-  indexPatternsGetProvider: jest.fn().mockImplementation(() => {
-    return () => {};
-  })
 }));
 
 jest.mock('../_index_pattern', () => {

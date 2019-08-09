@@ -5,8 +5,9 @@
  */
 
 import { InfraMetricLayoutSectionType } from '../../../pages/metrics/layouts/types';
-import { ChartSection } from './chart_section';
+// import { ChartSection } from './chart_section';
 import { GaugesSection } from './gauges_section';
+import { ChartSection } from './chart_section';
 
 export const sections = {
   [InfraMetricLayoutSectionType.chart]: ChartSection,

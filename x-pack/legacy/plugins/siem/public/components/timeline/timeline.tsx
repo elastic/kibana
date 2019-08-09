@@ -71,6 +71,7 @@ interface Props {
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
   show: boolean;
+  showCallOutUnauthorizedMsg: boolean;
   start: number;
   sort: Sort;
 }
@@ -99,6 +100,7 @@ export const Timeline = pure<Props>(
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
     show,
+    showCallOutUnauthorizedMsg,
     start,
     sort,
   }) => {
@@ -134,6 +136,7 @@ export const Timeline = pure<Props>(
                 onToggleDataProviderEnabled={onToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={onToggleDataProviderExcluded}
                 show={show}
+                showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
                 sort={sort}
               />
             </WrappedByAutoSizer>

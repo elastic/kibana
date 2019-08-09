@@ -38,7 +38,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { SavedObjectAttributes } from 'src/core/server/saved_objects';
+import { SavedObjectAttributes } from 'src/core/server';
 import { EmbeddableFactoryNotFoundError } from '../../../../embeddables/embeddable_factory_not_found_error';
 import { IContainer } from '../../../../containers';
 

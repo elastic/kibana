@@ -13,37 +13,45 @@ export const TASK_ID = `Maps-${TELEMETRY_TASK_TYPE}`;
 export function scheduleTask(server, taskManager) {
   const { kbnServer } = server.plugins.xpack_main.status.plugin;
 
-  kbnServer.afterPluginsInit(async () => {
-    try {
-      await taskManager.schedule({
-        id: TASK_ID,
-        taskType: TELEMETRY_TASK_TYPE,
-        state: { stats: {}, runs: 0 },
-      });
-    }catch(e) {
-      server.log(['warning', 'maps'], `Error scheduling telemetry task, received ${e.message}`);
-    }
+  kbnServer.afterPluginsInit(() => {
+    // The code block below can't await directly within "afterPluginsInit"
+    // callback due to circular dependency. The server isn't "ready" until
+    // this code block finishes. Migrations wait for server to be ready before
+    // executing. Saved objects repository waits for migrations to finish before
+    // finishing the request. To avoid this, we'll await within a separate
+    // function block.
+    (async () => {
+      try {
+        await taskManager.schedule({
+          id: TASK_ID,
+          taskType: TELEMETRY_TASK_TYPE,
+          state: { stats: {}, runs: 0 },
+        });
+      }catch(e) {
+        server.log(['warning', 'maps'], `Error scheduling telemetry task, received ${e.message}`);
+      }
+    })();
   });
 }
 
-export function registerMapsTelemetryTask(taskManager) {
+export function registerMapsTelemetryTask(server) {
+  const taskManager = server.taskManager;
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Maps telemetry fetch task',
       type: TELEMETRY_TASK_TYPE,
       timeout: '1m',
       numWorkers: 2,
-      createTaskRunner: telemetryTaskRunner(),
+      createTaskRunner: telemetryTaskRunner(server),
     },
   });
 }
 
-export function telemetryTaskRunner() {
+export function telemetryTaskRunner(server) {
 
-  return ({ kbnServer, taskInstance }) => {
+  return ({ taskInstance }) => {
     const { state } = taskInstance;
     const prevState = state;
-    const { server } = kbnServer;
     let mapsTelemetry = {};
 
     const callCluster = server.plugins.elasticsearch.getCluster('admin')
@@ -73,5 +81,5 @@ export function getNextMidnight() {
   const nextMidnight = new Date();
   nextMidnight.setHours(0, 0, 0, 0);
   nextMidnight.setDate(nextMidnight.getDate() + 1);
-  return nextMidnight.toISOString();
+  return nextMidnight;
 }

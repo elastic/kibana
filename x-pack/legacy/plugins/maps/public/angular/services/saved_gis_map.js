@@ -16,6 +16,7 @@ import {
   getMapExtent,
   getRefreshConfig,
   getQuery,
+  getFilters,
 } from '../../selectors/map_selectors';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../selectors/ui_selectors';
 import { convertMapExtentToPolygon } from '../../elasticsearch_geo_utils';
@@ -87,6 +88,10 @@ module.factory('SavedGisMap', function (Private) {
     return `/app/maps#map/${this.id}`;
   };
 
+  SavedGisMap.prototype.getLayerList = function () {
+    return this.layerListJSON ? JSON.parse(this.layerListJSON) : null;
+  };
+
   SavedGisMap.prototype.syncWithStore = function (state) {
     const layerList = getLayerListRaw(state);
     const layerListConfigOnly = copyPersistentState(layerList);
@@ -98,6 +103,7 @@ module.factory('SavedGisMap', function (Private) {
       timeFilters: getTimeFilters(state),
       refreshConfig: getRefreshConfig(state),
       query: _.omit(getQuery(state), 'queryLastTriggeredAt'),
+      filters: getFilters(state),
     });
 
     this.uiStateJSON = JSON.stringify({

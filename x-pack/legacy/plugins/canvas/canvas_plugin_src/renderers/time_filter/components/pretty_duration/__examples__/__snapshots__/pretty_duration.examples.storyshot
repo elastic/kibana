@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots renderers/TimeFilter/components/PrettyDuration with absolute dates 1`] = `
+<span>
+  ~ 5 months ago to ~ 4 months ago
+</span>
+`;
+
+exports[`Storyshots renderers/TimeFilter/components/PrettyDuration with relative dates 1`] = `
+<span>
+  Last 7 days
+</span>
+`;

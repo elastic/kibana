@@ -38,7 +38,7 @@ function areBoundsValid({ min, max }: Bounds): boolean {
 }
 
 function ExtendedBoundsParamEditor({
-  value,
+  value = {} as Bounds,
   setValue,
   setValidity,
   showValidation,
@@ -81,40 +81,46 @@ function ExtendedBoundsParamEditor({
       error={error}
       compressed
     >
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiFieldNumber
-            value={isUndefined(value.min) ? '' : value.min}
-            onChange={ev => handleChange(ev, 'min')}
-            onBlur={setTouched}
-            fullWidth={true}
-            isInvalid={showValidation ? !isValid : false}
-            aria-label={minLabel}
-            prepend={
-              <EuiText size="xs">
-                <strong>{minLabel}</strong>
-              </EuiText>
-            }
-            compressed
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFieldNumber
-            value={isUndefined(value.max) ? '' : value.max}
-            onChange={ev => handleChange(ev, 'max')}
-            onBlur={setTouched}
-            fullWidth={true}
-            isInvalid={showValidation ? !isValid : false}
-            aria-label={maxLabel}
-            prepend={
-              <EuiText size="xs">
-                <strong>{maxLabel}</strong>
-              </EuiText>
-            }
-            compressed
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <>
+        {/*
+          We have to put it into React.Fragment to avoid errors:
+          EuiFormRow will try to put "compressed" as attribute into a EuiFlexGroup div
+        */}
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiFieldNumber
+              value={isUndefined(value.min) ? '' : value.min}
+              onChange={ev => handleChange(ev, 'min')}
+              onBlur={setTouched}
+              fullWidth={true}
+              isInvalid={showValidation ? !isValid : false}
+              aria-label={minLabel}
+              prepend={
+                <EuiText size="xs">
+                  <strong>{minLabel}</strong>
+                </EuiText>
+              }
+              compressed
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFieldNumber
+              value={isUndefined(value.max) ? '' : value.max}
+              onChange={ev => handleChange(ev, 'max')}
+              onBlur={setTouched}
+              fullWidth={true}
+              isInvalid={showValidation ? !isValid : false}
+              aria-label={maxLabel}
+              prepend={
+                <EuiText size="xs">
+                  <strong>{maxLabel}</strong>
+                </EuiText>
+              }
+              compressed
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
     </EuiFormRow>
   );
 }

@@ -56,11 +56,24 @@ export interface FileTree {
 }
 
 export function sortFileTree(a: FileTree, b: FileTree) {
-  if (a.type !== b.type) {
-    return b.type - a.type;
-  } else {
-    return a.name.localeCompare(b.name);
+  // consider Link and File are the same type, Submodule and Directory are the same type when sorting.
+  // Submodule and Directory are before Link and File
+  const types1 = [FileTreeItemType.File, FileTreeItemType.Link];
+  const types2 = [FileTreeItemType.Directory, FileTreeItemType.Submodule];
+  if (types1.includes(a.type)) {
+    if (types1.includes(b.type)) {
+      return a.name.localeCompare(b.name);
+    } else {
+      return 1;
+    }
+  } else if (types2.includes(a.type)) {
+    if (types2.includes(b.type)) {
+      return a.name.localeCompare(b.name);
+    } else {
+      return -1;
+    }
   }
+  return a.name.localeCompare(b.name);
 }
 
 export enum FileTreeItemType {

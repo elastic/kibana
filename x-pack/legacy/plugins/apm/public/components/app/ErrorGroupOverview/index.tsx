@@ -21,6 +21,7 @@ import {
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useTrackPageview } from '../../../../../infra/public';
 
 const ErrorGroupOverview: React.SFC = () => {
   const {
@@ -51,6 +52,9 @@ const ErrorGroupOverview: React.SFC = () => {
       });
     }
   }, [serviceName, start, end, sortField, sortDirection, uiFilters]);
+
+  useTrackPageview({ app: 'apm', path: 'error_group_overview' });
+  useTrackPageview({ app: 'apm', path: 'error_group_overview', delay: 15000 });
 
   if (!errorDistributionData || !errorGroupListData) {
     return null;

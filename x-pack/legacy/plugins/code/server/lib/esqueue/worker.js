@@ -17,7 +17,6 @@ const puid = new Puid();
 function formatJobObject(job) {
   return {
     index: job._index,
-    type: job._type,
     id: job._id,
     // Expose the payload of the job even when the job failed/timeout
     ...job._source.payload,
@@ -37,6 +36,7 @@ export class Worker extends events.EventEmitter {
     this.id = puid.generate();
     this.queue = queue;
     this.client = opts.client || this.queue.client;
+    this.codeServices = opts.codeServices;
     this.jobtype = type;
     this.workerFn = workerFn;
     this.checkSize = opts.size || 10;
@@ -125,9 +125,9 @@ export class Worker extends events.EventEmitter {
 
     return this.client.update({
       index: job._index,
-      type: job._type,
       id: job._id,
-      version: job._version,
+      if_seq_no: job._seq_no,
+      if_primary_term: job._primary_term,
       body: { doc }
     })
       .then((response) => {
@@ -168,9 +168,9 @@ export class Worker extends events.EventEmitter {
 
     return this.client.update({
       index: job._index,
-      type: job._type,
       id: job._id,
-      version: job._version,
+      if_seq_no: job._seq_no,
+      if_primary_term: job._primary_term,
       body: { doc }
     })
       .then(() => true)
@@ -193,7 +193,6 @@ export class Worker extends events.EventEmitter {
 
     return this.client.update({
       index: job._index,
-      type: job._type,
       id: job._id,
       version: job._version,
       body: { doc }
@@ -276,9 +275,9 @@ export class Worker extends events.EventEmitter {
 
       return this.client.update({
         index: job._index,
-        type: job._type,
         id: job._id,
-        version: job._version,
+        if_seq_no: job._seq_no,
+        if_primary_term: job._primary_term,
         body: { doc }
       })
         .then(() => {
@@ -425,6 +424,7 @@ export class Worker extends events.EventEmitter {
   _getPendingJobs() {
     const nowTime = moment().toISOString();
     const query = {
+      seq_no_primary_term: true,
       _source: {
         excludes: [ 'output.content' ]
       },
@@ -466,7 +466,11 @@ export class Worker extends events.EventEmitter {
         if (jobs.length > 0) {
           this.debug(`${jobs.length} outstanding jobs returned`);
         }
-        return jobs;
+        return jobs.filter(async job => {
+          const payload = job._source.payload.payload;
+          const repoUrl = payload.uri || payload.url;
+          return await this.codeServices.isResourceLocal(repoUrl);
+        });
       })
       .catch((err) => {
       // ignore missing indices errors

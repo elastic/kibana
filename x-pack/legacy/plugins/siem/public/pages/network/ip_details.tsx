@@ -39,10 +39,10 @@ import { NetworkKql } from './kql';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
 import { AnomalyTableProvider } from '../../components/ml/anomaly/anomaly_table_provider';
-import { networkToInfluencers } from '../../components/ml/influencers/network_to_influencers';
 import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { AnomaliesNetworkTable } from '../../components/ml/tables/anomalies_network_table';
+import { networkToCriteria } from '../../components/ml/criteria/network_to_criteria';
 
 const DomainsTableManage = manageQuery(DomainsTable);
 const TlsTableManage = manageQuery(TlsTable);
@@ -102,9 +102,10 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       >
                         {({ id, inspect, ipOverviewData, loading, refetch }) => (
                           <AnomalyTableProvider
-                            influencers={networkToInfluencers(ip)}
+                            criteriaFields={networkToCriteria(ip, flowTarget)}
                             startDate={from}
                             endDate={to}
+                            skip={isInitializing}
                           >
                             {({ isLoadingAnomaliesData, anomaliesData }) => (
                               <IpOverviewManage
@@ -154,7 +155,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           totalCount,
                           pageInfo,
                           loading,
-                          loadMore,
+                          loadPage,
                           refetch,
                         }) => (
                           <DomainsTableManage
@@ -163,11 +164,15 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                             id={id}
                             inspect={inspect}
                             flowTarget={flowTarget}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                             ip={ip}
                             loading={loading}
-                            loadMore={loadMore}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                            loadPage={loadPage}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
                             refetch={refetch}
                             setQuery={setQuery}
                             totalCount={totalCount}
@@ -195,7 +200,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           totalCount,
                           pageInfo,
                           loading,
-                          loadMore,
+                          loadPage,
                           refetch,
                         }) => (
                           <UsersTableManage
@@ -203,10 +208,14 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                             id={id}
                             inspect={inspect}
                             flowTarget={flowTarget}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                             loading={loading}
-                            loadMore={loadMore}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                            loadPage={loadPage}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
                             refetch={refetch}
                             setQuery={setQuery}
                             totalCount={totalCount}
@@ -234,17 +243,21 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           totalCount,
                           pageInfo,
                           loading,
-                          loadMore,
+                          loadPage,
                           refetch,
                         }) => (
                           <TlsTableManage
                             data={tls}
                             id={id}
                             inspect={inspect}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo) || false}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                             loading={loading}
-                            loadMore={loadMore}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                            loadPage={loadPage}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
                             refetch={refetch}
                             setQuery={setQuery}
                             totalCount={totalCount}
@@ -261,6 +274,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         skip={isInitializing}
                         ip={ip}
                         type={networkModel.NetworkType.details}
+                        flowTarget={flowTarget}
                         narrowDateRange={(score, interval) => {
                           const fromTo = scoreIntervalToDateTime(score, interval);
                           setAbsoluteRangeDatePicker({

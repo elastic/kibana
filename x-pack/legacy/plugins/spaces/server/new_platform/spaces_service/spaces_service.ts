@@ -18,8 +18,9 @@ import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesClient } from '../../lib/spaces_client';
-import { getSpaceIdFromPath } from '../../lib/spaces_url_parser';
+import { getSpaceIdFromPath, addSpaceIdToPath } from '../../lib/spaces_url_parser';
 import { SpacesConfigType } from '../config';
+import { namespaceToSpaceId, spaceIdToNamespace } from '../../lib/utils/namespace';
 
 type RequestFacade = KibanaRequest | Legacy.Request;
 
@@ -28,7 +29,13 @@ export interface SpacesServiceSetup {
 
   getSpaceId(request: RequestFacade): string;
 
+  getBasePath(spaceId: string): string;
+
   isInDefaultSpace(request: RequestFacade): boolean;
+
+  spaceIdToNamespace(spaceId: string): string | undefined;
+
+  namespaceToSpaceId(namespace: string | undefined): string;
 }
 
 interface SpacesServiceDeps {
@@ -68,22 +75,34 @@ export class SpacesService {
 
     return {
       getSpaceId,
+      getBasePath: (spaceId: string) => {
+        if (!spaceId) {
+          throw new TypeError(`spaceId is required to retrieve base path`);
+        }
+        return addSpaceIdToPath(this.serverBasePath, spaceId);
+      },
       isInDefaultSpace: (request: RequestFacade) => {
         const spaceId = getSpaceId(request);
 
         return spaceId === DEFAULT_SPACE_ID;
       },
+      spaceIdToNamespace,
+      namespaceToSpaceId,
       scopedClient: async (request: RequestFacade) => {
         return combineLatest(elasticsearch.adminClient$, config$)
           .pipe(
             map(([clusterClient, config]) => {
               const internalRepository = savedObjects.getSavedObjectsRepository(
-                clusterClient.callAsInternalUser
+                clusterClient.callAsInternalUser,
+                ['space']
               );
 
               const callCluster = clusterClient.asScoped(request).callAsCurrentUser;
 
-              const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
+              const callWithRequestRepository = savedObjects.getSavedObjectsRepository(
+                callCluster,
+                ['space']
+              );
 
               const authorization = security.isEnabled ? security.authorization : null;
 

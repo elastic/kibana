@@ -4,7 +4,7 @@
 
 ## Router.post() method
 
-Register a `POST` request with the router
+Register a route handler for `POST` request.
 
 <b>Signature:</b>
 

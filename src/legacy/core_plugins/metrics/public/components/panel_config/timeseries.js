@@ -43,9 +43,8 @@ import {
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
-import { data } from 'plugins/data/setup';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-const { QueryBarInput } = data.query.ui;
+import { QueryBarInput } from 'plugins/data';
 const localStorage = new Storage(window.localStorage);
 class TimeseriesPanelConfigUi extends Component {
   constructor(props) {
@@ -144,7 +143,6 @@ class TimeseriesPanelConfigUi extends Component {
           fields={this.props.fields}
           model={this.props.model}
           name={this.props.name}
-          visData$={this.props.visData$}
           onChange={this.props.onChange}
         />
       );
@@ -370,7 +368,11 @@ class TimeseriesPanelConfigUi extends Component {
           <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
             <FormattedMessage id="tsvb.timeseries.dataTab.dataButtonLabel" defaultMessage="Data" />
           </EuiTab>
-          <EuiTab isSelected={selectedTab === 'options'} onClick={() => this.switchTab('options')}>
+          <EuiTab
+            isSelected={selectedTab === 'options'}
+            onClick={() => this.switchTab('options')}
+            data-test-subj="timeSeriesEditorPanelOptionsBtn"
+          >
             <FormattedMessage
               id="tsvb.timeseries.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"
@@ -396,7 +398,6 @@ TimeseriesPanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  visData$: PropTypes.object,
 };
 
 export const TimeseriesPanelConfig = injectI18n(TimeseriesPanelConfigUi);

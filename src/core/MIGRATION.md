@@ -24,9 +24,10 @@
   * [How can I avoid passing Core services deeply within my UI component tree?](#how-can-i-avoid-passing-core-services-deeply-within-my-ui-component-tree)
   * [How is "common" code shared on both the client and server?](#how-is-common-code-shared-on-both-the-client-and-server)
   * [When does code go into a plugin, core, or packages?](#when-does-code-go-into-a-plugin-core-or-packages)
+  * [How do I build my shim for New Platform services?](#how-do-i-build-my-shim-for-new-platform-services)
 * [How to](#how-to)
   * [Configure plugin](#configure-plugin)
-  * [Mock core services in tests](#mock-core-services-in-tests)
+  * [Mock new platform services in tests](#mock-new-platform-services-in-tests)
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
@@ -603,9 +604,155 @@ It is generally a much greater challenge preparing legacy browser-side code for 
 
 To complicate matters further, a significant amount of the business logic in Kibana's client-side code exists inside the `ui/public` directory (aka ui modules), and all of that must be migrated as well. Unlike the server-side code where the order in which you migrated plugins was not particularly important, it's important that UI modules be addressed as soon as possible.
 
-Also unlike the server-side migration, we won't concern ourselves with creating shimmed plugin definitions that then get copied over to complete the migration.
+Because usage of angular and `ui/public` modules varies widely between legacy plugins, there is no "one size fits all" solution to migrating your browser-side code to the new platform. The best place to start is by checking with the platform team to help identify the best migration path for your particular plugin.
 
-### Move UI modules into plugins
+That said, we've seen a series of patterns emerge as teams begin migrating browser code. In practice, most migrations will follow a path that looks something like this:
+
+#### 1. Create a plugin definition file
+
+We've found that doing this right away helps you start thinking about your plugin in terms of lifecycle methods and services, which makes the rest of the migration process feel more natural. It also forces you to identify which actions "kick off" your plugin, since you'll need to execute those when the `setup/start` methods are called.
+
+This definition isn't going to do much for us just yet, but as we get further into the process, we will gradually start returning contracts from our `setup` and `start` methods, while also injecting dependencies as arguments to these methods.
+
+```ts
+// public/plugin.ts
+import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
+import { FooSetup, FooStart } from '../../../../legacy/core_plugins/foo/public';
+
+/**
+ * These are the private interfaces for the services your plugin depends on.
+ * @internal
+ */
+export interface DemoSetupDeps {
+  foo: FooSetup;
+}
+export interface DemoStartDeps {
+  foo: FooStart;
+}
+
+/**
+ * These are the interfaces with your public contracts. You should export these
+ * for other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces.
+ * @public
+ */
+export type DemoSetup = {}
+export type DemoStart = {}
+
+/** @internal */
+export class DemoPlugin implements Plugin<DemoSetup, DemoStart, DemoSetupDeps, DemoStartDeps> {
+  public setup(core: CoreSetup, plugins: DemoSetupDeps): DemoSetup {
+    // kick off your plugin here...
+    return {
+      fetchConfig: () => ({}),
+    };
+  }
+
+  public start(core: CoreStart, plugins: DemoStartDeps): DemoStart {
+    // ...or here
+    return {
+      initDemo: () => ({}),
+    };
+  }
+
+  public stop() {}
+}
+```
+
+#### 2. Export all static code and types from `public/index.ts`
+
+If your plugin needs to share static code with other plugins, this code must be exported from your top-level `public/index.ts`. This includes any type interfaces that you wish to make public. For details on the types of code that you can safely share outside of the runtime lifecycle contracts, see [Can static code be shared between plugins?](#can-static-code-be-shared-between-plugins)
+
+```ts
+// public/index.ts
+import { DemoSetup, DemoStart } from './plugin';
+
+const myPureFn = (x: number): number => x + 1;
+const MyReactComponent = (props) => {
+  return <h1>Hello, {props.name}</h1>;
+}
+
+// These are your public types & static code
+export {
+  myPureFn,
+  MyReactComponent,
+  DemoSetup,
+  DemoStart,
+}
+```
+
+While you're at it, you can also add your plugin initializer to this file:
+
+```ts
+// public/index.ts
+import { PluginInitializer, PluginInitializerContext } from '../../../../core/public';
+import { DemoSetup, DemoStart, DemoSetupDeps, DemoStartDeps, DemoPlugin } from './plugin';
+
+// Core will be looking for this when loading our plugin in the new platform
+export const plugin: PluginInitializer<DemoSetup, DemoStart, DemoSetupDeps, DemoStartDeps> = (
+  initializerContext: PluginInitializerContext
+) => {
+  return new DemoPlugin();
+};
+
+const myPureFn = (x: number): number => x + 1;
+const MyReactComponent = (props) => {
+  return <h1>Hello, {props.name}</h1>;
+}
+
+/** @public */
+export {
+  myPureFn,
+  MyReactComponent,
+  DemoSetup,
+  DemoStart,
+}
+```
+
+Great! So you have your plugin definition, and you've moved all of your static exports to the top level of your plugin... now let's move on to the runtime contract your plugin will be exposing.
+
+#### 3. Export your runtime contract
+
+Next, we need a way to expose your runtime dependencies. In the new platform, core will handle this for you. But while we are still in the legacy world, other plugins will need a way to consume your plugin's contract without the help of core.
+
+So we will take a similar approach to what was described above in the server section: actually call the `Plugin.setup()` and `Plugin.start()` methods, and export the values those return for other legacy plugins to consume. By convention, we've been placing this in a `legacy.ts` file, which also serves as our shim where we import our legacy dependencies and reshape them into what we are expecting in the new platform:
+
+```ts
+// public/legacy.ts
+import { PluginInitializerContext } from '../../../../core/public';
+import { npSetup, npStart } from 'ui/new_platform';
+import { plugin } from '.';
+
+import { setup as fooSetup, start as fooStart } from '../../foo/public/legacy'; // assumes `foo` lives in `legacy/core_plugins`
+
+const pluginInstance = plugin({} as PluginInitializerContext);
+const shimCoreSetup = {
+  ...npSetup.core,
+  bar: {}, // shim for a core service that hasn't migrated yet
+};
+const shimCoreStart = {
+  ...npStart.core,
+  bar: {},
+};
+const shimSetupPlugins = {
+  ...npSetup.plugins,
+  foo: fooSetup,
+};
+const shimStartPlugins = {
+  ...npStart.plugins,
+  foo: fooStart,
+};
+
+export const setup = pluginInstance.setup(shimCoreSetup, shimSetupPlugins);
+export const start = pluginInstance.start(shimCoreStart, shimStartPlugins);
+```
+
+> As you build your shims, you may be wondering where you will find some legacy services in the new platform. Skip to [the tables below](#how-do-i-build-my-shim-for-new-platform-services) for a list of some of the more common legacy services and where we currently expect them to live.
+
+Notice how in the example above, we are importing the `setup` and `start` contracts from the legacy shim provided by `foo` plugin; we could just as easily be importing modules from `ui/public` here as well.
+
+The point is that, over time, this becomes the one file in our plugin containing stateful imports from the legacy world. And _that_ is where things start to get interesting...
+
+#### 4. Move "owned" UI modules into your plugin and expose them from your public contract
 
 Everything inside of the `ui/public` directory is going to be dealt with in one of the following ways:
 
@@ -620,7 +767,20 @@ Concerns around ownership or duplication of a given module should be raised and 
 
 A great outcome is a module being deleted altogether because it isn't used or it was used so lightly that it was easy to refactor away.
 
-### Provide plugin extension points decoupled from angular.js
+If it is determined that your plugin is going to own any UI modules that other plugins depend on, you'll want to migrate these quickly so that there's time for downstream plugins to update their imports. This will ultimately involve moving the module code into your plugin, and exposing it via your setup/start contracts, or as static code from your `plugin/index.ts`. We have identified owners for most of the legacy UI modules; if you aren't sure where you should move something that you own, please consult with the platform team.
+
+Depending on the module's level of complexity and the number of other places in Kibana that rely on it, there are a number of strategies you could use for this:
+
+* **Do it all at once.** Move the code, expose it from your plugin, and update all imports across Kibana.
+  - This works best for small pieces of code that aren't widely used.
+* **Shim first, move later.** Expose the code from your plugin by importing it in your shim and then re-exporting it from your plugin first, then gradually update imports to pull from the new location, leaving the actual moving of the code as a final step.
+  - This works best for the largest, most widely used modules that would otherwise result in huge, hard-to-review PRs.
+  - It makes things easier by splitting the process into small, incremental PRs, but is probably overkill for things with a small surface area.
+* **Hybrid approach.** As a middle ground, you can also move the code to your plugin immediately, and then re-export your plugin code from the original `ui/public` directory.
+  - This eliminates any concerns about backwards compatibility by allowing you to update the imports across Kibana later.
+  - Works best when the size of the PR is such that moving the code can be done without much refactoring.
+
+#### 5. Provide plugin extension points decoupled from angular.js
 
 There will be no global angular module in the new platform, which means none of the functionality provided by core will be coupled to angular. Since there is no global angular module shared by all applications, plugins providing extension points to be used by other plugins can not couple those extension points to angular either.
 
@@ -632,7 +792,7 @@ Another way to address this problem is to create an entirely new set of plugin A
 
 Please talk with the platform team when formalizing _any_ client-side extension points that you intend to move to the new platform as there are some bundling considerations to consider.
 
-### Move all webpack alias imports into uiExport entry files
+#### 6. Move all webpack alias imports into uiExport entry files
 
 Existing plugins import three things using webpack aliases today: services from ui/public (`ui/`), services from other plugins (`plugins/`), and uiExports themselves (`uiExports/`). These webpack aliases will not exist once we remove the legacy plugin system, so part of our migration effort is addressing all of the places where they are used today.
 
@@ -642,7 +802,29 @@ With the legacy plugin system, extensions of core and other plugins are handled 
 
 Each uiExport path is an entry file into one specific set of functionality provided by a client-side plugin. All webpack alias-based imports should be moved to these entry files, where they are appropriate. Moving a deeply nested webpack alias-based import in a plugin to one of the uiExport entry files might require some refactoring to ensure the dependency is now passed down to the appropriate place as function arguments instead of via import statements.
 
-### Switch to new platform services
+For stateful dependencies using the `plugins/` and `ui/` webpack aliases, you should be able to take advantage of the `legacy.ts` shim you created earlier. By placing these imports directly in your shim, you can pass the dependencies you need into your `Plugin.start` and `Plugin.setup` methods, from which point they can be passed down to the rest of your plugin's entry files.
+
+For items that don't yet have a clear "home" in the new platform, it may also be helpful to somehow indicate this in your shim to make it easier to remember that you'll need to change this later. One convention we've found helpful for this is simply using a namespace like `__LEGACY`:
+
+```ts
+// public/legacy.ts
+import { uiThing } from 'ui/thing';
+...
+
+const pluginInstance = plugin({} as PluginInitializerContext);
+const shimSetupPlugins = {
+  ...npSetup.plugins,
+  foo: fooSetup,
+  __LEGACY: {
+    uiThing, // eventually this will move out of __LEGACY and into a proper plugin
+  },
+};
+
+...
+export const setup = pluginInstance.setup(npSetup.core, shimSetupPlugins);
+```
+
+#### 7. Switch to new platform services
 
 At this point, your plugin has one or more uiExport entry files that together contain all of the webpack alias-based import statements needed to run your plugin. Each one of these import statements is either a service that is or will be provided by core or a service provided by another plugin.
 
@@ -650,13 +832,19 @@ As new non-angular-based APIs are added, update your entry files to import the c
 
 Once all of the existing webpack alias-based imports in your plugin switch to `ui/new_platform`, it no longer depends directly on the legacy "core" features or other legacy plugins, so it is ready to officially migrate to the new platform.
 
-### Migrate to the new plugin system
+#### 8. Migrate to the new plugin system
 
 With all of your services converted, you are now ready to complete your migration to the new platform.
 
-Many plugins at this point will create a new plugin definition class and copy and paste the code from their various uiExport entry files directly into the new plugin class. The legacy uiExport entry files can then simply be deleted.
+Many plugins at this point will copy over their plugin definition class & the code from their various service/uiExport entry files directly into the new plugin directory. The `legacy.ts` shim file can then simply be deleted.
 
 With the previous steps resolved, this final step should be easy, but the exact process may vary plugin by plugin, so when you're at this point talk to the platform team to figure out the exact changes you need.
+
+#### Bonus: Tips for complex migration scenarios
+
+For a few plugins, some of these steps (such as angular removal) could be a months-long process. In those cases, it may be helpful from an organizational perspective to maintain a clear separation of code that is and isn't "ready" for the new platform.
+
+One convention that is useful for this is creating a dedicated `public/np_ready` directory to house the code that is ready to migrate, and gradually move more and more code into it until the rest of your plugin is essentially empty. At that point, you'll be able to copy your `index.ts`, `plugin.ts`, and the contents of `./np_ready` over into your plugin in the new platform, leaving your legacy shim behind. This carries the added benefit of providing a way for us to introduce helpful tooling in the future, such as [custom eslint rules](https://github.com/elastic/kibana/pull/40537), which could be run against that specific directory to ensure your code is ready to migrate.
 
 ## Frequently asked questions
 
@@ -825,6 +1013,80 @@ After plugins, core is where most of the rest of the code in Kibana will exist. 
 
 The packages directory should have the least amount of code in Kibana. Just because some piece of code is not stateful doesn't mean it should go into packages. The packages directory exists to aid us in our quest to centralize as many of our owned dependencies in this single monorepo, so it's the logical place to put things like Kibana specific forks of node modules or vendor dependencies.
 
+### How do I build my shim for New Platform services?
+
+Many of the utilities you're using to build your plugins are available in the New Platform or in New Platform plugins. To help you build the shim for these new services, use the tables below to find where the New Platform equivalent lives.
+
+
+#### Client-side
+
+##### Core services
+In client code, `core` can be imported in legacy plugins via the `ui/new_platform` module.
+
+```ts
+import { npStart: { core } } from 'ui/new_platform';
+```
+
+| Legacy Platform                                       | New Platform                   | Notes                                                                                                                                          |
+|-------------------------------------------------------|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| `chrome.addBasePath`                                  | `core.http.basePath.prepend`   |                                                                                                                                                |
+| `chrome.breadcrumbs.set`                              | `core.chrome.setBreadcrumbs`   |                                                                                                                                                |
+| `chrome.getUiSettingsClient`                          | `core.uiSettings`              |                                                                                                                                                |
+| `chrome.helpExtension.set`                            | `core.chrome.setHelpExtension` |                                                                                                                                                |
+| `chrome.setVisible`                                   | `core.chrome.setVisible`       |                                                                                                                                                |
+| `chrome.getInjected`                                  | --                             | Not available, we'd like to hear about your usecase.                                                                                           |
+| `chrome.setRootTemplate` / `chrome.setRootController` | --                             | Use application mounting via `core.application.register` (coming soon).                                                                        |
+| `import { recentlyAccessed } from 'ui/persisted_log'` | `core.chrome.recentlyAccessed` |                                                                                                                                                |
+| `ui/documentation_links`                              | `core.docLinks`                |                                                                                                                                                |
+| `ui/kfetch`                                           | `core.http`                    | API is nearly identical                                                                                                                        |
+| `ui/metadata`                                         | `core.injectedMetadata`        | May be removed in the future. If you have a necessary usecase, please let us know.                                                             |
+| `ui/notify`                                           | `core.notifications`           | Currently only supports toast messages. Banners coming soon.                                                                                   |
+| `ui/routes`                                           | --                             | There is no global routing mechanism. Each app [configures its own routing](/rfcs/text/0004_application_service_mounting.md#complete-example). |
+
+_See also: [Public's CoreStart API Docs](/docs/development/core/public/kibana-plugin-public.corestart.md)_
+
+##### Plugins for shared application services
+In client code, we have a series of plugins which house shared application services that are being built in the shape of the new platform, but for the time being, are only available in legacy. So if your plugin depends on any of the APIs below, you'll need build your plugin as a legacy plugin that shims the new platform. Once these API's have been moved to the new platform you can migrate your plugin and declare a dependency on the plugin that owns the API's you require.
+
+The contracts for these plugins are exposed for you to consume in your own plugin; we have created dedicated exports for the `setup` and `start` contracts in a file called `legacy`. By passing these contracts to your plugin's `setup` and `start` methods, you can mimic the functionality that will eventually be provided in the new platform.
+
+```ts
+import { setup, start } from '../core_plugins/data/public/legacy';
+import { setup, start } from '../core_plugins/embeddables/public/legacy';
+import { setup, start } from '../core_plugins/visualizations/public/legacy';
+```
+
+| Legacy Platform                                        | New Platform                               | Notes                                                                                                                                  |
+|--------------------------------------------------------|--------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| `import 'ui/apply_filters'`                            | `import { ApplyFiltersPopover } from '../data/public'`         | `import '../data/public/legacy` should be called to load legacy directives                                               |
+| `import 'ui/filter_bar'`                               | `import { FilterBar } from '../data/public'`                   | `import '../data/public/legacy` should be called to load legacy directives                                               |
+| `import 'ui/query_bar'`                                | `import { QueryBar, QueryBarInput } from '../data/public'`     | Directives are deprecated.                                                                                            |
+| `import 'ui/search_bar'`                               | `import { SearchBar } from '../data/public'`           | Directive is deprecated.                                                                                              |
+| `import 'ui/kbn_top_nav'`                              | `import { TopNavMenu } from '../kibana_react/public'`          | Directive is still available in `ui/kbn_top_nav`.                                                                     |              
+| `core_plugins/interpreter`                             | `data.expressions`                                          | still in progress                                                                                                     |
+| `ui/courier`                                           | `data.search`                              | still in progress                                                                                                                  |
+| `ui/embeddable`                                        | `embeddables`                              | still in progress                                                                                                                  |
+| `ui/filter_manager`                                    | `data.filter`                              | --                                                                                                                                 |
+| `ui/index_patterns`                                    | `data.indexPatterns`                       | still in progress                                                                                                                  |
+| `ui/registry/vis_types`                                | `visualizations.types`                     | --                                                                                                                                 |
+| `ui/vis`                                               | `visualizations.types`                     | --                                                                                                                                 |
+| `ui/vis/vis_factory`                                   | `visualizations.types`                     | --                                                                                                                                 |
+| `ui/vis/vis_filters`                                   | `visualizations.filters`                   | --                                                                                                                                 |
+
+
+#### Server-side
+
+##### Core services
+In server code, `core` can be accessed from either `server.newPlatform` or `kbnServer.newPlatform`. There are not currently very many services available on the server-side:
+
+| Legacy Platform                                    | New Platform                      | Notes                                              |
+|----------------------------------------------------|-----------------------------------|----------------------------------------------------|
+| `request.getBasePath()`                            | `core.http.basePath.get`          |                                                    |
+| `server.plugins.elasticsearch.getCluster('data')`  | `core.elasticsearch.dataClient$`  | Handlers will also include a pre-configured client |
+| `server.plugins.elasticsearch.getCluster('admin')` | `core.elasticsearch.adminClient$` | Handlers will also include a pre-configured client |
+| `request.getBasePath()`                            | `core.http.basePath`              |                                                    |
+
+_See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-plugin-server.coresetup.md)_
 
 ## How to
 
@@ -852,20 +1114,37 @@ class MyPlugin {
   }
 ```
 
-### Mock core services in tests
-Core services already provide mocks to simplify testing and make sure plugins always rely on valid public contracts.
+### Mock new platform services in tests
+
+#### Writing mocks for your plugin
+Core services already provide mocks to simplify testing and make sure plugins always rely on valid public contracts:
 ```typescript
 // my_plugin/server/plugin.test.ts
-Import { configServiceMock } from 'src/core/server/mocks.ts'
+import { configServiceMock } from 'src/core/server/mocks';
 
 const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(config$);
 …
-const plugin = new MyPlugin({ configService }, …)
+const plugin = new MyPlugin({ configService }, …);
 ```
-However it's not mandatory, we strongly recommended to export your plugin mocks as well, in order for dependent plugins to use them in tests. Your plugin mocks should be exported from the root level of the plugin. Plugin mocks should consist of mocks for *public API only*: setup/start/stop contracts. Mocks aren't necessary for pure functions as other plugins can call original implementation in tests.
+
+Or if you need to get the whole core `setup` or `start` contracts:
 ```typescript
-// my_plugin/server/mocks.ts
+// my_plugin/public/plugin.test.ts
+import { coreMock } from 'src/core/public/mocks';
+
+const coreSetup = coreMock.createSetup();
+coreSetup.uiSettings.get.mockImplementation((key: string) => {
+  …
+});
+…
+const plugin = new MyPlugin(coreSetup, ...);
+```
+
+
+Although it isn't mandatory, we strongly recommended you export your plugin mocks as well, in order for dependent plugins to use them in tests. Your plugin mocks should be exported from the root `/server` and `/public` directories in your plugin:
+```typescript
+// my_plugin/server/mocks.ts or my_plugin/public/mocks.ts
 const createSetupContractMock = () => {
   const startContract: jest.Mocked<MyPluginStartContract>= {
     isValid: jest.fn();
@@ -877,6 +1156,31 @@ const createSetupContractMock = () => {
 
 export const myPluginMocks = {
   createSetup: createSetupContractMock,
-  createStart: ...
+  createStart: …
 }
 ```
+Plugin mocks should consist of mocks for *public APIs only*: setup/start/stop contracts. Mocks aren't necessary for pure functions as other plugins can call the original implementation in tests.
+
+#### Using mocks in your tests
+During the migration process, it is likely you are preparing your plugin by shimming in new platform-ready dependencies via the legacy `ui/new_platform` module:
+```typescript
+import { npSetup, npStart } from 'ui/new_platform';
+```
+
+If you are using this approach, the easiest way to mock core and new platform-ready plugins in your legacy tests is to mock the `ui/new_platform` module:
+```typescript
+jest.mock('ui/new_platform');
+```
+
+This will automatically mock the services in `ui/new_platform` thanks to the [helpers that have been added](https://github.com/elastic/kibana/blob/master/src/legacy/ui/public/new_platform/__mocks__/helpers.ts) to that module.
+
+If others are consuming your plugin's new platform contracts via the `ui/new_platform` module, you'll want to update the helpers as well to ensure your contracts are properly mocked.
+
+> Note: The `ui/new_platform` mock is only designed for use by old Jest tests. If you are writing new tests, you should structure your code and tests such that you don't need this mock. Instead, you should import the `core` mock directly and instantiate it.
+
+#### What about karma tests?
+While our plan is to only provide first-class mocks for Jest tests, there are many legacy karma tests that cannot be quickly or easily converted to Jest -- particularly those which are still relying on mocking Angular services via `ngMock`.
+
+For these tests, we are maintaining a separate set of mocks. Files with a `.karma_mock.{js|ts|tsx}` extension will be loaded _globally_ before karma tests are run.
+
+It is important to note that this behavior is different from `jest.mock('ui/new_platform')`, which only mocks tests on an individual basis. If you encounter any failures in karma tests as a result of new platform migration efforts, you may need to add a `.karma_mock.js` file for the affected services, or add to the existing karma mock we are maintaining in `ui/new_platform`.

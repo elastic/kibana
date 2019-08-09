@@ -5,4 +5,4 @@
  */
 
 
-import './select_interval_directive';
+export { interval$, SelectInterval } from './select_interval';

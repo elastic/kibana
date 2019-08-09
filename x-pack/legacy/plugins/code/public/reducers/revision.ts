@@ -16,6 +16,7 @@ import {
   fetchTreeCommitsSuccess,
   TreeCommitPayload,
 } from '../actions';
+import { routePathChange, repoChange } from '../actions/route';
 
 export interface RevisionState {
   branches: ReferenceInfo[];
@@ -32,6 +33,15 @@ const initialState: RevisionState = {
   loadingCommits: false,
   commitsFullyLoaded: {},
 };
+
+const clearState = (state: RevisionState) =>
+  produce<RevisionState>(state, draft => {
+    draft.branches = initialState.branches;
+    draft.tags = initialState.tags;
+    draft.treeCommits = initialState.treeCommits;
+    draft.loadingCommits = initialState.loadingCommits;
+    draft.commitsFullyLoaded = initialState.commitsFullyLoaded;
+  });
 
 type RevisionPayload = ReferenceInfo[] & CommitInfo[] & TreeCommitPayload;
 
@@ -72,6 +82,8 @@ export const revision = handleActions<RevisionState, RevisionPayload>(
         }
         draft.loadingCommits = false;
       }),
+    [String(routePathChange)]: clearState,
+    [String(repoChange)]: clearState,
   },
   initialState
 );

@@ -27,12 +27,12 @@ export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
 
-  describe('dashboard filter bar', async () => {
+  describe('dashboard filter bar', () => {
     before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    describe('Add a filter bar', async function () {
+    describe('Add a filter bar', function () {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
       });
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('filter editor field list', async function () {
+    describe('filter editor field list', function () {
       this.tags(['skipFirefox']);
 
       before(async () => {
@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('filter pills', async function () {
+    describe('filter pills', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();

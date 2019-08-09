@@ -5,8 +5,9 @@
  */
 
 import produce from 'immer';
-
+import querystring from 'querystring';
 import { Action, handleActions } from 'redux-actions';
+import { history } from '../utils/url';
 
 import {
   DocumentSearchResult,
@@ -33,6 +34,7 @@ import {
   turnOffDefaultRepoScope,
   turnOnDefaultRepoScope,
 } from '../actions';
+import { RepositoryUtils } from '../../common/repository_utils';
 
 export interface SearchState {
   scope: SearchScope;
@@ -51,12 +53,30 @@ export interface SearchState {
 
 const repositories: Repository[] = [];
 
+const getRepoScopeFromUrl = () => {
+  const { repoScope } = querystring.parse(history.location.search.replace('?', ''));
+  if (repoScope) {
+    return String(repoScope)
+      .split(',')
+      .map(r => ({
+        uri: r,
+        org: RepositoryUtils.orgNameFromUri(r),
+        name: RepositoryUtils.repoNameFromUri(r),
+      })) as Repository[];
+  } else {
+    return [];
+  }
+};
+
 const initialState: SearchState = {
   query: '',
   isLoading: false,
   isScopeSearchLoading: false,
   scope: SearchScope.DEFAULT,
-  searchOptions: { repoScope: [], defaultRepoScopeOn: false },
+  searchOptions: {
+    repoScope: getRepoScopeFromUrl(),
+    defaultRepoScopeOn: false,
+  },
   scopeSearchResults: { repositories, total: 0, took: 0 },
 };
 
@@ -98,7 +118,8 @@ export const search = handleActions<SearchState, SearchPayload>(
             draft.repositories = new Set();
           }
           draft.isLoading = true;
-          draft.error = undefined;
+          delete draft.error;
+          delete draft.documentSearchResults;
         }
       }),
     [String(documentSearchSuccess)]: (state: SearchState, action: Action<DocumentSearchResult>) =>
@@ -170,6 +191,8 @@ export const search = handleActions<SearchState, SearchPayload>(
         if (action.payload) {
           draft.query = action.payload.query;
           draft.isLoading = true;
+          delete draft.error;
+          delete draft.repositorySearchResults;
         }
       }),
     [String(repositorySearchSuccess)]: (

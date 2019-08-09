@@ -17,9 +17,9 @@
 
   // Sub applications
   @import 'data_frame/index';
+  @import 'data_frame_analytics/index';
   @import 'datavisualizer/index';
   @import 'explorer/index'; // SASSTODO: This file needs to be rewritten
-  @import 'file_datavisualizer/index';
   @import 'jobs/index'; // SASSTODO: This collection of sass files has multiple problems
   @import 'settings/index';
   @import 'timeseriesexplorer/index';
@@ -33,18 +33,17 @@
   @import 'components/data_recognizer/index';
   @import 'components/documentation_help_link/index';
   @import 'components/entity_cell/index';
-  @import 'components/field_data_card/index'; // SASSTODO: This file needs to be rewritten
   @import 'components/field_title_bar/index';
   @import 'components/field_type_icon/index';
   @import 'components/form_filter_input/index'; // SASSTODO: This file needs to be rewritten
   @import 'components/form_label/index';
   @import 'components/influencers_list/index';
   @import 'components/items_grid/index';
-  @import 'components/job_selector/index'; // TODO: remove above two once react conversion of job selector is done
+  @import 'components/job_selector/index';
   @import 'components/json_tooltip/index'; // SASSTODO: This file overwrites EUI directly
   @import 'components/loading_indicator/index'; // SASSTODO: This component should be replaced with EuiLoadingSpinner
   @import 'components/messagebar/index';
-  @import 'components/nav_menu/index';
+  @import 'components/navigation_menu/index';
   @import 'components/rule_editor/index'; // SASSTODO: This file overwrites EUI directly
 
   // Hacks are last so they can overwrite anything above if needed

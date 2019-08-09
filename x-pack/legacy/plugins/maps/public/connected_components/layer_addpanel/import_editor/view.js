@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { GeojsonFileSource } from '../../../shared/layers/sources/client_file_source';
+import { GeojsonFileSource } from '../../../layers/sources/client_file_source';
 import { EuiSpacer, EuiPanel, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 

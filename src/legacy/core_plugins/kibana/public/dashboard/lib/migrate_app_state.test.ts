@@ -16,23 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-jest.mock(
-  'ui/chrome',
-  () => ({
-    getKibanaVersion: () => '6.3.0',
-  }),
-  { virtual: true }
-);
 
-jest.mock(
-  'ui/notify',
-  () => ({
-    toastNotifications: {
-      addDanger: () => {},
-    },
-  }),
-  { virtual: true }
-);
+import '../np_core.test.mocks';
 
 import { SavedDashboardPanel } from '../types';
 import { migrateAppState } from './migrate_app_state';

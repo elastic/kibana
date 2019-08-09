@@ -12,6 +12,7 @@ exports[`Should render default props 1`] = `
     />
   }
   closePopover={[Function]}
+  display="inlineBlock"
   hasArrow={true}
   id="metricsPopover"
   initialFocus="body"
@@ -66,6 +67,7 @@ exports[`Should render metrics expression for metrics 1`] = `
     />
   }
   closePopover={[Function]}
+  display="inlineBlock"
   hasArrow={true}
   id="metricsPopover"
   initialFocus="body"

@@ -108,6 +108,10 @@ export interface ResponseNotes {
 }
 
 export interface PinnedEvent {
+  code?: number | null;
+
+  message?: string | null;
+
   pinnedEventId: string;
 
   eventId?: string | null;
@@ -229,7 +233,7 @@ export interface AuthenticationsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -348,10 +352,12 @@ export interface CursorType {
   tiebreaker?: string | null;
 }
 
-export interface PageInfo {
-  endCursor?: CursorType | null;
+export interface PageInfoPaginated {
+  activePage: number;
 
-  hasNextPage?: boolean | null;
+  fakeTotalCount: number;
+
+  showMorePagesIndicator: boolean;
 }
 
 export interface Inspect {
@@ -365,7 +371,7 @@ export interface EventsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -860,6 +866,12 @@ export interface TimelineNonEcsData {
   value?: ToStringArray | null;
 }
 
+export interface PageInfo {
+  endCursor?: CursorType | null;
+
+  hasNextPage?: boolean | null;
+}
+
 export interface TimelineDetailsData {
   data?: DetailItem[] | null;
 
@@ -867,15 +879,7 @@ export interface TimelineDetailsData {
 }
 
 export interface DetailItem {
-  category: string;
-
-  description?: string | null;
-
-  example?: string | null;
-
   field: string;
-
-  type: string;
 
   values?: ToStringArray | null;
 
@@ -893,7 +897,7 @@ export interface HostsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -979,7 +983,7 @@ export interface DomainsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1031,7 +1035,7 @@ export interface TlsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1063,7 +1067,7 @@ export interface UsersData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1175,7 +1179,7 @@ export interface NetworkTopNFlowData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1223,7 +1227,7 @@ export interface NetworkDnsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1295,7 +1299,7 @@ export interface UncommonProcessesData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1497,11 +1501,25 @@ export interface ResponseTimeline {
 }
 
 export interface ResponseFavoriteTimeline {
+  code?: number | null;
+
+  message?: string | null;
+
   savedObjectId: string;
 
   version: string;
 
   favorite?: FavoriteTimelineResult[] | null;
+}
+
+export interface EventsTimelineData {
+  edges: EcsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface OsFields {
@@ -1559,6 +1577,23 @@ export interface TimerangeInput {
   from: number;
 }
 
+export interface PaginationInputPaginated {
+  /** The activePage parameter defines the page of results you want to fetch */
+  activePage: number;
+  /** The cursorStart parameter defines the start of the results to be displayed */
+  cursorStart: number;
+  /** The fakePossibleCount parameter determines the total count in order to show 5 additional pages */
+  fakePossibleCount: number;
+  /** The querySize parameter is the number of items to be returned */
+  querySize: number;
+}
+
+export interface SortField {
+  sortFieldId: string;
+
+  direction: Direction;
+}
+
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -1566,12 +1601,6 @@ export interface PaginationInput {
   cursor?: string | null;
   /** The tiebreaker parameter allow to be more precise to fetch the next item */
   tiebreaker?: string | null;
-}
-
-export interface SortField {
-  sortFieldId: string;
-
-  direction: Direction;
 }
 
 export interface LastTimeDetails {
@@ -1784,14 +1813,14 @@ export interface GetAllTimelineQueryArgs {
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   filterQuery?: string | null;
 
   defaultIndex: string[];
 }
 export interface EventsSourceArgs {
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sortField: SortField;
 
@@ -1835,7 +1864,7 @@ export interface HostsSourceArgs {
 
   timerange: TimerangeInput;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: HostsSortField;
 
@@ -1875,7 +1904,7 @@ export interface DomainsSourceArgs {
 
   ip: string;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: DomainsSortField;
 
@@ -1894,7 +1923,7 @@ export interface TlsSourceArgs {
 
   ip: string;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: TlsSortField;
 
@@ -1911,7 +1940,7 @@ export interface UsersSourceArgs {
 
   ip: string;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: UsersSortField;
 
@@ -1957,7 +1986,7 @@ export interface NetworkTopNFlowSourceArgs {
 
   flowTarget: FlowTarget;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: NetworkTopNFlowSortField;
 
@@ -1972,7 +2001,7 @@ export interface NetworkDnsSourceArgs {
 
   isPtrIncluded: boolean;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: NetworkDnsSortField;
 
@@ -2001,7 +2030,7 @@ export interface OverviewHostSourceArgs {
 export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   filterQuery?: string | null;
 
@@ -2362,6 +2391,10 @@ export namespace ResponseNotesResolvers {
 
 export namespace PinnedEventResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = PinnedEvent> {
+    code?: CodeResolver<number | null, TypeParent, Context>;
+
+    message?: MessageResolver<string | null, TypeParent, Context>;
+
     pinnedEventId?: PinnedEventIdResolver<string, TypeParent, Context>;
 
     eventId?: EventIdResolver<string | null, TypeParent, Context>;
@@ -2381,6 +2414,16 @@ export namespace PinnedEventResolvers {
     version?: VersionResolver<string | null, TypeParent, Context>;
   }
 
+  export type CodeResolver<
+    R = number | null,
+    Parent = PinnedEvent,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type MessageResolver<
+    R = string | null,
+    Parent = PinnedEvent,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type PinnedEventIdResolver<
     R = string,
     Parent = PinnedEvent,
@@ -2503,7 +2546,7 @@ export namespace SourceResolvers {
   export interface AuthenticationsArgs {
     timerange: TimerangeInput;
 
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     filterQuery?: string | null;
 
@@ -2517,7 +2560,7 @@ export namespace SourceResolvers {
     EventsArgs
   >;
   export interface EventsArgs {
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     sortField: SortField;
 
@@ -2587,7 +2630,7 @@ export namespace SourceResolvers {
 
     timerange: TimerangeInput;
 
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     sort: HostsSortField;
 
@@ -2653,7 +2696,7 @@ export namespace SourceResolvers {
 
     ip: string;
 
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     sort: DomainsSortField;
 
@@ -2679,7 +2722,7 @@ export namespace SourceResolvers {
 
     ip: string;
 
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     sort: TlsSortField;
 
@@ -2703,7 +2746,7 @@ export namespace SourceResolvers {
 
     ip: string;
 
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     sort: UsersSortField;
 
@@ -2774,7 +2817,7 @@ export namespace SourceResolvers {
 
     flowTarget: FlowTarget;
 
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     sort: NetworkTopNFlowSortField;
 
@@ -2795,7 +2838,7 @@ export namespace SourceResolvers {
 
     isPtrIncluded: boolean;
 
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     sort: NetworkDnsSortField;
 
@@ -2842,7 +2885,7 @@ export namespace SourceResolvers {
   export interface UncommonProcessesArgs {
     timerange: TimerangeInput;
 
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     filterQuery?: string | null;
 
@@ -3012,7 +3055,7 @@ export namespace AuthenticationsDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -3028,7 +3071,7 @@ export namespace AuthenticationsDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
-    R = PageInfo,
+    R = PageInfoPaginated,
     Parent = AuthenticationsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3418,21 +3461,28 @@ export namespace CursorTypeResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace PageInfoResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = PageInfo> {
-    endCursor?: EndCursorResolver<CursorType | null, TypeParent, Context>;
+export namespace PageInfoPaginatedResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = PageInfoPaginated> {
+    activePage?: ActivePageResolver<number, TypeParent, Context>;
 
-    hasNextPage?: HasNextPageResolver<boolean | null, TypeParent, Context>;
+    fakeTotalCount?: FakeTotalCountResolver<number, TypeParent, Context>;
+
+    showMorePagesIndicator?: ShowMorePagesIndicatorResolver<boolean, TypeParent, Context>;
   }
 
-  export type EndCursorResolver<
-    R = CursorType | null,
-    Parent = PageInfo,
+  export type ActivePageResolver<
+    R = number,
+    Parent = PageInfoPaginated,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type HasNextPageResolver<
-    R = boolean | null,
-    Parent = PageInfo,
+  export type FakeTotalCountResolver<
+    R = number,
+    Parent = PageInfoPaginated,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ShowMorePagesIndicatorResolver<
+    R = boolean,
+    Parent = PageInfoPaginated,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
@@ -3462,7 +3512,7 @@ export namespace EventsDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -3477,11 +3527,11 @@ export namespace EventsDataResolvers {
     Parent,
     Context
   >;
-  export type PageInfoResolver<R = PageInfo, Parent = EventsData, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type PageInfoResolver<
+    R = PageInfoPaginated,
+    Parent = EventsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type InspectResolver<
     R = Inspect | null,
     Parent = EventsData,
@@ -5128,6 +5178,25 @@ export namespace TimelineNonEcsDataResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
+export namespace PageInfoResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = PageInfo> {
+    endCursor?: EndCursorResolver<CursorType | null, TypeParent, Context>;
+
+    hasNextPage?: HasNextPageResolver<boolean | null, TypeParent, Context>;
+  }
+
+  export type EndCursorResolver<
+    R = CursorType | null,
+    Parent = PageInfo,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type HasNextPageResolver<
+    R = boolean | null,
+    Parent = PageInfo,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
 export namespace TimelineDetailsDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = TimelineDetailsData> {
     data?: DataResolver<DetailItem[] | null, TypeParent, Context>;
@@ -5149,42 +5218,14 @@ export namespace TimelineDetailsDataResolvers {
 
 export namespace DetailItemResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = DetailItem> {
-    category?: CategoryResolver<string, TypeParent, Context>;
-
-    description?: DescriptionResolver<string | null, TypeParent, Context>;
-
-    example?: ExampleResolver<string | null, TypeParent, Context>;
-
     field?: FieldResolver<string, TypeParent, Context>;
-
-    type?: TypeResolver<string, TypeParent, Context>;
 
     values?: ValuesResolver<ToStringArray | null, TypeParent, Context>;
 
     originalValue?: OriginalValueResolver<EsValue | null, TypeParent, Context>;
   }
 
-  export type CategoryResolver<R = string, Parent = DetailItem, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type DescriptionResolver<
-    R = string | null,
-    Parent = DetailItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type ExampleResolver<
-    R = string | null,
-    Parent = DetailItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
   export type FieldResolver<R = string, Parent = DetailItem, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type TypeResolver<R = string, Parent = DetailItem, Context = SiemContext> = Resolver<
     R,
     Parent,
     Context
@@ -5226,7 +5267,7 @@ export namespace HostsDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -5241,11 +5282,11 @@ export namespace HostsDataResolvers {
     Parent,
     Context
   >;
-  export type PageInfoResolver<R = PageInfo, Parent = HostsData, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type PageInfoResolver<
+    R = PageInfoPaginated,
+    Parent = HostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type InspectResolver<
     R = Inspect | null,
     Parent = HostsData,
@@ -5507,7 +5548,7 @@ export namespace DomainsDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -5523,7 +5564,7 @@ export namespace DomainsDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
-    R = PageInfo,
+    R = PageInfoPaginated,
     Parent = DomainsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -5679,7 +5720,7 @@ export namespace TlsDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -5694,11 +5735,11 @@ export namespace TlsDataResolvers {
     Parent,
     Context
   >;
-  export type PageInfoResolver<R = PageInfo, Parent = TlsData, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type PageInfoResolver<
+    R = PageInfoPaginated,
+    Parent = TlsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type InspectResolver<
     R = Inspect | null,
     Parent = TlsData,
@@ -5785,7 +5826,7 @@ export namespace UsersDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -5800,11 +5841,11 @@ export namespace UsersDataResolvers {
     Parent,
     Context
   >;
-  export type PageInfoResolver<R = PageInfo, Parent = UsersData, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type PageInfoResolver<
+    R = PageInfoPaginated,
+    Parent = UsersData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type InspectResolver<
     R = Inspect | null,
     Parent = UsersData,
@@ -6203,7 +6244,7 @@ export namespace NetworkTopNFlowDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -6219,7 +6260,7 @@ export namespace NetworkTopNFlowDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
-    R = PageInfo,
+    R = PageInfoPaginated,
     Parent = NetworkTopNFlowData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -6361,7 +6402,7 @@ export namespace NetworkDnsDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -6377,7 +6418,7 @@ export namespace NetworkDnsDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
-    R = PageInfo,
+    R = PageInfoPaginated,
     Parent = NetworkDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -6603,7 +6644,7 @@ export namespace UncommonProcessesDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -6619,7 +6660,7 @@ export namespace UncommonProcessesDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
-    R = PageInfo,
+    R = PageInfoPaginated,
     Parent = UncommonProcessesData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -7341,6 +7382,10 @@ export namespace ResponseTimelineResolvers {
 
 export namespace ResponseFavoriteTimelineResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ResponseFavoriteTimeline> {
+    code?: CodeResolver<number | null, TypeParent, Context>;
+
+    message?: MessageResolver<string | null, TypeParent, Context>;
+
     savedObjectId?: SavedObjectIdResolver<string, TypeParent, Context>;
 
     version?: VersionResolver<string, TypeParent, Context>;
@@ -7348,6 +7393,16 @@ export namespace ResponseFavoriteTimelineResolvers {
     favorite?: FavoriteResolver<FavoriteTimelineResult[] | null, TypeParent, Context>;
   }
 
+  export type CodeResolver<
+    R = number | null,
+    Parent = ResponseFavoriteTimeline,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type MessageResolver<
+    R = string | null,
+    Parent = ResponseFavoriteTimeline,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type SavedObjectIdResolver<
     R = string,
     Parent = ResponseFavoriteTimeline,
@@ -7361,6 +7416,39 @@ export namespace ResponseFavoriteTimelineResolvers {
   export type FavoriteResolver<
     R = FavoriteTimelineResult[] | null,
     Parent = ResponseFavoriteTimeline,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace EventsTimelineDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = EventsTimelineData> {
+    edges?: EdgesResolver<EcsEdges[], TypeParent, Context>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, Context>;
+
+    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
+  }
+
+  export type EdgesResolver<
+    R = EcsEdges[],
+    Parent = EventsTimelineData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = EventsTimelineData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type PageInfoResolver<
+    R = PageInfo,
+    Parent = EventsTimelineData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
+    Parent = EventsTimelineData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

@@ -16,21 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ContextMenuAction, ContextMenuActionsRegistryProvider } from 'ui/embeddable';
+import {
+  Action,
+  actionRegistry,
+  triggerRegistry,
+  CONTEXT_MENU_TRIGGER,
+  attachAction,
+} from 'plugins/embeddable_api';
 
-class SamplePanelLink extends ContextMenuAction {
+class SamplePanelLink extends Action {
+  public readonly type = 'samplePanelLink';
+
   constructor() {
-    super(
-      {
-        id: 'samplePanelLink',
-        parentPanelId: 'mainMenu',
-      },
-      {
-        getDisplayName: () => {
-          return 'Sample Panel Link';
-        },
-      }
-    );
+    super('samplePanelLink');
+  }
+
+  public getDisplayName() {
+    return 'Sample panel Link';
+  }
+
+  public execute() {
+    return;
   }
 
   public getHref = () => {
@@ -38,4 +44,6 @@ class SamplePanelLink extends ContextMenuAction {
   };
 }
 
-ContextMenuActionsRegistryProvider.register(() => new SamplePanelLink());
+actionRegistry.set('samplePanelLink', new SamplePanelLink());
+
+attachAction(triggerRegistry, { triggerId: CONTEXT_MENU_TRIGGER, actionId: 'samplePanelLink' });

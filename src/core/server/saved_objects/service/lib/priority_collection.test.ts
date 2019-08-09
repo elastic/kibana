@@ -55,3 +55,15 @@ test(`1, 1 throws Error`, () => {
   priorityCollection.add(1, 1);
   expect(() => priorityCollection.add(1, 1)).toThrowErrorMatchingSnapshot();
 });
+
+test(`#has when empty returns false`, () => {
+  const priorityCollection = new PriorityCollection();
+  expect(priorityCollection.has(() => true)).toEqual(false);
+});
+
+test(`#has returns result of predicate`, () => {
+  const priorityCollection = new PriorityCollection();
+  priorityCollection.add(1, 'foo');
+  expect(priorityCollection.has(val => val === 'foo')).toEqual(true);
+  expect(priorityCollection.has(val => val === 'bar')).toEqual(false);
+});

@@ -33,7 +33,7 @@ export class TopBar extends React.Component<Props, { value: string }> {
     value: decodeRevisionString(this.props.routeParams.revision),
   };
 
-  get branch() {
+  public get branch() {
     return this.getBranch(this.state.value);
   }
 
@@ -50,7 +50,7 @@ export class TopBar extends React.Component<Props, { value: string }> {
     }
   };
 
-  get branchOptions() {
+  public get branchOptions() {
     return this.props.branches.map(b => ({
       value: b.name,
       text: b.name,

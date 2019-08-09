@@ -98,10 +98,19 @@ export class IndexWorker extends AbstractWorker {
             indexer.cancel();
             cancelled = true;
           });
-          this.cancellationService.registerIndexJobToken(uri, cancellationToken);
         }
         const progressReporter = this.getProgressReporter(uri, revision, index, indexerNumber);
-        return indexer.start(progressReporter, checkpointReq);
+        const indexJobPromise = indexer.start(progressReporter, checkpointReq);
+
+        if (cancellationToken) {
+          await this.cancellationService.registerCancelableIndexJob(
+            uri,
+            cancellationToken,
+            indexJobPromise
+          );
+        }
+
+        return indexJobPromise;
       }
     );
     const stats: IndexStats[] = await Promise.all(indexPromises);

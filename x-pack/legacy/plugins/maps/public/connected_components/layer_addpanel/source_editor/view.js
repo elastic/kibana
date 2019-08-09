@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { ALL_SOURCES } from '../../../shared/layers/sources/all_sources';
+import { ALL_SOURCES } from '../../../layers/sources/all_sources';
 import {
   EuiSpacer,
   EuiPanel,

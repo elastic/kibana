@@ -31,6 +31,14 @@ export interface Props {
    */
   boundingBox: { left: number; right: number; top: number; bottom: number };
   /**
+   * width of the workpad page
+   */
+  workpadWidth: number;
+  /**
+   * height of the workpad page
+   */
+  workpadHeight: number;
+  /**
    * handler to set the workpad zoom level to a specific value
    */
   setZoomScale: (scale: number) => void;
@@ -63,23 +71,29 @@ export class WorkpadZoom extends PureComponent<Props> {
       top: PropTypes.number.isRequired,
       bottom: PropTypes.number.isRequired,
     }),
+    workpadWidth: PropTypes.number.isRequired,
+    workpadHeight: PropTypes.number.isRequired,
   };
 
   _fitToWindow = () => {
-    const { boundingBox, setZoomScale } = this.props;
+    const { boundingBox, setZoomScale, workpadWidth, workpadHeight } = this.props;
     const canvasLayoutContent = document.querySelector(
       `#${CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR}`
     ) as HTMLElement;
     const layoutWidth = canvasLayoutContent.clientWidth;
     const layoutHeight = canvasLayoutContent.clientHeight;
+    const offsetLeft = boundingBox.left;
+    const offsetTop = boundingBox.top;
+    const offsetRight = boundingBox.right - workpadWidth;
+    const offsetBottom = boundingBox.bottom - workpadHeight;
     const boundingWidth =
-      Math.max(layoutWidth, boundingBox.right) -
-      Math.min(0, boundingBox.left) +
-      WORKPAD_CANVAS_BUFFER * 2;
+      workpadWidth +
+      Math.max(Math.abs(offsetLeft), Math.abs(offsetRight)) * 2 +
+      WORKPAD_CANVAS_BUFFER;
     const boundingHeight =
-      Math.max(layoutHeight, boundingBox.bottom) -
-      Math.min(0, boundingBox.top) +
-      WORKPAD_CANVAS_BUFFER * 2;
+      workpadHeight +
+      Math.max(Math.abs(offsetTop), Math.abs(offsetBottom)) * 2 +
+      WORKPAD_CANVAS_BUFFER;
     const xScale = layoutWidth / boundingWidth;
     const yScale = layoutHeight / boundingHeight;
 
@@ -87,11 +101,7 @@ export class WorkpadZoom extends PureComponent<Props> {
   };
 
   _button = (togglePopover: MouseEventHandler<HTMLButtonElement>) => (
-    <EuiButtonIcon
-      iconType="magnifyWithPlus"
-      aria-label="Share this workpad"
-      onClick={togglePopover}
-    />
+    <EuiButtonIcon iconType="magnifyWithPlus" aria-label="Zoom controls" onClick={togglePopover} />
   );
 
   _getPrettyZoomLevel = (scale: number) => `${scale * 100}%`;
@@ -151,7 +161,7 @@ export class WorkpadZoom extends PureComponent<Props> {
       <Popover
         button={this._button}
         panelPaddingSize="none"
-        tooltip="Zoom"
+        tooltip="Zoom controls"
         tooltipPosition="bottom"
       >
         {() => <EuiContextMenu initialPanelId={0} panels={this._getPanels()} />}

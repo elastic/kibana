@@ -11,7 +11,7 @@
       "type": "io"
     },
     {
-      "count": 748,
+      "count": 749,
       "latestMessage": "dial tcp 127.0.0.1:9200: connect: connection refused",
       "location": null,
       "monitorId": "auto-tcp-0X81440A68E839814C",

@@ -6,6 +6,7 @@
 import produce from 'immer';
 import { Action, handleActions } from 'redux-actions';
 
+import { i18n } from '@kbn/i18n';
 import { Repository, RepoConfigs, RepositoryConfig } from '../../model';
 
 import {
@@ -89,22 +90,35 @@ export const repositoryManagement = handleActions<
         draft.importLoading = true;
       }),
     [String(importRepoSuccess)]: (state, action: Action<Repository>) =>
+      // TODO is it possible and how to deal with action.payload === undefined?
       produce<RepositoryManagementState>(state, draft => {
         draft.importLoading = false;
         draft.showToast = true;
         draft.toastType = ToastType.success;
-        draft.toastMessage = `${action.payload!.name} has been successfully submitted!`;
+        draft.toastMessage = i18n.translate(
+          'xpack.code.repositoryManagement.repoSubmittedMessage',
+          {
+            defaultMessage: '{name} has been successfully submitted!',
+            values: { name: action.payload!.name },
+          }
+        );
         draft.repositories = [...state.repositories, action.payload!];
       }),
     [String(importRepoFailed)]: (state, action: Action<any>) =>
       produce<RepositoryManagementState>(state, draft => {
         if (action.payload) {
           if (action.payload.res.status === 304) {
-            draft.toastMessage = 'This Repository has already been imported!';
+            draft.toastMessage = i18n.translate(
+              'xpack.code.repositoryManagement.repoImportedMessage',
+              {
+                defaultMessage: 'This Repository has already been imported!',
+              }
+            );
             draft.showToast = true;
             draft.toastType = ToastType.warning;
             draft.importLoading = false;
           } else {
+            // TODO add localication for those messages
             draft.toastMessage = action.payload.body.message;
             draft.showToast = true;
             draft.toastType = ToastType.danger;
