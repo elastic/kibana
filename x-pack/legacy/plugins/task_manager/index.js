@@ -12,11 +12,8 @@ import { migrations } from './migrations';
 export function taskManager(kibana) {
   return new kibana.Plugin({
     id: 'task_manager',
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'encrypted_saved_objects'],
+    require: ['kibana', 'elasticsearch', 'xpack_main'],
     configPrefix: 'xpack.task_manager',
-    isEnabled(config) {
-      return config.get('xpack.encrypted_saved_objects.enabled') === true;
-    },
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
@@ -51,22 +48,6 @@ export function taskManager(kibana) {
         ['task']
       );
 
-      // Encrypted attributes
-      server.plugins.encrypted_saved_objects.registerType({
-        type: 'task',
-        attributesToEncrypt: new Set(['secrets']),
-        attributesToExcludeFromAAD: new Set([
-          'scheduledAt',
-          'runAt',
-          'startedAt',
-          'retryAt',
-          'interval',
-          'attempts',
-          'status',
-          'state',
-        ]),
-      });
-
       const taskManager = new TaskManager({
         kbnServer: this.kbnServer,
         config,
@@ -80,8 +61,7 @@ export function taskManager(kibana) {
       migrations,
       savedObjectSchemas: {
         task: {
-          // TODO: ADD BACK
-          // hidden: true,
+          hidden: true,
           isNamespaceAgnostic: true,
           convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
           indexPattern(config) {
