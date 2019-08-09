@@ -12,6 +12,7 @@ import { TemplateCreate } from './sections/template_create';
 import { TemplateClone } from './sections/template_clone';
 import { TemplateEdit } from './sections/template_edit';
 import { trackUiMetric } from './services';
+import { CreateIndex } from './sections/create_index';
 
 export const App = () => {
   useEffect(() => trackUiMetric('loaded', UIM_APP_LOAD), []);
@@ -26,6 +27,7 @@ export const App = () => {
 // Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
   <Switch>
+    <Route exact path={`${BASE_PATH}create-index`} component={CreateIndex} />
     <Route exact path={`${BASE_PATH}create_template`} component={TemplateCreate} />
     <Route exact path={`${BASE_PATH}clone_template/:name*`} component={TemplateClone} />
     <Route
