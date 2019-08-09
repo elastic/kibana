@@ -36,7 +36,7 @@ function createSortObject(sortPair, indexPattern) {
 
 /**
  * Take a sorting array and make it into an object
- * @param {array} sort 2 item array [fieldToSort, directionToSort]
+ * @param {array} sort two dimensional array [[fieldToSort, directionToSort]]
  * @param {object} indexPattern used for determining default sort
  * @returns {object} a sort object suitable for returning to elasticsearch
  */
@@ -58,7 +58,11 @@ export function getSort(sort, indexPattern, defaultSortOrder = 'desc') {
   }
 }
 
-getSort.array = function (sort, indexPattern, defaultSortOrder) {
-  return getSort(sort, indexPattern, defaultSortOrder).map((sortPair) => _(sortPair).pairs().pop());
+/*
+ * Take an array of elasticsearch sort objects and return an array of arrays.
+ * Basically the opposite of `getSort`.
+ */
+getSort.array = function (sort) {
+  return sort.map((sortPair) => _(sortPair).pairs().pop());
 };
 
