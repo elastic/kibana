@@ -38,27 +38,47 @@ import { VersionBadge } from '../components/version_badge';
 import { getIntegrationInfoByKey } from '../data';
 import { useBreadcrumbs, useLinks } from '../hooks';
 
-export function Detail(props: { package: string }) {
+type DetailViewPanelName = 'overview' | 'assets' | 'data-sources';
+export interface DetailProps {
+  pkgkey: string;
+  panel?: DetailViewPanelName;
+}
+
+export function Detail({ pkgkey, panel = 'overview' }: DetailProps) {
   const [info, setInfo] = useState<IntegrationInfo | null>(null);
   useEffect(() => {
-    getIntegrationInfoByKey(props.package).then(response => {
+    getIntegrationInfoByKey(pkgkey).then(response => {
       const { title } = response;
       setInfo({ ...response, title });
     });
-  }, [props.package]);
+  }, [pkgkey]);
 
   // don't have designs for loading/empty states
   if (!info) return null;
 
-  return <DetailLayout restrictWidth={1200} {...info} />;
+  return <DetailLayout restrictWidth={1200} {...info} panel={panel} />;
 }
 
-type LayoutProps = IntegrationInfo & EuiPageWidthProps;
+function overviewContentStyles() {
+  const headerGlobalNav = 49;
+  const pageTopNav = /* line-height */ 24 + /* padding-top */ 16;
+  const header = /* line-height */ 48 + /* padding-top */ 16 + /* padding-bottom */ 32;
+  const topBarsTotal = headerGlobalNav + pageTopNav + header;
+
+  return {
+    backgroundColor: 'white',
+    height: `calc(100vh - ${topBarsTotal}px)`,
+  };
+}
+
+type LayoutProps = IntegrationInfo & Pick<DetailProps, 'panel'> & EuiPageWidthProps;
 function DetailLayout(props: LayoutProps) {
-  const { name, restrictWidth, title } = props;
+  const { name, restrictWidth, title, panel } = props;
   const { toListView } = useLinks();
   const iconType = ICON_TYPES.find(key => key.toLowerCase() === `logo${name}`);
   useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }, { text: title }]);
+
+  const styles = panel === 'overview' ? overviewContentStyles() : {};
 
   return (
     <>
@@ -70,7 +90,7 @@ function DetailLayout(props: LayoutProps) {
           <Header iconType={iconType} {...props} />
         </EuiPageBody>
       </EuiPage>
-      <EuiPage style={{ backgroundColor: 'white' }}>
+      <EuiPage style={styles}>
         <EuiPageBody restrictWidth={restrictWidth}>
           <Content hasLogoPanel={!!iconType} {...props} />
         </EuiPageBody>
@@ -117,47 +137,47 @@ function Header(props: HeaderProps) {
   );
 }
 
-type ContentProps = IntegrationInfo & { hasLogoPanel: boolean };
+type ContentProps = IntegrationInfo & Pick<DetailProps, 'panel'> & { hasLogoPanel: boolean };
 function Content(props: ContentProps) {
-  const { assets, description, hasLogoPanel, requirement } = props;
+  const { assets, description, hasLogoPanel, panel, requirement } = props;
   const marginTop = ICON_HEIGHT_PANEL / 2 + ICON_HEIGHT_NATURAL / 2;
   const leftStyles = hasLogoPanel ? { marginTop: `${marginTop}px` } : {};
-  const headerGlobalNav = 49;
-  const pageTopNav = /* line-height */ 24 + /* padding-top */ 16;
-  const header = /* line-height */ 48 + /* padding-top */ 16 + /* padding-bottom */ 32;
-  const unknown = 8;
-  const topBarsTotal = headerGlobalNav + pageTopNav + header + unknown;
+  const isOverviewPanel = panel === 'overview';
+  const panelContent = isOverviewPanel ? (
+    <>
+      <EuiTitle size="xs">
+        <span>About</span>
+      </EuiTitle>
+      <EuiText>
+        <p>{description}</p>
+      </EuiText>
+    </>
+  ) : (
+    <AssetAccordion assets={assets} />
+  );
 
   return (
-    <EuiFlexGroup style={{ height: `calc(100vh - ${topBarsTotal}px)` }}>
+    <EuiFlexGroup>
       <LeftColumn style={leftStyles}>
         <EuiTitle>
           <span>Vertical Tabs</span>
         </EuiTitle>
       </LeftColumn>
-      <CenterColumn>
-        <>
-          <EuiTitle size="xs">
-            <span>About</span>
-          </EuiTitle>
-          <EuiText>
-            <p>{description}</p>
-          </EuiText>
-          <AssetAccordion assets={assets} />
-        </>
-      </CenterColumn>
+      <CenterColumn>{panelContent}</CenterColumn>
       <RightColumn>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <Requirements requirements={requirement} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiHorizontalRule margin="xl" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AssetsFacetGroup assets={assets} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {isOverviewPanel && (
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <Requirements requirements={requirement} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiHorizontalRule margin="xl" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <AssetsFacetGroup assets={assets} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </RightColumn>
     </EuiFlexGroup>
   );
