@@ -271,15 +271,7 @@ const TimeCursor = euiStyled.line`
 
 const MinimapWrapper = euiStyled.svg<{ showOverscanBoundaries: boolean }>`
   background: ${props =>
-    props.showOverscanBoundaries
-      ? `repeating-linear-gradient(
-    45deg,
-    ${props.theme.eui.euiColorLightShade},
-    ${props.theme.eui.euiColorLightShade} 5px,
-    transparent 5px,
-    transparent 10px
-  )`
-      : 'transparent'};
+    props.showOverscanBoundaries ? props.theme.eui.euiColorMediumShade : 'transparent'};
   & ${TimeCursor} {
     visibility: hidden;
   }
