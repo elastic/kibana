@@ -7,7 +7,7 @@
 
 import {
   GIS_API_PATH,
-  EMS_CATALOGUE_PATH
+  EMS_CATALOGUE_PATH, EMS_GLYPHS_PATH
 } from '../common/constants';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
@@ -79,10 +79,13 @@ export function getEMSClient() {
 
 }
 
-
 export function getGlyphUrl() {
-  //todo: take into account proxying
-  return chrome.getInjected('isEmsEnabled', true) ? 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf' : '';
+  if (!chrome.getInjected('isEmsEnabled', true)) {
+    return '';
+  }
+  return (chrome.getInjected('proxyElasticMapsServiceInMaps', false)) ?
+    (relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_GLYPHS_PATH}`) + `/{fontstack}/{range}`) : 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf';
+
 }
 
 export function isRetina() {

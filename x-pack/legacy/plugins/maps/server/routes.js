@@ -10,6 +10,7 @@ import {
   EMS_FILES_CATALOGUE_PATH,
   EMS_FILES_DEFAULT_JSON_PATH,
   EMS_TILES_CATALOGUE_PATH,
+  EMS_GLYPHS_PATH,
   EMS_TILES_RASTER_STYLE_PATH,
   EMS_TILES_RASTER_TILE_PATH,
   EMS_TILES_VECTOR_STYLE_PATH,
@@ -285,6 +286,7 @@ export function initRoutes(server, licenseUid) {
       }
       return {
         ...vectorStyle,
+        glyphs: `${GIS_API_PATH}/${EMS_GLYPHS_PATH}/{fontstack}/{range}`,
         sources: newSources
       };
     }
@@ -364,12 +366,37 @@ export function initRoutes(server, licenseUid) {
     }
   });
 
-  function checkEMSProxyConfig() {
-    if (!mapConfig.proxyElasticMapsServiceInMaps) {
-      server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
-      throw Boom.notFound();
+
+  server.route({
+
+    method: 'GET',
+    path: `${ROOT}/${EMS_GLYPHS_PATH}/{fontstack}/{range}`,
+    handler: async (request, h) => {
+
+      checkEMSProxyConfig();
+
+      const fontUrl = 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'
+        .replace('{fontstack}', request.params.fontstack)
+        .replace('{range}', request.params.range);
+
+      try {
+        const font = await fetch(fontUrl);
+        const arrayBuffer = await font.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        let response = h.response(buffer);
+        response = response.bytes(buffer.length);
+        response = response.header('Content-Disposition', 'inline');
+        response = response.encoding('binary');
+        return response;
+      } catch(e) {
+        server.log('warning', `Cannot connect to EMS for font, error: ${e.message}`);
+        throw Boom.badRequest(`Cannot connect to EMS`);
+      }
+
+
     }
-  }
+
+  });
 
   server.route({
     method: 'GET',
@@ -390,4 +417,15 @@ export function initRoutes(server, licenseUid) {
       }
     }
   });
+
+
+
+  function checkEMSProxyConfig() {
+    if (!mapConfig.proxyElasticMapsServiceInMaps) {
+      server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
+      throw Boom.notFound();
+    }
+  }
+
+
 }

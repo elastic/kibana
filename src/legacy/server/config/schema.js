@@ -257,6 +257,7 @@ export default () => Joi.object({
     }).default(),
     manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v7.2/manifest'),
     emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.2'),
+    emsFontLibraryUrl: Joi.string().default('https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'),
     emsTileLayerId: Joi.object({
       bright: Joi.string().default('road_map'),
       desaturated: Joi.string().default('road_map_desaturated'),
@@ -265,8 +266,7 @@ export default () => Joi.object({
       bright: 'road_map',
       desaturated: 'road_map_desaturated',
       dark: 'dark_map',
-    }),
-    emsFontLibraryUrl: 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'
+    })
   }).default(),
 
   i18n: Joi.object({

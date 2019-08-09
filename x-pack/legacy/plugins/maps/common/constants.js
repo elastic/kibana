@@ -8,9 +8,10 @@ export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
 export const EMS_FILES_CATALOGUE_PATH = 'ems/files';
 export const EMS_FILES_DEFAULT_JSON_PATH = 'ems/files/file';
+export const EMS_GLYPHS_PATH = 'ems/fonts';
+export const EMS_SPRITE_PATH = 'ems/sprites';
 
 export const EMS_TILES_CATALOGUE_PATH = 'ems/tiles';
-
 export const EMS_TILES_RASTER_STYLE_PATH = 'ems/tiles/raster/style';
 export const EMS_TILES_RASTER_TILE_PATH = 'ems/tiles/raster/tile';
 
