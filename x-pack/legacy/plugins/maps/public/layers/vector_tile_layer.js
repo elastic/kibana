@@ -215,7 +215,7 @@ export class VectorTileLayer extends TileLayer {
 
     vectorStyle.layers.forEach(mbLayer => {
       const mbLayerId = this._generateMbId(mbLayer.id);
-      mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+      this.syncVisibilityWithMb(mbMap, mbLayerId);
       this._setLayerZoomRange(mbMap, mbLayer, mbLayerId);
       this._setOpacityForType(mbMap, mbLayer, mbLayerId);
     });
