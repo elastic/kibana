@@ -104,136 +104,85 @@ function getRouteFullPath(routerPath: string, routePath: string) {
 }
 
 /**
+ * Create the validation schemas for a route
+ *
+ * @returns Route schemas if `validate` is specified on the route, otherwise
+ * undefined.
+ */
+function routeSchemasFromRouteConfig<
+  P extends ObjectType,
+  Q extends ObjectType,
+  B extends ObjectType
+>(route: RouteConfig<P, Q, B>, routeMethod: RouteMethod) {
+  // The type doesn't allow `validate` to be undefined, but it can still
+  // happen when it's used from JavaScript.
+  if (route.validate === undefined) {
+    throw new Error(
+      `The [${routeMethod}] at [${route.path}] does not have a 'validate' specified. Use 'false' as the value if you want to bypass validation.`
+    );
+  }
+
+  if (route.validate !== false) {
+    Object.entries(route.validate).forEach(([key, schema]) => {
+      if (!(schema instanceof Type)) {
+        throw new Error(
+          `Expected a valid schema declared with '@kbn/config-schema' package at key: [${key}].`
+        );
+      }
+    });
+  }
+
+  return route.validate ? route.validate : undefined;
+}
+
+/**
  * @internal
  */
 export class Router implements IRouter {
   public routes: Array<Readonly<RouterRoute>> = [];
+  public get: IRouter['get'];
+  public post: IRouter['post'];
+  public delete: IRouter['delete'];
+  public put: IRouter['put'];
 
   constructor(
     readonly routerPath: string,
     private readonly log: Logger,
     private readonly enhanceWithContext: ContextEnhancer<any, any, any> = fn => fn.bind(null, {})
-  ) {}
-
-  public get<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
-    handler: RequestHandler<P, Q, B>
   ) {
-    const { path, options = {} } = route;
-    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'get');
+    const buildMethod = (method: RouteMethod) => <
+      P extends ObjectType,
+      Q extends ObjectType,
+      B extends ObjectType
+    >(
+      route: RouteConfig<P, Q, B>,
+      handler: RequestHandler<P, Q, B>
+    ) => {
+      const { path, options = {} } = route;
+      const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
-    this.routes.push({
-      handler: async (req, responseToolkit) => {
-        return await this.handle({
-          routeSchemas,
-          request: req,
-          responseToolkit,
-          handler: this.enhanceWithContext(handler),
-        });
-      },
-      method: 'get',
-      path: getRouteFullPath(this.routerPath, path),
-      options,
-    });
-  }
+      this.routes.push({
+        handler: async (req, responseToolkit) =>
+          await this.handle({
+            routeSchemas,
+            request: req,
+            responseToolkit,
+            handler: this.enhanceWithContext(handler),
+          }),
+        method,
+        path: getRouteFullPath(this.routerPath, path),
+        options,
+      });
+    };
 
-  public post<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
-    handler: RequestHandler<P, Q, B>
-  ) {
-    const { path, options = {} } = route;
-    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'post');
-    this.routes.push({
-      handler: async (req, responseToolkit) => {
-        return await this.handle({
-          routeSchemas,
-          request: req,
-          responseToolkit,
-          handler: this.enhanceWithContext(handler),
-        });
-      },
-      method: 'post',
-      path: getRouteFullPath(this.routerPath, path),
-      options,
-    });
-  }
-
-  public put<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
-    handler: RequestHandler<P, Q, B>
-  ) {
-    const { path, options = {} } = route;
-    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'put');
-    this.routes.push({
-      handler: async (req, responseToolkit) => {
-        return await this.handle({
-          routeSchemas,
-          request: req,
-          responseToolkit,
-          handler: this.enhanceWithContext(handler),
-        });
-      },
-      method: 'put',
-      path: getRouteFullPath(this.routerPath, path),
-      options,
-    });
-  }
-
-  public delete<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
-    handler: RequestHandler<P, Q, B>
-  ) {
-    const { path, options = {} } = route;
-    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'delete');
-    this.routes.push({
-      handler: async (req, responseToolkit) => {
-        return await this.handle({
-          routeSchemas,
-          request: req,
-          responseToolkit,
-          handler: this.enhanceWithContext(handler),
-        });
-      },
-      method: 'delete',
-      path: getRouteFullPath(this.routerPath, path),
-      options,
-    });
+    this.get = buildMethod('get');
+    this.post = buildMethod('post');
+    this.delete = buildMethod('delete');
+    this.put = buildMethod('put');
   }
 
   public getRoutes() {
     return [...this.routes];
-  }
-
-  /**
-   * Create the validation schemas for a route
-   *
-   * @returns Route schemas if `validate` is specified on the route, otherwise
-   * undefined.
-   */
-  private routeSchemasFromRouteConfig<
-    P extends ObjectType,
-    Q extends ObjectType,
-    B extends ObjectType
-  >(route: RouteConfig<P, Q, B>, routeMethod: RouteMethod) {
-    // The type doesn't allow `validate` to be undefined, but it can still
-    // happen when it's used from JavaScript.
-    if (route.validate === undefined) {
-      throw new Error(
-        `The [${routeMethod}] at [${route.path}] does not have a 'validate' specified. Use 'false' as the value if you want to bypass validation.`
-      );
-    }
-
-    if (route.validate !== false) {
-      Object.entries(route.validate).forEach(([key, schema]) => {
-        if (!(schema instanceof Type)) {
-          throw new Error(
-            `Expected a valid schema declared with '@kbn/config-schema' package at key: [${key}].`
-          );
-        }
-      });
-    }
-
-    return route.validate ? route.validate : undefined;
   }
 
   private async handle<P extends ObjectType, Q extends ObjectType, B extends ObjectType>({
