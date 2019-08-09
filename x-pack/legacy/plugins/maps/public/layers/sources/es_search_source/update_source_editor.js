@@ -191,9 +191,9 @@ export class UpdateSourceEditor extends Component {
   }
 
   render() {
-    let useTopHitsCheckbox;
+    let topHitsCheckbox;
     if (this.state.dateFields && this.state.dateFields.length) {
-      useTopHitsCheckbox = (
+      topHitsCheckbox = (
         <EuiFormRow>
           <EuiSwitch
             label={
@@ -229,7 +229,7 @@ export class UpdateSourceEditor extends Component {
           />
         </EuiFormRow>
 
-        {useTopHitsCheckbox}
+        {topHitsCheckbox}
 
         {this.renderTopHitsForm()}
       </Fragment>
