@@ -218,14 +218,14 @@ describe('IndexPatternDimensionPanel', () => {
 
     const options = wrapper.find(EuiComboBox).prop('options');
 
-    expect(options![0].className).toContain('incompatible');
+    expect(options![0]['data-test-subj']).toEqual('lns-documentOptionIncompatible');
 
     expect(
-      options![1].options!.filter(({ label }) => label === 'timestamp')[0].className
-    ).toContain('incompatible');
+      options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+    ).toContain('Incompatible');
     expect(
-      options![1].options!.filter(({ label }) => label === 'memory')[0].className
-    ).not.toContain('incompatible');
+      options![1].options!.filter(({ label }) => label === 'memory')[0]['data-test-subj']
+    ).not.toContain('Incompatible');
   });
 
   it('should indicate operations which are incompatible for the field of the current column', () => {
@@ -260,12 +260,15 @@ describe('IndexPatternDimensionPanel', () => {
     const options = (wrapper.find(EuiSideNav).prop('items')[0].items as unknown) as Array<{
       name: string;
       className: string;
+      'data-test-subj': string;
     }>;
 
-    expect(options.find(({ name }) => name === 'Minimum')!.className).not.toContain('incompatible');
+    expect(options.find(({ name }) => name === 'Minimum')!['data-test-subj']).not.toContain(
+      'Incompatible'
+    );
 
-    expect(options.find(({ name }) => name === 'Date Histogram')!.className).toContain(
-      'incompatible'
+    expect(options.find(({ name }) => name === 'Date Histogram')!['data-test-subj']).toContain(
+      'Incompatible'
     );
   });
 
@@ -450,7 +453,9 @@ describe('IndexPatternDimensionPanel', () => {
       openPopover();
 
       act(() => {
-        wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+        wrapper
+          .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+          .simulate('click');
       });
 
       expect(setState).not.toHaveBeenCalled();
@@ -461,7 +466,9 @@ describe('IndexPatternDimensionPanel', () => {
 
       openPopover();
 
-      wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+        .simulate('click');
 
       expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).not.toHaveLength(0);
 
@@ -473,7 +480,9 @@ describe('IndexPatternDimensionPanel', () => {
 
       openPopover();
 
-      wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+        .simulate('click');
 
       wrapper
         .find('button[data-test-subj="lns-indexPatternDimension-date_histogram"]')
@@ -487,7 +496,9 @@ describe('IndexPatternDimensionPanel', () => {
 
       openPopover();
 
-      wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+        .simulate('click');
 
       act(() => {
         wrapper.find(EuiPopover).prop('closePopover')!();
@@ -503,18 +514,97 @@ describe('IndexPatternDimensionPanel', () => {
 
       openPopover();
 
-      wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+        .simulate('click');
 
       const options = wrapper.find(EuiComboBox).prop('options');
 
-      expect(options![0].className).toContain('incompatible');
+      expect(options![0]['data-test-subj']).toContain('Incompatible');
 
       expect(
-        options![1].options!.filter(({ label }) => label === 'timestamp')[0].className
-      ).toContain('incompatible');
+        options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+      ).toContain('Incompatible');
       expect(
-        options![1].options!.filter(({ label }) => label === 'source')[0].className
-      ).not.toContain('incompatible');
+        options![1].options!.filter(({ label }) => label === 'source')[0]['data-test-subj']
+      ).not.toContain('Incompatible');
+    });
+
+    it('should indicate document compatibility with selected field operation', () => {
+      const initialState: IndexPatternPrivateState = {
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col2: {
+                dataType: 'number',
+                isBucketed: false,
+                label: '',
+                operationType: 'avg',
+                sourceField: 'bytes',
+              },
+            },
+          },
+        },
+      };
+      wrapper = mount(
+        <IndexPatternDimensionPanel {...defaultProps} state={initialState} columnId="col2" />
+      );
+
+      openPopover();
+
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-count"]')
+        .simulate('click');
+
+      const options = wrapper.find(EuiComboBox).prop('options');
+
+      expect(options![0]['data-test-subj']).not.toContain('Incompatible');
+      options![1].options!.map(option =>
+        expect(option['data-test-subj']).toContain('Incompatible')
+      );
+    });
+
+    it('should indicate document and field compatibility with selected document operation', () => {
+      const initialState: IndexPatternPrivateState = {
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col2: {
+                dataType: 'number',
+                isBucketed: false,
+                label: '',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      };
+      wrapper = mount(
+        <IndexPatternDimensionPanel {...defaultProps} state={initialState} columnId="col2" />
+      );
+
+      openPopover();
+
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+        .simulate('click');
+
+      const options = wrapper.find(EuiComboBox).prop('options');
+
+      expect(options![0]['data-test-subj']).toContain('Incompatible');
+
+      expect(
+        options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+      ).toContain('Incompatible');
+      expect(
+        options![1].options!.filter(({ label }) => label === 'source')[0]['data-test-subj']
+      ).not.toContain('Incompatible');
     });
 
     it('should set datasource state if compatible field is selected for operation', () => {
@@ -523,7 +613,9 @@ describe('IndexPatternDimensionPanel', () => {
       openPopover();
 
       act(() => {
-        wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+        wrapper
+          .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+          .simulate('click');
       });
 
       const comboBox = wrapper.find(EuiComboBox)!;
@@ -622,6 +714,31 @@ describe('IndexPatternDimensionPanel', () => {
     });
   });
 
+  it('should select operation directly if only document is possible', () => {
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
+
+    openPopover();
+
+    wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col2: expect.objectContaining({
+              operationType: 'count',
+              // Other parts of this don't matter for this test
+            }),
+          },
+          columnOrder: ['col1', 'col2'],
+        },
+      },
+    });
+  });
+
   it('should indicate compatible fields when selecting the operation first', () => {
     wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
 
@@ -631,17 +748,50 @@ describe('IndexPatternDimensionPanel', () => {
 
     const options = wrapper.find(EuiComboBox).prop('options');
 
-    expect(options![0].className).toContain('incompatible');
+    expect(options![0]['data-test-subj']).toContain('Incompatible');
 
     expect(
-      options![1].options!.filter(({ label }) => label === 'timestamp')[0].className
-    ).toContain('incompatible');
+      options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+    ).toContain('Incompatible');
     expect(
-      options![1].options!.filter(({ label }) => label === 'bytes')[0].className
-    ).not.toContain('incompatible');
+      options![1].options!.filter(({ label }) => label === 'bytes')[0]['data-test-subj']
+    ).not.toContain('Incompatible');
     expect(
-      options![1].options!.filter(({ label }) => label === 'memory')[0].className
-    ).not.toContain('incompatible');
+      options![1].options!.filter(({ label }) => label === 'memory')[0]['data-test-subj']
+    ).not.toContain('Incompatible');
+  });
+
+  it('should indicate document compatibility when document operation is selected', () => {
+    const initialState: IndexPatternPrivateState = {
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col2: {
+              dataType: 'number',
+              isBucketed: false,
+              label: '',
+              operationType: 'count',
+            },
+          },
+        },
+      },
+    };
+    wrapper = mount(
+      <IndexPatternDimensionPanel {...defaultProps} state={initialState} columnId={'col2'} />
+    );
+
+    openPopover();
+
+    const options = wrapper.find(EuiComboBox).prop('options');
+
+    expect(options![0]['data-test-subj']).not.toContain('Incompatible');
+
+    options![1].options!.map(operation =>
+      expect(operation['data-test-subj']).toContain('Incompatible')
+    );
   });
 
   it('should show all operations that are not filtered out', () => {

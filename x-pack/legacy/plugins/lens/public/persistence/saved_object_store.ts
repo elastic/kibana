@@ -5,7 +5,8 @@
  */
 
 import { SavedObjectAttributes } from 'target/types/server';
-import { DatasourceMetaData } from '../types';
+import { Filter } from '@kbn/es-query';
+import { Query } from 'src/plugins/data/common';
 
 export interface Document {
   id?: string;
@@ -15,9 +16,13 @@ export interface Document {
   activeDatasourceId: string;
   expression: string;
   state: {
-    datasourceMetaData: DatasourceMetaData;
+    datasourceMetaData: {
+      filterableIndexPatterns: Array<{ id: string; title: string }>;
+    };
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
+    query: Query;
+    filters: Filter[];
   };
 }
 
@@ -33,7 +38,7 @@ interface SavedObjectClient {
     id: string;
     type: string;
     attributes: SavedObjectAttributes;
-    error?: { message: string };
+    error?: { statusCode: number; message: string };
   }>;
 }
 

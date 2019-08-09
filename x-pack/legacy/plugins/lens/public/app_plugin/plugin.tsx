@@ -5,8 +5,14 @@
  */
 
 import React from 'react';
+import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
+import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
+import chrome, { Chrome } from 'ui/chrome';
+import { localStorage } from 'ui/storage/storage_service';
+import { QueryBar } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { editorFrameSetup, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
+import { SavedObjectIndexStore } from '../persistence';
 import { xyVisualizationSetup, xyVisualizationStop } from '../xy_visualization_plugin';
 import {
   datatableVisualizationSetup,
@@ -17,6 +23,7 @@ import { EditorFrameInstance } from '../types';
 
 export class AppPlugin {
   private instance: EditorFrameInstance | null = null;
+  private chrome: Chrome | null = null;
 
   constructor() {}
 
@@ -32,9 +39,46 @@ export class AppPlugin {
     editorFrame.registerVisualization(xyVisualization);
     editorFrame.registerVisualization(datatableVisualization);
 
+    this.chrome = chrome;
+    const store = new SavedObjectIndexStore(this.chrome!.getSavedObjectsClient());
+
     this.instance = editorFrame.createInstance({});
 
-    return <App editorFrame={this.instance} />;
+    const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
+      return (
+        <App
+          editorFrame={this.instance!}
+          QueryBar={QueryBar}
+          chrome={chrome}
+          store={localStorage}
+          docId={routeProps.match.params.id}
+          docStorage={store}
+          redirectTo={id => {
+            if (!id) {
+              routeProps.history.push('/');
+            } else {
+              routeProps.history.push(`/edit/${id}`);
+            }
+          }}
+        />
+      );
+    };
+
+    function NotFound() {
+      return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
+    }
+
+    return (
+      <I18nProvider>
+        <HashRouter>
+          <Switch>
+            <Route exact path="/edit/:id" render={renderEditor} />
+            <Route exact path="/" render={renderEditor} />
+            <Route component={NotFound} />
+          </Switch>
+        </HashRouter>
+      </I18nProvider>
+    );
   }
 
   stop() {

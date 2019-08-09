@@ -150,8 +150,12 @@ describe('workspace_panel', () => {
           Object {
             "arguments": Object {
               "filters": Array [],
-              "query": Array [],
-              "timeRange": Array [],
+              "query": Array [
+                "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
+              ],
+              "timeRange": Array [
+                "{\\"from\\":\\"now-7d\\",\\"to\\":\\"now\\"}",
+              ],
             },
             "function": "kibana_context",
             "type": "function",
@@ -235,39 +239,91 @@ describe('workspace_panel', () => {
     expect(
       (instance.find(expressionRendererMock).prop('expression') as Ast).chain[2].arguments.tables
     ).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "chain": Array [
-                  Object {
-                    "arguments": Object {},
-                    "function": "datasource",
-                    "type": "function",
-                  },
-                ],
-                "type": "expression",
-              },
-              Object {
-                "chain": Array [
-                  Object {
-                    "arguments": Object {},
-                    "function": "datasource2",
-                    "type": "function",
-                  },
-                ],
-                "type": "expression",
-              },
-              Object {
-                "chain": Array [
-                  Object {
-                    "arguments": Object {},
-                    "function": "datasource2",
-                    "type": "function",
-                  },
-                ],
-                "type": "expression",
-              },
-            ]
-        `);
+                  Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {},
+                          "function": "datasource",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {},
+                          "function": "datasource2",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {},
+                          "function": "datasource2",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                  ]
+            `);
+  });
+
+  it('should run the expression again if the date range changes', async () => {
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+    mockDatasource.getLayers.mockReturnValue(['first']);
+
+    mockDatasource.toExpression
+      .mockReturnValueOnce('datasource')
+      .mockReturnValueOnce('datasource second');
+
+    expressionRendererMock = jest.fn(_arg => <span />);
+
+    instance = mount(
+      <InnerWorkspacePanel
+        activeDatasourceId={'mock'}
+        datasourceStates={{
+          mock: {
+            state: {},
+            isLoading: false,
+          },
+        }}
+        datasourceMap={{
+          mock: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        activeVisualizationId="vis"
+        visualizationMap={{
+          vis: { ...mockVisualization, toExpression: () => 'vis' },
+        }}
+        visualizationState={{}}
+        dispatch={() => {}}
+        ExpressionRenderer={expressionRendererMock}
+      />
+    );
+
+    // "wait" for the expression to execute
+    await waitForPromises();
+    instance.update();
+
+    expect(expressionRendererMock).toHaveBeenCalledTimes(1);
+
+    instance.setProps({
+      framePublicAPI: { ...framePublicAPI, dateRange: { fromDate: 'now-90d', toDate: 'now-30d' } },
+    });
+
+    await waitForPromises();
+    instance.update();
+
+    expect(expressionRendererMock).toHaveBeenCalledTimes(2);
   });
 
   describe('expression failures', () => {

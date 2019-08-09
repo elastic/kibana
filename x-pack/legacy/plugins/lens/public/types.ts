@@ -6,15 +6,29 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { Query } from 'src/plugins/data/common';
 import { DragContextState } from './drag_drop';
+import { Document } from './persistence';
 
 // eslint-disable-next-line
 export interface EditorFrameOptions {}
 
 export type ErrorCallback = (e: { message: string }) => void;
 
+export interface EditorFrameProps {
+  onError: ErrorCallback;
+  doc?: Document;
+  dateRange: {
+    fromDate: string;
+    toDate: string;
+  };
+  query: Query;
+
+  // Frame loader (app or embeddable) is expected to call this when it loads and updates
+  onChange: (newState: { indexPatternTitles: string[]; doc: Document }) => void;
+}
 export interface EditorFrameInstance {
-  mount: (element: Element, props: { onError: ErrorCallback }) => void;
+  mount: (element: Element, props: EditorFrameProps) => void;
   unmount: () => void;
 }
 
@@ -46,7 +60,7 @@ export interface DatasourceSuggestion<T = unknown> {
 }
 
 export interface DatasourceMetaData {
-  filterableIndexPatterns: string[];
+  filterableIndexPatterns: Array<{ id: string; title: string }>;
 }
 
 /**
@@ -185,6 +199,12 @@ export interface VisualizationSuggestion<T = unknown> {
 
 export interface FramePublicAPI {
   datasourceLayers: Record<string, DatasourcePublicAPI>;
+  dateRange: {
+    fromDate: string;
+    toDate: string;
+  };
+  query: Query;
+
   // Adds a new layer. This has a side effect of updating the datasource state
   addNewLayer: () => string;
   removeLayers: (layerIds: string[]) => void;
