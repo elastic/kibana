@@ -17,6 +17,7 @@ import {
   DatasourceMock,
 } from '../mocks';
 import { ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
+import { EuiPanel, EuiToolTip } from '@elastic/eui';
 
 // calling this function will wait for all pending Promises from mock
 // datasources to be processed by its callers.
@@ -1119,13 +1120,12 @@ describe('editor_frame', () => {
 
       // TODO why is this necessary?
       instance.update();
-      const suggestions = instance.find('[data-test-subj="suggestion-title"]');
-      expect(suggestions.map(el => el.text())).toEqual([
-        'Suggestion1',
-        'Suggestion2',
-        'Suggestion3',
-        'Suggestion4',
-      ]);
+      expect(
+        instance
+          .find('[data-test-subj="lnsSuggestion"]')
+          .find(EuiPanel)
+          .map(el => el.parents(EuiToolTip).prop('content'))
+      ).toEqual(['Suggestion1', 'Suggestion2', 'Suggestion3', 'Suggestion4']);
     });
 
     it('should switch to suggested visualization', async () => {
