@@ -490,7 +490,7 @@ function discoverController(
         query: '',
         language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
       },
-      sort: savedSearch.sort,
+      sort: getSort.array(savedSearch.sort, $scope.indexPattern, config.get('discover:sort:defaultOrder')),
       columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
       interval: 'auto',
@@ -499,6 +499,7 @@ function discoverController(
   }
 
   $state.index = $scope.indexPattern.id;
+  $state.sort = getSort.array($state.sort, $scope.indexPattern);
 
   $scope.getBucketIntervalToolTipText = () => {
     return i18n.translate('kbn.discover.bucketIntervalTooltip', {
@@ -554,7 +555,7 @@ function discoverController(
           if (!sort) return;
 
           // get the current sort from searchSource as array of arrays
-          const currentSort = getSort.array($scope.searchSource.getField('sort'));
+          const currentSort = getSort.array($scope.searchSource.getField('sort'), $scope.indexPattern);
 
           // if the searchSource doesn't know, tell it so
           if (!angular.equals(sort, currentSort)) $scope.fetch();
