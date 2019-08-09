@@ -21,6 +21,7 @@ export const AnalysisPage = () => {
     indexPattern: source ? source.configuration.logAlias : '',
     sourceId,
     spaceId,
+    timeField: source ? source.configuration.fields.timestamp : '',
   });
 
   return (
