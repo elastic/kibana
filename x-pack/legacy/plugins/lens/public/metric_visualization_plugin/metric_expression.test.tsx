@@ -5,21 +5,27 @@
  */
 
 import { metricChart, MetricChart } from './metric_expression';
-import { KibanaDatatable } from '../types';
+import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { MetricConfig } from './types';
 
 function sampleArgs() {
-  const data: KibanaDatatable = {
-    type: 'kibana_datatable',
-    columns: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }, { id: 'c', name: 'c' }],
-    rows: [{ a: 1, b: 2, c: 3 }],
+  const data: LensMultiTable = {
+    type: 'lens_multitable',
+    tables: {
+      l1: {
+        type: 'kibana_datatable',
+        columns: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }, { id: 'c', name: 'c' }],
+        rows: [{ a: 10110, b: 2, c: 3 }],
+      },
+    },
   };
 
   const args: MetricConfig = {
-    title: 'My fanci metric chart',
     accessor: 'a',
+    layerId: 'l1',
+    title: 'My fanci metric chart',
   };
 
   return { data, args };
@@ -43,35 +49,35 @@ describe('metric_expression', () => {
       const { data, args } = sampleArgs();
 
       expect(shallow(<MetricChart data={data} args={args} />)).toMatchInlineSnapshot(`
-<AutoScale>
-  <EuiFlexGroup
-    alignItems="center"
-    className="lnsChart"
-    justifyContent="spaceAround"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <div
-        style={
-          Object {
-            "fontSize": "60pt",
-            "fontWeight": 600,
-            "textAlign": "center",
-          }
-        }
-      >
-        1
-      </div>
-      <EuiText
-        textAlign="center"
-      >
-        My fanci metric chart
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</AutoScale>
-`);
+        <AutoScale>
+          <EuiFlexGroup
+            alignItems="center"
+            className="lnsChart"
+            justifyContent="spaceAround"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                style={
+                  Object {
+                    "fontSize": "60pt",
+                    "fontWeight": 600,
+                    "textAlign": "center",
+                  }
+                }
+              >
+                10110
+              </div>
+              <EuiText
+                textAlign="center"
+              >
+                My fanci metric chart
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </AutoScale>
+      `);
     });
   });
 });

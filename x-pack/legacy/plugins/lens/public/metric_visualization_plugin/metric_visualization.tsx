@@ -7,6 +7,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { getSuggestions } from './metric_suggestions';
 import { MetricConfigPanel } from './metric_config_panel';
 import { Visualization } from '../types';
@@ -14,11 +15,33 @@ import { State, PersistableState } from './types';
 import { generateId } from '../id_generator';
 
 export const metricVisualization: Visualization<State, PersistableState> = {
+  id: 'lnsMetric',
+
+  visualizationTypes: [
+    {
+      id: 'lnsMetric',
+      icon: 'visMetric',
+      label: i18n.translate('xpack.lens.metric.label', {
+        defaultMessage: 'Metric',
+      }),
+    },
+  ],
+
+  getDescription() {
+    return {
+      icon: 'visMetric',
+      label: i18n.translate('xpack.lens.metric.label', {
+        defaultMessage: 'Metric',
+      }),
+    };
+  },
+
   getSuggestions,
 
-  initialize(_, state) {
+  initialize(frame, state) {
     return (
       state || {
+        layerId: frame.addNewLayer(),
         accessor: generateId(),
       }
     );
@@ -34,8 +57,10 @@ export const metricVisualization: Visualization<State, PersistableState> = {
       domElement
     ),
 
-  toExpression(state, datasource) {
-    const operation = datasource.getOperationForColumnId(state.accessor);
+  toExpression(state, frame) {
+    const [datasource] = Object.values(frame.datasourceLayers);
+    const operation = datasource && datasource.getOperationForColumnId(state.accessor);
+
     return {
       type: 'expression',
       chain: [

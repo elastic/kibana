@@ -7,7 +7,7 @@
 import React from 'react';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
-import chrome, { Chrome } from 'ui/chrome';
+import chrome from 'ui/chrome';
 import { localStorage } from 'ui/storage/storage_service';
 import { QueryBar } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { editorFrameSetup, editorFrameStop } from '../editor_frame_plugin';
@@ -38,9 +38,9 @@ export class AppPlugin {
     const store = new SavedObjectIndexStore(chrome!.getSavedObjectsClient());
 
     editorFrame.registerDatasource('indexpattern', indexPattern);
-    editorFrame.registerVisualization(metricVisualization);
     editorFrame.registerVisualization(xyVisualization);
     editorFrame.registerVisualization(datatableVisualization);
+    editorFrame.registerVisualization(metricVisualization);
 
     this.instance = editorFrame.createInstance({});
 

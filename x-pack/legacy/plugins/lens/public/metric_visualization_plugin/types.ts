@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface MetricConfig {
+export interface State {
+  layerId: string;
   accessor: string;
 }
 
-export type State = MetricConfig;
-export type PersistableState = MetricConfig;
+export interface MetricConfig extends State {
+  title: string;
+}
+
+export type PersistableState = State;

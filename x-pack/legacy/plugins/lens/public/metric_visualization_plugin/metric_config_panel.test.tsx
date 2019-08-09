@@ -8,10 +8,10 @@ import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { MetricConfigPanel } from './metric_config_panel';
-import { DatasourcePublicAPI, DatasourceDimensionPanelProps, Operation } from '../types';
+import { DatasourceDimensionPanelProps, Operation, DatasourcePublicAPI } from '../types';
 import { State } from './types';
 import { NativeRendererProps } from '../native_renderer';
-import { createMockDatasource } from '../editor_frame_plugin/mocks';
+import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_plugin/mocks';
 
 describe('MetricConfigPanel', () => {
   const dragDropContext = { dragging: undefined, setDragging: jest.fn() };
@@ -23,6 +23,7 @@ describe('MetricConfigPanel', () => {
   function testState(): State {
     return {
       accessor: 'foo',
+      layerId: 'bar',
     };
   }
 
@@ -34,16 +35,15 @@ describe('MetricConfigPanel', () => {
   }
 
   test('the value dimension panel only accepts singular numeric operations', () => {
-    const datasource = {
-      ...mockDatasource(),
-      renderDimensionPanel: jest.fn(),
-    };
     const state = testState();
     const component = mount(
       <MetricConfigPanel
         dragDropContext={dragDropContext}
-        datasource={datasource}
         setState={jest.fn()}
+        frame={{
+          ...createMockFramePublicAPI(),
+          datasourceLayers: { bar: mockDatasource() },
+        }}
         state={{ ...state, accessor: 'shazm' }}
       />
     );
@@ -53,7 +53,6 @@ describe('MetricConfigPanel', () => {
     const { columnId, filterOperations } = nativeProps;
     const exampleOperation: Operation = {
       dataType: 'number',
-      id: 'foo',
       isBucketed: false,
       label: 'bar',
     };

@@ -9,12 +9,12 @@ import ReactDOM from 'react-dom';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { MetricConfig } from './types';
-import { KibanaDatatable } from '../types';
+import { LensMultiTable } from '../types';
 import { RenderFunction } from './plugin';
 import { AutoScale } from './auto_scale';
 
 export interface MetricChartProps {
-  data: KibanaDatatable;
+  data: LensMultiTable;
   args: MetricConfig;
 }
 
@@ -26,7 +26,7 @@ export interface MetricRender {
 
 export const metricChart: ExpressionFunction<
   'lens_metric_chart',
-  KibanaDatatable,
+  LensMultiTable,
   MetricConfig,
   MetricRender
 > = ({
@@ -44,9 +44,9 @@ export const metricChart: ExpressionFunction<
     },
   },
   context: {
-    types: ['kibana_datatable'],
+    types: ['lens_multitable'],
   },
-  fn(data: KibanaDatatable, args: MetricChartProps) {
+  fn(data: LensMultiTable, args: MetricChartProps) {
     return {
       type: 'render',
       as: 'lens_metric_chart_renderer',
@@ -59,15 +59,10 @@ export const metricChart: ExpressionFunction<
   // TODO the typings currently don't support custom type args. As soon as they do, this can be removed
 } as unknown) as ExpressionFunction<
   'lens_metric_chart',
-  KibanaDatatable,
+  LensMultiTable,
   MetricConfig,
   MetricRender
 >;
-
-export interface MetricChartProps {
-  data: KibanaDatatable;
-  args: MetricConfig;
-}
 
 export const metricChartRenderer: RenderFunction<MetricChartProps> = {
   name: 'lens_metric_chart_renderer',
@@ -82,7 +77,7 @@ export const metricChartRenderer: RenderFunction<MetricChartProps> = {
 
 export function MetricChart({ data, args }: MetricChartProps) {
   const { title, accessor } = args;
-  const row = data.rows[0];
+  const [row] = Object.values(data.tables)[0].rows;
   // TODO: Use field formatters here...
   const value = Number(Number(row[accessor]).toFixed(3)).toString();
 

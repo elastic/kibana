@@ -5,6 +5,7 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
+import _ from 'lodash';
 import { Visualization, DatasourceSuggestion, TableSuggestion } from '../../types';
 import { Action } from './state_management';
 
@@ -34,24 +35,28 @@ export function getSuggestions(
 ): Suggestion[] {
   const datasourceTables: TableSuggestion[] = datasourceTableSuggestions.map(({ table }) => table);
 
-  return Object.entries(visualizationMap)
-    .map(([visualizationId, visualization]) => {
-      return visualization
-        .getSuggestions({
-          tables: datasourceTables,
-          state: visualizationId === activeVisualizationId ? visualizationState : undefined,
-        })
-        .map(({ datasourceSuggestionId, ...suggestion }) => ({
-          ...suggestion,
-          visualizationId,
-          datasourceState: datasourceTableSuggestions.find(
-            datasourceSuggestion =>
-              datasourceSuggestion.table.datasourceSuggestionId === datasourceSuggestionId
-          )!.state,
-        }));
-    })
-    .reduce((globalList, currentList) => [...globalList, ...currentList], [])
-    .sort(({ score: scoreA }, { score: scoreB }) => scoreB - scoreA);
+  const suggestions = Object.entries(visualizationMap).map(([visualizationId, visualization]) => {
+    return visualization
+      .getSuggestions({
+        tables: datasourceTables,
+        state: visualizationId === activeVisualizationId ? visualizationState : undefined,
+      })
+      .map(({ datasourceSuggestionId, ...suggestion }) => ({
+        ...suggestion,
+        visualizationId,
+        datasourceState: datasourceTableSuggestions.find(
+          datasourceSuggestion =>
+            datasourceSuggestion.table.datasourceSuggestionId === datasourceSuggestionId
+        )!.state,
+      }));
+  });
+
+  return _(suggestions)
+    .flatten()
+    .sortBy(({ score }) => score)
+    .reverse()
+    .uniq(({ visualizationId }) => visualizationId)
+    .value() as Suggestion[];
 }
 
 export function toSwitchAction(suggestion: Suggestion): Action {

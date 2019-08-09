@@ -6,37 +6,47 @@
 
 import { metricVisualization } from './metric_visualization';
 import { State } from './types';
-import { createMockDatasource } from '../editor_frame_plugin/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_plugin/mocks';
 import { generateId } from '../id_generator';
-import { DatasourcePublicAPI } from '../types';
+import { DatasourcePublicAPI, FramePublicAPI } from '../types';
 
 jest.mock('../id_generator');
 
 function exampleState(): State {
   return {
     accessor: 'a',
+    layerId: 'l1',
+  };
+}
+
+function mockFrame(): FramePublicAPI {
+  return {
+    ...createMockFramePublicAPI(),
+    addNewLayer: () => 'l42',
+    datasourceLayers: {
+      l1: createMockDatasource().publicAPIMock,
+      l42: createMockDatasource().publicAPIMock,
+    },
   };
 }
 
 describe('metric_visualization', () => {
   describe('#initialize', () => {
     it('loads default state', () => {
-      const mockDatasource = createMockDatasource();
       (generateId as jest.Mock).mockReturnValueOnce('test-id1');
-      const initialState = metricVisualization.initialize(mockDatasource.publicAPIMock);
+      const initialState = metricVisualization.initialize(mockFrame());
 
       expect(initialState.accessor).toBeDefined();
       expect(initialState).toMatchInlineSnapshot(`
         Object {
           "accessor": "test-id1",
+          "layerId": "l42",
         }
       `);
     });
 
     it('loads from persisted state', () => {
-      expect(
-        metricVisualization.initialize(createMockDatasource().publicAPIMock, exampleState())
-      ).toEqual(exampleState());
+      expect(metricVisualization.initialize(mockFrame(), exampleState())).toEqual(exampleState());
     });
   });
 
@@ -60,7 +70,12 @@ describe('metric_visualization', () => {
         },
       };
 
-      expect(metricVisualization.toExpression(exampleState(), datasource)).toMatchInlineSnapshot(`
+      const frame = {
+        ...mockFrame(),
+        datasourceLayers: { l1: datasource },
+      };
+
+      expect(metricVisualization.toExpression(exampleState(), frame)).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {

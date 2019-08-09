@@ -8,11 +8,13 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow } from '@elastic/eui';
 import { State } from './types';
-import { VisualizationProps, Operation } from '../types';
+import { VisualizationProps } from '../types';
 import { NativeRenderer } from '../native_renderer';
 
 export function MetricConfigPanel(props: VisualizationProps<State>) {
-  const { state, datasource } = props;
+  const { state, frame } = props;
+  const [datasource] = Object.values(frame.datasourceLayers);
+  const [layerId] = Object.keys(frame.datasourceLayers);
 
   return (
     <EuiForm className="lnsConfigPanel">
@@ -22,12 +24,13 @@ export function MetricConfigPanel(props: VisualizationProps<State>) {
         })}
       >
         <NativeRenderer
-          data-test-subj={`lns_metric_valueDimensionPanel`}
+          data-test-subj={'lns_metric_valueDimensionPanel'}
           render={datasource.renderDimensionPanel}
           nativeProps={{
+            layerId,
             columnId: state.accessor,
             dragDropContext: props.dragDropContext,
-            filterOperations: (op: Operation) => !op.isBucketed && op.dataType === 'number',
+            filterOperations: op => !op.isBucketed && op.dataType === 'number',
           }}
         />
       </EuiFormRow>

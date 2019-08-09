@@ -960,7 +960,7 @@ describe('IndexPattern Data Source', () => {
             indexPatterns: expectedIndexPatterns,
           },
           table: {
-            datasourceSuggestionId: 0,
+            datasourceSuggestionId: 3,
             isMultiRow: true,
             columns: [
               {

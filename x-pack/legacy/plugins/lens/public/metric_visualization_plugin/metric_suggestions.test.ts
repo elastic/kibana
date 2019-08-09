@@ -5,39 +5,36 @@
  */
 
 import { getSuggestions } from './metric_suggestions';
-import { TableColumn } from '../types';
+import { TableSuggestionColumn } from '..';
 
 describe('metric_suggestions', () => {
-  function numCol(columnId: string): TableColumn {
+  function numCol(columnId: string): TableSuggestionColumn {
     return {
       columnId,
       operation: {
         dataType: 'number',
-        id: `avg_${columnId}`,
         label: `Avg ${columnId}`,
         isBucketed: false,
       },
     };
   }
 
-  function strCol(columnId: string): TableColumn {
+  function strCol(columnId: string): TableSuggestionColumn {
     return {
       columnId,
       operation: {
         dataType: 'string',
-        id: `terms_${columnId}`,
         label: `Top 5 ${columnId}`,
         isBucketed: true,
       },
     };
   }
 
-  function dateCol(columnId: string): TableColumn {
+  function dateCol(columnId: string): TableSuggestionColumn {
     return {
       columnId,
       operation: {
         dataType: 'date',
-        id: `date_histogram_${columnId}`,
         isBucketed: true,
         label: `${columnId} histogram`,
       },
@@ -54,11 +51,26 @@ describe('metric_suggestions', () => {
     expect(
       getSuggestions({
         tables: [
-          { datasourceSuggestionId: 0, isMultiRow: true, columns: [dateCol('a')] },
-          { datasourceSuggestionId: 1, isMultiRow: true, columns: [strCol('foo'), strCol('bar')] },
-          { datasourceSuggestionId: 2, isMultiRow: true, columns: [numCol('bar')] },
-          { datasourceSuggestionId: 3, isMultiRow: true, columns: [unknownCol(), numCol('bar')] },
-          { datasourceSuggestionId: 4, isMultiRow: false, columns: [numCol('bar'), numCol('baz')] },
+          { columns: [dateCol('a')], datasourceSuggestionId: 0, isMultiRow: true, layerId: 'l1' },
+          {
+            columns: [strCol('foo'), strCol('bar')],
+            datasourceSuggestionId: 1,
+            isMultiRow: true,
+            layerId: 'l1',
+          },
+          { layerId: 'l1', datasourceSuggestionId: 2, isMultiRow: true, columns: [numCol('bar')] },
+          {
+            columns: [unknownCol(), numCol('bar')],
+            datasourceSuggestionId: 3,
+            isMultiRow: true,
+            layerId: 'l1',
+          },
+          {
+            columns: [numCol('bar'), numCol('baz')],
+            datasourceSuggestionId: 4,
+            isMultiRow: false,
+            layerId: 'l1',
+          },
         ],
       })
     ).toEqual([]);
@@ -68,9 +80,10 @@ describe('metric_suggestions', () => {
     const [suggestion, ...rest] = getSuggestions({
       tables: [
         {
+          columns: [numCol('bytes')],
           datasourceSuggestionId: 0,
           isMultiRow: false,
-          columns: [numCol('bytes')],
+          layerId: 'l1',
         },
       ],
     });
@@ -83,6 +96,7 @@ describe('metric_suggestions', () => {
         "score": 1,
         "state": Object {
           "accessor": "bytes",
+          "layerId": "l1",
         },
         "title": "Avg bytes",
       }
