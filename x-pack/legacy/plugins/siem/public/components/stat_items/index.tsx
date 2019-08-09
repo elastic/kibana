@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScaleType, niceTimeFormatter, Rotation } from '@elastic/charts';
+import {
+  ScaleType,
+  niceTimeFormatter,
+  Rotation,
+  BrushEndListener,
+  ElementClickListener,
+} from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,7 +24,6 @@ import { get, getOr } from 'lodash/fp';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { BrushEndListener, ElementClickListener } from '@elastic/charts/dist/state/chart_state';
 import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
 import { AreaChart } from '../charts/areachart';
 import { BarChart } from '../charts/barchart';
