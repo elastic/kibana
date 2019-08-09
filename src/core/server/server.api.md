@@ -124,7 +124,6 @@ export interface CoreSetup {
         basePath: HttpServiceSetup['basePath'];
         isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
         createRouter: () => IRouter;
-        registerRouter: (router: IRouter) => void;
     };
 }
 
@@ -241,7 +240,7 @@ export interface HttpServerSetup {
 }
 
 // @public (undocumented)
-export type HttpServiceSetup = HttpServerSetup & {
+export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
     createRouter: (path: string) => IRouter;
 };
 
