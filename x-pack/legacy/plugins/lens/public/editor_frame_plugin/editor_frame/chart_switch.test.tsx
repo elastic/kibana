@@ -169,7 +169,7 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toEqual('bolt');
+    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toEqual('alert');
   });
 
   it('should indicate data loss if no data will be used', () => {
@@ -188,7 +188,7 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toEqual('bolt');
+    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toEqual('alert');
   });
 
   it('should not indicate data loss if there is no data', () => {

@@ -120,6 +120,10 @@ function InnerSuggestionPanel({
     visualizationState
   );
 
+  if (suggestions.length === 0) {
+    return null;
+  }
+
   return (
     <div className="lnsSidebar__suggestions">
       <EuiTitle size="xs">
@@ -130,7 +134,7 @@ function InnerSuggestionPanel({
           />
         </h3>
       </EuiTitle>
-      {suggestions.map((suggestion, index) => {
+      {suggestions.map(suggestion => {
         const previewExpression = suggestion.previewExpression
           ? prependDatasourceExpression(
               suggestion.previewExpression,
