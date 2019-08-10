@@ -285,7 +285,7 @@ export function FindProvider({ getService }) {
       log.debug(`clickByCssSelector(${selector})`);
       await retry.try(async () => {
         const element = await this.byCssSelector(selector, timeout);
-        await element.moveMouseTo();
+        // await element.moveMouseTo();
         await element.click();
       });
     }
