@@ -22,14 +22,16 @@ routes.when(JOBS_LIST_PATH, {
   resolve: {
     checkPrivilege: canGetManagementMlJobs,
   },
-  controller($scope) {
+  controller($scope, checkPrivilege) {
+    const { mlFeatureEnabledInSpace } = checkPrivilege;
+
     $scope.$on('$destroy', () => {
       const elem = document.getElementById('kibanaManagementMLSection');
       if (elem) unmountComponentAtNode(elem);
     });
     $scope.$$postDigest(() => {
       const element = document.getElementById('kibanaManagementMLSection');
-      render(JobsListPage(), element);
+      render(JobsListPage({ isMlEnabledInSpace: mlFeatureEnabledInSpace }), element);
     });
   },
 });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import {
@@ -20,7 +20,11 @@ import {
 // @ts-ignore undeclared module
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view';
 
-export const JobsListPage = () => {
+interface Props {
+  isMlEnabledInSpace: boolean;
+}
+
+export const JobsListPage: FC<Props> = ({ isMlEnabledInSpace }) => {
   const tabs = [
     {
       id: 'anomaly_detection_jobs',
@@ -30,22 +34,22 @@ export const JobsListPage = () => {
       content: (
         <Fragment>
           <EuiSpacer size="m" />
-          <JobsListView isManagementTable={true} />
+          <JobsListView isManagementTable={true} isMlEnabledInSpace={isMlEnabledInSpace} />
         </Fragment>
       ),
     },
-    // {
-    //   id: 'analytics_jobs',
-    //   name: i18n.translate('xpack.ml.management.jobsList.analyticsTab', {
-    //     defaultMessage: 'Analytics',
-    //   }),
-    //   content: renderAnalyticsJobs(),
-    // },
+    {
+      id: 'analytics_jobs',
+      name: i18n.translate('xpack.ml.management.jobsList.analyticsTab', {
+        defaultMessage: 'Analytics',
+      }),
+      content: renderAnalyticsJobs(),
+    },
   ];
 
-  // function renderAnalyticsJobs() {
-  //   return <div>Analytics job placeholder</div>;
-  // }
+  function renderAnalyticsJobs() {
+    return <div>Analytics job placeholder</div>;
+  }
 
   function renderTabs() {
     return <EuiTabbedContent size="s" tabs={tabs} initialSelectedTab={tabs[0]} />;

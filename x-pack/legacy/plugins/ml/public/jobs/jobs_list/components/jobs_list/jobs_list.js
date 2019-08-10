@@ -80,11 +80,21 @@ class JobsListUI extends Component {
   };
 
   getJobIdLink(id) {
-    return (
+    let link = (
       <EuiLink href={getJobIdUrl(id)}>
         {id}
       </EuiLink>
     );
+    // Disable link to job if ML is not enabled in current space
+    if (this.props.isMlEnabledInSpace === false) {
+      link = (
+        <EuiLink className="disabledLink" onClick={() => {}} color="subdued">
+          {id}
+        </EuiLink>
+      );
+    }
+
+    return link;
   }
 
   getPageOfJobs(index, size, sortField, sortDirection) {
@@ -253,6 +263,10 @@ class JobsListUI extends Component {
           <EuiBadge color={'hollow'}>{'all'}</EuiBadge>
         )
       });
+      // Remove actions if Ml not enabled in current space
+      if (this.props.isMlEnabledInSpace === false) {
+        columns.pop();
+      }
     } else {
       // insert before last column
       columns.splice(columns.length - 1, 0, {
@@ -344,6 +358,8 @@ class JobsListUI extends Component {
 JobsListUI.propTypes = {
   jobsSummaryList: PropTypes.array.isRequired,
   fullJobsList: PropTypes.object.isRequired,
+  isManagementTable: PropTypes.boolean,
+  isMlEnabledInSpace: PropTypes.boolean,
   itemIdToExpandedRowMap: PropTypes.object.isRequired,
   toggleRow: PropTypes.func.isRequired,
   selectJobChange: PropTypes.func.isRequired,
@@ -355,6 +371,8 @@ JobsListUI.propTypes = {
   loading: PropTypes.bool,
 };
 JobsListUI.defaultProps = {
+  isManagementTable: false,
+  isMlEnabledInSpace: true,
   loading: false,
 };
 

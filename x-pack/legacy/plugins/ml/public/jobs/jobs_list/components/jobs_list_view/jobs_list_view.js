@@ -362,21 +362,22 @@ export class JobsListView extends Component {
   }
 
   renderManagementJobsListComponents() {
-    const { loading } = this.state;
+    const { loading, itemIdToExpandedRowMap, filteredJobsSummaryList, fullJobsList, selectedJobs } = this.state;
     return (
       <div className="managementJobsList">
         <div>
           <JobFilterBar setFilters={this.setFilters} />
         </div>
         <JobsList
-          jobsSummaryList={this.state.filteredJobsSummaryList}
-          fullJobsList={this.state.fullJobsList}
-          itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
+          jobsSummaryList={filteredJobsSummaryList}
+          fullJobsList={fullJobsList}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           toggleRow={this.toggleRow}
           selectJobChange={this.selectJobChange}
-          selectedJobsCount={this.state.selectedJobs.length}
+          selectedJobsCount={selectedJobs.length}
           loading={loading}
           isManagementTable={true}
+          isMlEnabledInSpace={this.props.isMlEnabledInSpace}
         />
       </div>
     );
