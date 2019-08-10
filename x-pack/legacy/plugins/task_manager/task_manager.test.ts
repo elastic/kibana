@@ -9,6 +9,7 @@ import sinon from 'sinon';
 import { TaskManager } from './task_manager';
 import { SavedObjectsClientMock } from 'src/core/server/mocks';
 import { SavedObjectsSerializer, SavedObjectsSchema } from 'src/core/server';
+import { mockLogger } from './test_utils';
 
 const savedObjectsClient = SavedObjectsClientMock.create();
 const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
@@ -31,8 +32,8 @@ describe('TaskManager', () => {
     config,
     savedObjectsRepository: savedObjectsClient,
     serializer,
-    log: jest.fn(),
     callWithInternalUser: jest.fn(),
+    logger: mockLogger(),
   };
 
   beforeEach(() => {

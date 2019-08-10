@@ -5,8 +5,8 @@
  */
 
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
+import { Logger } from './types';
 import { fillPool } from './lib/fill_pool';
-import { Logger, TaskManagerLogger } from './lib/logger';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
 import { ConcreteTaskInstance, RunContext, TaskInstance } from './task';
@@ -17,7 +17,7 @@ import { TaskManagerRunner } from './task_runner';
 import { FetchOpts, FetchResult, TaskStore } from './task_store';
 
 export interface TaskManagerOpts {
-  log: any;
+  logger: Logger;
   config: any;
   callWithInternalUser: any;
   savedObjectsRepository: SavedObjectsClientContract;
@@ -61,8 +61,7 @@ export class TaskManager {
     this.overrideNumWorkers = opts.config.get('xpack.task_manager.override_num_workers');
     this.pollerInterval = opts.config.get('xpack.task_manager.poll_interval');
     this.definitions = {};
-
-    const logger = new TaskManagerLogger((...args: any[]) => opts.log(...args));
+    this.logger = opts.logger;
 
     /* Kibana UUID needs to be pulled live (not cached), as it takes a long time
      * to initialize, and can change after startup */
@@ -75,26 +74,25 @@ export class TaskManager {
       definitions: this.definitions,
     });
     const pool = new TaskPool({
-      logger,
+      logger: this.logger,
       maxWorkers: this.maxWorkers,
     });
     const createRunner = (instance: ConcreteTaskInstance) =>
       new TaskManagerRunner({
-        logger,
+        logger: this.logger,
         instance,
         store,
         definitions: this.definitions,
         beforeRun: this.middleware.beforeRun,
       });
     const poller = new TaskPoller({
-      logger,
+      logger: this.logger,
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
       work(): Promise<void> {
         return fillPool(pool.run, store.fetchAvailableTasks, createRunner);
       },
     });
 
-    this.logger = logger;
     this.store = store;
     this.poller = poller;
   }
@@ -106,7 +104,7 @@ export class TaskManager {
         await this.poller.start();
       } catch (err) {
         // FIXME: check the type of error to make sure it's actually an ES error
-        this.logger.warning(`PollError ${err.message}`);
+        this.logger.warn(`PollError ${err.message}`);
 
         // rety again to initialize store and poller, using the timing of
         // task_manager's configurable poll interval

@@ -9,7 +9,7 @@
  * tasks at once in a given Kibana instance.
  */
 
-import { Logger } from './lib/logger';
+import { Logger } from './types';
 import { TaskRunner } from './task_runner';
 
 interface Opts {
@@ -77,7 +77,7 @@ export class TaskPool {
         task
           .run()
           .catch(err => {
-            this.logger.warning(`Task ${task} failed in attempt to run: ${err.message}`);
+            this.logger.warn(`Task ${task} failed in attempt to run: ${err.message}`);
           })
           .then(() => this.running.delete(task));
       }

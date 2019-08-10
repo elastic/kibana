@@ -50,22 +50,38 @@ export function taskManager(kibana: any) {
       }).default();
     },
     init(server: Legacy.Server) {
-      const plugin = new Plugin();
+      const plugin = new Plugin({
+        logger: {
+          get: () => ({
+            info: (message: string) => server.log(['info', 'task_manager'], message),
+            debug: (message: string) => server.log(['debug', 'task_manager'], message),
+            warn: (message: string) => server.log(['warn', 'task_manager'], message),
+            error: (message: string) => server.log(['error', 'task_manager'], message),
+          }),
+        },
+      });
       const schema = new SavedObjectsSchema(this.kbnServer.uiExports.savedObjectSchemas);
       const serializer = new SavedObjectsSerializer(schema);
       const setupContract = plugin.setup(
         {},
         {
           serializer,
-          log: server.log.bind(server),
           config: server.config(),
           elasticsearch: server.plugins.elasticsearch,
           savedObjects: server.savedObjects,
         }
       );
-      this.kbnServer.afterPluginsInit(async () => {
-        await this.kbnServer.server.kibanaMigrator.awaitMigration();
-        plugin.start();
+      this.kbnServer.afterPluginsInit(() => {
+        (async () => {
+          // The code block below can't await directly within "afterPluginsInit"
+          // callback due to circular dependency. The server isn't "ready" until
+          // this code block finishes. Migrations wait for server to be ready before
+          // executing. Saved objects repository waits for migrations to finish before
+          // finishing the request. To avoid this, we'll await within a separate
+          // function block.
+          await this.kbnServer.server.kibanaMigrator.awaitMigration();
+          plugin.start();
+        })();
       });
       server.expose(setupContract);
     },
