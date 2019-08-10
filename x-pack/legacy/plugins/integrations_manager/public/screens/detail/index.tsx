@@ -4,34 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useState, useEffect } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPage,
-  EuiPageBody,
-  EuiPageWidthProps,
-  EuiPanel,
-  ICON_TYPES,
-} from '@elastic/eui';
-
+import { EuiButtonEmpty, EuiPage, EuiPageBody, EuiPageWidthProps, ICON_TYPES } from '@elastic/eui';
 import { PLUGIN } from '../../../common/constants';
 import { IntegrationInfo } from '../../../common/types';
 import { DetailViewPanelName } from '../../';
-import { Requirements } from '../../components/requirements';
-import { AssetAccordion } from '../../components/asset_accordion';
-import { AssetsFacetGroup } from '../../components/assets_facet_group';
 import { getIntegrationInfoByKey } from '../../data';
 import { useBreadcrumbs, useLinks } from '../../hooks';
 import { Header } from './header';
-import { CenterColumn, LeftColumn, RightColumn } from './layout';
-import { OverviewPanel } from './overview_panel';
-import { SideNavLinks } from './side_nav_links';
+import { Content } from './content';
 
 export const ICON_HEIGHT_PANEL = 164;
 export const ICON_HEIGHT_NATURAL = 32;
-const DEFAULT_PANEL: DetailViewPanelName = 'overview';
+export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 
 export interface DetailProps {
   pkgkey: string;
@@ -78,54 +62,6 @@ export function DetailLayout(props: LayoutProps) {
         </EuiPageBody>
       </EuiPage>
     </Fragment>
-  );
-}
-
-type ContentPanelProps = IntegrationInfo & Pick<DetailProps, 'panel'>;
-function ContentPanel(props: ContentPanelProps) {
-  const { assets, panel } = props;
-  switch (panel) {
-    case 'assets':
-      return <AssetAccordion assets={assets} />;
-    case 'data-sources':
-      return <EuiPanel />;
-    case 'overview':
-    default:
-      return <OverviewPanel {...props} />;
-  }
-}
-
-type ContentProps = IntegrationInfo & Pick<DetailProps, 'panel'> & { hasLogoPanel: boolean };
-export function Content(props: ContentProps) {
-  const { assets, hasLogoPanel, name, panel, requirement, version } = props;
-  const marginTop = ICON_HEIGHT_PANEL / 2 + ICON_HEIGHT_NATURAL / 2;
-  const leftStyles = hasLogoPanel ? { marginTop: `${marginTop}px` } : {};
-  const isOverviewPanel = panel === 'overview';
-
-  return (
-    <EuiFlexGroup>
-      <LeftColumn style={leftStyles}>
-        <SideNavLinks name={name} version={version} active={panel || DEFAULT_PANEL} />
-      </LeftColumn>
-      <CenterColumn>
-        <ContentPanel {...props} />
-      </CenterColumn>
-      <RightColumn>
-        {isOverviewPanel && (
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <Requirements requirements={requirement} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHorizontalRule margin="xl" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <AssetsFacetGroup assets={assets} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-      </RightColumn>
-    </EuiFlexGroup>
   );
 }
 
