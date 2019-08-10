@@ -17,8 +17,9 @@ import { TaskManagerRunner } from './task_runner';
 import { FetchOpts, FetchResult, TaskStore } from './task_store';
 
 export interface TaskManagerOpts {
-  kbnServer: any;
+  log: any;
   config: any;
+  callWithInternalUser: any;
   savedObjectsRepository: SavedObjectsClientContract;
   serializer: SavedObjectsSerializer;
 }
@@ -40,6 +41,7 @@ export class TaskManager {
   private isInitialized = false;
   private maxWorkers: number;
   private overrideNumWorkers: { [taskType: string]: number };
+  private readonly pollerInterval: number;
   private definitions: TaskDictionary<SanitizedTaskDefinition>;
   private store: TaskStore;
   private poller: TaskPoller;
@@ -55,19 +57,19 @@ export class TaskManager {
    * mechanism.
    */
   constructor(opts: TaskManagerOpts) {
-    const { server } = opts.kbnServer;
     this.maxWorkers = opts.config.get('xpack.task_manager.max_workers');
     this.overrideNumWorkers = opts.config.get('xpack.task_manager.override_num_workers');
+    this.pollerInterval = opts.config.get('xpack.task_manager.poll_interval');
     this.definitions = {};
 
-    const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
+    const logger = new TaskManagerLogger((...args: any[]) => opts.log(...args));
 
     /* Kibana UUID needs to be pulled live (not cached), as it takes a long time
      * to initialize, and can change after startup */
     const store = new TaskStore({
       serializer: opts.serializer,
       savedObjectsRepository: opts.savedObjectsRepository,
-      callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
+      callCluster: opts.callWithInternalUser,
       index: opts.config.get('xpack.task_manager.index'),
       maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
       definitions: this.definitions,
@@ -95,27 +97,24 @@ export class TaskManager {
     this.logger = logger;
     this.store = store;
     this.poller = poller;
+  }
 
-    opts.kbnServer.afterPluginsInit(() => {
-      // By this point, the plugins had their chance to register task definitions
-      // and we're good to start doing CRUD actions
-      this.isInitialized = true;
-      const startPoller = async () => {
-        await server.kibanaMigrator.awaitMigration();
-        try {
-          await poller.start();
-        } catch (err) {
-          // FIXME: check the type of error to make sure it's actually an ES error
-          logger.warning(`PollError ${err.message}`);
+  public start() {
+    this.isInitialized = true;
+    const startPoller = async () => {
+      try {
+        await this.poller.start();
+      } catch (err) {
+        // FIXME: check the type of error to make sure it's actually an ES error
+        this.logger.warning(`PollError ${err.message}`);
 
-          // rety again to initialize store and poller, using the timing of
-          // task_manager's configurable poll interval
-          const retryInterval = opts.config.get('xpack.task_manager.poll_interval');
-          setTimeout(() => startPoller(), retryInterval);
-        }
-      };
-      startPoller();
-    });
+        // rety again to initialize store and poller, using the timing of
+        // task_manager's configurable poll interval
+        const retryInterval = this.pollerInterval;
+        setTimeout(() => startPoller(), retryInterval);
+      }
+    };
+    startPoller();
   }
 
   /**

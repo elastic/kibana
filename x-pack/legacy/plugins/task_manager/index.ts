@@ -6,13 +6,12 @@
 
 import { Root } from 'joi';
 import { Legacy } from 'kibana';
+import { Plugin, PluginSetupContract } from './plugin';
 import { SavedObjectsSerializer, SavedObjectsSchema } from '../../../../src/core/server';
-import { TaskManager as TaskManagerClass } from './task_manager';
 import mappings from './mappings.json';
 import { migrations } from './migrations';
-import { TaskManager } from './types';
 
-export { TaskManager };
+export { PluginSetupContract as TaskManager };
 export { TaskInstance, ConcreteTaskInstance, TaskRunCreatorFunction } from './task';
 
 export function taskManager(kibana: any) {
@@ -51,29 +50,24 @@ export function taskManager(kibana: any) {
       }).default();
     },
     init(server: Legacy.Server) {
-      const config = server.config();
+      const plugin = new Plugin();
       const schema = new SavedObjectsSchema(this.kbnServer.uiExports.savedObjectSchemas);
       const serializer = new SavedObjectsSerializer(schema);
-      const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-      const savedObjectsRepository = server.savedObjects.getSavedObjectsRepository(
-        callWithInternalUser,
-        ['task']
+      const setupContract = plugin.setup(
+        {},
+        {
+          serializer,
+          log: server.log.bind(server),
+          config: server.config(),
+          elasticsearch: server.plugins.elasticsearch,
+          savedObjects: server.savedObjects,
+        }
       );
-
-      const taskManagerInstance = new TaskManagerClass({
-        kbnServer: this.kbnServer,
-        config,
-        savedObjectsRepository,
-        serializer,
+      this.kbnServer.afterPluginsInit(async () => {
+        await this.kbnServer.server.kibanaMigrator.awaitMigration();
+        plugin.start();
       });
-      const exposedFunctions: TaskManager = {
-        fetch: (...args) => taskManagerInstance.fetch(...args),
-        remove: (...args) => taskManagerInstance.remove(...args),
-        schedule: (...args) => taskManagerInstance.schedule(...args),
-        addMiddleware: (...args) => taskManagerInstance.addMiddleware(...args),
-        registerTaskDefinitions: (...args) => taskManagerInstance.registerTaskDefinitions(...args),
-      };
-      server.expose(exposedFunctions);
+      server.expose(setupContract);
     },
     uiExports: {
       mappings,
