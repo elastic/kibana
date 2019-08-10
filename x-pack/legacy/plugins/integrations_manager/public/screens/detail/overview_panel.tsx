@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiText, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { IntegrationInfo } from '../../../common/types';
 
 export function OverviewPanel(props: IntegrationInfo) {
@@ -16,6 +16,14 @@ export function OverviewPanel(props: IntegrationInfo) {
       </EuiTitle>
       <EuiText>
         <p>{description}</p>
+        <p>Still need a) longer descriptions b) component to show/hide</p>
+      </EuiText>
+      <EuiSpacer size="xl" />
+      <EuiTitle size="xs">
+        <span>Screenshots</span>
+      </EuiTitle>
+      <EuiText>
+        <p>Where are we getting these images?</p>
       </EuiText>
     </Fragment>
   );

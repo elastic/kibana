@@ -5,7 +5,14 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiTitle,
+  EuiText,
+} from '@elastic/eui';
 import { IntegrationInfo } from '../../../common/types';
 import { AssetAccordion } from '../../components/asset_accordion';
 import { AssetsFacetGroup } from '../../components/assets_facet_group';
@@ -55,7 +62,13 @@ export function ContentPanel(props: ContentPanelProps) {
     case 'assets':
       return <AssetAccordion assets={assets} />;
     case 'data-sources':
-      return <EuiPanel />;
+      return (
+        <EuiPanel>
+          <EuiTitle size="xs">
+            <span>Data Sources</span>
+          </EuiTitle>
+        </EuiPanel>
+      );
     case 'overview':
     default:
       return <OverviewPanel {...props} />;
