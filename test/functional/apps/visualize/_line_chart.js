@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
-  describe('line charts', function () {
+  describe.skip('line charts', function () {
     const vizName1 = 'Visualization LineChart';
 
     const initLineChart = async function () {

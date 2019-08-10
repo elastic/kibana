@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['settings', 'common', 'dashboard', 'header']);
 
-  describe('kibana settings', function describeIndexTests() {
+  describe.skip('kibana settings', function describeIndexTests() {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
