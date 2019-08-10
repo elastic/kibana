@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  describe.skip('embedding visualizations', function () {
+  describe('embedding visualizations', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('../functional/fixtures/es_archiver/visualize_embedding');

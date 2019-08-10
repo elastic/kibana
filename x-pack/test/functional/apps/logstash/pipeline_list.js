@@ -167,7 +167,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('clone button', () => {
+    describe('clone button', () => {
       it('links to the pipeline editor with cloned pipeline details', async () => {
         // First, create a random pipeline
         await PageObjects.logstash.gotoNewPipelineEditor();
