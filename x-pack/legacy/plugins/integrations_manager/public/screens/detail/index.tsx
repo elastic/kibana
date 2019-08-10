@@ -5,7 +5,6 @@
  */
 import React, { Fragment, useState, useEffect } from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,24 +13,21 @@ import {
   EuiPageBody,
   EuiPageWidthProps,
   EuiPanel,
-  EuiTitle,
   ICON_TYPES,
-  IconType,
 } from '@elastic/eui';
 
 import { PLUGIN } from '../../../common/constants';
 import { IntegrationInfo } from '../../../common/types';
 import { DetailViewPanelName } from '../../';
-import { useBreadcrumbs, useLinks } from '../../hooks';
-import { VersionBadge } from '../../components/version_badge';
 import { Requirements } from '../../components/requirements';
-import { AssetsFacetGroup } from '../../components/assets_facet_group';
 import { AssetAccordion } from '../../components/asset_accordion';
+import { AssetsFacetGroup } from '../../components/assets_facet_group';
 import { getIntegrationInfoByKey } from '../../data';
+import { useBreadcrumbs, useLinks } from '../../hooks';
+import { Header } from './header';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { OverviewPanel } from './overview_panel';
 import { SideNavLinks } from './side_nav_links';
-import { IconPanel } from './icon_panel';
 
 export const ICON_HEIGHT_PANEL = 164;
 export const ICON_HEIGHT_NATURAL = 32;
@@ -62,8 +58,10 @@ export function DetailLayout(props: LayoutProps) {
   const { name, restrictWidth, title, panel } = props;
   const { toListView } = useLinks();
   const iconType = ICON_TYPES.find(key => key.toLowerCase() === `logo${name}`);
-  useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }, { text: title }]);
   const styles = panel === 'overview' ? overviewContentStyles() : {};
+
+  useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }, { text: title }]);
+
   return (
     <Fragment>
       <EuiPage restrictWidth={restrictWidth} style={{ padding: '16px 16px 0 0' }}>
@@ -80,44 +78,6 @@ export function DetailLayout(props: LayoutProps) {
         </EuiPageBody>
       </EuiPage>
     </Fragment>
-  );
-}
-
-type HeaderProps = IntegrationInfo & { iconType?: IconType };
-function Header(props: HeaderProps) {
-  const { iconType, title, version } = props;
-  const [isInstalled, setInstalled] = useState(false);
-
-  return (
-    <EuiFlexGroup>
-      {iconType ? (
-        <LeftColumn>
-          <IconPanel iconType={iconType} />
-        </LeftColumn>
-      ) : null}
-      <CenterColumn>
-        <EuiTitle size="l">
-          <h1>
-            <span style={{ marginRight: '1rem' }}>{title}</span>
-            <VersionBadge version={version} />
-          </h1>
-        </EuiTitle>
-      </CenterColumn>
-      <RightColumn>
-        <EuiFlexGroup direction="column" alignItems="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill={!isInstalled}
-              iconType={isInstalled ? '' : 'plusInCircle'}
-              fullWidth={false}
-              onClick={() => setInstalled(!isInstalled)}
-            >
-              {isInstalled ? 'Installed' : 'Add Integration'}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </RightColumn>
-    </EuiFlexGroup>
   );
 }
 
