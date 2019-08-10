@@ -15,9 +15,9 @@ exports[`create_description_list renders correctly against snapshot 1`] = `
     <EuiSpacer
       size="m"
     />
-    <Styled(EuiText)>
+    <LargeScore>
       17
-    </Styled(EuiText)>
+    </LargeScore>
   </EuiDescriptionListDescription>
   <EuiDescriptionListTitle
     key="title-1"

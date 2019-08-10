@@ -16,6 +16,8 @@ const P = styled.p`
   margin-bottom: 5px;
 `;
 
+P.displayName = 'P';
+
 export const FormattedDurationTooltipContent = pure<{
   maybeDurationNanoseconds: string | number | object | undefined | null;
   tooltipTitle?: string;

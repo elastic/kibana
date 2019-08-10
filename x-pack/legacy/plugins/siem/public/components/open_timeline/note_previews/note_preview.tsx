@@ -22,9 +22,13 @@ const NotePreviewGroup = styled.article`
   }
 `;
 
+NotePreviewGroup.displayName = 'NotePreviewGroup';
+
 const NotePreviewHeader = styled.header`
   margin-bottom: ${props => props.theme.eui.euiSizeS};
 `;
+
+NotePreviewHeader.displayName = 'NotePreviewHeader';
 
 /**
  * Renders a preview of a note in the All / Open Timelines table

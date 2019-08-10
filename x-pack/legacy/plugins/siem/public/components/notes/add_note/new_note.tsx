@@ -17,15 +17,23 @@ const NewNoteTabs = styled(EuiTabbedContent)`
   width: 100%;
 `;
 
+NewNoteTabs.displayName = 'NewNoteTabs';
+
 const MarkdownContainer = styled(EuiPanel)<{ height: number }>`
   height: ${({ height }) => height}px;
   overflow: auto;
 `;
 
+MarkdownContainer.displayName = 'MarkdownContainer';
+
 const TextArea = styled(EuiTextArea)<{ height: number }>`
   min-height: ${({ height }) => `${height}px`};
   width: 100%;
 `;
+
+TextArea.displayName = 'TextArea';
+
+TextArea.displayName = 'TextArea';
 
 /** An input for entering a new note  */
 export const NewNote = pure<{

@@ -2,11 +2,11 @@
 
 exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
 <span>
-  <styled.div>
+  <Row>
     <span>
       some children
     </span>
-    <styled.div
+    <RowRendererContainer
       width={100}
     >
       <ZeekDetails
@@ -459,7 +459,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
           }
         }
       />
-    </styled.div>
-  </styled.div>
+    </RowRendererContainer>
+  </Row>
 </span>
 `;

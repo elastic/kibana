@@ -26,13 +26,19 @@ import * as i18n from './translations';
 // `;
 const Badge = (props: EuiBadgeProps) => <EuiBadge {...props} style={{ verticalAlign: 'top' }} />;
 
+Badge.displayName = 'Badge';
+
 const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
 `;
 
+TokensFlexItem.displayName = 'TokensFlexItem';
+
 const LinkFlexItem = styled(EuiFlexItem)`
   margin-left: 6px;
 `;
+
+LinkFlexItem.displayName = 'LinkFlexItem';
 
 type StringRenderer = (value: string) => string;
 

@@ -27,6 +27,8 @@ const Icon = styled(EuiIcon)`
   cursor: pointer;
 `;
 
+Icon.displayName = 'Icon';
+
 export const AnomalyScore = React.memo<Args>(
   ({ jobKey, startDate, endDate, index = 0, score, interval, narrowDateRange }): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false);

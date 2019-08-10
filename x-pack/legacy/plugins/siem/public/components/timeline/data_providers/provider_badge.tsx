@@ -37,6 +37,8 @@ const ProviderBadgeStyled = styled(EuiBadge)`
   }
 `;
 
+ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';
+
 interface ProviderBadgeProps {
   deleteProvider: () => void;
   field: string;

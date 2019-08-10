@@ -26,9 +26,13 @@ const AddNotesContainer = styled(EuiFlexGroup)`
   user-select: none;
 `;
 
+AddNotesContainer.displayName = 'AddNotesContainer';
+
 const ButtonsContainer = styled(EuiFlexGroup)`
   margin-top: 5px;
 `;
+
+ButtonsContainer.displayName = 'ButtonsContainer';
 
 export const CancelButton = pure<{ onCancelAddNote: () => void }>(({ onCancelAddNote }) => (
   <EuiButtonEmpty data-test-subj="cancel" onClick={onCancelAddNote}>

@@ -23,6 +23,8 @@ const SelectTypeItem = styled(EuiFlexItem)`
   min-width: 180px;
 `;
 
+SelectTypeItem.displayName = 'SelectTypeItem';
+
 interface FlowTargetSelectReduxProps {
   flowTarget: FlowTarget;
 }

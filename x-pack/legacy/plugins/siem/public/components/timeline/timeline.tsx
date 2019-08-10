@@ -41,6 +41,8 @@ const WrappedByAutoSizer = styled.div`
   width: 100%;
 `; // required by AutoSizer
 
+WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
+
 const TimelineContainer = styled(EuiFlexGroup)`
   min-height: 500px;
   overflow: hidden;
@@ -48,6 +50,8 @@ const TimelineContainer = styled(EuiFlexGroup)`
   user-select: none;
   width: 100%;
 `;
+
+TimelineContainer.displayName = 'TimelineContainer';
 
 interface Props {
   browserFields: BrowserFields;

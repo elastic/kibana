@@ -20,6 +20,8 @@ const CountBadgeContainer = styled.div`
   top: -3px;
 `;
 
+CountBadgeContainer.displayName = 'CountBadgeContainer';
+
 interface Props {
   /** The title of the category */
   categoryId: string;

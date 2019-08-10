@@ -140,7 +140,7 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
 `;
 
 exports[`kpiHostsComponent render it should render spinner if it is loading 1`] = `
-<Styled(EuiFlexGroup)
+<FlexGroupSpinner
   alignItems="center"
   justifyContent="center"
 >
@@ -151,5 +151,5 @@ exports[`kpiHostsComponent render it should render spinner if it is loading 1`] 
       size="xl"
     />
   </EuiFlexItem>
-</Styled(EuiFlexGroup)>
+</FlexGroupSpinner>
 `;

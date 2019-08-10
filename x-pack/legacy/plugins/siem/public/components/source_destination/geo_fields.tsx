@@ -68,6 +68,8 @@ const GeoFlexItem = styled(EuiFlexItem)`
   margin-right: 5px;
 `;
 
+GeoFlexItem.displayName = 'GeoFlexItem';
+
 const GeoFieldValues = pure<{
   contextId: string;
   eventId: string;

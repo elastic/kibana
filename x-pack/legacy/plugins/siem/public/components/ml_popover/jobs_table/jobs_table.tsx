@@ -25,6 +25,8 @@ const JobNameWrapper = styled.div`
   margin: 5px 0;
 `;
 
+JobNameWrapper.displayName = 'JobNameWrapper';
+
 // TODO: Use SASS mixin @include EuiTextTruncate when we switch from styled components
 const truncateThreshold = 200;
 

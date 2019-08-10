@@ -128,6 +128,8 @@ export const Badge = (props: EuiBadgeProps) => (
   <EuiBadge {...props} style={{ verticalAlign: 'top' }} />
 );
 
+Badge.displayName = 'Badge';
+
 export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
   contextId: string;
   eventId: string;

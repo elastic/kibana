@@ -16,6 +16,8 @@ export const ArrowBody = styled.span<{ height: number }>`
   width: 25px;
 `;
 
+ArrowBody.displayName = 'ArrowBody';
+
 export type ArrowDirection = 'arrowLeft' | 'arrowRight';
 
 /** Renders the head of an arrow */

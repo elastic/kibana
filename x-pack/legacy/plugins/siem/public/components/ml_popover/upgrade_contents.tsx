@@ -14,6 +14,8 @@ const PopoverContentsDiv = styled.div`
   width: 384px;
 `;
 
+PopoverContentsDiv.displayName = 'PopoverContentsDiv';
+
 export const UpgradeContents = React.memo(() => {
   return (
     <PopoverContentsDiv data-test-subj="ml-popover-upgrade-contents">

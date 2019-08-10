@@ -17,14 +17,20 @@ const InputDisplay = styled.div`
   width: 5px;
 `;
 
+InputDisplay.displayName = 'InputDisplay';
+
 const PinIconContainer = styled.div`
   margin-right: 5px;
 `;
+
+PinIconContainer.displayName = 'PinIconContainer';
 
 const PinActionItem = styled.div`
   display: flex;
   flex-direction: row;
 `;
+
+PinActionItem.displayName = 'PinActionItem';
 
 export type EventsSelectAction =
   | 'select-all'

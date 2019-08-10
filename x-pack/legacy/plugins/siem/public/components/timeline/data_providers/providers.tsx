@@ -56,10 +56,14 @@ const PanelProviders = styled.div`
   justify-content: flex-start;
 `;
 
+PanelProviders.displayName = 'PanelProviders';
+
 const PanelProvidersGroupContainer = styled(EuiFlexGroup)`
   position: relative;
   flex-grow: unset;
 `;
+
+PanelProvidersGroupContainer.displayName = 'PanelProvidersGroupContainer';
 
 /** A row of data providers in the timeline drop zone */
 const PanelProviderGroupContainer = styled(EuiFlexGroup)`
@@ -67,9 +71,13 @@ const PanelProviderGroupContainer = styled(EuiFlexGroup)`
   margin: 5px 0px;
 `;
 
+PanelProviderGroupContainer.displayName = 'PanelProviderGroupContainer';
+
 const PanelProviderItemContainer = styled(EuiFlexItem)`
   position: relative;
 `;
+
+PanelProviderItemContainer.displayName = 'PanelProviderItemContainer';
 
 const TimelineEuiFormHelpText = styled(EuiFormHelpText)`
   padding-top: 0px;
@@ -77,6 +85,8 @@ const TimelineEuiFormHelpText = styled(EuiFormHelpText)`
   bottom: 0px;
   left: 5px;
 `;
+
+TimelineEuiFormHelpText.displayName = 'TimelineEuiFormHelpText';
 
 interface GetDraggableIdParams {
   id: string;

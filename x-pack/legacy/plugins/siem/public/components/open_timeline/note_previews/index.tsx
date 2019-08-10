@@ -17,6 +17,8 @@ const NotePreviewsContainer = styled.section`
     `${props.theme.eui.euiSizeS} 0 ${props.theme.eui.euiSizeS} ${props.theme.eui.euiSizeXXL}`};
 `;
 
+NotePreviewsContainer.displayName = 'NotePreviewsContainer';
+
 /**
  * Renders a preview of a note in the All / Open Timelines table
  */

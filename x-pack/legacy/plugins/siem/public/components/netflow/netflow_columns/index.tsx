@@ -22,6 +22,8 @@ const EuiFlexItemMarginRight = styled(EuiFlexItem)`
   margin-right: 10px;
 `;
 
+EuiFlexItemMarginRight.displayName = 'EuiFlexItemMarginRight';
+
 /**
  * Renders columns of draggable badges that describe both Netflow data, or more
  * generally, hosts interacting over a network connection. This component is

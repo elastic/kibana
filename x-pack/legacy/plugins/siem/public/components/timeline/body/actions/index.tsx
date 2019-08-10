@@ -49,27 +49,39 @@ const ActionsContainer = styled.div<{ actionsColumnWidth: number }>`
   width: ${({ actionsColumnWidth }) => actionsColumnWidth}px;
 `;
 
+ActionsContainer.displayName = 'ActionsContainer';
+
 const ExpandEventContainer = styled.div`
   height: 25px;
   width: 25px;
 `;
+
+ExpandEventContainer.displayName = 'ExpandEventContainer';
 
 const ActionLoading = styled(EuiLoadingSpinner)`
   margin-top: 3px;
   margin-left: 6px;
 `;
 
+ActionLoading.displayName = 'ActionLoading';
+
 const PinContainer = styled.div`
   width: 27px;
 `;
+
+PinContainer.displayName = 'PinContainer';
 
 const SelectEventContainer = styled(EuiFlexItem)`
   padding: 4px 0 0 7px;
 `;
 
+SelectEventContainer.displayName = 'SelectEventContainer';
+
 const NotesButtonContainer = styled(EuiFlexItem)`
   margin-left: 5px;
 `;
+
+NotesButtonContainer.displayName = 'NotesButtonContainer';
 
 const emptyNotes: string[] = [];
 

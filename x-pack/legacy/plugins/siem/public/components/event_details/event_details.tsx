@@ -35,6 +35,8 @@ const Details = styled.div`
   width: 100%;
 `;
 
+Details.displayName = 'Details';
+
 export const EventDetails = pure<Props>(
   ({ browserFields, data, id, isLoading, view, onUpdateColumns, onViewSelected, timelineId }) => {
     const tabs: EuiTabbedContentTab[] = [

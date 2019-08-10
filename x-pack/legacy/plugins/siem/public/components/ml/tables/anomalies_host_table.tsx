@@ -94,4 +94,6 @@ const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
   `}
 `;
 
+Panel.displayName = 'Panel';
+
 AnomaliesHostTable.displayName = 'AnomaliesHostTable';

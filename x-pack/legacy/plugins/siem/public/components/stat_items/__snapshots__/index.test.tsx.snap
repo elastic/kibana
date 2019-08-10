@@ -31,7 +31,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
     narrowDateRange={[MockFunction]}
     to={1560837600000}
   >
-    <Styled(EuiFlexItem)>
+    <FlexItem>
       <EuiFlexItem
         className="sc-bZQynM kpuYFd"
       >
@@ -109,7 +109,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                             show={false}
                             title="KPI HOSTS"
                           >
-                            <styled.div
+                            <InspectContainer
                               showInspect={false}
                             >
                               <div
@@ -169,7 +169,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                                   title="KPI HOSTS"
                                 />
                               </div>
-                            </styled.div>
+                            </InspectContainer>
                           </Component>
                         </InspectButtonComponent>
                       </Connect(InspectButtonComponent)>
@@ -181,7 +181,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                 <div
                   className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
-                  <Styled(EuiFlexItem)
+                  <FlexItem
                     key="stat-items-field-hosts"
                   >
                     <EuiFlexItem
@@ -198,14 +198,14 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                           <div
                             className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                           >
-                            <Styled(EuiFlexItem)>
+                            <FlexItem>
                               <EuiFlexItem
                                 className="sc-bZQynM kpuYFd"
                               >
                                 <div
                                   className="euiFlexItem sc-bZQynM kpuYFd"
                                 >
-                                  <Styled(EuiTitle)>
+                                  <StatValue>
                                     <EuiTitle
                                       className="sc-gzVnrw dJnFxB"
                                     >
@@ -217,15 +217,15 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                                          
                                       </p>
                                     </EuiTitle>
-                                  </Styled(EuiTitle)>
+                                  </StatValue>
                                 </div>
                               </EuiFlexItem>
-                            </Styled(EuiFlexItem)>
+                            </FlexItem>
                           </div>
                         </EuiFlexGroup>
                       </div>
                     </EuiFlexItem>
-                  </Styled(EuiFlexItem)>
+                  </FlexItem>
                 </div>
               </EuiFlexGroup>
               <EuiFlexGroup>
@@ -237,7 +237,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
           </EuiPanel>
         </div>
       </EuiFlexItem>
-    </Styled(EuiFlexItem)>
+    </FlexItem>
   </StatItemsComponent>
 </Provider>
 `;
@@ -275,7 +275,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
     narrowDateRange={[MockFunction]}
     to={1560837600000}
   >
-    <Styled(EuiFlexItem)>
+    <FlexItem>
       <EuiFlexItem
         className="sc-bZQynM kpuYFd"
       >
@@ -353,7 +353,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                             show={false}
                             title="KPI HOSTS"
                           >
-                            <styled.div
+                            <InspectContainer
                               showInspect={false}
                             >
                               <div
@@ -413,7 +413,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                                   title="KPI HOSTS"
                                 />
                               </div>
-                            </styled.div>
+                            </InspectContainer>
                           </Component>
                         </InspectButtonComponent>
                       </Connect(InspectButtonComponent)>
@@ -425,7 +425,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                 <div
                   className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
-                  <Styled(EuiFlexItem)
+                  <FlexItem
                     key="stat-items-field-hosts"
                   >
                     <EuiFlexItem
@@ -443,14 +443,14 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                             className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                           >
                             0
-                            <Styled(EuiFlexItem)>
+                            <FlexItem>
                               <EuiFlexItem
                                 className="sc-bZQynM kpuYFd"
                               >
                                 <div
                                   className="euiFlexItem sc-bZQynM kpuYFd"
                                 >
-                                  <Styled(EuiTitle)>
+                                  <StatValue>
                                     <EuiTitle
                                       className="sc-gzVnrw dJnFxB"
                                     >
@@ -462,15 +462,15 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                                          
                                       </p>
                                     </EuiTitle>
-                                  </Styled(EuiTitle)>
+                                  </StatValue>
                                 </div>
                               </EuiFlexItem>
-                            </Styled(EuiFlexItem)>
+                            </FlexItem>
                           </div>
                         </EuiFlexGroup>
                       </div>
                     </EuiFlexItem>
-                  </Styled(EuiFlexItem)>
+                  </FlexItem>
                 </div>
               </EuiFlexGroup>
               <EuiFlexGroup>
@@ -482,7 +482,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
           </EuiPanel>
         </div>
       </EuiFlexItem>
-    </Styled(EuiFlexItem)>
+    </FlexItem>
   </StatItemsComponent>
 </Provider>
 `;
@@ -592,7 +592,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
     narrowDateRange={[MockFunction]}
     to={1560837600000}
   >
-    <Styled(EuiFlexItem)>
+    <FlexItem>
       <EuiFlexItem
         className="sc-bZQynM kpuYFd"
       >
@@ -670,7 +670,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             show={false}
                             title="KPI UNIQUE_PRIVATE_IPS"
                           >
-                            <styled.div
+                            <InspectContainer
                               showInspect={false}
                             >
                               <div
@@ -730,7 +730,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                   title="KPI UNIQUE_PRIVATE_IPS"
                                 />
                               </div>
-                            </styled.div>
+                            </InspectContainer>
                           </Component>
                         </InspectButtonComponent>
                       </Connect(InspectButtonComponent)>
@@ -742,7 +742,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                 <div
                   className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
-                  <Styled(EuiFlexItem)
+                  <FlexItem
                     key="stat-items-field-uniqueSourceIps"
                   >
                     <EuiFlexItem
@@ -759,7 +759,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                           <div
                             className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                           >
-                            <Styled(EuiFlexItem)
+                            <FlexItem
                               grow={false}
                             >
                               <EuiFlexItem
@@ -803,15 +803,15 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                   </EuiIcon>
                                 </div>
                               </EuiFlexItem>
-                            </Styled(EuiFlexItem)>
-                            <Styled(EuiFlexItem)>
+                            </FlexItem>
+                            <FlexItem>
                               <EuiFlexItem
                                 className="sc-bZQynM kpuYFd"
                               >
                                 <div
                                   className="euiFlexItem sc-bZQynM kpuYFd"
                                 >
-                                  <Styled(EuiTitle)>
+                                  <StatValue>
                                     <EuiTitle
                                       className="sc-gzVnrw dJnFxB"
                                     >
@@ -824,16 +824,16 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                         Source
                                       </p>
                                     </EuiTitle>
-                                  </Styled(EuiTitle)>
+                                  </StatValue>
                                 </div>
                               </EuiFlexItem>
-                            </Styled(EuiFlexItem)>
+                            </FlexItem>
                           </div>
                         </EuiFlexGroup>
                       </div>
                     </EuiFlexItem>
-                  </Styled(EuiFlexItem)>
-                  <Styled(EuiFlexItem)
+                  </FlexItem>
+                  <FlexItem
                     key="stat-items-field-uniqueDestinationIps"
                   >
                     <EuiFlexItem
@@ -850,7 +850,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                           <div
                             className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                           >
-                            <Styled(EuiFlexItem)
+                            <FlexItem
                               grow={false}
                             >
                               <EuiFlexItem
@@ -894,15 +894,15 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                   </EuiIcon>
                                 </div>
                               </EuiFlexItem>
-                            </Styled(EuiFlexItem)>
-                            <Styled(EuiFlexItem)>
+                            </FlexItem>
+                            <FlexItem>
                               <EuiFlexItem
                                 className="sc-bZQynM kpuYFd"
                               >
                                 <div
                                   className="euiFlexItem sc-bZQynM kpuYFd"
                                 >
-                                  <Styled(EuiTitle)>
+                                  <StatValue>
                                     <EuiTitle
                                       className="sc-gzVnrw dJnFxB"
                                     >
@@ -915,15 +915,15 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                         Dest.
                                       </p>
                                     </EuiTitle>
-                                  </Styled(EuiTitle)>
+                                  </StatValue>
                                 </div>
                               </EuiFlexItem>
-                            </Styled(EuiFlexItem)>
+                            </FlexItem>
                           </div>
                         </EuiFlexGroup>
                       </div>
                     </EuiFlexItem>
-                  </Styled(EuiFlexItem)>
+                  </FlexItem>
                 </div>
               </EuiFlexGroup>
               <EuiHorizontalRule>
@@ -935,7 +935,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                 <div
                   className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
-                  <Styled(EuiFlexItem)>
+                  <FlexItem>
                     <EuiFlexItem
                       className="sc-bZQynM kpuYFd"
                     >
@@ -987,7 +987,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             content={true}
                             detectAnyWindowResize={false}
                           >
-                            <styled.div
+                            <WrappedByAutoSizer
                               innerRef={[Function]}
                             >
                               <div
@@ -1077,13 +1077,13 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                   />
                                 </BarChartWithCustomPrompt>
                               </div>
-                            </styled.div>
+                            </WrappedByAutoSizer>
                           </AutoSizer>
                         </BarChart>
                       </div>
                     </EuiFlexItem>
-                  </Styled(EuiFlexItem)>
-                  <Styled(EuiFlexItem)>
+                  </FlexItem>
+                  <FlexItem>
                     <EuiFlexItem
                       className="sc-bZQynM kpuYFd"
                     >
@@ -1151,7 +1151,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             content={true}
                             detectAnyWindowResize={false}
                           >
-                            <styled.div
+                            <WrappedByAutoSizer
                               innerRef={[Function]}
                             >
                               <div
@@ -1273,19 +1273,19 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                   />
                                 </AreaChartWithCustomPrompt>
                               </div>
-                            </styled.div>
+                            </WrappedByAutoSizer>
                           </AutoSizer>
                         </AreaChart>
                       </div>
                     </EuiFlexItem>
-                  </Styled(EuiFlexItem)>
+                  </FlexItem>
                 </div>
               </EuiFlexGroup>
             </div>
           </EuiPanel>
         </div>
       </EuiFlexItem>
-    </Styled(EuiFlexItem)>
+    </FlexItem>
   </StatItemsComponent>
 </Provider>
 `;

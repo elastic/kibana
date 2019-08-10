@@ -19,9 +19,13 @@ const FieldBadgeFlexGroup = styled(EuiFlexGroup)`
   height: 38px;
 `;
 
+FieldBadgeFlexGroup.displayName = 'FieldBadgeFlexGroup';
+
 const FieldBadgeFlexItem = styled(EuiFlexItem)`
   font-weight: bold;
 `;
+
+FieldBadgeFlexItem.displayName = 'FieldBadgeFlexItem';
 
 /**
  * The name of a (draggable) field
@@ -34,6 +38,8 @@ export const FieldNameContainer = styled.div`
     color: #fff;
   }
 `;
+
+FieldNameContainer.displayName = 'FieldNameContainer';
 
 /**
  * Renders a field (e.g. `event.action`) as a draggable badge

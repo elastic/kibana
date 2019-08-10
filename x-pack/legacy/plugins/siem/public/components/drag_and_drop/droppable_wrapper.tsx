@@ -71,6 +71,8 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
   }
 `;
 
+ReactDndDropTarget.displayName = 'ReactDndDropTarget';
+
 export const DroppableWrapper = pure<Props>(
   ({ children, droppableId, height = '100%', isDropDisabled = false, type }) => (
     <Droppable

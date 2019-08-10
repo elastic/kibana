@@ -46,6 +46,8 @@ const TimelineHeaderContainer = styled.div`
   width: 100%;
 `;
 
+TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
+
 export const TimelineHeader = pure<Props>(
   ({
     browserFields,

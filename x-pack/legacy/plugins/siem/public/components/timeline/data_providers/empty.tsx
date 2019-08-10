@@ -20,6 +20,8 @@ const Text = styled(EuiText)`
   white-space: nowrap;
 `;
 
+Text.displayName = 'Text';
+
 // Ref: https://github.com/elastic/eui/issues/1655
 // const BadgeHighlighted = styled(EuiBadge)`
 //   height: 20px;
@@ -38,6 +40,8 @@ const BadgeHighlighted = (props: EuiBadgeProps) => (
     }}
   />
 );
+
+BadgeHighlighted.displayName = 'BadgeHighlighted';
 
 const EmptyContainer = styled.div<{ showSmallMsg: boolean }>`
   width: ${props => (props.showSmallMsg ? '60px' : 'auto')}
@@ -62,12 +66,16 @@ const EmptyContainer = styled.div<{ showSmallMsg: boolean }>`
   `}
 `;
 
+EmptyContainer.displayName = 'EmptyContainer';
+
 const NoWrap = styled.div`
   align-items: center;
   display: flex;
   flex-direction: row;
   flex-wrap: no-wrap;
 `;
+
+NoWrap.displayName = 'NoWrap';
 interface Props {
   showSmallMsg?: boolean;
 }

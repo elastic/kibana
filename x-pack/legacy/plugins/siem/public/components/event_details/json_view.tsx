@@ -24,6 +24,8 @@ const JsonEditor = styled.div`
   width: 100%;
 `;
 
+JsonEditor.displayName = 'JsonEditor';
+
 export const JsonView = pure<Props>(({ data }) => (
   <JsonEditor data-test-subj="jsonView">
     <EuiCodeEditor

@@ -25,9 +25,13 @@ const ActionsContainer = styled(EuiFlexGroup)`
   width: ${ACTIONS_WIDTH}px;
 `;
 
+ActionsContainer.displayName = 'ActionsContainer';
+
 const WrappedCloseButton = styled.div<{ show: boolean }>`
   visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
 `;
+
+WrappedCloseButton.displayName = 'WrappedCloseButton';
 
 interface Props {
   header: ColumnHeader;

@@ -66,6 +66,8 @@ const HoverActionsContainer = styled(EuiPanel)`
   cursor: pointer;
 `;
 
+HoverActionsContainer.displayName = 'HoverActionsContainer';
+
 interface AddToKqlProps {
   children: JSX.Element;
   indexPattern: StaticIndexPattern;

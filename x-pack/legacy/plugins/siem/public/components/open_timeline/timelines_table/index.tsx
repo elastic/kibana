@@ -30,6 +30,8 @@ const BasicTable = styled(EuiBasicTable)`
   }
 `;
 
+BasicTable.displayName = 'BasicTable';
+
 const getExtendedColumnsIfEnabled = (showExtendedColumnsAndActions: boolean) =>
   showExtendedColumnsAndActions ? [...getExtendedColumns()] : [];
 

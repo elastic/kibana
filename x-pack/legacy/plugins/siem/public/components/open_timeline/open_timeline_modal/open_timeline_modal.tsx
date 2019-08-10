@@ -18,6 +18,8 @@ export const HeaderContainer = styled.div`
   width: 100%;
 `;
 
+HeaderContainer.displayName = 'HeaderContainer';
+
 export const OpenTimelineModal = pure<OpenTimelineProps>(
   ({
     deleteTimelines,

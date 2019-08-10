@@ -14,9 +14,13 @@ const LinkIcon = styled(EuiIcon)`
   top: -2px;
 `;
 
+LinkIcon.displayName = 'LinkIcon';
+
 const LinkIconWithMargin = styled(LinkIcon)`
   margin-left: 5px;
 `;
+
+LinkIconWithMargin.displayName = 'LinkIconWithMargin';
 
 const color = 'subdued';
 const iconSize = 's';

@@ -26,6 +26,8 @@ const InspectContainer = styled.div<{ showInspect: boolean }>`
   }
 `;
 
+InspectContainer.displayName = 'InspectContainer';
+
 interface OwnProps {
   queryId: string;
   inputId?: InputsModelId;

@@ -44,9 +44,13 @@ const SearchOrFilterContainer = styled.div`
   user-select: none;
 `;
 
+SearchOrFilterContainer.displayName = 'SearchOrFilterContainer';
+
 const ModeFlexItem = styled(EuiFlexItem)`
   user-select: none;
 `;
+
+ModeFlexItem.displayName = 'ModeFlexItem';
 
 export const SearchOrFilter = pure<Props>(
   ({

@@ -28,9 +28,13 @@ const CountsFlexGroup = styled(EuiFlexGroup)`
   margin-top: 5px;
 `;
 
+CountsFlexGroup.displayName = 'CountsFlexGroup';
+
 const CountFlexItem = styled(EuiFlexItem)`
   margin-right: 5px;
 `;
+
+CountFlexItem.displayName = 'CountFlexItem';
 
 // background-color: ${props => props.theme.eui.euiColorLightestShade};
 const HeaderContainer = styled.div`
@@ -38,12 +42,16 @@ const HeaderContainer = styled.div`
   margin-bottom: 8px;
 `;
 
+HeaderContainer.displayName = 'HeaderContainer';
+
 const SearchContainer = styled.div`
   input {
     max-width: ${SEARCH_INPUT_WIDTH}px;
     width: ${SEARCH_INPUT_WIDTH}px;
   }
 `;
+
+SearchContainer.displayName = 'SearchContainer';
 
 interface Props {
   filteredBrowserFields: BrowserFields;

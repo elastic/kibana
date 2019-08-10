@@ -16,6 +16,8 @@ const IpPortSeparator = styled.span`
   margin: 0 3px;
 `;
 
+IpPortSeparator.displayName = 'IpPortSeparator';
+
 /**
  * Renders a separator (i.e. `:`) and a draggable, hyperlinked port when
  * a port is specified

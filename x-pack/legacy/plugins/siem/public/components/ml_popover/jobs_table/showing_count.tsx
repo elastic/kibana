@@ -15,6 +15,8 @@ const ShowingContainer = styled.div`
   margin-top: 5px;
 `;
 
+ShowingContainer.displayName = 'ShowingContainer';
+
 export interface ShowingCountProps {
   filterResultsLength: number;
 }

@@ -37,6 +37,8 @@ const HoverActionsPanelContainer = styled.div`
   position: relative;
 `;
 
+HoverActionsPanelContainer.displayName = 'HoverActionsPanelContainer';
+
 const HoverActionsPanel = pure<{ children: JSX.Element; show: boolean }>(({ children, show }) => (
   <HoverActionsPanelContainer data-test-subj="hover-actions-panel-container">
     {show ? children : null}
@@ -51,6 +53,8 @@ const WithHoverActionsContainer = styled.div`
   height: 100%;
   padding-right: 5px;
 `;
+
+WithHoverActionsContainer.displayName = 'WithHoverActionsContainer';
 
 /**
  * Decorates it's children with actions that are visible on hover.

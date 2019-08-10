@@ -48,6 +48,8 @@ const NotesCountBadge = (props: EuiBadgeProps) => (
   <EuiBadge {...props} style={{ marginLeft: '5px' }} />
 );
 
+NotesCountBadge.displayName = 'NotesCountBadge';
+
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;

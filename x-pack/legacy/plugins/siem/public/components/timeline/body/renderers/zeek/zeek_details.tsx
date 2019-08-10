@@ -19,6 +19,8 @@ const Details = styled.div`
   margin: 10px 0;
 `;
 
+Details.displayName = 'Details';
+
 export const ZeekDetails = pure<{ browserFields: BrowserFields; data: Ecs }>(({ data }) =>
   data.zeek != null ? (
     <Details>

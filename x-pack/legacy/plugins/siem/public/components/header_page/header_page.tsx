@@ -17,6 +17,8 @@ const Header = styled.header`
   `}
 `;
 
+Header.displayName = 'Header';
+
 export interface HeaderPageProps {
   badgeLabel?: string;
   badgeTooltip?: string;

@@ -52,6 +52,8 @@ const TitleText = styled.h3`
   user-select: none;
 `;
 
+TitleText.displayName = 'TitleText';
+
 /** Displays a count of the existing notes */
 export const NotesCount = pure<{
   noteIds: string[];
