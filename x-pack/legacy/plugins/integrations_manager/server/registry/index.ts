@@ -38,7 +38,6 @@ export async function getArchiveInfo(
     const { path, buffer } = entry;
     const { file } = pathParts(path);
     if (!file) return;
-    if (cacheHas(path)) return;
     if (buffer) {
       cacheSet(path, buffer);
       paths.push(path);
