@@ -129,6 +129,8 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   )
 );
 
+AuthenticationTableComponent.displayName = 'AuthenticationTableComponent';
+
 const makeMapStateToProps = () => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
   return (state: State, { type }: OwnProps) => {

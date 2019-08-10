@@ -194,3 +194,5 @@ export const OverflowField = React.memo<{
     )}
   </span>
 ));
+
+OverflowField.displayName = 'OverflowField';
