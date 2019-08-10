@@ -181,3 +181,5 @@ export const HomePage = pure(() => (
     )}
   </AutoSizer>
 ));
+
+HomePage.displayName = 'HomePage';
