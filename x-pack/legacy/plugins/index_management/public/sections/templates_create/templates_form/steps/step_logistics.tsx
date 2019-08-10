@@ -20,9 +20,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Template } from '../../../../../common/types';
+import { INVALID_CHARACTERS } from '../../../../../common/constants';
 import { templatesDocumentationLink } from '../../../../lib/documentation_links';
 import { loadIndexPatterns } from '../../../../services/api';
 import { StepProps } from '../types';
+
+const indexPatternIllegalCharacters = INVALID_CHARACTERS.join(' ');
 
 export const StepLogistics: React.FunctionComponent<StepProps> = ({
   template,
@@ -158,9 +161,10 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
           helpText={
             <FormattedMessage
               id="xpack.idxMgmt.templatesForm.stepLogistics.fieldIndexPatternsHelpText"
-              defaultMessage={
-                'Index patterns must match at least one index. Spaces and the characters / ? " < > | are not allowed.'
-              }
+              defaultMessage="Index patterns must match at least one index. Spaces and the characters {invalidCharactersList} are not allowed."
+              values={{
+                invalidCharactersList: <strong>{indexPatternIllegalCharacters}</strong>,
+              }}
             />
           }
           isInvalid={Boolean(indexPatternsError)}
