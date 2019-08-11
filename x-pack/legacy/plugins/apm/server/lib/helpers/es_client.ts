@@ -10,10 +10,12 @@ import {
   IndexDocumentParams,
   IndicesDeleteParams,
   IndicesCreateParams,
-  AggregationSearchResponse
+  APMSearchParams,
+  APMSearchResponse
 } from 'elasticsearch';
 import { Legacy } from 'kibana';
 import { cloneDeep, has, isString, set } from 'lodash';
+import * as t from 'io-ts';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 import { StringMap } from '../../../typings/common';
 
@@ -85,15 +87,33 @@ interface APMOptions {
   includeLegacyData: boolean;
 }
 
+// function search<T extends APMSearchParams, U extends t.Type<any, any, any>>(
+//   params: T
+// ): APMSearchResponse<T, U> {
+//   return (null as unknown) as APMSearchResponse<T, U>;
+// }
+
+// const response = search({
+//   body: {
+//     aggs: {
+//       foo: {
+//         terms: {
+//           field: 'bar'
+//         }
+//       }
+//     }
+//   }
+// });
+
 export function getESClient(req: Legacy.Request) {
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
   const query = req.query as StringMap;
 
   return {
-    search: async <Hits = unknown, U extends SearchParams = {}>(
+    search: async <T = null, U extends APMSearchParams = any>(
       params: U,
       apmOptions?: APMOptions
-    ): Promise<AggregationSearchResponse<Hits, U>> => {
+    ) => {
       const nextParams = await getParamsForSearchRequest(
         req,
         params,
@@ -111,8 +131,10 @@ export function getESClient(req: Legacy.Request) {
         console.log(JSON.stringify(nextParams.body, null, 4));
       }
 
+      type HitType = t.Type<T>;
+
       return cluster.callWithRequest(req, 'search', nextParams) as Promise<
-        AggregationSearchResponse<Hits, U>
+        APMSearchResponse<U, HitType>
       >;
     },
     index: <Body>(params: IndexDocumentParams<Body>) => {

@@ -11,17 +11,8 @@ import {
 import { Setup } from '../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import { rangeFilter } from '../helpers/range_filter';
-import { ChartBase } from './types';
+import { ChartBase, SearchParams } from './types';
 import { transformDataToMetricsChart } from './transform_metrics_chart';
-
-interface Aggs {
-  [key: string]: {
-    min?: any;
-    max?: any;
-    sum?: any;
-    avg?: any;
-  };
-}
 
 interface Filter {
   exists?: {
@@ -32,7 +23,7 @@ interface Filter {
   };
 }
 
-export async function fetchAndTransformMetrics<T extends Aggs>({
+export async function fetchAndTransformMetrics<T extends string>({
   setup,
   serviceName,
   chartBase,
@@ -42,12 +33,12 @@ export async function fetchAndTransformMetrics<T extends Aggs>({
   setup: Setup;
   serviceName: string;
   chartBase: ChartBase;
-  aggs: T;
+  aggs: SearchParams['body']['aggs']['timeseriesData']['aggs'];
   additionalFilters?: Filter[];
 }) {
   const { start, end, uiFiltersES, client, config } = setup;
 
-  const params = {
+  const params: SearchParams = {
     index: config.get<string>('apm_oss.metricsIndices'),
     body: {
       size: 0,

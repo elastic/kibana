@@ -17,7 +17,7 @@ import {
 import { rangeFilter } from '../../../helpers/range_filter';
 import { Setup } from '../../../helpers/setup_request';
 
-export function bucketFetcher(
+export async function bucketFetcher(
   serviceName: string,
   transactionName: string,
   transactionType: string,
@@ -74,5 +74,7 @@ export function bucketFetcher(
     }
   };
 
-  return client.search(params);
+  const response = await client.search(params);
+
+  return response;
 }

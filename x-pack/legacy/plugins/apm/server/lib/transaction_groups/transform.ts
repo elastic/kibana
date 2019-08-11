@@ -34,7 +34,7 @@ function getTransactionGroup(
   const averageResponseTime = bucket.avg.value;
   const transactionsPerMinute = bucket.doc_count / minutes;
   const impact = bucket.sum.value;
-  const sample = bucket.sample.hits.hits[0]._source as Transaction;
+  const sample = (bucket.sample.hits.hits[0]._source as unknown) as Transaction;
 
   return {
     name: bucket.key,

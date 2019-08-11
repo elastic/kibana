@@ -58,11 +58,13 @@ export async function getErrorGroups({
           terms: {
             field: ERROR_GROUP_ID,
             size: 500,
-            order: sortByLatestOccurrence
+            order: (sortByLatestOccurrence
               ? {
                   max_timestamp: sortDirection
                 }
-              : { _count: sortDirection }
+              : { _count: sortDirection }) as ({
+              [key: string]: 'asc' | 'desc';
+            })
           },
           aggs: {
             sample: {
@@ -75,7 +77,7 @@ export async function getErrorGroups({
                   ERROR_GROUP_ID,
                   '@timestamp'
                 ],
-                sort: [{ '@timestamp': 'desc' }],
+                sort: [{ '@timestamp': 'desc' as const }],
                 size: 1
               }
             },
@@ -115,7 +117,8 @@ export async function getErrorGroups({
   // this is an exception rather than the rule so the ES type does not account for this.
   const hits = (idx(resp, _ => _.aggregations.error_groups.buckets) || []).map(
     bucket => {
-      const source = bucket.sample.hits.hits[0]._source as SampleError;
+      const source = (bucket.sample.hits.hits[0]
+        ._source as unknown) as SampleError;
       const message =
         idx(source, _ => _.error.log.message) ||
         idx(source, _ => _.error.exception[0].message);

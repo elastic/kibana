@@ -53,7 +53,7 @@ export async function getTransactionBreakdown({
         field: SPAN_TYPE,
         size: 20,
         order: {
-          _count: 'desc'
+          _count: 'desc' as const
         }
       },
       aggs: {
@@ -63,7 +63,7 @@ export async function getTransactionBreakdown({
             missing: '',
             size: 20,
             order: {
-              _count: 'desc'
+              _count: 'desc' as const
             }
           },
           aggs: {

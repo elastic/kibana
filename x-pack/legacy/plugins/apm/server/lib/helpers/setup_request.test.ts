@@ -30,7 +30,7 @@ describe('setupRequest', () => {
   it('should call callWithRequest with default args', async () => {
     const { mockRequest, callWithRequestSpy } = getMockRequest();
     const { client } = await setupRequest(mockRequest);
-    await client.search({ index: 'apm-*', body: { foo: 'bar' } });
+    await client.search({ index: 'apm-*', body: { foo: 'bar' } } as any);
     expect(callWithRequestSpy).toHaveBeenCalledWith(mockRequest, 'search', {
       index: 'apm-*',
       body: {
@@ -71,7 +71,7 @@ describe('setupRequest', () => {
       it('should add `observer.version_major` filter if none exists', async () => {
         const { mockRequest, callWithRequestSpy } = getMockRequest();
         const { client } = await setupRequest(mockRequest);
-        await client.search({ index: 'apm-*' });
+        await client.search({ index: 'apm-*' } as any);
         const params = callWithRequestSpy.mock.calls[0][2];
         expect(params.body).toEqual({
           query: {
@@ -128,7 +128,7 @@ describe('setupRequest', () => {
       // mock includeFrozen to return false
       mockRequest.getUiSettingsService = () => ({ get: async () => false });
       const { client } = await setupRequest(mockRequest);
-      await client.search({});
+      await client.search({} as any);
       const params = callWithRequestSpy.mock.calls[0][2];
       expect(params.ignore_throttled).toBe(true);
     });
@@ -139,7 +139,7 @@ describe('setupRequest', () => {
       // mock includeFrozen to return true
       mockRequest.getUiSettingsService = () => ({ get: async () => true });
       const { client } = await setupRequest(mockRequest);
-      await client.search({});
+      await client.search({} as any);
       const params = callWithRequestSpy.mock.calls[0][2];
       expect(params.ignore_throttled).toBe(false);
     });

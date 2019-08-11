@@ -40,7 +40,7 @@ const chartBase: ChartBase = {
 };
 
 const percentUsedScript = {
-  lang: 'expression',
+  lang: 'expression' as const,
   source: `1 - doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`
 };
 

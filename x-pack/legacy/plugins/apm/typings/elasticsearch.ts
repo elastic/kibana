@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StringMap, IndexAsString } from './common';
+import * as t from 'io-ts';
+import { Either } from 'fp-ts/lib/Either';
+import { StringMap } from './common';
+import { Aggregations } from '../public/es/aggregations';
 
 export interface BoolQuery {
   must_not: Array<Record<string, any>>;
@@ -15,107 +18,32 @@ export interface BoolQuery {
 declare module 'elasticsearch' {
   // extending SearchResponse to be able to have typed aggregations
 
-  type AggregationType =
-    | 'date_histogram'
-    | 'histogram'
-    | 'terms'
-    | 'avg'
-    | 'top_hits'
-    | 'max'
-    | 'min'
-    | 'percentiles'
-    | 'sum'
-    | 'extended_stats';
+  // type AggregationType =
+  //   | 'percentiles'
 
-  type AggOptions = AggregationOptionMap & {
-    [key: string]: any;
-  };
-
-  // eslint-disable-next-line @typescript-eslint/prefer-interface
-  export type AggregationOptionMap = {
-    aggs?: {
-      [aggregationName: string]: {
-        [T in AggregationType]?: AggOptions & AggregationOptionMap;
-      };
+  export type APMSearchParams = Omit<SearchParams, 'body'> & {
+    body: {
+      query?: any;
+      size?: number;
+      aggs?: AggsInput;
     };
   };
 
-  // eslint-disable-next-line @typescript-eslint/prefer-interface
-  type BucketAggregation<SubAggregationMap, KeyType = string> = {
-    buckets: Array<
-      {
-        key: KeyType;
-        key_as_string: string;
-        doc_count: number;
-      } & (SubAggregationMap extends { aggs: any }
-        ? AggregationResultMap<SubAggregationMap['aggs']>
-        : {})
-    >;
-  };
-
-  interface AggregatedValue {
-    value: number | null;
-  }
-
-  type AggregationResultMap<AggregationOption> = IndexAsString<
-    {
-      [AggregationName in keyof AggregationOption]: {
-        avg: AggregatedValue;
-        max: AggregatedValue;
-        min: AggregatedValue;
-        sum: AggregatedValue;
-        terms: BucketAggregation<AggregationOption[AggregationName]>;
-        date_histogram: BucketAggregation<
-          AggregationOption[AggregationName],
-          number
-        >;
-        histogram: BucketAggregation<
-          AggregationOption[AggregationName],
-          number
-        >;
-        top_hits: {
-          hits: {
-            total: number;
-            max_score: number | null;
-            hits: Array<{
-              _source: AggregationOption[AggregationName] extends {
-                Mapping: any;
-              }
-                ? AggregationOption[AggregationName]['Mapping']
-                : never;
-            }>;
-          };
-        };
-        percentiles: {
-          values: {
-            [key: string]: number;
-          };
-        };
-        extended_stats: {
-          count: number;
-          min: number;
-          max: number;
-          avg: number;
-          sum: number;
-          sum_of_squares: number;
-          variance: number;
-          std_deviation: number;
-          std_deviation_bounds: {
-            upper: number;
-            lower: number;
-          };
-        };
-      }[AggregationType & keyof AggregationOption[AggregationName]];
-    }
-  >;
-
-  export type AggregationSearchResponse<HitType, SearchParams> = Pick<
-    SearchResponse<HitType>,
-    Exclude<keyof SearchResponse<HitType>, 'aggregations'>
-  > &
-    (SearchParams extends { body: Required<AggregationOptionMap> }
+  export type APMSearchResponse<
+    T extends APMSearchParams,
+    U extends t.Type<any, any, any> = t.NullType
+  > = (Omit<
+    SearchResponse<GetRight<ReturnType<U['decode']>>>,
+    'aggregations'
+  >) &
+    ({
+      hits: {
+        hits: Array<{ _source: GetRight<ReturnType<U['decode']>> }>;
+      };
+    }) &
+    (T extends { body: { aggs: AggsInput } }
       ? {
-          aggregations: AggregationResultMap<SearchParams['body']['aggs']>;
+          aggregations: AggregationResponseMap<T['body']['aggs']>;
         }
       : {});
 
@@ -124,4 +52,57 @@ declare module 'elasticsearch' {
       [key: string]: string | string[] | number | StringMap | ESFilter[];
     };
   }
+
+  export type APMAggregationInput = AggsInput;
+  export type APMAggregationInputTypes = AggregationInputTypes;
 }
+
+interface SubAggregationMergeStrategies<T extends AggsInput, U> {
+  bucket: U extends { buckets: Array<infer V> }
+    ? (Omit<U, 'buckets'> & {
+        buckets: Array<V & AggregationResponseMap<T>>;
+      })
+    : never;
+}
+
+type AggregationInputTypes = {
+  [key in keyof Aggregations]: t.TypeOf<Aggregations[key]['in']>;
+};
+
+type AggsInput = Partial<
+  Record<string, Partial<AggregationInputTypes> & { aggs?: AggsInput }>
+>;
+
+type GetRight<T> = T extends Either<any, infer R> ? R : never;
+
+type AggregationResponseValue<T extends keyof Aggregations> = GetRight<
+  ReturnType<Aggregations[T]['out']['decode']>
+>;
+
+type AggregationResponse<
+  T extends keyof Aggregations,
+  U extends { aggs?: AggsInput } | undefined
+> = U extends { aggs: AggsInput }
+  ? (Aggregations[T] extends {
+      aggs: keyof SubAggregationMergeStrategies<
+        U['aggs'],
+        AggregationResponseValue<T>
+      >;
+    }
+      ? SubAggregationMergeStrategies<
+          U['aggs'],
+          AggregationResponseValue<T>
+        >[Aggregations[T]['aggs']]
+      : never)
+  : AggregationResponseValue<T>;
+
+type AggregationResponseMap<
+  T extends AggsInput | undefined
+> = T extends AggsInput
+  ? {
+      [aggregationName in keyof T]: AggregationResponse<
+        keyof Aggregations & keyof T[aggregationName],
+        T[aggregationName]
+      >;
+    }
+  : {};

@@ -59,7 +59,7 @@ export async function calculateBucketSize(
 
   const minBucketSize: number = config.get('xpack.apm.minimumBucketSize');
   const bucketTargetCount: number = config.get('xpack.apm.bucketTargetCount');
-  const max = resp.aggregations.stats.max;
+  const max = resp.aggregations.stats.max || 0;
   const bucketSize = Math.floor(max / bucketTargetCount);
   return bucketSize > minBucketSize ? bucketSize : minBucketSize;
 }

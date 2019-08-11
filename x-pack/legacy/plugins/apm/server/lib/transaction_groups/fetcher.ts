@@ -64,7 +64,7 @@ export function transactionGroupsFetcher(options: Options, setup: Setup) {
         transactions: {
           terms: {
             field: TRANSACTION_NAME,
-            order: { sum: 'desc' },
+            order: { sum: 'desc' as const },
             size: config.get<number>('xpack.apm.ui.transactionGroupBucketSize')
           },
           aggs: {
@@ -74,7 +74,8 @@ export function transactionGroupsFetcher(options: Options, setup: Setup) {
                 sort: [
                   { _score: 'desc' }, // sort by _score to ensure that buckets with sampled:true ends up on top
                   { '@timestamp': { order: 'desc' } }
-                ]
+                  // TS complains about missing an index signature
+                ] as Array<{ [key: string]: any }>
               }
             },
             avg: { avg: { field: TRANSACTION_DURATION } },
