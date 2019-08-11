@@ -22,13 +22,14 @@ export const useRefreshInterval = (
   const { refresh } = useRefreshTransformList();
   useEffect(() => {
     let transformRefreshInterval: null | number = null;
-    let refreshIntervalSubscription: Subscription | undefined;
+    const refreshIntervalSubscription = timefilter
+      .getRefreshIntervalUpdate$()
+      .subscribe(setAutoRefresh);
 
     timefilter.disableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
     initAutoRefresh();
-    initAutoRefreshUpdate();
 
     function initAutoRefresh() {
       const { value } = timefilter.getRefreshInterval();
@@ -42,13 +43,6 @@ export const useRefreshInterval = (
       }
 
       setAutoRefresh();
-    }
-
-    function initAutoRefreshUpdate() {
-      // update the interval if it changes
-      refreshIntervalSubscription = timefilter.getRefreshIntervalUpdate$().subscribe(() => {
-        setAutoRefresh();
-      });
     }
 
     function setAutoRefresh() {
@@ -84,6 +78,7 @@ export const useRefreshInterval = (
 
     // useEffect cleanup
     return () => {
+      refreshIntervalSubscription.unsubscribe();
       clearRefreshInterval();
     };
   }, []); // [] as comparator makes sure this only runs once

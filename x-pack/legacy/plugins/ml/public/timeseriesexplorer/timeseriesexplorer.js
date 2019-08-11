@@ -884,7 +884,7 @@ export class TimeSeriesExplorer extends React.Component {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
-    this.timeUpdateSubscription = timefilter.getTimeUpdate$().subscribe(this.refresh);
+    this.subscriptions.add(timefilter.getTimeUpdate$().subscribe(this.refresh));
 
     // Required to redraw the time series chart when the container is resized.
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
@@ -896,7 +896,6 @@ export class TimeSeriesExplorer extends React.Component {
 
   componentWillUnmount() {
     this.subscriptions.unsubscribe();
-    this.timeUpdateSubscription.unsubscribe();
     this.resizeChecker.destroy();
     this.unsubscribeFromGlobalState();
   }
