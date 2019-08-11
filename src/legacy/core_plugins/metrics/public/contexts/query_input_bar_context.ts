@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { PersistedLog } from 'ui/persisted_log';
+import React from 'react';
+import { Storage } from 'ui/storage';
 import { UiSettingsClientContract } from 'src/core/public';
 
-export function getQueryLog(
-  uiSettings: UiSettingsClientContract,
-  appName: string,
-  language: string
-) {
-  return new PersistedLog(`typeahead:${appName}-${language}`, {
-    maxLength: uiSettings.get('history:limit'),
-    filterDuplicates: true,
-  });
+export interface ICoreSetupContext {
+  appName: string;
+  uiSettings: UiSettingsClientContract;
+  store: Storage;
 }
+
+export const CoreSetupContext = React.createContext<ICoreSetupContext | null>(null);
+
+export const CoreSetupContextProvider = CoreSetupContext.Provider;
