@@ -9,5 +9,5 @@ Add all the routes registered with `router` to HTTP server request listeners.
 <b>Signature:</b>
 
 ```typescript
-registerRouter: (router: Router) => void;
+registerRouter: (router: IRouter) => void;
 ```

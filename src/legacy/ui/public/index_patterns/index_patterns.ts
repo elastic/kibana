@@ -29,7 +29,6 @@ import { fieldFormats } from '../registry/field_formats';
 import { IndexPattern } from './_index_pattern';
 import { createIndexPatternCache } from './_pattern_cache';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
-
 const indexPatternCache = createIndexPatternCache();
 const apiClient = new IndexPatternsApiClient();
 

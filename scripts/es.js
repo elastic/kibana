@@ -30,6 +30,7 @@ kbnEs
     version: pkg.version,
     'source-path': resolve(__dirname, '../../elasticsearch'),
     'base-path': resolve(__dirname, '../.es'),
+    ssl: false,
   })
   .catch(function (e) {
     console.error(e);
