@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import '../saved_visualizations/saved_visualizations';
 import './visualization_editor';
@@ -395,16 +396,16 @@ function VisEditor(
       }
     };
 
-    const updateRefreshInterval = () => {
-      $scope.refreshInterval = timefilter.getRefreshInterval();
-    };
+    const subscriptions = new Subscription();
 
-    const refreshIntervalSubscription = subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
-      next: updateRefreshInterval
-    });
-    const timeUpdateSubscription = subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+    subscriptions.add(subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
+      next: () => {
+        $scope.refreshInterval = timefilter.getRefreshInterval();
+      }
+    }));
+    subscriptions.add(subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
       next: updateTimeRange
-    });
+    }));
 
     // update the searchSource when query updates
     $scope.fetch = function () {
@@ -415,15 +416,15 @@ function VisEditor(
     };
 
     // update the searchSource when filters update
-    const filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+    subscriptions.add(subscribeWithScope($scope, queryFilter.getUpdates$(), {
       next: () => {
         $scope.filters = queryFilter.getFilters();
         $scope.globalFilters = queryFilter.getGlobalFilters();
       }
-    });
-    const filterFetchSubscription = subscribeWithScope($scope, queryFilter.getFetches$(), {
+    }));
+    subscriptions.add(subscribeWithScope($scope, queryFilter.getFetches$(), {
       next: $scope.fetch
-    });
+    }));
 
     $scope.$on('$destroy', function () {
       if ($scope._handler) {
@@ -431,10 +432,7 @@ function VisEditor(
       }
       savedVis.destroy();
       stateMonitor.destroy();
-      filterUpdateSubscription.unsubscribe();
-      timeUpdateSubscription.unsubscribe();
-      refreshIntervalSubscription.unsubscribe();
-      filterFetchSubscription.unsubscribe();
+      subscriptions.unsubscribe();
     });
 
     if (!$scope.chrome.getVisible()) {
