@@ -23,7 +23,8 @@ import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
 import moment from 'moment';
-import { SerializedFieldFormat, createFormat } from './utilities';
+import { SerializedFieldFormat } from 'src/plugins/data/common';
+import { createFormat } from './utilities';
 
 interface SchemaConfigParams {
   precision?: number;

@@ -20,6 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
 import { AggConfig, Vis } from 'ui/vis';
+import { SerializedFieldFormat } from 'src/plugins/data/common';
 // @ts-ignore
 import { FieldFormat } from '../../../../field_formats/field_format';
 // @ts-ignore
@@ -38,11 +39,6 @@ function isTermsFieldFormat(
   serializedFieldFormat: SerializedFieldFormat
 ): serializedFieldFormat is SerializedFieldFormat<TermsFieldFormatParams> {
   return serializedFieldFormat.id === 'terms';
-}
-
-export interface SerializedFieldFormat<TParams = object> {
-  id?: string;
-  params?: TParams;
 }
 
 const config = chrome.getUiSettingsClient();
