@@ -134,20 +134,21 @@ export function XYChart({
     );
   }
 
+  // use formatting hint of first x axis column to format ticks
   const xAxisColumn = Object.values(data.tables)[0].columns.find(
     ({ id }) => id === layers[0].xAccessor
   );
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.formatHint);
 
-  let yAxisFormatter: ReturnType<FormatFactory>;
+  // use default number formatter for y axis and use formatting hint if there is just a single y column
+  let yAxisFormatter = formatFactory({ id: 'number' });
   if (layers.length === 1 && layers[0].accessors.length === 1) {
     const firstYAxisColumn = Object.values(data.tables)[0].columns.find(
       ({ id }) => id === layers[0].accessors[0]
     );
-    yAxisFormatter = formatFactory(firstYAxisColumn && firstYAxisColumn.formatHint);
-  } else {
-    // TODO if there are multiple y axes, try to merge the formatters for the axis
-    yAxisFormatter = formatFactory({ id: 'number' });
+    if (firstYAxisColumn && firstYAxisColumn.formatHint) {
+      yAxisFormatter = formatFactory(firstYAxisColumn.formatHint);
+    }
   }
 
   return (

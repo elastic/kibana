@@ -279,7 +279,6 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
         />
       );
-      expect(getFormatSpy).toHaveBeenCalledTimes(2);
       expect(getFormatSpy).toHaveBeenCalledWith({
         id: 'number',
         params: { pattern: '0,0.000' },
