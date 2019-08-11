@@ -8,7 +8,6 @@ import React, { useEffect } from 'react';
 
 import { timefilter } from 'ui/timefilter';
 
-import { Subscription } from 'rxjs';
 import {
   DEFAULT_REFRESH_INTERVAL_MS,
   MINIMUM_REFRESH_INTERVAL_MS,
