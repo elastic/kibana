@@ -20,14 +20,14 @@ const initialState: IndexPatternPrivateState = {
   layers: {
     first: {
       indexPatternId: '1',
-      columnOrder: ['col1'],
+      columnOrder: ['col1', 'col2'],
       columns: {
         col1: {
           label: 'My Op',
           dataType: 'string',
           isBucketed: true,
           operationType: 'terms',
-          sourceField: 'op',
+          sourceField: 'source',
           params: {
             size: 5,
             orderDirection: 'asc',
@@ -35,6 +35,40 @@ const initialState: IndexPatternPrivateState = {
               type: 'alphabetical',
             },
           },
+        },
+        col2: {
+          label: 'My Op',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'avg',
+          sourceField: 'memory',
+        },
+      },
+    },
+    second: {
+      indexPatternId: '1',
+      columnOrder: ['col1', 'col2'],
+      columns: {
+        col1: {
+          label: 'My Op',
+          dataType: 'string',
+          isBucketed: true,
+          operationType: 'terms',
+          sourceField: 'source',
+          params: {
+            size: 5,
+            orderDirection: 'asc',
+            orderBy: {
+              type: 'alphabetical',
+            },
+          },
+        },
+        col2: {
+          label: 'My Op',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'avg',
+          sourceField: 'bytes',
         },
       },
     },
@@ -106,9 +140,6 @@ const initialState: IndexPatternPrivateState = {
               agg: 'histogram',
               interval: 1000,
             },
-            avg: {
-              agg: 'avg',
-            },
             max: {
               agg: 'max',
             },
@@ -130,6 +161,31 @@ const initialState: IndexPatternPrivateState = {
               agg: 'terms',
             },
           },
+        },
+      ],
+    },
+    '3': {
+      id: '3',
+      title: 'my-compatible-pattern',
+      timeFieldName: 'timestamp',
+      fields: [
+        {
+          name: 'timestamp',
+          type: 'date',
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'bytes',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'source',
+          type: 'string',
+          aggregatable: true,
+          searchable: true,
         },
       ],
     },

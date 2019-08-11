@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectAttributes } from 'src/core/server';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/common';
-import { SavedObjectAttributes } from 'src/core/server';
 
 export interface Document {
   id?: string;

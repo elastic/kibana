@@ -23,10 +23,10 @@ export function FrameLayout(props: FrameLayoutProps) {
           <EuiPageSideBar className="lnsSidebar">{props.dataPanel}</EuiPageSideBar>
           <EuiPageBody className="lnsPageBody" restrictWidth={false}>
             {props.workspacePanel}
+            {props.suggestionsPanel}
           </EuiPageBody>
           <EuiPageSideBar className="lnsSidebar lnsSidebar--right">
             {props.configPanel}
-            {props.suggestionsPanel}
           </EuiPageSideBar>
         </div>
       </EuiPage>

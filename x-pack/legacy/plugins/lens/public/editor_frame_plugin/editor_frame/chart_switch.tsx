@@ -200,7 +200,7 @@ export function ChartSwitch(props: Props) {
         >
           (
           {i18n.translate('xpack.lens.configPanel.changeVisualization', {
-            defaultMessage: 'Change',
+            defaultMessage: 'change',
           })}
           )
         </EuiButtonEmpty>

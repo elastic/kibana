@@ -9,8 +9,10 @@ import {
   IndexPatternPrivateState,
   IndexPatternColumn,
   BaseIndexPatternColumn,
+  IndexPatternLayer,
+  IndexPattern,
 } from './indexpattern';
-import { operationDefinitionMap, OperationDefinition } from './operations';
+import { operationDefinitionMap, OperationDefinition, isColumnTransferable } from './operations';
 
 export function updateColumnParam<
   C extends BaseIndexPatternColumn & { params: object },
@@ -157,4 +159,35 @@ export function getColumnOrder(columns: Record<string, IndexPatternColumn>): str
     })
     .map(([id]) => id)
     .concat(metrics.map(([id]) => id));
+}
+
+export function isLayerTransferable(layer: IndexPatternLayer, newIndexPattern: IndexPattern) {
+  return Object.values(layer.columns).every(column =>
+    isColumnTransferable(column, newIndexPattern)
+  );
+}
+
+export function updateLayerIndexPattern(
+  layer: IndexPatternLayer,
+  newIndexPattern: IndexPattern
+): IndexPatternLayer {
+  const keptColumns: IndexPatternLayer['columns'] = _.pick(layer.columns, column =>
+    isColumnTransferable(column, newIndexPattern)
+  );
+  const newColumns: IndexPatternLayer['columns'] = _.mapValues(keptColumns, column => {
+    const operationDefinition = operationDefinitionMap[column.operationType] as OperationDefinition<
+      IndexPatternColumn
+    >;
+    return operationDefinition.transfer
+      ? operationDefinition.transfer(column, newIndexPattern)
+      : column;
+  });
+  const newColumnOrder = layer.columnOrder.filter(columnId => newColumns[columnId]);
+
+  return {
+    ...layer,
+    indexPatternId: newIndexPattern.id,
+    columns: newColumns,
+    columnOrder: newColumnOrder,
+  };
 }

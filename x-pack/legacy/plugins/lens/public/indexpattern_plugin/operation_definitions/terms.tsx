@@ -58,6 +58,16 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     }
     return [];
   },
+  isTransferable: (column, newIndexPattern) => {
+    const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+
+    return Boolean(
+      newField &&
+        newField.type === 'string' &&
+        newField.aggregatable &&
+        (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms)
+    );
+  },
   buildColumn({ suggestedPriority, columns, field }) {
     if (!field) {
       throw new Error('Invariant error: terms operation requires field');
