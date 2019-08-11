@@ -67,3 +67,5 @@ export const FilterGroup = React.memo<FilterGroupProps>(
     </EuiFlexGroup>
   )
 );
+
+FilterGroup.displayName = 'FilterGroup';

@@ -101,6 +101,8 @@ export const AuditdGenericLine = pure<Props>(
   )
 );
 
+AuditdGenericLine.displayName = 'AuditdGenericLine';
+
 interface GenericDetailsProps {
   browserFields: BrowserFields;
   data: Ecs;
@@ -151,3 +153,5 @@ export const AuditdGenericDetails = pure<GenericDetailsProps>(({ data, contextId
     return null;
   }
 });
+
+AuditdGenericDetails.displayName = 'AuditdGenericDetails';
