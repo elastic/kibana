@@ -39,6 +39,8 @@ const FlexGroupSpinner = styled(EuiFlexGroup)`
   }
 `;
 
+FlexGroupSpinner.displayName = 'FlexGroupSpinner';
+
 export const KpiHostsComponent = ({
   data,
   from,
