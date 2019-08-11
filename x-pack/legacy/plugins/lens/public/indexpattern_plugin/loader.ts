@@ -7,7 +7,7 @@
 import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectAttributes } from 'src/core/server/saved_objects';
+import { SavedObjectAttributes } from 'src/core/server';
 import { IndexPatternField } from './indexpattern';
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
