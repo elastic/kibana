@@ -51,40 +51,37 @@ export function getSuggestions({
   visualizationState: unknown;
   field?: unknown;
 }): Suggestion[] {
+  const datasources = Object.entries(datasourceMap).filter(
+    ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
+  );
+
   const allLayerIds = _.flatten(
-    Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
-      if (datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading) {
-        return datasource.getLayers(datasourceStates[datasourceId].state);
-      } else {
-        return [];
-      }
-    })
+    datasources.map(([datasourceId, datasource]) =>
+      datasource.getLayers(datasourceStates[datasourceId].state)
+    )
   );
 
   const datasourceTableSuggestions = _.flatten(
-    Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
-      if (datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading) {
-        const datasourceState = datasourceStates[datasourceId].state;
-        return (
-          (field
-            ? datasource.getDatasourceSuggestionsForField(datasourceState, field)
-            : datasource.getDatasourceSuggestionsFromCurrentState(datasourceState)
-          )
-            // TODO have the datasource in there by default
-            .map(suggestion => ({ ...suggestion, datasourceId }))
-        );
-      } else {
-        return [];
-      }
+    datasources.map(([datasourceId, datasource]) => {
+      const datasourceState = datasourceStates[datasourceId].state;
+      return (
+        (field
+          ? datasource.getDatasourceSuggestionsForField(datasourceState, field)
+          : datasource.getDatasourceSuggestionsFromCurrentState(datasourceState)
+        )
+          // TODO have the datasource in there by default
+          .map(suggestion => ({ ...suggestion, datasourceId }))
+      );
     })
   ).map((suggestion, index) => ({
     ...suggestion,
     table: { ...suggestion.table, datasourceSuggestionId: index },
   }));
+
   const datasourceTables = datasourceTableSuggestions.map(({ table }) => table);
 
-  return Object.entries(visualizationMap)
-    .map(([visualizationId, visualization]) => {
+  return _.flatten(
+    Object.entries(visualizationMap).map(([visualizationId, visualization]) => {
       return visualization
         .getSuggestions({
           tables: datasourceTables,
@@ -106,8 +103,7 @@ export function getSuggestions({
           };
         });
     })
-    .reduce((globalList, currentList) => [...globalList, ...currentList], [])
-    .sort(({ score: scoreA }, { score: scoreB }) => scoreB - scoreA);
+  ).sort((a, b) => b.score - a.score);
 }
 
 export function switchToSuggestion(

@@ -298,25 +298,28 @@ function createNewLayerWithMetricAggregation(
 export function getDatasourceSuggestionsFromCurrentState(
   state: IndexPatternPrivateState
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
-  const layers = Object.entries(state.layers || {});
-
   return _.flatten(
-    layers.map(([layerId, layer], index) => {
-      if (layer.columnOrder.length === 0) {
-        return [];
-      }
+    Object.entries(state.layers || {})
+      .filter(([_id, layer]) => layer.columnOrder.length)
+      .map(([layerId, layer], index) => {
+        if (layer.columnOrder.length === 0) {
+          return [];
+        }
 
-      const onlyMetric = layer.columnOrder.every(columnId => !layer.columns[columnId].isBucketed);
-      const onlyBucket = layer.columnOrder.every(columnId => layer.columns[columnId].isBucketed);
-      if (onlyMetric || onlyBucket) {
-        // intermediary chart, don't try to suggest reduced versions
-        return [
-          buildSuggestion({ state, layerId, isMultiRow: false, datasourceSuggestionId: index }),
-        ];
-      }
+        const onlyMetric = layer.columnOrder.every(columnId => !layer.columns[columnId].isBucketed);
+        const onlyBucket = layer.columnOrder.every(columnId => layer.columns[columnId].isBucketed);
+        if (onlyMetric || onlyBucket) {
+          // intermediary chart, don't try to suggest reduced versions
+          return buildSuggestion({
+            state,
+            layerId,
+            isMultiRow: false,
+            datasourceSuggestionId: index,
+          });
+        }
 
-      return createSimplifiedTableSuggestions(state, layerId);
-    })
+        return createSimplifiedTableSuggestions(state, layerId);
+      })
   ).map(
     (suggestion, index): DatasourceSuggestion<IndexPatternPrivateState> => ({
       ...suggestion,
@@ -349,22 +352,16 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
           buildLayerByColumnOrder(layer, [...bucketedColumns, availableMetricColumns[0]]),
         ];
       } else {
-        return [allMetricsSuggestion];
+        return allMetricsSuggestion;
       }
     })
   ).map(updatedLayer => buildSuggestion({ state, layerId, isMultiRow: true, updatedLayer }));
 }
 
-function buildLayerByColumnOrder(layer: IndexPatternLayer, newColumnOrder: string[]) {
-  const newColumns = { ...layer.columns };
-  Object.keys(newColumns).forEach(columnId => {
-    if (!newColumnOrder.includes(columnId)) {
-      delete newColumns[columnId];
-    }
-  });
+function buildLayerByColumnOrder(layer: IndexPatternLayer, columnOrder: string[]) {
   return {
     ...layer,
-    columns: newColumns,
-    columnOrder: newColumnOrder,
+    columns: _.pick(layer.columns, columnOrder),
+    columnOrder,
   };
 }
