@@ -25,8 +25,8 @@ export const getAreaStyles = ({ points, lines, color }) => ({
   areaSeriesStyle: {
     line: {
       stroke: color,
-      strokeWidth: lines.lineWidth || 1,
-      visible: Boolean(lines.show),
+      strokeWidth: Number(lines.lineWidth) || 0,
+      visible: Boolean(lines.show && lines.lineWidth),
     },
     area: {
       fill: color,
@@ -43,7 +43,7 @@ export const getAreaStyles = ({ points, lines, color }) => ({
   curve: lines.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
 });
 
-export const getBarStyles = ({ show = true, lineWidth = 1, fill = 1 }, color) => ({
+export const getBarStyles = ({ show = true, lineWidth = 0, fill = 1 }, color) => ({
   barSeriesStyle: {
     border: {
       stroke: color || DEFAULT_COLOR,

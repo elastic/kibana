@@ -34,7 +34,7 @@ Object {
     },
     "line": Object {
       "stroke": "",
-      "strokeWidth": 1,
+      "strokeWidth": 0,
       "visible": false,
     },
     "point": Object {
@@ -66,7 +66,7 @@ Object {
   "barSeriesStyle": Object {
     "border": Object {
       "stroke": "#000",
-      "strokeWidth": 1,
+      "strokeWidth": 0,
       "visible": true,
     },
     "opacity": 1,

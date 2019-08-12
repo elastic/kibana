@@ -31,6 +31,7 @@ import {
   getAnnotationId,
   AnnotationDomainTypes,
   LineAnnotation,
+  TooltipType,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
@@ -75,6 +76,7 @@ export const TimeSeries = ({
         animateData={false}
         theme={isDarkMode ? DARK_THEME : LIGHT_THEME}
         tooltip={{
+          type: TooltipType.VerticalCursor,
           headerFormatter: tooltipFormatter,
         }}
       />
