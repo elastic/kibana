@@ -252,12 +252,12 @@ function createGeoBoundBoxFilter(geometry, geoFieldName, filterProps = {}) {
   };
 }
 
-function createGeoPolygonFilter(polgyonCoordinates, geoFieldName, filterProps = {}) {
+function createGeoPolygonFilter(polygonCoordinates, geoFieldName, filterProps = {}) {
   return {
     geo_polygon: {
       ignore_unmapped: true,
       [geoFieldName]: {
-        points: polgyonCoordinates[POLYGON_COORDINATES_EXTERIOR_INDEX].map(coordinatePair => {
+        points: polygonCoordinates[POLYGON_COORDINATES_EXTERIOR_INDEX].map(coordinatePair => {
           return {
             lon: coordinatePair[LON_INDEX],
             lat: coordinatePair[LAT_INDEX]
@@ -352,7 +352,7 @@ function createGeometryFilterWithMeta({
     return createGeoBoundBoxFilter(geometry, geoFieldName, { meta });
   }
 
-  return createGeoPolygonFilter(geometry.coordinates, { meta });
+  return createGeoPolygonFilter(geometry.coordinates, geoFieldName, { meta });
 }
 
 export function roundCoordinates(coordinates) {

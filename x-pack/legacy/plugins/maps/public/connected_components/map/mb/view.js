@@ -105,7 +105,7 @@ export class MBMapContainer extends React.Component {
     try {
       const options = {
         indexPatternId: this.props.drawState.indexPatternId,
-        geoFieldName: this.props.drawState.geoField,
+        geoFieldName: this.props.drawState.geoFieldName,
         geoFieldType: this.props.drawState.geoFieldType,
       };
       const filter = isBoundingBox
