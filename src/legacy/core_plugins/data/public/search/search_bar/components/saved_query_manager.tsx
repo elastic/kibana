@@ -160,7 +160,11 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
             <EuiFlexGroup gutterSize="none" justifyContent="flexEnd" alignItems="center">
               <EuiFlexItem>
                 {savedQuery.attributes.description && (
-                  <EuiIconTip type="iInCircle" content={savedQuery.attributes.description} />
+                  <EuiIconTip
+                    type="iInCircle"
+                    content={savedQuery.attributes.description}
+                    aria-label={`${savedQuery.attributes.title} description`}
+                  />
                 )}
               </EuiFlexItem>
 
