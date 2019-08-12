@@ -20,6 +20,7 @@
 import { EditPanelAction } from './edit_panel_action';
 import { EmbeddableFactory, Embeddable, EmbeddableInput } from '../embeddables';
 import { GetEmbeddableFactory, ViewMode } from '../types';
+import { ContactCardEmbeddable } from '../test_samples';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 const getFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
@@ -61,24 +62,27 @@ test('getHref returns the edit urls', async () => {
 });
 
 test('is not compatible when edit url is not available', async () => {
-  /*
   const action = new EditPanelAction(getFactory);
-  const embeddable = new ContactCardEmbeddable({
-    id: '123',
-    firstName: 'sue',
-    viewMode: ViewMode.EDIT,
-  });
+  const embeddable = new ContactCardEmbeddable(
+    {
+      id: '123',
+      firstName: 'sue',
+      viewMode: ViewMode.EDIT,
+    },
+    {
+      execAction: () => Promise.resolve(undefined),
+    }
+  );
   expect(
     await action.isCompatible({
       embeddable,
     })
   ).toBe(false);
-  */
 });
-/*
+
 test('is not visible when edit url is available but in view mode', async () => {
-  const embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  const action = new EditPanelAction(embeddableFactories);
+  embeddableFactories.clear();
+  const action = new EditPanelAction(type => embeddableFactories.get(type));
   expect(
     await action.isCompatible({
       embeddable: new EditableEmbeddable(
@@ -93,8 +97,8 @@ test('is not visible when edit url is available but in view mode', async () => {
 });
 
 test('is not compatible when edit url is available, in edit mode, but not editable', async () => {
-  const embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  const action = new EditPanelAction(embeddableFactories);
+  embeddableFactories.clear();
+  const action = new EditPanelAction(type => embeddableFactories.get(type));
   expect(
     await action.isCompatible({
       embeddable: new EditableEmbeddable(
@@ -107,4 +111,3 @@ test('is not compatible when edit url is available, in edit mode, but not editab
     })
   ).toBe(false);
 });
-*/
