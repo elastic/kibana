@@ -19,56 +19,65 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-interface CreateAnalyticsModalProps {
-  closeModal: () => void;
-  createAnalyticsJob: () => void;
-  isJobCreated: boolean;
-  isJobStarted: boolean;
-  isModalButtonDisabled: boolean;
-  startAnalyticsJob: () => void;
-  isValid: boolean;
-}
+import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 
-export const CreateAnalyticsModal: FC<CreateAnalyticsModalProps> = ({
+export const CreateAnalyticsModal: FC<CreateAnalyticsFormProps> = ({
+  actions,
   children,
-  closeModal,
-  createAnalyticsJob,
-  isJobCreated,
-  isJobStarted,
-  isModalButtonDisabled,
-  startAnalyticsJob,
-  isValid,
-}) => (
-  <EuiOverlayMask>
-    <EuiModal onClose={closeModal} initialFocus="[name=popswitch]">
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          {i18n.translate('xpack.ml.dataframe.analytics.create.modalHeaderTitle', {
-            defaultMessage: 'Create data frame analytics job',
-          })}
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
+  formState,
+}) => {
+  const { closeModal, createAnalyticsJob, startAnalyticsJob } = actions;
+  const { isJobCreated, isJobStarted, isModalButtonDisabled, isValid } = formState;
 
-      <EuiModalBody>{children}</EuiModalBody>
+  return (
+    <EuiOverlayMask>
+      <EuiModal onClose={closeModal} initialFocus="[name=popswitch]">
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            {i18n.translate('xpack.ml.dataframe.analytics.create.modalHeaderTitle', {
+              defaultMessage: 'Create data frame analytics job',
+            })}
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
 
-      <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeModal}>Cancel</EuiButtonEmpty>
+        <EuiModalBody>{children}</EuiModalBody>
 
-        {!isJobCreated && (
-          <EuiButton disabled={!isValid || isModalButtonDisabled} onClick={createAnalyticsJob} fill>
-            Create
-          </EuiButton>
-        )}
-        {isJobCreated && (
-          <EuiButton
-            disabled={isJobStarted || isModalButtonDisabled}
-            onClick={startAnalyticsJob}
-            fill
-          >
-            Start
-          </EuiButton>
-        )}
-      </EuiModalFooter>
-    </EuiModal>
-  </EuiOverlayMask>
-);
+        <EuiModalFooter>
+          {(!isJobCreated || !isJobStarted) && (
+            <EuiButtonEmpty onClick={closeModal}>
+              {i18n.translate('xpack.ml.dataframe.analytics.create.modalCancelButton', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
+          )}
+
+          {!isJobCreated && !isJobStarted && (
+            <EuiButton
+              disabled={!isValid || isModalButtonDisabled}
+              onClick={createAnalyticsJob}
+              fill
+            >
+              {i18n.translate('xpack.ml.dataframe.analytics.create.modalCreateButton', {
+                defaultMessage: 'Create',
+              })}
+            </EuiButton>
+          )}
+          {isJobCreated && !isJobStarted && (
+            <EuiButton disabled={isModalButtonDisabled} onClick={startAnalyticsJob} fill>
+              {i18n.translate('xpack.ml.dataframe.analytics.create.modalStartButton', {
+                defaultMessage: 'Start',
+              })}
+            </EuiButton>
+          )}
+          {isJobCreated && isJobStarted && (
+            <EuiButton onClick={closeModal} fill>
+              {i18n.translate('xpack.ml.dataframe.analytics.create.modalCloseButton', {
+                defaultMessage: 'Close',
+              })}
+            </EuiButton>
+          )}
+        </EuiModalFooter>
+      </EuiModal>
+    </EuiOverlayMask>
+  );
+};
