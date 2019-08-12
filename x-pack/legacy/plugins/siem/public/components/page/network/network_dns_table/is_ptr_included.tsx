@@ -23,3 +23,5 @@ export const IsPtrIncluded = pure<Props>(({ isPtrIncluded, onChange }) => (
     onChange={onChange}
   />
 ));
+
+IsPtrIncluded.displayName = 'IsPtrIncluded';

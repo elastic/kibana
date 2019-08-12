@@ -102,7 +102,7 @@ export interface SavedObjectReference {
  * @public
  */
 export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
-  type?: string | string[];
+  type: string | string[];
   page?: number;
   perPage?: number;
   sortField?: string;

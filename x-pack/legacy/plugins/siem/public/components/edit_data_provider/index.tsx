@@ -44,6 +44,8 @@ export const HeaderContainer = styled.div`
   width: ${EDIT_DATA_PROVIDER_WIDTH};
 `;
 
+HeaderContainer.displayName = 'HeaderContainer';
+
 // SIDE EFFECT: the following `injectGlobal` overrides the default styling
 // of euiComboBoxOptionsList because it's implemented as a popover, so it's
 // not selectable as a child of the styled component
