@@ -48,6 +48,8 @@ const FieldsBrowserButtonContainer = styled.div`
   }
 `;
 
+FieldsBrowserButtonContainer.displayName = 'FieldsBrowserButtonContainer';
+
 interface DispatchProps {
   removeColumn?: ActionCreator<{
     id: string;

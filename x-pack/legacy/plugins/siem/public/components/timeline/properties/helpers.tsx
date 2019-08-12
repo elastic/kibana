@@ -48,6 +48,8 @@ const NotesCountBadge = (props: EuiBadgeProps) => (
   <EuiBadge {...props} style={{ marginLeft: '5px' }} />
 );
 
+NotesCountBadge.displayName = 'NotesCountBadge';
+
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
@@ -75,6 +77,8 @@ export const StarIcon = pure<{
   </div>
 ));
 
+StarIcon.displayName = 'StarIcon';
+
 export const Description = pure<{
   description: string;
   timelineId: string;
@@ -95,6 +99,8 @@ export const Description = pure<{
   </EuiToolTip>
 ));
 
+Description.displayName = 'Description';
+
 export const Name = pure<{ timelineId: string; title: string; updateTitle: UpdateTitle }>(
   ({ timelineId, title, updateTitle }) => (
     <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
@@ -109,6 +115,8 @@ export const Name = pure<{ timelineId: string; title: string; updateTitle: Updat
     </EuiToolTip>
   )
 );
+
+Name.displayName = 'Name';
 
 export const NewTimeline = pure<{
   createTimeline: CreateTimeline;
@@ -128,6 +136,8 @@ export const NewTimeline = pure<{
     {i18n.NEW_TIMELINE}
   </EuiButtonEmpty>
 ));
+
+NewTimeline.displayName = 'NewTimeline';
 
 interface NotesButtonProps {
   animate?: boolean;
@@ -153,6 +163,8 @@ const NotesIcon = pure<{ count: number }>(({ count }) => (
   />
 ));
 
+NotesIcon.displayName = 'NotesIcon';
+
 const LargeNotesButton = pure<{ noteIds: string[]; text?: string; toggleShowNotes: () => void }>(
   ({ noteIds, text, toggleShowNotes }) => (
     <EuiButton
@@ -177,6 +189,8 @@ const LargeNotesButton = pure<{ noteIds: string[]; text?: string; toggleShowNote
   )
 );
 
+LargeNotesButton.displayName = 'LargeNotesButton';
+
 const SmallNotesButton = pure<{ noteIds: string[]; toggleShowNotes: () => void }>(
   ({ noteIds, toggleShowNotes }) => (
     <SmallNotesButtonContainer
@@ -188,6 +202,8 @@ const SmallNotesButton = pure<{ noteIds: string[]; toggleShowNotes: () => void }
     </SmallNotesButtonContainer>
   )
 );
+
+SmallNotesButton.displayName = 'SmallNotesButton';
 
 /**
  * The internal implementation of the `NotesButton`
@@ -228,6 +244,8 @@ const NotesButtonComponent = pure<NotesButtonProps>(
     </ButtonContainer>
   )
 );
+
+NotesButtonComponent.displayName = 'NotesButtonComponent';
 
 export const NotesButton = pure<NotesButtonProps>(
   ({
@@ -270,3 +288,5 @@ export const NotesButton = pure<NotesButtonProps>(
       </EuiToolTip>
     )
 );
+
+NotesButton.displayName = 'NotesButton';
