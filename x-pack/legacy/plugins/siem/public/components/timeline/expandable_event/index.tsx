@@ -26,6 +26,8 @@ const ExpandableDetails = styled.div<{ hideExpandButton: boolean; width?: number
         : ''};
 `;
 
+ExpandableDetails.displayName = 'ExpandableDetails';
+
 interface Props {
   browserFields: BrowserFields;
   id: string;
