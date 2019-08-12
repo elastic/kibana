@@ -18,6 +18,8 @@ const drainPromiseQueue = () => {
   });
 };
 
+const mockCurrentUrl = (url: string) => window.history.pushState({}, '', url);
+
 const setupHttp = (basePath: string) => {
   const { http } = setup(injectedMetadata => {
     injectedMetadata.getBasePath.mockReturnValue(basePath);
@@ -53,6 +55,7 @@ it(`logs out 401 responses`, async () => {
 });
 
 it(`ignores anonymous paths`, async () => {
+  mockCurrentUrl('/foo/bar');
   const http = setupHttp('/foo');
   const sessionExpired = new SessionExpired(http.basePath);
   const interceptor = new UnauthorizedResponseInterceptor(
