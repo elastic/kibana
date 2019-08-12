@@ -8,7 +8,6 @@ import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { EuiText } from '@elastic/eui';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
@@ -28,6 +27,7 @@ import {
 } from './indexpattern_suggestions';
 
 import { isDraggedField } from './utils';
+import { LayerPanel } from './layerpanel';
 import { Datasource, DataType } from '..';
 
 export type OperationType = IndexPatternColumn['operationType'];
@@ -317,11 +317,7 @@ export function getIndexPatternDatasource({
 
         renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => {
           render(
-            <I18nProvider>
-              <EuiText size="s">
-                {state.indexPatterns[state.layers[props.layerId].indexPatternId].title}
-              </EuiText>
-            </I18nProvider>,
+            <LayerPanel state={state} setState={newState => setState(newState)} {...props} />,
             domElement
           );
         },

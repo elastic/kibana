@@ -133,7 +133,7 @@ describe('IndexPatternDimensionPanel', () => {
         .find('[data-test-subj="indexPattern-configure-dimension"]')
         .first()
         .prop('iconType')
-    ).toEqual('plusInCircle');
+    ).toEqual('plusInCircleFilled');
   });
 
   it('should call the filterOperations function', () => {

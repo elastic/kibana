@@ -9,7 +9,7 @@ import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiSpacer, EuiSwitch, EuiCallOut } from '@elastic/eui';
 
-import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
+import { IndexPatternSelect } from 'ui/index_patterns';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { indexPatternService } from '../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
@@ -71,7 +71,7 @@ export class CreateSourceEditor extends Component {
       }
     });
     return count;
-  }
+  };
 
   debouncedLoad = _.debounce(async (indexPatternId) => {
     if (!indexPatternId || indexPatternId.length === 0) {
@@ -143,11 +143,11 @@ export class CreateSourceEditor extends Component {
       ? { indexPatternId, geoField, filterByMapBounds }
       : null;
     this.props.onSourceConfigChange(sourceConfig);
-  }
+  };
 
   _onNoIndexPatterns = () => {
     this.setState({ noGeoIndexPatternsExist: true });
-  }
+  };
 
   _renderGeoSelect() {
     if (!this.state.indexPattern) {

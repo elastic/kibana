@@ -25,6 +25,7 @@ import { ObjectType, TypeOf } from '@kbn/config-schema';
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
 import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
+import { KibanaSocket, IKibanaSocket } from './socket';
 
 const requestSymbol = Symbol('request');
 
@@ -120,6 +121,8 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
    */
   public readonly headers: Headers;
 
+  public readonly socket: IKibanaSocket;
+
   /** @internal */
   protected readonly [requestSymbol]: Request;
 
@@ -142,6 +145,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     });
 
     this.route = deepFreeze(this.getRouteInfo());
+    this.socket = new KibanaSocket(request.raw.req.socket);
   }
 
   private getRouteInfo() {

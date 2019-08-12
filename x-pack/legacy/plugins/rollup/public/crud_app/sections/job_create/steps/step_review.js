@@ -18,23 +18,22 @@ import {
   JOB_DETAILS_TAB_TERMS,
   JOB_DETAILS_TAB_HISTOGRAM,
   JOB_DETAILS_TAB_METRICS,
-  JOB_DETAILS_TAB_JSON,
+  JOB_DETAILS_TAB_REQUEST,
   tabToHumanizedMap,
 } from '../../components';
+
 
 const JOB_DETAILS_TABS = [
   JOB_DETAILS_TAB_SUMMARY,
   JOB_DETAILS_TAB_TERMS,
   JOB_DETAILS_TAB_HISTOGRAM,
   JOB_DETAILS_TAB_METRICS,
-  JOB_DETAILS_TAB_JSON,
+  JOB_DETAILS_TAB_REQUEST,
 ];
 
 export class StepReviewUi extends Component {
   static propTypes = {
-    fields: PropTypes.object.isRequired,
     job: PropTypes.object.isRequired,
-    onFieldsChange: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -100,6 +99,8 @@ export class StepReviewUi extends Component {
     const { job } = this.props;
     const { selectedTab } = this.state;
     const json = serializeJob(job);
+    const endpoint = `PUT _rollup/job/${job.id}`;
+
     return (
       <Fragment>
         <EuiTitle data-test-subj="rollupJobCreateReviewTitle">
@@ -115,7 +116,7 @@ export class StepReviewUi extends Component {
         {this.renderTabs()}
 
         <EuiErrorBoundary>
-          <JobDetails job={job} json={json} tab={selectedTab} />
+          <JobDetails job={job} json={json} endpoint={endpoint} tab={selectedTab} />
         </EuiErrorBoundary>
       </Fragment>
     );
