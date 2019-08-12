@@ -45,7 +45,14 @@ import {
   ElasticsearchClientConfig,
   ElasticsearchServiceSetup,
 } from './elasticsearch';
-import { HttpServiceSetup, HttpServiceStart, IRouter } from './http';
+import {
+  HttpServiceSetup,
+  HttpServiceStart,
+  IRouter,
+  RequestHandlerContextNames,
+  RequestHandlerContextContainer,
+  RequestHandlerContextProvider,
+} from './http';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 
@@ -184,6 +191,10 @@ export interface CoreSetup {
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
     basePath: HttpServiceSetup['basePath'];
     isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
+    registerRouteHandlerContext: (
+      name: RequestHandlerContextNames,
+      provider: RequestHandlerContextProvider
+    ) => RequestHandlerContextContainer;
     createRouter: () => IRouter;
   };
 }

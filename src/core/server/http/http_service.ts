@@ -84,7 +84,7 @@ export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
    * @public
    */
   registerRouteHandlerContext: (
-    pluginOpaqueId: symbol,
+    pluginOpaqueId: PluginOpaqueId,
     contextName: RequestHandlerContextNames,
     provider: RequestHandlerContextProvider
   ) => RequestHandlerContextContainer;

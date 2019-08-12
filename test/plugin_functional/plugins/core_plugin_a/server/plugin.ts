@@ -17,9 +17,25 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./server_plugins.js'));
-  });
+import { Plugin, CoreSetup } from '../../../../../src/core/server';
+
+declare module '../../../../../src/core/server' {
+  interface RequestHandlerContext {
+    pluginA?: {
+      ping: () => Promise<string>;
+    };
+  }
+}
+
+export class CorePluginAPlugin implements Plugin {
+  public setup(core: CoreSetup, deps: {}) {
+    core.http.registerRouteHandlerContext('pluginA', context => {
+      return {
+        ping: () => context.elasticsearch.adminClient.callAsInternalUser('ping') as Promise<string>,
+      };
+    });
+  }
+
+  public start() {}
+  public stop() {}
 }

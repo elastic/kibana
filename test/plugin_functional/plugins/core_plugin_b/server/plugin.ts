@@ -17,9 +17,18 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./server_plugins.js'));
-  });
+import { Plugin, CoreSetup } from '../../../../../src/core/server';
+
+export class CorePluginBPlugin implements Plugin {
+  public setup(core: CoreSetup, deps: {}) {
+    const router = core.http.createRouter();
+    router.get({ path: '/', validate: false }, async (context, req, res) => {
+      if (!context.pluginA) return res.internalError('pluginA is disabled');
+      const response = await context.pluginA.ping();
+      return res.ok(`Pong via plugin A: ${response}`);
+    });
+  }
+
+  public start() {}
+  public stop() {}
 }

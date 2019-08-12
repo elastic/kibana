@@ -17,9 +17,14 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./server_plugins.js'));
+export default function ({ getService }) {
+  const supertest = getService('supertest');
+
+  describe('core', () => {
+    it('provides access to request context', async () => (
+      await supertest
+        .get('/testbed/ping')
+        .expect(200, 'Pong: true')
+    ));
   });
 }

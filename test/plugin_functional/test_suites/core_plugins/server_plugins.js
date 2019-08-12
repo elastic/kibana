@@ -17,9 +17,19 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./server_plugins.js'));
+import expect from '@kbn/expect';
+
+export default function ({ getService, getPageObjects }) {
+  const PageObjects = getPageObjects(['common']);
+  const browser = getService('browser');
+
+  describe('server plugins', function describeIndexTests() {
+    it('extend request handler context', async () => {
+      const url = `${PageObjects.common.getHostPort()}/core_plugin_b/`;
+      await browser.get(url);
+
+      const pageSource = await browser.execute('return window.document.body.textContent;');
+      expect(pageSource).to.equal('Pong via plugin A: true');
+    });
   });
 }

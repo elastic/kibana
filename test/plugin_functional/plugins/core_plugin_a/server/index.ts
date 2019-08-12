@@ -17,9 +17,6 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./server_plugins.js'));
-  });
-}
+import { CorePluginAPlugin } from './plugin';
+
+export const plugin = () => new CorePluginAPlugin();

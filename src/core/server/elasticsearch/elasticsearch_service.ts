@@ -29,7 +29,7 @@ import { ElasticsearchClientConfig } from './elasticsearch_client_config';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import { HttpServiceSetup, GetAuthHeaders } from '../http/';
 
-declare module '../http/types' {
+declare module '../../server' {
   interface RequestHandlerContext {
     elasticsearch: {
       dataClient: ScopedClusterClient;
