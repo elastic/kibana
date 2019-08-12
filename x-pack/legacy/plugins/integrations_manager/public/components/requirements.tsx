@@ -7,12 +7,12 @@
 import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiTitle } from '@elastic/eui';
 import { entries } from '../../common/type_utils';
-import { RequirementMap } from '../../common/types';
+import { RequirementsByServiceName } from '../../common/types';
 import { ServiceTitleMap } from '../constants';
 import { VersionBadge } from './version_badge';
 
 export interface RequirementsProps {
-  requirements: RequirementMap;
+  requirements: RequirementsByServiceName;
 }
 
 export function Requirements(props: RequirementsProps) {
