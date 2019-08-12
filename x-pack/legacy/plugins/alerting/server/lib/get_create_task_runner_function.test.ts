@@ -40,15 +40,14 @@ afterAll(() => fakeTimer.restore());
 
 const savedObjectsClient = SavedObjectsClientMock.create();
 const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
+const services = {
+  log: jest.fn(),
+  callCluster: jest.fn(),
+  savedObjectsClient,
+};
 
 const getCreateTaskRunnerFunctionParams = {
-  getServices() {
-    return {
-      log: jest.fn(),
-      callCluster: jest.fn(),
-      savedObjectsClient,
-    };
-  },
+  getServices: jest.fn().mockReturnValue(services),
   alertType: {
     id: 'test',
     name: 'My test alert',
@@ -89,7 +88,10 @@ const mockedAlertTypeSavedObject = {
   ],
 };
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+  jest.resetAllMocks();
+  getCreateTaskRunnerFunctionParams.getServices.mockReturnValue(services);
+});
 
 test('successfully executes the task', async () => {
   const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
@@ -240,4 +242,47 @@ test('throws error if reference not found', async () => {
   await expect(runner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
     `"Action reference \\"action_0\\" not found in alert id: 1"`
   );
+});
+
+test('uses API key when provided', async () => {
+  const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
+  savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '1',
+    type: 'alert',
+    attributes: {
+      apiKeyId: '123',
+      apiKeyValue: 'abc',
+    },
+    references: [],
+  });
+  const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
+
+  await runner.run();
+  expect(getCreateTaskRunnerFunctionParams.getServices).toHaveBeenCalledTimes(1);
+  const firstCall = getCreateTaskRunnerFunctionParams.getServices.mock.calls[0][0];
+  expect(firstCall.headers).toEqual({
+    // base64 encoded "123:abc"
+    authorization: 'ApiKey MTIzOmFiYw==',
+  });
+});
+
+test(`doesn't use API key when not provided`, async () => {
+  const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
+  savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '1',
+    type: 'alert',
+    attributes: {
+      apiKeyId: null,
+      apiKeyValue: null,
+    },
+    references: [],
+  });
+  const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
+
+  await runner.run();
+  expect(getCreateTaskRunnerFunctionParams.getServices).toHaveBeenCalledTimes(1);
+  const firstCall = getCreateTaskRunnerFunctionParams.getServices.mock.calls[0][0];
+  expect(firstCall.headers).toEqual({});
 });

@@ -19,7 +19,7 @@ describe('fire()', () => {
     const fireFn = createFireFunction({
       getBasePath,
       taskManager: mockTaskManager,
-      getScopedSavedObjectsClient: () => savedObjectsClient,
+      getScopedSavedObjectsClient: jest.fn().mockReturnValueOnce(savedObjectsClient),
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -65,5 +65,76 @@ describe('fire()', () => {
       apiKeyId: '123',
       apiKeyValue: 'abc',
     });
+  });
+
+  test('uses API key when provided', async () => {
+    const getScopedSavedObjectsClient = jest.fn().mockReturnValueOnce(savedObjectsClient);
+    const fireFn = createFireFunction({
+      getBasePath,
+      taskManager: mockTaskManager,
+      getScopedSavedObjectsClient,
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'mock-action',
+      },
+      references: [],
+    });
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '234',
+      type: 'fired_action',
+      attributes: {},
+      references: [],
+    });
+
+    await fireFn({
+      id: '123',
+      params: { baz: false },
+      spaceId: 'default',
+      apiKeyId: '123',
+      apiKeyValue: 'abc',
+    });
+    expect(getScopedSavedObjectsClient).toHaveBeenCalledTimes(1);
+    const firstCall = getScopedSavedObjectsClient.mock.calls[0][0];
+    expect(firstCall.headers).toEqual({
+      // base64 encoded "123:abc"
+      authorization: 'ApiKey MTIzOmFiYw==',
+    });
+  });
+
+  test(`doesn't use API keys when not provided`, async () => {
+    const getScopedSavedObjectsClient = jest.fn().mockReturnValueOnce(savedObjectsClient);
+    const fireFn = createFireFunction({
+      getBasePath,
+      taskManager: mockTaskManager,
+      getScopedSavedObjectsClient,
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'mock-action',
+      },
+      references: [],
+    });
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '234',
+      type: 'fired_action',
+      attributes: {},
+      references: [],
+    });
+
+    await fireFn({
+      id: '123',
+      params: { baz: false },
+      spaceId: 'default',
+      apiKeyId: null,
+      apiKeyValue: null,
+    });
+    expect(getScopedSavedObjectsClient).toHaveBeenCalledTimes(1);
+    const firstCall = getScopedSavedObjectsClient.mock.calls[0][0];
+    expect(firstCall.headers).toEqual({});
   });
 });
