@@ -104,6 +104,21 @@ export function SavedQueryManagerProvider({ getService }) {
 
       await testSubjects.click('saved-query-manager-popover-button');
     }
+
+    async saveNewQueryMissingOrFail() {
+      await this.openSavedQueryManager();
+      await testSubjects.missingOrFail('saved-query-manager-save-button');
+    }
+
+    async updateCurrentlyLoadedQueryMissingOrFail() {
+      await this.openSavedQueryManager();
+      await testSubjects.missingOrFail('saved-query-manager-save-changes-button');
+    }
+
+    async deleteSavedQueryMissingOrFail(title) {
+      await this.openSavedQueryManager();
+      await testSubjects.missingOrFail(`delete-saved-query-${title}-button`);
+    }
   }
 
   return new SavedQueryManager();
