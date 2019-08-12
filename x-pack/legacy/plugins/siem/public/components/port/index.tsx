@@ -43,3 +43,5 @@ export const Port = pure<{
     <ExternalLinkIcon />
   </DefaultDraggable>
 ));
+
+Port.displayName = 'Port';
