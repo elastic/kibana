@@ -170,15 +170,11 @@ export class VectorStyleEditor extends Component {
         {this._renderFillColor()}
         <EuiSpacer size="m" />
 
-        <Fragment>
-          {this._renderLineColor()}
-          <EuiSpacer size="m" />
-        </Fragment>
+        {this._renderLineColor()}
+        <EuiSpacer size="m" />
 
-        <Fragment>
-          {this._renderLineWidth()}
-          <EuiSpacer size="m" />
-        </Fragment>
+        {this._renderLineWidth()}
+        <EuiSpacer size="m" />
 
         {iconOrientation}
 
