@@ -94,8 +94,6 @@ Access your data in Elasticsearch using the Elasticsearch SQL syntax.
 
 . If everything looks correct, click *Save*. 
 
-//TODO add image
-
 Unfamiliar with writing Elasticsearch SQL queries? For more information, refer to {ref}/sql-spec.html[SQL language].
 
 [float]
@@ -118,8 +116,6 @@ Use the Lucene query syntax to use your raw data in Elasticsearch.
 
 . If your query looks correct, click *Save*. 
 
-//TODO add image
-
 For for more information about the Lucene query string sytax, refer to <<lucene-query,Lucene Query Syntax>>.
 
 [float]
@@ -137,8 +133,6 @@ For for more information about the Lucene query string syntax, refer to <<lucene
 . Enter the *Interval*, then click *Preview*.
 
 . If your query looks correct, click *Save*. 
-
-//TODO add image
 
 For more information about Timelion, refer to <<timelion,Timelion>>.
 
@@ -164,7 +158,8 @@ Choose the interval to refresh the data.
 
 . Under *Change auto-refresh interval*, select the interval you want to use.
 
-//TODO add image
+[role="screenshot"]
+image::images/canvas-refresh-interval.png[Element data refresh interval]
 
 To manually refresh the data, click the *Refresh data* icon. 
 
@@ -200,8 +195,6 @@ Move the element to a preferred location on your workpad.
 
 * To move the element by 1 pixel, select the element, then use your arrow keys.
 
-//TODO add image
-
 As you move the element, notice the alignment lines that appear to help you place the element exactly where you want it.
 
 [float]
@@ -213,8 +206,6 @@ Make your elements bigger or smaller than the default size.
 . Select the element.
 
 . Click and drag the resizing icon to the size you want.
-
-//TODO add image
 
 [float]
 [[alighn-canvas-elements]]
@@ -228,7 +219,8 @@ Align two or more elements on your workpad.
 
 . From the *Alignment* menu, how you want to align the elements on the workpad.
 
-//TODO add image
+[role="screenshot"]
+image::images/canvas-align-elements.gif[Align elements]
 
 [float]
 [[distribute-canvas-elements]]
@@ -242,7 +234,8 @@ Distribute two or more elements on your workpad.
 
 . From the *Distribution* menu, how you want to distribute the elements on the workpad.
 
-//TODO add image
+[role="screenshot"]
+image::images/canvas-distribute-elements.gif[Distribute elements]
 
 [float]
 [[change-element-order]]
@@ -254,9 +247,7 @@ Change the order of how the elements are displayed on your workpad.
 
 . In the top right corder, click the *Element options* icon. 
 
-.. Select *Order*, then select the order that you want the element to appear.
-
-//TODO add image
+. Select *Order*, then select the order that you want the element to appear.
 
 [float]
 [[element-save]]
@@ -268,7 +259,7 @@ After you have made changes to elements, save them so that you can reuse them ac
 +
 To save a group of elements, press Shift, then select the elements you want to save.
 
-. Next to *Selected element*, click the *Save as new element* icon.
+. Click the *Save as new element* icon.
 
 . In the *Create new element* window, enter a *Name*.
 
@@ -282,11 +273,12 @@ To access the element, click *Add element*, then select *My elements*.
 
 When you have run out of room on your workpad page, you can add more pages.
 
-. Click *Page 1*, then click the *+* icon.
+. Click *Page 1*, then click *+*.
 
 . On the *Page* editor panel on the right, select the page transition from the *Transition* dropdown. 
 
-//TODO add image
+[role="screenshot"]
+image::images/canvas-add-pages.gif[Add pages]
 
 [float]
 [[workpad-display-options]]
@@ -296,11 +288,7 @@ To change the view of the elements on your workpad, change the display options.
 
 * To view your workpad in fullscreen mode, click the *Enter fullscreen mode* icon in the upper left corner.
 
-//TODO add image
-
 * To zoom in or out on the workpad, click the *Zoom controls* icon in the upper left corder, then select one of the options.
-
-//TODO add image
 
 [float]
 [[enable-autoplay]]
@@ -310,6 +298,7 @@ Automatically cycle through your workpads pages in fullscreen mode.
 
 . In the upper left corner, click the *Control settings* icon.
 
-. Under *Change cycling interval*, select the cycle interval you want to use.
+. Under *Change cycling interval*, select the interval you want to use.
 
-//TODO add image
+[role="screenshot"]
+image::images/canvas-refresh-interval.png[Element data refresh interval]
