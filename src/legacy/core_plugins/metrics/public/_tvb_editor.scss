@@ -1,4 +1,6 @@
 .tvbEditor {
-  overflow: visible;
+  // Please test Drag and Drop functionality after modifying this styles
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
