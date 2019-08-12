@@ -17,7 +17,11 @@
  * under the License.
  */
 
+const path = require('path');
+
 module.exports = () => {
+  const rootPath = path.resolve(__dirname, '..', '..', 'build', 'kibana');
+
   return {
     presets: [
       [
@@ -40,7 +44,7 @@ module.exports = () => {
           corejs: 2,
         },
       ],
-      require('./common_preset').createConfig(),
+      require('./common_preset').createConfig(rootPath),
     ],
     plugins: [
       [

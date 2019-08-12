@@ -28,7 +28,7 @@ module.exports = () => {
           corejs: 2,
         },
       ],
-      require('./common_preset'),
+      require('./common_preset').createConfig(),
     ]
   };
 };

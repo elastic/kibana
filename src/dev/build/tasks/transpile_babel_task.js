@@ -25,6 +25,10 @@ import { createPromiseFromStreams } from '../../../legacy/utils';
 const transpileWithBabel = async (srcGlobs, build, presets) => {
   const buildRoot = build.resolvePath();
 
+  //console.log('buildRoot', buildRoot);
+
+  //console.log('transpileWithBabel presets', presets);
+
   await createPromiseFromStreams([
     vfs.src(
       srcGlobs.concat([
@@ -60,7 +64,7 @@ export const TranspileBabelTask = {
       ],
       build,
       [
-        require.resolve('@kbn/babel-preset/node_preset')
+        require.resolve('@kbn/babel-preset/build_node_preset')
       ]
     );
 
