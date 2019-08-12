@@ -17,8 +17,4 @@
  * under the License.
  */
 
-import { IndexPatternsService } from './service';
-
-export type IndexPatternsServiceFactory = (args: {
-  callCluster: (endpoint: string, clientParams: any, options: any) => Promise<any>;
-}) => IndexPatternsService;
+export * from './index_patterns_service';

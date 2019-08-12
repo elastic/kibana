@@ -20,8 +20,16 @@
 import { chain } from 'lodash';
 import moment from 'moment';
 
+import { APICaller } from 'src/core/server';
 import { timePatternToWildcard } from './time_pattern_to_wildcard';
 import { callIndexAliasApi } from './es_api';
+
+interface IndexDetail {
+  valid: boolean;
+  indexName: string;
+  order: moment.Moment;
+  isMatch: boolean;
+}
 
 /**
  *  Convert a time pattern into a list of indexes it could
@@ -34,24 +42,24 @@ import { callIndexAliasApi } from './es_api';
  *                            and the indices that actually match the time
  *                            pattern (matches);
  */
-export async function resolveTimePattern(callCluster, timePattern) {
+export async function resolveTimePattern(callCluster: APICaller, timePattern: string) {
   const aliases = await callIndexAliasApi(callCluster, timePatternToWildcard(timePattern));
 
-  const allIndexDetails = chain(aliases)
-    .reduce((acc, index, indexName) => acc.concat(
-      indexName,
-      Object.keys(index.aliases || {})
-    ), [])
+  const allIndexDetails: IndexDetail[] = chain(aliases)
+    .reduce(
+      (acc, index, indexName) => acc.concat(indexName, Object.keys(index.aliases || {})),
+      [] as string[]
+    )
     .sort()
     .uniq(true)
-    .map(indexName => {
+    .map((indexName: string) => {
       const parsed = moment(indexName, timePattern, true);
       if (!parsed.isValid()) {
         return {
           valid: false,
           indexName,
           order: indexName,
-          isMatch: false
+          isMatch: false,
         };
       }
 
@@ -59,18 +67,15 @@ export async function resolveTimePattern(callCluster, timePattern) {
         valid: true,
         indexName,
         order: parsed,
-        isMatch: indexName === parsed.format(timePattern)
+        isMatch: indexName === parsed.format(timePattern),
       };
     })
     .sortByOrder(['valid', 'order'], ['desc', 'desc'])
     .value();
 
   return {
-    all: allIndexDetails
-      .map(details => details.indexName),
+    all: allIndexDetails.map(details => details.indexName),
 
-    matches: allIndexDetails
-      .filter(details => details.isMatch)
-      .map(details => details.indexName),
+    matches: allIndexDetails.filter(details => details.isMatch).map(details => details.indexName),
   };
 }
