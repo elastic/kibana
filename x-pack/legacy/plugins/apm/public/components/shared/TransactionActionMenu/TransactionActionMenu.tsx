@@ -14,7 +14,6 @@ import {
   EuiPopover,
   EuiLink
 } from '@elastic/eui';
-import chrome from 'ui/chrome';
 import url from 'url';
 import { i18n } from '@kbn/i18n';
 import React, { useState, FunctionComponent } from 'react';
@@ -25,6 +24,7 @@ import { DiscoverTransactionLink } from '../Links/DiscoverLinks/DiscoverTransact
 import { InfraLink } from '../Links/InfraLink';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { fromQuery } from '../Links/url_helpers';
+import { useCore } from '../../../hooks/useCore';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
@@ -65,6 +65,8 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
   props: Props
 ) => {
   const { transaction } = props;
+
+  const core = useCore();
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -164,7 +166,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
   );
 
   const uptimeLink = url.format({
-    pathname: chrome.addBasePath('/app/uptime'),
+    pathname: core.http.basePath.prepend('/app/uptime'),
     hash: `/?${fromQuery(
       pick(
         {

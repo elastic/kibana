@@ -312,6 +312,8 @@ supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2
 setting this to `true` enables unauthenticated users to access the Kibana
 server status API and status page.
 
+`vega.enableExternalUrls:`:: *Default: false* Set this value to true to allow Vega to use any URL to access external data sources and images. If false, Vega can only get data from Elasticsearch.
+
 `xpack.license_management.enabled`:: *Default: true* Set this value to false to
 disable the License Management user interface.
 

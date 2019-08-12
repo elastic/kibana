@@ -7,6 +7,6 @@
 import { createAction } from 'redux-actions';
 
 export const routePathChange = createAction('ROUTE PATH CHANGE');
-export const repoChange = createAction('REPOSITORY CHANGE');
+export const repoChange = createAction<string>('REPOSITORY CHANGE');
 export const revisionChange = createAction('REVISION CHANGE');
 export const filePathChange = createAction('FILE PATH CHANGE');

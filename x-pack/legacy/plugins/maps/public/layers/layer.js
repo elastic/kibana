@@ -9,7 +9,7 @@ import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
-import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import { MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER, SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../reducers/util';
 import { i18n } from '@kbn/i18n';
@@ -71,6 +71,10 @@ export class AbstractLayer {
       });
     }
     return clonedDescriptor;
+  }
+
+  makeMbLayerId(layerNameSuffix) {
+    return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}${layerNameSuffix}`;
   }
 
   isJoinable() {
@@ -262,6 +266,14 @@ export class AbstractLayer {
 
   getMbLayerIds() {
     throw new Error('Should implement AbstractLayer#getMbLayerIds');
+  }
+
+  ownsMbLayerId() {
+    throw new Error('Should implement AbstractLayer#ownsMbLayerId');
+  }
+
+  ownsMbSourceId() {
+    throw new Error('Should implement AbstractLayer#ownsMbSourceId');
   }
 
   canShowTooltip() {

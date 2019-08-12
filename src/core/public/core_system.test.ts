@@ -41,6 +41,7 @@ import {
   MockDocLinksService,
   MockRenderingService,
   RenderingServiceConstructor,
+  MockContextService,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -51,6 +52,7 @@ const defaultCoreSystemParams = {
   rootDomElement: document.createElement('div'),
   browserSupportsCsp: true,
   injectedMetadata: {
+    uiPlugins: [],
     csp: {
       warnLegacyBrowsers: true,
     },
@@ -158,6 +160,11 @@ describe('#setup()', () => {
   it('calls application#setup()', async () => {
     await setupCore();
     expect(MockApplicationService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls context#setup()', async () => {
+    await setupCore();
+    expect(MockContextService.setup).toHaveBeenCalledTimes(1);
   });
 
   it('calls injectedMetadata#setup()', async () => {

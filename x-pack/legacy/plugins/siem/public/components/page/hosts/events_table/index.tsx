@@ -99,7 +99,6 @@ const EventsTableComponent = pure<EventsTableProps>(
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}
-      loadingTitle={i18n.EVENTS}
       loadPage={newActivePage => loadPage(newActivePage)}
       pageOfItems={data}
       showMorePagesIndicator={showMorePagesIndicator}
@@ -122,6 +121,8 @@ const EventsTableComponent = pure<EventsTableProps>(
     />
   )
 );
+
+EventsTableComponent.displayName = 'EventsTableComponent';
 
 const makeMapStateToProps = () => {
   const getEventsSelector = hostsSelectors.eventsSelector();

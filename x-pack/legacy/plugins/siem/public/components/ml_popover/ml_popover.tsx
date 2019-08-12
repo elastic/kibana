@@ -31,6 +31,8 @@ const PopoverContentsDiv = styled.div`
   max-width: 550px;
 `;
 
+PopoverContentsDiv.displayName = 'PopoverContentsDiv';
+
 interface State {
   isLoading: boolean;
   jobs: Job[];
@@ -253,3 +255,5 @@ export const MlPopover = React.memo(() => {
     return null;
   }
 });
+
+MlPopover.displayName = 'MlPopover';

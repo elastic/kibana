@@ -24,6 +24,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
@@ -62,10 +64,36 @@ const sortFunctionsFactory = (status: { [key: string]: RepoStatus }) => {
 };
 
 const sortOptions = [
-  { value: SortOptionsValue.AlphabeticalAsc, inputDisplay: 'A to Z' },
-  { value: SortOptionsValue.AlphabeticalDesc, inputDisplay: 'Z to A' },
-  { value: SortOptionsValue.UpdatedAsc, inputDisplay: 'Last Updated ASC' },
-  { value: SortOptionsValue.UpdatedDesc, inputDisplay: 'Last Updated DESC' },
+  {
+    value: SortOptionsValue.AlphabeticalAsc,
+    inputDisplay: i18n.translate('xpack.code.adminPage.repoTab.sort.aToZDropDownOptionLabel', {
+      defaultMessage: 'A to Z',
+    }),
+  },
+  {
+    value: SortOptionsValue.AlphabeticalDesc,
+    inputDisplay: i18n.translate('xpack.code.adminPage.repoTab.sort.zToADropDownOptionLabel', {
+      defaultMessage: 'Z to A',
+    }),
+  },
+  {
+    value: SortOptionsValue.UpdatedAsc,
+    inputDisplay: i18n.translate(
+      'xpack.code.adminPage.repoTab.sort.updatedAscDropDownOptionLabel',
+      {
+        defaultMessage: 'Last Updated ASC',
+      }
+    ),
+  },
+  {
+    value: SortOptionsValue.UpdatedDesc,
+    inputDisplay: i18n.translate(
+      'xpack.code.adminPage.repoTab.sort.updatedDescDropDownOptionLabel',
+      {
+        defaultMessage: 'Last Updated DESC',
+      }
+    ),
+  },
   // { value: SortOptionsValue.recently_added, inputDisplay: 'Recently Added' },
 ];
 
@@ -148,14 +176,29 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
       <EuiOverlayMask>
         <EuiModal onClose={this.closeModal}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>Import a new repo</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>
+              <FormattedMessage
+                id="xpack.code.adminPage.repoTab.importRepoTitle"
+                defaultMessage="Import a new repo"
+              />
+            </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <EuiTitle size="xs">
-              <h3>Repository URL</h3>
+              <h3>
+                <FormattedMessage
+                  id="xpack.code.adminPage.repoTab.repositoryUrlFormLabel"
+                  defaultMessage="Repository URL"
+                />
+              </h3>
             </EuiTitle>
             <EuiForm>
-              <EuiFormRow isInvalid={this.state.isInvalid} error="The URL shouldn't be empty.">
+              <EuiFormRow
+                isInvalid={this.state.isInvalid}
+                error={i18n.translate('xpack.code.adminPage.repoTab.repositoryUrlEmptyText', {
+                  defaultMessage: "The URL shouldn't be empty.",
+                })}
+              >
                 <EuiFieldText
                   value={this.state.repoURL}
                   onChange={this.onChange}
@@ -172,9 +215,17 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
             </EuiForm>
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={this.closeModal}>Cancel</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={this.closeModal}>
+              <FormattedMessage
+                id="xpack.code.adminPage.repoTab.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
             <EuiButton fill onClick={this.submitImportProject} disabled={this.props.importLoading}>
-              Import project
+              <FormattedMessage
+                id="xpack.code.adminPage.repoTab.importButtonLabel"
+                defaultMessage="Import"
+              />
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>
@@ -226,7 +277,11 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
         <EuiSpacer />
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow label="Sort By">
+            <EuiFormRow
+              label={i18n.translate('xpack.code.adminPage.repoTab.sort.sortByFormLabel', {
+                defaultMessage: 'Sort By',
+              })}
+            >
               <EuiSuperSelect
                 options={sortOptions}
                 valueOfSelected={this.state.sortOption}
@@ -244,7 +299,10 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
                 onClick={this.openModal}
                 data-test-subj="newProjectButton"
               >
-                Import a new repo
+                <FormattedMessage
+                  id="xpack.code.adminPage.repoTab.importRepoButtonLabel"
+                  defaultMessage="Import a new repo"
+                />
               </EuiButton>
             )}
           </EuiFlexItem>
@@ -252,8 +310,11 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
         <EuiSpacer />
         <EuiText>
           <h3>
-            {projectsCount}
-            {projectsCount === 1 ? <span> Repo</span> : <span> Repos</span>}
+            <FormattedMessage
+              id="xpack.code.adminPage.repoTab.repoDescription"
+              defaultMessage="{projectsCount} {projectsCount, plural, one {Repo} other {Repos}}"
+              values={{ projectsCount }}
+            />
           </h3>
         </EuiText>
         <EuiSpacer />

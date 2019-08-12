@@ -100,8 +100,9 @@ function updateScriptedFieldsTable($scope, $state) {
               getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
             }}
             onRemoveField={() => {
-              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.indexPatternListProvider);
+              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, $scope.indexPatternListProvider);
               $scope.refreshFilters();
+              $scope.$apply();
             }}
           />
         </I18nContext>,
@@ -263,7 +264,7 @@ uiModules.get('apps/management')
           }
         }
 
-        Promise.resolve(indexPatterns.delete($scope.indexPattern))
+        Promise.resolve($scope.indexPattern.destroy())
           .then(function () {
             $location.url('/management/kibana/index_patterns');
           })

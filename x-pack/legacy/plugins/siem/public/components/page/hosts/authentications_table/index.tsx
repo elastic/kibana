@@ -106,7 +106,6 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}
-      loadingTitle={i18n.AUTHENTICATIONS}
       loadPage={newActivePage => loadPage(newActivePage)}
       pageOfItems={data}
       showMorePagesIndicator={showMorePagesIndicator}
@@ -129,6 +128,8 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
     />
   )
 );
+
+AuthenticationTableComponent.displayName = 'AuthenticationTableComponent';
 
 const makeMapStateToProps = () => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();

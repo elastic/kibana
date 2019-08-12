@@ -6,33 +6,22 @@
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
-import styled from 'styled-components';
 
-import { ACTION_COLUMN_WIDTH, PositionedIcon } from './common_styles';
-import { FavoriteTimelineResult, OpenTimelineResult } from '../types';
+import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { getNotesCount, getPinnedEventCount } from '../helpers';
-
 import * as i18n from '../translations';
-
-const PinnedIcon = styled(EuiIcon)`
-  position: relative;
-  left: -3px;
-`;
-
-const CommentIcon = styled(EuiIcon)`
-  position: relative;
-  left: -2px;
-`;
+import { FavoriteTimelineResult, OpenTimelineResult } from '../types';
 
 /**
  * Returns the columns that have icon headers
  */
 export const getIconHeaderColumns = () => [
   {
+    align: 'center',
     field: 'pinnedEventIds',
     name: (
       <EuiToolTip content={i18n.PINNED_EVENTS}>
-        <PinnedIcon data-test-subj="pinned-event-header-icon" size="m" color="subdued" type="pin" />
+        <EuiIcon data-test-subj="pinned-event-header-icon" size="m" type="pin" />
       </EuiToolTip>
     ),
     render: (_: Record<string, boolean> | null | undefined, timelineResult: OpenTimelineResult) => (
@@ -42,15 +31,11 @@ export const getIconHeaderColumns = () => [
     width: ACTION_COLUMN_WIDTH,
   },
   {
+    align: 'center',
     field: 'eventIdToNoteIds',
     name: (
       <EuiToolTip content={i18n.NOTES}>
-        <CommentIcon
-          data-test-subj="notes-count-header-icon"
-          size="m"
-          color="subdued"
-          type="editorComment"
-        />
+        <EuiIcon data-test-subj="notes-count-header-icon" size="m" type="editorComment" />
       </EuiToolTip>
     ),
     render: (
@@ -61,21 +46,18 @@ export const getIconHeaderColumns = () => [
     width: ACTION_COLUMN_WIDTH,
   },
   {
+    align: 'center',
     field: 'favorite',
     name: (
       <EuiToolTip content={i18n.FAVORITES}>
-        <EuiIcon data-test-subj="favorites-header-icon" size="m" color="subdued" type="starEmpty" />
+        <EuiIcon data-test-subj="favorites-header-icon" size="m" type="starEmpty" />
       </EuiToolTip>
     ),
     render: (favorite: FavoriteTimelineResult[] | null | undefined) => {
       const isFavorite = favorite != null && favorite.length > 0;
       const fill = isFavorite ? 'starFilled' : 'starEmpty';
 
-      return (
-        <PositionedIcon>
-          <EuiIcon data-test-subj={`favorite-${fill}-star`} type={fill} size="m" />
-        </PositionedIcon>
-      );
+      return <EuiIcon data-test-subj={`favorite-${fill}-star`} type={fill} size="m" />;
     },
     sortable: false,
     width: ACTION_COLUMN_WIDTH,

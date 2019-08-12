@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 
 import _ from 'lodash';
 import { State } from 'ui/state_management/state';
@@ -34,8 +34,6 @@ export class FilterStateManager {
   filterManager: FilterManager;
   globalState: State;
   getAppState: GetAppStateFunc;
-  prevGlobalFilters: Filter[] | undefined;
-  prevAppFilters: Filter[] | undefined;
   interval: NodeJS.Timeout | undefined;
 
   constructor(globalState: State, getAppState: GetAppStateFunc, filterManager: FilterManager) {
@@ -67,10 +65,8 @@ export class FilterStateManager {
       const globalFilters = this.globalState.filters || [];
       const appFilters = (appState && appState.filters) || [];
 
-      const globalFilterChanged = !(
-        this.prevGlobalFilters && _.isEqual(this.prevGlobalFilters, globalFilters)
-      );
-      const appFilterChanged = !(this.prevAppFilters && _.isEqual(this.prevAppFilters, appFilters));
+      const globalFilterChanged = !_.isEqual(this.filterManager.getGlobalFilters(), globalFilters);
+      const appFilterChanged = !_.isEqual(this.filterManager.getAppFilters(), appFilters);
       const filterStateChanged = globalFilterChanged || appFilterChanged;
 
       if (!filterStateChanged) return;
@@ -81,10 +77,6 @@ export class FilterStateManager {
       FilterManager.setFiltersStore(newGlobalFilters, FilterStateStore.GLOBAL_STATE);
 
       this.filterManager.setFilters(newGlobalFilters.concat(newAppFilters));
-
-      // store new filter changes
-      this.prevGlobalFilters = newGlobalFilters;
-      this.prevAppFilters = newAppFilters;
     }, 10);
   }
 

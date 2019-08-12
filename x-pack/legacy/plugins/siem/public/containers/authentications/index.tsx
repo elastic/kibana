@@ -117,7 +117,7 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Authentications.pageInfo', data),
             refetch,
-            totalCount: getOr(0, 'source.Authentications.totalCount', data),
+            totalCount: getOr(-1, 'source.Authentications.totalCount', data),
           });
         }}
       </Query>

@@ -13,3 +13,5 @@ import { TimelinesPage } from './timelines_page';
 export const Timelines = pure(() => (
   <ApolloConsumer>{client => <TimelinesPage apolloClient={client} />}</ApolloConsumer>
 ));
+
+Timelines.displayName = 'Timelines';

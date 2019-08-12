@@ -160,7 +160,6 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadingTitle={i18n.TOP_TALKERS}
         loadPage={newActivePage => loadPage(newActivePage)}
         onChange={this.onChange}
         pageOfItems={data}
@@ -222,3 +221,5 @@ export const NetworkTopNFlowTable = connect(
 const SelectTypeItem = styled(EuiFlexItem)`
   min-width: 180px;
 `;
+
+SelectTypeItem.displayName = 'SelectTypeItem';
