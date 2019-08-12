@@ -55,18 +55,26 @@ const Avatar = styled(EuiAvatar)`
   margin-left: 5px;
 `;
 
+Avatar.displayName = 'Avatar';
+
 const DescriptionPopoverMenuContainer = styled.div`
   margin-top: 15px;
 `;
+
+DescriptionPopoverMenuContainer.displayName = 'DescriptionPopoverMenuContainer';
 
 const SettingsIcon = styled(EuiIcon)`
   margin-left: 4px;
   cursor: pointer;
 `;
 
+SettingsIcon.displayName = 'SettingsIcon';
+
 const HiddenFlexItem = styled(EuiFlexItem)`
   display: none;
 `;
+
+HiddenFlexItem.displayName = 'HiddenFlexItem';
 
 interface Props {
   associateNote: AssociateNote;
