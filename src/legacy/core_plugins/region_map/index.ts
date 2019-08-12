@@ -30,7 +30,13 @@ const regionMapPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyP
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
-      injectDefaultVars: server => ({}),
+      injectDefaultVars(server) {
+        const { regionmap } = server.config().get('map');
+
+        return {
+          regionmap,
+        };
+      },
     },
     init: (server: Legacy.Server) => ({}),
     config(Joi: any) {

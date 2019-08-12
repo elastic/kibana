@@ -18,13 +18,14 @@
  */
 
 import { idx } from '@kbn/elastic-idx';
-import { SavedObjectsClientContract, SimpleSavedObject, UiSettingsClient } from 'src/core/public';
+import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
 // @ts-ignore
 import { fieldFormats } from '../registry/field_formats';
 
 import { IndexPattern } from './_index_pattern';
 import { createIndexPatternCache } from './_pattern_cache';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
+import { UiSettingsClientContract } from '../../../../core/public';
 
 const indexPatternCache = createIndexPatternCache();
 const apiClient = new IndexPatternsApiClient();
@@ -32,11 +33,11 @@ const apiClient = new IndexPatternsApiClient();
 export class IndexPatterns {
   fieldFormats: fieldFormats;
 
-  private config: UiSettingsClient;
+  private config: UiSettingsClientContract;
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
 
-  constructor(config: UiSettingsClient, savedObjectsClient: SavedObjectsClientContract) {
+  constructor(config: UiSettingsClientContract, savedObjectsClient: SavedObjectsClientContract) {
     this.config = config;
     this.savedObjectsClient = savedObjectsClient;
   }

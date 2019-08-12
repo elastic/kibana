@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { VisParams, AggParams } from 'ui/vis';
+import { VisParams } from '../../..';
+import { AggParams } from '../agg_params';
 
 export interface AggControlProps<T> {
   aggParams: AggParams;

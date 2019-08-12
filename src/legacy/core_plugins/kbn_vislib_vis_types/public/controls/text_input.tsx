@@ -19,23 +19,22 @@
 
 import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { VisOptionsSetValue } from 'ui/vis/editors/default';
 
-interface TextInputOptionProps {
+interface TextInputOptionProps<ParamName extends string> {
   helpText?: React.ReactNode;
   label?: React.ReactNode;
-  paramName: string;
+  paramName: ParamName;
   value?: string;
-  setValue: VisOptionsSetValue;
+  setValue: (paramName: ParamName, value: string) => void;
 }
 
-function TextInputOption({
+function TextInputOption<ParamName extends string>({
   helpText,
   label,
   paramName,
   value = '',
   setValue,
-}: TextInputOptionProps) {
+}: TextInputOptionProps<ParamName>) {
   return (
     <EuiFormRow helpText={helpText} label={label} fullWidth compressed>
       <EuiFieldText fullWidth value={value} onChange={ev => setValue(paramName, ev.target.value)} />
