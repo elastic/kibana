@@ -56,6 +56,8 @@ export const TranspileBabelTask = {
   description: 'Transpiling sources with babel',
 
   async run(config, log, build) {
+    const rootPath = build.resolvePath();
+
     // Transpile server code
     await transpileWithBabel(
       [
@@ -64,7 +66,7 @@ export const TranspileBabelTask = {
       ],
       build,
       [
-        require.resolve('@kbn/babel-preset/build_node_preset')
+        [require.resolve('@kbn/babel-preset/node_preset'), { rootPath }]
       ]
     );
 

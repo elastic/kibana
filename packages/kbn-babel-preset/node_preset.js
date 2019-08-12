@@ -17,7 +17,9 @@
  * under the License.
  */
 
-module.exports = () => {
+module.exports = (_, options) => {
+  //console.log('node_preset', options);
+
   return {
     presets: [
       [
@@ -40,7 +42,7 @@ module.exports = () => {
           corejs: 2,
         },
       ],
-      require('./common_preset').createConfig(),
+      require('./common_preset').createConfig(options.rootPath),
     ],
     plugins: [
       [
