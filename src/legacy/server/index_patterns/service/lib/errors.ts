@@ -29,7 +29,7 @@ const ERR_NO_MATCHING_INDICES = 'no_matching_indices';
  *  @param  {Any}  err
  *  @return {Boolean}
  */
-export function isEsIndexNotFoundError(err) {
+export function isEsIndexNotFoundError(err: any) {
   return get(err, ['body', 'error', 'type']) === ERR_ES_INDEX_NOT_FOUND;
 }
 
@@ -39,7 +39,7 @@ export function isEsIndexNotFoundError(err) {
  *  @param  {String} pattern the pattern which indexes were supposed to match
  *  @return {Boom}
  */
-export function createNoMatchingIndicesError(pattern) {
+export function createNoMatchingIndicesError(pattern: string[] | string) {
   const err = Boom.notFound(`No indices match pattern "${pattern}"`);
   err.output.payload.code = ERR_NO_MATCHING_INDICES;
   return err;
@@ -51,7 +51,7 @@ export function createNoMatchingIndicesError(pattern) {
  *  @param  {Any} err
  *  @return {Boolean}
  */
-export function isNoMatchingIndicesError(err) {
+export function isNoMatchingIndicesError(err: Error) {
   return get(err, ['output', 'payload', 'code']) === ERR_NO_MATCHING_INDICES;
 }
 
@@ -61,7 +61,7 @@ export function isNoMatchingIndicesError(err) {
  *  @param  {[type]} indices [description]
  *  @return {[type]}         [description]
  */
-export function convertEsError(indices, error) {
+export function convertEsError(indices: string[] | string, error: any) {
   if (isEsIndexNotFoundError(error)) {
     return createNoMatchingIndicesError(indices);
   }

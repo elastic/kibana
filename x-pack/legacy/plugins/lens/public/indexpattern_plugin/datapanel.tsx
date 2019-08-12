@@ -84,23 +84,6 @@ export function IndexPatternDataPanel({
   );
 }
 
-// export interface DataVisOverallField {
-//   fieldName: string;
-//   existsInDocs: boolean;
-//   stats: {
-//     sampleCount: number;
-//     count: number;
-//     cardinality: number;
-//   };
-// }
-
-// export interface DataVisOverall {
-//   totalCount: number;
-//   aggregatableExistsFields: DataVisOverallField[];
-//   aggregatableNotExistsFields: DataVisOverallField[];
-//   nonAggregatableExistsFields: DataVisOverallField[];
-//   nonAggregatableNotExistsFields: DataVisOverallField[];
-// }
 type OverallFields = Record<
   string,
   {
@@ -109,12 +92,10 @@ type OverallFields = Record<
   }
 >;
 
-// type FilterableType = DataType | 'exists';
-
 interface DataPanelState {
   nameFilter: string;
   typeFilter: DataType[];
-  existsFilter: boolean;
+  hiddenFilter: boolean;
   isTypeFilterOpen: boolean;
   overallFields?: OverallFields;
 }
@@ -137,7 +118,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const [state, setState] = useState<DataPanelState>({
     nameFilter: '',
     typeFilter: [],
-    existsFilter: false,
+    hiddenFilter: false,
     isTypeFilterOpen: false,
   });
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
@@ -196,14 +177,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     type => type in fieldTypeNames
   );
 
-  // console.log(availableFieldTypes);
-  // const availableFilteredTypes = state.typeFilter.filter(type =>
-  //   availableFieldTypes.includes(type)
-  // );
-
   const displayedFields = allFields
     .filter(field => {
-      if (state.existsFilter) {
+      if (!state.hiddenFilter) {
         if (state.typeFilter.length > 0) {
           return (
             state.overallFields &&
@@ -321,7 +297,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     ...s,
                     nameFilter: '',
                     typeFilter: [],
-                    existsFilter: false,
+                    hiddenFilter: false,
                   }));
 
                   setShowIndexPatternSwitcher(false);
@@ -369,8 +345,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                       data-test-subj="indexPatternTypeFilterButton"
                       isSelected={state.isTypeFilterOpen}
                       numFilters={availableFieldTypes.length + 1}
-                      hasActiveFilters={state.typeFilter.length > 0 || state.existsFilter}
-                      numActiveFilters={state.typeFilter.length + (state.existsFilter ? 1 : 0)}
+                      hasActiveFilters={state.typeFilter.length > 0 || state.hiddenFilter}
+                      numActiveFilters={state.typeFilter.length + (state.hiddenFilter ? 1 : 0)}
                     >
                       {i18n.translate('xpack.lens.indexPatterns.typeFilterLabel', {
                         defaultMessage: 'Types',
@@ -382,18 +358,18 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     watchedItemProps={['icon', 'disabled']}
                     items={[
                       <EuiContextMenuItem
-                        key="empty"
-                        icon={state.existsFilter ? 'check' : 'empty'}
-                        data-test-subj="emptyFilter"
+                        key="hidden"
+                        icon={state.hiddenFilter ? 'check' : 'empty'}
+                        data-test-subj="hiddenFilter"
                         onClick={() => {
                           setState(s => ({
                             ...s,
-                            existsFilter: !state.existsFilter,
+                            hiddenFilter: !state.hiddenFilter,
                           }));
                         }}
                       >
-                        {i18n.translate('xpack.lens.datatypes.exists', {
-                          defaultMessage: 'Contains data',
+                        {i18n.translate('xpack.lens.datatypes.hiddenFields', {
+                          defaultMessage: 'Show fields without data',
                         })}
                       </EuiContextMenuItem>,
                     ].concat(

@@ -17,5 +17,6 @@
  * under the License.
  */
 
+export { indexPatternsMixin } from './mixin';
 export { IndexPatternsService, FieldDescriptor } from './service';
 export { IndexPatternsServiceFactory } from './mixin';

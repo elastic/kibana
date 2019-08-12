@@ -17,7 +17,9 @@
  * under the License.
  */
 
+import { APICaller } from 'src/core/server';
 import { convertEsError } from './errors';
+import { FieldCapsResponse } from './field_capabilities';
 
 /**
  *  Call the index.getAlias API for a list of indices.
@@ -33,12 +35,12 @@ import { convertEsError } from './errors';
  *  @param  {Array<String>|String} indices
  *  @return {Promise<IndexAliasResponse>}
  */
-export async function callIndexAliasApi(callCluster, indices) {
+export async function callIndexAliasApi(callCluster: APICaller, indices: string[] | string) {
   try {
     return await callCluster('indices.getAlias', {
       index: indices,
       ignoreUnavailable: true,
-      allowNoIndices: false
+      allowNoIndices: false,
     });
   } catch (error) {
     throw convertEsError(indices, error);
@@ -56,14 +58,14 @@ export async function callIndexAliasApi(callCluster, indices) {
  *  @param  {Array<String>|String} indices
  *  @return {Promise<FieldCapsResponse>}
  */
-export async function callFieldCapsApi(callCluster, indices) {
+export async function callFieldCapsApi(callCluster: APICaller, indices: string[] | string) {
   try {
-    return await callCluster('fieldCaps', {
+    return (await callCluster('fieldCaps', {
       index: indices,
       fields: '*',
       ignoreUnavailable: true,
-      allowNoIndices: false
-    });
+      allowNoIndices: false,
+    })) as FieldCapsResponse;
   } catch (error) {
     throw convertEsError(indices, error);
   }
