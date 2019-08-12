@@ -41,6 +41,7 @@ export const awsLayoutCreator = (theme: EuiTheme): InfraMetricLayout[] => [
               ),
               color: theme.eui.euiColorFullShade,
               formatter: InfraFormatterType.percent,
+              gaugeMax: 1,
             },
             'status-check-failed': {
               name: i18n.translate(
