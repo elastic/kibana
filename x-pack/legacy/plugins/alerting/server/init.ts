@@ -5,6 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
+import KbnServer from 'src/legacy/server/kbn_server';
 import {
   createAlertRoute,
   deleteAlertRoute,
@@ -25,6 +26,9 @@ import { createOptionalPlugin } from '../../../server/lib/optional_plugin';
 
 export function init(server: Legacy.Server) {
   const config = server.config();
+  const kbnServer = (server as unknown) as KbnServer;
+  const taskManager = server.plugins.task_manager!;
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
   const spaces = createOptionalPlugin<SpacesPlugin>(
     config,
     'xpack.spaces',
@@ -34,11 +38,9 @@ export function init(server: Legacy.Server) {
   const security = createOptionalPlugin<SecurityPluginSetupContract>(
     config,
     'xpack.security',
-    server.newPlatform.setup.plugins,
+    kbnServer.newPlatform.setup.plugins,
     'security'
   );
-
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
 
   // Encrypted attributes
   server.plugins.encrypted_saved_objects!.registerType({
@@ -61,7 +63,6 @@ export function init(server: Legacy.Server) {
     };
   }
 
-  const taskManager = server.plugins.task_manager!;
   const alertTypeRegistry = new AlertTypeRegistry({
     getServices,
     taskManager: taskManager!,

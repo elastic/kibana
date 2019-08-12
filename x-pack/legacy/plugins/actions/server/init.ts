@@ -24,14 +24,14 @@ import { createOptionalPlugin } from '../../../server/lib/optional_plugin';
 
 export function init(server: Legacy.Server) {
   const config = server.config();
+  const taskManager = server.plugins.task_manager!;
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
   const spaces = createOptionalPlugin<SpacesPlugin>(
     config,
     'xpack.spaces',
     server.plugins,
     'spaces'
   );
-
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
 
   // Encrypted attributes
   // - `secrets` properties will be encrypted
@@ -55,7 +55,6 @@ export function init(server: Legacy.Server) {
     };
   }
 
-  const taskManager = server.plugins.task_manager!;
   const actionTypeRegistry = new ActionTypeRegistry({
     getServices,
     taskManager: taskManager!,
