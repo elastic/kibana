@@ -51,7 +51,7 @@ import { KbnUrl } from 'ui/url/kbn_url';
 import { Filter } from '@kbn/es-query';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
-import { Query, SavedQuery } from 'plugins/data';
+import { Query, SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
 import { capabilities } from 'ui/capabilities';
 import { Subscription } from 'rxjs';
