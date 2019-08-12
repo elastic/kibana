@@ -31,7 +31,7 @@ export const AnalysisPage = () => {
         ) : isSetupRequired ? (
           <AnalysisSetupContent />
         ) : (
-          <AnalysisResultsContent />
+          <AnalysisResultsContent sourceId={sourceId} />
         )}
       </ColumnarPage>
     </AnalysisPageProviders>

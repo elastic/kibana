@@ -6,11 +6,28 @@
 
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
+import { useLogAnalysisResults } from '../../../containers/logs/log_analysis';
+import { LoadingPage } from '../../../components/loading_page';
 
-export const AnalysisResultsContent = () => {
+export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_results' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_results', delay: 15000 });
 
-  return <div>Results</div>;
+  const { isLoading, logEntryRate, getLogEntryRate } = useLogAnalysisResults({ sourceId });
+
+  return (
+    <>
+      {isLoading ? (
+        <LoadingPage
+          message={i18n.translate('xpack.infra.logs.logsAnalysisResults.loadingMessage', {
+            defaultMessage: 'Loading results...',
+          })}
+        />
+      ) : (
+        <div>Results</div>
+      )}
+    </>
+  );
 };

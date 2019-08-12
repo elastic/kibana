@@ -10,13 +10,16 @@ import { useMemo } from 'react';
 import { useLogEntryRate } from './log_entry_rate';
 
 export const useLogAnalysisResults = ({ sourceId }: { sourceId: string }) => {
-  const { isLoading: isLoadingLogEntryRate, logEntryRate } = useLogEntryRate({ sourceId });
+  const { isLoading: isLoadingLogEntryRate, logEntryRate, getLogEntryRate } = useLogEntryRate({
+    sourceId,
+  });
 
   const isLoading = useMemo(() => isLoadingLogEntryRate, [isLoadingLogEntryRate]);
 
   return {
     isLoading,
     logEntryRate,
+    getLogEntryRate,
   };
 };
 
