@@ -31,8 +31,8 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SavedQueryAttributes } from '../index';
 
