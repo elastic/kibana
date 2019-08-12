@@ -69,7 +69,7 @@ export class AgentAdapter implements AgentAdapterType {
       search: sharedId,
     });
 
-    const agents = response.saved_objects.map(_savedObjectToAgent);
+    const agents = response.saved_objects.map(this._savedObjectToAgent);
 
     if (agents.length > 0) {
       return agents[0];
@@ -108,7 +108,7 @@ export class AgentAdapter implements AgentAdapterType {
       search,
     });
 
-    return res.saved_objects.map(_savedObjectToAgent).filter(agent => {
+    return res.saved_objects.map(this._savedObjectToAgent).filter(agent => {
       return metadata.local
         ? isEqual(metadata.local, agent.local_metadata)
         : true && metadata.userProvided
@@ -129,11 +129,11 @@ export class AgentAdapter implements AgentAdapterType {
       type: 'agents',
       page,
       perPage,
-      ..._getSortFields(sortOptions),
+      ...this._getSortFields(sortOptions),
     });
 
     const agents: Agent[] = saved_objects
-      .map(_savedObjectToAgent)
+      .map(this._savedObjectToAgent)
       .filter(agent => agent.type !== 'EPHEMERAL_INSTANCE');
 
     return {
@@ -149,7 +149,7 @@ export class AgentAdapter implements AgentAdapterType {
       searchFields: ['config_shared_id'],
     });
     const agents = res.saved_objects
-      .map(_savedObjectToAgent)
+      .map(this._savedObjectToAgent)
       .filter(agent => agent.type === 'EPHEMERAL');
 
     return agents.length > 0 ? agents[0] : null;
@@ -166,7 +166,7 @@ export class AgentAdapter implements AgentAdapterType {
       searchFields: ['access_token'],
     });
 
-    const agents = res.saved_objects.map(_savedObjectToAgent);
+    const agents = res.saved_objects.map(this._savedObjectToAgent);
 
     if (agents.length < 0) {
       return null;
@@ -174,28 +174,27 @@ export class AgentAdapter implements AgentAdapterType {
 
     return agents[0];
   }
-}
-
-function _savedObjectToAgent(so: SavedObject<Agent>) {
-  if (so.error) {
-    throw new Error(so.error.message);
+  private _savedObjectToAgent(so: SavedObject<Agent>) {
+    if (so.error) {
+      throw new Error(so.error.message);
+    }
+    return so.attributes;
   }
-  return so.attributes;
-}
 
-function _getSortFields(sortOption?: SortOptions) {
-  switch (sortOption) {
-    case SortOptions.EnrolledAtASC:
-      return {
-        sortField: 'enrolled_at',
-        sortOrder: 'ASC',
-      };
-    case SortOptions.EnrolledAtDESC:
-      return {
-        sortField: 'enrolled_at',
-        sortOrder: 'DESC',
-      };
-    default:
-      return {};
+  private _getSortFields(sortOption?: SortOptions) {
+    switch (sortOption) {
+      case SortOptions.EnrolledAtASC:
+        return {
+          sortField: 'enrolled_at',
+          sortOrder: 'ASC',
+        };
+      case SortOptions.EnrolledAtDESC:
+        return {
+          sortField: 'enrolled_at',
+          sortOrder: 'DESC',
+        };
+      default:
+        return {};
+    }
   }
 }
