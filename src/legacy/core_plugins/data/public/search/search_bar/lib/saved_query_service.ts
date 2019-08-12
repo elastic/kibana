@@ -43,16 +43,7 @@ export const saveQuery = async (attributes: SavedQueryAttributes, { overwrite = 
     language: attributes.query.language,
   };
 
-  const queryObject: {
-    title: string;
-    description: string;
-    query: {
-      query: string;
-      language: string;
-    };
-    filters?: string;
-    timefilter?: string;
-  } = {
+  const queryObject: SerializedSavedQueryAttributes = {
     title: attributes.title,
     description: attributes.description,
     query,
