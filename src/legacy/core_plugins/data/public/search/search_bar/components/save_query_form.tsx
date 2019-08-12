@@ -55,8 +55,8 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
   savedQuery,
   onSave,
   onClose,
-  showFilterOption,
-  showTimeFilterOption,
+  showFilterOption = true,
+  showTimeFilterOption = true,
 }) => {
   const [title, setTitle] = useState(savedQuery ? savedQuery.title : '');
   const [description, setDescription] = useState(savedQuery ? savedQuery.description : '');
@@ -112,7 +112,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
           data-test-subj="saveQueryFormDescription"
         />
       </EuiFormRow>
-      {!!showFilterOption && (
+      {showFilterOption && (
         <EuiFormRow>
           <EuiSwitch
             name="shouldIncludeFilters"
@@ -128,7 +128,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
         </EuiFormRow>
       )}
 
-      {!!showTimeFilterOption && (
+      {showTimeFilterOption && (
         <EuiFormRow>
           <EuiSwitch
             name="shouldIncludeTimefilter"
