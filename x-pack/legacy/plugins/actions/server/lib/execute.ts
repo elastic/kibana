@@ -39,7 +39,7 @@ export async function execute({
   } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAction>('action', actionId, {
     namespace,
   });
-  const actionType = actionTypeRegistry.get(actionTypeId as string);
+  const actionType = actionTypeRegistry.get(actionTypeId);
 
   let validatedParams;
   let validatedConfig;
