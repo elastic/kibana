@@ -46,13 +46,6 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 // @ts-ignore
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 
-import {
-  embeddableFactories,
-  EmbeddableFactory,
-  ErrorEmbeddable,
-  Container,
-  EmbeddableOutput,
-} from 'plugins/embeddable_api';
 import chrome from 'ui/chrome';
 import { getVisualizeLoader } from 'ui/visualize/loader';
 
@@ -61,6 +54,13 @@ import { VisTypesRegistry, VisTypesRegistryProvider } from 'ui/registry/vis_type
 
 import { IPrivate } from 'ui/private';
 import { SavedObjectAttributes } from 'kibana/server';
+import {
+  EmbeddableFactory,
+  ErrorEmbeddable,
+  Container,
+  EmbeddableOutput,
+} from '../../../../embeddable_api/public/np_ready/public';
+import { setup } from '../../../../embeddable_api/public/np_ready/public/legacy';
 import { showNewVisModal } from '../wizard';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
@@ -79,6 +79,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   VisualizationAttributes
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
+  private readonly visTypes: VisTypesRegistry;
 
   static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
     const $injector = await chrome.dangerouslyGetActiveInjector();
@@ -88,32 +89,31 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     return new VisualizeEmbeddableFactory(visTypes);
   }
 
-  constructor(private visTypes: VisTypesRegistry) {
+  constructor(visTypes: VisTypesRegistry) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
         type: 'visualization',
         getIconForSavedObject: savedObject => {
-          if (!this.visTypes) {
+          if (!visTypes) {
             return 'visualizeApp';
           }
           return (
-            this.visTypes.byName[JSON.parse(savedObject.attributes.visState).type].icon ||
-            'visualizeApp'
+            visTypes.byName[JSON.parse(savedObject.attributes.visState).type].icon || 'visualizeApp'
           );
         },
         getTooltipForSavedObject: savedObject => {
-          if (!this.visTypes) {
+          if (!visTypes) {
             return '';
           }
-          return `${savedObject.attributes.title} (${this.visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title})`;
+          return `${savedObject.attributes.title} (${visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title})`;
         },
         showSavedObject: savedObject => {
-          if (!this.visTypes) {
+          if (!visTypes) {
             return false;
           }
           const typeName: string = JSON.parse(savedObject.attributes.visState).type;
-          const visType = this.visTypes.byName[typeName];
+          const visType = visTypes.byName[typeName];
           if (!visType) {
             return false;
           }
@@ -124,6 +124,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
         },
       },
     });
+
+    this.visTypes = visTypes;
   }
 
   public isEditable() {
@@ -189,5 +191,5 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 }
 
 VisualizeEmbeddableFactory.createVisualizeEmbeddableFactory().then(embeddableFactory => {
-  embeddableFactories.set(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+  setup.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 });

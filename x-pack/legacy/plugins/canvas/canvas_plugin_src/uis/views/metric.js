@@ -5,6 +5,7 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
+import { AdvancedSettings } from '../../../public/lib/kibana_advanced_settings';
 
 export const metric = () => ({
   name: 'metric',
@@ -20,6 +21,13 @@ export const metric = () => ({
       default: '""',
     },
     {
+      name: 'labelFont',
+      displayName: 'Label text settings',
+      help: 'Fonts, alignment and color',
+      argType: 'font',
+      default: `{font size=18 family="${openSans.value}" color="#000000" align=center}`,
+    },
+    {
       name: 'metricFont',
       displayName: 'Metric text settings',
       help: 'Fonts, alignment and color',
@@ -27,11 +35,10 @@ export const metric = () => ({
       default: `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
     },
     {
-      name: 'labelFont',
-      displayName: 'Label text settings',
-      help: 'Fonts, alignment and color',
-      argType: 'font',
-      default: `{font size=18 family="${openSans.value}" color="#000000" align=center}`,
+      name: 'metricFormat',
+      displayName: 'Metric Format',
+      argType: 'numberFormat',
+      default: `"${AdvancedSettings.get('format:number:defaultPattern')}"`,
     },
   ],
 });

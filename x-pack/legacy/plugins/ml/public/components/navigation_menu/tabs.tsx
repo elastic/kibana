@@ -51,6 +51,13 @@ function getTabs(disableLinks: boolean): Tab[] {
       disabled: false,
     },
     {
+      id: 'data_frame_analytics',
+      name: i18n.translate('xpack.ml.navMenu.dataFrameAnalyticsTabLinkText', {
+        defaultMessage: 'Analytics',
+      }),
+      disabled: disableLinks,
+    },
+    {
       id: 'datavisualizer',
       name: i18n.translate('xpack.ml.navMenu.dataVisualizerTabLinkText', {
         defaultMessage: 'Data Visualizer',
@@ -72,6 +79,7 @@ enum TAB_TEST_SUBJECT {
   explorer = 'mlTabAnomalyExplorer',
   timeseriesexplorer = 'mlTabSingleMetricViewer',
   data_frames = 'mlTabDataFrames', // eslint-disable-line
+  data_frame_analytics = 'mlTabDataFrameAnalytics', // eslint-disable-line
   datavisualizer = 'mlTabDataVisualizer',
   settings = 'mlTabSettings',
 }

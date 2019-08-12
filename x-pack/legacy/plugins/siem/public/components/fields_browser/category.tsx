@@ -22,6 +22,8 @@ const TableContainer = styled.div<{ height: number; width: number }>`
   ${({ width }) => `width: ${width}px`};
 `;
 
+TableContainer.displayName = 'TableContainer';
+
 interface Props {
   categoryId: string;
   fieldItems: FieldItem[];
@@ -51,3 +53,5 @@ export const Category = pure<Props>(
     </>
   )
 );
+
+Category.displayName = 'Category';
