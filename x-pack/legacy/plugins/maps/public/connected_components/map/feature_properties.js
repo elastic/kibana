@@ -110,6 +110,12 @@ export class FeatureProperties extends React.Component {
 
   render() {
 
+    requestAnimationFrame(() => {
+      if (this._isMounted) {
+        this.props.repositionTooltip();
+      }
+    });
+
     if (this.state.loadPropertiesErrorMsg) {
       return (
         <EuiCallOut

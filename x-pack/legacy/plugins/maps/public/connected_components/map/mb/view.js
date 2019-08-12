@@ -454,6 +454,11 @@ export class MBMapContainer extends React.Component {
     addSpritesheetToMap(json, sprites, this._mbMap);
   }
 
+  _repositionTooltip = () => {
+    // Force mapbox to ensure tooltip does not clip map boundary and move anchor when clipping occurs
+    this._mbPopup.setLngLat(this.props.tooltipState.location);
+  }
+
   _hideTooltip() {
     if (this._mbPopup.isOpen()) {
       this._mbPopup.remove();
@@ -475,6 +480,7 @@ export class MBMapContainer extends React.Component {
         showFilterButtons={!!this.props.addFilters && isLocked}
         isLocked={isLocked}
         addFilters={this.props.addFilters}
+        repositionTooltip={this._repositionTooltip}
       />
     ), this._tooltipContainer);
 
