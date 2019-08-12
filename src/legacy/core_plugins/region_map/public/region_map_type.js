@@ -62,7 +62,12 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.DATA, Status.UI_STATE],
     visualization: RegionMapsVisualization,
     editorConfig: {
-      optionsTemplate: (props) => <RegionMapOptions {...props} serviceSettings={serviceSettings} regionmapsConfig={regionmapsConfig} />,
+      optionsTemplate: (props) =>
+        (<RegionMapOptions
+          {...props}
+          serviceSettings={serviceSettings}
+          includeElasticMapsService={regionmapsConfig.includeElasticMapsService}
+        />),
       collections: {
         colorSchemas,
         vectorLayers,

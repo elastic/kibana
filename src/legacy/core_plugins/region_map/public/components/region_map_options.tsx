@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { EuiIcon, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -46,70 +46,37 @@ const mapFieldForOption = ({ description, name }: FileLayerField) => ({
 
 export type RegionMapOptionsProps = {
   serviceSettings: ServiceSettings;
-  regionmapsConfig: RegionMapsConfig;
+  includeElasticMapsService: RegionMapsConfig['includeElasticMapsService'];
 } & VisOptionsProps<RegionMapVisParams>;
 
 function RegionMapOptions(props: RegionMapOptionsProps) {
-  const { regionmapsConfig, serviceSettings, stateParams, vis, setValue } = props;
+  const { includeElasticMapsService, serviceSettings, stateParams, vis, setValue } = props;
   const [vectorLayers, setVectorLayers] = useState<VectorLayer[]>(
     vis.type.editorConfig.collections.vectorLayers
   );
   const [vectorLayerOptions, setVectorLayerOptions] = useState(vectorLayers.map(mapLayerForOption));
-  const [fieldOptions, setFieldOptions] = useState(
-    ((stateParams.selectedLayer && stateParams.selectedLayer.fields) || []).map(mapFieldForOption)
+  const currentLayerId = stateParams.selectedLayer && stateParams.selectedLayer.layerId;
+  const fieldOptions = useMemo(
+    () =>
+      ((stateParams.selectedLayer && stateParams.selectedLayer.fields) || []).map(
+        mapFieldForOption
+      ),
+    [currentLayerId]
   );
 
-  const onLayerChange = useCallback(async (selectedLayer: VectorLayer) => {
-    setFieldOptions(selectedLayer.fields.map(mapFieldForOption));
-    setValue('selectedJoinField', selectedLayer.fields[0]);
-    setValue('emsHotLink', null);
-
-    if (selectedLayer.isEMS) {
-      const emsHotLink = await serviceSettings.getEMSHotLink(selectedLayer);
-      setValue('emsHotLink', emsHotLink);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (regionmapsConfig.includeElasticMapsService) {
-      serviceSettings
-        .getFileLayers()
-        .then(layers => {
-          const newLayers = layers
-            .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
-            .filter(
-              layer => !vectorLayers.some(vectorLayer => vectorLayer.layerId === layer.layerId)
-            );
-
-          newLayers.forEach(layer => {
-            if (layer.format === 'geojson') {
-              layer.format = {
-                type: 'geojson',
-              };
-            }
-          });
-
-          const newVectorLayers = [...vectorLayers, ...newLayers];
-
-          setVectorLayers(newVectorLayers);
-          setVectorLayerOptions(newVectorLayers.map(mapLayerForOption));
-
-          if (newVectorLayers[0] && !stateParams.selectedLayer) {
-            setValue('selectedLayer', newVectorLayers[0]);
-            onLayerChange(newVectorLayers[0]);
-          }
-        })
-        .catch((error: Error) => toastNotifications.addWarning(error.message));
-    }
+  const setEmsHotLink = useCallback(async (layer: VectorLayer) => {
+    const emsHotLink = await serviceSettings.getEMSHotLink(layer);
+    setValue('emsHotLink', emsHotLink);
   }, []);
 
   const setLayer = useCallback(
-    (paramName: 'selectedLayer', value: VectorLayer['layerId']) => {
+    async (paramName: 'selectedLayer', value: VectorLayer['layerId']) => {
       const newLayer = vectorLayers.find(({ layerId }: VectorLayer) => layerId === value);
 
       if (newLayer) {
         setValue(paramName, newLayer);
-        onLayerChange(newLayer);
+        setValue('selectedJoinField', newLayer.fields[0]);
+        setEmsHotLink(newLayer);
       }
     },
     [vectorLayers]
@@ -121,8 +88,52 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
         setValue(paramName, stateParams.selectedLayer.fields.find(f => f.name === value));
       }
     },
-    [stateParams.selectedLayer]
+    [currentLayerId]
   );
+
+  useEffect(() => {
+    async function setDefaultValues() {
+      try {
+        const layers = await serviceSettings.getFileLayers();
+        const newLayers = layers
+          .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
+          .filter(
+            layer => !vectorLayers.some(vectorLayer => vectorLayer.layerId === layer.layerId)
+          );
+
+        // backfill v1 manifest for now
+        newLayers.forEach(layer => {
+          if (layer.format === 'geojson') {
+            layer.format = {
+              type: 'geojson',
+            };
+          }
+        });
+
+        const newVectorLayers = [...vectorLayers, ...newLayers];
+
+        setVectorLayers(newVectorLayers);
+        setVectorLayerOptions(newVectorLayers.map(mapLayerForOption));
+
+        const [newLayer] = newVectorLayers;
+
+        if (newLayer && !stateParams.selectedLayer) {
+          setValue('selectedLayer', newLayer);
+          setValue('selectedJoinField', newLayer.fields[0]);
+
+          if (newLayer.isEMS) {
+            setEmsHotLink(newLayer);
+          }
+        }
+      } catch (error) {
+        toastNotifications.addWarning(error.message);
+      }
+    }
+
+    if (includeElasticMapsService) {
+      setDefaultValues();
+    }
+  }, []);
 
   return (
     <>

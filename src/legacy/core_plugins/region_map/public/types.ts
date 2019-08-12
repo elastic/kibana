@@ -25,6 +25,8 @@ export interface RegionMapVisParams {
   readonly legendPosition: 'bottomright';
   colorSchema: string;
   emsHotLink?: string | null;
+  mapCenter: [number, number];
+  mapZoom: number;
   outlineWeight: number | '';
   isDisplayWarning: boolean;
   showAllShapes: boolean;
