@@ -5,14 +5,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiTitle,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiTitle } from '@elastic/eui';
 import { IntegrationInfo } from '../../../common/types';
 import { AssetAccordion } from '../../components/asset_accordion';
 import { AssetsFacetGroup } from '../../components/assets_facet_group';

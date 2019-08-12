@@ -10,7 +10,7 @@ import {
   RegistryList,
   RegistryPackage,
 } from '../../common/types';
-import { cacheGet, cacheSet, cacheHas } from './cache';
+import { cacheGet, cacheSet } from './cache';
 import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
 import { fetchUrl, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
