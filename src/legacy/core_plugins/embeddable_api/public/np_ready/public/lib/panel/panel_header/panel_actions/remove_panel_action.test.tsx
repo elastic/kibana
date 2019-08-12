@@ -31,9 +31,9 @@ import { FilterableContainer } from '../../../test_samples/embeddables/filterabl
 import { GetEmbeddableFactory } from '../../../types';
 import { ContactCardEmbeddable } from '../../../test_samples/embeddables/contact_card/contact_card_embeddable';
 
-const __embeddableFactories = new Map<string, EmbeddableFactory>();
-__embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
+const embeddableFactories = new Map<string, EmbeddableFactory>();
+embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+const getFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
 
 let container: FilterableContainer;
 let embeddable: FilterableEmbeddable;

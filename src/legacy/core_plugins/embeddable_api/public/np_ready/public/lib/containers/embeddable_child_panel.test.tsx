@@ -36,12 +36,12 @@ import { inspectorPluginMock } from '../../../../../../../../plugins/inspector/p
 test('EmbeddableChildPanel renders an embeddable when it is done loading', async () => {
   const inspector = inspectorPluginMock.createStartContract();
 
-  const __embeddableFactories = new Map<string, EmbeddableFactory>();
-  __embeddableFactories.set(
+  const embeddableFactories = new Map<string, EmbeddableFactory>();
+  embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
     new SlowContactCardEmbeddableFactory({ execAction: (() => null) as any })
   );
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
+  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
 
   const container = new HelloWorldContainer({ id: 'hello', panels: {} }, {
     getEmbeddableFactory,

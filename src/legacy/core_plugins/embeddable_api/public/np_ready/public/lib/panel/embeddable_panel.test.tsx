@@ -43,10 +43,10 @@ import {
 // eslint-disable-next-line
 import { inspectorPluginMock } from '../../../../../../../../plugins/inspector/public/mocks';
 
-const __actionRegistry = new Map<string, Action>();
-const __triggerRegistry = new Map<string, Trigger>();
-const __embeddableFactories = new Map<string, EmbeddableFactory>();
-const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
+const actionRegistry = new Map<string, Action>();
+const triggerRegistry = new Map<string, Trigger>();
+const embeddableFactories = new Map<string, EmbeddableFactory>();
+const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
 
 const editModeAction = new EditModeAction();
 const trigger: Trigger = {
@@ -59,9 +59,9 @@ const embeddableFactory = new ContactCardEmbeddableFactory(
   {} as any
 );
 
-__actionRegistry.set(editModeAction.id, editModeAction);
-__triggerRegistry.set(trigger.id, trigger);
-__embeddableFactories.set(embeddableFactory.type, embeddableFactory);
+actionRegistry.set(editModeAction.id, editModeAction);
+triggerRegistry.set(trigger.id, trigger);
+embeddableFactories.set(embeddableFactory.type, embeddableFactory);
 
 test('HelloWorldContainer initializes embeddables', async done => {
   const container = new HelloWorldContainer(

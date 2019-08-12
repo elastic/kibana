@@ -39,9 +39,9 @@ let container: Container;
 let embeddable: ContactCardEmbeddable;
 
 function createHelloWorldContainer(input = { id: '123', panels: {} }) {
-  const __embeddableFactories = new Map<string, EmbeddableFactory>();
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
-  __embeddableFactories.set(
+  const embeddableFactories = new Map<string, EmbeddableFactory>();
+  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
+  embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
     new ContactCardEmbeddableFactory({}, (() => {}) as any, {} as any)
   );

@@ -31,9 +31,9 @@ import { FilterableContainer } from '../../../../test_samples/embeddables/filter
 import { GetEmbeddableFactory } from '../../../../types';
 import { coreMock } from '../../../../../../../../../../../core/public/mocks';
 
-const __embeddableFactories = new Map<string, EmbeddableFactory>();
-__embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
+const embeddableFactories = new Map<string, EmbeddableFactory>();
+embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+const getFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
 
 let container: FilterableContainer;
 let embeddable: FilterableEmbeddable;
