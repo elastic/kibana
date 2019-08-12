@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsClientContract } from 'src/core/server';
 import { TaskManager } from '../../task_manager';
 import { SpacesPlugin } from '../../spaces';
 
 interface CreateFireFunctionOptions {
   taskManager: TaskManager;
   spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
-  getScopedSavedObjectsClient: any;
+  getScopedSavedObjectsClient: (request: any) => SavedObjectsClientContract;
   getBasePath: SpacesPlugin['getBasePath'];
 }
 
@@ -42,9 +43,8 @@ export function createFireFunction({
       getBasePath: () => getBasePath(spaceId),
     };
 
-    const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
-
     const namespace = spaceIdToNamespace(spaceId);
+    const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
     const actionSavedObject = await savedObjectsClient.get('action', id, { namespace });
     const firedActionRecord = await savedObjectsClient.create('fired_action', {
       actionId: id,
