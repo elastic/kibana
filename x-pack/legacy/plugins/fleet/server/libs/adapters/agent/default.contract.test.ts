@@ -92,6 +92,75 @@ describe('Agent Adapter', () => {
         },
       });
     });
+
+    it('should create a new agent with the specified id if specified', async () => {
+      const agent = await adapter.create(
+        {
+          shared_id: 'agent1',
+          active: false,
+          access_token: 'TOKEN_1',
+          config_id: 'config_id_1',
+          config_shared_id: 'shared_config_id-1',
+          type: 'EPHEMERAL',
+          version: '1',
+          local_metadata: {
+            host: 'localhost',
+          },
+          user_provided_metadata: undefined,
+          enrolled_at: '2019-08-05T19:35:14.861Z',
+        },
+        {
+          id: 'test-agent-id-1',
+        }
+      );
+
+      expect(agent).toBeDefined();
+      expect(agent.id).toBe('test-agent-id-1');
+    });
+
+    it('should allow to create a new agent with the same id two time if override is true', async () => {
+      const agent1 = await adapter.create(
+        {
+          shared_id: 'agent1',
+          active: false,
+          access_token: 'TOKEN_1',
+          config_id: 'config_id_1',
+          config_shared_id: 'shared_config_id-1',
+          type: 'EPHEMERAL',
+          version: '1',
+          local_metadata: {
+            host: 'localhost',
+          },
+          user_provided_metadata: undefined,
+          enrolled_at: '2019-08-05T19:35:14.861Z',
+        },
+        {
+          id: 'test-agent-id-2',
+        }
+      );
+      const agent2 = await adapter.create(
+        {
+          shared_id: 'agent1',
+          active: false,
+          access_token: 'TOKEN_1',
+          config_id: 'config_id_1',
+          config_shared_id: 'shared_config_id-1',
+          type: 'EPHEMERAL',
+          version: '1',
+          local_metadata: {
+            host: 'localhost',
+          },
+          user_provided_metadata: undefined,
+          enrolled_at: '2019-08-05T19:35:14.861Z',
+        },
+        {
+          id: 'test-agent-id-2',
+          overwrite: true,
+        }
+      );
+
+      expect(agent1.id).toBe(agent2.id);
+    });
   });
 
   describe('update', () => {

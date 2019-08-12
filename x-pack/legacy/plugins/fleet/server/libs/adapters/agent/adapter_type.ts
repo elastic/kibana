@@ -86,7 +86,7 @@ export enum SortOptions {
 }
 
 export interface AgentAdapter {
-  create(agent: NewAgent): Promise<Agent>;
+  create(agent: NewAgent, options?: { id?: string; overwrite?: boolean }): Promise<Agent>;
 
   delete(agent: Agent): Promise<void>;
 
