@@ -1,8 +1,8 @@
 [role="xpack"]
 [[infra-ui]]
-== Using the Infrastructure application
+== Using the Infrastructure app
 
-Use the Infrastructure application in {kib} to monitor your infrastructure and identify problems in real time.
+Use the Infrastructure app in {kib} to monitor your infrastructure and identify problems in real time.
 You can explore metrics for hosts, containers, and services.
 You can also drill down to view more detailed metrics, or seamlessly switch to view the corresponding logs, application traces, and uptime information.
 
@@ -61,7 +61,7 @@ Select *Auto-refresh* to keep up-to-date metrics information coming in, or *Stop
 [[infra-configure-source]]
 === Configure the data to use for your metrics
 
-The default source configuration for metrics is specified in the {kibana-ref}/infrastructure-ui-settings-kb.html[Infrastructure application settings] in the {kibana-ref}/settings.html[Kibana configuration file].
+The default source configuration for metrics is specified in the {kibana-ref}/infrastructure-ui-settings-kb.html[Infrastructure app settings] in the {kibana-ref}/settings.html[Kibana configuration file].
 The default configuration uses the `metricbeat-*` index pattern to query the data.
 The default configuration also defines field settings for things like timestamps and container names.
 
@@ -99,13 +99,13 @@ Hover over a component to see more information about that component.
 Click a component to see the other actions available for that component.
 You can:
 
-* Select *View Metrics* to <<xpack-view-metrics, view detailed infrastructure metrics for that component>>.
+* Select *View Metrics* to <<xpack-view-metrics, view detailed infrastructure metrics>>.
 
-* Select *View Logs* to <<xpack-logs-using, view the logs for that component>> in the *Logs* application.
+* Select *View Logs* to <<xpack-logs-using, view the logs>> in the *Logs* app.
 
 Depending on the features you have installed and configured, you may also be able to:
 
-* Select *View APM* to <<traces, view APM traces for the selected component>> in the *APM* application.
+* Select *View APM* to <<traces, view APM traces>> in the *APM* app.
 
-* Select *View Uptime* to <<uptime-overview, view uptime information for the selected component>> in the *Uptime* application.
+* Select *View Uptime* to <<uptime-overview, view uptime information>> in the *Uptime* app.
 
