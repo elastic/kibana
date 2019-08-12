@@ -39,6 +39,7 @@ export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
       datafeed_config: jobCreator.datafeedConfig,
     };
     delete mlJobService.tempJobCloningObjects.job.datafeed_config.aggregations;
+    delete mlJobService.tempJobCloningObjects.job.analysis_config.summary_count_field_name;
 
     mlJobService.tempJobCloningObjects.skipTimeRangeStep = true;
     window.location.href = window.location.href.replace('single_metric', 'multi_metric');
