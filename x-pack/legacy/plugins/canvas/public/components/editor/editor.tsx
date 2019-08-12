@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-
+import ReactResizeDetector from 'react-resize-detector';
 import MonacoEditor, { EditorDidMount, EditorWillMount } from 'react-monaco-editor';
 import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 import 'monaco-editor/esm/vs/editor/contrib/suggest/suggestController.js'; // Needed for suggestions
@@ -99,37 +99,29 @@ export class Editor extends React.Component<Props, {}> {
     }
   };
 
-  componentDidMount() {
-    const width = this.props.width ? '' + this.props.width : null;
-
-    // If width isn't specified OR it's variable,
-    // we'll want to setup a listener to re-layout the code editor
-    // when the window resizes
-    // TODO: Maybe there is a better way to handle this
-    if (!width || width[width.length - 1] === '%') {
-      window.addEventListener('resize', this.updateDimensions);
-    }
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.updateDimensions);
-  }
-
   render() {
     const { languageId, value, onChange, width, height, options } = this.props;
 
     return (
-      <MonacoEditor
-        theme="euiColors"
-        language={languageId}
-        value={value}
-        onChange={onChange}
-        editorWillMount={this.editorWillMount}
-        editorDidMount={this.editorDidMount}
-        width={width}
-        height={height}
-        options={options}
-      />
+      <React.Fragment>
+        <ReactResizeDetector
+          handleWidth
+          handleHeight
+          skipOnMount
+          onResize={this.updateDimensions}
+        />
+        <MonacoEditor
+          theme="euiColors"
+          language={languageId}
+          value={value}
+          onChange={onChange}
+          editorWillMount={this.editorWillMount}
+          editorDidMount={this.editorDidMount}
+          width={width}
+          height={height}
+          options={options}
+        />
+      </React.Fragment>
     );
   }
 

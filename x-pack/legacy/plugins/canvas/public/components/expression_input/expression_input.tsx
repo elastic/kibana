@@ -248,27 +248,28 @@ export class ExpressionInput extends React.Component<Props> {
           error={error}
           helpText={helpText}
         >
-          <Editor
-            languageId="expression"
-            languageDef={language}
-            value={value}
-            onChange={this.onChange}
-            suggestionProvider={{
-              provideCompletionItems: this.provideSuggestions,
-            }}
-            signatureProvider={{
-              provideSignatureHelp: this.provideSignature,
-            }}
-            height={250}
-            options={{
-              fontSize,
-              quickSuggestions: isAutocompleteEnabled,
-              minimap: {
-                enabled: false,
-              },
-              wordBasedSuggestions: false,
-            }}
-          />
+          <div style={{ minHeight: 250, flex: `'1 0 250px'` }}>
+            <Editor
+              languageId="expression"
+              languageDef={language}
+              value={value}
+              onChange={this.onChange}
+              suggestionProvider={{
+                provideCompletionItems: this.provideSuggestions,
+              }}
+              signatureProvider={{
+                provideSignatureHelp: this.provideSignature,
+              }}
+              options={{
+                fontSize,
+                quickSuggestions: isAutocompleteEnabled,
+                minimap: {
+                  enabled: false,
+                },
+                wordBasedSuggestions: false,
+              }}
+            />
+          </div>
         </EuiFormRow>
       </div>
     );
