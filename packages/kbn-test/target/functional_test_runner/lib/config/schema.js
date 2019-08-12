@@ -125,7 +125,8 @@ const schema = _joi.default.object().keys({
     from: _joi.default.string().default('snapshot'),
     serverArgs: _joi.default.array(),
     serverEnvVars: _joi.default.object(),
-    dataArchive: _joi.default.string()
+    dataArchive: _joi.default.string(),
+    ssl: _joi.default.boolean().default(false)
   }).default(),
   kbnTestServer: _joi.default.object().keys({
     buildArgs: _joi.default.array(),

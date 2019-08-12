@@ -54,7 +54,8 @@ function createEsTestCluster(options = {}) {
     basePath = (0, _path.resolve)(_.KIBANA_ROOT, '.es'),
     esFrom = _es_test_config.esTestConfig.getBuildFrom(),
     dataArchive,
-    esArgs
+    esArgs,
+    ssl
   } = options;
   const randomHash = Math.random().toString(36).substring(2);
   const clusterName = `test-${randomHash}`;
@@ -68,7 +69,8 @@ function createEsTestCluster(options = {}) {
     esArgs
   };
   const cluster = new _es.Cluster({
-    log
+    log,
+    ssl
   });
   return new class EsTestCluster {
     getStartTimeout() {
