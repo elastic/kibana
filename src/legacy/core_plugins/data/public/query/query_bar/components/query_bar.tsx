@@ -266,7 +266,12 @@ export class QueryBarUI extends Component<Props, State> {
     });
 
     return (
-      <EuiFlexGroup className={classes} responsive={!!this.props.showDatePicker} gutterSize="s">
+      <EuiFlexGroup
+        className={classes}
+        responsive={!!this.props.showDatePicker}
+        gutterSize="s"
+        justifyContent={'flexEnd'}
+      >
         {this.renderQueryInput()}
         <EuiFlexItem grow={false}>{this.renderUpdateButton()}</EuiFlexItem>
       </EuiFlexGroup>

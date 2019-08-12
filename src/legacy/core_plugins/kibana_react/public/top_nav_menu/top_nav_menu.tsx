@@ -44,58 +44,71 @@ type Props = Partial<SearchBarProps> & {
 
 export function TopNavMenu(props: Props) {
   function renderItems() {
-    if (!props.config) return;
-    return props.config.map((menuItem: TopNavMenuData, i: number) => {
-      return (
-        <EuiFlexItem grow={false} key={`nav-menu-${i}`}>
-          <TopNavMenuItem {...menuItem} />
-        </EuiFlexItem>
-      );
-    });
+    if (!props.config) {
+      return null;
+    }
+
+    return (
+      <EuiFlexGroup
+        data-test-subj="top-nav"
+        gutterSize="none"
+        justifyContent="flexStart"
+        className="kbnTopNavMenu"
+        responsive={false}
+      >
+        {props.config.map((menuItem: TopNavMenuData, i: number) => {
+          return (
+            <EuiFlexItem grow={false} key={`nav-menu-${i}`}>
+              <TopNavMenuItem {...menuItem} />
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
+    );
   }
 
   function renderSearchBar() {
     // Validate presense of all required fields
-    if (!props.showSearchBar) return;
+    if (!props.showSearchBar) {
+      return null;
+    }
 
     return (
-      <SearchBar
-        query={props.query}
-        filters={props.filters}
-        uiSettings={props.uiSettings}
-        showQueryBar={props.showQueryBar}
-        showQueryInput={props.showQueryInput}
-        showFilterBar={props.showFilterBar}
-        showDatePicker={props.showDatePicker}
-        appName={props.appName!}
-        screenTitle={props.screenTitle!}
-        onQuerySubmit={props.onQuerySubmit}
-        onFiltersUpdated={props.onFiltersUpdated}
-        dateRangeFrom={props.dateRangeFrom}
-        dateRangeTo={props.dateRangeTo}
-        isRefreshPaused={props.isRefreshPaused}
-        showAutoRefreshOnly={props.showAutoRefreshOnly}
-        onRefreshChange={props.onRefreshChange}
-        refreshInterval={props.refreshInterval}
-        indexPatterns={props.indexPatterns}
-        store={props.store}
-      />
+      <EuiFlexItem grow={true}>
+        <SearchBar
+          query={props.query}
+          filters={props.filters}
+          uiSettings={props.uiSettings}
+          showQueryBar={props.showQueryBar}
+          showQueryInput={props.showQueryInput}
+          showFilterBar={props.showFilterBar}
+          showDatePicker={props.showDatePicker}
+          appName={props.appName!}
+          screenTitle={props.screenTitle!}
+          onQuerySubmit={props.onQuerySubmit}
+          onFiltersUpdated={props.onFiltersUpdated}
+          dateRangeFrom={props.dateRangeFrom}
+          dateRangeTo={props.dateRangeTo}
+          isRefreshPaused={props.isRefreshPaused}
+          showAutoRefreshOnly={props.showAutoRefreshOnly}
+          onRefreshChange={props.onRefreshChange}
+          refreshInterval={props.refreshInterval}
+          indexPatterns={props.indexPatterns}
+          store={props.store}
+        />
+      </EuiFlexItem>
     );
   }
 
   function renderLayout() {
+    const direction = props.showSearchBar && props.showFilterBar ? 'column' : 'row';
+
     return (
       <span className="kbnTopNavMenu__wrapper">
-        <EuiFlexGroup
-          data-test-subj="top-nav"
-          justifyContent="flexStart"
-          gutterSize="none"
-          className="kbnTopNavMenu"
-          responsive={false}
-        >
+        <EuiFlexGroup gutterSize="none" direction={direction}>
           {renderItems()}
+          {renderSearchBar()}
         </EuiFlexGroup>
-        {renderSearchBar()}
       </span>
     );
   }
