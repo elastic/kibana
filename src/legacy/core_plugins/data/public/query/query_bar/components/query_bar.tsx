@@ -146,7 +146,7 @@ export class QueryBarUI extends Component<Props, State> {
 
   public onSubmit = ({ query, dateRange }: { query?: Query; dateRange: DateRange }) => {
     this.handleLuceneSyntaxWarning();
-    timeHistory.add(this.getDateRange());
+    timeHistory.add(dateRange);
 
     this.props.onSubmit({ query, dateRange });
   };
