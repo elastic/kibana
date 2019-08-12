@@ -8,7 +8,8 @@
   "scripts": {
     "build": "tsc",
     "kbn:watch": "tsc --watch",
-    "test": "tsd"
+    "test": "tsd",
+    "clean": "rimraf target"
   },
   "dependencies": {
     "utility-types": "^3.7.0"
