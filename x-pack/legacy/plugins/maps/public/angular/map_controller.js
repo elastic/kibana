@@ -52,7 +52,7 @@ import {
   MAP_SAVED_OBJECT_TYPE,
   MAP_APP_PATH
 } from '../../common/constants';
-
+import { FilterStateStore } from '@kbn/es-query';
 import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
@@ -170,6 +170,9 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
   };
 
   function addFilters(newFilters) {
+    newFilters.forEach(filter => {
+      filter.$state = FilterStateStore.APP_STATE;
+    });
     $scope.updateFiltersAndDispatch([...$scope.filters, ...newFilters]);
   }
 

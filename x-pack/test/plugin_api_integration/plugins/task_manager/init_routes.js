@@ -24,7 +24,7 @@ const taskManagerQuery = {
 };
 
 export function initRoutes(server) {
-  const { taskManager } = server;
+  const taskManager = server.plugins.task_manager;
 
   server.route({
     path: '/api/sample_tasks',

@@ -23,14 +23,33 @@ import { Server } from 'hapi';
 
 import { LoggerFactory } from '../logging';
 import { CoreService } from '../../types';
+
 import { Logger } from '../logging';
 import { CoreContext } from '../core_context';
+
+import { Router, IRouter } from './router';
 import { HttpConfig, HttpConfigType } from './http_config';
 import { HttpServer, HttpServerSetup } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 
 /** @public */
-export type HttpServiceSetup = HttpServerSetup;
+export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
+  /**
+   * Provides ability to declare a handler function for a particular path and HTTP request method.
+   * Each route can have only one handler functions, which is executed when the route is matched.
+   * All routes are prefixed with plugin name as a first segment of URL path.
+   * @example
+   * ```ts
+   * const router = createRouter();
+   * // handler is called when '${my-plugin-id}/path' resource is requested with `GET` method
+   * router.get({ path: '/path', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
+   * ```
+   *
+   * @internal
+   * */
+  createRouter: (path: string) => IRouter;
+};
+
 /** @public */
 export interface HttpServiceStart {
   /** Indicates if http server is listening on a given port */
@@ -78,7 +97,18 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
       await this.runNotReadyServer(config);
     }
 
-    return this.httpServer.setup(config);
+    const { registerRouter, ...serverContract } = await this.httpServer.setup(config);
+    const contract: HttpServiceSetup = {
+      ...serverContract,
+
+      createRouter: (path: string) => {
+        const router = new Router(path, this.log);
+        registerRouter(router);
+        return router;
+      },
+    };
+
+    return contract;
   }
 
   public async start() {
@@ -141,7 +171,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
       path: '/{p*}',
       method: '*',
       handler: (req, responseToolkit) => {
-        this.log.debug(`Kibana server is not ready yet ${req.method}:${req.url}.`);
+        this.log.debug(`Kibana server is not ready yet ${req.method}:${req.url.href}.`);
 
         // If server is not ready yet, because plugins or core can perform
         // long running tasks (build assets, saved objects migrations etc.)

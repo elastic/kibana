@@ -8,6 +8,11 @@
 // ML has it's own variables for coloring
 @import 'variables';
 
+// Kibana management page ML section
+#kibanaManagementMLSection {
+  @import 'management/index';
+}
+
 // Protect the rest of Kibana from ML generic namespacing
 // SASSTODO: Prefix ml selectors instead
 #ml-app {
@@ -17,10 +22,9 @@
 
   // Sub applications
   @import 'data_frame/index';
-  @import 'data_visualizer/index';
+  @import 'data_frame_analytics/index';
   @import 'datavisualizer/index';
   @import 'explorer/index'; // SASSTODO: This file needs to be rewritten
-  @import 'file_datavisualizer/index';
   @import 'jobs/index'; // SASSTODO: This collection of sass files has multiple problems
   @import 'settings/index';
   @import 'timeseriesexplorer/index';
@@ -34,7 +38,6 @@
   @import 'components/data_recognizer/index';
   @import 'components/documentation_help_link/index';
   @import 'components/entity_cell/index';
-  @import 'components/field_data_card/index'; // SASSTODO: This file needs to be rewritten
   @import 'components/field_title_bar/index';
   @import 'components/field_type_icon/index';
   @import 'components/form_filter_input/index'; // SASSTODO: This file needs to be rewritten
