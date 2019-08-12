@@ -72,7 +72,15 @@ import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } fr
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
 
-export { App, AppBase, AppUnmount, AppMountContext, AppMountParameters } from './application';
+export {
+  App,
+  AppBase,
+  AppUnmount,
+  AppMountContext,
+  AppMountContextNames,
+  AppMountParameters,
+} from './application';
+
 export {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,

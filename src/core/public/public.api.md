@@ -30,7 +30,7 @@ export interface AppBase {
 // @public (undocumented)
 export interface ApplicationSetup {
     register(app: App): void;
-    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountContext, keyof AppMountContext>): void;
+    registerMountContext<T extends AppMountContextNames>(contextName: T, provider: IContextProvider<AppMountContext, T>): void;
 }
 
 // @public (undocumented)
@@ -40,7 +40,7 @@ export interface ApplicationStart {
         path?: string;
         state?: any;
     }): void;
-    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountContext, T>): void;
+    registerMountContext<T extends AppMountContextNames>(contextName: T, provider: IContextProvider<AppMountContext, T>): void;
 }
 
 // @public
@@ -56,6 +56,9 @@ export interface AppMountContext {
         uiSettings: UiSettingsClientContract;
     };
 }
+
+// @public (undocumented)
+export type AppMountContextNames = keyof AppMountContext;
 
 // @public (undocumented)
 export interface AppMountParameters {

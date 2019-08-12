@@ -25,8 +25,7 @@ import { InjectedMetadataStart } from '../injected_metadata';
 import { CapabilitiesService } from './capabilities';
 import { AppRouter } from './ui';
 import { HttpStart } from '../http';
-import { IContextContainer } from '../context';
-import { ContextSetup } from '../context/context_service';
+import { ContextSetup, IContextContainer } from '../context';
 import {
   AppMountContext,
   App,
@@ -93,7 +92,7 @@ export class ApplicationService {
         if (this.legacyApps$.value.has(app.id)) {
           throw new Error(`A legacy application is already registered with the id "${app.id}"`);
         }
-        if (this.apps$.isStopped) {
+        if (this.legacyApps$.isStopped) {
           throw new Error(`Applications cannot be registered after "setup"`);
         }
 
@@ -153,6 +152,10 @@ export class ApplicationService {
       },
 
       getComponent: () => {
+        if (legacyMode) {
+          return null;
+        }
+
         // Filter only available apps and map to just the mount function.
         const appMounters = new Map<string, AppMounter>(
           [...this.apps$.value]
@@ -160,7 +163,7 @@ export class ApplicationService {
             .map(([id, { mount }]) => [id, mount])
         );
 
-        return legacyMode ? null : (
+        return (
           <AppRouter
             apps={appMounters}
             legacyApps={availableLegacyApps}

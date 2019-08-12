@@ -44,7 +44,7 @@ interface StartDeps {
  */
 export class RenderingService {
   start({ application, chrome, injectedMetadata, targetDomElement }: StartDeps): RenderingStart {
-    const chromeUi = chrome.getComponent();
+    const chromeUi = chrome.getHeaderComponent();
     const appUi = application.getComponent();
 
     const legacyMode = injectedMetadata.getLegacyMode();

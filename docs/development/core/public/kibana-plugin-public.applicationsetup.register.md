@@ -16,7 +16,7 @@ register(app: App): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  app | <code>App</code> |  |
+|  app | <code>App</code> | an [App](./kibana-plugin-public.app.md) |
 
 <b>Returns:</b>
 

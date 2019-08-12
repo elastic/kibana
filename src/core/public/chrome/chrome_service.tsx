@@ -124,7 +124,7 @@ export class ChromeService {
       navLinks,
       recentlyAccessed,
 
-      getComponent: () => (
+      getHeaderComponent: () => (
         <React.Fragment>
           <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
 
@@ -375,5 +375,5 @@ export interface InternalChromeStart extends ChromeStart {
    * Used only by MountingService to render the header UI
    * @internal
    */
-  getComponent(): JSX.Element;
+  getHeaderComponent(): JSX.Element;
 }

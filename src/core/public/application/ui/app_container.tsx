@@ -82,8 +82,7 @@ export class AppContainer extends React.Component<Props, State> {
 
     const legacyApp = findLegacyApp(appId, legacyApps);
     if (legacyApp) {
-      // Give the current app a chance to shutdown
-      await this.unmountApp();
+      this.unmountApp();
       redirectTo(basePath.prepend(`/app/${appId}`));
       this.setState({ appNotFound: false });
       return;

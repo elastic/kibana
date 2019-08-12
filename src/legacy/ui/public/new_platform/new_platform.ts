@@ -45,7 +45,7 @@ export const npStart = {
 
 /**
  * Only used by unit tests
- * @Legacy
+ * @internal
  */
 export function __reset__() {
   npSetup.core = (null as unknown) as LegacyCoreSetup;

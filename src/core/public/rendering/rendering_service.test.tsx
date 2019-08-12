@@ -31,7 +31,7 @@ describe('RenderingService#start', () => {
       getComponent: () => <div>Hello application!</div>,
     } as InternalApplicationStart;
     const chrome = chromeServiceMock.createStartContract();
-    chrome.getComponent.mockReturnValue(<div>Hello chrome!</div>);
+    chrome.getHeaderComponent.mockReturnValue(<div>Hello chrome!</div>);
     const injectedMetadata = injectedMetadataServiceMock.createStartContract();
     const targetDomElement = document.createElement('div');
     const start = rendering.start({ application, chrome, injectedMetadata, targetDomElement });

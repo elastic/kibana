@@ -118,6 +118,9 @@ export interface AppMountContext {
 }
 
 /** @public */
+export type AppMountContextNames = keyof AppMountContext;
+
+/** @public */
 export interface AppMountParameters {
   /**
    * The container element to render the application into.
@@ -180,7 +183,7 @@ export type AppMounter = (params: AppMountParameters) => Promise<AppUnmount>;
 export interface ApplicationSetup {
   /**
    * Register an mountable application to the system. Apps will be mounted based on their `rootRoute`.
-   * @param app
+   * @param app - an {@link App}
    */
   register(app: App): void;
 
@@ -191,9 +194,9 @@ export interface ApplicationSetup {
    * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
    * @param provider - A {@link IContextProvider} function
    */
-  registerMountContext<T extends keyof AppMountContext>(
+  registerMountContext<T extends AppMountContextNames>(
     contextName: T,
-    provider: IContextProvider<AppMountContext, keyof AppMountContext>
+    provider: IContextProvider<AppMountContext, T>
   ): void;
 }
 
@@ -204,7 +207,7 @@ export interface InternalApplicationSetup {
    * @param plugin - opaque ID of the plugin that registers this application
    * @param app
    */
-  register(plugin: symbol, app: App): void;
+  register(plugin: PluginOpaqueId, app: App): void;
 
   /**
    * Register metadata about legacy applications. Legacy apps will not be mounted when navigated to.
@@ -221,10 +224,10 @@ export interface InternalApplicationSetup {
    * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
    * @param provider - A {@link IContextProvider} function
    */
-  registerMountContext<T extends keyof AppMountContext>(
-    pluginOpaqueId: symbol,
+  registerMountContext<T extends AppMountContextNames>(
+    pluginOpaqueId: PluginOpaqueId,
     contextName: T,
-    provider: IContextProvider<AppMountContext, keyof AppMountContext>
+    provider: IContextProvider<AppMountContext, T>
   ): void;
 }
 
@@ -252,7 +255,7 @@ export interface ApplicationStart {
    * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
    * @param provider - A {@link IContextProvider} function
    */
-  registerMountContext<T extends keyof AppMountContext>(
+  registerMountContext<T extends AppMountContextNames>(
     contextName: T,
     provider: IContextProvider<AppMountContext, T>
   ): void;
@@ -281,7 +284,7 @@ export interface InternalApplicationStart
    * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
    * @param provider - A {@link IContextProvider} function
    */
-  registerMountContext<T extends keyof AppMountContext>(
+  registerMountContext<T extends AppMountContextNames>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: T,
     provider: IContextProvider<AppMountContext, T>

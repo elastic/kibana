@@ -9,7 +9,7 @@ Register a context provider for application mounting. Will only be available to 
 <b>Signature:</b>
 
 ```typescript
-registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountContext, T>): void;
+registerMountContext<T extends AppMountContextNames>(contextName: T, provider: IContextProvider<AppMountContext, T>): void;
 ```
 
 ## Parameters
