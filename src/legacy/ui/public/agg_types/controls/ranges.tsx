@@ -49,7 +49,15 @@ interface RangeValuesModel extends RangeValues {
   id: string;
 }
 
-function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<RangeValues[]>) {
+interface RangesParamEditorProps {
+  value: RangeValues[];
+  setValue(value?: RangeValues[]): void;
+}
+
+function RangesParamEditor({
+  value = [],
+  setValue,
+}: AggParamEditorProps<RangeValues[]> | RangesParamEditorProps) {
   const [ranges, setRanges] = useState(() => value.map(range => ({ ...range, id: generateId() })));
 
   // set up an initial range when there is no default range
@@ -89,7 +97,7 @@ function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<Ra
     );
 
   return (
-    <EuiFormRow compressed>
+    <EuiFormRow compressed fullWidth>
       <>
         {ranges.map(({ from, to, id }) => {
           const deleteBtnTitle = i18n.translate(

@@ -49,33 +49,6 @@ module.directive('gaugeOptions', function () {
         }
       });
 
-
-      const updateLegend = () => {
-        if (!$scope.editorState.params.gauge.style.bgColor && !$scope.editorState.params.gauge.style.labelColor) {
-          $scope.editorState.params.addLegend = false;
-        } else {
-          $scope.editorState.params.addLegend = true;
-        }
-      };
-
-      $scope.$watch('editorState.params.gauge.gaugeColorMode', newValue => {
-        switch (newValue) {
-          case 'Labels':
-            $scope.editorState.params.gauge.style.labelColor = true;
-            $scope.editorState.params.gauge.style.bgColor = false;
-            break;
-          case 'Background':
-            $scope.editorState.params.gauge.style.labelColor = false;
-            $scope.editorState.params.gauge.style.bgColor = true;
-            break;
-          case 'None':
-            $scope.editorState.params.gauge.style.labelColor = false;
-            $scope.editorState.params.gauge.style.bgColor = false;
-            break;
-        }
-        updateLegend();
-      });
-
       $scope.resetColors = function () {
         $scope.uiState.set('vis.colors', null);
         $scope.customColors = false;

@@ -2791,3 +2791,6 @@ export const vislibColorMaps = {
       [0.996, [0.655, 0.007, 0.149]], [0.998, [0.647, 0, 0.149]], [1, [0.647, 0, 0.149]]]
   }
 };
+
+export const colorSchemas = Object.values(vislibColorMaps)
+  .map(({ id, label }) => ({ value: id, text: label }));

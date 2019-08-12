@@ -309,73 +309,26 @@
       </div>
     </div>
     <div id="gaugeOptionsStyle" ng-if="showStyle">
-      <div ng-hide="editorState.params.gauge.type === 'simple'">
-        <div class="visEditorSidebar__formRow" ng-show="editorState.params.gauge.colorsRange.length > 1">
-          <label
-            class="visEditorSidebar__formLabel"
-            for="labelColor"
-            i18n-id="kbnVislibVisTypes.controls.gaugeOptions.colorLabelsLabel"
-            i18n-default-message="Color Labels"
-          ></label>
-          <div class="visEditorSidebar__formControl">
-            <input class="kuiCheckBox" id="labelColor" type="checkbox" ng-model="editorState.params.gauge.style.labelColor">
-          </div>
-        </div>
-        <div class="visEditorSidebar__formRow">
-          <label
-            class="visEditorSidebar__formLabel"
-            for="showScale"
-            i18n-id="kbnVislibVisTypes.controls.gaugeOptions.showScaleLabel"
-            i18n-default-message="Show Scale"
-          ></label>
-          <div class="visEditorSidebar__formControl">
-            <input class="kuiCheckBox" id="showScale" type="checkbox" ng-model="editorState.params.gauge.scale.show">
-          </div>
+      <div class="visEditorSidebar__formRow" ng-show="editorState.params.gauge.colorsRange.length > 1">
+        <label
+          class="visEditorSidebar__formLabel"
+          for="labelColor"
+          i18n-id="kbnVislibVisTypes.controls.gaugeOptions.colorLabelsLabel"
+          i18n-default-message="Color Labels"
+        ></label>
+        <div class="visEditorSidebar__formControl">
+          <input class="kuiCheckBox" id="labelColor" type="checkbox" ng-model="editorState.params.gauge.style.labelColor">
         </div>
       </div>
-      <div ng-show="editorState.params.gauge.type === 'simple'">
-        <div class="visEditorSidebar__formRow">
-          <label
-            class="visEditorSidebar__formLabel"
-            for="gaugeColorMode"
-            i18n-id="kbnVislibVisTypes.controls.gaugeOptions.colorLabel"
-            i18n-default-message="Color"
-          ></label>
-          <div class="visEditorSidebar__formControl">
-            <select
-              id="gaugeColorMode"
-              class="kuiSelect visEditorSidebar__select"
-              ng-model="editorState.params.gauge.gaugeColorMode"
-              ng-options="mode for mode in collections.gaugeColorMode"
-            ></select>
-          </div>
-        </div>
-        <div class="visEditorSidebar__formRow">
-          <label
-            class="visEditorSidebar__formLabel"
-            for="backColor"
-            i18n-id="kbnVislibVisTypes.controls.gaugeOptions.backTextColorLabel"
-            i18n-default-message="Back/Text Color"
-          ></label>
-          <div class="visEditorSidebar__formControl">
-            <input
-              id="backTextColor"
-              class="kuiInput visEditorSidebar__input"
-              ng-model="editorState.params.gauge.style.bgFill"
-            >
-          </div>
-        </div>
-        <div class="visEditorSidebar__formRow">
-          <label
-            class="visEditorSidebar__formLabel"
-            for="showScale"
-            i18n-id="kbnVislibVisTypes.controls.gaugeOptions.fontSizeLabel"
-            i18n-default-message="Font Size ({fontSize}pt)"
-            i18n-values="{ fontSize: editorState.params.gauge.style.fontSize }"
-          ></label>
-          <div class="visEditorSidebar__formControl">
-            <input type="range" ng-model="editorState.params.gauge.style.fontSize" class="form-control" min="12" max="120" />
-          </div>
+      <div class="visEditorSidebar__formRow">
+        <label
+          class="visEditorSidebar__formLabel"
+          for="showScale"
+          i18n-id="kbnVislibVisTypes.controls.gaugeOptions.showScaleLabel"
+          i18n-default-message="Show Scale"
+        ></label>
+        <div class="visEditorSidebar__formControl">
+          <input class="kuiCheckBox" id="showScale" type="checkbox" ng-model="editorState.params.gauge.scale.show">
         </div>
       </div>
     </div>
