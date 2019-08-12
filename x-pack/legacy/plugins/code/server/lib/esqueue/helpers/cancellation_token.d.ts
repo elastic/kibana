@@ -5,6 +5,6 @@
  */
 
 export class CancellationToken {
-  public on(callback: () => void): void;
-  public cancel(): void;
+  public on(callback: (reason: string) => void): void;
+  public cancel(reason: string): void;
 }

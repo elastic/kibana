@@ -50,11 +50,17 @@ export interface InfraBackendFrameworkAdapter {
   ): Promise<InfraDatabaseGetIndicesResponse>;
   callWithRequest(
     req: InfraFrameworkRequest,
+    method: 'ml.getBuckets',
+    options?: object
+  ): Promise<InfraDatabaseGetIndicesResponse>;
+  callWithRequest(
+    req: InfraFrameworkRequest,
     method: string,
     options?: object
   ): Promise<InfraDatabaseSearchResponse>;
   getIndexPatternsService(req: InfraFrameworkRequest<any>): Legacy.IndexPatternsService;
   getSavedObjectsService(): Legacy.SavedObjectsService;
+  getSpaceId(request: InfraFrameworkRequest<any>): string;
   makeTSVBRequest(
     req: InfraFrameworkRequest,
     model: InfraMetricModel,
@@ -151,15 +157,21 @@ export interface SortedSearchHit extends SearchHit {
   };
 }
 
-export interface InfraDateRangeAggregationBucket {
+export type InfraDateRangeAggregationBucket<NestedAggregation extends object = {}> = {
   from?: number;
   to?: number;
   doc_count: number;
   key: string;
+} & NestedAggregation;
+
+export interface InfraDateRangeAggregationResponse<NestedAggregation extends object = {}> {
+  buckets: Array<InfraDateRangeAggregationBucket<NestedAggregation>>;
 }
 
-export interface InfraDateRangeAggregationResponse {
-  buckets: InfraDateRangeAggregationBucket[];
+export interface InfraTopHitsAggregationResponse {
+  hits: {
+    hits: [];
+  };
 }
 
 export interface InfraMetadataAggregationBucket {

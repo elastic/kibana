@@ -118,10 +118,19 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
       }
     }
 
+    const frozenIndicesParams = ['search', 'msearch'].includes(endpoint)
+      ? {
+          ignore_throttled: !includeFrozen,
+        }
+      : {};
+
     const fields = await callWithRequest(
       internalRequest,
       endpoint,
-      { ...params, ignore_throttled: !includeFrozen },
+      {
+        ...params,
+        ...frozenIndicesParams,
+      },
       ...rest
     );
     return fields;
@@ -141,6 +150,10 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
         return fieldCaps;
       },
     });
+  }
+
+  public getSpaceId(request: InfraFrameworkRequest): string {
+    return this.server.plugins.spaces.getSpaceId(request[internalInfraFrameworkRequest]);
   }
 
   public getSavedObjectsService() {
