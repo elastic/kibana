@@ -69,6 +69,7 @@ function GridOptions({ stateParams, setValue }: VisOptionsProps<BasicVislibParam
       />
 
       <SelectOption
+        id="gridAxis"
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.gridAxis.yAxisLinesLabel', {
           defaultMessage: 'Y-axis lines',
         })}
@@ -76,7 +77,6 @@ function GridOptions({ stateParams, setValue }: VisOptionsProps<BasicVislibParam
         paramName="valueAxis"
         value={stateParams.grid.valueAxis || ''}
         setValue={setGrid}
-        dataTestSubj="gridAxis"
       />
     </EuiPanel>
   );
