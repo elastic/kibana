@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './components/forecasting_modal';
-import './components/timeseries_chart/timeseries_chart_directive';
-import './timeseriesexplorer_controller.js';
+import './timeseriesexplorer_directive.js';
+import './timeseriesexplorer_route.js';
 import './timeseries_search_service.js';
-import 'plugins/ml/components/job_selector';
-import 'plugins/ml/components/chart_tooltip';
+import '../components/job_selector';
+import '../components/chart_tooltip';

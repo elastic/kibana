@@ -41,6 +41,8 @@ const WrappedByAutoSizer = styled.div`
   width: 100%;
 `; // required by AutoSizer
 
+WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
+
 const TimelineContainer = styled(EuiFlexGroup)`
   min-height: 500px;
   overflow: hidden;
@@ -48,6 +50,8 @@ const TimelineContainer = styled(EuiFlexGroup)`
   user-select: none;
   width: 100%;
 `;
+
+TimelineContainer.displayName = 'TimelineContainer';
 
 interface Props {
   browserFields: BrowserFields;
@@ -71,6 +75,7 @@ interface Props {
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
   show: boolean;
+  showCallOutUnauthorizedMsg: boolean;
   start: number;
   sort: Sort;
 }
@@ -99,6 +104,7 @@ export const Timeline = pure<Props>(
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
     show,
+    showCallOutUnauthorizedMsg,
     start,
     sort,
   }) => {
@@ -134,6 +140,7 @@ export const Timeline = pure<Props>(
                 onToggleDataProviderEnabled={onToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={onToggleDataProviderExcluded}
                 show={show}
+                showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
                 sort={sort}
               />
             </WrappedByAutoSizer>
@@ -202,3 +209,5 @@ export const Timeline = pure<Props>(
     );
   }
 );
+
+Timeline.displayName = 'Timeline';

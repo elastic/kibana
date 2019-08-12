@@ -26,6 +26,7 @@ import {
   HostsRequestOptions,
   HostValue,
 } from './types';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -35,28 +36,35 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
     options: HostsRequestOptions
   ): Promise<HostsData> {
     const dsl = buildHostsQuery(options);
+    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+    }
     const response = await this.framework.callWithRequest<HostEsData, TermAggregation>(
       request,
       'search',
       dsl
     );
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.host_count.value', response);
     const buckets: HostAggEsItem[] = getOr([], 'aggregations.host_data.buckets', response);
     const hostsEdges = buckets.map(bucket => formatHostEdgesData(options.fields, bucket));
-    const hasNextPage = hostsEdges.length === limit + 1;
-    const beginning = cursor != null ? parseInt(cursor, 10) : 0;
-    const edges = hostsEdges.splice(beginning, limit - beginning);
+    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+    const edges = hostsEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
+    const showMorePagesIndicator = totalCount > fakeTotalCount;
 
     return {
       inspect,
       edges,
       totalCount,
-      pageInfo: { hasNextPage, endCursor: { value: String(limit) } },
+      pageInfo: {
+        activePage: activePage ? activePage : 0,
+        fakeTotalCount,
+        showMorePagesIndicator,
+      },
     };
   }
 

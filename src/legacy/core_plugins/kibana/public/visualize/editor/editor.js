@@ -54,6 +54,7 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { npStart } from 'ui/new_platform';
+import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 
 
 uiRoutes
@@ -106,7 +107,6 @@ uiRoutes
 
 uiModules
   .get('app/visualize', [
-    'kibana/notify',
     'kibana/url'
   ])
   .directive('visualizeApp', function () {
@@ -131,7 +131,10 @@ function VisEditor(
   Promise,
   config,
   kbnBaseUrl,
-  localStorage
+  localStorage,
+  // unused but required to initialize auto refresh :-\
+  /* eslint-disable no-unused-vars */
+  courier,
 ) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
@@ -400,22 +403,24 @@ function VisEditor(
     $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateTimeRange);
     $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateRefreshInterval);
 
-    // update the searchSource when filters update
-    const filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
-      next: () => {
-        $scope.filters = queryFilter.getFilters();
-        $scope.fetch();
-      }
-    });
-
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
       savedVis.searchSource.setField('query', $state.query);
       savedVis.searchSource.setField('filter', $state.filters);
-      $scope.globalFilters = queryFilter.getGlobalFilters();
       $scope.vis.forceReload();
     };
+
+    // update the searchSource when filters update
+    const filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+      next: () => {
+        $scope.filters = queryFilter.getFilters();
+        $scope.globalFilters = queryFilter.getGlobalFilters();
+      }
+    });
+    const filterFetchSubscription = subscribeWithScope($scope, queryFilter.getFetches$(), {
+      next: $scope.fetch
+    });
 
     $scope.$on('$destroy', function () {
       if ($scope._handler) {
@@ -424,6 +429,7 @@ function VisEditor(
       savedVis.destroy();
       stateMonitor.destroy();
       filterUpdateSubscription.unsubscribe();
+      filterFetchSubscription.unsubscribe();
     });
 
     if (!$scope.chrome.getVisible()) {
@@ -439,9 +445,16 @@ function VisEditor(
   }
 
   $scope.updateQueryAndFetch = function ({ query, dateRange }) {
-    timefilter.setTime(dateRange);
+    const isUpdate = (
+      (query && !_.isEqual(query, $state.query)) ||
+      (dateRange && !_.isEqual(dateRange, $scope.timeRange))
+    );
+
     $state.query = query;
-    $scope.fetch();
+    timefilter.setTime(dateRange);
+
+    // If nothing has changed, trigger the fetch manually, otherwise it will happen as a result of the changes
+    if (!isUpdate) $scope.fetch();
   };
 
   $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
@@ -555,6 +568,8 @@ function VisEditor(
     ' ' +
     vis.type.feedbackMessage;
   };
+
+  addHelpMenuToAppChrome(chrome);
 
   init();
 }

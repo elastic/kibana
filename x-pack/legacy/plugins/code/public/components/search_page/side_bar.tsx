@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiToken,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
@@ -116,7 +117,12 @@ export class SideBar extends React.PureComponent<Props> {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="xxs">
-                <h3>Repositories</h3>
+                <h3>
+                  <FormattedMessage
+                    id="xpack.code.searchPage.sideBar.repositoriesTitle"
+                    defaultMessage="Repositories"
+                  />
+                </h3>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -136,7 +142,12 @@ export class SideBar extends React.PureComponent<Props> {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="xxs">
-                <h3>Languages</h3>
+                <h3>
+                  <FormattedMessage
+                    id="xpack.code.searchPage.sideBar.languagesTitle"
+                    defaultMessage="Languages"
+                  />
+                </h3>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>

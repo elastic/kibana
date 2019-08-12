@@ -14,13 +14,14 @@ import {
   CloneWorkerResult,
   WorkerReservedProgress,
 } from '../../model';
+import { DiskWatermarkService } from '../disk_watermark';
 import { GitOperations } from '../git_operations';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { ServerOptions } from '../server_options';
 import { AbstractGitWorker } from './abstract_git_worker';
-import { CancellationSerivce } from './cancellation_service';
+import { CancellationReason, CancellationSerivce } from './cancellation_service';
 import { IndexWorker } from './index_worker';
 import { Job } from './job';
 
@@ -35,12 +36,18 @@ export class CloneWorker extends AbstractGitWorker {
     protected readonly gitOps: GitOperations,
     private readonly indexWorker: IndexWorker,
     private readonly repoServiceFactory: RepositoryServiceFactory,
-    private readonly cancellationService: CancellationSerivce
+    private readonly cancellationService: CancellationSerivce,
+    protected readonly watermarkService: DiskWatermarkService
   ) {
-    super(queue, log, client, serverOptions, gitOps);
+    super(queue, log, client, serverOptions, gitOps, watermarkService);
   }
 
   public async executeJob(job: Job) {
+    const superRes = await super.executeJob(job);
+    if (superRes.cancelled) {
+      return superRes;
+    }
+
     const { payload, cancellationToken } = job;
     const { url } = payload;
     try {
@@ -54,9 +61,7 @@ export class CloneWorker extends AbstractGitWorker {
       this.log.error(error);
       return {
         uri: url,
-        // Return a null repo for invalid git url.
-        repo: null,
-      };
+      } as CloneWorkerResult;
     }
 
     this.log.info(`Execute clone job for ${url}`);
@@ -69,22 +74,36 @@ export class CloneWorker extends AbstractGitWorker {
     const repo = RepositoryUtils.buildRepository(url);
 
     // Try to cancel any existing clone job for this repository.
-    this.cancellationService.cancelCloneJob(repo.uri);
+    this.cancellationService.cancelCloneJob(repo.uri, CancellationReason.NEW_JOB_OVERRIDEN);
 
     let cancelled = false;
+    let cancelledReason;
     if (cancellationToken) {
-      cancellationToken.on(() => {
+      cancellationToken.on((reason: string) => {
         cancelled = true;
+        cancelledReason = reason;
       });
     }
 
     const cloneJobPromise = repoService.clone(
       repo,
-      (progress: number, cloneProgress?: CloneProgress) => {
+      async (progress: number, cloneProgress?: CloneProgress) => {
         if (cancelled) {
           // return false to stop the clone progress
           return false;
         }
+
+        // Keep an eye on the disk usage during clone in case it goes above the
+        // disk watermark config.
+        if (await this.watermarkService.isLowWatermark()) {
+          // Cancel this clone job
+          if (cancellationToken) {
+            cancellationToken.cancel(CancellationReason.LOW_DISK_SPACE);
+          }
+          // return false to stop the clone progress
+          return false;
+        }
+
         // For clone job payload, it only has the url. Populate back the
         // repository uri before update progress.
         job.payload.uri = repo.uri;
@@ -100,26 +119,31 @@ export class CloneWorker extends AbstractGitWorker {
         cloneJobPromise
       );
     }
-    return await cloneJobPromise;
+    const res = await cloneJobPromise;
+    return {
+      ...res,
+      cancelled,
+      cancelledReason,
+    };
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
     if (res.cancelled) {
+      await this.onJobCancelled(job, res.cancelledReason);
       // Skip updating job progress if the job is done because of cancellation.
       return;
     }
-    this.log.info(`Clone job done for ${res.repo.uri}`);
+
+    const { uri, revision } = res.repo!;
+    this.log.info(`Clone job done for ${uri}`);
     // For clone job payload, it only has the url. Populate back the
     // repository uri.
-    job.payload.uri = res.repo.uri;
+    job.payload.uri = uri;
     await super.onJobCompleted(job, res);
 
     // Throw out a repository index request after 1 second.
     return delay(async () => {
-      const payload = {
-        uri: res.repo.uri,
-        revision: res.repo.revision,
-      };
+      const payload = { uri, revision };
       await this.indexWorker.enqueueJob(payload, {});
     }, 1000);
   }

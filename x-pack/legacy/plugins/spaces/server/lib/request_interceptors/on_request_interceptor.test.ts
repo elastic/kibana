@@ -5,8 +5,9 @@
  */
 
 import { Legacy } from 'kibana';
+import { schema } from '@kbn/config-schema';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
-import { HttpServiceSetup, Router, KibanaRequest } from '../../../../../../../src/core/server';
+import { HttpServiceSetup, KibanaRequest } from '../../../../../../../src/core/server';
 
 import * as kbnTestServer from '../../../../../../../src/test_utils/kbn_server';
 import { KibanaConfig } from '../../../../../../../src/legacy/server/kbn_server';
@@ -54,15 +55,18 @@ describe('onRequestInterceptor', () => {
     }
 
     if (routes === 'new-platform') {
-      const router = new Router('/');
+      const router = http.createRouter('/');
 
-      router.get({ path: '/foo', validate: false }, (req: KibanaRequest, h: any) => {
-        return h.ok({ path: req.url.pathname, basePath: http.basePath.get(req) });
-      });
+      router.get(
+        { path: '/foo', validate: false },
+        (context: unknown, req: KibanaRequest, h: any) => {
+          return h.ok({ path: req.url.pathname, basePath: http.basePath.get(req) });
+        }
+      );
 
       router.get(
         { path: '/some/path/s/foo/bar', validate: false },
-        (req: KibanaRequest, h: any) => {
+        (context: unknown, req: KibanaRequest, h: any) => {
           return h.ok({ path: req.url.pathname, basePath: http.basePath.get(req) });
         }
       );
@@ -70,17 +74,15 @@ describe('onRequestInterceptor', () => {
       router.get(
         {
           path: '/i/love/spaces',
-          validate: schema => {
-            return {
-              query: schema.object({
-                queryParam: schema.string({
-                  defaultValue: 'oh noes, this was not set on the request correctly',
-                }),
+          validate: {
+            query: schema.object({
+              queryParam: schema.string({
+                defaultValue: 'oh noes, this was not set on the request correctly',
               }),
-            };
+            }),
           },
         },
-        (req: KibanaRequest, h: any) => {
+        (context: unknown, req: KibanaRequest, h: any) => {
           return h.ok({
             path: req.url.pathname,
             basePath: http.basePath.get(req),
@@ -88,8 +90,6 @@ describe('onRequestInterceptor', () => {
           });
         }
       );
-
-      http.registerRouter(router);
     }
   }
 

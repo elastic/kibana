@@ -21,14 +21,14 @@
 import { EuiFilterButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { Storage } from 'ui/storage';
 
-import { IndexPattern } from '../../../index_patterns';
-import { Query, QueryBar } from '../../../query/query_bar';
-import { FilterBar } from '../../../filter/filter_bar';
+import { UiSettingsClientContract } from 'src/core/public';
+import { IndexPattern, Query, QueryBar, FilterBar } from '../../../../../data/public';
 
 interface DateRange {
   from: string;
@@ -42,6 +42,7 @@ interface DateRange {
 export interface SearchBarProps {
   appName: string;
   intl: InjectedIntl;
+  uiSettings: UiSettingsClientContract;
   indexPatterns?: IndexPattern[];
   // Query bar
   showQueryBar?: boolean;
@@ -109,21 +110,27 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   private getFilterTriggerButton() {
-    const filtersAppliedText = this.props.intl.formatMessage({
-      id: 'data.search.searchBar.filtersButtonFiltersAppliedTitle',
-      defaultMessage: 'filters applied.',
-    });
+    const filterCount = this.getFilterLength();
+    const filtersAppliedText = this.props.intl.formatMessage(
+      {
+        id: 'data.search.searchBar.searchBar.filtersButtonFiltersAppliedTitle',
+        defaultMessage:
+          '{filterCount} {filterCount, plural, one {filter} other {filters}} applied.',
+      },
+      {
+        filterCount,
+      }
+    );
     const clickToShowOrHideText = this.state.isFiltersVisible
       ? this.props.intl.formatMessage({
-          id: 'data.search.searchBar.filtersButtonClickToShowTitle',
+          id: 'data.search.searchBar.searchBar.filtersButtonClickToShowTitle',
           defaultMessage: 'Select to hide',
         })
       : this.props.intl.formatMessage({
-          id: 'data.search.searchBar.filtersButtonClickToHideTitle',
+          id: 'data.search.searchBar.searchBar.filtersButtonClickToHideTitle',
           defaultMessage: 'Select to show',
         });
 
-    const filterCount = this.getFilterLength();
     return (
       <EuiFilterButton
         onClick={this.toggleFiltersVisible}
@@ -134,7 +141,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         aria-expanded={!!this.state.isFiltersVisible}
         title={`${filterCount ? filtersAppliedText : ''} ${clickToShowOrHideText}`}
       >
-        Filters
+        {i18n.translate('data.search.searchBar.searchBar.filtersButtonLabel', {
+          defaultMessage: 'Filters',
+          description: 'The noun "filter" in plural.',
+        })}
       </EuiFilterButton>
     );
   }
@@ -175,10 +185,17 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   public render() {
+    // This is needed, as kbn-top-nav-v2 might render before npSetup.core.uiSettings is set.
+    // This won't be needed when it's loaded exclusively with React.
+    if (!this.props.uiSettings) {
+      return null;
+    }
+
     let queryBar;
     if (this.shouldRenderQueryBar()) {
       queryBar = (
         <QueryBar
+          uiSettings={this.props.uiSettings}
           query={this.props.query}
           screenTitle={this.props.screenTitle}
           onSubmit={this.props.onQuerySubmit!}
@@ -218,6 +235,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           >
             <FilterBar
               className="globalFilterGroup__filterBar"
+              uiSettings={this.props.uiSettings}
               filters={this.props.filters!}
               onFiltersUpdated={this.getFilterUpdateFunction()}
               indexPatterns={this.props.indexPatterns!}

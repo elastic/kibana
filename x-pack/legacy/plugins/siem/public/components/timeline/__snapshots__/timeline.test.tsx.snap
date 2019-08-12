@@ -741,6 +741,7 @@ In other use cases the message field can be used to concatenate different values
   onToggleDataProviderEnabled={[MockFunction]}
   onToggleDataProviderExcluded={[MockFunction]}
   show={true}
+  showCallOutUnauthorizedMsg={false}
   sort={
     Object {
       "columnId": "@timestamp",

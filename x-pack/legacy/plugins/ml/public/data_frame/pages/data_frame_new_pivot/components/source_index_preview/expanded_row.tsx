@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
-
 import React from 'react';
 
 import { EuiBadge, EuiText } from '@elastic/eui';
+import { idx } from '@kbn/elastic-idx';
 
 import { getSelectableFields, EsDoc } from '../../../../common';
 
@@ -19,7 +18,8 @@ interface ExpandedRowProps {
 export const ExpandedRow: React.SFC<ExpandedRowProps> = ({ item }) => {
   const keys = getSelectableFields([item]);
   const list = keys.map(k => {
-    const value = get(item._source, k, '');
+    // split the attribute key string and use reduce with an idx check to access nested attributes.
+    const value = k.split('.').reduce((obj, i) => idx(obj, _ => _[i]), item._source) || '';
     return (
       <span key={k}>
         <EuiBadge>{k}:</EuiBadge>

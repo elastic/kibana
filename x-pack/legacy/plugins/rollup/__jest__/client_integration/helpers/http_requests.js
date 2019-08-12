@@ -24,8 +24,16 @@ const registerHttpRequestMockHelpers = server => {
     ]);
   };
 
-  const setCreateJobResponse = () => {
+  const setCreateJobResponse = (responsePayload = {}) => {
     server.respondWith(/\/api\/rollup\/create/, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(responsePayload),
+    ]);
+  };
+
+  const setStartJobResponse = () => {
+    server.respondWith(/\/api\/rollup\/start/, [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify({}),
@@ -43,7 +51,8 @@ const registerHttpRequestMockHelpers = server => {
   return {
     setIndexPatternValidityResponse,
     setCreateJobResponse,
-    setLoadJobsResponse
+    setLoadJobsResponse,
+    setStartJobResponse
   };
 };
 

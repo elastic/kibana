@@ -7,7 +7,7 @@
 import { EuiComboBox } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { useCallback, useState, useEffect } from 'react';
-import { StaticIndexPatternField } from 'ui/index_patterns';
+import { FieldType } from 'ui/index_patterns';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
 import {
   MetricsExplorerMetric,
@@ -20,7 +20,7 @@ interface Props {
   autoFocus?: boolean;
   options: MetricsExplorerOptions;
   onChange: (metrics: MetricsExplorerMetric[]) => void;
-  fields: StaticIndexPatternField[];
+  fields: FieldType[];
 }
 
 interface SelectedOption {

@@ -24,23 +24,20 @@ import {
   UiSettingsClientContract,
 } from '../../../../core/public';
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
-
-// @ts-ignore
-import { createVegaFn } from './vega_fn';
-// @ts-ignore
-import { createVegaTypeDefinition } from './vega_type';
-import { DataSetup } from '../../data/public';
+import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 
-/** @private */
-interface VegaVisualizationDependencies extends LegacyDependenciesPluginSetup {
+import { createVegaFn } from './vega_fn';
+import { createVegaTypeDefinition } from './vega_type';
+
+/** @internal */
+export interface VegaVisualizationDependencies extends LegacyDependenciesPluginSetup {
   uiSettings: UiSettingsClientContract;
 }
 
 /** @internal */
 export interface VegaPluginSetupDependencies {
-  // TODO: Remove `any` as functionsRegistry will be added to the DataSetup.
-  data: DataSetup | any;
+  data: ReturnType<DataPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   __LEGACY: LegacyDependenciesPlugin;
 }

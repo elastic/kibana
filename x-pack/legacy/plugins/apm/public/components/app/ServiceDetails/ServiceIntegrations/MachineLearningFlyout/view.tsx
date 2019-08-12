@@ -20,21 +20,23 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { isEmpty } from 'lodash';
 import { FETCH_STATUS, useFetcher } from '../../../../../hooks/useFetcher';
 import { getHasMLJob } from '../../../../../services/rest/ml';
 import { KibanaLink } from '../../../../shared/Links/KibanaLink';
 import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MLLink } from '../../../../shared/Links/MachineLearningLinks/MLLink';
 import { TransactionSelect } from './TransactionSelect';
+import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
+import { useServiceTransactionTypes } from '../../../../../hooks/useServiceTransactionTypes';
 
 interface Props {
   hasIndexPattern: boolean;
   isCreatingJob: boolean;
   onClickCreate: ({ transactionType }: { transactionType: string }) => void;
   onClose: () => void;
-  serviceName: string;
-  serviceTransactionTypes: string[];
+  urlParams: IUrlParams;
 }
 
 export function MachineLearningFlyoutView({
@@ -42,16 +44,31 @@ export function MachineLearningFlyoutView({
   isCreatingJob,
   onClickCreate,
   onClose,
-  serviceName,
-  serviceTransactionTypes
+  urlParams
 }: Props) {
-  const [transactionType, setTransactionType] = useState(
-    serviceTransactionTypes[0]
-  );
-  const { data: hasMLJob = false, status } = useFetcher(
-    () => getHasMLJob({ serviceName, transactionType }),
-    [serviceName, transactionType]
-  );
+  const { serviceName } = urlParams;
+  const transactionTypes = useServiceTransactionTypes(urlParams);
+
+  const [selectedTransactionType, setSelectedTransactionType] = useState<
+    string | undefined
+  >(undefined);
+  const { data: hasMLJob = false, status } = useFetcher(() => {
+    if (serviceName && selectedTransactionType) {
+      return getHasMLJob({
+        serviceName,
+        transactionType: selectedTransactionType
+      });
+    }
+  }, [serviceName, selectedTransactionType]);
+
+  // update selectedTransactionType when list of transaction types has loaded
+  useEffect(() => {
+    setSelectedTransactionType(transactionTypes[0]);
+  }, [transactionTypes]);
+
+  if (!serviceName || !selectedTransactionType || isEmpty(transactionTypes)) {
+    return null;
+  }
 
   const isLoadingMLJob = status === FETCH_STATUS.LOADING;
 
@@ -91,13 +108,13 @@ export function MachineLearningFlyoutView({
                       'There is currently a job running for {serviceName} ({transactionType}).',
                     values: {
                       serviceName,
-                      transactionType
+                      transactionType: selectedTransactionType
                     }
                   }
                 )}{' '}
                 <MLJobLink
                   serviceName={serviceName}
-                  transactionType={transactionType}
+                  transactionType={selectedTransactionType}
                 >
                   {i18n.translate(
                     'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsDescription.viewJobLinkText',
@@ -199,12 +216,12 @@ export function MachineLearningFlyoutView({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
           <EuiFlexItem>
-            {serviceTransactionTypes.length > 1 ? (
+            {transactionTypes.length > 1 ? (
               <TransactionSelect
-                selectedTransactionType={transactionType}
-                transactionTypes={serviceTransactionTypes}
+                selectedTransactionType={selectedTransactionType}
+                transactionTypes={transactionTypes}
                 onChange={(value: string) => {
-                  setTransactionType(value);
+                  setSelectedTransactionType(value);
                 }}
               />
             ) : null}
@@ -212,7 +229,9 @@ export function MachineLearningFlyoutView({
           <EuiFlexItem grow={false}>
             <EuiFormRow>
               <EuiButton
-                onClick={() => onClickCreate({ transactionType })}
+                onClick={() =>
+                  onClickCreate({ transactionType: selectedTransactionType })
+                }
                 fill
                 disabled={
                   isCreatingJob ||

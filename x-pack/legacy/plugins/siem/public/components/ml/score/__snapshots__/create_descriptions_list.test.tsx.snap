@@ -15,9 +15,9 @@ exports[`create_description_list renders correctly against snapshot 1`] = `
     <EuiSpacer
       size="m"
     />
-    <Styled(EuiText)>
+    <LargeScore>
       17
-    </Styled(EuiText)>
+    </LargeScore>
   </EuiDescriptionListDescription>
   <EuiDescriptionListTitle
     key="title-1"
@@ -25,7 +25,7 @@ exports[`create_description_list renders correctly against snapshot 1`] = `
     <EuiSpacer
       size="m"
     />
-    Anomaly Job
+    Job
   </EuiDescriptionListTitle>
   <EuiDescriptionListDescription
     key="description-1"
@@ -70,7 +70,7 @@ exports[`create_description_list renders correctly against snapshot 1`] = `
       <EuiFlexItem
         grow={false}
       >
-        <pure(Component)
+        <PreferenceFormattedDate
           value={2019-06-16T06:00:00.000Z}
         />
       </EuiFlexItem>
@@ -92,7 +92,7 @@ exports[`create_description_list renders correctly against snapshot 1`] = `
   <EuiDescriptionListTitle
     key="title-3"
   >
-    Top Anomaly Suspect
+    Anomalous Entity
   </EuiDescriptionListTitle>
   <EuiDescriptionListDescription
     key="description-3"

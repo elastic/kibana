@@ -8,9 +8,6 @@ cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
 
-### Force ES Snapshot
-export TEST_ES_SNAPSHOT_VERSION=8.0.0-5480a616
-
 ###
 ### Since the Jenkins logging output collector doesn't look like a TTY
 ### Node/Chalk and other color libs disable their color output. But Jenkins

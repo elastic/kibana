@@ -7,11 +7,9 @@
 import { connect } from 'react-redux';
 import { ToolbarOverlay } from './toolbar_overlay';
 import { getUniqueIndexPatternIds } from '../../selectors/map_selectors';
-import { getIsFilterable } from '../../selectors/ui_selectors';
 
 function mapStateToProps(state = {}) {
   return {
-    isFilterable: getIsFilterable(state),
     uniqueIndexPatternIds: getUniqueIndexPatternIds(state)
   };
 }

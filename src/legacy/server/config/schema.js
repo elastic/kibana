@@ -29,7 +29,11 @@ import {
 import {
   getData
 } from '../path';
-import { DEFAULT_CSP_RULES } from '../csp';
+import {
+  DEFAULT_CSP_RULES,
+  DEFAULT_CSP_STRICT,
+  DEFAULT_CSP_WARN_LEGACY_BROWSERS,
+} from '../csp';
 
 export default () => Joi.object({
   pkg: Joi.object({
@@ -56,8 +60,8 @@ export default () => Joi.object({
 
   csp: Joi.object({
     rules: Joi.array().items(Joi.string()).default(DEFAULT_CSP_RULES),
-    strict: Joi.boolean().default(false),
-    warnLegacyBrowsers: Joi.boolean().default(true),
+    strict: Joi.boolean().default(DEFAULT_CSP_STRICT),
+    warnLegacyBrowsers: Joi.boolean().default(DEFAULT_CSP_WARN_LEGACY_BROWSERS),
   }).default(),
 
   cpu: Joi.object({

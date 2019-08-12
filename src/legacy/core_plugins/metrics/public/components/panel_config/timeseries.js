@@ -42,11 +42,8 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { Storage } from 'ui/storage';
-import { data } from 'plugins/data/setup';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-const { QueryBarInput } = data.query.ui;
-const localStorage = new Storage(window.localStorage);
+import { QueryBarWrapper } from '../query_bar_wrapper';
 class TimeseriesPanelConfigUi extends Component {
   constructor(props) {
     super(props);
@@ -144,7 +141,6 @@ class TimeseriesPanelConfigUi extends Component {
           fields={this.props.fields}
           model={this.props.model}
           name={this.props.name}
-          visData$={this.props.visData$}
           onChange={this.props.onChange}
         />
       );
@@ -188,15 +184,13 @@ class TimeseriesPanelConfigUi extends Component {
                   }
                   fullWidth
                 >
-                  <QueryBarInput
+                  <QueryBarWrapper
                     query={{
                       language: model.filter.language || getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
                     onChange={filter => this.props.onChange({ filter })}
-                    appName={'VisEditor'}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
-                    store={localStorage}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -400,7 +394,6 @@ TimeseriesPanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  visData$: PropTypes.object,
 };
 
 export const TimeseriesPanelConfig = injectI18n(TimeseriesPanelConfigUi);

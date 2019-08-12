@@ -5,7 +5,7 @@
  */
 
 import { UncommonProcessesData } from '../../graphql/types';
-import { FrameworkRequest, RequestOptions } from '../framework';
+import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 export * from './elasticsearch_adapter';
 import { UncommonProcessesAdapter } from './types';
 
@@ -14,7 +14,7 @@ export class UncommonProcesses {
 
   public async getUncommonProcesses(
     req: FrameworkRequest,
-    options: RequestOptions
+    options: RequestOptionsPaginated
   ): Promise<UncommonProcessesData> {
     return await this.adapter.getUncommonProcesses(req, options);
   }

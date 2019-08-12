@@ -28,6 +28,7 @@ import { TableSeries as table } from './vis_types/table/series';
 import { GaugeSeries as gauge } from './vis_types/gauge/series';
 import { MarkdownSeries as markdown } from './vis_types/markdown/series';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { VisDataContext } from '../contexts/vis_data_context';
 
 const lookup = {
   top_n: topN,
@@ -76,29 +77,33 @@ export class Series extends Component {
     const { panel } = this.props;
     const Component = lookup[panel.type];
 
-    const params = {
-      className: this.props.className,
-      disableAdd: this.props.disableAdd,
-      disableDelete: this.props.disableDelete,
-      fields: this.props.fields,
-      name: this.props.name,
-      onAdd: this.props.onAdd,
-      onChange: this.handleChange,
-      onClone: this.props.onClone,
-      onDelete: this.props.onDelete,
-      model: this.props.model,
-      panel: this.props.panel,
-      selectedTab: this.state.selectedTab,
-      style: this.props.style,
-      switchTab: this.switchTab,
-      toggleVisible: this.toggleVisible,
-      togglePanelActivation: this.togglePanelActivation,
-      visible: this.state.visible,
-      dragHandleProps: this.props.dragHandleProps,
-      indexPatternForQuery: panel.index_pattern || panel.default_index_pattern,
-    };
     return Boolean(Component) ? (
-      <Component {...params} />
+      <VisDataContext.Consumer>
+        {visData => (
+          <Component
+            className={this.props.className}
+            disableAdd={this.props.disableAdd}
+            uiRestrictions={visData.uiRestrictions}
+            disableDelete={this.props.disableDelete}
+            fields={this.props.fields}
+            name={this.props.name}
+            onAdd={this.props.onAdd}
+            onChange={this.handleChange}
+            onClone={this.props.onClone}
+            onDelete={this.props.onDelete}
+            model={this.props.model}
+            panel={this.props.panel}
+            selectedTab={this.state.selectedTab}
+            style={this.props.style}
+            switchTab={this.switchTab}
+            toggleVisible={this.toggleVisible}
+            togglePanelActivation={this.togglePanelActivation}
+            visible={this.state.visible}
+            dragHandleProps={this.props.dragHandleProps}
+            indexPatternForQuery={panel.index_pattern || panel.default_index_pattern}
+          />
+        )}
+      </VisDataContext.Consumer>
     ) : (
       <FormattedMessage
         id="tsvb.seriesConfig.missingSeriesComponentDescription"
@@ -125,6 +130,5 @@ Series.propTypes = {
   onDelete: PropTypes.func,
   model: PropTypes.object,
   panel: PropTypes.object,
-  visData$: PropTypes.object,
   dragHandleProps: PropTypes.object,
 };

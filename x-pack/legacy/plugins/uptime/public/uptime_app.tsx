@@ -5,22 +5,7 @@
  */
 
 import DateMath from '@elastic/datemath';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  // @ts-ignore missing typings for EuiHeaderLink
-  EuiHeaderLink,
-  // @ts-ignore missing typings for EuiHeaderLinks
-  EuiHeaderLogo,
-  // @ts-ignore missing typings for EuiHeaderLogo
-  EuiHeaderSectionItem,
-  // @ts-ignore missing typings for EuiHeaderSectionItem
-  EuiPage,
-  EuiSpacer,
-  // @ts-ignore missing typings for EuiSuperDatePicker
-  EuiSuperDatePicker,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiSpacer, EuiTitle } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
@@ -32,7 +17,7 @@ import { I18nContext } from 'ui/i18n';
 import { UMBreadcrumb } from './breadcrumbs';
 import { UMGraphQLClient, UMUpdateBreadcrumbs, UMUpdateBadge } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
-import { UptimeRefreshContext, UptimeSettingsContext } from './contexts';
+import { UptimeRefreshContext, UptimeSettingsContext, UMSettingsContextValues } from './contexts';
 import { UptimeDatePicker } from './components/functional/uptime_date_picker';
 import { useUrlParams } from './hooks';
 
@@ -119,37 +104,44 @@ const Application = (props: UptimeAppProps) => {
     setLastRefresh(Date.now());
   };
 
+  const [getUrlParams] = useUrlParams();
+  const initializeSettingsContextValues = (): UMSettingsContextValues => {
+    const {
+      autorefreshInterval,
+      autorefreshIsPaused,
+      dateRangeStart,
+      dateRangeEnd,
+    } = getUrlParams();
+    const absoluteStartDate = DateMath.parse(dateRangeStart);
+    const absoluteEndDate = DateMath.parse(dateRangeEnd);
+    return {
+      // TODO: extract these values to dedicated (and more sensible) constants
+      absoluteStartDate: absoluteStartDate ? absoluteStartDate.valueOf() : 0,
+      absoluteEndDate: absoluteEndDate ? absoluteEndDate.valueOf() : 1,
+      autorefreshInterval,
+      autorefreshIsPaused,
+      basePath,
+      colors,
+      dateRangeStart,
+      dateRangeEnd,
+      isApmAvailable,
+      isInfraAvailable,
+      isLogsAvailable,
+      refreshApp,
+      setHeadingText,
+    };
+  };
+
   return (
     <I18nContext>
       <Router basename={routerBasename}>
         <Route
           path="/"
           render={(rootRouteProps: RouteComponentProps) => {
-            const [
-              { autorefreshInterval, autorefreshIsPaused, dateRangeStart, dateRangeEnd },
-            ] = useUrlParams(rootRouteProps.history, rootRouteProps.location);
-            const absoluteStartDate = DateMath.parse(dateRangeStart);
-            const absoluteEndDate = DateMath.parse(dateRangeEnd);
             return (
               <ApolloProvider client={client}>
-                <UptimeSettingsContext.Provider
-                  value={{
-                    absoluteStartDate: absoluteStartDate ? absoluteStartDate.valueOf() : 0,
-                    absoluteEndDate: absoluteEndDate ? absoluteEndDate.valueOf() : 1,
-                    autorefreshInterval,
-                    autorefreshIsPaused,
-                    basePath,
-                    colors,
-                    dateRangeStart,
-                    dateRangeEnd,
-                    isApmAvailable,
-                    isInfraAvailable,
-                    isLogsAvailable,
-                    refreshApp,
-                    setHeadingText,
-                  }}
-                >
-                  <UptimeRefreshContext.Provider value={{ lastRefresh }}>
+                <UptimeRefreshContext.Provider value={{ lastRefresh, ...rootRouteProps }}>
+                  <UptimeSettingsContext.Provider value={initializeSettingsContextValues()}>
                     <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                       <div>
                         <EuiFlexGroup
@@ -194,8 +186,8 @@ const Application = (props: UptimeAppProps) => {
                         </Switch>
                       </div>
                     </EuiPage>
-                  </UptimeRefreshContext.Provider>
-                </UptimeSettingsContext.Provider>
+                  </UptimeSettingsContext.Provider>
+                </UptimeRefreshContext.Provider>
               </ApolloProvider>
             );
           }}

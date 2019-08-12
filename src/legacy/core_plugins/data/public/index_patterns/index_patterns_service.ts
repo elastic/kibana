@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import chrome from 'ui/chrome';
 // @ts-ignore
 import { mockFields, mockIndexPattern } from 'ui/index_patterns/fixtures';
 // @ts-ignore
@@ -31,11 +29,18 @@ import { IndexPatterns } from 'ui/index_patterns/index';
 // @ts-ignore
 import { validateIndexPattern } from 'ui/index_patterns/index';
 
-// IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field
+import { isFilterable, getFromSavedObject } from 'ui/index_patterns/static_utils';
+
+// IndexPattern, StaticIndexPattern, Field
 import * as types from 'ui/index_patterns';
 
-const config = chrome.getUiSettingsClient();
-const savedObjectsClient = chrome.getSavedObjectsClient();
+import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+
+export interface IndexPatternDependencies {
+  uiSettings: UiSettingsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
+}
+
 /**
  * Index Patterns Service
  *
@@ -48,9 +53,9 @@ const savedObjectsClient = chrome.getSavedObjectsClient();
  * @internal
  */
 export class IndexPatternsService {
-  public setup() {
+  public setup({ uiSettings, savedObjectsClient }: IndexPatternDependencies) {
     return {
-      indexPatterns: new IndexPatterns(config, savedObjectsClient),
+      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient),
     };
   }
 
@@ -75,7 +80,12 @@ const ui = {
   IndexPatternSelect,
 };
 
-export { validateIndexPattern, constants, fixtures, ui, IndexPatterns };
+const utils = {
+  getFromSavedObject,
+  isFilterable,
+};
+
+export { validateIndexPattern, constants, fixtures, ui, IndexPatterns, utils };
 
 /** @public */
 export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
@@ -87,7 +97,7 @@ export type IndexPattern = types.IndexPattern;
 export type StaticIndexPattern = types.StaticIndexPattern;
 
 /** @public */
-export type StaticIndexPatternField = types.StaticIndexPatternField;
+export type Field = types.Field;
 
 /** @public */
-export type Field = types.Field;
+export type FieldType = types.FieldType;

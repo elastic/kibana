@@ -51,7 +51,6 @@ class Schemas {
           aggFilter: '*',
           editor: false,
           params: [],
-          deprecate: false
         });
 
         // convert the params into a params registry
