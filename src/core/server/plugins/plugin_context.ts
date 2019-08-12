@@ -109,7 +109,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
-      createRouter: () => deps.http.createRouter(`/${plugin.name}`),
+      createRouter: () => deps.http.createRouter(`/${plugin.name}`, plugin.opaqueId),
       registerOnPreAuth: deps.http.registerOnPreAuth,
       registerAuth: deps.http.registerAuth,
       registerOnPostAuth: deps.http.registerOnPostAuth,

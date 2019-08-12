@@ -18,15 +18,25 @@
  */
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
-import { filter, first, map, publishReplay, switchMap } from 'rxjs/operators';
+import { filter, first, map, publishReplay, switchMap, take } from 'rxjs/operators';
 import { merge } from 'lodash';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { ClusterClient } from './cluster_client';
+import { ScopedClusterClient } from './scoped_cluster_client';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import { HttpServiceSetup, GetAuthHeaders } from '../http/';
+
+declare module '../http/types' {
+  interface RequestHandlerContext {
+    elasticsearch: {
+      dataClient: ScopedClusterClient;
+      adminClient: ScopedClusterClient;
+    };
+  }
+}
 
 /** @internal */
 interface CoreClusterClients {
@@ -123,11 +133,27 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
 
     const config = await this.config$.pipe(first()).toPromise();
 
+    const adminClient$ = clients$.pipe(map(clients => clients.adminClient));
+    const dataClient$ = clients$.pipe(map(clients => clients.dataClient));
+
+    deps.http.registerRouteHandlerContext(
+      this.coreContext.coreId,
+      'elasticsearch',
+      async (context, req) => {
+        const adminClient = await adminClient$.pipe(take(1)).toPromise();
+        const dataClient = await dataClient$.pipe(take(1)).toPromise();
+        return {
+          adminClient: adminClient.asScoped(req),
+          dataClient: dataClient.asScoped(req),
+        };
+      }
+    );
+
     return {
       legacy: { config$: clients$.pipe(map(clients => clients.config)) },
 
-      adminClient$: clients$.pipe(map(clients => clients.adminClient)),
-      dataClient$: clients$.pipe(map(clients => clients.dataClient)),
+      adminClient$,
+      dataClient$,
 
       createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
         const finalConfig = merge({}, config, clientConfig);

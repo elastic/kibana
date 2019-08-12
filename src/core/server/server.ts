@@ -63,11 +63,13 @@ export class Server {
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     const pluginDependencies = await this.plugins.discover();
+    const contextServiceSetup = this.context.setup({ pluginDependencies });
 
-    const httpSetup = await this.http.setup();
+    const httpSetup = await this.http.setup({
+      context: contextServiceSetup,
+    });
     this.registerDefaultRoute(httpSetup);
 
-    const contextServiceSetup = this.context.setup({ pluginDependencies });
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
     });
