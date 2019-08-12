@@ -98,7 +98,6 @@ export function systemRoutes({
     async handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       try {
-        config;
         const ignoreSpaces = request.query && request.query.ignoreSpaces === 'true';
         // if spaces is disabled or ignoreSpace is true force isMlEnabledInSpace to be true
         const { isMlEnabledInSpace } = (spacesPlugin !== undefined && ignoreSpaces === false) ?
