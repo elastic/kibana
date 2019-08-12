@@ -18,6 +18,7 @@ export {
   AuthenticationResult,
   BasicCredentials,
   DeauthenticationResult,
+  OIDCAuthenticationFlow,
   CreateAPIKeyResult,
 } from './authentication';
 

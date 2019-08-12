@@ -85,6 +85,8 @@ export const PrimarySecondary = pure<Props>(({ contextId, eventId, primary, seco
   }
 });
 
+PrimarySecondary.displayName = 'PrimarySecondary';
+
 interface PrimarySecondaryUserInfoProps {
   contextId: string;
   eventId: string;
@@ -135,3 +137,5 @@ export const PrimarySecondaryUserInfo = pure<PrimarySecondaryUserInfoProps>(
     }
   }
 );
+
+PrimarySecondaryUserInfo.displayName = 'PrimarySecondaryUserInfo';

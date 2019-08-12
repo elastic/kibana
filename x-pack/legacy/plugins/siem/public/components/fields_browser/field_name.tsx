@@ -37,6 +37,8 @@ export const FieldNameContainer = styled.span`
   }
 `;
 
+FieldNameContainer.displayName = 'FieldNameContainer';
+
 const HoverActionsContainer = styled(EuiPanel)`
   cursor: default;
   height: 25px;
@@ -45,15 +47,21 @@ const HoverActionsContainer = styled(EuiPanel)`
   top: 3px;
 `;
 
+HoverActionsContainer.displayName = 'HoverActionsContainer';
+
 const HoverActionsFlexGroup = styled(EuiFlexGroup)`
   cursor: pointer;
   position: relative;
   top: -8px;
 `;
 
+HoverActionsFlexGroup.displayName = 'HoverActionsFlexGroup';
+
 const ViewCategoryIcon = styled(EuiIcon)`
   margin-left: 5px;
 `;
+
+ViewCategoryIcon.displayName = 'ViewCategoryIcon';
 
 /** Renders a field name in it's non-dragging state */
 export const FieldName = pure<{
@@ -107,3 +115,5 @@ export const FieldName = pure<{
     )}
   />
 ));
+
+FieldName.displayName = 'FieldName';

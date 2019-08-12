@@ -18,8 +18,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { getFromSavedObject } from 'ui/index_patterns/static_utils';
+import { StaticIndexPattern, getFromSavedObject } from 'ui/index_patterns';
 import { VisSavedObject } from 'ui/visualize/loader/types';
 
 export async function getIndexPattern(

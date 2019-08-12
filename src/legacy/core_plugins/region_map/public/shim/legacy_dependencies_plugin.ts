@@ -20,29 +20,32 @@
 import chrome from 'ui/chrome';
 import { CoreStart, Plugin } from 'kibana/public';
 import { initTileMapLegacyModule } from './region_map_legacy_module';
+import { RegionMapsConfig } from '../plugin';
 
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
   $injector: any;
   serviceSettings: any;
-  regionmapsConfig: any;
+  regionmapsConfig: RegionMapsConfig;
 }
 
 export class LegacyDependenciesPlugin
   implements Plugin<Promise<LegacyDependenciesPluginSetup>, void> {
+  constructor(private readonly regionmapsConfig: RegionMapsConfig) {}
+
   public async setup() {
-    initTileMapLegacyModule();
+    initTileMapLegacyModule(this.regionmapsConfig);
 
     const $injector = await chrome.dangerouslyGetActiveInjector();
 
     return {
       $injector,
+      regionmapsConfig: this.regionmapsConfig,
       // Settings for EMSClient.
       // EMSClient, which currently lives in the tile_map vis,
       //  will probably end up being exposed from the future vis_type_maps plugin,
       //  which would register both the tile_map and the region_map vis plugins.
       serviceSettings: $injector.get('serviceSettings'),
-      regionmapsConfig: $injector.get('regionmapsConfig'),
     } as LegacyDependenciesPluginSetup;
   }
 
