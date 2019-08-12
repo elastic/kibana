@@ -12,7 +12,7 @@ import { Logger } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { ServerOptions } from '../server_options';
 import { AbstractGitWorker } from './abstract_git_worker';
-import { CancellationSerivce } from './cancellation_service';
+import { CancellationReason, CancellationSerivce } from './cancellation_service';
 import { Job } from './job';
 
 export class UpdateWorker extends AbstractGitWorker {
@@ -32,7 +32,10 @@ export class UpdateWorker extends AbstractGitWorker {
   }
 
   public async executeJob(job: Job) {
-    await super.executeJob(job);
+    const superRes = await super.executeJob(job);
+    if (superRes.cancelled) {
+      return superRes;
+    }
 
     const { payload, cancellationToken } = job;
     const repo: Repository = payload;
@@ -45,20 +48,34 @@ export class UpdateWorker extends AbstractGitWorker {
     );
 
     // Try to cancel any existing update job for this repository.
-    this.cancellationService.cancelUpdateJob(repo.uri);
+    this.cancellationService.cancelUpdateJob(repo.uri, CancellationReason.NEW_JOB_OVERRIDEN);
 
     let cancelled = false;
+    let cancelledReason;
     if (cancellationToken) {
-      cancellationToken.on(() => {
+      cancellationToken.on((reason: string) => {
         cancelled = true;
+        cancelledReason = reason;
       });
     }
 
-    const updateJobPromise = repoService.update(repo, () => {
+    const updateJobPromise = repoService.update(repo, async () => {
       if (cancelled) {
-        // return false to stop the clone progress
+        // return false to stop the update progress
         return false;
       }
+
+      // Keep an eye on the disk usage during update in case it goes above the
+      // disk watermark config.
+      if (await this.watermarkService.isLowWatermark()) {
+        // Cancel this update job
+        if (cancellationToken) {
+          cancellationToken.cancel(CancellationReason.LOW_DISK_SPACE);
+        }
+        // return false to stop the update progress
+        return false;
+      }
+
       return true;
     });
 
@@ -69,11 +86,21 @@ export class UpdateWorker extends AbstractGitWorker {
         updateJobPromise
       );
     }
-
-    return await updateJobPromise;
+    const res = await updateJobPromise;
+    return {
+      ...res,
+      cancelled,
+      cancelledReason,
+    };
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
+    if (res.cancelled) {
+      await this.onJobCancelled(job, res.cancelledReason);
+      // Skip updating job progress if the job is done because of cancellation.
+      return;
+    }
+
     this.log.info(`Update job done for ${job.payload.uri}`);
     return await super.onJobCompleted(job, res);
   }
