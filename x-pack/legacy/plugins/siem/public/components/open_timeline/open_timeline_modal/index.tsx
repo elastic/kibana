@@ -37,6 +37,8 @@ const ModalContainer = styled.div`
   }
 `;
 
+ModalContainer.displayName = 'ModalContainer';
+
 /**
  * Renders a button that when clicked, displays the `Open Timelines` modal
  */
