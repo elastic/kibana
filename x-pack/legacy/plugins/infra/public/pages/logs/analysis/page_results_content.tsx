@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { useLogAnalysisResults } from '../../../containers/logs/log_analysis';
+import { useLogAnalysisResultsUrlState } from '../../../containers/logs/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 
 export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
@@ -16,7 +17,7 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_results', delay: 15000 });
 
   const { isLoading, logEntryRate, getLogEntryRate } = useLogAnalysisResults({ sourceId });
-
+  const { timeRange, setTimeRange } = useLogAnalysisResultsUrlState();
   return (
     <>
       {isLoading ? (
@@ -26,7 +27,10 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
           })}
         />
       ) : (
-        <div>Results</div>
+        <div>
+          {timeRange.startTime}
+          {timeRange.endTime}
+        </div>
       )}
     </>
   );
