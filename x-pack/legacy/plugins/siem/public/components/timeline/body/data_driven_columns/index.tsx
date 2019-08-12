@@ -43,12 +43,16 @@ const Cell = styled.div<{
   width: ${({ width }) => width};
 `;
 
+Cell.displayName = 'Cell';
+
 const CellContainer = styled(EuiFlexGroup)<{ width: string }>`
   display: flex;
   height: 100%;
   overflow: hidden;
   width: ${({ width }) => width};
 `;
+
+CellContainer.displayName = 'CellContainer';
 
 export class DataDrivenColumns extends React.PureComponent<Props> {
   public render() {

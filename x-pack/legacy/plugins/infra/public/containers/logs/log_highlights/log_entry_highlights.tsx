@@ -11,11 +11,11 @@ import { LogEntryHighlightsQuery } from '../../../graphql/types';
 import { DependencyError, useApolloClient } from '../../../utils/apollo_context';
 import { LogEntryHighlightsMap } from '../../../utils/log_entry';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { logEntryHighlightsQuery } from './log_highlights.gql_query';
+import { logEntryHighlightsQuery } from './log_entry_highlights.gql_query';
 
 export type LogEntryHighlights = LogEntryHighlightsQuery.Query['source']['logEntryHighlights'];
 
-export const useHighlightsFetcher = (
+export const useLogEntryHighlights = (
   sourceId: string,
   sourceVersion: string | undefined,
   startKey: TimeKey | null,
@@ -24,9 +24,7 @@ export const useHighlightsFetcher = (
   highlightTerms: string[]
 ) => {
   const apolloClient = useApolloClient();
-  const [logEntryHighlights, setLogEntryHighlights] = useState<LogEntryHighlights | undefined>(
-    undefined
-  );
+  const [logEntryHighlights, setLogEntryHighlights] = useState<LogEntryHighlights>([]);
   const [loadLogEntryHighlightsRequest, loadLogEntryHighlights] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
@@ -35,7 +33,7 @@ export const useHighlightsFetcher = (
           throw new DependencyError('Failed to load source: No apollo client available.');
         }
         if (!startKey || !endKey || !highlightTerms.length) {
-          throw new Error();
+          throw new Error('Skipping request: Insufficient parameters');
         }
 
         return await apolloClient.query<
@@ -51,9 +49,7 @@ export const useHighlightsFetcher = (
             filterQuery,
             highlights: [
               {
-                query: JSON.stringify({
-                  multi_match: { query: highlightTerms[0], type: 'phrase', lenient: true },
-                }),
+                query: highlightTerms[0],
                 countBefore: 1,
                 countAfter: 1,
               },
@@ -69,7 +65,7 @@ export const useHighlightsFetcher = (
   );
 
   useEffect(() => {
-    setLogEntryHighlights(undefined);
+    setLogEntryHighlights([]);
   }, [highlightTerms]);
 
   useEffect(() => {
@@ -80,29 +76,24 @@ export const useHighlightsFetcher = (
     ) {
       loadLogEntryHighlights();
     } else {
-      setLogEntryHighlights(undefined);
+      setLogEntryHighlights([]);
     }
   }, [highlightTerms, startKey, endKey, filterQuery, sourceVersion]);
 
   const logEntryHighlightsById = useMemo(
     () =>
-      logEntryHighlights
-        ? logEntryHighlights.reduce<LogEntryHighlightsMap>(
-            (accumulatedLogEntryHighlightsById, { entries }) => {
-              return entries.reduce<LogEntryHighlightsMap>(
-                (singleHighlightLogEntriesById, entry) => {
-                  const highlightsForId = singleHighlightLogEntriesById[entry.gid] || [];
-                  return {
-                    ...singleHighlightLogEntriesById,
-                    [entry.gid]: [...highlightsForId, entry],
-                  };
-                },
-                accumulatedLogEntryHighlightsById
-              );
-            },
-            {}
-          )
-        : {},
+      logEntryHighlights.reduce<LogEntryHighlightsMap>(
+        (accumulatedLogEntryHighlightsById, { entries }) => {
+          return entries.reduce<LogEntryHighlightsMap>((singleHighlightLogEntriesById, entry) => {
+            const highlightsForId = singleHighlightLogEntriesById[entry.gid] || [];
+            return {
+              ...singleHighlightLogEntriesById,
+              [entry.gid]: [...highlightsForId, entry],
+            };
+          }, accumulatedLogEntryHighlightsById);
+        },
+        {}
+      ),
     [logEntryHighlights]
   );
 

@@ -28,9 +28,13 @@ const CountsFlexGroup = styled(EuiFlexGroup)`
   margin-top: 5px;
 `;
 
+CountsFlexGroup.displayName = 'CountsFlexGroup';
+
 const CountFlexItem = styled(EuiFlexItem)`
   margin-right: 5px;
 `;
+
+CountFlexItem.displayName = 'CountFlexItem';
 
 // background-color: ${props => props.theme.eui.euiColorLightestShade};
 const HeaderContainer = styled.div`
@@ -38,12 +42,16 @@ const HeaderContainer = styled.div`
   margin-bottom: 8px;
 `;
 
+HeaderContainer.displayName = 'HeaderContainer';
+
 const SearchContainer = styled.div`
   input {
     max-width: ${SEARCH_INPUT_WIDTH}px;
     width: ${SEARCH_INPUT_WIDTH}px;
   }
 `;
+
+SearchContainer.displayName = 'SearchContainer';
 
 interface Props {
   filteredBrowserFields: BrowserFields;
@@ -81,6 +89,8 @@ const CountRow = pure<Pick<Props, 'filteredBrowserFields'>>(({ filteredBrowserFi
   </CountsFlexGroup>
 ));
 
+CountRow.displayName = 'CountRow';
+
 const TitleRow = pure<{ onOutsideClick: () => void; onUpdateColumns: OnUpdateColumns }>(
   ({ onOutsideClick, onUpdateColumns }) => (
     <EuiFlexGroup
@@ -109,6 +119,8 @@ const TitleRow = pure<{ onOutsideClick: () => void; onUpdateColumns: OnUpdateCol
   )
 );
 
+TitleRow.displayName = 'TitleRow';
+
 export const Header = pure<Props>(
   ({
     isSearching,
@@ -134,3 +146,5 @@ export const Header = pure<Props>(
     </HeaderContainer>
   )
 );
+
+Header.displayName = 'Header';
