@@ -79,6 +79,7 @@ export class FeatureGeometryFilterForm extends Component {
       relation: 'intersects',
     });
     this.props.addFilters([filter]);
+    this.props.onClose();
   }
 
   _renderHeader() {
@@ -86,7 +87,7 @@ export class FeatureGeometryFilterForm extends Component {
       <button
         className="euiContextMenuPanelTitle"
         type="button"
-        onClick={this.props.onClose}
+        onClick={this.props.showPropertiesView}
       >
         <span className="euiContextMenu__itemLayout">
           <EuiIcon
@@ -125,8 +126,9 @@ export class FeatureGeometryFilterForm extends Component {
       <EuiForm>
         <EuiFormRow
           label={i18n.translate('xpack.maps.tooltip.geometryFilterForm.geometryLabelLabel', {
-            defaultMessage: 'Geometry name'
+            defaultMessage: 'Geometry label'
           })}
+          compressed
         >
           <EuiFieldText
             value={this.state.geometryLabel}
@@ -134,11 +136,14 @@ export class FeatureGeometryFilterForm extends Component {
           />
         </EuiFormRow>
         <EuiFormRow
+          className="mapFeatureTooltip_geoFieldSuperSelectWrapper"
           label={i18n.translate('xpack.maps.tooltip.geometryFilterForm.geoFieldLabel', {
-            defaultMessage: 'Geospatial field'
+            defaultMessage: 'Filtered field'
           })}
+          compressed
         >
           <EuiSuperSelect
+            className="mapFeatureTooltip_geoFieldSuperSelect"
             options={options}
             valueOfSelected={this.state.geoFieldTag}
             onChange={this._onGeoFieldChange}

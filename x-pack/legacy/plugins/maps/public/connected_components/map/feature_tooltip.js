@@ -209,7 +209,14 @@ export class FeatureTooltip extends React.Component {
             {this._renderLayerFilterBox()}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {this._renderCloseButton()}
+            <EuiButtonIcon
+              onClick={this._onCloseTooltip}
+              iconType="cross"
+              aria-label={i18n.translate('xpack.maps.tooltip.closeAriaLabel', {
+                defaultMessage: 'Close tooltip'
+              })}
+              data-test-subj="mapTooltipCloseButton"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         {divider}
@@ -227,19 +234,6 @@ export class FeatureTooltip extends React.Component {
         <EuiHorizontalRule margin="xs"/>
         {this._renderPagination(filteredFeatures)}
       </Fragment>
-    );
-  }
-
-  _renderCloseButton() {
-    return (
-      <EuiButtonIcon
-        onClick={this._onCloseTooltip}
-        iconType="cross"
-        aria-label={i18n.translate('xpack.maps.tooltip.closeAriaLabel', {
-          defaultMessage: 'Close tooltip'
-        })}
-        data-test-subj="mapTooltipCloseButton"
-      />
     );
   }
 
@@ -336,7 +330,8 @@ export class FeatureTooltip extends React.Component {
     if (this.state.view === GEOMETRY_FILTER_VIEW) {
       return (
         <FeatureGeometryFilterForm
-          onClose={this._showPropertiesView}
+          onClose={this._onCloseTooltip}
+          showPropertiesView={this._showPropertiesView}
           feature={currentFeature}
           geoFields={filteredGeoFields}
           addFilters={this.props.addFilters}
