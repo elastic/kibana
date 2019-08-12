@@ -21,6 +21,8 @@ import { VectorLayer, FileLayerField } from 'ui/vis/map/service_settings';
 import { WMSOptions } from '../../tile_map/public/types';
 
 export interface RegionMapVisParams {
+  readonly addTooltip: true;
+  readonly legendPosition: 'bottomright';
   colorSchema: string;
   emsHotLink?: string | null;
   outlineWeight: number | '';

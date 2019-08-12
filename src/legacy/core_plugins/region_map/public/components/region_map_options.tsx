@@ -202,7 +202,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
           })}
           tooltip={i18n.translate('regionMap.visParams.turnOffShowingAllShapesTipText', {
             defaultMessage:
-              'Turning this off only shows the shapes that were matched with a corresponding term',
+              'Turning this off only shows the shapes that were matched with a corresponding term.',
           })}
           paramName="showAllShapes"
           value={stateParams.showAllShapes}
@@ -235,7 +235,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
 
         <NumberInputOption
           label={i18n.translate('regionMap.visParams.outlineWeightLabel', {
-            defaultMessage: 'Outline weight',
+            defaultMessage: 'Border thickness',
           })}
           paramName="outlineWeight"
           value={stateParams.outlineWeight}

@@ -64,19 +64,6 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
     editorConfig: {
       optionsTemplate: (props) => <RegionMapOptions {...props} serviceSettings={serviceSettings} regionmapsConfig={regionmapsConfig} />,
       collections: {
-        legendPositions: [{
-          value: 'bottomleft',
-          text: i18n.translate('regionMap.mapVis.regionMapEditorConfig.bottomLeftText', { defaultMessage: 'Bottom left' }),
-        }, {
-          value: 'bottomright',
-          text: i18n.translate('regionMap.mapVis.regionMapEditorConfig.bottomRightText', { defaultMessage: 'Bottom right' }),
-        }, {
-          value: 'topleft',
-          text: i18n.translate('regionMap.mapVis.regionMapEditorConfig.topLeftText', { defaultMessage: 'Top left' }),
-        }, {
-          value: 'topright',
-          text: i18n.translate('regionMap.mapVis.regionMapEditorConfig.topRightText', { defaultMessage: 'Top right' }),
-        }],
         colorSchemas,
         vectorLayers,
         tmsLayers: []

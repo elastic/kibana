@@ -2643,7 +2643,6 @@
     "regionMap.mapVis.regionMapTitle": "地域マップ",
     "regionMap.visParams.displayWarningsLabel": "警告を表示",
     "regionMap.visParams.joinFieldLabel": "フィールドを結合",
-    "regionMap.visParams.outlineWeightLabel": "アウトライン重量",
     "regionMap.visParams.previewOnEMSLinkText": "EMS でプレビュー",
     "regionMap.visParams.previewOnEMSLinkTitle": "Elastic Maps Service で {selectedLayerName} をプレビュー",
     "regionMap.visParams.showAllShapesLabel": "すべてのシェイプを表示",

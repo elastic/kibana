@@ -2643,7 +2643,6 @@
     "regionMap.mapVis.regionMapTitle": "区域地图",
     "regionMap.visParams.displayWarningsLabel": "显示警告",
     "regionMap.visParams.joinFieldLabel": "联接字段",
-    "regionMap.visParams.outlineWeightLabel": "轮廓粗细",
     "regionMap.visParams.previewOnEMSLinkText": "在 EMS 上预览",
     "regionMap.visParams.previewOnEMSLinkTitle": "在 Elastic 地图服务上预览“{selectedLayerName}”",
     "regionMap.visParams.showAllShapesLabel": "显示所有形状",
