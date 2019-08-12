@@ -41,6 +41,8 @@ const ActionsContainer = styled.div<{ actionsColumnWidth: number }>`
   width: ${({ actionsColumnWidth }) => actionsColumnWidth}px;
 `;
 
+ActionsContainer.displayName = 'ActionsContainer';
+
 interface Props {
   actionsColumnWidth: number;
   browserFields: BrowserFields;
@@ -70,13 +72,19 @@ const ColumnHeadersContainer = styled.div<{
   margin-bottom: 2px;
 `;
 
+ColumnHeadersContainer.displayName = 'ColumnHeadersContainer';
+
 const ColumnHeadersFlexGroup = styled(EuiFlexGroup)`
   height: ${COLUMN_HEADERS_HEIGHT};
 `;
 
+ColumnHeadersFlexGroup.displayName = 'ColumnHeadersFlexGroup';
+
 const EventsSelectContainer = styled(EuiFlexItem)`
   margin-right: 4px;
 `;
+
+EventsSelectContainer.displayName = 'EventsSelectContainer';
 
 /** Renders the timeline header columns */
 export const ColumnHeaders = pure<Props>(
@@ -188,3 +196,5 @@ export const ColumnHeaders = pure<Props>(
     );
   }
 );
+
+ColumnHeaders.displayName = 'ColumnHeaders';

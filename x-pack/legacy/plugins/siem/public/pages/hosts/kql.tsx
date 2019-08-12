@@ -45,3 +45,5 @@ export const HostsKql = pure<HostsKqlProps>(({ indexPattern, type }) => (
     )}
   </KueryAutocompletion>
 ));
+
+HostsKql.displayName = 'HostsKql';

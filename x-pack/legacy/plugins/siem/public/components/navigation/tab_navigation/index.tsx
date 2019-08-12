@@ -57,6 +57,8 @@ const TabContainer = styled.div`
   }
 `;
 
+TabContainer.displayName = 'TabContainer';
+
 interface TabNavigationState {
   selectedTabId: string;
 }
