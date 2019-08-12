@@ -27,3 +27,5 @@ export const PopoverDescription = React.memo(() => (
     />
   </EuiText>
 ));
+
+PopoverDescription.displayName = 'PopoverDescription';

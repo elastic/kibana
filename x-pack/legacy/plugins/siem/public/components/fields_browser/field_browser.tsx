@@ -41,9 +41,13 @@ const FieldsBrowserContainer = styled.div<{
   z-index: 9990;
 `;
 
+FieldsBrowserContainer.displayName = 'FieldsBrowserContainer';
+
 const PanesFlexGroup = styled(EuiFlexGroup)`
   width: ${PANES_FLEX_GROUP_WIDTH}px;
 `;
+
+PanesFlexGroup.displayName = 'PanesFlexGroup';
 
 type Props = Pick<
   FieldBrowserProps,
