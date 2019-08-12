@@ -20,6 +20,8 @@ const PinIcon = styled(EuiIcon)<{ transform: string }>`
   transform: ${({ transform }) => transform};
 `;
 
+PinIcon.displayName = 'PinIcon';
+
 interface Props {
   allowUnpinning: boolean;
   pinned: boolean;
@@ -38,3 +40,5 @@ export const Pin = pure<Props>(({ allowUnpinning, pinned, onClick = noop }) => (
     type="pin"
   />
 ));
+
+Pin.displayName = 'Pin';
