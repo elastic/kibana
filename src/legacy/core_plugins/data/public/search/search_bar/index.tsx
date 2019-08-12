@@ -18,10 +18,14 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { RefreshInterval } from 'ui/timefilter/timefilter';
+import { RefreshInterval, TimeRange } from 'ui/timefilter/timefilter';
 import { Query } from '../../query/query_bar';
 
 export * from './components';
+
+type SavedQueryTimeFilter = TimeRange & {
+  refreshInterval: RefreshInterval;
+};
 
 export interface SavedQuery {
   id: string;
@@ -33,9 +37,5 @@ export interface SavedQueryAttributes {
   description: string;
   query: Query;
   filters?: Filter[];
-  timefilter?: {
-    timeFrom: string;
-    timeTo: string;
-    refreshInterval: RefreshInterval;
-  };
+  timefilter?: SavedQueryTimeFilter;
 }

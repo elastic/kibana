@@ -49,8 +49,8 @@ const savedQueryAttributesWithFilters: SavedQueryAttributes = {
     },
   ],
   timefilter: {
-    timeTo: 'now',
-    timeFrom: 'now-15m',
+    to: 'now',
+    from: 'now-15m',
     refreshInterval: {
       pause: false,
       value: 0,

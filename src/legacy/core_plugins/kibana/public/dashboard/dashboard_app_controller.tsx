@@ -457,8 +457,8 @@ export class DashboardAppController {
       );
       if (savedQuery.attributes.timefilter) {
         timefilter.setTime({
-          from: savedQuery.attributes.timefilter.timeFrom,
-          to: savedQuery.attributes.timefilter.timeTo,
+          from: savedQuery.attributes.timefilter.from,
+          to: savedQuery.attributes.timefilter.to,
         });
         if (savedQuery.attributes.timefilter.refreshInterval) {
           timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);

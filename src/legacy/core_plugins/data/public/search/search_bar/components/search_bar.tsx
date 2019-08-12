@@ -232,8 +232,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       this.props.isRefreshPaused !== undefined
     ) {
       savedQueryAttributes.timefilter = {
-        timeFrom: this.state.dateRangeFrom,
-        timeTo: this.state.dateRangeTo,
+        from: this.state.dateRangeFrom,
+        to: this.state.dateRangeTo,
         refreshInterval: {
           value: this.props.refreshInterval,
           pause: this.props.isRefreshPaused,
@@ -320,12 +320,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   public onLoadSavedQuery = (savedQuery: SavedQuery) => {
-    const dateRangeFrom = get(
-      savedQuery,
-      'attributes.timefilter.timeFrom',
-      this.state.dateRangeFrom
-    );
-    const dateRangeTo = get(savedQuery, 'attributes.timefilter.timeTo', this.state.dateRangeTo);
+    const dateRangeFrom = get(savedQuery, 'attributes.timefilter.from', this.state.dateRangeFrom);
+    const dateRangeTo = get(savedQuery, 'attributes.timefilter.to', this.state.dateRangeTo);
 
     this.setState({
       query: savedQuery.attributes.query,
