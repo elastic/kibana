@@ -44,9 +44,8 @@ const taskInstanceMock = {
   runAt: new Date(),
   state: {},
   params: {
-    id: '2',
-    params: { baz: true },
     spaceId: 'test',
+    firedActionId: '3',
   },
   taskType: 'actions:1',
 };
@@ -60,11 +59,27 @@ test('executes the task by calling the executor with proper parameters', async (
 
   mockExecute.mockResolvedValueOnce({ status: 'ok' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'fired_action',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKeyId: '123',
+      generatedApiKey: 'abc',
+    },
+    references: [],
+  });
 
   const runnerResult = await runner.run();
 
   expect(runnerResult).toBeUndefined();
   expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
+  expect(mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+    'fired_action',
+    '3',
+    { namespace: 'namespace-test' }
+  );
   expect(mockExecute).toHaveBeenCalledWith({
     namespace: 'namespace-test',
     actionId: '2',
@@ -80,6 +95,17 @@ test('throws an error with suggested retry logic when return status is error', a
   const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
   const runner = createTaskRunner({ taskInstance: taskInstanceMock });
 
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'fired_action',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKeyId: '123',
+      generatedApiKey: 'abc',
+    },
+    references: [],
+  });
   mockExecute.mockResolvedValueOnce({
     status: 'error',
     message: 'Error message',

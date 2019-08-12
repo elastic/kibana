@@ -35,6 +35,8 @@ test('calls fireAction per selected action', async () => {
   expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
+        "apiKeyId": "123",
+        "generatedApiKey": "abc",
         "id": "1",
         "params": Object {
           "contextVal": "My  goes here",
@@ -60,6 +62,8 @@ test('context attribute gets parameterized', async () => {
   expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
+        "apiKeyId": "123",
+        "generatedApiKey": "abc",
         "id": "1",
         "params": Object {
           "contextVal": "My context-val goes here",
@@ -79,6 +83,8 @@ test('state attribute gets parameterized', async () => {
   expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
+        "apiKeyId": "123",
+        "generatedApiKey": "abc",
         "id": "1",
         "params": Object {
           "contextVal": "My  goes here",

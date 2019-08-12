@@ -29,6 +29,12 @@ describe('fire()', () => {
       },
       references: [],
     });
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '234',
+      type: 'fired_action',
+      attributes: {},
+      references: [],
+    });
     await fireFn({
       id: '123',
       params: { baz: false },
@@ -41,10 +47,7 @@ describe('fire()', () => {
       Array [
         Object {
           "params": Object {
-            "id": "123",
-            "params": Object {
-              "baz": false,
-            },
+            "firedActionId": "234",
             "spaceId": "default",
           },
           "scope": Array [
@@ -55,15 +58,12 @@ describe('fire()', () => {
         },
       ]
     `);
-    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
-            Array [
-              "action",
-              "123",
-              Object {
-                "namespace": "namespace1",
-              },
-            ]
-        `);
+    expect(savedObjectsClient.get).toHaveBeenCalledWith('action', '123');
+    expect(savedObjectsClient.create).toHaveBeenCalledWith('fired_action', {
+      actionId: '123',
+      params: { baz: false },
+      apiKeyId: '123',
+      generatedApiKey: 'abc',
+    });
   });
 });

@@ -59,7 +59,7 @@ export function getCreateTaskRunnerFunction({
         // via a request, we're faking one with the proper authorization headers.
         const fakeRequest: any = {
           headers: requestHeaders,
-          getBasePath: () => getBasePath(taskInstance.params.spaceId),
+          getBasePath: () => getBasePath(spaceId),
         };
 
         const services = getServices(fakeRequest);

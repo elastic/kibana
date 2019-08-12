@@ -81,7 +81,8 @@ Object {
   "name": "Test",
 }
 `);
-    expect(firstCall.savedObjectsRepositoryWithInternalUser).toBeTruthy();
+    expect(firstCall.getServices).toBeTruthy();
+    expect(firstCall.encryptedSavedObjectsPlugin).toBeTruthy();
     expect(firstCall.getBasePath).toBeTruthy();
     expect(firstCall.spaceIdToNamespace).toBeTruthy();
     expect(firstCall.fireAction).toMatchInlineSnapshot(`[MockFunction]`);
