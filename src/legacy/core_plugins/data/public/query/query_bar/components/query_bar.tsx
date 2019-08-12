@@ -97,9 +97,10 @@ export class QueryBarUI extends Component<Props, State> {
   };
 
   public getDateRange() {
+    const defaultTimeSetting = this.props.uiSettings.get('timepicker:timeDefaults');
     return {
-      from: this.props.dateRangeFrom || 'now-15m',
-      to: this.props.dateRangeTo || 'now',
+      from: this.props.dateRangeFrom || defaultTimeSetting.from,
+      to: this.props.dateRangeTo || defaultTimeSetting.to,
     };
   }
 
