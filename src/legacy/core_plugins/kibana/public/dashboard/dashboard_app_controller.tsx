@@ -437,7 +437,7 @@ export class DashboardAppController {
     $scope.onClearSavedQuery = () => {
       delete $scope.savedQuery;
       dashboardStateManager.setSavedQueryId(undefined);
-      queryFilter.setFilters([]);
+      queryFilter.removeAll();
       dashboardStateManager.applyFilters(
         {
           query: '',

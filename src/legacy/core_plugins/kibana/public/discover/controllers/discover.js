@@ -933,7 +933,7 @@ function discoverController(
       query: '',
       language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
     };
-    queryFilter.setFilters([]);
+    queryFilter.removeAll();
     $state.save();
     $scope.fetch();
   };
