@@ -11,6 +11,7 @@ import { NoteCard } from './note_card';
 import * as i18n from './translations';
 
 const Column = pure<{ text: string }>(({ text }) => <span>{text}</span>);
+Column.displayName = 'Column';
 
 interface Item {
   created: Date;

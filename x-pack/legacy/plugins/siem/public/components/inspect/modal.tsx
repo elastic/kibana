@@ -36,6 +36,8 @@ const DescriptionListStyled = styled(EuiDescriptionList)`
   }
 `;
 
+DescriptionListStyled.displayName = 'DescriptionListStyled';
+
 interface ModalInspectProps {
   closeModal: () => void;
   isShowing: boolean;
@@ -68,6 +70,8 @@ const MyEuiModal = styled(EuiModal)`
     max-width: 718px;
   }
 `;
+
+MyEuiModal.displayName = 'MyEuiModal';
 const parseInspectString = function<T>(objectStringify: string): T | null {
   try {
     return JSON.parse(objectStringify);

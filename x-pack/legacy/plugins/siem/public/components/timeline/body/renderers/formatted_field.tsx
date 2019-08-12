@@ -67,3 +67,5 @@ export const FormattedFieldValue = pure<{
     return getOrEmptyTagFromValue(value);
   }
 });
+
+FormattedFieldValue.displayName = 'FormattedFieldValue';
