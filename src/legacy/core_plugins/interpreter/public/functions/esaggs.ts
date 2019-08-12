@@ -48,6 +48,7 @@ interface Arguments {
   metricsAtAllLevels: boolean;
   partialRows: boolean;
   aggConfigs: string;
+  scaleMetricValues: boolean;
 }
 
 type Return = Promise<KibanaDatatable>;
@@ -82,6 +83,11 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       default: '""',
       help: '',
     },
+    scaleMetricValues: {
+      types: ['boolean'],
+      default: false,
+      help: '',
+    },
   },
   async fn(context, args, handlers) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
@@ -91,6 +97,14 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
     const queryFilter = Private(FilterBarQueryFilterProvider);
 
     const aggConfigsState = JSON.parse(args.aggConfigs);
+    aggConfigsState.forEach(
+      (aggParams: { type: string; params: { scaleMetricValues?: boolean } }) => {
+        if (aggParams.type === 'date_histogram') {
+          aggParams.params.scaleMetricValues = args.scaleMetricValues;
+        }
+      }
+    );
+
     const indexPattern = await indexPatterns.get(args.index);
     const aggs = new AggConfigs(indexPattern, aggConfigsState);
 

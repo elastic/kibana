@@ -531,6 +531,7 @@ export const buildPipeline = async (
     pipeline += `esaggs
     ${prepareString('index', indexPattern.id)}
     metricsAtAllLevels=${vis.isHierarchical()}
+    scaleMetricValues=true
     partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false}
     ${prepareJson('aggConfigs', visState.aggs)} | `;
   }

@@ -113,6 +113,18 @@ export const dateHistogramBucketAgg = new BucketAggType({
       write: _.noop,
     },
     {
+      // Setting this parameter to true, will enable the potentially confusing "metric scale behavior", that will
+      // scale down some metric values, as long as the date histogram deicded we need a larger bucket size than the
+      // user configured. Since we don't want to emulate that behavior in newer parts of Kibana, we made this configurable,
+      // and disabled by default. esaggs itself has a `scaleMetricValues` parameter that can be used to enable that behavior,
+      // as it's currently done for all the classical old visualize editor charts. We don't serialize this parameter into
+      // the saved object since it should solely be used via the esaggs parameter.
+      name: 'scaleMetricValues',
+      default: false,
+      serialize: () => undefined,
+      write: _.noop,
+    },
+    {
       name: 'interval',
       editorComponent: TimeIntervalParamEditor,
       deserialize: function (state, agg) {
@@ -138,7 +150,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
       write: function (agg, output, aggs) {
         setBounds(agg, true);
         agg.buckets.setInterval(getInterval(agg));
-        const { useNormalizedEsInterval } = agg.params;
+        const { useNormalizedEsInterval, scaleMetricValues } = agg.params;
         const interval = agg.buckets.getInterval(useNormalizedEsInterval);
         output.bucketInterval = interval;
         if (interval.expression === '0ms') {
@@ -155,7 +167,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
           ...dateHistogramInterval(interval.expression),
         };
 
-        const scaleMetrics = interval.scaled && interval.scale < 1;
+        const scaleMetrics =  scaleMetricValues && interval.scaled && interval.scale < 1;
         if (scaleMetrics && aggs) {
           const metrics = aggs.filter(agg => agg.type && agg.type.type === 'metrics');
           const all = _.every(metrics, function (agg) {
