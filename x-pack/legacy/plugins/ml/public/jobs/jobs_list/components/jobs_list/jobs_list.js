@@ -358,8 +358,8 @@ class JobsListUI extends Component {
 JobsListUI.propTypes = {
   jobsSummaryList: PropTypes.array.isRequired,
   fullJobsList: PropTypes.object.isRequired,
-  isManagementTable: PropTypes.boolean,
-  isMlEnabledInSpace: PropTypes.boolean,
+  isManagementTable: PropTypes.bool,
+  isMlEnabledInSpace: PropTypes.bool,
   itemIdToExpandedRowMap: PropTypes.object.isRequired,
   toggleRow: PropTypes.func.isRequired,
   selectJobChange: PropTypes.func.isRequired,

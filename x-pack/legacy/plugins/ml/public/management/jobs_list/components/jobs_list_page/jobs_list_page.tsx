@@ -19,6 +19,7 @@ import {
 
 // @ts-ignore undeclared module
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view';
+import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
 
 interface Props {
   isMlEnabledInSpace: boolean;
@@ -43,13 +44,14 @@ export const JobsListPage: FC<Props> = ({ isMlEnabledInSpace }) => {
       name: i18n.translate('xpack.ml.management.jobsList.analyticsTab', {
         defaultMessage: 'Analytics',
       }),
-      content: renderAnalyticsJobs(),
+      content: (
+        <Fragment>
+          <EuiSpacer size="m" />
+          <DataFrameAnalyticsList />
+        </Fragment>
+      ),
     },
   ];
-
-  function renderAnalyticsJobs() {
-    return <div>Analytics job placeholder</div>;
-  }
 
   function renderTabs() {
     return <EuiTabbedContent size="s" tabs={tabs} initialSelectedTab={tabs[0]} />;
