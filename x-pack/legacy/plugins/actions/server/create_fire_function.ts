@@ -56,7 +56,7 @@ export function createFireFunction({
       taskType: `actions:${actionSavedObject.attributes.actionTypeId}`,
       params: {
         spaceId,
-        firedActionId: firedActionRecord,
+        firedActionId: firedActionRecord.id,
       },
       state: {},
       scope: ['actions'],
