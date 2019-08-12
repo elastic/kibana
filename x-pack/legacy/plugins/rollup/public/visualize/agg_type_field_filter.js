@@ -11,6 +11,7 @@ export function initAggTypeFieldFilter() {
    * If rollup index pattern, check its capabilities
    * and limit available fields for a given aggType based on that.
    */
+  aggTypeFieldFilters.addFilter(
     (field, aggConfig) => {
       const indexPattern = aggConfig.getIndexPattern();
       if(!indexPattern || indexPattern.type !== 'rollup') {
