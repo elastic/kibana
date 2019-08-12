@@ -99,7 +99,7 @@ function convertPanelActionToContextMenuItem({
 }): EuiContextMenuPanelItemDescriptor {
   const menuPanelItem: EuiContextMenuPanelItemDescriptor = {
     name: action.getDisplayName(actionContext),
-    icon: action.getIcon(actionContext),
+    icon: action.getIconType(actionContext),
     panel: _.get(action, 'childContextMenuPanel.id'),
     'data-test-subj': `embeddablePanelAction-${action.id}`,
   };

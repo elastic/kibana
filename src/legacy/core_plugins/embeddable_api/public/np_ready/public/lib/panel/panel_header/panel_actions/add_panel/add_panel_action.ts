@@ -47,8 +47,8 @@ export class AddPanelAction extends Action {
     });
   }
 
-  public getIcon() {
-    return <EuiIcon type="plusInCircleFilled" />;
+  public getIconType() {
+    return 'plusInCircleFilled';
   }
 
   public async isCompatible({ embeddable }: ActionContext) {
