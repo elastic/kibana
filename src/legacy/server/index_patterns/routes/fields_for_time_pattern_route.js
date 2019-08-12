@@ -17,56 +17,37 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
 import Joi from 'joi';
-import { IndexPatternsService } from '../service';
 
-interface FieldsForTimePatternRequest extends Hapi.Request {
-  pre: {
-    indexPatterns: IndexPatternsService;
-  };
-  query: {
-    pattern: string;
-    interval: string;
-    look_back: number;
-    meta_fields: string[];
-  };
-}
-
-interface Prerequisites {
-  getIndexPatternsService: Hapi.RouteOptionsPreAllOptions;
-}
-
-export const createFieldsForTimePatternRoute = (pre: Prerequisites) => ({
+export const createFieldsForTimePatternRoute = pre => ({
   path: '/api/index_patterns/_fields_for_time_pattern',
   method: 'GET',
   config: {
     pre: [pre.getIndexPatternsService],
     validate: {
-      query: Joi.object()
-        .keys({
-          pattern: Joi.string().required(),
-          look_back: Joi.number()
-            .min(1)
-            .required(),
-          meta_fields: Joi.array()
-            .items(Joi.string())
-            .default([]),
-        })
-        .default(),
+      query: Joi.object().keys({
+        pattern: Joi.string().required(),
+        look_back: Joi.number().min(1).required(),
+        meta_fields: Joi.array().items(Joi.string()).default([]),
+      }).default()
     },
-    async handler(req: FieldsForTimePatternRequest) {
+    async handler(req) {
       const { indexPatterns } = req.pre;
-      const { pattern, interval, look_back: lookBack, meta_fields: metaFields } = req.query;
+      const {
+        pattern,
+        interval,
+        look_back: lookBack,
+        meta_fields: metaFields,
+      } = req.query;
 
       const fields = await indexPatterns.getFieldsForTimePattern({
         pattern,
         interval,
         lookBack,
-        metaFields,
+        metaFields
       });
 
       return { fields };
-    },
-  },
+    }
+  }
 });

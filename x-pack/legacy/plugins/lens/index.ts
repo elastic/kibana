@@ -5,42 +5,14 @@
  */
 
 import * as Joi from 'joi';
-import { ServerRoute } from 'hapi';
 import { resolve } from 'path';
-import { Legacy } from 'kibana';
 import { LegacyPluginInitializer } from 'src/legacy/types';
-import {
-  CoreSetup,
-  PluginInitializerContext,
-  Logger,
-  HttpServiceSetup,
-  ElasticsearchServiceSetup,
-} from 'src/core/server';
-import { npStart } from 'ui/new_platform';
-import KbnServer, { Server, KibanaConfig } from 'src/legacy/server/kbn_server';
+import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import mappings from './mappings.json';
 import { PLUGIN_ID, getEditPath } from './common';
-import {
-  lensServerPlugin,
-  LensInitializerContext,
-  LensHttpServiceSetup,
-  LensCoreSetup,
-} from './server';
+import { lensServerPlugin, LensHttpServiceSetup, LensCoreSetup } from './server';
 
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
-
-// export interface LensInitializerContext extends PluginInitializerContext {
-//   legacyConfig: KibanaConfig;
-// }
-
-// export interface LensHttpServiceSetup extends HttpServiceSetup {
-//   route(route: ServerRoute | ServerRoute[]): void;
-// }
-
-// export interface LensCoreSetup {
-//   http: LensHttpServiceSetup;
-//   elasticsearch: ElasticsearchServiceSetup;
-// }
 
 export const lens: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -109,16 +81,6 @@ export const lens: LegacyPluginInitializer = kibana => {
         },
       });
 
-      const initializerContext = ({
-        legacyConfig: server.config(),
-        config: {},
-        logger: {
-          get(...contextParts: string[]) {
-            return kbnServer.newPlatform.coreContext.logger.get('plugins', 'lens', ...contextParts);
-          },
-        },
-      } as unknown) as LensInitializerContext;
-
       const lensHttpService: LensHttpServiceSetup = {
         ...kbnServer.newPlatform.setup.core.http,
         route: server.route.bind(server),
@@ -130,11 +92,8 @@ export const lens: LegacyPluginInitializer = kibana => {
       };
 
       // Set up with the new platform plugin lifecycle API.
-      const plugin = lensServerPlugin(initializerContext);
-      await plugin.setup(core, {});
-
-      // await plugin.start(coreSetup);
-      // await plugin.start(core, {});
+      const plugin = lensServerPlugin();
+      await plugin.setup(core);
 
       server.events.on('stop', async () => {
         await plugin.stop();

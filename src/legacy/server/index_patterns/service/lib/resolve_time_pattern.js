@@ -20,7 +20,6 @@
 import { chain } from 'lodash';
 import moment from 'moment';
 
-import { APICaller } from 'src/core/server';
 import { timePatternToWildcard } from './time_pattern_to_wildcard';
 import { callIndexAliasApi } from './es_api';
 
@@ -35,24 +34,24 @@ import { callIndexAliasApi } from './es_api';
  *                            and the indices that actually match the time
  *                            pattern (matches);
  */
-export async function resolveTimePattern(callCluster: APICaller, timePattern: string) {
+export async function resolveTimePattern(callCluster, timePattern) {
   const aliases = await callIndexAliasApi(callCluster, timePatternToWildcard(timePattern));
 
   const allIndexDetails = chain(aliases)
-    .reduce(
-      (acc, index, indexName) => acc.concat(indexName, Object.keys(index.aliases || {})),
-      [] as string[]
-    )
+    .reduce((acc, index, indexName) => acc.concat(
+      indexName,
+      Object.keys(index.aliases || {})
+    ), [])
     .sort()
     .uniq(true)
-    .map((indexName: string) => {
+    .map(indexName => {
       const parsed = moment(indexName, timePattern, true);
       if (!parsed.isValid()) {
         return {
           valid: false,
           indexName,
           order: indexName,
-          isMatch: false,
+          isMatch: false
         };
       }
 
@@ -60,15 +59,18 @@ export async function resolveTimePattern(callCluster: APICaller, timePattern: st
         valid: true,
         indexName,
         order: parsed,
-        isMatch: indexName === parsed.format(timePattern),
+        isMatch: indexName === parsed.format(timePattern)
       };
     })
     .sortByOrder(['valid', 'order'], ['desc', 'desc'])
     .value();
 
   return {
-    all: allIndexDetails.map(details => details.indexName),
+    all: allIndexDetails
+      .map(details => details.indexName),
 
-    matches: allIndexDetails.filter(details => details.isMatch).map(details => details.indexName),
+    matches: allIndexDetails
+      .filter(details => details.isMatch)
+      .map(details => details.indexName),
   };
 }

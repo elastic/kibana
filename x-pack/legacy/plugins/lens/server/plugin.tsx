@@ -5,24 +5,8 @@
  */
 
 import { ServerRoute } from 'hapi';
-// import { Legacy } from 'kibana';
-// import { LegacyPluginInitializer } from 'src/legacy/types';
-import {
-  Plugin,
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Logger,
-  HttpServiceSetup,
-  ElasticsearchServiceSetup,
-} from 'src/core/server';
-
-import KbnServer, { Server, KibanaConfig } from 'src/legacy/server/kbn_server';
+import { Plugin, HttpServiceSetup, ElasticsearchServiceSetup } from 'src/core/server';
 import { setupRoutes } from './routes';
-
-export interface LensInitializerContext extends PluginInitializerContext {
-  legacyConfig: KibanaConfig;
-}
 
 export interface LensHttpServiceSetup extends HttpServiceSetup {
   route(route: ServerRoute | ServerRoute[]): void;
@@ -33,22 +17,17 @@ export interface LensCoreSetup {
   elasticsearch: ElasticsearchServiceSetup;
 }
 
-export interface LensSetup {}
-export interface LensStart {}
-export interface LensSetupDeps {}
-export interface LensStartDeps {}
+export class LensServer implements Plugin<LensCoreSetup, {}, {}, {}> {
+  constructor() {}
 
-export class LensServer implements Plugin<LensSetup, LensStart, LensSetupDeps, LensStartDeps> {
-  constructor(context: PluginInitializerContext) {}
-
-  setup(core: LensCoreSetup, plugins: LensSetupDeps) {
+  setup(core: LensCoreSetup) {
     setupRoutes(core);
 
     return {};
   }
 
   // TODO: Should be a separate type for start
-  start(core: LensCoreSetup, plugins: LensSetupDeps) {
+  start() {
     return {};
   }
 

@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
 import { LensServer } from './plugin';
 
 export * from './plugin';
 
-export const lensServerPlugin = (initializerContext: PluginInitializerContext) =>
-  new LensServer(initializerContext);
+export const lensServerPlugin = () => new LensServer();

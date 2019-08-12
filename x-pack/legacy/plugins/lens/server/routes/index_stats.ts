@@ -9,11 +9,14 @@ import _ from 'lodash';
 import { first } from 'rxjs/operators';
 // import { schema } from '@kbn/config-schema';
 import { KibanaRequest } from 'src/core/server';
+import { SearchResponse } from 'elasticsearch';
 import {
   IndexPatternsService,
   FieldDescriptor,
 } from '../../../../../../src/legacy/server/index_patterns/service';
 import { LensCoreSetup } from '..';
+
+type Document = Record<string, unknown>;
 
 interface LensSampleDocsRequestParams {
   indexPatternTitle: string;
@@ -31,7 +34,9 @@ interface LensStatsBodyParams {
 }
 
 function recursiveFlatten(
-  docs: unknown[],
+  docs: Array<{
+    _source: Document;
+  }>,
   indexPattern: FieldDescriptor[],
   fields: LensStatsBodyParams['fields']
 ): Record<
@@ -52,7 +57,6 @@ function recursiveFlatten(
   const expectedKeys: Record<string, boolean> = {};
   fields.forEach(field => {
     expectedKeys[field.name] = true;
-    // overallKeys[field.name] = false;
   });
 
   // TODO: Alias types
@@ -70,7 +74,6 @@ function recursiveFlatten(
         return _.get(doc._source, field.parent!);
       });
     } else {
-      // match = docs.find(doc => _.get(doc._source, field.name));
       match = docs.find(doc => {
         if (!doc) {
           return;
@@ -138,7 +141,7 @@ export async function initStatsRoute(setup: LensCoreSetup) {
           metaFields: ['_source', '_id', '_type', '_index', '_score'],
         });
 
-        const results: any = await requestClient.callAsCurrentUser('search', {
+        const results: SearchResponse<Document> = await requestClient.callAsCurrentUser('search', {
           index: req.params.indexPatternTitle,
           body: {
             query: {

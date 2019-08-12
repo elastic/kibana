@@ -17,49 +17,32 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
 import Joi from 'joi';
-import { IndexPatternsService } from '../service';
 
-interface FieldsForWildcardPatternRequest extends Hapi.Request {
-  pre: {
-    indexPatterns: IndexPatternsService;
-  };
-  query: {
-    pattern: string;
-    meta_fields: string[];
-  };
-}
-
-interface Prerequisites {
-  getIndexPatternsService: Hapi.RouteOptionsPreAllOptions;
-}
-
-export const createFieldsForWildcardRoute = (pre: Prerequisites) => ({
+export const createFieldsForWildcardRoute = pre => ({
   path: '/api/index_patterns/_fields_for_wildcard',
   method: 'GET',
   config: {
     pre: [pre.getIndexPatternsService],
     validate: {
-      query: Joi.object()
-        .keys({
-          pattern: Joi.string().required(),
-          meta_fields: Joi.array()
-            .items(Joi.string())
-            .default([]),
-        })
-        .default(),
+      query: Joi.object().keys({
+        pattern: Joi.string().required(),
+        meta_fields: Joi.array().items(Joi.string()).default([]),
+      }).default()
     },
-    async handler(req: FieldsForWildcardPatternRequest) {
+    async handler(req) {
       const { indexPatterns } = req.pre;
-      const { pattern, meta_fields: metaFields } = req.query;
+      const {
+        pattern,
+        meta_fields: metaFields,
+      } = req.query;
 
       const fields = await indexPatterns.getFieldsForWildcard({
         pattern,
-        metaFields,
+        metaFields
       });
 
       return { fields };
-    },
-  },
+    }
+  }
 });

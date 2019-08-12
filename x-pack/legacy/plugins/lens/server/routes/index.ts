@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
 import { initStatsRoute } from './index_stats';
 import { LensCoreSetup } from '../plugin';
 

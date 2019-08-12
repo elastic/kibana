@@ -18,6 +18,7 @@
  */
 
 import { APICaller } from 'src/core/server';
+// @ts-ignore
 import { convertEsError } from './errors';
 import { FieldCapsResponse } from './field_capabilities';
 
