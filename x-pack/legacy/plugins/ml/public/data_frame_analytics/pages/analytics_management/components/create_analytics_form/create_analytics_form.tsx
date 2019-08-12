@@ -171,7 +171,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, for
                   disabled={true}
                   value={sourceIndex}
                   aria-label={i18n.translate(
-                    'xpack.ml.dataframe.analytics.create.jobIdInputAriaLabel',
+                    'xpack.ml.dataframe.analytics.create.sourceIndexInputAriaLabel',
                     {
                       defaultMessage: 'Source index pattern or search.',
                     }

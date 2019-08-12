@@ -155,7 +155,7 @@ export function reducer(state: State, action: Action): State {
       // update state attributes which are derived from other state attributes.
       if (action.payload.destinationIndex !== undefined) {
         newState.destinationIndexNameExists = newState.indexNames.some(
-          name => state.destinationIndex === name
+          name => newState.destinationIndex === name
         );
         newState.destinationIndexNameEmpty = newState.destinationIndex === '';
         newState.destinationIndexNameValid = isValidIndexName(newState.destinationIndex);
@@ -186,11 +186,11 @@ export function reducer(state: State, action: Action): State {
       }
 
       if (action.payload.jobIds !== undefined) {
-        newState.jobIdExists = newState.jobIds.some(id => state.jobId === id);
+        newState.jobIdExists = newState.jobIds.some(id => newState.jobId === id);
       }
 
       if (action.payload.sourceIndex !== undefined) {
-        newState.sourceIndexNameExists = state.indexNames.some(
+        newState.sourceIndexNameExists = newState.indexNames.some(
           name => newState.sourceIndex === name
         );
         newState.sourceIndexNameEmpty = newState.sourceIndex === '';
@@ -292,14 +292,14 @@ export const useCreateAnalyticsForm = () => {
       if (id === false) {
         addRequestMessage({
           error: i18n.translate(
-            'xpack.ml.dataframe.stepCreateForm.duplicateIndexPatternErrorMessageError',
+            'xpack.ml.dataframe.analytics.create.duplicateIndexPatternErrorMessageError',
             {
               defaultMessage: 'The index pattern {indexPatternName} already exists.',
               values: { indexPatternName },
             }
           ),
           message: i18n.translate(
-            'xpack.ml.dataframe.stepCreateForm.duplicateIndexPatternErrorMessage',
+            'xpack.ml.dataframe.analytics.create.duplicateIndexPatternErrorMessage',
             {
               defaultMessage: 'An error occurred creating the Kibana index pattern:',
             }
@@ -316,7 +316,7 @@ export const useCreateAnalyticsForm = () => {
 
       addRequestMessage({
         message: i18n.translate(
-          'xpack.ml.dataframe.stepCreateForm.createIndexPatternSuccessMessage',
+          'xpack.ml.dataframe.analytics.create.createIndexPatternSuccessMessage',
           {
             defaultMessage: 'Kibana index pattern {indexPatternName} created.',
             values: { indexPatternName },
@@ -327,7 +327,7 @@ export const useCreateAnalyticsForm = () => {
       addRequestMessage({
         error: getErrorMessage(e),
         message: i18n.translate(
-          'xpack.ml.dataframe.stepCreateForm.createIndexPatternErrorMessage',
+          'xpack.ml.dataframe.analytics.create.createIndexPatternErrorMessage',
           {
             defaultMessage: 'An error occurred creating the Kibana index pattern:',
           }
@@ -364,7 +364,7 @@ export const useCreateAnalyticsForm = () => {
       addRequestMessage({
         error: getErrorMessage(e),
         message: i18n.translate(
-          'xpack.ml.dataframe.stepDetailsForm.errorGettingDataFrameIndexNames',
+          'xpack.ml.dataframe.analytics.create.errorGettingDataFrameIndexNames',
           {
             defaultMessage: 'An error occurred getting the existing index names:',
           }
@@ -398,7 +398,7 @@ export const useCreateAnalyticsForm = () => {
       addRequestMessage({
         error: getErrorMessage(e),
         message: i18n.translate(
-          'xpack.ml.dataframe.stepDetailsForm.errorGettingIndexPatternTitles',
+          'xpack.ml.dataframe.analytics.create.errorGettingIndexPatternTitles',
           {
             defaultMessage: 'An error occurred getting the existing index pattern titles:',
           }
@@ -418,7 +418,7 @@ export const useCreateAnalyticsForm = () => {
       }
       addRequestMessage({
         message: i18n.translate(
-          'xpack.ml.dataframe.stepCreateForm.startDataFrameAnalyticsSuccessMessage',
+          'xpack.ml.dataframe.analytics.create.startDataFrameAnalyticsSuccessMessage',
           {
             defaultMessage: 'Analytics job {jobId} started.',
             values: { jobId },
