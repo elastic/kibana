@@ -146,7 +146,7 @@ function DefaultEditorAggParams({
         onAggParamsChange(agg.params, param, newValue);
       }
     });
-  }, [agg.type, editorConfig]);
+  }, [editorConfig]);
 
   useEffect(() => {
     setTouched(false);
