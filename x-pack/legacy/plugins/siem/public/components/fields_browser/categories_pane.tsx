@@ -27,9 +27,13 @@ const CategoryNames = styled.div<{ height: number; width: number }>`
   }
 `;
 
+CategoryNames.displayName = 'CategoryNames';
+
 const Title = styled(EuiTitle)`
   padding-left: 5px;
 `;
+
+Title.displayName = 'Title';
 
 type Props = Pick<
   FieldBrowserProps,
@@ -89,3 +93,5 @@ export const CategoriesPane = pure<Props>(
     </>
   )
 );
+
+CategoriesPane.displayName = 'CategoriesPane';
