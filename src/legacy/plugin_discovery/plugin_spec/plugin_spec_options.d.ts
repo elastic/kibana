@@ -18,12 +18,14 @@
  */
 import { Server } from '../../server/kbn_server';
 import { Capabilities } from '../../../core/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsManagementDefinition } from '../../../core/server/saved_objects/management';
 
 export type InitPluginFunction = (server: Server) => void;
 export interface UiExports {
   injectDefaultVars?: (server: Server) => { [key: string]: any };
   styleSheetPaths?: string;
-  savedObjectsManagement?: any; // Not ideal
+  savedObjectsManagement?: SavedObjectsManagementDefinition;
   mappings?: any; // Not ideal
   visTypes?: string[];
   interpreter?: string[];
