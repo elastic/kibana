@@ -8,9 +8,7 @@ import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/co
 
 export { Request, ResponseToolkit, ServerRoute } from 'hapi';
 
-const INSTALLED = 'installed';
-const NOT_INSTALLED = 'not_installed';
-export type InstallationStatus = typeof INSTALLED | typeof NOT_INSTALLED;
+export type InstallationStatus = Installed['status'] | NotInstalled['status'];
 
 export type AssetType =
   | 'config'
@@ -82,12 +80,12 @@ export interface InstallationAttributes extends SavedObjectAttributes {
 export type Installable<T> = Installed<T> | NotInstalled<T>;
 
 export type Installed<T = {}> = T & {
-  status: typeof INSTALLED;
+  status: 'installed';
   savedObject: Installation;
 };
 
 export type NotInstalled<T = {}> = T & {
-  status: typeof NOT_INSTALLED;
+  status: 'not_installed';
 };
 
 // from API_DELETE_PATTERN
