@@ -21,41 +21,55 @@ import _ from 'lodash';
 import { ORIGIN } from './origin';
 
 export class TMSService {
-  _getTileJson = _.once(
-    async url => this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url)));
 
-  constructor(config,  emsClient) {
+  _getRasterStyleJson = _.once(async () => {
+    const rasterUrl = this._getRasterStyleUrl();
+    const url = this._proxyPath + rasterUrl;
+    return this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
+  });
+
+  constructor(config, emsClient, proxyPath) {
     this._config = config;
     this._emsClient = emsClient;
+    this._proxyPath = proxyPath;
   }
 
-  _getFormatsOfType(type) {
-    const formats = this._config.formats.filter(format => {
-      const language = this._emsClient.getLocale();
-      return format.locale === language && format.format === type;
+  _getRasterFormats(locale) {
+    return this._config.formats.filter(format => {
+      return format.locale === locale && format.format === 'raster';
     });
-    return formats;
   }
 
-  _getDefaultStyleUrl() {
-    const defaultStyle = this._getFormatsOfType('raster')[0];
+  _getRasterStyleUrl() {
+    let rasterFormats = this._getRasterFormats(this._emsClient.getLocale());
+    if (!rasterFormats.length) {//fallback to default locale
+      rasterFormats = this._getRasterFormats(this._emsClient.getDefaultLocale());
+    }
+    if (!rasterFormats.length) {
+      throw new Error(`Cannot find raster tile layer for locale ${this._emsClient.getLocale()} or ${this._emsClient.getDefaultLocale()}`);
+    }
+    const defaultStyle = rasterFormats[0];
     if (defaultStyle && defaultStyle.hasOwnProperty('url')) {
       return defaultStyle.url;
     }
   }
 
+  async getDefaultRasterStyle() {
+    return await this._getRasterStyleJson();
+  }
+
   async getUrlTemplate() {
-    const tileJson = await this._getTileJson(this._getDefaultStyleUrl());
-    return this._emsClient.extendUrlWithParams(tileJson.tiles[0]);
+    const tileJson = await this._getRasterStyleJson();
+    const directUrl = this._proxyPath + tileJson.tiles[0];
+    return this._emsClient.extendUrlWithParams(directUrl);
   }
 
   getDisplayName() {
-    const serviceName = this._emsClient.getValueInLanguage(this._config.name);
-    return serviceName;
+    return this._emsClient.getValueInLanguage(this._config.name);
   }
 
   getAttributions() {
-    const attributions = this._config.attribution.map(attribution => {
+    return this._config.attribution.map(attribution => {
       const url = this._emsClient.getValueInLanguage(attribution.url);
       const label = this._emsClient.getValueInLanguage(attribution.label);
       return {
@@ -63,7 +77,6 @@ export class TMSService {
         label: label
       };
     });
-    return attributions;
   }
 
   getHTMLAttribution() {
@@ -80,19 +93,18 @@ export class TMSService {
     const attributions = this._config.attribution.map(attribution => {
       const url = this._emsClient.getValueInLanguage(attribution.url);
       const label = this._emsClient.getValueInLanguage(attribution.label);
-      const markdown = `[${label}](${url})`;
-      return markdown;
+      return `[${label}](${url})`;
     });
     return attributions.join('|');
   }
 
   async getMinZoom() {
-    const tileJson = await this._getTileJson(this._getDefaultStyleUrl());
+    const tileJson = await this._getRasterStyleJson();
     return tileJson.minzoom;
   }
 
   async getMaxZoom() {
-    const tileJson = await this._getTileJson(this._getDefaultStyleUrl());
+    const tileJson = await this._getRasterStyleJson();
     return tileJson.maxzoom;
   }
 
@@ -107,5 +119,4 @@ export class TMSService {
   getOrigin() {
     return ORIGIN.EMS;
   }
-
 }

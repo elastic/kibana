@@ -139,6 +139,12 @@
 
 .codeTopBar__toolbar {
   padding: $euiSizeS;
+  flex-wrap: wrap;
+}
+
+.codeTopBar__left {
+  min-width: 12rem;
+  width: calc(100% - 29rem);
 }
 
 .codeSearch__suggestion-item {
@@ -257,7 +263,8 @@
 }
 
 .codeBlame__item {
-  padding: $euiSizeXS $euiSizeS;
+  padding-right: $euiSizeM;
+  padding-left: $euiSizeM;
   border-top: $euiBorderThin;
   &.codeBlame__item--first {
     border-top: none;
@@ -282,5 +289,7 @@
 
 .code-line-decoration {
   border-right: $euiBorderThick;
-  width: 316px !important;
+  margin-left: $euiSize;
+  border-left: $euiBorderThin;
+  width: 300px !important;
 }

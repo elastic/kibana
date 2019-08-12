@@ -27,7 +27,7 @@ export function QueryBarProvider({ getService, getPageObjects }) {
   class QueryBar {
 
     async getQueryString() {
-      return await testSubjects.getProperty('queryInput', 'value');
+      return await testSubjects.getAttribute('queryInput', 'value');
     }
 
     async setQuery(query) {

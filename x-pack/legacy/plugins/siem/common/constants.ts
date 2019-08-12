@@ -7,3 +7,5 @@
 export const APP_ID = 'siem';
 export const APP_NAME = 'SIEM';
 export const DEFAULT_INDEX_KEY = 'siem:defaultIndex';
+export const DEFAULT_ANOMALY_SCORE = 'siem:defaultAnomalyScore';
+export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;

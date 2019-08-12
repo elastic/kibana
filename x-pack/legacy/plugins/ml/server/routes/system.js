@@ -9,6 +9,8 @@
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { callWithInternalUserFactory } from '../client/call_with_internal_user_factory';
 import { privilegesProvider } from '../lib/check_privileges';
+import { spacesUtilsProvider } from '../lib/spaces_utils';
+
 import { mlLog } from '../client/log';
 
 import { wrapError } from '../client/errors';
@@ -16,7 +18,14 @@ import Boom from 'boom';
 
 import { isSecurityDisabled } from '../lib/security_utils';
 
-export function systemRoutes({ commonRouteConfig, elasticsearchPlugin, route, xpackMainPlugin }) {
+export function systemRoutes({
+  commonRouteConfig,
+  elasticsearchPlugin,
+  route,
+  xpackMainPlugin,
+  config,
+  spacesPlugin
+}) {
   const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
 
   function getNodeCount() {
@@ -85,11 +94,18 @@ export function systemRoutes({ commonRouteConfig, elasticsearchPlugin, route, xp
 
   route({
     method: 'GET',
-    path: '/api/ml/ml_privileges',
+    path: '/api/ml/ml_capabilities',
     async handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       try {
-        const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPlugin);
+        const ignoreSpaces = request.query && request.query.ignoreSpaces === 'true';
+        const spacesFeature = xpackMainPlugin.info.feature('spaces');
+        // if spaces is disabled or ignoreSpace is true force isMlEnabledInSpace to be true
+        const { isMlEnabledInSpace } = (spacesFeature.isEnabled() && ignoreSpaces === false) ?
+          spacesUtilsProvider(spacesPlugin, request, config) :
+          { isMlEnabledInSpace: async () => true };
+
+        const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPlugin, isMlEnabledInSpace);
         return await getPrivileges();
       } catch (error) {
         return wrapError(error);

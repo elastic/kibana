@@ -239,7 +239,7 @@ export const ML_DATA_PREVIEW_COUNT = 10;
 export function prefixDatafeedId(datafeedId, prefix) {
   return (datafeedId.match(/^datafeed-/)) ?
     datafeedId.replace(/^datafeed-/, `datafeed-${prefix}`) :
-    `${prefix}${datafeedId}`;
+    `datafeed-${prefix}${datafeedId}`;
 }
 
 // Returns a name which is safe to use in elasticsearch aggregations for the supplied
@@ -509,4 +509,15 @@ export function validateGroupNames(job) {
     contains: id =>  (messages.some(m => id === m.id)),
     find: id => (messages.find(m => id === m.id)),
   };
+}
+
+// Returns the latest of the last source data and last processed bucket timestamp,
+// as used for example in setting the end time of results views for cases where
+// anomalies might have been raised after the point at which data ingest has stopped.
+export function getLatestDataOrBucketTimestamp(latestDataTimestamp, latestBucketTimestamp) {
+  if (latestDataTimestamp !== undefined && latestBucketTimestamp !== undefined) {
+    return Math.max(latestDataTimestamp, latestBucketTimestamp);
+  } else {
+    return (latestDataTimestamp !== undefined) ? latestDataTimestamp : latestBucketTimestamp;
+  }
 }

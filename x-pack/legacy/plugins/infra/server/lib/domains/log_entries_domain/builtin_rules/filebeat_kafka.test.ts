@@ -27,7 +27,7 @@ describe('Filebeat Rules', () => {
         'service.type': 'kafka',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[",

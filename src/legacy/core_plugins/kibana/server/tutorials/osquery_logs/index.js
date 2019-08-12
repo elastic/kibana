@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
 export function osqueryLogsSpecProvider(server, context) {
   const moduleName = 'osquery';
@@ -29,12 +33,13 @@ export function osqueryLogsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.osqueryLogs.nameTitle', {
       defaultMessage: 'Osquery logs',
     }),
-    category: TUTORIAL_CATEGORY.SECURITY,
+    category: TUTORIAL_CATEGORY.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.osqueryLogs.shortDescription', {
       defaultMessage: 'Collect the result logs created by osqueryd.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.osqueryLogs.longDescription', {
-      defaultMessage: 'The `osquery` Filebeat module collects the JSON result logs collected by `osqueryd`. \
+      defaultMessage:
+        'The `osquery` Filebeat module collects the JSON result logs collected by `osqueryd`. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-osquery.html',
@@ -45,20 +50,23 @@ export function osqueryLogsSpecProvider(server, context) {
       dashboards: [
         {
           id: '69f5ae20-eb02-11e7-8f04-51231daa5b05-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.osqueryLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Osquery logs dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.osqueryLogs.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'Osquery logs dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-osquery.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-osquery.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/osquery_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

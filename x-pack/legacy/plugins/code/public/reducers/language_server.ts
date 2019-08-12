@@ -27,23 +27,28 @@ const initialState: LanguageServerState = {
   installServerLoading: {},
 };
 
-export const languageServer = handleActions(
+type LanguageServerPayload = string & LanguageServer[];
+
+export const languageServer = handleActions<LanguageServerState, LanguageServerPayload>(
   {
-    [String(loadLanguageServers)]: (state: LanguageServerState, action: Action<any>) =>
+    [String(loadLanguageServers)]: state =>
       produce<LanguageServerState>(state, draft => {
         draft.loading = true;
       }),
-    [String(loadLanguageServersSuccess)]: (state: LanguageServerState, action: Action<any>) =>
+    [String(loadLanguageServersSuccess)]: (
+      state: LanguageServerState,
+      action: Action<LanguageServer[]>
+    ) =>
       produce<LanguageServerState>(state, draft => {
-        draft.languageServers = action.payload;
+        draft.languageServers = action.payload!;
         draft.loading = false;
       }),
-    [String(loadLanguageServersFailed)]: (state: LanguageServerState, action: Action<any>) =>
+    [String(loadLanguageServersFailed)]: state =>
       produce<LanguageServerState>(state, draft => {
         draft.languageServers = [];
         draft.loading = false;
       }),
-    [String(requestInstallLanguageServer)]: (state: LanguageServerState, action: Action<string>) =>
+    [String(requestInstallLanguageServer)]: (state, action: Action<string>) =>
       produce<LanguageServerState>(state, draft => {
         draft.installServerLoading[action.payload!] = true;
       }),
@@ -51,7 +56,7 @@ export const languageServer = handleActions(
       state: LanguageServerState,
       action: Action<string>
     ) =>
-      produce<LanguageServerState>(state, (draft: LanguageServerState) => {
+      produce<LanguageServerState>(state, draft => {
         draft.installServerLoading[action.payload!] = false;
         draft.languageServers.find(ls => ls.name === action.payload)!.status =
           LanguageServerStatus.READY;

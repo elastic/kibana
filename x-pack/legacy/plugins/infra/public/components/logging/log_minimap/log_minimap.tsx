@@ -9,12 +9,11 @@ import * as React from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { LogEntryTime } from '../../../../common/log_entry';
-// import { SearchSummaryBucket } from '../../../../common/log_search_summary';
 import { DensityChart } from './density_chart';
 import { HighlightedInterval } from './highlighted_interval';
-// import { SearchMarkers } from './search_markers';
+import { SearchMarkers } from './search_markers';
 import { TimeRuler } from './time_ruler';
-import { SummaryBucket } from './types';
+import { SummaryBucket, SummaryHighlightBucket } from './types';
 
 interface LogMinimapProps {
   className?: string;
@@ -26,12 +25,20 @@ interface LogMinimapProps {
   jumpToTarget: (params: LogEntryTime) => any;
   intervalSize: number;
   summaryBuckets: SummaryBucket[];
-  // searchSummaryBuckets?: SearchSummaryBucket[];
+  summaryHighlightBuckets?: SummaryHighlightBucket[];
   target: number | null;
   width: number;
 }
 
-export class LogMinimap extends React.Component<LogMinimapProps> {
+interface LogMinimapState {
+  timeCursorY: number;
+}
+
+export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState> {
+  public readonly state = {
+    timeCursorY: 0,
+  };
+
   public handleClick: React.MouseEventHandler<SVGSVGElement> = event => {
     const svgPosition = event.currentTarget.getBoundingClientRect();
     const clickedYPosition = event.clientY - svgPosition.top;
@@ -61,27 +68,37 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
     return ((time - minTime) * height) / intervalSize;
   };
 
+  private updateTimeCursor: React.MouseEventHandler<SVGSVGElement> = event => {
+    const svgPosition = event.currentTarget.getBoundingClientRect();
+    const timeCursorY = event.clientY - svgPosition.top;
+
+    this.setState({ timeCursorY });
+  };
+
   public render() {
     const {
       className,
       height,
       highlightedInterval,
-      // jumpToTarget,
+      jumpToTarget,
       summaryBuckets,
-      // searchSummaryBuckets,
+      summaryHighlightBuckets,
       width,
     } = this.props;
+
+    const { timeCursorY } = this.state;
 
     const [minTime, maxTime] = this.getYScale().domain();
 
     return (
-      <svg
+      <MinimapWrapper
         className={className}
         height={height}
         preserveAspectRatio="none"
         viewBox={`0 0 ${width} ${height}`}
         width={width}
         onClick={this.handleClick}
+        onMouseMove={this.updateTimeCursor}
       >
         <MinimapBackground x={width / 2} y="0" width={width / 2} height={height} />
         <DensityChart
@@ -101,17 +118,18 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
             width={width}
           />
         ) : null}
-        {/* <g transform={`translate(${width * 0.5}, 0)`}>
+        <g transform={`translate(${width * 0.5}, 0)`}>
           <SearchMarkers
-            buckets={searchSummaryBuckets || []}
+            buckets={summaryHighlightBuckets || []}
             start={minTime}
             end={maxTime}
             width={width / 2}
             height={height}
             jumpToTarget={jumpToTarget}
           />
-        </g> */}
-      </svg>
+        </g>
+        <TimeCursor x1={0} x2={width} y1={timeCursorY} y2={timeCursorY} />
+      </MinimapWrapper>
     );
   }
 }
@@ -123,4 +141,22 @@ const MinimapBackground = euiStyled.rect`
 const MinimapBorder = euiStyled.line`
   stroke: ${props => props.theme.eui.euiColorMediumShade};
   stroke-width: 1px;
+`;
+
+const TimeCursor = euiStyled.line`
+  pointer-events: none;
+  stroke-width: 1px;
+  stroke: ${props =>
+    props.theme.darkMode
+      ? props.theme.eui.euiColorDarkestShade
+      : props.theme.eui.euiColorDarkShade};
+`;
+
+const MinimapWrapper = euiStyled.svg`
+  & ${TimeCursor} {
+    visibility: hidden;
+  }
+  &:hover ${TimeCursor} {
+    visibility: visible;
+  }
 `;

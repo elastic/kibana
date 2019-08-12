@@ -106,8 +106,7 @@ describe('buildRequestBody(req)', () => {
       size: 0,
       query: {
         bool: {
-          filter: [],
-          must: [
+          filter: [
             {
               bool: {
                 must: [
@@ -121,6 +120,8 @@ describe('buildRequestBody(req)', () => {
                 must_not: [],
               },
             },
+          ],
+          must: [
             {
               range: {
                 '@timestamp': {
@@ -157,7 +158,7 @@ describe('buildRequestBody(req)', () => {
               min: 1485463055881,
             },
             field: '@timestamp',
-            interval: '10s',
+            fixed_interval: '10s',
             min_doc_count: 0,
             time_zone: 'UTC',
           },

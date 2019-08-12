@@ -30,7 +30,7 @@ export function MonitoringElasticsearchNodeDetailProvider({ getService }) {
         indicesCount: await testSubjects.getVisibleText(SUBJ_SUMMARY_INDICES_COUNT),
         shardsCount: await testSubjects.getVisibleText(SUBJ_SUMMARY_SHARDS_COUNT),
         nodeType: await testSubjects.getVisibleText(SUBJ_SUMMARY_NODE_TYPE),
-        status: await testSubjects.getProperty(SUBJ_SUMMARY_STATUS, 'alt'),
+        status: await testSubjects.getAttribute(SUBJ_SUMMARY_STATUS, 'alt'),
       };
     }
 

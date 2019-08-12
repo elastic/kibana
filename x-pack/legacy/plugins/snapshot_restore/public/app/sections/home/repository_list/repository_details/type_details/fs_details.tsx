@@ -117,7 +117,7 @@ export const FSDetails: React.FunctionComponent<Props> = ({ repository }) => {
 
       <EuiSpacer size="s" />
 
-      <EuiDescriptionList listItems={listItems} />
+      <EuiDescriptionList textStyle="reverse" listItems={listItems} />
     </Fragment>
   );
 };

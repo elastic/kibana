@@ -5,11 +5,13 @@
  */
 
 import fs from 'fs';
+import { Server } from 'hapi';
 import * as os from 'os';
 import path from 'path';
 
 import { AnyObject } from './lib/esqueue';
 import { ServerOptions } from './server_options';
+import { ServerFacade } from '..';
 
 // TODO migrate other duplicate classes, functions
 
@@ -35,9 +37,12 @@ const TEST_OPTIONS = {
     enableGitCertCheck: true,
     gitProtocolWhitelist: ['ssh', 'https', 'git'],
   },
+  disk: {
+    thresholdEnabled: true,
+    watermarkLow: '80%',
+  },
   repos: [],
   maxWorkspace: 5, // max workspace folder for each language server
-  disableIndexScheduler: true, // Temp option to disable index scheduler.
 };
 
 export function createTestServerOption() {
@@ -52,4 +57,18 @@ export function createTestServerOption() {
   };
 
   return new ServerOptions(TEST_OPTIONS, config);
+}
+
+export function createTestHapiServer() {
+  const server: ServerFacade = new Server();
+  // @ts-ignore
+  server.config = () => {
+    return {
+      get(key: string) {
+        if (key === 'env.dev') return false;
+        else return true;
+      },
+    };
+  };
+  return server;
 }

@@ -58,6 +58,13 @@ const uiCapabilities = {
   timelion: {
     save: true
   },
+  management: {
+    kibana: {
+      settings: true,
+      index_patterns: true,
+      objects: true
+    }
+  }
 };
 
 // Mock fetch for CoreSystem calls.

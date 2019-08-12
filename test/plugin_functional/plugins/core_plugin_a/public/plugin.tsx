@@ -29,6 +29,7 @@ export class CorePluginAPlugin implements Plugin<CorePluginAPluginSetup, CorePlu
   }
 
   public start() {}
+  public stop() {}
 }
 
 export type CorePluginAPluginSetup = ReturnType<CorePluginAPlugin['setup']>;

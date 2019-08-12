@@ -10,6 +10,8 @@ exports[`Error ERROR_GROUP_ID 1`] = `"grouping key"`;
 
 exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 
+exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
+
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
 exports[`Error METRIC_JAVA_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
@@ -56,17 +58,23 @@ exports[`Error SPAN_ID 1`] = `undefined`;
 
 exports[`Error SPAN_NAME 1`] = `undefined`;
 
+exports[`Error SPAN_SELF_TIME_SUM 1`] = `undefined`;
+
 exports[`Error SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Error SPAN_TYPE 1`] = `undefined`;
 
 exports[`Error TRACE_ID 1`] = `"trace id"`;
 
+exports[`Error TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
+
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
 
 exports[`Error TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Error TRANSACTION_NAME 1`] = `undefined`;
+
+exports[`Error TRANSACTION_PAGE_URL 1`] = `undefined`;
 
 exports[`Error TRANSACTION_RESULT 1`] = `undefined`;
 
@@ -87,6 +95,8 @@ exports[`Span ERROR_EXC_MESSAGE 1`] = `undefined`;
 exports[`Span ERROR_GROUP_ID 1`] = `undefined`;
 
 exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
+
+exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
@@ -134,17 +144,23 @@ exports[`Span SPAN_ID 1`] = `"span id"`;
 
 exports[`Span SPAN_NAME 1`] = `"span name"`;
 
+exports[`Span SPAN_SELF_TIME_SUM 1`] = `undefined`;
+
 exports[`Span SPAN_SUBTYPE 1`] = `"my subtype"`;
 
 exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
 exports[`Span TRACE_ID 1`] = `"trace id"`;
 
+exports[`Span TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
+
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
 
 exports[`Span TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Span TRANSACTION_NAME 1`] = `undefined`;
+
+exports[`Span TRANSACTION_PAGE_URL 1`] = `undefined`;
 
 exports[`Span TRANSACTION_RESULT 1`] = `undefined`;
 
@@ -165,6 +181,8 @@ exports[`Transaction ERROR_EXC_MESSAGE 1`] = `undefined`;
 exports[`Transaction ERROR_GROUP_ID 1`] = `undefined`;
 
 exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
+
+exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 
@@ -212,17 +230,23 @@ exports[`Transaction SPAN_ID 1`] = `undefined`;
 
 exports[`Transaction SPAN_NAME 1`] = `undefined`;
 
+exports[`Transaction SPAN_SELF_TIME_SUM 1`] = `undefined`;
+
 exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
 
+exports[`Transaction TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
+
 exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
 
 exports[`Transaction TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Transaction TRANSACTION_NAME 1`] = `"transaction name"`;
+
+exports[`Transaction TRANSACTION_PAGE_URL 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_RESULT 1`] = `"transaction result"`;
 

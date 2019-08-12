@@ -15,10 +15,7 @@ import {
   toNumber,
   toString
 } from './helpers';
-import {
-  toQuery,
-  legacyDecodeURIComponent
-} from '../../components/shared/Links/url_helpers';
+import { toQuery } from '../../components/shared/Links/url_helpers';
 import { TIMEPICKER_DEFAULTS } from './constants';
 
 type TimeUrlParams = Pick<
@@ -27,22 +24,21 @@ type TimeUrlParams = Pick<
 >;
 
 export function resolveUrlParams(location: Location, state: TimeUrlParams) {
-  const {
-    processorEvent,
-    serviceName,
-    transactionName,
-    transactionType,
-    errorGroupId
-  } = getPathParams(location.pathname);
+  const { processorEvent, serviceName, errorGroupId } = getPathParams(
+    location.pathname
+  );
 
   const {
     traceId,
     transactionId,
+    transactionName,
+    transactionType,
     detailTab,
     flyoutDetailTab,
     waterfallItemId,
     spanId,
     page,
+    pageSize,
     sortDirection,
     sortField,
     kuery,
@@ -61,10 +57,12 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     rangeTo,
     refreshPaused: toBoolean(refreshPaused),
     refreshInterval: toNumber(refreshInterval),
+
     // query params
     sortDirection,
     sortField,
     page: toNumber(page) || 0,
+    pageSize: pageSize ? toNumber(pageSize) : undefined,
     transactionId: toString(transactionId),
     traceId: toString(traceId),
     waterfallItemId: toString(waterfallItemId),
@@ -72,12 +70,14 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     flyoutDetailTab: toString(flyoutDetailTab),
     spanId: toNumber(spanId),
     kuery: kuery && decodeURIComponent(kuery),
+    transactionName,
+    transactionType,
+
     // path params
     processorEvent,
     serviceName,
-    transactionType: legacyDecodeURIComponent(transactionType),
-    transactionName: legacyDecodeURIComponent(transactionName),
     errorGroupId,
+
     // ui filters
     environment
   });

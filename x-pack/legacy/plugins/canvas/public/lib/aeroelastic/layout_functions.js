@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { landmarkPoint, shapesAt } from './geometry';
+import { insideAABB, landmarkPoint, shapesAt } from './geometry';
 
 import {
   compositeComponent,
@@ -1123,7 +1123,7 @@ export const getHoveredShapes = (config, shapes, cursorPosition) =>
 
 export const getHoveredShape = hoveredShapes => (hoveredShapes.length ? hoveredShapes[0] : null);
 
-const singleSelect = (prev, config, hoveredShapes, metaHeld, uid) => {
+const singleSelect = (prev, config, hoveredShapes, metaHeld, uid, _, boxHighlightedShapes) => {
   // cycle from top ie. from zero after the cursor position changed ie. !sameLocation
   const down = true; // this function won't be called otherwise
   const depthIndex =
@@ -1137,10 +1137,19 @@ const singleSelect = (prev, config, hoveredShapes, metaHeld, uid) => {
     uid,
     depthIndex: hoveredShapes.length ? depthIndex : 0,
     down,
+    boxHighlightedShapes,
   };
 };
 
-const multiSelect = (prev, config, hoveredShapes, metaHeld, uid, selectedShapeObjects) => {
+const multiSelect = (
+  prev,
+  config,
+  hoveredShapes,
+  metaHeld,
+  uid,
+  selectedShapeObjects,
+  boxHighlightedShapes
+) => {
   const shapes =
     hoveredShapes.length > 0
       ? disjunctiveUnion(shape => shape.id, selectedShapeObjects, hoveredShapes.slice(0, 1)) // ie. depthIndex of 0, if any
@@ -1150,6 +1159,7 @@ const multiSelect = (prev, config, hoveredShapes, metaHeld, uid, selectedShapeOb
     uid,
     depthIndex: 0,
     down: false,
+    boxHighlightedShapes,
   };
 };
 
@@ -1291,26 +1301,52 @@ export const getSelectionStateFull = (
   config,
   selectedShapeObjects,
   hoveredShapes,
-  { down, uid },
+  { up, down, uid },
   metaHeld,
-  multiselect
+  multiselect,
+  boxHighlightedShapes
 ) => {
   const uidUnchanged = uid === prev.uid;
   const mouseButtonUp = !down;
   if (selectedShapeObjects) {
     prev.shapes = selectedShapeObjects.slice();
   }
-  // take action on mouse down only, and if the uid changed (except with directSelect), ie. bail otherwise
   if (mouseButtonUp || uidUnchanged) {
-    return { ...prev, down, uid, metaHeld };
+    return {
+      ...prev,
+      shapes:
+        up && prev.boxHighlightedShapes.length
+          ? prev.shapes
+              .concat(prev.boxHighlightedShapes)
+              .filter((d, i, a) => a.findIndex(dd => dd.id === d.id) === i)
+          : prev.shapes,
+      down,
+      uid,
+      metaHeld,
+      boxHighlightedShapes: boxHighlightedShapes,
+    };
   }
   const selectFunction = config.singleSelect || !multiselect ? singleSelect : multiSelect;
-  return selectFunction(prev, config, hoveredShapes, metaHeld, uid, selectedShapeObjects);
+  return selectFunction(
+    prev,
+    config,
+    hoveredShapes,
+    metaHeld,
+    uid,
+    selectedShapeObjects,
+    boxHighlightedShapes
+  );
 };
 
 export const getSelectedShapes = selectionTuple => selectionTuple.shapes;
 
-export const getSelectionState = ({ uid, depthIndex, down }) => ({ uid, depthIndex, down });
+export const getSelectionState = ({ uid, depthIndex, down, metaHeld, boxHighlightedShapes }) => ({
+  uid,
+  depthIndex,
+  down,
+  metaHeld,
+  boxHighlightedShapes,
+});
 
 export const getSelectedPrimaryShapeIds = shapes => shapes.map(primaryShape);
 
@@ -1388,6 +1424,9 @@ export const getHoverAnnotations = (config, shapes, selectedPrimaryShapeIds, dra
         !draggedShape
     )
     .map(borderAnnotation(config.hoverAnnotationName, config.hoverLift));
+
+export const getShapesToHover = (dragBox, hoveredShapes, boxHighlightedShapes) =>
+  dragBox ? boxHighlightedShapes : hoveredShapes.slice(0, 1);
 
 export const getSnappedShapes = (
   config,
@@ -1500,6 +1539,41 @@ export const getRotationAnnotations = (config, { shapes, selectedShapes }) => {
     .filter(identity);
 };
 
+export const getDragBox = (dragging, draggedShape, { x0, y0, x1, y1 }) =>
+  dragging &&
+  !draggedShape && {
+    x: (x0 + x1) / 2,
+    y: (y0 + y1) / 2,
+    a: Math.abs(x1 - x0) / 2,
+    b: Math.abs(y1 - y0) / 2,
+  };
+
+export const getDragboxHighlighted = (box, shapes) => {
+  if (!box) {
+    return [];
+  }
+  const filter = insideAABB(box);
+  return shapes.filter(
+    s => s.type !== 'annotation' && !s.parent && filter(s.transformMatrix, s.a, s.b)
+  );
+};
+
+export const getDragBoxAnnotation = (config, box) =>
+  box
+    ? [
+        {
+          id: config.dragBoxAnnotationName,
+          type: 'annotation',
+          subtype: config.dragBoxAnnotationName,
+          interactive: false,
+          parent: null,
+          localTransformMatrix: translate(box.x, box.y, config.dragBoxZ),
+          a: box.a,
+          b: box.b,
+        },
+      ]
+    : [];
+
 export const getAnnotatedShapes = (
   { shapes },
   alignmentGuideAnnotations,
@@ -1507,7 +1581,8 @@ export const getAnnotatedShapes = (
   rotationAnnotations,
   resizeAnnotations,
   rotationTooltipAnnotation,
-  adHocChildrenAnnotations
+  adHocChildrenAnnotations,
+  dragBoxAnnotation
 ) => {
   // fixme update it to a simple concatenator, no need for enlisting the now pretty long subtype list
   const annotations = [].concat(
@@ -1516,7 +1591,8 @@ export const getAnnotatedShapes = (
     rotationAnnotations,
     resizeAnnotations,
     rotationTooltipAnnotation,
-    adHocChildrenAnnotations
+    adHocChildrenAnnotations,
+    dragBoxAnnotation
   );
   // remove preexisting annotations
   const contentShapes = shapes.filter(shape => shape.type !== 'annotation');

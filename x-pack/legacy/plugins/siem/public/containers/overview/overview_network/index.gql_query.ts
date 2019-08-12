@@ -12,6 +12,7 @@ export const overviewNetworkQuery = gql`
     $timerange: TimerangeInput!
     $filterQuery: String
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -29,6 +30,10 @@ export const overviewNetworkQuery = gql`
         packetbeatDNS
         packetbeatFlow
         packetbeatTLS
+        inspect @include(if: $inspect) {
+          dsl
+          response
+        }
       }
     }
   }

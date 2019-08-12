@@ -16,20 +16,23 @@ import { Location } from 'history';
 import { first } from 'lodash';
 import React from 'react';
 import { useTransactionList } from '../../../hooks/useTransactionList';
-import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
+import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
-import { legacyEncodeURIComponent } from '../../shared/Links/url_helpers';
+import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
 import { TransactionList } from './List';
 import { useRedirect } from './useRedirect';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { getHasMLJob } from '../../../services/rest/ml';
 import { history } from '../../../utils/history';
 import { useLocation } from '../../../hooks/useLocation';
+import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { useTrackPageview } from '../../../../../infra/public';
+import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
+import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 
 interface Props {
   urlParams: IUrlParams;
-  serviceTransactionTypes: string[];
 }
 
 function getRedirectLocation({
@@ -40,23 +43,27 @@ function getRedirectLocation({
   location: Location;
   urlParams: IUrlParams;
   serviceTransactionTypes: string[];
-}) {
-  const { serviceName, transactionType } = urlParams;
+}): Location | undefined {
+  const { transactionType } = urlParams;
   const firstTransactionType = first(serviceTransactionTypes);
+
   if (!transactionType && firstTransactionType) {
     return {
       ...location,
-      pathname: `/${serviceName}/transactions/${firstTransactionType}`
+      search: fromQuery({
+        ...toQuery(location.search),
+        transactionType: firstTransactionType
+      })
     };
   }
 }
 
-export function TransactionOverview({
-  urlParams,
-  serviceTransactionTypes
-}: Props) {
+export function TransactionOverview({ urlParams }: Props) {
   const location = useLocation();
   const { serviceName, transactionType } = urlParams;
+
+  // TODO: fetching of transaction types should perhaps be lifted since it is needed in several places. Context?
+  const serviceTransactionTypes = useServiceTransactionTypes(urlParams);
 
   // redirect to first transaction type
   useRedirect(
@@ -68,9 +75,20 @@ export function TransactionOverview({
     })
   );
 
-  const { data: transactionOverviewCharts } = useTransactionOverviewCharts(
-    urlParams
-  );
+  const { data: transactionCharts } = useTransactionCharts();
+
+  useTrackPageview({ app: 'apm', path: 'transaction_overview' });
+  useTrackPageview({ app: 'apm', path: 'transaction_overview', delay: 15000 });
+  const {
+    data: transactionListData,
+    status: transactionListStatus
+  } = useTransactionList(urlParams);
+
+  const { data: hasMLJob = false } = useFetcher(() => {
+    if (serviceName && transactionType) {
+      return getHasMLJob({ serviceName, transactionType });
+    }
+  }, [serviceName, transactionType]);
 
   // TODO: improve urlParams typings.
   // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
@@ -78,14 +96,9 @@ export function TransactionOverview({
     return null;
   }
 
-  const { data: transactionListData } = useTransactionList(urlParams);
-  const { data: hasMLJob = false } = useFetcher(
-    () => getHasMLJob({ serviceName, transactionType }),
-    [serviceName, transactionType]
-  );
-
   return (
     <React.Fragment>
+      {/* TODO: This should be replaced by local filters */}
       {serviceTransactionTypes.length > 1 ? (
         <EuiFormRow
           id="transaction-type-select-row"
@@ -103,22 +116,31 @@ export function TransactionOverview({
             }))}
             value={transactionType}
             onChange={event => {
-              const type = legacyEncodeURIComponent(event.target.value);
               history.push({
                 ...location,
-                pathname: `/${urlParams.serviceName}/transactions/${type}`
+                pathname: `/services/${urlParams.serviceName}/transactions`,
+                search: fromQuery({
+                  ...toQuery(location.search),
+                  transactionType: event.target.value
+                })
               });
             }}
           />
         </EuiFormRow>
       ) : null}
 
-      <TransactionCharts
-        hasMLJob={hasMLJob}
-        charts={transactionOverviewCharts}
-        location={location}
-        urlParams={urlParams}
-      />
+      <ChartsSyncContextProvider>
+        <TransactionBreakdown initialIsOpen={true} />
+
+        <EuiSpacer size="s" />
+
+        <TransactionCharts
+          hasMLJob={hasMLJob}
+          charts={transactionCharts}
+          location={location}
+          urlParams={urlParams}
+        />
+      </ChartsSyncContextProvider>
 
       <EuiSpacer size="s" />
 
@@ -128,8 +150,8 @@ export function TransactionOverview({
         </EuiTitle>
         <EuiSpacer size="s" />
         <TransactionList
+          isLoading={transactionListStatus === 'loading'}
           items={transactionListData}
-          serviceName={serviceName}
         />
       </EuiPanel>
     </React.Fragment>

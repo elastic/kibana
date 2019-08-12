@@ -8,7 +8,7 @@ import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { hostFieldsMap, sourceFieldsMap } from '../ecs_fields';
 import { extendMap } from '../ecs_fields/extend_map';
-import { RequestOptions } from '../framework';
+import { RequestOptionsPaginated } from '../framework';
 
 export const auditdFieldsMap: Readonly<Record<string, string>> = {
   latest: '@timestamp',
@@ -24,12 +24,12 @@ export const buildQuery = ({
   fields,
   filterQuery,
   timerange: { from, to },
-  pagination: { limit },
+  pagination: { querySize },
   defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
   },
-}: RequestOptions) => {
+}: RequestOptionsPaginated) => {
   const esFields = reduceFields(fields, { ...hostFieldsMap, ...sourceFieldsMap });
 
   const filter = [
@@ -62,7 +62,7 @@ export const buildQuery = ({
         ...agg,
         group_by_users: {
           terms: {
-            size: limit + 1,
+            size: querySize,
             field: 'user.name',
             order: [{ 'successes.doc_count': 'desc' }, { 'failures.doc_count': 'desc' }],
           },
@@ -99,13 +99,6 @@ export const buildQuery = ({
                 },
               },
             },
-            authentication: {
-              top_hits: {
-                size: 1,
-                _source: esFields,
-                sort: [{ '@timestamp': { order: 'desc' } }],
-              },
-            },
           },
         },
       },
@@ -114,8 +107,8 @@ export const buildQuery = ({
           filter,
         },
       },
+      size: 0,
     },
-    size: 0,
     track_total_hits: false,
   };
 

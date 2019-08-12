@@ -64,8 +64,9 @@ uiModules.get('kibana')
       // the job completes, that way we don't give the user a toast to download their report if they can't.
       // NOTE: this should be looking at configuration rather than the existence of a navLink
       if (chrome.navLinks.has('kibana:management')) {
-        const managementUrl = chrome.navLinks.get('kibana:management').url;
-        const reportingSectionUrl = `${managementUrl}/kibana/reporting`;
+        const { baseUrl } = chrome.navLinks.get('kibana:management');
+        const reportingSectionUrl = `${baseUrl}/kibana/reporting`;
+
         seeReportLink = (
           <p>
             <FormattedMessage
@@ -99,6 +100,32 @@ uiModules.get('kibana')
       );
 
       const maxSizeReached = get(job, '_source.output.max_size_reached');
+      const csvContainsFormulas = get(job, '_source.output.csv_contains_formulas');
+
+      if (csvContainsFormulas) {
+        return toastNotifications.addWarning({
+          title: (
+            <FormattedMessage
+              id="xpack.reporting.jobCompletionNotifier.csvContainsFormulas.formulaReportTitle"
+              defaultMessage="Report may contain formulas {reportObjectType} '{reportObjectTitle}'"
+              values={{ reportObjectType, reportObjectTitle }}
+            />
+          ),
+          text: (
+            <div>
+              <p>
+                <FormattedMessage
+                  id="xpack.reporting.jobCompletionNotifier.csvContainsFormulas.formulaReportMessage"
+                  defaultMessage="The report contains characters which spreadsheet applications can interpret as formulas."
+                />
+              </p>
+              {seeReportLink}
+              {downloadReportButton}
+            </div>
+          ),
+          'data-test-subj': 'completeReportSuccess',
+        });
+      }
 
       if (maxSizeReached) {
         return toastNotifications.addWarning({

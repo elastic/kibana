@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n/react';
 import { I18nContext } from 'ui/i18n';
 
 import chrome from 'ui/chrome';
@@ -16,13 +16,15 @@ import routes from 'ui/routes';
 import { HashRouter } from 'react-router-dom';
 
 // @ts-ignore: allow traversal to fail on x-pack build
-import { trackUiMetric as track } from '../../../../../src/legacy/core_plugins/ui_metric/public';
+import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 
 export interface AppCore {
   i18n: {
     [i18nPackage: string]: any;
     Context: typeof I18nContext;
     FormattedMessage: typeof FormattedMessage;
+    FormattedDate: typeof FormattedDate;
+    FormattedTime: typeof FormattedTime;
   };
   notification: {
     fatalError: typeof fatalError;
@@ -61,7 +63,7 @@ export interface Plugins extends AppPlugins {
     };
   };
   uiMetric: {
-    track: typeof track;
+    createUiStatsReporter: typeof createUiStatsReporter;
   };
 }
 
@@ -78,6 +80,8 @@ export function createShim(): { core: Core; plugins: Plugins } {
         ...i18n,
         Context: I18nContext,
         FormattedMessage,
+        FormattedDate,
+        FormattedTime,
       },
       routing: {
         registerAngularRoute: (path: string, config: object): void => {
@@ -114,7 +118,7 @@ export function createShim(): { core: Core; plugins: Plugins } {
         },
       },
       uiMetric: {
-        track,
+        createUiStatsReporter,
       },
     },
   };

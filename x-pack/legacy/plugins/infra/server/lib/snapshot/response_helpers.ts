@@ -89,7 +89,7 @@ export const getNodePath = (
     return { value: node[`${gb.field}`], label: node[`${gb.field}`] } as InfraSnapshotNodePath;
   });
   const ip = getIPFromBucket(options.nodeType, groupBucket);
-  path.push({ value: node.id, label: node.name, ip });
+  path.push({ value: node.id, label: node.name || node.id, ip });
   return path;
 };
 

@@ -5,18 +5,18 @@
  */
 import {
   EuiBadge,
+  EuiBasicTable,
   EuiComboBox,
   EuiComboBoxOptionProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  // @ts-ignore
-  EuiInMemoryTable,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
+  EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -27,25 +27,37 @@ import { Ping, PingResults } from '../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/helper';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { pingsQuery } from '../../queries';
+import { LocationName } from './location_name';
+import { Criteria, Pagination } from './monitor_list';
 
 interface PingListQueryResult {
   allPings?: PingResults;
 }
 
 interface PingListProps {
+  onSelectedStatusChange: (status: string | null) => void;
+  onSelectedLocationChange: (location: EuiComboBoxOptionProps[]) => void;
+  onPageCountChange: (itemCount: number) => void;
   onUpdateApp: () => void;
-  onSelectedStatusUpdate: (status: string | null) => void;
+  pageSize: number;
   selectedOption: string;
+  selectedLocation: EuiComboBoxOptionProps[];
 }
 
 type Props = UptimeGraphQLQueryProps<PingListQueryResult> & PingListProps;
 
+export const BaseLocationOptions = [{ label: 'All', value: 'All' }];
+
 export const PingListComponent = ({
   data,
   loading,
-  onSelectedStatusUpdate,
+  onPageCountChange,
+  onSelectedLocationChange,
+  onSelectedStatusChange,
   onUpdateApp,
+  pageSize,
   selectedOption,
+  selectedLocation,
 }: Props) => {
   const statusOptions: EuiComboBoxOptionProps[] = [
     {
@@ -67,6 +79,15 @@ export const PingListComponent = ({
       value: 'down',
     },
   ];
+  const locations = get<string[]>(data, 'allPings.locations');
+  const locationOptions: EuiComboBoxOptionProps[] = !locations
+    ? BaseLocationOptions
+    : BaseLocationOptions.concat(
+        locations.map(name => {
+          return { label: name, value: name };
+        })
+      );
+
   const columns = [
     {
       field: 'monitor.status',
@@ -96,26 +117,43 @@ export const PingListComponent = ({
       ),
     },
     {
-      field: 'monitor.ip',
+      align: 'left',
       dataType: 'number',
+      field: 'observer.geo.name',
+      name: i18n.translate('xpack.uptime.pingList.locationNameColumnLabel', {
+        defaultMessage: 'Location',
+      }),
+      render: (location: string) => <LocationName location={location} />,
+    },
+    {
+      align: 'left',
+      dataType: 'number',
+      field: 'monitor.ip',
       name: i18n.translate('xpack.uptime.pingList.ipAddressColumnLabel', {
         defaultMessage: 'IP',
       }),
     },
     {
+      align: 'right',
       field: 'monitor.duration.us',
       name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
         defaultMessage: 'Duration',
       }),
-      render: (duration: number) => microsToMillis(duration),
+      render: (duration: number) =>
+        i18n.translate('xpack.uptime.pingList.durationMsColumnFormatting', {
+          values: { millis: microsToMillis(duration) },
+          defaultMessage: '{millis} ms',
+        }),
     },
     {
+      align: 'left',
       field: 'error.type',
       name: i18n.translate('xpack.uptime.pingList.errorTypeColumnLabel', {
         defaultMessage: 'Error type',
       }),
     },
     {
+      align: 'left',
       field: 'error.message',
       name: i18n.translate('xpack.uptime.pingList.errorMessageColumnLabel', {
         defaultMessage: 'Error message',
@@ -138,12 +176,9 @@ export const PingListComponent = ({
         ),
     },
   ];
-  useEffect(
-    () => {
-      onUpdateApp();
-    },
-    [selectedOption]
-  );
+  useEffect(() => {
+    onUpdateApp();
+  }, [selectedOption]);
   let pings: Ping[] = [];
   let total: number = 0;
   if (data && data.allPings && data.allPings.pings) {
@@ -166,6 +201,17 @@ export const PingListComponent = ({
       });
     }
   }
+  const pagination: Pagination = {
+    initialPageSize: 20,
+    pageIndex: 0,
+    pageSize,
+    pageSizeOptions: [5, 10, 20, 50, 100],
+    /**
+     * we're not currently supporting pagination in this component
+     * so the first page is the only page
+     */
+    totalItemCount: pageSize,
+  };
 
   return (
     <Fragment>
@@ -191,35 +237,69 @@ export const PingListComponent = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup>
               <EuiFlexItem style={{ minWidth: 200 }}>
-                <EuiComboBox
-                  isClearable={false}
-                  singleSelection={{ asPlainText: true }}
-                  selectedOptions={[
-                    statusOptions.find(({ value }) => value === selectedOption) || statusOptions[2],
-                  ]}
-                  options={statusOptions}
-                  aria-label={i18n.translate('xpack.uptime.pingList.statusLabel', {
-                    defaultMessage: 'Status',
-                  })}
-                  onChange={(selectedOptions: EuiComboBoxOptionProps[]) => {
-                    if (typeof selectedOptions[0].value === 'string') {
-                      onSelectedStatusUpdate(
-                        // @ts-ignore it's definitely a string
-                        selectedOptions[0].value !== '' ? selectedOptions[0].value : null
-                      );
-                    }
-                  }}
-                />
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiFormRow
+                      label="Status"
+                      aria-label={i18n.translate('xpack.uptime.pingList.statusLabel', {
+                        defaultMessage: 'Status',
+                      })}
+                    >
+                      <EuiComboBox
+                        isClearable={false}
+                        singleSelection={{ asPlainText: true }}
+                        selectedOptions={[
+                          statusOptions.find(({ value }) => value === selectedOption) ||
+                            statusOptions[2],
+                        ]}
+                        options={statusOptions}
+                        aria-label={i18n.translate('xpack.uptime.pingList.statusLabel', {
+                          defaultMessage: 'Status',
+                        })}
+                        onChange={(selectedOptions: EuiComboBoxOptionProps[]) => {
+                          if (typeof selectedOptions[0].value === 'string') {
+                            onSelectedStatusChange(
+                              // @ts-ignore it's definitely a string
+                              selectedOptions[0].value !== '' ? selectedOptions[0].value : null
+                            );
+                          }
+                        }}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFormRow
+                      label="Location"
+                      aria-label={i18n.translate('xpack.uptime.pingList.locationLabel', {
+                        defaultMessage: 'Location',
+                      })}
+                    >
+                      <EuiComboBox
+                        isClearable={false}
+                        singleSelection={{ asPlainText: true }}
+                        selectedOptions={selectedLocation}
+                        options={locationOptions}
+                        aria-label={i18n.translate('xpack.uptime.pingList.locationLabel', {
+                          defaultMessage: 'Location',
+                        })}
+                        onChange={(selectedOptions: EuiComboBoxOptionProps[]) => {
+                          onSelectedLocationChange(selectedOptions);
+                        }}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <EuiInMemoryTable
+        <EuiBasicTable
           loading={loading}
           columns={columns}
           items={pings}
-          pagination={{ initialPageSize: 20, pageSizeOptions: [5, 10, 20, 100] }}
+          pagination={pagination}
+          onChange={({ page: { size } }: Criteria) => onPageCountChange(size)}
         />
       </EuiPanel>
     </Fragment>

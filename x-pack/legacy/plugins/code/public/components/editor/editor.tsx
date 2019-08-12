@@ -30,7 +30,8 @@ export interface EditorActions {
 }
 
 interface Props {
-  file: FetchFileResponse;
+  hidden?: boolean;
+  file?: FetchFileResponse;
   revealPosition?: Position;
   isReferencesOpen: boolean;
   isReferencesLoading: boolean;
@@ -45,6 +46,10 @@ interface Props {
 type IProps = Props & EditorActions & RouteComponentProps<MainRouteParams>;
 
 export class EditorComponent extends React.Component<IProps> {
+  static defaultProps = {
+    hidden: false,
+  };
+
   public blameWidgets: any;
   private container: HTMLElement | undefined;
   private monaco: MonacoHelper | undefined;
@@ -56,20 +61,15 @@ export class EditorComponent extends React.Component<IProps> {
     super(props, context);
   }
 
-  updateGutterClickHandler = (
-    repoUri: string,
-    revision: string,
-    path: string,
-    queryString: string
-  ) => {
-    if (this.monaco && this.editor) {
-      if (this.gutterClickHandler) {
-        this.gutterClickHandler.dispose();
-      }
+  registerGutterClickHandler = () => {
+    if (!this.gutterClickHandler) {
       this.gutterClickHandler = this.editor!.onMouseDown(
         (e: editorInterfaces.IEditorMouseEvent) => {
+          const { resource, org, repo, revision, path, pathType } = this.props.match.params;
+          const queryString = this.props.location.search;
+          const repoUri = `${resource}/${org}/${repo}`;
           if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
-            const url = `${repoUri}/blob/${encodeRevisionString(revision)}/${path}`;
+            const url = `${repoUri}/${pathType}/${encodeRevisionString(revision)}/${path}`;
             const position = e.target.position || { lineNumber: 0, column: 0 };
             history.push(`/${url}!L${position.lineNumber}:0${queryString}`);
           }
@@ -88,9 +88,7 @@ export class EditorComponent extends React.Component<IProps> {
     const { file } = this.props;
     if (file && file.content) {
       const { uri, path, revision } = file.payload;
-      const qs = this.props.location.search;
       this.loadText(file.content, uri, path, file.lang!, revision).then(() => {
-        this.updateGutterClickHandler(uri, revision, path, qs);
         if (this.props.revealPosition) {
           this.revealPosition(this.props.revealPosition);
         }
@@ -103,6 +101,9 @@ export class EditorComponent extends React.Component<IProps> {
 
   public componentDidUpdate(prevProps: IProps) {
     const { file } = this.props;
+    if (!file) {
+      return;
+    }
     const { uri, path, revision } = file.payload;
     const {
       resource,
@@ -113,17 +114,11 @@ export class EditorComponent extends React.Component<IProps> {
     } = this.props.match.params;
     const prevContent = prevProps.file && prevProps.file.content;
     const qs = this.props.location.search;
-    if (this.editor && qs !== prevProps.location.search) {
-      this.updateGutterClickHandler(uri, revision, path, qs);
-    }
     if (!this.props.revealPosition && this.monaco) {
       this.monaco.clearLineSelection();
     }
     if (prevContent !== file.content) {
       this.loadText(file.content!, uri, path, file.lang!, revision).then(() => {
-        if (this.editor && qs !== prevProps.location.search) {
-          this.updateGutterClickHandler(uri, revision, path, qs);
-        }
         if (this.props.revealPosition) {
           this.revealPosition(this.props.revealPosition);
         }
@@ -141,15 +136,15 @@ export class EditorComponent extends React.Component<IProps> {
     }
     if (this.monaco && this.monaco.editor) {
       if (prevProps.showBlame !== this.props.showBlame && this.props.showBlame) {
+        this.monaco.editor.updateOptions({ lineDecorationsWidth: 316 });
         this.loadBlame(this.props.blames);
-        this.monaco.editor.updateOptions({ lineHeight: 38 });
       } else if (!this.props.showBlame) {
         this.destroyBlameWidgets();
-        this.monaco.editor.updateOptions({ lineHeight: 18, lineDecorationsWidth: 16 });
+        this.monaco.editor.updateOptions({ lineDecorationsWidth: 16 });
       }
       if (prevProps.blames !== this.props.blames && this.props.showBlame) {
+        this.monaco.editor.updateOptions({ lineDecorationsWidth: 316 });
         this.loadBlame(this.props.blames);
-        this.monaco.editor.updateOptions({ lineHeight: 38, lineDecorationsWidth: 316 });
       }
     }
   }
@@ -162,7 +157,12 @@ export class EditorComponent extends React.Component<IProps> {
   }
   public render() {
     return (
-      <EuiFlexItem data-test-subj="codeSourceViewer" className="codeOverflowHidden" grow={1}>
+      <EuiFlexItem
+        data-test-subj="codeSourceViewer"
+        className="codeOverflowHidden"
+        grow={this.props.hidden ? false : 1}
+        hidden={this.props.hidden}
+      >
         <Shortcut
           keyCode="f"
           help="With editor ‘active’ Find in file"
@@ -170,7 +170,12 @@ export class EditorComponent extends React.Component<IProps> {
           macModifier={[Modifier.meta]}
           winModifier={[Modifier.ctrl]}
         />
-        <div tabIndex={0} className="codeContainer__editor" id="mainEditor" />
+        <div
+          tabIndex={0}
+          className="codeContainer__editor"
+          id="mainEditor"
+          hidden={this.props.hidden}
+        />
         {this.renderReferences()}
       </EuiFlexItem>
     );
@@ -180,9 +185,6 @@ export class EditorComponent extends React.Component<IProps> {
     if (this.blameWidgets) {
       this.destroyBlameWidgets();
     }
-    this.blameWidgets = blames.map((b, index) => {
-      return new BlameWidget(b, index === 0, this.monaco!.editor!);
-    });
     if (!this.lineDecorations) {
       this.lineDecorations = this.monaco!.editor!.deltaDecorations(
         [],
@@ -194,6 +196,9 @@ export class EditorComponent extends React.Component<IProps> {
         ]
       );
     }
+    this.blameWidgets = blames.map((b, index) => {
+      return new BlameWidget(b, index === 0, this.monaco!.editor!);
+    });
   }
 
   public destroyBlameWidgets() {
@@ -209,7 +214,14 @@ export class EditorComponent extends React.Component<IProps> {
 
   private async loadText(text: string, repo: string, file: string, lang: string, revision: string) {
     if (this.monaco) {
+      try {
+        await monaco.editor.colorize(text, lang, {});
+      } catch (e) {
+        // workaround a upstream issue: https://github.com/microsoft/monaco-editor/issues/134
+        lang = 'text';
+      }
       this.editor = await this.monaco.loadFile(repo, file, text, lang, revision);
+      this.registerGutterClickHandler();
     }
   }
 

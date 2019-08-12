@@ -7,27 +7,31 @@
 import { i18n } from '@kbn/i18n';
 import { date } from '../../functions/common/date';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { ISO8601, MOMENTJS, JS } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof date>> = {
   help: i18n.translate('xpack.canvas.functions.dateHelpText', {
     defaultMessage:
-      'Returns the current time, or a time parsed from a string, as milliseconds since epoch',
+      'Returns the current time, or a time parsed from a specified string, as milliseconds since epoch.',
   }),
   args: {
     value: i18n.translate('xpack.canvas.functions.date.args.valueHelpText', {
       defaultMessage:
-        'An optional date string to parse into milliseconds since epoch. Can be either a valid ' +
-        'Javascript Date input or a string to parse using the format argument. Must be an {iso} ' +
-        'string or you must provide the format',
+        'An optional date string that is parsed into milliseconds since epoch. The date string can be either a valid ' +
+        '{JS} {date} input or a string to parse using the {formatArg} argument. Must be an {ISO8601} ' +
+        'string, or you must provide the format.',
       values: {
-        iso: 'ISO8601',
+        JS,
+        date: '`Date`',
+        formatArg: '`format`',
+        ISO8601,
       },
     }),
     format: i18n.translate('xpack.canvas.functions.date.args.formatHelpText', {
-      defaultMessage: 'The {moment} format for parsing the optional date string (See {url})',
+      defaultMessage: 'The {MOMENTJS} format used to parse the specified date string. See {url}.',
       values: {
-        moment: 'momentJS',
+        MOMENTJS,
         url: 'https://momentjs.com/docs/#/displaying/',
       },
     }),

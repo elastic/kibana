@@ -18,6 +18,7 @@ import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGroup
 import { ClusterStatus } from '../../../components/kibana/cluster_status';
 import { I18nContext } from 'ui/i18n';
 import { MonitoringViewBaseController } from '../../base_controller';
+import { CODE_PATH_KIBANA } from '../../../../common/constants';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -45,7 +46,7 @@ uiRoutes.when('/kibana', {
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_KIBANA] });
     },
     pageData: getPageData
   },
@@ -80,12 +81,14 @@ uiRoutes.when('/kibana', {
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_cluster_requests}
                         onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={true}>
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_cluster_response_times}
                         onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>

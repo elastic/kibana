@@ -16,10 +16,63 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Request, ResponseToolkit } from 'hapi';
+import { Request } from 'hapi';
 import { merge } from 'lodash';
 
-import { KibanaRequest } from './router';
+import querystring from 'querystring';
+
+import { schema } from '@kbn/config-schema';
+
+import {
+  KibanaRequest,
+  LifecycleResponseFactory,
+  RouteMethod,
+  KibanaResponseFactory,
+} from './router';
+
+interface RequestFixtureOptions {
+  headers?: Record<string, string>;
+  params?: Record<string, any>;
+  body?: Record<string, any>;
+  query?: Record<string, any>;
+  path?: string;
+  method?: RouteMethod;
+}
+
+function createKibanaRequestMock({
+  path = '/path',
+  headers = { accept: 'something/html' },
+  params = {},
+  body = {},
+  query = {},
+  method = 'get',
+}: RequestFixtureOptions = {}) {
+  const queryString = querystring.stringify(query);
+  return KibanaRequest.from(
+    {
+      headers,
+      params,
+      query,
+      payload: body,
+      path,
+      method,
+      url: {
+        path,
+        query: queryString,
+        search: queryString ? `?${queryString}` : queryString,
+      },
+      route: { settings: {} },
+      raw: {
+        req: {},
+      },
+    } as any,
+    {
+      params: schema.object({}, { allowUnknowns: true }),
+      body: schema.object({}, { allowUnknowns: true }),
+      query: schema.object({}, { allowUnknowns: true }),
+    }
+  );
+}
 
 type DeepPartial<T> = T extends any[]
   ? DeepPartialArray<T[number]>
@@ -39,6 +92,9 @@ function createRawRequestMock(customization: DeepPartial<Request> = {}) {
       headers: {},
       path: '/',
       route: { settings: {} },
+      url: {
+        href: '/',
+      },
       raw: {
         req: {
           url: '/',
@@ -49,12 +105,35 @@ function createRawRequestMock(customization: DeepPartial<Request> = {}) {
   ) as Request;
 }
 
-function createRawResponseToolkitMock(customization: DeepPartial<ResponseToolkit> = {}) {
-  return merge({}, customization) as ResponseToolkit;
-}
+const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
+  ok: jest.fn(),
+  accepted: jest.fn(),
+  noContent: jest.fn(),
+  custom: jest.fn(),
+  redirected: jest.fn(),
+  badRequest: jest.fn(),
+  unauthorized: jest.fn(),
+  forbidden: jest.fn(),
+  notFound: jest.fn(),
+  conflict: jest.fn(),
+  internalError: jest.fn(),
+  customError: jest.fn(),
+});
+
+const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFactory> => ({
+  redirected: jest.fn(),
+  badRequest: jest.fn(),
+  unauthorized: jest.fn(),
+  forbidden: jest.fn(),
+  notFound: jest.fn(),
+  conflict: jest.fn(),
+  internalError: jest.fn(),
+  customError: jest.fn(),
+});
 
 export const httpServerMock = {
-  createKibanaRequest: () => KibanaRequest.from(createRawRequestMock()),
+  createKibanaRequest: createKibanaRequestMock,
   createRawRequest: createRawRequestMock,
-  createRawResponseToolkit: createRawResponseToolkitMock,
+  createResponseFactory: createResponseFactoryMock,
+  createLifecycleResponseFactory: createLifecycleResponseFactoryMock,
 };

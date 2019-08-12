@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`KpiNetwork Component rendering it renders loading icons 1`] = `
-<Memo()
+<KpiNetworkComponent
   data={
     Object {
       "dnsQueries": 278,
@@ -32,12 +32,16 @@ exports[`KpiNetwork Component rendering it renders loading icons 1`] = `
       ],
     }
   }
+  from={1560578400000}
+  id="kpiNetwork"
   loading={true}
+  narrowDateRange={[MockFunction]}
+  to={1560837600000}
 />
 `;
 
 exports[`KpiNetwork Component rendering it renders the default widget 1`] = `
-<Memo()
+<KpiNetworkComponent
   data={
     Object {
       "dnsQueries": 278,
@@ -68,6 +72,10 @@ exports[`KpiNetwork Component rendering it renders the default widget 1`] = `
       ],
     }
   }
+  from={1560578400000}
+  id="kpiNetwork"
   loading={false}
+  narrowDateRange={[MockFunction]}
+  to={1560837600000}
 />
 `;

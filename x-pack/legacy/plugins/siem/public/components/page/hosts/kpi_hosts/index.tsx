@@ -13,17 +13,24 @@ import { KpiHostsData, KpiHostDetailsData } from '../../../../graphql/types';
 import { StatItemsComponent, StatItemsProps, useKpiMatrixStatus } from '../../../stat_items';
 import { kpiHostsMapping } from './kpi_hosts_mapping';
 import { kpiHostDetailsMapping } from './kpi_host_details_mapping';
+import { UpdateDateRange } from '../../../charts/common';
 
 const kpiWidgetHeight = 247;
 
-interface KpiHostsProps {
-  data: KpiHostsData;
+interface GenericKpiHostProps {
+  from: number;
+  id: string;
   loading: boolean;
+  to: number;
+  narrowDateRange: UpdateDateRange;
 }
 
-interface KpiHostDetailsProps {
+interface KpiHostsProps extends GenericKpiHostProps {
+  data: KpiHostsData;
+}
+
+interface KpiHostDetailsProps extends GenericKpiHostProps {
   data: KpiHostDetailsData;
-  loading: boolean;
 }
 
 const FlexGroupSpinner = styled(EuiFlexGroup)`
@@ -32,10 +39,26 @@ const FlexGroupSpinner = styled(EuiFlexGroup)`
   }
 `;
 
-export const KpiHostsComponent = ({ data, loading }: KpiHostsProps | KpiHostDetailsProps) => {
+FlexGroupSpinner.displayName = 'FlexGroupSpinner';
+
+export const KpiHostsComponent = ({
+  data,
+  from,
+  loading,
+  id,
+  to,
+  narrowDateRange,
+}: KpiHostsProps | KpiHostDetailsProps) => {
   const mappings =
     (data as KpiHostsData).hosts !== undefined ? kpiHostsMapping : kpiHostDetailsMapping;
-  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(mappings, data);
+  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
+    mappings,
+    data,
+    id,
+    from,
+    to,
+    narrowDateRange
+  );
   return loading ? (
     <FlexGroupSpinner justifyContent="center" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -44,7 +67,7 @@ export const KpiHostsComponent = ({ data, loading }: KpiHostsProps | KpiHostDeta
     </FlexGroupSpinner>
   ) : (
     <EuiFlexGroup>
-      {statItemsProps.map(mappedStatItemProps => {
+      {statItemsProps.map((mappedStatItemProps, idx) => {
         return <StatItemsComponent {...mappedStatItemProps} />;
       })}
     </EuiFlexGroup>

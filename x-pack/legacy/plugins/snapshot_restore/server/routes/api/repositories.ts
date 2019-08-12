@@ -13,7 +13,11 @@ import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../commo
 import { Repository, RepositoryType, RepositoryVerification } from '../../../common/types';
 
 import { Plugins } from '../../../shim';
-import { deserializeRepositorySettings, serializeRepositorySettings } from '../../lib';
+import {
+  deserializeRepositorySettings,
+  serializeRepositorySettings,
+  getManagedRepositoryName,
+} from '../../lib';
 
 let isCloudEnabled: boolean = false;
 let callWithInternalUser: any;
@@ -30,20 +34,6 @@ export function registerRepositoriesRoutes(router: Router, plugins: Plugins) {
   router.delete('repositories/{names}', deleteHandler);
 }
 
-export const getManagedRepositoryName = async () => {
-  const { persistent, transient, defaults } = await callWithInternalUser('cluster.getSettings', {
-    filterPath: '*.*managed_repository',
-    flatSettings: true,
-    includeDefaults: true,
-  });
-  const { 'cluster.metadata.managed_repository': managedRepositoryName = undefined } = {
-    ...defaults,
-    ...persistent,
-    ...transient,
-  };
-  return managedRepositoryName;
-};
-
 export const getAllHandler: RouterRouteHandler = async (
   req,
   callWithRequest
@@ -51,7 +41,7 @@ export const getAllHandler: RouterRouteHandler = async (
   repositories: Repository[];
   managedRepository?: string;
 }> => {
-  const managedRepository = await getManagedRepositoryName();
+  const managedRepository = await getManagedRepositoryName(callWithInternalUser);
   const repositoriesByName = await callWithRequest('snapshot.getRepository', {
     repository: '_all',
   });
@@ -76,7 +66,7 @@ export const getOneHandler: RouterRouteHandler = async (
   snapshots: { count: number | null } | {};
 }> => {
   const { name } = req.params;
-  const managedRepository = await getManagedRepositoryName();
+  const managedRepository = await getManagedRepositoryName(callWithInternalUser);
   const repositoryByName = await callWithRequest('snapshot.getRepository', { repository: name });
   const {
     responses: snapshotResponses,

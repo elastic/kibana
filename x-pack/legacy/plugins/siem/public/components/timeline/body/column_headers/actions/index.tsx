@@ -25,9 +25,13 @@ const ActionsContainer = styled(EuiFlexGroup)`
   width: ${ACTIONS_WIDTH}px;
 `;
 
+ActionsContainer.displayName = 'ActionsContainer';
+
 const WrappedCloseButton = styled.div<{ show: boolean }>`
   visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
 `;
+
+WrappedCloseButton.displayName = 'WrappedCloseButton';
 
 interface Props {
   header: ColumnHeader;
@@ -59,6 +63,8 @@ export const CloseButton = pure<{
   </WrappedCloseButton>
 ));
 
+CloseButton.displayName = 'CloseButton';
+
 export const Actions = pure<Props>(({ header, isLoading, onColumnRemoved, show, sort }) => (
   <ActionsContainer
     alignItems="center"
@@ -84,3 +90,5 @@ export const Actions = pure<Props>(({ header, isLoading, onColumnRemoved, show, 
     )}
   </ActionsContainer>
 ));
+
+Actions.displayName = 'Actions';

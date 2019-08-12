@@ -97,6 +97,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
                 {this.renderCopyOnSave()}
 
                 <EuiFormRow
+                  fullWidth
                   label={
                     <FormattedMessage
                       id="common.ui.savedObjects.saveModal.titleLabel"
@@ -105,6 +106,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
                   }
                 >
                   <EuiFieldText
+                    fullWidth
                     autoFocus
                     data-test-subj="savedObjectTitle"
                     value={title}

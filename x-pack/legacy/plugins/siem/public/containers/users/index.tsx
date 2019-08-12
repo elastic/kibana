@@ -14,27 +14,31 @@ import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetUsersQuery,
   FlowTarget,
-  PageInfo,
+  PageInfoPaginated,
   UsersEdges,
   UsersSortField,
 } from '../../graphql/types';
-import { inputsModel, networkModel, networkSelectors, State } from '../../store';
+import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { createFilter } from '../helpers';
-import { QueryTemplate, QueryTemplateProps } from '../query_template';
+import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
+import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 
 import { usersQuery } from './index.gql_query';
 
+const ID = 'usersQuery';
+
 export interface UsersArgs {
   id: string;
-  users: UsersEdges[];
-  totalCount: number;
-  pageInfo: PageInfo;
+  inspect: inputsModel.InspectQuery;
   loading: boolean;
-  loadMore: (cursor: string) => void;
+  loadPage: (newActivePage: number) => void;
+  pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
+  totalCount: number;
+  users: UsersEdges[];
 }
 
-export interface OwnProps extends QueryTemplateProps {
+export interface OwnProps extends QueryTemplatePaginatedProps {
   children: (args: UsersArgs) => React.ReactNode;
   flowTarget: FlowTarget;
   ip: string;
@@ -42,30 +46,34 @@ export interface OwnProps extends QueryTemplateProps {
 }
 
 export interface UsersComponentReduxProps {
+  activePage: number;
+  isInspected: boolean;
   limit: number;
   usersSortField: UsersSortField;
 }
 
 type UsersProps = OwnProps & UsersComponentReduxProps;
 
-class UsersComponentQuery extends QueryTemplate<
+class UsersComponentQuery extends QueryTemplatePaginated<
   UsersProps,
   GetUsersQuery.Query,
   GetUsersQuery.Variables
 > {
   public render() {
     const {
-      id = 'usersQuery',
+      activePage,
       children,
-      usersSortField,
+      endDate,
       filterQuery,
+      flowTarget,
+      id = ID,
       ip,
+      isInspected,
+      limit,
       skip,
       sourceId,
       startDate,
-      endDate,
-      limit,
-      flowTarget,
+      usersSortField,
     } = this.props;
     return (
       <Query<GetUsersQuery.Query, GetUsersQuery.Variables>
@@ -74,33 +82,27 @@ class UsersComponentQuery extends QueryTemplate<
         notifyOnNetworkStatusChange
         skip={skip}
         variables={{
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          filterQuery: createFilter(filterQuery),
+          flowTarget,
+          inspect: isInspected,
+          ip,
+          pagination: generateTablePaginationOptions(activePage, limit),
+          sort: usersSortField,
           sourceId,
           timerange: {
             interval: '12h',
             from: startDate!,
             to: endDate!,
           },
-          ip,
-          flowTarget,
-          sort: usersSortField,
-          pagination: {
-            limit,
-            cursor: null,
-            tiebreaker: null,
-          },
-          filterQuery: createFilter(filterQuery),
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const users = getOr([], `source.Users.edges`, data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string) => ({
+          this.setFetchMoreOptions((newActivePage: number) => ({
             variables: {
-              pagination: {
-                cursor: newCursor,
-                limit: limit + parseInt(newCursor, 10),
-              },
+              pagination: generateTablePaginationOptions(newActivePage, limit),
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -112,7 +114,7 @@ class UsersComponentQuery extends QueryTemplate<
                   ...fetchMoreResult.source,
                   Users: {
                     ...fetchMoreResult.source.Users,
-                    edges: [...prev.source.Users.edges, ...fetchMoreResult.source.Users.edges],
+                    edges: [...fetchMoreResult.source.Users.edges],
                   },
                 },
               };
@@ -120,12 +122,13 @@ class UsersComponentQuery extends QueryTemplate<
           }));
           return children({
             id,
-            refetch,
+            inspect: getOr(null, 'source.Users.inspect', data),
             loading,
-            totalCount: getOr(0, 'source.Users.totalCount', data),
-            users,
+            loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Users.pageInfo', data),
-            loadMore: this.wrappedLoadMore,
+            refetch,
+            totalCount: getOr(-1, 'source.Users.totalCount', data),
+            users,
           });
         }}
       </Query>
@@ -135,9 +138,14 @@ class UsersComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getUsersSelector = networkSelectors.usersSelector();
-  const mapStateToProps = (state: State) => ({
-    ...getUsersSelector(state),
-  });
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getUsersSelector(state),
+      isInspected,
+    };
+  };
 
   return mapStateToProps;
 };

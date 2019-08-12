@@ -17,7 +17,10 @@ import * as React from 'react';
 import styled, { injectGlobal } from 'styled-components';
 
 import { Note } from '../../../lib/note';
+import { InputsModelId } from '../../../store/inputs/constants';
+import { InspectButton } from '../../inspect';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
+import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal';
 import { SuperDatePicker } from '../../super_date_picker';
 
 import { Description, Name, NewTimeline, NotesButton, StarIcon } from './helpers';
@@ -29,8 +32,6 @@ import {
   LockIconContainer,
 } from './styles';
 import * as i18n from './translations';
-import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal';
-import { InputsModelId } from '../../../store/inputs/constants';
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
@@ -54,22 +55,31 @@ const Avatar = styled(EuiAvatar)`
   margin-left: 5px;
 `;
 
+Avatar.displayName = 'Avatar';
+
 const DescriptionPopoverMenuContainer = styled.div`
   margin-top: 15px;
 `;
+
+DescriptionPopoverMenuContainer.displayName = 'DescriptionPopoverMenuContainer';
 
 const SettingsIcon = styled(EuiIcon)`
   margin-left: 4px;
   cursor: pointer;
 `;
 
+SettingsIcon.displayName = 'SettingsIcon';
+
 const HiddenFlexItem = styled(EuiFlexItem)`
   display: none;
 `;
 
+HiddenFlexItem.displayName = 'HiddenFlexItem';
+
 interface Props {
   associateNote: AssociateNote;
   createTimeline: CreateTimeline;
+  isDataInTimeline: boolean;
   isDatepickerLocked: boolean;
   isFavorite: boolean;
   title: string;
@@ -136,6 +146,7 @@ export class Properties extends React.PureComponent<Props, State> {
       description,
       getNotesByIds,
       isFavorite,
+      isDataInTimeline,
       isDatepickerLocked,
       title,
       noteIds,
@@ -267,6 +278,18 @@ export class Properties extends React.PureComponent<Props, State> {
 
                 <EuiFlexItem grow={false}>
                   <OpenTimelineModalButton />
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <InspectButton
+                    queryId={timelineId}
+                    inputId="timeline"
+                    inspectIndex={0}
+                    isDisabled={!isDataInTimeline}
+                    onCloseInspect={this.onClosePopover}
+                    show={true}
+                    title={i18n.INSPECT_TIMELINE_TITLE}
+                  />
                 </EuiFlexItem>
 
                 {width < showNotesThreshold ? (

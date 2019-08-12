@@ -7,18 +7,24 @@
 import { i18n } from '@kbn/i18n';
 import { getCell } from '../../functions/common/getCell';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { DATATABLE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof getCell>> = {
   help: i18n.translate('xpack.canvas.functions.getCellHelpText', {
-    defaultMessage: 'Fetch a single cell in a table',
+    defaultMessage: 'Fetchs a single cell from a {DATATABLE}.',
+    values: {
+      DATATABLE,
+    },
   }),
   args: {
     column: i18n.translate('xpack.canvas.functions.getCell.args.columnHelpText', {
-      defaultMessage: 'The name of the column value to fetch',
+      defaultMessage:
+        'The name of the column to fetch the value from. ' +
+        'If not provided, the value is retrieved from the first column.',
     }),
     row: i18n.translate('xpack.canvas.functions.getCell.args.rowHelpText', {
-      defaultMessage: 'The row number, starting at 0',
+      defaultMessage: 'The row number, starting at 0.',
     }),
   },
 };

@@ -8,7 +8,7 @@ import { ActionType, Services } from '../types';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
-import { validateActionTypeParams } from '../lib';
+import { validateParams } from '../lib';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 
 import { registerBuiltInActionTypes } from './index';
@@ -35,6 +35,8 @@ beforeAll(() => {
     getServices,
     taskManager: taskManagerMock.create(),
     encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
+    spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+    getBasePath: jest.fn().mockReturnValue(undefined),
   });
   registerBuiltInActionTypes(actionTypeRegistry);
 });
@@ -57,7 +59,7 @@ describe('get()', () => {
   });
 });
 
-describe('validateActionTypeParams()', () => {
+describe('validateParams()', () => {
   let actionType: ActionType;
 
   beforeAll(() => {
@@ -66,12 +68,12 @@ describe('validateActionTypeParams()', () => {
   });
 
   test('should validate and pass when params is valid', () => {
-    expect(validateActionTypeParams(actionType, { message: 'a message' })).toEqual({
+    expect(validateParams(actionType, { message: 'a message' })).toEqual({
       message: 'a message',
       tags: ['info', 'alerting'],
     });
     expect(
-      validateActionTypeParams(actionType, {
+      validateParams(actionType, {
         message: 'a message',
         tags: ['info', 'blorg'],
       })
@@ -83,27 +85,27 @@ describe('validateActionTypeParams()', () => {
 
   test('should validate and throw error when params is invalid', () => {
     expect(() => {
-      validateActionTypeParams(actionType, {});
+      validateParams(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: child \\"message\\" fails because [\\"message\\" is required]"`
+      `"error validating action params: [message]: expected value of type [string] but got [undefined]"`
     );
 
     expect(() => {
-      validateActionTypeParams(actionType, { message: 1 });
+      validateParams(actionType, { message: 1 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: child \\"message\\" fails because [\\"message\\" must be a string]"`
+      `"error validating action params: [message]: expected value of type [string] but got [number]"`
     );
 
     expect(() => {
-      validateActionTypeParams(actionType, { message: 'x', tags: 2 });
+      validateParams(actionType, { message: 'x', tags: 2 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: child \\"tags\\" fails because [\\"tags\\" must be an array]"`
+      `"error validating action params: [tags]: expected value of type [array] but got [number]"`
     );
 
     expect(() => {
-      validateActionTypeParams(actionType, { message: 'x', tags: [2] });
+      validateParams(actionType, { message: 'x', tags: [2] });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: child \\"tags\\" fails because [\\"tags\\" at position 0 fails because [\\"0\\" must be a string]]"`
+      `"error validating action params: [tags.0]: expected value of type [string] but got [number]"`
     );
   });
 });
@@ -114,14 +116,17 @@ describe('execute()', () => {
 
     services.log = mockLog;
     const actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+    const id = 'some-id';
     await actionType.executor({
+      id,
       services: {
         log: mockLog,
         callCluster: async (path: string, opts: any) => {},
         savedObjectsClient: SavedObjectsClientMock.create(),
       },
-      config: {},
       params: { message: 'message text here', tags: ['tag1', 'tag2'] },
+      config: {},
+      secrets: {},
     });
     expect(mockLog).toMatchInlineSnapshot(`
 [MockFunction] {

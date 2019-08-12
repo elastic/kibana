@@ -17,13 +17,10 @@
  * under the License.
  */
 
-import { DashboardContainerInput } from '../../../../../../src/legacy/core_plugins/dashboard_embeddable_container/public';
-import {
-  HELLO_WORLD_EMBEDDABLE_TYPE,
-  CONTACT_CARD_EMBEDDABLE,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/test_samples';
-
-import { ViewMode } from '../../../../../../src/legacy/core_plugins/embeddable_api/public';
+import { DashboardContainerInput } from '../../../../../../src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
+import { CONTACT_CARD_EMBEDDABLE } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { HELLO_WORLD_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/hello_world/hello_world_embeddable';
+import { ViewMode } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
 export const dashboardInput: DashboardContainerInput = {
   panels: {
@@ -52,51 +49,50 @@ export const dashboardInput: DashboardContainerInput = {
       explicitInput: {
         id: '2',
         firstName: 'Sue',
-      },
+      } as any,
     },
-    // TODO: Uncomment when saved objects are using the new Embeddable API
-    // '822cd0f0-ce7c-419d-aeaa-1171cf452745': {
-    //   gridData: {
-    //     w: 24,
-    //     h: 15,
-    //     x: 0,
-    //     y: 0,
-    //     i: '822cd0f0-ce7c-419d-aeaa-1171cf452745',
-    //   },
-    //   type: 'visualization',
-    //   explicitInput: {
-    //     id: '822cd0f0-ce7c-419d-aeaa-1171cf452745',
-    //   },
-    //   savedObjectId: '3fe22200-3dcb-11e8-8660-4d65aa086b3c',
-    // },
-    // '66f0a265-7b06-4974-accd-d05f74f7aa82': {
-    //   gridData: {
-    //     w: 24,
-    //     h: 15,
-    //     x: 24,
-    //     y: 0,
-    //     i: '66f0a265-7b06-4974-accd-d05f74f7aa82',
-    //   },
-    //   type: 'visualization',
-    //   explicitInput: {
-    //     id: '66f0a265-7b06-4974-accd-d05f74f7aa82',
-    //   },
-    //   savedObjectId: '4c0f47e0-3dcd-11e8-8660-4d65aa086b3c',
-    // },
-    // 'b2861741-40b9-4dc8-b82b-080c6e29a551': {
-    //   gridData: {
-    //     w: 24,
-    //     h: 15,
-    //     x: 0,
-    //     y: 15,
-    //     i: 'b2861741-40b9-4dc8-b82b-080c6e29a551',
-    //   },
-    //   type: 'search',
-    //   explicitInput: {
-    //     id: 'b2861741-40b9-4dc8-b82b-080c6e29a551',
-    //   },
-    //   savedObjectId: 'be5accf0-3dca-11e8-8660-4d65aa086b3c',
-    // },
+    '822cd0f0-ce7c-419d-aeaa-1171cf452745': {
+      gridData: {
+        w: 24,
+        h: 15,
+        x: 0,
+        y: 0,
+        i: '822cd0f0-ce7c-419d-aeaa-1171cf452745',
+      },
+      type: 'visualization',
+      explicitInput: {
+        id: '822cd0f0-ce7c-419d-aeaa-1171cf452745',
+      },
+      savedObjectId: '3fe22200-3dcb-11e8-8660-4d65aa086b3c',
+    },
+    '66f0a265-7b06-4974-accd-d05f74f7aa82': {
+      gridData: {
+        w: 24,
+        h: 15,
+        x: 24,
+        y: 0,
+        i: '66f0a265-7b06-4974-accd-d05f74f7aa82',
+      },
+      type: 'visualization',
+      explicitInput: {
+        id: '66f0a265-7b06-4974-accd-d05f74f7aa82',
+      },
+      savedObjectId: '4c0f47e0-3dcd-11e8-8660-4d65aa086b3c',
+    },
+    'b2861741-40b9-4dc8-b82b-080c6e29a551': {
+      gridData: {
+        w: 24,
+        h: 15,
+        x: 0,
+        y: 15,
+        i: 'b2861741-40b9-4dc8-b82b-080c6e29a551',
+      },
+      type: 'search',
+      explicitInput: {
+        id: 'b2861741-40b9-4dc8-b82b-080c6e29a551',
+      },
+      savedObjectId: 'be5accf0-3dca-11e8-8660-4d65aa086b3c',
+    },
   },
   isFullScreenMode: false,
   filters: [],

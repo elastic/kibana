@@ -29,7 +29,7 @@ function UseGeocentroidParamEditor({ value, setValue }: AggParamEditorProps<bool
   });
 
   return (
-    <EuiFormRow className="visEditorSidebar__aggParamFormRow">
+    <EuiFormRow compressed>
       <EuiSwitch label={label} checked={value} onChange={ev => setValue(ev.target.checked)} />
     </EuiFormRow>
   );

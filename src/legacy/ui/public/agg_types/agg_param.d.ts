@@ -18,10 +18,13 @@
  */
 
 import { AggConfig } from '../vis';
+import { AggParamEditorProps } from '../vis/editors/default';
 
 interface AggParam {
+  editorComponent: React.ComponentType<AggParamEditorProps<unknown>>;
   type: string;
   name: string;
+  advanced?: boolean;
   options?: AggParamOption[];
   required?: boolean;
   displayName?: string;

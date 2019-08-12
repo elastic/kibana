@@ -54,6 +54,3 @@ export function truncate(width: string) {
       text-overflow: ellipsis;
     `;
 }
-
-// height of specific elements
-export const topNavHeight = '29px';

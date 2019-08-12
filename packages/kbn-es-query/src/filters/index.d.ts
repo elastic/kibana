@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { Field, IndexPattern } from 'ui/index_patterns';
 import { CustomFilter, ExistsFilter, PhraseFilter, PhrasesFilter, RangeFilter } from './lib';
 import { RangeFilterParams } from './lib/range_filter';
 
 export * from './lib';
+
+// We can't import the real types from the data plugin, so need to either duplicate
+// them here or figure out another solution, perhaps housing them in this package
+type Field = any;
+type IndexPattern = any;
 
 export function buildExistsFilter(field: Field, indexPattern: IndexPattern): ExistsFilter;
 

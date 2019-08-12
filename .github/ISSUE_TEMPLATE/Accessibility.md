@@ -1,13 +1,15 @@
 ---
 name: Accessibility Issue
 about: Issues to help Kibana be as keyboard-navigable, screen-readable, and accessible to all, with a focus on WCAG / Section 508 compliance
-labels: accessibility
+labels: Project:Accessibility
 title: (Accessibility)
 ---
 
-**Steps to reproduce (assumes [ChromeVox](https://chrome.google.com/webstore/detail/chromevox/kgejglhpjiefppelpmljglcjbhoiplfn) or similar)**
+[Please add a WCAG level label: WCAG A/AA/AAA]
 
-1. 
+**Steps to reproduce**
+
+1.
 2.
 3.
 
@@ -15,15 +17,22 @@ title: (Accessibility)
 
 **Actual Result**
 
-4.
+*
 
 **Expected Result**
 
-4.
+*
 
 **Meta Issue**
 
 **Kibana Version:**
 
-**Relevant WCAG Criteria:** [#.#.# WCAG Criterion](link to https://www.w3.org/WAI/WCAG21/quickref/?versions=2.0)
+**OS:**
 
+**Browser:**
+
+**Screen reader:** [if relevant]
+
+**Relevant WCAG Criteria:** [#.#.# WCAG Criterion - Level A/AA/AAA](link to https://www.w3.org/WAI/WCAG21/quickref/)
+
+**Relevant ARIA spec:** [](link to https://www.w3.org/TR/wai-aria-practices/)

@@ -24,12 +24,9 @@ import { SwitchParamEditor } from './switch';
 import { isType } from '../buckets/migrate_include_exclude_format';
 
 function HasExtendedBoundsParamEditor(props: AggParamEditorProps<boolean>) {
-  useEffect(
-    () => {
-      props.setValue(props.value && props.agg.params.min_doc_count);
-    },
-    [props.agg.params.min_doc_count]
-  );
+  useEffect(() => {
+    props.setValue(props.value && props.agg.params.min_doc_count);
+  }, [props.agg.params.min_doc_count]);
 
   return (
     <SwitchParamEditor

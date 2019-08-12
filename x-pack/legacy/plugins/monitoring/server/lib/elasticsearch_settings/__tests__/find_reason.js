@@ -129,7 +129,7 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
     expect(result).to.eql({ found: false });
   });
 
-  describe('exporters', async () => {
+  describe('exporters', () => {
     it('should warn if all exporters are disabled', async () => {
       const input = {
         exporters: {

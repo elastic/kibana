@@ -13,6 +13,7 @@ import { http } from '../../services/http_service';
 
 import { annotations } from './annotations';
 import { dataFrame } from './data_frame';
+import { dataFrameAnalytics } from './data_frame_analytics';
 import { filters } from './filters';
 import { results } from './results';
 import { jobs } from './jobs';
@@ -221,8 +222,15 @@ export const ml = {
 
   checkMlPrivileges() {
     return http({
-      url: `${basePath}/ml_privileges`,
+      url: `${basePath}/ml_capabilities`,
       method: 'GET',
+    });
+  },
+
+  checkManageMLPrivileges() {
+    return http({
+      url: `${basePath}/ml_capabilities?ignoreSpaces=true`,
+      method: 'GET'
     });
   },
 
@@ -443,6 +451,7 @@ export const ml = {
 
   annotations,
   dataFrame,
+  dataFrameAnalytics,
   filters,
   results,
   jobs,

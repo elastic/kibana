@@ -26,6 +26,10 @@ export const DESCRIPTION = i18n.translate('xpack.siem.eventDetails.description',
   defaultMessage: 'Description',
 });
 
+export const BLANK = i18n.translate('xpack.siem.eventDetails.blank', {
+  defaultMessage: ' ',
+});
+
 export const PLACEHOLDER = i18n.translate('xpack.siem.eventDetails.filter.placeholder', {
   defaultMessage: 'Filter by Field, Value, or Description...',
 });

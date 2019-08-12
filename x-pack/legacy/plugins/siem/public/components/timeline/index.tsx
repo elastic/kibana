@@ -49,6 +49,7 @@ interface StateReduxProps {
   sort?: Sort;
   start: number;
   show?: boolean;
+  showCallOutUnauthorizedMsg: boolean;
 }
 
 interface DispatchProps {
@@ -139,6 +140,7 @@ class StatefulTimelineComponent extends React.Component<Props> {
     sort,
     start,
     show,
+    showCallOutUnauthorizedMsg,
   }: Props) =>
     id !== this.props.id ||
     flyoutHeaderHeight !== this.props.flyoutHeaderHeight ||
@@ -155,7 +157,8 @@ class StatefulTimelineComponent extends React.Component<Props> {
     pageCount !== this.props.pageCount ||
     !isEqual(sort, this.props.sort) ||
     start !== this.props.start ||
-    show !== this.props.show;
+    show !== this.props.show ||
+    showCallOutUnauthorizedMsg !== this.props.showCallOutUnauthorizedMsg;
 
   public componentDidMount() {
     const { createTimeline, id } = this.props;
@@ -179,6 +182,7 @@ class StatefulTimelineComponent extends React.Component<Props> {
       kqlMode,
       kqlQueryExpression,
       show,
+      showCallOutUnauthorizedMsg,
       start,
       sort,
     } = this.props;
@@ -208,6 +212,7 @@ class StatefulTimelineComponent extends React.Component<Props> {
             onToggleDataProviderEnabled={this.onToggleDataProviderEnabled}
             onToggleDataProviderExcluded={this.onToggleDataProviderExcluded}
             show={show!}
+            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
             start={start}
             sort={sort!}
           />
@@ -274,6 +279,7 @@ class StatefulTimelineComponent extends React.Component<Props> {
 }
 
 const makeMapStateToProps = () => {
+  const getShowCallOutUnauthorizedMsg = timelineSelectors.getShowCallOutUnauthorizedMsg();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getKqlQueryTimeline = timelineSelectors.getKqlFilterQuerySelector();
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
@@ -303,6 +309,7 @@ const makeMapStateToProps = () => {
       kqlQueryExpression,
       sort,
       start: input.timerange.from,
+      showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
       show,
     };
   };

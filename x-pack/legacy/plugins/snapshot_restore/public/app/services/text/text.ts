@@ -49,13 +49,16 @@ class TextService {
     };
     this.breadcrumbs = {
       home: i18n.translate('xpack.snapshotRestore.home.breadcrumbTitle', {
-        defaultMessage: 'Snapshot Repositories',
+        defaultMessage: 'Snapshot and Restore',
       }),
       repositoryAdd: i18n.translate('xpack.snapshotRestore.addRepository.breadcrumbTitle', {
         defaultMessage: 'Add repository',
       }),
       repositoryEdit: i18n.translate('xpack.snapshotRestore.editRepository.breadcrumbTitle', {
         defaultMessage: 'Edit repository',
+      }),
+      restoreSnapshot: i18n.translate('xpack.snapshotRestore.restoreSnapshot.breadcrumbTitle', {
+        defaultMessage: 'Restore snapshot',
       }),
     };
   }

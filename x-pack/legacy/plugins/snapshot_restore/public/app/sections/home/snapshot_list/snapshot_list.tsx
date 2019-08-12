@@ -14,7 +14,7 @@ import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { documentationLinksService } from '../../../services/documentation';
-import { loadSnapshots } from '../../../services/http';
+import { useLoadSnapshots } from '../../../services/http';
 import { linkToRepositories } from '../../../services/navigation';
 import { uiMetricService } from '../../../services/ui_metric';
 
@@ -41,10 +41,10 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   const {
     error,
-    loading,
+    isLoading,
     data: { snapshots = [], repositories = [], errors = {} },
-    request: reload,
-  } = loadSnapshots();
+    sendRequest: reload,
+  } = useLoadSnapshots();
 
   const openSnapshotDetailsUrl = (
     repositoryNameToOpen: string,
@@ -61,13 +61,36 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     history.push(`${BASE_PATH}/snapshots`);
   };
 
-  // Allow deeplinking to list pre-filtered by repository name
+  const onSnapshotDeleted = (
+    snapshotsDeleted: Array<{ snapshot: string; repository: string }>
+  ): void => {
+    if (
+      repositoryName &&
+      snapshotId &&
+      snapshotsDeleted.find(
+        ({ snapshot, repository }) => snapshot === snapshotId && repository === repositoryName
+      )
+    ) {
+      closeSnapshotDetails();
+    }
+    if (snapshotsDeleted.length) {
+      reload();
+    }
+  };
+
+  // Allow deeplinking to list pre-filtered by repository name or by policy name
   const [filteredRepository, setFilteredRepository] = useState<string | undefined>(undefined);
+  const [filteredPolicy, setFilteredPolicy] = useState<string | undefined>(undefined);
   useEffect(() => {
     if (search) {
       const parsedParams = parse(search.replace(/^\?/, ''));
-      if (parsedParams.repository && parsedParams.repository !== filteredRepository) {
-        setFilteredRepository(String(parsedParams.repository));
+      const { repository, policy } = parsedParams;
+
+      if (policy && policy !== filteredPolicy) {
+        setFilteredPolicy(String(policy));
+        history.replace(`${BASE_PATH}/snapshots`);
+      } else if (repository && repository !== filteredRepository) {
+        setFilteredRepository(String(repository));
         history.replace(`${BASE_PATH}/snapshots`);
       }
     }
@@ -81,7 +104,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   let content;
 
-  if (loading) {
+  if (isLoading) {
     content = (
       <SectionLoading>
         <FormattedMessage
@@ -229,45 +252,48 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     );
   } else {
     const repositoryErrorsWarning = Object.keys(errors).length ? (
-      <EuiCallOut
-        title={
+      <Fragment>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryWarningTitle"
+              defaultMessage="Some repositories contain errors"
+            />
+          }
+          color="warning"
+          iconType="alert"
+        >
           <FormattedMessage
-            id="xpack.snapshotRestore.repositoryWarningTitle"
-            defaultMessage="Some repositories contain errors"
+            id="xpack.snapshotRestore.repositoryWarningDescription"
+            defaultMessage="Snapshots might load slowly. Go to {repositoryLink} to fix the errors."
+            values={{
+              repositoryLink: (
+                <EuiLink href={linkToRepositories()}>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.repositoryWarningLinkText"
+                    defaultMessage="Repositories"
+                  />
+                </EuiLink>
+              ),
+            }}
           />
-        }
-        color="warning"
-        iconType="alert"
-      >
-        <FormattedMessage
-          id="xpack.snapshotRestore.repositoryWarningDescription"
-          defaultMessage="Snapshots might load slowly. Go to {repositoryLink} to fix the errors."
-          values={{
-            repositoryLink: (
-              <EuiLink href={linkToRepositories()}>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryWarningLinkText"
-                  defaultMessage="Repositories"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiCallOut>
+        </EuiCallOut>
+        <EuiSpacer />
+      </Fragment>
     ) : null;
 
     content = (
       <Fragment>
         {repositoryErrorsWarning}
 
-        <EuiSpacer />
-
         <SnapshotTable
           snapshots={snapshots}
           repositories={repositories}
           reload={reload}
           openSnapshotDetailsUrl={openSnapshotDetailsUrl}
+          onSnapshotDeleted={onSnapshotDeleted}
           repositoryFilter={filteredRepository}
+          policyFilter={filteredPolicy}
         />
       </Fragment>
     );
@@ -280,6 +306,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           repositoryName={repositoryName}
           snapshotId={snapshotId}
           onClose={closeSnapshotDetails}
+          onSnapshotDeleted={onSnapshotDeleted}
         />
       ) : null}
       {content}

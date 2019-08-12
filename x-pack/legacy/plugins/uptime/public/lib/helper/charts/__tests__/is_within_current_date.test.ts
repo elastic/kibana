@@ -13,13 +13,11 @@ describe('isWithinCurrentDate', () => {
   });
 
   it('returns true for timespan within current date', () => {
-    expect.assertions(1);
     // Thu, 19 Jul 2001 14:06:19 GMT -> Thu, 19 Jul 2001 18:52:59 GMT
     expect(isWithinCurrentDate(995551579000, 995568779000)).toBe(true);
   });
 
   it('returns false for timespan crossing current date', () => {
-    expect.assertions(1);
     // Thu, 19 Jul 2001 14:06:19 GMT ->  Fri, 20 Jul 2001 22:39:39 GMT
     expect(isWithinCurrentDate(995551579000, 995668779000)).toBe(false);
   });

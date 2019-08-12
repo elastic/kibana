@@ -10,23 +10,24 @@ import { loadTrace } from '../services/rest/apm/traces';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 
-const INITIAL_DATA = { trace: [], errorsPerTransaction: {} };
+const INITIAL_DATA = {
+  root: undefined,
+  trace: { items: [], exceedsMax: false },
+  errorsPerTransaction: {}
+};
 
 export function useWaterfall(urlParams: IUrlParams) {
   const { traceId, start, end, transactionId } = urlParams;
-  const { data = INITIAL_DATA, status, error } = useFetcher(
-    () => {
-      if (traceId && start && end) {
-        return loadTrace({ traceId, start, end });
-      }
-    },
-    [traceId, start, end]
-  );
+  const { data = INITIAL_DATA, status, error } = useFetcher(() => {
+    if (traceId && start && end) {
+      return loadTrace({ traceId, start, end });
+    }
+  }, [traceId, start, end]);
 
   const waterfall = useMemo(() => getWaterfall(data, transactionId), [
     data,
     transactionId
   ]);
 
-  return { data: waterfall, status, error };
+  return { data: waterfall, status, error, exceedsMax: data.trace.exceedsMax };
 }

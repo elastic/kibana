@@ -39,12 +39,12 @@ export const networkTraffic = (
         [`${id}_interfaces`]: {
           terms: { field: interfaceField },
           aggregations: {
-            [`${id}_interface_avg`]: { avg: { field: metricField } },
+            [`${id}_interface_max`]: { max: { field: metricField } },
           },
         },
         [`${id}_sum_of_interfaces`]: {
           sum_bucket: {
-            buckets_path: `${id}_interfaces>${id}_interface_avg`,
+            buckets_path: `${id}_interfaces>${id}_interface_max`,
           },
         },
         [`${id}_deriv`]: {

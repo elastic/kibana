@@ -9,3 +9,5 @@ export {
   RepositorySettingsValidation,
   validateRepository,
 } from './validate_repository';
+
+export { RestoreValidation, validateRestore } from './validate_restore';

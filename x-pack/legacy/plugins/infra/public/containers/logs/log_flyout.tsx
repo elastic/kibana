@@ -66,21 +66,15 @@ export const useLogFlyout = () => {
     [apolloClient, sourceId, flyoutId]
   );
 
-  const isLoading = useMemo(
-    () => {
-      return loadFlyoutItemRequest.state === 'pending';
-    },
-    [loadFlyoutItemRequest.state]
-  );
+  const isLoading = useMemo(() => {
+    return loadFlyoutItemRequest.state === 'pending';
+  }, [loadFlyoutItemRequest.state]);
 
-  useEffect(
-    () => {
-      if (flyoutId) {
-        loadFlyoutItem();
-      }
-    },
-    [loadFlyoutItem, flyoutId]
-  );
+  useEffect(() => {
+    if (flyoutId) {
+      loadFlyoutItem();
+    }
+  }, [loadFlyoutItem, flyoutId]);
 
   return {
     flyoutVisible,

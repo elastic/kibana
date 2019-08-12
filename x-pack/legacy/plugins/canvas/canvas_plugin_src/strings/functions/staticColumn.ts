@@ -7,20 +7,25 @@
 import { i18n } from '@kbn/i18n';
 import { staticColumn } from '../../functions/common/staticColumn';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof staticColumn>> = {
   help: i18n.translate('xpack.canvas.functions.staticColumnHelpText', {
-    defaultMessage: 'Add a column with a static value',
+    defaultMessage:
+      'Add a column with the same static value in every row. See also {alterColumnFn} and {mapColumnFn}.',
+    values: {
+      alterColumnFn: '`alterColumn`',
+      mapColumnFn: '`mapColumn`',
+    },
   }),
   args: {
     name: i18n.translate('xpack.canvas.functions.staticColumn.args.nameHelpText', {
-      defaultMessage: 'The name of the new column column',
+      defaultMessage: 'The name of the new column column.',
     }),
     value: i18n.translate('xpack.canvas.functions.staticColumn.args.valueHelpText', {
       defaultMessage:
-        'The value to insert in each column. Tip: use a sub-expression to rollup ' +
-        'other columns into a static value',
+        'The value to insert in each row in the new column. Tip: use a sub-expression to rollup ' +
+        'other columns into a static value.',
     }),
   },
 };

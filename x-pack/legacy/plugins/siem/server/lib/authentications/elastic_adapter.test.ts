@@ -28,7 +28,7 @@ describe('authentications elasticsearch_adapter', () => {
     };
 
     test('it formats a authentication with an empty set', () => {
-      const fields: ReadonlyArray<string> = [''];
+      const fields: readonly string[] = [''];
       const data = formatAuthenticationData(fields, hit, auditdFieldsMap);
       const expected: AuthenticationsEdges = {
         cursor: {
@@ -49,7 +49,7 @@ describe('authentications elasticsearch_adapter', () => {
     });
 
     test('it formats a authentications with a source ip correctly', () => {
-      const fields: ReadonlyArray<string> = ['lastSuccess.source.ip'];
+      const fields: readonly string[] = ['lastSuccess.source.ip'];
       const data = formatAuthenticationData(fields, hit, auditdFieldsMap);
       const expected: AuthenticationsEdges = {
         cursor: {
@@ -70,7 +70,7 @@ describe('authentications elasticsearch_adapter', () => {
     });
 
     test('it formats a authentications with a host name only', () => {
-      const fields: ReadonlyArray<string> = ['lastSuccess.host.name'];
+      const fields: readonly string[] = ['lastSuccess.host.name'];
       const data = formatAuthenticationData(fields, hit, auditdFieldsMap);
       const expected: AuthenticationsEdges = {
         cursor: {
@@ -91,7 +91,7 @@ describe('authentications elasticsearch_adapter', () => {
     });
 
     test('it formats a authentications with a host id only', () => {
-      const fields: ReadonlyArray<string> = ['lastSuccess.host.id'];
+      const fields: readonly string[] = ['lastSuccess.host.id'];
       const data = formatAuthenticationData(fields, hit, auditdFieldsMap);
       const expected: AuthenticationsEdges = {
         cursor: {
@@ -112,7 +112,7 @@ describe('authentications elasticsearch_adapter', () => {
     });
 
     test('it formats a authentications with a host name and id correctly', () => {
-      const fields: ReadonlyArray<string> = ['lastSuccess.host.name', 'lastSuccess.host.id'];
+      const fields: readonly string[] = ['lastSuccess.host.name', 'lastSuccess.host.id'];
       const data = formatAuthenticationData(fields, hit, auditdFieldsMap);
       const expected: AuthenticationsEdges = {
         cursor: {

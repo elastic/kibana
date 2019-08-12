@@ -5,10 +5,8 @@
  */
 
 import { editor } from 'monaco-editor';
-import chrome from 'ui/chrome';
 import { ResizeChecker } from 'ui/resize_checker';
 import { EditorActions } from '../components/editor/editor';
-import { provideDefinition } from './definition/definition_provider';
 
 import { toCanonicalUrl } from '../../common/uri_util';
 import { EditorService } from './editor_service';
@@ -37,17 +35,6 @@ export class MonacoHelper {
   public init() {
     return new Promise(resolve => {
       this.monaco = monaco;
-      const definitionProvider = {
-        provideDefinition(model: any, position: any) {
-          return provideDefinition(monaco, model, position);
-        },
-      };
-      this.monaco.languages.registerDefinitionProvider('java', definitionProvider);
-      this.monaco.languages.registerDefinitionProvider('typescript', definitionProvider);
-      this.monaco.languages.registerDefinitionProvider('javascript', definitionProvider);
-      if (chrome.getInjected('enableLangserversDeveloping', false) === true) {
-        this.monaco.languages.registerDefinitionProvider('go', definitionProvider);
-      }
       const codeEditorService = new EditorService(this.getUrlQuery);
       codeEditorService.setMonacoHelper(this);
       this.editor = monaco.editor.create(

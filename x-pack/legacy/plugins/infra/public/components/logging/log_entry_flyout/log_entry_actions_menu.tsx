@@ -6,18 +6,19 @@
 
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import url from 'url';
 
 import chrome from 'ui/chrome';
 import { InfraLogItem } from '../../../graphql/types';
+import { useVisibilityState } from '../../../utils/use_visibility_state';
 
 const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
 
 export const LogEntryActionsMenu: React.FunctionComponent<{
   logItem: InfraLogItem;
 }> = ({ logItem }) => {
-  const { hide, isVisible, show } = useVisibility();
+  const { hide, isVisible, show } = useVisibilityState(false);
 
   const uptimeLink = useMemo(() => getUptimeLink(logItem), [logItem]);
 
@@ -80,15 +81,6 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
       <EuiContextMenuPanel items={menuItems} />
     </EuiPopover>
   );
-};
-
-const useVisibility = (initialVisibility: boolean = false) => {
-  const [isVisible, setIsVisible] = useState(initialVisibility);
-
-  const hide = useCallback(() => setIsVisible(false), [setIsVisible]);
-  const show = useCallback(() => setIsVisible(true), [setIsVisible]);
-
-  return { hide, isVisible, show };
 };
 
 const getUptimeLink = (logItem: InfraLogItem) => {

@@ -36,7 +36,6 @@ export interface InfraMetricLayoutVisualizationConfig {
   type?: InfraMetricLayoutVisualizationType;
   formatter?: InfraFormatterType;
   formatterTemplate?: string;
-  bounds?: { min: number; max: number };
   seriesOverrides: SeriesOverrideObject;
 }
 

@@ -76,6 +76,7 @@ export function Modal(props) {
           <EuiButtonEmpty
             onClick={props.close}
             size="s"
+            data-test-subj="mlModalForecastButtonClose"
           >
             <FormattedMessage
               id="xpack.ml.timeSeriesExplorer.forecastingModal.closeButtonLabel"

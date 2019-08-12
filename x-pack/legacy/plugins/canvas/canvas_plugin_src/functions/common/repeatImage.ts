@@ -9,7 +9,7 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 // @ts-ignore .png file
 import { elasticOutline } from '../../lib/elastic_outline';
-import { Render } from '../types';
+import { Render } from '../../../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -36,25 +36,25 @@ export function repeatImage(): ExpressionFunction<
       types: ['number'],
     },
     args: {
+      emptyImage: {
+        types: ['string', 'null'],
+        help: argHelp.emptyImage,
+        default: null,
+      },
       image: {
         types: ['string', 'null'],
         help: argHelp.image,
         default: elasticOutline,
-      },
-      size: {
-        types: ['number'],
-        default: 100,
-        help: argHelp.size,
       },
       max: {
         types: ['number'],
         help: argHelp.max,
         default: 1000,
       },
-      emptyImage: {
-        types: ['string', 'null'],
-        help: argHelp.emptyImage,
-        default: null,
+      size: {
+        types: ['number'],
+        default: 100,
+        help: argHelp.size,
       },
     },
     fn: (count, args) => {

@@ -39,19 +39,24 @@ export interface RepoTreePayload {
   tree: FileTree;
   path: string;
   withParents: boolean | undefined;
+  revision: string;
+}
+
+export interface TreeCommitPayload {
+  path: string;
+  commits: CommitInfo[];
+  append?: boolean;
 }
 
 export const fetchRootRepoTree = createAction<FetchRepoPayloadWithRevision>('FETCH ROOT REPO TREE');
-export const fetchRootRepoTreeSuccess = createAction<FileTree>('FETCH ROOT REPO TREE SUCCESS');
+export const fetchRootRepoTreeSuccess = createAction<{ tree: FileTree; revision: string }>(
+  'FETCH ROOT REPO TREE SUCCESS'
+);
 export const fetchRootRepoTreeFailed = createAction<Error>('FETCH ROOT REPO TREE FAILED');
 
 export const fetchRepoTree = createAction<FetchRepoTreePayload>('FETCH REPO TREE');
 export const fetchRepoTreeSuccess = createAction<RepoTreePayload>('FETCH REPO TREE SUCCESS');
 export const fetchRepoTreeFailed = createAction<Error>('FETCH REPO TREE FAILED');
-
-export const resetRepoTree = createAction('CLEAR REPO TREE');
-export const closeTreePath = createAction<string>('CLOSE TREE PATH');
-export const openTreePath = createAction<string>('OPEN TREE PATH');
 
 export const fetchRepoBranches = createAction<FetchRepoPayload>('FETCH REPO BRANCHES');
 export const fetchRepoBranchesSuccess = createAction<ReferenceInfo[]>(
@@ -73,11 +78,9 @@ export const setNotFound = createAction<boolean>('SET FILE NOT FOUND');
 export const dirNotFound = createAction<string>('DIR NOT FOUND');
 
 export const fetchTreeCommits = createAction<FetchFilePayload>('FETCH TREE COMMITS');
-export const fetchTreeCommitsSuccess = createAction<{
-  path: string;
-  commits: CommitInfo[];
-  append?: boolean;
-}>('FETCH TREE COMMITS SUCCESS');
+export const fetchTreeCommitsSuccess = createAction<TreeCommitPayload>(
+  'FETCH TREE COMMITS SUCCESS'
+);
 export const fetchTreeCommitsFailed = createAction<Error>('FETCH TREE COMMITS FAILED');
 
 export const fetchMoreCommits = createAction<string>('FETCH MORE COMMITS');

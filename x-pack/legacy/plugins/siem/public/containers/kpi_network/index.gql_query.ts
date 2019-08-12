@@ -17,6 +17,7 @@ export const kpiNetworkQuery = gql`
     $timerange: TimerangeInput!
     $filterQuery: String
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -33,6 +34,10 @@ export const kpiNetworkQuery = gql`
         }
         dnsQueries
         tlsHandshakes
+        inspect @include(if: $inspect) {
+          dsl
+          response
+        }
       }
     }
   }

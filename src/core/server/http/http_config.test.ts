@@ -125,6 +125,16 @@ describe('with TLS', () => {
     expect(configValue.ssl.certificateAuthorities).toBe('/authority/');
   });
 
+  test('can specify socket timeouts', () => {
+    const obj = {
+      keepaliveTimeout: 1e5,
+      socketTimeout: 5e5,
+    };
+    const { keepaliveTimeout, socketTimeout } = config.schema.validate(obj);
+    expect(keepaliveTimeout).toBe(1e5);
+    expect(socketTimeout).toBe(5e5);
+  });
+
   test('can specify several `certificateAuthorities`', () => {
     const obj = {
       ssl: {

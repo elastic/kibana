@@ -20,13 +20,16 @@ export interface KbnServer {
   log: any;
   fieldFormatServiceFactory: (uiConfig: any) => any;
   savedObjects: {
-    getScopedSavedObjectsClient: (
-      fakeRequest: { headers: object; getBasePath: () => string }
-    ) => SavedObjectClient;
+    getScopedSavedObjectsClient: (fakeRequest: {
+      headers: object;
+      getBasePath: () => string;
+    }) => SavedObjectClient;
   };
-  uiSettingsServiceFactory: (
-    { savedObjectsClient }: { savedObjectsClient: SavedObjectClient }
-  ) => UiSettings;
+  uiSettingsServiceFactory: ({
+    savedObjectsClient,
+  }: {
+    savedObjectsClient: SavedObjectClient;
+  }) => UiSettings;
 }
 
 export interface ExportTypeDefinition {
@@ -47,26 +50,8 @@ export interface ConfigObject {
   get: (path?: string) => any;
 }
 
-export interface Size {
-  width: number;
-  height: number;
-}
-
-export interface Logger {
-  debug: (message: string) => void;
-  error: (message: string) => void;
-  warning: (message: string) => void;
-  clone?: (tags: string[]) => Logger;
-}
-
-export interface ViewZoomWidthHeight {
-  zoom: number;
-  width: number;
-  height: number;
-}
-
 export type EvalArgs = any[];
-export type EvalFn<T> = ((...evalArgs: EvalArgs) => T);
+export type EvalFn<T> = (...evalArgs: EvalArgs) => T;
 
 export interface EvaluateOptions {
   fn: EvalFn<any>;
@@ -122,7 +107,7 @@ type PostPayloadState = Partial<{
 }>;
 
 // retain POST payload data, needed for async
-interface JobParamPostPayload extends PostPayloadState {
+export interface JobParamPostPayload extends PostPayloadState {
   timerange: TimeRangeParams;
 }
 
@@ -183,6 +168,7 @@ export interface JobDocOutputExecuted {
   content: string | null; // defaultOutput is null
   max_size_reached: boolean;
   size: number;
+  csv_contains_formulas?: string[];
 }
 
 export interface ESQueueWorker {
@@ -211,3 +197,5 @@ export interface ESQueueInstance {
     workerOptions: ESQueueWorkerOptions
   ) => ESQueueWorker;
 }
+
+export { LevelLogger as Logger } from './server/lib/level_logger';

@@ -7,26 +7,27 @@
 import { i18n } from '@kbn/i18n';
 import { escount } from '../../functions/server/escount';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { ELASTICSEARCH, LUCENE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof escount>> = {
   help: i18n.translate('xpack.canvas.functions.escountHelpText', {
-    defaultMessage: 'Query {es} for a count of the number of hits matching a query',
+    defaultMessage: 'Query {ELASTICSEARCH} for the number of hits matching the specified query.',
     values: {
-      es: 'elasticsearch',
+      ELASTICSEARCH,
     },
   }),
   args: {
-    index: i18n.translate('xpack.canvas.functions.escount.args.indexHelpText', {
-      defaultMessage: 'Specify an index pattern. Eg "{example}"',
+    query: i18n.translate('xpack.canvas.functions.escount.args.queryHelpText', {
+      defaultMessage: 'A {LUCENE} query string.',
       values: {
-        example: 'logstash-*',
+        LUCENE,
       },
     }),
-    query: i18n.translate('xpack.canvas.functions.escount.args.queryHelpText', {
-      defaultMessage: 'A {lucene} query string',
+    index: i18n.translate('xpack.canvas.functions.escount.args.indexHelpText', {
+      defaultMessage: 'An index or index pattern. For example, {example}.',
       values: {
-        lucene: 'Lucene',
+        example: '`"logstash-*"`',
       },
     }),
   },

@@ -136,7 +136,7 @@ class ProjectSettingsModal extends React.PureComponent<
 
 const mapStateToProps = (state: RootState, ownProps: { repoUri: string }) => ({
   languageServers: state.languageServer.languageServers,
-  config: state.repository.projectConfigs![ownProps.repoUri] || defaultConfig,
+  config: state.repositoryManagement.repoLangseverConfigs![ownProps.repoUri] || defaultConfig,
 });
 
 const mapDispatchToProps = {
