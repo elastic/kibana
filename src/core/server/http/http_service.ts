@@ -65,7 +65,6 @@ export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
    * ```ts
    *  // my-plugin.ts
    *  deps.http.registerRouteHandlerContext(
-   *    plugin.opaqueId,
    *    'myApp',
    *    (context, req) => {
    *     async function search (id: string) {

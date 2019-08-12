@@ -14,6 +14,7 @@ http: {
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         basePath: HttpServiceSetup['basePath'];
         isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
+        registerRouteHandlerContext: (name: RequestHandlerContextNames, provider: RequestHandlerContextProvider) => RequestHandlerContextContainer;
         createRouter: () => IRouter;
     };
 ```

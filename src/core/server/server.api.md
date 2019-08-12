@@ -125,6 +125,7 @@ export interface CoreSetup {
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         basePath: HttpServiceSetup['basePath'];
         isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
+        registerRouteHandlerContext: (name: RequestHandlerContextNames, provider: RequestHandlerContextProvider) => RequestHandlerContextContainer;
         createRouter: () => IRouter;
     };
 }
@@ -243,7 +244,8 @@ export interface HttpServerSetup {
 
 // @public (undocumented)
 export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
-    createRouter: (path: string) => IRouter;
+    createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+    registerRouteHandlerContext: (pluginOpaqueId: PluginOpaqueId, contextName: RequestHandlerContextNames, provider: RequestHandlerContextProvider) => RequestHandlerContextContainer;
 };
 
 // @public (undocumented)
@@ -533,7 +535,28 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 };
 
 // @public
-export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (context: {}, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
+export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (context: RequestHandlerContext, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
+
+// @public
+export interface RequestHandlerContext {
+}
+
+// @public
+export type RequestHandlerContextContainer = IContextContainer<RequestHandlerContext, RequestHandlerReturn | Promise<RequestHandlerReturn>, RequestHandlerParams>;
+
+// @public
+export type RequestHandlerContextNames = keyof RequestHandlerContext;
+
+// Warning: (ae-forgotten-export) The symbol "IContextProvider" needs to be exported by the entry point index.d.ts
+// 
+// @public
+export type RequestHandlerContextProvider = IContextProvider<RequestHandlerContext, RequestHandlerContextNames, RequestHandlerParams>;
+
+// @public
+export type RequestHandlerParams = [KibanaRequest, KibanaResponseFactory];
+
+// @public
+export type RequestHandlerReturn = KibanaResponse;
 
 // @public
 export type ResponseError = string | Error | {

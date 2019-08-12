@@ -9,6 +9,7 @@
 
 ```typescript
 export declare type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
-    createRouter: (path: string) => IRouter;
+    createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+    registerRouteHandlerContext: (pluginOpaqueId: PluginOpaqueId, contextName: RequestHandlerContextNames, provider: RequestHandlerContextProvider) => RequestHandlerContextContainer;
 };
 ```

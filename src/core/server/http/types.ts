@@ -19,19 +19,47 @@
 import { IContextProvider, IContextContainer } from '../context';
 import { KibanaRequest, KibanaResponseFactory, KibanaResponse } from './router';
 
+/**
+ * Plugin specific context passed to a route handler.
+ * @public
+ */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RequestHandlerContext {}
+
+/**
+ * A list of RequestHandlerContext object keys.
+ * @public
+ */
 export type RequestHandlerContextNames = keyof RequestHandlerContext;
 
+/**
+ * Parameters passed to the request handler function.
+ * @public
+ */
 export type RequestHandlerParams = [KibanaRequest, KibanaResponseFactory];
+
+/**
+ * Expected outcome the request handler function.
+ * @public
+ */
 export type RequestHandlerReturn = KibanaResponse;
 
+/**
+ * An object that handles registration of http request context providers.
+ * @public
+ */
 export type RequestHandlerContextContainer = IContextContainer<
   RequestHandlerContext,
   RequestHandlerReturn | Promise<RequestHandlerReturn>,
   RequestHandlerParams
 >;
 
+/**
+ * Context provider for request handler.
+ * Extends request context object with provided functionality or data.
+ *
+ * @public
+ */
 export type RequestHandlerContextProvider = IContextProvider<
   RequestHandlerContext,
   RequestHandlerContextNames,
