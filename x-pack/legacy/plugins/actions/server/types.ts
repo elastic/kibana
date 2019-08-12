@@ -71,6 +71,13 @@ export interface ActionType {
   executor: ExecutorType;
 }
 
+export interface RawAction extends SavedObjectAttributes {
+  actionTypeId: string;
+  description: string;
+  config: SavedObjectAttributes;
+  secrets: SavedObjectAttributes;
+}
+
 export interface FiredAction extends SavedObjectAttributes {
   actionId: string;
   params: Record<string, any>;

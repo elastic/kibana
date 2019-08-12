@@ -52,9 +52,6 @@ export function fireRoute({ server, actionTypeRegistry, getServices }: FireRoute
       const { id } = request.params;
       const { params } = request.payload;
       const namespace = server.plugins.spaces && server.plugins.spaces.getSpaceId(request);
-      const savedObjectsClient = request.getSavedObjectsClient();
-      // Ensure user can read the action and has access to it
-      await savedObjectsClient.get('action', id);
       const result = await execute({
         params,
         actionTypeRegistry,
