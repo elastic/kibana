@@ -150,8 +150,11 @@ export function cloneJob(jobId) {
   loadFullJob(jobId)
     .then((job) => {
       if(job.custom_settings && job.custom_settings.created_by) {
+        // if the job is from a wizards, i.e. contains a created_by property
+        // use tempJobCloningObjects to temporarily store the job
         mlJobService.tempJobCloningObjects.job = job;
       } else {
+        // otherwise use the currentJob
         mlJobService.currentJob = job;
       }
       window.location.href = `#/jobs/new_job`;

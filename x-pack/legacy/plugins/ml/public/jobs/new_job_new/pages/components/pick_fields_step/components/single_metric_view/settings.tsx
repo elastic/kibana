@@ -32,7 +32,7 @@ export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
     setBucketSpan(jobCreator.bucketSpan);
   }, [jobCreatorUpdated]);
 
-  const convertToMM = () => {
+  const convertToMultiMetricJob = () => {
     jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
     mlJobService.tempJobCloningObjects.job = {
       ...jobCreator.jobConfig,
@@ -56,7 +56,9 @@ export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={convertToMM}>Convert to multi metric job</EuiButtonEmpty>
+              <EuiButtonEmpty onClick={convertToMultiMetricJob}>
+                Convert to multi metric job
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </Fragment>

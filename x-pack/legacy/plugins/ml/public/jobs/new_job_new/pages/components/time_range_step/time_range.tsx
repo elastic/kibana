@@ -80,28 +80,6 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     });
   }
 
-  // useEffect(() => {
-  //   if (mlJobService.currentJob !== undefined) {
-  //     (async (index: string, timeFieldName: string | undefined, query: object) => {
-  //       const resp = await ml.getTimeFieldRange({
-  //         index,
-  //         timeFieldName,
-  //         query,
-  //       });
-  //       setTimeRange({
-  //         start: resp.start.epoch,
-  //         end: resp.end.epoch,
-  //       });
-  //       // wipe the cloning job
-  //       mlJobService.currentJob = undefined;
-  //     })(
-  //       kibanaContext.currentIndexPattern.title,
-  //       kibanaContext.currentIndexPattern.timeFieldName,
-  //       kibanaContext.combinedQuery
-  //     );
-  //   }
-  // }, []);
-
   return (
     <Fragment>
       {isCurrentStep && (
