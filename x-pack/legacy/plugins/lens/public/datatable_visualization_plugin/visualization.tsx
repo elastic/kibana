@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { EuiForm, EuiFormRow, EuiPanel } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { MultiColumnEditor } from '../multi_column_editor';
@@ -15,6 +15,7 @@ import {
   Visualization,
   VisualizationProps,
   VisualizationSuggestion,
+  Operation,
 } from '../types';
 import { generateId } from '../id_generator';
 import { NativeRenderer } from '../native_renderer';
@@ -57,32 +58,31 @@ export function DataTableLayer({
 }: { layer: LayerState } & VisualizationProps<DatatableVisualizationState>) {
   const datasource = frame.datasourceLayers[layer.layerId];
   return (
-    <EuiPanel className="lnsConfigPanel">
-      <>
-        <NativeRenderer
-          render={datasource.renderLayerPanel}
-          nativeProps={{ layerId: layer.layerId }}
+    <EuiPanel className="lnsConfigPanel__panel" paddingSize="s">
+      <NativeRenderer
+        render={datasource.renderLayerPanel}
+        nativeProps={{ layerId: layer.layerId }}
+      />
+
+      <EuiSpacer size="s" />
+      <EuiFormRow
+        className="lnsConfigPanel__axis"
+        label={i18n.translate('xpack.lens.datatable.columns', { defaultMessage: 'Columns' })}
+      >
+        <MultiColumnEditor
+          accessors={layer.columns}
+          datasource={datasource}
+          dragDropContext={dragDropContext}
+          filterOperations={allOperations}
+          layerId={layer.layerId}
+          onAdd={() => setState(updateColumns(state, layer, columns => [...columns, generateId()]))}
+          onRemove={column =>
+            setState(updateColumns(state, layer, columns => columns.filter(c => c !== column)))
+          }
+          testSubj="datatable_columns"
+          data-test-subj="datatable_multicolumnEditor"
         />
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.datatable.columns', { defaultMessage: 'Columns' })}
-        >
-          <MultiColumnEditor
-            accessors={layer.columns}
-            datasource={datasource}
-            dragDropContext={dragDropContext}
-            filterOperations={allOperations}
-            layerId={layer.layerId}
-            onAdd={() =>
-              setState(updateColumns(state, layer, columns => [...columns, generateId()]))
-            }
-            onRemove={column =>
-              setState(updateColumns(state, layer, columns => columns.filter(c => c !== column)))
-            }
-            testSubj="datatable_columns"
-            data-test-subj="datatable_multicolumnEditor"
-          />
-        </EuiFormRow>
-      </>
+      </EuiFormRow>
     </EuiPanel>
   );
 }
@@ -105,7 +105,7 @@ export const datatableVisualization: Visualization<
 
   getDescription(state) {
     return {
-      icon: 'empty',
+      icon: 'visTable',
       label: i18n.translate('xpack.lens.datatable.label', {
         defaultMessage: 'Datatable',
       }),
@@ -135,7 +135,15 @@ export const datatableVisualization: Visualization<
       const title = i18n.translate('xpack.lens.datatable.visualizationOf', {
         defaultMessage: 'Table: {operations}',
         values: {
-          operations: table.columns.map(col => col.operation.label).join(' & '),
+          operations: table.columns
+            .map(col => col.operation.label)
+            .join(
+              i18n.translate('xpack.lens.datatable.conjunctionSign', {
+                defaultMessage: ' & ',
+                description:
+                  'A character that can be used for conjunction of multiple enumarated items. Make sure to include spaces around it if needed.',
+              })
+            ),
         },
       });
 
@@ -174,7 +182,7 @@ export const datatableVisualization: Visualization<
     const datasource = frame.datasourceLayers[layer.layerId];
     const operations = layer.columns
       .map(columnId => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
-      .filter(o => o.operation);
+      .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
 
     return {
       type: 'expression',
@@ -194,7 +202,7 @@ export const datatableVisualization: Visualization<
                       columnIds: operations.map(o => o.columnId),
                       labels: operations.map(
                         o =>
-                          o.operation!.label ||
+                          o.operation.label ||
                           i18n.translate('xpack.lens.datatable.na', {
                             defaultMessage: 'N/A',
                           })

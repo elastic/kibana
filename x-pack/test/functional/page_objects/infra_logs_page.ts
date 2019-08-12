@@ -25,10 +25,5 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
     async getNoLogsIndicesPrompt() {
       return await testSubjects.find('noLogsIndicesPrompt');
     },
-
-    async openSourceConfigurationFlyout() {
-      await testSubjects.click('configureSourceButton');
-      await testSubjects.exists('sourceConfigurationFlyout');
-    },
   };
 }

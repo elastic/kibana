@@ -74,6 +74,9 @@ export function FieldSelect({
         className: classNames({
           'lnsConfigPanel__fieldOption--incompatible': !isCurrentOperationApplicableWithoutField,
         }),
+        'data-test-subj': `lns-documentOption${
+          isCurrentOperationApplicableWithoutField ? '' : 'Incompatible'
+        }`,
       });
     }
 
@@ -109,6 +112,7 @@ export function FieldSelect({
             label,
             value,
             className: classNames({ 'lnsConfigPanel__fieldOption--incompatible': !compatible }),
+            'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${label}`,
           })),
       });
     }

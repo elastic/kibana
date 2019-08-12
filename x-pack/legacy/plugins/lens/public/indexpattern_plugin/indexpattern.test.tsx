@@ -238,12 +238,12 @@ describe('IndexPattern Data Source', () => {
       };
       const state = await indexPatternDatasource.initialize(queryPersistedState);
       expect(indexPatternDatasource.toExpression(state, 'first')).toMatchInlineSnapshot(`
-"esaggs
-      index=\\"1\\"
-      metricsAtAllLevels=false
-      partialRows=false
-      aggConfigs='[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"timeRange\\":{\\"from\\":\\"now-1d\\",\\"to\\":\\"now\\"},\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":1,\\"extended_bounds\\":{}}}]' | lens_rename_columns idMap='{\\"col-0-col1\\":\\"col1\\",\\"col-1-col2\\":\\"col2\\"}'"
-`);
+        "esaggs
+              index=\\"1\\"
+              metricsAtAllLevels=false
+              partialRows=false
+              aggConfigs='[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":1,\\"extended_bounds\\":{}}}]' | lens_rename_columns idMap='{\\"col-0-col1\\":\\"col1\\",\\"col-1-col2\\":\\"col2\\"}'"
+      `);
     });
   });
 
@@ -330,6 +330,40 @@ describe('IndexPattern Data Source', () => {
           currentIndexPatternId: '1',
         })
       ).toEqual(['first', 'second']);
+    });
+  });
+
+  describe('#getMetadata', () => {
+    it('should return the title of the index patterns', () => {
+      expect(
+        indexPatternDatasource.getMetaData({
+          indexPatterns: expectedIndexPatterns,
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: [],
+              columns: {},
+            },
+            second: {
+              indexPatternId: '2',
+              columnOrder: [],
+              columns: {},
+            },
+          },
+          currentIndexPatternId: '1',
+        })
+      ).toEqual({
+        filterableIndexPatterns: [
+          {
+            id: '1',
+            title: 'my-fake-index-pattern',
+          },
+          {
+            id: '2',
+            title: 'my-fake-restricted-pattern',
+          },
+        ],
+      });
     });
   });
 

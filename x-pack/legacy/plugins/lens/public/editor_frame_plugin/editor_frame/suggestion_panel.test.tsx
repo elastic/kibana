@@ -18,7 +18,7 @@ import { ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
 import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { fromExpression } from '@kbn/interpreter/target/common';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 
 jest.mock('./suggestion_helpers');
 
@@ -86,17 +86,19 @@ describe('suggestion_panel', () => {
   it('should list passed in suggestions', () => {
     const wrapper = mount(<SuggestionPanel {...defaultProps} />);
 
-    expect(wrapper.find('[data-test-subj="suggestion-title"]').map(el => el.text())).toEqual([
-      'Suggestion1',
-      'Suggestion2',
-    ]);
+    expect(
+      wrapper
+        .find('[data-test-subj="lnsSuggestion"]')
+        .find(EuiPanel)
+        .map(el => el.parents(EuiToolTip).prop('content'))
+    ).toEqual(['Suggestion1', 'Suggestion2']);
   });
 
   it('should dispatch visualization switch action if suggestion is clicked', () => {
     const wrapper = mount(<SuggestionPanel {...defaultProps} />);
 
     wrapper
-      .find('[data-test-subj="suggestion-title"]')
+      .find('[data-test-subj="lnsSuggestion"]')
       .first()
       .simulate('click');
 

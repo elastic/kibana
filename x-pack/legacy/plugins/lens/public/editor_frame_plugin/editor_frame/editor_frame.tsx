@@ -5,9 +5,10 @@
  */
 
 import React, { useEffect, useReducer } from 'react';
-import { EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
+import {
+  ExpressionRenderer,
+  Query,
+} from '../../../../../../../src/legacy/core_plugins/data/public';
 import { Datasource, DatasourcePublicAPI, FramePublicAPI, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
@@ -15,21 +16,26 @@ import { ConfigPanelWrapper } from './config_panel_wrapper';
 import { FrameLayout } from './frame_layout';
 import { SuggestionPanel } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
-import { SavedObjectStore, Document } from '../../persistence/saved_object_store';
-import { save } from './save';
+import { Document } from '../../persistence/saved_object_store';
+import { getSavedObjectFormat } from './save';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { generateId } from '../../id_generator';
 
 export interface EditorFrameProps {
   doc?: Document;
-  store: SavedObjectStore;
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
-  redirectTo: (path: string) => void;
   initialDatasourceId: string | null;
   initialVisualizationId: string | null;
   ExpressionRenderer: ExpressionRenderer;
   onError: (e: { message: string }) => void;
+
+  dateRange: {
+    fromDate: string;
+    toDate: string;
+  };
+  query: Query;
+  onChange: (arg: { indexPatternTitles: string[]; doc: Document }) => void;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -90,6 +96,8 @@ export function EditorFrame(props: EditorFrameProps) {
 
   const framePublicAPI: FramePublicAPI = {
     datasourceLayers,
+    dateRange: props.dateRange,
+    query: props.query,
 
     addNewLayer() {
       const newLayerId = generateId();
@@ -147,48 +155,58 @@ export function EditorFrame(props: EditorFrameProps) {
     }
   }, [allLoaded, state.visualization.activeId, state.visualization.state]);
 
-  const activeDatasource =
-    state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
-      ? props.datasourceMap[state.activeDatasourceId]
+  // The frame needs to call onChange every time its internal state changes
+  useEffect(() => {
+    const activeDatasource =
+      state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
+        ? props.datasourceMap[state.activeDatasourceId]
+        : undefined;
+
+    const visualization = state.visualization.activeId
+      ? props.visualizationMap[state.visualization.activeId]
       : undefined;
 
-  const visualization = state.visualization.activeId
-    ? props.visualizationMap[state.visualization.activeId]
-    : undefined;
+    if (!activeDatasource || !visualization) {
+      return;
+    }
+
+    const indexPatternTitles: string[] = [];
+    Object.entries(props.datasourceMap)
+      .filter(([id, datasource]) => {
+        const stateWrapper = state.datasourceStates[id];
+        return (
+          stateWrapper &&
+          !stateWrapper.isLoading &&
+          datasource.getLayers(stateWrapper.state).length > 0
+        );
+      })
+      .forEach(([id, datasource]) => {
+        indexPatternTitles.push(
+          ...datasource
+            .getMetaData(state.datasourceStates[id].state)
+            .filterableIndexPatterns.map(pattern => pattern.title)
+        );
+      });
+
+    const doc = getSavedObjectFormat({
+      activeDatasources: Object.keys(state.datasourceStates).reduce(
+        (datasourceMap, datasourceId) => ({
+          ...datasourceMap,
+          [datasourceId]: props.datasourceMap[datasourceId],
+        }),
+        {}
+      ),
+      visualization,
+      state,
+      activeDatasourceId: state.activeDatasourceId!,
+      framePublicAPI,
+    });
+
+    props.onChange({ indexPatternTitles, doc });
+  }, [state.datasourceStates, state.visualization, props.query, props.dateRange, state.title]);
 
   return (
     <FrameLayout
-      navPanel={
-        <nav>
-          <EuiLink
-            onClick={() => {
-              if (state.activeDatasourceId && activeDatasource && visualization) {
-                save({
-                  activeDatasources: Object.keys(state.datasourceStates).reduce(
-                    (datasourceMap, datasourceId) => ({
-                      ...datasourceMap,
-                      [datasourceId]: props.datasourceMap[datasourceId],
-                    }),
-                    {}
-                  ),
-                  dispatch,
-                  visualization,
-                  state,
-                  redirectTo: props.redirectTo,
-                  store: props.store,
-                  activeDatasourceId: state.activeDatasourceId,
-                  framePublicAPI,
-                }).catch(onError);
-              }
-            }}
-            disabled={state.saving || !state.activeDatasourceId || !state.visualization.activeId}
-          >
-            {i18n.translate('xpack.lens.editorFrame.Save', {
-              defaultMessage: 'Save',
-            })}
-          </EuiLink>
-        </nav>
-      }
       dataPanel={
         <DataPanelWrapper
           datasourceMap={props.datasourceMap}

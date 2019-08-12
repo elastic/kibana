@@ -10,6 +10,7 @@ import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
 import { TermsIndexPatternColumn, IndexPatternColumn } from '../indexpattern';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
+import { DataType } from '../../types';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -42,28 +43,45 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     defaultMessage: 'Top Values',
   }),
   getPossibleOperationsForDocument: () => [],
-  getPossibleOperationsForField: ({ aggregationRestrictions, type }) => {
-    if (type === 'string' && (!aggregationRestrictions || aggregationRestrictions.terms)) {
+  getPossibleOperationsForField: ({ aggregationRestrictions, aggregatable, type }) => {
+    if (
+      (type === 'string' || type === 'boolean') &&
+      aggregatable &&
+      (!aggregationRestrictions || aggregationRestrictions.terms)
+    ) {
       return [
         {
-          dataType: 'string',
+          dataType: type,
           isBucketed: true,
         },
       ];
     }
     return [];
   },
+  isTransferable: (column, newIndexPattern) => {
+    const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+
+    return Boolean(
+      newField &&
+        newField.type === 'string' &&
+        newField.aggregatable &&
+        (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms)
+    );
+  },
   buildColumn({ suggestedPriority, columns, field }) {
+    if (!field) {
+      throw new Error('Invariant error: terms operation requires field');
+    }
     const existingMetricColumn = Object.entries(columns)
       .filter(([_columnId, column]) => column && isSortableByColumn(column))
       .map(([id]) => id)[0];
 
     return {
-      label: ofName(field ? field.name : ''),
-      dataType: 'string',
+      label: ofName(field.name),
+      dataType: field.type as DataType,
       operationType: 'terms',
       suggestedPriority,
-      sourceField: field ? field.name : '',
+      sourceField: field.name,
       isBucketed: true,
       params: {
         size: DEFAULT_SIZE,

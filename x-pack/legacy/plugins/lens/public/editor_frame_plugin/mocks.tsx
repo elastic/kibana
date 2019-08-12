@@ -73,6 +73,8 @@ export function createMockFramePublicAPI(): FrameMock {
     datasourceLayers: {},
     addNewLayer: jest.fn(() => ''),
     removeLayers: jest.fn(),
+    dateRange: { fromDate: 'now-7d', toDate: 'now' },
+    query: { query: '', language: 'lucene' },
   };
 }
 

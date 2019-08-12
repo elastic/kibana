@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip } from '@elastic/eui';
+import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip, EuiToolTip } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import { Action } from './state_management';
@@ -54,46 +54,46 @@ const SuggestionPreview = ({
   }, [previewExpression]);
 
   return (
-    <EuiPanel
-      paddingSize="s"
-      data-test-subj="suggestion"
-      onClick={() => {
+    <EuiToolTip content={suggestion.title}>
+      <EuiPanel
+        className="lnsSuggestionPanel__button"
+        paddingSize="none"
+        data-test-subj="lnsSuggestion"
+        onClick={() => {
         switchToSuggestion(frame, dispatch, suggestion);
-      }}
-    >
-      <EuiTitle size="xxxs">
-        <h4 data-test-subj="suggestion-title">{suggestion.title}</h4>
-      </EuiTitle>
-      {expressionError ? (
-        <div className="lnsSidebar__suggestionIcon">
-          <EuiIconTip
-            size="xxl"
-            color="danger"
-            type="cross"
-            aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
-              defaultMessage: 'Preview rendering failed',
-            })}
-            content={i18n.translate('xpack.lens.editorFrame.previewErrorTooltip', {
-              defaultMessage: 'Preview rendering failed',
-            })}
+        }}
+      >
+        {expressionError ? (
+          <div className="lnsSidebar__suggestionIcon">
+            <EuiIconTip
+              size="xxl"
+              color="danger"
+              type="cross"
+              aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
+                defaultMessage: 'Preview rendering failed',
+              })}
+              content={i18n.translate('xpack.lens.editorFrame.previewErrorTooltip', {
+                defaultMessage: 'Preview rendering failed',
+              })}
+            />
+          </div>
+        ) : previewExpression ? (
+          <ExpressionRendererComponent
+            className="lnsSuggestionChartWrapper"
+            expression={previewExpression}
+            onRenderFailure={(e: unknown) => {
+              // eslint-disable-next-line no-console
+              console.error(`Failed to render preview: `, e);
+              setExpressionError(true);
+            }}
           />
-        </div>
-      ) : previewExpression ? (
-        <ExpressionRendererComponent
-          className="lnsSuggestionChartWrapper"
-          expression={previewExpression}
-          onRenderFailure={(e: unknown) => {
-            // eslint-disable-next-line no-console
-            console.error(`Failed to render preview: `, e);
-            setExpressionError(true);
-          }}
-        />
-      ) : (
-        <div className="lnsSidebar__suggestionIcon">
-          <EuiIcon size="xxl" color="subdued " type={suggestion.previewIcon} />
-        </div>
-      )}
-    </EuiPanel>
+        ) : (
+          <div className="lnsSidebar__suggestionIcon">
+            <EuiIcon size="xxl" type={suggestion.previewIcon} />
+          </div>
+        )}
+      </EuiPanel>
+    </EuiToolTip>
   );
 };
 
@@ -122,9 +122,13 @@ function InnerSuggestionPanel({
     visualizationState,
   }).slice(0, 3);
 
+  if (suggestions.length === 0) {
+    return null;
+  }
+
   return (
-    <div className="lnsSidebar__suggestions">
-      <EuiTitle size="xs">
+    <div className="lnsSuggestionsPanel">
+      <EuiTitle className="lnsSuggestionsPanel__title" size="xxs">
         <h3>
           <FormattedMessage
             id="xpack.lens.editorFrame.suggestionPanelTitle"
@@ -132,15 +136,16 @@ function InnerSuggestionPanel({
           />
         </h3>
       </EuiTitle>
-      {suggestions.map((suggestion, index) => {
-        const previewExpression = suggestion.previewExpression
-          ? prependDatasourceExpression(
-              suggestion.previewExpression,
-              datasourceMap,
-              datasourceStates
-            )
-          : null;
-        return (
+      <div className="lnsSuggestionsPanel__suggestions">
+        {suggestions.map(suggestion => {
+          const previewExpression = suggestion.previewExpression
+            ? prependDatasourceExpression(
+                suggestion.previewExpression,
+                datasourceMap,
+                datasourceStates
+              )
+            : null;
+          return (
           <SuggestionPreview
             suggestion={suggestion}
             dispatch={dispatch}
@@ -149,8 +154,9 @@ function InnerSuggestionPanel({
             previewExpression={previewExpression ? toExpression(previewExpression) : undefined}
             key={`${suggestion.visualizationId}-${suggestion.title}`}
           />
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
