@@ -37,9 +37,13 @@ const HeaderContainer = styled(EuiFlexGroup)<{ width: string }>`
   width: ${({ width }) => width};
 `;
 
+HeaderContainer.displayName = 'HeaderContainer';
+
 const HeaderFlexItem = styled(EuiFlexItem)<{ width: string }>`
   width: ${({ width }) => width};
 `;
+
+HeaderFlexItem.displayName = 'HeaderFlexItem';
 
 const HeaderDiv = styled.div<{ isLoading: boolean }>`
   cursor: ${({ isLoading }) => (isLoading ? 'default' : 'grab')};
@@ -49,10 +53,14 @@ const HeaderDiv = styled.div<{ isLoading: boolean }>`
   overflow: hidden;
 `;
 
+HeaderDiv.displayName = 'HeaderDiv';
+
 const TruncatableHeaderText = styled(TruncatableText)`
   font-weight: bold;
   padding: 5px;
 `;
+
+TruncatableHeaderText.displayName = 'TruncatableHeaderText';
 
 interface Props {
   header: ColumnHeader;
