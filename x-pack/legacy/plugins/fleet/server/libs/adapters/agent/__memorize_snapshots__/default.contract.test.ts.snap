@@ -1,4 +1,107 @@
 
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - create (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "test-agent-id-2",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": {
+        "host": "localhost"
+      },
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-12T15:04:53.953Z",
+    "version": "WzYsMV0="
+  }
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - create (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "test-agent-id-2",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": {
+        "host": "localhost"
+      },
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-12T15:04:54.987Z",
+    "version": "WzcsMV0="
+  }
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - create (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "8c2c3840-bd12-11e9-b9f3-1de71e3ab333",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": {
+        "host": "localhost"
+      },
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-12T15:04:57.028Z",
+    "version": "WzksMV0="
+  }
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - delete (4)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - find (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "test-agent-id-2",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "localhost"
+          },
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:04:54.987Z",
+        "version": "WzcsMV0="
+      }
+    ]
+  }
+}
+
 exports['Agent Adapter create should create a new agent - bulkCreate (4)'] = {
   "results": {
     "saved_objects": [
@@ -29,7 +132,7 @@ exports['Agent Adapter create should create a new agent - bulkCreate (4)'] = {
 exports['Agent Adapter create should create a new agent - create (1)'] = {
   "results": {
     "type": "agents",
-    "id": "3b6d1e40-b9ef-11e9-92c3-0d66c68c242d",
+    "id": "8813c9d0-bd12-11e9-b9f3-1de71e3ab333",
     "attributes": {
       "shared_id": "agent1",
       "active": false,
@@ -44,7 +147,7 @@ exports['Agent Adapter create should create a new agent - create (1)'] = {
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-08T15:14:35.684Z",
+    "updated_at": "2019-08-12T15:04:50.156Z",
     "version": "WzEsMV0="
   }
 }
@@ -75,7 +178,7 @@ exports['Agent Adapter create should create a new agent - create (3)'] = {
 exports['Agent Adapter create should create a new agent - create (4)'] = {
   "results": {
     "type": "agents",
-    "id": "3c7d7cd0-b9ef-11e9-92c3-0d66c68c242d",
+    "id": "ba7dba00-bacb-11e9-8040-8d3ee92147bd",
     "attributes": {
       "shared_id": "agent1",
       "active": false,
@@ -90,7 +193,7 @@ exports['Agent Adapter create should create a new agent - create (4)'] = {
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-08T15:14:37.468Z",
+    "updated_at": "2019-08-09T17:32:58.144Z",
     "version": "WzMsMV0="
   }
 }
@@ -111,7 +214,7 @@ exports['Agent Adapter create should create a new agent - find (2)'] = {
     "saved_objects": [
       {
         "type": "agents",
-        "id": "3b6d1e40-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "8813c9d0-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -126,8 +229,88 @@ exports['Agent Adapter create should create a new agent - find (2)'] = {
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:35.684Z",
+        "updated_at": "2019-08-12T15:04:50.156Z",
         "version": "WzEsMV0="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter create should create a new agent with the specified id if specified - create (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "test-agent-id-1",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": {
+        "host": "localhost"
+      },
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-12T15:04:51.916Z",
+    "version": "WzQsMV0="
+  }
+}
+
+exports['Agent Adapter create should create a new agent with the specified id if specified - create (4)'] = {
+  "results": {
+    "type": "agents",
+    "id": "fdbb8b80-bd0a-11e9-ba77-eb46c42566de",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": {
+        "host": "localhost"
+      },
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-12T14:10:51.576Z",
+    "version": "WzYsMV0="
+  }
+}
+
+exports['Agent Adapter create should create a new agent with the specified id if specified - delete (3)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent with the specified id if specified - find (2)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "test-agent-id-1",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "localhost"
+          },
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:04:51.916Z",
+        "version": "WzQsMV0="
       }
     ]
   }
@@ -215,7 +398,7 @@ exports['Agent Adapter delete should delete an agent - create (3)'] = {
 exports['Agent Adapter delete should delete an agent - create (4)'] = {
   "results": {
     "type": "agents",
-    "id": "38f9cdf0-b9e7-11e9-b447-43273c057f0b",
+    "id": "8f3b7410-bd12-11e9-b9f3-1de71e3ab333",
     "attributes": {
       "shared_id": "agent1",
       "active": false,
@@ -233,15 +416,15 @@ exports['Agent Adapter delete should delete an agent - create (4)'] = {
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-08T14:17:15.599Z",
-    "version": "WzEwLDFd"
+    "updated_at": "2019-08-12T15:05:02.161Z",
+    "version": "WzE1LDFd"
   }
 }
 
 exports['Agent Adapter delete should delete an agent - create (5)'] = {
   "results": {
     "type": "agents",
-    "id": "3f89f980-b9ef-11e9-92c3-0d66c68c242d",
+    "id": "df6f23c0-bd10-11e9-b718-9b4bb3a0f100",
     "attributes": {
       "shared_id": "agent2",
       "active": false,
@@ -259,8 +442,8 @@ exports['Agent Adapter delete should delete an agent - create (5)'] = {
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-08T15:14:42.584Z",
-    "version": "WzEwLDFd"
+    "updated_at": "2019-08-12T14:52:57.724Z",
+    "version": "WzEzLDFd"
   }
 }
 
@@ -371,7 +554,7 @@ exports['Agent Adapter findByMetadata should allow to find agents by local metad
 exports['Agent Adapter findByMetadata should allow to find agents by local metadata - create (1)'] = {
   "results": {
     "type": "agents",
-    "id": "67b37fd0-b9ef-11e9-92c3-0d66c68c242d",
+    "id": "b791d6c0-bd12-11e9-b9f3-1de71e3ab333",
     "attributes": {
       "shared_id": "agent1",
       "active": false,
@@ -389,15 +572,15 @@ exports['Agent Adapter findByMetadata should allow to find agents by local metad
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-08T15:15:49.965Z",
-    "version": "WzEzNCwxXQ=="
+    "updated_at": "2019-08-12T15:06:09.836Z",
+    "version": "WzEzOSwxXQ=="
   }
 }
 
 exports['Agent Adapter findByMetadata should allow to find agents by local metadata - create (2)'] = {
   "results": {
     "type": "agents",
-    "id": "7b0bd360-b9e6-11e9-b382-6bf6e78bed04",
+    "id": "9cf0d6b0-bd0b-11e9-8c81-f55c192d4d0a",
     "attributes": {
       "shared_id": "agent2",
       "active": false,
@@ -415,8 +598,8 @@ exports['Agent Adapter findByMetadata should allow to find agents by local metad
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-08T14:11:56.950Z",
-    "version": "WzEzLDFd"
+    "updated_at": "2019-08-12T14:15:18.683Z",
+    "version": "WzEzOCwxXQ=="
   }
 }
 
@@ -506,7 +689,7 @@ exports['Agent Adapter findByMetadata should allow to find agents by local metad
     "saved_objects": [
       {
         "type": "agents",
-        "id": "67b3f500-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "b7924bf0-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent2",
           "active": false,
@@ -524,8 +707,8 @@ exports['Agent Adapter findByMetadata should allow to find agents by local metad
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:49.968Z",
-        "version": "WzEzMywxXQ=="
+        "updated_at": "2019-08-12T15:06:09.839Z",
+        "version": "WzEzOCwxXQ=="
       }
     ]
   }
@@ -539,7 +722,30 @@ exports['Agent Adapter findByMetadata should allow to find agents by local metad
     "saved_objects": [
       {
         "type": "agents",
-        "id": "67b37fd0-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "b7924bf0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "elastic.co"
+          },
+          "user_provided_metadata": {
+            "color": "blue"
+          },
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:06:09.839Z",
+        "version": "WzEzOCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "b791d6c0-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -557,31 +763,8 @@ exports['Agent Adapter findByMetadata should allow to find agents by local metad
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:49.965Z",
-        "version": "WzEzNCwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "67b3f500-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent2",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id-1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "elastic.co"
-          },
-          "user_provided_metadata": {
-            "color": "blue"
-          },
-          "enrolled_at": "2019-08-05T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:49.968Z",
-        "version": "WzEzMywxXQ=="
+        "updated_at": "2019-08-12T15:06:09.836Z",
+        "version": "WzEzOSwxXQ=="
       }
     ]
   }
@@ -643,7 +826,7 @@ exports['Agent Adapter findByMetadata should allow to find agents by user provid
 exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - create (1)'] = {
   "results": {
     "type": "agents",
-    "id": "7cdac700-b9e6-11e9-b382-6bf6e78bed04",
+    "id": "b965d370-bd12-11e9-b9f3-1de71e3ab333",
     "attributes": {
       "shared_id": "agent1",
       "active": false,
@@ -661,15 +844,15 @@ exports['Agent Adapter findByMetadata should allow to find agents by user provid
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-08T14:11:59.984Z",
-    "version": "WzE3LDFd"
+    "updated_at": "2019-08-12T15:06:12.903Z",
+    "version": "WzE0MywxXQ=="
   }
 }
 
 exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - create (2)'] = {
   "results": {
     "type": "agents",
-    "id": "69849650-b9ef-11e9-92c3-0d66c68c242d",
+    "id": "9ec17800-bd0b-11e9-8c81-f55c192d4d0a",
     "attributes": {
       "shared_id": "agent2",
       "active": false,
@@ -687,8 +870,8 @@ exports['Agent Adapter findByMetadata should allow to find agents by user provid
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-08T15:15:53.013Z",
-    "version": "WzEzOCwxXQ=="
+    "updated_at": "2019-08-12T14:15:21.728Z",
+    "version": "WzE0MSwxXQ=="
   }
 }
 
@@ -786,7 +969,7 @@ exports['Agent Adapter findByMetadata should allow to find agents by user provid
     "saved_objects": [
       {
         "type": "agents",
-        "id": "69842120-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "b965d370-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -804,8 +987,8 @@ exports['Agent Adapter findByMetadata should allow to find agents by user provid
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:53.010Z",
-        "version": "WzEzNywxXQ=="
+        "updated_at": "2019-08-12T15:06:12.903Z",
+        "version": "WzE0MywxXQ=="
       }
     ]
   }
@@ -819,7 +1002,7 @@ exports['Agent Adapter findByMetadata should allow to find agents by user provid
     "saved_objects": [
       {
         "type": "agents",
-        "id": "69842120-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "b965d370-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -837,12 +1020,12 @@ exports['Agent Adapter findByMetadata should allow to find agents by user provid
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:53.010Z",
-        "version": "WzEzNywxXQ=="
+        "updated_at": "2019-08-12T15:06:12.903Z",
+        "version": "WzE0MywxXQ=="
       },
       {
         "type": "agents",
-        "id": "69849650-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "b96648a0-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent2",
           "active": false,
@@ -860,8 +1043,8 @@ exports['Agent Adapter findByMetadata should allow to find agents by user provid
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:53.013Z",
-        "version": "WzEzOCwxXQ=="
+        "updated_at": "2019-08-12T15:06:12.906Z",
+        "version": "WzE0MiwxXQ=="
       }
     ]
   }
@@ -939,7 +1122,7 @@ exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent 
     "saved_objects": [
       {
         "type": "agents",
-        "id": "3f898450-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "8f3b7410-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -957,8 +1140,8 @@ exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent 
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:42.581Z",
-        "version": "WzksMV0="
+        "updated_at": "2019-08-12T15:05:02.161Z",
+        "version": "WzE1LDFd"
       }
     ]
   }
@@ -972,7 +1155,7 @@ exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent 
     "saved_objects": [
       {
         "type": "agents",
-        "id": "3f89f980-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "8f3be940-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent2",
           "active": false,
@@ -990,12 +1173,12 @@ exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent 
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:42.584Z",
-        "version": "WzEwLDFd"
+        "updated_at": "2019-08-12T15:05:02.164Z",
+        "version": "WzE0LDFd"
       },
       {
         "type": "agents",
-        "id": "3f898450-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "8f3b7410-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -1013,10 +1196,538 @@ exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent 
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:42.581Z",
-        "version": "WzksMV0="
+        "updated_at": "2019-08-12T15:05:02.161Z",
+        "version": "WzE1LDFd"
       }
     ]
+  }
+}
+
+exports['Agent Adapter list should list all agents - create (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "769384e0-bd0b-11e9-8c81-f55c192d4d0a",
+    "attributes": {
+      "shared_id": "agent0",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": {
+        "host": "test.fr"
+      },
+      "user_provided_metadata": {
+        "color": "red"
+      },
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-12T14:14:14.318Z",
+    "version": "WzMxLDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create (15)'] = {
+  "results": {
+    "type": "agents",
+    "id": "66ad70c0-ba0b-11e9-b464-83a29b1ee188",
+    "attributes": {
+      "shared_id": "agent14",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": {
+        "host": "test.fr"
+      },
+      "user_provided_metadata": {
+        "color": "red"
+      },
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-08T18:36:14.156Z",
+    "version": "WzI4LDFd"
   }
 }
 
@@ -1281,6 +1992,534 @@ exports['Agent Adapter list should list all agents - create (18)'] = {
     "references": [],
     "updated_at": "2019-08-08T15:14:45.701Z",
     "version": "WzMwLDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create (19)'] = {
+  "results": {
+    "type": "agents",
+    "id": "9117d530-bd12-11e9-b9f3-1de71e3ab333",
+    "attributes": {
+      "shared_id": "agent18",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": {
+        "host": "test.fr"
+      },
+      "user_provided_metadata": {
+        "color": "red"
+      },
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-12T15:05:05.283Z",
+    "version": "WzM2LDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "e142ab40-bd10-11e9-b718-9b4bb3a0f100",
+    "attributes": {
+      "shared_id": "agent4",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": {
+        "host": "test.fr"
+      },
+      "user_provided_metadata": {
+        "color": "red"
+      },
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-12T14:53:00.788Z",
+    "version": "WzI1LDFd"
   }
 }
 
@@ -4834,30 +6073,7 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
     "saved_objects": [
       {
         "type": "agents",
-        "id": "41601910-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent6",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-11T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.664Z",
-        "version": "WzEzLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "41606730-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "91111e70-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent7",
           "active": false,
@@ -4875,58 +6091,12 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
           "enrolled_at": "2019-08-12T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.667Z",
-        "version": "WzE0LDFd"
+        "updated_at": "2019-08-12T15:05:05.239Z",
+        "version": "WzE4LDFd"
       },
       {
         "type": "agents",
-        "id": "415ee090-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent3",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-08T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.657Z",
-        "version": "WzE1LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "41623bf0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent9",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-14T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.679Z",
-        "version": "WzE2LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "415e1d40-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "910d74f0-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -4944,150 +6114,12 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
           "enrolled_at": "2019-08-06T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.652Z",
-        "version": "WzE3LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "415fa3e0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent5",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-10T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.662Z",
-        "version": "WzE4LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4162b120-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent10",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-15T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.682Z",
+        "updated_at": "2019-08-12T15:05:05.214Z",
         "version": "WzE5LDFd"
       },
       {
         "type": "agents",
-        "id": "41645ed0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent14",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-19T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.693Z",
-        "version": "WzIwLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "41659750-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent17",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-22T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.701Z",
-        "version": "WzMwLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4164acf0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent15",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-20T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.695Z",
-        "version": "WzIxLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "41660c80-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent18",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-23T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.704Z",
-        "version": "WzMxLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "415e9270-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "910dea20-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent2",
           "active": false,
@@ -5105,35 +6137,12 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
           "enrolled_at": "2019-08-07T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.654Z",
-        "version": "WzIyLDFd"
+        "updated_at": "2019-08-12T15:05:05.218Z",
+        "version": "WzIwLDFd"
       },
       {
         "type": "agents",
-        "id": "415f55c0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent4",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-09T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.659Z",
-        "version": "WzIzLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4160dc60-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "9111bab0-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent8",
           "active": false,
@@ -5151,14 +6160,14 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
           "enrolled_at": "2019-08-13T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.670Z",
-        "version": "WzI0LDFd"
+        "updated_at": "2019-08-12T15:05:05.242Z",
+        "version": "WzIxLDFd"
       },
       {
         "type": "agents",
-        "id": "41665aa0-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "9112a510-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
-          "shared_id": "agent19",
+          "shared_id": "agent9",
           "active": false,
           "access_token": "TOKEN_1",
           "config_id": "config_id_1",
@@ -5171,15 +6180,15 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
           "user_provided_metadata": {
             "color": "red"
           },
-          "enrolled_at": "2019-08-24T19:35:14.861Z"
+          "enrolled_at": "2019-08-14T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.706Z",
-        "version": "WzMyLDFd"
+        "updated_at": "2019-08-12T15:05:05.249Z",
+        "version": "WzIyLDFd"
       },
       {
         "type": "agents",
-        "id": "41652220-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "91169cb0-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent16",
           "active": false,
@@ -5197,14 +6206,14 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
           "enrolled_at": "2019-08-21T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.698Z",
-        "version": "WzI1LDFd"
+        "updated_at": "2019-08-12T15:05:05.275Z",
+        "version": "WzM0LDFd"
       },
       {
         "type": "agents",
-        "id": "41639b80-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "91184a60-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
-          "shared_id": "agent12",
+          "shared_id": "agent19",
           "active": false,
           "access_token": "TOKEN_1",
           "config_id": "config_id_1",
@@ -5217,17 +6226,17 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
           "user_provided_metadata": {
             "color": "red"
           },
-          "enrolled_at": "2019-08-17T19:35:14.861Z"
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.687Z",
-        "version": "WzI2LDFd"
+        "updated_at": "2019-08-12T15:05:05.286Z",
+        "version": "WzM1LDFd"
       },
       {
         "type": "agents",
-        "id": "415da810-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "910fe5f0-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
-          "shared_id": "agent0",
+          "shared_id": "agent5",
           "active": false,
           "access_token": "TOKEN_1",
           "config_id": "config_id_1",
@@ -5240,38 +6249,15 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
           "user_provided_metadata": {
             "color": "red"
           },
-          "enrolled_at": "2019-08-05T19:35:14.861Z"
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.649Z",
-        "version": "WzI3LDFd"
+        "updated_at": "2019-08-12T15:05:05.231Z",
+        "version": "WzIzLDFd"
       },
       {
         "type": "agents",
-        "id": "4163e9a0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent13",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-18T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.690Z",
-        "version": "WzI5LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "41632650-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "9113b680-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent11",
           "active": false,
@@ -5289,8 +6275,261 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
           "enrolled_at": "2019-08-16T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.685Z",
+        "updated_at": "2019-08-12T15:05:05.255Z",
+        "version": "WzI0LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "911479d0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent12",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-17T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.261Z",
+        "version": "WzI1LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "91156430-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent14",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-19T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.267Z",
+        "version": "WzI2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "91162780-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent15",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-20T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.272Z",
+        "version": "WzI3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "910c8a90-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent0",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.208Z",
         "version": "WzI4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9114ef00-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent13",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-18T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.264Z",
+        "version": "WzI5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9110a940-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent6",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-11T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.236Z",
+        "version": "WzMwLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9117d530-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent18",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-23T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.283Z",
+        "version": "WzM2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "910f70c0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent4",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-09T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.228Z",
+        "version": "WzMxLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "911711e0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.278Z",
+        "version": "WzM3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "91131a40-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.252Z",
+        "version": "WzMyLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "910ead70-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent3",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-08T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.223Z",
+        "version": "WzMzLDFd"
       }
     ]
   }
@@ -5304,30 +6543,7 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
     "saved_objects": [
       {
         "type": "agents",
-        "id": "41601910-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent6",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-11T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.664Z",
-        "version": "WzEzLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "41606730-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "91111e70-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent7",
           "active": false,
@@ -5345,58 +6561,12 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
           "enrolled_at": "2019-08-12T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.667Z",
-        "version": "WzE0LDFd"
+        "updated_at": "2019-08-12T15:05:05.239Z",
+        "version": "WzE4LDFd"
       },
       {
         "type": "agents",
-        "id": "415ee090-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent3",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-08T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.657Z",
-        "version": "WzE1LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "41623bf0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent9",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-14T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.679Z",
-        "version": "WzE2LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "415e1d40-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "910d74f0-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -5414,150 +6584,12 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
           "enrolled_at": "2019-08-06T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.652Z",
-        "version": "WzE3LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "415fa3e0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent5",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-10T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.662Z",
-        "version": "WzE4LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4162b120-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent10",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-15T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.682Z",
+        "updated_at": "2019-08-12T15:05:05.214Z",
         "version": "WzE5LDFd"
       },
       {
         "type": "agents",
-        "id": "41645ed0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent14",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-19T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.693Z",
-        "version": "WzIwLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "41659750-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent17",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-22T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.701Z",
-        "version": "WzMwLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4164acf0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent15",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-20T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.695Z",
-        "version": "WzIxLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "41660c80-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent18",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-23T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.704Z",
-        "version": "WzMxLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "415e9270-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "910dea20-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent2",
           "active": false,
@@ -5575,35 +6607,12 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
           "enrolled_at": "2019-08-07T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.654Z",
-        "version": "WzIyLDFd"
+        "updated_at": "2019-08-12T15:05:05.218Z",
+        "version": "WzIwLDFd"
       },
       {
         "type": "agents",
-        "id": "415f55c0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent4",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-09T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.659Z",
-        "version": "WzIzLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4160dc60-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "9111bab0-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent8",
           "active": false,
@@ -5621,14 +6630,14 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
           "enrolled_at": "2019-08-13T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.670Z",
-        "version": "WzI0LDFd"
+        "updated_at": "2019-08-12T15:05:05.242Z",
+        "version": "WzIxLDFd"
       },
       {
         "type": "agents",
-        "id": "41665aa0-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "9112a510-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
-          "shared_id": "agent19",
+          "shared_id": "agent9",
           "active": false,
           "access_token": "TOKEN_1",
           "config_id": "config_id_1",
@@ -5641,15 +6650,15 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
           "user_provided_metadata": {
             "color": "red"
           },
-          "enrolled_at": "2019-08-24T19:35:14.861Z"
+          "enrolled_at": "2019-08-14T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.706Z",
-        "version": "WzMyLDFd"
+        "updated_at": "2019-08-12T15:05:05.249Z",
+        "version": "WzIyLDFd"
       },
       {
         "type": "agents",
-        "id": "41652220-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "91169cb0-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent16",
           "active": false,
@@ -5667,14 +6676,14 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
           "enrolled_at": "2019-08-21T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.698Z",
-        "version": "WzI1LDFd"
+        "updated_at": "2019-08-12T15:05:05.275Z",
+        "version": "WzM0LDFd"
       },
       {
         "type": "agents",
-        "id": "41639b80-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "91184a60-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
-          "shared_id": "agent12",
+          "shared_id": "agent19",
           "active": false,
           "access_token": "TOKEN_1",
           "config_id": "config_id_1",
@@ -5687,17 +6696,17 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
           "user_provided_metadata": {
             "color": "red"
           },
-          "enrolled_at": "2019-08-17T19:35:14.861Z"
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.687Z",
-        "version": "WzI2LDFd"
+        "updated_at": "2019-08-12T15:05:05.286Z",
+        "version": "WzM1LDFd"
       },
       {
         "type": "agents",
-        "id": "415da810-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "910fe5f0-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
-          "shared_id": "agent0",
+          "shared_id": "agent5",
           "active": false,
           "access_token": "TOKEN_1",
           "config_id": "config_id_1",
@@ -5710,38 +6719,15 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
           "user_provided_metadata": {
             "color": "red"
           },
-          "enrolled_at": "2019-08-05T19:35:14.861Z"
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.649Z",
-        "version": "WzI3LDFd"
+        "updated_at": "2019-08-12T15:05:05.231Z",
+        "version": "WzIzLDFd"
       },
       {
         "type": "agents",
-        "id": "4163e9a0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent13",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-18T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:14:45.690Z",
-        "version": "WzI5LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "41632650-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "9113b680-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent11",
           "active": false,
@@ -5759,8 +6745,261 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
           "enrolled_at": "2019-08-16T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:45.685Z",
+        "updated_at": "2019-08-12T15:05:05.255Z",
+        "version": "WzI0LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "911479d0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent12",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-17T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.261Z",
+        "version": "WzI1LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "91156430-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent14",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-19T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.267Z",
+        "version": "WzI2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "91162780-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent15",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-20T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.272Z",
+        "version": "WzI3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "910c8a90-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent0",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.208Z",
         "version": "WzI4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9114ef00-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent13",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-18T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.264Z",
+        "version": "WzI5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9110a940-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent6",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-11T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.236Z",
+        "version": "WzMwLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9117d530-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent18",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-23T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.283Z",
+        "version": "WzM2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "910f70c0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent4",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-09T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.228Z",
+        "version": "WzMxLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "911711e0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.278Z",
+        "version": "WzM3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "91131a40-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.252Z",
+        "version": "WzMyLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "910ead70-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent3",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-08T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:05.223Z",
+        "version": "WzMzLDFd"
       }
     ]
   }
@@ -6030,10 +7269,274 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - cre
   }
 }
 
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create (17)'] = {
+  "results": {
+    "type": "agents",
+    "id": "2d6e7930-bd0d-11e9-8c72-3d86fe106f39",
+    "attributes": {
+      "shared_id": "agent16",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": {
+        "host": "test.fr"
+      },
+      "user_provided_metadata": {
+        "color": "red"
+      },
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-12T14:26:30.595Z",
+    "version": "Wzc0LDFd"
+  }
+}
+
 exports['Agent Adapter list should support to sort by enrolled_at date ASC - create (20)'] = {
   "results": {
     "type": "agents",
-    "id": "4e34b470-b9ef-11e9-92c3-0d66c68c242d",
+    "id": "9df215e0-bd12-11e9-b9f3-1de71e3ab333",
     "attributes": {
       "shared_id": "agent19",
       "active": false,
@@ -6289,8 +7792,536 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - cre
       }
     },
     "references": [],
-    "updated_at": "2019-08-08T15:15:07.190Z",
-    "version": "WzcyLDFd"
+    "updated_at": "2019-08-12T15:05:26.846Z",
+    "version": "Wzc2LDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create (4)'] = {
+  "results": {
+    "type": "agents",
+    "id": "ee1794c0-bd10-11e9-b718-9b4bb3a0f100",
+    "attributes": {
+      "shared_id": "agent3",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": {
+        "host": "test.fr"
+      },
+      "user_provided_metadata": {
+        "color": "red"
+      },
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-12T14:53:22.316Z",
+    "version": "WzYwLDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create (8)'] = {
+  "results": {
+    "type": "agents",
+    "id": "8366c0b0-bd0b-11e9-8c81-f55c192d4d0a",
+    "attributes": {
+      "shared_id": "agent7",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": {
+        "host": "test.fr"
+      },
+      "user_provided_metadata": {
+        "color": "red"
+      },
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-12T14:14:35.834Z",
+    "version": "Wzc2LDFd"
   }
 }
 
@@ -9444,7 +11475,7 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - fin
     "saved_objects": [
       {
         "type": "agents",
-        "id": "4e2aa250-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "9de8a000-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent0",
           "active": false,
@@ -9462,12 +11493,12 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - fin
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:07.125Z",
-        "version": "WzU1LDFd"
+        "updated_at": "2019-08-12T15:05:26.783Z",
+        "version": "Wzc1LDFd"
       },
       {
         "type": "agents",
-        "id": "4e2b3e90-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "9de91530-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -9485,12 +11516,12 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - fin
           "enrolled_at": "2019-08-06T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:07.128Z",
-        "version": "WzY3LDFd"
+        "updated_at": "2019-08-12T15:05:26.787Z",
+        "version": "WzYzLDFd"
       },
       {
         "type": "agents",
-        "id": "4e2c01e0-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "9de98a60-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent2",
           "active": false,
@@ -9508,8 +11539,8 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - fin
           "enrolled_at": "2019-08-07T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:07.134Z",
-        "version": "WzU3LDFd"
+        "updated_at": "2019-08-12T15:05:26.790Z",
+        "version": "WzY5LDFd"
       }
     ]
   }
@@ -9523,191 +11554,7 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - fin
     "saved_objects": [
       {
         "type": "agents",
-        "id": "4e313200-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent12",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-17T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.167Z",
-        "version": "WzY2LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e2d6170-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent5",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-10T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.143Z",
-        "version": "WzYxLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e32b8a0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent16",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-21T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.178Z",
-        "version": "WzYzLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e2dd6a0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent6",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-11T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.146Z",
-        "version": "WzYwLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e31f550-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent14",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-19T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.173Z",
-        "version": "WzY0LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e318020-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent13",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-18T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.170Z",
-        "version": "WzY1LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e332dd0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent17",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-22T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.181Z",
-        "version": "WzY5LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e2b3e90-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent1",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-06T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.128Z",
-        "version": "WzY3LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e2f3630-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "9deda910-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent9",
           "active": false,
@@ -9725,219 +11572,12 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - fin
           "enrolled_at": "2019-08-14T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:07.155Z",
-        "version": "WzcwLDFd"
+        "updated_at": "2019-08-12T15:05:26.817Z",
+        "version": "WzYwLDFd"
       },
       {
         "type": "agents",
-        "id": "4e2aa250-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent0",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-05T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.125Z",
-        "version": "WzU1LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e34b470-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent19",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-24T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.190Z",
-        "version": "WzcyLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e30bcd0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent11",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-16T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.165Z",
-        "version": "WzU2LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e326a80-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent15",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-20T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.176Z",
-        "version": "WzY4LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e2ec100-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent8",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-13T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.152Z",
-        "version": "WzU4LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e2c7710-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent3",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-08T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.137Z",
-        "version": "WzU0LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e2fab60-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent10",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-15T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.158Z",
-        "version": "WzU5LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e2e4bd0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent7",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-12T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.149Z",
-        "version": "WzYyLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e2c01e0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent2",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-07T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:07.134Z",
-        "version": "WzU3LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "4e337bf0-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "9df1a0b0-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent18",
           "active": false,
@@ -9955,12 +11595,81 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - fin
           "enrolled_at": "2019-08-23T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:07.183Z",
-        "version": "WzcxLDFd"
+        "updated_at": "2019-08-12T15:05:26.843Z",
+        "version": "Wzc0LDFd"
       },
       {
         "type": "agents",
-        "id": "4e2cec40-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "9dee9370-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent11",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-16T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.823Z",
+        "version": "WzcwLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9ded33e0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent8",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-13T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.814Z",
+        "version": "WzY3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9debd450-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent7",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-12T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.805Z",
+        "version": "WzcyLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9dea9bd0-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent4",
           "active": false,
@@ -9978,8 +11687,330 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - fin
           "enrolled_at": "2019-08-09T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:07.140Z",
-        "version": "WzUzLDFd"
+        "updated_at": "2019-08-12T15:05:26.797Z",
+        "version": "WzU5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9df12b80-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.840Z",
+        "version": "Wzc3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9def7dd0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent13",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-18T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.829Z",
+        "version": "WzY4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9df0b650-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent16",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-21T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.837Z",
+        "version": "WzczLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9de98a60-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-07T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.790Z",
+        "version": "WzY5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9deb8630-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent6",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-11T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.802Z",
+        "version": "WzcxLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9deb1100-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent5",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.800Z",
+        "version": "WzYyLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9df06830-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent15",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-20T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.835Z",
+        "version": "WzY2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9de91530-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-06T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.787Z",
+        "version": "WzYzLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9dea26a0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent3",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-08T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.794Z",
+        "version": "WzU4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9df215e0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent19",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.846Z",
+        "version": "Wzc2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9def08a0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent12",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-17T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.826Z",
+        "version": "WzYxLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9dee1e40-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.820Z",
+        "version": "WzY0LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9deff300-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent14",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-19T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.832Z",
+        "version": "WzY1LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "9de8a000-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent0",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:26.783Z",
+        "version": "Wzc1LDFd"
       }
     ]
   }
@@ -10249,10 +12280,802 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - cr
   }
 }
 
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create (10)'] = {
+  "results": {
+    "type": "agents",
+    "id": "d914feb0-bacb-11e9-8040-8d3ee92147bd",
+    "attributes": {
+      "shared_id": "agent9",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": {
+        "host": "test.fr"
+      },
+      "user_provided_metadata": {
+        "color": "red"
+      },
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-09T17:33:49.467Z",
+    "version": "WzExMSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create (13)'] = {
+  "results": {
+    "type": "agents",
+    "id": "1c536c70-bd0b-11e9-ba77-eb46c42566de",
+    "attributes": {
+      "shared_id": "agent12",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": {
+        "host": "test.fr"
+      },
+      "user_provided_metadata": {
+        "color": "red"
+      },
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-12T14:11:42.903Z",
+    "version": "WzExNCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create (14)'] = {
+  "results": {
+    "type": "agents",
+    "id": "faedddd0-bd10-11e9-b718-9b4bb3a0f100",
+    "attributes": {
+      "shared_id": "agent13",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": {
+        "host": "test.fr"
+      },
+      "user_provided_metadata": {
+        "color": "red"
+      },
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-12T14:53:43.853Z",
+    "version": "Wzk3LDFd"
+  }
+}
+
 exports['Agent Adapter list should support to sort by enrolled_at date DESC - create (16)'] = {
   "results": {
     "type": "agents",
-    "id": "5af85fe0-b9ef-11e9-92c3-0d66c68c242d",
+    "id": "aac6ff60-bd12-11e9-b9f3-1de71e3ab333",
     "attributes": {
       "shared_id": "agent15",
       "active": false,
@@ -10508,8 +13331,272 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - cr
       }
     },
     "references": [],
-    "updated_at": "2019-08-08T15:15:28.606Z",
-    "version": "WzExMCwxXQ=="
+    "updated_at": "2019-08-12T15:05:48.374Z",
+    "version": "WzExMywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create (20)'] = {
+  "results": {
+    "type": "agents",
+    "id": "903393e0-bd0b-11e9-8c81-f55c192d4d0a",
+    "attributes": {
+      "shared_id": "agent19",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": {
+        "host": "test.fr"
+      },
+      "user_provided_metadata": {
+        "color": "red"
+      },
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-12T14:14:57.310Z",
+    "version": "WzExNCwxXQ=="
   }
 }
 
@@ -10619,7 +13706,7 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
     "saved_objects": [
       {
         "type": "agents",
-        "id": "5af9bf70-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "aac99770-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent19",
           "active": false,
@@ -10637,12 +13724,12 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
           "enrolled_at": "2019-08-24T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:28.615Z",
-        "version": "WzEwNiwxXQ=="
+        "updated_at": "2019-08-12T15:05:48.391Z",
+        "version": "WzExNiwxXQ=="
       },
       {
         "type": "agents",
-        "id": "5af97150-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "aac92240-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent18",
           "active": false,
@@ -10660,12 +13747,12 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
           "enrolled_at": "2019-08-23T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:28.613Z",
-        "version": "WzEwNSwxXQ=="
+        "updated_at": "2019-08-12T15:05:48.388Z",
+        "version": "WzExNywxXQ=="
       },
       {
         "type": "agents",
-        "id": "5af92330-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "aac8ad10-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent17",
           "active": false,
@@ -10683,8 +13770,8 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
           "enrolled_at": "2019-08-22T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:28.610Z",
-        "version": "WzEwMiwxXQ=="
+        "updated_at": "2019-08-12T15:05:48.385Z",
+        "version": "WzExMiwxXQ=="
       }
     ]
   }
@@ -10698,168 +13785,7 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
     "saved_objects": [
       {
         "type": "agents",
-        "id": "5af1d030-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent1",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-06T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:28.562Z",
-        "version": "Wzk2LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "5af48f50-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent9",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-14T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:28.581Z",
-        "version": "WzExMSwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "5af552a0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent11",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-16T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:28.586Z",
-        "version": "WzEwMSwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "5af9bf70-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent19",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-24T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:28.615Z",
-        "version": "WzEwNiwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "5af72760-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent12",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-17T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:28.597Z",
-        "version": "WzEwOSwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "5af21e50-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent2",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-07T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:28.565Z",
-        "version": "Wzk1LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "5af44130-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent8",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-13T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:28.579Z",
-        "version": "WzEwMCwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "5af15b00-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "aabee910-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent0",
           "active": false,
@@ -10877,14 +13803,14 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:28.560Z",
-        "version": "Wzk4LDFd"
+        "updated_at": "2019-08-12T15:05:48.321Z",
+        "version": "WzEwNiwxXQ=="
       },
       {
         "type": "agents",
-        "id": "5af79c90-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "aac44040-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
-          "shared_id": "agent13",
+          "shared_id": "agent9",
           "active": false,
           "access_token": "TOKEN_1",
           "config_id": "config_id_1",
@@ -10897,199 +13823,15 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
           "user_provided_metadata": {
             "color": "red"
           },
-          "enrolled_at": "2019-08-18T19:35:14.861Z"
+          "enrolled_at": "2019-08-14T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:28.600Z",
-        "version": "WzExMiwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "5af26c70-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent3",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-08T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:28.567Z",
+        "updated_at": "2019-08-12T15:05:48.356Z",
         "version": "Wzk5LDFd"
       },
       {
         "type": "agents",
-        "id": "5af85fe0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent15",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-20T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:28.606Z",
-        "version": "WzExMCwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "5af32fc0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent5",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-10T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:28.572Z",
-        "version": "Wzk0LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "5af37de0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent6",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-11T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:28.574Z",
-        "version": "Wzk3LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "5af92330-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent17",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-22T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:28.610Z",
-        "version": "WzEwMiwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "5af50480-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent10",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-15T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:28.584Z",
-        "version": "WzEwOCwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "5af8ae00-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent16",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-21T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:28.608Z",
-        "version": "WzEwMywxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "5af7eab0-b9ef-11e9-92c3-0d66c68c242d",
-        "attributes": {
-          "shared_id": "agent14",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": {
-            "host": "test.fr"
-          },
-          "user_provided_metadata": {
-            "color": "red"
-          },
-          "enrolled_at": "2019-08-19T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-08T15:15:28.603Z",
-        "version": "WzEwNCwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "5af97150-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "aac92240-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent18",
           "active": false,
@@ -11107,12 +13849,150 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
           "enrolled_at": "2019-08-23T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:28.613Z",
-        "version": "WzEwNSwxXQ=="
+        "updated_at": "2019-08-12T15:05:48.388Z",
+        "version": "WzExNywxXQ=="
       },
       {
         "type": "agents",
-        "id": "5af3f310-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "aabf8550-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-06T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:48.324Z",
+        "version": "WzEwNywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "aac4b570-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:48.358Z",
+        "version": "WzEwNCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "aac99770-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent19",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:48.391Z",
+        "version": "WzExNiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "aac59fd0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent12",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-17T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:48.364Z",
+        "version": "WzEwOSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "aac68a30-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent14",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-19T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:48.371Z",
+        "version": "WzExNSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "aac6ff60-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent15",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-20T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:48.374Z",
+        "version": "WzExMywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "aac355e0-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent7",
           "active": false,
@@ -11130,12 +14010,81 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
           "enrolled_at": "2019-08-12T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:28.577Z",
-        "version": "WzkzLDFd"
+        "updated_at": "2019-08-12T15:05:48.349Z",
+        "version": "WzEwNSwxXQ=="
       },
       {
         "type": "agents",
-        "id": "5af2e1a0-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "aac61500-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent13",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-18T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:48.368Z",
+        "version": "Wzk4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "aac52aa0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent11",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-16T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:48.361Z",
+        "version": "WzEwMCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "aac2e0b0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent6",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-11T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:48.346Z",
+        "version": "WzEwMywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "aac1cf40-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent4",
           "active": false,
@@ -11153,8 +14102,146 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
           "enrolled_at": "2019-08-09T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:15:28.569Z",
-        "version": "WzEwNywxXQ=="
+        "updated_at": "2019-08-12T15:05:48.340Z",
+        "version": "WzEwOCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "aac837e0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent16",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-21T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:48.382Z",
+        "version": "WzExNCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "aac096c0-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent3",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-08T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:48.331Z",
+        "version": "WzExMSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "aac3cb10-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent8",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-13T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:48.353Z",
+        "version": "WzEwMiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "aac8ad10-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:48.385Z",
+        "version": "WzExMiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "aabffa80-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-07T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:48.328Z",
+        "version": "WzExMCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "aac24470-bd12-11e9-b9f3-1de71e3ab333",
+        "attributes": {
+          "shared_id": "agent5",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": {
+            "host": "test.fr"
+          },
+          "user_provided_metadata": {
+            "color": "red"
+          },
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-12T15:05:48.343Z",
+        "version": "WzEwMSwxXQ=="
       }
     ]
   }
@@ -11213,7 +14300,7 @@ exports['Agent Adapter update should allow to update an agent - create (4)'] = {
 exports['Agent Adapter update should allow to update an agent - create (5)'] = {
   "results": {
     "type": "agents",
-    "id": "3e4fcbd0-b9ef-11e9-92c3-0d66c68c242d",
+    "id": "8dff71a0-bd12-11e9-b9f3-1de71e3ab333",
     "attributes": {
       "shared_id": "agent1",
       "active": false,
@@ -11228,8 +14315,8 @@ exports['Agent Adapter update should allow to update an agent - create (5)'] = {
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-08T15:14:40.525Z",
-    "version": "WzcsMV0="
+    "updated_at": "2019-08-12T15:05:00.090Z",
+    "version": "WzEyLDFd"
   }
 }
 
@@ -11279,7 +14366,7 @@ exports['Agent Adapter update should allow to update an agent - find (3)'] = {
     "saved_objects": [
       {
         "type": "agents",
-        "id": "3c7d7cd0-b9ef-11e9-92c3-0d66c68c242d",
+        "id": "8c2c3840-bd12-11e9-b9f3-1de71e3ab333",
         "attributes": {
           "shared_id": "agent1",
           "active": true,
@@ -11294,8 +14381,8 @@ exports['Agent Adapter update should allow to update an agent - find (3)'] = {
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-08T15:14:38.488Z",
-        "version": "WzQsMV0="
+        "updated_at": "2019-08-12T15:04:58.063Z",
+        "version": "WzEwLDFd"
       }
     ]
   }
@@ -11303,10 +14390,10 @@ exports['Agent Adapter update should allow to update an agent - find (3)'] = {
 
 exports['Agent Adapter update should allow to update an agent - get (2)'] = {
   "results": {
-    "id": "3c7d7cd0-b9ef-11e9-92c3-0d66c68c242d",
+    "id": "8c2c3840-bd12-11e9-b9f3-1de71e3ab333",
     "type": "agents",
-    "updated_at": "2019-08-08T15:14:38.488Z",
-    "version": "WzQsMV0=",
+    "updated_at": "2019-08-12T15:04:58.063Z",
+    "version": "WzEwLDFd",
     "attributes": {
       "shared_id": "agent1",
       "active": true,
@@ -11326,13 +14413,18 @@ exports['Agent Adapter update should allow to update an agent - get (2)'] = {
 
 exports['Agent Adapter update should allow to update an agent - update (1)'] = {
   "results": {
-    "id": "3c7d7cd0-b9ef-11e9-92c3-0d66c68c242d",
+    "id": "8c2c3840-bd12-11e9-b9f3-1de71e3ab333",
     "type": "agents",
-    "updated_at": "2019-08-08T15:14:38.488Z",
-    "version": "WzQsMV0=",
+    "updated_at": "2019-08-12T15:04:58.063Z",
+    "version": "WzEwLDFd",
     "references": [],
     "attributes": {
       "active": true
     }
   }
+}
+
+exports['Agent Adapter update should allow to update an agent - update (2)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Saved object [agents/test] not found\",\"name\":\"Error\",\"stack\":\"Error: Saved object [agents/test] not found\\n    at Function.notFound [as createGenericNotFoundError] (/Users/nicolas/Workspace/kibana/src/core/server/saved_objects/service/lib/errors.ts:142:28)\\n    at SavedObjectsRepository.createGenericNotFoundError [as update] (/Users/nicolas/Workspace/kibana/src/core/server/saved_objects/service/lib/repository.ts:630:38)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\",\"data\":null,\"isBoom\":true,\"isServer\":false,\"output\":{\"statusCode\":404,\"payload\":{\"statusCode\":404,\"error\":\"Not Found\",\"message\":\"Saved object [agents/test] not found\"},\"headers\":{}}}",
+  "results": null
 }

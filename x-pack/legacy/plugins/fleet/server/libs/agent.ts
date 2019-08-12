@@ -43,7 +43,7 @@ export class AgentLib {
 
     const parentId =
       type === 'EPHEMERAL_INSTANCE'
-        ? (await this._findOrCreateParentForEphemeral(config.id, config.sharedId)).id
+        ? (await this._createParentForEphemeral(config.id, config.sharedId)).id
         : undefined;
 
     const agentData: NewAgent = {
@@ -97,21 +97,28 @@ export class AgentLib {
     return this.agentAdater.list(sortOptions, page, perPage);
   }
 
-  private async _findOrCreateParentForEphemeral(
+  private async _createParentForEphemeral(
     configId: string,
     configSharedId: string
   ): Promise<Agent> {
-    const parentAgent = await this.agentAdater.findEphemeralByConfigSharedId(configSharedId);
+    const ephemeralParentId = `agents:ephemeral:${configSharedId}`;
+    const parentAgent = await this.agentAdater.getById('ephemeralParentId');
 
     if (parentAgent) {
       return parentAgent;
     }
 
-    return await this.agentAdater.create({
-      type: 'EPHEMERAL',
-      config_id: configId,
-      config_shared_id: configSharedId,
-      active: true,
-    });
+    return await this.agentAdater.create(
+      {
+        type: 'EPHEMERAL',
+        config_id: configId,
+        config_shared_id: configSharedId,
+        active: true,
+      },
+      {
+        id: ephemeralParentId,
+        overwrite: true,
+      }
+    );
   }
 }

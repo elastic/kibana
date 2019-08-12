@@ -13,10 +13,13 @@ export class InMemoryAgentAdapter implements AgentAdapter {
   public agents: { [k: string]: Agent } = {};
   private id = 1;
 
-  public async create(agent: NewAgent): Promise<Agent> {
+  public async create(
+    agent: NewAgent,
+    options: { id?: string; overwrite?: boolean }
+  ): Promise<Agent> {
     const newAgent = {
       ...agent,
-      id: `agent-${this.id++}`,
+      id: (options && options.id) || `agent-${this.id++}`,
       last_updated: undefined,
       last_checkin: undefined,
     };

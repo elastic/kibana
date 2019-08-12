@@ -16,10 +16,17 @@ export class AgentAdapter implements AgentAdapterType {
    * Create a new saved object agent
    * @param agent
    */
-  public async create(agent: NewAgent): Promise<Agent> {
-    const { error, id, attributes } = await this.soAdapter.create('agents', {
-      ...agent,
-    });
+  public async create(
+    agent: NewAgent,
+    options?: { id?: string; overwrite?: boolean }
+  ): Promise<Agent> {
+    const { error, id: savedObjectId, attributes } = await this.soAdapter.create(
+      'agents',
+      {
+        ...agent,
+      },
+      options
+    );
 
     if (error) {
       throw new Error(error.message);
@@ -27,7 +34,7 @@ export class AgentAdapter implements AgentAdapterType {
 
     return {
       ...attributes,
-      id,
+      id: savedObjectId,
       last_updated: undefined,
       last_checkin: undefined,
     };
