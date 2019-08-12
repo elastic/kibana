@@ -253,6 +253,8 @@ export interface HttpServiceStart {
 
 // @public
 export interface IKibanaSocket {
+    readonly authorizationError?: Error;
+    readonly authorized?: boolean;
     // (undocumented)
     getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
     // (undocumented)
