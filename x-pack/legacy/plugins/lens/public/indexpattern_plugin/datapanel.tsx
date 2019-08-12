@@ -9,6 +9,7 @@ import React, { useState, useEffect, memo, useCallback } from 'react';
 import {
   EuiComboBox,
   EuiFieldSearch,
+  EuiLoadingSpinner,
   // @ts-ignore
   EuiHighlight,
   EuiFlexGroup,
@@ -93,6 +94,7 @@ type OverallFields = Record<
 >;
 
 interface DataPanelState {
+  isLoading: boolean;
   nameFilter: string;
   typeFilter: DataType[];
   hiddenFilter: boolean;
@@ -116,6 +118,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   onChangeIndexPattern?: (newId: string) => void;
 }) {
   const [state, setState] = useState<DataPanelState>({
+    isLoading: false,
     nameFilter: '',
     typeFilter: [],
     hiddenFilter: false,
@@ -203,6 +206,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const paginatedFields = displayedFields.sort(sortFields).slice(0, pageSize);
 
   useEffect(() => {
+    setState(s => ({ ...s, isLoading: true }));
     npStart.core.http
       .post(`/api/lens/index_stats/${indexPatterns[currentIndexPatternId].title}`, {
         body: JSON.stringify({
@@ -221,11 +225,14 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         }),
       })
       .then((results: OverallFields) => {
-        console.log(results);
         setState(s => ({
           ...s,
+          isLoading: false,
           overallFields: results,
         }));
+      })
+      .catch(() => {
+        setState(s => ({ ...s, isLoading: false }));
       });
   }, [currentIndexPatternId]);
 
@@ -407,6 +414,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             onScroll={lazyScroll}
           >
             <div className="lnsFieldListPanel__list">
+              {state.isLoading && <EuiLoadingSpinner />}
+
               {paginatedFields.map(field => {
                 const overallField = state.overallFields && state.overallFields[field.name];
                 return (
@@ -420,7 +429,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     count={overallField && overallField.count}
                     cardinality={overallField && overallField.cardinality}
                     // sampleCount={overallField && overallField.stats.sampleCount}
-                    // cardinality={overallField && overallField.stats.cardinality}
                   />
                 );
               })}
