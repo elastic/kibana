@@ -40,6 +40,8 @@ export default async function ({ readConfigFile }) {
        * property 'overlays' of null". Possibly those are `overlays` from
        * `npStart.core.overlays`, possibly `npStart.core` is `null` on CI, but
        * available when this test suite is executed locally.
+       *
+       * See issue: https://github.com/elastic/kibana/issues/43087
        */
       // require.resolve('./test_suites/embeddable_explorer'),
 

@@ -40,7 +40,6 @@ export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
 type InheritedInput = {
   id: string;
   viewMode: ViewMode;
-  firstName: string;
   lastName: string;
 };
 
@@ -72,7 +71,6 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
     return {
       id,
       viewMode: this.input.viewMode || ViewMode.EDIT,
-      firstName: '',
       lastName: this.input.lastName || 'foo',
     };
   }
