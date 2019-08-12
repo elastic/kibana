@@ -30,6 +30,8 @@ export const NewRuntimeConfigurationFile = t.interface(
     description: t.string,
     output: t.string,
     monitoring_enabled: t.boolean,
+    shared_id: t.string,
+    version: t.number,
     agent_version: t.string,
     data_sources: t.array(DataSource),
   },

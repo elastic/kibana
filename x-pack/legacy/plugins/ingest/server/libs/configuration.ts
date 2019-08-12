@@ -5,6 +5,7 @@
  */
 import { merge, omit } from 'lodash';
 import uuidv4 from 'uuid/v4';
+import uuid from 'uuid/v4';
 import { ConfigAdapter } from './adapters/configurations/default';
 import { BackendFrameworkLib } from './framework';
 import { ConfigurationFile } from './adapters/configurations/adapter_types';
@@ -17,16 +18,19 @@ export class ConfigurationLib {
     }
   ) {}
   public async create(name: string, description?: string) {
-    if (!this.libs.framework.version) {
+    const info = await this.libs.framework.info;
+    if (!info) {
       throw new Error('Could not get version information about Kibana from xpack');
     }
 
-    await this.adapter.create({
+    return await this.adapter.create({
       name,
       description: description || '',
       output: 'defaut',
       monitoring_enabled: true,
-      agent_version: this.libs.framework.version,
+      shared_id: uuid(),
+      version: 0,
+      agent_version: info.kibana.version,
       data_sources: [],
     });
   }
@@ -129,7 +133,13 @@ export class ConfigurationLib {
     // TODO fire events for fleet that update was made
   }
 
-  public async finishUpdateFrom(id: string) {}
+  public async finishUpdateFrom(configId: string) {
+    const oldConfig = await this.adapter.get(configId);
+    await this.adapter.update(configId, {
+      ...oldConfig,
+      status: 'inactive',
+    });
+  }
 
   public async rollForward(id: string): Promise<{ id: string; version: number }> {
     return {

@@ -1,0 +1,77 @@
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","monitoring_enabled":true,"agent_version":"8.0.0","data_sources":[]} (2)'] = {
+  "results": {
+    "id": "8a8874b0-bd51-11e9-a21b-dbec3e1a8be1"
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","monitoring_enabled":true,"shared_id":"994528b0-887f-4c71-923e-4ffe5dd302e2","version":0,"agent_version":"8.0.0","data_sources":[]} (2)'] = {
+  "results": {
+    "id": "715d5cb0-bd53-11e9-bb4e-fb77f27555ca",
+    "shared_id": "994528b0-887f-4c71-923e-4ffe5dd302e2",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1568242146524
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get info (2)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1568240322629
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1568240322629
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
