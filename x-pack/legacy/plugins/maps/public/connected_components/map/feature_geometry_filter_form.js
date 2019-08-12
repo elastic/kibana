@@ -14,10 +14,17 @@ import {
   EuiText,
   EuiFieldText,
   EuiButton,
+  EuiSelect,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { createSpatialFilterWithGeometry } from '../../elasticsearch_geo_utils';
+import {
+  ES_GEO_FIELD_TYPE,
+  ES_SPATIAL_RELATIONS,
+  GEO_JSON_TYPE,
+} from '../../../common/constants';
+import { getEsSpatialRelationLabel } from '../../../common/i18n_getters';
 
 const GEO_FIELD_VALUE_DELIMITER = '//'; // `/` is not allowed in index pattern name so should not have collisions
 
@@ -35,11 +42,10 @@ function splitIndexGeoFieldName(value) {
 
 export class FeatureGeometryFilterForm extends Component {
 
-  // TODO add ability to specify spatial relationship
-
   state = {
     geoFieldTag: createIndexGeoFieldName(this.props.geoFields[0]),
     geometryLabel: this.props.feature.geometry.type.toLowerCase(),
+    relation: ES_SPATIAL_RELATIONS.INTERSECTS,
   };
 
   _getSelectedGeoField = () => {
@@ -66,7 +72,13 @@ export class FeatureGeometryFilterForm extends Component {
     this.setState({
       geometryLabel: e.target.value,
     });
-  };
+  }
+
+  _onRelationChange = e => {
+    this.setState({
+      relation: e.target.value,
+    });
+  }
 
   _createFilter = () => {
     const geoField = this._getSelectedGeoField();
@@ -76,7 +88,7 @@ export class FeatureGeometryFilterForm extends Component {
       indexPatternId: geoField.indexPatternId,
       geoFieldName: geoField.geoFieldName,
       geoFieldType: geoField.geoFieldType,
-      relation: 'intersects',
+      relation: this.state.relation,
     });
     this.props.addFilters([filter]);
     this.props.onClose();
@@ -104,6 +116,52 @@ export class FeatureGeometryFilterForm extends Component {
           </span>
         </span>
       </button>
+    );
+  }
+
+  _renderRelationInput() {
+    if (!this.state.geoFieldTag) {
+      return null;
+    }
+
+    const { geoFieldType } = this._getSelectedGeoField();
+
+    // relationship only used when filtering geo_shape fields
+    if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
+      return null;
+    }
+
+    const options = Object.values(ES_SPATIAL_RELATIONS)
+      .filter(relation => {
+        // line geometries can not filter by within relation since there is no closed shape
+        if (this.props.feature.geometry.type === GEO_JSON_TYPE.LINE_STRING
+          || this.props.feature.geometry.type === GEO_JSON_TYPE.MULTI_LINE_STRING) {
+          return relation !== ES_SPATIAL_RELATIONS.WITHIN;
+        }
+
+        return true;
+      })
+      .map(relation => {
+        return {
+          value: relation,
+          text: getEsSpatialRelationLabel(relation)
+        };
+      });
+
+    return (
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.tooltip.geometryFilterForm.relationLabel', {
+          defaultMessage: 'Spatial relation'
+        })}
+        compressed
+      >
+        <EuiSelect
+          options={options}
+          value={this.state.relation}
+          onChange={this._onRelationChange}
+        />
+
+      </EuiFormRow>
     );
   }
 
@@ -135,6 +193,7 @@ export class FeatureGeometryFilterForm extends Component {
             onChange={this._onGeometryLabelChange}
           />
         </EuiFormRow>
+
         <EuiFormRow
           className="mapFeatureTooltip_geoFieldSuperSelectWrapper"
           label={i18n.translate('xpack.maps.tooltip.geometryFilterForm.geoFieldLabel', {
@@ -153,6 +212,9 @@ export class FeatureGeometryFilterForm extends Component {
             itemClassName="mapFeatureTooltip__geoFieldItem"
           />
         </EuiFormRow>
+
+        {this._renderRelationInput()}
+
         <EuiButton
           onClick={this._createFilter}
           isDisabled={!this.state.geometryLabel || !this.state.geoFieldTag}
