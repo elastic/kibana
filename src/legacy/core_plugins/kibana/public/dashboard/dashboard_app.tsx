@@ -42,7 +42,7 @@ import { IPrivate } from 'ui/private';
 import { StaticIndexPattern, Query, SavedQuery } from 'plugins/data';
 import moment from 'moment';
 
-import { ViewMode } from '../../../embeddable_api/public';
+import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
 import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
 

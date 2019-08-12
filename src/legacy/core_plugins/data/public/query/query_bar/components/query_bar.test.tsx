@@ -25,6 +25,28 @@ import './query_bar.test.mocks';
 import { QueryBar } from './query_bar';
 import { IndexPattern } from '../../../index';
 
+import { coreMock } from '../../../../../../../core/public/mocks';
+const setupMock = coreMock.createSetup();
+
+setupMock.uiSettings.get.mockImplementation((key: string) => {
+  switch (key) {
+    case 'timepicker:quickRanges':
+      return [
+        {
+          from: 'now/d',
+          to: 'now/d',
+          display: 'Today',
+        },
+      ];
+    case 'dateFormat':
+      return 'YY';
+    case 'history:limit':
+      return 10;
+    default:
+      throw new Error(`Unexpected config key: ${key}`);
+  }
+});
+
 const noop = () => {
   return;
 };
@@ -76,6 +98,7 @@ describe('QueryBar', () => {
   it('Should render the given query', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
+        uiSettings={setupMock.uiSettings}
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -88,12 +111,14 @@ describe('QueryBar', () => {
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(1);
+    expect(component.find(TIMEPICKER_SELECTOR).length).toBe(1);
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {
     shallowWithIntl(
       <QueryBar.WrappedComponent
+        uiSettings={setupMock.uiSettings}
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -113,6 +138,7 @@ describe('QueryBar', () => {
   it('Should render only timepicker when no options provided', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
+        uiSettings={setupMock.uiSettings}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
@@ -129,6 +155,7 @@ describe('QueryBar', () => {
   it('Should not show timepicker when asked', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
+        uiSettings={setupMock.uiSettings}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
@@ -146,6 +173,7 @@ describe('QueryBar', () => {
   it('Should render timepicker with options', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
+        uiSettings={setupMock.uiSettings}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
@@ -166,6 +194,7 @@ describe('QueryBar', () => {
   it('Should render only query input bar', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
+        uiSettings={setupMock.uiSettings}
         query={kqlQuery}
         onSubmit={noop}
         onChange={noop}
@@ -186,6 +215,7 @@ describe('QueryBar', () => {
   it('Should NOT render query input bar if disabled', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
+        uiSettings={setupMock.uiSettings}
         query={kqlQuery}
         onSubmit={noop}
         onChange={noop}
@@ -207,6 +237,7 @@ describe('QueryBar', () => {
   it('Should NOT render query input bar if missing options', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
+        uiSettings={setupMock.uiSettings}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}

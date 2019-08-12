@@ -40,10 +40,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { Storage } from 'ui/storage';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
-import { QueryBarInput } from 'plugins/data';
-const localStorage = new Storage(window.localStorage);
+
+import { QueryBarWrapper } from '../../query_bar_wrapper';
 class TableSeriesConfigUI extends Component {
   componentWillMount() {
     const { model } = this.props;
@@ -158,7 +157,7 @@ class TableSeriesConfigUI extends Component {
               label={<FormattedMessage id="tsvb.table.filterLabel" defaultMessage="Filter" />}
               fullWidth
             >
-              <QueryBarInput
+              <QueryBarWrapper
                 query={{
                   language:
                     model.filter && model.filter.language
@@ -167,9 +166,7 @@ class TableSeriesConfigUI extends Component {
                   query: model.filter && model.filter.query ? model.filter.query : '',
                 }}
                 onChange={filter => this.props.onChange({ filter })}
-                appName={'VisEditor'}
                 indexPatterns={[this.props.indexPatternForQuery]}
-                store={localStorage}
               />
             </EuiFormRow>
           </EuiFlexItem>

@@ -70,6 +70,7 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
+import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 
 import { data } from 'plugins/data/setup';
 
@@ -1104,6 +1105,8 @@ function discoverController(
     $scope.unsupportedIndexPatternType = $route.current.locals.ip.loaded.type;
     return;
   }
+
+  addHelpMenuToAppChrome(chrome);
 
   init();
 }

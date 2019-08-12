@@ -26,6 +26,7 @@ import { Storage } from 'ui/storage';
 import { get, isEqual } from 'lodash';
 
 import { toastNotifications } from 'ui/notify';
+import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPattern, Query, QueryBar, FilterBar } from '../../../../../data/public';
 import { SavedQuery, SavedQueryAttributes } from '../index';
 import { saveQuery } from '../lib/saved_query_service';
@@ -44,6 +45,7 @@ interface DateRange {
 export interface SearchBarProps {
   appName: string;
   intl: InjectedIntl;
+  uiSettings: UiSettingsClientContract;
   indexPatterns?: IndexPattern[];
   // Query bar
   showQueryBar?: boolean;
@@ -351,6 +353,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   public render() {
+    // This is needed, as kbn-top-nav-v2 might render before npSetup.core.uiSettings is set.
+    // This won't be needed when it's loaded exclusively with React.
+    if (!this.props.uiSettings) {
+      return null;
+    }
+
     const savedQueryManager = this.state.query && this.props.onClearSavedQuery && (
       <SavedQueryManager
         showSaveQuery={this.props.showSaveQuery}
@@ -367,6 +375,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     if (this.shouldRenderQueryBar()) {
       queryBar = (
         <QueryBar
+          uiSettings={this.props.uiSettings}
           query={this.state.query}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
@@ -411,6 +420,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           >
             <FilterBar
               className="globalFilterGroup__filterBar"
+              uiSettings={this.props.uiSettings}
               filters={this.props.filters!}
               onFiltersUpdated={this.getFilterUpdateFunction()}
               indexPatterns={this.props.indexPatterns!}

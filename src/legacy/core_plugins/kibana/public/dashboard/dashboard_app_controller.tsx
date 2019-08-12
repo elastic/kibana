@@ -21,6 +21,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import angular from 'angular';
+import { uniq } from 'lodash';
 
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
@@ -54,21 +55,24 @@ import { Query, SavedQuery } from 'plugins/data';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
 import { capabilities } from 'ui/capabilities';
 import { Subscription } from 'rxjs';
+import { npStart } from 'ui/new_platform';
+import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import { data } from '../../../data/public/setup';
+
 import {
   DashboardContainer,
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainerFactory,
   DashboardContainerInput,
   DashboardPanelState,
-} from '../../../dashboard_embeddable_container/public';
+} from '../../../dashboard_embeddable_container/public/np_ready/public';
 import {
   isErrorEmbeddable,
-  embeddableFactories,
   ErrorEmbeddable,
   ViewMode,
   openAddPanelFlyout,
-} from '../../../embeddable_api/public';
+} from '../../../embeddable_api/public/np_ready/public';
+import { start } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
@@ -157,7 +161,17 @@ export class DashboardAppController {
       if (!container || isErrorEmbeddable(container)) {
         return;
       }
-      const panelIndexPatterns = container.getPanelIndexPatterns();
+
+      let panelIndexPatterns: IndexPattern[] = [];
+      Object.values(container.getChildIds()).forEach(id => {
+        const embeddable = container.getChild(id);
+        if (isErrorEmbeddable(embeddable)) return;
+        const embeddableIndexPatterns = (embeddable.getOutput() as any).indexPatterns;
+        if (!embeddableIndexPatterns) return;
+        panelIndexPatterns.push(...embeddableIndexPatterns);
+      });
+      panelIndexPatterns = uniq(panelIndexPatterns, 'id');
+
       if (panelIndexPatterns && panelIndexPatterns.length > 0) {
         $scope.$evalAsync(() => {
           $scope.indexPatterns = panelIndexPatterns;
@@ -228,7 +242,7 @@ export class DashboardAppController {
     let outputSubscription: Subscription | undefined;
 
     const dashboardDom = document.getElementById('dashboardViewport');
-    const dashboardFactory = embeddableFactories.get(
+    const dashboardFactory = start.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
     ) as DashboardContainerFactory;
     dashboardFactory
@@ -355,7 +369,9 @@ export class DashboardAppController {
       const differences: Partial<DashboardContainerInput> = {};
       Object.keys(containerInput).forEach(key => {
         const containerValue = (containerInput as { [key: string]: unknown })[key];
-        const appStateValue = (appStateDashboardInput as { [key: string]: unknown })[key];
+        const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[
+          key
+        ];
         if (!_.isEqual(containerValue, appStateValue)) {
           (differences as { [key: string]: unknown })[key] = appStateValue;
         }
@@ -728,7 +744,14 @@ export class DashboardAppController {
     };
     navActions[TopNavIds.ADD] = () => {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
-        openAddPanelFlyout(dashboardContainer);
+        openAddPanelFlyout({
+          embeddable: dashboardContainer,
+          getAllFactories: start.getEmbeddableFactories,
+          getFactory: start.getEmbeddableFactory,
+          notifications: npStart.core.notifications,
+          overlays: npStart.core.overlays,
+          SavedObjectFinder,
+        });
       }
     };
 

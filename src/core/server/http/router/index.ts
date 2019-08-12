@@ -18,7 +18,7 @@
  */
 
 export { Headers, filterHeaders, ResponseHeaders, KnownHeaders } from './headers';
-export { Router, RequestHandler } from './router';
+export { Router, RequestHandler, IRouter } from './router';
 export {
   KibanaRequest,
   KibanaRequestRoute,
@@ -41,3 +41,5 @@ export {
   lifecycleResponseFactory,
   LifecycleResponseFactory,
 } from './response';
+
+export { IKibanaSocket } from './socket';

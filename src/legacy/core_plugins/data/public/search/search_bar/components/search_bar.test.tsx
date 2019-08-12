@@ -22,6 +22,9 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { SearchBar } from './search_bar';
 import { IndexPattern } from 'ui/index_patterns';
 
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
+const setupMock = coreMock.createSetup();
+
 jest.mock('../../../../../data/public', () => {
   return {
     FilterBar: () => <div className="filterBar"></div>,
@@ -87,6 +90,7 @@ describe('SearchBar', () => {
   it('Should render query bar when no options provided (in reality - timepicker)', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
+        uiSettings={setupMock.uiSettings}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -101,6 +105,7 @@ describe('SearchBar', () => {
   it('Should render empty when timepicker is off and no options provided', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
+        uiSettings={setupMock.uiSettings}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -116,6 +121,7 @@ describe('SearchBar', () => {
   it('Should render filter bar, when required fields are provided', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
+        uiSettings={setupMock.uiSettings}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -133,6 +139,7 @@ describe('SearchBar', () => {
   it('Should NOT render filter bar, if disabled', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
+        uiSettings={setupMock.uiSettings}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -151,6 +158,7 @@ describe('SearchBar', () => {
   it('Should render query bar, when required fields are provided', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
+        uiSettings={setupMock.uiSettings}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -169,6 +177,7 @@ describe('SearchBar', () => {
   it('Should NOT render query bar, if disabled', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
+        uiSettings={setupMock.uiSettings}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -188,6 +197,7 @@ describe('SearchBar', () => {
   it('Should render query bar and filter bar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
+        uiSettings={setupMock.uiSettings}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}

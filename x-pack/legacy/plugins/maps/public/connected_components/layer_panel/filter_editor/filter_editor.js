@@ -92,6 +92,7 @@ export class FilterEditor extends Component {
       >
         <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
           <SearchBar
+            uiSettings={settings}
             showFilterBar={false}
             showDatePicker={false}
             showQueryInput={true}

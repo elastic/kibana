@@ -32,15 +32,13 @@ import { EuiSuperUpdateButton } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { documentationLinks } from 'ui/documentation_links';
 import { Toast, toastNotifications } from 'ui/notify';
-import chrome from 'ui/chrome';
 import { PersistedLog } from 'ui/persisted_log';
+import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
 
 import { getQueryLog } from '../lib/get_query_log';
 import { Query } from '../index';
-
-const config = chrome.getUiSettingsClient();
 
 interface DateRange {
   from: string;
@@ -68,6 +66,7 @@ interface Props {
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   customSubmitButton?: any;
   isDirty: boolean;
+  uiSettings: UiSettingsClientContract;
 }
 
 interface State {
@@ -160,13 +159,21 @@ export class QueryBarUI extends Component<Props, State> {
 
   public componentDidMount() {
     if (!this.props.query) return;
-    this.persistedLog = getQueryLog(this.props.appName, this.props.query.language);
+    this.persistedLog = getQueryLog(
+      this.props.uiSettings,
+      this.props.appName,
+      this.props.query.language
+    );
   }
 
   public componentDidUpdate(prevProps: Props) {
     if (!this.props.query || !prevProps.query) return;
     if (prevProps.query.language !== this.props.query.language) {
-      this.persistedLog = getQueryLog(this.props.appName, this.props.query.language);
+      this.persistedLog = getQueryLog(
+        this.props.uiSettings,
+        this.props.appName,
+        this.props.query.language
+      );
     }
   }
 
@@ -198,6 +205,7 @@ export class QueryBarUI extends Component<Props, State> {
           onChange={this.onQueryChange}
           onSubmit={this.onInputSubmit}
           persistedLog={this.persistedLog}
+          uiSettings={this.props.uiSettings}
         />
       </EuiFlexItem>
     );
@@ -249,7 +257,7 @@ export class QueryBarUI extends Component<Props, State> {
         };
       });
 
-    const commonlyUsedRanges = config
+    const commonlyUsedRanges = this.props.uiSettings
       .get('timepicker:quickRanges')
       .map(({ from, to, display }: { from: string; to: string; display: string }) => {
         return {
@@ -271,7 +279,7 @@ export class QueryBarUI extends Component<Props, State> {
           showUpdateButton={false}
           recentlyUsedRanges={recentlyUsedRanges}
           commonlyUsedRanges={commonlyUsedRanges}
-          dateFormat={config.get('dateFormat')}
+          dateFormat={this.props.uiSettings.get('dateFormat')}
           isAutoRefreshOnly={this.props.showAutoRefreshOnly}
         />
       </EuiFlexItem>

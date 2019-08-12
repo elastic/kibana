@@ -27,3 +27,5 @@ export const CountryFlag = pure<{
 
   return flag !== null ? <span data-test-subj="country-flag">{flag}</span> : null;
 });
+
+CountryFlag.displayName = 'CountryFlag';

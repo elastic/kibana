@@ -79,6 +79,7 @@ export class WhereExpression extends Component {
             />
           </EuiFormHelpText>
           <SearchBar
+            uiSettings={settings}
             showFilterBar={false}
             showDatePicker={false}
             showQueryInput={true}
