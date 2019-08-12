@@ -31,7 +31,7 @@ export const CreateAnalyticsModal: FC<CreateAnalyticsFormProps> = ({
 
   return (
     <EuiOverlayMask>
-      <EuiModal onClose={closeModal} initialFocus="[name=popswitch]">
+      <EuiModal onClose={closeModal} style={{ width: '450px' }}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             {i18n.translate('xpack.ml.dataframe.analytics.create.modalHeaderTitle', {
