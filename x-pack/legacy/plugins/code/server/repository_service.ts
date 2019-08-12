@@ -22,8 +22,11 @@ import {
 import { Logger } from './log';
 
 // Return false to stop the clone progress. Return true to keep going;
-export type CloneProgressHandler = (progress: number, cloneProgress?: CloneProgress) => boolean;
-export type UpdateProgressHandler = () => boolean;
+export type CloneProgressHandler = (
+  progress: number,
+  cloneProgress?: CloneProgress
+) => Promise<boolean>;
+export type UpdateProgressHandler = () => Promise<boolean>;
 
 const GIT_FETCH_PROGRESS_CANCEL = -1;
 // TODO: Cannot directly access Git.Error.CODE.EUSER (-7). Investigate why.
@@ -127,10 +130,18 @@ export class RepositoryService {
     let repo: Git.Repository | undefined;
     try {
       repo = await Git.Repository.open(localPath);
+      let lastProgressUpdate = moment();
       const cbs: RemoteCallbacks = {
-        transferProgress: (_: any) => {
+        transferProgress: async (_: any) => {
+          // Update progress update throttling.
+          const now = moment();
+          if (now.diff(lastProgressUpdate) < this.PROGRESS_UPDATE_THROTTLING_FREQ_MS) {
+            return 0;
+          }
+          lastProgressUpdate = now;
+
           if (handler) {
-            const resumeUpdate = handler();
+            const resumeUpdate = await handler();
             if (!resumeUpdate) {
               return GIT_FETCH_PROGRESS_CANCEL;
             }
@@ -219,6 +230,7 @@ export class RepositoryService {
     throw SSH_AUTH_ERROR;
   }
 
+  private PROGRESS_UPDATE_THROTTLING_FREQ_MS = 1000;
   private async doClone(
     repo: Repository,
     localPath: string,
@@ -228,10 +240,10 @@ export class RepositoryService {
     try {
       let lastProgressUpdate = moment();
       const cbs: RemoteCallbacks = {
-        transferProgress: (stats: any) => {
+        transferProgress: async (stats: any) => {
           // Clone progress update throttling.
           const now = moment();
-          if (now.diff(lastProgressUpdate) < 1000) {
+          if (now.diff(lastProgressUpdate) < this.PROGRESS_UPDATE_THROTTLING_FREQ_MS) {
             return 0;
           }
           lastProgressUpdate = now;
@@ -250,7 +262,7 @@ export class RepositoryService {
               indexedDeltas: stats.indexedDeltas(),
               receivedBytes: stats.receivedBytes(),
             };
-            const resumeClone = handler(progress, cloneProgress);
+            const resumeClone = await handler(progress, cloneProgress);
             if (!resumeClone) {
               return GIT_FETCH_PROGRESS_CANCEL;
             }
