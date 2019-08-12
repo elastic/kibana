@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { SearchBar } from './search_bar';
 import * as savedQueryService from './search_bar/lib/saved_query_service';
 
 /**
@@ -28,9 +27,6 @@ import * as savedQueryService from './search_bar/lib/saved_query_service';
 export class SearchService {
   public setup() {
     return {
-      ui: {
-        SearchBar,
-      },
       services: {
         savedQueryService,
       },
