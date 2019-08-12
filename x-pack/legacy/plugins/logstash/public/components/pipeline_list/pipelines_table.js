@@ -58,7 +58,7 @@ function getColumns(openPipeline, clonePipeline) {
         />
       ),
       render: lastModified => <span data-test-subj="cellLastModified">{lastModified}</span>,
-      sortable: true,
+      sortable: ({ lastModified }) => lastModified.valueOf(),
     },
     {
       field: 'username',
