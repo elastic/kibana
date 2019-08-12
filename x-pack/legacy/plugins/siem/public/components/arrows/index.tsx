@@ -16,6 +16,8 @@ export const ArrowBody = styled.span<{ height: number }>`
   width: 25px;
 `;
 
+ArrowBody.displayName = 'ArrowBody';
+
 export type ArrowDirection = 'arrowLeft' | 'arrowRight';
 
 /** Renders the head of an arrow */
@@ -24,3 +26,5 @@ export const ArrowHead = pure<{
 }>(({ direction }) => (
   <EuiIcon color="subdued" data-test-subj="arrow-icon" size="s" type={direction} />
 ));
+
+ArrowHead.displayName = 'ArrowHead';
