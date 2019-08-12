@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import {
   Action,
   IEmbeddable,
