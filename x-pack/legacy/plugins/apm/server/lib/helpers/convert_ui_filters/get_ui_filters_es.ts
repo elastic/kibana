@@ -15,13 +15,13 @@ import {
 } from '../../ui_filters/local_ui_filters/config';
 
 export async function getUiFiltersES(server: Server, uiFilters: UIFilters) {
-  const { kuery, environment, ...localFilters } = uiFilters;
+  const { kuery, environment, ...localFilterValues } = uiFilters;
 
   const mappedFilters = localUIFilterNames
-    .filter(name => name in localFilters)
+    .filter(name => name in localFilterValues)
     .map(filterName => {
       const field = localUIFilters[filterName];
-      const value = localFilters[filterName];
+      const value = localFilterValues[filterName];
       return {
         terms: {
           [field.fieldName]: value

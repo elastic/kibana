@@ -20,8 +20,9 @@ export type Projection = Omit<SearchParams, 'body' | 'aggs'> & {
 
 export enum PROJECTION {
   SERVICES = 'services',
-  TRACES = 'traces',
   TRANSACTION_GROUPS = 'transactionGroups',
+  TRACES = 'traces',
+  TRANSACTIONS = 'transactions',
   METRICS = 'metrics',
   ERROR_GROUPS = 'errorGroups'
 }

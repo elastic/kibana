@@ -6,22 +6,43 @@
 
 import { Setup } from '../../server/lib/helpers/setup_request';
 import {
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
   PROCESSOR_EVENT,
   TRANSACTION_NAME
 } from '../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
 
-export function getBaseTransactionGroupsProjection({
-  setup
+export function getTransactionsProjection({
+  setup,
+  serviceName,
+  transactionName,
+  transactionType
 }: {
   setup: Setup;
+  serviceName?: string;
+  transactionName?: string;
+  transactionType?: string;
 }) {
   const { start, end, uiFiltersES, config } = setup;
+
+  const transactionNameFilter = transactionName
+    ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
+    : [];
+  const transactionTypeFilter = transactionType
+    ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
+    : [];
+  const serviceNameFilter = serviceName
+    ? [{ term: { [SERVICE_NAME]: serviceName } }]
+    : [];
 
   const bool = {
     filter: [
       { range: rangeFilter(start, end) },
       { term: { [PROCESSOR_EVENT]: 'transaction' } },
+      ...transactionNameFilter,
+      ...transactionTypeFilter,
+      ...serviceNameFilter,
       ...uiFiltersES
     ]
   };
@@ -31,13 +52,6 @@ export function getBaseTransactionGroupsProjection({
     body: {
       query: {
         bool
-      },
-      aggs: {
-        transactions: {
-          terms: {
-            field: TRANSACTION_NAME
-          }
-        }
       }
     }
   };

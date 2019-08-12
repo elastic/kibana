@@ -5,39 +5,51 @@
  */
 
 import { Setup } from '../../server/lib/helpers/setup_request';
-import { getBaseTransactionGroupsProjection } from './base_transaction_groups';
 import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE
+  TRANSACTION_NAME,
+  PARENT_ID
 } from '../../common/elasticsearch_fieldnames';
+import { Options } from '../../server/lib/transaction_groups/fetcher';
+import { getTransactionsProjection } from './transactions';
 import { mergeProjection } from './util/merge_projection';
 
 export function getTransactionGroupsProjection({
   setup,
-  serviceName,
-  transactionType,
-  transactionName
+  transactionName,
+  options
 }: {
   setup: Setup;
-  serviceName: string;
-  transactionType: string;
   transactionName?: string;
+  options: Options;
 }) {
-  const transactionNameFilter = transactionName
-    ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
-    : [];
+  const transactionsProjection = getTransactionsProjection({
+    setup,
+    ...(options.type === 'top_transactions'
+      ? {
+          serviceName: options.serviceName,
+          transactionType: options.transactionType
+        }
+      : {}),
+    transactionName
+  });
 
-  const projection = getBaseTransactionGroupsProjection({ setup });
-  return mergeProjection(projection, {
+  const bool =
+    options.type === 'top_traces'
+      ? {
+          must_not: [{ exists: { field: PARENT_ID } }]
+        }
+      : {};
+
+  return mergeProjection(transactionsProjection, {
     body: {
       query: {
-        bool: {
-          filter: [
-            ...projection.body.query.bool.filter,
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [TRANSACTION_TYPE]: transactionType } },
-            ...transactionNameFilter
-          ]
+        bool
+      },
+      aggs: {
+        transactions: {
+          terms: {
+            field: TRANSACTION_NAME
+          }
         }
       }
     }

@@ -23,13 +23,23 @@ export const getFilterAggregations = async ({
 }) => {
   const mappedFilters = localFilterNames.map(name => localUIFilters[name]);
 
-  const nestedAggregationKey = projection.body.aggs
-    ? Object.keys(projection.body.aggs)[0]
-    : '';
-
   const aggs = await Promise.all(
     mappedFilters.map(async field => {
       const filter = await getUiFiltersES(server, omit(uiFilters, field.name));
+
+      const bucketCountAggregation = projection.body.aggs
+        ? {
+            aggs: {
+              bucket_count: {
+                cardinality: {
+                  field:
+                    projection.body.aggs[Object.keys(projection.body.aggs)[0]]
+                      .terms.field
+                }
+              }
+            }
+          }
+        : {};
 
       return {
         [field.name]: {
@@ -46,20 +56,7 @@ export const getFilterAggregations = async ({
                   _count: 'desc'
                 }
               },
-              ...(projection.body.aggs &&
-              nestedAggregationKey in projection.body.aggs
-                ? {
-                    aggs: {
-                      bucket_count: {
-                        cardinality: {
-                          field:
-                            projection.body.aggs[nestedAggregationKey].terms
-                              .field
-                        }
-                      }
-                    }
-                  }
-                : {})
+              ...bucketCountAggregation
             }
           }
         }

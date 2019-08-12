@@ -51,7 +51,7 @@ export function TransactionDetails() {
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
       filterNames: ['transactionResult'],
-      projection: PROJECTION.TRANSACTION_GROUPS,
+      projection: PROJECTION.TRANSACTIONS,
       params: {
         transactionName,
         transactionType,

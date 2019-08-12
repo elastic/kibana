@@ -19,10 +19,10 @@ import {
 import { getUiFiltersES } from '../lib/helpers/convert_ui_filters/get_ui_filters_es';
 import { getLocalUIFilters } from '../lib/ui_filters/local_ui_filters';
 import { getServicesProjection } from '../../public/projections/services';
-import { getTracesProjection } from '../../public/projections/traces';
 import { getTransactionGroupsProjection } from '../../public/projections/transaction_groups';
 import { getMetricsProjection } from '../../public/projections/metrics';
 import { getErrorGroupsProjection } from '../../public/projections/errors';
+import { getTransactionsProjection } from '../../public/projections/transactions';
 
 const defaultErrorHandler = (err: Error) => {
   // eslint-disable-next-line
@@ -122,8 +122,11 @@ export function initUIFiltersApi(core: InternalCoreSetup) {
 
   createLocalFiltersEndpoint({
     name: PROJECTION.TRACES,
-    getProjection: ({ setup, query }) => {
-      return getTracesProjection({ setup });
+    getProjection: ({ setup }) => {
+      return getTransactionGroupsProjection({
+        setup,
+        options: { type: 'top_traces' }
+      });
     }
   });
 
@@ -137,6 +140,31 @@ export function initUIFiltersApi(core: InternalCoreSetup) {
       };
       return getTransactionGroupsProjection({
         setup,
+        options: {
+          type: 'top_transactions',
+          transactionType,
+          serviceName
+        },
+        transactionName
+      });
+    },
+    validators: {
+      serviceName: Joi.string().required(),
+      transactionType: Joi.string().required(),
+      transactionName: Joi.string()
+    }
+  });
+
+  createLocalFiltersEndpoint({
+    name: PROJECTION.TRANSACTIONS,
+    getProjection: ({ setup, query }) => {
+      const { transactionType, serviceName, transactionName } = query as {
+        transactionType: string;
+        serviceName: string;
+        transactionName: string;
+      };
+      return getTransactionsProjection({
+        setup,
         transactionType,
         serviceName,
         transactionName
@@ -145,7 +173,7 @@ export function initUIFiltersApi(core: InternalCoreSetup) {
     validators: {
       serviceName: Joi.string().required(),
       transactionType: Joi.string().required(),
-      transactionName: Joi.string()
+      transactionName: Joi.string().required()
     }
   });
 

@@ -10,7 +10,6 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
 import { Setup } from '../helpers/setup_request';
-import { getTracesProjection } from '../../../public/projections/traces';
 import { getTransactionGroupsProjection } from '../../../public/projections/transaction_groups';
 import { mergeProjection } from '../../../public/projections/util/merge_projection';
 
@@ -30,14 +29,10 @@ export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
 export function transactionGroupsFetcher(options: Options, setup: Setup) {
   const { client, config } = setup;
 
-  const projection =
-    options.type === 'top_traces'
-      ? getTracesProjection({ setup })
-      : getTransactionGroupsProjection({
-          setup,
-          serviceName: options.serviceName,
-          transactionType: options.transactionType
-        });
+  const projection = getTransactionGroupsProjection({
+    setup,
+    options
+  });
 
   const params = mergeProjection(projection, {
     body: {
