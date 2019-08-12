@@ -20,7 +20,7 @@
 import { PluginInitializerContext } from '../../../core/public';
 import { DataPublicPlugin } from './plugin';
 
-export * from './types';
+export { RefreshInterval, TimeRange } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataPublicPlugin(initializerContext);

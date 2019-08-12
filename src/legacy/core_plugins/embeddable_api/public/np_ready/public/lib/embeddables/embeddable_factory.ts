@@ -56,7 +56,6 @@ export abstract class EmbeddableFactory<
   >,
   TSavedObjectAttributes extends SavedObjectAttributes = SavedObjectAttributes
 > {
-  // TODO: Rename this to `id` to align with other objects?
   // A unique identified for this factory, which will be used to map an embeddable spec to
   // a factory that can generate an instance of it.
   public abstract readonly type: string;
