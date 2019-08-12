@@ -88,7 +88,8 @@ describe('code in multiple nodes', () => {
             port: codePort,
           },
           plugins: { paths: [pluginPaths] },
-          xpack: xpackOption,
+          xpack: { ...xpackOption, code: { codeNodeUrl: `http://localhost:${codePort}` } },
+          logging: { silent: false },
         },
       },
     });
@@ -109,6 +110,7 @@ describe('code in multiple nodes', () => {
         ...xpackOption,
         code: { codeNodeUrl: `http://localhost:${codePort}` },
       },
+      logging: { silent: true },
     };
     nonCodeNode = createRootWithCorePlugins(setting);
     await nonCodeNode.setup();
@@ -132,13 +134,23 @@ describe('code in multiple nodes', () => {
     await esServer.stop();
   });
 
+  function delay(ms: number) {
+    return new Promise(resolve1 => {
+      setTimeout(resolve1, ms);
+    });
+  }
+
   it('Code node setup should be ok', async () => {
+    await delay(6000);
     await request.get(kbnRootServer, '/api/code/setup').expect(200);
-  });
+    // @ts-ignore
+  }).timeout(20000);
 
   it('Non-code node setup should be ok', async () => {
+    await delay(1000);
     await request.get(nonCodeNode, '/api/code/setup').expect(200);
-  });
+    // @ts-ignore
+  }).timeout(5000);
 
   it('Non-code node setup should fail if code node is shutdown', async () => {
     await kbn.stop();

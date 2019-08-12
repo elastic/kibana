@@ -124,7 +124,12 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
   if (Object.keys(indexPatterns).length === 0) {
     return (
-      <EuiFlexGroup gutterSize="s" className="lnsIndexPatternDataPanel" direction="column">
+      <EuiFlexGroup
+        gutterSize="s"
+        className="lnsIndexPatternDataPanel"
+        direction="column"
+        responsive={false}
+      >
         <EuiFlexItem grow={null}>
           <EuiCallOut
             data-test-subj="indexPattern-no-indexpatterns"
@@ -162,7 +167,12 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
-      <EuiFlexGroup gutterSize="s" className="lnsIndexPatternDataPanel" direction="column">
+      <EuiFlexGroup
+        gutterSize="none"
+        className="lnsIndexPatternDataPanel"
+        direction="column"
+        responsive={false}
+      >
         <EuiFlexItem grow={null}>
           <div className="lnsIndexPatternDataPanel__header">
             {!showIndexPatternSwitcher ? (
@@ -232,7 +242,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="m" className="lnsIndexPatternDataPanel__filter-wrapper">
+          <EuiFlexGroup
+            gutterSize="s"
+            className="lnsIndexPatternDataPanel__filter-wrapper"
+            responsive={false}
+          >
             <EuiFlexItem grow={true}>
               <EuiFieldSearch
                 placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
@@ -319,6 +333,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 .sort(sortFields)
                 .map(field => (
                   <FieldItem
+                    indexPatternId={currentIndexPatternId}
                     key={field.name}
                     field={field}
                     highlight={state.nameFilter.toLowerCase()}
@@ -332,4 +347,4 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   );
 };
 
-const MemoizedDataPanel = memo(InnerIndexPatternDataPanel);
+export const MemoizedDataPanel = memo(InnerIndexPatternDataPanel);

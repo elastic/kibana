@@ -36,6 +36,7 @@ import chrome from 'ui/chrome';
 const courierRequestHandlerProvider = CourierRequestHandlerProvider;
 const courierRequestHandler = courierRequestHandlerProvider().handler;
 
+import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { ExpressionFunction } from '../../types';
 import { KibanaContext, KibanaDatatable } from '../../common';
 
@@ -47,6 +48,7 @@ interface Arguments {
   index: string | null;
   metricsAtAllLevels: boolean;
   partialRows: boolean;
+  includeFormatHints: boolean;
   aggConfigs: string;
 }
 
@@ -77,6 +79,11 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       default: false,
       help: '',
     },
+    includeFormatHints: {
+      types: ['boolean'],
+      default: false,
+      help: '',
+    },
     aggConfigs: {
       types: ['string'],
       default: '""',
@@ -99,7 +106,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
 
-    const response: Pick<KibanaDatatable, 'columns' | 'rows'> = await courierRequestHandler({
+    const response = await courierRequestHandler({
       searchSource,
       aggs,
       timeRange: get(context, 'timeRange', null),
@@ -112,13 +119,21 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       queryFilter,
     });
 
-    return {
+    const table: KibanaDatatable = {
       type: 'kibana_datatable',
       rows: response.rows,
-      columns: response.columns.map(column => ({
-        id: column.id,
-        name: column.name,
-      })),
+      columns: response.columns.map((column: any) => {
+        const cleanedColumn: KibanaDatatable['columns'][0] = {
+          id: column.id,
+          name: column.name,
+        };
+        if (args.includeFormatHints) {
+          cleanedColumn.formatHint = createFormat(column.aggConfig);
+        }
+        return cleanedColumn;
+      }),
     };
+
+    return table;
   },
 });

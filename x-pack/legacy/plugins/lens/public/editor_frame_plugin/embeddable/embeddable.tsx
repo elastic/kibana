@@ -63,7 +63,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
       initialInput,
       {
         defaultTitle: savedVis.title,
-        savedObjectId: savedVis.id!,
+        savedObjectId: savedVis.id,
         editable,
         // passing edit url and index patterns to the output of this embeddable for
         // the container to pick them up and use them to configure filter bar and

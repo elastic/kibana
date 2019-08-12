@@ -15,6 +15,8 @@ import { updateColumnParam } from '../state_helpers';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
+const supportedIntervals = ['M', 'w', 'd', 'h'];
+
 // Add ticks to EuiRange component props
 const FixedEuiRange = (EuiRange as unknown) as React.ComponentType<
   PropType<typeof EuiRange> & {
@@ -38,8 +40,12 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     defaultMessage: 'Date Histogram',
   }),
   getPossibleOperationsForDocument: () => [],
-  getPossibleOperationsForField: ({ aggregationRestrictions, type }) => {
-    if (type === 'date' && (!aggregationRestrictions || aggregationRestrictions.date_histogram)) {
+  getPossibleOperationsForField: ({ aggregationRestrictions, aggregatable, type }) => {
+    if (
+      type === 'date' &&
+      aggregatable &&
+      (!aggregationRestrictions || aggregationRestrictions.date_histogram)
+    ) {
       return [
         {
           dataType: 'date',
@@ -51,11 +57,9 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
   },
   buildColumn({
     suggestedPriority,
-    indexPatternId,
     field,
   }: {
     suggestedPriority: DimensionPriority | undefined;
-    indexPatternId: string;
     field?: IndexPatternField;
   }): DateHistogramIndexPatternColumn {
     if (!field) {
@@ -69,7 +73,6 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       timeZone = field.aggregationRestrictions.date_histogram.time_zone;
     }
     return {
-      indexPatternId,
       label: ofName(field.name),
       dataType: 'date',
       operationType: 'date_histogram',
@@ -82,6 +85,51 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       },
     };
   },
+  isTransferable: (column, newIndexPattern) => {
+    const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+
+    return Boolean(
+      newField &&
+        newField.type === 'date' &&
+        newField.aggregatable &&
+        (!newField.aggregationRestrictions || newField.aggregationRestrictions.date_histogram)
+    );
+  },
+  transfer: (column, newIndexPattern) => {
+    const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+    if (
+      newField &&
+      newField.aggregationRestrictions &&
+      newField.aggregationRestrictions.date_histogram
+    ) {
+      const restrictions = newField.aggregationRestrictions.date_histogram;
+      return {
+        ...column,
+        params: {
+          ...column.params,
+          timeZone: restrictions.time_zone,
+          // TODO this rewrite logic is simplified - if the current interval is a multiple of
+          // the restricted interval, we could carry it over directly. However as the current
+          // UI does not allow to select multiples of an interval anyway, this is not included yet.
+          // If the UI allows to pick more complicated intervals, this should be re-visited.
+          interval: (newField.aggregationRestrictions.date_histogram.calendar_interval ||
+            newField.aggregationRestrictions.date_histogram.fixed_interval) as string,
+        },
+      };
+    } else {
+      return {
+        ...column,
+        params: {
+          ...column.params,
+          // TODO remove this once it's possible to specify free intervals instead of picking from a list
+          interval: supportedIntervals.includes(column.params.interval)
+            ? column.params.interval
+            : supportedIntervals[0],
+          timeZone: undefined,
+        },
+      };
+    }
+  },
   toEsAggsConfig: (column, columnId) => ({
     id: columnId,
     enabled: true,
@@ -89,11 +137,6 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     schema: 'segment',
     params: {
       field: column.sourceField,
-      // TODO: This range should be passed in from somewhere else
-      timeRange: {
-        from: 'now-1d',
-        to: 'now',
-      },
       time_zone: column.params.timeZone,
       useNormalizedEsInterval: true,
       interval: column.params.interval,
@@ -113,14 +156,12 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
 
-    const intervals = ['M', 'w', 'd', 'h'];
-
     function intervalToNumeric(interval: string) {
-      return intervals.indexOf(interval);
+      return supportedIntervals.indexOf(interval);
     }
 
     function numericToInterval(i: number) {
-      return intervals[i];
+      return supportedIntervals[i];
     }
     return (
       <EuiForm>
@@ -140,11 +181,14 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
           ) : (
             <FixedEuiRange
               min={0}
-              max={intervals.length - 1}
+              max={supportedIntervals.length - 1}
               step={1}
               value={intervalToNumeric(column.params.interval)}
               showTicks
-              ticks={intervals.map((interval, index) => ({ label: interval, value: index }))}
+              ticks={supportedIntervals.map((interval, index) => ({
+                label: interval,
+                value: index,
+              }))}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setState(
                   updateColumnParam(

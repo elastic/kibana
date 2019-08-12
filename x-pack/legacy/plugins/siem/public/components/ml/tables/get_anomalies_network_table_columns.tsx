@@ -93,25 +93,26 @@ export const getAnomaliesNetworkTableColumns = (
     field: 'anomaly.influencers',
     render: (influencers, anomaliesByNetwork) => (
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-        {influencers.map(influencer => {
-          const [key, value] = getEntries(influencer);
-          const entityName = key != null ? key : '';
-          const entityValue = value != null ? value : '';
-          return (
-            <EuiFlexItem
-              key={`${entityName}-${entityValue}-${createCompoundNetworkKey(anomaliesByNetwork)}`}
-              grow={false}
-            >
-              <EntityDraggable
-                idPrefix={`anomalies-network-table-influencers-${entityName}-${entityValue}-${createCompoundNetworkKey(
-                  anomaliesByNetwork
-                )}`}
-                entityName={entityName}
-                entityValue={entityValue}
-              />
-            </EuiFlexItem>
-          );
-        })}
+        {influencers &&
+          influencers.map(influencer => {
+            const [key, value] = getEntries(influencer);
+            const entityName = key != null ? key : '';
+            const entityValue = value != null ? value : '';
+            return (
+              <EuiFlexItem
+                key={`${entityName}-${entityValue}-${createCompoundNetworkKey(anomaliesByNetwork)}`}
+                grow={false}
+              >
+                <EntityDraggable
+                  idPrefix={`anomalies-network-table-influencers-${entityName}-${entityValue}-${createCompoundNetworkKey(
+                    anomaliesByNetwork
+                  )}`}
+                  entityName={entityName}
+                  entityValue={entityValue}
+                />
+              </EuiFlexItem>
+            );
+          })}
       </EuiFlexGroup>
     ),
   },

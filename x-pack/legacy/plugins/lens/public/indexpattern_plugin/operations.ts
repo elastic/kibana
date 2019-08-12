@@ -6,7 +6,6 @@
 
 import _ from 'lodash';
 import { Storage } from 'ui/storage';
-import { DataSetup } from '../../../../../../src/legacy/core_plugins/data/public';
 import { DimensionPriority, OperationMetadata } from '../types';
 import {
   IndexPatternColumn,
@@ -26,6 +25,7 @@ import {
 import { dateHistogramOperation } from './operation_definitions/date_histogram';
 import { countOperation } from './operation_definitions/count';
 import { filterRatioOperation } from './operation_definitions/filter_ratio';
+import { DataPluginDependencies } from './plugin';
 
 type PossibleOperationDefinition<
   U extends IndexPatternColumn = IndexPatternColumn
@@ -63,7 +63,7 @@ export interface ParamEditorProps {
   setState: (newState: IndexPatternPrivateState) => void;
   columnId: string;
   layerId: string;
-  dataPlugin?: DataSetup;
+  dataPluginDependencies: DataPluginDependencies;
   storage?: Storage;
 }
 
@@ -75,7 +75,6 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   buildColumn: (arg: {
     suggestedPriority: DimensionPriority | undefined;
     layerId: string;
-    indexPatternId: string;
     columns: Partial<Record<string, IndexPatternColumn>>;
     field?: IndexPatternField;
   }) => C;
@@ -85,6 +84,14 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   ) => C;
   paramEditor?: React.ComponentType<ParamEditorProps>;
   toEsAggsConfig: (column: C, columnId: string) => unknown;
+  isTransferable: (column: C, newIndexPattern: IndexPattern) => boolean;
+  transfer?: (column: C, newIndexPattern: IndexPattern) => C;
+}
+
+export function isColumnTransferable(column: IndexPatternColumn, newIndexPattern: IndexPattern) {
+  return (operationDefinitionMap[column.operationType] as OperationDefinition<
+    IndexPatternColumn
+  >).isTransferable(column, newIndexPattern);
 }
 
 export function getOperationDisplay() {
@@ -189,6 +196,5 @@ export function buildColumn({
     suggestedPriority,
     field,
     layerId,
-    indexPatternId: indexPattern.id,
   });
 }

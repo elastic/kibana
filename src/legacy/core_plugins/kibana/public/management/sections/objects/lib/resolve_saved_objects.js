@@ -96,7 +96,7 @@ async function importIndexPattern(doc, indexPatterns, overwriteAll, confirmModal
       return;
     }
   }
-  indexPatterns.cache.clear(newId);
+  indexPatterns.clearCache(newId);
   return newId;
 }
 

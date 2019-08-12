@@ -18,6 +18,7 @@ import {
   getTheme,
   ChartSeriesConfigs,
   browserTimezone,
+  chartDefaultSettings,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
@@ -32,10 +33,13 @@ export const BarChartBaseComponent = React.memo<{
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const xAxisId = getAxisId(`stat-items-barchart-${data[0].key}-x`);
   const yAxisId = getAxisId(`stat-items-barchart-${data[0].key}-y`);
-
+  const settings = {
+    ...chartDefaultSettings,
+    ...get('configs.settings', chartConfigs),
+  };
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
-      <Settings rotation={90} theme={getTheme()} />
+      <Settings {...settings} theme={getTheme()} />
       {data.map(series => {
         const barSeriesKey = series.key;
         const barSeriesSpecId = getSpecId(barSeriesKey);

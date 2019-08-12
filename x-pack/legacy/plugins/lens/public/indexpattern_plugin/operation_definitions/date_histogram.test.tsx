@@ -9,6 +9,7 @@ import { dateHistogramOperation } from './date_histogram';
 import { shallow } from 'enzyme';
 import { DateHistogramIndexPatternColumn, IndexPatternPrivateState } from '../indexpattern';
 import { EuiRange } from '@elastic/eui';
+import { DataPluginDependencies } from '..';
 
 describe('date_histogram', () => {
   let state: IndexPatternPrivateState;
@@ -61,7 +62,6 @@ describe('date_histogram', () => {
                 interval: 'w',
               },
               sourceField: 'timestamp',
-              indexPatternId: '1',
             },
           },
         },
@@ -80,7 +80,6 @@ describe('date_histogram', () => {
                 interval: 'd',
               },
               sourceField: 'other_timestamp',
-              indexPatternId: '2',
             },
           },
         },
@@ -94,7 +93,6 @@ describe('date_histogram', () => {
         columns: {},
         suggestedPriority: 0,
         layerId: 'first',
-        indexPatternId: '1',
         field: {
           name: 'timestamp',
           type: 'date',
@@ -111,7 +109,6 @@ describe('date_histogram', () => {
         columns: {},
         suggestedPriority: 0,
         layerId: 'first',
-        indexPatternId: '1',
         field: {
           name: 'timestamp',
           type: 'date',
@@ -149,11 +146,96 @@ describe('date_histogram', () => {
     });
   });
 
+  describe('transfer', () => {
+    it('should adjust interval and time zone params if that is necessary due to restrictions', () => {
+      const transferedColumn = dateHistogramOperation.transfer!(
+        {
+          dataType: 'date',
+          isBucketed: true,
+          label: '',
+          operationType: 'date_histogram',
+          sourceField: 'dateField',
+          params: {
+            interval: 'd',
+          },
+        },
+        {
+          title: '',
+          id: '',
+          fields: [
+            {
+              name: 'dateField',
+              type: 'date',
+              aggregatable: true,
+              searchable: true,
+              aggregationRestrictions: {
+                date_histogram: {
+                  agg: 'date_histogram',
+                  time_zone: 'CET',
+                  calendar_interval: 'w',
+                },
+              },
+            },
+          ],
+        }
+      );
+      expect(transferedColumn).toEqual(
+        expect.objectContaining({
+          params: {
+            interval: 'w',
+            timeZone: 'CET',
+          },
+        })
+      );
+    });
+
+    it('should remove time zone param and normalize interval param', () => {
+      const transferedColumn = dateHistogramOperation.transfer!(
+        {
+          dataType: 'date',
+          isBucketed: true,
+          label: '',
+          operationType: 'date_histogram',
+          sourceField: 'dateField',
+          params: {
+            interval: '20s',
+          },
+        },
+        {
+          title: '',
+          id: '',
+          fields: [
+            {
+              name: 'dateField',
+              type: 'date',
+              aggregatable: true,
+              searchable: true,
+            },
+          ],
+        }
+      );
+      expect(transferedColumn).toEqual(
+        expect.objectContaining({
+          params: {
+            interval: 'M',
+            timeZone: undefined,
+          },
+        })
+      );
+    });
+  });
+
   describe('param editor', () => {
     it('should render current value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       expect(instance.find(EuiRange).prop('value')).toEqual(1);
@@ -162,7 +244,13 @@ describe('date_histogram', () => {
     it('should render current value for other index pattern', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col2" layerId="second" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col2"
+          layerId="second"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       expect(instance.find(EuiRange).prop('value')).toEqual(2);
@@ -171,7 +259,13 @@ describe('date_histogram', () => {
     it('should update state with the interval value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       instance.find(EuiRange).prop('onChange')!({
@@ -226,6 +320,7 @@ describe('date_histogram', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
         />
       );
 

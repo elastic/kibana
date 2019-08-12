@@ -22,6 +22,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     id="y"
     position="left"
     showGridLines={false}
+    tickFormat={[Function]}
     title=""
   />
   <inject-AreaSeriesSpecComponent-with-chartStore
@@ -30,12 +31,12 @@ exports[`xy_expression XYChart component it renders area 1`] = `
         Object {
           "Label A": 1,
           "Label B": 2,
-          "c": 3,
+          "c": "I",
         },
         Object {
           "Label A": 1,
           "Label B": 5,
-          "c": 4,
+          "c": "J",
         },
       ]
     }
@@ -48,7 +49,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     }
     stackAccessors={Array []}
     xAccessor="c"
-    xScaleType="linear"
+    xScaleType="ordinal"
     yAccessors={
       Array [
         "Label A",
@@ -82,6 +83,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     id="y"
     position="left"
     showGridLines={false}
+    tickFormat={[Function]}
     title=""
   />
   <inject-BarSeriesSpecComponent-with-chartStore
@@ -90,12 +92,12 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
         Object {
           "Label A": 1,
           "Label B": 2,
-          "c": 3,
+          "c": "I",
         },
         Object {
           "Label A": 1,
           "Label B": 5,
-          "c": 4,
+          "c": "J",
         },
       ]
     }
@@ -108,7 +110,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     }
     stackAccessors={Array []}
     xAccessor="c"
-    xScaleType="linear"
+    xScaleType="ordinal"
     yAccessors={
       Array [
         "Label A",
@@ -142,6 +144,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     id="y"
     position="left"
     showGridLines={false}
+    tickFormat={[Function]}
     title=""
   />
   <inject-BarSeriesSpecComponent-with-chartStore
@@ -150,12 +153,12 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
         Object {
           "Label A": 1,
           "Label B": 2,
-          "c": 3,
+          "c": "I",
         },
         Object {
           "Label A": 1,
           "Label B": 5,
-          "c": 4,
+          "c": "J",
         },
       ]
     }
@@ -168,7 +171,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     }
     stackAccessors={Array []}
     xAccessor="c"
-    xScaleType="linear"
+    xScaleType="ordinal"
     yAccessors={
       Array [
         "Label A",
@@ -202,6 +205,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     id="y"
     position="left"
     showGridLines={false}
+    tickFormat={[Function]}
     title=""
   />
   <inject-LineSeriesSpecComponent-with-chartStore
@@ -210,12 +214,12 @@ exports[`xy_expression XYChart component it renders line 1`] = `
         Object {
           "Label A": 1,
           "Label B": 2,
-          "c": 3,
+          "c": "I",
         },
         Object {
           "Label A": 1,
           "Label B": 5,
-          "c": 4,
+          "c": "J",
         },
       ]
     }
@@ -228,7 +232,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     }
     stackAccessors={Array []}
     xAccessor="c"
-    xScaleType="linear"
+    xScaleType="ordinal"
     yAccessors={
       Array [
         "Label A",
@@ -262,6 +266,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     id="y"
     position="left"
     showGridLines={false}
+    tickFormat={[Function]}
     title=""
   />
   <inject-AreaSeriesSpecComponent-with-chartStore
@@ -270,12 +275,12 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
         Object {
           "Label A": 1,
           "Label B": 2,
-          "c": 3,
+          "c": "I",
         },
         Object {
           "Label A": 1,
           "Label B": 5,
-          "c": 4,
+          "c": "J",
         },
       ]
     }
@@ -292,7 +297,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
       ]
     }
     xAccessor="c"
-    xScaleType="linear"
+    xScaleType="ordinal"
     yAccessors={
       Array [
         "Label A",
@@ -326,6 +331,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     id="y"
     position="left"
     showGridLines={false}
+    tickFormat={[Function]}
     title=""
   />
   <inject-BarSeriesSpecComponent-with-chartStore
@@ -334,12 +340,12 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
         Object {
           "Label A": 1,
           "Label B": 2,
-          "c": 3,
+          "c": "I",
         },
         Object {
           "Label A": 1,
           "Label B": 5,
-          "c": 4,
+          "c": "J",
         },
       ]
     }
@@ -356,7 +362,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
       ]
     }
     xAccessor="c"
-    xScaleType="linear"
+    xScaleType="ordinal"
     yAccessors={
       Array [
         "Label A",
@@ -390,6 +396,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     id="y"
     position="left"
     showGridLines={false}
+    tickFormat={[Function]}
     title=""
   />
   <inject-BarSeriesSpecComponent-with-chartStore
@@ -398,12 +405,12 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
         Object {
           "Label A": 1,
           "Label B": 2,
-          "c": 3,
+          "c": "I",
         },
         Object {
           "Label A": 1,
           "Label B": 5,
-          "c": 4,
+          "c": "J",
         },
       ]
     }
@@ -420,7 +427,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
       ]
     }
     xAccessor="c"
-    xScaleType="linear"
+    xScaleType="ordinal"
     yAccessors={
       Array [
         "Label A",

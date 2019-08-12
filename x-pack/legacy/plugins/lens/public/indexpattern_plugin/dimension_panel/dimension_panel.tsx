@@ -6,10 +6,9 @@
 
 import _ from 'lodash';
 import React, { memo, useMemo } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
-import { DataSetup } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { DatasourceDimensionPanelProps } from '../../types';
 import {
   IndexPatternColumn,
@@ -22,12 +21,14 @@ import { getAvailableOperationsByMetadata, buildColumn } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
+import { isDraggedField } from '../utils';
+import { DataPluginDependencies } from '..';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
   setState: (newState: IndexPatternPrivateState) => void;
   dragDropContext: DragContextState;
-  dataPlugin: DataSetup;
+  dataPluginDependencies: DataPluginDependencies;
   storage: Storage;
   layerId: string;
 };
@@ -87,9 +88,13 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
 
   function canHandleDrop() {
     const { dragging } = props.dragDropContext;
-    const field = dragging as IndexPatternField;
+    const layerIndexPatternId = props.state.layers[props.layerId].indexPatternId;
 
-    return !!field && !!field.type && !!hasOperationForField(field as IndexPatternField);
+    return (
+      isDraggedField(dragging) &&
+      layerIndexPatternId === dragging.indexPatternId &&
+      Boolean(hasOperationForField(dragging.field))
+    );
   }
 
   return (
@@ -98,8 +103,8 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
         className="lnsConfigPanel__summary"
         data-test-subj="indexPattern-dropTarget"
         droppable={canHandleDrop()}
-        onDrop={field => {
-          if (!hasOperationForField(field as IndexPatternField)) {
+        onDrop={droppedItem => {
+          if (!isDraggedField(droppedItem) || !hasOperationForField(droppedItem.field)) {
             // TODO: What do we do if we couldn't find a column?
             return;
           }
@@ -114,50 +119,45 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
                 indexPattern: currentIndexPattern,
                 layerId,
                 suggestedPriority: props.suggestedPriority,
-                field: field as IndexPatternField,
+                field: droppedItem.field,
               }),
             })
           );
         }}
       >
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={true}>
-            <PopoverEditor
-              {...props}
-              currentIndexPattern={currentIndexPattern}
-              selectedColumn={selectedColumn}
-              operationFieldSupportMatrix={operationFieldSupportMatrix}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={null}>
-            {selectedColumn && (
-              <EuiFlexItem>
-                <EuiButtonIcon
-                  data-test-subj="indexPattern-dimensionPopover-remove"
-                  iconType="cross"
-                  iconSize="s"
-                  size="s"
-                  color="danger"
-                  aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-                    defaultMessage: 'Remove',
-                  })}
-                  onClick={() => {
-                    props.setState(
-                      deleteColumn({
-                        state: props.state,
-                        layerId,
-                        columnId: props.columnId,
-                      })
-                    );
-                    if (props.onRemove) {
-                      props.onRemove(props.columnId);
-                    }
-                  }}
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <PopoverEditor
+          {...props}
+          currentIndexPattern={currentIndexPattern}
+          selectedColumn={selectedColumn}
+          operationFieldSupportMatrix={operationFieldSupportMatrix}
+        />
+        {selectedColumn && (
+          <EuiButtonIcon
+            data-test-subj="indexPattern-dimensionPopover-remove"
+            iconType="cross"
+            iconSize="s"
+            size="s"
+            color="danger"
+            aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+              defaultMessage: 'Remove configuration',
+            })}
+            title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+              defaultMessage: 'Remove configuration',
+            })}
+            onClick={() => {
+              props.setState(
+                deleteColumn({
+                  state: props.state,
+                  layerId,
+                  columnId: props.columnId,
+                })
+              );
+              if (props.onRemove) {
+                props.onRemove(props.columnId);
+              }
+            }}
+          />
+        )}
       </DragDrop>
     </ChildDragDropProvider>
   );

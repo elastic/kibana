@@ -9,6 +9,7 @@ import { termsOperation } from './terms';
 import { shallow } from 'enzyme';
 import { IndexPatternPrivateState, TermsIndexPatternColumn } from '../indexpattern';
 import { EuiRange, EuiSelect } from '@elastic/eui';
+import { DataPluginDependencies } from '..';
 
 describe('terms', () => {
   let state: IndexPatternPrivateState;
@@ -32,11 +33,10 @@ describe('terms', () => {
               operationType: 'terms',
               params: {
                 orderBy: { type: 'alphabetical' },
-                size: 5,
+                size: 3,
                 orderDirection: 'asc',
               },
               sourceField: 'category',
-              indexPatternId: '1',
             },
             col2: {
               label: 'Count',
@@ -45,7 +45,6 @@ describe('terms', () => {
 
               // Private
               operationType: 'count',
-              indexPatternId: '1',
             },
           },
         },
@@ -64,18 +63,90 @@ describe('terms', () => {
           params: expect.objectContaining({
             orderBy: '_key',
             field: 'category',
-            size: 5,
+            size: 3,
           }),
         })
       );
     });
   });
 
+  describe('getPossibleOperationsForField', () => {
+    it('should return operation with the right type', () => {
+      expect(
+        termsOperation.getPossibleOperationsForField({
+          aggregatable: true,
+          searchable: true,
+          name: 'test',
+          type: 'string',
+          aggregationRestrictions: {
+            terms: {
+              agg: 'terms',
+            },
+          },
+        })
+      ).toEqual([
+        {
+          dataType: 'string',
+          isBucketed: true,
+        },
+      ]);
+
+      expect(
+        termsOperation.getPossibleOperationsForField({
+          aggregatable: true,
+          searchable: true,
+          name: 'test',
+          type: 'boolean',
+        })
+      ).toEqual([
+        {
+          dataType: 'boolean',
+          isBucketed: true,
+        },
+      ]);
+    });
+
+    it('should not return an operation if restrictions prevent terms', () => {
+      expect(
+        termsOperation.getPossibleOperationsForField({
+          aggregatable: false,
+          searchable: true,
+          name: 'test',
+          type: 'string',
+        })
+      ).toEqual([]);
+
+      expect(
+        termsOperation.getPossibleOperationsForField({
+          aggregatable: true,
+          aggregationRestrictions: {},
+          searchable: true,
+          name: 'test',
+          type: 'string',
+        })
+      ).toEqual([]);
+    });
+  });
+
   describe('buildColumn', () => {
+    it('should use type from the passed field', () => {
+      const termsColumn = termsOperation.buildColumn({
+        layerId: 'first',
+        suggestedPriority: undefined,
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+        },
+        columns: {},
+      });
+      expect(termsColumn.dataType).toEqual('boolean');
+    });
+
     it('should use existing metric column as order column', () => {
       const termsColumn = termsOperation.buildColumn({
         layerId: 'first',
-        indexPatternId: '1',
         suggestedPriority: undefined,
         columns: {
           col1: {
@@ -85,8 +156,13 @@ describe('terms', () => {
 
             // Private
             operationType: 'count',
-            indexPatternId: '1',
           },
+        },
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
         },
       });
       expect(termsColumn.params).toEqual(
@@ -108,11 +184,10 @@ describe('terms', () => {
         operationType: 'terms',
         params: {
           orderBy: { type: 'column', columnId: 'col1' },
-          size: 5,
+          size: 3,
           orderDirection: 'asc',
         },
         sourceField: 'category',
-        indexPatternId: '1',
       };
       const updatedColumn = termsOperation.onOtherColumnChanged!(initialColumn, {
         col1: {
@@ -122,7 +197,6 @@ describe('terms', () => {
 
           // Private
           operationType: 'count',
-          indexPatternId: '1',
         },
       });
       expect(updatedColumn).toBe(initialColumn);
@@ -139,11 +213,10 @@ describe('terms', () => {
           operationType: 'terms',
           params: {
             orderBy: { type: 'column', columnId: 'col1' },
-            size: 5,
+            size: 3,
             orderDirection: 'asc',
           },
           sourceField: 'category',
-          indexPatternId: '1',
         },
         {}
       );
@@ -165,11 +238,10 @@ describe('terms', () => {
           operationType: 'terms',
           params: {
             orderBy: { type: 'column', columnId: 'col1' },
-            size: 5,
+            size: 3,
             orderDirection: 'asc',
           },
           sourceField: 'category',
-          indexPatternId: '1',
         },
         {
           col1: {
@@ -183,7 +255,6 @@ describe('terms', () => {
               interval: 'w',
             },
             sourceField: 'timestamp',
-            indexPatternId: '1',
           },
         }
       );
@@ -199,7 +270,13 @@ describe('terms', () => {
     it('should render current order by value and options', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       const select = instance.find('[data-test-subj="indexPattern-terms-orderBy"]').find(EuiSelect);
@@ -234,7 +311,6 @@ describe('terms', () => {
                       numerator: { query: '', language: 'kuery' },
                       denominator: { query: '', language: 'kuery' },
                     },
-                    indexPatternId: '1',
                   },
                 },
               },
@@ -243,6 +319,7 @@ describe('terms', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
         />
       );
 
@@ -254,7 +331,13 @@ describe('terms', () => {
     it('should update state with the order by value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       instance
@@ -292,7 +375,13 @@ describe('terms', () => {
     it('should render current order direction value and options', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       const select = instance
@@ -306,7 +395,13 @@ describe('terms', () => {
     it('should update state with the order direction value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       instance
@@ -341,16 +436,28 @@ describe('terms', () => {
     it('should render current size value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
-      expect(instance.find(EuiRange).prop('value')).toEqual(5);
+      expect(instance.find(EuiRange).prop('value')).toEqual(3);
     });
 
     it('should update state with the size value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+        />
       );
 
       instance.find(EuiRange).prop('onChange')!({

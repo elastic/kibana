@@ -4,12 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { updateColumnParam, changeColumn, getColumnOrder, deleteColumn } from './state_helpers';
+import {
+  updateColumnParam,
+  changeColumn,
+  getColumnOrder,
+  deleteColumn,
+  updateLayerIndexPattern,
+} from './state_helpers';
 import {
   IndexPatternPrivateState,
   DateHistogramIndexPatternColumn,
   TermsIndexPatternColumn,
   AvgIndexPatternColumn,
+  IndexPattern,
+  IndexPatternLayer,
 } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 
@@ -31,7 +39,6 @@ describe('state_helpers', () => {
           orderDirection: 'asc',
           size: 5,
         },
-        indexPatternId: '',
       };
 
       const state: IndexPatternPrivateState = {
@@ -50,7 +57,6 @@ describe('state_helpers', () => {
 
                 // Private
                 operationType: 'count',
-                indexPatternId: '1',
               },
             },
           },
@@ -78,7 +84,6 @@ describe('state_helpers', () => {
           orderDirection: 'asc',
           size: 5,
         },
-        indexPatternId: '',
       };
 
       const state: IndexPatternPrivateState = {
@@ -97,7 +102,6 @@ describe('state_helpers', () => {
 
                 // Private
                 operationType: 'count',
-                indexPatternId: '1',
               },
             },
           },
@@ -129,7 +133,6 @@ describe('state_helpers', () => {
           interval: '1d',
         },
         sourceField: 'timestamp',
-        indexPatternId: '1',
       };
 
       const state: IndexPatternPrivateState = {
@@ -173,7 +176,6 @@ describe('state_helpers', () => {
                 // Private
                 operationType: 'avg',
                 sourceField: 'bytes',
-                indexPatternId: '1',
               },
               col2: {
                 label: 'Max of bytes',
@@ -183,7 +185,6 @@ describe('state_helpers', () => {
                 // Private
                 operationType: 'max',
                 sourceField: 'bytes',
-                indexPatternId: '1',
               },
             },
           },
@@ -205,7 +206,6 @@ describe('state_helpers', () => {
               interval: '1d',
             },
             sourceField: 'timestamp',
-            indexPatternId: '1',
           },
         })
       ).toEqual({
@@ -238,7 +238,6 @@ describe('state_helpers', () => {
                 params: {
                   interval: 'h',
                 },
-                indexPatternId: '1',
               },
             },
           },
@@ -260,7 +259,6 @@ describe('state_helpers', () => {
             params: {
               interval: 'w',
             },
-            indexPatternId: '1',
           },
         }).layers.first.columns.col1
       ).toEqual(
@@ -284,7 +282,6 @@ describe('state_helpers', () => {
           orderDirection: 'asc',
           size: 5,
         },
-        indexPatternId: '1',
       };
 
       const newColumn: AvgIndexPatternColumn = {
@@ -295,7 +292,6 @@ describe('state_helpers', () => {
         // Private
         operationType: 'avg',
         sourceField: 'bytes',
-        indexPatternId: '1',
       };
 
       const state: IndexPatternPrivateState = {
@@ -314,7 +310,6 @@ describe('state_helpers', () => {
 
                 // Private
                 operationType: 'count',
-                indexPatternId: '1',
               },
             },
           },
@@ -354,7 +349,6 @@ describe('state_helpers', () => {
             params: {
               interval: 'h',
             },
-            indexPatternId: '1',
           },
         })
       ).toEqual(['col1']);
@@ -378,7 +372,6 @@ describe('state_helpers', () => {
               },
               orderDirection: 'asc',
             },
-            indexPatternId: '1',
           },
           col2: {
             label: 'Average of bytes',
@@ -388,7 +381,6 @@ describe('state_helpers', () => {
             // Private
             operationType: 'avg',
             sourceField: 'bytes',
-            indexPatternId: '1',
           },
           col3: {
             label: 'Date Histogram of timestamp',
@@ -401,7 +393,6 @@ describe('state_helpers', () => {
             params: {
               interval: '1d',
             },
-            indexPatternId: '1',
           },
         })
       ).toEqual(['col1', 'col3', 'col2']);
@@ -426,7 +417,6 @@ describe('state_helpers', () => {
               orderDirection: 'asc',
             },
             suggestedPriority: 2,
-            indexPatternId: '1',
           },
           col2: {
             label: 'Average of bytes',
@@ -437,7 +427,6 @@ describe('state_helpers', () => {
             operationType: 'avg',
             sourceField: 'bytes',
             suggestedPriority: 0,
-            indexPatternId: '1',
           },
           col3: {
             label: 'Date Histogram of timestamp',
@@ -451,10 +440,228 @@ describe('state_helpers', () => {
             params: {
               interval: '1d',
             },
-            indexPatternId: '1',
           },
         })
       ).toEqual(['col3', 'col1', 'col2']);
+    });
+  });
+
+  describe('updateLayerIndexPattern', () => {
+    const indexPattern: IndexPattern = {
+      id: 'test',
+      title: '',
+      fields: [
+        {
+          name: 'fieldA',
+          aggregatable: true,
+          searchable: true,
+          type: 'string',
+        },
+        {
+          name: 'fieldB',
+          aggregatable: true,
+          searchable: true,
+          type: 'number',
+          aggregationRestrictions: {
+            avg: {
+              agg: 'avg',
+            },
+          },
+        },
+        {
+          name: 'fieldC',
+          aggregatable: false,
+          searchable: true,
+          type: 'date',
+        },
+        {
+          name: 'fieldD',
+          aggregatable: true,
+          searchable: true,
+          type: 'date',
+          aggregationRestrictions: {
+            date_histogram: {
+              agg: 'date_histogram',
+              time_zone: 'CET',
+              calendar_interval: 'w',
+            },
+          },
+        },
+        {
+          name: 'fieldE',
+          aggregatable: true,
+          searchable: true,
+          type: 'date',
+        },
+      ],
+    };
+
+    it('should switch index pattern id in layer', () => {
+      const layer = { columnOrder: [], columns: {}, indexPatternId: 'original' };
+      expect(updateLayerIndexPattern(layer, indexPattern)).toEqual({
+        ...layer,
+        indexPatternId: 'test',
+      });
+    });
+
+    it('should remove operations referencing unavailable fields', () => {
+      const layer: IndexPatternLayer = {
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: {
+            dataType: 'string',
+            isBucketed: true,
+            label: '',
+            operationType: 'terms',
+            sourceField: 'fieldA',
+            params: {
+              orderBy: { type: 'alphabetical' },
+              orderDirection: 'asc',
+              size: 3,
+            },
+          },
+          col2: {
+            dataType: 'number',
+            isBucketed: false,
+            label: '',
+            operationType: 'avg',
+            sourceField: 'xxx',
+          },
+        },
+        indexPatternId: 'original',
+      };
+      const updatedLayer = updateLayerIndexPattern(layer, indexPattern);
+      expect(updatedLayer.columnOrder).toEqual(['col1']);
+      expect(updatedLayer.columns).toEqual({
+        col1: layer.columns.col1,
+      });
+    });
+
+    it('should remove operations referencing fields with insufficient capabilities', () => {
+      const layer: IndexPatternLayer = {
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: {
+            dataType: 'string',
+            isBucketed: true,
+            label: '',
+            operationType: 'date_histogram',
+            sourceField: 'fieldC',
+            params: {
+              interval: 'd',
+            },
+          },
+          col2: {
+            dataType: 'number',
+            isBucketed: false,
+            label: '',
+            operationType: 'avg',
+            sourceField: 'fieldB',
+          },
+        },
+        indexPatternId: 'original',
+      };
+      const updatedLayer = updateLayerIndexPattern(layer, indexPattern);
+      expect(updatedLayer.columnOrder).toEqual(['col2']);
+      expect(updatedLayer.columns).toEqual({
+        col2: layer.columns.col2,
+      });
+    });
+
+    it('should rewrite column params if that is necessary due to restrictions', () => {
+      const layer: IndexPatternLayer = {
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: {
+            dataType: 'date',
+            isBucketed: true,
+            label: '',
+            operationType: 'date_histogram',
+            sourceField: 'fieldD',
+            params: {
+              interval: 'd',
+            },
+          },
+        },
+        indexPatternId: 'original',
+      };
+      const updatedLayer = updateLayerIndexPattern(layer, indexPattern);
+      expect(updatedLayer.columnOrder).toEqual(['col1']);
+      expect(updatedLayer.columns).toEqual({
+        col1: {
+          ...layer.columns.col1,
+          params: {
+            interval: 'w',
+            timeZone: 'CET',
+          },
+        },
+      });
+    });
+
+    it('should remove operations referencing fields with wrong field types', () => {
+      const layer: IndexPatternLayer = {
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: {
+            dataType: 'string',
+            isBucketed: true,
+            label: '',
+            operationType: 'terms',
+            sourceField: 'fieldA',
+            params: {
+              orderBy: { type: 'alphabetical' },
+              orderDirection: 'asc',
+              size: 3,
+            },
+          },
+          col2: {
+            dataType: 'number',
+            isBucketed: false,
+            label: '',
+            operationType: 'avg',
+            sourceField: 'fieldD',
+          },
+        },
+        indexPatternId: 'original',
+      };
+      const updatedLayer = updateLayerIndexPattern(layer, indexPattern);
+      expect(updatedLayer.columnOrder).toEqual(['col1']);
+      expect(updatedLayer.columns).toEqual({
+        col1: layer.columns.col1,
+      });
+    });
+
+    it('should remove operations referencing fields with incompatible restrictions', () => {
+      const layer: IndexPatternLayer = {
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: {
+            dataType: 'string',
+            isBucketed: true,
+            label: '',
+            operationType: 'terms',
+            sourceField: 'fieldA',
+            params: {
+              orderBy: { type: 'alphabetical' },
+              orderDirection: 'asc',
+              size: 3,
+            },
+          },
+          col2: {
+            dataType: 'number',
+            isBucketed: false,
+            label: '',
+            operationType: 'min',
+            sourceField: 'fieldC',
+          },
+        },
+        indexPatternId: 'original',
+      };
+      const updatedLayer = updateLayerIndexPattern(layer, indexPattern);
+      expect(updatedLayer.columnOrder).toEqual(['col1']);
+      expect(updatedLayer.columns).toEqual({
+        col1: layer.columns.col1,
+      });
     });
   });
 });

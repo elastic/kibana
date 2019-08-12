@@ -6,42 +6,93 @@
 import React from 'react';
 import { getSetupModeState, initSetupModeState, updateSetupModeData } from '../../lib/setup_mode';
 import { Flyout } from '../metricbeat_migration/flyout';
-import { ELASTICSEARCH_CUSTOM_ID } from '../../../common/constants';
+import { findNewUuid } from './lib/find_new_uuid';
 
 export class SetupModeRenderer extends React.Component {
   state = {
     renderState: false,
     isFlyoutOpen: false,
     instance: null,
+    newProduct: null,
+    isSettingUpNew: false,
   }
 
   componentWillMount() {
     const { scope, injector } = this.props;
-    initSetupModeState(scope, injector, () => this.setState({ renderState: true }));
+    initSetupModeState(scope, injector, (_oldData) => {
+      const newState = { renderState: true };
+      const { productName } = this.props;
+      if (!productName) {
+        this.setState(newState);
+        return;
+      }
+
+      const setupModeState = getSetupModeState();
+      if (!setupModeState.enabled || !setupModeState.data) {
+        this.setState(newState);
+        return;
+      }
+
+      const data = setupModeState.data[productName];
+      const oldData = _oldData ? _oldData[productName] : null;
+      if (data && oldData) {
+        const newUuid = findNewUuid(Object.keys(oldData.byUuid), Object.keys(data.byUuid));
+        if (newUuid) {
+          newState.newProduct = data.byUuid[newUuid];
+        }
+      }
+
+      this.setState(newState);
+    });
+  }
+
+  reset() {
+    this.setState({
+      renderState: false,
+      isFlyoutOpen: false,
+      instance: null,
+      newProduct: null,
+      isSettingUpNew: false,
+    });
   }
 
   getFlyout(data, meta) {
     const { productName } = this.props;
-    const { isFlyoutOpen, instance } = this.state;
+    const { isFlyoutOpen, instance, isSettingUpNew, newProduct } = this.state;
     if (!data || !isFlyoutOpen) {
       return null;
     }
 
-    let product = instance ? data.byUuid[instance.uuid] : null;
-    const isFullyOrPartiallyMigrated = data.totalUniquePartiallyMigratedCount === data.totalUniqueInstanceCount
-      || data.totalUniqueFullyMigratedCount === data.totalUniqueInstanceCount;
-    if (!product && productName === ELASTICSEARCH_CUSTOM_ID && isFullyOrPartiallyMigrated) {
-      product = Object.values(data.byUuid)[0];
+    let product = null;
+    if (newProduct) {
+      product = newProduct;
+    }
+    // For new instance discovery flow, we pass in empty instance object
+    else if (instance && Object.keys(instance).length) {
+      product = data.byUuid[instance.uuid];
+    }
+
+    if (!product) {
+      const uuids = Object.values(data.byUuid);
+      if (uuids.length && !isSettingUpNew) {
+        product = uuids[0];
+      }
+      else {
+        product = {
+          isNetNewUser: true
+        };
+      }
     }
 
     return (
       <Flyout
-        onClose={() => this.setState({ isFlyoutOpen: false })}
+        onClose={() => this.reset()}
         productName={productName}
         product={product}
         meta={meta}
         instance={instance}
         updateProduct={updateSetupModeData}
+        isSettingUpNew={isSettingUpNew}
       />
     );
   }
@@ -59,6 +110,7 @@ export class SetupModeRenderer extends React.Component {
         data = setupModeState.data;
       }
     }
+
     const meta = setupModeState.data ? setupModeState.data._meta : null;
 
     return render({
@@ -67,7 +119,7 @@ export class SetupModeRenderer extends React.Component {
         enabled: setupModeState.enabled,
         productName,
         updateSetupModeData,
-        openFlyout: (instance) => this.setState({ isFlyoutOpen: true, instance }),
+        openFlyout: (instance, isSettingUpNew) => this.setState({ isFlyoutOpen: true, instance, isSettingUpNew }),
         closeFlyout: () => this.setState({ isFlyoutOpen: false }),
       },
       flyoutComponent: this.getFlyout(data, meta),

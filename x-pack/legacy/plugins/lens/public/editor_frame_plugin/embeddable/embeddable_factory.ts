@@ -9,7 +9,11 @@ import { Chrome } from 'ui/chrome';
 
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
-import { DataSetup, ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
+import {
+  IndexPatterns,
+  ExpressionRenderer,
+  IndexPattern,
+} from 'src/legacy/core_plugins/data/public';
 import {
   EmbeddableFactory as AbstractEmbeddableFactory,
   ErrorEmbeddable,
@@ -24,13 +28,13 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
   type = DOC_TYPE;
 
   private chrome: Chrome;
-  private indexPatternService: DataSetup['indexPatterns']['indexPatterns'];
+  private indexPatternService: IndexPatterns;
   private expressionRenderer: ExpressionRenderer;
 
   constructor(
     chrome: Chrome,
     expressionRenderer: ExpressionRenderer,
-    indexPatternService: DataSetup['indexPatterns']
+    indexPatternService: IndexPatterns
   ) {
     super({
       savedObjectMetaData: {
@@ -42,7 +46,7 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
       },
     });
     this.chrome = chrome;
-    this.indexPatternService = indexPatternService.indexPatterns;
+    this.indexPatternService = indexPatternService;
     this.expressionRenderer = expressionRenderer;
   }
 
@@ -69,9 +73,9 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
     const savedVis = await store.load(savedObjectId);
 
     const promises = savedVis.state.datasourceMetaData.filterableIndexPatterns.map(
-      async indexPatternId => {
+      async ({ id }) => {
         try {
-          return await this.indexPatternService.get(indexPatternId);
+          return await this.indexPatternService.get(id);
         } catch (error) {
           // Unable to load index pattern, ignore error as the index patterns are only used to
           // configure the filter and query bar - there is still a good chance to get the visualization
@@ -80,8 +84,8 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
         }
       }
     );
-    const indexPatterns = (await Promise.all(promises)).filter(indexPattern =>
-      Boolean(indexPattern)
+    const indexPatterns = (await Promise.all(promises)).filter(
+      (indexPattern: IndexPattern | null): indexPattern is IndexPattern => Boolean(indexPattern)
     );
 
     return new Embeddable(

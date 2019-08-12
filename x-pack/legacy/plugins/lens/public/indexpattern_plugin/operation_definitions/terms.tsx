@@ -10,6 +10,7 @@ import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
 import { TermsIndexPatternColumn, IndexPatternColumn } from '../indexpattern';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
+import { DataType } from '../../types';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -34,38 +35,56 @@ function isSortableByColumn(column: IndexPatternColumn) {
   return !column.isBucketed && column.operationType !== 'filter_ratio';
 }
 
+const DEFAULT_SIZE = 3;
+
 export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   type: 'terms',
   displayName: i18n.translate('xpack.lens.indexPattern.terms', {
     defaultMessage: 'Top Values',
   }),
   getPossibleOperationsForDocument: () => [],
-  getPossibleOperationsForField: ({ aggregationRestrictions, type }) => {
-    if (type === 'string' && (!aggregationRestrictions || aggregationRestrictions.terms)) {
+  getPossibleOperationsForField: ({ aggregationRestrictions, aggregatable, type }) => {
+    if (
+      (type === 'string' || type === 'boolean') &&
+      aggregatable &&
+      (!aggregationRestrictions || aggregationRestrictions.terms)
+    ) {
       return [
         {
-          dataType: 'string',
+          dataType: type,
           isBucketed: true,
         },
       ];
     }
     return [];
   },
-  buildColumn({ suggestedPriority, columns, field, indexPatternId }) {
+  isTransferable: (column, newIndexPattern) => {
+    const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+
+    return Boolean(
+      newField &&
+        newField.type === 'string' &&
+        newField.aggregatable &&
+        (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms)
+    );
+  },
+  buildColumn({ suggestedPriority, columns, field }) {
+    if (!field) {
+      throw new Error('Invariant error: terms operation requires field');
+    }
     const existingMetricColumn = Object.entries(columns)
       .filter(([_columnId, column]) => column && isSortableByColumn(column))
       .map(([id]) => id)[0];
 
     return {
-      label: ofName(field ? field.name : ''),
-      dataType: 'string',
+      label: ofName(field.name),
+      dataType: field.type as DataType,
       operationType: 'terms',
       suggestedPriority,
-      sourceField: field ? field.name : '',
+      sourceField: field.name,
       isBucketed: true,
-      indexPatternId,
       params: {
-        size: 5,
+        size: DEFAULT_SIZE,
         orderBy: existingMetricColumn
           ? { type: 'column', columnId: existingMetricColumn }
           : { type: 'alphabetical' },

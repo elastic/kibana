@@ -10,7 +10,7 @@ import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EuiButtonGroupProps } from '@elastic/eui';
 import { XYConfigPanel } from './xy_config_panel';
 import { DatasourceDimensionPanelProps, Operation, FramePublicAPI } from '../types';
-import { State } from './types';
+import { State, XYState } from './types';
 import { Position } from '@elastic/charts';
 import { NativeRendererProps } from '../native_renderer';
 import { generateId } from '../id_generator';
@@ -27,6 +27,7 @@ describe('XYConfigPanel', () => {
   function testState(): State {
     return {
       legend: { isVisible: true, position: Position.Right },
+      preferredSeriesType: 'bar',
       isHorizontal: false,
       layers: [
         {
@@ -119,11 +120,11 @@ describe('XYConfigPanel', () => {
       .prop('options') as EuiButtonGroupProps['options'];
 
     expect(options.map(({ id }) => id)).toEqual([
+      'bar',
+      'bar_stacked',
       'line',
       'area',
-      'bar',
       'area_stacked',
-      'bar_stacked',
     ]);
 
     expect(options.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
@@ -294,6 +295,109 @@ describe('XYConfigPanel', () => {
         ],
       });
     });
+
+    it('should use series type of existing layers if they all have the same', () => {
+      frame.addNewLayer = jest.fn().mockReturnValue('newLayerId');
+      frame.datasourceLayers.second = createMockDatasource().publicAPIMock;
+      (generateId as jest.Mock).mockReturnValue('accessor');
+      const setState = jest.fn();
+      const state: XYState = {
+        ...testState(),
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            seriesType: 'line',
+            layerId: 'first',
+            splitAccessor: 'baz',
+            xAccessor: 'foo',
+            title: 'X',
+            accessors: ['bar'],
+          },
+          {
+            seriesType: 'line',
+            layerId: 'second',
+            splitAccessor: 'baz',
+            xAccessor: 'foo',
+            title: 'Y',
+            accessors: ['bar'],
+          },
+        ],
+      };
+      const component = mount(
+        <XYConfigPanel
+          dragDropContext={dragDropContext}
+          frame={frame}
+          setState={setState}
+          state={state}
+        />
+      );
+
+      component
+        .find('[data-test-subj="lnsXY_layer_add"]')
+        .first()
+        .simulate('click');
+
+      expect(setState.mock.calls[0][0]).toMatchObject({
+        layers: [
+          ...state.layers,
+          expect.objectContaining({
+            seriesType: 'line',
+          }),
+        ],
+      });
+    });
+
+    it('should use preffered series type if there are already various different layers', () => {
+      frame.addNewLayer = jest.fn().mockReturnValue('newLayerId');
+      frame.datasourceLayers.second = createMockDatasource().publicAPIMock;
+      (generateId as jest.Mock).mockReturnValue('accessor');
+      const setState = jest.fn();
+      const state: XYState = {
+        ...testState(),
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            seriesType: 'area',
+            layerId: 'first',
+            splitAccessor: 'baz',
+            xAccessor: 'foo',
+            title: 'X',
+            accessors: ['bar'],
+          },
+          {
+            seriesType: 'line',
+            layerId: 'second',
+            splitAccessor: 'baz',
+            xAccessor: 'foo',
+            title: 'Y',
+            accessors: ['bar'],
+          },
+        ],
+      };
+      const component = mount(
+        <XYConfigPanel
+          dragDropContext={dragDropContext}
+          frame={frame}
+          setState={setState}
+          state={state}
+        />
+      );
+
+      component
+        .find('[data-test-subj="lnsXY_layer_add"]')
+        .first()
+        .simulate('click');
+
+      expect(setState.mock.calls[0][0]).toMatchObject({
+        layers: [
+          ...state.layers,
+          expect.objectContaining({
+            seriesType: 'bar',
+          }),
+        ],
+      });
+    });
+
     it('removes layers', () => {
       const setState = jest.fn();
       const state = testState();
@@ -313,7 +417,7 @@ describe('XYConfigPanel', () => {
         .first()
         .simulate('click');
 
-      expect(frame.removeLayer).toHaveBeenCalled();
+      expect(frame.removeLayers).toHaveBeenCalled();
       expect(setState).toHaveBeenCalledTimes(1);
       expect(setState.mock.calls[0][0]).toMatchObject({
         layers: [],

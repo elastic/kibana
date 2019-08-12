@@ -10,7 +10,6 @@ import { Document } from '../../persistence/saved_object_store';
 
 export interface EditorFrameState {
   persistedId?: string;
-  saving: boolean;
   title: string;
   visualization: {
     activeId: string | null;
@@ -26,16 +25,8 @@ export type Action =
       state: EditorFrameState;
     }
   | {
-      type: 'SAVING';
-      isSaving: boolean;
-    }
-  | {
       type: 'UPDATE_TITLE';
       title: string;
-    }
-  | {
-      type: 'UPDATE_PERSISTED_ID';
-      id: string;
     }
   | {
       type: 'UPDATE_DATASOURCE_STATE';
@@ -45,6 +36,12 @@ export type Action =
   | {
       type: 'UPDATE_VISUALIZATION_STATE';
       newState: unknown;
+    }
+  | {
+      type: 'UPDATE_LAYER';
+      layerId: string;
+      datasourceId: string;
+      updater: (state: unknown, layerId: string) => unknown;
     }
   | {
       type: 'VISUALIZATION_LOADED';
@@ -76,7 +73,6 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
   }
 
   return {
-    saving: false,
     title: i18n.translate('xpack.lens.chartTitle', { defaultMessage: 'New visualization' }),
     datasourceStates,
     activeDatasourceId: props.initialDatasourceId ? props.initialDatasourceId : null,
@@ -89,14 +85,24 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
 
 export const reducer = (state: EditorFrameState, action: Action): EditorFrameState => {
   switch (action.type) {
-    case 'SAVING':
-      return { ...state, saving: action.isSaving };
     case 'RESET':
       return action.state;
-    case 'UPDATE_PERSISTED_ID':
-      return { ...state, persistedId: action.id };
     case 'UPDATE_TITLE':
       return { ...state, title: action.title };
+    case 'UPDATE_LAYER':
+      return {
+        ...state,
+        datasourceStates: {
+          ...state.datasourceStates,
+          [action.datasourceId]: {
+            ...state.datasourceStates[action.datasourceId],
+            state: action.updater(
+              state.datasourceStates[action.datasourceId].state,
+              action.layerId
+            ),
+          },
+        },
+      };
     case 'VISUALIZATION_LOADED':
       return {
         ...state,
