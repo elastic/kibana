@@ -19,8 +19,6 @@
 
 export function injectVars(server) {
   const serverConfig = server.config();
-  const mapConfig = serverConfig.get('map');
-  const regionmap = mapConfig.regionmap;
 
   // Get types that are import and exportable, by default yes unless isImportableAndExportable is set to false
   const { types: allTypes } = server.savedObjects;
@@ -32,7 +30,6 @@ export function injectVars(server) {
   return {
     kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
     disableWelcomeScreen: serverConfig.get('kibana.disableWelcomeScreen'),
-    regionmapsConfig: regionmap,
     importAndExportableTypes,
     autocompleteTerminateAfter: serverConfig.get('kibana.autocompleteTerminateAfter'),
     autocompleteTimeout: serverConfig.get('kibana.autocompleteTimeout'),

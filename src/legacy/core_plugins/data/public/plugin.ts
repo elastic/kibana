@@ -19,6 +19,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { ExpressionsService, ExpressionsSetup } from './expressions';
+import { SearchService, SearchSetup } from './search';
 import { QueryService, QuerySetup } from './query';
 import { FilterService, FilterSetup } from './filter';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
@@ -44,6 +45,7 @@ export interface DataSetup {
   indexPatterns: IndexPatternsSetup;
   filter: FilterSetup;
   query: QuerySetup;
+  search: SearchSetup;
 }
 
 /**
@@ -63,18 +65,27 @@ export class DataPlugin implements Plugin<DataSetup, void, DataPluginSetupDepend
   private readonly filter: FilterService = new FilterService();
   private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
   private readonly query: QueryService = new QueryService();
+  private readonly search: SearchService = new SearchService();
 
   public setup(core: CoreSetup, { __LEGACY, interpreter }: DataPluginSetupDependencies): DataSetup {
-    const indexPatternsService = this.indexPatterns.setup();
+    const { uiSettings } = core;
+    const savedObjectsClient = __LEGACY.savedObjectsClient;
+
+    const indexPatternsService = this.indexPatterns.setup({
+      uiSettings,
+      savedObjectsClient,
+    });
     return {
       expressions: this.expressions.setup({
         interpreter,
       }),
       indexPatterns: indexPatternsService,
       filter: this.filter.setup({
+        uiSettings,
         indexPatterns: indexPatternsService.indexPatterns,
       }),
       query: this.query.setup(),
+      search: this.search.setup(),
     };
   }
 
@@ -85,5 +96,6 @@ export class DataPlugin implements Plugin<DataSetup, void, DataPluginSetupDepend
     this.indexPatterns.stop();
     this.filter.stop();
     this.query.stop();
+    this.search.stop();
   }
 }

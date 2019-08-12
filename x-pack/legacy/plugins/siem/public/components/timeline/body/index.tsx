@@ -68,6 +68,8 @@ const HorizontalScroll = styled.div<{
   min-height: 0px;
 `;
 
+HorizontalScroll.displayName = 'HorizontalScroll';
+
 const VerticalScrollContainer = styled.div<{
   height: number;
   minWidth: number;
@@ -78,6 +80,8 @@ const VerticalScrollContainer = styled.div<{
   overflow-y: auto;
   min-width: ${({ minWidth }) => `${minWidth}px`};
 `;
+
+VerticalScrollContainer.displayName = 'VerticalScrollContainer';
 
 /** Renders the timeline body */
 export const Body = pure<Props>(
@@ -161,3 +165,5 @@ export const Body = pure<Props>(
     );
   }
 );
+
+Body.displayName = 'Body';

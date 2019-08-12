@@ -66,6 +66,8 @@ const EuiFlyoutContainer = styled.div<{ headerHeight: number; width: number }>`
   }
 `;
 
+EuiFlyoutContainer.displayName = 'EuiFlyoutContainer';
+
 const FlyoutHeaderContainer = styled.div`
   align-items: center;
   display: flex;
@@ -74,10 +76,14 @@ const FlyoutHeaderContainer = styled.div`
   width: 100%;
 `;
 
+FlyoutHeaderContainer.displayName = 'FlyoutHeaderContainer';
+
 // manually wrap the close button because EuiButtonIcon can't be a wrapped `styled`
 const WrappedCloseButton = styled.div`
   margin-right: 5px;
 `;
+
+WrappedCloseButton.displayName = 'WrappedCloseButton';
 
 const FlyoutHeaderWithCloseButton = pure<{
   onClose: () => void;
@@ -98,6 +104,8 @@ const FlyoutHeaderWithCloseButton = pure<{
     <FlyoutHeader timelineId={timelineId} usersViewing={usersViewing} />
   </FlyoutHeaderContainer>
 ));
+
+FlyoutHeaderWithCloseButton.displayName = 'FlyoutHeaderWithCloseButton';
 
 class FlyoutPaneComponent extends React.PureComponent<Props> {
   public render() {

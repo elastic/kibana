@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-
 import {
   CloneProgress,
   CloneWorkerProgress,
@@ -20,6 +18,7 @@ import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
 import { AbstractWorker } from './abstract_worker';
+import { CancellationReason } from './cancellation_service';
 import { Job } from './job';
 
 export abstract class AbstractGitWorker extends AbstractWorker {
@@ -38,32 +37,21 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     this.objectClient = new RepositoryObjectClient(client);
   }
 
-  public async executeJob(_: Job): Promise<WorkerResult> {
-    const { thresholdEnabled, watermarkLowMb } = this.serverOptions.disk;
-    if (thresholdEnabled) {
-      const isLowWatermark = await this.watermarkService.isLowWatermark();
-      if (isLowWatermark) {
-        const msg = i18n.translate('xpack.code.git.diskWatermarkLowMessage', {
-          defaultMessage: `Disk watermark level lower than {watermarkLowMb} MB`,
-          values: {
-            watermarkLowMb,
-          },
-        });
-        this.log.error(msg);
-        throw new Error(msg);
-      }
+  public async executeJob(job: Job): Promise<WorkerResult> {
+    const uri = job.payload.uri;
+    if (await this.watermarkService.isLowWatermark()) {
+      // Return job result as cancelled.
+      return {
+        uri,
+        cancelled: true,
+        cancelledReason: CancellationReason.LOW_DISK_SPACE,
+      };
     }
 
-    return new Promise<WorkerResult>((resolve, reject) => {
-      resolve();
-    });
+    return { uri };
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
-    if (res.cancelled) {
-      // Skip updating job progress if the job is done because of cancellation.
-      return;
-    }
     await super.onJobCompleted(job, res);
 
     // Update the default branch.
@@ -117,6 +105,19 @@ export abstract class AbstractGitWorker extends AbstractWorker {
       // Do nothing here since it's not blocking anything.
       // this.log.warn(`Update git clone progress error.`);
       // this.log.warn(err);
+    }
+  }
+
+  protected async onJobCancelled(job: Job, reason?: CancellationReason) {
+    if (reason && reason === CancellationReason.LOW_DISK_SPACE) {
+      // If the clone/update job is cancelled because of the disk watermark, manually
+      // trigger onJobExecutionError.
+      const msg = this.watermarkService.diskWatermarkViolationMessage();
+      this.log.error(
+        'Git clone/update job completed because of low disk space. Move forward as error.'
+      );
+      const error = new Error(msg);
+      await this.onJobExecutionError({ job, error });
     }
   }
 }
