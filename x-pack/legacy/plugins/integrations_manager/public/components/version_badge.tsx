@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
-import { RequirementVersionValue } from '../../common/types';
+import { RequirementVersion } from '../../common/types';
 
-export function VersionBadge({ version }: { version: RequirementVersionValue }) {
+export function VersionBadge({ version }: { version: RequirementVersion }) {
   return <EuiBadge color="hollow">v{version}</EuiBadge>;
 }

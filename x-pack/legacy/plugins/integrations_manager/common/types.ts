@@ -34,13 +34,13 @@ export interface RegistryListItem {
 // from /package/{name}
 // https://github.com/elastic/integrations-registry/blob/master/docs/api/package.json
 export type ServiceName = 'kibana' | 'elasticsearch' | 'filebeat' | 'metricbeat';
-export type RequirementVersionValue = string;
-export interface RequirementGroup {
-  'version.min': RequirementVersionValue;
-  'version.max': RequirementVersionValue;
+export type RequirementVersion = string;
+export interface ServiceRequirements {
+  'version.min': RequirementVersion;
+  'version.max': RequirementVersion;
 }
 
-export type RequirementMap = Record<ServiceName, RequirementGroup>;
+export type RequirementsByServiceName = Record<ServiceName, ServiceRequirements>;
 export interface AssetParts {
   pkgkey: string;
   service: ServiceName;
@@ -54,7 +54,7 @@ export interface RegistryPackage {
   version: string;
   description: string;
   icon: string;
-  requirement: RequirementMap;
+  requirement: RequirementsByServiceName;
 }
 
 // Managers public HTTP response types
