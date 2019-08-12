@@ -18,14 +18,10 @@
  */
 
 import { Filter } from '@kbn/es-query';
+import { RefreshInterval } from 'ui/timefilter/timefilter';
 import { Query } from '../../query/query_bar';
 
 export * from './components';
-
-interface RefreshInterval {
-  pause: boolean;
-  value: number;
-}
 
 export interface SavedQuery {
   id: string;
