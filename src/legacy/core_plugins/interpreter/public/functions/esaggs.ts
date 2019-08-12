@@ -86,7 +86,10 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
     scaleMetricValues: {
       types: ['boolean'],
       default: false,
-      help: '',
+      help: i18n.translate('interpreter.functions.esaggs.params.scaleMetricValues', {
+        defaultMessage:
+          'This flag is deprecated and will be removed in a future version. This flag enables scaling metric values to manually specified intervals.',
+      }),
     },
   },
   async fn(context, args, handlers) {
