@@ -45,7 +45,7 @@ export default function({ getService }: FtrProviderContext) {
       const { body } = await supertest
         .post(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}`)
         .set('kbn-xsrf', 'xxx')
-        .send({ attributes: savedObjectOriginalAttributes }, {})
+        .send({ attributes: savedObjectOriginalAttributes })
         .expect(200);
 
       savedObject = body;
@@ -170,7 +170,7 @@ export default function({ getService }: FtrProviderContext) {
       const { body: response } = await supertest
         .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
-        .send({ attributes: updatedAttributes }, {})
+        .send({ attributes: updatedAttributes })
         .expect(200);
 
       expect(response.attributes).to.eql({
@@ -202,7 +202,7 @@ export default function({ getService }: FtrProviderContext) {
       const { body: response } = await supertest
         .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
-        .send({ attributes: updatedAttributes }, {})
+        .send({ attributes: updatedAttributes })
         .expect(200);
 
       expect(response.attributes).to.eql({
@@ -225,7 +225,7 @@ export default function({ getService }: FtrProviderContext) {
       const { body: response } = await supertest
         .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
-        .send({ attributes: updatedAttributes }, {})
+        .send({ attributes: updatedAttributes })
         .expect(200);
 
       expect(response.attributes).to.eql({

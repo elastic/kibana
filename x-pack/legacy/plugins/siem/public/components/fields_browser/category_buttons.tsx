@@ -38,3 +38,5 @@ export const DefaultCategoryButton = pure<{
     </EuiButton>
   </EuiToolTip>
 ));
+
+DefaultCategoryButton.displayName = 'DefaultCategoryButton';
