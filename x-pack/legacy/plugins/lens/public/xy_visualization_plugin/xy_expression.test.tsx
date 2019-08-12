@@ -49,7 +49,7 @@ function sampleArgs() {
         title: 'A and B',
         splitAccessor: 'd',
         columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
-        xScaleType: 'linear',
+        xScaleType: 'ordinal',
         yScaleType: 'linear',
       },
     ],
@@ -231,29 +231,30 @@ describe('xy_expression', () => {
       expect(component.find(LineSeries).prop('yAccessors')).toEqual(['Label A', 'Label B']);
     });
 
-    test('it indicates an ordinal scale for a string X axis', () => {
+    test('it set the scale of the x axis according to the args prop', () => {
       const { data, args } = sampleArgs();
 
-      const component = shallow(<XYChart data={data} args={args} formatFactory={getFormatSpy} />);
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], xScaleType: 'ordinal' }] }}
+          formatFactory={getFormatSpy}
+        />
+      );
       expect(component.find(LineSeries).prop('xScaleType')).toEqual(ScaleType.Ordinal);
     });
 
-    test('it indicates a linear scale for a numeric X axis', () => {
-      const { args } = sampleArgs();
+    test('it set the scale of the y axis according to the args prop', () => {
+      const { data, args } = sampleArgs();
 
-      const data: LensMultiTable = {
-        type: 'lens_multitable',
-        tables: {
-          first: {
-            type: 'kibana_datatable',
-            columns: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }, { id: 'c', name: 'c' }],
-            rows: [{ a: 1, b: 2, c: 3 }, { a: 6, b: 5, c: 9 }],
-          },
-        },
-      };
-
-      const component = shallow(<XYChart data={data} args={args} formatFactory={getFormatSpy} />);
-      expect(component.find(LineSeries).prop('xScaleType')).toEqual(ScaleType.Linear);
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], yScaleType: 'sqrt' }] }}
+          formatFactory={getFormatSpy}
+        />
+      );
+      expect(component.find(LineSeries).prop('yScaleType')).toEqual(ScaleType.Sqrt);
     });
 
     test('it gets the formatter for the x axis', () => {

@@ -16,7 +16,6 @@ import {
   AreaSeries,
   BarSeries,
   Position,
-  niceTimeFormatter,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
@@ -105,7 +104,6 @@ export const getXyChartRenderer = (formatFactory: FormatFactory): RenderFunction
 function getIconForSeriesType(seriesType: SeriesType): IconType {
   return visualizationTypes.find(c => c.id === seriesType)!.icon || 'empty';
 }
-
 
 export function XYChart({
   data,
