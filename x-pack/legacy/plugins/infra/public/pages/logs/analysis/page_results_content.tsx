@@ -7,7 +7,19 @@
 import React, { useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiSuperDatePicker } from '@elastic/eui';
+import {
+  EuiSuperDatePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiTitle,
+  EuiPanel,
+} from '@elastic/eui';
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
@@ -55,14 +67,31 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
       {isLoading && !logEntryRate ? (
         <>{getLoadingState()}</>
       ) : (
-        <div>
-          <EuiSuperDatePicker
-            start={moment.utc(timeRange.startTime).format(DATE_PICKER_FORMAT)}
-            end={moment.utc(timeRange.endTime).format(DATE_PICKER_FORMAT)}
-            onTimeChange={handleTimeRangeChange}
-          />
-          {isLoading ? <>{getLoadingState()}</> : <div>Graph</div>}
-        </div>
+        <>
+          <EuiPanel grow={false}>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <span>Analysed x of x</span>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiSuperDatePicker
+                  start={moment.utc(timeRange.startTime).format(DATE_PICKER_FORMAT)}
+                  end={moment.utc(timeRange.endTime).format(DATE_PICKER_FORMAT)}
+                  onTimeChange={handleTimeRangeChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+          <EuiPage>
+            <EuiPageBody>
+              <EuiPageContent>
+                <EuiPageContentBody>
+                  {isLoading ? <>{getLoadingState()}</> : <div>Graph</div>}
+                </EuiPageContentBody>
+              </EuiPageContent>
+            </EuiPageBody>
+          </EuiPage>
+        </>
       )}
     </>
   );
