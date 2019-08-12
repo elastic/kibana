@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { EuiContextMenuItemIcon } from '@elastic/eui';
-
 import { IEmbeddable } from '../embeddables';
 
 export interface ActionContext<
