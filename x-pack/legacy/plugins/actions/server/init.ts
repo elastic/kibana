@@ -89,7 +89,6 @@ export function init(server: Legacy.Server) {
   const fireFn = createFireFunction({
     taskManager: taskManager!,
     getScopedSavedObjectsClient: server.savedObjects.getScopedSavedObjectsClient,
-    spaceIdToNamespace,
     getBasePath,
   });
 

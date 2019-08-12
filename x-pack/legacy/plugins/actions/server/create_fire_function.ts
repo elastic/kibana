@@ -6,11 +6,10 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { TaskManager } from '../../task_manager';
-import { GetBasePathFunction, SpaceIdToNamespaceFunction } from './types';
+import { GetBasePathFunction } from './types';
 
 interface CreateFireFunctionOptions {
   taskManager: TaskManager;
-  spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getScopedSavedObjectsClient: (request: any) => SavedObjectsClientContract;
   getBasePath: GetBasePathFunction;
 }
@@ -27,7 +26,6 @@ export function createFireFunction({
   getBasePath,
   getScopedSavedObjectsClient,
   taskManager,
-  spaceIdToNamespace,
 }: CreateFireFunctionOptions) {
   return async function fire({ id, params, spaceId, apiKeyId, generatedApiKey }: FireOptions) {
     const requestHeaders: Record<string, string> = {};
@@ -43,9 +41,8 @@ export function createFireFunction({
       getBasePath: () => getBasePath(spaceId),
     };
 
-    const namespace = spaceIdToNamespace(spaceId);
     const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
-    const actionSavedObject = await savedObjectsClient.get('action', id, { namespace });
+    const actionSavedObject = await savedObjectsClient.get('action', id);
     const firedActionRecord = await savedObjectsClient.create('fired_action', {
       actionId: id,
       params,
