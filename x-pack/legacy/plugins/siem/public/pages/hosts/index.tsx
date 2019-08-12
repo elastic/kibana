@@ -44,3 +44,5 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
     </Switch>
   </>
 ));
+
+HostsContainer.displayName = 'HostsContainer';

@@ -46,6 +46,8 @@ const MyEuiPopover = styled(EuiPopover)`
   user-select: none;
 `;
 
+MyEuiPopover.displayName = 'MyEuiPopover';
+
 export const getProviderActions = ({
   andProviderId,
   browserFields,
