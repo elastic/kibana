@@ -19,6 +19,7 @@
 
 import { Plugin, CoreSetup } from 'kibana/public';
 import { CorePluginAPluginSetup } from '../../core_plugin_a/public/plugin';
+import { renderApp } from './application';
 
 declare global {
   interface Window {
@@ -34,6 +35,15 @@ export class CorePluginBPlugin
   implements Plugin<CorePluginBPluginSetup, CorePluginBPluginStart, CorePluginBDeps> {
   public setup(core: CoreSetup, deps: CorePluginBDeps) {
     window.corePluginB = `Plugin A said: ${deps.core_plugin_a.getGreeting()}`;
+
+    core.application.register({
+      id: 'bar',
+      title: 'Bar',
+      async mount(context, params) {
+        // Once dynamic imports are supported, replace with `await import()`
+        return renderApp(context, params);
+      },
+    });
   }
 
   public start() {}

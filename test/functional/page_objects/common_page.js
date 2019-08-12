@@ -151,11 +151,21 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
     navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true, shouldAcceptAlert = true, hash = '' } = {}) {
       const self = this;
-      const appConfig = config.get(['apps', appName]);
-      const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
-        pathname: `${basePath}${appConfig.pathname}`,
-        hash: hash || appConfig.hash,
-      });
+
+      let appUrl;
+      if (config.has(['apps', appName])) {
+        // Legacy applications
+        const appConfig = config.get(['apps', appName]);
+        appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+          pathname: `${basePath}${appConfig.pathname}`,
+          hash: hash || appConfig.hash,
+        });
+      } else {
+        appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+          pathname: `${basePath}/app/${appName}`
+        });
+      }
+
       log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       function navigateTo(url) {
