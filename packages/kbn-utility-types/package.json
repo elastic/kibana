@@ -7,6 +7,7 @@
   "types": "target/index.d.ts",
   "scripts": {
     "build": "tsc",
+    "kbn:bootstrap": "tsc",
     "kbn:watch": "tsc --watch",
     "test": "tsd",
     "clean": "rimraf target"
