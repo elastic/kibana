@@ -299,6 +299,8 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
   );
 });
 
+HostsComponent.displayName = 'HostsComponent';
+
 const makeMapStateToProps = () => {
   const getHostsFilterQueryAsJson = hostsSelectors.hostsFilterQueryAsJson();
   const mapStateToProps = (state: State) => ({
