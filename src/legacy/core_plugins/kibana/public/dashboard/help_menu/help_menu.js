@@ -17,7 +17,26 @@
  * under the License.
  */
 
-import { Storage } from './storage';
+import React, { Fragment, PureComponent } from 'react';
+import { EuiButton, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
-export const localStorage = new Storage(window.localStorage);
-export const sessionStorage = new Storage(window.sessionStorage);
+export class HelpMenu extends PureComponent {
+  render() {
+    return (
+      <Fragment>
+        <EuiHorizontalRule margin="none" />
+        <EuiSpacer />
+        <EuiButton
+          fill
+          iconType="popout"
+          href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`}
+          target="_blank"
+        >
+          <FormattedMessage id="kbn.dashboard.helpMenu.docLabel" defaultMessage="Dashboard documentation" />
+        </EuiButton>
+      </Fragment>
+    );
+  }
+}

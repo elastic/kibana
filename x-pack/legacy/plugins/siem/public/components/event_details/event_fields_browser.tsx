@@ -55,3 +55,5 @@ export const EventFieldsBrowser = pure<Props>(
     );
   }
 );
+
+EventFieldsBrowser.displayName = 'EventFieldsBrowser';

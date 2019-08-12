@@ -20,6 +20,8 @@ const CountBadgeContainer = styled.div`
   top: -3px;
 `;
 
+CountBadgeContainer.displayName = 'CountBadgeContainer';
+
 interface Props {
   /** The title of the category */
   categoryId: string;
@@ -52,3 +54,5 @@ export const CategoryTitle = pure<Props>(({ filteredBrowserFields, categoryId, t
     </EuiFlexItem>
   </EuiFlexGroup>
 ));
+
+CategoryTitle.displayName = 'CategoryTitle';
