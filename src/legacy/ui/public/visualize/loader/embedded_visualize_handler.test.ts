@@ -20,7 +20,7 @@ import { mockDataLoaderFetch, timefilter } from './embedded_visualize_handler.te
 
 // @ts-ignore
 import MockState from '../../../../../fixtures/mock_state';
-import { RequestHandlerParams, Vis } from '../../vis';
+import { RequestHandlerParams, Vis, AggConfig } from '../../vis';
 import { VisResponseData } from './types';
 
 import { Inspector } from '../../inspector';
@@ -49,7 +49,7 @@ describe('EmbeddedVisualizeHandler', () => {
     jest.clearAllMocks();
 
     dataLoaderParams = {
-      aggs: [],
+      aggs: [] as AggConfig[],
       filters: undefined,
       forceFetch: false,
       inspectorAdapters: {},
@@ -157,7 +157,7 @@ describe('EmbeddedVisualizeHandler', () => {
     });
 
     it('should call dataLoader.render with updated filters', () => {
-      const params = { filters: [{ foo: 'bar' }] };
+      const params = { filters: [{ meta: { disabled: false } }] };
       handler.update(params);
       jest.runAllTimers();
       expect(mockDataLoaderFetch).toHaveBeenCalledWith({ ...dataLoaderParams, ...params });

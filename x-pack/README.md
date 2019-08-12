@@ -58,6 +58,8 @@ yarn test:server
 
 #### Running functional tests
 
+For more info, see [the Elastic functional test development guide](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html).
+
 The functional UI tests, the API integration tests, and the SAML API integration tests are all run against a live browser, Kibana, and Elasticsearch install. Each set of tests is specified with a unique config that describes how to start the Elasticsearch server, the Kibana server, and what tests to run against them. The sets of tests that exist today are *functional UI tests* ([specified by this config](test/functional/config.js)), *API integration tests* ([specified by this config](test/api_integration/config.js)), and *SAML API integration tests* ([specified by this config](test/saml_api_integration/config.js)).
 
 The script runs all sets of tests sequentially like so:
@@ -128,6 +130,6 @@ node ../scripts/functional_test_runner
 
 For both of the above commands, it's crucial that you pass in `--config` to specify the same config file to both commands. This makes sure that the right tests will run against the right servers. Typically a set of tests and server configuration go together.
 
-Read more about how the scripts work [here](scripts/README.md).
+Read more about how the scripts work [here](../scripts/README.md).
 
-For a deeper dive, read more about the way functional tests and servers work [here](packages/kbn-test/README.md).
+For a deeper dive, read more about the way functional tests and servers work [here](../packages/kbn-test/README.md).

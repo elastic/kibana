@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import fs from 'fs';
 import { ChildProcess } from 'child_process';
+import fs from 'fs';
 import { ResponseError } from 'vscode-jsonrpc';
-import { ILanguageServerLauncher } from './language_server_launcher';
+import { LanguageServerStartFailed } from '../../common/lsp_error_codes';
+import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
-import { Logger } from '../log';
+import { ILanguageServerLauncher } from './language_server_launcher';
 import { LanguageServerProxy } from './proxy';
 import { RequestExpander } from './request_expander';
-import { LanguageServerStartFailed } from '../../common/lsp_error_codes';
 
 let seqNo = 1;
 

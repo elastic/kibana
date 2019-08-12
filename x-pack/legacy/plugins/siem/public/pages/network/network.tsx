@@ -85,6 +85,11 @@ const NetworkComponent = pure<NetworkComponentProps>(
                             loading={loading}
                             from={from}
                             to={to}
+                            narrowDateRange={(min: number, max: number) => {
+                              setTimeout(() => {
+                                setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                              }, 500);
+                            }}
                           />
                         )}
                       </KpiNetworkQuery>
@@ -203,6 +208,8 @@ const NetworkComponent = pure<NetworkComponentProps>(
     </WithSource>
   )
 );
+
+NetworkComponent.displayName = 'NetworkComponent';
 
 const makeMapStateToProps = () => {
   const getNetworkFilterQueryAsJson = networkSelectors.networkFilterQueryAsJson();

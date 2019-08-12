@@ -11,7 +11,6 @@
  */
 
 import Joi from 'joi';
-import Boom from 'boom';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
 import { Logger } from './lib/logger';
 import { BeforeRunFunction } from './lib/middleware';
@@ -23,6 +22,7 @@ import {
   SanitizedTaskDefinition,
   TaskDictionary,
   validateRunResult,
+  TaskStatus,
 } from './task';
 
 const defaultBackoffPerFailure = 5 * 60 * 1000;
@@ -47,7 +47,6 @@ interface Opts {
   definitions: TaskDictionary<SanitizedTaskDefinition>;
   instance: ConcreteTaskInstance;
   store: Updatable;
-  kbnServer: any;
   beforeRun: BeforeRunFunction;
 }
 
@@ -65,7 +64,6 @@ export class TaskManagerRunner implements TaskRunner {
   private definitions: TaskDictionary<SanitizedTaskDefinition>;
   private logger: Logger;
   private store: Updatable;
-  private kbnServer: any;
   private beforeRun: BeforeRunFunction;
 
   /**
@@ -75,7 +73,6 @@ export class TaskManagerRunner implements TaskRunner {
    * @prop {TaskDefinition} definition - The definition of the task being run
    * @prop {ConcreteTaskInstance} instance - The record describing this particular task instance
    * @prop {Updatable} store - The store used to read / write tasks instance info
-   * @prop {kbnServer} kbnServer - An async function that provides the task's run context
    * @prop {BeforeRunFunction} beforeRun - A function that adjusts the run context prior to running the task
    * @memberof TaskManagerRunner
    */
@@ -84,7 +81,6 @@ export class TaskManagerRunner implements TaskRunner {
     this.definitions = opts.definitions;
     this.logger = opts.logger;
     this.store = opts.store;
-    this.kbnServer = opts.kbnServer;
     this.beforeRun = opts.beforeRun;
   }
 
@@ -142,7 +138,6 @@ export class TaskManagerRunner implements TaskRunner {
   public async run(): Promise<RunResult> {
     this.logger.debug(`Running task ${this}`);
     const modifiedContext = await this.beforeRun({
-      kbnServer: this.kbnServer,
       taskInstance: this.instance,
     });
 
@@ -171,17 +166,21 @@ export class TaskManagerRunner implements TaskRunner {
     const attempts = this.instance.attempts + 1;
     const now = new Date();
 
-    const timeoutDate = intervalFromNow(this.definition.timeout!)!;
-
     try {
       this.instance = await this.store.update({
         ...this.instance,
         status: 'running',
         startedAt: now,
         attempts,
-        retryAt: new Date(
-          timeoutDate.getTime() + this.getRetryDelay(attempts, Boom.clientTimeout())
-        ),
+        retryAt: this.instance.interval
+          ? intervalFromNow(this.definition.timeout)!
+          : this.getRetryDelay({
+              attempts,
+              // Fake an error. This allows retry logic when tasks keep timing out
+              // and lets us set a proper "retryAt" value each time.
+              error: new Error('Task timeout'),
+              addDuration: this.definition.timeout,
+            }),
       });
 
       return true;
@@ -223,7 +222,7 @@ export class TaskManagerRunner implements TaskRunner {
     // recurring task: update the task instance
     const startedAt = this.instance.startedAt!;
     const state = result.state || this.instance.state || {};
-    const status = this.getInstanceStatus();
+    let status: TaskStatus = this.getInstanceStatus();
 
     let runAt;
     if (status === 'failed') {
@@ -233,7 +232,18 @@ export class TaskManagerRunner implements TaskRunner {
       runAt = result.runAt;
     } else if (result.error) {
       // when result.error is truthy, then we're retrying because it failed
-      runAt = new Date(Date.now() + this.getRetryDelay(this.instance.attempts, result.error));
+      const newRunAt = this.instance.interval
+        ? intervalFromDate(startedAt, this.instance.interval)!
+        : this.getRetryDelay({
+            attempts: this.instance.attempts,
+            error: result.error,
+          });
+      if (!newRunAt) {
+        status = 'failed';
+        runAt = this.instance.runAt;
+      } else {
+        runAt = newRunAt;
+      }
     } else {
       runAt = intervalFromDate(startedAt, this.instance.interval)!;
     }
@@ -286,11 +296,34 @@ export class TaskManagerRunner implements TaskRunner {
     return this.instance.attempts < maxAttempts ? 'idle' : 'failed';
   }
 
-  private getRetryDelay(attempts: number, error: any) {
-    if (this.definition.getRetryDelay) {
-      return this.definition.getRetryDelay(attempts, error) * 1000;
+  private getRetryDelay({
+    error,
+    attempts,
+    addDuration,
+  }: {
+    error: any;
+    attempts: number;
+    addDuration?: string;
+  }): Date | null {
+    let result = null;
+
+    // Use custom retry logic, if any, otherwise we'll use the default logic
+    const retry: boolean | Date = this.definition.getRetry
+      ? this.definition.getRetry(attempts, error)
+      : true;
+
+    if (retry instanceof Date) {
+      result = retry;
+    } else if (retry === true) {
+      result = new Date(Date.now() + attempts * defaultBackoffPerFailure);
     }
-    return attempts * defaultBackoffPerFailure;
+
+    // Add a duration to the result
+    if (addDuration && result) {
+      result = intervalFromDate(result, addDuration)!;
+    }
+
+    return result;
   }
 }
 

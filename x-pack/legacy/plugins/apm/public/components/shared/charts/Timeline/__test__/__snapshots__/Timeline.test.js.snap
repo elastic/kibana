@@ -546,7 +546,6 @@ exports[`Timeline should render with data 1`] = `
                 onMouseOver={[Function]}
               >
                 <div
-                  aria-describedby="timeToFirstByte"
                   className="c0"
                   disabled={false}
                   fontSize="12px"
@@ -576,7 +575,6 @@ exports[`Timeline should render with data 1`] = `
                 onMouseOver={[Function]}
               >
                 <div
-                  aria-describedby="domInteractive"
                   className="c0"
                   disabled={false}
                   fontSize="12px"
@@ -606,7 +604,6 @@ exports[`Timeline should render with data 1`] = `
                 onMouseOver={[Function]}
               >
                 <div
-                  aria-describedby="domComplete"
                   className="c0"
                   disabled={false}
                   fontSize="12px"
