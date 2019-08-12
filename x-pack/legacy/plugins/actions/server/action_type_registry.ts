@@ -6,18 +6,22 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { ActionType, GetServicesFunction } from './types';
 import { TaskManager, TaskRunCreatorFunction } from '../../task_manager';
 import { getCreateTaskRunnerFunction, ExecutorError } from './lib';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
-import { SpacesPlugin } from '../../spaces';
+import {
+  ActionType,
+  GetBasePathFunction,
+  GetServicesFunction,
+  SpaceIdToNamespaceFunction,
+} from './types';
 
 interface ConstructorOptions {
   taskManager: TaskManager;
   getServices: GetServicesFunction;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
-  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
-  getBasePath: SpacesPlugin['getBasePath'];
+  spaceIdToNamespace: SpaceIdToNamespaceFunction;
+  getBasePath: GetBasePathFunction;
 }
 
 export class ActionTypeRegistry {

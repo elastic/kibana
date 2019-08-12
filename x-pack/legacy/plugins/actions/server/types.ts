@@ -11,6 +11,8 @@ import { FireOptions } from './create_fire_function';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: any) => Services;
 export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
+export type GetBasePathFunction = (spaceId?: string) => string;
+export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
 export interface Services {
   callCluster(path: string, opts: any): Promise<any>;

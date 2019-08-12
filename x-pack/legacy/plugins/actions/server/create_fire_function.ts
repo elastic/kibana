@@ -6,13 +6,13 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { TaskManager } from '../../task_manager';
-import { SpacesPlugin } from '../../spaces';
+import { GetBasePathFunction, SpaceIdToNamespaceFunction } from './types';
 
 interface CreateFireFunctionOptions {
   taskManager: TaskManager;
-  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
+  spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getScopedSavedObjectsClient: (request: any) => SavedObjectsClientContract;
-  getBasePath: SpacesPlugin['getBasePath'];
+  getBasePath: GetBasePathFunction;
 }
 
 export interface FireOptions {

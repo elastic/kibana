@@ -5,23 +5,29 @@
  */
 
 import { ActionsPlugin } from '../../../actions';
-import { AlertType, AlertServices, RawAlert, GetServicesFunction } from '../types';
 import { ConcreteTaskInstance } from '../../../task_manager';
 import { createFireHandler } from './create_fire_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from './validate_alert_type_params';
-import { SpacesPlugin } from '../../../spaces';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
+import {
+  AlertType,
+  AlertServices,
+  GetBasePathFunction,
+  GetServicesFunction,
+  RawAlert,
+  SpaceIdToNamespaceFunction,
+} from '../types';
 
 interface CreateTaskRunnerFunctionOptions {
   getServices: GetServicesFunction;
   alertType: AlertType;
   fireAction: ActionsPlugin['fire'];
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
-  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
-  getBasePath: SpacesPlugin['getBasePath'];
+  spaceIdToNamespace: SpaceIdToNamespaceFunction;
+  getBasePath: GetBasePathFunction;
 }
 
 interface TaskRunnerOptions {

@@ -62,18 +62,22 @@ export function init(server: Legacy.Server) {
       savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(request),
     };
   }
+  function getBasePath(spaceId?: string): string {
+    return spaces.isEnabled && spaceId
+      ? spaces.getBasePath(spaceId)
+      : ((server.config().get('server.basePath') || '') as string);
+  }
+  function spaceIdToNamespace(spaceId?: string): string | undefined {
+    return spaces.isEnabled && spaceId ? spaces.spaceIdToNamespace(spaceId) : undefined;
+  }
 
   const alertTypeRegistry = new AlertTypeRegistry({
     getServices,
     taskManager: taskManager!,
     fireAction: server.plugins.actions!.fire,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
-    getBasePath(...args) {
-      return spaces.isEnabled ? spaces.getBasePath(...args) : config.get('server.basePath');
-    },
-    spaceIdToNamespace(...args) {
-      return spaces.isEnabled ? spaces.spaceIdToNamespace(...args) : undefined;
-    },
+    getBasePath,
+    spaceIdToNamespace,
   });
 
   // Register routes

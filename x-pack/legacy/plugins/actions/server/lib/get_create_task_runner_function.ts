@@ -6,17 +6,22 @@
 
 import { execute } from './execute';
 import { ExecutorError } from './executor_error';
-import { ActionTypeRegistryContract, FiredAction, GetServicesFunction } from '../types';
 import { TaskInstance } from '../../../task_manager';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
-import { SpacesPlugin } from '../../../spaces';
+import {
+  ActionTypeRegistryContract,
+  FiredAction,
+  GetBasePathFunction,
+  GetServicesFunction,
+  SpaceIdToNamespaceFunction,
+} from '../types';
 
 interface CreateTaskRunnerFunctionOptions {
   getServices: GetServicesFunction;
   actionTypeRegistry: ActionTypeRegistryContract;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
-  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
-  getBasePath: SpacesPlugin['getBasePath'];
+  spaceIdToNamespace: SpaceIdToNamespaceFunction;
+  getBasePath: GetBasePathFunction;
 }
 
 interface TaskRunnerOptions {

@@ -6,20 +6,24 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { AlertType, GetServicesFunction } from './types';
 import { TaskManager } from '../../task_manager';
 import { getCreateTaskRunnerFunction } from './lib';
 import { ActionsPlugin } from '../../actions';
-import { SpacesPlugin } from '../../spaces';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
+import {
+  AlertType,
+  GetBasePathFunction,
+  GetServicesFunction,
+  SpaceIdToNamespaceFunction,
+} from './types';
 
 interface ConstructorOptions {
   getServices: GetServicesFunction;
   taskManager: TaskManager;
   fireAction: ActionsPlugin['fire'];
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
-  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
-  getBasePath: SpacesPlugin['getBasePath'];
+  spaceIdToNamespace: SpaceIdToNamespaceFunction;
+  getBasePath: GetBasePathFunction;
 }
 
 export class AlertTypeRegistry {
@@ -28,8 +32,8 @@ export class AlertTypeRegistry {
   private readonly fireAction: ActionsPlugin['fire'];
   private readonly alertTypes: Map<string, AlertType> = new Map();
   private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
-  private readonly spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
-  private readonly getBasePath: SpacesPlugin['getBasePath'];
+  private readonly spaceIdToNamespace: SpaceIdToNamespaceFunction;
+  private readonly getBasePath: GetBasePathFunction;
 
   constructor({
     encryptedSavedObjectsPlugin,
