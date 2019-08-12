@@ -249,8 +249,7 @@ export interface HttpServiceStart {
 
 // @public
 export interface IContextContainer<TContext extends {}, THandlerReturn, THandlerParameters extends any[] = []> {
-    // Warning: (ae-forgotten-export) The symbol "Promisify" needs to be exported by the entry point index.d.ts
-    createHandler(pluginOpaqueId: PluginOpaqueId, handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => Promisify<THandlerReturn>;
+    createHandler(pluginOpaqueId: PluginOpaqueId, handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => THandlerReturn extends Promise<any> ? THandlerReturn : Promise<THandlerReturn>;
     registerContext<TContextName extends keyof TContext>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<TContext, TContextName, THandlerParameters>): this;
 }
 
