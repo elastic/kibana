@@ -25,9 +25,13 @@ const NoFieldsPanel = styled.div`
   height: ${TABLE_HEIGHT}px;
 `;
 
+NoFieldsPanel.displayName = 'NoFieldsPanel';
+
 const NoFieldsFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
+
+NoFieldsFlexGroup.displayName = 'NoFieldsFlexGroup';
 
 type Props = Pick<
   FieldBrowserProps,
@@ -104,3 +108,5 @@ export const FieldsPane = pure<Props>(
     </>
   )
 );
+
+FieldsPane.displayName = 'FieldsPane';

@@ -59,6 +59,8 @@ const DescriptionListStyled = styled(EuiDescriptionList)`
   `}
 `;
 
+DescriptionListStyled.displayName = 'DescriptionListStyled';
+
 const getDescriptionList = (descriptionList: DescriptionList[], key: number) => {
   return (
     <EuiFlexItem key={key}>
@@ -171,3 +173,5 @@ export const IpOverview = pure<IpOverviewProps>(
     );
   }
 );
+
+IpOverview.displayName = 'IpOverview';

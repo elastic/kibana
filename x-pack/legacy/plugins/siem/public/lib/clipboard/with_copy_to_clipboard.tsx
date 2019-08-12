@@ -19,6 +19,8 @@ const WithCopyToClipboardContainer = styled.div`
   user-select: text;
 `;
 
+WithCopyToClipboardContainer.displayName = 'WithCopyToClipboardContainer';
+
 /**
  * Renders `children` with an adjacent icon that when clicked, copies `text` to
  * the clipboard and displays a confirmation toast
@@ -37,3 +39,5 @@ export const WithCopyToClipboard = pure<{ text: string; titleSummary?: string }>
     </WithCopyToClipboardContainer>
   )
 );
+
+WithCopyToClipboard.displayName = 'WithCopyToClipboard';
