@@ -20,6 +20,8 @@ export const LoadingSpinner = styled(EuiLoadingSpinner)`
   top: 3px;
 `;
 
+LoadingSpinner.displayName = 'LoadingSpinner';
+
 export const CATEGORY_PANE_WIDTH = 200;
 export const DESCRIPTION_COLUMN_WIDTH = 300;
 export const FIELD_COLUMN_WIDTH = 200;

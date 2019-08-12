@@ -20,3 +20,5 @@ export const TruncatableText = styled(EuiText)<{ width: string }>`
   white-space: nowrap;
   width: ${({ width }) => width};
 `;
+
+TruncatableText.displayName = 'TruncatableText';
