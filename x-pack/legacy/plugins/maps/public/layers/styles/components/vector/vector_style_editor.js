@@ -141,18 +141,6 @@ export class VectorStyleEditor extends Component {
 
   _renderPointProperties() {
     let iconOrientation;
-    const lineColor = (
-      <Fragment>
-        {this._renderLineColor()}
-        <EuiSpacer size="m" />
-      </Fragment>
-    );
-    const lineWidth = (
-      <Fragment>
-        {this._renderLineWidth()}
-        <EuiSpacer size="m" />
-      </Fragment>
-    );
     if (this.props.styleProperties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON)  {
       iconOrientation = (
         <Fragment>
@@ -182,9 +170,15 @@ export class VectorStyleEditor extends Component {
         {this._renderFillColor()}
         <EuiSpacer size="m" />
 
-        {lineColor}
+        <Fragment>
+          {this._renderLineColor()}
+          <EuiSpacer size="m" />
+        </Fragment>
 
-        {lineWidth}
+        <Fragment>
+          {this._renderLineWidth()}
+          <EuiSpacer size="m" />
+        </Fragment>
 
         {iconOrientation}
 

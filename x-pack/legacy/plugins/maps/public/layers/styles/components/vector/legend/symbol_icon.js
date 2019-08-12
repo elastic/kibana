@@ -74,4 +74,6 @@ export class SymbolIcon extends Component {
 SymbolIcon.propTypes = {
   symbolId: PropTypes.string.isRequired,
   fill: PropTypes.string.isRequired,
+  stroke: PropTypes.string.isRequired,
+  strokeWidth: PropTypes.string.isRequired
 };
