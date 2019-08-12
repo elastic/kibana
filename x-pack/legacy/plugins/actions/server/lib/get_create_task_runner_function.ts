@@ -62,12 +62,16 @@ export function getCreateTaskRunnerFunction({
           getBasePath: () => getBasePath(taskInstance.params.spaceId),
         };
 
+        const services = getServices(fakeRequest);
+        // Ensure API key is still valid and user has access to read the action
+        await services.savedObjectsClient.get('action', actionId);
+
         const executorResult = await execute({
           namespace,
           actionTypeRegistry,
           encryptedSavedObjectsPlugin,
           actionId,
-          services: getServices(fakeRequest),
+          services,
           params,
         });
         if (executorResult.status === 'error') {
