@@ -44,7 +44,7 @@ export function init(server: Legacy.Server) {
   });
   server.plugins.encrypted_saved_objects!.registerType({
     type: 'fired_action',
-    attributesToEncrypt: new Set(['apiKeyId', 'generatedApiKey']),
+    attributesToEncrypt: new Set(['apiKeyId', 'apiKeyValue']),
   });
 
   function getServices(request: any): Services {

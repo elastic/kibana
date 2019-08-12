@@ -147,7 +147,7 @@ test('fireAction is called per alert instance that fired', async () => {
         Array [
           Object {
             "apiKeyId": undefined,
-            "generatedApiKey": undefined,
+            "apiKeyValue": undefined,
             "id": "1",
             "params": Object {
               "foo": true,

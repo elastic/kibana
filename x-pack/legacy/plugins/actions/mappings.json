@@ -28,7 +28,7 @@
       "apiKeyId": {
         "type": "binary"
       },
-      "generatedApiKey": {
+      "apiKeyValue": {
         "type": "binary"
       }
     }

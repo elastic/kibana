@@ -164,9 +164,9 @@ describe('create()', () => {
           "bar": true,
         },
         "apiKeyId": null,
+        "apiKeyValue": null,
         "createdBy": "elastic",
         "enabled": true,
-        "generatedApiKey": null,
         "interval": "10s",
       }
     `);

@@ -42,7 +42,7 @@ export function getCreateTaskRunnerFunction({
         const namespace = spaceIdToNamespace(spaceId);
 
         const {
-          attributes: { actionId, params, apiKeyId, generatedApiKey },
+          attributes: { actionId, params, apiKeyId, apiKeyValue },
         } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<FiredAction>(
           'fired_action',
           firedActionId,
@@ -50,8 +50,8 @@ export function getCreateTaskRunnerFunction({
         );
 
         const requestHeaders: Record<string, string> = {};
-        if (apiKeyId && generatedApiKey) {
-          const key = Buffer.from(`${apiKeyId}:${generatedApiKey}`).toString('base64');
+        if (apiKeyId && apiKeyValue) {
+          const key = Buffer.from(`${apiKeyId}:${apiKeyValue}`).toString('base64');
           requestHeaders.authorization = `ApiKey ${key}`;
         }
 

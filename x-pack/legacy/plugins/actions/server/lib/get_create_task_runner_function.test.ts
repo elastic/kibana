@@ -66,7 +66,7 @@ test('executes the task by calling the executor with proper parameters', async (
       actionId: '2',
       params: { baz: true },
       apiKeyId: '123',
-      generatedApiKey: 'abc',
+      apiKeyValue: 'abc',
     },
     references: [],
   });
@@ -102,7 +102,7 @@ test('throws an error with suggested retry logic when return status is error', a
       actionId: '2',
       params: { baz: true },
       apiKeyId: '123',
-      generatedApiKey: 'abc',
+      apiKeyValue: 'abc',
     },
     references: [],
   });

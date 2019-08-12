@@ -75,5 +75,5 @@ export interface FiredAction extends SavedObjectAttributes {
   actionId: string;
   params: Record<string, any>;
   apiKeyId: string | null;
-  generatedApiKey: string | null;
+  apiKeyValue: string | null;
 }

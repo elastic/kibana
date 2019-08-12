@@ -71,7 +71,7 @@ export interface Alert {
   scheduledTaskId?: string;
   createdBy: string | null;
   apiKeyId: string | null;
-  generatedApiKey: string | null;
+  apiKeyValue: string | null;
 }
 
 export interface RawAlert extends SavedObjectAttributes {
@@ -83,7 +83,7 @@ export interface RawAlert extends SavedObjectAttributes {
   scheduledTaskId?: string;
   createdBy: string | null;
   apiKeyId: string | null;
-  generatedApiKey: string | null;
+  apiKeyValue: string | null;
 }
 
 export interface AlertingPlugin {

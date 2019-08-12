@@ -40,7 +40,7 @@ describe('fire()', () => {
       params: { baz: false },
       spaceId: 'default',
       apiKeyId: '123',
-      generatedApiKey: 'abc',
+      apiKeyValue: 'abc',
     });
     expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
     expect(mockTaskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
@@ -63,7 +63,7 @@ describe('fire()', () => {
       actionId: '123',
       params: { baz: false },
       apiKeyId: '123',
-      generatedApiKey: 'abc',
+      apiKeyValue: 'abc',
     });
   });
 });

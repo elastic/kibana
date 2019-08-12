@@ -10,7 +10,7 @@ const createFireHandlerParams = {
   fireAction: jest.fn(),
   spaceId: 'default',
   apiKeyId: '123',
-  generatedApiKey: 'abc',
+  apiKeyValue: 'abc',
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
   actions: [
@@ -36,7 +36,7 @@ test('calls fireAction per selected action', async () => {
     Array [
       Object {
         "apiKeyId": "123",
-        "generatedApiKey": "abc",
+        "apiKeyValue": "abc",
         "id": "1",
         "params": Object {
           "contextVal": "My  goes here",
@@ -63,7 +63,7 @@ test('context attribute gets parameterized', async () => {
     Array [
       Object {
         "apiKeyId": "123",
-        "generatedApiKey": "abc",
+        "apiKeyValue": "abc",
         "id": "1",
         "params": Object {
           "contextVal": "My context-val goes here",
@@ -84,7 +84,7 @@ test('state attribute gets parameterized', async () => {
     Array [
       Object {
         "apiKeyId": "123",
-        "generatedApiKey": "abc",
+        "apiKeyValue": "abc",
         "id": "1",
         "params": Object {
           "contextVal": "My  goes here",

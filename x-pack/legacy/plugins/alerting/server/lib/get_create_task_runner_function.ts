@@ -51,15 +51,15 @@ export function getCreateTaskRunnerFunction({
         // Only fetch encrypted attributes here, we'll create a saved objects client
         // scoped with the API key to fetch the remaining data.
         const {
-          attributes: { apiKeyId, generatedApiKey },
+          attributes: { apiKeyId, apiKeyValue },
         } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAlert>(
           'alert',
           alertId,
           { namespace }
         );
 
-        if (apiKeyId && generatedApiKey) {
-          const key = Buffer.from(`${apiKeyId}:${generatedApiKey}`).toString('base64');
+        if (apiKeyId && apiKeyValue) {
+          const key = Buffer.from(`${apiKeyId}:${apiKeyValue}`).toString('base64');
           requestHeaders.authorization = `ApiKey ${key}`;
         }
 
@@ -95,7 +95,7 @@ export function getCreateTaskRunnerFunction({
         const fireHandler = createFireHandler({
           fireAction,
           apiKeyId,
-          generatedApiKey,
+          apiKeyValue,
           actions: actionsWithIds,
           spaceId,
         });

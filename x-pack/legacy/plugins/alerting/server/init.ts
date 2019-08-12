@@ -45,7 +45,7 @@ export function init(server: Legacy.Server) {
   // Encrypted attributes
   server.plugins.encrypted_saved_objects!.registerType({
     type: 'alert',
-    attributesToEncrypt: new Set(['apiKeyId', 'generatedApiKey']),
+    attributesToEncrypt: new Set(['apiKeyId', 'apiKeyValue']),
     attributesToExcludeFromAAD: new Set([
       'enabled',
       'interval',

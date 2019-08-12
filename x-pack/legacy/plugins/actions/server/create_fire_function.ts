@@ -19,7 +19,7 @@ export interface FireOptions {
   params: Record<string, any>;
   spaceId: string;
   apiKeyId: string | null;
-  generatedApiKey: string | null;
+  apiKeyValue: string | null;
 }
 
 export function createFireFunction({
@@ -27,10 +27,10 @@ export function createFireFunction({
   getScopedSavedObjectsClient,
   taskManager,
 }: CreateFireFunctionOptions) {
-  return async function fire({ id, params, spaceId, apiKeyId, generatedApiKey }: FireOptions) {
+  return async function fire({ id, params, spaceId, apiKeyId, apiKeyValue }: FireOptions) {
     const requestHeaders: Record<string, string> = {};
-    if (apiKeyId && generatedApiKey) {
-      const key = Buffer.from(`${apiKeyId}:${generatedApiKey}`).toString('base64');
+    if (apiKeyId && apiKeyValue) {
+      const key = Buffer.from(`${apiKeyId}:${apiKeyValue}`).toString('base64');
       requestHeaders.authorization = `ApiKey ${key}`;
     }
 
@@ -47,7 +47,7 @@ export function createFireFunction({
       actionId: id,
       params,
       apiKeyId,
-      generatedApiKey,
+      apiKeyValue,
     });
     await taskManager.schedule({
       taskType: `actions:${actionSavedObject.attributes.actionTypeId}`,
