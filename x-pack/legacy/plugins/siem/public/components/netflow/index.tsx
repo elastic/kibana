@@ -113,3 +113,5 @@ export const Netflow = pure<NetflowProps>(
     </EuiFlexGroup>
   )
 );
+
+Netflow.displayName = 'Netflow';

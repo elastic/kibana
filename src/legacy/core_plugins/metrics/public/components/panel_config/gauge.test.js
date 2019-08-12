@@ -19,6 +19,13 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+
+jest.mock('plugins/data', () => {
+  return {
+    QueryBarInput: () => <div className="queryBarInput" />,
+  };
+});
+
 import { GaugePanelConfig } from './gauge';
 
 jest.mock('plugins/data', () => {
