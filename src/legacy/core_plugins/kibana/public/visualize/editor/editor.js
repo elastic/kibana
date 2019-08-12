@@ -54,6 +54,7 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { npStart } from 'ui/new_platform';
+import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 import { start as data } from '../../../../data/public/legacy';
@@ -657,6 +658,8 @@ function VisEditor(
     ' ' +
     vis.type.feedbackMessage;
   };
+
+  addHelpMenuToAppChrome(chrome);
 
   init();
 }
