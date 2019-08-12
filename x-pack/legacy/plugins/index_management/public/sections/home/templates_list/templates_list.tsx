@@ -51,6 +51,10 @@ export const TemplatesList: React.FunctionComponent<RouteComponentProps<MatchPar
     history.push(`${BASE_PATH}templates`);
   };
 
+  const editTemplate = (name: Template['name']) => {
+    history.push(`${BASE_PATH}templates_edit/${encodeURIComponent(name)}`);
+  };
+
   // Track component loaded
   useEffect(() => {
     trackUiMetric(METRIC_TYPE.LOADED, UIM_TEMPLATE_LIST_LOAD);
@@ -137,6 +141,7 @@ export const TemplatesList: React.FunctionComponent<RouteComponentProps<MatchPar
         <TemplateDetails
           templateName={templateName}
           onClose={closeTemplateDetails}
+          onEdit={editTemplate}
           reload={reload}
         />
       )}

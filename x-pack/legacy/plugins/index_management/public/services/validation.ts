@@ -35,7 +35,7 @@ export interface TemplateValidation {
 }
 
 export const validateTemplate = (template: Template): TemplateValidation => {
-  const { name, indexPatterns, settings, aliases } = template;
+  const { name, indexPatterns, settings, aliases, mappings } = template;
 
   const validation: TemplateValidation = {
     isValid: true,
@@ -104,6 +104,18 @@ export const validateTemplate = (template: Template): TemplateValidation => {
       }
     } catch (e) {
       validation.errors.aliases.push(invalidJsonMsg);
+    }
+  }
+
+  // Mappings validation
+  if (typeof mappings === 'string' && !isStringEmpty(mappings)) {
+    try {
+      const parsedMappingsJson = JSON.parse(mappings);
+      if (parsedMappingsJson && typeof parsedMappingsJson !== 'object') {
+        validation.errors.mappings.push(invalidJsonMsg);
+      }
+    } catch (e) {
+      validation.errors.mappings.push(invalidJsonMsg);
     }
   }
 

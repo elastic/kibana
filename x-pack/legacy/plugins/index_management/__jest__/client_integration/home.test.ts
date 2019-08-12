@@ -400,7 +400,7 @@ describe.skip('<IndexManagementHome />', () => {
                     number_of_shards: '1',
                   },
                 }),
-                mappings: {
+                mappings: JSON.stringify({
                   _source: {
                     enabled: false,
                   },
@@ -410,7 +410,7 @@ describe.skip('<IndexManagementHome />', () => {
                       format: 'EEE MMM dd HH:mm:ss Z yyyy',
                     },
                   },
-                },
+                }),
                 aliases: JSON.stringify({
                   alias1: {},
                 }),

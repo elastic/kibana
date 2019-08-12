@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { Template } from '../../../../common/types';
-import { TemplateValidation } from '../../../services/validation';
+import { Template } from '../../../common/types';
+import { TemplateValidation } from '../../services/validation';
 
 export interface StepProps {
   template: Template;
   updateTemplate: (updatedTemplate: Partial<Template>) => void;
   updateCurrentStep: (step: number) => void;
   errors: TemplateValidation['errors'];
-  children?: React.ReactElement<any>;
+  isEditing?: boolean;
 }

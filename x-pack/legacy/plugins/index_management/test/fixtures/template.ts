@@ -9,8 +9,8 @@ import { Template } from '../../common/types';
 
 export const getTemplate = ({
   name = getRandomString(),
-  version = getRandomNumber().toString(),
-  order = getRandomNumber().toString(),
+  version = getRandomNumber(),
+  order = getRandomNumber(),
   indexPatterns = [],
   settings,
   aliases,

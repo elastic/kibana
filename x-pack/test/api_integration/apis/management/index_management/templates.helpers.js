@@ -24,7 +24,7 @@ export const registerHelpers = ({ supertest }) => {
         }
       }
     }),
-    mappings: {
+    mappings: JSON.stringify({
       _source: {
         enabled: false
       },
@@ -37,7 +37,7 @@ export const registerHelpers = ({ supertest }) => {
           format: 'EEE MMM dd HH:mm:ss Z yyyy'
         }
       }
-    },
+    }),
     aliases: JSON.stringify({
       alias1: {}
     })

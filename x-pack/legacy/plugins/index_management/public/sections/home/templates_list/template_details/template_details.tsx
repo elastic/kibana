@@ -18,6 +18,11 @@ import {
   EuiTab,
   EuiTabs,
   EuiSpacer,
+  EuiPopover,
+  EuiButton,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiText,
 } from '@elastic/eui';
 import {
   UIM_TEMPLATE_DETAIL_PANEL_MAPPINGS_TAB,
@@ -34,6 +39,7 @@ import { SummaryTab, MappingsTab, SettingsTab, AliasesTab } from './tabs';
 interface Props {
   templateName: Template['name'];
   onClose: () => void;
+  onEdit: (templateName: Template['name']) => void;
   reload: () => Promise<void>;
 }
 
@@ -95,12 +101,37 @@ const tabToUiMetricMap: { [key: string]: string } = {
 export const TemplateDetails: React.FunctionComponent<Props> = ({
   templateName,
   onClose,
+  onEdit,
   reload,
 }) => {
   const { error, data: templateDetails, isLoading } = loadIndexTemplate(templateName);
 
   const [templateToDelete, setTemplateToDelete] = useState<Array<Template['name']>>([]);
   const [activeTab, setActiveTab] = useState<string>(SUMMARY_TAB_ID);
+  const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
+
+  const contextMenuItems = [
+    {
+      type: 'edit',
+      label: (
+        <FormattedMessage
+          id="xpack.idxMgmt.templateDetails.editButtonLabel"
+          defaultMessage="Edit template"
+        />
+      ),
+      handleClick: () => onEdit(templateName),
+    },
+    {
+      type: 'delete',
+      label: (
+        <FormattedMessage
+          id="xpack.idxMgmt.templateDetails.deleteButtonLabel"
+          defaultMessage="Delete template"
+        />
+      ),
+      handleClick: () => setTemplateToDelete([templateName]),
+    },
+  ];
 
   let content;
 
@@ -233,16 +264,47 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
 
             {templateDetails && (
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  color="danger"
-                  onClick={() => setTemplateToDelete([templateName])}
-                  data-test-subj="deleteTemplateButton"
+                {/* Manage templates context menu */}
+                <EuiPopover
+                  id="manageTemplatesPanel"
+                  button={
+                    <EuiButton
+                      fill
+                      data-test-subj="manageTemplatesButton"
+                      iconType="arrowDown"
+                      iconSide="right"
+                      onClick={() => setIsPopOverOpen(!isPopoverOpen)}
+                    >
+                      <FormattedMessage
+                        id="xpack.idxMgmt.templateDetails.manageButtonLabel"
+                        defaultMessage="Manage"
+                      />
+                    </EuiButton>
+                  }
+                  isOpen={isPopoverOpen}
+                  closePopover={() => setIsPopOverOpen(false)}
+                  panelPaddingSize="none"
+                  anchorPosition="downCenter"
                 >
-                  <FormattedMessage
-                    id="xpack.idxMgmt.templateDetails.deleteButtonLabel"
-                    defaultMessage="Delete"
+                  <EuiContextMenuPanel
+                    items={contextMenuItems.map(({ type, handleClick, label }) => {
+                      return (
+                        <EuiContextMenuItem
+                          key={type}
+                          data-test-subj={`${type}TemplateLink`}
+                          onClick={() => {
+                            setIsPopOverOpen(false);
+                            handleClick();
+                          }}
+                        >
+                          <EuiText size="m">
+                            <span>{label}</span>
+                          </EuiText>
+                        </EuiContextMenuItem>
+                      );
+                    })}
                   />
-                </EuiButtonEmpty>
+                </EuiPopover>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

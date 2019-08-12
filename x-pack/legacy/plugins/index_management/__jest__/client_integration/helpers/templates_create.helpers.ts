@@ -65,11 +65,11 @@ export const setup = async (): Promise<TemplatesCreateTestBed> => {
     }
 
     if (order) {
-      form.setInputValue('orderInput', order);
+      form.setInputValue('orderInput', JSON.stringify(order));
     }
 
     if (version) {
-      form.setInputValue('versionInput', version);
+      form.setInputValue('versionInput', JSON.stringify(version));
     }
 
     clickNextButton();

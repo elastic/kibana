@@ -4,21 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiSpacer,
-  EuiText,
   EuiButtonEmpty,
+  EuiSpacer,
+  EuiFormRow,
+  EuiText,
+  EuiCodeEditor,
 } from '@elastic/eui';
-import { mappingDocumentationLink } from '../../../../lib/documentation_links';
+import { mappingDocumentationLink } from '../../../lib/documentation_links';
 import { StepProps } from '../types';
 
-export const StepMappings: React.FunctionComponent<StepProps> = ({ children, errors }) => {
+export const StepMappings: React.FunctionComponent<StepProps> = ({
+  template,
+  updateTemplate,
+  errors,
+}) => {
+  const { mappings } = template;
   const { mappings: mappingsError } = errors;
 
   return (
@@ -64,7 +71,7 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({ children, err
 
       <EuiSpacer size="l" />
 
-      {/* Mappings plugin */}
+      {/* Mappings code editor */}
       <EuiFormRow
         label={
           <FormattedMessage
@@ -76,7 +83,32 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({ children, err
         error={mappingsError}
         fullWidth
       >
-        <Fragment>{children}</Fragment>
+        <EuiCodeEditor
+          mode="json"
+          theme="textmate"
+          width="100%"
+          setOptions={{
+            showLineNumbers: false,
+            tabSize: 2,
+            maxLines: Infinity,
+          }}
+          editorProps={{
+            $blockScrolling: Infinity,
+          }}
+          showGutter={false}
+          minLines={6}
+          aria-label={i18n.translate(
+            'xpack.idxMgmt.templatesForm.stepMappings.fieldMappingsAriaLabel',
+            {
+              defaultMessage: 'Mappings editor',
+            }
+          )}
+          value={mappings}
+          onChange={(newMappings: string) => {
+            updateTemplate({ mappings: newMappings });
+          }}
+          data-test-subj="mappingsEditor"
+        />
       </EuiFormRow>
     </div>
   );

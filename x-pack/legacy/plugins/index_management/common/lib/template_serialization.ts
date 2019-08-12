@@ -60,7 +60,7 @@ export function serializeTemplate(template: Template): TemplateEs {
     index_patterns: indexPatterns,
     settings: settings ? parseJson(settings) : undefined,
     aliases: aliases ? parseJson(aliases) : undefined,
-    mappings,
+    mappings: mappings ? parseJson(mappings) : undefined,
   };
 
   return serializedTemplate;
@@ -79,12 +79,12 @@ export function deserializeTemplate(templateEs: TemplateEs): Template {
 
   const deserializedTemplate: Template = {
     name,
-    version: typeof version !== 'undefined' ? version.toString() : undefined,
-    order: typeof order !== 'undefined' ? order.toString() : undefined,
+    version: version || version === 0 ? version : '',
+    order: order || order === 0 ? order : '',
     indexPatterns: indexPatterns.sort(),
     settings: settings && hasEntries(settings) ? JSON.stringify(settings, null, 2) : undefined,
     aliases: aliases && hasEntries(aliases) ? JSON.stringify(aliases, null, 2) : undefined,
-    mappings: mappings && hasEntries(mappings) ? mappings : undefined,
+    mappings: mappings && hasEntries(mappings) ? JSON.stringify(mappings, null, 2) : undefined,
     ilmPolicy: settings && settings.index && settings.index.lifecycle,
   };
 

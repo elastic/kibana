@@ -17,7 +17,7 @@ import {
   EuiCodeEditor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { settingsDocumentationLink } from '../../../../lib/documentation_links';
+import { settingsDocumentationLink } from '../../../lib/documentation_links';
 import { StepProps } from '../types';
 
 export const StepSettings: React.FunctionComponent<StepProps> = ({

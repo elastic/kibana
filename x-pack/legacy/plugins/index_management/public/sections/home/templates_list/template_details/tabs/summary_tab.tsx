@@ -90,7 +90,7 @@ export const SummaryTab: React.FunctionComponent<Props> = ({ templateDetails }) 
             />
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            {typeof order !== 'undefined' ? order : <NoneDescriptionText />}
+            {order || order === 0 ? order : <NoneDescriptionText />}
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
             <FormattedMessage
@@ -99,7 +99,7 @@ export const SummaryTab: React.FunctionComponent<Props> = ({ templateDetails }) 
             />
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            {typeof version !== 'undefined' ? version : <NoneDescriptionText />}
+            {version || version === 0 ? version : <NoneDescriptionText />}
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
       </EuiFlexItem>

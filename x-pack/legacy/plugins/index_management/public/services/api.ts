@@ -29,6 +29,7 @@ import {
   UIM_TEMPLATE_DELETE,
   UIM_TEMPLATE_DELETE_MANY,
   UIM_TEMPLATE_CREATE,
+  UIM_TEMPLATE_UPDATE,
 } from '../../common/constants';
 
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
@@ -221,6 +222,7 @@ export async function deleteTemplates(names: Array<Template['name']>) {
   const uimActionType = names.length > 1 ? UIM_TEMPLATE_DELETE_MANY : UIM_TEMPLATE_DELETE;
 
   trackUiMetric(METRIC_TYPE.COUNT, uimActionType);
+
   return result;
 }
 
@@ -237,6 +239,7 @@ export async function loadIndexPatterns() {
     fields: ['title'],
     perPage: 10000,
   });
+
   return savedObjects;
 }
 
@@ -248,5 +251,19 @@ export async function saveTemplate(template: Template) {
   });
 
   trackUiMetric(METRIC_TYPE.COUNT, UIM_TEMPLATE_CREATE);
+
+  return result;
+}
+
+export async function updateTemplate(template: Template) {
+  const { name } = template;
+  const result = sendRequest({
+    path: `${apiPrefix}/templates/${encodeURIComponent(name)}`,
+    method: 'put',
+    body: template,
+  });
+
+  trackUiMetric(METRIC_TYPE.COUNT, UIM_TEMPLATE_UPDATE);
+
   return result;
 }

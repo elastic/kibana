@@ -19,10 +19,10 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Template } from '../../../../../common/types';
-import { INVALID_CHARACTERS } from '../../../../../common/constants';
-import { templatesDocumentationLink } from '../../../../lib/documentation_links';
-import { loadIndexPatterns } from '../../../../services/api';
+import { Template } from '../../../../common/types';
+import { INVALID_CHARACTERS } from '../../../../common/constants';
+import { templatesDocumentationLink } from '../../../lib/documentation_links';
+import { loadIndexPatterns } from '../../../services/api';
 import { StepProps } from '../types';
 
 const indexPatternIllegalCharacters = INVALID_CHARACTERS.join(' ');
@@ -31,6 +31,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
   template,
   updateTemplate,
   errors,
+  isEditing,
 }) => {
   const { name, order, version, indexPatterns } = template;
   const { name: nameError, indexPatterns: indexPatternsError } = errors;
@@ -122,6 +123,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
         >
           <EuiFieldText
             value={name}
+            readOnly={isEditing}
             data-test-subj="nameInput"
             onChange={e => {
               updateTemplate({ name: e.target.value });
@@ -233,7 +235,8 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
           <EuiFieldNumber
             value={order}
             onChange={e => {
-              updateTemplate({ order: e.target.value });
+              const value = e.target.value;
+              updateTemplate({ order: value === '' ? value : Number(value) });
             }}
             data-test-subj="orderInput"
             fullWidth
@@ -273,7 +276,8 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
           <EuiFieldNumber
             value={version}
             onChange={e => {
-              updateTemplate({ version: e.target.value });
+              const value = e.target.value;
+              updateTemplate({ version: value === '' ? value : Number(value) });
             }}
             fullWidth
             data-test-subj="versionInput"

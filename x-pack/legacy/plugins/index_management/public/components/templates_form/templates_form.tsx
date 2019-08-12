@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState, useRef } from 'react';
+import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -14,74 +13,43 @@ import {
   EuiForm,
   EuiSpacer,
 } from '@elastic/eui';
-import { MappingsEditor, Mappings } from '../../../../static/ui';
-import { Template } from '../../../../common/types';
+import { Template } from '../../../common/types';
 import { TemplateSteps } from './template_steps';
-import { TemplateValidation, validateTemplate } from '../../../services/validation';
+import { TemplateValidation, validateTemplate } from '../../services/validation';
 import { StepAliases, StepLogistics, StepMappings, StepSettings, StepReview } from './steps';
 import { StepProps } from './types';
-import { SectionError } from '../../../components';
+import { SectionError } from '..';
 
 interface Props {
   onSave: (template: Template) => void;
   clearSaveError: () => void;
   isSaving: boolean;
   saveError: any;
+  template: Template;
+  isEditing?: boolean;
 }
 
-type GetMappingsEditorDataHandler = () => { isValid: boolean; data: Mappings };
-
-const defaultTemplate: Template = {
-  name: '',
-  indexPatterns: [],
-  version: '',
-  order: '',
-  settings: undefined,
-  mappings: {},
-  aliases: undefined,
-};
-
 export const TemplatesForm: React.FunctionComponent<Props> = ({
+  template: initialTemplate,
   onSave,
   isSaving,
   saveError,
   clearSaveError,
+  isEditing,
 }) => {
   // hooks
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [maxCompletedStep, setMaxCompletedStep] = useState<number>(0);
-  const [template, setTemplate] = useState<Template>(defaultTemplate);
+  const [template, setTemplate] = useState<Template>(initialTemplate);
   const [validation, setValidation] = useState<TemplateValidation>({
     isValid: true,
     errors: {},
   });
 
-  const getMappingsEditorData = useRef<GetMappingsEditorDataHandler>(() => ({
-    isValid: true,
-    data: {},
-  }));
-
-  const setGetMappingsEditorDataHandler = (handler: GetMappingsEditorDataHandler) =>
-    (getMappingsEditorData.current = handler);
-
-  const StepMappingsWithEditor = () => (
-    <StepMappings
-      template={template}
-      updateTemplate={updateTemplate}
-      errors={errors}
-      updateCurrentStep={updateCurrentStep}
-    >
-      <MappingsEditor
-        setGetDataHandler={setGetMappingsEditorDataHandler}
-        FormattedMessage={FormattedMessage}
-      />
-    </StepMappings>
-  );
-
   const stepComponentMap: { [key: number]: React.FunctionComponent<StepProps> } = {
     1: StepLogistics,
     2: StepSettings,
-    3: StepMappingsWithEditor,
+    3: StepMappings,
     4: StepAliases,
     5: StepReview,
   };
@@ -123,27 +91,7 @@ export const TemplatesForm: React.FunctionComponent<Props> = ({
 
   const onNext = () => {
     const nextStep = currentStep + 1;
-    let newValidation = validateTemplate(template);
-
-    // step 3 (mappings) utilizes the mappings plugin and requires different logic to validate and set value
-    if (currentStep === 3) {
-      const { isValid: isMappingValid, data } = getMappingsEditorData.current();
-
-      setTemplate({ ...template, mappings: data });
-
-      if (!isMappingValid) {
-        newValidation = {
-          isValid: false,
-          errors: {
-            mappings: [
-              i18n.translate('xpack.idxMgmt.templateValidation.mappingsInvalidError', {
-                defaultMessage: 'Mappings data is invalid.',
-              }),
-            ],
-          },
-        };
-      }
-    }
+    const newValidation = validateTemplate(template);
 
     setValidation(newValidation);
 
@@ -152,6 +100,18 @@ export const TemplatesForm: React.FunctionComponent<Props> = ({
       setCurrentStep(nextStep);
     }
   };
+
+  const saveButtonLabel = isEditing ? (
+    <FormattedMessage
+      id="xpack.idxMgmt.templatesForm.saveButtonLabel"
+      defaultMessage="Save template"
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.idxMgmt.templatesForm.createButtonLabel"
+      defaultMessage="Create template"
+    />
+  );
 
   return (
     <Fragment>
@@ -185,6 +145,7 @@ export const TemplatesForm: React.FunctionComponent<Props> = ({
           updateTemplate={updateTemplate}
           errors={errors}
           updateCurrentStep={updateCurrentStep}
+          isEditing={isEditing}
         />
         <EuiSpacer size="l" />
 
@@ -224,13 +185,10 @@ export const TemplatesForm: React.FunctionComponent<Props> = ({
                 {isSaving ? (
                   <FormattedMessage
                     id="xpack.idxMgmt.templatesForm.savingButtonLabel"
-                    defaultMessage="Creating..."
+                    defaultMessage="Saving..."
                   />
                 ) : (
-                  <FormattedMessage
-                    id="xpack.idxMgmt.templatesForm.submitButtonLabel"
-                    defaultMessage="Create template"
-                  />
+                  saveButtonLabel
                 )}
               </EuiButton>
             </EuiFlexItem>

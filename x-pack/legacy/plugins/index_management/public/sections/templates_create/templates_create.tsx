@@ -7,11 +7,21 @@ import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { TemplatesForm } from './templates_form';
+import { TemplatesForm } from '../../components';
 import { setBreadcrumbs } from '../../services/set_breadcrumbs';
 import { Template } from '../../../common/types';
 import { saveTemplate } from '../../services/api';
 import { BASE_PATH } from '../../../common/constants';
+
+const defaultTemplate: Template = {
+  name: '',
+  indexPatterns: [],
+  version: '',
+  order: '',
+  settings: undefined,
+  mappings: undefined,
+  aliases: undefined,
+};
 
 export const TemplatesCreate: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -54,6 +64,7 @@ export const TemplatesCreate: React.FunctionComponent<RouteComponentProps> = ({ 
         </EuiTitle>
         <EuiSpacer size="l" />
         <TemplatesForm
+          template={defaultTemplate}
           onSave={onSave}
           isSaving={isSaving}
           saveError={saveError}

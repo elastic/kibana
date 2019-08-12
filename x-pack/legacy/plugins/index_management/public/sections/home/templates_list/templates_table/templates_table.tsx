@@ -116,9 +116,33 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
       width: '75px',
       actions: [
         {
-          render: (template: TemplateListItem) => {
-            const { name } = template;
-
+          render: ({ name }: { name: TemplateListItem['name'] }) => {
+            return (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.idxMgmt.templatesList.table.actionEditTooltipLabel',
+                  { defaultMessage: 'Edit' }
+                )}
+              >
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.idxMgmt.templatesList.table.actionEditTooltipLabel',
+                    {
+                      defaultMessage: `Edit template '{name}'`,
+                      values: { name },
+                    }
+                  )}
+                  iconType="pencil"
+                  color="primary"
+                  href={`#${BASE_PATH}templates_edit/${encodeURIComponent(name)}`}
+                  data-test-subj="editTemplateButton"
+                />
+              </EuiToolTip>
+            );
+          },
+        },
+        {
+          render: ({ name }: { name: TemplateListItem['name'] }) => {
             return (
               <EuiToolTip
                 content={i18n.translate(

@@ -20,7 +20,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { serializeTemplate } from '../../../../../common/lib/template_serialization';
+import { serializeTemplate } from '../../../../common/lib/template_serialization';
 import { StepProps } from '../types';
 
 const NoneDescriptionText = () => (
@@ -101,7 +101,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {order !== '' ? order : <NoneDescriptionText />}
+              {order ? order : <NoneDescriptionText />}
             </EuiDescriptionListDescription>
 
             <EuiDescriptionListTitle>
@@ -111,7 +111,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {version !== '' ? version : <NoneDescriptionText />}
+              {version ? version : <NoneDescriptionText />}
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
