@@ -87,7 +87,7 @@ describe('CollectorSet', () => {
         // Do nothing
       }
       // This must return an empty object instead of null/undefined
-      expect(result).to.eql([{}]);
+      expect(result).to.eql([]);
     });
   });
 

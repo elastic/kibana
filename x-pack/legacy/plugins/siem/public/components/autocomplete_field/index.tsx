@@ -311,6 +311,8 @@ const AutocompleteContainer = euiStyled.div`
   position: relative;
 `;
 
+AutocompleteContainer.displayName = 'AutocompleteContainer';
+
 const SuggestionsPanel = euiStyled(EuiPanel).attrs({
   paddingSize: 'none',
   hasShadow: true,
@@ -321,3 +323,5 @@ const SuggestionsPanel = euiStyled(EuiPanel).attrs({
   overflow: hidden;
   z-index: ${props => props.theme.eui.euiZLevel1};
 `;
+
+SuggestionsPanel.displayName = 'SuggestionsPanel';

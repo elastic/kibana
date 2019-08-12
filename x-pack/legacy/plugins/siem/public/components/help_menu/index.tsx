@@ -23,3 +23,5 @@ export const HelpMenu = pure<{}>(() => {
 
   return null;
 });
+
+HelpMenu.displayName = 'HelpMenu';

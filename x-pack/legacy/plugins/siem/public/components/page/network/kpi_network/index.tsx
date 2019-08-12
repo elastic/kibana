@@ -120,6 +120,8 @@ const FlexGroup = styled(EuiFlexGroup)`
   min-height: ${kpiWidgetHeight}px;
 `;
 
+FlexGroup.displayName = 'FlexGroup';
+
 export const KpiNetworkBaseComponent = ({
   fieldsMapping,
   data,
@@ -192,3 +194,5 @@ export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
     );
   }
 );
+
+KpiNetworkComponent.displayName = 'KpiNetworkComponent';

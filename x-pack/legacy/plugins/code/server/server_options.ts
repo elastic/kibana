@@ -24,7 +24,7 @@ export interface SecurityOptions {
 
 export interface DiskOptions {
   thresholdEnabled: boolean;
-  watermarkLowMb: number;
+  watermarkLow: string;
 }
 
 export class ServerOptions {
