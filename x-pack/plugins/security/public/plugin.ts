@@ -6,6 +6,7 @@
 
 import { Plugin, CoreSetup } from 'src/core/public';
 import { AnonymousPaths } from './anonymous_paths';
+import { SessionExpired } from './session_expired';
 import { UnauthorizedResponseInterceptor } from './unauthorized_response_interceptor';
 
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {
@@ -18,7 +19,9 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
       '/status',
       '/app/kibana',
     ]);
-    core.http.intercept(new UnauthorizedResponseInterceptor(basePath, anonymousPaths));
+    core.http.intercept(
+      new UnauthorizedResponseInterceptor(new SessionExpired(basePath), anonymousPaths)
+    );
 
     return {
       anonymousPaths,
