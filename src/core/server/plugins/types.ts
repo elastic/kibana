@@ -40,7 +40,12 @@ export type PluginOpaqueId = symbol;
 /**
  * Describes the set of required and optional properties plugin can define in its
  * mandatory JSON manifest file.
- * @internal
+ *
+ * @remarks
+ * Should never be used in code outside of Core but is exported for
+ * documentation purposes.
+ *
+ * @public
  */
 export interface PluginManifest {
   /**
@@ -59,7 +64,8 @@ export interface PluginManifest {
   readonly kibanaVersion: string;
 
   /**
-   * Root configuration path used by the plugin, defaults to "id".
+   * Root {@link ConfigPath | configuration path} used by the plugin, defaults
+   * to "id".
    */
   readonly configPath: ConfigPath;
 
