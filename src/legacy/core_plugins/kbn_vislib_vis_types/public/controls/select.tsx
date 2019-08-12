@@ -25,6 +25,7 @@ interface SelectOptionProps<ParamName extends string, ValidParamValues extends s
   options: Array<{ value: ValidParamValues; text: string }>;
   paramName: ParamName;
   value?: ValidParamValues;
+  dataTestSubj?: string;
   setValue: (paramName: ParamName, value: ValidParamValues) => void;
 }
 
@@ -33,6 +34,7 @@ function SelectOption<ParamName extends string, ValidParamValues extends string>
   options,
   paramName,
   value,
+  dataTestSubj,
   setValue,
 }: SelectOptionProps<ParamName, ValidParamValues>) {
   return (
@@ -42,6 +44,7 @@ function SelectOption<ParamName extends string, ValidParamValues extends string>
         value={value}
         onChange={ev => setValue(paramName, ev.target.value as ValidParamValues)}
         fullWidth={true}
+        data-test-subj={dataTestSubj}
       />
     </EuiFormRow>
   );

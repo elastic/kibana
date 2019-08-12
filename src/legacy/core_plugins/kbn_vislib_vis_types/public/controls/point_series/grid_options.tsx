@@ -76,7 +76,7 @@ function GridOptions({ stateParams, setValue }: VisOptionsProps<BasicVislibParam
         paramName="valueAxis"
         value={stateParams.grid.valueAxis || ''}
         setValue={setGrid}
-        data-test-subj="gridAxis"
+        dataTestSubj="gridAxis"
       />
     </EuiPanel>
   );
