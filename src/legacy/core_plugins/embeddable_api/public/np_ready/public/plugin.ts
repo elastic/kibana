@@ -25,6 +25,7 @@ import {
 } from '../../../../../../core/public';
 import { TriggerRegistry, ActionRegistry, EmbeddableFactoryRegistry } from './types';
 import { createApi, EmbeddableApi } from './api';
+import { bootstrap } from './bootstrap';
 
 export class EmbeddablePublicPlugin implements Plugin<any, any> {
   private readonly triggers: TriggerRegistry = new Map();
@@ -40,6 +41,7 @@ export class EmbeddablePublicPlugin implements Plugin<any, any> {
       embeddableFactories: this.embeddableFactories,
       triggers: this.triggers,
     }));
+    bootstrap(this.api);
 
     const { registerTrigger, registerAction, registerEmbeddableFactory, attachAction } = this.api;
 

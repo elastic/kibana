@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { EmbeddableApi } from '../types';
-import { CONTEXT_MENU_TRIGGER, APPLY_FILTER_TRIGGER, ApplyFilterAction } from '../../lib';
+import { EmbeddableApi } from './api/types';
+import { CONTEXT_MENU_TRIGGER, APPLY_FILTER_TRIGGER, ApplyFilterAction } from './lib';
 
 /**
- * This method initialized Embeddable plugin with initial set of
+ * This method initializes Embeddable plugin with initial set of
  * triggers and actions.
  *
  * @param api

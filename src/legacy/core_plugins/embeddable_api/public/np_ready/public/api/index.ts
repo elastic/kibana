@@ -34,7 +34,6 @@ import { getTriggerCompatibleActions } from './get_trigger_compatible_actions';
 import { registerAction } from './register_action';
 import { registerEmbeddableFactory } from './register_embeddable_factory';
 import { registerTrigger } from './register_trigger';
-import { bootstrap } from './utils/bootstrap';
 
 export * from './types';
 
@@ -60,6 +59,5 @@ export const createApi = (deps: EmbeddableDependencies) => {
   }
   Object.freeze(partialApi);
   const api = partialApi as EmbeddableApi;
-  bootstrap(api);
   return { api, depsInternal };
 };
