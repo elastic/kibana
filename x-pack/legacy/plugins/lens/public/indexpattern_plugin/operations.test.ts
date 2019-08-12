@@ -246,6 +246,7 @@ describe('getOperationTypesForField', () => {
             "operationMetaData": Object {
               "dataType": "date",
               "isBucketed": true,
+              "isHistogram": true,
             },
             "operations": Array [
               Object {

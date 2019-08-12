@@ -85,7 +85,10 @@ export interface XYChartProps {
   args: XYArgs;
 }
 
-export const getXyChartRenderer = (formatFactory: FormatFactory): RenderFunction<XYChartProps> => ({
+export const getXyChartRenderer = (dependencies: {
+  formatFactory: FormatFactory;
+  timeZone: string;
+}): RenderFunction<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY Chart',
   help: 'X/Y Chart Renderer',
@@ -94,7 +97,7 @@ export const getXyChartRenderer = (formatFactory: FormatFactory): RenderFunction
   render: async (domNode: Element, config: XYChartProps, _handlers: unknown) => {
     ReactDOM.render(
       <I18nProvider>
-        <XYChart {...config} formatFactory={formatFactory} />
+        <XYChart {...config} {...dependencies} />
       </I18nProvider>,
       domNode
     );
@@ -109,8 +112,10 @@ export function XYChart({
   data,
   args,
   formatFactory,
+  timeZone,
 }: XYChartProps & {
   formatFactory: FormatFactory;
+  timeZone: string;
 }) {
   const { legend, layers, isHorizontal } = args;
 
@@ -188,6 +193,7 @@ export function XYChart({
             columnToLabel,
             yScaleType,
             xScaleType,
+            isHistogram,
           },
           index
         ) => {
@@ -225,6 +231,8 @@ export function XYChart({
             data: rows,
             xScaleType,
             yScaleType,
+            enableHistogramMode: isHistogram,
+            timeZone,
           };
 
           return seriesType === 'line' ? (

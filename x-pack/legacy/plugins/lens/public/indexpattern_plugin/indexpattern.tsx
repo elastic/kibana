@@ -14,6 +14,7 @@ import {
   DimensionPriority,
   Operation,
   DatasourceLayerPanelProps,
+  OperationMetadata,
 } from '../types';
 import { Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { getIndexPatterns } from './loader';
@@ -42,11 +43,7 @@ export type IndexPatternColumn =
   | CountIndexPatternColumn
   | FilterRatioIndexPatternColumn;
 
-export interface BaseIndexPatternColumn {
-  label: string;
-  dataType: DataType;
-  isBucketed: boolean;
-
+export interface BaseIndexPatternColumn extends Operation {
   // Private
   operationType: OperationType;
   suggestedPriority?: DimensionPriority;
@@ -146,11 +143,12 @@ export type IndexPatternPrivateState = IndexPatternPersistedState & {
 };
 
 export function columnToOperation(column: IndexPatternColumn): Operation {
-  const { dataType, label, isBucketed } = column;
+  const { dataType, label, isBucketed, isHistogram } = column;
   return {
     label,
     dataType,
     isBucketed,
+    isHistogram,
   };
 }
 

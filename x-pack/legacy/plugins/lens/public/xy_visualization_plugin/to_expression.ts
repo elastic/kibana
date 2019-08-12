@@ -133,6 +133,9 @@ export const buildExpression = (
             });
           }
 
+          const xAxisOperation =
+            frame && frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor);
+
           return {
             type: 'expression',
             chain: [
@@ -148,6 +151,7 @@ export const buildExpression = (
                   xAccessor: [layer.xAccessor],
                   yScaleType: [getScaleType(dataTypes[layer.layerId][layer.accessors[0]])],
                   xScaleType: [getScaleType(dataTypes[layer.layerId][layer.xAccessor])],
+                  isHistogram: [Boolean(xAxisOperation && xAxisOperation.isHistogram)],
                   splitAccessor: [layer.splitAccessor],
                   seriesType: [layer.seriesType],
                   accessors: layer.accessors,

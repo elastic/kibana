@@ -136,6 +136,11 @@ export const layerConfig: ExpressionFunction<
       help: 'The scale type of the x axis',
       default: 'ordinal',
     },
+    isHistogram: {
+      types: ['boolean'],
+      default: false,
+      help: 'Whether to layout the chart as a histogram',
+    },
     yScaleType: {
       options: ['log', 'sqrt', 'linear', 'time'],
       help: 'The scale type of the y axes',
@@ -178,6 +183,7 @@ export type LayerArgs = LayerConfig & {
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: 'time' | 'linear' | 'log' | 'sqrt';
   xScaleType: 'time' | 'linear' | 'ordinal';
+  isHistogram: boolean;
 };
 
 // Arguments to XY chart expression, with computed properties
