@@ -139,7 +139,7 @@ yarn kbn build
 ###
 GIT_CHANGES="$(git ls-files --modified)"
 if [ "$GIT_CHANGES" ]; then
-  echo -e "\n${RED}ERROR: 'yarn run build' caused changes to the following files:${C_RESET}\n"
+  echo -e "\n${RED}ERROR: 'yarn kbn build' caused changes to the following files:${C_RESET}\n"
   echo -e "$GIT_CHANGES\n"
   exit 1
 fi
