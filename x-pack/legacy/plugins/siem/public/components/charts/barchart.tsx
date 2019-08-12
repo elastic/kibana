@@ -83,6 +83,8 @@ export const BarChartBaseComponent = React.memo<{
   ) : null;
 });
 
+BarChartBaseComponent.displayName = 'BarChartBaseComponent';
+
 export const BarChartWithCustomPrompt = React.memo<{
   data: ChartConfigsData[] | null | undefined;
   height: number | null | undefined;
@@ -101,6 +103,8 @@ export const BarChartWithCustomPrompt = React.memo<{
   );
 });
 
+BarChartWithCustomPrompt.displayName = 'BarChartWithCustomPrompt';
+
 export const BarChart = React.memo<{
   barChart: ChartConfigsData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
@@ -113,3 +117,5 @@ export const BarChart = React.memo<{
     )}
   </AutoSizer>
 ));
+
+BarChart.displayName = 'BarChart';

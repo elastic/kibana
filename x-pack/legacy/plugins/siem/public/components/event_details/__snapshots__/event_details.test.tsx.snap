@@ -2,7 +2,7 @@
 
 exports[`EventDetails rendering should match snapshot 1`] = `
 <Component>
-  <pure(Component)
+  <EventDetails
     browserFields={
       Object {
         "agent": Object {
