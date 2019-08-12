@@ -17,13 +17,15 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from '../../../../../src/core/server';
+import { Plugin, CoreSetup } from 'kibana/server';
 
-declare module '../../../../../src/core/server' {
+export interface PluginARequestContext {
+  ping: () => Promise<string>;
+}
+
+declare module 'kibana/server' {
   interface RequestHandlerContext {
-    pluginA?: {
-      ping: () => Promise<string>;
-    };
+    pluginA?: PluginARequestContext;
   }
 }
 
@@ -31,7 +33,8 @@ export class CorePluginAPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
     core.http.registerRouteHandlerContext('pluginA', context => {
       return {
-        ping: () => context.elasticsearch.adminClient.callAsInternalUser('ping') as Promise<string>,
+        ping: () =>
+          context.elasticsearch!.adminClient.callAsInternalUser('ping') as Promise<string>,
       };
     });
   }

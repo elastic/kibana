@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from '../../../../../src/core/server';
+import { Plugin, CoreSetup } from 'kibana/server';
+import { PluginARequestContext } from '../../core_plugin_a/server';
+
+declare module 'kibana/server' {
+  interface RequestHandlerContext {
+    pluginA?: PluginARequestContext;
+  }
+}
 
 export class CorePluginBPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {

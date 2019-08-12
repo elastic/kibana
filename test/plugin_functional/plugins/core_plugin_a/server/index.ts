@@ -18,5 +18,6 @@
  */
 
 import { CorePluginAPlugin } from './plugin';
+export { PluginARequestContext } from './plugin';
 
 export const plugin = () => new CorePluginAPlugin();
