@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "babel src --out-dir target",
+    "build": "babel src --out-dir target --copy-files",
     "kbn:bootstrap": "yarn build --quiet",
     "kbn:watch": "yarn build --watch"
   },

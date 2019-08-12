@@ -66,3 +66,5 @@ export const ModalAllErrors = ({ isShowing, toast, toggle }: FullErrorProps) =>
 const MyEuiCodeBlock = styled(EuiCodeBlock)`
   margin-top: 4px;
 `;
+
+MyEuiCodeBlock.displayName = 'MyEuiCodeBlock';

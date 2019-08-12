@@ -12,18 +12,21 @@ import moment from 'moment';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';
+import { useKibanaContext } from '../../../../../contexts/kibana';
 import { FullTimeRangeSelector } from '../../../../../components/full_time_range_selector';
 import { EventRateChart } from '../charts/event_rate_chart';
 import { LineChartPoint } from '../../../common/chart_loader';
 import { TimeRangePicker } from './time_range_picker';
 import { GetTimeFieldRangeResponse } from '../../../../../services/ml_api_service';
+import { mlJobService } from '../../../../../services/job_service';
+import { ml } from '../../../../../services/ml_api_service';
 
+export interface TimeRange {
+  start: number;
+  end: number;
+}
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
-  const kibanaContext = useContext(KibanaContext);
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
+  const kibanaContext = useKibanaContext();
 
   const {
     jobCreator,
@@ -33,8 +36,10 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     chartInterval,
   } = useContext(JobCreatorContext);
 
-  const [start, setStart] = useState(jobCreator.start);
-  const [end, setEnd] = useState(jobCreator.end);
+  const [timeRange, setTimeRange] = useState<TimeRange>({
+    start: jobCreator.start,
+    end: jobCreator.end,
+  });
   const [eventRateChartData, setEventRateChartData] = useState<LineChartPoint[]>([]);
 
   async function loadChart() {
@@ -47,6 +52,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
   }
 
   useEffect(() => {
+    const { start, end } = timeRange;
     jobCreator.setTimeRange(start, end);
     chartInterval.setBounds({
       min: moment(start),
@@ -60,17 +66,43 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
 
     jobCreatorUpdate();
     loadChart();
-  }, [start, end]);
+  }, [JSON.stringify(timeRange)]);
 
   useEffect(() => {
-    setStart(jobCreator.start);
-    setEnd(jobCreator.end);
+    setTimeRange({
+      start: jobCreator.start,
+      end: jobCreator.end,
+    });
   }, [jobCreatorUpdated]);
 
   function fullTimeRangeCallback(range: GetTimeFieldRangeResponse) {
-    setStart(range.start.epoch);
-    setEnd(range.end.epoch);
+    setTimeRange({
+      start: range.start.epoch,
+      end: range.end.epoch,
+    });
   }
+
+  useEffect(() => {
+    if (mlJobService.currentJob !== undefined) {
+      (async (index: string, timeFieldName: string | undefined, query: object) => {
+        const resp = await ml.getTimeFieldRange({
+          index,
+          timeFieldName,
+          query,
+        });
+        setTimeRange({
+          start: resp.start.epoch,
+          end: resp.end.epoch,
+        });
+        // wipe the cloning job
+        mlJobService.currentJob = undefined;
+      })(
+        kibanaContext.currentIndexPattern.title,
+        kibanaContext.currentIndexPattern.timeFieldName,
+        kibanaContext.combinedQuery
+      );
+    }
+  }, []);
 
   return (
     <Fragment>
@@ -78,7 +110,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
         <Fragment>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <TimeRangePicker setStart={setStart} setEnd={setEnd} start={start} end={end} />
+              <TimeRangePicker setTimeRange={setTimeRange} timeRange={timeRange} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FullTimeRangeSelector
