@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { EuiIcon } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Action, ActionContext } from '../../../../actions';
 import { ViewMode } from '../../../../types';
@@ -41,8 +39,8 @@ export class CustomizePanelTitleAction extends Action {
     });
   }
 
-  public getIcon() {
-    return <EuiIcon type="pencil" />;
+  public getIconType() {
+    return 'pencil';
   }
 
   public async isCompatible({ embeddable }: ActionContext) {
