@@ -63,6 +63,9 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
   const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
     savedQuery ? !!savedQuery.filters : true
   );
+  // Defaults to false because saved queries are meant to be as portable as possible and loading
+  // a saved query with a time filter will override whatever the current value of the global timepicker
+  // is. We expect this option to be used rarely and only when the user knows they want this behavior.
   const [shouldIncludeTimefilter, setIncludeTimefilter] = useState(
     savedQuery ? !!savedQuery.timefilter : false
   );
