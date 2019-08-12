@@ -70,7 +70,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
     <I18nProvider>
       <EmbeddablePanel
         embeddable={embeddable}
-        getActions={(() => []) as any}
+        getActions={() => Promise.resolve([])}
         getAllEmbeddableFactories={(() => []) as any}
         getEmbeddableFactory={(() => null) as any}
         notifications={{} as any}
