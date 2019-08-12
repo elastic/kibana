@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Context {
-  page?: { url: string }; // only for RUM agent
-}
+export { JobsListPage } from './jobs_list_page';

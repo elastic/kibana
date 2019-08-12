@@ -182,6 +182,8 @@ export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
   }
 );
 
+DefaultFieldRenderer.displayName = 'DefaultFieldRenderer';
+
 interface DefaultFieldRendererOverflowProps {
   rowItems: string[];
   idPrefix: string;
@@ -237,3 +239,5 @@ export const DefaultFieldRendererOverflow = pure<DefaultFieldRendererOverflowPro
     );
   }
 );
+
+DefaultFieldRendererOverflow.displayName = 'DefaultFieldRendererOverflow';

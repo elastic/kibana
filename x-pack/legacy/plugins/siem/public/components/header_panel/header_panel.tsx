@@ -23,6 +23,8 @@ const Header = styled.header<{ border?: boolean }>`
   `}
 `;
 
+Header.displayName = 'Header';
+
 export interface HeaderPanelProps {
   border?: boolean;
   children?: React.ReactNode;
@@ -64,3 +66,5 @@ export const HeaderPanel = pure<HeaderPanelProps>(
     </Header>
   )
 );
+
+HeaderPanel.displayName = 'HeaderPanel';

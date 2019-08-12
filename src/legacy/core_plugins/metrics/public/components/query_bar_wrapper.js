@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { Storage } from './storage';
+import React, { useContext } from 'react';
+import { CoreSetupContext } from '../contexts/query_input_bar_context';
+import { QueryBarInput } from 'plugins/data';
 
-export const localStorage = new Storage(window.localStorage);
-export const sessionStorage = new Storage(window.sessionStorage);
+export function QueryBarWrapper(props) {
+  const coreSetupContext = useContext(CoreSetupContext);
+
+  return <QueryBarInput {...props} {...coreSetupContext} />;
+}

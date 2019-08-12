@@ -32,13 +32,19 @@ const Percent = styled.span`
   margin-right: 5px;
 `;
 
+Percent.displayName = 'Percent';
+
 const SourceDestinationArrowsContainer = styled(EuiFlexGroup)`
   margin: 0 2px;
 `;
 
+SourceDestinationArrowsContainer.displayName = 'SourceDestinationArrowsContainer';
+
 const Data = styled(EuiText)`
   margin: 0 5px;
 `;
+
+Data.displayName = 'Data';
 
 /**
  * Visualizes the communication from a source as an arrow with draggable badges
@@ -110,6 +116,8 @@ const SourceArrow = pure<{
     </EuiFlexGroup>
   );
 });
+
+SourceArrow.displayName = 'SourceArrow';
 
 /**
  * Visualizes the communication from a destination as an arrow with draggable
@@ -185,6 +193,8 @@ const DestinationArrow = pure<{
   );
 });
 
+DestinationArrow.displayName = 'DestinationArrow';
+
 /**
  * Visualizes the communication between a source and a destination using arrows
  * that grow in thickness based on the percentage of bytes transferred, and stats badges
@@ -256,3 +266,5 @@ export const SourceDestinationArrows = pure<{
     </SourceDestinationArrowsContainer>
   );
 });
+
+SourceDestinationArrows.displayName = 'SourceDestinationArrows';
