@@ -240,7 +240,7 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toEqual('bolt');
+    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toEqual('alert');
   });
 
   it('should indicate data loss if not all layers will be used', () => {

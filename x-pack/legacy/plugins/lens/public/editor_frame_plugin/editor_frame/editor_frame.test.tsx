@@ -17,11 +17,8 @@ import {
   DatasourceMock,
 } from '../mocks';
 import { ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
-<<<<<<< HEAD
 import { DragDrop } from '../../drag_drop';
-=======
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
->>>>>>> feature/lens
 
 // calling this function will wait for all pending Promises from mock
 // datasources to be processed by its callers.

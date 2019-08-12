@@ -60,7 +60,7 @@ const SuggestionPreview = ({
         paddingSize="none"
         data-test-subj="lnsSuggestion"
         onClick={() => {
-        switchToSuggestion(frame, dispatch, suggestion);
+          switchToSuggestion(frame, dispatch, suggestion);
         }}
       >
         {expressionError ? (
@@ -146,14 +146,14 @@ function InnerSuggestionPanel({
               )
             : null;
           return (
-          <SuggestionPreview
-            suggestion={suggestion}
-            dispatch={dispatch}
-            frame={frame}
-            ExpressionRenderer={ExpressionRendererComponent}
-            previewExpression={previewExpression ? toExpression(previewExpression) : undefined}
-            key={`${suggestion.visualizationId}-${suggestion.title}`}
-          />
+            <SuggestionPreview
+              suggestion={suggestion}
+              dispatch={dispatch}
+              frame={frame}
+              ExpressionRenderer={ExpressionRendererComponent}
+              previewExpression={previewExpression ? toExpression(previewExpression) : undefined}
+              key={`${suggestion.visualizationId}-${suggestion.title}`}
+            />
           );
         })}
       </div>
