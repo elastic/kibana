@@ -59,11 +59,11 @@ export const dashboardInput: DashboardContainerInput = {
         y: 0,
         i: '822cd0f0-ce7c-419d-aeaa-1171cf452745',
       },
-      type: 'visualization',
+      type: 'map',
       explicitInput: {
         id: '822cd0f0-ce7c-419d-aeaa-1171cf452745',
       },
-      savedObjectId: '3fe22200-3dcb-11e8-8660-4d65aa086b3c',
+      savedObjectId: '53006120-b56c-11e9-bfa8-fd22ee6bf542',
     },
     '66f0a265-7b06-4974-accd-d05f74f7aa82': {
       gridData: {

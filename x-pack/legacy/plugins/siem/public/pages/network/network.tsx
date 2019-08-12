@@ -34,6 +34,7 @@ import { AnomaliesNetworkTable } from '../../components/ml/tables/anomalies_netw
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
+import { SavedMap } from '../../components/embeddables/saved_map';
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
@@ -68,6 +69,7 @@ const NetworkComponent = pure<NetworkComponentProps>(
                 <UseUrlState indexPattern={indexPattern}>
                   {({ isInitializing }) => (
                     <>
+                      <SavedMap />
                       <KpiNetworkQuery
                         endDate={to}
                         filterQuery={filterQuery}

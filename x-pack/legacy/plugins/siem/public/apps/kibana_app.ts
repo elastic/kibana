@@ -5,6 +5,7 @@
  */
 
 import 'uiExports/autocompleteProviders';
+import 'uiExports/embeddableFactories';
 
 import { compose } from '../lib/compose/kibana_compose';
 
