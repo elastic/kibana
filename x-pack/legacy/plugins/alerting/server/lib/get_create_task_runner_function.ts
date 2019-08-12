@@ -45,15 +45,16 @@ export function getCreateTaskRunnerFunction({
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
       run: async () => {
+        const { alertId, spaceId } = taskInstance.params;
         const requestHeaders: Record<string, string> = {};
-        const namespace = spaceIdToNamespace(taskInstance.params.spaceId);
+        const namespace = spaceIdToNamespace(spaceId);
         // Only fetch encrypted attributes here, we'll create a saved objects client
         // scoped with the API key to fetch the remaining data.
         const {
           attributes: { apiKeyId, generatedApiKey },
         } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAlert>(
           'alert',
-          taskInstance.params.alertId,
+          alertId,
           { namespace }
         );
 
@@ -64,7 +65,7 @@ export function getCreateTaskRunnerFunction({
 
         const fakeRequest = {
           headers: requestHeaders,
-          getBasePath: () => getBasePath(taskInstance.params.spaceId),
+          getBasePath: () => getBasePath(spaceId),
         };
 
         const services = getServices(fakeRequest);
@@ -72,7 +73,7 @@ export function getCreateTaskRunnerFunction({
         const {
           attributes: { alertTypeParams, actions, interval },
           references,
-        } = await services.savedObjectsClient.get<RawAlert>('alert', taskInstance.params.alertId);
+        } = await services.savedObjectsClient.get<RawAlert>('alert', alertId);
 
         // Validate
         const validatedAlertTypeParams = validateAlertTypeParams(alertType, alertTypeParams);
@@ -82,7 +83,7 @@ export function getCreateTaskRunnerFunction({
           const actionReference = references.find(obj => obj.name === action.actionRef);
           if (!actionReference) {
             throw new Error(
-              `Action reference "${action.actionRef}" not found in alert id: ${taskInstance.params.alertId}`
+              `Action reference "${action.actionRef}" not found in alert id: ${alertId}`
             );
           }
           return {
@@ -96,7 +97,7 @@ export function getCreateTaskRunnerFunction({
           apiKeyId,
           generatedApiKey,
           actions: actionsWithIds,
-          spaceId: taskInstance.params.spaceId,
+          spaceId,
         });
         const alertInstances: Record<string, AlertInstance> = {};
         const alertInstancesData = taskInstance.state.alertInstances || {};
