@@ -201,7 +201,7 @@ export class QueryBarUI extends Component<Props, State> {
           prepend={this.props.prepend}
           query={this.props.query!}
           screenTitle={this.props.screenTitle}
-          store={this.props.store}
+          store={this.props.store!}
           onChange={this.onQueryChange}
           onSubmit={this.onInputSubmit}
           persistedLog={this.persistedLog}
@@ -216,7 +216,9 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   private shouldRenderQueryInput() {
-    return this.props.showQueryInput && this.props.indexPatterns && this.props.query;
+    return (
+      this.props.showQueryInput && this.props.indexPatterns && this.props.query && this.props.store
+    );
   }
 
   private renderUpdateButton() {
