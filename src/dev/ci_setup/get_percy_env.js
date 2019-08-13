@@ -24,11 +24,21 @@ const { stdout: commit } = execa.sync('git', ['rev-parse', 'HEAD']);
 const shortCommit = commit.slice(0, 8);
 
 const isPr = process.env.JOB_NAME.includes('elastic+kibana+pull-request');
+let branch = process.env.PR_TARGET_BRANCH;
 
-const { stdout: branch } = execa.sync('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
+if (!isPr) {
+  if (!process.env.branch_specifier) {
+    throw new Error('Unable to determine PERCY_BRANCH without a [branch_specifier]');
+  }
 
-const prBranch = 'origin/' + process.env.PR_TARGET_BRANCH;
+  [, branch] = process.env.branch_specifier.split('refs/heads/');
+  if (!branch) {
+    throw new Error(
+      `Unable to determine PERCY_BRANCH from [branch_specifier=${process.env.branch_specifier}], expected it to start with [refs/heads/]`
+    );
+  }
+}
 
 console.log(`export PERCY_PARALLEL_TOTAL=2;`);
 console.log(`export PERCY_PARALLEL_NONCE="${shortCommit}/${isPr ? 'PR' : pkg.branch}/${process.env.BUILD_ID}";`);
-console.log(`export PERCY_TARGET_BRANCH="${isPr ? prBranch : branch}";`);
+console.log(`export PERCY_BRANCH="${branch}";`);
