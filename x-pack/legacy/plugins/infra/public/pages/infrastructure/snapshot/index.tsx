@@ -14,7 +14,6 @@ import { SnapshotToolbar } from './toolbar';
 
 import { DocumentTitle } from '../../../components/document_title';
 import { NoIndices } from '../../../components/empty_states/no_indices';
-import { Header } from '../../../components/header';
 import { ColumnarPage } from '../../../components/page';
 
 import { SourceErrorPage } from '../../../components/source_error_page';
@@ -64,18 +63,6 @@ export const SnapshotPage = injectUICapabilities(
               }
             )
           }
-        />
-        <Header
-          breadcrumbs={[
-            {
-              href: '#/',
-              text: intl.formatMessage({
-                id: 'xpack.infra.header.infrastructureTitle',
-                defaultMessage: 'Infrastructure',
-              }),
-            },
-          ]}
-          readOnlyBadge={!uiCapabilities.infrastructure.save}
         />
         {isLoading ? (
           <SourceLoadingPage />
