@@ -16,10 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { EuiIcon } from '@elastic/eui';
-import React from 'react';
-
 import { i18n } from '@kbn/i18n';
 import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
 import { Action, ActionContext } from '../../../../actions';
@@ -47,8 +43,8 @@ export class AddPanelAction extends Action {
     });
   }
 
-  public getIcon() {
-    return <EuiIcon type="plusInCircleFilled" />;
+  public getIconType() {
+    return 'plusInCircleFilled';
   }
 
   public async isCompatible({ embeddable }: ActionContext) {

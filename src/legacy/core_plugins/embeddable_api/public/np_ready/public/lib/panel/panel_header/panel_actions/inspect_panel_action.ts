@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { EuiIcon } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Action, ActionContext } from '../../../actions';
 import { Start as InspectorStartContract } from '../../../../../../../../../../plugins/inspector/public';
@@ -39,8 +37,8 @@ export class InspectPanelAction extends Action {
     });
   }
 
-  public getIcon() {
-    return <EuiIcon type="inspect" />;
+  public getIconType() {
+    return 'inspect';
   }
 
   public async isCompatible({ embeddable }: ActionContext) {
