@@ -16,15 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { EmbeddablePanel } from 'plugins/embeddable_api';
-import { HelloWorldEmbeddable } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/test_samples';
 
-export class ContactCardEmbeddableExample extends React.Component<{}> {
+import React from 'react';
+import {
+  EmbeddablePanel,
+  GetActionsCompatibleWithTrigger,
+  GetEmbeddableFactory,
+  GetEmbeddableFactories,
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { HelloWorldEmbeddable } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/hello_world/hello_world_embeddable';
+import { CoreStart } from '../../../../../../src/core/public';
+import { Start as InspectorStartContract } from '../../../../../../src/plugins/inspector/public';
+
+interface Props {
+  getActions: GetActionsCompatibleWithTrigger;
+  getEmbeddableFactory: GetEmbeddableFactory;
+  getAllEmbeddableFactories: GetEmbeddableFactories;
+  overlays: CoreStart['overlays'];
+  notifications: CoreStart['notifications'];
+  inspector: InspectorStartContract;
+  SavedObjectFinder: React.ComponentType<any>;
+}
+
+export class ContactCardEmbeddableExample extends React.Component<Props> {
   private embeddable: HelloWorldEmbeddable;
 
-  constructor() {
-    super({});
+  constructor(props: Props) {
+    super(props);
+
     this.embeddable = new HelloWorldEmbeddable({ id: 'hello' });
   }
 
@@ -37,7 +56,16 @@ export class ContactCardEmbeddableExample extends React.Component<{}> {
   public render() {
     return (
       <div className="app-container dshAppContainer">
-        <EmbeddablePanel embeddable={this.embeddable} />
+        <EmbeddablePanel
+          embeddable={this.embeddable}
+          getActions={this.props.getActions}
+          getEmbeddableFactory={this.props.getEmbeddableFactory}
+          getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
+          overlays={this.props.overlays}
+          notifications={this.props.notifications}
+          inspector={this.props.inspector}
+          SavedObjectFinder={this.props.SavedObjectFinder}
+        />
       </div>
     );
   }

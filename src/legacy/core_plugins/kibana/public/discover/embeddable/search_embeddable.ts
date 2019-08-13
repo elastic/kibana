@@ -34,9 +34,9 @@ import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Embeddable,
-  executeTriggerActions,
   Container,
-} from '../../../../embeddable_api/public';
+  ExecuteTriggerActions,
+} from '../../../../embeddable_api/public/np_ready/public';
 import * as columnActions from '../doc_table/actions/columns';
 import { SavedSearch } from '../types';
 import searchTemplate from './search_template.html';
@@ -112,6 +112,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       queryFilter,
     }: SearchEmbeddableConfig,
     initialInput: SearchInput,
+    private readonly executeTriggerActions: ExecuteTriggerActions,
     parent?: Container
   ) {
     super(
@@ -243,7 +244,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
         $state: { store: FilterStateStore.APP_STATE },
       }));
 
-      await executeTriggerActions(APPLY_FILTER_TRIGGER, {
+      await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
         embeddable: this,
         triggerContext: {
           filters,
