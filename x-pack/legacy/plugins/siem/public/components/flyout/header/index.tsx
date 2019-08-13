@@ -113,6 +113,8 @@ const statefulFlyoutHeader = pure<Props>(
   )
 );
 
+statefulFlyoutHeader.displayName = 'statefulFlyoutHeader';
+
 const emptyHistory: History[] = []; // stable reference
 
 const makeMapStateToProps = () => {

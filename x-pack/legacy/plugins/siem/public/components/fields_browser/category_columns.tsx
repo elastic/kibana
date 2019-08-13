@@ -21,6 +21,8 @@ const CategoryName = styled.span<{ bold: boolean }>`
   font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};
 `;
 
+CategoryName.displayName = 'CategoryName';
+
 const HoverActionsContainer = styled(EuiPanel)`
   cursor: default;
   height: 25px;
@@ -30,6 +32,8 @@ const HoverActionsContainer = styled(EuiPanel)`
   width: 30px;
 `;
 
+HoverActionsContainer.displayName = 'HoverActionsContainer';
+
 const HoverActionsFlexGroup = styled(EuiFlexGroup)`
   cursor: pointer;
   left: -2px;
@@ -37,12 +41,16 @@ const HoverActionsFlexGroup = styled(EuiFlexGroup)`
   top: -6px;
 `;
 
+HoverActionsFlexGroup.displayName = 'HoverActionsFlexGroup';
+
 const LinkContainer = styled.div`
   width: 100%;
   .euiLink {
     width: 100%;
   }
 `;
+
+LinkContainer.displayName = 'LinkContainer';
 
 export interface CategoryItem {
   categoryId: string;
@@ -70,6 +78,7 @@ export const getCategoryColumns = ({
 }) => [
   {
     field: 'categoryId',
+    name: '',
     sortable: true,
     truncateText: false,
     render: (categoryId: string) => (
@@ -125,7 +134,7 @@ export const getCategoryColumns = ({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <CountBadge color="hollow">
+              <CountBadge data-test-subj={`${categoryId}-category-count`} color="hollow">
                 {getFieldCount(filteredBrowserFields[categoryId])}
               </CountBadge>
             </EuiFlexItem>
