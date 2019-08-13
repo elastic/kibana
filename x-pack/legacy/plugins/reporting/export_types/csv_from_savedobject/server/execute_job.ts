@@ -24,7 +24,7 @@ interface FakeRequest {
 
 type ExecuteJobFn = (job: JobDocPayload, realRequest?: Request) => Promise<JobDocOutputExecuted>;
 
-function executeJobFn(server: KbnServer): ExecuteJobFn {
+function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
   const crypto = cryptoFactory(server);
   const config = server.config();
   const serverBasePath = config.get('server.basePath');
@@ -107,4 +107,4 @@ function executeJobFn(server: KbnServer): ExecuteJobFn {
   };
 }
 
-export const executeJobFactory = oncePerServer(executeJobFn);
+export const executeJobFactory = oncePerServer(executeJobFactoryFn);

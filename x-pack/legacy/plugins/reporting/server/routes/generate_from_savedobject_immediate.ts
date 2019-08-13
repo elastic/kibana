@@ -44,6 +44,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
       const createJobFn = createJobFactory(server);
+      // By passing the request, we signal this as an "immediate" job.
+      // TODO: use a different executeFn for immediate, with a different call signature, to clean up messy types
       const executeJobFn = executeJobFactory(server, request);
       const jobDocPayload: JobDocPayload = await createJobFn(jobParams, request.headers, request);
       const {
