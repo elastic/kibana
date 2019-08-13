@@ -53,6 +53,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IRouter](./kibana-plugin-server.irouter.md) | Registers route handlers for specified resource path and method. |
 |  [KibanaRequestRoute](./kibana-plugin-server.kibanarequestroute.md) | Request specific route information exposed to a handler. |
 |  [LegacyRequest](./kibana-plugin-server.legacyrequest.md) |  |
+|  [LegacyServiceSetupDeps](./kibana-plugin-server.legacyservicesetupdeps.md) |  |
+|  [LegacyServiceStartDeps](./kibana-plugin-server.legacyservicestartdeps.md) |  |
 |  [Logger](./kibana-plugin-server.logger.md) | Logger exposes all the necessary methods to log any type of information and this is the interface used by the logging consumers including plugins. |
 |  [LoggerFactory](./kibana-plugin-server.loggerfactory.md) | The single purpose of <code>LoggerFactory</code> interface is to define a way to retrieve a context-based logger instance. |
 |  [LogMeta](./kibana-plugin-server.logmeta.md) | Contextual metadata |
@@ -132,7 +134,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RedirectResponseOptions](./kibana-plugin-server.redirectresponseoptions.md) | HTTP response parameters for redirection response |
 |  [RequestHandler](./kibana-plugin-server.requesthandler.md) | A function executed when route path matched requested resource path. Request handler is expected to return a result of one of [KibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) functions. |
 |  [RequestHandlerContextContainer](./kibana-plugin-server.requesthandlercontextcontainer.md) | An object that handles registration of http request context providers. |
-|  [RequestHandlerContextNames](./kibana-plugin-server.requesthandlercontextnames.md) | A list of RequestHandlerContext object keys. |
 |  [RequestHandlerContextProvider](./kibana-plugin-server.requesthandlercontextprovider.md) | Context provider for request handler. Extends request context object with provided functionality or data. |
 |  [RequestHandlerParams](./kibana-plugin-server.requesthandlerparams.md) | Parameters passed to the request handler function. |
 |  [RequestHandlerReturn](./kibana-plugin-server.requesthandlerreturn.md) | Expected outcome the request handler function. |

@@ -125,7 +125,7 @@ export interface CoreSetup {
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         basePath: HttpServiceSetup['basePath'];
         isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
-        registerRouteHandlerContext: (name: RequestHandlerContextNames, provider: RequestHandlerContextProvider) => RequestHandlerContextContainer;
+        registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(name: T, provider: RequestHandlerContextProvider<RequestHandlerContext>) => RequestHandlerContextContainer<RequestHandlerContext>;
         createRouter: () => IRouter;
     };
 }
@@ -245,7 +245,7 @@ export interface HttpServerSetup {
 // @public (undocumented)
 export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
     createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
-    registerRouteHandlerContext: (pluginOpaqueId: PluginOpaqueId, contextName: RequestHandlerContextNames, provider: RequestHandlerContextProvider) => RequestHandlerContextContainer;
+    registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(pluginOpaqueId: PluginOpaqueId, contextName: T, provider: RequestHandlerContextProvider<RequestHandlerContext>) => RequestHandlerContextContainer<RequestHandlerContext>;
 };
 
 // @public (undocumented)
@@ -265,17 +265,15 @@ export interface IKibanaSocket {
 // @internal (undocumented)
 export interface InternalCoreSetup {
     // (undocumented)
+    context: ContextSetup;
+    // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
     http: HttpServiceSetup;
-    // (undocumented)
-    plugins: PluginsServiceSetup;
 }
 
 // @public (undocumented)
 export interface InternalCoreStart {
-    // (undocumented)
-    plugins: PluginsServiceStart;
 }
 
 // @public
@@ -358,6 +356,28 @@ export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 
 // @public @deprecated (undocumented)
 export interface LegacyRequest extends Request {
+}
+
+// @public @deprecated (undocumented)
+export interface LegacyServiceSetupDeps {
+    // Warning: (ae-incompatible-release-tags) The symbol "core" is marked as @public, but its signature references "InternalCoreSetup" which is marked as @internal
+    // 
+    // (undocumented)
+    core: InternalCoreSetup & {
+        plugins: PluginsServiceSetup;
+    };
+    // (undocumented)
+    plugins: Record<string, unknown>;
+}
+
+// @public @deprecated (undocumented)
+export interface LegacyServiceStartDeps {
+    // (undocumented)
+    core: InternalCoreStart & {
+        plugins: PluginsServiceStart;
+    };
+    // (undocumented)
+    plugins: Record<string, unknown>;
 }
 
 // Warning: (ae-forgotten-export) The symbol "lifecycleResponseFactory" needs to be exported by the entry point index.d.ts
@@ -539,18 +559,22 @@ export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends
 
 // @public
 export interface RequestHandlerContext {
+    // (undocumented)
+    core: {
+        elasticsearch: {
+            dataClient: ScopedClusterClient;
+            adminClient: ScopedClusterClient;
+        };
+    };
 }
 
 // @public
-export type RequestHandlerContextContainer = IContextContainer<RequestHandlerContext, RequestHandlerReturn | Promise<RequestHandlerReturn>, RequestHandlerParams>;
-
-// @public
-export type RequestHandlerContextNames = keyof RequestHandlerContext;
+export type RequestHandlerContextContainer<TContext> = IContextContainer<TContext, RequestHandlerReturn | Promise<RequestHandlerReturn>, RequestHandlerParams>;
 
 // Warning: (ae-forgotten-export) The symbol "IContextProvider" needs to be exported by the entry point index.d.ts
 // 
 // @public
-export type RequestHandlerContextProvider = IContextProvider<RequestHandlerContext, RequestHandlerContextNames, RequestHandlerParams>;
+export type RequestHandlerContextProvider<TContext> = IContextProvider<TContext, keyof TContext, RequestHandlerParams>;
 
 // @public
 export type RequestHandlerParams = [KibanaRequest, KibanaResponseFactory];

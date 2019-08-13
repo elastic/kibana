@@ -47,6 +47,10 @@ function getLegacyRawConfig(config: Config) {
   return rawConfig;
 }
 
+/**
+ * @public
+ * @deprecated
+ */
 export interface LegacyServiceSetupDeps {
   core: InternalCoreSetup & {
     plugins: PluginsServiceSetup;
@@ -54,6 +58,10 @@ export interface LegacyServiceSetupDeps {
   plugins: Record<string, unknown>;
 }
 
+/**
+ * @public
+ * @deprecated
+ */
 export interface LegacyServiceStartDeps {
   core: InternalCoreStart & {
     plugins: PluginsServiceStart;

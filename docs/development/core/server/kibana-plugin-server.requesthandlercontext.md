@@ -11,3 +11,10 @@ Plugin specific context passed to a route handler.
 ```typescript
 export interface RequestHandlerContext 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [core](./kibana-plugin-server.requesthandlercontext.core.md) | <code>{</code><br/><code>        elasticsearch: {</code><br/><code>            dataClient: ScopedClusterClient;</code><br/><code>            adminClient: ScopedClusterClient;</code><br/><code>        };</code><br/><code>    }</code> |  |
+
