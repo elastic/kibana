@@ -316,8 +316,8 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
   ]);
 
   const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
-  const liveEsNodes = skipLiveData ? [] : await getLivesNodes(req);
-  const liveKibanaInstance = skipLiveData ? {} : await getLiveKibanaInstance(req);
+  const liveEsNodes = skipLiveData || (clusterUuid && liveClusterUuid !== clusterUuid) ? [] : await getLivesNodes(req);
+  const liveKibanaInstance = skipLiveData || (clusterUuid && liveClusterUuid !== clusterUuid) ? {} : await getLiveKibanaInstance(req);
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
 
   const status = PRODUCTS.reduce((products, product) => {
