@@ -93,7 +93,6 @@ describe('AggType Class', function () {
           const aggType = new AggType({});
 
           let vis = new Vis(indexPattern, {
-            type: 'histogram',
             aggs: [
               {
                 type: 'date_histogram',
@@ -107,7 +106,6 @@ describe('AggType Class', function () {
           expect(aggType.getFormat(aggConfig)).to.be(fieldFormats.getDefaultInstance('date'));
 
           vis = new Vis(indexPattern, {
-            type: 'metric',
             aggs: [
               {
                 type: 'count',
