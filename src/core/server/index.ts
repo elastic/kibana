@@ -140,9 +140,6 @@ export {
   SavedObjectsService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-  SavedObjectsImportError,
-  SavedObjectsImportResponse,
-  SavedObjectsImportRetry,
 } from './saved_objects';
 
 export { RecursiveReadonly } from '../utils';

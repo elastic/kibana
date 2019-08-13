@@ -127,20 +127,3 @@ export interface SavedObjectsResolveImportErrorsOptions {
   supportedTypes: string[];
   namespace?: string;
 }
-
-export interface SavedObjectsImportResponse {
-  success: boolean;
-  successCount: number;
-  errors?: SavedObjectsImportError[];
-}
-
-export interface SavedObjectsImportRetry {
-  type: string;
-  id: string;
-  overwrite: boolean;
-  replaceReferences: Array<{
-    type: string;
-    from: string;
-    to: string;
-  }>;
-}
