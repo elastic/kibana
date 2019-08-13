@@ -5,7 +5,9 @@
  */
 
 import React, { FC, Fragment, useContext, useState } from 'react';
+import { toastNotifications } from 'ui/notify';
 import { EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { JobRunner } from '../../../../../common/job_runner';
 
@@ -42,8 +44,23 @@ export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
   async function startJobInRealTime() {
     setDatafeedState(DATAFEED_STATE.STARTING);
     if (jobRunner !== null) {
-      const started = await jobRunner.startDatafeedInRealTime();
-      setDatafeedState(started === true ? DATAFEED_STATE.STARTED : DATAFEED_STATE.STOPPED);
+      try {
+        const started = await jobRunner.startDatafeedInRealTime();
+        setDatafeedState(started === true ? DATAFEED_STATE.STARTED : DATAFEED_STATE.STOPPED);
+        toastNotifications.addSuccess({
+          title: i18n.translate('xpack.ml.newJob.wizard.createJobErrordw', {
+            defaultMessage: `Job ${jobCreator.jobId} started`,
+          }),
+        });
+      } catch (error) {
+        setDatafeedState(DATAFEED_STATE.STOPPED);
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.ml.newJob.wizard.createJobErrorw', {
+            defaultMessage: `Error starting job`,
+          }),
+          text: error.message,
+        });
+      }
     }
   }
 
@@ -73,7 +90,7 @@ export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
         data-test-subj="mlButtonUseFullData"
       >
         <FormattedMessage
-          id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
+          id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel3"
           defaultMessage="Create watch"
         />
       </EuiButton>
