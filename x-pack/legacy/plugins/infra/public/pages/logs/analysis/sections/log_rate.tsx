@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { Axis, Chart, getAxisId, getSpecId, AreaSeries, LineSeries } from '@elastic/charts';
 import {
   EuiTitle,
   EuiFlexGroup,
@@ -15,6 +16,7 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../common/http_api/log_analysis/results/log_entry_rate';
+import { useLogEntryRateGraphData } from '../../../../containers/logs/log_analysis/log_analysis_graph_data/log_entry_rate';
 
 export const LogRateResults = ({
   isLoading,
@@ -31,6 +33,10 @@ export const LogRateResults = ({
     'xpack.infra.logs.analysis.logRateSectionLoadingAriaLabel',
     { defaultMessage: 'Loading log rate results' }
   );
+
+  const { areaSeries, lineSeries } = useLogEntryRateGraphData({
+    data: results,
+  });
 
   return (
     <>
@@ -63,7 +69,44 @@ export const LogRateResults = ({
           }
         />
       ) : (
-        <div>results</div>
+        <div style={{ height: 400, width: '100%' }}>
+          <Chart className="log-entry-rate-chart">
+            <Axis
+              id={getAxisId('timestamp')}
+              title="Time"
+              position="bottom"
+              showOverlappingTicks
+              tickFormat={value => value}
+            />
+            <Axis
+              id={getAxisId('values')}
+              title="Log entries"
+              position="left"
+              tickFormat={value => value}
+            />
+            <AreaSeries
+              id={getSpecId('modelBounds')}
+              xScaleType="time"
+              yScaleType="linear"
+              xAccessor="x"
+              yAccessors={['max']}
+              y0Accessors={['min']}
+              data={areaSeries}
+              yScaleToDataExtent
+              curve={2}
+            />
+            <LineSeries
+              id={getSpecId('averageValues')}
+              xScaleType="time"
+              yScaleType="linear"
+              xAccessor={0}
+              yAccessors={[1]}
+              data={lineSeries}
+              yScaleToDataExtent
+              curve={2}
+            />
+          </Chart>
+        </div>
       )}
     </>
   );
