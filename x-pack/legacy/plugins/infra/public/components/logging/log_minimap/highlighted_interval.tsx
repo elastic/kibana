@@ -14,6 +14,7 @@ interface HighlightedIntervalProps {
   start: number;
   end: number;
   width: number;
+  target: number | null;
 }
 
 export const HighlightedInterval: React.SFC<HighlightedIntervalProps> = ({
@@ -22,19 +23,37 @@ export const HighlightedInterval: React.SFC<HighlightedIntervalProps> = ({
   getPositionOfTime,
   start,
   width,
+  target,
 }) => {
   const yStart = getPositionOfTime(start);
   const yEnd = getPositionOfTime(end);
+  const yTarget = target && getPositionOfTime(target);
 
   return (
-    <HighlightPolygon
-      className={className}
-      points={`0,${yStart} ${width},${yStart} ${width},${yEnd} 0,${yEnd}`}
-    />
+    <>
+      {yTarget && (
+        <HighlightTargetMarker
+          className={className}
+          x1={0}
+          x2={width / 3}
+          y1={yTarget}
+          y2={yTarget}
+        />
+      )}
+      <HighlightPolygon
+        className={className}
+        points={` ${width / 3},${yStart} ${width},${yStart} ${width},${yEnd}  ${width / 3},${yEnd}`}
+      />
+    </>
   );
 };
 
 HighlightedInterval.displayName = 'HighlightedInterval';
+
+const HighlightTargetMarker = euiStyled.line`
+  stroke: ${props => props.theme.eui.euiColorPrimary};
+  stroke-width: 1;
+`;
 
 const HighlightPolygon = euiStyled.polygon`
   fill: ${props => props.theme.eui.euiColorPrimary};

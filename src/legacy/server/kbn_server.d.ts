@@ -18,6 +18,7 @@
  */
 
 import { ResponseObject, Server } from 'hapi';
+import { UnwrapPromise } from '@kbn/utility-types';
 
 import { SavedObjectsClientProviderOptions } from 'src/core/server';
 import {
@@ -87,7 +88,7 @@ declare module 'hapi' {
 }
 
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
-type Unpromise<T> = T extends Promise<infer U> ? U : T;
+
 // eslint-disable-next-line import/no-default-export
 export default class KbnServer {
   public readonly newPlatform: {
@@ -98,7 +99,7 @@ export default class KbnServer {
     start: LegacyServiceStartDeps;
     stop: null;
     params: {
-      handledConfigPaths: Unpromise<ReturnType<ConfigService['getUsedPaths']>>;
+      handledConfigPaths: UnwrapPromise<ReturnType<ConfigService['getUsedPaths']>>;
     };
   };
   public server: Server;
