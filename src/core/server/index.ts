@@ -45,12 +45,13 @@ import {
   ElasticsearchClientConfig,
   ElasticsearchServiceSetup,
 } from './elasticsearch';
-import { HttpServiceSetup, HttpServiceStart } from './http';
+import { HttpServiceSetup, HttpServiceStart, IRouter } from './http';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 
 export { bootstrap } from './bootstrap';
 export { ConfigPath, ConfigService } from './config';
+export { IContextContainer, IContextProvider, IContextHandler } from './context';
 export { CoreId } from './core_context';
 export {
   CallAPIOptions,
@@ -75,6 +76,7 @@ export {
   HttpResponseOptions,
   HttpResponsePayload,
   HttpServerSetup,
+  IKibanaSocket,
   IsAuthenticated,
   KibanaRequest,
   KibanaRequestRoute,
@@ -92,7 +94,7 @@ export {
   kibanaResponseFactory,
   KibanaResponseFactory,
   RouteConfig,
-  Router,
+  IRouter,
   RouteMethod,
   RouteConfigOptions,
   SessionStorage,
@@ -177,6 +179,7 @@ export interface CoreSetup {
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
     basePath: HttpServiceSetup['basePath'];
     isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
+    createRouter: () => IRouter;
   };
 }
 

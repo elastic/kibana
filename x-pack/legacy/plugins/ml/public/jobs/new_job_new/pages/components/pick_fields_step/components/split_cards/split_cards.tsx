@@ -65,7 +65,7 @@ export const SplitCards: FC<Props> = memo(
           marginBottom: `-${SPACING}px`,
           marginLeft: `${sideMargin}px`,
           marginRight: `${sideMargin}px`,
-          ...(animate ? { transition: 'margin 0.2s' } : {}),
+          ...(animate ? { transition: 'margin 0.5s' } : {}),
         };
         return (
           <div key={fieldName} ref={ref => storePanels(ref, marginBottom)} style={style}>

@@ -47,7 +47,7 @@ export function init(server: Legacy.Server) {
     };
   }
 
-  const { taskManager } = server;
+  const taskManager = server.plugins.task_manager!;
   const alertTypeRegistry = new AlertTypeRegistry({
     getServices,
     taskManager: taskManager!,

@@ -31,7 +31,6 @@ export const defaultChartSettings: ChartSettings = {
 
 export const seriesStyle = {
   line: {
-    stroke: '',
     strokeWidth: 2,
     visible: true,
     opacity: 1,
@@ -39,17 +38,14 @@ export const seriesStyle = {
   border: {
     visible: false,
     strokeWidth: 0,
-    stroke: '',
   },
   point: {
     visible: false,
     radius: 2,
-    stroke: '',
     strokeWidth: 4,
     opacity: 0.5,
   },
   area: {
-    fill: '',
     opacity: 0.25,
     visible: false,
   },
