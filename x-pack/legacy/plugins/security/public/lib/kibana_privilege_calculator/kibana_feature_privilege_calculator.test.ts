@@ -634,7 +634,7 @@ describe('getMostPermissiveFeaturePrivilege', () => {
       );
 
       runTest(
-        'returns "all" when assigned as the feature privilege, which overrides assigned space feature privilege',
+        'returns "all" when assigned as the feature privilege, which is more permissive than the base privilege',
         {
           role: {
             spacesPrivileges: [
