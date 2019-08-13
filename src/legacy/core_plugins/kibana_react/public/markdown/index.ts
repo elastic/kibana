@@ -18,3 +18,4 @@
  */
 
 export { MarkdownSimple } from './markdown_simple';
+export { Markdown } from './markdown';
