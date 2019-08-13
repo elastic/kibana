@@ -85,6 +85,7 @@
     "@types/react": "^16.8.0",
     "@types/react-dom": "^16.8.0",
     "@types/react-redux": "^6.0.6",
+    "@types/react-resize-detector": "^4.0.1",
     "@types/react-router-dom": "^4.3.1",
     "@types/react-sticky": "^6.0.3",
     "@types/react-test-renderer": "^16.8.0",
