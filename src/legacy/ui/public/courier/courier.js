@@ -21,12 +21,11 @@ import _ from 'lodash';
 
 import { timefilter } from 'ui/timefilter';
 
-import 'ui/es';
-import 'ui/directives/listen';
-import 'ui/index_patterns';
-import { uiModules } from 'ui/modules';
-import { addFatalErrorCallback } from 'ui/notify';
-import 'ui/promises';
+import '../es';
+import '../directives/listen';
+import { uiModules } from '../modules';
+import { addFatalErrorCallback } from '../notify';
+import '../promises';
 
 import { searchRequestQueue } from './search_request_queue';
 import { FetchSoonProvider } from './fetch';
