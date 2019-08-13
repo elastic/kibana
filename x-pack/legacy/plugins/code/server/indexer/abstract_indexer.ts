@@ -57,7 +57,7 @@ export abstract class AbstractIndexer implements Indexer {
 
     // Prepare all the index requests
     let totalCount = 0;
-    let prevTimestamp = moment();
+    let prevTimestamp = moment(0);
     let successCount = 0;
     let failCount = 0;
     const statsBuffer: IndexStats[] = [];

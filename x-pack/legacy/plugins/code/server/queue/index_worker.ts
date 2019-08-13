@@ -148,10 +148,13 @@ export class IndexWorker extends AbstractWorker {
       progress === WorkerReservedProgress.ERROR ||
       progress === WorkerReservedProgress.TIMEOUT
     ) {
-      // Reset the checkpoint if necessary.
+      // Reset the checkpoints if necessary.
       p = {
         ...p,
         indexProgress: {
+          checkpoint: null,
+        },
+        commitIndexProgress: {
           checkpoint: null,
         },
       };
@@ -186,28 +189,37 @@ export class IndexWorker extends AbstractWorker {
     repoUri: RepositoryUri,
     revision: string,
     type: IndexerType,
-    total: number
+    total: number // total number of indexers
   ) {
     return async (progress: IndexProgress) => {
+      const indexStatus: IndexWorkerProgress = await this.objectClient.getRepositoryIndexStatus(
+        repoUri
+      );
       const p: IndexWorkerProgress = {
         uri: repoUri,
-        // TODO: compute the correct percentage when commit indexing is enabled.
-        progress: progress.percentage,
+        progress: indexStatus.progress,
         timestamp: new Date(),
         revision,
       };
+
       switch (type) {
         case IndexerType.COMMIT:
           p.commitIndexProgress = progress;
+          p.progress =
+            progress.percentage +
+            (indexStatus.indexProgress ? indexStatus.indexProgress.percentage : 0);
           break;
         case IndexerType.LSP:
           p.indexProgress = progress;
+          p.progress =
+            progress.percentage +
+            (indexStatus.commitIndexProgress ? indexStatus.commitIndexProgress.percentage : 0);
           break;
         default:
           this.log.warn(`Unknown indexer type ${type} for indexing progress report.`);
           break;
       }
-      return await this.objectClient.setRepositoryIndexStatus(repoUri, p);
+      return await this.objectClient.updateRepositoryIndexStatus(repoUri, p);
     };
   }
 
