@@ -394,7 +394,7 @@ export class RemoteClusterForm extends Component {
 
   renderActions() {
     const { isSaving, cancel } = this.props;
-    const { areErrorsVisible } = this.state;
+    const { areErrorsVisible, isRequestVisible } = this.state;
 
     if (isSaving) {
       return (
@@ -464,10 +464,17 @@ export class RemoteClusterForm extends Component {
           <EuiButtonEmpty
             onClick={this.toggleRequest}
           >
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.toggleRequestButtonLabel"
-              defaultMessage="Show request"
-            />
+            {isRequestVisible ? (
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.hideRequestButtonLabel"
+                defaultMessage="Hide request"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.showRequestButtonLabel"
+                defaultMessage="Show request"
+              />
+            )}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>

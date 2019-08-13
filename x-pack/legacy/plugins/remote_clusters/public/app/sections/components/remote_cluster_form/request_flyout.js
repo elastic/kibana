@@ -15,11 +15,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 
 import {
+  EuiButtonEmpty,
   EuiCodeBlock,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiPortal,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -41,48 +42,59 @@ export class RequestFlyout extends PureComponent {
     const request = `${endpoint}\n${payload}`;
 
     return (
-      <EuiPortal>
-        <EuiFlyout maxWidth={480} onClose={close}>
-          <EuiFlyoutHeader>
-            <EuiTitle>
-              <h2>
-                {name ? (
-                  <FormattedMessage
-                    id="xpack.remoteClusters.requestFlyout.namedTitle"
-                    defaultMessage="Request for {name}"
-                    values={{ name }}
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.remoteClusters.requestFlyout.unnamedTitle"
-                    defaultMessage="Request"
-                  />
-                )}
-              </h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-
-          <EuiFlyoutBody>
-            <EuiText>
-              <p>
+      <EuiFlyout maxWidth={480} onClose={close}>
+        <EuiFlyoutHeader>
+          <EuiTitle>
+            <h2>
+              {name ? (
                 <FormattedMessage
-                  id="xpack.remoteClusters.requestFlyout.descriptionText"
-                  defaultMessage="This Elasticsearch request will create or update this remote cluster."
+                  id="xpack.remoteClusters.requestFlyout.namedTitle"
+                  defaultMessage="Request for '{name}'"
+                  values={{ name }}
                 />
-              </p>
-            </EuiText>
+              ) : (
+                <FormattedMessage
+                  id="xpack.remoteClusters.requestFlyout.unnamedTitle"
+                  defaultMessage="Request"
+                />
+              )}
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
 
-            <EuiSpacer />
+        <EuiFlyoutBody>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.remoteClusters.requestFlyout.descriptionText"
+                defaultMessage="This Elasticsearch request will create or update this remote cluster."
+              />
+            </p>
+          </EuiText>
 
-            <EuiCodeBlock
-              language="json"
-              isCopyable
-            >
-              {request}
-            </EuiCodeBlock>
-          </EuiFlyoutBody>
-        </EuiFlyout>
-      </EuiPortal>
+          <EuiSpacer />
+
+          <EuiCodeBlock
+            language="json"
+            isCopyable
+          >
+            {request}
+          </EuiCodeBlock>
+        </EuiFlyoutBody>
+
+        <EuiFlyoutFooter>
+          <EuiButtonEmpty
+            iconType="cross"
+            onClick={close}
+            flush="left"
+          >
+            <FormattedMessage
+              id="xpack.remoteClusters.requestFlyout.closeButtonLabel"
+              defaultMessage="Close"
+            />
+          </EuiButtonEmpty>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
     );
   }
 }
