@@ -51,14 +51,14 @@ export const MetricsExplorerChartOptions = injectI18n(({ chartOptions, onChange,
       id: MetricsExplorerYAxisMode.auto,
       label: intl.formatMessage({
         id: 'xpack.infra.metricsExplorer.chartOptions.autoLabel',
-        defaultMessage: 'Automatic (Min to Max)',
+        defaultMessage: 'Automatic (min to max)',
       }),
     },
     {
       id: MetricsExplorerYAxisMode.fromZero,
       label: intl.formatMessage({
         id: 'xpack.infra.metricsExplorer.chartOptions.fromZeroLabel',
-        defaultMessage: 'From zero (0 to Max)',
+        defaultMessage: 'From zero (0 to max)',
       }),
     },
   ];
