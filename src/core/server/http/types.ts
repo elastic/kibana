@@ -20,13 +20,6 @@ import { IContextProvider, IContextContainer } from '../context';
 import { KibanaRequest, KibanaResponseFactory, KibanaResponse } from './router';
 
 /**
- * Plugin specific context passed to a route handler.
- * @public
- */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface RequestHandlerContext {}
-
-/**
  * Parameters passed to the request handler function.
  * @public
  */

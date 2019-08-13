@@ -26,7 +26,7 @@ import { KibanaRequest } from './request';
 import { KibanaResponse, KibanaResponseFactory, kibanaResponseFactory } from './response';
 import { RouteConfig, RouteConfigOptions, RouteMethod, RouteSchemas } from './route';
 import { HapiResponseAdapter } from './response_adapter';
-import { RequestHandlerContext } from '../types';
+import { RequestHandlerContext } from '../../../server';
 
 interface RouterRoute {
   method: RouteMethod;

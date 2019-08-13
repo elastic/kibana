@@ -44,6 +44,7 @@ import {
   ClusterClient,
   ElasticsearchClientConfig,
   ElasticsearchServiceSetup,
+  ScopedClusterClient,
 } from './elasticsearch';
 import {
   HttpServiceSetup,
@@ -94,8 +95,8 @@ export {
   OnPostAuthToolkit,
   RedirectResponseOptions,
   RequestHandler,
-  RequestHandlerContext,
   RequestHandlerContextContainer,
+  RequestHandlerContextProvider,
   RequestHandlerParams,
   RequestHandlerReturn,
   ResponseError,
@@ -165,6 +166,19 @@ export {
 } from './types';
 
 export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
+
+/**
+ * Plugin specific context passed to a route handler.
+ * @public
+ */
+export interface RequestHandlerContext {
+  core: {
+    elasticsearch: {
+      dataClient: ScopedClusterClient;
+      adminClient: ScopedClusterClient;
+    };
+  };
+}
 
 /**
  * Context passed to the plugins `setup` method.

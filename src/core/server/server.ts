@@ -27,24 +27,13 @@ import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { PluginsService, config as pluginsConfig } from './plugins';
 
-import { config as elasticsearchConfig, ScopedClusterClient } from './elasticsearch';
+import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
 import { mapToObject } from '../utils/';
 import { ContextService } from './context';
 import { InternalCoreSetup } from './index';
-
-declare module '../server' {
-  interface RequestHandlerContext {
-    core: {
-      elasticsearch: {
-        dataClient: ScopedClusterClient;
-        adminClient: ScopedClusterClient;
-      };
-    };
-  }
-}
 
 const coreId = Symbol('core');
 
