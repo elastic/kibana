@@ -32,9 +32,13 @@ export const Badge = styled(EuiBadge)`
   border-bottom-left-radius: 5px;
 `;
 
+Badge.displayName = 'Badge';
+
 const Visible = styled.div<{ show: boolean }>`
   visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
 `;
+
+Visible.displayName = 'Visible';
 
 interface OwnProps {
   children?: React.ReactNode;
@@ -106,6 +110,8 @@ export const FlyoutComponent = pure<Props>(
     </>
   )
 );
+
+FlyoutComponent.displayName = 'FlyoutComponent';
 
 const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
   const timelineById = defaultTo({}, timelineSelectors.timelineByIdSelector(state));

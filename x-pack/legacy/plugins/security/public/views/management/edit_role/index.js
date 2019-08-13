@@ -14,7 +14,7 @@ import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import 'plugins/security/services/shield_indices';
 
-import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
+import { IndexPatternsProvider } from 'ui/index_patterns';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { ROLES_PATH, CLONE_ROLES_PATH, EDIT_ROLES_PATH } from '../management_urls';
 import { getEditRoleBreadcrumbs, getCreateRoleBreadcrumbs } from '../breadcrumbs';

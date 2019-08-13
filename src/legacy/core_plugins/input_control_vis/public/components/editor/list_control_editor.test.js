@@ -17,6 +17,8 @@
  * under the License.
  */
 
+jest.mock('ui/new_platform');
+
 import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';

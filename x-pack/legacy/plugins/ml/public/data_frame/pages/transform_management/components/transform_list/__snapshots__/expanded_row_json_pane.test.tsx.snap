@@ -46,8 +46,7 @@ exports[`Data Frame: Transform List Expanded Row <ExpandedRowJsonPane /> Minimal
     }
   },
   \\"version\\": \\"8.0.0\\",
-  \\"create_time\\": 1564388146667,
-  \\"mode\\": \\"batch\\"
+  \\"create_time\\": 1564388146667
 }"
     />
   </EuiFlexItem>

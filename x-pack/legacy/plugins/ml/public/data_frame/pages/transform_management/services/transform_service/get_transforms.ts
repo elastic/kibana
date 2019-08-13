@@ -89,7 +89,6 @@ export const getTransformsFactory = (
             // Table with expandable rows requires `id` on the outer most level
             reducedtableRows.push({
               id: config.id,
-              checkpointing: stats.checkpointing,
               config,
               mode:
                 typeof config.sync !== 'undefined'
