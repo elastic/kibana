@@ -4,6 +4,8 @@
 
 ## SavedObjectsImportError interface
 
+Represents a failure to import.
+
 <b>Signature:</b>
 
 ```typescript
@@ -14,7 +16,7 @@ export interface SavedObjectsImportError
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [error](./kibana-plugin-server.savedobjectsimporterror.error.md) | <code>ConflictError &#124; UnsupportedTypeError &#124; MissingReferencesError &#124; UnknownError</code> |  |
+|  [error](./kibana-plugin-server.savedobjectsimporterror.error.md) | <code>SavedObjectsImportConflictError &#124; SavedObjectsImportUnsupportedTypeError &#124; SavedObjectsImportMissingReferencesError &#124; SavedObjectsImportUnknownError</code> |  |
 |  [id](./kibana-plugin-server.savedobjectsimporterror.id.md) | <code>string</code> |  |
 |  [title](./kibana-plugin-server.savedobjectsimporterror.title.md) | <code>string</code> |  |
 |  [type](./kibana-plugin-server.savedobjectsimporterror.type.md) | <code>string</code> |  |

@@ -24,4 +24,5 @@
 
 /** @public types */
 export { TopNavMenu, TopNavMenuData } from './top_nav_menu';
-export { SearchBar, SearchBarProps } from './search_bar';
+
+export { Markdown, MarkdownSimple } from './markdown';

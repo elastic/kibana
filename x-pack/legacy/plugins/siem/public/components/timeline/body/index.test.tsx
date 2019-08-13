@@ -51,6 +51,7 @@ describe('Body', () => {
             range={'1 Day'}
             rowRenderers={rowRenderers}
             sort={mockSort}
+            toggleColumn={jest.fn()}
             updateNote={jest.fn()}
             width={100}
           />
@@ -90,6 +91,7 @@ describe('Body', () => {
             range={'1 Day'}
             rowRenderers={rowRenderers}
             sort={mockSort}
+            toggleColumn={jest.fn()}
             updateNote={jest.fn()}
             width={100}
           />
@@ -129,6 +131,7 @@ describe('Body', () => {
             range={'1 Day'}
             rowRenderers={rowRenderers}
             sort={mockSort}
+            toggleColumn={jest.fn()}
             updateNote={jest.fn()}
             width={100}
           />
@@ -170,6 +173,7 @@ describe('Body', () => {
             range={'1 Day'}
             rowRenderers={rowRenderers}
             sort={mockSort}
+            toggleColumn={jest.fn()}
             updateNote={jest.fn()}
             width={100}
           />

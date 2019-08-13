@@ -4,6 +4,8 @@
 
 ## SavedObjectsImportRetry interface
 
+Describes a retry operation for importing a saved object.
+
 <b>Signature:</b>
 
 ```typescript

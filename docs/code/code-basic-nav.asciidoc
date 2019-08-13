@@ -17,4 +17,9 @@ Clicking *Blame* shows the most recent commit per line.
 [role="screenshot"]
 image::images/code-blame.png[]
 
+[float]
+==== Branch selector
+You can use the Branch selector to view different branches of a repo. Note that code intelligence and search index are not available for any branch other than master branch.
+
+
 include::code-semantic-nav.asciidoc[]

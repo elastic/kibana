@@ -16,29 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { Readable } from 'stream';
-import { SavedObjectsClientContract } from '../';
 import { collectSavedObjects } from './collect_saved_objects';
 import { createObjectsFilter } from './create_objects_filter';
 import { extractErrors } from './extract_errors';
 import { splitOverwrites } from './split_overwrites';
-import { SavedObjectsImportError, Retry } from './types';
+import {
+  SavedObjectsImportError,
+  SavedObjectsImportResponse,
+  SavedObjectsResolveImportErrorsOptions,
+} from './types';
 import { validateReferences } from './validate_references';
-
-interface ResolveImportErrorsOptions {
-  readStream: Readable;
-  objectLimit: number;
-  savedObjectsClient: SavedObjectsClientContract;
-  retries: Retry[];
-  supportedTypes: string[];
-}
-
-interface SavedObjectsImportResponse {
-  success: boolean;
-  successCount: number;
-  errors?: SavedObjectsImportError[];
-}
 
 export async function resolveImportErrors({
   readStream,
@@ -46,7 +33,8 @@ export async function resolveImportErrors({
   retries,
   savedObjectsClient,
   supportedTypes,
-}: ResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
+  namespace,
+}: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   let successCount = 0;
   let errorAccumulator: SavedObjectsImportError[] = [];
   const filter = createObjectsFilter(retries);
@@ -89,7 +77,8 @@ export async function resolveImportErrors({
   // Validate references
   const { filteredObjects, errors: validationErrors } = await validateReferences(
     objectsToResolve,
-    savedObjectsClient
+    savedObjectsClient,
+    namespace
   );
   errorAccumulator = [...errorAccumulator, ...validationErrors];
 
@@ -98,6 +87,7 @@ export async function resolveImportErrors({
   if (objectsToOverwrite.length) {
     const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToOverwrite, {
       overwrite: true,
+      namespace,
     });
     errorAccumulator = [
       ...errorAccumulator,
@@ -106,7 +96,9 @@ export async function resolveImportErrors({
     successCount += bulkCreateResult.saved_objects.filter(obj => !obj.error).length;
   }
   if (objectsToNotOverwrite.length) {
-    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite);
+    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite, {
+      namespace,
+    });
     errorAccumulator = [
       ...errorAccumulator,
       ...extractErrors(bulkCreateResult.saved_objects, objectsToNotOverwrite),

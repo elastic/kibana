@@ -264,6 +264,7 @@ describe('Filter editor utils', () => {
         mockedIndexPattern,
         mockedFields[0],
         isOperator,
+        false,
         params,
         alias,
         state
@@ -285,6 +286,7 @@ describe('Filter editor utils', () => {
         mockedIndexPattern,
         mockedFields[0],
         isOneOfOperator,
+        false,
         params,
         alias,
         state
@@ -306,6 +308,7 @@ describe('Filter editor utils', () => {
         mockedIndexPattern,
         mockedFields[0],
         isBetweenOperator,
+        false,
         params,
         alias,
         state
@@ -326,6 +329,7 @@ describe('Filter editor utils', () => {
         mockedIndexPattern,
         mockedFields[0],
         existsOperator,
+        false,
         params,
         alias,
         state
@@ -338,6 +342,22 @@ describe('Filter editor utils', () => {
       }
     });
 
+    it('should include disabled state', () => {
+      const params = undefined;
+      const alias = 'bar';
+      const state = FilterStateStore.APP_STATE;
+      const filter = buildFilter(
+        mockedIndexPattern,
+        mockedFields[0],
+        doesNotExistOperator,
+        true,
+        params,
+        alias,
+        state
+      );
+      expect(filter.meta.disabled).toBe(true);
+    });
+
     it('should negate based on operator', () => {
       const params = undefined;
       const alias = 'bar';
@@ -346,6 +366,7 @@ describe('Filter editor utils', () => {
         mockedIndexPattern,
         mockedFields[0],
         doesNotExistOperator,
+        false,
         params,
         alias,
         state

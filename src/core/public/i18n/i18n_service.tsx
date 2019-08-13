@@ -246,7 +246,6 @@ export class I18nService {
       ),
       'euiStat.loadingText': i18n.translate('core.euiStat.loadingText', {
         defaultMessage: 'Statistic is loading',
-        description: 'Placeholder message while data is asynchronously loaded',
       }),
       'euiStep.completeStep': i18n.translate('core.euiStep.completeStep', {
         defaultMessage: 'Step',

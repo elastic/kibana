@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 
 import { ResponseError, ResponseMessage } from './jsonrpc';
 
@@ -27,9 +27,7 @@ export class LspRestClient implements LspClient {
     signal?: AbortSignal
   ): Promise<ResponseMessage> {
     try {
-      const response = await kfetch({
-        pathname: `${this.baseUri}/${method}`,
-        method: 'POST',
+      const response = await npStart.core.http.post(`${this.baseUri}/${method}`, {
         body: JSON.stringify(params),
         signal,
       });

@@ -4,6 +4,8 @@
 
 ## SavedObjectsImportResponse interface
 
+The response describing the result of an import.
+
 <b>Signature:</b>
 
 ```typescript
