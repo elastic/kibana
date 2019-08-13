@@ -9,11 +9,9 @@ import { RepositoryUri } from '../../model';
 import { GitOperations } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
-import { LspService } from '../lsp/lsp_service';
 
 export class CommitIndexerFactory implements IndexerFactory {
   constructor(
-    protected readonly lspService: LspService,
     protected readonly gitOps: GitOperations,
     protected readonly client: EsClient,
     protected readonly log: Logger
@@ -22,10 +20,11 @@ export class CommitIndexerFactory implements IndexerFactory {
   public async create(
     repoUri: RepositoryUri,
     revision: string,
+    // Apply this param when the incremental indexer has been built.
     enforcedReindex: boolean = false
   ): Promise<Indexer | undefined> {
     this.log.info(`Create indexer to index ${repoUri} commits`);
     // Create the indexer to index the entire repository.
-    return new CommitIndexer(repoUri, this.lspService, this.gitOps, this.client, this.log);
+    return new CommitIndexer(repoUri, revision, this.gitOps, this.client, this.log);
   }
 }

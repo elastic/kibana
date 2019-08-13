@@ -37,7 +37,7 @@ export function initWorkers(
   indexerFactoryMap.set(IndexerType.LSP, lspIndexerFactory);
 
   if (serverOptions.enableCommitIndexing) {
-    const commitIndexerFactory = new CommitIndexerFactory(lspService, gitOps, esClient, log);
+    const commitIndexerFactory = new CommitIndexerFactory(gitOps, esClient, log);
     indexerFactoryMap.set(IndexerType.COMMIT, commitIndexerFactory);
   }
 

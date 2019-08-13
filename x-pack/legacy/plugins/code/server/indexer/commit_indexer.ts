@@ -16,7 +16,6 @@ import {
 import { GitOperations, HEAD } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
-import { LspService } from '../lsp/lsp_service';
 import { AbstractIndexer } from './abstract_indexer';
 import { BatchIndexHelper } from './batch_index_helper';
 import { getCommitIndexCreationRequest } from './index_creation_request';
@@ -32,13 +31,12 @@ export class CommitIndexer extends AbstractIndexer {
 
   constructor(
     protected readonly repoUri: RepositoryUri,
-    // For workspace handling.
-    protected readonly lspService: LspService,
+    protected readonly revision: string,
     protected readonly gitOps: GitOperations,
     protected readonly client: EsClient,
     protected log: Logger
   ) {
-    super(repoUri, HEAD, client, log);
+    super(repoUri, revision, client, log);
     this.commitBatchIndexHelper = new BatchIndexHelper(client, log, this.COMMIT_BATCH_INDEX_SIZE);
   }
 
