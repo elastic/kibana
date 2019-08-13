@@ -76,8 +76,8 @@ export const getColumns = (
     // spread to a new array otherwise the component wouldn't re-render
     setExpandedRowItemIds([...expandedRowItemIds]);
   }
-
-  const columns = [
+  // update possible column types to something like (FieldDataColumn | ComputedColumn | ActionsColumn)[] when they have been added to EUI
+  const columns: any[] = [
     {
       align: RIGHT_ALIGNMENT,
       width: '40px',
