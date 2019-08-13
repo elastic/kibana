@@ -10,6 +10,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
+import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DetailItem } from '../../graphql/types';
 import { OnUpdateColumns } from '../timeline/events';
 
@@ -21,6 +22,7 @@ export type View = 'table-view' | 'json-view';
 
 interface Props {
   browserFields: BrowserFields;
+  columnHeaders: ColumnHeader[];
   data: DetailItem[];
   id: string;
   isLoading: boolean;
@@ -28,6 +30,7 @@ interface Props {
   onUpdateColumns: OnUpdateColumns;
   onViewSelected: (selected: View) => void;
   timelineId: string;
+  toggleColumn: (column: ColumnHeader) => void;
 }
 
 const Details = styled.div`
@@ -35,8 +38,21 @@ const Details = styled.div`
   width: 100%;
 `;
 
+Details.displayName = 'Details';
+
 export const EventDetails = pure<Props>(
-  ({ browserFields, data, id, isLoading, view, onUpdateColumns, onViewSelected, timelineId }) => {
+  ({
+    browserFields,
+    columnHeaders,
+    data,
+    id,
+    isLoading,
+    view,
+    onUpdateColumns,
+    onViewSelected,
+    timelineId,
+    toggleColumn,
+  }) => {
     const tabs: EuiTabbedContentTab[] = [
       {
         id: 'table-view',
@@ -44,11 +60,13 @@ export const EventDetails = pure<Props>(
         content: (
           <EventFieldsBrowser
             browserFields={browserFields}
+            columnHeaders={columnHeaders}
             data={data}
             eventId={id}
             isLoading={isLoading}
             onUpdateColumns={onUpdateColumns}
             timelineId={timelineId}
+            toggleColumn={toggleColumn}
           />
         ),
       },
@@ -70,3 +88,5 @@ export const EventDetails = pure<Props>(
     );
   }
 );
+
+EventDetails.displayName = 'EventDetails';

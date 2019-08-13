@@ -18,7 +18,7 @@
  */
 
 export { Headers, filterHeaders, ResponseHeaders, KnownHeaders } from './headers';
-export { Router, RequestHandler } from './router';
+export { Router, RequestHandler, IRouter } from './router';
 export {
   KibanaRequest,
   KibanaRequestRoute,
@@ -27,6 +27,7 @@ export {
   ensureRawRequest,
 } from './request';
 export { RouteMethod, RouteConfig, RouteConfigOptions } from './route';
+export { HapiResponseAdapter } from './response_adapter';
 export {
   CustomHttpResponseOptions,
   HttpResponseOptions,
@@ -34,6 +35,11 @@ export {
   RedirectResponseOptions,
   ResponseError,
   ResponseErrorMeta,
+  KibanaResponse,
   kibanaResponseFactory,
   KibanaResponseFactory,
+  lifecycleResponseFactory,
+  LifecycleResponseFactory,
 } from './response';
+
+export { IKibanaSocket } from './socket';

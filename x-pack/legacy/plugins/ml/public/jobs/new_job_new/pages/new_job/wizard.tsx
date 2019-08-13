@@ -39,6 +39,7 @@ interface Props {
   chartInterval: MlTimeBuckets;
   jobValidator: JobValidator;
   existingJobsAndGroups: ExistingJobsAndGroups;
+  skipTimeRangeStep: boolean;
 }
 
 export const Wizard: FC<Props> = ({
@@ -48,6 +49,7 @@ export const Wizard: FC<Props> = ({
   chartInterval,
   jobValidator,
   existingJobsAndGroups,
+  skipTimeRangeStep = false,
 }) => {
   const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number) => number>(s => s + 1, 0);
   const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
@@ -102,6 +104,10 @@ export const Wizard: FC<Props> = ({
 
   useEffect(() => {
     jobCreator.subscribeToProgress(setProgress);
+
+    if (skipTimeRangeStep) {
+      setCurrentStep(WIZARD_STEPS.PICK_FIELDS);
+    }
   }, []);
 
   // disable the step links if the job is running

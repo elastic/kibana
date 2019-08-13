@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { xpackInfo } from '../../../../xpack_main/public/services/xpack_info';
+import { LICENSE_STATUS_VALID } from '../../../../../common/constants/license_status';
 import {
   xpackFeatureAvailable,
 } from '../check_license';
@@ -13,13 +14,13 @@ import {
 const initialInfo = {
   features: {
     watcher: {
-      isAvailable: true
+      status: LICENSE_STATUS_VALID
     }
   }
 };
 
 describe('ML - check license', () => {
-  describe('xpackFeatureProvider', () => {
+  describe('xpackFeatureAvailable', () => {
     beforeEach(() => {
       xpackInfo.setAll(initialInfo);
     });

@@ -73,6 +73,8 @@ export const OverviewNetworkComponentQuery = pure<OverviewNetworkProps & Overvie
   )
 );
 
+OverviewNetworkComponentQuery.displayName = 'OverviewNetworkComponentQuery';
+
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { id = ID }: OverviewNetworkProps) => {

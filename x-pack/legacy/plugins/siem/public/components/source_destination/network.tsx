@@ -27,9 +27,13 @@ const EuiFlexItemMarginRight = styled(EuiFlexItem)`
   margin-right: 3px;
 `;
 
+EuiFlexItemMarginRight.displayName = 'EuiFlexItemMarginRight';
+
 const Stats = styled(EuiText)`
   margin: 0 5px;
 `;
+
+Stats.displayName = 'Stats';
 
 /**
  * Renders a row of draggable badges containing fields from the
@@ -133,3 +137,5 @@ export const Network = pure<{
       : null}
   </EuiFlexGroup>
 ));
+
+Network.displayName = 'Network';

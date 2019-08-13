@@ -32,7 +32,7 @@ const getSuccessToast = ({ titleSummary }: GetSuccessToastParams): Toast => ({
 });
 
 interface Props {
-  children: JSX.Element;
+  children?: JSX.Element;
   content: string | number;
   onCopy?: OnCopy;
   titleSummary?: string;
@@ -62,9 +62,8 @@ export const Clipboard = ({ children, content, onCopy, titleSummary, toastLifeTi
   return (
     <EuiButtonIcon
       aria-label={i18n.COPY_TO_THE_CLIPBOARD}
-      color="subdued"
+      color="text"
       data-test-subj="clipboard"
-      iconSize="s"
       iconType="copyClipboard"
       onClick={onClick}
     >
