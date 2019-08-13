@@ -15,6 +15,7 @@ import {
   EuiFieldText,
   EuiButton,
   EuiSelect,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -97,7 +98,7 @@ export class FeatureGeometryFilterForm extends Component {
   _renderHeader() {
     return (
       <button
-        className="euiContextMenuPanelTitle"
+        className="euiContextMenuPanelTitle mapFeatureTooltip_backButton"
         type="button"
         onClick={this.props.showPropertiesView}
       >
@@ -182,6 +183,8 @@ export class FeatureGeometryFilterForm extends Component {
     });
     return (
       <EuiForm>
+        <EuiSpacer size="s" />
+
         <EuiFormRow
           label={i18n.translate('xpack.maps.tooltip.geometryFilterForm.geometryLabelLabel', {
             defaultMessage: 'Geometry label'
@@ -216,6 +219,7 @@ export class FeatureGeometryFilterForm extends Component {
         {this._renderRelationInput()}
 
         <EuiButton
+          size="s"
           onClick={this._createFilter}
           isDisabled={!this.state.geometryLabel || !this.state.geoFieldTag}
         >

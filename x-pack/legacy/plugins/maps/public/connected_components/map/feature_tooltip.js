@@ -150,11 +150,12 @@ export class FeatureTooltip extends React.Component {
 
     return (
       <EuiLink
+        className="mapFeatureTooltip_actionLinks"
         onClick={this._showGeometryFilterView}
       >
         <FormattedMessage
           id="xpack.maps.tooltip.showGeometryFilterViewLinkLabel"
-          defaultMessage="filter by geometry"
+          defaultMessage="Filter by geometry"
         />
       </EuiLink>
     );
