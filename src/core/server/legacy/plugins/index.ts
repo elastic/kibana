@@ -16,23 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { Observable } from 'rxjs';
-import { toArray, flatMap } from 'rxjs/operators';
-// @ts-ignore
-import { findPluginSpecs } from '../../../../legacy/plugin_discovery/find_plugin_specs.js';
-// @ts-ignore
-import { Config } from './../../../../legacy/server/config';
-// @ts-ignore
-import { transformDeprecations } from '../../../../../src/legacy/server/config/transform_deprecations.js';
-
-export function findLegacyPluginSpecs$(settings$: Observable<any>) {
-  return settings$.pipe(
-    flatMap(settings => {
-      const config = Config.withDefaultSchema(transformDeprecations(settings));
-      const { spec$ }: { spec$: Observable<unknown> } = findPluginSpecs(settings, config) as any;
-
-      return spec$.pipe(toArray());
-    })
-  );
-}
+export { findLegacyPluginSpecs$ } from './find_legacy_plugin_specs';
+export { SavedObjectsLegacyUiExports, collectLegacyUiExports$ } from './collect_legacy_ui_exports';

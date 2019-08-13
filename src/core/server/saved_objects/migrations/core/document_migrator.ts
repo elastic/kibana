@@ -75,7 +75,7 @@ export type TransformFn = (
 
 type ValidateDoc = (doc: RawSavedObjectDoc) => void;
 
-interface MigrationDefinition {
+export interface MigrationDefinition {
   [type: string]: { [version: string]: TransformFn };
 }
 

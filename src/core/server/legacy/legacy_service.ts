@@ -27,7 +27,11 @@ import { DevConfig, DevConfigType } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType } from '../http';
 import { Logger } from '../logging';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
-import { findLegacyPluginSpec$ } from './plugins/find_legacy_plugin_specs';
+import {
+  findLegacyPluginSpecs$,
+  collectLegacyUiExports$,
+  SavedObjectsLegacyUiExports,
+} from './plugins';
 
 interface LegacyKbnServer {
   applyLoggingConfiguration: (settings: Readonly<Record<string, any>>) => void;
@@ -72,6 +76,7 @@ export interface LegacyServiceStartDeps {
 
 export interface LegacyServiceSetup {
   pluginSpecs$: Observable<unknown[]>;
+  uiExports$: Observable<SavedObjectsLegacyUiExports>;
 }
 
 /** @internal */
@@ -108,10 +113,12 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
 
     this.configSubscription = this.update$.connect();
 
-    const pluginSpecs$ = findLegacyPluginSpec$(
+    const pluginSpecs$ = findLegacyPluginSpecs$(
       this.update$.pipe(map(config => getLegacyRawConfig(config)))
     );
-    return { pluginSpecs$ };
+
+    const uiExports$ = collectLegacyUiExports$(pluginSpecs$);
+    return { pluginSpecs$, uiExports$ };
   }
 
   public async start(startDeps: LegacyServiceStartDeps) {
