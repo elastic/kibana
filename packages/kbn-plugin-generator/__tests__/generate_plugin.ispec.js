@@ -20,14 +20,14 @@
 /* eslint-disable no-restricted-syntax */
 import { spawn } from 'child_process';
 import { resolve } from 'path';
-import { promises } from 'fs';
+import { promises as fsP } from 'fs';
 import { snakeCase } from 'lodash';
 import * as del from 'del';
 
 const ROOT_DIR = resolve(__dirname, '../../../');
 const oneMinute = 60000;
 
-describe('build a plugin', () => {
+describe('running the plugin-generator', () => {
   const pluginName = 'ispec-plugin';
   const snakeCased = snakeCase(pluginName);
   const generatedPath = resolve(ROOT_DIR, `plugins/${snakeCased}`);
@@ -47,9 +47,28 @@ describe('build a plugin', () => {
     del.sync(generatedPath, { force: true });
   }, oneMinute);
 
-  it(`should have created a plugin in a directory named ${snakeCased}`, async () => {
-    const stats = await promises.stat(generatedPath);
+  it(`should succeed on creating a plugin in a directory named ${snakeCased}`, async () => {
+    const stats = await fsP.stat(generatedPath);
     // eslint-disable-next-line no-undef
     expect(stats.isDirectory()).toBe(true);
   });
+
+  it(
+    `should fail on 'yarn lint' within the plugin's root dir`,
+    done => {
+      const yarnLint = spawn('yarn', ['lint'], { cwd: generatedPath });
+
+      yarnLint.stderr.on('data', data => {
+        // eslint-disable-next-line no-undef
+        expect(data.includes('Error:'));
+      });
+
+      yarnLint.on('close', data => {
+        // eslint-disable-next-line no-undef
+        expect(data).not.toBe(0); // Not exit code 0
+        done();
+      });
+    },
+    oneMinute
+  );
 });
