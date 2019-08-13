@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Node } from './node';
+export { CreateAnalyticsForm } from './create_analytics_form';
