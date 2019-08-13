@@ -64,7 +64,7 @@ function stringMatch(str: string | undefined, substr: string) {
 }
 
 interface Props {
-  isManagementTable: boolean;
+  isManagementTable?: boolean;
 }
 // isManagementTable - for use in Kibana managagement ML section
 export const DataFrameAnalyticsList: FC<Props> = ({ isManagementTable }) => {
