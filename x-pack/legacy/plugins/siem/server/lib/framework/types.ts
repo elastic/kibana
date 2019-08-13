@@ -120,7 +120,6 @@ export interface MappingResponse {
 interface FrameworkIndexFieldDescriptor {
   aggregatable: boolean;
   esTypes: string[];
-  format: string;
   name: string;
   readFromDocValues: boolean;
   searchable: boolean;
