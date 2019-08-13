@@ -31,7 +31,7 @@ import { IndexPattern, Query, QueryBar, FilterBar } from '../../../../../data/pu
 import { SavedQuery, SavedQueryAttributes } from '../index';
 import { saveQuery } from '../lib/saved_query_service';
 import { SavedQueryMeta, SaveQueryForm } from './save_query_form';
-import { SavedQueryManager } from './saved_query_manager';
+import { SavedQueryManagementComponent } from './saved_query_management_component';
 
 interface DateRange {
   from: string;
@@ -355,8 +355,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       return null;
     }
 
-    const savedQueryManager = this.state.query && this.props.onClearSavedQuery && (
-      <SavedQueryManager
+    const savedQueryManagement = this.state.query && this.props.onClearSavedQuery && (
+      <SavedQueryManagementComponent
         showSaveQuery={this.props.showSaveQuery}
         loadedSavedQuery={this.props.savedQuery}
         onSave={this.onInitiateSave}
@@ -364,7 +364,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onLoad={this.onLoadSavedQuery}
         query={this.state.query}
         onClearSavedQuery={this.props.onClearSavedQuery}
-      ></SavedQueryManager>
+      ></SavedQueryManagementComponent>
     );
 
     let queryBar;
@@ -378,7 +378,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           appName={this.props.appName}
           indexPatterns={this.props.indexPatterns}
           store={this.props.store}
-          prepend={this.props.showFilterBar ? savedQueryManager : undefined}
+          prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}

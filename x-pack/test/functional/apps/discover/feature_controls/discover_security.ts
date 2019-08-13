@@ -22,7 +22,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const queryBar = getService('queryBar');
-  const savedQueryManager = getService('savedQueryManager');
+  const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
   async function setDiscoverTimeRange() {
     const fromTime = '2015-09-19 06:31:44.000';
@@ -107,29 +107,34 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('allow saving via the saved query manager popover with no query loaded', async () => {
-        await savedQueryManager.saveNewQuery('foo', 'bar', true, false);
-        await savedQueryManager.savedQueryExistOrFail('foo');
+        await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
+        await savedQueryManagementComponent.savedQueryExistOrFail('foo');
       });
 
       it('allow saving a currently loaded saved query as a new query via the saved query manager ', async () => {
-        await savedQueryManager.saveCurrentlyLoadedAsNewQuery('foo2', 'bar2', true, false);
-        await savedQueryManager.savedQueryExistOrFail('foo2');
+        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
+          'foo2',
+          'bar2',
+          true,
+          false
+        );
+        await savedQueryManagementComponent.savedQueryExistOrFail('foo2');
       });
 
       it('allow saving changes to a currently loaded query via the saved query manager', async () => {
         await queryBar.setQuery('response:404');
-        await savedQueryManager.updateCurrentlyLoadedQuery('bar2', false, false);
-        await savedQueryManager.clearCurrentlyLoadedQuery();
-        await savedQueryManager.loadSavedQuery('foo2');
+        await savedQueryManagementComponent.updateCurrentlyLoadedQuery('bar2', false, false);
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        await savedQueryManagementComponent.loadSavedQuery('foo2');
         const queryString = await queryBar.getQueryString();
         expect(queryString).to.eql('response:404');
       });
 
       it('allows deleting saved queries in the saved query manager ', async () => {
-        await savedQueryManager.deleteSavedQuery('foo2');
+        await savedQueryManagementComponent.deleteSavedQuery('foo2');
         // add a manual delay
         await queryBar.setQuery('');
-        await savedQueryManager.savedQueryMissingOrFail('foo2');
+        await savedQueryManagementComponent.savedQueryMissingOrFail('foo2');
       });
     });
 
@@ -199,28 +204,28 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('allows loading a saved query via the saved query manager', async () => {
-        await savedQueryManager.loadSavedQuery('OKJpgs');
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         const queryString = await queryBar.getQueryString();
         expect(queryString).to.eql('response:200');
       });
 
       it('does not allow saving via the saved query manager popover with no query loaded', async () => {
-        await savedQueryManager.saveNewQueryMissingOrFail();
+        await savedQueryManagementComponent.saveNewQueryMissingOrFail();
       });
 
       it('does not allow saving changes to saved query from the saved query manager', async () => {
-        await savedQueryManager.loadSavedQuery('OKJpgs');
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         await queryBar.setQuery('response:404');
-        await savedQueryManager.updateCurrentlyLoadedQueryMissingOrFail();
+        await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
       });
 
       it('does not allow deleting a saved query from the saved query manager', async () => {
-        await savedQueryManager.deleteSavedQueryMissingOrFail('OKJpgs');
+        await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
       });
 
       it('allows clearing the currently loaded saved query', async () => {
-        await savedQueryManager.loadSavedQuery('OKJpgs');
-        await savedQueryManager.clearCurrentlyLoadedQuery();
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
       });
     });
 

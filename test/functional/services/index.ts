@@ -61,7 +61,7 @@ import { PieChartProvider } from './visualizations';
 // @ts-ignore not TS yet
 import { VisualizeListingTableProvider } from './visualize_listing_table';
 // @ts-ignore not TS yet
-import { SavedQueryManagerProvider } from './saved_query_manager';
+import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
 
 export const services = {
   ...commonServiceProviders,
@@ -91,5 +91,5 @@ export const services = {
   appsMenu: AppsMenuProvider,
   globalNav: GlobalNavProvider,
   toasts: ToastsProvider,
-  savedQueryManager: SavedQueryManagerProvider,
+  savedQueryManagementComponent: SavedQueryManagementComponentProvider,
 };

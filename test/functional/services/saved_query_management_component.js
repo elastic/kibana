@@ -19,45 +19,45 @@
 
 import expect from '@kbn/expect';
 
-export function SavedQueryManagerProvider({ getService }) {
+export function SavedQueryManagementComponentProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
 
-  class SavedQueryManager {
+  class SavedQueryManagementComponent {
 
     async saveNewQuery(name, description, includeFilters, includeTimeFilter) {
-      await this.openSavedQueryManager();
-      await testSubjects.click('saved-query-manager-save-button');
+      await this.openSavedQueryManagementComponent();
+      await testSubjects.click('saved-query-management-save-button');
       await this.submitSaveQueryForm(name, description, includeFilters, includeTimeFilter);
     }
 
     async saveCurrentlyLoadedAsNewQuery(name, description, includeFilters, includeTimeFilter) {
-      await this.openSavedQueryManager();
-      await testSubjects.click('saved-query-manager-save-as-new-button');
+      await this.openSavedQueryManagementComponent();
+      await testSubjects.click('saved-query-management-save-as-new-button');
       await this.submitSaveQueryForm(name, description, includeFilters, includeTimeFilter);
     }
 
     async updateCurrentlyLoadedQuery(description, includeFilters, includeTimeFilter) {
-      await this.openSavedQueryManager();
-      await testSubjects.click('saved-query-manager-save-changes-button');
+      await this.openSavedQueryManagementComponent();
+      await testSubjects.click('saved-query-management-save-changes-button');
       await this.submitSaveQueryForm(null, description, includeFilters, includeTimeFilter);
     }
 
     async loadSavedQuery(title) {
-      await this.openSavedQueryManager();
+      await this.openSavedQueryManagementComponent();
       await testSubjects.click(`load-saved-query-${title}-button`);
     }
 
     async deleteSavedQuery(title) {
-      await this.openSavedQueryManager();
+      await this.openSavedQueryManagementComponent();
       await testSubjects.click(`delete-saved-query-${title}-button`);
       await testSubjects.click('confirmModalConfirmButton');
     }
 
     async clearCurrentlyLoadedQuery() {
-      await this.openSavedQueryManager();
-      await testSubjects.click('saved-query-manager-clear-button');
-      await this.closeSavedQueryManager();
+      await this.openSavedQueryManagementComponent();
+      await testSubjects.click('saved-query-management-clear-button');
+      await this.closeSavedQueryManagementComponent();
       const queryString = await queryBar.getQueryString();
       expect(queryString).to.be.empty();
     }
@@ -82,44 +82,44 @@ export function SavedQueryManagerProvider({ getService }) {
     }
 
     async savedQueryExistOrFail(title) {
-      await this.openSavedQueryManager();
+      await this.openSavedQueryManagementComponent();
       await testSubjects.existOrFail(`load-saved-query-${title}-button`);
     }
 
     async savedQueryMissingOrFail(title) {
-      await this.openSavedQueryManager();
+      await this.openSavedQueryManagementComponent();
       await testSubjects.missingOrFail(`load-saved-query-${title}-button`);
     }
 
-    async openSavedQueryManager() {
-      const isOpenAlready = await testSubjects.exists('saved-query-manager-popover');
+    async openSavedQueryManagementComponent() {
+      const isOpenAlready = await testSubjects.exists('saved-query-management-popover');
       if (isOpenAlready) return;
 
-      await testSubjects.click('saved-query-manager-popover-button');
+      await testSubjects.click('saved-query-management-popover-button');
     }
 
-    async closeSavedQueryManager() {
-      const isOpenAlready = await testSubjects.exists('saved-query-manager-popover');
+    async closeSavedQueryManagementComponent() {
+      const isOpenAlready = await testSubjects.exists('saved-query-management-popover');
       if (!isOpenAlready) return;
 
-      await testSubjects.click('saved-query-manager-popover-button');
+      await testSubjects.click('saved-query-management-popover-button');
     }
 
     async saveNewQueryMissingOrFail() {
-      await this.openSavedQueryManager();
-      await testSubjects.missingOrFail('saved-query-manager-save-button');
+      await this.openSavedQueryManagementComponent();
+      await testSubjects.missingOrFail('saved-query-management-save-button');
     }
 
     async updateCurrentlyLoadedQueryMissingOrFail() {
-      await this.openSavedQueryManager();
-      await testSubjects.missingOrFail('saved-query-manager-save-changes-button');
+      await this.openSavedQueryManagementComponent();
+      await testSubjects.missingOrFail('saved-query-management-save-changes-button');
     }
 
     async deleteSavedQueryMissingOrFail(title) {
-      await this.openSavedQueryManager();
+      await this.openSavedQueryManagementComponent();
       await testSubjects.missingOrFail(`delete-saved-query-${title}-button`);
     }
   }
 
-  return new SavedQueryManager();
+  return new SavedQueryManagementComponent();
 }
