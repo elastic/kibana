@@ -15,11 +15,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 
 import {
+  EuiButtonEmpty,
   EuiCodeBlock,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiPortal,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -41,48 +42,51 @@ export class FollowerIndexRequestFlyout extends PureComponent {
     const request = `${endpoint}\n${payload}`;
 
     return (
-      <EuiPortal>
-        <EuiFlyout maxWidth={480} onClose={close}>
-          <EuiFlyoutHeader>
-            <EuiTitle>
-              <h2>
-                {name ? (
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexForm.requestFlyout.namedTitle"
-                    defaultMessage="Request for {name}"
-                    values={{ name }}
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexForm.requestFlyout.unnamedTitle"
-                    defaultMessage="Request"
-                  />
-                )}
-              </h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
+      <EuiFlyout maxWidth={480} onClose={close}>
+        <EuiFlyoutHeader>
+          <EuiTitle>
+            <h2>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexForm.requestFlyout.title"
+                defaultMessage="Request"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
 
-          <EuiFlyoutBody>
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexForm.requestFlyout.descriptionText"
-                  defaultMessage="This Elasticsearch request will create this follower index."
-                />
-              </p>
-            </EuiText>
+        <EuiFlyoutBody>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexForm.requestFlyout.descriptionText"
+                defaultMessage="This Elasticsearch request will create this follower index."
+              />
+            </p>
+          </EuiText>
 
-            <EuiSpacer />
+          <EuiSpacer />
 
-            <EuiCodeBlock
-              language="json"
-              isCopyable
-            >
-              {request}
-            </EuiCodeBlock>
-          </EuiFlyoutBody>
-        </EuiFlyout>
-      </EuiPortal>
+          <EuiCodeBlock
+            language="json"
+            isCopyable
+          >
+            {request}
+          </EuiCodeBlock>
+        </EuiFlyoutBody>
+
+        <EuiFlyoutFooter>
+          <EuiButtonEmpty
+            iconType="cross"
+            onClick={close}
+            flush="left"
+          >
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexForm.requestFlyout.closeButtonLabel"
+              defaultMessage="Close"
+            />
+          </EuiButtonEmpty>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
     );
   }
 }

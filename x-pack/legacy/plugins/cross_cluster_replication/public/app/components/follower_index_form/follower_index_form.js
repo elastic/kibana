@@ -642,7 +642,7 @@ export class FollowerIndexForm extends PureComponent {
      */
     const renderActions = () => {
       const { apiStatus, saveButtonLabel } = this.props;
-      const { areErrorsVisible } = this.state;
+      const { areErrorsVisible, isRequestVisible } = this.state;
 
       if (apiStatus === API_STATUS.SAVING) {
         return (
@@ -699,10 +699,17 @@ export class FollowerIndexForm extends PureComponent {
             <EuiButtonEmpty
               onClick={this.toggleRequest}
             >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexForm.toggleRequestButtonLabel"
-                defaultMessage="Show request"
-              />
+              {isRequestVisible ? (
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexForm.hideRequestButtonLabel"
+                  defaultMessage="Hide request"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexForm.showRequestButtonLabel"
+                  defaultMessage="Show request"
+                />
+              )}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
