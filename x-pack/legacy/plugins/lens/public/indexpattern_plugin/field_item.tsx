@@ -13,6 +13,15 @@ import {
   EuiLoadingSpinner,
   EuiButtonIcon,
 } from '@elastic/eui';
+import {
+  Chart,
+  Axis,
+  getAxisId,
+  getSpecId,
+  AreaSeries,
+  Position,
+  ScaleType,
+} from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { kfetch } from 'ui/kfetch';
 import { IndexPattern, IndexPatternField, DraggedField } from './indexpattern';
@@ -63,6 +72,16 @@ function wrapOnDot(str?: string) {
   // the browser to efficiently word-wrap right after the dot
   // without us having to draw a lot of extra DOM elements, etc
   return str ? str.replace(/\./g, '.\u200B') : '';
+}
+
+function distributionToChart({ min, distribution }: DataVisResults) {
+  let currentPercentile = 0;
+  return [{ x: min!, y: distribution!.minPercentile }].concat(
+    distribution!.percentiles.map(percentile => {
+      currentPercentile = currentPercentile + percentile.percent;
+      return { x: percentile.minValue, y: currentPercentile };
+    })
+  );
 }
 
 export function FieldItem({
@@ -154,54 +173,60 @@ export function FieldItem({
             anchorPosition="rightUp"
           >
             <div>
-              {count && (
-                <div>
-                  {i18n.translate('xpack.lens.indexPattern.fieldCountLabel', {
-                    defaultMessage: 'Count: {count} ({percent}%)',
-                    values: {
-                      count,
-                      percent: (howManyDocs ? (count / howManyDocs) * 100 : 100).toFixed(1),
-                    },
-                  })}
-                </div>
-              )}
-
-              {cardinality && (
-                <div>
-                  {i18n.translate('xpack.lens.indexPattern.fieldCardinalityLabel', {
-                    defaultMessage: '{cardinality} distinct values',
-                    values: { cardinality },
-                  })}
-                </div>
-              )}
-
-              {sampleCount && (
-                <div>
-                  {i18n.translate('xpack.lens.indexPattern.fieldSampleCountLabel', {
-                    defaultMessage: 'Sampled from {sampleCount} documents per shard',
-                    values: { sampleCount },
-                  })}
-                </div>
-              )}
-
               {state.isLoading && <EuiLoadingSpinner />}
 
-              {state.fieldMetadata && (
+              {state.fieldMetadata && cardinality && sampleCount && (
                 <div>
-                  {state.fieldMetadata.topValues && count && (
+                  {state.fieldMetadata && (
                     <div>
-                      {state.fieldMetadata.topValues.map(topValue => (
-                        <EuiFlexGroup>
-                          <EuiFlexItem>{topValue.key}</EuiFlexItem>
-                          <EuiFlexItem grow={1}>
-                            <EuiProgress value={topValue.doc_count / count} max={1} size={'m'} />
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            {((topValue.doc_count / count) * 100).toFixed(1)}%
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      ))}
+                      {i18n.translate('xpack.lens.indexPattern.fieldSampleCountLabel', {
+                        defaultMessage: 'Sampled from {sampleCount} documents per shard',
+                        values: { sampleCount: state.fieldMetadata.topValuesSampleSize },
+                      })}
                     </div>
+                  )}
+
+                  {state.fieldMetadata.distribution && cardinality / sampleCount > 0.02 ? (
+                    <Chart className="lnsDistributionChart">
+                      <Axis
+                        id={getAxisId('x')}
+                        position={Position.Bottom}
+                        title={'Values'}
+                        tickFormat={d => d.toFixed(2)}
+                      />
+
+                      <Axis
+                        id={getAxisId('y')}
+                        position={Position.Left}
+                        tickFormat={d => `${d}%`}
+                      />
+
+                      <AreaSeries
+                        data={distributionToChart(state.fieldMetadata)}
+                        xAccessor={'x'}
+                        yAccessors={['y']}
+                        id={getSpecId('distribution')}
+                        xScaleType={ScaleType.Linear}
+                        yScaleType={ScaleType.Linear}
+                      />
+                    </Chart>
+                  ) : (
+                    state.fieldMetadata.topValues &&
+                    count && (
+                      <div>
+                        {state.fieldMetadata.topValues.map(topValue => (
+                          <EuiFlexGroup>
+                            <EuiFlexItem>{topValue.key}</EuiFlexItem>
+                            <EuiFlexItem grow={1}>
+                              <EuiProgress value={topValue.doc_count / count} max={1} size={'m'} />
+                            </EuiFlexItem>
+                            <EuiFlexItem>
+                              {((topValue.doc_count / count) * 100).toFixed(1)}%
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        ))}
+                      </div>
+                    )
                   )}
                 </div>
               )}

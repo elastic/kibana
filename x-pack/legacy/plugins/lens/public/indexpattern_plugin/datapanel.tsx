@@ -493,6 +493,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     // howManyDocs={state.overallStats && state.overallStats.totalCount}
                     count={overallField && overallField.count}
                     cardinality={overallField && overallField.cardinality}
+                    sampleCount={overallField ? 500 : undefined}
                     // sampleCount={overallField && overallField.stats.sampleCount}
                   />
                 );
