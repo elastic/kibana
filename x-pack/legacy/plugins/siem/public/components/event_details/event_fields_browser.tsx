@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { sortBy } from 'lodash';
 import {
   // @ts-ignore
   EuiInMemoryTable,
@@ -11,7 +12,7 @@ import {
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { sortBy } from 'lodash';
+import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';
 import { DetailItem } from '../../graphql/types';
 import { OnUpdateColumns } from '../timeline/events';
@@ -21,16 +22,27 @@ import { search } from './helpers';
 
 interface Props {
   browserFields: BrowserFields;
+  columnHeaders: ColumnHeader[];
   data: DetailItem[];
   eventId: string;
   isLoading: boolean;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
+  toggleColumn: (column: ColumnHeader) => void;
 }
 
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = pure<Props>(
-  ({ browserFields, data, eventId, isLoading, onUpdateColumns, timelineId }) => {
+  ({
+    browserFields,
+    columnHeaders,
+    data,
+    eventId,
+    isLoading,
+    onUpdateColumns,
+    timelineId,
+    toggleColumn,
+  }) => {
     const fieldsByName = getAllFieldsByName(browserFields);
     return (
       <EuiInMemoryTable
@@ -43,10 +55,12 @@ export const EventFieldsBrowser = pure<Props>(
         })}
         columns={getColumns({
           browserFields,
+          columnHeaders,
           eventId,
           isLoading,
           onUpdateColumns,
           timelineId,
+          toggleColumn,
         })}
         pagination={false}
         search={search}

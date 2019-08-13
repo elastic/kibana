@@ -6,15 +6,11 @@
 
 import { logout } from '../../lib/logout';
 import { TIMELINE_DROPPED_DATA_PROVIDERS } from '../../lib/timeline/selectors';
-import {
-  dragFromAllHostsToTimeline,
-  TIMELINE_RENDER_DATA_PROVIDERS_TIMEOUT,
-  toggleTimelineVisibility,
-} from '../../lib/timeline/helpers';
+import { dragFromAllHostsToTimeline, toggleTimelineVisibility } from '../../lib/timeline/helpers';
 import { ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS } from '../../lib/hosts/selectors';
 import { HOSTS_PAGE } from '../../lib/urls';
 import { waitForAllHostsWidget } from '../../lib/hosts/helpers';
-import { loginAndWaitForPage } from '../../lib/util/helpers';
+import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../lib/util/helpers';
 
 describe('timeline data providers', () => {
   beforeEach(() => {
@@ -25,7 +21,6 @@ describe('timeline data providers', () => {
     logout();
   });
 
-  // eslint-disable-next-line ban/ban
   it('renders the data provider of a host dragged from the All Hosts widget on the hosts page', () => {
     waitForAllHostsWidget();
 
@@ -34,7 +29,7 @@ describe('timeline data providers', () => {
     dragFromAllHostsToTimeline();
 
     cy.get(TIMELINE_DROPPED_DATA_PROVIDERS, {
-      timeout: TIMELINE_RENDER_DATA_PROVIDERS_TIMEOUT,
+      timeout: DEFAULT_TIMEOUT + 10 * 1000,
     })
       .first()
       .invoke('text')
