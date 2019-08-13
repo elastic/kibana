@@ -73,7 +73,7 @@ export class CommitIndexer extends AbstractIndexer {
   protected ifCheckpointMet(req: CommitIndexRequest, checkpointReq: CommitIndexRequest): boolean {
     // Assume for the same revision, the order of the files we iterate the repository is definite
     // everytime. This is up to change when integrate with the actual git api.
-    return req.commitRevision === checkpointReq.commitRevision;
+    return req.commit.id === checkpointReq.commit.id;
   }
 
   protected async prepareIndexCreationRequests() {
@@ -81,13 +81,15 @@ export class CommitIndexer extends AbstractIndexer {
   }
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<CommitIndexRequest> {
+    if (!this.commits) {
+      return;
+    }
     try {
-      const commitIterator = await this.gitOps.iterateCommits(this.repoUri, HEAD);
-      for await (const commit of commitIterator) {
+      for await (const commit of this.commits) {
         const req: CommitIndexRequest = {
           repoUri: this.repoUri,
-          commitRevision: commit.id,
           revision: this.revision,
+          commit,
         };
         yield req;
       }
@@ -98,10 +100,11 @@ export class CommitIndexer extends AbstractIndexer {
     }
   }
 
+  private commits: Commit[] | null = null;
   protected async getIndexRequestCount(): Promise<number> {
     try {
-      // return await this.gitOps.countRepoFiles(this.repoUri, HEAD);
-      return 1;
+      this.commits = await this.gitOps.iterateCommits(this.repoUri, HEAD);
+      return this.commits.length;
     } catch (error) {
       if (this.isCancelled()) {
         this.log.debug(`Indexer ${this.type} got cancelled. Skip get index count error.`);
@@ -134,13 +137,9 @@ export class CommitIndexer extends AbstractIndexer {
 
   protected async processRequest(request: CommitIndexRequest): Promise<IndexStats> {
     const stats: IndexStats = new Map<IndexStatsKey, number>().set(IndexStatsKey.Commit, 0);
-    const { repoUri, commitRevision } = request;
+    const { repoUri, commit } = request;
 
-    const body: Commit = {
-      repoUri,
-      id: commitRevision,
-    };
-    await this.commitBatchIndexHelper.index(CommitIndexName(repoUri), body);
+    await this.commitBatchIndexHelper.index(CommitIndexName(repoUri), commit);
     stats.set(IndexStatsKey.Commit, 1);
     return stats;
   }

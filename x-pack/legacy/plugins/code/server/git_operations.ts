@@ -13,6 +13,7 @@ import {
   Error as NodeGitError,
   Oid,
   Repository,
+  Revwalk,
 } from '@elastic/nodegit';
 import Boom from 'boom';
 import LruCache from 'lru-cache';
@@ -303,21 +304,41 @@ export class GitOperations {
     }
   }
 
-  // TODO: this is the GIT API to iterate all commits.
   public async iterateCommits(
     uri: RepositoryUri,
-    revision: string
-  ): Promise<AsyncIterableIterator<Commit>> {
-    const commit = await this.getCommit(uri, revision);
+    startRevision: string,
+    untilRevision?: string
+  ): Promise<Commit[]> {
+    const repository = await this.openRepo(uri);
+    const commit = await this.getCommit(uri, startRevision);
 
-    async function* walk(): AsyncIterableIterator<Commit> {
-      yield {
-        repoUri: uri,
-        id: commit.sha(),
-      };
-    }
+    const revWalk = repository.createRevWalk();
+    revWalk.sorting(Revwalk.SORT.TOPOLOGICAL);
+    revWalk.push(commit.id());
 
-    return await walk();
+    const commits: NodeGitCommit[] = await revWalk.getCommitsUntil((c: NodeGitCommit) => {
+      // Iterate commits all the way to the oldest one.
+      return true;
+    });
+
+    const res: Commit[] = commits.map(c => {
+      return {
+        id: c.sha(),
+        message: c.message(),
+        body: c.body(),
+        date: c.date(),
+        parents: c.parents().map(i => i.tostrS()),
+        author: {
+          name: c.author().name(),
+          email: c.author().email(),
+        },
+        committer: {
+          name: c.committer().name(),
+          email: c.committer().email(),
+        },
+      } as Commit;
+    });
+    return res;
   }
 
   /**

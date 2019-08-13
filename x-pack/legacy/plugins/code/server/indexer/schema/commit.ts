@@ -9,19 +9,19 @@ import { RepositoryUri } from '../../../model';
 
 export const CommitSchema = {
   id: {
-    type: 'keyward',
+    type: 'keyword',
   },
   message: {
     type: 'text',
   },
   body: {
-    type: 'body',
+    type: 'text',
   },
   date: {
     type: 'date',
   },
   parents: {
-    type: 'keyward',
+    type: 'keyword',
   },
   author: {
     properties: {

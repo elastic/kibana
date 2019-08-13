@@ -78,19 +78,16 @@ export class IndexWorker extends AbstractWorker {
       }
 
       const progressReporter = this.getProgressReporter(uri, revision, indexer.type, indexerNumber);
-      const indexJobPromise = indexer.start(progressReporter, checkpointReqs.get(indexer.type));
-
-      if (cancellationToken) {
-        await this.cancellationService.registerCancelableIndexJob(
-          uri,
-          cancellationToken,
-          indexJobPromise
-        );
-      }
-
-      return indexJobPromise;
+      return indexer.start(progressReporter, checkpointReqs.get(indexer.type));
     });
-    const stats: IndexStats[] = await Promise.all(indexPromises);
+
+    const allPromise = Promise.all(indexPromises);
+
+    if (cancellationToken) {
+      await this.cancellationService.registerCancelableIndexJob(uri, cancellationToken, allPromise);
+    }
+
+    const stats: IndexStats[] = await allPromise;
     const res: IndexWorkerResult = {
       uri,
       revision,

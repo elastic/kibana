@@ -21,8 +21,19 @@ export interface Document {
 }
 
 export interface Commit {
-  repoUri: RepositoryUri;
   id: string;
+  message: string;
+  body: string;
+  date: Date;
+  parents: string[] | string;
+  author: {
+    name: string;
+    email: string;
+  };
+  committer: {
+    name: string;
+    email: string;
+  };
 }
 
 // The base interface of indexer requests
@@ -47,10 +58,9 @@ export interface LspIndexRequest extends IndexRequest {
 
 // The request for CommitIndexer
 export interface CommitIndexRequest extends IndexRequest {
-  // The absolute revision of the commit to be indexed.
-  commitRevision: string;
   // The git ref as the starting point for the entire commit index job.
   revision: string;
+  commit: Commit;
 }
 
 export interface LspIncIndexRequest extends LspIndexRequest {
