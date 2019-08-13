@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { SavedObject, SavedObjectsService } from 'src/core/server';
+import { SavedObject, SavedObjectsLegacyService } from 'src/core/server';
 import { Feature } from '../../../../xpack_main/types';
 import { convertSavedObjectToSpace } from '../../routes/lib';
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
@@ -206,7 +206,7 @@ describe('onPostAuthRequestInterceptor', () => {
       spacesService = await service.setup({
         http: httpMock,
         elasticsearch: elasticsearchServiceMock.createSetupContract(),
-        savedObjects: (savedObjectsService as unknown) as SavedObjectsService,
+        savedObjects: (savedObjectsService as unknown) as SavedObjectsLegacyService,
         security: {} as OptionalPlugin<SecurityPlugin>,
         spacesAuditLogger: {} as SpacesAuditLogger,
         config$: Rx.of({ maxSpaces: 1000 }),

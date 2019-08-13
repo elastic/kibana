@@ -42,7 +42,7 @@ export namespace Legacy {
   export type Request = LegacyKibanaServer.Request;
   export type ResponseToolkit = LegacyKibanaServer.ResponseToolkit;
   export type SavedObjectsClient = LegacyKibanaServer.SavedObjectsClient;
-  export type SavedObjectsService = LegacyKibanaServer.SavedObjectsService;
+  export type SavedObjectsService = LegacyKibanaServer.SavedObjectsLegacyService;
   export type Server = LegacyKibanaServer.Server;
 
   export type InitPluginFunction = LegacyKibanaPluginSpec.InitPluginFunction;

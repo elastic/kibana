@@ -5,7 +5,7 @@
  */
 import {
   SavedObjectsSchema,
-  SavedObjectsService,
+  SavedObjectsLegacyService,
   SavedObjectsClientContract,
   SavedObjectsImportResponse,
   SavedObjectsImportOptions,
@@ -42,7 +42,7 @@ describe('copySavedObjectsToSpaces', () => {
   const setup = (setupOpts: SetupOpts) => {
     const savedObjectsClient = (null as unknown) as SavedObjectsClientContract;
 
-    const savedObjectsService: SavedObjectsService = ({
+    const savedObjectsService: SavedObjectsLegacyService = ({
       importExport: {
         objectLimit: 1000,
         getSortedObjectsForExport:
@@ -73,7 +73,7 @@ describe('copySavedObjectsToSpaces', () => {
       schema: new SavedObjectsSchema({
         globalType: { isNamespaceAgnostic: true },
       }),
-    } as unknown) as SavedObjectsService;
+    } as unknown) as SavedObjectsLegacyService;
 
     return {
       savedObjectsClient,

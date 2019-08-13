@@ -148,7 +148,7 @@ export {
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsSchema,
   SavedObjectsSerializer,
-  SavedObjectsService,
+  SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from './saved_objects';

@@ -5,7 +5,7 @@
  */
 import {
   SavedObjectsSchema,
-  SavedObjectsService,
+  SavedObjectsLegacyService,
   SavedObjectsClientContract,
   SavedObjectsImportResponse,
   SavedObjectsResolveImportErrorsOptions,
@@ -42,7 +42,7 @@ const expectStreamToContainObjects = async (
 
 describe('resolveCopySavedObjectsToSpacesConflicts', () => {
   const setup = (setupOpts: SetupOpts) => {
-    const savedObjectsService: SavedObjectsService = ({
+    const savedObjectsService: SavedObjectsLegacyService = ({
       importExport: {
         objectLimit: 1000,
         getSortedObjectsForExport:
@@ -76,7 +76,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
       schema: new SavedObjectsSchema({
         globalType: { isNamespaceAgnostic: true },
       }),
-    } as unknown) as SavedObjectsService;
+    } as unknown) as SavedObjectsLegacyService;
 
     const savedObjectsClient = (null as unknown) as SavedObjectsClientContract;
 

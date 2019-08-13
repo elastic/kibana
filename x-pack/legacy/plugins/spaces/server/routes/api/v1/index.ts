@@ -5,7 +5,7 @@
  */
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { SavedObjectsService } from 'src/core/server';
+import { SavedObjectsLegacyService } from 'src/core/server';
 import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { initInternalSpacesApi } from './spaces';
@@ -17,7 +17,7 @@ type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 interface RouteDeps {
   xpackMain: XPackMainPlugin;
   http: SpacesHttpServiceSetup;
-  savedObjects: SavedObjectsService;
+  savedObjects: SavedObjectsLegacyService;
   spacesService: SpacesServiceSetup;
   config: KibanaConfig;
 }

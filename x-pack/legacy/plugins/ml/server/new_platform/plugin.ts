@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { ServerRoute } from 'hapi';
-import { KibanaConfig, SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { KibanaConfig, SavedObjectsLegacyService } from 'src/legacy/server/kbn_server';
 import { HttpServiceSetup, Logger, PluginInitializerContext } from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
@@ -73,7 +73,7 @@ export interface MlCoreSetup {
   addAppLinksToSampleDataset: () => any;
   injectUiAppVars: (id: string, callback: () => {}) => any;
   http: MlHttpServiceSetup;
-  savedObjects: SavedObjectsService;
+  savedObjects: SavedObjectsLegacyService;
   usage: {
     collectorSet: {
       makeUsageCollector: any;
@@ -99,7 +99,7 @@ export interface RouteInitialization {
   elasticsearchPlugin: ElasticsearchPlugin;
   route(route: ServerRoute | ServerRoute[]): void;
   xpackMainPlugin?: MlXpackMainPlugin;
-  savedObjects?: SavedObjectsService;
+  savedObjects?: SavedObjectsLegacyService;
   spacesPlugin: any;
 }
 export interface UsageInitialization {
@@ -110,7 +110,7 @@ export interface UsageInitialization {
       register: (collector: any) => void;
     };
   };
-  savedObjects: SavedObjectsService;
+  savedObjects: SavedObjectsLegacyService;
 }
 
 export class Plugin {

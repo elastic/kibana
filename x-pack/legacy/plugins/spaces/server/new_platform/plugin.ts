@@ -7,7 +7,7 @@
 import { ServerRoute } from 'hapi';
 import { Observable } from 'rxjs';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { SavedObjectsService } from 'src/core/server';
+import { SavedObjectsLegacyService } from 'src/core/server';
 import {
   Logger,
   HttpServiceSetup,
@@ -41,7 +41,7 @@ export interface SpacesHttpServiceSetup extends HttpServiceSetup {
 }
 export interface SpacesCoreSetup {
   http: SpacesHttpServiceSetup;
-  savedObjects: SavedObjectsService;
+  savedObjects: SavedObjectsLegacyService;
   elasticsearch: ElasticsearchServiceSetup;
   usage: {
     collectorSet: {

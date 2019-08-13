@@ -12,7 +12,7 @@ import {
   ElasticsearchServiceSetup,
   HttpServiceSetup,
   KibanaRequest,
-  SavedObjectsService,
+  SavedObjectsLegacyService,
 } from 'src/core/server';
 import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
@@ -41,7 +41,7 @@ export interface SpacesServiceSetup {
 interface SpacesServiceDeps {
   http: HttpServiceSetup;
   elasticsearch: ElasticsearchServiceSetup;
-  savedObjects: SavedObjectsService;
+  savedObjects: SavedObjectsLegacyService;
   security: OptionalPlugin<SecurityPlugin>;
   config$: Observable<SpacesConfigType>;
   spacesAuditLogger: any;

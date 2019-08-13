@@ -10,7 +10,7 @@ import { Legacy } from 'kibana';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { httpServiceMock, elasticsearchServiceMock } from 'src/core/server/mocks';
-import { SavedObjectsSchema, SavedObjectsService } from 'src/core/server';
+import { SavedObjectsSchema, SavedObjectsLegacyService } from 'src/core/server';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from 'src/legacy/utils/streams';
 import { createOptionalPlugin } from '../../../../../../server/lib/optional_plugin';
@@ -45,13 +45,19 @@ export interface RequestRunnerResult {
   server: any;
   mockSavedObjectsRepository: any;
   mockSavedObjectsService: {
-    getScopedSavedObjectsClient: jest.Mock<SavedObjectsService['getScopedSavedObjectsClient']>;
+    getScopedSavedObjectsClient: jest.Mock<
+      SavedObjectsLegacyService['getScopedSavedObjectsClient']
+    >;
     importExport: {
       getSortedObjectsForExport: jest.Mock<
-        SavedObjectsService['importExport']['getSortedObjectsForExport']
+        SavedObjectsLegacyService['importExport']['getSortedObjectsForExport']
       >;
-      importSavedObjects: jest.Mock<SavedObjectsService['importExport']['importSavedObjects']>;
-      resolveImportErrors: jest.Mock<SavedObjectsService['importExport']['resolveImportErrors']>;
+      importSavedObjects: jest.Mock<
+        SavedObjectsLegacyService['importExport']['importSavedObjects']
+      >;
+      resolveImportErrors: jest.Mock<
+        SavedObjectsLegacyService['importExport']['resolveImportErrors']
+      >;
     };
   };
   headers: Record<string, unknown>;

@@ -7,7 +7,7 @@ import * as Rx from 'rxjs';
 import { SpacesService } from './spaces_service';
 import { httpServiceMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { SpacesAuditLogger } from '../../lib/audit_logger';
-import { KibanaRequest, SavedObjectsService } from 'src/core/server';
+import { KibanaRequest, SavedObjectsLegacyService } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { getSpaceIdFromPath } from '../../lib/spaces_url_parser';
 import { createOptionalPlugin } from '../../../../../server/lib/optional_plugin';
@@ -42,7 +42,7 @@ const createService = async (serverBasePath: string = '') => {
     security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
     savedObjects: ({
       getSavedObjectsRepository: jest.fn().mockReturnValue(null),
-    } as unknown) as SavedObjectsService,
+    } as unknown) as SavedObjectsLegacyService,
     spacesAuditLogger: new SpacesAuditLogger({}),
   });
 
