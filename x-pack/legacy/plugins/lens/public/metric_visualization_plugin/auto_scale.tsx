@@ -21,22 +21,25 @@ export class AutoScale extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { scale: 1 };
+    // An initial scale of 0 means we always redraw
+    // at least once, which is sub-optimal, but it
+    // prevents an annoying flicker.
+    this.state = { scale: 0 };
   }
 
-  setParent(el: Element | null) {
+  setParent = (el: Element | null) => {
     if (this.parent !== el) {
       this.parent = el;
       setTimeout(() => this.scale());
     }
-  }
+  };
 
-  setChild(el: Element | null) {
+  setChild = (el: Element | null) => {
     if (this.child !== el) {
       this.child = el;
       setTimeout(() => this.scale());
     }
-  }
+  };
 
   scale() {
     const scale = computeScale(this.parent, this.child);
@@ -54,7 +57,7 @@ export class AutoScale extends React.Component<Props, State> {
     return (
       <div
         className="autoscale-parent"
-        ref={el => this.setParent(el)}
+        ref={this.setParent}
         style={{
           display: 'flex',
           justifyContent: 'center',
@@ -64,7 +67,7 @@ export class AutoScale extends React.Component<Props, State> {
       >
         <div
           className="autoscale-child"
-          ref={el => this.setChild(el)}
+          ref={this.setChild}
           style={{
             transform: `scale(${scale})`,
             position: 'relative',
@@ -94,8 +97,10 @@ export function computeScale(
     return 1;
   }
 
-  const scaleX = parent.clientWidth / child.clientWidth;
-  const scaleY = parent.clientHeight / child.clientHeight;
+  const marginSize = 16;
+  const labelSize = 16;
+  const scaleX = (parent.clientWidth - marginSize) / child.clientWidth;
+  const scaleY = (parent.clientHeight - marginSize - labelSize) / child.clientHeight;
 
   return Math.min(1, Math.min(scaleX, scaleY));
 }

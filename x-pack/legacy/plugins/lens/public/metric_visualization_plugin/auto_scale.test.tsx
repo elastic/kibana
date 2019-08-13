@@ -26,8 +26,8 @@ describe('AutoScale', () => {
     });
 
     it('is the lesser of the x or y scale', () => {
-      expect(computeScale(mockElement(1000, 2000), mockElement(3000, 8000))).toBe(0.25);
-      expect(computeScale(mockElement(2000, 3000), mockElement(4000, 3200))).toBe(0.5);
+      expect(computeScale(mockElement(1000, 2000), mockElement(3000, 8000))).toBe(0.246);
+      expect(computeScale(mockElement(2000, 3000), mockElement(4000, 3200))).toBe(0.496);
     });
   });
 
@@ -40,20 +40,20 @@ describe('AutoScale', () => {
           </AutoScale>
         )
       ).toMatchInlineSnapshot(`
-<div
-  class="autoscale-parent"
-  style="display:flex;justify-content:center;position:relative"
->
-  <div
-    class="autoscale-child"
-    style="transform:scale(1);position:relative"
-  >
-    <h1>
-      Hoi!
-    </h1>
-  </div>
-</div>
-`);
+        <div
+          class="autoscale-parent"
+          style="display:flex;justify-content:center;position:relative;max-width:100%"
+        >
+          <div
+            class="autoscale-child"
+            style="transform:scale(0);position:relative"
+          >
+            <h1>
+              Hoi!
+            </h1>
+          </div>
+        </div>
+      `);
     });
   });
 });
