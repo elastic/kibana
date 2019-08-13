@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useState, useEffect } from 'react';
-import { EuiButtonEmpty, EuiPage, EuiPageBody, EuiPageWidthProps, ICON_TYPES } from '@elastic/eui';
-import { PLUGIN } from '../../../common/constants';
+import { EuiPage, EuiPageBody, EuiPageWidthProps, ICON_TYPES } from '@elastic/eui';
 import { IntegrationInfo } from '../../../common/types';
 import { DetailViewPanelName } from '../../';
 import { getIntegrationInfoByKey } from '../../data';
-import { useBreadcrumbs, useLinks } from '../../hooks';
 import { Header } from './header';
 import { Content } from './content';
 
@@ -39,44 +37,24 @@ export function Detail({ pkgkey, panel = DEFAULT_PANEL }: DetailProps) {
 
 type LayoutProps = IntegrationInfo & Pick<DetailProps, 'panel'> & EuiPageWidthProps;
 export function DetailLayout(props: LayoutProps) {
-  const { name, restrictWidth, title, panel } = props;
-  const { toListView } = useLinks();
+  const { name, restrictWidth, panel } = props;
   const iconType = ICON_TYPES.find(key => key.toLowerCase() === `logo${name}`);
-  const styles = panel === 'overview' ? overviewContentStyles() : {};
-
-  useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }, { text: title }]);
+  const headerStyles = { borderBottom: '1px solid #D3DAE6', paddingBottom: '32px' };
+  const contentStyles = panel === 'overview' ? overviewContentStyles() : {};
 
   return (
     <Fragment>
-      <EuiPage restrictWidth={restrictWidth} style={{ padding: '16px 16px 0 0' }}>
-        <NavButtonBack />
-      </EuiPage>
-      <EuiPage style={{ borderBottom: '1px solid #D3DAE6', paddingBottom: '32px' }}>
+      <EuiPage style={headerStyles}>
         <EuiPageBody restrictWidth={restrictWidth}>
           <Header iconType={iconType} {...props} />
         </EuiPageBody>
       </EuiPage>
-      <EuiPage style={styles}>
+      <EuiPage style={contentStyles}>
         <EuiPageBody restrictWidth={restrictWidth}>
           <Content hasLogoPanel={!!iconType} {...props} />
         </EuiPageBody>
       </EuiPage>
     </Fragment>
-  );
-}
-
-function NavButtonBack() {
-  const { toListView } = useLinks();
-  return (
-    <EuiButtonEmpty
-      href={toListView()}
-      iconType="arrowLeft"
-      size="xs"
-      flush="left"
-      style={{ marginRight: '32px' }}
-    >
-      Browse Integrations
-    </EuiButtonEmpty>
   );
 }
 

@@ -21,6 +21,7 @@ export function Content(props: ContentProps) {
   const marginTop = ICON_HEIGHT_PANEL / 2 + ICON_HEIGHT_NATURAL / 2;
   const leftStyles = hasLogoPanel ? { marginTop: `${marginTop}px` } : {};
   const isOverviewPanel = panel === 'overview';
+
   return (
     <EuiFlexGroup>
       <LeftColumn style={leftStyles}>
