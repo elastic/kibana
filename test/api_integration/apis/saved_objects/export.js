@@ -349,8 +349,7 @@ export default function ({ getService }) {
         });
       });
 
-      // FAILING: https://github.com/elastic/kibana/issues/43163
-      describe.skip('10,001 objects', () => {
+      describe('10,001 objects', () => {
         let customVisId;
         before(async () => {
           await esArchiver.load('saved_objects/10k');
