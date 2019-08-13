@@ -29,7 +29,7 @@ import {
 
 import { isDraggedField } from './utils';
 import { LayerPanel } from './layerpanel';
-import { Datasource, DataType } from '..';
+import { Datasource, DataType, StateSetter } from '..';
 
 export type OperationType = IndexPatternColumn['operationType'];
 
@@ -103,6 +103,7 @@ export interface IndexPattern {
   fields: IndexPatternField[];
   title: string;
   timeFieldName?: string | null;
+  hasExistence?: boolean;
 }
 
 export interface IndexPatternField {
@@ -124,6 +125,11 @@ export interface IndexPatternField {
       }
     >
   >;
+
+  // Loaded separately
+  exists?: boolean;
+  cardinality?: number;
+  count?: number;
 }
 
 export interface DraggedField {
@@ -287,7 +293,11 @@ export function getIndexPatternDatasource({
       );
     },
 
-    getPublicAPI(state, setState, layerId) {
+    getPublicAPI(
+      state: IndexPatternPrivateState,
+      setState: StateSetter<IndexPatternPrivateState>,
+      layerId: string
+    ) {
       return {
         getTableSpec: () => {
           return state.layers[layerId].columnOrder.map(colId => ({ columnId: colId }));
@@ -305,7 +315,7 @@ export function getIndexPatternDatasource({
             <I18nProvider>
               <IndexPatternDimensionPanel
                 state={state}
-                setState={newState => setState(newState)}
+                setState={setState}
                 uiSettings={uiSettings}
                 storage={storage}
                 layerId={props.layerId}
@@ -317,10 +327,7 @@ export function getIndexPatternDatasource({
         },
 
         renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => {
-          render(
-            <LayerPanel state={state} setState={newState => setState(newState)} {...props} />,
-            domElement
-          );
+          render(<LayerPanel state={state} setState={setState} {...props} />, domElement);
         },
 
         removeColumnInTableSpec: (columnId: string) => {

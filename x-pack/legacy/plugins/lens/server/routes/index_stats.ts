@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import _ from 'lodash';
+import { get, uniq } from 'lodash';
 import { first } from 'rxjs/operators';
 // import { schema } from '@kbn/config-schema';
 import { KibanaRequest } from 'src/core/server';
@@ -33,7 +33,7 @@ interface LensStatsBodyParams {
   }>;
 }
 
-function recursiveFlatten(
+export function recursiveFlatten(
   docs: Array<{
     _source: Document;
   }>,
@@ -65,35 +65,35 @@ function recursiveFlatten(
       return;
     }
 
-    let match;
+    let matches;
     if (field.parent) {
-      match = docs.find(doc => {
+      matches = docs.map(doc => {
         if (!doc) {
           return;
         }
-        return _.get(doc._source, field.parent!);
+        return get(doc._source, field.parent!);
       });
     } else {
-      match = docs.find(doc => {
+      matches = docs.map(doc => {
         if (!doc) {
           return;
         }
-        return _.get(doc._source, field.name);
+        return get(doc._source, field.name);
       });
     }
 
-    if (match) {
+    matches.forEach(match => {
       const record = overallKeys[field.name];
       if (record) {
         record.count += 1;
         record.samples.push(match);
-      } else {
+      } else if (match) {
         overallKeys[field.name] = {
           count: 1,
           samples: [match],
         };
       }
-    }
+    });
   });
 
   const returnTypes: Record<
@@ -106,7 +106,7 @@ function recursiveFlatten(
   Object.entries(overallKeys).forEach(([key, value]) => {
     returnTypes[key] = {
       count: value.count,
-      cardinality: _.uniq(value.samples).length,
+      cardinality: uniq(value.samples).length,
     };
   });
   return returnTypes;

@@ -33,7 +33,7 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
     () => (newState: unknown) => {
       props.dispatch({
         type: 'UPDATE_VISUALIZATION_STATE',
-        newState,
+        newState: typeof newState === 'function' ? newState(props.visualizationState) : newState,
       });
     },
     [props.dispatch]

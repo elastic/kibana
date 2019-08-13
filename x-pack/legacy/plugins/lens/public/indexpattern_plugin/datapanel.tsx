@@ -48,7 +48,6 @@ const supportedFieldTypes = ['string', 'number', 'boolean', 'date'];
 const PAGINATION_SIZE = 50;
 
 const fieldTypeNames: Record<DataType, string> = {
-  // exists: i18n.translate('xpack.lens.datatypes.exists', { defaultMessage: 'Exists' }),
   string: i18n.translate('xpack.lens.datatypes.string', { defaultMessage: 'string' }),
   number: i18n.translate('xpack.lens.datatypes.number', { defaultMessage: 'number' }),
   boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'boolean' }),
@@ -83,6 +82,25 @@ export function IndexPatternDataPanel({
     [state, setState]
   );
 
+  const updateFieldsWithCounts = useCallback(
+    (allFields: IndexPattern['fields']) => {
+      setState(prevState => {
+        return {
+          ...prevState,
+          indexPatterns: {
+            ...prevState.indexPatterns,
+            [currentIndexPatternId]: {
+              ...prevState.indexPatterns[currentIndexPatternId],
+              hasExistence: true,
+              fields: allFields,
+            },
+          },
+        };
+      });
+    },
+    [currentIndexPatternId, indexPatterns[currentIndexPatternId]]
+  );
+
   return (
     <MemoizedDataPanel
       showIndexPatternSwitcher={showIndexPatternSwitcher}
@@ -92,6 +110,9 @@ export function IndexPatternDataPanel({
       dragDropContext={dragDropContext}
       // only pass in the state change callback if it's actually needed to avoid re-renders
       onChangeIndexPattern={showIndexPatternSwitcher ? onChangeIndexPattern : undefined}
+      updateFieldsWithCounts={
+        !indexPatterns[currentIndexPatternId].hasExistence ? updateFieldsWithCounts : undefined
+      }
     />
   );
 }
@@ -110,7 +131,6 @@ interface DataPanelState {
   typeFilter: DataType[];
   hiddenFilter: boolean;
   isTypeFilterOpen: boolean;
-  overallFields?: OverallFields;
 }
 
 export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
@@ -120,6 +140,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   showIndexPatternSwitcher,
   setShowIndexPatternSwitcher,
   onChangeIndexPattern,
+  updateFieldsWithCounts,
 }: {
   currentIndexPatternId: string;
   indexPatterns: Record<string, IndexPattern>;
@@ -127,6 +148,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   showIndexPatternSwitcher: boolean;
   setShowIndexPatternSwitcher: (show: boolean) => void;
   onChangeIndexPattern?: (newId: string) => void;
+  updateFieldsWithCounts?: (fields: IndexPattern['fields']) => void;
 }) {
   const [state, setState] = useState<DataPanelState>({
     isLoading: false,
@@ -154,7 +176,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       setPageSize(PAGINATION_SIZE);
       lazyScroll();
     }
-  }, [state.nameFilter, state.typeFilter, currentIndexPatternId, state.overallFields]);
+  }, [state.nameFilter, state.typeFilter, currentIndexPatternId]);
 
   if (Object.keys(indexPatterns).length === 0) {
     return (
@@ -194,14 +216,16 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const displayedFields = allFields
     .filter(field => {
       if (!state.hiddenFilter) {
+        const indexField =
+          indexPatterns[currentIndexPatternId] &&
+          indexPatterns[currentIndexPatternId].hasExistence &&
+          indexPatterns[currentIndexPatternId].fields.find(f => f.name === field.name);
         if (state.typeFilter.length > 0) {
           return (
-            state.overallFields &&
-            state.overallFields[field.name] &&
-            state.typeFilter.includes(field.type as DataType)
+            indexField && indexField.exists && state.typeFilter.includes(field.type as DataType)
           );
         }
-        return state.overallFields && state.overallFields[field.name];
+        return indexField && indexField.exists;
       }
       if (state.typeFilter.length > 0) {
         return state.typeFilter.includes(field.type as DataType);
@@ -218,6 +242,15 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
   useEffect(() => {
     setState(s => ({ ...s, isLoading: true }));
+
+    if (
+      state.isLoading ||
+      indexPatterns[currentIndexPatternId].hasExistence ||
+      !updateFieldsWithCounts
+    ) {
+      return;
+    }
+
     npStart.core.http
       .post(`/api/lens/index_stats/${indexPatterns[currentIndexPatternId].title}`, {
         body: JSON.stringify({
@@ -239,8 +272,26 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         setState(s => ({
           ...s,
           isLoading: false,
-          overallFields: results,
         }));
+
+        if (!updateFieldsWithCounts) {
+          return;
+        }
+
+        updateFieldsWithCounts(
+          indexPatterns[currentIndexPatternId].fields.map(field => {
+            const matching = results[field.name];
+            if (!matching) {
+              return { ...field, exists: false };
+            }
+            return {
+              ...field,
+              exists: true,
+              cardinality: matching.cardinality,
+              count: matching.count,
+            };
+          })
+        );
       })
       .catch(() => {
         setState(s => ({ ...s, isLoading: false }));
@@ -428,14 +479,17 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               {state.isLoading && <EuiLoadingSpinner />}
 
               {paginatedFields.map(field => {
-                const overallField = state.overallFields && state.overallFields[field.name];
+                // const overallField = state.overallFields && state.overallFields[field.name];
+                const overallField = indexPatterns[currentIndexPatternId].fields.find(
+                  f => f.name === field.name
+                );
                 return (
                   <FieldItem
                     indexPattern={indexPatterns[currentIndexPatternId]}
                     key={field.name}
                     field={field}
                     highlight={state.nameFilter.toLowerCase()}
-                    exists={!!overallField}
+                    exists={overallField ? !!overallField.exists : false}
                     // howManyDocs={state.overallStats && state.overallStats.totalCount}
                     count={overallField && overallField.count}
                     cardinality={overallField && overallField.cardinality}
