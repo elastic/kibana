@@ -12,6 +12,7 @@ import { LanguageServerProxy } from './proxy';
 import { Logger } from '../log';
 import { RequestExpander } from './request_expander';
 import { AbstractLauncher } from './abstract_launcher';
+import { ExternalProcess } from './process/external_process';
 
 const CTAGS_LANG_DETACH_PORT = 2092;
 export class CtagsLauncher extends AbstractLauncher {
@@ -57,6 +58,6 @@ export class CtagsLauncher extends AbstractLauncher {
     p.stderr.on('data', data => {
       log.stderr(data.toString());
     });
-    return p;
+    return new ExternalProcess(p);
   }
 }
