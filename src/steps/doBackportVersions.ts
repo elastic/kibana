@@ -17,6 +17,7 @@ import { createPullRequest } from '../services/github/createPullRequest';
 import { getRepoPath } from '../services/env';
 import { getShortSha } from '../services/github/commitFormatters';
 import { log } from '../services/logger';
+import { exec } from '../services/child-process-promisified';
 
 export function doBackportVersions(
   options: BackportOptions,
@@ -108,13 +109,15 @@ async function cherrypickAndConfirm(options: BackportOptions, sha: string) {
     await cherrypick(options, sha);
     spinner.succeed();
   } catch (e) {
+    const repoPath = getRepoPath(options);
     spinner.fail(`Cherry-picking failed.\n`);
     log(
-      `Please resolve conflicts in: ${getRepoPath(
-        options
-      )} and when all conflicts have been resolved and staged run:`
+      `Please resolve conflicts in: ${repoPath} and when all conflicts have been resolved and staged run:`
     );
     log(`\ngit cherry-pick --continue\n`);
+    if (options.editor) {
+      await exec(`${options.editor} ${repoPath}`);
+    }
 
     const hasConflict = e.cmd.includes('git cherry-pick');
     if (!hasConflict) {

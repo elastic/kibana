@@ -7,6 +7,7 @@ export interface Config {
   // global config
   accessToken?: string;
   username?: string;
+  editor?: string;
 
   // project config
   branches?: (string | BranchChoice)[];

@@ -90,10 +90,11 @@ The above commands will start an interactive prompt. You can use the `arrow keys
 | --author         | Filter commits by author                               | _Current user_                  | string  |
 | --branch         | Branch to backport to                                  |                                 | string  |
 | --commits-count  | Number of commits to choose from                       | 10                              | number  |
+| --editor         | Editor (eg. `code`) to open and solve conflicts        |                                 | string  |
+| --fork           | Create backports in fork (true) or origin repo (false) | true                            | boolean |
 | --git-hostname   | Hostname for Git remotes                               | github.com                      | string  |
 | --labels         | Pull request labels                                    |                                 | string  |
 | --multiple       | Select multiple commits/branches                       | false                           | boolean |
-| --fork           | Create backports in fork (true) or origin repo (false) | true                            | boolean |
 | --pr-description | Pull request description suffix                        |                                 | string  |
 | --pr-title       | Pull request title pattern                             | [{baseBranch}] {commitMessages} | string  |
 | --sha            | Sha of commit to backport                              |                                 | string  |

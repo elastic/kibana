@@ -42,6 +42,11 @@ export function getOptionsFromCliArgs(
       description: 'Number of commits to choose from',
       type: 'number'
     })
+    .option('editor', {
+      default: configOptions.editor,
+      description: 'Editor to be opened during conflict resolution',
+      type: 'string'
+    })
     .option('fork', {
       default: configOptions.fork,
       description: 'Create backports in fork or origin repo',
@@ -109,6 +114,7 @@ export function getOptionsFromCliArgs(
     commitsCount: cliArgs.commitsCount,
     branchChoices: configOptions.branchChoices,
     branches: cliArgs.branches,
+    editor: cliArgs.editor,
     fork: cliArgs.fork,
     gitHostname: cliArgs.gitHostname,
     labels: cliArgs.labels,
