@@ -48,6 +48,7 @@ const TimeRulerTickLabel = euiStyled.text`
   font-size: ${props => props.theme.eui.euiFontSizeXS};
   line-height: ${props => props.theme.eui.euiLineHeight};
   fill: ${props => props.theme.eui.textColors.subdued};
+  pointer-events: none;
 `;
 
 const TimeRulerGridLine = euiStyled.line`

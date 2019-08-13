@@ -232,6 +232,7 @@ describe('editor_frame state management', () => {
           newVisualizationId: 'testVis2',
           initialState: newVisState,
           datasourceState: newDatasourceState,
+          datasourceId: 'testDatasource',
         }
       );
 

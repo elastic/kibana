@@ -5,8 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
-import { LensMultiTable, KibanaDatatable } from '../types';
+import { ExpressionFunction, KibanaDatatable } from 'src/legacy/core_plugins/interpreter/types';
+import { LensMultiTable } from '../types';
 
 interface MergeTables {
   layerIds: string[];

@@ -8,7 +8,10 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiFormRow } from '@elastic/eui';
-import { Query } from '../../../../../../../src/legacy/core_plugins/data/public/query';
+import {
+  Query,
+  QueryBarInput,
+} from '../../../../../../../src/legacy/core_plugins/data/public/query';
 import { FilterRatioIndexPatternColumn } from '../indexpattern';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
@@ -64,17 +67,8 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
     // TODO parse the KQL tree and check whether this would work out
     return false;
   },
-  paramEditor: ({
-    state,
-    setState,
-    columnId: currentColumnId,
-    dataPluginDependencies: pluginDependencies,
-    storage,
-    layerId,
-  }) => {
+  paramEditor: ({ state, setState, columnId: currentColumnId, uiSettings, storage, layerId }) => {
     const [hasDenominator, setDenominator] = useState(false);
-
-    const { QueryBarInput } = pluginDependencies.components;
 
     return (
       <div>
@@ -92,6 +86,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
             }
             screenTitle={''}
             store={storage}
+            uiSettings={uiSettings}
             onChange={(newQuery: Query) => {
               setState(
                 updateColumnParam(
@@ -121,6 +116,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
               }
               screenTitle={''}
               store={storage}
+              uiSettings={uiSettings}
               onChange={(newQuery: Query) => {
                 setState(
                   updateColumnParam(

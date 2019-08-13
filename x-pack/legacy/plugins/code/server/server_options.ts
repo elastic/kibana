@@ -16,6 +16,7 @@ export interface LspOptions {
 export interface SecurityOptions {
   enableMavenImport: boolean;
   enableGradleImport: boolean;
+  installGoDependency: boolean;
   installNodeDependency: boolean;
   gitHostWhitelist: string[];
   gitProtocolWhitelist: string[];
@@ -24,7 +25,7 @@ export interface SecurityOptions {
 
 export interface DiskOptions {
   thresholdEnabled: boolean;
-  watermarkLowMb: number;
+  watermarkLow: string;
 }
 
 export class ServerOptions {

@@ -62,11 +62,19 @@ export function buildSrcUrl(svgString) {
   return domUrl.createObjectURL(svg);
 }
 
-export async function styleSvg(svgString, fill) {
+export async function styleSvg(svgString, fill, stroke, strokeWidth) {
   const svgXml = await parseXmlString(svgString);
+  let style = '';
   if (fill) {
-    svgXml.svg.$.style = `fill: ${fill};`;
+    style += `fill:${fill};`;
   }
+  if (stroke) {
+    style += `stroke:${stroke};`;
+  }
+  if (strokeWidth) {
+    style += `stroke-width:${strokeWidth};`;
+  }
+  if (style) svgXml.svg.$.style = style;
   const builder = new xml2js.Builder();
   return builder.buildObject(svgXml);
 }

@@ -74,6 +74,7 @@ function getExpressionForLayer(
       index="${indexPattern.id}"
       metricsAtAllLevels=false
       partialRows=false
+      includeFormatHints=true
       aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
   }
 

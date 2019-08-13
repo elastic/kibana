@@ -225,6 +225,8 @@ export function EditorFrame(props: EditorFrameProps) {
       configPanel={
         allLoaded && (
           <ConfigPanelWrapper
+            datasourceMap={props.datasourceMap}
+            datasourceStates={state.datasourceStates}
             visualizationMap={props.visualizationMap}
             activeVisualizationId={state.visualization.activeId}
             dispatch={dispatch}
@@ -253,6 +255,7 @@ export function EditorFrame(props: EditorFrameProps) {
       suggestionsPanel={
         allLoaded && (
           <SuggestionPanel
+            frame={framePublicAPI}
             activeDatasourceId={state.activeDatasourceId}
             activeVisualizationId={state.visualization.activeId}
             datasourceMap={props.datasourceMap}
