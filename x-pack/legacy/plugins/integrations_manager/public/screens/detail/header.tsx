@@ -17,7 +17,7 @@ import {
 import { PLUGIN } from '../../../common/constants';
 import { IntegrationInfo } from '../../../common/types';
 import { VersionBadge } from '../../components/version_badge';
-import { IconPanel } from './icon_panel';
+import { IconPanel } from '../../components/icon_panel';
 import { useBreadcrumbs, useLinks } from '../../hooks';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 

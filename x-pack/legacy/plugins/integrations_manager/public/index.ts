@@ -8,15 +8,14 @@ import 'ui/autoload/all';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
-import { PLUGIN } from '../common/constants';
 import { Plugin, PluginInitializerContext, PluginStart } from './plugin';
 import { routes } from './routes';
 
 // create './types' later and move there?
 export type DetailViewPanelName = 'overview' | 'assets' | 'data-sources';
 
-const REACT_APP_ROOT_ID = `react-${PLUGIN.ID}-root`;
-const template = `<div id="${REACT_APP_ROOT_ID}" class="integrationsManagerReactRoot"></div>`;
+const REACT_APP_ROOT_ID = 'integrationsManager__root';
+const template = `<div id="${REACT_APP_ROOT_ID}"></div>`;
 const getRootEl = () => document.getElementById(REACT_APP_ROOT_ID);
 
 main();

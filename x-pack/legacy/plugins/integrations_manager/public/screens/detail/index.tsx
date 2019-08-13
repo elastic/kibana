@@ -11,8 +11,6 @@ import { getIntegrationInfoByKey } from '../../data';
 import { Header } from './header';
 import { Content } from './content';
 
-export const ICON_HEIGHT_PANEL = 164;
-export const ICON_HEIGHT_NATURAL = 32;
 export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 
 export interface DetailProps {
@@ -51,7 +49,7 @@ export function DetailLayout(props: LayoutProps) {
       </EuiPage>
       <EuiPage style={contentStyles}>
         <EuiPageBody restrictWidth={restrictWidth}>
-          <Content hasLogoPanel={!!iconType} {...props} />
+          <Content hasIconPanel={!!iconType} {...props} />
         </EuiPageBody>
       </EuiPage>
     </Fragment>

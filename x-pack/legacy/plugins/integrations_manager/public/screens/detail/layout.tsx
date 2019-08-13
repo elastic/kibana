@@ -10,20 +10,29 @@ import { EuiFlexItem } from '@elastic/eui';
 interface ColumnProps {
   children?: ReactNode;
   style?: object;
+  className?: string;
 }
 
-export const LeftColumn: FunctionComponent<ColumnProps> = ({ children, style }) => {
+export const LeftColumn: FunctionComponent<ColumnProps> = ({ children, ...rest }) => {
   return (
-    <EuiFlexItem grow={2} style={style}>
+    <EuiFlexItem grow={2} {...rest}>
       {children}
     </EuiFlexItem>
   );
 };
 
-export const CenterColumn: FunctionComponent<ColumnProps> = ({ children }) => {
-  return <EuiFlexItem grow={7}>{children}</EuiFlexItem>;
+export const CenterColumn: FunctionComponent<ColumnProps> = ({ children, ...rest }) => {
+  return (
+    <EuiFlexItem grow={7} {...rest}>
+      {children}
+    </EuiFlexItem>
+  );
 };
 
-export const RightColumn: FunctionComponent<ColumnProps> = ({ children }) => {
-  return <EuiFlexItem grow={3}>{children}</EuiFlexItem>;
+export const RightColumn: FunctionComponent<ColumnProps> = ({ children, ...rest }) => {
+  return (
+    <EuiFlexItem grow={3} {...rest}>
+      {children}
+    </EuiFlexItem>
+  );
 };
