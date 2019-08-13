@@ -208,4 +208,30 @@ describe('BucketNestingEditor', () => {
 
     expect(setColumns).toHaveBeenCalledWith(['a', 'c', 'b']);
   });
+
+  it('should allow the last bucket to be moved', () => {
+    const setColumns = jest.fn();
+    const component = mount(
+      <BucketNestingEditor
+        columnId="b"
+        layer={{
+          columnOrder: ['c', 'a', 'b'],
+          columns: {
+            a: mockCol({ suggestedPriority: 0, operationType: 'count', isBucketed: true }),
+            b: mockCol({ suggestedPriority: 1, operationType: 'max', isBucketed: true }),
+            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: true }),
+          },
+          indexPatternId: 'foo',
+        }}
+        setColumns={setColumns}
+      />
+    );
+
+    const control = component.find('[data-test-subj="indexPattern-nesting-select"]').first();
+    (control.prop('onChange') as (e: unknown) => {})({
+      target: { value: '' },
+    });
+
+    expect(setColumns).toHaveBeenCalledWith(['b', 'c', 'a']);
+  });
 });

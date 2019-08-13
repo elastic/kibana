@@ -81,7 +81,9 @@ export function BucketNestingEditor({
           options={[
             {
               value: '',
-              text: '',
+              text: i18n.translate('xpack.lens.xyChart.nestUnderRoot', {
+                defaultMessage: 'Top level',
+              }),
             },
             ...aggColumns,
           ]}
