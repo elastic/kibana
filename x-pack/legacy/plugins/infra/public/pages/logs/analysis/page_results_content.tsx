@@ -68,10 +68,14 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
         <>{getLoadingState()}</>
       ) : (
         <>
-          <EuiPanel grow={false}>
+          <EuiPanel paddingSize="l" grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <span>Analysed x of x</span>
+              <EuiFlexItem grow={7}>
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem>
+                    <span>Analysed x of x</span>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiSuperDatePicker
@@ -82,7 +86,7 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
-          <EuiPage>
+          <EuiPage style={{ minHeight: '100vh' }}>
             <EuiPageBody>
               <EuiPageContent>
                 <EuiPageContentBody>
