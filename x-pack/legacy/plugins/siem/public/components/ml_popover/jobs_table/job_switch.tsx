@@ -16,6 +16,8 @@ const StaticSwitch = styled(EuiSwitch)`
   }
 `;
 
+StaticSwitch.displayName = 'StaticSwitch';
+
 export interface JobSwitchProps {
   job: Job;
   isSummaryLoading: boolean;
@@ -64,3 +66,5 @@ export const JobSwitch = React.memo<JobSwitchProps>(
     );
   }
 );
+
+JobSwitch.displayName = 'JobSwitch';

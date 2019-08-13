@@ -18,7 +18,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import semver from 'semver';
-import { GridData } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/embeddable/types';
+import { GridData } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 
 import {
   RawSavedDashboardPanelTo60,
@@ -161,7 +161,7 @@ function migrate610PanelToLatest(
     }
   });
 
-  const embeddableConfig = uiState ? uiState[`P-${panel.panelIndex}`] : {};
+  const embeddableConfig = uiState ? uiState[`P-${panel.panelIndex}`] || {} : {};
 
   // 2. (6.4) remove columns, sort properties
   if (panel.columns || panel.sort) {

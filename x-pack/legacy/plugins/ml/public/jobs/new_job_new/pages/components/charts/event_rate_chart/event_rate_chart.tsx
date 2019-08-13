@@ -22,7 +22,7 @@ const SPEC_ID = 'event_rate';
 
 export const EventRateChart: FC<Props> = ({ eventRateChartData, height, width, showAxis }) => {
   return (
-    <div style={{ width, height }}>
+    <div style={{ width, height }} data-test-subj="mlEventRateChart">
       <Chart>
         {showAxis === true && <Axes />}
 

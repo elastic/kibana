@@ -9,6 +9,8 @@ import React, { Component } from 'react';
 // @ts-ignore
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { IUrlParams } from '../../../../../../context/UrlParamsContext/types';
 // @ts-ignore
 import Timeline from '../../../../../shared/charts/Timeline';
@@ -47,6 +49,7 @@ interface Props {
   waterfall: IWaterfall;
   location: Location;
   serviceColors: IServiceColors;
+  exceedsMax: boolean;
 }
 
 export class Waterfall extends Component<Props> {
@@ -126,12 +129,23 @@ export class Waterfall extends Component<Props> {
   };
 
   public render() {
-    const { waterfall } = this.props;
+    const { waterfall, exceedsMax } = this.props;
     const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
     const waterfallHeight = itemContainerHeight * waterfall.orderedItems.length;
 
     return (
       <Container>
+        {exceedsMax ? (
+          <EuiCallOut
+            color="warning"
+            size="s"
+            iconType="alert"
+            title={i18n.translate('xpack.apm.waterfall.exceedsMax', {
+              defaultMessage:
+                'Number of items in this trace exceed what is displayed'
+            })}
+          />
+        ) : null}
         <StickyContainer>
           <Timeline
             agentMarks={this.props.agentMarks}

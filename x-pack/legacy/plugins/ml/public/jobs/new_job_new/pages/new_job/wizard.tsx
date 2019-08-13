@@ -39,6 +39,7 @@ interface Props {
   chartInterval: MlTimeBuckets;
   jobValidator: JobValidator;
   existingJobsAndGroups: ExistingJobsAndGroups;
+  skipTimeRangeStep: boolean;
 }
 
 export const Wizard: FC<Props> = ({
@@ -48,6 +49,7 @@ export const Wizard: FC<Props> = ({
   chartInterval,
   jobValidator,
   existingJobsAndGroups,
+  skipTimeRangeStep = false,
 }) => {
   const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number) => number>(s => s + 1, 0);
   const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
@@ -102,6 +104,10 @@ export const Wizard: FC<Props> = ({
 
   useEffect(() => {
     jobCreator.subscribeToProgress(setProgress);
+
+    if (skipTimeRangeStep) {
+      setCurrentStep(WIZARD_STEPS.PICK_FIELDS);
+    }
   }, []);
 
   // disable the step links if the job is running
@@ -176,7 +182,7 @@ export const Wizard: FC<Props> = ({
 
       {currentStep === WIZARD_STEPS.TIME_RANGE && (
         <Fragment>
-          <Title>Time range</Title>
+          <Title data-test-subj="mlJobWizardStepTitleTimeRange">Time range</Title>
           <TimeRangeStep
             isCurrentStep={currentStep === WIZARD_STEPS.TIME_RANGE}
             setCurrentStep={setCurrentStep}
@@ -185,7 +191,7 @@ export const Wizard: FC<Props> = ({
       )}
       {currentStep === WIZARD_STEPS.PICK_FIELDS && (
         <Fragment>
-          <Title>Pick fields</Title>
+          <Title data-test-subj="mlJobWizardStepTitlePickFields">Pick fields</Title>
           <PickFieldsStep
             isCurrentStep={currentStep === WIZARD_STEPS.PICK_FIELDS}
             setCurrentStep={setCurrentStep}
@@ -194,7 +200,7 @@ export const Wizard: FC<Props> = ({
       )}
       {currentStep === WIZARD_STEPS.JOB_DETAILS && (
         <Fragment>
-          <Title>Job details</Title>
+          <Title data-test-subj="mlJobWizardStepTitleJobDetails">Job details</Title>
           <JobDetailsStep
             isCurrentStep={currentStep === WIZARD_STEPS.JOB_DETAILS}
             setCurrentStep={setCurrentStep}
@@ -207,7 +213,7 @@ export const Wizard: FC<Props> = ({
       )}
       {currentStep === WIZARD_STEPS.VALIDATION && (
         <Fragment>
-          <Title>Validation</Title>
+          <Title data-test-subj="mlJobWizardStepTitleValidation">Validation</Title>
           <ValidationStep
             isCurrentStep={currentStep === WIZARD_STEPS.VALIDATION}
             setCurrentStep={setCurrentStep}
@@ -216,7 +222,7 @@ export const Wizard: FC<Props> = ({
       )}
       {currentStep === WIZARD_STEPS.SUMMARY && (
         <Fragment>
-          <Title>Summary</Title>
+          <Title data-test-subj="mlJobWizardStepTitleSummary">Summary</Title>
           <SummaryStep
             isCurrentStep={currentStep === WIZARD_STEPS.SUMMARY}
             setCurrentStep={setCurrentStep}
@@ -227,11 +233,11 @@ export const Wizard: FC<Props> = ({
   );
 };
 
-const Title: FC = ({ children }) => {
+const Title: FC<{ 'data-test-subj': string }> = ({ 'data-test-subj': dataTestSubj, children }) => {
   return (
     <Fragment>
       <EuiTitle>
-        <h2>{children}</h2>
+        <h2 data-test-subj={dataTestSubj}>{children}</h2>
       </EuiTitle>
       <EuiSpacer />
     </Fragment>

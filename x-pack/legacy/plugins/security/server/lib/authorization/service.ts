@@ -19,12 +19,17 @@ import {
 } from './check_privileges_dynamically';
 import { AuthorizationMode, authorizationModeFactory } from './mode';
 import { privilegesFactory, PrivilegesService } from './privileges';
+import {
+  CheckSavedObjectsPrivilegesWithRequest,
+  checkSavedObjectsPrivilegesWithRequestFactory,
+} from './check_saved_objects_privileges';
 
 export interface AuthorizationService {
   actions: Actions;
   application: string;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   checkPrivilegesDynamicallyWithRequest: CheckPrivilegesDynamicallyWithRequest;
+  checkSavedObjectsPrivilegesWithRequest: CheckSavedObjectsPrivilegesWithRequest;
   mode: AuthorizationMode;
   privileges: PrivilegesService;
 }
@@ -49,6 +54,12 @@ export function createAuthorizationService(
     checkPrivilegesWithRequest,
     spaces
   );
+
+  const checkSavedObjectsPrivilegesWithRequest = checkSavedObjectsPrivilegesWithRequestFactory(
+    checkPrivilegesWithRequest,
+    spaces
+  );
+
   const mode = authorizationModeFactory(securityXPackFeature);
   const privileges = privilegesFactory(actions, xpackMainPlugin);
 
@@ -57,6 +68,7 @@ export function createAuthorizationService(
     application,
     checkPrivilegesWithRequest,
     checkPrivilegesDynamicallyWithRequest,
+    checkSavedObjectsPrivilegesWithRequest,
     mode,
     privileges,
   };

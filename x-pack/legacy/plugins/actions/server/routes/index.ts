@@ -10,4 +10,4 @@ export { findRoute } from './find';
 export { getRoute } from './get';
 export { updateRoute } from './update';
 export { listActionTypesRoute } from './list_action_types';
-export { fireRoute } from './fire';
+export { executeRoute } from './execute';
