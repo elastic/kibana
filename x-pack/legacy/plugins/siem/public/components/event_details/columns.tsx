@@ -42,10 +42,14 @@ const HoverActionsContainer = styled(EuiPanel)`
   width: 30px;
 `;
 
+HoverActionsContainer.displayName = 'HoverActionsContainer';
+
 const FieldTypeIcon = styled(EuiIcon)`
   position: relative;
   top: -2px;
 `;
+
+FieldTypeIcon.displayName = 'FieldTypeIcon';
 
 export const getColumns = ({
   browserFields,

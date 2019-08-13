@@ -38,6 +38,7 @@ export function createEsTestCluster(options = {}) {
     esFrom = esTestConfig.getBuildFrom(),
     dataArchive,
     esArgs,
+    ssl,
   } = options;
 
   const randomHash = Math.random()
@@ -54,7 +55,7 @@ export function createEsTestCluster(options = {}) {
     esArgs,
   };
 
-  const cluster = new Cluster({ log });
+  const cluster = new Cluster({ log, ssl });
 
   return new (class EsTestCluster {
     getStartTimeout() {

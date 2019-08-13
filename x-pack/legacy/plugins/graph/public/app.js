@@ -26,7 +26,7 @@ import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import { addAppRedirectMessageToUrl, fatalError, toastNotifications } from 'ui/notify';
 import { formatAngularHttpError } from 'ui/notify/lib';
-import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
+import { IndexPatternsProvider } from 'ui/index_patterns';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { npStart } from 'ui/new_platform';
@@ -738,7 +738,7 @@ app.controller('graphuiPlugin', function (
     }
   }
 
-  $scope.indices = $route.current.locals.indexPatterns.filter(indexPattern => !indexPattern.type);
+  $scope.indices = $route.current.locals.indexPatterns.filter(indexPattern => !indexPattern.attributes.type);
 
 
   $scope.setDetail = function (data) {
