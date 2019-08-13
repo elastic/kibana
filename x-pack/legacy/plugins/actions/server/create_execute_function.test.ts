@@ -5,7 +5,7 @@
  */
 
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
-import { createFireFunction } from './create_fire_function';
+import { createExecuteFunction } from './create_execute_function';
 import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
 
 const mockTaskManager = taskManagerMock.create();
@@ -14,9 +14,9 @@ const spaceIdToNamespace = jest.fn();
 
 beforeEach(() => jest.resetAllMocks());
 
-describe('fire()', () => {
+describe('execute()', () => {
   test('schedules the action with all given parameters', async () => {
-    const fireFn = createFireFunction({
+    const executeFn = createExecuteFunction({
       taskManager: mockTaskManager,
       internalSavedObjectsRepository: savedObjectsClient,
       spaceIdToNamespace,
@@ -30,7 +30,7 @@ describe('fire()', () => {
       references: [],
     });
     spaceIdToNamespace.mockReturnValueOnce('namespace1');
-    await fireFn({
+    await executeFn({
       id: '123',
       params: { baz: false },
       spaceId: 'default',

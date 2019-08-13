@@ -8,24 +8,24 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { TaskManager } from '../../task_manager';
 import { SpacesPlugin } from '../../spaces';
 
-interface CreateFireFunctionOptions {
+interface CreateExecuteFunctionOptions {
   taskManager: TaskManager;
   internalSavedObjectsRepository: SavedObjectsClientContract;
   spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
 }
 
-export interface FireOptions {
+export interface ExecuteOptions {
   id: string;
   params: Record<string, any>;
   spaceId: string;
 }
 
-export function createFireFunction({
+export function createExecuteFunction({
   taskManager,
   internalSavedObjectsRepository,
   spaceIdToNamespace,
-}: CreateFireFunctionOptions) {
-  return async function fire({ id, params, spaceId }: FireOptions) {
+}: CreateExecuteFunctionOptions) {
+  return async function execute({ id, params, spaceId }: ExecuteOptions) {
     const namespace = spaceIdToNamespace(spaceId);
     const actionSavedObject = await internalSavedObjectsRepository.get('action', id, { namespace });
     await taskManager.schedule({
