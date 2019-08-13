@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { IndexPatternEnhanced } from 'ui/index_patterns/_index_pattern';
+import { IndexPattern } from 'ui/index_patterns';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../common/utils/shorten_dotted_string';
 import { TableHeaderColumn } from './table_header_column';
@@ -26,12 +26,12 @@ import { SortOrder, getDisplayedColumns } from './helpers';
 interface Props {
   columns: string[];
   hideTimeColumn: boolean;
-  indexPattern: IndexPatternEnhanced;
+  indexPattern: IndexPattern;
   isShortDots: boolean;
-  onChangeSortOrder: (name: string, direction: 'asc' | 'desc') => void;
-  onMoveColumn: (name: string, index: number) => void;
-  onRemoveColumn: (name: string) => void;
-  sortOrder: SortOrder;
+  onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
+  onMoveColumn?: (name: string, index: number) => void;
+  onRemoveColumn?: (name: string) => void;
+  sortOrder: SortOrder[];
 }
 
 export function TableHeader({
@@ -45,7 +45,6 @@ export function TableHeader({
   sortOrder,
 }: Props) {
   const displayedColumns = getDisplayedColumns(columns, indexPattern, hideTimeColumn, isShortDots);
-  const [currColumnName, currDirection = 'asc'] = sortOrder;
 
   return (
     <tr data-test-subj="docTableHeader" className="kbnDocTableHeader">
@@ -55,7 +54,7 @@ export function TableHeader({
           <TableHeaderColumn
             key={col.name}
             {...col}
-            sortDirection={col.name === currColumnName ? currDirection : ''}
+            sortOrder={sortOrder}
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}
             onChangeSortOrder={onChangeSortOrder}

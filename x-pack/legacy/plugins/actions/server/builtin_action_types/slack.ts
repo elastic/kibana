@@ -14,13 +14,11 @@ import {
   ExecutorType,
 } from '../types';
 
-// config definition
+// secrets definition
 
-const unencryptedConfigProperties: string[] = [];
+export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 
-export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
-
-const ConfigSchema = schema.object({
+const SecretsSchema = schema.object({
   webhookUrl: schema.string(),
 });
 
@@ -41,9 +39,8 @@ export function getActionType({ executor }: { executor?: ExecutorType } = {}): A
   return {
     id: '.slack',
     name: 'slack',
-    unencryptedAttributes: unencryptedConfigProperties,
     validate: {
-      config: ConfigSchema,
+      secrets: SecretsSchema,
       params: ParamsSchema,
     },
     executor,
@@ -59,11 +56,11 @@ async function slackExecutor(
   execOptions: ActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> {
   const id = execOptions.id;
-  const config = execOptions.config as ActionTypeConfigType;
+  const secrets = execOptions.secrets as ActionTypeSecretsType;
   const params = execOptions.params as ActionParamsType;
 
   let result: IncomingWebhookResult;
-  const { webhookUrl } = config;
+  const { webhookUrl } = secrets;
   const { message } = params;
 
   try {

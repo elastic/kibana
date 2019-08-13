@@ -8,19 +8,35 @@ import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ResizeChecker } from 'ui/resize_checker';
-import { syncLayerOrder, removeOrphanedSourcesAndLayers, createMbMapInstance } from './utils';
+import {
+  syncLayerOrderForSingleLayer,
+  removeOrphanedSourcesAndLayers,
+  addSpritesheetToMap
+} from './utils';
 import {
   DECIMAL_DEGREES_PRECISION,
   FEATURE_ID_PROPERTY_NAME,
-  ZOOM_PRECISION
+  ZOOM_PRECISION,
+  LON_INDEX
 } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw-unminified';
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import { FeatureTooltip } from '../feature_tooltip';
 import { DRAW_TYPE } from '../../../actions/map_actions';
-import { createShapeFilterWithMeta, createExtentFilterWithMeta } from '../../../elasticsearch_geo_utils';
+import {
+  createSpatialFilterWithBoundingBox,
+  createSpatialFilterWithGeometry,
+  getBoundingBoxGeometry,
+  roundCoordinates
+} from '../../../elasticsearch_geo_utils';
+import chrome from 'ui/chrome';
+import { spritesheet } from '@elastic/maki';
+import sprites1 from '@elastic/maki/dist/sprite@1.png';
+import sprites2 from '@elastic/maki/dist/sprite@2.png';
+import { i18n } from '@kbn/i18n';
 
+const isRetina = window.devicePixelRatio === 2;
 const mbDrawModes = MapboxDraw.modes;
 mbDrawModes.draw_rectangle = DrawRectangle;
 
@@ -75,40 +91,44 @@ export class MBMapContainer extends React.Component {
     this.props.setTooltipState(null);
   };
 
-  _onDraw = async (e) => {
-
+  _onDraw = (e) => {
     if (!e.features.length) {
       return;
     }
-    const { geoField, geoFieldType, indexPatternId, drawType } = this.props.drawState;
-    this.props.disableDrawState();
 
+    const isBoundingBox = this.props.drawState.drawType === DRAW_TYPE.BOUNDS;
+    const geometry = e.features[0].geometry;
+    // MapboxDraw returns coordinates with 12 decimals. Round to a more reasonable number
+    roundCoordinates(geometry.coordinates);
 
-    let filter;
-    if (drawType === DRAW_TYPE.POLYGON) {
-      filter = createShapeFilterWithMeta(e.features[0].geometry, indexPatternId, geoField, geoFieldType);
-    } else if (drawType === DRAW_TYPE.BOUNDS) {
-      const coordinates = e.features[0].geometry.coordinates[0];
-      const extent = {
-        minLon: coordinates[0][0],
-        minLat: coordinates[0][1],
-        maxLon: coordinates[0][0],
-        maxLat: coordinates[0][1]
+    try {
+      const options = {
+        indexPatternId: this.props.drawState.indexPatternId,
+        geoFieldName: this.props.drawState.geoField,
+        geoFieldType: this.props.drawState.geoFieldType,
       };
-      for (let i  = 1; i < coordinates.length; i++) {
-        extent.minLon = Math.min(coordinates[i][0], extent.minLon);
-        extent.minLat = Math.min(coordinates[i][1], extent.minLat);
-        extent.maxLon = Math.max(coordinates[i][0], extent.maxLon);
-        extent.maxLat = Math.max(coordinates[i][1], extent.maxLat);
-      }
-      filter = createExtentFilterWithMeta(extent, indexPatternId, geoField, geoFieldType);
+      const filter = isBoundingBox
+        ? createSpatialFilterWithBoundingBox({
+          ...options,
+          geometryLabel: i18n.translate('xpack.maps.drawControl.defaultEnvelopeLabel', {
+            defaultMessage: 'extent'
+          }),
+          geometry: getBoundingBoxGeometry(geometry)
+        })
+        : createSpatialFilterWithGeometry({
+          ...options,
+          geometryLabel: i18n.translate('xpack.maps.drawControl.defaultShapeLabel', {
+            defaultMessage: 'shape'
+          }),
+          geometry
+        });
+      this.props.addFilters([filter]);
+    } catch (error) {
+      // TODO notify user why filter was not created
+      console.log(error);
+    } finally {
+      this.props.disableDrawState();
     }
-
-    if (!filter) {
-      return;
-    }
-
-    this.props.addFilters([filter]);
   };
 
   _debouncedSync = _.debounce(() => {
@@ -224,8 +244,8 @@ export class MBMapContainer extends React.Component {
       // Ensure that if the map is zoomed out such that multiple
       // copies of the feature are visible, the popup appears
       // over the copy being pointed to.
-      while (Math.abs(mbLngLat.lng - coordinates[0]) > 180) {
-        coordinates[0] += mbLngLat.lng > coordinates[0] ? 360 : -360;
+      while (Math.abs(mbLngLat.lng - coordinates[LON_INDEX]) > 180) {
+        coordinates[0] += mbLngLat.lng > coordinates[LON_INDEX] ? 360 : -360;
       }
 
       popupAnchorLocation = coordinates;
@@ -340,13 +360,43 @@ export class MBMapContainer extends React.Component {
     this._mbDrawControl.changeMode(mbDrawMode);
   }
 
+
+  async _createMbMapInstance() {
+    const initialView = this.props.goto ? this.props.goto.center : null;
+    return new Promise((resolve) => {
+      const options = {
+        attributionControl: false,
+        container: this.refs.mapContainer,
+        style: {
+          version: 8,
+          sources: {},
+          layers: []
+        },
+        scrollZoom: this.props.scrollZoom,
+        preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false)
+      };
+      if (initialView) {
+        options.zoom = initialView.zoom;
+        options.center = {
+          lng: initialView.lon,
+          lat: initialView.lat
+        };
+      }
+      const mbMap = new mapboxgl.Map(options);
+      mbMap.dragRotate.disable();
+      mbMap.touchZoomRotate.disableRotation();
+      mbMap.addControl(
+        new mapboxgl.NavigationControl({ showCompass: false }), 'top-left'
+      );
+      mbMap.on('load', () => {
+        resolve(mbMap);
+      });
+    });
+  }
+
   async _initializeMap() {
     try {
-      this._mbMap = await createMbMapInstance({
-        node: this.refs.mapContainer,
-        initialView: this.props.goto ? this.props.goto.center : null,
-        scrollZoom: this.props.scrollZoom
-      });
+      this._mbMap = await this._createMbMapInstance();
     } catch(error) {
       this.props.setMapInitError(error.message);
       return;
@@ -355,6 +405,8 @@ export class MBMapContainer extends React.Component {
     if (!this._isMounted) {
       return;
     }
+
+    this._loadMakiSprites();
 
     this._initResizerChecker();
 
@@ -396,6 +448,21 @@ export class MBMapContainer extends React.Component {
     });
   }
 
+  _loadMakiSprites() {
+    const sprites = isRetina ? sprites2 : sprites1;
+    const json = isRetina ? spritesheet[2] : spritesheet[1];
+    addSpritesheetToMap(json, sprites, this._mbMap);
+  }
+
+  _reevaluateTooltipPosition = () => {
+    // Force mapbox to ensure tooltip does not clip map boundary and move anchor when clipping occurs
+    requestAnimationFrame(() => {
+      if (this._isMounted && this.props.tooltipState && this.props.tooltipState.location) {
+        this._mbPopup.setLngLat(this.props.tooltipState.location);
+      }
+    });
+  }
+
   _hideTooltip() {
     if (this._mbPopup.isOpen()) {
       this._mbPopup.remove();
@@ -417,6 +484,7 @@ export class MBMapContainer extends React.Component {
         showFilterButtons={!!this.props.addFilters && isLocked}
         isLocked={isLocked}
         addFilters={this.props.addFilters}
+        reevaluateTooltipPosition={this._reevaluateTooltipPosition}
       />
     ), this._tooltipContainer);
 
@@ -518,7 +586,7 @@ export class MBMapContainer extends React.Component {
       layer.syncLayerWithMB(this._mbMap);
     });
 
-    syncLayerOrder(this._mbMap, this.props.layerList);
+    syncLayerOrderForSingleLayer(this._mbMap, this.props.layerList);
   };
 
   _syncMbMapWithInspector = () => {

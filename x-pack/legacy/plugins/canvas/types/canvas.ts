@@ -6,29 +6,39 @@
 
 // @ts-ignore Unlinked Webpack Type
 import ContainerStyle from 'types/interpreter';
-import { PositionedElement } from './elements';
+import { ElementPosition } from './elements';
 
-export interface CanvasWorkpad {
-  css: string;
+export interface CanvasElement {
   id: string;
-  name: string;
-  width: number;
-  height: number;
-  page: number;
-  colors: string[];
-  isWritable: boolean;
-  assets: any;
-  '@timestamp': string;
-  '@created': string;
-  pages: CanvasPage[];
+  position: ElementPosition;
+  type: 'element';
+  expression: string;
+  filter: string;
 }
 
 export interface CanvasPage {
   id: string;
-  style: any;
-  transitions: any[];
-  groups: string[];
-  elements: PositionedElement[];
+  style: {
+    background: string;
+  };
+  transition: {}; // Fix
+  elements: CanvasElement[];
+  groups: CanvasElement[][];
+}
+
+export interface CanvasWorkpad {
+  '@created': string;
+  '@timestamp': string;
+  assets: any;
+  colors: string[];
+  css: string;
+  height: number;
+  id: string;
+  isWriteable: boolean;
+  name: string;
+  page: number;
+  pages: CanvasPage[];
+  width: number;
 }
 
 export interface CanvasRenderable {

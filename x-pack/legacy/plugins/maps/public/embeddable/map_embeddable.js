@@ -10,11 +10,10 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-import {
-  APPLY_FILTER_TRIGGER,
-  Embeddable,
-  executeTriggerActions
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/index';
+import { Embeddable, APPLY_FILTER_TRIGGER } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { start } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { onlyDisabledFiltersChanged } from '../../../../../../src/legacy/core_plugins/data/public';
+
 import { I18nContext } from 'ui/i18n';
 
 import { GisMap } from '../connected_components/gis_map';
@@ -65,7 +64,7 @@ export class MapEmbeddable extends Embeddable {
   onContainerStateChanged(containerState) {
     if (!_.isEqual(containerState.timeRange, this._prevTimeRange) ||
         !_.isEqual(containerState.query, this._prevQuery) ||
-        !_.isEqual(containerState.filters, this._prevFilters)) {
+        !onlyDisabledFiltersChanged(containerState.filters, this._prevFilters)) {
       this._dispatchSetQuery(containerState);
     }
 
@@ -150,7 +149,7 @@ export class MapEmbeddable extends Embeddable {
   }
 
   addFilters = filters => {
-    executeTriggerActions(APPLY_FILTER_TRIGGER, {
+    start.executeTriggerActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,
       triggerContext: {
         filters,

@@ -65,9 +65,9 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
       return (
         <Panel loading={{ loading }}>
           <HeaderPanel
-            subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${
-              i18n.ANOMALIES
-            }`}
+            subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
+              pagination.totalItemCount
+            )}`}
             title={i18n.ANOMALIES}
             tooltip={i18n.TOOLTIP}
           />
@@ -93,3 +93,7 @@ const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
     overflow: hidden;
   `}
 `;
+
+Panel.displayName = 'Panel';
+
+AnomaliesHostTable.displayName = 'AnomaliesHostTable';

@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { Vis, VisParams } from 'ui/vis';
+import { Vis } from './../..';
 
-export interface VisOptionsProps {
-  stateParams: VisParams;
+export interface VisOptionsProps<VisParamType = unknown> {
+  stateParams: VisParamType;
   vis: Vis;
-  setValue(paramName: string, value: unknown): void;
+  setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
 }

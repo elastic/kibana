@@ -36,11 +36,11 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
 
   const {
     error,
-    loading,
+    isLoading,
     data: { policies } = {
       policies: undefined,
     },
-    request: reload,
+    sendRequest: reload,
   } = useLoadPolicies();
 
   const openPolicyDetailsUrl = (newPolicyName: SlmPolicy['name']): string => {
@@ -53,6 +53,19 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     history.push(`${BASE_PATH}/policies`);
   };
 
+  const onPolicyDeleted = (policiesDeleted: Array<SlmPolicy['name']>): void => {
+    if (policyName && policiesDeleted.includes(policyName)) {
+      closePolicyDetails();
+    }
+    if (policiesDeleted.length) {
+      reload();
+    }
+  };
+
+  const onPolicyExecuted = () => {
+    reload();
+  };
+
   // Track component loaded
   const { trackUiMetric } = uiMetricService;
   useEffect(() => {
@@ -61,7 +74,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
 
   let content;
 
-  if (loading) {
+  if (isLoading) {
     content = (
       <SectionLoading>
         <FormattedMessage
@@ -113,13 +126,22 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
         policies={policies || []}
         reload={reload}
         openPolicyDetailsUrl={openPolicyDetailsUrl}
+        onPolicyDeleted={onPolicyDeleted}
+        onPolicyExecuted={onPolicyExecuted}
       />
     );
   }
 
   return (
     <section data-test-subj="policyList">
-      {policyName ? <PolicyDetails policyName={policyName} onClose={closePolicyDetails} /> : null}
+      {policyName ? (
+        <PolicyDetails
+          policyName={policyName}
+          onClose={closePolicyDetails}
+          onPolicyDeleted={onPolicyDeleted}
+          onPolicyExecuted={onPolicyExecuted}
+        />
+      ) : null}
       {content}
     </section>
   );

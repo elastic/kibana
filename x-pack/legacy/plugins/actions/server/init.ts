@@ -7,7 +7,7 @@
 import { Legacy } from 'kibana';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
-import { createFireFunction } from './create_fire_function';
+import { createExecuteFunction } from './create_execute_function';
 import { ActionsPlugin, Services } from './types';
 import {
   createRoute,
@@ -16,21 +16,33 @@ import {
   getRoute,
   updateRoute,
   listActionTypesRoute,
-  fireRoute,
+  executeRoute,
 } from './routes';
-
 import { registerBuiltInActionTypes } from './builtin_action_types';
+import { SpacesPlugin } from '../../spaces';
+import { createOptionalPlugin } from '../../../server/lib/optional_plugin';
 
 export function init(server: Legacy.Server) {
+  const config = server.config();
+  const spaces = createOptionalPlugin<SpacesPlugin>(
+    config,
+    'xpack.spaces',
+    server.plugins,
+    'spaces'
+  );
+
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
     callWithInternalUser
   );
 
   // Encrypted attributes
+  // - `secrets` properties will be encrypted
+  // - `config` will be included in AAD
+  // - everything else excluded from AAD
   server.plugins.encrypted_saved_objects!.registerType({
     type: 'action',
-    attributesToEncrypt: new Set(['actionTypeConfigSecrets']),
+    attributesToEncrypt: new Set(['secrets']),
     attributesToExcludeFromAAD: new Set(['description']),
   });
 
@@ -50,11 +62,19 @@ export function init(server: Legacy.Server) {
     };
   }
 
-  const { taskManager } = server;
+  const taskManager = server.plugins.task_manager!;
   const actionTypeRegistry = new ActionTypeRegistry({
     getServices,
     taskManager: taskManager!,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
+    getBasePath(...args) {
+      return spaces.isEnabled
+        ? spaces.getBasePath(...args)
+        : server.config().get('server.basePath');
+    },
+    spaceIdToNamespace(...args) {
+      return spaces.isEnabled ? spaces.spaceIdToNamespace(...args) : undefined;
+    },
   });
 
   registerBuiltInActionTypes(actionTypeRegistry);
@@ -66,15 +86,18 @@ export function init(server: Legacy.Server) {
   findRoute(server);
   updateRoute(server);
   listActionTypesRoute(server);
-  fireRoute({
+  executeRoute({
     server,
     actionTypeRegistry,
     getServices,
   });
 
-  const fireFn = createFireFunction({
+  const executeFn = createExecuteFunction({
     taskManager: taskManager!,
     internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
+    spaceIdToNamespace(...args) {
+      return spaces.isEnabled ? spaces.spaceIdToNamespace(...args) : undefined;
+    },
   });
 
   // Expose functions to server
@@ -88,7 +111,7 @@ export function init(server: Legacy.Server) {
     return actionsClient;
   });
   const exposedFunctions: ActionsPlugin = {
-    fire: fireFn,
+    execute: executeFn,
     registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
     listTypes: actionTypeRegistry.list.bind(actionTypeRegistry),
   };

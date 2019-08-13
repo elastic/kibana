@@ -117,71 +117,12 @@ export type CanvasFunction = FunctionFactory<Functions>;
 export type CanvasFunctionName = CanvasFunction['name'];
 
 /**
- * Represents an object that is intended to be rendered.
- */
-export interface Render<T> {
-  type: 'render';
-  as: string;
-  value: T;
-}
-
-/**
- * Represents an object that is a Filter.
- */
-export interface Filter {
-  type?: string;
-  value?: string;
-  column?: string;
-  and: Filter[];
-  to?: string;
-  from?: string;
-  query?: string | null;
-}
-
-/**
  * Represents a function called by the `case` Function.
  */
 export interface Case {
   type: 'case';
   matches: any;
   result: any;
-}
-
-// DATATABLES
-// ----------
-
-/**
- * A Utility function that Typescript can use to determine if an object is a Datatable.
- * @param datatable
- */
-export const isDatatable = (datatable: any): datatable is Datatable =>
-  !!datatable && datatable.type === 'datatable';
-
-/**
- * This type represents the `type` of any `DatatableColumn` in a `Datatable`.
- */
-export type DatatableColumnType = 'string' | 'number' | 'boolean' | 'date' | 'null';
-
-/**
- * This type represents a `DatatableRow` in a `Datatable`.
- */
-export type DatatableRow = Record<string, any>;
-
-/**
- * This type represents the shape of a column in a `Datatable`.
- */
-export interface DatatableColumn {
-  name: string;
-  type: DatatableColumnType;
-}
-
-/**
- * A `Datatable` in Canvas is a unique structure that represents tabulated data.
- */
-export interface Datatable {
-  type: 'datatable';
-  columns: DatatableColumn[];
-  rows: DatatableRow[];
 }
 
 export enum Legend {
@@ -196,34 +137,6 @@ export enum Position {
   BOTTOM = 'bottom',
   LEFT = 'left',
   RIGHT = 'right',
-}
-
-/**
- * Allowed column names in a PointSeries
- */
-export type PointSeriesColumnName = 'x' | 'y' | 'color' | 'size' | 'text';
-
-/**
- * Column in a PointSeries
- */
-export interface PointSeriesColumn {
-  type: 'number' | 'string';
-  role: 'measure' | 'dimension';
-  expression: string;
-}
-
-/**
- * Represents a collection of valid Columns in a PointSeries
- */
-export type PointSeriesColumns = { [key in PointSeriesColumnName]: PointSeriesColumn };
-
-/**
- * A `PointSeries` in Canvas is a unique structure that represents dots on a chart.
- */
-export interface PointSeries {
-  type: 'pointseries';
-  columns: PointSeriesColumns;
-  rows: Array<Record<string, any>>;
 }
 
 export interface SeriesStyle {

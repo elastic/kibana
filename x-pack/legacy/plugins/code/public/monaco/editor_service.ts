@@ -7,7 +7,7 @@
 import { editor, IRange, Uri } from 'monaco-editor';
 // @ts-ignore
 import { StandaloneCodeEditorServiceImpl } from 'monaco-editor/esm/vs/editor/standalone/browser/standaloneCodeServiceImpl.js';
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 import { parseSchema } from '../../common/uri_util';
 import { SymbolSearchResult } from '../../model';
 import { history } from '../utils/url';
@@ -37,10 +37,7 @@ export class EditorService extends StandaloneCodeEditorServiceImpl {
 
   public static async findSymbolByQname(qname: string) {
     try {
-      const response = await kfetch({
-        pathname: `/api/code/lsp/symbol/${qname}`,
-        method: 'GET',
-      });
+      const response = await npStart.core.http.get(`/api/code/lsp/symbol/${qname}`);
       return response as SymbolSearchResult;
     } catch (e) {
       const error = e.body;

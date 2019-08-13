@@ -13,7 +13,7 @@ import { fontSizes, truncate } from '../../../style/variables';
 import { asMillis } from '../../../utils/formatters';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
-import { TransactionLink } from '../../shared/Links/TransactionLink';
+import { TransactionLink } from '../../shared/Links/apm/TransactionLink';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
 

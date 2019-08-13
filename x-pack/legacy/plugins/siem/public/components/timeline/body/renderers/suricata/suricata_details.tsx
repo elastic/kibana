@@ -21,6 +21,8 @@ const Details = styled.div`
   margin: 10px 0;
 `;
 
+Details.displayName = 'Details';
+
 export const SuricataDetails = pure<{ browserFields: BrowserFields; data: Ecs }>(({ data }) => {
   const signature: string | null | undefined = get('suricata.eve.alert.signature[0]', data);
   const signatureId: number | null | undefined = get('suricata.eve.alert.signature_id[0]', data);
@@ -42,3 +44,5 @@ export const SuricataDetails = pure<{ browserFields: BrowserFields; data: Ecs }>
     return null;
   }
 });
+
+SuricataDetails.displayName = 'SuricataDetails';
