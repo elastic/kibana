@@ -17,11 +17,16 @@
  * under the License.
  */
 
-// Those exports are kept here for now, so we can move over imports
-// step by step into the data plugin.
-export {
-  parseEsInterval,
-  ParsedInterval,
-  InvalidEsCalendarIntervalError,
-  InvalidEsIntervalFormatError,
-} from '../../../core_plugins/data/common';
+import { Style } from '../../interpreter/public/types';
+
+export interface Arguments {
+  markdown: string;
+  font: Style;
+  openLinksInNewTab: boolean;
+}
+
+export interface MarkdownVisParams {
+  markdown: Arguments['markdown'];
+  openLinksInNewTab: Arguments['openLinksInNewTab'];
+  fontSize: number;
+}
