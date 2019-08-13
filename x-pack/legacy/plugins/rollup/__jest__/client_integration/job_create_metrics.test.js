@@ -30,6 +30,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
   let getEuiStepsHorizontalActive;
   let goToStep;
   let table;
+  let metrics;
 
   beforeAll(() => {
     ({ server, httpRequestsMockHelpers } = setupEnvironment());
@@ -50,6 +51,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       getEuiStepsHorizontalActive,
       goToStep,
       table,
+      metrics,
     } = setup());
   });
 
@@ -251,33 +253,18 @@ describe('Create Rollup Job, step 5: Metrics', () => {
     });
 
     describe('when using multi-selectors', () => {
+      let getSelectAllInputForRow;
+      let getFieldChooserColumnForRow;
+      let getFieldListTableRows;
+
       beforeEach(async () => {
         httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields, dateFields });
         await goToStep(5);
         await addFieldToList('numeric');
         await addFieldToList('date');
+        find('rollupJobSelectAllMetricsPopoverButton').simulate('click');
+        ({ getSelectAllInputForRow, getFieldChooserColumnForRow, getFieldListTableRows } = metrics);
       });
-
-      const getFieldListTableRows = () => {
-        const { rows } = table.getMetaData('rollupJobMetricsFieldList');
-        return rows;
-      };
-
-      const getFieldListTableRow = (row) => {
-        const rows = getFieldListTableRows();
-        return rows[row];
-      };
-
-      const getFieldChooserColumnForRow = (row) => {
-        const selectedRow = getFieldListTableRow(row);
-        const [,, fieldChooserColumn] = selectedRow.columns;
-        return fieldChooserColumn;
-      };
-
-      const getSelectAllInputForRow = (row) => {
-        const fieldChooser = getFieldChooserColumnForRow(row);
-        return fieldChooser.reactWrapper.find('input').first();
-      };
 
       const expectAllFieldChooserInputs = (fieldChooserColumn, expected) => {
         const inputs = fieldChooserColumn.reactWrapper.find('input');
@@ -307,30 +294,31 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         expectAllFieldChooserInputs(fieldChooserColumn, false);
       });
 
-      it('should select all of the metric types across rows',  () => {
+      it('should select all of the metric types across rows (column-wise)',  () => {
         const selectAllAvgCheckbox = find('rollupJobMetricsSelectAllCheckbox-avg');
         selectAllAvgCheckbox.first().simulate('change', { checked: true });
 
         const rows = getFieldListTableRows();
 
-        rows.forEach((row, idx) => {
-          const [, metricTypeCol ] = row.columns;
-          if (metricTypeCol.value !== 'numeric') {
-            return;
-          }
-          const fieldChooser = getFieldChooserColumnForRow(idx);
-          fieldChooser.reactWrapper.find('input').forEach(input => {
-            const props = input.props();
-            if (props['data-test-subj'].endsWith('avg')) {
-              expect(props.checked).toBe(true);
-            } else {
-              expect(props.checked).toBe(false);
-            }
+        rows
+          .filter((row) => {
+            const [, metricTypeCol ] = row.columns;
+            return metricTypeCol.value === 'numeric';
+          })
+          .forEach((row, idx) => {
+            const fieldChooser = getFieldChooserColumnForRow(idx);
+            fieldChooser.reactWrapper.find('input').forEach(input => {
+              const props = input.props();
+              if (props['data-test-subj'].endsWith('avg')) {
+                expect(props.checked).toBe(true);
+              } else {
+                expect(props.checked).toBe(false);
+              }
+            });
           });
-        });
       });
 
-      it('should deselect all of the metric types across rows',  () => {
+      it('should deselect all of the metric types across rows (column-wise)',  () => {
         const selectAllAvgCheckbox = find('rollupJobMetricsSelectAllCheckbox-avg');
         selectAllAvgCheckbox.last().simulate('change', { checked: true });
         selectAllAvgCheckbox.last().simulate('change', { checked: false });

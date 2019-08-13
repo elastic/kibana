@@ -224,7 +224,11 @@ export class StepMetricsUi extends Component {
   }
 
   getMetricsSelectAllMenu() {
-    const { jsxElements: checkboxElements, allCheckboxesDisabled } = this.renderMetricsSelectAllCheckboxes();
+    const {
+      jsxElements: checkboxElements,
+      allCheckboxesDisabled
+    } = this.renderMetricsSelectAllCheckboxes();
+
     return (
       <Fragment>
         <EuiPopover
@@ -235,6 +239,7 @@ export class StepMetricsUi extends Component {
             <EuiButton
               disabled={allCheckboxesDisabled}
               onClick={this.openMetricsPopover}
+              data-test-subj="rollupJobSelectAllMetricsPopoverButton"
             >
               {
                 i18n.translate(
@@ -244,7 +249,7 @@ export class StepMetricsUi extends Component {
             </EuiButton>
           }
         >
-          <EuiFlexGroup alignItems="left" direction="column">
+          <EuiFlexGroup alignItems="flexStart" direction="column">
             {
               checkboxElements
                 .map((item, idx) => <EuiFlexItem key={idx}>{item}</EuiFlexItem>)
@@ -279,7 +284,7 @@ export class StepMetricsUi extends Component {
     return (
       <EuiCheckbox
         id={`${fieldName}-selectAll-checkbox`}
-        data-test-subj={`rollupJobMetricsCheckbox-selectAll`}
+        data-test-subj="rollupJobMetricsCheckbox-selectAll"
         label={label}
         checked={allSelected}
         onChange={onChange}
