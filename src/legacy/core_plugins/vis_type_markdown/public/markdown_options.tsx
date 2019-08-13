@@ -30,12 +30,9 @@ import {
   EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { SwitchOption } from '../../kbn_vislib_vis_types/public/controls/switch';
-import { RangeOption } from '../../kbn_vislib_vis_types/public/controls/range';
 import { MarkdownVisParams } from './types';
 
 function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisParams>) {
@@ -67,26 +64,6 @@ function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisP
       </EuiFlexGroup>
       <EuiSpacer size="s" />
 
-      <RangeOption
-        label={i18n.translate('visTypeMarkdown.params.fontSizeLabel', {
-          defaultMessage: 'Base font size in points',
-        })}
-        max={36}
-        min={8}
-        paramName="fontSize"
-        showInput
-        value={stateParams.fontSize}
-        setValue={setValue}
-      />
-
-      <SwitchOption
-        label={i18n.translate('visTypeMarkdown.params.openLinksLabel', {
-          defaultMessage: 'Open links in new tab',
-        })}
-        paramName="openLinksInNewTab"
-        value={stateParams.openLinksInNewTab}
-        setValue={setValue}
-      />
       <EuiFormRow fullWidth={true} compressed>
         <EuiTextArea
           id="markdownVisInput"
