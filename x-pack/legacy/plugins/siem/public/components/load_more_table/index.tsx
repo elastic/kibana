@@ -303,6 +303,8 @@ const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
   `}
 `;
 
+Panel.displayName = 'Panel';
+
 const BasicTable = styled(EuiBasicTable)`
   tbody {
     th,
@@ -312,9 +314,13 @@ const BasicTable = styled(EuiBasicTable)`
   }
 `;
 
+BasicTable.displayName = 'BasicTable';
+
 const FooterAction = styled(EuiFlexGroup).attrs({
   alignItems: 'center',
   responsive: false,
 })`
   margin-top: ${props => props.theme.eui.euiSizeXS};
 `;
+
+FooterAction.displayName = 'FooterAction';
