@@ -36,6 +36,27 @@ export const LogsPage = injectUICapabilities(
     const [sourceId] = useSourceId();
     const source = useSource({ sourceId });
     const { hasLogAnalysisCapabilites } = useLogAnalysisCapabilities();
+    const streamTab = {
+      title: intl.formatMessage({
+        id: 'xpack.infra.logs.index.streamTabTitle',
+        defaultMessage: 'Stream',
+      }),
+      path: `${match.path}/stream`,
+    };
+    const analysisTab = {
+      title: intl.formatMessage({
+        id: 'xpack.infra.logs.index.analysisTabTitle',
+        defaultMessage: 'Analysis',
+      }),
+      path: `${match.path}/analysis`,
+    };
+    const settingsTab = {
+      title: intl.formatMessage({
+        id: 'xpack.infra.logs.index.settingsTabTitle',
+        defaultMessage: 'Settings',
+      }),
+      path: `${match.path}/settings`,
+    };
     return (
       <Source.Context.Provider value={source}>
         <ColumnarPage>
@@ -78,33 +99,11 @@ export const LogsPage = injectUICapabilities(
             <>
               <AppNavigation>
                 <RoutedTabs
-                  tabs={[
-                    {
-                      title: intl.formatMessage({
-                        id: 'xpack.infra.logs.index.streamTabTitle',
-                        defaultMessage: 'Stream',
-                      }),
-                      path: `${match.path}/stream`,
-                    },
-                    ...(hasLogAnalysisCapabilites
-                      ? [
-                          {
-                            title: intl.formatMessage({
-                              id: 'xpack.infra.logs.index.analysisTabTitle',
-                              defaultMessage: 'Analysis',
-                            }),
-                            path: `${match.path}/analysis`,
-                          },
-                        ]
-                      : []),
-                    {
-                      title: intl.formatMessage({
-                        id: 'xpack.infra.logs.index.settingsTabTitle',
-                        defaultMessage: 'Settings',
-                      }),
-                      path: `${match.path}/settings`,
-                    },
-                  ]}
+                  tabs={
+                    hasLogAnalysisCapabilites
+                      ? [streamTab, analysisTab, settingsTab]
+                      : [streamTab, settingsTab]
+                  }
                 />
               </AppNavigation>
 

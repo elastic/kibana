@@ -155,9 +155,5 @@ test('Returns title', async () => {
 test('Returns an icon', async () => {
   const inspector = inspectorPluginMock.createStartContract();
   const inspectAction = new InspectPanelAction(inspector);
-  expect(inspectAction.getIcon()).toMatchInlineSnapshot(`
-    <EuiIcon
-      type="inspect"
-    />
-  `);
+  expect(inspectAction.getIconType()).toBe('inspect');
 });

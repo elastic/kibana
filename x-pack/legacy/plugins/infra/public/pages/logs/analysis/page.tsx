@@ -6,6 +6,7 @@
 
 import React, { useContext } from 'react';
 import chrome from 'ui/chrome';
+import i18n from '@elastic/i18n';
 import { ColumnarPage } from '../../../components/page';
 import { LoadingPage } from '../../../components/loading_page';
 import { AnalysisPageProviders } from './page_providers';
@@ -27,7 +28,11 @@ export const AnalysisPage = () => {
     <AnalysisPageProviders>
       <ColumnarPage data-test-subj="infraLogsAnalysisPage">
         {isLoadingSetupStatus ? (
-          <LoadingPage message="Checking status of analysis jobs..." />
+          <LoadingPage
+            message={i18n.translate('xpack.infra.logs.analysisPage.loadingMessage', {
+              defaultMessage: 'Checking status of analysis jobs...',
+            })}
+          />
         ) : isSetupRequired ? (
           <AnalysisSetupContent />
         ) : (
