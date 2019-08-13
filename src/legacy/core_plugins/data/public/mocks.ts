@@ -17,35 +17,26 @@
  * under the License.
  */
 
-import { UiSettingsClientContract } from 'src/core/public';
-import { IndexPatterns } from '../index_patterns';
-import { FilterManager } from './filter_manager';
+import { DataSetup } from '.';
+import { filterServiceMock } from './filter/filter_service.mock';
+import { indexPatternsServiceMock } from './index_patterns/index_patterns_service.mock';
+import { queryServiceMock } from './query/query_service.mock';
 
-/**
- * Filter Service
- * @internal
- */
+function createDataSetupMock() {
+  const mock: MockedKeys<Partial<DataSetup>> = {
+    filter: filterServiceMock.createSetupContract(),
+    indexPatterns: indexPatternsServiceMock.createSetupContract(),
+    query: queryServiceMock.createSetupContract(),
+  };
 
-export interface FilterServiceDependencies {
-  indexPatterns: IndexPatterns;
-  uiSettings: UiSettingsClientContract;
+  return mock;
 }
 
-export class FilterService {
-  public setup({ indexPatterns, uiSettings }: FilterServiceDependencies) {
-    return {
-      filterManager: new FilterManager(indexPatterns, uiSettings),
-    };
-  }
-
-  public start() {
-    // nothing to do here yet
-  }
-
-  public stop() {
-    // nothing to do here yet
-  }
+function createDataStartMock() {
+  return {};
 }
 
-/** @public */
-export type FilterSetup = ReturnType<FilterService['setup']>;
+export const dataPluginMock = {
+  createSetup: createDataSetupMock,
+  createStart: createDataStartMock,
+};

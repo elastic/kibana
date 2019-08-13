@@ -17,6 +17,8 @@
  * under the License.
  */
 
+// @ts-ignore
+export * from './flatten_hit';
 export * from './format_hit';
 export * from './index_pattern';
 export * from './index_patterns';

@@ -17,29 +17,21 @@
  * under the License.
  */
 
-/**
- * Nothing to see here!
- *
- * Index Patterns have moved to the data plugin, and are being re-exported
- * from ui/index_patterns for backwards compatibility.
- */
+import { dataPluginMock } from '../../../../core_plugins/data/public/mocks';
 
-import { setup as data } from '../../../core_plugins/data/public/legacy';
+const createMock = () => {
+  const mock = {
+    setup: {
+      data: dataPluginMock.createSetup(),
+    },
+    start: {
+      data: dataPluginMock.createStart(),
+    },
+  };
+  return mock;
+};
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-export {
-  mockFields,
-  mockIndexPattern,
-} from '../../../core_plugins/data/public/index_patterns/index_patterns_service.mock';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
-
-// Field is only used as class in Index Patterns Management UI.
-// FieldList is only used in discover.
-export const { FieldList, flattenHitWrapper, formatHitProvider } = data.indexPatterns;
-export const { IndexPatternsProvider } = data.indexPatterns.__LEGACY;
-
-// ui components
-export const { IndexPatternSelect } = data.indexPatterns.ui;
+createMock();
 
 // static code
 export {
@@ -55,13 +47,4 @@ export {
   IndexPatternMissingIndices,
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
-} from '../../../core_plugins/data/public';
-
-// types
-export {
-  Field,
-  FieldType,
-  IndexPattern,
-  IndexPatterns,
-  StaticIndexPattern,
-} from '../../../core_plugins/data/public';
+} from '../../../../core_plugins/data/public';

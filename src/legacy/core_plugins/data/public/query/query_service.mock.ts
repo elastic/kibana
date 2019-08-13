@@ -17,35 +17,35 @@
  * under the License.
  */
 
-import { UiSettingsClientContract } from 'src/core/public';
-import { IndexPatterns } from '../index_patterns';
-import { FilterManager } from './filter_manager';
+import { QueryService, QuerySetup } from '.';
 
-/**
- * Filter Service
- * @internal
- */
+type QueryServiceClientContract = PublicMethodsOf<QueryService>;
 
-export interface FilterServiceDependencies {
-  indexPatterns: IndexPatterns;
-  uiSettings: UiSettingsClientContract;
-}
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<QuerySetup> = {
+    helpers: {
+      fromUser: jest.fn(),
+      toUser: jest.fn(),
+      getQueryLog: jest.fn(),
+    },
+  };
 
-export class FilterService {
-  public setup({ indexPatterns, uiSettings }: FilterServiceDependencies) {
-    return {
-      filterManager: new FilterManager(indexPatterns, uiSettings),
-    };
-  }
+  return setupContract;
+};
 
-  public start() {
-    // nothing to do here yet
-  }
+const createMock = () => {
+  const mocked: jest.Mocked<QueryServiceClientContract> = {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
 
-  public stop() {
-    // nothing to do here yet
-  }
-}
+  mocked.setup.mockReturnValue(createSetupContractMock());
+  return mocked;
+};
 
-/** @public */
-export type FilterSetup = ReturnType<FilterService['setup']>;
+export const queryServiceMock = {
+  create: createMock,
+  createSetupContract: createSetupContractMock,
+  createStartContract: createSetupContractMock,
+};

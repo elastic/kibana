@@ -19,4 +19,4 @@
 
 export * from './index_patterns_service';
 
-export { mockFields, mockIndexPattern } from './mocks';
+export { mockFields, mockIndexPattern } from './index_patterns_service.mock';
