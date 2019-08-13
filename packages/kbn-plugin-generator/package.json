@@ -13,5 +13,14 @@
     "lodash.snakecase": "^4.1.1",
     "lodash.startcase": "^4.4.0",
     "sao": "^0.22.12"
+  },
+  "scripts": {
+    "test": "jest -c jest.config.integration.js"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "babel-jest": "^24.8.0",
+    "jest": "^24.8.0"
   }
 }
