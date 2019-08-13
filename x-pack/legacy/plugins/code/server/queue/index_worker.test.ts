@@ -17,7 +17,7 @@ import { CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { emptyAsyncFunc } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
-import { CancellationSerivce } from './cancellation_service';
+import { CancellationReason, CancellationSerivce } from './cancellation_service';
 import { IndexWorker } from './index_worker';
 
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
@@ -164,7 +164,7 @@ test('Execute index job and then cancel.', async () => {
   });
 
   // Cancel the index job.
-  cToken.cancel();
+  cToken.cancel(CancellationReason.REPOSITORY_DELETE);
 
   expect(cancelIndexJobSpy.calledOnce).toBeTruthy();
   expect(getSpy.calledOnce).toBeTruthy();

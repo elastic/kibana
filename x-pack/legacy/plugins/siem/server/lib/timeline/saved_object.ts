@@ -61,6 +61,7 @@ export class Timeline {
     sort: SortTimeline | null
   ): Promise<ResponseTimelines> {
     const options: SavedObjectsFindOptions = {
+      type: timelineSavedObjectType,
       perPage: pageInfo != null ? pageInfo.pageSize : undefined,
       page: pageInfo != null ? pageInfo.pageIndex : undefined,
       search: search != null ? search : undefined,
@@ -266,10 +267,7 @@ export class Timeline {
       }`;
     }
 
-    const savedObjects = await savedObjectsClient.find({
-      type: timelineSavedObjectType,
-      ...options,
-    });
+    const savedObjects = await savedObjectsClient.find(options);
 
     const timelinesWithNotesAndPinnedEvents = await Promise.all(
       savedObjects.saved_objects.map(async savedObject => {

@@ -12,7 +12,7 @@ import { Aggregation, Field } from '../../../../../common/types/fields';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
-import { JOB_TYPE } from './util/constants';
+import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -341,12 +341,12 @@ export class JobCreator {
     return null;
   }
 
-  public set createdBy(createdBy: string | null) {
+  public set createdBy(createdBy: CREATED_BY_LABEL | null) {
     this._setCustomSetting('created_by', createdBy);
   }
 
-  public get createdBy(): string | null {
-    return this._getCustomSetting('created_by') as string | null;
+  public get createdBy(): CREATED_BY_LABEL | null {
+    return this._getCustomSetting('created_by') as CREATED_BY_LABEL | null;
   }
 
   public get formattedJobJson() {
@@ -355,5 +355,20 @@ export class JobCreator {
 
   public get formattedDatafeedJson() {
     return JSON.stringify(this._datafeed_config, null, 2);
+  }
+
+  protected _overrideConfigs(job: Job, datafeed: Datafeed) {
+    this._job_config = job;
+    this._datafeed_config = datafeed;
+
+    this._detectors = this._job_config.analysis_config.detectors;
+    this._influencers = this._job_config.analysis_config.influencers;
+    if (this._job_config.groups === undefined) {
+      this._job_config.groups = [];
+    }
+
+    if (this._job_config.analysis_config.influencers !== undefined) {
+      this._job_config.analysis_config.influencers.forEach(i => this.addInfluencer(i));
+    }
   }
 }

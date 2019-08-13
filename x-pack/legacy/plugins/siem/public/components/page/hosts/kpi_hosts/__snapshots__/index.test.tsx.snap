@@ -2,7 +2,7 @@
 
 exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
 <EuiFlexGroup>
-  <Memo()
+  <StatItemsComponent
     description="User authentications"
     enableAreaChart={true}
     enableBarChart={true}
@@ -30,7 +30,7 @@ exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
     index={0}
     key="authentication"
   />
-  <Memo()
+  <StatItemsComponent
     description="Unique IPs"
     enableAreaChart={true}
     enableBarChart={true}
@@ -63,7 +63,7 @@ exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
 
 exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
 <EuiFlexGroup>
-  <Memo()
+  <StatItemsComponent
     description="Hosts"
     enableAreaChart={true}
     fields={
@@ -80,7 +80,7 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
     index={0}
     key="hosts"
   />
-  <Memo()
+  <StatItemsComponent
     description="User authentications"
     enableAreaChart={true}
     enableBarChart={true}
@@ -108,7 +108,7 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
     index={1}
     key="authentication"
   />
-  <Memo()
+  <StatItemsComponent
     description="Unique IPs"
     enableAreaChart={true}
     enableBarChart={true}
@@ -140,7 +140,7 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
 `;
 
 exports[`kpiHostsComponent render it should render spinner if it is loading 1`] = `
-<Styled(EuiFlexGroup)
+<FlexGroupSpinner
   alignItems="center"
   justifyContent="center"
 >
@@ -151,5 +151,5 @@ exports[`kpiHostsComponent render it should render spinner if it is loading 1`] 
       size="xl"
     />
   </EuiFlexItem>
-</Styled(EuiFlexGroup)>
+</FlexGroupSpinner>
 `;

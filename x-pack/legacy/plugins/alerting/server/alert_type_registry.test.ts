@@ -23,8 +23,10 @@ const alertTypeRegistryParams = {
     };
   },
   taskManager,
-  fireAction: jest.fn(),
+  executeAction: jest.fn(),
   internalSavedObjectsRepository: SavedObjectsClientMock.create(),
+  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+  getBasePath: jest.fn().mockReturnValue(undefined),
 };
 
 beforeEach(() => jest.resetAllMocks());
@@ -46,7 +48,7 @@ describe('has()', () => {
   });
 });
 
-describe('registry()', () => {
+describe('register()', () => {
   test('registers the executor with the task manager', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getCreateTaskRunnerFunction } = require('./lib/get_create_task_runner_function');
@@ -79,7 +81,9 @@ Object {
 }
 `);
     expect(firstCall.internalSavedObjectsRepository).toBeTruthy();
-    expect(firstCall.fireAction).toMatchInlineSnapshot(`[MockFunction]`);
+    expect(firstCall.getBasePath).toBeTruthy();
+    expect(firstCall.spaceIdToNamespace).toBeTruthy();
+    expect(firstCall.executeAction).toMatchInlineSnapshot(`[MockFunction]`);
   });
 
   test('should throw an error if type is already registered', () => {

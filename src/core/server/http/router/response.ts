@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IncomingHttpHeaders } from 'http';
 import { Stream } from 'stream';
+import { ResponseHeaders } from './headers';
 
 /**
  * Additional metadata to enhance error output or provide error details.
@@ -40,7 +40,11 @@ export type ResponseError =
       meta?: ResponseErrorMeta;
     };
 
-export class KibanaResponse<T extends HttpResponsePayload | ResponseError> {
+/**
+ * A response data object, expected to returned as a result of {@link RequestHandler} execution
+ * @internal
+ */
+export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any> {
   constructor(
     readonly status: number,
     readonly payload?: T,
@@ -49,50 +53,30 @@ export class KibanaResponse<T extends HttpResponsePayload | ResponseError> {
 }
 
 /**
- * Creates a Union type of all known keys of a given interface.
- * @example
- * ```ts
- * interface Person {
- *   name: string;
- *   age: number;
- *   [attributes: string]: string | number;
- * }
- * type PersonKnownKeys = KnownKeys<Person>; // "age" | "name"
- * ```
- */
-type KnownKeys<T> = {
-  [K in keyof T]: string extends K ? never : number extends K ? never : K;
-} extends { [_ in keyof T]: infer U }
-  ? U
-  : never;
-
-type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
-/**
  * HTTP response parameters
  * @public
  */
 export interface HttpResponseOptions {
   /** HTTP Headers with additional information about response */
-  headers?: { [header in KnownHeaders]?: string | string[] } & {
-    [header: string]: string | string[];
-  };
+  headers?: ResponseHeaders;
 }
 
 /**
+ * Data send to the client as a response payload.
  * @public
  */
 export type HttpResponsePayload = undefined | string | Record<string, any> | Buffer | Stream;
 
 /**
- * HTTP response parameters
+ * HTTP response parameters for a response with adjustable status code.
  * @public
  */
-export interface CustomResponseOptions extends HttpResponseOptions {
+export interface CustomHttpResponseOptions extends HttpResponseOptions {
   statusCode: number;
 }
 
 /**
- * HTTP response parameters
+ * HTTP response parameters for redirection response
  * @public
  */
 export type RedirectResponseOptions = HttpResponseOptions & {
@@ -101,8 +85,7 @@ export type RedirectResponseOptions = HttpResponseOptions & {
   };
 };
 
-export const responseFactory = {
-  // Success
+const successResponseFactory = {
   /**
    * The request has succeeded.
    * Status code: `200`.
@@ -127,21 +110,9 @@ export const responseFactory = {
    * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
    */
   noContent: (options: HttpResponseOptions = {}) => new KibanaResponse(204, undefined, options),
+};
 
-  /**
-   * Creates a response with defined status code and payload.
-   * @param payload - {@link HttpResponsePayload} payload to send to the client
-   * @param options - {@link CustomResponseOptions} configures HTTP response parameters.
-   */
-  custom: (payload: HttpResponsePayload | ResponseError, options: CustomResponseOptions) => {
-    if (!options || !options.statusCode) {
-      throw new Error(`options.statusCode is expected to be set. given options: ${options}`);
-    }
-    const { statusCode: code, ...rest } = options;
-    return new KibanaResponse(code, payload, rest);
-  },
-
-  // Redirection
+const redirectionResponseFactory = {
   /**
    * Redirect to a different URI.
    * Status code: `302`.
@@ -151,8 +122,9 @@ export const responseFactory = {
    */
   redirected: (payload: HttpResponsePayload, options: RedirectResponseOptions) =>
     new KibanaResponse(302, payload, options),
+};
 
-  // Client error
+const errorResponseFactory = {
   /**
    * The server cannot process the request due to something that is perceived to be a client error.
    * Status code: `400`.
@@ -205,12 +177,149 @@ export const responseFactory = {
    * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
    * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
    */
-  internal: (error: ResponseError = 'Internal Error', options: HttpResponseOptions = {}) =>
+  internalError: (error: ResponseError = 'Internal Error', options: HttpResponseOptions = {}) =>
     new KibanaResponse(500, error, options),
+
+  /**
+   * Creates an error response with defined status code and payload.
+   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
+   * @param options - {@link CustomHttpResponseOptions} configures HTTP response parameters.
+   */
+  customError: (error: ResponseError, options: CustomHttpResponseOptions) => {
+    if (!options || !options.statusCode) {
+      throw new Error(`options.statusCode is expected to be set. given options: ${options}`);
+    }
+    if (options.statusCode < 400 || options.statusCode >= 600) {
+      throw new Error(
+        `Unexpected Http status code. Expected from 400 to 599, but given: ${options.statusCode}`
+      );
+    }
+    return new KibanaResponse(options.statusCode, error, options);
+  },
+};
+/**
+ * Set of helpers used to create `KibanaResponse` to form HTTP response on an incoming request.
+ * Should be returned as a result of {@link RequestHandler} execution.
+ *
+ * @example
+ * 1. Successful response. Supported types of response body are:
+ * - `undefined`, no content to send.
+ * - `string`, send text
+ * - `JSON`, send JSON object, HTTP server will throw if given object is not valid (has circular references, for example)
+ * - `Stream` send data stream
+ * - `Buffer` send binary stream
+ * ```js
+ * return response.ok(undefined);
+ * return response.ok('ack');
+ * return response.ok({ id: '1' });
+ * return response.ok(Buffer.from(...););
+ *
+ * const stream = new Stream.PassThrough();
+ * fs.createReadStream('./file').pipe(stream);
+ * return res.ok(stream);
+ * ```
+ * HTTP headers are configurable via response factory parameter `options` {@link HttpResponseOptions}.
+ *
+ * ```js
+ * return response.ok({ id: '1' }, {
+ *   headers: {
+ *     'content-type': 'application/json'
+ *   }
+ * });
+ * ```
+ * 2. Redirection response. Redirection URL is configures via 'Location' header.
+ * ```js
+ * return response.redirected('The document has moved', {
+ *   headers: {
+ *    location: '/new-url',
+ *   },
+ * });
+ * ```
+ * 3. Error response. You may pass an error message to the client, where error message can be:
+ * - `string` send message text
+ * - `Error` send the message text of given Error object.
+ * - `{ message: string | Error, meta: {data: Record<string, any>, ...} }` - send message text and attach additional error metadata.
+ * ```js
+ * return response.unauthorized('User has no access to the requested resource.', {
+ *   headers: {
+ *     'WWW-Authenticate': 'challenge',
+ *   }
+ * })
+ * return response.badRequest();
+ * return response.badRequest('validation error');
+ *
+ * try {
+ *   // ...
+ * } catch(error){
+ *   return response.badRequest(error);
+ * }
+ *
+ * return response.badRequest({
+ *   message: 'validation error',
+ *   meta: {
+ *     data: {
+ *       requestBody: request.body,
+ *       failedFields: validationResult
+ *     },
+ *   }
+ * });
+ *
+ * try {
+ *   // ...
+ * } catch(error) {
+ *   return response.badRequest({
+ *     message: error,
+ *     meta: {
+ *       data: {
+ *         requestBody: request.body,
+ *       },
+ *     }
+ *   });
+ * }
+ *
+ * ```
+ * 4. Custom response. `ResponseFactory` may not cover your use case, so you can use the `custom` function to customize the response.
+ * ```js
+ * return response.custom('ok', {
+ *   statusCode: 201,
+ *   headers: {
+ *     location: '/created-url'
+ *   }
+ * })
+ * ```
+ * @public
+ */
+export const kibanaResponseFactory = {
+  ...successResponseFactory,
+  ...redirectionResponseFactory,
+  ...errorResponseFactory,
+  /**
+   * Creates a response with defined status code and payload.
+   * @param payload - {@link HttpResponsePayload} payload to send to the client
+   * @param options - {@link CustomHttpResponseOptions} configures HTTP response parameters.
+   */
+  custom: (payload: HttpResponsePayload | ResponseError, options: CustomHttpResponseOptions) => {
+    if (!options || !options.statusCode) {
+      throw new Error(`options.statusCode is expected to be set. given options: ${options}`);
+    }
+    const { statusCode: code, ...rest } = options;
+    return new KibanaResponse(code, payload, rest);
+  },
+};
+
+export const lifecycleResponseFactory = {
+  ...redirectionResponseFactory,
+  ...errorResponseFactory,
 };
 
 /**
  * Creates an object containing request response payload, HTTP headers, error details, and other data transmitted to the client.
  * @public
  */
-export type ResponseFactory = typeof responseFactory;
+export type KibanaResponseFactory = typeof kibanaResponseFactory;
+
+/**
+ * Creates an object containing redirection or error response with error details, HTTP headers, and other data transmitted to the client.
+ * @public
+ */
+export type LifecycleResponseFactory = typeof lifecycleResponseFactory;
