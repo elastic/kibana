@@ -55,6 +55,10 @@ export const TemplatesList: React.FunctionComponent<RouteComponentProps<MatchPar
     history.push(`${BASE_PATH}templates_edit/${encodeURIComponent(name)}`);
   };
 
+  const cloneTemplate = (name: Template['name']) => {
+    history.push(`${BASE_PATH}templates_create/${encodeURIComponent(name)}`);
+  };
+
   // Track component loaded
   useEffect(() => {
     trackUiMetric(METRIC_TYPE.LOADED, UIM_TEMPLATE_LIST_LOAD);
@@ -129,6 +133,8 @@ export const TemplatesList: React.FunctionComponent<RouteComponentProps<MatchPar
         <TemplatesTable
           templates={showSystemTemplates ? templates : filteredTemplates}
           reload={reload}
+          editTemplate={editTemplate}
+          cloneTemplate={cloneTemplate}
         />
       </Fragment>
     );
@@ -141,7 +147,8 @@ export const TemplatesList: React.FunctionComponent<RouteComponentProps<MatchPar
         <TemplateDetails
           templateName={templateName}
           onClose={closeTemplateDetails}
-          onEdit={editTemplate}
+          editTemplate={editTemplate}
+          cloneTemplate={cloneTemplate}
           reload={reload}
         />
       )}

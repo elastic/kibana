@@ -11,13 +11,11 @@ import {
   EuiInMemoryTable,
   EuiIcon,
   EuiButton,
-  EuiToolTip,
-  EuiButtonIcon,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { TemplateListItem } from '../../../../../common/types';
+import { TemplateListItem, Template } from '../../../../../common/types';
 import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../common/constants';
 import { DeleteTemplatesModal } from '../../../../components';
 import { trackUiMetric, METRIC_TYPE } from '../../../../services/track_ui_metric';
@@ -25,9 +23,16 @@ import { trackUiMetric, METRIC_TYPE } from '../../../../services/track_ui_metric
 interface Props {
   templates: TemplateListItem[];
   reload: () => Promise<void>;
+  editTemplate: (name: Template['name']) => void;
+  cloneTemplate: (name: Template['name']) => void;
 }
 
-export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, reload }) => {
+export const TemplatesTable: React.FunctionComponent<Props> = ({
+  templates,
+  reload,
+  editTemplate,
+  cloneTemplate,
+}) => {
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
   const [templatesToDelete, setTemplatesToDelete] = useState<Array<TemplateListItem['name']>>([]);
 
@@ -116,61 +121,45 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
       width: '75px',
       actions: [
         {
-          render: ({ name }: { name: TemplateListItem['name'] }) => {
-            return (
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.idxMgmt.templatesList.table.actionEditTooltipLabel',
-                  { defaultMessage: 'Edit' }
-                )}
-              >
-                <EuiButtonIcon
-                  aria-label={i18n.translate(
-                    'xpack.idxMgmt.templatesList.table.actionEditTooltipLabel',
-                    {
-                      defaultMessage: `Edit template '{name}'`,
-                      values: { name },
-                    }
-                  )}
-                  iconType="pencil"
-                  color="primary"
-                  href={`#${BASE_PATH}templates_edit/${encodeURIComponent(name)}`}
-                  data-test-subj="editTemplateButton"
-                />
-              </EuiToolTip>
-            );
+          name: i18n.translate('xpack.idxMgmt.templatesList.table.actionEditText', {
+            defaultMessage: 'Edit',
+          }),
+          isPrimary: true,
+          description: i18n.translate('xpack.idxMgmt.templatesList.table.actionEditDecription', {
+            defaultMessage: 'Edit this template',
+          }),
+          icon: 'pencil',
+          type: 'icon',
+          onClick: ({ name }: Template) => {
+            editTemplate(name);
           },
         },
         {
-          render: ({ name }: { name: TemplateListItem['name'] }) => {
-            return (
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.idxMgmt.templatesList.table.actionDeleteTooltipLabel',
-                  {
-                    defaultMessage: 'Delete',
-                  }
-                )}
-                delay="long"
-              >
-                <EuiButtonIcon
-                  aria-label={i18n.translate(
-                    'xpack.idxMgmt.templatesList.table.actionDeleteAriaLabel',
-                    {
-                      defaultMessage: "Delete template '{name}'",
-                      values: { name },
-                    }
-                  )}
-                  iconType="trash"
-                  color="danger"
-                  onClick={() => {
-                    setTemplatesToDelete([name]);
-                  }}
-                  data-test-subj="deleteTemplateButton"
-                />
-              </EuiToolTip>
-            );
+          name: i18n.translate('xpack.idxMgmt.templatesList.table.actionCloneTitle', {
+            defaultMessage: 'Clone',
+          }),
+          description: i18n.translate('xpack.idxMgmt.templatesList.table.actionCloneDescription', {
+            defaultMessage: 'Clone this template',
+          }),
+          icon: 'copy',
+          onClick: ({ name }: Template) => {
+            cloneTemplate(name);
           },
+        },
+        {
+          name: i18n.translate('xpack.idxMgmt.templatesList.table.actionDeleteText', {
+            defaultMessage: 'Delete',
+          }),
+          description: i18n.translate('xpack.idxMgmt.templatesList.table.actionDeleteDecription', {
+            defaultMessage: 'Delete this template',
+          }),
+          icon: 'trash',
+          color: 'danger',
+          type: 'icon',
+          onClick: ({ name }: Template) => {
+            setTemplatesToDelete([name]);
+          },
+          isPrimary: true,
         },
       ],
     },

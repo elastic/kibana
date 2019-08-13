@@ -267,3 +267,10 @@ export async function updateTemplate(template: Template) {
 
   return result;
 }
+
+export async function loadTemplateToClone(name: Template['name']) {
+  return sendRequest({
+    path: `${apiPrefix}/templates/${encodeURIComponent(name)}`,
+    method: 'get',
+  });
+}

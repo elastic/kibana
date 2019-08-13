@@ -25,7 +25,7 @@ export const App = () => {
 // Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
   <Switch>
-    <Route exact path={`${BASE_PATH}templates_create`} component={TemplatesCreate} />
+    <Route exact path={`${BASE_PATH}templates_create/:name?`} component={TemplatesCreate} />
     <Route
       exact
       path={`${BASE_PATH}templates_edit/:name*`}

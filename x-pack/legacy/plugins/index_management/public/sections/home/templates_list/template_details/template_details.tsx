@@ -6,6 +6,7 @@
 
 import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -23,6 +24,7 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 import {
   UIM_TEMPLATE_DETAIL_PANEL_MAPPINGS_TAB,
@@ -39,7 +41,8 @@ import { SummaryTab, MappingsTab, SettingsTab, AliasesTab } from './tabs';
 interface Props {
   templateName: Template['name'];
   onClose: () => void;
-  onEdit: (templateName: Template['name']) => void;
+  editTemplate: (templateName: Template['name']) => void;
+  cloneTemplate: (templateName: Template['name']) => void;
   reload: () => Promise<void>;
 }
 
@@ -101,7 +104,8 @@ const tabToUiMetricMap: { [key: string]: string } = {
 export const TemplateDetails: React.FunctionComponent<Props> = ({
   templateName,
   onClose,
-  onEdit,
+  editTemplate,
+  cloneTemplate,
   reload,
 }) => {
   const { error, data: templateDetails, isLoading } = loadIndexTemplate(templateName);
@@ -119,10 +123,23 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
           defaultMessage="Edit template"
         />
       ),
-      handleClick: () => onEdit(templateName),
+      icon: <EuiIcon type="pencil" />,
+      handleClick: () => editTemplate(templateName),
+    },
+    {
+      type: 'clone',
+      icon: <EuiIcon type="copy" />,
+      label: (
+        <FormattedMessage
+          id="xpack.idxMgmt.templateDetails.cloneButtonLabel"
+          defaultMessage="Clone template"
+        />
+      ),
+      handleClick: () => cloneTemplate(templateName),
     },
     {
       type: 'delete',
+      icon: <EuiIcon type="trash" />,
       label: (
         <FormattedMessage
           id="xpack.idxMgmt.templateDetails.deleteButtonLabel"
@@ -287,7 +304,13 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
                   anchorPosition="downCenter"
                 >
                   <EuiContextMenuPanel
-                    items={contextMenuItems.map(({ type, handleClick, label }) => {
+                    title={i18n.translate(
+                      'xpack.idxMgmt.templateDetails.manageContextMenuPanelTitle',
+                      {
+                        defaultMessage: 'Template options',
+                      }
+                    )}
+                    items={contextMenuItems.map(({ type, handleClick, label, icon }) => {
                       return (
                         <EuiContextMenuItem
                           key={type}
@@ -297,9 +320,14 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
                             handleClick();
                           }}
                         >
-                          <EuiText size="m">
-                            <span>{label}</span>
-                          </EuiText>
+                          <EuiFlexGroup alignItems="center">
+                            <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiText size="m">
+                                <span>{label}</span>
+                              </EuiText>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
                         </EuiContextMenuItem>
                       );
                     })}

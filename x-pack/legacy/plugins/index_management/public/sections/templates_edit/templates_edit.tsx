@@ -25,6 +25,7 @@ export const TemplatesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
 }) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
+
   const { error, data: template, isLoading } = loadIndexTemplate(name);
 
   useEffect(() => {
