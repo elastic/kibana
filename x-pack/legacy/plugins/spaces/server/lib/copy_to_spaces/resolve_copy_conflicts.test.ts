@@ -10,7 +10,6 @@ import {
   SavedObjectsClientContract,
   SavedObjectsImportResponse,
 } from 'src/core/server';
-import { copySavedObjectsToSpacesFactory } from './copy_to_spaces';
 import { Readable } from 'stream';
 import { Space } from '../../../common/model/space';
 import { resolveCopySavedObjectsToSpacesConflictsFactory } from './resolve_copy_conflicts';
