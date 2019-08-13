@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-
 /**
  * Helper string to add as a tag in every logging call
  */
@@ -132,16 +130,6 @@ export const LOGSTASH = {
     PERSISTED: 'persisted'
   }
 };
-
-export const DEFAULT_NO_DATA_MESSAGE = i18n.translate('xpack.monitoring.defaultNoDataMessage', {
-  defaultMessage: 'There are no records that match your query. Try changing the time range selection.' });
-export const DEFAULT_NO_DATA_MESSAGE_WITH_FILTER = i18n.translate('xpack.monitoring.defaultNoDataWithFilterMessage', {
-  defaultMessage:
-  'There are no records that match your query with the filter [{filter}]. Try changing the filter or the time range selection.',
-  values: { filter: '{{FILTER}}' } });
-
-export const TABLE_ACTION_UPDATE_FILTER = 'UPDATE_FILTER';
-export const TABLE_ACTION_RESET_PAGING = 'RESET_PAGING';
 
 export const DEBOUNCE_SLOW_MS = 17; // roughly how long it takes to render a frame at 60fps
 export const DEBOUNCE_FAST_MS = 10; // roughly how long it takes to render a frame at 100fps
