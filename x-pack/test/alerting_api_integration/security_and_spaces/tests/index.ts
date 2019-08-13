@@ -46,10 +46,6 @@ export default function alertingApiIntegrationTests({
     });
 
     after(async () => {
-      for (const space of Spaces) {
-        await spacesService.delete(space.id);
-      }
-
       for (const user of Users) {
         await securityService.user.delete(user.username);
 
