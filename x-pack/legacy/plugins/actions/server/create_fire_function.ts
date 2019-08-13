@@ -43,7 +43,7 @@ export function createFireFunction({
 
     const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
     const actionSavedObject = await savedObjectsClient.get('action', id);
-    const firedActionRecord = await savedObjectsClient.create('fired_action', {
+    const actionTaskParamsRecord = await savedObjectsClient.create('action_task_params', {
       actionId: id,
       params,
       apiKeyId,
@@ -53,7 +53,7 @@ export function createFireFunction({
       taskType: `actions:${actionSavedObject.attributes.actionTypeId}`,
       params: {
         spaceId,
-        firedActionId: firedActionRecord.id,
+        actionTaskParamsId: actionTaskParamsRecord.id,
       },
       state: {},
       scope: ['actions'],

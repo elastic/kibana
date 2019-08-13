@@ -31,7 +31,7 @@ describe('fire()', () => {
     });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '234',
-      type: 'fired_action',
+      type: 'action_task_params',
       attributes: {},
       references: [],
     });
@@ -47,7 +47,7 @@ describe('fire()', () => {
       Array [
         Object {
           "params": Object {
-            "firedActionId": "234",
+            "actionTaskParamsId": "234",
             "spaceId": "default",
           },
           "scope": Array [
@@ -59,7 +59,7 @@ describe('fire()', () => {
       ]
     `);
     expect(savedObjectsClient.get).toHaveBeenCalledWith('action', '123');
-    expect(savedObjectsClient.create).toHaveBeenCalledWith('fired_action', {
+    expect(savedObjectsClient.create).toHaveBeenCalledWith('action_task_params', {
       actionId: '123',
       params: { baz: false },
       apiKeyId: '123',
@@ -84,7 +84,7 @@ describe('fire()', () => {
     });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '234',
-      type: 'fired_action',
+      type: 'action_task_params',
       attributes: {},
       references: [],
     });
@@ -121,7 +121,7 @@ describe('fire()', () => {
     });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '234',
-      type: 'fired_action',
+      type: 'action_task_params',
       attributes: {},
       references: [],
     });

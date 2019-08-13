@@ -44,7 +44,7 @@ const taskInstanceMock = {
   state: {},
   params: {
     spaceId: 'test',
-    firedActionId: '3',
+    actionTaskParamsId: '3',
   },
   taskType: 'actions:1',
 };
@@ -63,7 +63,7 @@ test('executes the task by calling the executor with proper parameters', async (
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
   mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
-    type: 'fired_action',
+    type: 'action_task_params',
     attributes: {
       actionId: '2',
       params: { baz: true },
@@ -78,7 +78,7 @@ test('executes the task by calling the executor with proper parameters', async (
   expect(runnerResult).toBeUndefined();
   expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
   expect(mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser).toHaveBeenCalledWith(
-    'fired_action',
+    'action_task_params',
     '3',
     { namespace: 'namespace-test' }
   );
@@ -99,7 +99,7 @@ test('throws an error with suggested retry logic when return status is error', a
 
   mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
-    type: 'fired_action',
+    type: 'action_task_params',
     attributes: {
       actionId: '2',
       params: { baz: true },
@@ -134,7 +134,7 @@ test('uses API key when provided', async () => {
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
   mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
-    type: 'fired_action',
+    type: 'action_task_params',
     attributes: {
       actionId: '2',
       params: { baz: true },
@@ -163,7 +163,7 @@ test(`doesn't use API key when not provided`, async () => {
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
   mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
-    type: 'fired_action',
+    type: 'action_task_params',
     attributes: {
       actionId: '2',
       params: { baz: true },

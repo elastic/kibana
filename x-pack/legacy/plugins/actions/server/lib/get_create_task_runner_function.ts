@@ -38,14 +38,14 @@ export function getCreateTaskRunnerFunction({
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
       run: async () => {
-        const { spaceId, firedActionId } = taskInstance.params;
+        const { spaceId, actionTaskParamsId } = taskInstance.params;
         const namespace = spaceIdToNamespace(spaceId);
 
         const {
           attributes: { actionId, params, apiKeyId, apiKeyValue },
         } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<FiredAction>(
-          'fired_action',
-          firedActionId,
+          'action_task_params',
+          actionTaskParamsId,
           { namespace }
         );
 

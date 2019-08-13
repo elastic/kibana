@@ -43,7 +43,7 @@ export function init(server: Legacy.Server) {
     attributesToExcludeFromAAD: new Set(['description']),
   });
   server.plugins.encrypted_saved_objects!.registerType({
-    type: 'fired_action',
+    type: 'action_task_params',
     attributesToEncrypt: new Set(['apiKeyId', 'apiKeyValue']),
   });
 

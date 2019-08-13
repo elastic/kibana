@@ -16,7 +16,7 @@
       }
     }
   },
-  "fired_action": {
+  "action_task_params": {
     "properties": {
       "actionId": {
         "type": "keyword"
