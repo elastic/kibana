@@ -15,9 +15,6 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiTitle,
   EuiPanel,
 } from '@elastic/eui';
 import dateMath from '@elastic/datemath';
