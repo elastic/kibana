@@ -59,7 +59,8 @@ export const getTaskStateBadge = (
 
 export const getColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
-  setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>
+  setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
+  isManagementTable: boolean = false
 ) => {
   const actions = getActions();
 
@@ -76,7 +77,7 @@ export const getColumns = (
     setExpandedRowItemIds([...expandedRowItemIds]);
   }
 
-  return [
+  const columns = [
     {
       align: RIGHT_ALIGNMENT,
       width: '40px',
@@ -205,12 +206,17 @@ export const getColumns = (
       },
       width: '100px',
     },
-    {
+  ];
+
+  if (isManagementTable === false) {
+    columns.push({
       name: i18n.translate('xpack.ml.dataframe.analyticsList.tableActionLabel', {
         defaultMessage: 'Actions',
       }),
       actions,
       width: '200px',
-    },
-  ];
+    });
+  }
+
+  return columns;
 };

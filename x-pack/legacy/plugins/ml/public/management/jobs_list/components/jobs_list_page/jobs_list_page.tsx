@@ -47,7 +47,7 @@ export const JobsListPage: FC<Props> = ({ isMlEnabledInSpace }) => {
       content: (
         <Fragment>
           <EuiSpacer size="m" />
-          <DataFrameAnalyticsList />
+          <DataFrameAnalyticsList isManagementTable={true} />
         </Fragment>
       ),
     },
