@@ -222,13 +222,15 @@ function getArgNameSuggestions(
     }
   );
 
-  const unusedArgDefs = matchingArgDefs.filter(([_, argDef]) => {
-    if (argDef.multi) {
+  const unusedArgDefs = matchingArgDefs.filter(([matchingArgName, matchingArgDef]) => {
+    if (matchingArgDef.multi) {
       return true;
     }
     return !argEntries.some(([name, values]) => {
-      // @ts-ignore ArgValue doesn't have a required name type, but actual Args do
-      return values.length > 0 && (name === argDef.name || (argDef.aliases || []).includes(name));
+      return (
+        values.length > 0 &&
+        (name === matchingArgName || (matchingArgDef.aliases || []).includes(name))
+      );
     });
   });
 
@@ -236,15 +238,18 @@ function getArgNameSuggestions(
   // with the text at the marker, then alphabetically
   const comparator = combinedComparator(
     unnamedArgComparator,
-    // @ts-ignore ArgValue doesn't have a required name type, but actual Args do
-    invokeWithProp<string, 'name', ArgValue, number>(startsWithComparator(query), 'name'),
-    // @ts-ignore ArgValue doesn't have a required name type, but actual Args do
-    invokeWithProp<string, 'name', ArgValue, number>(alphanumericalComparator, 'name')
+    invokeWithProp<string, 'name', ArgValue & { name: string }, number>(
+      startsWithComparator(query),
+      'name'
+    ),
+    invokeWithProp<string, 'name', ArgValue & { name: string }, number>(
+      alphanumericalComparator,
+      'name'
+    )
   );
-  const argDefs = unusedArgDefs.map(([_, arg]) => arg).sort(comparator);
+  const argDefs = unusedArgDefs.map(([name, arg]) => ({ name, ...arg })).sort(comparator);
 
   return argDefs.map(argDef => {
-    // @ts-ignore ArgValue doesn't have a required name type, but actual Args do
     return { type: 'argument', text: argDef.name + '=', start, end: end - MARKER.length, argDef };
   });
 }
