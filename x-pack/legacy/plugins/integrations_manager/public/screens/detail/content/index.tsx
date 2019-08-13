@@ -7,14 +7,14 @@
 import React from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiTitle } from '@elastic/eui';
-import { IntegrationInfo } from '../../../common/types';
-import { AssetAccordion } from '../../components/asset_accordion';
-import { AssetsFacetGroup } from '../../components/assets_facet_group';
-import { Requirements } from '../../components/requirements';
-import { CenterColumn, LeftColumn, RightColumn } from './layout';
-import { OverviewPanel } from './overview_panel';
-import { SideNavLinks } from './side_nav_links';
-import { DEFAULT_PANEL, DetailProps } from './index';
+import { IntegrationInfo } from '../../../../common/types';
+import { AssetAccordion } from '../../../components/asset_accordion';
+import { AssetsFacetGroup } from '../../../components/assets_facet_group';
+import { Requirements } from '../../../components/requirements';
+import { CenterColumn, LeftColumn, RightColumn } from '.././layout';
+import { OverviewPanel } from '.././overview_panel';
+import { SideNavLinks } from '../side_nav_links';
+import { DEFAULT_PANEL, DetailProps } from '../index';
 
 type ContentProps = IntegrationInfo & Pick<DetailProps, 'panel'> & { hasIconPanel: boolean };
 export function Content(props: ContentProps) {
