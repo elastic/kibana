@@ -53,7 +53,6 @@ export class DeleteWorker extends AbstractWorker {
       this.log,
       this.serverOptions.security.enableGitCertCheck
     );
-    const deleteRepoPromise = this.deletePromiseWrapper(repoService.remove(uri), 'git data', uri);
 
     const deleteWorkspacePromise = this.deletePromiseWrapper(
       this.lspService.deleteWorkspace(uri),
@@ -82,7 +81,7 @@ export class DeleteWorker extends AbstractWorker {
       ]);
 
       this.gitOps.cleanRepo(uri);
-      await deleteRepoPromise;
+      await this.deletePromiseWrapper(repoService.remove(uri), 'git data', uri);
 
       // 4. Delete the document index and alias where the repository document and all status reside,
       // so that you won't be able to import the same repositories until they are

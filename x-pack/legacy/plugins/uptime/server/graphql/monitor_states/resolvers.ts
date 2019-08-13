@@ -11,7 +11,6 @@ import {
   GetMonitorStatesQueryArgs,
   MonitorSummaryResult,
   StatesIndexStatus,
-  GetStatesIndexStatusQueryArgs,
 } from '../../../common/graphql/types';
 
 export type UMGetMonitorStatesResolver = UMResolver<
@@ -24,7 +23,7 @@ export type UMGetMonitorStatesResolver = UMResolver<
 export type UMStatesIndexExistsResolver = UMResolver<
   StatesIndexStatus | Promise<StatesIndexStatus>,
   any,
-  GetStatesIndexStatusQueryArgs,
+  {},
   UMContext
 >;
 
@@ -59,28 +58,8 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           totalSummaryCount,
         };
       },
-      async getStatesIndexStatus(
-        resolver,
-        { dateRangeStart, dateRangeEnd, filters },
-        { req }
-      ): Promise<StatesIndexStatus> {
-        const indexExists = await libs.monitorStates.statesIndexExists(req);
-        let summaryCount: { up: number; down: number } | undefined;
-        if (indexExists) {
-          // TODO: provide count of states index in future release
-          summaryCount = await libs.monitorStates.getSummaryCount(
-            req,
-            dateRangeStart,
-            dateRangeEnd,
-            filters
-          );
-        }
-        return {
-          indexExists,
-          docCount: {
-            count: summaryCount ? summaryCount.up + summaryCount.down : undefined,
-          },
-        };
+      async getStatesIndexStatus(resolver, {}, { req }): Promise<StatesIndexStatus> {
+        return await libs.monitorStates.statesIndexExists(req);
       },
     },
   };

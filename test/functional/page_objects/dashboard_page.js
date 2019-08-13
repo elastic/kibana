@@ -151,7 +151,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getCloneTitle() {
-      return await testSubjects.getProperty('clonedDashboardTitle', 'value');
+      return await testSubjects.getAttribute('clonedDashboardTitle', 'value');
     }
 
     async confirmClone() {
@@ -277,8 +277,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async isMarginsOn() {
       log.debug('isMarginsOn');
       await this.openOptions();
-      const marginsCheckbox = await testSubjects.find('dashboardMarginsCheckbox');
-      return await marginsCheckbox.getProperty('checked');
+      return await testSubjects.getAttribute('dashboardMarginsCheckbox', 'checked');
     }
 
     async useMargins(on = true) {
@@ -410,7 +409,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getSearchFilterValue() {
       const searchFilter = await this.getSearchFilter();
-      return await searchFilter.getProperty('value');
+      return await searchFilter.getAttribute('value');
     }
 
     async getSearchFilter() {
@@ -430,6 +429,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
         await searchFilter.type(dashName.replace('-', ' '));
         await PageObjects.common.pressEnterKey();
+        await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 5000);
       });
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -456,9 +456,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.gotoDashboardLandingPage();
 
       await this.searchForDashboardWithName(dashName);
-      await this.selectDashboard(dashName);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
+      await retry.try(async () => {
+        await this.selectDashboard(dashName);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // check Dashboard landing page is not present
+        await testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
+      });
     }
 
     async getPanelTitles() {
@@ -536,7 +539,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async setSaveAsNewCheckBox(checked) {
       log.debug('saveAsNewCheckbox: ' + checked);
       const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
-      const isAlreadyChecked = await saveAsNewCheckbox.getProperty('checked');
+      const isAlreadyChecked = (await saveAsNewCheckbox.getAttribute('checked') === 'true');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping save as new checkbox');
         await retry.try(() => saveAsNewCheckbox.click());
@@ -546,7 +549,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async setStoreTimeWithDashboard(checked) {
       log.debug('Storing time with dashboard: ' + checked);
       const storeTimeCheckbox = await testSubjects.find('storeTimeWithDashboard');
-      const isAlreadyChecked = await storeTimeCheckbox.getProperty('checked');
+      const isAlreadyChecked = (await storeTimeCheckbox.getAttribute('checked') === 'true');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping store time checkbox');
         await retry.try(() => storeTimeCheckbox.click());

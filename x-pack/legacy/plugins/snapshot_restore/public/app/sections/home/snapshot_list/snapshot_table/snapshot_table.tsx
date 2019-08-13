@@ -18,10 +18,9 @@ import {
 import { SnapshotDetails } from '../../../../../../common/types';
 import { BASE_PATH, SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
-import { formatDate } from '../../../../services/text';
 import { linkToRepository } from '../../../../services/navigation';
 import { uiMetricService } from '../../../../services/ui_metric';
-import { DataPlaceholder, SnapshotDeleteProvider } from '../../../../components';
+import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
 
 interface Props {
   snapshots: SnapshotDetails[];
@@ -116,7 +115,9 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (startTimeInMillis: number) => (
-        <DataPlaceholder data={startTimeInMillis}>{formatDate(startTimeInMillis)}</DataPlaceholder>
+        <DataPlaceholder data={startTimeInMillis}>
+          <FormattedDateTime epochMs={startTimeInMillis} />
+        </DataPlaceholder>
       ),
     },
     {
@@ -325,7 +326,9 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       {
         type: 'field_value_selection',
         field: 'repository',
-        name: 'Repository',
+        name: i18n.translate('xpack.snapshotRestore.snapshotList.table.repositoryFilterLabel', {
+          defaultMessage: 'Repository',
+        }),
         multiSelect: false,
         options: repositories.map(repository => ({
           value: repository,

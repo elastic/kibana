@@ -146,7 +146,7 @@ describe('_makeAggConfigs', () => {
 });
 
 describe('extractPropertiesMap', () => {
-  const resp = {
+  const responseWithNumberTypes = {
     'aggregations': {
       'join': {
         'buckets': [
@@ -173,29 +173,29 @@ describe('extractPropertiesMap', () => {
   let propertiesMap;
   beforeAll(() => {
     propertiesMap = extractPropertiesMap(
-      resp,
+      responseWithNumberTypes,
       [minPropName],
       countPropName
     );
   });
 
   it('should create key for each join term', () => {
-    expect(propertiesMap.has(109)).toBe(true);
-    expect(propertiesMap.has(62)).toBe(true);
+    expect(propertiesMap.has('109')).toBe(true);
+    expect(propertiesMap.has('62')).toBe(true);
   });
 
   it('should extract count property', () => {
-    const properties = propertiesMap.get(109);
+    const properties = propertiesMap.get('109');
     expect(properties[countPropName]).toBe(1130);
   });
 
   it('should extract min property', () => {
-    const properties = propertiesMap.get(109);
+    const properties = propertiesMap.get('109');
     expect(properties[minPropName]).toBe(36);
   });
 
   it('should extract property with value of "0"', () => {
-    const properties = propertiesMap.get(62);
+    const properties = propertiesMap.get('62');
     expect(properties[minPropName]).toBe(0);
   });
 });

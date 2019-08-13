@@ -455,7 +455,7 @@ export class PolicyTable extends Component {
                 <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="l">
-                      <h1>
+                      <h1 data-test-subj="sectionHeading">
                         <FormattedMessage
                           id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
                           defaultMessage="Index Lifecycle Policies"

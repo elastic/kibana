@@ -100,6 +100,11 @@ module.directive('mlTimeseriesChart', function ($timeout) {
     resizeChecker.on('resize', () => {
       scope.$evalAsync(() => {
         renderReactComponent();
+
+        // Add a re-render of the focus chart to set renderFocusChartOnly back to true.
+        // Not efficient, but ensures adding annotations doesn't cause the whole chart
+        // to be re-rendered.
+        renderReactComponent(true);
       });
     });
 

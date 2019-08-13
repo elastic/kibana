@@ -26,7 +26,11 @@ import { Flags, getFlags, getHelp } from './flags';
 
 type CleanupTask = () => void;
 type RunFn = (
-  args: { log: ToolingLog; flags: Flags; addCleanupTask: (task: CleanupTask) => void }
+  args: {
+    log: ToolingLog;
+    flags: Flags;
+    addCleanupTask: (task: CleanupTask) => void;
+  }
 ) => Promise<void> | void;
 
 export interface Options {

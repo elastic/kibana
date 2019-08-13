@@ -9,10 +9,11 @@ import { parse as parseQuery } from 'querystring';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { QueryString } from 'ui/utils/query_string';
-import { MainRouteParams, PathTypes } from '../../common/types';
+import { MainRouteParams } from '../../common/types';
 import { FileTree } from '../file_tree/file_tree';
 import { Shortcut } from '../shortcuts';
 import { SymbolTree } from '../symbol_tree/symbol_tree';
+import { FileTree as IFileTree, FileTreeItemType } from '../../../model';
 
 enum Tabs {
   file = 'file',
@@ -24,6 +25,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   loadingStructureTree: boolean;
   hasStructure: boolean;
   languageServerInitializing: boolean;
+  currentTree: IFileTree | null;
 }
 
 class CodeSideTabs extends React.PureComponent<Props> {
@@ -77,7 +79,9 @@ class CodeSideTabs extends React.PureComponent<Props> {
         id: Tabs.structure,
         name: 'Structure',
         content: structureTabContent,
-        disabled: this.props.match.params.pathType === PathTypes.tree || !this.props.hasStructure,
+        disabled:
+          !(this.props.currentTree && this.props.currentTree.type === FileTreeItemType.File) ||
+          !this.props.hasStructure,
         'data-test-subj': 'codeStructureTreeTab',
       },
     ];

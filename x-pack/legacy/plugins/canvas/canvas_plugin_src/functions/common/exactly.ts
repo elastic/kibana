@@ -20,10 +20,10 @@ export function exactly(): ExpressionFunction<'exactly', Filter, Arguments, Filt
     name: 'exactly',
     aliases: [],
     type: 'filter',
+    help,
     context: {
       types: ['filter'],
     },
-    help,
     args: {
       column: {
         types: ['string'],

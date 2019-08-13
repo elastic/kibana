@@ -16,7 +16,7 @@ import { Location } from 'history';
 import { first } from 'lodash';
 import React from 'react';
 import { useTransactionList } from '../../../hooks/useTransactionList';
-import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
+import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
@@ -27,7 +27,7 @@ import { useFetcher } from '../../../hooks/useFetcher';
 import { getHasMLJob } from '../../../services/rest/ml';
 import { history } from '../../../utils/history';
 import { useLocation } from '../../../hooks/useLocation';
-import { ChartsTimeContextProvider } from '../../../context/ChartsTimeContext';
+import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 
 interface Props {
   urlParams: IUrlParams;
@@ -70,8 +70,19 @@ export function TransactionOverview({
     })
   );
 
-  const { data: transactionOverviewCharts } = useTransactionOverviewCharts(
-    urlParams
+  const { data: transactionCharts } = useTransactionCharts();
+
+  const {
+    data: transactionListData,
+    status: transactionListStatus
+  } = useTransactionList(urlParams);
+  const { data: hasMLJob = false } = useFetcher(
+    () => {
+      return serviceName && transactionType
+        ? getHasMLJob({ serviceName, transactionType })
+        : undefined;
+    },
+    [serviceName, transactionType]
   );
 
   // TODO: improve urlParams typings.
@@ -79,12 +90,6 @@ export function TransactionOverview({
   if (!serviceName || !transactionType) {
     return null;
   }
-
-  const { data: transactionListData } = useTransactionList(urlParams);
-  const { data: hasMLJob = false } = useFetcher(
-    () => getHasMLJob({ serviceName, transactionType }),
-    [serviceName, transactionType]
-  );
 
   return (
     <React.Fragment>
@@ -115,18 +120,18 @@ export function TransactionOverview({
         </EuiFormRow>
       ) : null}
 
-      <ChartsTimeContextProvider>
+      <ChartsSyncContextProvider>
         <TransactionBreakdown initialIsOpen={true} />
 
         <EuiSpacer size="s" />
 
         <TransactionCharts
           hasMLJob={hasMLJob}
-          charts={transactionOverviewCharts}
+          charts={transactionCharts}
           location={location}
           urlParams={urlParams}
         />
-      </ChartsTimeContextProvider>
+      </ChartsSyncContextProvider>
 
       <EuiSpacer size="s" />
 
@@ -136,8 +141,8 @@ export function TransactionOverview({
         </EuiTitle>
         <EuiSpacer size="s" />
         <TransactionList
+          isLoading={transactionListStatus === 'loading'}
           items={transactionListData}
-          serviceName={serviceName}
         />
       </EuiPanel>
     </React.Fragment>

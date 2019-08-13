@@ -35,7 +35,10 @@ interface OverviewPageProps {
 type Props = OverviewPageProps;
 
 export type UptimeSearchBarQueryChangeHandler = (
-  queryChangedEvent: { query?: { text: string }; queryText?: string }
+  queryChangedEvent: {
+    query?: { text: string };
+    queryText?: string;
+  }
 ) => void;
 
 export const OverviewPage = ({
@@ -110,7 +113,7 @@ export const OverviewPage = ({
 
   return (
     <Fragment>
-      <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={sharedProps}>
+      <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
         <FilterBar
           currentQuery={filterQueryString}
           error={error}

@@ -62,7 +62,13 @@ export type OnDeleteOneTimeline = (timelineIds: string[]) => void;
 
 /** Invoked when the user clicks on the name of a timeline to open it */
 export type OnOpenTimeline = (
-  { duplicate, timelineId }: { duplicate: boolean; timelineId: string }
+  {
+    duplicate,
+    timelineId,
+  }: {
+    duplicate: boolean;
+    timelineId: string;
+  }
 ) => void;
 
 /** Invoked when the user presses enters to submit the text in the search input */

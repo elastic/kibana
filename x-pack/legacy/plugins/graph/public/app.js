@@ -162,18 +162,17 @@ app.controller('graphuiPlugin', function (
   $route,
   $http,
   kbnUrl,
-  Private,
   Promise,
   confirmModal,
   kbnBaseUrl
 ) {
   function handleSuccess(data) {
-    return checkLicense(Private, Promise, kbnBaseUrl)
+    return checkLicense(Promise, kbnBaseUrl)
       .then(() => data);
   }
 
   function handleError(err) {
-    return checkLicense(Private, Promise, kbnBaseUrl)
+    return checkLicense(Promise, kbnBaseUrl)
       .then(() => notify.error(err));
   }
 

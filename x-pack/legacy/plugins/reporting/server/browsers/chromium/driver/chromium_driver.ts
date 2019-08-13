@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore no module definition
 import * as Chrome from 'puppeteer-core';
 import { parse as parseUrl } from 'url';
 import {

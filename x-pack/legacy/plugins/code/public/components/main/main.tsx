@@ -14,14 +14,16 @@ import { MainRouteParams } from '../../common/types';
 import { ShortcutsProvider } from '../shortcuts';
 import { Content } from './content';
 import { SideTabs } from './side_tabs';
-import { structureSelector } from '../../selectors';
+import { structureSelector, currentTreeSelector } from '../../selectors';
 import { RootState } from '../../reducers';
+import { FileTree } from '../../../model';
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   loadingFileTree: boolean;
   loadingStructureTree: boolean;
   hasStructure: boolean;
   languageServerInitializing: boolean;
+  currentTree: FileTree | null;
 }
 
 class CodeMain extends React.Component<Props> {
@@ -60,6 +62,7 @@ class CodeMain extends React.Component<Props> {
         <div className="codeContainer__rootInner">
           <React.Fragment>
             <SideTabs
+              currentTree={this.props.currentTree}
               loadingFileTree={loadingFileTree}
               loadingStructureTree={loadingStructureTree}
               hasStructure={hasStructure}
@@ -79,6 +82,7 @@ const mapStateToProps = (state: RootState) => ({
   loadingStructureTree: state.symbol.loading,
   hasStructure: structureSelector(state).length > 0 && !state.symbol.error,
   languageServerInitializing: state.symbol.languageServerInitializing,
+  currentTree: currentTreeSelector(state),
 });
 
 export const Main = connect(mapStateToProps)(CodeMain);

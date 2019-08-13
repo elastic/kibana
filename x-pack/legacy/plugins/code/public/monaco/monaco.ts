@@ -97,6 +97,9 @@ import 'monaco-editor/esm/vs/basic-languages/python/python.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/typescript/typescript.contribution';
 import chrome from 'ui/chrome';
 
+import { CTAGS_SUPPORT_LANGS } from '../../common/language_server';
+import { definitionProvider } from './definition/definition_provider';
+
 const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 
 const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
@@ -152,5 +155,15 @@ monaco.editor.defineTheme('euiColors', {
   },
 });
 monaco.editor.setTheme('euiColors');
+
+monaco.languages.registerDefinitionProvider('java', definitionProvider);
+monaco.languages.registerDefinitionProvider('typescript', definitionProvider);
+monaco.languages.registerDefinitionProvider('javascript', definitionProvider);
+if (chrome.getInjected('enableLangserversDeveloping', false) === true) {
+  monaco.languages.registerDefinitionProvider('go', definitionProvider);
+}
+CTAGS_SUPPORT_LANGS.forEach(language =>
+  monaco.languages.registerDefinitionProvider(language, definitionProvider)
+);
 
 export { monaco };

@@ -30,7 +30,7 @@ export function DynamicColorSelection({ ordinalFields, onChange, styleOptions })
       <EuiSpacer size="s" />
       <FieldSelect
         fields={ordinalFields}
-        selectedField={_.get(styleOptions, 'field')}
+        selectedFieldName={_.get(styleOptions, 'field.name')}
         onChange={onFieldChange}
       />
     </Fragment>

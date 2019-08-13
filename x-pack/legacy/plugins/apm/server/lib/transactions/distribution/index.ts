@@ -34,7 +34,7 @@ export async function getTransactionDistribution({
     setup
   );
 
-  const { defaultSample, buckets, totalHits } = await getBuckets(
+  const { buckets, totalHits } = await getBuckets(
     serviceName,
     transactionName,
     transactionType,
@@ -47,7 +47,6 @@ export async function getTransactionDistribution({
   return {
     totalHits,
     buckets,
-    bucketSize,
-    defaultSample
+    bucketSize
   };
 }

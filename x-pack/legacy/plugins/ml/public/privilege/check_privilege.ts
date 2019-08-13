@@ -16,11 +16,14 @@ let privileges: Privileges = getDefaultPrivileges();
 
 export function checkGetJobsPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(priv => {
-      privileges = priv;
-      // the minimum privilege for using ML with a platinum or trial license is being able to get the jobs list.
-      // all other functionality is controlled by the return privileges object
-      if (privileges.canGetJobs) {
+    getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
+      privileges = capabilities;
+      // the minimum privilege for using ML with a platinum or trial license is being able to get the transforms list.
+      // all other functionality is controlled by the return privileges object.
+      // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
+      // allow the promise to resolve as the separate license check will redirect then user to
+      // a basic feature
+      if (privileges.canGetJobs || isPlatinumOrTrialLicense === false) {
         return resolve(privileges);
       } else {
         kbnUrl.redirect('/access-denied');
@@ -32,9 +35,12 @@ export function checkGetJobsPrivilege(kbnUrl: any): Promise<Privileges> {
 
 export function checkCreateJobsPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(priv => {
-      privileges = priv;
-      if (privileges.canCreateJob) {
+    getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
+      privileges = capabilities;
+      // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
+      // allow the promise to resolve as the separate license check will redirect then user to
+      // a basic feature
+      if (privileges.canCreateJob || isPlatinumOrTrialLicense === false) {
         return resolve(privileges);
       } else {
         // if the user has no permission to create a job,
@@ -48,8 +54,8 @@ export function checkCreateJobsPrivilege(kbnUrl: any): Promise<Privileges> {
 
 export function checkFindFileStructurePrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(priv => {
-      privileges = priv;
+    getPrivileges().then(({ capabilities }) => {
+      privileges = capabilities;
       // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
       // all other functionality is controlled by the return privileges object
       if (privileges.canFindFileStructure) {
@@ -64,8 +70,8 @@ export function checkFindFileStructurePrivilege(kbnUrl: any): Promise<Privileges
 
 export function checkGetDataFrameJobsPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(priv => {
-      privileges = priv;
+    getPrivileges().then(({ capabilities }) => {
+      privileges = capabilities;
       // the minimum privilege for using ML with a basic license is being able to use the data frames.
       // all other functionality is controlled by the return privileges object
       if (privileges.canGetDataFrameJobs) {
@@ -80,8 +86,8 @@ export function checkGetDataFrameJobsPrivilege(kbnUrl: any): Promise<Privileges>
 
 export function checkCreateDataFrameJobsPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(priv => {
-      privileges = priv;
+    getPrivileges().then(({ capabilities }) => {
+      privileges = capabilities;
       if (
         privileges.canCreateDataFrameJob &&
         privileges.canPreviewDataFrameJob &&

@@ -100,6 +100,10 @@ export class AutocompleteField extends React.Component<
       this.updateSuggestions();
     }
 
+    if (hasNewValue && this.props.value === '') {
+      this.submit();
+    }
+
     if (hasNewSuggestions && this.state.isFocused) {
       this.showSuggestions();
     }

@@ -29,7 +29,11 @@ export type SavedObjectsClientWrapperFactory<Request = unknown> = (
 ) => SavedObjectsClientContract;
 
 export type SavedObjectsClientFactory<Request = unknown> = (
-  { request }: { request: Request }
+  {
+    request,
+  }: {
+    request: Request;
+  }
 ) => SavedObjectsClientContract;
 
 /**

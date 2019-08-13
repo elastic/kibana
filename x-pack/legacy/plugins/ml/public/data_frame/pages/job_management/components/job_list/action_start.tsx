@@ -14,6 +14,8 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
+import { startJob } from './job_service';
+
 import {
   checkPermission,
   createPermissionFailureMessage,
@@ -23,10 +25,9 @@ import { DataFrameJobListRow, isCompletedBatchJob } from './common';
 
 interface StartActionProps {
   item: DataFrameJobListRow;
-  startJob(d: DataFrameJobListRow): void;
 }
 
-export const StartAction: SFC<StartActionProps> = ({ startJob, item }) => {
+export const StartAction: SFC<StartActionProps> = ({ item }) => {
   const canStartStopDataFrameJob: boolean = checkPermission('canStartStopDataFrameJob');
 
   const [isModalVisible, setModalVisible] = useState(false);

@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { filter, distinctUntilChanged } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 import { PivotAggDict } from './pivot_aggs';
 import { PivotGroupByDict } from './pivot_group_by';
@@ -20,7 +22,7 @@ export interface DataFrameJob {
     index: IndexName;
   };
   source: {
-    index: IndexPattern;
+    index: IndexPattern | IndexPattern[];
   };
   sync?: {
     time: {
@@ -54,24 +56,49 @@ export const refreshTransformList$ = new BehaviorSubject<REFRESH_TRANSFORM_LIST_
   REFRESH_TRANSFORM_LIST_STATE.IDLE
 );
 
-export const useRefreshTransformList = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isRefresh, setIsRefresh] = useState(false);
-
+export const useRefreshTransformList = (
+  callback: {
+    isLoading?(d: boolean): void;
+    onRefresh?(): void;
+  } = {}
+) => {
   useEffect(() => {
-    const sub = refreshTransformList$.subscribe(s => {
-      setIsLoading(s === REFRESH_TRANSFORM_LIST_STATE.LOADING);
-      setIsRefresh(s === REFRESH_TRANSFORM_LIST_STATE.REFRESH);
-    });
-    return () => sub.unsubscribe();
+    const distinct$ = refreshTransformList$.pipe(distinctUntilChanged());
+
+    const subscriptions: Subscription[] = [];
+
+    if (typeof callback.onRefresh === 'function') {
+      // initial call to refresh
+      callback.onRefresh();
+
+      subscriptions.push(
+        distinct$
+          .pipe(filter(state => state === REFRESH_TRANSFORM_LIST_STATE.REFRESH))
+          .subscribe(() => typeof callback.onRefresh === 'function' && callback.onRefresh())
+      );
+    }
+
+    if (typeof callback.isLoading === 'function') {
+      subscriptions.push(
+        distinct$.subscribe(
+          state =>
+            typeof callback.isLoading === 'function' &&
+            callback.isLoading(state === REFRESH_TRANSFORM_LIST_STATE.LOADING)
+        )
+      );
+    }
+
+    return () => {
+      subscriptions.map(sub => sub.unsubscribe());
+    };
   }, []);
 
   return {
-    isLoading,
-    isRefresh,
     refresh: () => {
+      // A refresh is followed immediately by setting the state to loading
+      // to trigger data fetching and loading indicators in one go.
       refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
+      refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.LOADING);
     },
-    subscribe: refreshTransformList$.subscribe.bind(refreshTransformList$),
   };
 };

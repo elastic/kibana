@@ -159,7 +159,7 @@ const Application = (props: UptimeAppProps) => {
                         >
                           <EuiFlexItem grow={false}>
                             <EuiTitle>
-                              <h2>{headingText}</h2>
+                              <h1>{headingText}</h1>
                             </EuiTitle>
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>

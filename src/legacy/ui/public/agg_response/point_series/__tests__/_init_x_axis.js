@@ -106,8 +106,9 @@ describe('initXAxis', function () {
     });
   });
 
-  it('reads the interval param from the x agg', function () {
+  it('reads the date interval param from the x agg', function () {
     chart.aspects.x[0].params.interval = 'P1D';
+    chart.aspects.x[0].params.date = true;
     initXAxis(chart, table);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
@@ -116,5 +117,16 @@ describe('initXAxis', function () {
 
     expect(moment.isDuration(chart.ordered.interval)).to.be(true);
     expect(chart.ordered.interval.toISOString()).to.eql('P1D');
+  });
+
+  it('reads the numeric interval param from the x agg', function () {
+    chart.aspects.x[0].params.interval = 0.5;
+    initXAxis(chart, table);
+    expect(chart)
+      .to.have.property('xAxisLabel', 'label')
+      .and.have.property('xAxisFormat', chart.aspects.x[0].format)
+      .and.have.property('ordered');
+
+    expect(chart.ordered.interval).to.eql(0.5);
   });
 });

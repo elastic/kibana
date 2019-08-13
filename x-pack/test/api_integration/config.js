@@ -60,6 +60,7 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
         `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
+        '--xpack.code.ui.enabled=true', // Enable Code Ui just in tests
       ],
     },
     esTestCluster: {

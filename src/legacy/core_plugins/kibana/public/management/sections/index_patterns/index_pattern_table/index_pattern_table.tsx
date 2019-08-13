@@ -39,10 +39,24 @@ const columns = [
   {
     field: 'title',
     name: 'Pattern',
-    render: (name: string, index: { id: string; default: boolean }) => (
+    render: (
+      name: string,
+      index: {
+        id: string;
+        tags?: Array<{
+          key: string;
+          name: string;
+        }>;
+      }
+    ) => (
       <EuiButtonEmpty size="xs" href={`#/management/kibana/index_patterns/${index.id}`}>
         {name}
-        {index.default && <EuiBadge className="indexPatternList__badge">Default</EuiBadge>}
+        {index.tags &&
+          index.tags.map(({ key: tagKey, name: tagName }) => (
+            <EuiBadge className="indexPatternList__badge" key={tagKey}>
+              {tagName}
+            </EuiBadge>
+          ))}
       </EuiButtonEmpty>
     ),
     dataType: 'string',

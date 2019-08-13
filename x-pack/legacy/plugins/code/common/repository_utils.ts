@@ -13,6 +13,19 @@ import { CloneProgress, FileTree, FileTreeItemType, Repository, RepositoryUri } 
 import { parseLspUrl, toCanonicalUrl } from './uri_util';
 
 export class RepositoryUtils {
+  // visible for tests
+  // the max length of the hash part used to normalize the repository URI
+  static readonly MAX_HASH_LEN = 8;
+  // as the normalized uri is used to create the name of code indices, and a valid index name cannot be longer than 255,
+  // see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html
+  // the utf8 encoded max normalized name length cannot be greater than (255 - len(index_prefix) - len(index_suffix))
+  // the index prefixes currently in use are '.code-document-', '.code-reference-', '.code-symbol-',
+  // the index suffix currently in use is `-${version}`,
+  // and also leave some room for future extensions
+  static readonly MAX_NORMALIZED_NAME_LEN = 200;
+  static readonly MAX_NORMALIZED_URI_LEN =
+    RepositoryUtils.MAX_NORMALIZED_NAME_LEN - RepositoryUtils.MAX_HASH_LEN - 1;
+
   // Generate a Repository instance by parsing repository remote url
   public static buildRepository(remoteUrl: string): Repository {
     const repo = GitUrlParse(remoteUrl.trim());
@@ -78,18 +91,24 @@ export class RepositoryUtils {
   }
 
   public static normalizeRepoUriToIndexName(repoUri: RepositoryUri) {
+    // the return value should be <capped readable repository name>-<hash after lowercased uri>
+    // the repoUri is encoded in case there is non-ascii character
+    const lcRepoUri = encodeURI(repoUri).toLowerCase();
+
     // Following the unit test here in Elasticsearch repository:
     // https://github.com/elastic/elasticsearch/blob/c75773745cd048cd81a58c7d8a74272b45a25cc6/server/src/test/java/org/elasticsearch/cluster/metadata/MetaDataCreateIndexServiceTests.java#L404
+    // the hash is calculated from the lowercased repoUri to make it case insensitive
     const hash = crypto
       .createHash('md5')
-      .update(repoUri)
+      .update(lcRepoUri)
       .digest('hex')
-      .substring(0, 8);
+      .substring(0, RepositoryUtils.MAX_HASH_LEN);
     // Invalid chars in index can be found here:
     // https://github.com/elastic/elasticsearch/blob/237650e9c054149fd08213b38a81a3666c1868e5/server/src/main/java/org/elasticsearch/common/Strings.java#L376
-    const normalizedUri = repoUri.replace(/[/\\?%*:|"<> ,]/g, '-');
+    const normalizedUri = lcRepoUri.replace(/[/\\?%*:|"<> ,]/g, '-');
+    const cappedNormalizedUri = normalizedUri.substr(0, RepositoryUtils.MAX_NORMALIZED_URI_LEN);
     // Elasticsearch index name is case insensitive
-    return `${normalizedUri}-${hash}`.toLowerCase();
+    return `${cappedNormalizedUri}-${hash}`.toLowerCase();
   }
 
   public static locationToUrl(loc: Location) {

@@ -63,16 +63,14 @@ const xpackOption = {
   },
 };
 
-// Skip because of issue: https://github.com/elastic/code/issues/1387
-describe.skip('code in multiple nodes', () => {
+describe('code in multiple nodes', () => {
   const codeNodeUuid = 'c4add484-0cba-4e05-86fe-4baa112d9e53';
   const nonodeNodeUuid = '22b75e04-0e50-4647-9643-6b1b1d88beaf';
   let codePort: number;
   let nonCodePort: number;
   let nonCodeNode: Root;
   let servers: any;
-  const pluginPaths = resolve(__dirname, '../../../../../x-pack');
-
+  const pluginPaths = resolve(__dirname, '../../../../../');
   async function startServers() {
     servers = await startTestServers({
       adjustTimeout: t => {
@@ -86,7 +84,12 @@ describe.skip('code in multiple nodes', () => {
             port: codePort,
           },
           plugins: { paths: [pluginPaths] },
-          xpack: xpackOption,
+          xpack: {
+            ...xpackOption,
+            code: {
+              ui: { enabled: true },
+            },
+          },
         },
       },
     });
@@ -103,7 +106,10 @@ describe.skip('code in multiple nodes', () => {
       plugins: { paths: [pluginPaths] },
       xpack: {
         ...xpackOption,
-        code: { codeNodeUrl: `http://localhost:${codePort}` },
+        code: {
+          ui: { enabled: true },
+          codeNodeUrl: `http://localhost:${codePort}`,
+        },
       },
     };
     nonCodeNode = createRootWithCorePlugins(setting);

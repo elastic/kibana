@@ -7,16 +7,8 @@
 import gql from 'graphql-tag';
 
 export const docCountQueryString = `
-query GetStateIndexStatus(
-  $dateRangeStart: String!
-  $dateRangeEnd: String!
-  $filters: String
-) {
-  statesIndexStatus: getStatesIndexStatus(
-    dateRangeStart: $dateRangeStart
-    dateRangeEnd: $dateRangeEnd
-    filters: $filters
-  ) {
+query GetStateIndexStatus {
+  statesIndexStatus: getStatesIndexStatus {
     docCount {
       count
     }

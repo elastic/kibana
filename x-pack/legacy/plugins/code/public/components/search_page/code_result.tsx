@@ -14,17 +14,19 @@ import { history } from '../../utils/url';
 import { CodeBlock } from '../codeblock/codeblock';
 
 interface Props {
+  query: string;
   results: any[];
 }
 
 export class CodeResult extends React.PureComponent<Props> {
   public render() {
-    return this.props.results.map(item => {
+    const { results, query } = this.props;
+    return results.map(item => {
       const { uri, filePath, hits, compositeContent } = item;
       const { content, lineMapping, ranges } = compositeContent;
       const repoLinkUrl = `/${uri}/tree/HEAD/`;
       const fileLinkUrl = `/${uri}/blob/HEAD/${filePath}`;
-      const key = `${uri}${filePath}`;
+      const key = `${uri}-${filePath}-${query}`;
       const lineMappingFunc = (l: number) => {
         return lineMapping[l - 1];
       };

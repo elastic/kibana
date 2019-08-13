@@ -19,6 +19,7 @@ import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGrid,
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { I18nContext } from 'ui/i18n';
 import { MonitoringViewBaseController } from '../../base_controller';
+import { CODE_PATH_LOGSTASH } from '../../../../common/constants';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -48,7 +49,7 @@ uiRoutes.when('/logstash/node/:uuid', {
   resolve: {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_LOGSTASH] });
     },
     pageData: getPageData
   },
@@ -98,6 +99,7 @@ uiRoutes.when('/logstash/node/:uuid', {
                         <MonitoringTimeseriesContainer
                           series={metric}
                           onBrush={this.onBrush}
+                          zoomInfo={this.zoomInfo}
                           {...data}
                         />
                         <EuiSpacer />

@@ -207,7 +207,9 @@ class Authenticator {
       }
 
       if (authenticationResult.succeeded()) {
-        return AuthenticationResult.succeeded(authenticationResult.user!);
+        return AuthenticationResult.succeeded(authenticationResult.user!, {
+          authResponseHeaders: authenticationResult.authResponseHeaders,
+        });
       } else if (authenticationResult.redirected()) {
         return authenticationResult;
       }

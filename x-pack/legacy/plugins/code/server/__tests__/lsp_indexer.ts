@@ -38,6 +38,7 @@ const esClient = {
 
 function prepareProject(url: string, p: string) {
   const opts: CloneOptions = {
+    bare: 1,
     fetchOpts: {
       callbacks: {
         certificateCheck: () => 0,
@@ -314,7 +315,6 @@ describe('lsp_indexer unit tests', function(this: any) {
       repoUri: '',
       filePath: 'src/public/js/main.ts',
       revision: 'HEAD',
-      localRepoPath: '',
     });
 
     // Expect EsClient deleteByQuery called 0 times for repository cleaning while
@@ -338,7 +338,7 @@ describe('lsp_indexer unit tests', function(this: any) {
     for (let i = 0; i < bulkSpy.callCount; i++) {
       total += bulkSpy.getCall(i).args[0].body.length;
     }
-    assert.strictEqual(total, 48 * 2);
+    assert.strictEqual(total, 49 * 2);
     // @ts-ignore
   }).timeout(20000);
 });

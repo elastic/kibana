@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useEffect, useState } from 'react';
+import React, { Fragment, SFC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiEmptyPrompt, SortDirection } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, SortDirection } from '@elastic/eui';
 
 import { JobId, moveToDataFrameWizard, useRefreshTransformList } from '../../../../common';
+import { checkPermission } from '../../../../../privilege/check_privilege';
 
 import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
 import { getJobsFactory } from './job_service';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
-import { TransformTable } from './transform_table';
+import { ProgressBar, TransformTable } from './transform_table';
 import { useRefreshInterval } from './use_refresh_interval';
 
 function getItemIdToExpandedRowMap(
@@ -36,48 +37,81 @@ function getItemIdToExpandedRowMap(
 }
 
 export const DataFrameJobList: SFC = () => {
-  const [dataFrameJobs, setDataFrameJobs] = useState<DataFrameJobListRow[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [blockRefresh, setBlockRefresh] = useState(false);
+
+  const [dataFrameJobs, setDataFrameJobs] = useState<DataFrameJobListRow[]>([]);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<JobId[]>([]);
+
+  const [errorMessage, setErrorMessage] = useState<any>(undefined);
+
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+
   const [sortField, setSortField] = useState<string>(DataFrameJobListColumn.id);
   const [sortDirection, setSortDirection] = useState<string>(SortDirection.ASC);
 
-  const getJobs = getJobsFactory(setDataFrameJobs, blockRefresh);
+  const disabled =
+    !checkPermission('canCreateDataFrameJob') ||
+    !checkPermission('canPreviewDataFrameJob') ||
+    !checkPermission('canStartStopDataFrameJob');
+
+  const getJobs = getJobsFactory(setDataFrameJobs, setErrorMessage, setIsInitialized, blockRefresh);
   // Subscribe to the refresh observable to trigger reloading the jobs list.
-  const { isRefresh } = useRefreshTransformList();
-  useEffect(() => {
-    if (isRefresh) {
-      getJobs(true);
-    }
-  });
+  useRefreshTransformList({ isLoading: setIsLoading, onRefresh: () => getJobs(true) });
   // Call useRefreshInterval() after the subscription above is set up.
   useRefreshInterval(setBlockRefresh);
 
-  if (dataFrameJobs.length === 0) {
+  // Before the jobs have been loaded for the first time, display the loading indicator only.
+  // Otherwise a user would see 'No data frame transforms found' during the initial loading.
+  if (!isInitialized) {
+    return <ProgressBar isLoading={isLoading} />;
+  }
+
+  if (typeof errorMessage !== 'undefined') {
     return (
-      <EuiEmptyPrompt
-        title={
-          <h2>
-            {i18n.translate('xpack.ml.dataFrame.list.emptyPromptTitle', {
-              defaultMessage: 'No data frame transforms found',
-            })}
-          </h2>
-        }
-        actions={[
-          <EuiButtonEmpty onClick={moveToDataFrameWizard}>
-            {i18n.translate('xpack.ml.dataFrame.list.emptyPromptButtonText', {
-              defaultMessage: 'Create your first data frame transform',
-            })}
-          </EuiButtonEmpty>,
-        ]}
-        data-test-subj="mlNoDataFrameJobsFound"
-      />
+      <Fragment>
+        <ProgressBar isLoading={isLoading} />
+        <EuiCallOut
+          title={i18n.translate('xpack.ml.dataFrame.list.errorPromptTitle', {
+            defaultMessage: 'An error occurred getting the data frame transform list.',
+          })}
+          color="danger"
+          iconType="alert"
+        >
+          <pre>{JSON.stringify(errorMessage)}</pre>
+        </EuiCallOut>
+      </Fragment>
     );
   }
 
-  const columns = getColumns(getJobs, expandedRowItemIds, setExpandedRowItemIds);
+  if (dataFrameJobs.length === 0) {
+    return (
+      <Fragment>
+        <ProgressBar isLoading={isLoading} />
+        <EuiEmptyPrompt
+          title={
+            <h2>
+              {i18n.translate('xpack.ml.dataFrame.list.emptyPromptTitle', {
+                defaultMessage: 'No data frame transforms found',
+              })}
+            </h2>
+          }
+          actions={[
+            <EuiButtonEmpty onClick={moveToDataFrameWizard} isDisabled={disabled}>
+              {i18n.translate('xpack.ml.dataFrame.list.emptyPromptButtonText', {
+                defaultMessage: 'Create your first data frame transform',
+              })}
+            </EuiButtonEmpty>,
+          ]}
+          data-test-subj="mlNoDataFrameJobsFound"
+        />
+      </Fragment>
+    );
+  }
+
+  const columns = getColumns(expandedRowItemIds, setExpandedRowItemIds);
 
   const sorting = {
     sort: {
@@ -113,18 +147,22 @@ export const DataFrameJobList: SFC = () => {
   };
 
   return (
-    <TransformTable
-      columns={columns}
-      hasActions={false}
-      isExpandable={true}
-      isSelectable={false}
-      items={dataFrameJobs}
-      itemId={DataFrameJobListColumn.id}
-      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-      onChange={onTableChange}
-      pagination={pagination}
-      sorting={sorting}
-      data-test-subj="mlDataFramesTableJobs"
-    />
+    <Fragment>
+      <ProgressBar isLoading={isLoading} />
+      <TransformTable
+        className="mlTransformTable"
+        columns={columns}
+        hasActions={false}
+        isExpandable={true}
+        isSelectable={false}
+        items={dataFrameJobs}
+        itemId={DataFrameJobListColumn.id}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        onChange={onTableChange}
+        pagination={pagination}
+        sorting={sorting}
+        data-test-subj="mlDataFramesTableJobs"
+      />
+    </Fragment>
   );
 };

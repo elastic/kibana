@@ -19,6 +19,7 @@ import { InfraIndexField, InfraNodeType, InfraSnapshotGroupbyInput } from '../..
 import { InfraGroupByOptions } from '../../lib/lib';
 import { CustomFieldPanel } from './custom_field_panel';
 import { fieldToName } from './lib/field_to_display_name';
+import euiStyled from '../../../../../common/eui_styled_components';
 
 interface Props {
   nodeType: InfraNodeType;
@@ -39,7 +40,7 @@ let OPTIONS: { [P in InfraNodeType]: InfraGroupByOptions[] };
 const getOptions = (
   nodeType: InfraNodeType,
   intl: InjectedIntl
-): Array<{ text: string; field: string }> => {
+): Array<{ text: string; field: string; toolTipContent?: string }> => {
   if (!OPTIONS) {
     const mapFieldToOption = createFieldToOptionMapper(intl);
     OPTIONS = {
@@ -80,7 +81,11 @@ export const WaffleGroupByControls = injectI18n(
 
     public render() {
       const { nodeType, groupBy, intl } = this.props;
-      const options = getOptions(nodeType, intl).concat(this.props.customOptions);
+      const customOptions = this.props.customOptions.map(option => ({
+        ...option,
+        toolTipContent: option.text,
+      }));
+      const options = getOptions(nodeType, intl).concat(customOptions);
 
       if (!options.length) {
         throw Error(
@@ -118,6 +123,9 @@ export const WaffleGroupByControls = injectI18n(
                 onClick: this.handleClick(o.field),
                 icon,
               } as EuiContextMenuPanelItemDescriptor;
+              if (o.toolTipContent) {
+                panel.toolTipContent = o.toolTipContent;
+              }
               return panel;
             }),
           ],
@@ -163,7 +171,7 @@ export const WaffleGroupByControls = injectI18n(
             panelPaddingSize="none"
             closePopover={this.handleClose}
           >
-            <EuiContextMenu initialPanelId="firstPanel" panels={panels} />
+            <StyledContextMenu initialPanelId="firstPanel" panels={panels} />
           </EuiPopover>
         </EuiFilterGroup>
       );
@@ -211,3 +219,11 @@ export const WaffleGroupByControls = injectI18n(
     };
   }
 );
+
+const StyledContextMenu = euiStyled(EuiContextMenu)`
+  width: 320px;
+  & .euiContextMenuItem__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+`;

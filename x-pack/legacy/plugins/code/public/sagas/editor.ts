@@ -29,7 +29,6 @@ import {
   revealPosition,
   fetchRepos,
   turnOnDefaultRepoScope,
-  openTreePath,
   fetchRootRepoTree,
 } from '../actions';
 import { loadRepo, loadRepoFailed, loadRepoSuccess } from '../actions/status';
@@ -44,6 +43,7 @@ import {
   repoScopeSelector,
   urlQueryStringSelector,
   createTreeSelector,
+  getTreeRevision,
 } from '../selectors';
 import { history } from '../utils/url';
 import { mainRoutePattern } from './patterns';
@@ -189,21 +189,15 @@ function* handleMainRouteChange(action: Action<Match>) {
   }
   const lastRequestPath = yield select(lastRequestPathSelector);
   const currentTree: FileTree = yield select(getTree);
+  const currentTreeRevision: string = yield select(getTreeRevision);
   // repo changed
-  if (currentTree.repoUri !== repoUri) {
+  if (currentTree.repoUri !== repoUri || revision !== currentTreeRevision) {
     yield put(resetRepoTree());
     yield put(fetchRepoCommits({ uri: repoUri, revision }));
     yield put(fetchRootRepoTree({ uri: repoUri, revision }));
   }
   const tree = yield select(getTree);
   const isDir = pathType === PathTypes.tree;
-  const openPath = isDir
-    ? file
-    : (file || '')
-        .split('/')
-        .slice(0, -1)
-        .join('/');
-  yield put(openTreePath(openPath || ''));
   function isTreeLoaded(isDirectory: boolean, targetTree: FileTree | null) {
     if (!isDirectory) {
       return !!targetTree;

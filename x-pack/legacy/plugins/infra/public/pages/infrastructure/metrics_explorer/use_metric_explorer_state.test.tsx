@@ -30,8 +30,35 @@ const renderUseMetricsExplorerStateHook = () =>
 jest.mock('../../../utils/fetch');
 const mockedFetch = fetch as jest.Mocked<typeof fetch>;
 
+interface LocalStore {
+  [key: string]: string;
+}
+
+interface LocalStorage {
+  getItem: (key: string) => string | null;
+  setItem: (key: string, value: string) => void;
+}
+
+const STORE: LocalStore = {};
+const localStorageMock: LocalStorage = {
+  getItem: (key: string) => {
+    return STORE[key] || null;
+  },
+  setItem: (key: string, value: any) => {
+    STORE[key] = value.toString();
+  },
+};
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+});
+
 describe('useMetricsExplorerState', () => {
-  beforeEach(() => mockedFetch.post.mockResolvedValue({ data: resp } as any));
+  beforeEach(() => {
+    mockedFetch.post.mockResolvedValue({ data: resp } as any);
+    delete STORE.MetricsExplorerOptions;
+    delete STORE.MetricsExplorerTimeRange;
+  });
 
   it('should just work', async () => {
     const { result, waitForNextUpdate } = renderUseMetricsExplorerStateHook();

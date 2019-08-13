@@ -156,7 +156,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
 
       this.debug('User has been authenticated with new access token');
 
-      return AuthenticationResult.succeeded(user, { accessToken, refreshToken });
+      return AuthenticationResult.succeeded(user, { state: { accessToken, refreshToken } });
     } catch (err) {
       this.debug(`Failed to authenticate request via login attempt: ${err.message}`);
 
@@ -231,7 +231,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
         this.debug('Clearing session since both access and refresh tokens are expired.');
 
         // Set state to `null` to let `Authenticator` know that we want to clear current session.
-        return AuthenticationResult.redirectTo(this.getLoginPageURL(request), null);
+        return AuthenticationResult.redirectTo(this.getLoginPageURL(request), { state: null });
       }
 
       return AuthenticationResult.failed(
@@ -244,7 +244,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
       const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
 
       this.debug('Request has been authenticated via refreshed token.');
-      return AuthenticationResult.succeeded(user, refreshedTokenPair);
+      return AuthenticationResult.succeeded(user, { state: refreshedTokenPair });
     } catch (err) {
       this.debug(`Failed to authenticate user using newly refreshed access token: ${err.message}`);
 

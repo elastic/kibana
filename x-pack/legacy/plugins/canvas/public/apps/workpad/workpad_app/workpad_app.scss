@@ -22,7 +22,7 @@ $canvasLayoutFontSize: $euiFontSizeS;
 
 .canvasLayout__stage {
   flex-grow: 1;
-  flex-basis: 0%;
+  flex-basis: auto;
   display: flex;
   flex-direction: column;
 }
@@ -37,9 +37,13 @@ $canvasLayoutFontSize: $euiFontSizeS;
   user-select: none;
 }
 
+.canvasLayout__stageHeaderInner {
+  height: ($euiSizeL * 2);
+}
+
 .canvasLayout__stageContent {
   flex-grow: 1;
-  flex-basis: 0%;
+  flex-basis: auto;
   position: relative;
 }
 

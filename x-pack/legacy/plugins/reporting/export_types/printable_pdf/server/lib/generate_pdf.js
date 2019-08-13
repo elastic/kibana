@@ -34,8 +34,7 @@ function generatePdfObservableFn(server) {
 
   const urlScreenshotsObservable = (urls, conditionalHeaders, layout, browserTimezone) => {
     return Rx.from(urls).pipe(
-      mergeMap(url => screenshotsObservable(url, conditionalHeaders, layout, browserTimezone),  // eslint-disable-line no-unused-vars
-        (outer, inner) => inner,
+      mergeMap(url => screenshotsObservable(url, conditionalHeaders, layout, browserTimezone),
         captureConcurrency
       )
     );

@@ -27,6 +27,8 @@ import { Overview } from '../overview';
 import { Timelines } from '../timelines';
 import { WithSource } from '../../containers/source';
 import { MlPopover } from '../../components/ml_popover/ml_popover';
+import { MlHostConditionalContainer } from '../../components/ml/conditional_links/ml_host_conditional_container';
+import { MlNetworkConditionalContainer } from '../../components/ml/conditional_links/ml_network_conditional_container';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -101,24 +103,31 @@ export const HomePage = pure(() => (
                         <SiemNavigation />
                       </EuiFlexItem>
 
-                      <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
-                        <EuiFlexItem grow={false}>
-                          <MlPopover />
-                        </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup
+                          alignItems="center"
+                          gutterSize="m"
+                          responsive={false}
+                          wrap={true}
+                        >
+                          <EuiFlexItem grow={false}>
+                            <MlPopover />
+                          </EuiFlexItem>
 
-                        <EuiFlexItem grow={false}>
-                          <EuiButton
-                            data-test-subj="add-data"
-                            href="kibana#home/tutorial_directory/security"
-                            iconType="plusInCircle"
-                          >
-                            <FormattedMessage
-                              id="xpack.siem.global.addData"
-                              defaultMessage="Add data"
-                            />
-                          </EuiButton>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
+                          <EuiFlexItem grow={false}>
+                            <EuiButton
+                              data-test-subj="add-data"
+                              href="kibana#home/tutorial_directory/siem"
+                              iconType="plusInCircle"
+                            >
+                              <FormattedMessage
+                                id="xpack.siem.global.addData"
+                                defaultMessage="Add data"
+                              />
+                            </EuiButton>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
                     </EuiFlexGroup>
                   </NavGlobal>
 
@@ -129,6 +138,8 @@ export const HomePage = pure(() => (
                     <Route path="/network" component={NetworkContainer} />
                     <Route path="/timelines" component={Timelines} />
                     <Route path="/link-to" component={LinkToPage} />
+                    <Route path="/ml-hosts" component={MlHostConditionalContainer} />
+                    <Route path="/ml-network" component={MlNetworkConditionalContainer} />
                     <Route component={NotFoundPage} />
                   </Switch>
                 </EuiPageBody>

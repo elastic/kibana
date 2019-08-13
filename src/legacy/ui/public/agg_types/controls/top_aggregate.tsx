@@ -124,6 +124,7 @@ function TopAggregateParamEditor({
         isInvalid={showValidation ? !isValid : false}
         disabled={disabled}
         onBlur={setTouched}
+        data-test-subj="visDefaultEditorAggregateWith"
       />
     </EuiFormRow>
   );

@@ -193,11 +193,13 @@ describe('PingList component', () => {
       <PingListComponent
         loading={false}
         data={{ allPings }}
+        onPageCountChange={jest.fn()}
+        onSelectedLocationChange={(loc: EuiComboBoxProps[]) => {}}
+        onSelectedStatusChange={jest.fn()}
         onUpdateApp={jest.fn()}
-        onSelectedStatusUpdate={jest.fn()}
+        pageSize={30}
         selectedOption="down"
         selectedLocation={BaseLocationOptions}
-        setSelectedLocation={(loc: EuiComboBoxProps[]) => {}}
       />
     );
     expect(component).toMatchSnapshot();

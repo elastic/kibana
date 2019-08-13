@@ -414,7 +414,7 @@ export class IndexTable extends Component {
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
-              <h1>
+              <h1 data-test-subj="sectionHeading">
                 <FormattedMessage
                   id="xpack.idxMgmt.indexTable.sectionHeading"
                   defaultMessage="Index Management"
@@ -501,6 +501,7 @@ export class IndexTable extends Component {
                     loadIndices();
                   }}
                   iconType="refresh"
+                  data-test-subj="reloadIndicesButton"
                 >
                   <FormattedMessage
                     id="xpack.idxMgmt.indexTable.reloadIndicesButton"

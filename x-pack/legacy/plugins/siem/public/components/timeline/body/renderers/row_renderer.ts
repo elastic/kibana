@@ -21,6 +21,11 @@ export interface RowRenderer {
       data,
       width,
       children,
-    }: { browserFields: BrowserFields; data: Ecs; width: number; children: React.ReactNode }
+    }: {
+      browserFields: BrowserFields;
+      data: Ecs;
+      width: number;
+      children: React.ReactNode;
+    }
   ) => React.ReactNode;
 }

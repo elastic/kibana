@@ -8,7 +8,7 @@ import { getActions } from './actions';
 
 describe('Data Frame: Job List Actions', () => {
   test('getActions()', () => {
-    const actions = getActions(() => {});
+    const actions = getActions();
 
     expect(actions).toHaveLength(2);
     expect(actions[0].isPrimary).toBeTruthy();

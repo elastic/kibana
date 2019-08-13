@@ -14,20 +14,21 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
+import { deleteJob } from './job_service';
+
 import {
   checkPermission,
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { DataFrameJobListRow, DATA_FRAME_RUNNING_STATE } from './common';
+import { DataFrameJobListRow, DATA_FRAME_TASK_STATE } from './common';
 
 interface DeleteActionProps {
   item: DataFrameJobListRow;
-  deleteJob(d: DataFrameJobListRow): void;
 }
 
-export const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, item }) => {
-  const disabled = item.state.task_state === DATA_FRAME_RUNNING_STATE.STARTED;
+export const DeleteAction: SFC<DeleteActionProps> = ({ item }) => {
+  const disabled = item.state.task_state === DATA_FRAME_TASK_STATE.STARTED;
 
   const canDeleteDataFrameJob: boolean = checkPermission('canDeleteDataFrameJob');
 

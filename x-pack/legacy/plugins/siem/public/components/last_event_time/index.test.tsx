@@ -17,7 +17,7 @@ import '../../mock/ui_settings';
 
 import { LastEventTime } from '.';
 
-describe('Last Event Time Stat', async () => {
+describe('Last Event Time Stat', () => {
   // this is just a little hack to silence a warning that we'll get until react
   // fixes this: https://github.com/facebook/react/pull/14853
   // For us that mean we need to upgrade to 16.9.0

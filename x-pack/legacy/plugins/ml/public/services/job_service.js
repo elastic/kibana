@@ -58,7 +58,6 @@ class JobService {
         defaultMessage: 'Active datafeeds'
       }), value: 0, show: true }
     };
-    this.jobUrls = {};
   }
 
   getBlankJob() {
@@ -132,7 +131,6 @@ class JobService {
                   processBasicJobInfo(this, jobs);
                   this.jobs = jobs;
                   createJobStats(this.jobs, this.jobStats);
-                  createJobUrls(this.jobs, this.jobUrls);
                   resolve({ jobs: this.jobs });
                 });
             })
@@ -218,7 +216,6 @@ class JobService {
                     }
                     this.jobs = jobs;
                     createJobStats(this.jobs, this.jobStats);
-                    createJobUrls(this.jobs, this.jobUrls);
                     resolve({ jobs: this.jobs });
                   });
               })
@@ -868,33 +865,17 @@ function createJobStats(jobsList, jobStats) {
   jobStats.activeNodes.value = Object.keys(mlNodes).length;
 }
 
-function createJobUrls(jobsList, jobUrls) {
-  _.each(jobsList, (job) => {
-    if (job.data_counts) {
-      const from = moment(job.data_counts.earliest_record_timestamp).toISOString();
-      const to = moment(job.data_counts.latest_record_timestamp).toISOString();
-      const path = createResultsUrl([job.job_id], to, from);
-
-      if (jobUrls[job.job_id]) {
-        jobUrls[job.job_id].url = path;
-      } else {
-        jobUrls[job.job_id] = { url: path };
-      }
-    }
-  });
-}
-
 function createResultsUrlForJobs(jobsList, resultsPage) {
   let from = undefined;
   let to = undefined;
   if (jobsList.length === 1) {
     from = jobsList[0].earliestTimestampMs;
-    to = jobsList[0].latestTimestampMs;
+    to = jobsList[0].latestResultsTimestampMs; // Will be max(latest source data, latest bucket results)
   } else {
     const jobsWithData = jobsList.filter(j => (j.earliestTimestampMs !== undefined));
     if (jobsWithData.length > 0) {
       from = Math.min(...jobsWithData.map(j => j.earliestTimestampMs));
-      to = Math.max(...jobsWithData.map(j => j.latestTimestampMs));
+      to = Math.max(...jobsWithData.map(j => j.latestResultsTimestampMs));
     }
   }
 

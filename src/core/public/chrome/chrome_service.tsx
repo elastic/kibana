@@ -66,7 +66,7 @@ export interface ChromeBreadcrumb {
 }
 
 /** @public */
-export type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
+export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
 
 interface ConstructorParams {
   browserSupportsCsp: boolean;

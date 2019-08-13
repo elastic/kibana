@@ -282,7 +282,10 @@ export const ScrollableLogTextStreamView = injectI18n(ScrollableLogTextStreamVie
  */
 const WithColumnWidths: React.FunctionComponent<{
   children: (
-    params: { columnWidths: LogEntryColumnWidths; CharacterDimensionsProbe: React.ComponentType }
+    params: {
+      columnWidths: LogEntryColumnWidths;
+      CharacterDimensionsProbe: React.ComponentType;
+    }
   ) => React.ReactElement<any> | null;
   columnConfigurations: LogColumnConfiguration[];
   scale: TextScale;

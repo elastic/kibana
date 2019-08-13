@@ -6,7 +6,7 @@
 
 import mockDataFrameJobListRow from './__mocks__/data_frame_job_list_row.json';
 
-import { DATA_FRAME_RUNNING_STATE, isCompletedBatchJob } from './common';
+import { DATA_FRAME_TASK_STATE, isCompletedBatchJob } from './common';
 
 describe('Data Frame: isCompletedBatchJob()', () => {
   test('isCompletedBatchJob()', () => {
@@ -15,9 +15,7 @@ describe('Data Frame: isCompletedBatchJob()', () => {
     // followed by a call to isCompletedBatchJob() itself
     expect(mockDataFrameJobListRow.state.checkpoint === 1).toBe(true);
     expect(mockDataFrameJobListRow.sync === undefined).toBe(true);
-    expect(mockDataFrameJobListRow.state.task_state === DATA_FRAME_RUNNING_STATE.STOPPED).toBe(
-      true
-    );
+    expect(mockDataFrameJobListRow.state.task_state === DATA_FRAME_TASK_STATE.STOPPED).toBe(true);
     expect(isCompletedBatchJob(mockDataFrameJobListRow)).toBe(true);
 
     // adapt the mock config to resemble a non-completed job.

@@ -15,6 +15,29 @@ import { wrapError } from './errors';
  * request that needs to be authenticated.
  */
 export function authenticateFactory(server) {
+
+  // Sometimes authentication subsystem may require some special headers to be sent back to
+  // the client with the requested payload (e.g. for mutual client-server authentication).
+  const authResponseHeadersMap = new WeakMap();
+  server.ext('onPreResponse', (request, h) => {
+    const authResponseHeaders = authResponseHeadersMap.get(request);
+    if (authResponseHeaders) {
+      const response = request.response;
+      if (Boom.isBoom(response)) {
+        response.output.headers = {
+          ...response.output.headers,
+          ...authResponseHeaders,
+        };
+      } else {
+        for (const [headerName, headerValue] of Object.entries(authResponseHeaders)) {
+          response.header(headerName, headerValue);
+        }
+      }
+    }
+
+    return h.continue;
+  });
+
   return async function authenticate(request, h) {
     // If security is disabled continue with no user credentials
     // and delete the client cookie as well.
@@ -29,6 +52,12 @@ export function authenticateFactory(server) {
     } catch (err) {
       server.log(['error', 'authentication'], err);
       return wrapError(err);
+    }
+
+    // Remember authentication related response headers and attach them to response in the
+    // `onPreResponse` hook.
+    if (authenticationResult.authResponseHeaders) {
+      authResponseHeadersMap.set(request, authenticationResult.authResponseHeaders);
     }
 
     if (authenticationResult.succeeded()) {
@@ -50,12 +79,7 @@ export function authenticateFactory(server) {
         `Authentication attempt failed: ${authenticationResult.error.message}`
       );
 
-      const error = wrapError(authenticationResult.error);
-      if (authenticationResult.challenges) {
-        error.output.headers['WWW-Authenticate'] = authenticationResult.challenges;
-      }
-
-      return error;
+      return  wrapError(authenticationResult.error);
     }
 
     return Boom.unauthorized();

@@ -36,25 +36,25 @@ export function repeatImage(): ExpressionFunction<
       types: ['number'],
     },
     args: {
+      emptyImage: {
+        types: ['string', 'null'],
+        help: argHelp.emptyImage,
+        default: null,
+      },
       image: {
         types: ['string', 'null'],
         help: argHelp.image,
         default: elasticOutline,
-      },
-      size: {
-        types: ['number'],
-        default: 100,
-        help: argHelp.size,
       },
       max: {
         types: ['number'],
         help: argHelp.max,
         default: 1000,
       },
-      emptyImage: {
-        types: ['string', 'null'],
-        help: argHelp.emptyImage,
-        default: null,
+      size: {
+        types: ['number'],
+        default: 100,
+        help: argHelp.size,
       },
     },
     fn: (count, args) => {

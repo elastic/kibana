@@ -8,6 +8,7 @@ import { Action, handleActions } from 'redux-actions';
 
 import { GitBlame } from '../../common/git_blame';
 import { loadBlame, loadBlameFailed, loadBlameSuccess } from '../actions/blame';
+import { routePathChange, repoChange, revisionChange, filePathChange } from '../actions/route';
 
 export interface BlameState {
   blames: GitBlame[];
@@ -20,6 +21,13 @@ const initialState: BlameState = {
   loading: false,
 };
 
+const clearState = (state: BlameState) =>
+  produce<BlameState>(state, draft => {
+    draft.blames = initialState.blames;
+    draft.loading = initialState.loading;
+    draft.error = undefined;
+  });
+
 type BlameStatePayload = GitBlame[] & Error;
 
 export const blame = handleActions<BlameState, BlameStatePayload>(
@@ -30,7 +38,6 @@ export const blame = handleActions<BlameState, BlameStatePayload>(
       }),
     [String(loadBlameSuccess)]: (state, action: Action<GitBlame[]>) =>
       produce<BlameState>(state, draft => {
-        // @ts-ignore
         draft.blames = action.payload!;
         draft.loading = false;
       }),
@@ -40,6 +47,10 @@ export const blame = handleActions<BlameState, BlameStatePayload>(
         draft.error = action.payload;
         draft.blames = [];
       }),
+    [String(routePathChange)]: clearState,
+    [String(repoChange)]: clearState,
+    [String(revisionChange)]: clearState,
+    [String(filePathChange)]: clearState,
   },
   initialState
 );

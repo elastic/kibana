@@ -17,11 +17,12 @@ import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import { I18nContext } from 'ui/i18n';
 
-import { ErrorToast } from '../components/error_toast';
+import { ErrorToastDispatcher } from '../components/error_toast_dispatcher';
 import { KibanaConfigContext } from '../lib/adapters/framework/kibana_framework_adapter';
 import { AppFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store/store';
+import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
 import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabilities_provider';
 
 export const startApp = async (libs: AppFrontendLibs) => {
@@ -34,23 +35,26 @@ export const startApp = async (libs: AppFrontendLibs) => {
   libs.framework.render(
     <EuiErrorBoundary>
       <I18nContext>
-        <ReduxStoreProvider store={store}>
-          <ApolloProvider client={libs.apolloClient}>
-            <ThemeProvider
-              theme={() => ({
-                eui: libs.framework.darkMode ? euiDarkVars : euiLightVars,
-                darkMode: libs.framework.darkMode,
-              })}
-            >
-              <KibanaConfigContext.Provider value={libs.framework}>
-                <MlCapabilitiesProvider>
-                  <PageRouter history={history} />
-                </MlCapabilitiesProvider>
-              </KibanaConfigContext.Provider>
-            </ThemeProvider>
-            <ErrorToast />
-          </ApolloProvider>
-        </ReduxStoreProvider>
+        <ManageGlobalToaster>
+          <ReduxStoreProvider store={store}>
+            <ApolloProvider client={libs.apolloClient}>
+              <ThemeProvider
+                theme={() => ({
+                  eui: libs.framework.darkMode ? euiDarkVars : euiLightVars,
+                  darkMode: libs.framework.darkMode,
+                })}
+              >
+                <KibanaConfigContext.Provider value={libs.framework}>
+                  <MlCapabilitiesProvider>
+                    <PageRouter history={history} />
+                  </MlCapabilitiesProvider>
+                </KibanaConfigContext.Provider>
+              </ThemeProvider>
+              <ErrorToastDispatcher />
+              <GlobalToaster />
+            </ApolloProvider>
+          </ReduxStoreProvider>
+        </ManageGlobalToaster>
       </I18nContext>
     </EuiErrorBoundary>
   );

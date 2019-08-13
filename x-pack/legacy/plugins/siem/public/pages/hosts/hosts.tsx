@@ -214,6 +214,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                       startDate={from}
                       endDate={to}
                       skip={isInitializing}
+                      type={hostsModel.HostsType.page}
                       narrowDateRange={(score, interval) => {
                         const fromTo = scoreIntervalToDateTime(score, interval);
                         setAbsoluteRangeDatePicker({

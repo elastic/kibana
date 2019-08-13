@@ -7,9 +7,24 @@
 import { get, set } from 'lodash';
 import { DatabaseAdapter } from '../../database';
 import { ElasticsearchMonitorsAdapter } from '../elasticsearch_monitors_adapter';
+import { CountParams, CountResponse } from 'elasticsearch';
 
 // FIXME: there are many untested functions in this adapter. They should be tested.
 describe('ElasticsearchMonitorsAdapter', () => {
+  let defaultCountResponse: CountResponse;
+
+  beforeEach(() => {
+    defaultCountResponse = {
+      count: 0,
+      _shards: {
+        total: 0,
+        successful: 0,
+        failed: 0,
+        skipped: 0,
+      },
+    };
+  });
+
   it('will return kubernetes information if contained in hits', async () => {
     expect.assertions(2);
 
@@ -56,7 +71,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
 
     const database: DatabaseAdapter = {
       search: async (request: any, params: any) => mockEsQueryResult,
-      count: async (request: any, params: any) => null,
+      count: async (request: any, params: CountParams) => defaultCountResponse,
       head: async (request: any, params: any) => null,
     };
     const adapter = new ElasticsearchMonitorsAdapter(database);
@@ -71,7 +86,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     const search = searchMock.bind({});
     const database = {
       search,
-      count: async (request: any, params: any) => null,
+      count: async (request: any, params: CountParams) => defaultCountResponse,
       head: async (request: any, params: any) => null,
     };
     const adapter = new ElasticsearchMonitorsAdapter(database);
@@ -102,7 +117,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     const search = searchMock.bind({});
     const database = {
       search,
-      count: async (request: any, params: any) => null,
+      count: async (request: any, params: CountParams) => defaultCountResponse,
       head: async (request: any, params: any) => null,
     };
     const adapter = new ElasticsearchMonitorsAdapter(database);

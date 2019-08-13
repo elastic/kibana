@@ -8,20 +8,22 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { ml } from '../../../../../../services/ml_api_service';
 
-import { DataFrameJobListRow } from '../common';
+import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../../common';
 
-import { GetJobs } from './get_jobs';
+import { DATA_FRAME_TASK_STATE, DataFrameJobListRow } from '../common';
 
-export const startJobFactory = (getJobs: GetJobs) => async (d: DataFrameJobListRow) => {
+export const startJob = async (d: DataFrameJobListRow) => {
   try {
-    await ml.dataFrame.startDataFrameTransformsJob(d.config.id);
+    await ml.dataFrame.startDataFrameTransformsJob(
+      d.config.id,
+      d.state.task_state === DATA_FRAME_TASK_STATE.FAILED
+    );
     toastNotifications.addSuccess(
       i18n.translate('xpack.ml.dataframe.jobsList.startJobSuccessMessage', {
         defaultMessage: 'Data frame transform {jobId} started successfully.',
         values: { jobId: d.config.id },
       })
     );
-    getJobs(true);
   } catch (e) {
     toastNotifications.addDanger(
       i18n.translate('xpack.ml.dataframe.jobsList.startJobErrorMessage', {
@@ -30,4 +32,5 @@ export const startJobFactory = (getJobs: GetJobs) => async (d: DataFrameJobListR
       })
     );
   }
+  refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
 };

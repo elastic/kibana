@@ -73,6 +73,7 @@ export function createDateNanosFormat(FieldFormat) {
     getParamDefaults() {
       return {
         pattern: this.getConfig('dateNanosFormat'),
+        fallbackPattern: this.getConfig('dateFormat'),
         timezone: this.getConfig('dateFormat:tz'),
       };
     }
@@ -83,6 +84,7 @@ export function createDateNanosFormat(FieldFormat) {
       const pattern = this.param('pattern');
       const timezone = this.param('timezone');
       const fractPattern = analysePatternForFract(pattern);
+      const fallbackPattern = this.param('patternFallback');
 
       const timezoneChanged = this._timeZone !== timezone;
       const datePatternChanged = this._memoizedPattern !== pattern;
@@ -97,7 +99,11 @@ export function createDateNanosFormat(FieldFormat) {
 
           const date = moment(val);
 
-          if (date.isValid()) {
+          if(typeof val !== 'string' && date.isValid()) {
+            //fallback for max/min aggregation, where unixtime in ms is returned as a number
+            //aggregations in Elasticsearch generally just return ms
+            return date.format(fallbackPattern);
+          } else if (date.isValid()) {
             return formatWithNanos(date, val, fractPattern);
           } else {
             return val;

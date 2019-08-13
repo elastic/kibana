@@ -34,13 +34,15 @@ export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
 
-  describe('dashboard filtering', async function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/41088
+  // FLAKY: https://github.com/elastic/kibana/issues/41087
+  describe.skip('dashboard filtering', function () {
     this.tags('smoke');
     before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    describe('adding a filter that excludes all data', async () => {
+    describe('adding a filter that excludes all data', () => {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.setTimepickerInDataRange();
@@ -106,7 +108,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('using a pinned filter that excludes all data', async () => {
+    describe('using a pinned filter that excludes all data', () => {
       before(async () => {
         await filterBar.toggleFilterPinned('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -168,7 +170,10 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('disabling a filter unfilters the data on', async () => {
+    describe('disabling a filter unfilters the data on', function () {
+      // Flaky test
+      // https://github.com/elastic/kibana/issues/41087
+      this.tags('skipFirefox');
       before(async () => {
         await filterBar.toggleFilterEnabled('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -225,7 +230,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('nested filtering', async () => {
+    describe('nested filtering', () => {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
       });

@@ -78,10 +78,17 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       return await this.createVisualizationPromptButton();
     }
 
+    /*
+    This method should use retry loop to delete visualizations from multiple pages until we find the createVisualizationPromptButton.
+    Perhaps it *could* set the page size larger than the default 10, but it might still need to loop anyway.
+    */
     async deleteAllVisualizations() {
-      await this.checkListingSelectAllCheckbox();
-      await this.clickDeleteSelected();
-      await PageObjects.common.clickConfirmOnModal();
+      await retry.try(async () => {
+        await this.checkListingSelectAllCheckbox();
+        await this.clickDeleteSelected();
+        await PageObjects.common.clickConfirmOnModal();
+        await testSubjects.find('createVisualizationPromptButton');
+      });
     }
 
     async createSimpleMarkdownViz(vizName) {
@@ -552,6 +559,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await comboBox.setElement(fieldEl, fieldValue);
     }
 
+    async selectAggregateWith(fieldValue) {
+      const sortSelect = await testSubjects.find(`visDefaultEditorAggregateWith`);
+      const sortMetric = await sortSelect.findByCssSelector(`option[value="${fieldValue}"]`);
+      await sortMetric.click();
+    }
+
     async selectFieldById(fieldValue, id) {
       await find.clickByCssSelector(`#${id} > option[label="${fieldValue}"]`);
     }
@@ -571,8 +584,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getNumericInterval(agg = 2) {
-      const intervalElement = await testSubjects.find(`visEditorInterval${agg}`);
-      return await intervalElement.getProperty('value');
+      return await testSubjects.getAttribute(`visEditorInterval${agg}`, 'value');
     }
 
     async setNumericInterval(newValue, { append } = {}, agg = 2) {
@@ -730,6 +742,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       }
       log.debug('Click Save Visualization button');
       await testSubjects.click('confirmSaveSavedObjectButton');
+
+      // wait for save to complete before completion
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
@@ -1214,7 +1229,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async getBucketErrorMessage() {
       const error = await find.byCssSelector('[group-name="buckets"] [data-test-subj="defaultEditorAggSelect"] + .euiFormErrorText');
-      const errorMessage = await error.getProperty('innerText');
+      const errorMessage = await error.getAttribute('innerText');
       log.debug(errorMessage);
       return errorMessage;
     }

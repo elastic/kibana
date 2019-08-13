@@ -19,7 +19,7 @@ import { createStore, hostsModel, networkModel, State } from '../../../store';
 
 import { AddToKql } from '.';
 
-describe('AddToKql Component', async () => {
+describe('AddToKql Component', () => {
   const state: State = mockGlobalState;
   let store = createStore(state, apolloClientObservable);
 

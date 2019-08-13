@@ -39,6 +39,7 @@ function prepareProject(url: string, p: string) {
               certificateCheck: () => 0,
             },
           },
+          bare: 1,
         }).then(repo => {
           resolve(repo);
         });

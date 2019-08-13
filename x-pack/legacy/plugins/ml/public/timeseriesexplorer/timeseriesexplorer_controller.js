@@ -935,14 +935,14 @@ module.controller('MlTimeSeriesExplorerController', function (
       $scope.autoZoomDuration = getAutoZoomDuration();
 
       // Check that the zoom times are valid.
-      // zoomFrom must be at or after dashboard earliest,
-      // zoomTo must be at or before dashboard latest plus context chart agg interval.
+      // zoomFrom must be at or after context chart search bounds earliest,
+      // zoomTo must be at or before context chart search bounds latest.
       const zoomFrom = moment(zoomState.from, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
       const zoomTo = moment(zoomState.to, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
-      const aggIntervalMs = $scope.contextAggregationInterval.asMilliseconds();
       const bounds = timefilter.getActiveBounds();
-      const earliest = bounds.min;
-      const latest = moment(bounds.max).add(aggIntervalMs, 'ms');
+      const searchBounds = getBoundsRoundedToInterval(bounds, $scope.contextAggregationInterval, true);
+      const earliest = searchBounds.min;
+      const latest = searchBounds.max;
 
       if (zoomFrom.isValid() && zoomTo.isValid &&
         zoomTo.isAfter(zoomFrom) &&

@@ -124,7 +124,7 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
         title={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreSnapshot.executeRestoreErrorTitle"
-            defaultMessage="Unable to execute restore"
+            defaultMessage="Unable to restore snapshot"
           />
         }
         error={saveError}

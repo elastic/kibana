@@ -52,43 +52,20 @@ export type OnDataProviderEdited = (
 ) => void;
 
 /** Invoked when a user change the kql query of our data provider */
-export type OnChangeDataProviderKqlQuery = (
-  edit: {
-    providerId: string;
-    kqlQuery: string;
-  }
-) => void;
+export type OnChangeDataProviderKqlQuery = (edit: { providerId: string; kqlQuery: string }) => void;
 
 /** Invoked when a user selects a new minimap time range */
 export type OnRangeSelected = (range: string) => void;
 
 /** Invoked when a user updates a column's filter */
-export type OnFilterChange = (
-  filter: {
-    columnId: ColumnId;
-    filter: string;
-  }
-) => void;
+export type OnFilterChange = (filter: { columnId: ColumnId; filter: string }) => void;
 
 /** Invoked when a column is sorted */
-export type OnColumnSorted = (
-  sorted: {
-    columnId: ColumnId;
-    sortDirection: SortDirection;
-  }
-) => void;
+export type OnColumnSorted = (sorted: { columnId: ColumnId; sortDirection: SortDirection }) => void;
 
 export type OnColumnRemoved = (columnId: ColumnId) => void;
 
-export type OnColumnResized = (
-  {
-    columnId,
-    delta,
-  }: {
-    columnId: ColumnId;
-    delta: number;
-  }
-) => void;
+export type OnColumnResized = ({ columnId, delta }: { columnId: ColumnId; delta: number }) => void;
 
 /** Invoked when a user clicks to change the number items to show per page */
 export type OnChangeItemsPerPage = (itemsPerPage: number) => void;

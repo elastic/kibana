@@ -5,8 +5,9 @@
  */
 
 import produce from 'immer';
-
+import querystring from 'querystring';
 import { Action, handleActions } from 'redux-actions';
+import { history } from '../utils/url';
 
 import {
   DocumentSearchResult,
@@ -33,6 +34,7 @@ import {
   turnOffDefaultRepoScope,
   turnOnDefaultRepoScope,
 } from '../actions';
+import { RepositoryUtils } from '../../common/repository_utils';
 
 export interface SearchState {
   scope: SearchScope;
@@ -51,12 +53,30 @@ export interface SearchState {
 
 const repositories: Repository[] = [];
 
+const getRepoScopeFromUrl = () => {
+  const { repoScope } = querystring.parse(history.location.search.replace('?', ''));
+  if (repoScope) {
+    return String(repoScope)
+      .split(',')
+      .map(r => ({
+        uri: r,
+        org: RepositoryUtils.orgNameFromUri(r),
+        name: RepositoryUtils.repoNameFromUri(r),
+      })) as Repository[];
+  } else {
+    return [];
+  }
+};
+
 const initialState: SearchState = {
   query: '',
   isLoading: false,
   isScopeSearchLoading: false,
   scope: SearchScope.DEFAULT,
-  searchOptions: { repoScope: [], defaultRepoScopeOn: false },
+  searchOptions: {
+    repoScope: getRepoScopeFromUrl(),
+    defaultRepoScopeOn: false,
+  },
   scopeSearchResults: { repositories, total: 0, took: 0 },
 };
 
@@ -74,7 +94,6 @@ export const search = handleActions<SearchState, SearchPayload>(
     [String(changeSearchScope)]: (state: SearchState, action: Action<SearchScope>) =>
       produce<SearchState>(state, draft => {
         if (Object.values(SearchScope).includes(action.payload)) {
-          // @ts-ignore
           draft.scope = action.payload!;
         } else {
           draft.scope = SearchScope.DEFAULT;
@@ -99,7 +118,8 @@ export const search = handleActions<SearchState, SearchPayload>(
             draft.repositories = new Set();
           }
           draft.isLoading = true;
-          draft.error = undefined;
+          delete draft.error;
+          delete draft.documentSearchResults;
         }
       }),
     [String(documentSearchSuccess)]: (state: SearchState, action: Action<DocumentSearchResult>) =>
@@ -171,6 +191,8 @@ export const search = handleActions<SearchState, SearchPayload>(
         if (action.payload) {
           draft.query = action.payload.query;
           draft.isLoading = true;
+          delete draft.error;
+          delete draft.repositorySearchResults;
         }
       }),
     [String(repositorySearchSuccess)]: (
@@ -193,7 +215,6 @@ export const search = handleActions<SearchState, SearchPayload>(
     },
     [String(saveSearchOptions)]: (state: SearchState, action: Action<SearchOptions>) =>
       produce<SearchState>(state, draft => {
-        // @ts-ignore
         draft.searchOptions = action.payload!;
       }),
     [String(searchReposForScope)]: (state: SearchState, action: Action<RepositorySearchPayload>) =>
@@ -205,7 +226,6 @@ export const search = handleActions<SearchState, SearchPayload>(
       action: Action<RepositorySearchResult>
     ) =>
       produce<SearchState>(state, draft => {
-        // @ts-ignore
         draft.scopeSearchResults = action.payload!;
         draft.isScopeSearchLoading = false;
       }),

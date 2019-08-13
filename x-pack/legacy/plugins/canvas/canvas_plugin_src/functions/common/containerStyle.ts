@@ -25,24 +25,12 @@ export function containerStyle(): ExpressionFunction<
   return {
     name: 'containerStyle',
     aliases: [],
+    type: 'containerStyle',
+    help,
     context: {
       types: ['null'],
     },
-    type: 'containerStyle',
-    help,
     args: {
-      border: {
-        types: ['string'],
-        help: argHelp.border,
-      },
-      borderRadius: {
-        types: ['string'],
-        help: argHelp.borderRadius,
-      },
-      padding: {
-        types: ['string'],
-        help: argHelp.padding,
-      },
       backgroundColor: {
         types: ['string'],
         help: argHelp.backgroundColor,
@@ -51,17 +39,25 @@ export function containerStyle(): ExpressionFunction<
         types: ['string'],
         help: argHelp.backgroundImage,
       },
+      backgroundRepeat: {
+        types: ['string'],
+        help: argHelp.backgroundRepeat,
+        default: 'no-repeat',
+        options: Object.values(BackgroundRepeat),
+      },
       backgroundSize: {
         types: ['string'],
         help: argHelp.backgroundSize,
         default: 'contain',
         options: Object.values(BackgroundSize),
       },
-      backgroundRepeat: {
+      border: {
         types: ['string'],
-        help: argHelp.backgroundRepeat,
-        default: 'no-repeat',
-        options: Object.values(BackgroundRepeat),
+        help: argHelp.border,
+      },
+      borderRadius: {
+        types: ['string'],
+        help: argHelp.borderRadius,
       },
       opacity: {
         types: ['number'],
@@ -72,6 +68,10 @@ export function containerStyle(): ExpressionFunction<
         help: argHelp.overflow,
         options: Object.values(Overflow),
         default: 'hidden',
+      },
+      padding: {
+        types: ['string'],
+        help: argHelp.padding,
       },
     },
     fn: (_context, args) => {

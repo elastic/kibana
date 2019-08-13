@@ -13,13 +13,14 @@ import template from './index.html';
 import { KibanaInstances } from 'plugins/monitoring/components/kibana/instances';
 import { SetupModeRenderer } from '../../../components/renderers';
 import { I18nContext } from 'ui/i18n';
+import { CODE_PATH_KIBANA } from '../../../../common/constants';
 
 uiRoutes.when('/kibana/instances', {
   template,
   resolve: {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_KIBANA] });
     },
     pageData: getPageData,
   },

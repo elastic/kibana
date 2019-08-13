@@ -20,7 +20,8 @@ export default function spaceSelectorFunctonalTests({
     'spaceSelector',
   ]);
 
-  describe('Spaces', () => {
+  describe('Spaces', function() {
+    this.tags('smoke');
     describe('Space Selector', () => {
       before(async () => await esArchiver.load('spaces/selector'));
       after(async () => await esArchiver.unload('spaces/selector'));
@@ -91,7 +92,7 @@ export default function spaceSelectorFunctonalTests({
         await esArchiver.unload('spaces/selector');
       });
 
-      describe('displays separate data for each space', async () => {
+      describe('displays separate data for each space', () => {
         it('in the default space', async () => {
           await PageObjects.common.navigateToApp('dashboard');
           await expectDashboardRenders('[Logs] Web Traffic');

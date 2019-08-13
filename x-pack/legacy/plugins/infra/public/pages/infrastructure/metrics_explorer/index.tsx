@@ -42,7 +42,7 @@ export const MetricsExplorerPage = injectI18n(
     } = useMetricsExplorerState(source, derivedIndexPattern);
 
     return (
-      <div>
+      <React.Fragment>
         <DocumentTitle
           title={(previousTitle: string) =>
             intl.formatMessage(
@@ -93,7 +93,7 @@ export const MetricsExplorerPage = injectI18n(
             onTimeChange={handleTimeChange}
           />
         )}
-      </div>
+      </React.Fragment>
     );
   }
 );

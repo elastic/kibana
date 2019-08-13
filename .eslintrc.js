@@ -362,6 +362,16 @@ module.exports = {
     },
 
     /**
+     * Jest specific rules
+     */
+    {
+      files: ['**/*.test.{js,ts,tsx}'],
+      rules: {
+        'jest/valid-describe': 'error',
+      },
+    },
+
+    /**
      * APM overrides
      */
     {
@@ -369,6 +379,14 @@ module.exports = {
       rules: {
         'no-unused-vars': ['error', { ignoreRestSiblings: true }],
         'no-console': ['warn', { allow: ['error'] }],
+      },
+    },
+    {
+      plugins: ['react-hooks'],
+      files: ['x-pack/legacy/plugins/apm/**/*.{ts,tsx}'],
+      rules: {
+        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
+        'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
       },
     },
 

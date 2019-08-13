@@ -40,6 +40,11 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       const actual = prepareJson('foo', { well: `hello 'hi'`, there: { friend: true } });
       expect(actual).toBe(expected);
     });
+
+    it('returns empty string if data is undefined', () => {
+      const actual = prepareJson('foo', undefined);
+      expect(actual).toBe('');
+    });
   });
 
   describe('prepareString', () => {
@@ -53,6 +58,11 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       const expected = `foo='\\'bar\\'' `;
       const actual = prepareString('foo', `'bar'`);
       expect(actual).toBe(expected);
+    });
+
+    it('returns empty string if data is undefined', () => {
+      const actual = prepareString('foo', undefined);
+      expect(actual).toBe('');
     });
   });
 

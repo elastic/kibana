@@ -198,8 +198,6 @@ export function JobSelector({
     setSelectedIds(newSelection);
     setNewSelection([]);
     applyTimeRangeFromSelection(allNewSelectionUnique);
-    jobSelectService.next({ selection: allNewSelectionUnique });
-
     setGlobalState(globalState, { selectedIds: allNewSelectionUnique, selectedGroups: groupSelection });
   }
 

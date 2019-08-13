@@ -51,14 +51,9 @@ const navTabs: NavTab[] = [
   },
 ];
 
-const MyEuiTab = styled(EuiTab)`
+const TabContainer = styled.div`
   .euiLink {
     color: inherit !important;
-    background-color: inherit !important;
-  }
-  .euiLink.euiLink--primary:focus {
-    outline: none !important;
-    background: none !important;
   }
 `;
 
@@ -98,21 +93,20 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
 
   private renderTabs = () =>
     navTabs.map((tab: NavTab) => (
-      <MyEuiTab
-        data-href={tab.href}
-        data-test-subj={`navigation-${tab.id}`}
-        disabled={tab.disabled}
-        isSelected={this.state.selectedTabId === tab.id}
-        key={`navigation-${tab.id}`}
-        onClick={() => track(`tab_${tab.id}`)}
-      >
-        <EuiLink
-          className={'navigation-link'}
-          data-test-subj={`navigation-link-${tab.id}`}
-          href={tab.href + this.props.search}
-        >
-          {tab.name}
+      <TabContainer className="euiTab" key={`navigation-${tab.id}`}>
+        <EuiLink data-test-subj={`navigation-link-${tab.id}`} href={tab.href + this.props.search}>
+          <EuiTab
+            data-href={tab.href}
+            data-test-subj={`navigation-${tab.id}`}
+            disabled={tab.disabled}
+            isSelected={this.state.selectedTabId === tab.id}
+            onClick={() => {
+              track(`tab_${tab.id}`);
+            }}
+          >
+            {tab.name}
+          </EuiTab>
         </EuiLink>
-      </MyEuiTab>
+      </TabContainer>
     ));
 }

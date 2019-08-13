@@ -6,64 +6,46 @@
 
 import gql from 'graphql-tag';
 
-export const monitorStatesQuery = gql`
-  query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $filters: String) {
-    monitorStates: getMonitorStates(
-      dateRangeStart: $dateRangeStart
-      dateRangeEnd: $dateRangeEnd
-      filters: $filters
-    ) {
-      totalSummaryCount {
+export const monitorStatesQueryString = `
+query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $filters: String) {
+  monitorStates: getMonitorStates(
+    dateRangeStart: $dateRangeStart
+    dateRangeEnd: $dateRangeEnd
+    filters: $filters
+  ) {
+    totalSummaryCount {
+      count
+    }
+    summaries {
+      monitor_id
+      histogram {
         count
-      }
-      summaries {
-        monitor_id
-        histogram {
-          count
-          points {
-            timestamp
-            up
-            down
-          }
+        points {
+          timestamp
+          up
+          down
         }
-        state {
+      }
+      state {
+        agent {
+          id
+        }
+        checks {
           agent {
             id
           }
-          checks {
-            agent {
-              id
-            }
-            container {
-              id
-            }
-            kubernetes {
-              pod {
-                uid
-              }
-            }
-            monitor {
-              ip
-              name
-              status
-            }
-            observer {
-              geo {
-                name
-                location {
-                  lat
-                  lon
-                }
-              }
-            }
-            timestamp
+          container {
+            id
           }
-          geo {
-            name
-            location {
-              lat
-              lon
+          kubernetes {
+            pod {
+              uid
             }
+          }
+          monitor {
+            ip
+            name
+            status
           }
           observer {
             geo {
@@ -74,30 +56,52 @@ export const monitorStatesQuery = gql`
               }
             }
           }
-          monitor {
-            id
-            name
-            status
-            type
-          }
-          summary {
-            up
-            down
-            geo {
-              name
-              location {
-                lat
-                lon
-              }
-            }
-          }
-          url {
-            full
-            domain
-          }
           timestamp
         }
+        geo {
+          name
+          location {
+            lat
+            lon
+          }
+        }
+        observer {
+          geo {
+            name
+            location {
+              lat
+              lon
+            }
+          }
+        }
+        monitor {
+          id
+          name
+          status
+          type
+        }
+        summary {
+          up
+          down
+          geo {
+            name
+            location {
+              lat
+              lon
+            }
+          }
+        }
+        url {
+          full
+          domain
+        }
+        timestamp
       }
     }
   }
+}
+`;
+
+export const monitorStatesQuery = gql`
+  ${monitorStatesQueryString}
 `;
