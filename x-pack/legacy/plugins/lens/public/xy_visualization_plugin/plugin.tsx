@@ -5,6 +5,7 @@
  */
 
 import { CoreSetup } from 'src/core/public';
+import { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { xyVisualization } from './xy_visualization';
 
 import {
@@ -12,23 +13,30 @@ import {
   functionsRegistry,
 } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { InterpreterSetup, RenderFunction } from '../interpreter_types';
-import { xyChart, xyChartRenderer } from './xy_expression';
+import { xyChart, getXyChartRenderer } from './xy_expression';
 import { legendConfig, xConfig, layerConfig } from './types';
 
 export interface XyVisualizationPluginSetupPlugins {
   interpreter: InterpreterSetup;
+  // TODO this is a simulated NP plugin.
+  // Once field formatters are actually migrated, the actual shim can be used
+  fieldFormat: {
+    formatFactory: FormatFactory;
+  };
 }
 
 class XyVisualizationPlugin {
   constructor() {}
 
-  setup(_core: CoreSetup | null, { interpreter }: XyVisualizationPluginSetupPlugins) {
+  setup(_core: CoreSetup | null, { interpreter, fieldFormat }: XyVisualizationPluginSetupPlugins) {
     interpreter.functionsRegistry.register(() => legendConfig);
     interpreter.functionsRegistry.register(() => xConfig);
     interpreter.functionsRegistry.register(() => layerConfig);
     interpreter.functionsRegistry.register(() => xyChart);
 
-    interpreter.renderersRegistry.register(() => xyChartRenderer as RenderFunction<unknown>);
+    interpreter.renderersRegistry.register(
+      () => getXyChartRenderer(fieldFormat.formatFactory) as RenderFunction<unknown>
+    );
 
     return xyVisualization;
   }
@@ -43,6 +51,9 @@ export const xyVisualizationSetup = () =>
     interpreter: {
       renderersRegistry,
       functionsRegistry,
+    },
+    fieldFormat: {
+      formatFactory: getFormat,
     },
   });
 export const xyVisualizationStop = () => plugin.stop();
