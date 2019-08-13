@@ -33,7 +33,8 @@ export function getDefaultProperties(mapColors = []) {
 export function getDefaultStaticProperties(mapColors = []) {
   // Colors must be state-aware to reduce unnecessary incrementation
   const lastColor = mapColors.pop();
-  const nextColorIndex = (DEFAULT_FILL_COLORS.indexOf(lastColor) + 1) % (DEFAULT_FILL_COLORS.length - 1);
+  const nextColorIndex = (DEFAULT_FILL_COLORS.indexOf(lastColor) + 1)
+    % DEFAULT_FILL_COLORS.length;
   const nextFillColor = DEFAULT_FILL_COLORS[nextColorIndex];
   const nextLineColor = DEFAULT_LINE_COLORS[nextColorIndex];
 
