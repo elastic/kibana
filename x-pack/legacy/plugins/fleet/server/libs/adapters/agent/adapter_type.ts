@@ -41,12 +41,33 @@ export const RuntimeAgent = t.intersection([
   t.interface({
     ...newAgentProperties,
     id: t.string,
-    last_updated: t.union([t.undefined, t.string]),
-    last_checkin: t.union([t.undefined, t.string]),
+  }),
+  t.partial({
+    last_updated: t.string,
+    last_checkin: t.string,
   }),
   newAgentOptionalProperties,
 ]);
 
+export const RuntimeSavedObjectAgentAttributes = t.intersection([
+  t.partial({
+    shared_id: t.string,
+    access_token: t.string,
+    last_updated: t.string,
+    last_checkin: t.string,
+    parent_id: t.string,
+    version: t.string,
+    enrolled_at: t.string,
+  }),
+  t.interface({
+    ...newAgentProperties,
+    id: t.string,
+    user_provided_metadata: t.string,
+    local_metadata: t.string,
+  }),
+]);
+
+export type SavedObjectAgentAttributes = t.TypeOf<typeof RuntimeSavedObjectAgentAttributes>;
 export type Agent = t.TypeOf<typeof RuntimeAgent>;
 export type NewAgent = t.TypeOf<typeof NewRuntimeAgent>;
 

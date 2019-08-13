@@ -22,7 +22,11 @@ describe('Agent Adapter', () => {
   async function loadFixtures(agents: any[]): Promise<SavedObject[]> {
     return await Promise.all(
       agents.map(agent => {
-        return soAdapter.create('agents', agent);
+        return soAdapter.create('agents', {
+          ...agent,
+          local_metadata: JSON.stringify(agent.local_metadata || {}),
+          user_provided_metadata: JSON.stringify(agent.user_provided_metadata || {}),
+        });
       })
     );
   }

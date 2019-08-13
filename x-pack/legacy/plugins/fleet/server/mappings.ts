@@ -26,12 +26,10 @@ export const mappings = {
         type: 'text',
       },
       user_provided_metadata: {
-        properties: {},
-        dynamic: true,
+        type: 'text',
       },
       local_metadata: {
-        properties: {},
-        dynamic: true,
+        type: 'text',
       },
       config_shared_id: {
         type: 'text',
