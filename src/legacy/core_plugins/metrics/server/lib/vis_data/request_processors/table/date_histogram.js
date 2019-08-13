@@ -18,7 +18,7 @@
  */
 
 import { set } from 'lodash';
-import { dateHistogramInterval } from '../../../../../../data/common';
+import { dateHistogramInterval } from '../../../../../../data/server';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
