@@ -27,6 +27,7 @@ import { DevConfig, DevConfigType } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType } from '../http';
 import { Logger } from '../logging';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
+import { findLegacyPluginSpec$ } from './plugins/find_legacy_plugin_specs';
 
 interface LegacyKbnServer {
   applyLoggingConfiguration: (settings: Readonly<Record<string, any>>) => void;
@@ -69,14 +70,19 @@ export interface LegacyServiceStartDeps {
   plugins: Record<string, unknown>;
 }
 
+export interface LegacyServiceSetup {
+  pluginSpecs$: Observable<unknown[]>;
+}
+
 /** @internal */
-export class LegacyService implements CoreService {
+export class LegacyService implements CoreService<LegacyServiceSetup> {
   private readonly log: Logger;
   private readonly devConfig$: Observable<DevConfig>;
   private readonly httpConfig$: Observable<HttpConfig>;
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
   private setupDeps?: LegacyServiceSetupDeps;
+  private update$: ConnectableObservable<Config> | undefined;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('legacy-service');
@@ -89,15 +95,8 @@ export class LegacyService implements CoreService {
   }
   public async setup(setupDeps: LegacyServiceSetupDeps) {
     this.setupDeps = setupDeps;
-  }
-  public async start(startDeps: LegacyServiceStartDeps) {
-    const { setupDeps } = this;
-    if (!setupDeps) {
-      throw new Error('Legacy service is not setup yet.');
-    }
-    this.log.debug('starting legacy service');
 
-    const update$ = this.coreContext.configService.getConfig$().pipe(
+    this.update$ = this.coreContext.configService.getConfig$().pipe(
       tap(config => {
         if (this.kbnServer !== undefined) {
           this.kbnServer.applyLoggingConfiguration(config.toRaw());
@@ -107,10 +106,23 @@ export class LegacyService implements CoreService {
       publishReplay(1)
     ) as ConnectableObservable<Config>;
 
-    this.configSubscription = update$.connect();
+    this.configSubscription = this.update$.connect();
+
+    const pluginSpecs$ = findLegacyPluginSpec$(
+      this.update$.pipe(map(config => getLegacyRawConfig(config)))
+    );
+    return { pluginSpecs$ };
+  }
+
+  public async start(startDeps: LegacyServiceStartDeps) {
+    const { setupDeps } = this;
+    if (!setupDeps || !this.update$) {
+      throw new Error('Legacy service is not setup yet.');
+    }
+    this.log.debug('starting legacy service');
 
     // Receive initial config and create kbnServer/ClusterManager.
-    this.kbnServer = await update$
+    this.kbnServer = await this.update$
       .pipe(
         first(),
         mergeMap(async config => {
