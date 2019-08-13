@@ -59,6 +59,7 @@ export class AutoScale extends React.Component<Props, State> {
           display: 'flex',
           justifyContent: 'center',
           position: 'relative',
+          maxWidth: '100%',
         }}
       >
         <div
