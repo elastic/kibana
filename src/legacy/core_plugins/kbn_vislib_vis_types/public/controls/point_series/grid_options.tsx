@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -26,7 +26,11 @@ import { SwitchOption } from '../switch';
 import { SelectOption } from '../select';
 import { BasicVislibParams, ValueAxis } from '../../types';
 
-function GridOptions({ stateParams, setValue }: VisOptionsProps<BasicVislibParams>) {
+function GridOptions({
+  stateParams,
+  setValue,
+  hasHistogramAgg,
+}: VisOptionsProps<BasicVislibParams>) {
   const setGrid = <T extends keyof BasicVislibParams['grid']>(
     paramName: T,
     value: BasicVislibParams['grid'][T]
@@ -47,6 +51,13 @@ function GridOptions({ stateParams, setValue }: VisOptionsProps<BasicVislibParam
     ],
     [stateParams.valueAxes.map(({ id }: ValueAxis) => id)]
   );
+
+  useEffect(() => {
+    if (hasHistogramAgg) {
+      setGrid('categoryLines', false);
+    }
+  }, [hasHistogramAgg]);
+
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
@@ -59,6 +70,7 @@ function GridOptions({ stateParams, setValue }: VisOptionsProps<BasicVislibParam
       </EuiTitle>
 
       <SwitchOption
+        disabled={hasHistogramAgg}
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.gridAxis.xAxisLinesLabel', {
           defaultMessage: 'Show x-axis lines',
         })}
