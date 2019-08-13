@@ -112,7 +112,7 @@ export class FeatureGeometryFilterForm extends Component {
           <span className="euiContextMenu__text">
             <FormattedMessage
               id="xpack.maps.tooltip.geometryFilterForm.viewProperties"
-              defaultMessage="View propeties"
+              defaultMessage="View properties"
             />
           </span>
         </span>
