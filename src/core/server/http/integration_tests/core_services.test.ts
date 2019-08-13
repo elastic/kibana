@@ -21,7 +21,6 @@ import { Request } from 'hapi';
 import { first } from 'rxjs/operators';
 import { clusterClientMock } from './core_service.test.mocks';
 
-import { Router } from '../router';
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
 
 interface User {
@@ -254,19 +253,18 @@ describe('http service', () => {
     it('rewrites authorization header via authHeaders to make a request to Elasticsearch', async () => {
       const authHeaders = { authorization: 'Basic: user:password' };
       const { http, elasticsearch } = await root.setup();
-      const { registerAuth, registerRouter } = http;
+      const { registerAuth, createRouter } = http;
 
       await registerAuth((req, res, toolkit) =>
         toolkit.authenticated({ requestHeaders: authHeaders })
       );
 
-      const router = new Router('/new-platform');
-      router.get({ path: '/', validate: false }, async (req, res) => {
+      const router = createRouter('/new-platform');
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
         const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
         client.asScoped(req);
         return res.ok({ header: 'ok' });
       });
-      registerRouter(router);
 
       await root.start();
 
@@ -280,15 +278,14 @@ describe('http service', () => {
     it('passes request authorization header to Elasticsearch if registerAuth was not set', async () => {
       const authorizationHeader = 'Basic: username:password';
       const { http, elasticsearch } = await root.setup();
-      const { registerRouter } = http;
+      const { createRouter } = http;
 
-      const router = new Router('/new-platform');
-      router.get({ path: '/', validate: false }, async (req, res) => {
+      const router = createRouter('/new-platform');
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
         const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
         client.asScoped(req);
         return res.ok({ header: 'ok' });
       });
-      registerRouter(router);
 
       await root.start();
 
