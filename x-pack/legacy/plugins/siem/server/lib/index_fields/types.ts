@@ -13,6 +13,7 @@ export interface FieldsAdapter {
 
 export interface IndexFieldDescriptor {
   name: string;
+  format: string;
   type: string;
   searchable: boolean;
   aggregatable: boolean;

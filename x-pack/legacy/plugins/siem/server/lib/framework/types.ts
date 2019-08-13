@@ -124,6 +124,7 @@ interface FrameworkIndexFieldDescriptor {
   aggregatable: boolean;
   readFromDocValues: boolean;
   esTypes: string[];
+  format: string;
 }
 
 export interface FrameworkIndexPatternsService {
