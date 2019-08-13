@@ -5059,7 +5059,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.saveAsNewPolicyMessage": "另存为新策略",
     "xpack.indexLifecycleMgmt.editPolicy.saveButton": "保存策略",
     "xpack.indexLifecycleMgmt.editPolicy.saveErrorMessage": "保存生命周期策略 {lifecycleName} 时出错",
-    "xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButton": "显示 JSON",
     "xpack.indexLifecycleMgmt.editPolicy.successfulSaveMessage": "{verb}生命周期策略“{lifecycleName}”",
     "xpack.indexLifecycleMgmt.editPolicy.updatedMessage": "已更新",
     "xpack.indexLifecycleMgmt.editPolicy.validPolicyNameMessage": "策略名称不能以下划线开头，且不能包含问号或空格。",
