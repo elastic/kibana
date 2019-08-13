@@ -5,10 +5,9 @@
  */
 import expect from '@kbn/expect';
 import { SecurityService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security: SecurityService = getService('security');
   const PageObjects = getPageObjects(['common', 'error', 'security']);
@@ -70,7 +69,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it('can navigate to APM app', async () => {
         await PageObjects.common.navigateToApp('apm');
-        await testSubjects.existOrFail('apmMainContainer', 10000);
+        await testSubjects.existOrFail('apmMainContainer', {
+          timeout: 10000,
+        });
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -119,7 +120,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it('can navigate to APM app', async () => {
         await PageObjects.common.navigateToApp('apm');
-        await testSubjects.existOrFail('apmMainContainer', 10000);
+        await testSubjects.existOrFail('apmMainContainer', {
+          timeout: 10000,
+        });
       });
 
       it(`shows read-only badge`, async () => {

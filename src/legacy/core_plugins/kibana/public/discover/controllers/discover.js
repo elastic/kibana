@@ -70,6 +70,7 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
+import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -554,8 +555,8 @@ function discoverController(
         $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;
 
-          // get the current sort from {key: val} to ["key", "val"];
-          const currentSort = _.pairs($scope.searchSource.getField('sort')).pop();
+          // get the current sort from searchSource as array of arrays
+          const currentSort = getSort.array($scope.searchSource.getField('sort'), $scope.indexPattern);
 
           // if the searchSource doesn't know, tell it so
           if (!angular.equals(sort, currentSort)) $scope.fetch();
@@ -862,8 +863,8 @@ function discoverController(
       .setField('filter', queryFilter.getFilters());
   });
 
-  $scope.setSortOrder = function setSortOrder(columnName, direction) {
-    $scope.state.sort = [columnName, direction];
+  $scope.setSortOrder = function setSortOrder(sortPair) {
+    $scope.state.sort = sortPair;
   };
 
   // TODO: On array fields, negating does not negate the combination, rather all terms
@@ -1026,6 +1027,8 @@ function discoverController(
     $scope.unsupportedIndexPatternType = $route.current.locals.ip.loaded.type;
     return;
   }
+
+  addHelpMenuToAppChrome(chrome);
 
   init();
 }

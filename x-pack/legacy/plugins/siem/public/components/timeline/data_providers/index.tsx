@@ -51,6 +51,8 @@ const DropTargetDataProviders = styled.div`
   background-color: ${props => props.theme.eui.euiFormBackgroundColor};
 `;
 
+DropTargetDataProviders.displayName = 'DropTargetDataProviders';
+
 const getDroppableId = (id: string): string => `${droppableTimelineProvidersPrefix}${id}`;
 
 /**
@@ -108,3 +110,5 @@ export const DataProviders = pure<Props>(
     </DropTargetDataProviders>
   )
 );
+
+DataProviders.displayName = 'DataProviders';

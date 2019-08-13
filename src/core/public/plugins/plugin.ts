@@ -17,13 +17,10 @@
  * under the License.
  */
 
-import { DiscoveredPlugin } from '../../server';
+import { DiscoveredPlugin, PluginOpaqueId } from '../../server';
 import { PluginInitializerContext } from './plugin_context';
 import { loadPluginBundle } from './plugin_loader';
 import { CoreStart, CoreSetup } from '..';
-
-/** @public */
-export type PluginOpaqueId = symbol;
 
 /**
  * The interface that should be returned by a `PluginInitializer`.

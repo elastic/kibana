@@ -5,10 +5,10 @@
  */
 
 import moment from 'moment';
-import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
+import React, { Fragment, FC, useState, useEffect } from 'react';
 import { EuiDatePickerRange, EuiDatePicker } from '@elastic/eui';
 
-import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';
+import { useKibanaContext } from '../../../../../contexts/kibana';
 import { TimeRange } from './time_range';
 
 const WIDTH = '512px';
@@ -21,11 +21,8 @@ interface Props {
 type Moment = moment.Moment;
 
 export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
-  const kibanaContext = useContext(KibanaContext);
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
-  const dateFormat = kibanaContext.kibanaConfig.get('dateFormat');
+  const kibanaContext = useKibanaContext();
+  const dateFormat: string = kibanaContext.kibanaConfig.get('dateFormat');
 
   const [startMoment, setStartMoment] = useState<Moment | undefined>(moment(timeRange.start));
   const [endMoment, setEndMoment] = useState<Moment | undefined>(moment(timeRange.end));
