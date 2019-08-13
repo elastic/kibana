@@ -8,8 +8,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow } from '@elastic/eui';
 import { State } from './types';
-import { VisualizationProps } from '../types';
+import { VisualizationProps, OperationMetadata } from '../types';
 import { NativeRenderer } from '../native_renderer';
+
+const isMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
 
 export function MetricConfigPanel(props: VisualizationProps<State>) {
   const { state, frame } = props;
@@ -30,7 +32,7 @@ export function MetricConfigPanel(props: VisualizationProps<State>) {
             layerId,
             columnId: state.accessor,
             dragDropContext: props.dragDropContext,
-            filterOperations: op => !op.isBucketed && op.dataType === 'number',
+            filterOperations: isMetric,
           }}
         />
       </EuiFormRow>
