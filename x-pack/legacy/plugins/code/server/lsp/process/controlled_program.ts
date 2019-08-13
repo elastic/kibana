@@ -7,9 +7,9 @@
 export interface ControlledProgram {
   readonly pid: number;
 
-  kill(force: boolean = false): void;
+  kill(force: boolean): void;
 
-  onExit(callback: () => void);
+  onExit(callback: () => void): void;
 
   killed(): boolean;
 }

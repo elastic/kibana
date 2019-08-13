@@ -13,7 +13,7 @@ import { LoggerFactory } from '../utils/log_factory';
 import { AbstractLauncher } from './abstract_launcher';
 import { LanguageServerProxy } from './proxy';
 import { InitializeOptions, RequestExpander } from './request_expander';
-import { ExternalProcess } from './process/external_process';
+import { ExternalProgram } from './process/external_program';
 import { ControlledProgram } from './process/controlled_program';
 
 const TS_LANG_DETACH_PORT = 2089;
@@ -69,6 +69,6 @@ export class TypescriptServerLauncher extends AbstractLauncher {
     p.stderr.on('data', data => {
       log.stderr(data.toString());
     });
-    return new ExternalProcess(p);
+    return new ExternalProgram(p, this.options, log);
   }
 }

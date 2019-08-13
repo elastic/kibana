@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import fs from 'fs';
 import { ResponseError } from 'vscode-jsonrpc';
 import { LanguageServerStartFailed } from '../../common/lsp_error_codes';
 import { Logger } from '../log';
@@ -16,9 +15,6 @@ import { RequestExpander } from './request_expander';
 import { ControlledProgram } from './process/controlled_program';
 
 let seqNo = 1;
-
-const OOM_SCORE_ADJ = 667;
-const OOM_ADJ = 10;
 
 export abstract class AbstractLauncher implements ILanguageServerLauncher {
   running: boolean = false;
@@ -74,7 +70,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
       this.child = child;
     }
     proxy.onExit(() => {
-      log.debug('proxy exited, is the process running? ' + this.running);
+      log.debug('proxy exited, is the program running? ' + this.running);
       if (this.child && this.running) {
         const p = this.child!;
         this.killProcess(p);
@@ -134,7 +130,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
       } else {
         if (this.spawnTimes < this.maxRespawn) {
           if (child && this.running) {
-            this.log.debug('killing the old process.');
+            this.log.debug('killing the old program.');
             await this.killProcess(child);
           }
           const port = await this.getPort();
@@ -149,7 +145,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
           );
           this.launchReject!(ServerStartFailed);
           proxy.setError(ServerStartFailed);
-          this.log.warn(`spawned process ${this.spawnTimes} times, mark this proxy unusable.`);
+          this.log.warn(`spawned program ${this.spawnTimes} times, mark this proxy unusable.`);
         }
       }
     }
@@ -160,32 +156,12 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
     port: number,
     log: Logger
   ): Promise<ControlledProgram> {
-    this.log.debug('spawn process');
+    this.log.debug('start program');
     const child = await this.spawnProcess(installationPath, port, log);
-    const pid = child.pid;
-    this.currentPid = pid;
-    this.log.debug('spawned a child process ' + pid);
+    this.currentPid = child.pid;
     this.spawnTimes += 1;
     this.startTime = Date.now();
     this.running = true;
-    if (this.options.lsp.oomScoreAdj && process.platform === 'linux') {
-      try {
-        // clone form https://github.com/elastic/ml-cpp/blob/4dd90fa93338667b681364657222715f81c9868a/lib/core/CProcessPriority_Linux.cc
-        fs.writeFileSync(`/proc/${pid}/oom_score_adj`, `${OOM_SCORE_ADJ}\n`);
-        this.log.debug(`wrote oom_score_adj of process ${pid} to ${OOM_SCORE_ADJ}`);
-      } catch (e) {
-        this.log.warn(e);
-        try {
-          fs.writeFileSync(`/proc/${pid}/oom_adj`, `${OOM_ADJ}\n`);
-          this.log.debug(`wrote oom_adj of process ${pid} to ${OOM_ADJ}`);
-        } catch (err) {
-          this.log.warn(
-            'write oom_score_adj and oom_adj file both failed, reduce priority not working'
-          );
-          this.log.warn(err);
-        }
-      }
-    }
     return child;
   }
 
@@ -198,6 +174,8 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
   /**
    * await for proxy connected, create a request expander
    * @param proxy
+   * @param builtinWorkspace
+   * @param maxWorkspace
    */
   abstract createExpander(
     proxy: LanguageServerProxy,
@@ -220,13 +198,11 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
           clearTimeout(t);
           resolve(true);
         });
-        child.kill();
-        this.log.info('killed process ' + child.pid);
+        child.kill(false);
       })
         .catch(() => {
           // force kill
           child.kill(true);
-          this.log.info('force killed process ' + child.pid);
           return child.killed();
         })
         .finally(() => {

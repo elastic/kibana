@@ -5,14 +5,13 @@
  */
 
 import getPort from 'get-port';
-import { spawn } from 'child_process';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
 import { LanguageServerProxy } from './proxy';
 import { Logger } from '../log';
 import { RequestExpander } from './request_expander';
 import { AbstractLauncher } from './abstract_launcher';
-import { ExternalProcess } from './process/external_process';
+import { EmbedCtagServer } from './process/embed_ctag_server';
 
 const CTAGS_LANG_DETACH_PORT = 2092;
 export class CtagsLauncher extends AbstractLauncher {
@@ -48,16 +47,8 @@ export class CtagsLauncher extends AbstractLauncher {
   }
 
   async spawnProcess(installationPath: string, port: number, log: Logger) {
-    const p = spawn(process.execPath, [installationPath, `--socket=${port.toString()}`], {
-      detached: false,
-      stdio: 'pipe',
-    });
-    p.stdout.on('data', data => {
-      log.stdout(data.toString());
-    });
-    p.stderr.on('data', data => {
-      log.stderr(data.toString());
-    });
-    return new ExternalProcess(p);
+    const embed = new EmbedCtagServer(port, log);
+    await embed.start();
+    return embed;
   }
 }
