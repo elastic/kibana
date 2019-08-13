@@ -16,13 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { render } from 'react-dom';
 import angular from 'angular';
 import chrome from 'ui/chrome';
-import { DocViewRenderProps, AngularScope, AngularController } from './doc_views_types';
+import {
+  DocViewRenderProps,
+  AngularScope,
+  AngularController,
+  AngularDirective,
+} from './doc_views_types';
+import { DocViewerError } from '../../../core_plugins/kibana/public/doc_viewer/doc_viewer_render_error';
 
 /**
- * compiling and injecting the give angular template into the given dom node
- * returning a function to cleanup the injected angular element
+ * Compiles and injects the give angular template into the given dom node
+ * returns a function to cleanup the injected angular element
  */
 export async function injectAngularElement(
   domNode: Element,
@@ -46,5 +54,33 @@ export async function injectAngularElement(
 
   return () => {
     newScope.$destroy();
+  };
+}
+/**
+ * Converts a given legacy angular directive to a render function
+ * for usage in a react component. Note that the rendering is async
+ */
+export function convertDirectiveToRenderFn(directive: AngularDirective) {
+  return (domNode: Element, props: DocViewRenderProps) => {
+    let rejected = false;
+
+    const cleanupFnPromise = injectAngularElement(
+      domNode,
+      directive.template,
+      props,
+      directive.controller
+    );
+    cleanupFnPromise.catch(e => {
+      rejected = true;
+      render(<DocViewerError error={e} />, domNode);
+    });
+
+    return () => {
+      if (!rejected) {
+        // for cleanup
+        // http://roubenmeschian.com/rubo/?p=51
+        cleanupFnPromise.then(cleanup => cleanup());
+      }
+    };
   };
 }

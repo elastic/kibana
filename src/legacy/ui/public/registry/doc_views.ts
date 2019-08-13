@@ -16,37 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { injectAngularElement } from './doc_views_helpers';
-import {
-  DocView,
-  DocViewInput,
-  ElasticSearchHit,
-  DocViewInputFn,
-  DocViewRenderProps,
-} from './doc_views_types';
+import { convertDirectiveToRenderFn } from './doc_views_helpers';
+import { DocView, DocViewInput, ElasticSearchHit, DocViewInputFn } from './doc_views_types';
 
 export { DocViewRenderProps, DocView, DocViewRenderFn } from './doc_views_types';
 
 export const docViews: DocView[] = [];
 
-export function addDocView(docViewRaw: DocViewInput) {
-  const docView = docViewRaw;
-  const { directive } = docViewRaw;
-  if (directive) {
+/**
+ * Extends and adds the given doc view to the registry array
+ */
+export function addDocView(docView: DocViewInput) {
+  if (docView.directive) {
     // convert angular directive to render function for backwards compatibilty
-    docViewRaw.render = (domNode: Element, props: DocViewRenderProps) => {
-      const cleanupFnPromise = injectAngularElement(
-        domNode,
-        directive.template,
-        props,
-        directive.controller
-      );
-      return () => {
-        // for cleanup
-        // http://roubenmeschian.com/rubo/?p=51
-        cleanupFnPromise.then(cleanup => cleanup());
-      };
-    };
+    docView.render = convertDirectiveToRenderFn(docView.directive);
   }
   if (typeof docView.shouldShow !== 'function') {
     docView.shouldShow = () => true;
@@ -54,11 +37,23 @@ export function addDocView(docViewRaw: DocViewInput) {
   docViews.push(docView as DocView);
 }
 
+/**
+ * Empty array of doc views for testing
+ */
+export function emptyDocViews() {
+  docViews.length = 0;
+}
+
+/**
+ * Returns a sorted array of doc_views for rendering tabs
+ */
 export function getDocViewsSorted(hit: ElasticSearchHit): DocView[] {
-  return docViews.filter(docView => docView.shouldShow(hit)).sort(docView => Number(docView.order));
+  return docViews
+    .filter(docView => docView.shouldShow(hit))
+    .sort((a, b) => (Number(a.order) > Number(b.order) ? 1 : -1));
 }
 /**
- * for compatiblity with 3rd Party plugins,
+ * Provider for compatiblity with 3rd Party plugins
  */
 export const DocViewsRegistryProvider = {
   register: (docViewRaw: DocViewInput | DocViewInputFn) => {
