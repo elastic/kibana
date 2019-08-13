@@ -142,10 +142,19 @@ export class ExpressionInput extends React.Component<Props> {
 
     const suggestions = aSuggestions.map((s: any) => {
       if (s.type === 'argument') {
+        const { aliases, types, default: def, required, help } = s.argDef;
+
+        // Aliases, Types, Default, Required
+        const doc = `**Aliases**: ${aliases.length ? aliases.join(' | ') : 'null'}, **Types**: ${
+          types.length ? types.join(' | ') : 'null'
+        }
+\n\n${def != null ? '**Default**: ' + def + ', ' : ''}**Required**: ${String(Boolean(required))}
+\n\n${help}`;
+
         return {
           label: s.argDef.name,
           kind: monacoEditor.languages.CompletionItemKind.Field,
-          documentation: { value: s.argDef.help, isTrusted: true },
+          documentation: { value: doc, isTrusted: true },
           insertText: s.text,
           command: {
             id: 'editor.action.triggerSuggest',
@@ -157,17 +166,26 @@ export class ExpressionInput extends React.Component<Props> {
           kind: monacoEditor.languages.CompletionItemKind.Value,
           insertText: s.text,
           command: {
-            id: 'editor.action.triggerParameterHints',
+            id: 'editor.action.triggerSuggest',
           },
         };
       } else {
+        const { help, context, type } = s.fnDef;
+        const doc = `**Accepts**: ${
+          context.types ? context.types.join(' | ') : 'null'
+        }, **Returns**: ${type ? type : 'null'}
+\n\n${help}`;
+
         return {
           label: s.fnDef.name,
           kind: monacoEditor.languages.CompletionItemKind.Function,
-          documentation: { value: s.fnDef.help, isTrusted: true },
+          documentation: {
+            value: doc,
+            isTrusted: true,
+          },
           insertText: s.text,
           command: {
-            id: 'editor.action.triggerParameterHints',
+            id: 'editor.action.triggerSuggest',
           },
         };
       }
@@ -175,52 +193,6 @@ export class ExpressionInput extends React.Component<Props> {
 
     return {
       suggestions,
-    };
-  };
-
-  provideSignature = (model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) => {
-    const text = model.getValue();
-    const textRange = model.getFullModelRange();
-
-    const lengthAfterPosition = model.getValueLengthInRange({
-      startLineNumber: position.lineNumber,
-      startColumn: position.column,
-      endLineNumber: textRange.endLineNumber,
-      endColumn: textRange.endColumn,
-    });
-
-    const { fnDef } = getFnArgDefAtPosition(
-      this.props.functionDefinitions,
-      text,
-      text.length - lengthAfterPosition
-    );
-
-    if (fnDef) {
-      return {
-        signatures: [
-          {
-            label: `${fnDef.name} ${Object.values((fnDef as FunctionDef).args).map(
-              (arg: ArgDef) => `${arg.name}= `
-            )}`,
-            documentation: fnDef.help,
-            parameters: Object.keys(fnDef.args).map(argName => {
-              const arg = fnDef.args[argName];
-              return {
-                label: arg.name,
-                documentation: arg.help,
-              };
-            }),
-          },
-        ],
-        activeSignature: 0,
-        activeParameter: 0,
-      };
-    }
-
-    return {
-      signatures: [],
-      activeSignature: 0,
-      activeParameter: 0,
     };
   };
 
@@ -255,10 +227,8 @@ export class ExpressionInput extends React.Component<Props> {
               value={value}
               onChange={this.onChange}
               suggestionProvider={{
+                triggerCharacters: [' '],
                 provideCompletionItems: this.provideSuggestions,
-              }}
-              signatureProvider={{
-                provideSignatureHelp: this.provideSignature,
               }}
               options={{
                 fontSize,
