@@ -40,6 +40,7 @@ interface Props {
   pinnedEventIds: Readonly<Record<string, boolean>>;
   rowRenderers: RowRenderer[];
   timelineId: string;
+  toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
   width: number;
 }
@@ -77,6 +78,7 @@ export class StatefulEvent extends React.PureComponent<Props, State> {
       pinnedEventIds,
       rowRenderers,
       timelineId,
+      toggleColumn,
       updateNote,
       width,
     } = this.props;
@@ -140,12 +142,14 @@ export class StatefulEvent extends React.PureComponent<Props, State> {
             <EuiFlexItem data-test-subj="event-details" grow={true}>
               <ExpandableEvent
                 browserFields={browserFields}
+                columnHeaders={columnHeaders}
                 id={event._id}
                 isLoading={isLoading}
                 event={detailsData || []}
                 forceExpand={!!this.state.expanded[event._id] && !loading}
                 onUpdateColumns={onUpdateColumns}
                 timelineId={timelineId}
+                toggleColumn={toggleColumn}
                 width={width}
               />
             </EuiFlexItem>

@@ -56,6 +56,7 @@ interface Props {
   showEventsSelect: boolean;
   sort: Sort;
   timelineId: string;
+  toggleColumn: (column: ColumnHeader) => void;
   minWidth: number;
 }
 
@@ -101,6 +102,7 @@ export const ColumnHeaders = pure<Props>(
     showEventsSelect,
     sort,
     timelineId,
+    toggleColumn,
     minWidth,
   }) => {
     const { isResizing, setIsResizing } = isContainerResizing();
@@ -132,6 +134,7 @@ export const ColumnHeaders = pure<Props>(
                     isLoading={isLoading}
                     onUpdateColumns={onUpdateColumns}
                     timelineId={timelineId}
+                    toggleColumn={toggleColumn}
                     width={FIELD_BROWSER_WIDTH}
                   />
                 </EuiFlexItem>

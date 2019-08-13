@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { EuiContextMenuItemIcon } from '@elastic/eui';
-
 import { IEmbeddable } from '../embeddables';
 
 export interface ActionContext<
@@ -43,11 +41,9 @@ export abstract class Action<
   constructor(public readonly id: string) {}
 
   /**
-   * Optional icon that can be displayed along with the title.
+   * Optional EUI icon type that can be displayed along with the title.
    */
-  public getIcon(
-    context: ActionContext<TEmbeddable, TTriggerContext>
-  ): EuiContextMenuItemIcon | undefined {
+  public getIconType(context: ActionContext<TEmbeddable, TTriggerContext>): string | undefined {
     return undefined;
   }
 
