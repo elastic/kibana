@@ -92,6 +92,23 @@ describe('metric_suggestions', () => {
     expect(suggestion).toMatchInlineSnapshot(`
       Object {
         "datasourceSuggestionId": 0,
+        "previewExpression": Object {
+          "chain": Array [
+            Object {
+              "arguments": Object {
+                "accessor": Array [
+                  "bytes",
+                ],
+                "title": Array [
+                  "",
+                ],
+              },
+              "function": "lens_metric_chart",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
+        },
         "previewIcon": "visMetric",
         "score": 1,
         "state": Object {
