@@ -231,7 +231,7 @@ export function XYChart({
             data: rows,
             xScaleType,
             yScaleType,
-            enableHistogramMode: isHistogram,
+            enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             timeZone,
           };
 

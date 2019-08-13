@@ -24,6 +24,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       {
         dataType: 'number',
         isBucketed: false,
+        scale: 'ratio',
       },
     ];
   },
@@ -36,6 +37,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       operationType: 'filter_ratio',
       suggestedPriority,
       isBucketed: false,
+      scale: 'ratio',
       params: {
         numerator: { language: 'kuery', query: '' },
         denominator: { language: 'kuery', query: '' },

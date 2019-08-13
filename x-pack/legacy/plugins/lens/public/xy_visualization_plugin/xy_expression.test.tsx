@@ -223,18 +223,65 @@ describe('xy_expression', () => {
       expect(component.find(Settings).prop('rotation')).toEqual(90);
     });
 
-    test('it passes time zone and histogram mode to the series', () => {
+    test('it passes time zone to the series', () => {
+      const { data, args } = sampleArgs();
+      const component = shallow(
+        <XYChart data={data} args={args} formatFactory={getFormatSpy} timeZone="CEST" />
+      );
+      expect(component.find(LineSeries).prop('timeZone')).toEqual('CEST');
+    });
+
+    test('it applies histogram mode to the series for single series', () => {
+      const { data, args } = sampleArgs();
+      const firstLayer: LayerArgs = { ...args.layers[0], seriesType: 'bar', isHistogram: true };
+      delete firstLayer.splitAccessor;
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [firstLayer] }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+        />
+      );
+      expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(true);
+    });
+
+    test('it applies histogram mode to the series for stacked series', () => {
       const { data, args } = sampleArgs();
       const component = shallow(
         <XYChart
           data={data}
-          args={{ ...args, layers: [{ ...args.layers[0], isHistogram: true }] }}
+          args={{
+            ...args,
+            layers: [
+              {
+                ...args.layers[0],
+                seriesType: 'bar_stacked',
+                isHistogram: true,
+              },
+            ],
+          }}
           formatFactory={getFormatSpy}
-          timeZone="CEST"
+          timeZone="UTC"
         />
       );
-      expect(component.find(LineSeries).prop('timeZone')).toEqual('CEST');
-      expect(component.find(LineSeries).prop('enableHistogramMode')).toEqual(true);
+      expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(true);
+    });
+
+    test('it does not apply histogram mode for splitted series', () => {
+      const { data, args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{
+            ...args,
+            layers: [{ ...args.layers[0], seriesType: 'bar', isHistogram: true }],
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+        />
+      );
+      expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(false);
     });
 
     test('it rewrites the rows based on provided labels', () => {

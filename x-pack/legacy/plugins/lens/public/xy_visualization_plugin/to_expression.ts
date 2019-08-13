@@ -7,7 +7,7 @@
 import { Ast } from '@kbn/interpreter/common';
 import { ScaleType } from '@elastic/charts';
 import { State, LayerConfig } from './types';
-import { FramePublicAPI, DataType } from '../types';
+import { FramePublicAPI, DataType, OperationMetadata } from '../types';
 
 function xyTitles(layer: LayerConfig, frame: FramePublicAPI) {
   const defaults = {
@@ -56,16 +56,16 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
     }),
   };
 
-  const dataTypes: Record<string, Record<string, DataType>> = {};
+  const metadata: Record<string, Record<string, OperationMetadata>> = {};
   state.layers.forEach(layer => {
-    dataTypes[layer.layerId] = {};
+    metadata[layer.layerId] = {};
     const datasource = frame.datasourceLayers[layer.layerId];
     datasource.getTableSpec().forEach(column => {
       const operation = frame.datasourceLayers[layer.layerId].getOperationForColumnId(
         column.columnId
       );
       if (operation) {
-        dataTypes[layer.layerId][column.columnId] = operation.dataType;
+        metadata[layer.layerId][column.columnId] = operation;
       }
     });
   });
@@ -73,13 +73,22 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
   return buildExpression(
     stateWithValidAccessors,
     xyTitles(state.layers[0], frame),
-    dataTypes,
+    metadata,
     frame
   );
 };
 
-export function getScaleType(dataType: DataType) {
-  switch (dataType) {
+export function getScaleType(metadata: OperationMetadata) {
+  // use scale information if available
+  if (metadata.scale === 'ordinal') {
+    return ScaleType.Ordinal;
+  }
+  if (metadata.scale === 'interval' || metadata.scale === 'ratio') {
+    return metadata.dataType === 'date' ? ScaleType.Time : ScaleType.Linear;
+  }
+
+  // fall back to data type if necessary
+  switch (metadata.dataType) {
     case 'boolean':
     case 'string':
       return ScaleType.Ordinal;
@@ -93,7 +102,7 @@ export function getScaleType(dataType: DataType) {
 export const buildExpression = (
   state: State,
   { xTitle, yTitle }: { xTitle: string; yTitle: string },
-  dataTypes: Record<string, Record<string, DataType>>,
+  metadata: Record<string, Record<string, OperationMetadata>>,
   frame?: FramePublicAPI
 ): Ast => ({
   type: 'expression',
@@ -149,8 +158,8 @@ export const buildExpression = (
                   hide: [Boolean(layer.hide)],
 
                   xAccessor: [layer.xAccessor],
-                  yScaleType: [getScaleType(dataTypes[layer.layerId][layer.accessors[0]])],
-                  xScaleType: [getScaleType(dataTypes[layer.layerId][layer.xAccessor])],
+                  yScaleType: [getScaleType(metadata[layer.layerId][layer.accessors[0]])],
+                  xScaleType: [getScaleType(metadata[layer.layerId][layer.xAccessor])],
                   isHistogram: [Boolean(xAxisOperation && xAxisOperation.isHistogram)],
                   splitAccessor: [layer.splitAccessor],
                   seriesType: [layer.seriesType],

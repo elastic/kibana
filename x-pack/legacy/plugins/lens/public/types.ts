@@ -159,7 +159,7 @@ export interface OperationMetadata {
   // treated as unique
   isBucketed: boolean;
   isHistogram?: boolean;
-
+  scale?: 'ordinal' | 'interval' | 'ratio';
   // Extra meta-information like cardinality, color
 }
 
