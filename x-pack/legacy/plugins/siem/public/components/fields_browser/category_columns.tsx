@@ -78,6 +78,7 @@ export const getCategoryColumns = ({
 }) => [
   {
     field: 'categoryId',
+    name: '',
     sortable: true,
     truncateText: false,
     render: (categoryId: string) => (
@@ -133,7 +134,7 @@ export const getCategoryColumns = ({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <CountBadge color="hollow">
+              <CountBadge data-test-subj={`${categoryId}-category-count`} color="hollow">
                 {getFieldCount(filteredBrowserFields[categoryId])}
               </CountBadge>
             </EuiFlexItem>
