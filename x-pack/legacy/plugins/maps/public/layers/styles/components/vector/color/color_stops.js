@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -20,7 +26,7 @@ import {
 
 const DEFAULT_COLOR = '#FF0000';
 
-export const EuiColorStops = ({
+export const ColorStops = ({
   colorStops = [{ stop: 0, color: DEFAULT_COLOR }],
   onChange,
 }) => {
@@ -116,15 +122,17 @@ export const EuiColorStops = ({
     return (
       <EuiFormRow
         key={index}
-        className="euiColorStop"
+        className="mapColorStop"
         isInvalid={errors.length !== 0}
-        error={errors}>
+        error={errors}
+        compressed
+      >
         <div>
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
             <EuiFlexItem>{stopInput}</EuiFlexItem>
             <EuiFlexItem>{colorInput}</EuiFlexItem>
           </EuiFlexGroup>
-          <div className="euiColorStop__icons">
+          <div className="mapColorStop__icons">
             {deleteButton}
             <EuiButtonIcon
               iconType="plusInCircle"
@@ -142,7 +150,7 @@ export const EuiColorStops = ({
   return <div>{rows}</div>;
 };
 
-EuiColorStops.propTypes = {
+ColorStops.propTypes = {
   /**
    * Array of { stop, color }.
    * Stops are numbers in strictly ascending order.

@@ -1,18 +1,18 @@
-.euiColorStop {
+.mapColorStop {
   position: relative;
 
   &:hover,
   &:focus {
-    .euiColorStop__icons {
+    .mapColorStop__icons {
       visibility: visible;
       opacity: 1;
       display: block;
-      animation: euiColorStopBecomeVisible $euiAnimSpeedFast $euiAnimSlightResistance;
+      animation: mapColorStopBecomeVisible $euiAnimSpeedFast $euiAnimSlightResistance;
     }
   }
 }
 
-.euiColorStop__icons {
+.mapColorStop__icons {
   flex-shrink: 0;
   display: none;
   position: absolute;
@@ -22,7 +22,7 @@
   margin-top: -$euiSizeM;
 }
 
-@keyframes euiColorStopBecomeVisible {
+@keyframes mapColorStopBecomeVisible {
   0% { opacity: 0; }
   100% { opacity: 1; }
 }

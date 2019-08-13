@@ -7,10 +7,10 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiSuperSelect } from '@elastic/eui';
+import { EuiSuperSelect, EuiSpacer } from '@elastic/eui';
 import { COLOR_GRADIENTS } from '../../../color_utils';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiColorStops } from './color_stops';
+import { ColorStops } from './color_stops';
 
 const CUSTOM_COLOR_RAMP = 'CUSTOM_COLOR_RAMP';
 
@@ -53,10 +53,13 @@ export class ColorRampSelect extends Component {
     let colorStopsInput;
     if (this.props.useCustomColorRamp) {
       colorStopsInput = (
-        <EuiColorStops
-          colorStops={this.state.customColorRamp}
-          onChange={this._onCustomColorRampChange}
-        />
+        <Fragment>
+          <EuiSpacer size="m" />
+          <ColorStops
+            colorStops={this.state.customColorRamp}
+            onChange={this._onCustomColorRampChange}
+          />
+        </Fragment>
       );
     }
 
