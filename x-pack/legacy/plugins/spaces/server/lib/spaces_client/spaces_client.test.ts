@@ -8,6 +8,7 @@ import { SpacesClient, GetSpacePurpose } from './spaces_client';
 import { AuthorizationService } from '../../../../security/server/lib/authorization/service';
 import { actionsFactory } from '../../../../security/server/lib/authorization/actions';
 import { SpacesConfigType, config } from '../../new_platform/config';
+import { DEFAULT_SPACE_ID } from '../../../common/constants';
 
 const createMockAuditLogger = () => {
   return {
@@ -506,6 +507,136 @@ describe('#canEnumerateSpaces', () => {
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
         mockAuthorization.actions.space.manage
+      );
+
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+    });
+  });
+});
+
+describe('#canManageSavedObjects', () => {
+  describe(`authorization is null`, () => {
+    test(`returns true`, async () => {
+      const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const authorization = null;
+      const request = Symbol() as any;
+
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        mockDebugLogger,
+        authorization,
+        null,
+        mockConfig,
+        null,
+        request
+      );
+
+      const canManageSavedObjects = await client.canManageSavedObjects(DEFAULT_SPACE_ID);
+
+      expect(canManageSavedObjects).toEqual(true);
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe(`authorization.mode.useRbacForRequest is false`, () => {
+    test(`returns true`, async () => {
+      const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const { mockAuthorization } = createMockAuthorization();
+      mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
+      const request = Symbol() as any;
+
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        mockDebugLogger,
+        mockAuthorization,
+        null,
+        mockConfig,
+        null,
+        request
+      );
+      const canManageSavedObjects = await client.canManageSavedObjects(DEFAULT_SPACE_ID);
+
+      expect(canManageSavedObjects).toEqual(true);
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('useRbacForRequest is true', () => {
+    test(`returns false if user is not authorized to manage saved objects at the indicated space`, async () => {
+      const username = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const { mockAuthorization, mockCheckPrivilegesAtSpace } = createMockAuthorization();
+      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockCheckPrivilegesAtSpace.mockReturnValue({
+        username,
+        hasAllRequested: false,
+      });
+      const request = Symbol() as any;
+
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        mockDebugLogger,
+        mockAuthorization,
+        null,
+        mockConfig,
+        null,
+        request
+      );
+
+      const canManageSavedObjects = await client.canManageSavedObjects(DEFAULT_SPACE_ID);
+
+      expect(canManageSavedObjects).toEqual(false);
+
+      expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivilegesAtSpace).toHaveBeenCalledWith(
+        DEFAULT_SPACE_ID,
+        mockAuthorization.actions.ui.get('savedObjectsManagement', 'edit')
+      );
+
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+    });
+
+    test(`returns true if user is authorized to manage saved objects at the indicated space`, async () => {
+      const username = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const { mockAuthorization, mockCheckPrivilegesAtSpace } = createMockAuthorization();
+      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockCheckPrivilegesAtSpace.mockReturnValue({
+        username,
+        hasAllRequested: true,
+      });
+      const request = Symbol() as any;
+
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        mockDebugLogger,
+        mockAuthorization,
+        null,
+        mockConfig,
+        null,
+        request
+      );
+
+      const canManageSavedObjects = await client.canManageSavedObjects(DEFAULT_SPACE_ID);
+
+      expect(canManageSavedObjects).toEqual(true);
+
+      expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivilegesAtSpace).toHaveBeenCalledWith(
+        DEFAULT_SPACE_ID,
+        mockAuthorization.actions.ui.get('savedObjectsManagement', 'edit')
       );
 
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
