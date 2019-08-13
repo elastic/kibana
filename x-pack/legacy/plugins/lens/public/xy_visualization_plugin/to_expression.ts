@@ -56,7 +56,7 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
     }),
   };
 
-  const metadata: Record<string, Record<string, OperationMetadata>> = {};
+  const metadata: Record<string, Record<string, OperationMetadata | null>> = {};
   state.layers.forEach(layer => {
     metadata[layer.layerId] = {};
     const datasource = frame.datasourceLayers[layer.layerId];
@@ -64,9 +64,7 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
       const operation = frame.datasourceLayers[layer.layerId].getOperationForColumnId(
         column.columnId
       );
-      if (operation) {
-        metadata[layer.layerId][column.columnId] = operation;
-      }
+      metadata[layer.layerId][column.columnId] = operation;
     });
   });
 
@@ -78,7 +76,11 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
   );
 };
 
-export function getScaleType(metadata: OperationMetadata) {
+export function getScaleType(metadata: OperationMetadata | null, defaultScale: ScaleType) {
+  if (!metadata) {
+    return defaultScale;
+  }
+
   // use scale information if available
   if (metadata.scale === 'ordinal') {
     return ScaleType.Ordinal;
@@ -102,7 +104,7 @@ export function getScaleType(metadata: OperationMetadata) {
 export const buildExpression = (
   state: State,
   { xTitle, yTitle }: { xTitle: string; yTitle: string },
-  metadata: Record<string, Record<string, OperationMetadata>>,
+  metadata: Record<string, Record<string, OperationMetadata | null>>,
   frame?: FramePublicAPI
 ): Ast => ({
   type: 'expression',
@@ -158,8 +160,12 @@ export const buildExpression = (
                   hide: [Boolean(layer.hide)],
 
                   xAccessor: [layer.xAccessor],
-                  yScaleType: [getScaleType(metadata[layer.layerId][layer.accessors[0]])],
-                  xScaleType: [getScaleType(metadata[layer.layerId][layer.xAccessor])],
+                  yScaleType: [
+                    getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
+                  ],
+                  xScaleType: [
+                    getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear),
+                  ],
                   isHistogram: [Boolean(xAxisOperation && xAxisOperation.isHistogram)],
                   splitAccessor: [layer.splitAccessor],
                   seriesType: [layer.seriesType],
