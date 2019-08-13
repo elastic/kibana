@@ -7,7 +7,16 @@
 import React from 'react';
 import ReactResizeDetector from 'react-resize-detector';
 import MonacoEditor, { EditorDidMount, EditorWillMount } from 'react-monaco-editor';
+
 import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
+import 'monaco-editor/esm/vs/base/common/worker/simpleWorker';
+import 'monaco-editor/esm/vs/base/worker/defaultWorkerFactory';
+
+import 'monaco-editor/esm/vs/editor/browser/controller/coreCommands.js';
+import 'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js';
+import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/bracketMatching.js';
+import 'monaco-editor/esm/vs/editor/contrib/clipboard/clipboard.js';
+
 import 'monaco-editor/esm/vs/editor/contrib/suggest/suggestController.js'; // Needed for suggestions
 import 'monaco-editor/esm/vs/editor/contrib/hover/hover.js'; // Needed for hover
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/parameterHints.js'; // Needed for signature
