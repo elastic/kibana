@@ -14,7 +14,6 @@ import {
   DimensionPriority,
   Operation,
   DatasourceLayerPanelProps,
-  OperationMetadata,
 } from '../types';
 import { Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { getIndexPatterns } from './loader';
@@ -29,7 +28,7 @@ import {
 
 import { isDraggedField } from './utils';
 import { LayerPanel } from './layerpanel';
-import { Datasource, DataType } from '..';
+import { Datasource } from '..';
 
 export type OperationType = IndexPatternColumn['operationType'];
 

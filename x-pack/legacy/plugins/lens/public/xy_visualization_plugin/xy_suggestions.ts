@@ -12,7 +12,7 @@ import {
   VisualizationSuggestion,
   TableSuggestionColumn,
   TableSuggestion,
-  DataType,
+  OperationMetadata,
 } from '../types';
 import { State, SeriesType } from './types';
 import { generateId } from '../id_generator';
@@ -141,11 +141,11 @@ function getSuggestion(
     ],
   };
 
-  const dataTypes: Record<string, DataType> = {};
+  const metadata: Record<string, OperationMetadata> = {};
 
   [xValue, ...yValues, splitBy].forEach(col => {
     if (col) {
-      dataTypes[col.columnId] = col.operation.dataType;
+      metadata[col.columnId] = col.operation;
     }
   });
 
@@ -168,7 +168,7 @@ function getSuggestion(
         },
       },
       { xTitle, yTitle },
-      { [layerId]: dataTypes }
+      { [layerId]: metadata }
     ),
   };
 }

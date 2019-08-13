@@ -7,7 +7,7 @@
 import { Ast } from '@kbn/interpreter/common';
 import { ScaleType } from '@elastic/charts';
 import { State, LayerConfig } from './types';
-import { FramePublicAPI, DataType, OperationMetadata } from '../types';
+import { FramePublicAPI, OperationMetadata } from '../types';
 
 function xyTitles(layer: LayerConfig, frame: FramePublicAPI) {
   const defaults = {

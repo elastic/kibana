@@ -183,6 +183,7 @@ describe('xy_expression', () => {
           timeZone="UTC"
         />
       );
+      expect(component).toMatchSnapshot();
       expect(component.find(BarSeries)).toHaveLength(1);
       expect(component.find(BarSeries).prop('stackAccessors')).toHaveLength(1);
     });
