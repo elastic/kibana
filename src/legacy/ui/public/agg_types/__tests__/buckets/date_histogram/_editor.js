@@ -25,7 +25,7 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import { VisProvider } from '../../../../vis';
 import { intervalOptions } from '../../../buckets/_interval_options';
 
-describe('editor', function () {
+describe.skip('editor', function () {
 
   let indexPattern;
   let vis;

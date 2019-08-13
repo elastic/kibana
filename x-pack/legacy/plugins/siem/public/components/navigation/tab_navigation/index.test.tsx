@@ -11,25 +11,28 @@ import { TabNavigation } from './';
 
 describe('Tab Navigation', () => {
   test('it mounts with correct tab highlighted', () => {
-    const wrapper = shallow(<TabNavigation location={'/hosts'} />);
+    const wrapper = shallow(
+      <TabNavigation location={'/hosts'} search={'?thisisareallycoolsearch'} />
+    );
     const hostsTab = wrapper.find('[data-test-subj="navigation-hosts"]');
 
     expect(hostsTab.prop('isSelected')).toBeTruthy();
   });
-  test('it changes active tab to clicked tab', () => {
-    const wrapper = shallow(<TabNavigation location={'/hosts'} />);
-    const networkTab = () => wrapper.find('[data-test-subj="navigation-network"]');
-    expect(networkTab().prop('isSelected')).toBeFalsy();
-    networkTab().simulate('click');
-    wrapper.update();
-    expect(networkTab().prop('isSelected')).toBeTruthy();
-  });
   test('it changes active tab when nav changes by props', () => {
-    const wrapper = shallow(<TabNavigation location={'/hosts'} />);
+    const wrapper = shallow(
+      <TabNavigation location={'/hosts'} search={'?thisisareallycoolsearch'} />
+    );
     const networkTab = () => wrapper.find('[data-test-subj="navigation-network"]');
     expect(networkTab().prop('isSelected')).toBeFalsy();
     wrapper.setProps({ location: '/network' });
     wrapper.update();
     expect(networkTab().prop('isSelected')).toBeTruthy();
+  });
+  test('it carries the url state in the link', () => {
+    const wrapper = shallow(
+      <TabNavigation location={'/hosts'} search={'?thisisareallycoolsearch'} />
+    );
+    const firstTab = wrapper.find('[data-test-subj="navigation-link-network"]');
+    expect(firstTab.props().href).toBe('#/link-to/network?thisisareallycoolsearch');
   });
 });

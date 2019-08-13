@@ -25,18 +25,13 @@ import { FetchNowProvider } from './fetch_now';
  * This is usually the right fetch provider to use, rather than FetchNowProvider, as this class introduces
  * a slight delay in the request process to allow multiple requests to queue up (e.g. when a dashboard
  * is loading).
- *
- * @param Private
- * @param Promise
- * @constructor
  */
-export function FetchSoonProvider(Private, Promise) {
+export function FetchSoonProvider(Private, Promise, config) {
 
   const fetchNow = Private(FetchNowProvider);
 
-  const debouncedFetchNow = _.debounce(() => {
-    fetchNow(searchRequestQueue.getPending());
-  }, {
+  const fetch = () => fetchNow(searchRequestQueue.getPending());
+  const debouncedFetch = _.debounce(fetch, {
     wait: 10,
     maxWait: 50
   });
@@ -48,7 +43,7 @@ export function FetchSoonProvider(Private, Promise) {
    */
   this.fetchSearchRequests = (requests) => {
     requests.forEach(req => req._setFetchRequested());
-    debouncedFetchNow();
+    config.get('courier:batchSearches') ? debouncedFetch() : fetch();
     return Promise.all(requests.map(req => req.getCompletePromise()));
   };
 

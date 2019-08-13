@@ -18,10 +18,9 @@
  */
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { pluck, get, clone, isString } from 'lodash';
-import { relativeOptions } from '../../../../../ui/public/timepicker/relative_options';
-
-import { GTE_INTERVAL_RE, INTERVAL_STRING_RE } from '../../../common/interval_regexp';
+import { get } from 'lodash';
+import { parseEsInterval } from '../../../../data/public';
+import { GTE_INTERVAL_RE } from '../../../common/interval_regexp';
 
 export const AUTO_INTERVAL = 'auto';
 
@@ -36,7 +35,8 @@ export const unitLookup = {
 };
 
 export const convertIntervalIntoUnit = (interval, hasTranslateUnitString = true) => {
-  const units = pluck(clone(relativeOptions).reverse(), 'value').filter(s => /^[smhdwMy]$/.test(s));
+  // Iterate units from biggest to smallest
+  const units = Object.keys(unitLookup).reverse();
   const duration = moment.duration(interval, 'ms');
 
   for (let i = 0; i < units.length; i++) {
@@ -50,13 +50,22 @@ export const convertIntervalIntoUnit = (interval, hasTranslateUnitString = true)
     }
   }
 };
-export const isGteInterval = interval => GTE_INTERVAL_RE.test(interval);
 
-export const isIntervalValid = interval => {
-  return (
-    isString(interval) &&
-    (interval === AUTO_INTERVAL || INTERVAL_STRING_RE.test(interval) || isGteInterval(interval))
-  );
+export const isGteInterval = interval => GTE_INTERVAL_RE.test(interval);
+export const isAutoInterval = interval => !interval || interval === AUTO_INTERVAL;
+
+export const validateReInterval = intervalValue => {
+  const validationResult = {};
+
+  try {
+    parseEsInterval(intervalValue);
+  } catch ({ message }) {
+    validationResult.errorMessage = message;
+  } finally {
+    validationResult.isValid = !validationResult.errorMessage;
+  }
+
+  return validationResult;
 };
 
 export const getInterval = (visData, model) => {

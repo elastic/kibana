@@ -19,13 +19,11 @@
 
 import { Moment } from 'moment';
 import { TimeRange } from './time_history';
+import { RefreshInterval } from '../../../../plugins/data/public';
 
 // NOTE: These types are somewhat guessed, they may be incorrect.
 
-export interface RefreshInterval {
-  pause: boolean;
-  value: number;
-}
+export { RefreshInterval };
 
 export interface Timefilter {
   time: TimeRange;
@@ -33,11 +31,15 @@ export interface Timefilter {
   setTime: (timeRange: TimeRange) => void;
   setRefreshInterval: (refreshInterval: RefreshInterval) => void;
   getRefreshInterval: () => RefreshInterval;
+  getActiveBounds: () => void;
   disableAutoRefreshSelector: () => void;
   disableTimeRangeSelector: () => void;
   enableAutoRefreshSelector: () => void;
+  enableTimeRangeSelector: () => void;
   off: (event: string, reload: () => void) => void;
   on: (event: string, reload: () => void) => void;
+  isAutoRefreshSelectorEnabled: boolean;
+  isTimeRangeSelectorEnabled: boolean;
 }
 
 export const timefilter: Timefilter;

@@ -27,7 +27,7 @@ describe('Filebeat Rules', () => {
         'service.type': 'mysql',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[",
@@ -81,7 +81,7 @@ Array [
         'user.name': 'appuser',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[MySQL][slowlog] ",
@@ -147,7 +147,7 @@ Array [
         'mysql.error.message':
           "Access denied for user 'petclinicdd'@'47.153.152.234' (using password: YES)",
       };
-      const message = format(errorDoc);
+      const message = format(errorDoc, {});
       expect(message).toEqual([
         {
           constant: '[MySQL][error] ',
@@ -168,7 +168,7 @@ Array [
         'mysql.slowlog.ip': '192.168.1.42',
         'mysql.slowlog.host': 'webserver-01',
       };
-      const message = format(errorDoc);
+      const message = format(errorDoc, {});
       expect(message).toEqual([
         {
           constant: '[MySQL][slowlog] ',

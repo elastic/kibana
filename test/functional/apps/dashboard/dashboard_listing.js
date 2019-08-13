@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.initTests();
     });
 
-    describe('create prompt', async () => {
+    describe('create prompt', () => {
       it('appears when there are no dashboards', async function () {
         const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(true);
@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('delete', async function () {
+    describe('delete', function () {
       it('default confirm action is cancel', async function () {
         await PageObjects.dashboard.searchForDashboardWithName(dashboardName);
         await PageObjects.dashboard.checkDashboardListingSelectAllCheckbox();

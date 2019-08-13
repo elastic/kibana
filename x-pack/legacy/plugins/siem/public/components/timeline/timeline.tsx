@@ -41,6 +41,8 @@ const WrappedByAutoSizer = styled.div`
   width: 100%;
 `; // required by AutoSizer
 
+WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
+
 const TimelineContainer = styled(EuiFlexGroup)`
   min-height: 500px;
   overflow: hidden;
@@ -48,6 +50,8 @@ const TimelineContainer = styled(EuiFlexGroup)`
   user-select: none;
   width: 100%;
 `;
+
+TimelineContainer.displayName = 'TimelineContainer';
 
 interface Props {
   browserFields: BrowserFields;
@@ -71,8 +75,10 @@ interface Props {
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
   show: boolean;
+  showCallOutUnauthorizedMsg: boolean;
   start: number;
   sort: Sort;
+  toggleColumn: (column: ColumnHeader) => void;
 }
 
 /** The parent Timeline component */
@@ -99,8 +105,10 @@ export const Timeline = pure<Props>(
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
     show,
+    showCallOutUnauthorizedMsg,
     start,
     sort,
+    toggleColumn,
   }) => {
     const combinedQueries = combineQueries(
       dataProviders,
@@ -134,12 +142,14 @@ export const Timeline = pure<Props>(
                 onToggleDataProviderEnabled={onToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={onToggleDataProviderExcluded}
                 show={show}
+                showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
                 sort={sort}
               />
             </WrappedByAutoSizer>
 
             {combinedQueries != null ? (
               <TimelineQuery
+                id={id}
                 fields={columnsHeader.map(c => c.id)}
                 sourceId="default"
                 limit={itemsPerPage}
@@ -149,8 +159,17 @@ export const Timeline = pure<Props>(
                   direction: sort.sortDirection as Direction,
                 }}
               >
-                {({ events, loading, totalCount, pageInfo, loadMore, getUpdatedAt, refetch }) => (
-                  <TimelineRefetch loading={loading} id={id} refetch={refetch}>
+                {({
+                  events,
+                  inspect,
+                  loading,
+                  totalCount,
+                  pageInfo,
+                  loadMore,
+                  getUpdatedAt,
+                  refetch,
+                }) => (
+                  <TimelineRefetch loading={loading} id={id} inspect={inspect} refetch={refetch}>
                     <TimelineContext.Provider value={{ isLoading: loading }} />
                     <StatefulBody
                       browserFields={browserFields}
@@ -164,6 +183,7 @@ export const Timeline = pure<Props>(
                         timelineFooterHeight: footerHeight,
                       })}
                       sort={sort}
+                      toggleColumn={toggleColumn}
                       width={width}
                     />
                     <Footer
@@ -192,3 +212,5 @@ export const Timeline = pure<Props>(
     );
   }
 );
+
+Timeline.displayName = 'Timeline';

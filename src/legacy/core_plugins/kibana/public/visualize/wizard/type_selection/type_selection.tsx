@@ -70,7 +70,7 @@ interface TypeSelectionState {
 }
 
 class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionState> {
-  public state = {
+  public state: TypeSelectionState = {
     highlightedType: null,
     query: '',
   };

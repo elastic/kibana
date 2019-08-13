@@ -91,6 +91,7 @@ describe('deserializeSnapshotDetails', () => {
         failed: 1,
         successful: 2,
       },
+      isManagedRepository: false,
     });
   });
 });

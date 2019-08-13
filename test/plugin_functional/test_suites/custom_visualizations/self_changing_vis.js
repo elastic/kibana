@@ -29,8 +29,7 @@ export default function ({ getService, getPageObjects }) {
   }
 
   async function getEditorValue() {
-    const editor = await testSubjects.find('counterEditor');
-    return await editor.getProperty('value');
+    return await testSubjects.getAttribute('counterEditor', 'value');
   }
 
   describe('self changing vis', function describeIndexTests() {

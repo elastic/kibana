@@ -31,7 +31,9 @@ interface DashboardAttributes extends SavedObjectAttributes {
   description: string;
   version: number;
   timeRestore: boolean;
-  useMargins: boolean;
+  useMargins?: boolean;
+  title: string;
+  optionsJSON?: string;
 }
 
 export type DashboardAttributes730ToLatest = DashboardAttributes;
@@ -42,7 +44,9 @@ interface DashboardAttributesTo720 extends SavedObjectAttributes {
   uiStateJSON: string;
   version: number;
   timeRestore: boolean;
-  useMargins: boolean;
+  useMargins?: boolean;
+  title: string;
+  optionsJSON?: string;
 }
 
 export type DashboardDoc730ToLatest = Doc<DashboardAttributes>;

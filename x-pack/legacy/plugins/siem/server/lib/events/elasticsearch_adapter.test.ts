@@ -13,13 +13,22 @@ import {
   formatTimelineData,
 } from './elasticsearch_adapter';
 import {
+  mockDetailsQueryDsl,
   mockOptions,
+  mockQueryDsl,
   mockRequest,
   mockResponseMap,
   mockResponseSearchTimelineDetails,
   mockTimelineDetailsResult,
 } from './mock';
 import { EventHit } from './types';
+
+jest.mock('./query.dsl', () => {
+  return {
+    buildQuery: jest.fn(() => mockQueryDsl),
+    buildDetailsQuery: jest.fn(() => mockDetailsQueryDsl),
+  };
+});
 
 describe('events elasticsearch_adapter', () => {
   const hit: EventHit = {
@@ -72,7 +81,7 @@ describe('events elasticsearch_adapter', () => {
 
   describe('#formatEventsData', () => {
     test('it formats an event with a source of hostname correctly', () => {
-      const fields: ReadonlyArray<string> = ['host.name'];
+      const fields: readonly string[] = ['host.name'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -91,7 +100,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a source of host ip correctly', () => {
-      const fields: ReadonlyArray<string> = ['host.ip'];
+      const fields: readonly string[] = ['host.ip'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -110,7 +119,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a event category correctly', () => {
-      const fields: ReadonlyArray<string> = ['event.category'];
+      const fields: readonly string[] = ['event.category'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -130,7 +139,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a event id correctly', () => {
-      const fields: ReadonlyArray<string> = ['event.id'];
+      const fields: readonly string[] = ['event.id'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -149,7 +158,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a event module correctly', () => {
-      const fields: ReadonlyArray<string> = ['event.module'];
+      const fields: readonly string[] = ['event.module'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -168,7 +177,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a event action correctly', () => {
-      const fields: ReadonlyArray<string> = ['event.action'];
+      const fields: readonly string[] = ['event.action'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -188,7 +197,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a event severity correctly', () => {
-      const fields: ReadonlyArray<string> = ['event.severity'];
+      const fields: readonly string[] = ['event.severity'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -208,7 +217,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a suricata eve flow id correctly', () => {
-      const fields: ReadonlyArray<string> = ['suricata.eve.flow_id'];
+      const fields: readonly string[] = ['suricata.eve.flow_id'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -230,7 +239,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a suricata eve proto correctly', () => {
-      const fields: ReadonlyArray<string> = ['suricata.eve.proto'];
+      const fields: readonly string[] = ['suricata.eve.proto'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -252,7 +261,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a suricata eve alert signature correctly', () => {
-      const fields: ReadonlyArray<string> = ['suricata.eve.alert.signature'];
+      const fields: readonly string[] = ['suricata.eve.alert.signature'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -276,7 +285,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a suricata eve alert signature id correctly', () => {
-      const fields: ReadonlyArray<string> = ['suricata.eve.alert.signature_id'];
+      const fields: readonly string[] = ['suricata.eve.alert.signature_id'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -300,7 +309,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a source ip correctly', () => {
-      const fields: ReadonlyArray<string> = ['source.ip'];
+      const fields: readonly string[] = ['source.ip'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -320,7 +329,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a source port correctly', () => {
-      const fields: ReadonlyArray<string> = ['source.port'];
+      const fields: readonly string[] = ['source.port'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -340,7 +349,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a destination ip correctly', () => {
-      const fields: ReadonlyArray<string> = ['destination.ip'];
+      const fields: readonly string[] = ['destination.ip'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -360,7 +369,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a destination port correctly', () => {
-      const fields: ReadonlyArray<string> = ['destination.port'];
+      const fields: readonly string[] = ['destination.port'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -380,7 +389,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a geo region name correctly', () => {
-      const fields: ReadonlyArray<string> = ['geo.region_name'];
+      const fields: readonly string[] = ['geo.region_name'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -400,7 +409,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a geo country iso code correctly', () => {
-      const fields: ReadonlyArray<string> = ['geo.country_iso_code'];
+      const fields: readonly string[] = ['geo.country_iso_code'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -420,7 +429,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats an event with a lot of fields correctly', () => {
-      const fields: ReadonlyArray<string> = [
+      const fields: readonly string[] = [
         'host.name',
         'host.ip',
         'suricata.eve.proto',
@@ -458,7 +467,7 @@ describe('events elasticsearch_adapter', () => {
     });
 
     test('it formats a event data if fields are empty', () => {
-      const fields: ReadonlyArray<string> = [];
+      const fields: readonly string[] = [];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = { cursor: { tiebreaker: null, value: '' }, node: { _id: '' } };
 
@@ -468,12 +477,12 @@ describe('events elasticsearch_adapter', () => {
 
   describe('#formatTimelineData', () => {
     test('it formats TimelineEdges from hit as expected ', () => {
-      const datafields: ReadonlyArray<string> = [
+      const datafields: readonly string[] = [
         '@timestamp',
         'host.name',
         'suricata.eve.alert.signature_id',
       ];
-      const ecsfields: ReadonlyArray<string> = ['host.name', 'suricata.eve.alert.signature_id'];
+      const ecsfields: readonly string[] = ['host.name', 'suricata.eve.alert.signature_id'];
       const data = formatTimelineData(datafields, ecsfields, hit, eventFieldsMap);
       // TODO: Re-add TimelineEdges back once we settle on if data can contain numbers or not.
       // otherwise delete this test.

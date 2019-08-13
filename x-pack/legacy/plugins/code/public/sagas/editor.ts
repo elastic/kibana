@@ -6,7 +6,7 @@
 
 import queryString from 'querystring';
 import { Action } from 'redux-actions';
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 import { TextDocumentPositionParams } from 'vscode-languageserver';
 import Url from 'url';
 import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
@@ -16,8 +16,6 @@ import {
   closeReferences,
   fetchFile,
   FetchFileResponse,
-  fetchRepoBranches,
-  fetchRepoCommits,
   fetchRepoTree,
   fetchTreeCommits,
   findReferences,
@@ -25,17 +23,14 @@ import {
   findReferencesSuccess,
   loadStructure,
   Match,
-  resetRepoTree,
   revealPosition,
   fetchRepos,
   turnOnDefaultRepoScope,
-  openTreePath,
-  fetchRootRepoTree,
 } from '../actions';
 import { loadRepo, loadRepoFailed, loadRepoSuccess } from '../actions/status';
 import { PathTypes } from '../common/types';
 import { RootState } from '../reducers';
-import { getPathOfTree } from '../reducers/file';
+import { getPathOfTree } from '../reducers/file_tree';
 import {
   fileSelector,
   getTree,
@@ -44,6 +39,7 @@ import {
   repoScopeSelector,
   urlQueryStringSelector,
   createTreeSelector,
+  reposSelector,
 } from '../selectors';
 import { history } from '../utils/url';
 import { mainRoutePattern } from './patterns';
@@ -60,9 +56,7 @@ function* handleReferences(action: Action<TextDocumentPositionParams>) {
 }
 
 function requestFindReferences(params: TextDocumentPositionParams) {
-  return kfetch({
-    pathname: `/api/code/lsp/findReferences`,
-    method: 'POST',
+  return npStart.core.http.post(`/api/code/lsp/findReferences`, {
     body: JSON.stringify(params),
   });
 }
@@ -134,7 +128,7 @@ function* handleFile(repoUri: string, file: string, revision: string) {
 }
 
 function fetchRepo(repoUri: string) {
-  return kfetch({ pathname: `/api/code/repo/${repoUri}` });
+  return npStart.core.http.get(`/api/code/repo/${repoUri}`);
 }
 
 function* loadRepoSaga(action: any) {
@@ -157,9 +151,11 @@ export function* watchLoadRepo() {
 }
 
 function* handleMainRouteChange(action: Action<Match>) {
-  // in source view page, we need repos as default repo scope options when no query input
-  yield put(fetchRepos());
-
+  const repos = yield select(reposSelector);
+  if (repos.length === 0) {
+    // in source view page, we need repos as default repo scope options when no query input
+    yield put(fetchRepos());
+  }
   const { location } = action.payload!;
   const search = location.search.startsWith('?') ? location.search.substring(1) : location.search;
   const queryParams = queryString.parse(search);
@@ -169,8 +165,6 @@ function* handleMainRouteChange(action: Action<Match>) {
   if (goto) {
     position = parseGoto(goto);
   }
-  yield put(loadRepo(repoUri));
-  yield put(fetchRepoBranches({ uri: repoUri }));
   if (file) {
     if ([PathTypes.blob, PathTypes.blame].includes(pathType as PathTypes)) {
       yield put(revealPosition(position));
@@ -182,28 +176,14 @@ function* handleMainRouteChange(action: Action<Match>) {
       }
     }
     yield call(handleFile, repoUri, file, revision);
-    const commits = yield select((state: RootState) => state.file.treeCommits[file]);
+    const commits = yield select((state: RootState) => state.revision.treeCommits[file]);
     if (commits === undefined) {
       yield put(fetchTreeCommits({ revision, uri: repoUri, path: file }));
     }
   }
   const lastRequestPath = yield select(lastRequestPathSelector);
-  const currentTree: FileTree = yield select(getTree);
-  // repo changed
-  if (currentTree.repoUri !== repoUri) {
-    yield put(resetRepoTree());
-    yield put(fetchRepoCommits({ uri: repoUri, revision }));
-    yield put(fetchRootRepoTree({ uri: repoUri, revision }));
-  }
   const tree = yield select(getTree);
   const isDir = pathType === PathTypes.tree;
-  const openPath = isDir
-    ? file
-    : (file || '')
-        .split('/')
-        .slice(0, -1)
-        .join('/');
-  yield put(openTreePath(openPath || ''));
   function isTreeLoaded(isDirectory: boolean, targetTree: FileTree | null) {
     if (!isDirectory) {
       return !!targetTree;

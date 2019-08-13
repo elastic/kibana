@@ -28,33 +28,10 @@ export class CodeBlock extends React.PureComponent<Props> {
   private resizeChecker?: ResizeChecker;
   private currentHighlightDecorations: string[] = [];
 
-  public componentDidMount(): void {
+  public async componentDidMount() {
     if (this.el) {
-      this.ed = monaco.editor.create(this.el!, {
-        value: this.props.code,
-        language: this.props.language,
-        lineNumbers: this.lineNumbersFunc.bind(this),
-        readOnly: true,
-        folding: this.props.folding,
-        minimap: {
-          enabled: false,
-        },
-        scrollbar: {
-          vertical: 'hidden',
-          handleMouseWheel: false,
-          verticalScrollbarSize: 0,
-        },
-        hover: {
-          enabled: false, // disable default hover;
-        },
-        contextmenu: false,
-        selectOnLineNumbers: false,
-        selectionHighlight: false,
-        renderLineHighlight: 'none',
-        renderIndentGuides: false,
-        automaticLayout: false,
-      });
-      this.ed.onMouseDown((e: editor.IEditorMouseEvent) => {
+      await this.tryLoadFile(this.props.code, this.props.language || 'text');
+      this.ed!.onMouseDown((e: editor.IEditorMouseEvent) => {
         if (
           this.props.onClick &&
           (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS ||
@@ -68,7 +45,7 @@ export class CodeBlock extends React.PureComponent<Props> {
           });
         }
       });
-      registerEditor(this.ed);
+      registerEditor(this.ed!);
       if (this.props.highlightRanges) {
         const decorations = this.props.highlightRanges.map((range: IRange) => {
           return {
@@ -78,7 +55,7 @@ export class CodeBlock extends React.PureComponent<Props> {
             },
           };
         });
-        this.currentHighlightDecorations = this.ed.deltaDecorations([], decorations);
+        this.currentHighlightDecorations = this.ed!.deltaDecorations([], decorations);
       }
       this.resizeChecker = new ResizeChecker(this.el!);
       this.resizeChecker.on('resize', () => {
@@ -87,6 +64,41 @@ export class CodeBlock extends React.PureComponent<Props> {
         });
       });
     }
+  }
+  private async tryLoadFile(code: string, language: string) {
+    try {
+      await monaco.editor.colorize(code, language, {});
+      this.loadFile(code, language);
+    } catch (e) {
+      this.loadFile(code);
+    }
+  }
+
+  private loadFile(code: string, language: string = 'text') {
+    this.ed = monaco.editor.create(this.el!, {
+      value: code,
+      language,
+      lineNumbers: this.lineNumbersFunc.bind(this),
+      readOnly: true,
+      folding: this.props.folding,
+      minimap: {
+        enabled: false,
+      },
+      scrollbar: {
+        vertical: 'hidden',
+        handleMouseWheel: false,
+        verticalScrollbarSize: 0,
+      },
+      hover: {
+        enabled: false, // disable default hover;
+      },
+      contextmenu: false,
+      selectOnLineNumbers: false,
+      selectionHighlight: false,
+      renderLineHighlight: 'none',
+      renderIndentGuides: false,
+      automaticLayout: false,
+    });
   }
 
   public componentDidUpdate(prevProps: Readonly<Props>) {

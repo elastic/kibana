@@ -41,7 +41,9 @@ export interface SearchSource730 {
 }
 
 function isQueryFilter(filter: Filter | { query: unknown }): filter is Pre600FilterQuery {
-  return filter.query && !(filter as Filter).meta;
+  return (
+    filter.query && !(filter as Filter).meta && (filter as Pre600FilterQuery).query.query_string
+  );
 }
 
 export function moveFiltersToQuery(

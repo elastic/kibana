@@ -72,7 +72,9 @@
 
 .codeContainer__select {
   margin-right: $euiSizeS;
-  min-width: 12rem;
+  width: 12rem;
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 
 .codeContainer__tabs {

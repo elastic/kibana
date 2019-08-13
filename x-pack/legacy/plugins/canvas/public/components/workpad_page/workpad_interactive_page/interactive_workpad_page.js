@@ -7,6 +7,7 @@
 import React, { PureComponent } from 'react';
 import { ElementWrapper } from '../../element_wrapper';
 import { AlignmentGuide } from '../../alignment_guide';
+import { DragBoxAnnotation } from '../../dragbox_annotation';
 import { HoverAnnotation } from '../../hover_annotation';
 import { TooltipAnnotation } from '../../tooltip_annotation';
 import { RotationHandle } from '../../rotation_handle';
@@ -14,6 +15,7 @@ import { BorderConnection } from '../../border_connection';
 import { BorderResizeHandle } from '../../border_resize_handle';
 import { WorkpadShortcuts } from '../../workpad_shortcuts';
 import { interactiveWorkpadPagePropTypes } from '../prop_types';
+import { InteractionBoundary } from './interaction_boundary';
 
 export class InteractiveWorkpadPage extends PureComponent {
   static propTypes = interactiveWorkpadPagePropTypes;
@@ -107,6 +109,8 @@ export class InteractiveWorkpadPage extends PureComponent {
                 case 'adHocChildAnnotation': // now sharing aesthetics but may diverge in the future
                 case 'hoverAnnotation': // fixme: with the upcoming TS work, use enumerative types here
                   return <HoverAnnotation {...props} />;
+                case 'dragBoxAnnotation':
+                  return <DragBoxAnnotation {...props} />;
                 case 'rotationHandle':
                   return <RotationHandle {...props} />;
                 case 'resizeHandle':
@@ -123,6 +127,7 @@ export class InteractiveWorkpadPage extends PureComponent {
             }
           })
           .filter(element => !!element)}
+        <InteractionBoundary />
       </div>
     );
   }

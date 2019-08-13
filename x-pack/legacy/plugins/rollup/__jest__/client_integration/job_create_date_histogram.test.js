@@ -8,6 +8,8 @@ import moment from 'moment-timezone';
 
 import { setupEnvironment, pageHelpers } from './helpers';
 
+jest.mock('ui/new_platform');
+
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
@@ -17,7 +19,11 @@ jest.mock('ui/chrome', () => ({
   addBasePath: () => '/api/rollup',
   breadcrumbs: { set: () => {} },
   getInjected: () => ({}),
+  getUiSettingsClient: () => ({}),
+  getSavedObjectsClient: () => ({}),
 }));
+
+jest.mock('ui/timefilter', () => {});
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 
@@ -93,6 +99,16 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
 
       const dateFieldSelectOptionsValues = find('rollupJobCreateDateFieldSelect').find('option').map(option => option.text());
       expect(dateFieldSelectOptionsValues).toEqual(dateFields);
+    });
+
+    it('should sort the options in ascending order', async () => {
+      const dateFields = ['field3', 'field2', 'field1'];
+      httpRequestsMockHelpers.setIndexPatternValidityResponse({ dateFields });
+
+      await goToStep(2);
+
+      const dateFieldSelectOptionsValues = find('rollupJobCreateDateFieldSelect').find('option').map(option => option.text());
+      expect(dateFieldSelectOptionsValues).toEqual(dateFields.sort());
     });
   });
 

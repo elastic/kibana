@@ -18,7 +18,7 @@ import { NetworkDnsTable } from '.';
 import { mockData } from './mock';
 
 describe('NetworkTopNFlow Table Component', () => {
-  const loadMore = jest.fn();
+  const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
@@ -32,12 +32,17 @@ describe('NetworkTopNFlow Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <NetworkDnsTable
-            loading={false}
             data={mockData.NetworkDns.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkDns.pageInfo)}
+            id="dns"
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.NetworkDns.pageInfo
+            )}
             totalCount={mockData.NetworkDns.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkDns.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.NetworkDns.pageInfo)}
-            loadMore={loadMore}
             type={networkModel.NetworkType.page}
           />
         </ReduxStoreProvider>
@@ -53,12 +58,17 @@ describe('NetworkTopNFlow Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <NetworkDnsTable
-              loading={false}
               data={mockData.NetworkDns.edges}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkDns.pageInfo)}
+              id="dns"
+              loading={false}
+              loadPage={loadPage}
+              showMorePagesIndicator={getOr(
+                false,
+                'showMorePagesIndicator',
+                mockData.NetworkDns.pageInfo
+              )}
               totalCount={mockData.NetworkDns.totalCount}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkDns.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkDns.pageInfo)}
-              loadMore={loadMore}
               type={networkModel.NetworkType.page}
             />
           </TestProviders>

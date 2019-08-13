@@ -9,5 +9,5 @@ Additional metadata tag strings to attach to the route.
 <b>Signature:</b>
 
 ```typescript
-tags?: ReadonlyArray<string>;
+tags?: readonly string[];
 ```

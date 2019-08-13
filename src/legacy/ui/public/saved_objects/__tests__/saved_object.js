@@ -23,13 +23,11 @@ import sinon from 'sinon';
 import BluebirdPromise from 'bluebird';
 
 import { SavedObjectProvider } from '../saved_object';
-import { IndexPattern } from '../../index_patterns/_index_pattern';
+import { IndexPattern } from '../../index_patterns';
 import { SavedObjectsClientProvider } from '../saved_objects_client_provider';
 import { InvalidJSONProperty } from '../../errors';
 
-const configMock = {
-  get: cfg => cfg
-};
+const getConfig = cfg => cfg;
 
 describe('Saved Object', function () {
   require('test_utils/no_digest_promises').activateForSuite();
@@ -339,7 +337,7 @@ describe('Saved Object', function () {
                 type: 'dashboard',
               });
             });
-            const indexPattern = new IndexPattern('my-index', configMock, null, []);
+            const indexPattern = new IndexPattern('my-index', getConfig, null, []);
             indexPattern.title = indexPattern.id;
             savedObject.searchSource.setField('index', indexPattern);
             return savedObject
@@ -693,7 +691,7 @@ describe('Saved Object', function () {
 
         const savedObject = new SavedObject(config);
         sinon.stub(savedObject, 'hydrateIndexPattern').callsFake(() => {
-          const indexPattern = new IndexPattern(indexPatternId, configMock, null, []);
+          const indexPattern = new IndexPattern(indexPatternId, getConfig, null, []);
           indexPattern.title = indexPattern.id;
           savedObject.searchSource.setField('index', indexPattern);
           return Promise.resolve(indexPattern);

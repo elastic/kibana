@@ -230,6 +230,7 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
   onToggleDataProviderEnabled={[MockFunction]}
   onToggleDataProviderExcluded={[MockFunction]}
   show={true}
+  showCallOutUnauthorizedMsg={false}
   sort={
     Object {
       "columnId": "@timestamp",

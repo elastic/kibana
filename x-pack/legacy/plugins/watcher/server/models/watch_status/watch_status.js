@@ -141,7 +141,7 @@ export class WatchStatus {
     if (!json.id) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.watchStatus.idPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {id} property',
+          defaultMessage: 'JSON argument must contain an {id} property',
           values: {
             id: 'id'
           }
@@ -151,7 +151,7 @@ export class WatchStatus {
     if (!json.watchStatusJson) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.watchStatus.watchStatusJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain a {watchStatusJson} property',
+          defaultMessage: 'JSON argument must contain a {watchStatusJson} property',
           values: {
             watchStatusJson: 'watchStatusJson'
           }

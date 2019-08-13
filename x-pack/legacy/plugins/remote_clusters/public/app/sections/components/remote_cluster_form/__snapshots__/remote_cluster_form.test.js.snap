@@ -17,12 +17,12 @@ Array [
         <div
           class="euiFlexItem"
         >
-          <h4
+          <h2
             class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
             id="mockId-title"
           >
             Name
-          </h4>
+          </h2>
           <div
             class="euiText euiText--small euiDescribedFormGroup__description"
             id="mockId"
@@ -89,12 +89,12 @@ Array [
         <div
           class="euiFlexItem"
         >
-          <h4
+          <h2
             class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
             id="mockId-title"
           >
             Seed nodes for cluster discovery
-          </h4>
+          </h2>
           <div
             class="euiText euiText--small euiDescribedFormGroup__description"
             id="mockId"
@@ -102,9 +102,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              <p>
-                A list of remote cluster nodes to query for the cluster state. Specify multiple seed nodes so discovery doesn't fail if a node is unavailable.
-              </p>
+              A list of remote cluster nodes to query for the cluster state. Specify multiple seed nodes so discovery doesn't fail if a node is unavailable.
             </div>
           </div>
         </div>
@@ -197,12 +195,12 @@ Array [
         <div
           class="euiFlexItem"
         >
-          <h4
+          <h2
             class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
             id="mockId-title"
           >
             Make remote cluster optional
-          </h4>
+          </h2>
           <div
             class="euiText euiText--small euiDescribedFormGroup__description"
             id="mockId"
@@ -292,6 +290,7 @@ Array [
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <button
+        aria-describedby="staticGenerator_removeClustersErrorTitle staticGenerator_removeClustersErrorList"
         class="euiButton euiButton--secondary euiButton--fill"
         data-test-subj="remoteClusterFormSaveButton"
         type="button"
@@ -494,27 +493,8 @@ Array [
     </div>
   </div>,
   <div
-    class="euiCallOut euiCallOut--danger"
+    class="euiSpacer euiSpacer--m"
     data-test-subj="remoteClusterFormGlobalError"
-  >
-    <div
-      class="euiCallOutHeader"
-    >
-      <svg
-        aria-hidden="true"
-        class="euiIcon euiIcon--medium euiIcon-isLoading euiCallOutHeader__icon"
-        focusable="false"
-        height="16"
-        viewBox="0 0 16 16"
-        width="16"
-        xmlns="http://www.w3.org/2000/svg"
-      />
-      <span
-        class="euiCallOutHeader__title"
-      >
-        Fix errors before continuing.
-      </span>
-    </div>
-  </div>,
+  />,
 ]
 `;

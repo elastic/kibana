@@ -1,5 +1,8 @@
 {
   "ccr.follow": {
+    "url_params": {
+      "wait_for_active_shards": ""
+    },
     "methods": [
       "PUT"
     ],

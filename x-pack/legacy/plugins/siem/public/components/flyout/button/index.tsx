@@ -28,11 +28,15 @@ const Container = styled.div`
   max-height: 240px;
 `;
 
+Container.displayName = 'Container';
+
 const BadgeButtonContainer = styled.div`
   align-items: center;
   display: flex;
   flex-direction: column;
 `;
+
+BadgeButtonContainer.displayName = 'BadgeButtonContainer';
 
 export const Button = styled(EuiPanel)`
   display: flex;
@@ -44,18 +48,20 @@ export const Button = styled(EuiPanel)`
   border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   border-radius: 6px 0 0 6px;
   box-shadow: ${({ theme }) =>
-    `0 3px 3px -1px ${theme.eui.euiColorLightestShade}, 0 5px 7px -2px ${
-      theme.eui.euiColorLightestShade
-    }`};
+    `0 3px 3px -1px ${theme.eui.euiColorLightestShade}, 0 5px 7px -2px ${theme.eui.euiColorLightestShade}`};
   background-color: inherit;
   cursor: pointer;
 `;
+
+Button.displayName = 'Button';
 
 export const Text = styled(EuiText)`
   width: 12px;
   z-index: 10;
   user-select: none;
 `;
+
+Text.displayName = 'Text';
 
 // Ref: https://github.com/elastic/eui/issues/1655
 // export const Badge = styled(EuiBadge)`
@@ -77,6 +83,9 @@ export const Badge = (props: EuiBadgeProps) => (
     }}
   />
 );
+
+Badge.displayName = 'Badge';
+
 interface FlyoutButtonProps {
   dataProviders: DataProvider[];
   onOpen: () => void;
@@ -110,3 +119,5 @@ export const FlyoutButton = pure<FlyoutButtonProps>(({ onOpen, show, dataProvide
     </Container>
   ) : null
 );
+
+FlyoutButton.displayName = 'FlyoutButton';

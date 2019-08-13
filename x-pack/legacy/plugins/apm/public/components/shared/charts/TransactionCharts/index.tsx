@@ -16,18 +16,23 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React, { Component } from 'react';
-import { isEmpty } from 'lodash';
+import { isEmpty, flatten } from 'lodash';
 import styled from 'styled-components';
-import { Coordinate } from '../../../../../typings/timeseries';
+import { idx } from '@kbn/elastic-idx';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { asInteger, asMillis, tpmUnit } from '../../../../utils/formatters';
+import {
+  asInteger,
+  tpmUnit,
+  TimeFormatter
+} from '../../../../utils/formatters';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
-// @ts-ignore
-import CustomPlot from '../CustomPlot';
-import { SyncChartGroup } from '../SyncChartGroup';
 import { LicenseContext } from '../../../../context/LicenseContext';
-import { getEmptySeries } from '../CustomPlot/getEmptySeries';
+import { TransactionLineChart } from './TransactionLineChart';
+import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
+import { getTimeFormatter } from '../../../../utils/formatters';
 
 interface TransactionChartProps {
   hasMLJob: boolean;
@@ -48,37 +53,42 @@ const ShiftedEuiText = styled(EuiText)`
   top: 5px;
 `;
 
-const msTimeUnitLabel = i18n.translate(
-  'xpack.apm.metrics.transactionChart.msTimeUnitLabel',
-  {
-    defaultMessage: 'ms'
-  }
-);
-
 export class TransactionCharts extends Component<TransactionChartProps> {
-  public getResponseTimeTickFormatter = (t: number) => {
-    return this.props.charts.noHits ? `- ${msTimeUnitLabel}` : asMillis(t);
+  public getMaxY = (responseTimeSeries: TimeSeries[]) => {
+    const coordinates = flatten(
+      responseTimeSeries.map((serie: TimeSeries) => serie.data as Coordinate[])
+    );
+
+    const numbers: number[] = coordinates.map((c: Coordinate) =>
+      c.y ? c.y : 0
+    );
+
+    return Math.max(...numbers, 0);
   };
 
-  public getResponseTimeTooltipFormatter = (p: Coordinate) => {
-    return this.props.charts.noHits || !p
-      ? `- ${msTimeUnitLabel}`
-      : asMillis(p.y);
+  public getResponseTimeTickFormatter = (formatter: TimeFormatter) => {
+    return (t: number) => formatter(t);
   };
 
-  public getTPMFormatter = (t: number | null) => {
-    const { urlParams, charts } = this.props;
+  public getResponseTimeTooltipFormatter = (formatter: TimeFormatter) => {
+    return (p: Coordinate) => {
+      return isValidCoordinateValue(p.y) ? formatter(p.y) : NOT_AVAILABLE_LABEL;
+    };
+  };
+
+  public getTPMFormatter = (t: number) => {
+    const { urlParams } = this.props;
     const unit = tpmUnit(urlParams.transactionType);
-    return charts.noHits || t === null
-      ? `- ${unit}`
-      : `${asInteger(t)} ${unit}`;
+    return `${asInteger(t)} ${unit}`;
   };
 
   public getTPMTooltipFormatter = (p: Coordinate) => {
-    return this.getTPMFormatter(p.y);
+    return isValidCoordinateValue(p.y)
+      ? this.getTPMFormatter(p.y)
+      : NOT_AVAILABLE_LABEL;
   };
 
-  public renderMLHeader(hasValidMlLicense: boolean) {
+  public renderMLHeader(hasValidMlLicense: boolean | undefined) {
     const { hasMLJob } = this.props;
     if (!hasValidMlLicense || !hasMLJob) {
       return null;
@@ -134,61 +144,57 @@ export class TransactionCharts extends Component<TransactionChartProps> {
 
   public render() {
     const { charts, urlParams } = this.props;
-    const { noHits, responseTimeSeries, tpmSeries } = charts;
-    const { transactionType, start, end } = urlParams;
+    const { responseTimeSeries, tpmSeries } = charts;
+    const { transactionType } = urlParams;
+    const maxY = this.getMaxY(responseTimeSeries);
+    const formatter = getTimeFormatter(maxY);
 
     return (
-      <SyncChartGroup
-        render={hoverXHandlers => (
-          <EuiFlexGrid columns={2} gutterSize="s">
-            <EuiFlexItem>
-              <EuiPanel>
-                <React.Fragment>
-                  <EuiFlexGroup justifyContent="spaceBetween">
-                    <EuiFlexItem>
-                      <EuiTitle size="xs">
-                        <span>{responseTimeLabel(transactionType)}</span>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <LicenseContext.Consumer>
-                      {license =>
-                        this.renderMLHeader(license.features.ml.is_available)
-                      }
-                    </LicenseContext.Consumer>
-                  </EuiFlexGroup>
-                  <CustomPlot
-                    noHits={noHits}
-                    series={
-                      noHits ? getEmptySeries(start, end) : responseTimeSeries
-                    }
-                    {...hoverXHandlers}
-                    tickFormatY={this.getResponseTimeTickFormatter}
-                    formatTooltipValue={this.getResponseTimeTooltipFormatter}
-                  />
-                </React.Fragment>
-              </EuiPanel>
-            </EuiFlexItem>
-
-            <EuiFlexItem style={{ flexShrink: 1 }}>
-              <EuiPanel>
-                <React.Fragment>
+      <EuiFlexGrid columns={2} gutterSize="s">
+        <EuiFlexItem>
+          <EuiPanel>
+            <React.Fragment>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
                   <EuiTitle size="xs">
-                    <span>{tpmLabel(transactionType)}</span>
+                    <span>{responseTimeLabel(transactionType)}</span>
                   </EuiTitle>
-                  <CustomPlot
-                    noHits={noHits}
-                    series={noHits ? getEmptySeries(start, end) : tpmSeries}
-                    {...hoverXHandlers}
-                    tickFormatY={this.getTPMFormatter}
-                    formatTooltipValue={this.getTPMTooltipFormatter}
-                    truncateLegends
-                  />
-                </React.Fragment>
-              </EuiPanel>
-            </EuiFlexItem>
-          </EuiFlexGrid>
-        )}
-      />
+                </EuiFlexItem>
+                <LicenseContext.Consumer>
+                  {license =>
+                    this.renderMLHeader(
+                      idx(license, _ => _.features.ml.is_available)
+                    )
+                  }
+                </LicenseContext.Consumer>
+              </EuiFlexGroup>
+              <TransactionLineChart
+                series={responseTimeSeries}
+                tickFormatY={this.getResponseTimeTickFormatter(formatter)}
+                formatTooltipValue={this.getResponseTimeTooltipFormatter(
+                  formatter
+                )}
+              />
+            </React.Fragment>
+          </EuiPanel>
+        </EuiFlexItem>
+
+        <EuiFlexItem style={{ flexShrink: 1 }}>
+          <EuiPanel>
+            <React.Fragment>
+              <EuiTitle size="xs">
+                <span>{tpmLabel(transactionType)}</span>
+              </EuiTitle>
+              <TransactionLineChart
+                series={tpmSeries}
+                tickFormatY={this.getTPMFormatter}
+                formatTooltipValue={this.getTPMTooltipFormatter}
+                truncateLegends
+              />
+            </React.Fragment>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGrid>
     );
   }
 }

@@ -44,6 +44,7 @@ describe('Spaces Public API', () => {
       id: 'a-space',
       name: 'my updated space',
       description: 'with a description',
+      disabledFeatures: [],
     };
 
     const { mockSavedObjectsRepository, response } = await request(
@@ -61,10 +62,38 @@ describe('Spaces Public API', () => {
     expect(mockSavedObjectsRepository.update).toHaveBeenCalledWith('space', 'a-space', {
       name: 'my updated space',
       description: 'with a description',
+      disabledFeatures: [],
     });
   });
 
   test('PUT /space should allow an empty description', async () => {
+    const payload = {
+      id: 'a-space',
+      name: 'my updated space',
+      description: '',
+      disabledFeatures: ['foo'],
+    };
+
+    const { mockSavedObjectsRepository, response } = await request(
+      'PUT',
+      '/api/spaces/space/a-space',
+      {
+        payload,
+      }
+    );
+
+    const { statusCode } = response;
+
+    expect(statusCode).toEqual(200);
+    expect(mockSavedObjectsRepository.update).toHaveBeenCalledTimes(1);
+    expect(mockSavedObjectsRepository.update).toHaveBeenCalledWith('space', 'a-space', {
+      name: 'my updated space',
+      description: '',
+      disabledFeatures: ['foo'],
+    });
+  });
+
+  test('PUT /space should not require disabledFeatures', async () => {
     const payload = {
       id: 'a-space',
       name: 'my updated space',
@@ -86,6 +115,7 @@ describe('Spaces Public API', () => {
     expect(mockSavedObjectsRepository.update).toHaveBeenCalledWith('space', 'a-space', {
       name: 'my updated space',
       description: '',
+      disabledFeatures: [],
     });
   });
 

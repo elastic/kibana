@@ -27,7 +27,7 @@ function samplePanelAction(kibana: KibanaPlugin) {
   return new kibana.Plugin({
     publicDir: resolve(__dirname, './public'),
     uiExports: {
-      contextMenuActions: [
+      embeddableActions: [
         'plugins/kbn_tp_sample_panel_action/sample_panel_action',
         'plugins/kbn_tp_sample_panel_action/sample_panel_link',
       ],

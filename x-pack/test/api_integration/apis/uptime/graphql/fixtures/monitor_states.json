@@ -1,0 +1,1459 @@
+{
+  "monitorStates": {
+    "totalSummaryCount": {
+      "count": 9234
+    },
+    "summaries": [
+      {
+        "monitor_id": "auto-http-0X131221E73F825974",
+        "histogram": {
+          "count": 840,
+          "points": [
+            {
+              "timestamp": 1548697571840,
+              "up": 35,
+              "down": 0
+            },
+            {
+              "timestamp": 1548697764160,
+              "up": 48,
+              "down": 0
+            },
+            {
+              "timestamp": 1548697956480,
+              "up": 48,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698148800,
+              "up": 48,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698341120,
+              "up": 48,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698533440,
+              "up": 47,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698725760,
+              "up": 47,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698918080,
+              "up": 48,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699110400,
+              "up": 48,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699302720,
+              "up": 47,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699495040,
+              "up": 49,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699687360,
+              "up": 48,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699879680,
+              "up": 48,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700072000,
+              "up": 48,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700264320,
+              "up": 48,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700456640,
+              "up": 48,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700648960,
+              "up": 48,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700841280,
+              "up": 39,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "172.217.12.132",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": null,
+                  "location": null
+                }
+              },
+              "timestamp": "1548700995077"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "https://www.google.com/",
+            "domain": "www.google.com"
+          },
+          "timestamp": 1548700995077
+        }
+      },
+      {
+        "monitor_id": "auto-http-0X3675F89EF0612091",
+        "histogram": {
+          "count": 843,
+          "points": [
+            {
+              "timestamp": 1548697571840,
+              "up": 0,
+              "down": 35
+            },
+            {
+              "timestamp": 1548697764160,
+              "up": 0,
+              "down": 48
+            },
+            {
+              "timestamp": 1548697956480,
+              "up": 0,
+              "down": 48
+            },
+            {
+              "timestamp": 1548698148800,
+              "up": 0,
+              "down": 48
+            },
+            {
+              "timestamp": 1548698341120,
+              "up": 0,
+              "down": 48
+            },
+            {
+              "timestamp": 1548698533440,
+              "up": 0,
+              "down": 48
+            },
+            {
+              "timestamp": 1548698725760,
+              "up": 0,
+              "down": 48
+            },
+            {
+              "timestamp": 1548698918080,
+              "up": 0,
+              "down": 48
+            },
+            {
+              "timestamp": 1548699110400,
+              "up": 0,
+              "down": 48
+            },
+            {
+              "timestamp": 1548699302720,
+              "up": 0,
+              "down": 48
+            },
+            {
+              "timestamp": 1548699495040,
+              "up": 0,
+              "down": 49
+            },
+            {
+              "timestamp": 1548699687360,
+              "up": 0,
+              "down": 48
+            },
+            {
+              "timestamp": 1548699879680,
+              "up": 0,
+              "down": 48
+            },
+            {
+              "timestamp": 1548700072000,
+              "up": 0,
+              "down": 48
+            },
+            {
+              "timestamp": 1548700264320,
+              "up": 0,
+              "down": 48
+            },
+            {
+              "timestamp": 1548700456640,
+              "up": 0,
+              "down": 48
+            },
+            {
+              "timestamp": 1548700648960,
+              "up": 0,
+              "down": 48
+            },
+            {
+              "timestamp": 1548700841280,
+              "up": 0,
+              "down": 39
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "down"
+              },
+              "observer": {
+                "geo": {
+                  "name": null,
+                  "location": null
+                }
+              },
+              "timestamp": "1548700995077"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "down",
+            "type": null
+          },
+          "summary": {
+            "up": 0,
+            "down": 1,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:12349/",
+            "domain": "localhost"
+          },
+          "timestamp": 1548700995077
+        }
+      },
+      {
+        "monitor_id": "auto-http-0X970CBD2F2102BFA8",
+        "histogram": {
+          "count": 674,
+          "points": [
+            {
+              "timestamp": 1548697571840,
+              "up": 27,
+              "down": 0
+            },
+            {
+              "timestamp": 1548697764160,
+              "up": 39,
+              "down": 0
+            },
+            {
+              "timestamp": 1548697956480,
+              "up": 38,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698148800,
+              "up": 39,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698341120,
+              "up": 38,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698533440,
+              "up": 39,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698725760,
+              "up": 38,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698918080,
+              "up": 39,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699110400,
+              "up": 38,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699302720,
+              "up": 38,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699495040,
+              "up": 39,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699687360,
+              "up": 38,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699879680,
+              "up": 39,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700072000,
+              "up": 38,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700264320,
+              "up": 39,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700456640,
+              "up": 38,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700648960,
+              "up": 39,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700841280,
+              "up": 31,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "172.217.12.132",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": null,
+                  "location": null
+                }
+              },
+              "timestamp": "1548700995077"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://www.google.com/",
+            "domain": "www.google.com"
+          },
+          "timestamp": 1548700995077
+        }
+      },
+      {
+        "monitor_id": "auto-http-0X9CB71300ABD5A2A8",
+        "histogram": {
+          "count": 781,
+          "points": [
+            {
+              "timestamp": 1548697571840,
+              "up": 32,
+              "down": 0
+            },
+            {
+              "timestamp": 1548697764160,
+              "up": 46,
+              "down": 0
+            },
+            {
+              "timestamp": 1548697956480,
+              "up": 44,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698148800,
+              "up": 45,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698341120,
+              "up": 42,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698533440,
+              "up": 45,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698725760,
+              "up": 44,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698918080,
+              "up": 45,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699110400,
+              "up": 44,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699302720,
+              "up": 44,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699495040,
+              "up": 46,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699687360,
+              "up": 45,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699879680,
+              "up": 44,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700072000,
+              "up": 45,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700264320,
+              "up": 43,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700456640,
+              "up": 45,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700648960,
+              "up": 45,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700841280,
+              "up": 37,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "192.30.253.112",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": null,
+                  "location": null
+                }
+              },
+              "timestamp": "1548700995077"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "https://www.github.com/",
+            "domain": "www.github.com"
+          },
+          "timestamp": 1548700995077
+        }
+      },
+      {
+        "monitor_id": "auto-http-0XA8096548ECEB85B7",
+        "histogram": {
+          "count": 645,
+          "points": [
+            {
+              "timestamp": 1548697571840,
+              "up": 0,
+              "down": 28
+            },
+            {
+              "timestamp": 1548697764160,
+              "up": 0,
+              "down": 37
+            },
+            {
+              "timestamp": 1548697956480,
+              "up": 0,
+              "down": 38
+            },
+            {
+              "timestamp": 1548698148800,
+              "up": 0,
+              "down": 38
+            },
+            {
+              "timestamp": 1548698341120,
+              "up": 0,
+              "down": 39
+            },
+            {
+              "timestamp": 1548698533440,
+              "up": 0,
+              "down": 39
+            },
+            {
+              "timestamp": 1548698725760,
+              "up": 0,
+              "down": 28
+            },
+            {
+              "timestamp": 1548698918080,
+              "up": 0,
+              "down": 30
+            },
+            {
+              "timestamp": 1548699110400,
+              "up": 0,
+              "down": 28
+            },
+            {
+              "timestamp": 1548699302720,
+              "up": 0,
+              "down": 37
+            },
+            {
+              "timestamp": 1548699495040,
+              "up": 0,
+              "down": 40
+            },
+            {
+              "timestamp": 1548699687360,
+              "up": 0,
+              "down": 38
+            },
+            {
+              "timestamp": 1548699879680,
+              "up": 0,
+              "down": 39
+            },
+            {
+              "timestamp": 1548700072000,
+              "up": 0,
+              "down": 40
+            },
+            {
+              "timestamp": 1548700264320,
+              "up": 0,
+              "down": 39
+            },
+            {
+              "timestamp": 1548700456640,
+              "up": 0,
+              "down": 38
+            },
+            {
+              "timestamp": 1548700648960,
+              "up": 0,
+              "down": 39
+            },
+            {
+              "timestamp": 1548700841280,
+              "up": 0,
+              "down": 30
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "198.71.248.67",
+                "name": "",
+                "status": "down"
+              },
+              "observer": {
+                "geo": {
+                  "name": null,
+                  "location": null
+                }
+              },
+              "timestamp": "1548700987078"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "down",
+            "type": null
+          },
+          "summary": {
+            "up": 0,
+            "down": 1,
+            "geo": null
+          },
+          "url": {
+            "full": "http://www.example.com/",
+            "domain": "www.example.com"
+          },
+          "timestamp": 1548700987078
+        }
+      },
+      {
+        "monitor_id": "auto-http-0XC9CDA429418EDC2B",
+        "histogram": {
+          "count": 56,
+          "points": [
+            {
+              "timestamp": 1548697571840,
+              "up": 2,
+              "down": 0
+            },
+            {
+              "timestamp": 1548697764160,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548697956480,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698148800,
+              "up": 4,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698341120,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698533440,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698725760,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698918080,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699110400,
+              "up": 4,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699302720,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699495040,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699687360,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699879680,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700072000,
+              "up": 4,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700264320,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700456640,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700648960,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700841280,
+              "up": 3,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "208.80.154.224",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": null,
+                  "location": null
+                }
+              },
+              "timestamp": "1548700975074"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "https://www.wikipedia.org/",
+            "domain": "www.wikipedia.org"
+          },
+          "timestamp": 1548700975074
+        }
+      },
+      {
+        "monitor_id": "auto-http-0XD9AE729FC1C1E04A",
+        "histogram": {
+          "count": 991,
+          "points": [
+            {
+              "timestamp": 1548697571840,
+              "up": 38,
+              "down": 0
+            },
+            {
+              "timestamp": 1548697764160,
+              "up": 52,
+              "down": 0
+            },
+            {
+              "timestamp": 1548697956480,
+              "up": 51,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698148800,
+              "up": 52,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698341120,
+              "up": 58,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698533440,
+              "up": 57,
+              "down": 1
+            },
+            {
+              "timestamp": 1548698725760,
+              "up": 51,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698918080,
+              "up": 52,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699110400,
+              "up": 64,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699302720,
+              "up": 64,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699495040,
+              "up": 64,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699687360,
+              "up": 63,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699879680,
+              "up": 64,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700072000,
+              "up": 65,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700264320,
+              "up": 52,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700456640,
+              "up": 51,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700648960,
+              "up": 51,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700841280,
+              "up": 41,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "151.101.249.140",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": null,
+                  "location": null
+                }
+              },
+              "timestamp": "1548700993074"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://www.reddit.com/",
+            "domain": "www.reddit.com"
+          },
+          "timestamp": 1548700993074
+        }
+      },
+      {
+        "monitor_id": "auto-http-0XDD2D4E60FD4A61C3",
+        "histogram": {
+          "count": 975,
+          "points": [
+            {
+              "timestamp": 1548697571840,
+              "up": 37,
+              "down": 0
+            },
+            {
+              "timestamp": 1548697764160,
+              "up": 52,
+              "down": 0
+            },
+            {
+              "timestamp": 1548697956480,
+              "up": 51,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698148800,
+              "up": 52,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698341120,
+              "up": 58,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698533440,
+              "up": 58,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698725760,
+              "up": 51,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698918080,
+              "up": 52,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699110400,
+              "up": 61,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699302720,
+              "up": 60,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699495040,
+              "up": 61,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699687360,
+              "up": 63,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699879680,
+              "up": 62,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700072000,
+              "up": 62,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700264320,
+              "up": 52,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700456640,
+              "up": 51,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700648960,
+              "up": 51,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700841280,
+              "up": 41,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "151.101.250.217",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": null,
+                  "location": null
+                }
+              },
+              "timestamp": "1548700993074"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "https://www.elastic.co",
+            "domain": "www.elastic.co"
+          },
+          "timestamp": 1548700993074
+        }
+      },
+      {
+        "monitor_id": "auto-http-0XE3B163481423197D",
+        "histogram": {
+          "count": 56,
+          "points": [
+            {
+              "timestamp": 1548697571840,
+              "up": 2,
+              "down": 0
+            },
+            {
+              "timestamp": 1548697764160,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548697956480,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698148800,
+              "up": 4,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698341120,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698533440,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698725760,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698918080,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699110400,
+              "up": 4,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699302720,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699495040,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699687360,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699879680,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700072000,
+              "up": 4,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700264320,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700456640,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700648960,
+              "up": 3,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700841280,
+              "up": 3,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "216.58.219.206",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": null,
+                  "location": null
+                }
+              },
+              "timestamp": "1548700975074"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "https://news.google.com/",
+            "domain": "news.google.com"
+          },
+          "timestamp": 1548700975074
+        }
+      },
+      {
+        "monitor_id": "auto-tcp-0X81440A68E839814C",
+        "histogram": {
+          "count": 3373,
+          "points": [
+            {
+              "timestamp": 1548697571840,
+              "up": 2,
+              "down": 139
+            },
+            {
+              "timestamp": 1548697764160,
+              "up": 0,
+              "down": 192
+            },
+            {
+              "timestamp": 1548697956480,
+              "up": 0,
+              "down": 192
+            },
+            {
+              "timestamp": 1548698148800,
+              "up": 0,
+              "down": 193
+            },
+            {
+              "timestamp": 1548698341120,
+              "up": 159,
+              "down": 33
+            },
+            {
+              "timestamp": 1548698533440,
+              "up": 192,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698725760,
+              "up": 193,
+              "down": 0
+            },
+            {
+              "timestamp": 1548698918080,
+              "up": 192,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699110400,
+              "up": 192,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699302720,
+              "up": 192,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699495040,
+              "up": 193,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699687360,
+              "up": 192,
+              "down": 0
+            },
+            {
+              "timestamp": 1548699879680,
+              "up": 192,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700072000,
+              "up": 193,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700264320,
+              "up": 192,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700456640,
+              "up": 192,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700648960,
+              "up": 193,
+              "down": 0
+            },
+            {
+              "timestamp": 1548700841280,
+              "up": 155,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": null,
+                  "location": null
+                }
+              },
+              "timestamp": "1548700996078"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "tcp://localhost:9200",
+            "domain": "localhost"
+          },
+          "timestamp": 1548700996078
+        }
+      }
+    ]
+  }
+}

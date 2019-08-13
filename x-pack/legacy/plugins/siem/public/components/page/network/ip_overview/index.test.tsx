@@ -15,6 +15,8 @@ import { createStore, networkModel, State } from '../../../../store';
 
 import { IpOverview } from './index';
 import { mockData } from './mock';
+import { mockAnomalies } from '../../../ml/mock';
+import { NarrowDateRange } from '../../../ml/types';
 
 describe('IP Overview Component', () => {
   const state: State = mockGlobalState;
@@ -27,10 +29,16 @@ describe('IP Overview Component', () => {
 
   describe('rendering', () => {
     const mockProps = {
+      anomaliesData: mockAnomalies,
+      data: mockData.IpOverview,
+      endDate: new Date('2019-06-18T06:00:00.000Z').valueOf(),
       flowTarget: FlowTarget.source,
       loading: false,
+      id: 'ipOverview',
       ip: '10.10.10.10',
-      data: mockData.IpOverview,
+      isLoadingAnomaliesData: false,
+      narrowDateRange: (jest.fn() as unknown) as NarrowDateRange,
+      startDate: new Date('2019-06-15T06:00:00.000Z').valueOf(),
       type: networkModel.NetworkType.details,
       updateFlowTargetAction: (jest.fn() as unknown) as ActionCreator<{
         flowTarget: FlowTarget;

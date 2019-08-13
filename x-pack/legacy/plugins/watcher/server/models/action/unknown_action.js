@@ -68,7 +68,7 @@ export class UnknownAction extends BaseAction {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.unknownAction.actionJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJson} property',
+          defaultMessage: 'JSON argument must contain an {actionJson} property',
           values: {
             actionJson: 'actionJson'
           }

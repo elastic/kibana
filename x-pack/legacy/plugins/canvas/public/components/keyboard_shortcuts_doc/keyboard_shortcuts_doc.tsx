@@ -16,7 +16,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { keymap, ShortcutMap, ShortcutNameSpace } from '../../lib/keymap';
+import { keymap } from '../../lib/keymap';
+import { ShortcutMap, ShortcutNameSpace } from '../../../types';
 import { getClientPlatform } from '../../lib/get_client_platform';
 import { getId } from '../../lib/get_id';
 import { getPrettyShortcut } from '../../lib/get_pretty_shortcut';

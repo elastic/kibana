@@ -1,0 +1,10 @@
+{
+  "ccr.forget_follower": {
+    "data_autocomplete_rules": {
+      "follower_cluster" : "",
+      "follower_index" : "",
+      "follower_index_uuid" : "",
+      "leader_remote_cluster" : ""
+    }
+  }
+}

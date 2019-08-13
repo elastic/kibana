@@ -7,7 +7,7 @@
 const path = require('path');
 
 const DLL_NAME = 'canvas_storybook_dll';
-const KIBANA_ROOT = path.resolve(__dirname, '../../../..');
+const KIBANA_ROOT = path.resolve(__dirname, '../../../../..');
 const BUILT_ASSETS = path.resolve(KIBANA_ROOT, 'built_assets');
 const DLL_OUTPUT = path.resolve(BUILT_ASSETS, DLL_NAME);
 

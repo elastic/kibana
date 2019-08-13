@@ -15,12 +15,12 @@ jest.mock('../../../../lib/roles_api', () => {
         }
         return [
           {
-            name: 'Test Role 1',
+            name: 'test-role-1',
             elasticsearch: { cluster: [], indices: [], run_as: [] },
             kibana: { global: [], space: {} },
           },
           {
-            name: 'Reserved Role',
+            name: 'reserved-role',
             elasticsearch: { cluster: [], indices: [], run_as: [] },
             kibana: { global: [], space: {} },
             metadata: {
@@ -28,7 +28,7 @@ jest.mock('../../../../lib/roles_api', () => {
             },
           },
           {
-            name: 'Disabled Role',
+            name: 'disabled-role',
             elasticsearch: { cluster: [], indices: [], run_as: [] },
             kibana: { global: [], space: {} },
             transient_metadata: {
@@ -93,5 +93,29 @@ describe('<RolesGridPage />', () => {
       return updatedWrapper.find(PermissionDenied).length > 0;
     });
     expect(wrapper.find(PermissionDenied)).toMatchSnapshot();
+  });
+
+  it('renders role actions as appropriate', async () => {
+    const wrapper = mountWithIntl(<RolesGridPage />);
+    const initialIconCount = wrapper.find(EuiIcon).length;
+
+    await waitForRender(wrapper, updatedWrapper => {
+      return updatedWrapper.find(EuiIcon).length > initialIconCount;
+    });
+
+    expect(wrapper.find(PermissionDenied)).toHaveLength(0);
+    expect(
+      wrapper.find('EuiButtonIcon[data-test-subj="edit-role-action-test-role-1"]')
+    ).toHaveLength(1);
+    expect(
+      wrapper.find('EuiButtonIcon[data-test-subj="edit-role-action-disabled-role"]')
+    ).toHaveLength(1);
+
+    expect(
+      wrapper.find('EuiButtonIcon[data-test-subj="clone-role-action-test-role-1"]')
+    ).toHaveLength(1);
+    expect(
+      wrapper.find('EuiButtonIcon[data-test-subj="clone-role-action-disabled-role"]')
+    ).toHaveLength(1);
   });
 });

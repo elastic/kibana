@@ -99,7 +99,7 @@ routes
               $rootScope.$digest();
             }
           };
-          const services = { autoLogout, xpackInfo, kbnUrl: kbnUrlWrapper };
+          const services = { autoLogout, xPackInfo: xpackInfo, kbnUrl: kbnUrlWrapper, $injector };
           const store = licenseManagementStore(initialState, services);
           renderReact(elem, store);
           manageAngularLifecycle($scope, $route, elem);

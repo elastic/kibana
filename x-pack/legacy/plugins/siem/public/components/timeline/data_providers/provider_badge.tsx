@@ -28,7 +28,7 @@ const ProviderBadgeStyled = styled(EuiBadge)`
     font-weight: 200;
   }
   &.globalFilterItem {
-    line-height: 28px;
+    white-space: nowrap;
     &.globalFilterItem-isDisabled {
       text-decoration: line-through;
       font-weight: 400;
@@ -36,6 +36,8 @@ const ProviderBadgeStyled = styled(EuiBadge)`
     }
   }
 `;
+
+ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';
 
 interface ProviderBadgeProps {
   deleteProvider: () => void;
@@ -104,3 +106,5 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
     );
   }
 );
+
+ProviderBadge.displayName = 'ProviderBadge';

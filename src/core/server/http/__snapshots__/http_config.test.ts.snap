@@ -14,11 +14,13 @@ Object {
   "autoListen": true,
   "cors": false,
   "host": "localhost",
+  "keepaliveTimeout": 120000,
   "maxPayload": ByteSizeValue {
     "valueInBytes": 1048576,
   },
   "port": 5601,
   "rewriteBasePath": false,
+  "socketTimeout": 120000,
   "ssl": Object {
     "cipherSuites": Array [
       "ECDHE-RSA-AES128-GCM-SHA256",

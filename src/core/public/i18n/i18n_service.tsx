@@ -70,11 +70,11 @@ export class I18nService {
         description: 'Displayed button text when a card option can be selected.',
       }),
       'euiCardSelect.selected': i18n.translate('core.euiCardSelect.selected', {
-        defaultMessage: 'Unavailable',
+        defaultMessage: 'Selected',
         description: 'Displayed button text when a card option is selected.',
       }),
       'euiCardSelect.unavailable': i18n.translate('core.euiCardSelect.unavailable', {
-        defaultMessage: 'Selected',
+        defaultMessage: 'Unavailable',
         description: 'Displayed button text when a card option is unavailable.',
       }),
       'euiCodeBlock.copyButton': i18n.translate('core.euiCodeBlock.copyButton', {
@@ -244,9 +244,9 @@ export class I18nService {
           values={{ searchValue }}
         />
       ),
-      'euiStat.loadingText': () => (
-        <FormattedMessage id="core.euiStat.loadingText" defaultMessage="Statistic is loading" />
-      ),
+      'euiStat.loadingText': i18n.translate('core.euiStat.loadingText', {
+        defaultMessage: 'Statistic is loading',
+      }),
       'euiStep.completeStep': i18n.translate('core.euiStep.completeStep', {
         defaultMessage: 'Step',
         description:

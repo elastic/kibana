@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { execute } from './execute';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
@@ -46,10 +46,10 @@ test('successfully executes', async () => {
     type: 'action',
     attributes: {
       actionTypeId: 'test',
-      actionTypeConfig: {
+      config: {
         bar: true,
       },
-      actionTypeConfigSecrets: {
+      secrets: {
         baz: true,
       },
     },
@@ -69,16 +69,19 @@ test('successfully executes', async () => {
   expect(actionTypeRegistry.get).toHaveBeenCalledWith('test');
 
   expect(actionType.executor).toHaveBeenCalledWith({
+    id: '1',
     services: expect.anything(),
     config: {
       bar: true,
+    },
+    secrets: {
       baz: true,
     },
     params: { foo: true },
   });
 });
 
-test('provides empty config when actionTypeConfig and / or actionTypeConfigSecrets is empty', async () => {
+test('provides empty config when config and / or secrets is empty', async () => {
   const actionType = {
     id: 'test',
     name: 'Test',
@@ -99,7 +102,7 @@ test('provides empty config when actionTypeConfig and / or actionTypeConfigSecre
 
   expect(actionType.executor).toHaveBeenCalledTimes(1);
   const executorCall = actionType.executor.mock.calls[0][0];
-  expect(executorCall.config).toMatchInlineSnapshot(`Object {}`);
+  expect(executorCall.config).toMatchInlineSnapshot(`undefined`);
 });
 
 test('throws an error when config is invalid', async () => {
@@ -107,11 +110,9 @@ test('throws an error when config is invalid', async () => {
     id: 'test',
     name: 'Test',
     validate: {
-      config: Joi.object()
-        .keys({
-          param1: Joi.string().required(),
-        })
-        .required(),
+      config: schema.object({
+        param1: schema.string(),
+      }),
     },
     executor: jest.fn(),
   };
@@ -127,9 +128,12 @@ test('throws an error when config is invalid', async () => {
   encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
-  await expect(execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"The following actionTypeConfig attributes are invalid: param1 [any.required]"`
-  );
+  const result = await execute(executeParams);
+  expect(result).toEqual({
+    status: 'error',
+    retry: false,
+    message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
+  });
 });
 
 test('throws an error when params is invalid', async () => {
@@ -137,11 +141,9 @@ test('throws an error when params is invalid', async () => {
     id: 'test',
     name: 'Test',
     validate: {
-      params: Joi.object()
-        .keys({
-          param1: Joi.string().required(),
-        })
-        .required(),
+      params: schema.object({
+        param1: schema.string(),
+      }),
     },
     executor: jest.fn(),
   };
@@ -157,7 +159,10 @@ test('throws an error when params is invalid', async () => {
   encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
-  await expect(execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"The actionParams is invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
-  );
+  const result = await execute(executeParams);
+  expect(result).toEqual({
+    status: 'error',
+    retry: false,
+    message: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
+  });
 });

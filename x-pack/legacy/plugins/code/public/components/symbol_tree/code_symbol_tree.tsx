@@ -9,32 +9,24 @@ import { IconType } from '@elastic/eui';
 import React from 'react';
 import { Link, RouteComponentProps } from 'react-router-dom';
 import url from 'url';
-import { Location, SymbolKind } from 'vscode-languageserver-types/lib/umd/main';
+import { Range, SymbolKind } from 'vscode-languageserver-types';
 import { isEqual } from 'lodash';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { EuiSideNavItem, MainRouteParams } from '../../common/types';
-import { SymbolWithMembers } from '../../reducers/symbol';
+import { SymbolWithMembers } from '../../actions/structure';
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   structureTree: SymbolWithMembers[];
   closedPaths: string[];
   openSymbolPath: (p: string) => void;
   closeSymbolPath: (p: string) => void;
+  uri: string;
 }
-
-const sortSymbol = (a: SymbolWithMembers, b: SymbolWithMembers) => {
-  const lineDiff = a.location.range.start.line - b.location.range.start.line;
-  if (lineDiff === 0) {
-    return a.location.range.start.character - b.location.range.start.character;
-  } else {
-    return lineDiff;
-  }
-};
 
 interface ActiveSymbol {
   name: string;
-  location: Location;
+  range: Range;
 }
 
 export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: ActiveSymbol }> {
@@ -45,7 +37,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: 
   };
 
   public getStructureTreeItemRenderer = (
-    location: Location,
+    range: Range,
     name: string,
     kind: SymbolKind,
     isContainer: boolean = false,
@@ -60,7 +52,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: 
     if (
       this.state.activeSymbol &&
       this.state.activeSymbol.name === name &&
-      isEqual(this.state.activeSymbol.location, location)
+      isEqual(this.state.activeSymbol.range, range)
     ) {
       bg = <div className="code-full-width-node" />;
     }
@@ -89,11 +81,11 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: 
             ))}
           <Link
             to={url.format({
-              pathname: RepositoryUtils.locationToUrl(location),
+              pathname: RepositoryUtils.locationToUrl({ uri: this.props.uri, range }),
               query: { sideTab: 'structure', ...queries },
             })}
             className="code-symbol-link"
-            onClick={this.getClickHandler({ name, location })}
+            onClick={this.getClickHandler({ name, range })}
           >
             <EuiFlexGroup gutterSize="none" alignItems="center" className="code-structure-node">
               <EuiToken iconType={tokenType as IconType} />
@@ -108,7 +100,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: 
   };
 
   public symbolsToSideNavItems = (symbolsWithMembers: SymbolWithMembers[]): EuiSideNavItem[] => {
-    return symbolsWithMembers.sort(sortSymbol).map((s: SymbolWithMembers, index: number) => {
+    return symbolsWithMembers.map((s: SymbolWithMembers, index: number) => {
       const item: EuiSideNavItem = {
         name: s.name,
         id: `${s.name}_${index}`,
@@ -120,16 +112,16 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: 
           item.items = this.symbolsToSideNavItems(s.members);
         }
         item.renderItem = this.getStructureTreeItemRenderer(
-          s.location,
+          s.range,
           s.name,
           s.kind,
-          true,
+          s.members.length > 0,
           item.forceOpen,
           s.path
         );
       } else {
         item.renderItem = this.getStructureTreeItemRenderer(
-          s.location,
+          s.range,
           s.name,
           s.kind,
           false,

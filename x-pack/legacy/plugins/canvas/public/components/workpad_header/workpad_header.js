@@ -78,17 +78,22 @@ export class WorkpadHeader extends React.PureComponent {
     </EuiOverlayMask>
   );
 
-  _getTooltipText = () => {
+  _getEditToggleToolTip = ({ textOnly } = { textOnly: false }) => {
     if (!this.props.canUserWrite) {
       return "You don't have permission to edit this workpad";
-    } else {
-      const content = this.props.isWriteable ? `Hide editing controls` : `Show editing controls`;
-      return (
-        <span>
-          {content} <ToolTipShortcut namespace="EDITOR" action="EDITING" />
-        </span>
-      );
     }
+
+    const content = this.props.isWriteable ? `Hide editing controls` : `Show editing controls`;
+
+    if (textOnly) {
+      return content;
+    }
+
+    return (
+      <span>
+        {content} <ToolTipShortcut namespace="EDITOR" action="EDITING" />
+      </span>
+    );
   };
 
   render() {
@@ -98,7 +103,12 @@ export class WorkpadHeader extends React.PureComponent {
     return (
       <div>
         {isModalVisible ? this._elementAdd() : null}
-        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="spaceBetween"
+          className="canvasLayout__stageHeaderInner"
+        >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem grow={false}>
@@ -111,6 +121,9 @@ export class WorkpadHeader extends React.PureComponent {
                 <FullscreenControl>{this._fullscreenButton}</FullscreenControl>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
+                <WorkpadZoom />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <WorkpadExport />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -120,20 +133,18 @@ export class WorkpadHeader extends React.PureComponent {
                     handler={this._keyHandler}
                     targetNodeSelector="body"
                     global
+                    isolate
                   />
                 )}
-                <EuiToolTip position="bottom" content={this._getTooltipText()}>
+                <EuiToolTip position="bottom" content={this._getEditToggleToolTip()}>
                   <EuiButtonIcon
                     iconType={isWriteable ? 'lockOpen' : 'lock'}
                     onClick={toggleWriteable}
                     size="s"
-                    aria-label={this._getTooltipText()}
+                    aria-label={this._getEditToggleToolTip({ textOnly: true })}
                     isDisabled={!canUserWrite}
                   />
                 </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <WorkpadZoom />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

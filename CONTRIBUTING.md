@@ -372,10 +372,11 @@ The following table outlines possible test file locations and how to invoke them
 
 | Test runner        | Test location                                                                                                                                           | Runner command (working directory is kibana root)                                       |
 | -----------------  | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Jest               | `src/**/*.test.js`<br>`src/**/*.test.ts`                                                                                                                | `node scripts/jest -t regexp [test path]`                                                  |
+| Jest               | `src/**/*.test.js`<br>`src/**/*.test.ts`                                                                                                                | `node scripts/jest -t regexp [test path]`                                               |
 | Jest (integration) | `**/integration_tests/**/*.test.js`                                                                                                                     | `node scripts/jest_integration -t regexp [test path]`                                   |
-| Mocha              | `src/**/__tests__/**/*.js`<br>`packages/kbn-datemath/test/**/*.js`<br>`packages/kbn-dev-utils/src/**/__tests__/**/*.js`<br>`tasks/**/__tests__/**/*.js` | `node scripts/mocha --grep=regexp [test path]`                                          |
+| Mocha              | `src/**/__tests__/**/*.js`<br>`!src/**/public/__tests__/*.js`<br>`packages/kbn-datemath/test/**/*.js`<br>`packages/kbn-dev-utils/src/**/__tests__/**/*.js`<br>`tasks/**/__tests__/**/*.js` | `node scripts/mocha --grep=regexp [test path]`       |
 | Functional         | `test/*integration/**/config.js`<br>`test/*functional/**/config.js`                                                                                     | `node scripts/functional_tests_server --config test/[directory]/config.js`<br>`node scripts/functional_test_runner --config test/[directory]/config.js --grep=regexp`       |
+| Karma              | `src/**/public/__tests__/*.js`                                                                                                                          | `npm run test:dev`                                                                      |
 
 For X-Pack tests located in `x-pack/` see [X-Pack Testing](x-pack/README.md#testing)
 
@@ -461,6 +462,7 @@ yarn test:browser --dev # remove the --dev flag to run them once and close
 * In System Preferences > Sharing, change your computer name to be something simple, e.g. "computer".
 * Run Kibana with `yarn start --host=computer.local` (substituting your computer name).
 * Now you can run your VM, open the browser, and navigate to `http://computer.local:5601` to test Kibana.
+* Alternatively you can use browserstack 
 
 #### Running Browser Automation Tests
 

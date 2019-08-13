@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DashboardViewMode } from './dashboard_view_mode';
+import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 
 /**
  * @param title {string} the current title of the dashboard
@@ -27,12 +27,8 @@ import { DashboardViewMode } from './dashboard_view_mode';
  * end of the title.
  * @returns {string} A title to display to the user based on the above parameters.
  */
-export function getDashboardTitle(
-  title: string,
-  viewMode: DashboardViewMode,
-  isDirty: boolean
-): string {
-  const isEditMode = viewMode === DashboardViewMode.EDIT;
+export function getDashboardTitle(title: string, viewMode: ViewMode, isDirty: boolean): string {
+  const isEditMode = viewMode === ViewMode.EDIT;
   let displayTitle: string;
 
   if (isEditMode && isDirty) {

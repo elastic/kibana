@@ -4,6 +4,8 @@
       "GET"
     ],
     "patterns": [
+      "_security/privilege",
+      "_security/privilege/{application}",
       "_security/privilege/{application}/{name}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-get-privileges.html"

@@ -10,17 +10,16 @@ import { getAssetById } from '../state/selectors/assets';
 export const asset = () => ({
   name: 'asset',
   aliases: [],
+  type: 'string',
+  help: 'Retrieves Canvas workpad asset objects to provide as argument values. Usually images.',
   context: {
     types: ['null'],
   },
-  type: 'string',
-  help: 'Use Canvas workpad asset objects to provide argument values. Usually images',
   args: {
     id: {
       aliases: ['_'],
       types: ['string'],
-      help: 'The ID of the asset value to return',
-      multi: false,
+      help: 'The ID of the asset to retrieve.',
       required: true,
     },
   },

@@ -11,6 +11,8 @@ import { ElasticsearchMonitorsAdapter } from '../adapters/monitors';
 import { ElasticsearchPingsAdapter } from '../adapters/pings';
 import { UMAuthDomain, UMMonitorsDomain, UMPingsDomain } from '../domains';
 import { UMDomainLibs, UMServerLibs } from '../lib';
+import { UMMonitorStatesDomain } from '../domains/monitor_states';
+import { ElasticsearchMonitorStatesAdapter } from '../adapters/monitor_states';
 
 export function compose(hapiServer: any): UMServerLibs {
   const framework = new UMKibanaBackendFrameworkAdapter(hapiServer);
@@ -19,11 +21,16 @@ export function compose(hapiServer: any): UMServerLibs {
   const pingsDomain = new UMPingsDomain(new ElasticsearchPingsAdapter(database), {});
   const authDomain = new UMAuthDomain(new UMXPackAuthAdapter(hapiServer.plugins.xpack_main), {});
   const monitorsDomain = new UMMonitorsDomain(new ElasticsearchMonitorsAdapter(database), {});
+  const monitorStatesDomain = new UMMonitorStatesDomain(
+    new ElasticsearchMonitorStatesAdapter(database),
+    {}
+  );
 
   const domainLibs: UMDomainLibs = {
-    pings: pingsDomain,
     auth: authDomain,
     monitors: monitorsDomain,
+    monitorStates: monitorStatesDomain,
+    pings: pingsDomain,
   };
 
   const libs: UMServerLibs = {

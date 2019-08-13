@@ -25,6 +25,8 @@ const alertTypeRegistryParams = {
   taskManager,
   fireAction: jest.fn(),
   internalSavedObjectsRepository: SavedObjectsClientMock.create(),
+  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+  getBasePath: jest.fn().mockReturnValue(undefined),
 };
 
 beforeEach(() => jest.resetAllMocks());
@@ -40,13 +42,13 @@ describe('has()', () => {
     registry.register({
       id: 'foo',
       name: 'Foo',
-      execute: jest.fn(),
+      executor: jest.fn(),
     });
     expect(registry.has('foo')).toEqual(true);
   });
 });
 
-describe('registry()', () => {
+describe('register()', () => {
   test('registers the executor with the task manager', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getCreateTaskRunnerFunction } = require('./lib/get_create_task_runner_function');
@@ -55,7 +57,7 @@ describe('registry()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
-      execute: jest.fn(),
+      executor: jest.fn(),
     });
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
     expect(taskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
@@ -73,12 +75,14 @@ Array [
     const firstCall = getCreateTaskRunnerFunction.mock.calls[0][0];
     expect(firstCall.alertType).toMatchInlineSnapshot(`
 Object {
-  "execute": [MockFunction],
+  "executor": [MockFunction],
   "id": "test",
   "name": "Test",
 }
 `);
     expect(firstCall.internalSavedObjectsRepository).toBeTruthy();
+    expect(firstCall.getBasePath).toBeTruthy();
+    expect(firstCall.spaceIdToNamespace).toBeTruthy();
     expect(firstCall.fireAction).toMatchInlineSnapshot(`[MockFunction]`);
   });
 
@@ -87,13 +91,13 @@ Object {
     registry.register({
       id: 'test',
       name: 'Test',
-      execute: jest.fn(),
+      executor: jest.fn(),
     });
     expect(() =>
       registry.register({
         id: 'test',
         name: 'Test',
-        execute: jest.fn(),
+        executor: jest.fn(),
       })
     ).toThrowErrorMatchingInlineSnapshot(`"Alert type \\"test\\" is already registered."`);
   });
@@ -105,12 +109,12 @@ describe('get()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
-      execute: jest.fn(),
+      executor: jest.fn(),
     });
     const alertType = registry.get('test');
     expect(alertType).toMatchInlineSnapshot(`
 Object {
-  "execute": [MockFunction],
+  "executor": [MockFunction],
   "id": "test",
   "name": "Test",
 }
@@ -137,7 +141,7 @@ describe('list()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
-      execute: jest.fn(),
+      executor: jest.fn(),
     });
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`

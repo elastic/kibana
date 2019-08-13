@@ -12,10 +12,11 @@ export const tlsQuery = gql`
     $filterQuery: String
     $flowTarget: FlowTarget!
     $ip: String!
-    $pagination: PaginationInput!
+    $pagination: PaginationInputPaginated!
     $sort: TlsSortField!
     $timerange: TimerangeInput!
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -43,10 +44,13 @@ export const tlsQuery = gql`
           }
         }
         pageInfo {
-          endCursor {
-            value
-          }
-          hasNextPage
+          activePage
+          fakeTotalCount
+          showMorePagesIndicator
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
         }
       }
     }

@@ -39,7 +39,7 @@ function TopSizeParamEditor(props: AggParamEditorProps<number | ''>) {
     </>
   );
   const fieldType = props.agg.params.field && props.agg.params.field.type;
-  const disabled = fieldType && !getCompatibleAggs(props.agg, props.visName).length;
+  const disabled = fieldType && !getCompatibleAggs(props.agg).length;
 
   return <SizeParamEditor {...props} iconTip={iconTip} disabled={disabled} />;
 }

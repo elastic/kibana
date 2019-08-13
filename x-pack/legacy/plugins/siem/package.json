@@ -18,7 +18,7 @@
     "ts-loader": "^6.0.4"
   },
   "dependencies": {
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.13",
     "react-beautiful-dnd": "^10.0.1",
     "react-markdown": "^4.0.6"
   }

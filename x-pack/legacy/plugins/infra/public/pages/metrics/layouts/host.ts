@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { InfraMetric } from '../../../graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 import { nginxLayoutCreator } from './nginx';
+import { awsLayoutCreator } from './aws';
 import {
   InfraMetricLayoutCreator,
   InfraMetricLayoutSectionType,
@@ -104,7 +105,6 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
           stacked: true,
           type: InfraMetricLayoutVisualizationType.area,
           formatter: InfraFormatterType.percent,
-          bounds: { min: 0, max: 1 },
           seriesOverrides: {
             user: { color: theme.eui.euiColorVis0 },
             system: { color: theme.eui.euiColorVis2 },
@@ -365,4 +365,5 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
     ],
   },
   ...nginxLayoutCreator(theme),
+  ...awsLayoutCreator(theme),
 ];

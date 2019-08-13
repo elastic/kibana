@@ -1,0 +1,10 @@
+{
+  "ml.evaluate_data_frame": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/data_frame/_evaluate"
+    ]
+  }
+}

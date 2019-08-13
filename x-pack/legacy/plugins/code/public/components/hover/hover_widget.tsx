@@ -5,6 +5,7 @@
  */
 
 import { EuiText, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { MarkedString } from 'vscode-languageserver-types';
 import ReactMarkdown from 'react-markdown';
@@ -63,7 +64,7 @@ export class HoverWidget extends React.PureComponent<HoverWidgetProps> {
       ),
       code: ({ value, language }: { value: string; language: string }) => {
         const support = TokenizationRegistry.get(language);
-        const code = tokenizeToString(value, support);
+        const code = tokenizeToString(value || '', support);
         return <div className="code" dangerouslySetInnerHTML={{ __html: code }} />;
       },
     };
@@ -98,9 +99,19 @@ export class HoverWidget extends React.PureComponent<HoverWidgetProps> {
         {/*
               // @ts-ignore */}
         <EuiText textAlign="center">
-          <h4>Language Server is initializing…</h4>
+          <h4>
+            <FormattedMessage
+              id="xpack.code.monaco.hover.languageServerInitializingTitle"
+              defaultMessage="Language Server is initializing…"
+            />
+          </h4>
           <EuiText size="xs" color="subdued">
-            <p>Depending on the size of your repo, this could take a few minutes.</p>
+            <p>
+              <FormattedMessage
+                id="xpack.code.monaco.hover.languageServerInitializingDescription"
+                defaultMessage="Depending on the size of your repo, this could take a few minutes."
+              />
+            </p>
           </EuiText>
         </EuiText>
       </div>

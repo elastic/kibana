@@ -29,12 +29,11 @@ import {
   getAutocompleteProvider,
 } from 'ui/autocomplete_providers';
 import { debounce, compact, isEqual, omit } from 'lodash';
-import { IndexPattern, StaticIndexPattern } from 'ui/index_patterns';
 import { PersistedLog } from 'ui/persisted_log';
-import chrome from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
 import { Storage } from 'ui/storage';
-import { localStorage } from 'ui/storage/storage_service';
+import { UiSettingsClientContract } from 'src/core/public';
+import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
 import { Query } from '../index';
 import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';
@@ -43,14 +42,15 @@ import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 
 interface Props {
+  uiSettings: UiSettingsClientContract;
   indexPatterns: Array<IndexPattern | string>;
+  store: Storage;
   intl: InjectedIntl;
   query: Query;
   appName: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
   prepend?: any;
-  store?: Storage;
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
@@ -80,11 +80,10 @@ const KEY_CODES = {
   END: 35,
 };
 
-const config = chrome.getUiSettingsClient();
 const recentSearchType: AutocompleteSuggestionType = 'recentSearch';
 
 export class QueryBarInputUI extends Component<Props, State> {
-  public state = {
+  public state: State = {
     isSuggestionsVisible: false,
     index: null,
     suggestions: [],
@@ -111,7 +110,10 @@ export class QueryBarInputUI extends Component<Props, State> {
       indexPattern => typeof indexPattern !== 'string'
     ) as IndexPattern[];
 
-    const objectPatternsFromStrings = await fetchIndexPatterns(stringPatterns);
+    const objectPatternsFromStrings = (await fetchIndexPatterns(
+      stringPatterns,
+      this.props.uiSettings
+    )) as IndexPattern[];
 
     this.setState({
       indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
@@ -123,6 +125,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       return;
     }
 
+    const uiSettings = this.props.uiSettings;
     const language = this.props.query.language;
     const queryString = this.getQueryString();
 
@@ -138,7 +141,10 @@ export class QueryBarInputUI extends Component<Props, State> {
     }
 
     const indexPatterns = this.state.indexPatterns;
-    const getAutocompleteSuggestions = autocompleteProvider({ config, indexPatterns });
+    const getAutocompleteSuggestions = autocompleteProvider({
+      config: uiSettings,
+      indexPatterns,
+    });
 
     const { selectionStart, selectionEnd } = this.inputRef;
     if (selectionStart === null || selectionEnd === null) {
@@ -359,11 +365,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    if (this.props.store) {
-      this.props.store.set('kibana.userQueryLanguage', language);
-    } else {
-      localStorage.set('kibana.userQueryLanguage', language);
-    }
+    this.props.store.set('kibana.userQueryLanguage', language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
@@ -391,7 +393,7 @@ export class QueryBarInputUI extends Component<Props, State> {
   public componentDidMount() {
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
-      : getQueryLog(this.props.appName, this.props.query.language);
+      : getQueryLog(this.props.uiSettings, this.props.appName, this.props.query.language);
 
     this.fetchIndexPatterns().then(this.updateSuggestions);
   }
@@ -399,7 +401,7 @@ export class QueryBarInputUI extends Component<Props, State> {
   public componentDidUpdate(prevProps: Props) {
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
-      : getQueryLog(this.props.appName, this.props.query.language);
+      : getQueryLog(this.props.uiSettings, this.props.appName, this.props.query.language);
 
     if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
       this.fetchIndexPatterns().then(this.updateSuggestions);
@@ -440,6 +442,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       'languageSwitcherPopoverAnchorPosition',
       'onChange',
       'onSubmit',
+      'uiSettings',
     ]);
 
     return (

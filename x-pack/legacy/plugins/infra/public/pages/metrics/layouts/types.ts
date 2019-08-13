@@ -25,6 +25,7 @@ interface SeriesOverrides {
   name?: string;
   formatter?: InfraFormatterType;
   formatterTemplate?: string;
+  gaugeMax?: number;
 }
 
 interface SeriesOverrideObject {
@@ -36,7 +37,6 @@ export interface InfraMetricLayoutVisualizationConfig {
   type?: InfraMetricLayoutVisualizationType;
   formatter?: InfraFormatterType;
   formatterTemplate?: string;
-  bounds?: { min: number; max: number };
   seriesOverrides: SeriesOverrideObject;
 }
 

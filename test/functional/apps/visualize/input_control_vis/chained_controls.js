@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }) {
   const find = getService('find');
   const comboBox = getService('comboBox');
 
-  describe('chained controls', () => {
+  describe('chained controls', function () {
+    this.tags('smoke');
 
     before(async () => {
       await PageObjects.common.navigateToApp('visualize');
@@ -38,8 +39,8 @@ export default function ({ getService, getPageObjects }) {
       expect(parentControlMenu.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,NG,PK,RU,US');
 
       const childControlInput = await find.byCssSelector('[data-test-subj="inputControl1"] input');
-      const isDisabled = await childControlInput.getProperty('disabled');
-      expect(isDisabled).to.equal(true);
+      const isDisabled = await childControlInput.getAttribute('disabled');
+      expect(isDisabled).to.equal('true');
     });
 
     it('should filter child control options by parent control value', async () => {
@@ -66,8 +67,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.sleep(500); // give time for filter to be removed and event handlers to fire
 
       const childControlInput = await find.byCssSelector('[data-test-subj="inputControl1"] input');
-      const isDisabled = await childControlInput.getProperty('disabled');
-      expect(isDisabled).to.equal(true);
+      const isDisabled = await childControlInput.getAttribute('disabled');
+      expect(isDisabled).to.equal('true');
 
       await testSubjects.click('inputControlCancelBtn');
     });

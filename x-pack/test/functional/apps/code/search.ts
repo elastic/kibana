@@ -5,17 +5,17 @@
  */
 
 import expect from '@kbn/expect';
-import { TestInvoker } from './lib/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function searchFunctonalTests({ getService, getPageObjects }: TestInvoker) {
+export default function searchFunctonalTests({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  describe('Search', () => {
+  describe('Search', function() {
+    this.tags('smoke');
     const symbolTypeaheadListSelector = 'codeTypeaheadList-symbol codeTypeaheadItem';
     const fileTypeaheadListSelector = 'codeTypeaheadList-file codeTypeaheadItem';
     const searchResultListSelector = 'codeSearchResultList codeSearchResultFileItem';

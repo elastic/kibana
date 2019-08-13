@@ -37,6 +37,8 @@ export const FieldNameContainer = styled.span`
   }
 `;
 
+FieldNameContainer.displayName = 'FieldNameContainer';
+
 const HoverActionsContainer = styled(EuiPanel)`
   cursor: default;
   height: 25px;
@@ -45,15 +47,21 @@ const HoverActionsContainer = styled(EuiPanel)`
   top: 3px;
 `;
 
+HoverActionsContainer.displayName = 'HoverActionsContainer';
+
 const HoverActionsFlexGroup = styled(EuiFlexGroup)`
   cursor: pointer;
   position: relative;
   top: -8px;
 `;
 
+HoverActionsFlexGroup.displayName = 'HoverActionsFlexGroup';
+
 const ViewCategoryIcon = styled(EuiIcon)`
   margin-left: 5px;
 `;
+
+ViewCategoryIcon.displayName = 'ViewCategoryIcon';
 
 /** Renders a field name in it's non-dragging state */
 export const FieldName = pure<{
@@ -75,7 +83,11 @@ export const FieldName = pure<{
         >
           <EuiFlexItem grow={false}>
             <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
-              <WithCopyToClipboard text={fieldId} titleSummary={i18n.FIELD} />
+              <WithCopyToClipboard
+                data-test-subj="copy-to-clipboard"
+                text={fieldId}
+                titleSummary={i18n.FIELD}
+              />
             </EuiToolTip>
           </EuiFlexItem>
 
@@ -86,6 +98,7 @@ export const FieldName = pure<{
                   <ViewCategoryIcon
                     aria-label={i18n.VIEW_CATEGORY(categoryId)}
                     color="text"
+                    data-test-subj="view-category"
                     onClick={() => {
                       onUpdateColumns(categoryColumns);
                     }}
@@ -102,8 +115,12 @@ export const FieldName = pure<{
     }
     render={() => (
       <FieldNameContainer>
-        <EuiHighlight search={highlight}>{fieldId}</EuiHighlight>
+        <EuiHighlight data-test-subj={`field-name-${fieldId}`} search={highlight}>
+          {fieldId}
+        </EuiHighlight>
       </FieldNameContainer>
     )}
   />
 ));
+
+FieldName.displayName = 'FieldName';

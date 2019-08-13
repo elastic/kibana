@@ -30,9 +30,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       [InfraNodeType.container]: options.sourceConfiguration.fields.container,
       [InfraNodeType.pod]: options.sourceConfiguration.fields.pod,
     };
-    const indexPattern = `${options.sourceConfiguration.metricAlias},${
-      options.sourceConfiguration.logAlias
-    }`;
+    const indexPattern = `${options.sourceConfiguration.metricAlias},${options.sourceConfiguration.logAlias}`;
     const timeField = options.sourceConfiguration.fields.timestamp;
     const interval = options.timerange.interval;
     const nodeField = fields[options.nodeType];
@@ -44,13 +42,13 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     const search = <Aggregation>(searchOptions: object) =>
       this.framework.callWithRequest<{}, Aggregation>(req, 'search', searchOptions);
 
-    const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeId);
+    const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeIds.nodeId);
     if (!validNode) {
       throw new InvalidNodeError(
         i18n.translate('xpack.infra.kibanaMetrics.nodeDoesNotExistErrorMessage', {
           defaultMessage: '{nodeId} does not exist.',
           values: {
-            nodeId: options.nodeId,
+            nodeId: options.nodeIds.nodeId,
           },
         })
       );
@@ -58,7 +56,23 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     const requests = options.metrics.map(metricId => {
       const model = metricModels[metricId](timeField, indexPattern, interval);
-      const filters = [{ match: { [nodeField]: options.nodeId } }];
+      if (model.id_type === 'cloud' && !options.nodeIds.cloudId) {
+        throw new InvalidNodeError(
+          i18n.translate('xpack.infra.kibanaMetrics.cloudIdMissingErrorMessage', {
+            defaultMessage:
+              'Model for {metricId} requires a cloudId, but none was given for {nodeId}.',
+            values: {
+              metricId,
+              nodeId: options.nodeIds.nodeId,
+            },
+          })
+        );
+      }
+      const id =
+        model.id_type === 'cloud' ? (options.nodeIds.cloudId as string) : options.nodeIds.nodeId;
+      const filters = model.map_field_to
+        ? [{ match: { [model.map_field_to]: id } }]
+        : [{ match: { [nodeField]: id } }];
       return this.framework.makeTSVBRequest(req, model, timerange, filters);
     });
     return Promise.all(requests)

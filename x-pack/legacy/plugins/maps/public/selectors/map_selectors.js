@@ -6,16 +6,16 @@
 
 import { createSelector } from 'reselect';
 import _ from 'lodash';
-import { TileLayer } from '../shared/layers/tile_layer';
-import { VectorLayer } from '../shared/layers/vector_layer';
-import { HeatmapLayer } from '../shared/layers/heatmap_layer';
-import { ALL_SOURCES } from '../shared/layers/sources/all_sources';
-import { VectorStyle } from '../shared/layers/styles/vector_style';
-import { HeatmapStyle } from '../shared/layers/styles/heatmap_style';
-import { TileStyle } from '../shared/layers/styles/tile_style';
+import { TileLayer } from '../layers/tile_layer';
+import { VectorLayer } from '../layers/vector_layer';
+import { HeatmapLayer } from '../layers/heatmap_layer';
+import { ALL_SOURCES } from '../layers/sources/all_sources';
+import { VectorStyle } from '../layers/styles/vector_style';
+import { HeatmapStyle } from '../layers/styles/heatmap_style';
+import { TileStyle } from '../layers/styles/tile_style';
 import { timefilter } from 'ui/timefilter';
-import { getInspectorAdapters } from '../store/non_serializable_instances';
-import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../store/util';
+import { getInspectorAdapters } from '../reducers/non_serializable_instances';
+import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
@@ -219,5 +219,24 @@ export const hasDirtyState = createSelector(
       const currentState = copyPersistentState(layerDescriptor);
       return !_.isEqual(currentState, trackedState);
     });
+  }
+);
+
+export const areLayersLoaded = createSelector(
+  getLayerList,
+  getWaitingForMapReadyLayerListRaw,
+  getMapZoom,
+  (layerList, waitingForMapReadyLayerList, zoom) => {
+    if (waitingForMapReadyLayerList.length) {
+      return false;
+    }
+
+    for (let i = 0; i < layerList.length; i++) {
+      const layer = layerList[i];
+      if (layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.isDataLoaded()) {
+        return false;
+      }
+    }
+    return true;
   }
 );

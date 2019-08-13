@@ -41,6 +41,7 @@ import {
   MockDocLinksService,
   MockRenderingService,
   RenderingServiceConstructor,
+  MockContextService,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -51,6 +52,7 @@ const defaultCoreSystemParams = {
   rootDomElement: document.createElement('div'),
   browserSupportsCsp: true,
   injectedMetadata: {
+    uiPlugins: [],
     csp: {
       warnLegacyBrowsers: true,
     },
@@ -158,6 +160,11 @@ describe('#setup()', () => {
   it('calls application#setup()', async () => {
     await setupCore();
     expect(MockApplicationService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls context#setup()', async () => {
+    await setupCore();
+    expect(MockContextService.setup).toHaveBeenCalledTimes(1);
   });
 
   it('calls injectedMetadata#setup()', async () => {
@@ -379,12 +386,10 @@ describe('Notifications targetDomElement', () => {
     });
 
     let targetDomElementParentInStart: HTMLElement | null;
-    MockNotificationsService.start.mockImplementation(
-      ({ targetDomElement }): any => {
-        expect(targetDomElement.parentElement).not.toBeNull();
-        targetDomElementParentInStart = targetDomElement.parentElement;
-      }
-    );
+    MockNotificationsService.start.mockImplementation(({ targetDomElement }): any => {
+      expect(targetDomElement.parentElement).not.toBeNull();
+      targetDomElementParentInStart = targetDomElement.parentElement;
+    });
 
     // Starting the core system should pass the targetDomElement as a child of the rootDomElement
     await core.setup();

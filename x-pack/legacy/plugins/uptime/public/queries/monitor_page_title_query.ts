@@ -6,12 +6,15 @@
 
 import gql from 'graphql-tag';
 
-export const monitorPageTitleQuery = gql`
-  query MonitorPageTitle($monitorId: String!) {
-    monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
-      id
-      url
-      name
-    }
+export const monitorPageTitleQueryString = `
+query MonitorPageTitle($monitorId: String!) {
+  monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
+    id
+    url
+    name
   }
+}`;
+
+export const monitorPageTitleQuery = gql`
+  ${monitorPageTitleQueryString}
 `;

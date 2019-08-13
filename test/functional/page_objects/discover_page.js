@@ -161,7 +161,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getChartInterval() {
-      const selectedValue = await testSubjects.getProperty('discoverIntervalSelect', 'value');
+      const selectedValue = await testSubjects.getAttribute('discoverIntervalSelect', 'value');
       const selectedOption = await find.byCssSelector('option[value="' + selectedValue + '"]');
       return selectedOption.getVisibleText();
     }
@@ -217,7 +217,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getSidebarWidth() {
       const sidebar = await find.byCssSelector('.sidebar-list');
-      return await sidebar.getProperty('clientWidth');
+      return await sidebar.getAttribute('clientWidth');
     }
 
     async hasNoResults() {
@@ -248,7 +248,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async expectMissingFieldListItemVisualize(field) {
-      await testSubjects.missingOrFail(`fieldVisualize-${field}`);
+      await testSubjects.missingOrFail(`fieldVisualize-${field}`, { allowHidden: true });
     }
 
     async clickFieldListPlusFilter(field, value) {
@@ -288,7 +288,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
       if (fieldFilterFormExists) {
         await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.missingOrFail('discoverFieldFilter');
+        await testSubjects.missingOrFail('discoverFieldFilter', { allowHidden: true });
       }
     }
 

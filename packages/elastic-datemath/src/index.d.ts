@@ -26,7 +26,7 @@ declare const datemath: {
       weight: number;
       type: 'calendar' | 'fixed' | 'mixed';
       base: number;
-    }
+    };
   };
   units: Unit[];
   unitsAsc: Unit[];

@@ -6,7 +6,6 @@
 import produce from 'immer';
 import { Action, handleActions } from 'redux-actions';
 
-import { AnyAction } from 'redux';
 import { CommitDiff } from '../../common/git_diff';
 import { loadCommit, loadCommitFailed, loadCommitSuccess } from '../actions/commit';
 
@@ -20,18 +19,20 @@ const initialState: CommitState = {
   loading: false,
 };
 
-export const commit = handleActions<CommitState, AnyAction>(
+type CommitPayload = CommitDiff & Error;
+
+export const commit = handleActions<CommitState, CommitPayload>(
   {
-    [String(loadCommit)]: (state: CommitState, action: Action<any>) =>
+    [String(loadCommit)]: state =>
       produce<CommitState>(state, draft => {
         draft.loading = true;
       }),
-    [String(loadCommitSuccess)]: (state: CommitState, action: Action<any>) =>
+    [String(loadCommitSuccess)]: (state, action: Action<CommitDiff>) =>
       produce<CommitState>(state, draft => {
-        draft.commit = action.payload;
+        draft.commit = action.payload!;
         draft.loading = false;
       }),
-    [String(loadCommitFailed)]: (state: CommitState, action: Action<any>) =>
+    [String(loadCommitFailed)]: state =>
       produce<CommitState>(state, draft => {
         draft.commit = null;
         draft.loading = false;

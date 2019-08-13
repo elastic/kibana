@@ -1,7 +1,6 @@
 {
   "bulk": {
     "url_params": {
-      "include_type_name": "",
       "wait_for_active_shards": "",
       "refresh": [
         "true",
@@ -12,8 +11,8 @@
       "timeout": "",
       "type": "",
       "_source": [],
-      "_source_exclude": [],
-      "_source_include": [],
+      "_source_excludes": [],
+      "_source_includes": [],
       "pipeline": ""
     },
     "methods": [

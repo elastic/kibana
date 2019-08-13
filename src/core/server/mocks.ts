@@ -21,7 +21,10 @@ import { PluginInitializerContext, CoreSetup, CoreStart } from '.';
 import { loggingServiceMock } from './logging/logging_service.mock';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
+import { contextServiceMock } from './context/context_service.mock';
 
+export { httpServerMock } from './http/http_server.mocks';
+export { sessionStorageMock } from './http/cookie_session_storage.mocks';
 export { configServiceMock } from './config/config_service.mock';
 export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
@@ -38,7 +41,8 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
 }
 
 function pluginInitializerContextMock<T>(config: T) {
-  const mock: jest.Mocked<PluginInitializerContext<T>> = {
+  const mock: PluginInitializerContext<T> = {
+    opaqueId: Symbol(),
     logger: loggingServiceMock.create(),
     env: {
       mode: {
@@ -54,9 +58,22 @@ function pluginInitializerContextMock<T>(config: T) {
 }
 
 function createCoreSetupMock() {
+  const httpService = httpServiceMock.createSetupContract();
+  const httpMock: jest.Mocked<CoreSetup['http']> = {
+    createCookieSessionStorageFactory: httpService.createCookieSessionStorageFactory,
+    registerOnPreAuth: httpService.registerOnPreAuth,
+    registerAuth: httpService.registerAuth,
+    registerOnPostAuth: httpService.registerOnPostAuth,
+    basePath: httpService.basePath,
+    isTlsEnabled: httpService.isTlsEnabled,
+    createRouter: jest.fn(),
+  };
+  httpMock.createRouter.mockImplementation(() => httpService.createRouter(''));
+
   const mock: MockedKeys<CoreSetup> = {
+    context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetupContract(),
-    http: httpServiceMock.createSetupContract(),
+    http: httpMock,
   };
 
   return mock;
