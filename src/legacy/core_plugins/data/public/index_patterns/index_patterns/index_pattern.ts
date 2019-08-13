@@ -454,7 +454,7 @@ export class IndexPattern implements StaticIndexPattern {
 
             if (unresolvedCollision) {
               const message = i18n.translate(
-                'common.ui.indexPattern.unableWriteLabel',
+                'data.indexPatterns.unableWriteLabel',
                 {
                   defaultMessage:
                     'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
@@ -504,7 +504,7 @@ export class IndexPattern implements StaticIndexPattern {
         }
 
         toastNotifications.addError(err, {
-          title: i18n.translate('common.ui.indexPattern.fetchFieldErrorTitle', {
+          title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields',
           }),
         });
