@@ -18,13 +18,4 @@
  */
 
 /** @public static code */
-export { dateHistogramInterval } from '../common/date_histogram_interval';
-
-/** @public static code */
-export {
-  isValidEsInterval,
-  InvalidEsCalendarIntervalError,
-  InvalidEsIntervalFormatError,
-  parseEsInterval,
-  ParsedInterval,
-} from '../common/parse_es_interval';
+export * from '../common';

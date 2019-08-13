@@ -48,7 +48,7 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
     render={[Function]}
   />
   ,
-  <styled.span />
+  <Spacer />
   <Connect(DraggableWrapperComponent)
     dataProvider={
       Object {
@@ -70,7 +70,7 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
     render={[Function]}
   />
   ,
-  <styled.span />
+  <Spacer />
   <Connect(DraggableWrapperComponent)
     dataProvider={
       Object {
@@ -119,7 +119,7 @@ exports[`Table Helpers #getRowItemOverflow it returns correctly against snapshot
     delay="regular"
     position="top"
   >
-    <Styled(EuiIcon)
+    <MoreRowItems
       type="boxesHorizontal"
     />
   </EuiToolTip>
@@ -134,7 +134,7 @@ exports[`Table Helpers OverflowField it returns correctly against snapshot 1`] =
     delay="regular"
     position="top"
   >
-    <Styled(EuiIcon)
+    <MoreRowItems
       type="boxesHorizontal"
     />
   </EuiToolTip>

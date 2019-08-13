@@ -53,3 +53,5 @@ export const DraggableScore = React.memo<{
     />
   )
 );
+
+DraggableScore.displayName = 'DraggableScore';

@@ -28,7 +28,7 @@ import { ReduxSourceIdBridge, WithStreamItems } from '../../../containers/logs/w
 import { Source } from '../../../containers/source';
 
 import { LogsToolbar } from './page_toolbar';
-import { LogHighlightsBridge } from '../../../containers/logs/log_highlights';
+import { LogHighlightsBridge, LogHighlightsState } from '../../../containers/logs/log_highlights';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
   const { createDerivedIndexPattern, source, sourceId, version } = useContext(Source.Context);
@@ -42,7 +42,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     flyoutItem,
     isLoading,
   } = useContext(LogFlyoutState.Context);
-
+  const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
   const derivedIndexPattern = createDerivedIndexPattern('logs');
 
   return (
@@ -121,16 +121,30 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                 <WithSummary>
                   {({ buckets }) => (
                     <WithLogPosition>
-                      {({ jumpToTargetPosition, visibleMidpointTime, visibleTimeInterval }) => (
-                        <LogMinimap
-                          height={height}
-                          width={width}
-                          highlightedInterval={visibleTimeInterval}
-                          intervalSize={intervalSize}
-                          jumpToTarget={jumpToTargetPosition}
-                          summaryBuckets={buckets}
-                          target={visibleMidpointTime}
-                        />
+                      {({
+                        isAutoReloading,
+                        jumpToTargetPosition,
+                        visibleMidpointTime,
+                        visibleTimeInterval,
+                      }) => (
+                        <WithStreamItems initializeOnMount={!isAutoReloading}>
+                          {({ isReloading }) => (
+                            <LogMinimap
+                              height={height}
+                              width={width}
+                              highlightedInterval={isReloading ? null : visibleTimeInterval}
+                              intervalSize={intervalSize}
+                              jumpToTarget={jumpToTargetPosition}
+                              summaryBuckets={buckets}
+                              summaryHighlightBuckets={
+                                logSummaryHighlights.length > 0
+                                  ? logSummaryHighlights[0].buckets
+                                  : []
+                              }
+                              target={visibleMidpointTime}
+                            />
+                          )}
+                        </WithStreamItems>
                       )}
                     </WithLogPosition>
                   )}
