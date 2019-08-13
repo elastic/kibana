@@ -142,8 +142,15 @@ export function getAutocompleteSuggestions(
 }
 
 /**
- * Get the function and argument (if there is one) at the given position.
- */
+    Each entry of the node.chain has it's overall start and end position.  For instance,
+    given the expression "link arg='something' | render" the link functions start position is 0 and end
+    position is 21.
+
+    This function is given the full ast and the current cursor position in the expression string.
+
+    It returns which function the cursor is in, as well as which argument for that function the cursor is in
+    if any.
+*/
 function getFnArgAtPosition(
   ast: ExpressionASTWithMeta,
   position: number
