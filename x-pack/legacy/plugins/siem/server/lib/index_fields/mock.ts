@@ -12,30 +12,35 @@ export const mockAuditbeatIndexField: IndexFieldDescriptor[] = [
     searchable: true,
     type: 'date',
     aggregatable: true,
+    format: '',
   },
   {
     name: 'agent.ephemeral_id',
     searchable: true,
     type: 'string',
     aggregatable: true,
+    format: '',
   },
   {
     name: 'agent.name',
     searchable: true,
     type: 'string',
     aggregatable: true,
+    format: '',
   },
   {
     name: 'agent.type',
     searchable: true,
     type: 'string',
     aggregatable: true,
+    format: '',
   },
   {
     name: 'agent.version',
     searchable: true,
     type: 'string',
     aggregatable: true,
+    format: '',
   },
 ];
 
@@ -45,24 +50,28 @@ export const mockFilebeatIndexField: IndexFieldDescriptor[] = [
     searchable: true,
     type: 'date',
     aggregatable: true,
+    format: '',
   },
   {
     name: 'agent.hostname',
     searchable: true,
     type: 'string',
     aggregatable: true,
+    format: '',
   },
   {
     name: 'agent.name',
     searchable: true,
     type: 'string',
     aggregatable: true,
+    format: '',
   },
   {
     name: 'agent.version',
     searchable: true,
     type: 'string',
     aggregatable: true,
+    format: '',
   },
 ];
 
@@ -72,17 +81,20 @@ export const mockPacketbeatIndexField: IndexFieldDescriptor[] = [
     searchable: true,
     type: 'date',
     aggregatable: true,
+    format: '',
   },
   {
     name: 'agent.id',
     searchable: true,
     type: 'string',
     aggregatable: true,
+    format: '',
   },
   {
     name: 'agent.type',
     searchable: true,
     type: 'string',
     aggregatable: true,
+    format: '',
   },
 ];

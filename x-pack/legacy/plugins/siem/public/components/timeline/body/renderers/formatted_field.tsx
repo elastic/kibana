@@ -10,7 +10,7 @@ import { pure } from 'recompose';
 import { isNumber } from 'lodash/fp';
 import { EuiToolTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
-import { Bytes, BYTES_KEY } from '../../../bytes';
+import { Bytes, BYTES_FORMAT } from '../../../bytes';
 
 import { getOrEmptyTagFromValue } from '../../../empty_value';
 import { FormattedDate } from '../../../formatted_date';
@@ -20,13 +20,13 @@ import { Port, PORT_NAMES } from '../../../port';
 import { DATE_FIELD_TYPE, IP_FIELD_TYPE, MESSAGE_FIELD_NAME } from './constants';
 
 export const FormattedFieldValue = pure<{
-  eventId: string;
   contextId: string;
+  eventId: string;
+  fieldFormat?: string;
   fieldName: string;
   fieldType: string;
   value: string | number | undefined | null;
-}>(({ eventId, contextId, fieldName, fieldType, value }) => {
-  const fieldNameArray = fieldName.split('.');
+}>(({ eventId, contextId, fieldFormat, fieldName, fieldType, value }) => {
   if (fieldType === IP_FIELD_TYPE) {
     return (
       <FormattedIp
@@ -46,7 +46,7 @@ export const FormattedFieldValue = pure<{
     return (
       <Duration contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
     );
-  } else if (fieldNameArray[fieldNameArray.length - 1] === BYTES_KEY) {
+  } else if (fieldFormat === BYTES_FORMAT) {
     return (
       <Bytes contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
     );

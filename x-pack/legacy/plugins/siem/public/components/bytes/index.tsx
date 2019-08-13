@@ -10,7 +10,7 @@ import { pure } from 'recompose';
 import { DefaultDraggable } from '../draggables';
 import { PreferenceFormattedBytes } from '../formatted_bytes';
 
-export const BYTES_KEY = 'bytes';
+export const BYTES_FORMAT = 'bytes';
 
 /**
  * Renders draggable text containing the value of a field representing a
