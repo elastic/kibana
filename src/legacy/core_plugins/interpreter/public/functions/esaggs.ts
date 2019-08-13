@@ -119,7 +119,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       queryFilter,
     });
 
-    const table: KibanaDatatable = {
+    return {
       type: 'kibana_datatable',
       rows: response.rows,
       columns: response.columns.map((column: any) => {
@@ -133,7 +133,5 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
         return cleanedColumn;
       }),
     };
-
-    return table;
   },
 });
