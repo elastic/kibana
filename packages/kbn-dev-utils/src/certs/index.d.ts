@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export * from './src/tooling_log';
-export * from './src/serializers';
-export * from './src/certs';
+export const CA_CERT_PATH: string;
+export const ES_KEY_PATH: string;
+export const ES_CERT_PATH: string;
