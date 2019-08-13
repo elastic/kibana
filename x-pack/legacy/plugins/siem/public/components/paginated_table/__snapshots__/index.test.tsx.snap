@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Paginated Table Component rendering it renders the default load more table 1`] = `
-<Component
+<PaginatedTable
   columns={
     Array [
       Object {
@@ -70,7 +70,6 @@ exports[`Paginated Table Component rendering it renders the default load more ta
   limit={1}
   loadPage={[Function]}
   loading={false}
-  loadingTitle="Hosts"
   pageOfItems={
     Array [
       Object {

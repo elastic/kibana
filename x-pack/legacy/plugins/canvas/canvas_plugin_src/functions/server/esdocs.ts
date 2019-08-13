@@ -39,7 +39,7 @@ export function esdocs(): ExpressionFunction<'esdocs', Filter, Arguments, any> {
       },
       count: {
         types: ['number'],
-        default: 100,
+        default: 1000,
         help: argHelp.count,
       },
       fields: {

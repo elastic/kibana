@@ -21,6 +21,7 @@ export const TRANSACTION_NAME = 'transaction.name';
 export const TRANSACTION_ID = 'transaction.id';
 export const TRANSACTION_SAMPLED = 'transaction.sampled';
 export const TRANSACTION_BREAKDOWN_COUNT = 'transaction.breakdown.count';
+export const TRANSACTION_PAGE_URL = 'transaction.page.url';
 
 export const TRACE_ID = 'trace.id';
 
@@ -40,6 +41,7 @@ export const ERROR_CULPRIT = 'error.culprit';
 export const ERROR_LOG_MESSAGE = 'error.log.message';
 export const ERROR_EXC_MESSAGE = 'error.exception.message'; // only to be used in es queries, since error.exception is now an array
 export const ERROR_EXC_HANDLED = 'error.exception.handled'; // only to be used in es queries, since error.exception is now an array
+export const ERROR_PAGE_URL = 'error.page.url';
 
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';

@@ -21,7 +21,7 @@ import {
   getDataFrameIndexOrSearchBreadcrumbs,
 } from '../../breadcrumbs';
 
-const wizardTemplate = `<ml-nav-menu name="new_data_frame" /><ml-new-data-frame />`;
+const wizardTemplate = `<ml-new-data-frame />`;
 
 uiRoutes.when('/data_frames/new_transform/step/pivot?', {
   template: wizardTemplate,

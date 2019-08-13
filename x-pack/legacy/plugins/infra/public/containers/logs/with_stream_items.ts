@@ -14,6 +14,7 @@ import { PropsOfContainer, RendererFunction } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 // deep inporting to avoid a circular import problem
 import { LogHighlightsState } from './log_highlights/log_highlights';
+import { UniqueTimeKey } from '../../../common/time';
 
 export const withStreamItems = connect(
   (state: State) => ({
@@ -26,7 +27,6 @@ export const withStreamItems = connect(
     entries: logEntriesSelectors.selectEntries(state),
     entriesStart: logEntriesSelectors.selectEntriesStart(state),
     entriesEnd: logEntriesSelectors.selectEntriesEnd(state),
-    // items: selectItems(state),
   }),
   bindPlainActionCreators({
     loadNewerEntries: logEntriesActions.loadNewerEntries,
@@ -45,12 +45,13 @@ export const WithStreamItems = withStreamItems(
   }: WithStreamItemsProps & {
     children: RendererFunction<
       WithStreamItemsProps & {
+        currentHighlightKey: UniqueTimeKey | null;
         items: StreamItem[];
       }
     >;
     initializeOnMount: boolean;
   }) => {
-    const { logEntryHighlightsById } = useContext(LogHighlightsState.Context);
+    const { currentHighlightKey, logEntryHighlightsById } = useContext(LogHighlightsState.Context);
     const items = useMemo(
       () =>
         props.isReloading && !props.isAutoReloading
@@ -69,31 +70,11 @@ export const WithStreamItems = withStreamItems(
 
     return children({
       ...props,
+      currentHighlightKey,
       items,
     });
   }
 );
-
-// export const WithStreamItemsOld = asChildFunctionRenderer(withStreamItems, {
-//   onInitialize: props => {
-//     if (!props.isReloading && !props.isLoadingMore) {
-//       props.reloadEntries();
-//     }
-//   },
-// });
-
-// const selectItems = createSelector(
-//   logEntriesSelectors.selectEntries,
-//   logEntriesSelectors.selectIsReloadingEntries,
-//   logPositionSelectors.selectIsAutoReloading,
-//   // searchResultsSelectors.selectSearchResultsById,
-//   (logEntries, isReloading, isAutoReloading /* , searchResults */) =>
-//     isReloading && !isAutoReloading
-//       ? []
-//       : logEntries.map(logEntry =>
-//           createLogEntryStreamItem(logEntry /* , searchResults[logEntry.gid] || null */)
-//         )
-// );
 
 const createLogEntryStreamItem = (
   logEntry: LogEntry,

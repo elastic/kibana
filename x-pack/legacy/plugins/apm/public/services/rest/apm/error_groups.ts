@@ -8,7 +8,6 @@ import { ErrorDistributionAPIResponse } from '../../../../server/lib/errors/dist
 import { ErrorGroupAPIResponse } from '../../../../server/lib/errors/get_error_group';
 import { ErrorGroupListAPIResponse } from '../../../../server/lib/errors/get_error_groups';
 import { callApi } from '../callApi';
-import { getUiFiltersES } from '../../ui_filters/get_ui_filters_es';
 import { UIFilters } from '../../../../typings/ui-filters';
 
 export async function loadErrorGroupList({
@@ -33,7 +32,7 @@ export async function loadErrorGroupList({
       end,
       sortField,
       sortDirection,
-      uiFiltersES: await getUiFiltersES(uiFilters)
+      uiFilters: JSON.stringify(uiFilters)
     }
   });
 }
@@ -56,7 +55,7 @@ export async function loadErrorGroupDetails({
     query: {
       start,
       end,
-      uiFiltersES: await getUiFiltersES(uiFilters)
+      uiFilters: JSON.stringify(uiFilters)
     }
   });
 }
@@ -80,7 +79,7 @@ export async function loadErrorDistribution({
       start,
       end,
       groupId: errorGroupId,
-      uiFiltersES: await getUiFiltersES(uiFilters)
+      uiFilters: JSON.stringify(uiFilters)
     }
   });
 }

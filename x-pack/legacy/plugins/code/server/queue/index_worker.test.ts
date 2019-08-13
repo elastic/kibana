@@ -17,7 +17,7 @@ import { CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { emptyAsyncFunc } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
-import { CancellationSerivce } from './cancellation_service';
+import { CancellationReason, CancellationSerivce } from './cancellation_service';
 import { IndexWorker } from './index_worker';
 
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
@@ -31,13 +31,13 @@ afterEach(() => {
 test('Execute index job.', async () => {
   // Setup CancellationService
   const cancelIndexJobSpy = sinon.spy();
-  const registerIndexJobTokenSpy = sinon.spy();
+  const registerCancelableIndexJobSpy = sinon.spy();
   const cancellationService = {
     cancelIndexJob: emptyAsyncFunc,
-    registerIndexJobToken: emptyAsyncFunc,
+    registerCancelableIndexJob: emptyAsyncFunc,
   };
   cancellationService.cancelIndexJob = cancelIndexJobSpy;
-  cancellationService.registerIndexJobToken = registerIndexJobTokenSpy;
+  cancellationService.registerCancelableIndexJob = registerCancelableIndexJobSpy;
 
   // Setup EsClient
   const getSpy = sinon.fake.returns(
@@ -102,13 +102,13 @@ test('Execute index job.', async () => {
 test('Execute index job and then cancel.', async () => {
   // Setup CancellationService
   const cancelIndexJobSpy = sinon.spy();
-  const registerIndexJobTokenSpy = sinon.spy();
+  const registerCancelableIndexJobSpy = sinon.spy();
   const cancellationService = {
     cancelIndexJob: emptyAsyncFunc,
-    registerIndexJobToken: emptyAsyncFunc,
+    registerCancelableIndexJob: emptyAsyncFunc,
   };
   cancellationService.cancelIndexJob = cancelIndexJobSpy;
-  cancellationService.registerIndexJobToken = registerIndexJobTokenSpy;
+  cancellationService.registerCancelableIndexJob = registerCancelableIndexJobSpy;
 
   // Setup EsClient
   const getSpy = sinon.fake.returns(
@@ -164,7 +164,7 @@ test('Execute index job and then cancel.', async () => {
   });
 
   // Cancel the index job.
-  cToken.cancel();
+  cToken.cancel(CancellationReason.REPOSITORY_DELETE);
 
   expect(cancelIndexJobSpy.calledOnce).toBeTruthy();
   expect(getSpy.calledOnce).toBeTruthy();
@@ -177,13 +177,13 @@ test('Execute index job and then cancel.', async () => {
 test('Index job skipped/deduplicated if revision matches', async () => {
   // Setup CancellationService
   const cancelIndexJobSpy = sinon.spy();
-  const registerIndexJobTokenSpy = sinon.spy();
+  const registerCancelableIndexJobSpy = sinon.spy();
   const cancellationService = {
     cancelIndexJob: emptyAsyncFunc,
-    registerIndexJobToken: emptyAsyncFunc,
+    registerCancelableIndexJob: emptyAsyncFunc,
   };
   cancellationService.cancelIndexJob = cancelIndexJobSpy;
-  cancellationService.registerIndexJobToken = registerIndexJobTokenSpy;
+  cancellationService.registerCancelableIndexJob = registerCancelableIndexJobSpy;
 
   // Setup EsClient
   const getSpy = sinon.fake.returns(
@@ -250,13 +250,13 @@ test('Index job skipped/deduplicated if revision matches', async () => {
 test('Index job continue if revision matches and checkpoint found', async () => {
   // Setup CancellationService
   const cancelIndexJobSpy = sinon.spy();
-  const registerIndexJobTokenSpy = sinon.spy();
+  const registerCancelableIndexJobSpy = sinon.spy();
   const cancellationService = {
     cancelIndexJob: emptyAsyncFunc,
-    registerIndexJobToken: emptyAsyncFunc,
+    registerCancelableIndexJob: emptyAsyncFunc,
   };
   cancellationService.cancelIndexJob = cancelIndexJobSpy;
-  cancellationService.registerIndexJobToken = registerIndexJobTokenSpy;
+  cancellationService.registerCancelableIndexJob = registerCancelableIndexJobSpy;
 
   // Setup EsClient
   const getSpy = sinon.fake.returns(

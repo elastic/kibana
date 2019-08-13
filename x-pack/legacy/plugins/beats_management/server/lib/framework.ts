@@ -53,14 +53,14 @@ export class BackendFrameworkLib {
   /**
    * Expired `null` happens when we have no xpack info
    */
-  get license() {
+  public get license() {
     return {
       type: this.adapter.info ? this.adapter.info.license.type : 'unknown',
       expired: this.adapter.info ? this.adapter.info.license.expired : null,
     };
   }
 
-  get securityIsEnabled() {
+  public get securityIsEnabled() {
     return this.adapter.info ? this.adapter.info.security.enabled : false;
   }
 

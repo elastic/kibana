@@ -25,6 +25,9 @@ const defaultProps = {
     type: VectorStyle.STYLE_TYPE.DYNAMIC,
     options: {
       color: 'Blues',
+      field: {
+        name: 'prop1'
+      }
     }
   }
 };

@@ -32,7 +32,7 @@ instances of `{nonce}` will be replaced with an automatically generated nonce
 at load time. We strongly recommend that you keep the default CSP rules that
 ship with Kibana.
 
-`csp.strict:`:: *Default: `false`* Blocks access to Kibana to any browser that
+`csp.strict:`:: *Default: `true`* Blocks access to Kibana to any browser that
 does not enforce even rudimentary CSP rules. In practice, this will disable
 support for older, less safe browsers like Internet Explorer.
 
@@ -311,6 +311,8 @@ supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2
 `status.allowAnonymous:`:: *Default: false* If authentication is enabled,
 setting this to `true` enables unauthenticated users to access the Kibana
 server status API and status page.
+
+`vega.enableExternalUrls:`:: *Default: false* Set this value to true to allow Vega to use any URL to access external data sources and images. If false, Vega can only get data from Elasticsearch.
 
 `xpack.license_management.enabled`:: *Default: true* Set this value to false to
 disable the License Management user interface.

@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
 import { buildEsQuery } from '@kbn/es-query';
-import { data } from 'plugins/data/setup';
+import { setup as data } from '../../../../core_plugins/data/public/legacy';
 
 const { getQueryLog } = data.query.helpers;
 const config = chrome.getUiSettingsClient();
@@ -50,7 +50,7 @@ export const filtersBucketAgg = new BucketAggType({
         if (!_.size(inFilters)) return;
 
         inFilters.forEach((filter) => {
-          const persistedLog = getQueryLog('filtersAgg', filter.input.language);
+          const persistedLog = getQueryLog(config, 'filtersAgg', filter.input.language);
           persistedLog.add(filter.input.query);
         });
 

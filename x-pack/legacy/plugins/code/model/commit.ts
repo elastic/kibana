@@ -11,6 +11,7 @@ export interface CommitInfo {
   author: string;
   id: string;
   parents: string[];
+  treeId: string;
 }
 
 export interface ReferenceInfo {

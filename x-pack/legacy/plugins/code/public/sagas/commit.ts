@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Action } from 'redux-actions';
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 import { call, put, takeEvery } from 'redux-saga/effects';
 import { loadCommit, loadCommitFailed, loadCommitSuccess, Match } from '../actions';
 import { commitRoutePattern } from './patterns';
 
 function requestCommit(repo: string, commitId: string) {
-  return kfetch({
-    pathname: `/api/code/repo/${repo}/diff/${commitId}`,
-  });
+  return npStart.core.http.get(`/api/code/repo/${repo}/diff/${commitId}`);
 }
 
 function* handleLoadCommit(action: Action<Match>) {

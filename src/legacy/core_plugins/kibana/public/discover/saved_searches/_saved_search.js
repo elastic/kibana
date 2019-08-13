@@ -24,7 +24,6 @@ import { createLegacyClass } from 'ui/utils/legacy_class';
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 
 const module = uiModules.get('discover/saved_searches', [
-  'kibana/notify',
   'kibana/courier'
 ]);
 

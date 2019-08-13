@@ -7,6 +7,7 @@
 import uiRoutes from 'ui/routes';
 import template from './index.html';
 import { NoDataController } from './controller';
+import { CODE_PATH_LICENSE } from '../../../common/constants';
 uiRoutes
   .when('/no-data', {
     template,
@@ -15,7 +16,7 @@ uiRoutes
         const monitoringClusters = $injector.get('monitoringClusters');
         const kbnUrl = $injector.get('kbnUrl');
 
-        return monitoringClusters().then(clusters => {
+        return monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE]).then(clusters => {
           if (clusters && clusters.length) {
             kbnUrl.changePath('/home');
             return Promise.reject();

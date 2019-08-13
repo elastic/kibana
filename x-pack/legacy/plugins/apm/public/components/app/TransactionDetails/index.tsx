@@ -19,6 +19,7 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { useTrackPageview } from '../../../../../infra/public';
 
 export function TransactionDetails() {
   const location = useLocation();
@@ -30,10 +31,13 @@ export function TransactionDetails() {
 
   const { data: transactionChartsData } = useTransactionCharts();
 
-  const { data: waterfall } = useWaterfall(urlParams);
+  const { data: waterfall, exceedsMax } = useWaterfall(urlParams);
   const transaction = waterfall.getTransactionById(urlParams.transactionId);
 
   const { transactionName } = urlParams;
+
+  useTrackPageview({ app: 'apm', path: 'transaction_details' });
+  useTrackPageview({ app: 'apm', path: 'transaction_details', delay: 15000 });
 
   return (
     <div>
@@ -77,6 +81,7 @@ export function TransactionDetails() {
           transaction={transaction}
           urlParams={urlParams}
           waterfall={waterfall}
+          exceedsMax={exceedsMax}
         />
       )}
     </div>

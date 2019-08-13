@@ -38,7 +38,7 @@ describe('metric', () => {
       });
     });
 
-    describe('metricStyle', () => {
+    describe('metricFont', () => {
       it('sets the font style for the metric', () => {
         const result = fn(null, {
           metricFont: fontStyle,
@@ -51,7 +51,7 @@ describe('metric', () => {
       // it("sets a default style for the metric when not provided, () => {});
     });
 
-    describe('labelStyle', () => {
+    describe('labelFont', () => {
       it('sets the font style for the label', () => {
         const result = fn(null, {
           labelFont: fontStyle,
@@ -62,6 +62,16 @@ describe('metric', () => {
 
       // TODO: write test when using an instance of the interpreter
       // it("sets a default style for the label when not provided, () => {});
+    });
+
+    describe('metricFormat', () => {
+      it('sets the number format of the metric value', () => {
+        const result = fn(null, {
+          metricFormat: '0.0%',
+        });
+
+        expect(result.value).toHaveProperty('metricFormat', '0.0%');
+      });
     });
   });
 });

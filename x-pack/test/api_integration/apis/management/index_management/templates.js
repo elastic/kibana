@@ -19,7 +19,8 @@ export default function ({ getService }) {
   } = initElasticsearchHelpers(es);
 
   const {
-    list,
+    getAllTemplates,
+    getOneTemplate,
     createTemplate,
     getTemplatePayload,
     deleteTemplates,
@@ -28,12 +29,29 @@ export default function ({ getService }) {
   describe('index templates', () => {
     after(() => Promise.all([cleanUpEsResources()]));
 
-    describe('list', function () {
-      it('should list all the index templates with the expected properties', async function () {
-        const { body } = await list().expect(200);
+    describe('get all', () => {
+      it('should list all the index templates with the expected properties', async () => {
+        const { body } = await getAllTemplates().expect(200);
         const expectedKeys = ['name', 'indexPatterns', 'settings', 'aliases', 'mappings'];
 
         expectedKeys.forEach(key => expect(Object.keys(body[0]).includes(key)).to.be(true));
+      });
+    });
+
+    describe('get one', () => {
+      const templateName = `template-${getRandomString()}`;
+      const payload = getTemplatePayload(templateName);
+
+      beforeEach(async () => {
+        await createTemplate(payload).expect(200);
+      });
+
+      it('should list the index template with the expected properties', async () => {
+        const { body } = await getOneTemplate(templateName).expect(200);
+        const expectedKeys = ['name', 'indexPatterns', 'settings', 'aliases', 'mappings'];
+
+        expect(body.name).to.equal(templateName);
+        expectedKeys.forEach(key => expect(Object.keys(body).includes(key)).to.be(true));
       });
     });
 

@@ -9,13 +9,14 @@ import {
   InfraMetricModelMetricType,
   InfraMetricModel,
 } from '../../adapter_types';
+import { InfraMetric } from '../../../../../graphql/types';
 
 export const podMemoryUsage: InfraMetricModelCreator = (
   timeField,
   indexPattern,
   interval
 ): InfraMetricModel => ({
-  id: 'podMemoryUsage',
+  id: InfraMetric.podMemoryUsage,
   requires: ['kubernetes.pod'],
   index_pattern: indexPattern,
   interval,

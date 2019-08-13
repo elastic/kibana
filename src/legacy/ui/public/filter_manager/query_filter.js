@@ -22,8 +22,8 @@ import { FilterStateManager } from 'plugins/data';
 export function FilterBarQueryFilterProvider(getAppState, globalState) {
   // TODO: this is imported here to avoid circular imports.
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { data } = require('plugins/data/setup');
-  const filterManager = data.filter.filterManager;
+  const { setup } = require('../../../core_plugins/data/public/legacy');
+  const filterManager = setup.filter.filterManager;
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
 
   const queryFilter = {};
@@ -33,7 +33,6 @@ export function FilterBarQueryFilterProvider(getAppState, globalState) {
   queryFilter.getAppFilters = filterManager.getAppFilters.bind(filterManager);
   queryFilter.getGlobalFilters = filterManager.getGlobalFilters.bind(filterManager);
   queryFilter.removeFilter = filterManager.removeFilter.bind(filterManager);
-  queryFilter.invertFilter = filterManager.invertFilter.bind(filterManager);
   queryFilter.addFilters = filterManager.addFilters.bind(filterManager);
   queryFilter.setFilters = filterManager.setFilters.bind(filterManager);
   queryFilter.addFiltersAndChangeTimeFilter = filterManager.addFiltersAndChangeTimeFilter.bind(filterManager);

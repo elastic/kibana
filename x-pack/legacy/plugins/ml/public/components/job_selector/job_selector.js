@@ -72,13 +72,13 @@ const BADGE_LIMIT = 10;
 const DEFAULT_GANTT_BAR_WIDTH = 299; // pixels
 
 export function JobSelector({
-  config,
+  dateFormatTz,
   globalState,
   jobSelectService,
   selectedJobIds,
   selectedGroups,
   singleSelection,
-  timeseriesOnly
+  timeseriesOnly,
 }) {
   const [jobs, setJobs] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -114,8 +114,6 @@ export function JobSelector({
   // Not wrapping it would cause this dependency to change on every render
   const handleResize = useCallback(() => {
     if (jobs.length > 0 && flyoutEl && flyoutEl.current && flyoutEl.current.flyout) {
-      const tzConfig = config.get('dateFormat:tz');
-      const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
       // get all cols in flyout table
       const tableHeaderCols = flyoutEl.current.flyout.querySelectorAll('table thead th');
       // get the width of the last col
@@ -126,7 +124,7 @@ export function JobSelector({
       setGroups(updatedGroups);
       setGanttBarWidth(derivedWidth);
     }
-  }, [config, jobs]);
+  }, [dateFormatTz, jobs]);
 
   useEffect(() => {
     // Ensure ganttBar width gets calculated on resize
@@ -151,8 +149,6 @@ export function JobSelector({
 
   function handleJobSelectionClick() {
     showFlyout();
-    const tzConfig = config.get('dateFormat:tz');
-    const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
 
     ml.jobs.jobsWithTimerange(dateFormatTz)
       .then((resp) => {
@@ -381,6 +377,6 @@ JobSelector.propTypes = {
   globalState: PropTypes.object,
   jobSelectService: PropTypes.object,
   selectedJobIds: PropTypes.array,
-  singleSelection: PropTypes.string,
-  timeseriesOnly: PropTypes.string
+  singleSelection: PropTypes.bool,
+  timeseriesOnly: PropTypes.bool
 };

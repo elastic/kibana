@@ -5,13 +5,14 @@
  */
 
 import { get, uniq } from 'lodash';
-import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
+import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN, ELASTICSEARCH_CUSTOM_ID, APM_CUSTOM_ID } from '../../../../common/constants';
 import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../../telemetry/common/constants';
+import { getLivesNodes } from '../../elasticsearch/nodes/get_nodes/get_live_nodes';
+import { KIBANA_STATS_TYPE } from '../../../../../../../../src/legacy/server/status/constants';
 
 const NUMBER_OF_SECONDS_AGO_TO_LOOK = 30;
-const APM_CUSTOM_ID = 'apm';
 
-const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => {
+const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nodeUuid) => {
   const start = get(req.payload, 'timeRange.min', `now-${NUMBER_OF_SECONDS_AGO_TO_LOOK}s`);
   const end = get(req.payload, 'timeRange.max', 'now');
 
@@ -30,6 +31,20 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
     filters.push({ term: { 'cluster_uuid': clusterUuid } });
   }
 
+  const nodesClause = [];
+  if (nodeUuid) {
+    nodesClause.push({
+      bool: {
+        should: [
+          { term: { 'node_stats.node_id': nodeUuid } },
+          { term: { 'kibana_stats.kibana.uuid': nodeUuid } },
+          { term: { 'beats_stats.beat.uuid': nodeUuid } },
+          { term: { 'logstash_stats.logstash.uuid': nodeUuid } }
+        ]
+      }
+    });
+  }
+
   const params = {
     index: Object.values(indexPatterns),
     size: 0,
@@ -41,6 +56,7 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
       query: {
         bool: {
           filter: filters,
+          must: nodesClause,
         }
       },
       aggs: {
@@ -88,6 +104,11 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
                   terms: {
                     field: 'beats_stats.beat.type'
                   }
+                },
+                cluster_uuid: {
+                  terms: {
+                    field: 'cluster_uuid'
+                  }
                 }
               }
             },
@@ -99,6 +120,11 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
                 by_timestamp: {
                   max: {
                     field: 'timestamp'
+                  }
+                },
+                cluster_uuid: {
+                  terms: {
+                    field: 'cluster_uuid'
                   }
                 }
               }
@@ -223,9 +249,30 @@ function shouldSkipBucket(product, bucket) {
   return false;
 }
 
+async function getLiveKibanaInstance(req) {
+  const { collectorSet } = req.server.usage;
+  const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
+  if (!await kibanaStatsCollector.isReady()) {
+    return null;
+  }
+  return collectorSet.toApiFieldNames(await kibanaStatsCollector.fetch());
+}
+
+async function getLiveElasticsearchClusterUuid(req) {
+  const params = {
+    path: '/_cluster/state/cluster_uuid',
+    method: 'GET',
+  };
+
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
+  const { cluster_uuid: clusterUuid } = await callWithRequest(req, 'transport.request', params);
+  return clusterUuid;
+}
+
 /**
  * This function will scan all monitoring documents within the past 30s (or a custom time range is supported too)
- * and determine which products fall into one of three states:
+ * and determine which products fall into one of four states:
+ * - isNetNewUser: This means we have detected this instance without monitoring and know that monitoring isn't connected to it. This is really only applicable to ES nodes from the same cluster Kibana is talking to.
  * - isPartiallyMigrated: This means we are seeing some monitoring documents from MB and some from internal collection
  * - isFullyMigrated: This means we are only seeing monitoring documents from MB
  * - isInternalCollector: This means we are only seeing monitoring documents from internal collection
@@ -245,8 +292,10 @@ function shouldSkipBucket(product, bucket) {
  * @param {*} req Standard request object. Can contain a timeRange to use for the query
  * @param {*} indexPatterns Map of index patterns to search against (will be all .monitoring-* indices)
  * @param {*} clusterUuid Optional and will be used to filter down the query if used
+ * @param {*} nodeUuid Optional and will be used to filter down the query if used
+ * @param {*} skipLiveData Optional and will not make any live api calls if set to true
  */
-export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
+export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeUuid, skipLiveData) => {
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
 
@@ -262,10 +311,13 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
     recentDocuments,
     detectedProducts
   ] = await Promise.all([
-    await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid),
+    await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid, nodeUuid),
     await detectProducts(req)
   ]);
 
+  const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
+  const liveEsNodes = skipLiveData ? [] : await getLivesNodes(req);
+  const liveKibanaInstance = skipLiveData ? {} : await getLiveKibanaInstance(req);
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
 
   const status = PRODUCTS.reduce((products, product) => {
@@ -284,6 +336,28 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
     const fullyMigratedUuidsMap = {};
     const internalCollectorsUuidsMap = {};
     const partiallyMigratedUuidsMap = {};
+
+    if (product.name === ELASTICSEARCH_CUSTOM_ID && liveEsNodes.length) {
+      productStatus.byUuid = liveEsNodes.reduce((accum, esNode) => ({
+        ...accum,
+        [esNode.id]: {
+          node: esNode,
+          isNetNewUser: true
+        },
+      }), {});
+    }
+
+    if (product.name === KIBANA_SYSTEM_ID && liveKibanaInstance) {
+      const kibanaLiveUuid = get(liveKibanaInstance, 'kibana.uuid');
+      if (kibanaLiveUuid) {
+        productStatus.byUuid = {
+          [kibanaLiveUuid]: {
+            instance: liveKibanaInstance,
+            isNetNewUser: true
+          }
+        };
+      }
+    }
 
     // If there is no data, then they are a net new user
     if (!indexBuckets || indexBuckets.length === 0) {
@@ -307,23 +381,45 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
           if (product.name === KIBANA_SYSTEM_ID && key === kibanaUuid) {
             map[key].isPrimary = true;
           }
+          if (product.name === BEATS_SYSTEM_ID) {
+            map[key].beatType = get(bucket.beat_type, 'buckets[0].key');
+          }
+          if (bucket.cluster_uuid) {
+            map[key].clusterUuid = get(bucket.cluster_uuid, 'buckets[0].key', '') || null;
+          }
         }
       }
       productStatus.totalUniqueInstanceCount = Object.keys(map).length;
       productStatus.totalUniquePartiallyMigratedCount = Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
+        ...productStatus.byUuid,
         ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({
           ...accum,
-          [uuid]: { isInternalCollector: true, ...internalCollectorsUuidsMap[uuid] }
+          [uuid]: {
+            ...internalCollectorsUuidsMap[uuid],
+            ...productStatus.byUuid[uuid],
+            isInternalCollector: true,
+            isNetNewUser: false,
+          }
         }), {}),
         ...Object.keys(partiallyMigratedUuidsMap).reduce((accum, uuid) => ({
           ...accum,
-          [uuid]: { isPartiallyMigrated: true, ...partiallyMigratedUuidsMap[uuid] }
+          [uuid]: {
+            ...partiallyMigratedUuidsMap[uuid],
+            ...productStatus.byUuid[uuid],
+            isPartiallyMigrated: true,
+            isNetNewUser: false,
+          }
         }), {}),
         ...Object.keys(fullyMigratedUuidsMap).reduce((accum, uuid) => ({
           ...accum,
-          [uuid]: { isFullyMigrated: true, ...fullyMigratedUuidsMap[uuid] }
+          [uuid]: {
+            ...fullyMigratedUuidsMap[uuid],
+            ...productStatus.byUuid[uuid],
+            isFullyMigrated: true,
+            isNetNewUser: false,
+          }
         }), {}),
       };
     }
@@ -352,6 +448,12 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
               if (product.name === KIBANA_SYSTEM_ID && key === kibanaUuid) {
                 map[key].isPrimary = true;
               }
+              if (product.name === BEATS_SYSTEM_ID) {
+                map[key].beatType = get(bucket.beat_type, 'buckets[0].key');
+              }
+              if (bucket.cluster_uuid) {
+                map[key].clusterUuid = get(bucket.cluster_uuid, 'buckets[0].key', '') || null;
+              }
             }
           }
           if (!isFullyMigrated) {
@@ -368,26 +470,33 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
       productStatus.totalUniquePartiallyMigratedCount = Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
+        ...productStatus.byUuid,
         ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({
           ...accum,
           [uuid]: {
+            ...internalCollectorsUuidsMap[uuid],
+            ...productStatus.byUuid[uuid],
             isInternalCollector: true,
-            ...internalCollectorsUuidsMap[uuid]
+            isNetNewUser: false,
           }
         }), {}),
         ...Object.keys(partiallyMigratedUuidsMap).reduce((accum, uuid) => ({
           ...accum,
           [uuid]: {
+            ...partiallyMigratedUuidsMap[uuid],
+            ...productStatus.byUuid[uuid],
             isPartiallyMigrated: true,
             lastInternallyCollectedTimestamp: internalTimestamps[0],
-            ...partiallyMigratedUuidsMap[uuid]
+            isNetNewUser: false,
           }
         }), {}),
         ...Object.keys(fullyMigratedUuidsMap).reduce((accum, uuid) => ({
           ...accum,
           [uuid]: {
+            ...fullyMigratedUuidsMap[uuid],
+            ...productStatus.byUuid[uuid],
             isFullyMigrated: true,
-            ...fullyMigratedUuidsMap[uuid]
+            isNetNewUser: false
           }
         }), {}),
       };
@@ -401,6 +510,8 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
 
   status._meta = {
     secondsAgo: NUMBER_OF_SECONDS_AGO_TO_LOOK,
+    clusterUuid: liveClusterUuid,
+    isOnCloud: get(req.server.plugins, 'cloud.config.isCloudEnabled', false)
   };
 
   return status;

@@ -16,7 +16,8 @@ const layerMock = {
   getIconAndTooltipContent: (zoom) => {
     return {
       icon: (<span>mockIcon</span>),
-      tooltipContent: `simulated tooltip content at zoom: ${zoom}`
+      tooltipContent: `simulated tooltip content at zoom: ${zoom}`,
+      areResultsTrimmed: false
     };
   }
 };
