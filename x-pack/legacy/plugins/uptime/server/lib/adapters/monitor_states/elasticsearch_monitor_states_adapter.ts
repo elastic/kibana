@@ -204,7 +204,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     filters?: string | null
   ) {
     const monitors: any[] = [];
-    let searchAfter = pagination.cursorKey;
+    let searchAfter = pagination.cursorKey || null;
     do {
       const queryRes: LegacyMonitorStatesQueryResult = await this.enrichAndCollapsePage(
         request,
@@ -216,8 +216,10 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       );
       const { result, statusFilter } = queryRes;
       searchAfter = queryRes.searchAfter;
-
       monitors.push(...this.getMonitorBuckets(result, statusFilter));
+      if (get<number>(result, 'hits.total.value', 0) === 0) {
+        break;
+      }
     } while (searchAfter !== null && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
 
     return monitors;
