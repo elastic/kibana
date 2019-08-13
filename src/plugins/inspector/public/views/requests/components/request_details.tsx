@@ -39,21 +39,21 @@ export interface DetailViewData {
 const DETAILS: DetailViewData[] = [
   {
     name: 'Statistics',
-    label: i18n.translate('inspectorViews.requests.statisticsTabLabel', {
+    label: i18n.translate('inspector.requests.statisticsTabLabel', {
       defaultMessage: 'Statistics',
     }),
     component: RequestDetailsStats,
   },
   {
     name: 'Request',
-    label: i18n.translate('inspectorViews.requests.requestTabLabel', {
+    label: i18n.translate('inspector.requests.requestTabLabel', {
       defaultMessage: 'Request',
     }),
     component: RequestDetailsRequest,
   },
   {
     name: 'Response',
-    label: i18n.translate('inspectorViews.requests.responseTabLabel', {
+    label: i18n.translate('inspector.requests.responseTabLabel', {
       defaultMessage: 'Response',
     }),
     component: RequestDetailsResponse,

@@ -90,13 +90,13 @@ export class RequestSelector extends Component<RequestSelectorProps, RequestSele
           {request.name}
 
           {hasFailed && (
-            <FormattedMessage id="inspectorViews.requests.failedLabel" defaultMessage=" (failed)" />
+            <FormattedMessage id="inspector.requests.failedLabel" defaultMessage=" (failed)" />
           )}
 
           {inProgress && (
             <EuiLoadingSpinner
               size="s"
-              aria-label={i18n.translate('inspectorViews.requests.requestInProgressAriaLabel', {
+              aria-label={i18n.translate('inspector.requests.requestInProgressAriaLabel', {
                 defaultMessage: 'Request in progress',
               })}
               className="insRequestSelector__menuSpinner"
@@ -145,7 +145,7 @@ export class RequestSelector extends Component<RequestSelectorProps, RequestSele
       <EuiFlexGroup alignItems="center" gutterSize="xs">
         <EuiFlexItem grow={false}>
           <strong>
-            <FormattedMessage id="inspectorViews.requests.requestLabel" defaultMessage="Request:" />
+            <FormattedMessage id="inspector.requests.requestLabel" defaultMessage="Request:" />
           </strong>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
@@ -166,19 +166,19 @@ export class RequestSelector extends Component<RequestSelectorProps, RequestSele
               title={
                 selectedRequest.status === RequestStatus.OK ? (
                   <FormattedMessage
-                    id="inspectorViews.requests.requestSucceededTooltipTitle"
+                    id="inspector.requests.requestSucceededTooltipTitle"
                     defaultMessage="Request succeeded"
                   />
                 ) : (
                   <FormattedMessage
-                    id="inspectorViews.requests.requestFailedTooltipTitle"
+                    id="inspector.requests.requestFailedTooltipTitle"
                     defaultMessage="Request failed"
                   />
                 )
               }
               content={
                 <FormattedMessage
-                  id="inspectorViews.requests.requestTooltipDescription"
+                  id="inspector.requests.requestTooltipDescription"
                   defaultMessage="The total time the request took."
                 />
               }
@@ -188,7 +188,7 @@ export class RequestSelector extends Component<RequestSelectorProps, RequestSele
                 iconType={selectedRequest.status === RequestStatus.OK ? 'check' : 'cross'}
               >
                 <FormattedMessage
-                  id="inspectorViews.requests.requestTimeLabel"
+                  id="inspector.requests.requestTimeLabel"
                   defaultMessage="{requestTime}ms"
                   values={{ requestTime: selectedRequest.time }}
                 />
@@ -198,7 +198,7 @@ export class RequestSelector extends Component<RequestSelectorProps, RequestSele
           {selectedRequest.status === RequestStatus.PENDING && (
             <EuiLoadingSpinner
               size="m"
-              aria-label={i18n.translate('inspectorViews.requests.requestInProgressAriaLabel', {
+              aria-label={i18n.translate('inspector.requests.requestInProgressAriaLabel', {
                 defaultMessage: 'Request in progress',
               })}
             />

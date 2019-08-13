@@ -78,7 +78,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
         title={
           <h2>
             <FormattedMessage
-              id="inspectorViews.requests.noRequestsLoggedTitle"
+              id="inspector.requests.noRequestsLoggedTitle"
               defaultMessage="No requests logged"
             />
           </h2>
@@ -87,13 +87,13 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
           <React.Fragment>
             <p>
               <FormattedMessage
-                id="inspectorViews.requests.noRequestsLoggedDescription.elementHasNotLoggedAnyRequestsText"
+                id="inspector.requests.noRequestsLoggedDescription.elementHasNotLoggedAnyRequestsText"
                 defaultMessage="The element hasn't logged any requests (yet)."
               />
             </p>
             <p>
               <FormattedMessage
-                id="inspectorViews.requests.noRequestsLoggedDescription.whatDoesItUsuallyMeanText"
+                id="inspector.requests.noRequestsLoggedDescription.whatDoesItUsuallyMeanText"
                 defaultMessage="This usually means that there was no need to fetch any data or
                   that the element has not yet started fetching data."
               />
@@ -118,7 +118,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
         <EuiText size="xs">
           <p role="status" aria-live="polite" aria-atomic="true">
             <FormattedMessage
-              id="inspectorViews.requests.requestWasMadeDescription"
+              id="inspector.requests.requestWasMadeDescription"
               defaultMessage="{requestsCount, plural, one {# request was} other {# requests were} } made{failedRequests}"
               values={{
                 requestsCount: this.state.requests.length,
@@ -126,7 +126,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
                   failedCount > 0 ? (
                     <EuiTextColor color="danger">
                       <FormattedMessage
-                        id="inspectorViews.requests.requestWasMadeDescription.requestHadFailureText"
+                        id="inspector.requests.requestWasMadeDescription.requestHadFailureText"
                         defaultMessage=", {failedCount} had a failure"
                         values={{ failedCount }}
                       />

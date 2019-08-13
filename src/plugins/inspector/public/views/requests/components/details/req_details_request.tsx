@@ -28,7 +28,7 @@ export class RequestDetailsRequest extends Component<RequestDetailsProps> {
     request: PropTypes.object.isRequired,
   };
 
-  static shouldShow = (request: Request) => Boolean(request.json);
+  static shouldShow = (request: Request) => Boolean(request && request.json);
 
   render() {
     if (!this.props.request) {

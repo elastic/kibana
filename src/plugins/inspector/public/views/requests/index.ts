@@ -22,11 +22,11 @@ import { RequestsViewComponent } from './components/requests_view';
 import { Adapters, InspectorViewDescription } from '../../types';
 
 export const RequestsView = {
-  title: i18n.translate('inspectorViews.requests.requestsTitle', {
+  title: i18n.translate('inspector.requests.requestsTitle', {
     defaultMessage: 'Requests',
   }),
   order: 20,
-  help: i18n.translate('inspectorViews.requests.requestsDescriptionTooltip', {
+  help: i18n.translate('inspector.requests.requestsDescriptionTooltip', {
     defaultMessage: 'View the requests that collected the data',
   }),
   shouldShow(adapters: Adapters) {

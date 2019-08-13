@@ -31,7 +31,7 @@ export class RequestDetailsResponse extends Component<RequestDetailsProps> {
   static shouldShow = (request: Request) =>
     Boolean(RequestDetailsResponse.getResponseJson(request));
 
-  static getResponseJson = (request: Request) => request.response!.json || null;
+  static getResponseJson = (request: Request) => (request.response ? request.response.json : null);
 
   render() {
     const responseJSON = RequestDetailsResponse.getResponseJson(this.props.request);

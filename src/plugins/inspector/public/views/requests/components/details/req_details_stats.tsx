@@ -51,7 +51,7 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
           <span className="insRequestDetailsStats__icon">
             {stat.description ? (
               <EuiIconTip
-                aria-label={i18n.translate('inspectorViews.requests.descriptionRowIconAriaLabel', {
+                aria-label={i18n.translate('inspector.requests.descriptionRowIconAriaLabel', {
                   defaultMessage: 'Description',
                 })}
                 type="questionInCircle"
