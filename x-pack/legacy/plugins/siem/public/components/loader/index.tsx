@@ -36,6 +36,8 @@ const Aside = styled.aside<{ overlay?: boolean; overlayBackground?: string }>`
   `}
 `;
 
+Aside.displayName = 'Aside';
+
 const FlexGroup = styled(EuiFlexGroup).attrs({
   alignItems: 'center',
   direction: 'column',
@@ -48,6 +50,8 @@ const FlexGroup = styled(EuiFlexGroup).attrs({
     height: 100%;
   `}
 `;
+
+FlexGroup.displayName = 'FlexGroup';
 
 export interface LoaderProps {
   overlay?: boolean;
@@ -72,3 +76,5 @@ export const Loader = pure<LoaderProps>(({ children, overlay, overlayBackground,
     </FlexGroup>
   </Aside>
 ));
+
+Loader.displayName = 'Loader';

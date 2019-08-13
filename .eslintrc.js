@@ -40,6 +40,7 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
+        'packages/kbn-utility-types/**/*',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'packages/kbn-config-schema/**/*',
         'packages/kbn-pm/**/*',
@@ -186,8 +187,10 @@ module.exports = {
         'x-pack/legacy/plugins/apm/**/*.js',
         'test/*/config.ts',
         'test/visual_regression/tests/**/*',
-        'x-pack/test/visual_regression/tests/**/*',
-        'x-pack/test/*/config.ts',
+        'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
+        'x-pack/test/*/*config.*ts',
+        'x-pack/test/saved_object_api_integration/*/apis/**/*',
+        'x-pack/test/ui_capabilities/*/tests/**/*',
       ],
       rules: {
         'import/no-default-export': 'off',

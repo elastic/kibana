@@ -41,3 +41,5 @@ interface Props {
 export const SortIndicator = pure<Props>(({ sortDirection }) => (
   <EuiIcon data-test-subj="sortIndicator" type={getDirection(sortDirection) || 'empty'} />
 ));
+
+SortIndicator.displayName = 'SortIndicator';
