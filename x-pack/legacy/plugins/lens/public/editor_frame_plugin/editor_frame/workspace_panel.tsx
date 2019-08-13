@@ -12,7 +12,7 @@ import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins
 import { Action } from './state_management';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
 import { DragDrop, DragContext } from '../../drag_drop';
-import { getSuggestions, toSwitchAction } from './suggestion_helpers';
+import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 
@@ -54,32 +54,29 @@ export function InnerWorkspacePanel({
     if (!dragDropContext.dragging || !activeDatasourceId) {
       return;
     }
-    const datasourceSuggestions = datasourceMap[
-      activeDatasourceId
-    ].getDatasourceSuggestionsForField(
-      datasourceStates[activeDatasourceId].state,
-      dragDropContext.dragging
-    );
 
     const hasData = Object.values(framePublicAPI.datasourceLayers).some(
       datasource => datasource.getTableSpec().length > 0
     );
 
-    const suggestions = getSuggestions(
-      datasourceSuggestions,
-      hasData && activeVisualizationId
-        ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
-        : visualizationMap,
+    const suggestions = getSuggestions({
+      datasourceMap: { [activeDatasourceId]: datasourceMap[activeDatasourceId] },
+      datasourceStates,
+      visualizationMap:
+        hasData && activeVisualizationId
+          ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
+          : visualizationMap,
       activeVisualizationId,
-      visualizationState
-    );
+      visualizationState,
+      field: dragDropContext.dragging,
+    });
 
     return suggestions[0];
   }, [dragDropContext.dragging]);
 
   function onDrop() {
     if (suggestionForDraggedField) {
-      dispatch(toSwitchAction(suggestionForDraggedField));
+      switchToSuggestion(framePublicAPI, dispatch, suggestionForDraggedField);
     }
   }
 

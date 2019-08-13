@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Request, Server, ResponseToolkit } from 'hapi';
+import { Request, Server } from 'hapi';
 
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
@@ -25,7 +25,8 @@ import { createServer, getListenerOptions, getServerOptions } from './http_tools
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
-import { KibanaRequest, LegacyRequest, ResponseHeaders, Router } from './router';
+
+import { KibanaRequest, LegacyRequest, ResponseHeaders, IRouter } from './router';
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
@@ -44,10 +45,9 @@ import { BasePath } from './base_path_service';
  *
  * @example
  * To handle an incoming request in your plugin you should:
- * - Create a `Router` instance. Use `plugin-id` as a prefix path segment for your routes.
+ * - Create a `Router` instance. Router is already configured to use `plugin-id` to prefix path segment for your routes.
  * ```ts
- * import { Router } from 'src/core/server';
- * const router = new Router('my-app');
+ * const router = httpSetup.createRouter();
  * ```
  *
  * - Use `@kbn/config-schema` package to create a schema to validate the request `params`, `query`, and `body`. Every incoming request will be validated against the created schema. If validation failed, the request is rejected with `400` status and `Bad request` error without calling the route's handler.
@@ -82,8 +82,7 @@ import { BasePath } from './base_path_service';
  * - Register route handler for GET request to 'my-app/path/{id}' path
  * ```ts
  * import { schema, TypeOf } from '@kbn/config-schema';
- * import { Router } from 'src/core/server';
- * const router = new Router('my-app');
+ * const router = httpSetup.createRouter();
  *
  * const validate = {
  *   params: schema.object({
@@ -95,7 +94,7 @@ import { BasePath } from './base_path_service';
  *   path: 'path/{id}',
  *   validate
  * },
- * async (request, response) => {
+ * async (context, request, response) => {
  *   const data = await findObject(request.params.id);
  *   if (!data) return response.notFound();
  *   return response.ok(data, {
@@ -111,9 +110,9 @@ export interface HttpServerSetup {
   server: Server;
   /**
    * Add all the routes registered with `router` to HTTP server request listeners.
-   * @param router {@link Router} - a router with registered route handlers.
+   * @param router {@link IRouter} - a router with registered route handlers.
    */
-  registerRouter: (router: Router) => void;
+  registerRouter: (router: IRouter) => void;
   /**
    * Creates cookie based session storage factory {@link SessionStorageFactory}
    * @param cookieOptions {@link SessionStorageCookieOptions} - options to configure created cookie session storage.
@@ -179,7 +178,7 @@ export interface HttpServerSetup {
 export class HttpServer {
   private server?: Server;
   private config?: HttpConfig;
-  private registeredRouters = new Set<Router>();
+  private registeredRouters = new Set<IRouter>();
   private authRegistered = false;
   private cookieSessionStorageCreated = false;
 
@@ -199,12 +198,11 @@ export class HttpServer {
     return this.server !== undefined && this.server.listener.listening;
   }
 
-  private registerRouter(router: Router) {
+  private registerRouter(router: IRouter) {
     if (this.isListening()) {
       throw new Error('Routers can be registered only when HTTP server is stopped.');
     }
 
-    this.log.debug(`registering route handler for [${router.path}]`);
     this.registeredRouters.add(router);
   }
 
@@ -246,12 +244,12 @@ export class HttpServer {
 
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
+        this.log.debug(`registering route handler for [${route.path}]`);
         const { authRequired = true, tags } = route.options;
         this.server.route({
-          handler: (req: Request, responseToolkit: ResponseToolkit) =>
-            route.handler(req, responseToolkit, this.log),
+          handler: route.handler,
           method: route.method,
-          path: this.getRouteFullPath(router.path, route.path),
+          path: route.path,
           options: {
             auth: authRequired ? undefined : false,
             tags: tags ? Array.from(tags) : undefined,
@@ -261,9 +259,12 @@ export class HttpServer {
     }
 
     await this.server.start();
-    const serverPath = this.config!.rewriteBasePath || this.config!.basePath || '';
-    this.log.info('http server running');
-    this.log.debug(`http server listening on ${this.server.info.uri}${serverPath}`);
+    const serverPath =
+      this.config && this.config.rewriteBasePath && this.config.basePath !== undefined
+        ? this.config.basePath
+        : '';
+
+    this.log.info(`http server running at ${this.server.info.uri}${serverPath}`);
   }
 
   public async stop() {
@@ -290,13 +291,6 @@ export class HttpServer {
       }
       return response.notFound(new Error('not found'));
     });
-  }
-
-  private getRouteFullPath(routerPath: string, routePath: string) {
-    // If router's path ends with slash and route's path starts with slash,
-    // we should omit one of them to have a valid concatenated path.
-    const routePathStartIndex = routerPath.endsWith('/') && routePath.startsWith('/') ? 1 : 0;
-    return `${routerPath}${routePath.slice(routePathStartIndex)}`;
   }
 
   private registerOnPostAuth(fn: OnPostAuthHandler) {

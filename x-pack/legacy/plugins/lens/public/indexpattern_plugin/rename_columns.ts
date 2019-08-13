@@ -5,8 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
-import { KibanaDatatable } from '../types';
+import { ExpressionFunction, KibanaDatatable } from 'src/legacy/core_plugins/interpreter/types';
 
 interface RemapArgs {
   idMap: string;

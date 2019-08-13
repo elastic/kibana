@@ -103,7 +103,7 @@ export function createMockDependencies() {
       },
     },
     embeddables: {
-      addEmbeddableFactory: jest.fn(),
+      registerEmbeddableFactory: jest.fn(),
     },
     chrome: {
       getSavedObjectsClient: () => {},

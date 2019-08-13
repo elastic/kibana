@@ -11,11 +11,17 @@ import { EditorFrameInstance } from '../types';
 import { Chrome } from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { Storage } from 'ui/storage';
-import { QueryBar as QueryBarType } from 'src/legacy/core_plugins/data/public/query';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
+import { QueryBar } from '../../../../../../src/legacy/core_plugins/data/public/query';
 
+jest.mock('../../../../../../src/legacy/core_plugins/data/public/query', () => ({
+  QueryBar: jest.fn(() => null),
+}));
+
+jest.mock('ui/new_platform');
 jest.mock('ui/notify');
+jest.mock('ui/chrome');
 jest.mock('../persistence');
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
@@ -33,7 +39,6 @@ function makeDefaultArgs(): jest.Mocked<{
   store: Storage;
   docId?: string;
   docStorage: SavedObjectStore;
-  QueryBar: typeof QueryBarType;
   redirectTo: (id?: string) => void;
 }> {
   return ({
@@ -46,6 +51,8 @@ function makeDefaultArgs(): jest.Mocked<{
               return { from: 'now-7d', to: 'now' };
             } else if (type === 'search:queryLanguage') {
               return 'kuery';
+            } else {
+              return [];
             }
           }),
         };
@@ -66,7 +73,6 @@ function makeDefaultArgs(): jest.Mocked<{
     store: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
-    QueryBar: typeof QueryBarType;
     redirectTo: (id?: string) => void;
   }>;
 }
@@ -134,7 +140,7 @@ describe('Lens App', () => {
       await waitForPromises();
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
-      expect(args.QueryBar).toHaveBeenCalledWith(
+      expect(QueryBar).toHaveBeenCalledWith(
         expect.objectContaining({
           dateRangeFrom: 'now-7d',
           dateRangeTo: 'now',
@@ -303,7 +309,7 @@ describe('Lens App', () => {
 
       mount(<App {...args} />);
 
-      expect(args.QueryBar).toHaveBeenCalledWith(
+      expect(QueryBar).toHaveBeenCalledWith(
         expect.objectContaining({
           dateRangeFrom: 'now-7d',
           dateRangeTo: 'now',
@@ -326,9 +332,7 @@ describe('Lens App', () => {
 
       const instance = mount(<App {...args} />);
 
-      expect(args.QueryBar).toHaveBeenCalledTimes(1);
-
-      expect(args.QueryBar).toHaveBeenCalledWith(
+      expect(QueryBar).toHaveBeenCalledWith(
         expect.objectContaining({
           indexPatterns: [],
         }),
@@ -343,8 +347,7 @@ describe('Lens App', () => {
 
       instance.update();
 
-      expect(args.QueryBar).toHaveBeenCalledTimes(2);
-      expect(args.QueryBar).toHaveBeenCalledWith(
+      expect(QueryBar).toHaveBeenCalledWith(
         expect.objectContaining({
           indexPatterns: ['newIndex'],
         }),
@@ -368,7 +371,7 @@ describe('Lens App', () => {
 
       instance.update();
 
-      expect(args.QueryBar).toHaveBeenCalledWith(
+      expect(QueryBar).toHaveBeenCalledWith(
         expect.objectContaining({
           dateRangeFrom: 'now-14d',
           dateRangeTo: 'now-7d',

@@ -298,17 +298,70 @@ function createNewLayerWithMetricAggregation(
 export function getDatasourceSuggestionsFromCurrentState(
   state: IndexPatternPrivateState
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
-  const layers = Object.entries(state.layers);
+  return _.flatten(
+    Object.entries(state.layers || {})
+      .filter(([_id, layer]) => layer.columnOrder.length)
+      .map(([layerId, layer], index) => {
+        if (layer.columnOrder.length === 0) {
+          return [];
+        }
 
-  return layers
-    .map(([layerId, layer], index) => {
-      if (layer.columnOrder.length === 0) {
-        return;
-      }
+        const onlyMetric = layer.columnOrder.every(columnId => !layer.columns[columnId].isBucketed);
+        const onlyBucket = layer.columnOrder.every(columnId => layer.columns[columnId].isBucketed);
+        if (onlyMetric || onlyBucket) {
+          // intermediary chart, don't try to suggest reduced versions
+          return buildSuggestion({
+            state,
+            layerId,
+            isMultiRow: false,
+            datasourceSuggestionId: index,
+          });
+        }
 
-      return buildSuggestion({ state, layerId, isMultiRow: true, datasourceSuggestionId: index });
+        return createSimplifiedTableSuggestions(state, layerId);
+      })
+  ).map(
+    (suggestion, index): DatasourceSuggestion<IndexPatternPrivateState> => ({
+      ...suggestion,
+      table: { ...suggestion.table, datasourceSuggestionId: index },
     })
-    .reduce((prev, current) => (current ? prev.concat([current]) : prev), [] as Array<
-      DatasourceSuggestion<IndexPatternPrivateState>
-    >);
+  );
+}
+
+function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layerId: string) {
+  const layer = state.layers[layerId];
+
+  const availableBucketedColumns = layer.columnOrder.filter(
+    columnId => layer.columns[columnId].isBucketed
+  );
+  const availableMetricColumns = layer.columnOrder.filter(
+    columnId => !layer.columns[columnId].isBucketed
+  );
+
+  return _.flatten(
+    availableBucketedColumns.map((_col, index) => {
+      const bucketedColumns = availableBucketedColumns.slice(0, index + 1);
+      const allMetricsSuggestion = buildLayerByColumnOrder(layer, [
+        ...bucketedColumns,
+        ...availableMetricColumns,
+      ]);
+
+      if (availableMetricColumns.length > 1) {
+        return [
+          allMetricsSuggestion,
+          buildLayerByColumnOrder(layer, [...bucketedColumns, availableMetricColumns[0]]),
+        ];
+      } else {
+        return allMetricsSuggestion;
+      }
+    })
+  ).map(updatedLayer => buildSuggestion({ state, layerId, isMultiRow: true, updatedLayer }));
+}
+
+function buildLayerByColumnOrder(layer: IndexPatternLayer, columnOrder: string[]) {
+  return {
+    ...layer,
+    columns: _.pick(layer.columns, columnOrder),
+    columnOrder,
+  };
 }

@@ -17,6 +17,7 @@ import {
   DatasourceMock,
 } from '../mocks';
 import { ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
+import { DragDrop } from '../../drag_drop';
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
 
 // calling this function will wait for all pending Promises from mock
@@ -902,6 +903,17 @@ describe('editor_frame', () => {
 
     beforeEach(async () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
+      mockDatasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+        {
+          state: {},
+          table: {
+            columns: [],
+            datasourceSuggestionId: 0,
+            isMultiRow: true,
+            layerId: 'first',
+          },
+        },
+      ]);
 
       instance = mount(
         <EditorFrame
@@ -1060,7 +1072,7 @@ describe('editor_frame', () => {
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
     });
 
-    it('should display suggestions in descending order', async () => {
+    it('should display top 3 suggestions in descending order', async () => {
       const instance = mount(
         <EditorFrame
           {...getDefaultProps()}
@@ -1069,14 +1081,14 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 1,
+                  datasourceSuggestionId: 0,
                   score: 0.5,
                   state: {},
                   title: 'Suggestion2',
                   previewIcon: 'empty',
                 },
                 {
-                  datasourceSuggestionId: 1,
+                  datasourceSuggestionId: 0,
                   score: 0.8,
                   state: {},
                   title: 'Suggestion1',
@@ -1088,14 +1100,14 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 1,
+                  datasourceSuggestionId: 0,
                   score: 0.4,
                   state: {},
                   title: 'Suggestion4',
                   previewIcon: 'empty',
                 },
                 {
-                  datasourceSuggestionId: 1,
+                  datasourceSuggestionId: 0,
                   score: 0.45,
                   state: {},
                   title: 'Suggestion3',
@@ -1125,7 +1137,7 @@ describe('editor_frame', () => {
           .find('[data-test-subj="lnsSuggestion"]')
           .find(EuiPanel)
           .map(el => el.parents(EuiToolTip).prop('content'))
-      ).toEqual(['Suggestion1', 'Suggestion2', 'Suggestion3', 'Suggestion4']);
+      ).toEqual(['Suggestion1', 'Suggestion2', 'Suggestion3']);
     });
 
     it('should switch to suggested visualization', async () => {
@@ -1139,7 +1151,7 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 1,
+                  datasourceSuggestionId: 0,
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion1',
@@ -1198,14 +1210,14 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 1,
+                  datasourceSuggestionId: 0,
                   score: 0.2,
                   state: {},
                   title: 'Suggestion1',
                   previewIcon: 'empty',
                 },
                 {
-                  datasourceSuggestionId: 1,
+                  datasourceSuggestionId: 0,
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion2',
@@ -1255,14 +1267,14 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 1,
+                  datasourceSuggestionId: 0,
                   score: 0.2,
                   state: {},
                   title: 'Suggestion1',
                   previewIcon: 'empty',
                 },
                 {
-                  datasourceSuggestionId: 1,
+                  datasourceSuggestionId: 0,
                   score: 0.6,
                   state: {},
                   title: 'Suggestion2',
@@ -1274,7 +1286,7 @@ describe('editor_frame', () => {
               ...mockVisualization2,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 1,
+                  datasourceSuggestionId: 0,
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion3',
@@ -1307,7 +1319,10 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find('[data-test-subj="lnsDragDrop"]').simulate('drop');
+        instance.find(DragDrop).prop('onDrop')!({
+          indexPatternId: '1',
+          field: {},
+        });
       });
 
       expect(mockVisualization2.renderConfigPanel).toHaveBeenCalledWith(

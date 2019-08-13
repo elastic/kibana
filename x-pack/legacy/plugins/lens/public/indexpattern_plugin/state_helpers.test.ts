@@ -21,6 +21,7 @@ import {
 } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 
+jest.mock('ui/new_platform');
 jest.mock('./operations');
 
 describe('state_helpers', () => {
