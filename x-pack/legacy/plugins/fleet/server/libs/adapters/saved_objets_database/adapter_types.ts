@@ -13,12 +13,10 @@ import {
   SavedObjectsBulkResponse,
   SavedObject,
   SavedObjectsUpdateOptions,
-} from 'src/core/server';
-import {
   SavedObjectsCreateOptions,
   SavedObjectsBulkGetObject,
   SavedObjectsUpdateResponse,
-} from 'target/types/server';
+} from 'src/core/server';
 
 export interface SODatabaseAdapter {
   create<T extends SavedObjectAttributes = any>(

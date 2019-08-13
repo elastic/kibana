@@ -14,12 +14,10 @@ import {
   SavedObjectsBulkResponse,
   SavedObject,
   SavedObjectsUpdateOptions,
-} from 'src/core/server';
-import {
   SavedObjectsCreateOptions,
   SavedObjectsBulkGetObject,
   SavedObjectsUpdateResponse,
-} from 'target/types/server';
+} from 'src/core/server';
 import { SODatabaseAdapter as SODatabaseAdapterType } from './adapter_types';
 import { SODatabaseAdapter } from './default';
 

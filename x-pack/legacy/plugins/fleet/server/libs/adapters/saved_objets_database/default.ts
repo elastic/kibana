@@ -15,13 +15,11 @@ import {
   SavedObjectsBulkResponse,
   SavedObject,
   SavedObjectsUpdateOptions,
-} from 'src/core/server';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
-import {
   SavedObjectsCreateOptions,
   SavedObjectsBulkGetObject,
   SavedObjectsUpdateResponse,
-} from 'target/types/server';
+} from 'src/core/server';
+import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { SODatabaseAdapter as SODatabaseAdapterType } from './adapter_types';
 
 export class SODatabaseAdapter implements SODatabaseAdapterType {
