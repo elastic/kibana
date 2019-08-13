@@ -39,19 +39,18 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
     Query: {
       async getMonitorStates(
         resolver,
-        { dateRangeStart, dateRangeEnd, filters, pagination},
+        { dateRangeStart, dateRangeEnd, filters, pagination },
         { req }
       ): Promise<MonitorSummaryResult> {
-        const [
-          // TODO: rely on new summaries adapter function once continuous data frame is available
-          // summaries,
-          totalSummaryCount,
-          legacySummaries,
-        ] = await Promise.all([
-          // TODO: rely on new summaries adapter function once continuous data frame is available
-          // libs.monitorStates.getMonitorStates(req, pageIndex, pageSize, sortField, sortDirection),
+        const [totalSummaryCount, legacySummaries] = await Promise.all([
           libs.pings.getDocCount(req),
-          libs.monitorStates.getMonitorStates(req, dateRangeStart, dateRangeEnd, pagination || undefined, filters),
+          libs.monitorStates.getMonitorStates(
+            req,
+            dateRangeStart,
+            dateRangeEnd,
+            pagination || undefined,
+            filters
+          ),
         ]);
         return {
           summaries: legacySummaries.summaries,
