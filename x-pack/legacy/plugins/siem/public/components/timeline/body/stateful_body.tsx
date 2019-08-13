@@ -39,6 +39,7 @@ interface OwnProps {
   isLoading: boolean;
   height: number;
   sort: Sort;
+  toggleColumn: (column: ColumnHeader) => void;
   width: number;
 }
 
@@ -96,6 +97,7 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
       pinnedEventIds,
       range,
       sort,
+      toggleColumn,
       width,
     } = this.props;
 
@@ -122,6 +124,7 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
         range={range!}
         rowRenderers={rowRenderers}
         sort={sort}
+        toggleColumn={toggleColumn}
         updateNote={this.onUpdateNote}
         width={width}
       />
