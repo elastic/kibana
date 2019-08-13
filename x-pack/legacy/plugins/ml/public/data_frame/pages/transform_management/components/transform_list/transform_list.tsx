@@ -8,7 +8,15 @@ import React, { Fragment, SFC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiBadge, EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, SortDirection } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiPopover,
+  SortDirection,
+} from '@elastic/eui';
 
 import {
   DataFrameTransformId,
@@ -66,6 +74,8 @@ export const DataFrameTransformList: SFC = () => {
   const [transforms, setTransforms] = useState<DataFrameTransformListRow[]>([]);
   const [filteredTransforms, setFilteredTransforms] = useState<DataFrameTransformListRow[]>([]);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<DataFrameTransformId[]>([]);
+
+  const [transformSelection, setTransformSelection] = useState<DataFrameTransformListRow[]>([]);
 
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const [searchError, setSearchError] = useState<any>(undefined);
@@ -237,7 +247,33 @@ export const DataFrameTransformList: SFC = () => {
     hidePerPageOptions: false,
   };
 
+  const renderToolsLeft = () => {
+    // const selection = this.state.selection;
+    // if (selection.length === 0) {
+    //   return;
+    // }
+    // const onClick = () => {
+    //   store.deleteUsers(...selection.map(user => user.id));
+    //   this.setState({ selection: [] });
+    // };
+    return (
+      <EuiButtonIcon
+        size="s"
+        iconType="gear"
+        color="text"
+        onClick={() => {}}
+        aria-label={i18n.translate(
+          'xpack.ml.dataframe.multiTransformActionsMenu.managementActionsAriaLabel',
+          {
+            defaultMessage: 'Management actions',
+          }
+        )}
+      />
+    );
+  };
+
   const search = {
+    toolsLeft: renderToolsLeft(),
     onChange: onQueryChange,
     box: {
       incremental: true,
@@ -288,6 +324,10 @@ export const DataFrameTransformList: SFC = () => {
     setSortDirection(direction);
   };
 
+  const selection = {
+    onSelectionChange: (selected: DataFrameTransformListRow[]) => setTransformSelection(selected),
+  };
+
   return (
     <Fragment>
       <ProgressBar isLoading={isLoading} />
@@ -303,6 +343,7 @@ export const DataFrameTransformList: SFC = () => {
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         onChange={onTableChange}
         pagination={pagination}
+        selection={selection}
         sorting={sorting}
         search={search}
         data-test-subj="mlDataFramesTableTransforms"
