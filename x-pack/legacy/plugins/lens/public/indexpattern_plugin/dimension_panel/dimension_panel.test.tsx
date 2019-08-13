@@ -8,22 +8,22 @@ import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox, EuiSideNav, EuiPopover } from '@elastic/eui';
-import { localStorage } from 'ui/storage/storage_service';
 import { IndexPatternPrivateState } from '../indexpattern';
 import { changeColumn } from '../state_helpers';
 import { IndexPatternDimensionPanel, IndexPatternDimensionPanelProps } from './dimension_panel';
 import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
-import { DataPluginDependencies } from '..';
+import { UiSettingsClientContract } from 'src/core/public';
+import { Storage } from 'ui/storage';
 
+jest.mock('ui/new_platform');
 jest.mock('../loader');
 jest.mock('../state_helpers');
 jest.mock('../operations');
 
 // Used by indexpattern plugin, which is a dependency of a dependency
 jest.mock('ui/chrome');
-jest.mock('ui/storage/storage_service');
 // Contains old and new platform data plugins, used for interpreter and filter ratio
 jest.mock('ui/new_platform');
 jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
@@ -113,8 +113,8 @@ describe('IndexPatternDimensionPanel', () => {
       columnId: 'col1',
       layerId: 'first',
       filterOperations: () => true,
-      storage: localStorage,
-      dataPluginDependencies: (undefined as unknown) as DataPluginDependencies,
+      storage: {} as Storage,
+      uiSettings: {} as UiSettingsClientContract,
     };
 
     jest.clearAllMocks();

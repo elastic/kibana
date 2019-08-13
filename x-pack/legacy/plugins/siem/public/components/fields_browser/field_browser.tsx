@@ -25,7 +25,7 @@ import { Header } from './header';
 import { CategoriesPane } from './categories_pane';
 import { FieldsPane } from './fields_pane';
 
-const TOP_OFFSET = 207;
+const TOP_OFFSET = 267;
 
 const FieldsBrowserContainer = styled.div<{
   top: number;
@@ -41,9 +41,13 @@ const FieldsBrowserContainer = styled.div<{
   z-index: 9990;
 `;
 
+FieldsBrowserContainer.displayName = 'FieldsBrowserContainer';
+
 const PanesFlexGroup = styled(EuiFlexGroup)`
   width: ${PANES_FLEX_GROUP_WIDTH}px;
 `;
+
+PanesFlexGroup.displayName = 'PanesFlexGroup';
 
 type Props = Pick<
   FieldBrowserProps,
@@ -144,6 +148,7 @@ export class FieldsBrowser extends React.PureComponent<Props> {
           width={width}
         >
           <Header
+            data-test-subj="header"
             filteredBrowserFields={filteredBrowserFields}
             isSearching={isSearching}
             onOutsideClick={onOutsideClick}

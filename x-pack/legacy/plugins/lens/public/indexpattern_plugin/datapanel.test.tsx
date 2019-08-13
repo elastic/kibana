@@ -7,12 +7,13 @@
 import { shallow } from 'enzyme';
 import React, { ChangeEvent, ReactElement } from 'react';
 import { EuiComboBox, EuiFieldSearch, EuiContextMenuPanel } from '@elastic/eui';
-import { IndexPatternPrivateState } from './indexpattern';
+import { IndexPatternPrivateState, IndexPatternColumn } from './indexpattern';
 import { createMockedDragDropContext } from './mocks';
-import { InnerIndexPatternDataPanel } from './datapanel';
+import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
 import { FieldItem } from './field_item';
 import { act } from 'react-dom/test-utils';
 
+jest.mock('ui/new_platform');
 jest.mock('./loader');
 
 const initialState: IndexPatternPrivateState = {
@@ -203,6 +204,84 @@ describe('IndexPattern Data Panel', () => {
       setShowIndexPatternSwitcher: jest.fn(),
       onChangeIndexPattern: jest.fn(),
     };
+  });
+
+  it('should update index pattern of layer on switch if it is a single empty one', async () => {
+    const setStateSpy = jest.fn();
+    const wrapper = shallow(
+      <IndexPatternDataPanel
+        state={{
+          ...initialState,
+          layers: { first: { indexPatternId: '1', columnOrder: [], columns: {} } },
+        }}
+        setState={setStateSpy}
+        dragDropContext={{ dragging: {}, setDragging: () => {} }}
+      />
+    );
+
+    act(() => {
+      wrapper.find(MemoizedDataPanel).prop('setShowIndexPatternSwitcher')!(true);
+    });
+    wrapper.find(MemoizedDataPanel).prop('onChangeIndexPattern')!('2');
+
+    expect(setStateSpy).toHaveBeenCalledWith({
+      ...initialState,
+      layers: { first: { indexPatternId: '2', columnOrder: [], columns: {} } },
+      currentIndexPatternId: '2',
+    });
+  });
+
+  it('should not update index pattern of layer on switch if there are more than one', async () => {
+    const setStateSpy = jest.fn();
+    const state = {
+      ...initialState,
+      layers: {
+        first: { indexPatternId: '1', columnOrder: [], columns: {} },
+        second: { indexPatternId: '1', columnOrder: [], columns: {} },
+      },
+    };
+    const wrapper = shallow(
+      <IndexPatternDataPanel
+        state={state}
+        setState={setStateSpy}
+        dragDropContext={{ dragging: {}, setDragging: () => {} }}
+      />
+    );
+
+    act(() => {
+      wrapper.find(MemoizedDataPanel).prop('setShowIndexPatternSwitcher')!(true);
+    });
+    wrapper.find(MemoizedDataPanel).prop('onChangeIndexPattern')!('2');
+
+    expect(setStateSpy).toHaveBeenCalledWith({ ...state, currentIndexPatternId: '2' });
+  });
+
+  it('should not update index pattern of layer on switch if there are columns configured', async () => {
+    const setStateSpy = jest.fn();
+    const state = {
+      ...initialState,
+      layers: {
+        first: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: { col1: {} as IndexPatternColumn },
+        },
+      },
+    };
+    const wrapper = shallow(
+      <IndexPatternDataPanel
+        state={state}
+        setState={setStateSpy}
+        dragDropContext={{ dragging: {}, setDragging: () => {} }}
+      />
+    );
+
+    act(() => {
+      wrapper.find(MemoizedDataPanel).prop('setShowIndexPatternSwitcher')!(true);
+    });
+    wrapper.find(MemoizedDataPanel).prop('onChangeIndexPattern')!('2');
+
+    expect(setStateSpy).toHaveBeenCalledWith({ ...state, currentIndexPatternId: '2' });
   });
 
   it('should render a warning if there are no index patterns', () => {

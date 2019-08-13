@@ -10,11 +10,13 @@ import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip, EuiToolTip } from '@elastic/eu
 import { toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import { Action } from './state_management';
-import { Datasource, Visualization } from '../../types';
-import { getSuggestions, toSwitchAction, Suggestion } from './suggestion_helpers';
+import { Datasource, Visualization, FramePublicAPI } from '../../types';
+import { getSuggestions, Suggestion, switchToSuggestion } from './suggestion_helpers';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { prependDatasourceExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
+
+const MAX_SUGGESTIONS_DISPLAYED = 3;
 
 export interface SuggestionPanelProps {
   activeDatasourceId: string | null;
@@ -31,16 +33,19 @@ export interface SuggestionPanelProps {
   visualizationState: unknown;
   dispatch: (action: Action) => void;
   ExpressionRenderer: ExpressionRenderer;
+  frame: FramePublicAPI;
 }
 
 const SuggestionPreview = ({
   suggestion,
   dispatch,
+  frame,
   previewExpression,
   ExpressionRenderer: ExpressionRendererComponent,
 }: {
   suggestion: Suggestion;
   dispatch: (action: Action) => void;
+  frame: FramePublicAPI;
   ExpressionRenderer: ExpressionRenderer;
   previewExpression?: string;
 }) => {
@@ -57,7 +62,7 @@ const SuggestionPreview = ({
         paddingSize="none"
         data-test-subj="lnsSuggestion"
         onClick={() => {
-          dispatch(toSwitchAction(suggestion));
+          switchToSuggestion(frame, dispatch, suggestion);
         }}
       >
         {expressionError ? (
@@ -104,21 +109,20 @@ function InnerSuggestionPanel({
   visualizationMap,
   visualizationState,
   dispatch,
+  frame,
   ExpressionRenderer: ExpressionRendererComponent,
 }: SuggestionPanelProps) {
   if (!activeDatasourceId) {
     return null;
   }
-  const datasourceSuggestions = datasourceMap[
-    activeDatasourceId
-  ].getDatasourceSuggestionsFromCurrentState(datasourceStates[activeDatasourceId].state);
 
-  const suggestions = getSuggestions(
-    datasourceSuggestions,
+  const suggestions = getSuggestions({
+    datasourceMap,
+    datasourceStates,
     visualizationMap,
     activeVisualizationId,
-    visualizationState
-  );
+    visualizationState,
+  }).slice(0, MAX_SUGGESTIONS_DISPLAYED);
 
   if (suggestions.length === 0) {
     return null;
@@ -147,6 +151,7 @@ function InnerSuggestionPanel({
             <SuggestionPreview
               suggestion={suggestion}
               dispatch={dispatch}
+              frame={frame}
               ExpressionRenderer={ExpressionRendererComponent}
               previewExpression={previewExpression ? toExpression(previewExpression) : undefined}
               key={`${suggestion.visualizationId}-${suggestion.title}`}

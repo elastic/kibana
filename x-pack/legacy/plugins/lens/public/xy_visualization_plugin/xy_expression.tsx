@@ -22,6 +22,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, IconType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { RenderFunction } from '../interpreter_types';
@@ -85,7 +86,7 @@ export interface XYChartProps {
   args: XYArgs;
 }
 
-export const xyChartRenderer: RenderFunction<XYChartProps> = {
+export const getXyChartRenderer = (formatFactory: FormatFactory): RenderFunction<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY Chart',
   help: 'X/Y Chart Renderer',
@@ -94,18 +95,24 @@ export const xyChartRenderer: RenderFunction<XYChartProps> = {
   render: async (domNode: Element, config: XYChartProps, _handlers: unknown) => {
     ReactDOM.render(
       <I18nProvider>
-        <XYChart {...config} />
+        <XYChart {...config} formatFactory={formatFactory} />
       </I18nProvider>,
       domNode
     );
   },
-};
+});
 
 function getIconForSeriesType(seriesType: SeriesType): IconType {
   return visualizationTypes.find(c => c.id === seriesType)!.icon || 'empty';
 }
 
-export function XYChart({ data, args }: XYChartProps) {
+export function XYChart({
+  data,
+  args,
+  formatFactory,
+}: XYChartProps & {
+  formatFactory: FormatFactory;
+}) {
   const { legend, layers, isHorizontal } = args;
 
   if (Object.values(data.tables).every(table => table.rows.length === 0)) {
@@ -127,6 +134,23 @@ export function XYChart({ data, args }: XYChartProps) {
     );
   }
 
+  // use formatting hint of first x axis column to format ticks
+  const xAxisColumn = Object.values(data.tables)[0].columns.find(
+    ({ id }) => id === layers[0].xAccessor
+  );
+  const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.formatHint);
+
+  // use default number formatter for y axis and use formatting hint if there is just a single y column
+  let yAxisFormatter = formatFactory({ id: 'number' });
+  if (layers.length === 1 && layers[0].accessors.length === 1) {
+    const firstYAxisColumn = Object.values(data.tables)[0].columns.find(
+      ({ id }) => id === layers[0].accessors[0]
+    );
+    if (firstYAxisColumn && firstYAxisColumn.formatHint) {
+      yAxisFormatter = formatFactory(firstYAxisColumn.formatHint);
+    }
+  }
+
   return (
     <Chart className="lnsChart">
       <Settings
@@ -142,6 +166,7 @@ export function XYChart({ data, args }: XYChartProps) {
         title={args.xTitle}
         showGridLines={false}
         hide={layers[0].hide}
+        tickFormat={d => xAxisFormatter.convert(d)}
       />
 
       <Axis
@@ -150,6 +175,7 @@ export function XYChart({ data, args }: XYChartProps) {
         title={args.yTitle}
         showGridLines={false}
         hide={layers[0].hide}
+        tickFormat={d => yAxisFormatter.convert(d)}
       />
 
       {layers.map(
