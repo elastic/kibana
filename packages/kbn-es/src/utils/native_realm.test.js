@@ -40,7 +40,7 @@ const log = new ToolingLog();
 let nativeRealm;
 
 beforeEach(() => {
-  nativeRealm = new NativeRealm('changeme', '9200', log);
+  nativeRealm = new NativeRealm({ elasticPassword: 'changeme', port: '9200', log });
 });
 
 afterAll(() => {

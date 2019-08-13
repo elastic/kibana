@@ -88,7 +88,7 @@ export class ChromeService {
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
 
-  public constructor({ browserSupportsCsp }: ConstructorParams) {
+  constructor({ browserSupportsCsp }: ConstructorParams) {
     this.browserSupportsCsp = browserSupportsCsp;
   }
 

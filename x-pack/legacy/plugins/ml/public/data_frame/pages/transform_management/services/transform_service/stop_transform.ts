@@ -11,7 +11,7 @@ import { ml } from '../../../../../services/ml_api_service';
 import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
 
 import {
-  DATA_FRAME_TASK_STATE,
+  DATA_FRAME_TRANSFORM_STATE,
   DataFrameTransformListRow,
 } from '../../components/transform_list/common';
 
@@ -19,7 +19,7 @@ export const stopTransform = async (d: DataFrameTransformListRow) => {
   try {
     await ml.dataFrame.stopDataFrameTransform(
       d.config.id,
-      d.state.task_state === DATA_FRAME_TASK_STATE.FAILED,
+      d.stats.state === DATA_FRAME_TRANSFORM_STATE.FAILED,
       true
     );
     toastNotifications.addSuccess(

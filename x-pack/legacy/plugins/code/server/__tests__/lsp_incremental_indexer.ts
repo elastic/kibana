@@ -200,14 +200,14 @@ describe('lsp_incremental_indexer unit tests', () => {
 
     // There are 5 MODIFIED items and 1 ADDED item. Only 1 file is in supported
     // language. Each file with supported language has 1 file + 1 symbol + 1 reference.
-    // Total doc indexed should be 8 * 3 = 15,
+    // Total doc indexed should be 6 * 2 + 4 = 16,
     // which can be fitted into a single batch index.
     assert.strictEqual(bulkSpy.callCount, 2);
     let total = 0;
     for (let i = 0; i < bulkSpy.callCount; i++) {
       total += bulkSpy.getCall(i).args[0].body.length;
     }
-    assert.strictEqual(total, 8 * 2);
+    assert.strictEqual(total, 16);
 
     // @ts-ignore
   }).timeout(20000);

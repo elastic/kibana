@@ -25,7 +25,7 @@ export default function ({ getPageObjects }) {
   describe('visualize listing page', function describeIndexTests() {
     const vizName = 'Visualize Listing Test';
 
-    describe('create and delete', async function () {
+    describe('create and delete', function () {
 
       before(async function () {
         await PageObjects.visualize.gotoVisualizationLandingPage();

@@ -75,6 +75,8 @@ export class VectorIcon extends Component {
       <SymbolIcon
         symbolId={this.props.symbolId}
         fill={style.fill}
+        stroke={style.stroke}
+        strokeWidth={style.strokeWidth}
       />
     );
   }
@@ -87,6 +89,11 @@ function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
 
   if (colorStyleProperty.type === VectorStyle.STYLE_TYPE.STATIC) {
     return colorStyleProperty.options.color;
+  }
+
+  // Do not use dynamic color unless configuration is complete
+  if (!colorStyleProperty.options.field || !colorStyleProperty.options.field.name) {
+    return defaultColor;
   }
 
   // return middle of gradient for dynamic style property

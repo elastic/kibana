@@ -42,7 +42,6 @@ const CourierRequestHandlerProvider = function () {
       inspectorAdapters,
       queryFilter
     }) {
-
       // Create a new search source that inherits the original search source
       // but has the appropriate timeRange applied via a filter.
       // This is a temporary solution until we properly pass down all required

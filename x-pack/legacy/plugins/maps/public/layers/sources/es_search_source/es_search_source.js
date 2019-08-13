@@ -284,7 +284,7 @@ export class ESSearchSource extends AbstractESSource {
     searchSource.setField('size', 1);
     const query = {
       language: 'kuery',
-      query: `_id:${docId}`
+      query: `_id:"${docId}"`
     };
     searchSource.setField('query', query);
     searchSource.setField('fields', this._descriptor.tooltipProperties);
@@ -303,7 +303,9 @@ export class ESSearchSource extends AbstractESSource {
 
     const properties = indexPattern.flattenHit(hit);
     indexPattern.metaFields.forEach(metaField => {
-      delete properties[metaField];
+      if (!this._descriptor.tooltipProperties.includes(metaField)) {
+        delete properties[metaField];
+      }
     });
     return properties;
   }
@@ -354,7 +356,10 @@ export class ESSearchSource extends AbstractESSource {
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
     if (!featureCollection || !meta) {
       // no tooltip content needed when there is no feature collection or meta
-      return null;
+      return {
+        tooltipContent: null,
+        areResultsTrimmed: false
+      };
     }
 
     if (this._isTopHits()) {
@@ -367,23 +372,35 @@ export class ESSearchSource extends AbstractESSource {
           defaultMessage: `Results limited to most recent {topHitsSize} documents per entity.`,
           values: { topHitsSize: this._descriptor.topHitsSize }
         });
-        return `${entitiesFoundMsg} ${trimmedMsg}`;
+        return {
+          tooltipContent: `${entitiesFoundMsg} ${trimmedMsg}`,
+          areResultsTrimmed: false
+        };
       }
 
-      return entitiesFoundMsg;
+      return {
+        tooltipContent: entitiesFoundMsg,
+        areResultsTrimmed: false
+      };
     }
 
     if (meta.areResultsTrimmed) {
-      return i18n.translate('xpack.maps.esSearch.resultsTrimmedMsg', {
-        defaultMessage: `Results limited to first {count} documents.`,
-        values: { count: featureCollection.features.length }
-      });
+      return {
+        tooltipContent: i18n.translate('xpack.maps.esSearch.resultsTrimmedMsg', {
+          defaultMessage: `Results limited to first {count} documents.`,
+          values: { count: featureCollection.features.length }
+        }),
+        areResultsTrimmed: true
+      };
     }
 
-    return i18n.translate('xpack.maps.esSearch.featureCountMsg', {
-      defaultMessage: `Found {count} documents.`,
-      values: { count: featureCollection.features.length }
-    });
+    return {
+      tooltipContent: i18n.translate('xpack.maps.esSearch.featureCountMsg', {
+        defaultMessage: `Found {count} documents.`,
+        values: { count: featureCollection.features.length }
+      }),
+      areResultsTrimmed: false
+    };
   }
 
   getSyncMeta() {

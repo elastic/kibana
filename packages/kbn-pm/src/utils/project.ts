@@ -85,7 +85,7 @@ export class Project {
     this.scripts = this.json.scripts || {};
   }
 
-  get name(): string {
+  public get name(): string {
     return this.json.name;
   }
 

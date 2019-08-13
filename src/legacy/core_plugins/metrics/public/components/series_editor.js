@@ -101,7 +101,6 @@ export class SeriesEditor extends Component {
                   onChange={doc => handleChange(this.props, doc)}
                   onClone={() => this.handleClone(row)}
                   onDelete={() => handleDelete(this.props, row)}
-                  visData$={this.props.visData$}
                   model={row}
                   panel={model}
                   dragHandleProps={provided.dragHandleProps}
@@ -128,5 +127,4 @@ SeriesEditor.propTypes = {
   model: PropTypes.object,
   name: PropTypes.string,
   onChange: PropTypes.func,
-  visData$: PropTypes.object,
 };

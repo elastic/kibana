@@ -81,3 +81,9 @@ export const KIBANA_LOCALIZATION_STATS_TYPE = 'localization';
  * @type {string}
  */
 export const TELEMETRY_QUERY_SOURCE = 'TELEMETRY';
+
+/**
+ * UI metric usage type
+ * @type {string}
+ */
+export const UI_METRIC_USAGE_TYPE = 'ui_metric';

@@ -170,14 +170,6 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
 
   const fieldType = fieldMapping.type;
 
-  if (fieldType === 'multi_field') {
-    nestedFields = $.map(fieldMapping.fields, function (fieldMapping, fieldName) {
-      return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
-    });
-
-    return applyPathSettings(nestedFields);
-  }
-
   const ret = { name: fieldName, type: fieldType };
 
   if (fieldMapping.index_name) {
@@ -287,6 +279,16 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
 }
 
 // Retrieve all selected settings by default.
+// TODO: We should refactor this to be easier to consume. Ideally this function should retrieve
+// whatever settings are specified, otherwise just use the saved settings. This requires changing
+// the behavior to not *clear* whatever settings have been unselected, but it's hard to tell if
+// this is possible without altering the autocomplete behavior. These are the scenarios we need to
+// support:
+//   1. Manual refresh. Specify what we want. Fetch specified, leave unspecified alone.
+//   2. Changed selection and saved: Specify what we want. Fetch changed and selected, leave
+//      unchanged alone (both selected and unselected).
+//   3. Poll: Use saved. Fetch selected. Ignore unselected.
+
 function retrieveAutoCompleteInfo(settingsToRetrieve = settings.getAutocomplete()) {
   if (pollTimeoutId) {
     clearTimeout(pollTimeoutId);

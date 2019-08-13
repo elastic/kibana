@@ -38,10 +38,10 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { uiModules } from 'ui/modules';
 import 'ui/capabilities/route_setup';
+import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 
-import { data } from 'plugins/data/setup';
-data.search.loadLegacyDirectives();
-data.filter.loadLegacyDirectives();
+// load directives
+import '../../../data/public';
 
 const app = uiModules.get('app/dashboard', [
   'ngRoute',
@@ -56,6 +56,7 @@ function createNewDashboardCtrl($scope) {
   $scope.visitVisualizeAppLinkText = i18n.translate('kbn.dashboard.visitVisualizeAppLinkText', {
     defaultMessage: 'visit the Visualize app',
   });
+  addHelpMenuToAppChrome(chrome);
 }
 
 uiRoutes
@@ -108,6 +109,7 @@ uiRoutes
           defaultMessage: 'Dashboards',
         }),
       }]);
+      addHelpMenuToAppChrome(chrome);
     },
     resolve: {
       dash: function ($route, Private, redirectWhenMissing, kbnUrl) {

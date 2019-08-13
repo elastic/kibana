@@ -49,6 +49,7 @@ interface StateReduxProps {
   sort?: Sort;
   start: number;
   show?: boolean;
+  showCallOutUnauthorizedMsg: boolean;
 }
 
 interface DispatchProps {
@@ -78,6 +79,10 @@ interface DispatchProps {
   updateProviders?: ActionCreator<{
     id: string;
     providers: DataProvider[];
+  }>;
+  removeColumn?: ActionCreator<{
+    id: string;
+    columnId: string;
   }>;
   removeProvider?: ActionCreator<{
     id: string;
@@ -117,6 +122,11 @@ interface DispatchProps {
     id: string;
     providerId: string;
   }>;
+  upsertColumn?: ActionCreator<{
+    column: ColumnHeader;
+    id: string;
+    index: number;
+  }>;
 }
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
@@ -139,6 +149,7 @@ class StatefulTimelineComponent extends React.Component<Props> {
     sort,
     start,
     show,
+    showCallOutUnauthorizedMsg,
   }: Props) =>
     id !== this.props.id ||
     flyoutHeaderHeight !== this.props.flyoutHeaderHeight ||
@@ -155,7 +166,8 @@ class StatefulTimelineComponent extends React.Component<Props> {
     pageCount !== this.props.pageCount ||
     !isEqual(sort, this.props.sort) ||
     start !== this.props.start ||
-    show !== this.props.show;
+    show !== this.props.show ||
+    showCallOutUnauthorizedMsg !== this.props.showCallOutUnauthorizedMsg;
 
   public componentDidMount() {
     const { createTimeline, id } = this.props;
@@ -179,6 +191,7 @@ class StatefulTimelineComponent extends React.Component<Props> {
       kqlMode,
       kqlQueryExpression,
       show,
+      showCallOutUnauthorizedMsg,
       start,
       sort,
     } = this.props;
@@ -208,8 +221,10 @@ class StatefulTimelineComponent extends React.Component<Props> {
             onToggleDataProviderEnabled={this.onToggleDataProviderEnabled}
             onToggleDataProviderExcluded={this.onToggleDataProviderExcluded}
             show={show!}
+            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
             start={start}
             sort={sort!}
+            toggleColumn={this.toggleColumn}
           />
         )}
       </WithSource>
@@ -271,9 +286,30 @@ class StatefulTimelineComponent extends React.Component<Props> {
 
   private onChangeDroppableAndProvider: OnChangeDroppableAndProvider = providerId =>
     this.props.updateHighlightedDropAndProviderId!({ id: this.props.id, providerId });
+
+  private toggleColumn = (column: ColumnHeader) => {
+    const { columns, removeColumn, id, upsertColumn } = this.props;
+    const exists = columns.findIndex(c => c.id === column.id) !== -1;
+
+    if (!exists && upsertColumn != null) {
+      upsertColumn({
+        column,
+        id,
+        index: 1,
+      });
+    }
+
+    if (exists && removeColumn != null) {
+      removeColumn({
+        columnId: column.id,
+        id,
+      });
+    }
+  };
 }
 
 const makeMapStateToProps = () => {
+  const getShowCallOutUnauthorizedMsg = timelineSelectors.getShowCallOutUnauthorizedMsg();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getKqlQueryTimeline = timelineSelectors.getKqlFilterQuerySelector();
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
@@ -303,6 +339,7 @@ const makeMapStateToProps = () => {
       kqlQueryExpression,
       sort,
       start: input.timerange.from,
+      showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
       show,
     };
   };
@@ -324,5 +361,7 @@ export const StatefulTimeline = connect(
     updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
     updateSort: timelineActions.updateSort,
     removeProvider: timelineActions.removeProvider,
+    removeColumn: timelineActions.removeColumn,
+    upsertColumn: timelineActions.upsertColumn,
   }
 )(StatefulTimelineComponent);

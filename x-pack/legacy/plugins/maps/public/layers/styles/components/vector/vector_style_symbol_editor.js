@@ -85,6 +85,8 @@ export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange, sy
             <SymbolIcon
               symbolId={value}
               fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+              stroke={isDarkMode ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
+              strokeWidth={'1px'}
             />
           </EuiFlexItem>
           <EuiFlexItem>

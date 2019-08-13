@@ -17,7 +17,7 @@ import { RepositoryServiceFactory } from '../repository_service_factory';
 import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
 import { AbstractWorker } from './abstract_worker';
-import { CancellationSerivce } from './cancellation_service';
+import { CancellationReason, CancellationSerivce } from './cancellation_service';
 import { Job } from './job';
 
 export class DeleteWorker extends AbstractWorker {
@@ -42,9 +42,9 @@ export class DeleteWorker extends AbstractWorker {
     const { uri } = job.payload;
 
     // 1. Cancel running workers
-    this.cancellationService.cancelCloneJob(uri);
-    this.cancellationService.cancelUpdateJob(uri);
-    this.cancellationService.cancelIndexJob(uri);
+    await this.cancellationService.cancelCloneJob(uri, CancellationReason.REPOSITORY_DELETE);
+    await this.cancellationService.cancelUpdateJob(uri, CancellationReason.REPOSITORY_DELETE);
+    await this.cancellationService.cancelIndexJob(uri, CancellationReason.REPOSITORY_DELETE);
 
     // 2. Delete git repository and all related data.
     const repoService = this.repoServiceFactory.newInstance(

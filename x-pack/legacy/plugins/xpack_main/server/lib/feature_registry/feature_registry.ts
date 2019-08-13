@@ -139,6 +139,15 @@ export interface Feature<TPrivileges extends Partial<PrivilegesSet> = Privileges
   name: string;
 
   /**
+   * Whether or not this feature should be excluded from the base privileges.
+   * This is primarily helpful when migrating applications with a "legacy" privileges model
+   * to use Kibana privileges. We don't want these features to be considered part of the `all`
+   * or `read` base privileges in a minor release if the user was previously granted access
+   * using an additional reserved role.
+   */
+  excludeFromBasePrivileges?: boolean;
+
+  /**
    * Optional array of supported licenses.
    * If omitted, all licenses are allowed.
    * This does not restrict access to your feature based on license.
@@ -249,6 +258,7 @@ const schema = Joi.object({
     .invalid(...prohibitedFeatureIds)
     .required(),
   name: Joi.string().required(),
+  excludeFromBasePrivileges: Joi.boolean(),
   validLicenses: Joi.array().items(Joi.string().valid('basic', 'standard', 'gold', 'platinum')),
   icon: Joi.string(),
   description: Joi.string(),

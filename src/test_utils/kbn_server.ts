@@ -75,7 +75,7 @@ export function createRootWithSettings(
       repl: false,
       basePath: false,
       optimize: false,
-      oss: false,
+      oss: true,
       ...cliArgs,
     },
     isDevClusterMaster: false,
@@ -221,13 +221,17 @@ export function createTestServers({
       await es.start();
 
       if (['gold', 'trial'].includes(license)) {
-        await setupUsers(log, esTestConfig.getUrlParts().port, [
-          ...usersToBeAdded,
-          // user elastic
-          esTestConfig.getUrlParts(),
-          // user kibana
-          kbnTestConfig.getUrlParts(),
-        ]);
+        await setupUsers({
+          log,
+          esPort: esTestConfig.getUrlParts().port,
+          updates: [
+            ...usersToBeAdded,
+            // user elastic
+            esTestConfig.getUrlParts(),
+            // user kibana
+            kbnTestConfig.getUrlParts(),
+          ],
+        });
 
         // Override provided configs, we know what the elastic user is now
         kbnSettings.elasticsearch = {

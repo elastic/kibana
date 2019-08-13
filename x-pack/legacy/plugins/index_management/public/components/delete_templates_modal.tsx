@@ -21,10 +21,6 @@ export const DeleteTemplatesModal = ({
 }) => {
   const numTemplatesToDelete = templatesToDelete.length;
 
-  if (!numTemplatesToDelete) {
-    return null;
-  }
-
   const hasSystemTemplate = Boolean(
     templatesToDelete.find(templateName => templateName.startsWith('.'))
   );

@@ -14,12 +14,11 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { State, timelineSelectors } from '../../store';
 import { DataProvider } from '../timeline/data_providers/data_provider';
-
 import { FlyoutButton } from './button';
 import { Pane } from './pane';
 import { timelineActions } from '../../store/actions';
 import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/helpers';
-import { trackUiAction as track } from '../../lib/track_usage';
+import { trackUiAction as track, METRIC_TYPE } from '../../lib/track_usage';
 
 /** The height in pixels of the flyout header, exported for use in height calculations */
 export const flyoutHeaderHeight: number = 60;
@@ -33,9 +32,13 @@ export const Badge = styled(EuiBadge)`
   border-bottom-left-radius: 5px;
 `;
 
+Badge.displayName = 'Badge';
+
 const Visible = styled.div<{ show: boolean }>`
   visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
 `;
+
+Visible.displayName = 'Visible';
 
 interface OwnProps {
   children?: React.ReactNode;
@@ -100,13 +103,15 @@ export const FlyoutComponent = pure<Props>(
         show={!show}
         timelineId={timelineId}
         onOpen={() => {
-          track('open_timeline');
+          track(METRIC_TYPE.LOADED, 'open_timeline');
           showTimeline!({ id: timelineId, show: true });
         }}
       />
     </>
   )
 );
+
+FlyoutComponent.displayName = 'FlyoutComponent';
 
 const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
   const timelineById = defaultTo({}, timelineSelectors.timelineByIdSelector(state));

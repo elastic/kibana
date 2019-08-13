@@ -6,7 +6,17 @@
 
 import { replaceKqlQueryLocationForHostPage } from './replace_kql_query_location_for_host_page';
 
+// Suppress warnings about invalid RISON as this is what we are testing
+/* eslint-disable no-console */
+const originalError = console.log;
 describe('replace_kql_query_location_for_host_page', () => {
+  beforeAll(() => {
+    console.log = jest.fn();
+  });
+
+  afterAll(() => {
+    console.log = originalError;
+  });
   test('replaces host details and type details for a page', () => {
     const replacement = replaceKqlQueryLocationForHostPage(
       '(filterQuery:(expression:\'process.name: "some-name"\',kind:kuery),queryLocation:hosts.details,type:details)'

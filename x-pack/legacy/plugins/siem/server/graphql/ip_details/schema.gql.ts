@@ -85,7 +85,7 @@ const domainsSchema = gql`
   type DomainsData {
     edges: [DomainsEdges!]!
     totalCount: Float!
-    pageInfo: PageInfo!
+    pageInfo: PageInfoPaginated!
     inspect: Inspect
   }
 
@@ -94,7 +94,7 @@ const domainsSchema = gql`
       filterQuery: String
       id: String
       ip: String!
-      pagination: PaginationInput!
+      pagination: PaginationInputPaginated!
       sort: DomainsSortField!
       flowDirection: FlowDirection!
       flowTarget: FlowTarget!
@@ -128,7 +128,7 @@ const tlsSchema = gql`
   type TlsData {
     edges: [TlsEdges!]!
     totalCount: Float!
-    pageInfo: PageInfo!
+    pageInfo: PageInfoPaginated!
     inspect: Inspect
   }
   extend type Source {
@@ -136,7 +136,7 @@ const tlsSchema = gql`
       filterQuery: String
       id: String
       ip: String!
-      pagination: PaginationInput!
+      pagination: PaginationInputPaginated!
       sort: TlsSortField!
       flowTarget: FlowTarget!
       timerange: TimerangeInput!
@@ -178,7 +178,7 @@ const usersSchema = gql`
   type UsersData {
     edges: [UsersEdges!]!
     totalCount: Float!
-    pageInfo: PageInfo!
+    pageInfo: PageInfoPaginated!
     inspect: Inspect
   }
 
@@ -187,7 +187,7 @@ const usersSchema = gql`
       filterQuery: String
       id: String
       ip: String!
-      pagination: PaginationInput!
+      pagination: PaginationInputPaginated!
       sort: UsersSortField!
       flowTarget: FlowTarget!
       timerange: TimerangeInput!

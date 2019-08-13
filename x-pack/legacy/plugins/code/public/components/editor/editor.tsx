@@ -30,6 +30,7 @@ export interface EditorActions {
 }
 
 interface Props {
+  hidden?: boolean;
   file?: FetchFileResponse;
   revealPosition?: Position;
   isReferencesOpen: boolean;
@@ -45,6 +46,10 @@ interface Props {
 type IProps = Props & EditorActions & RouteComponentProps<MainRouteParams>;
 
 export class EditorComponent extends React.Component<IProps> {
+  static defaultProps = {
+    hidden: false,
+  };
+
   public blameWidgets: any;
   private container: HTMLElement | undefined;
   private monaco: MonacoHelper | undefined;
@@ -152,7 +157,12 @@ export class EditorComponent extends React.Component<IProps> {
   }
   public render() {
     return (
-      <EuiFlexItem data-test-subj="codeSourceViewer" className="codeOverflowHidden" grow={1}>
+      <EuiFlexItem
+        data-test-subj="codeSourceViewer"
+        className="codeOverflowHidden"
+        grow={this.props.hidden ? false : 1}
+        hidden={this.props.hidden}
+      >
         <Shortcut
           keyCode="f"
           help="With editor ‘active’ Find in file"
@@ -160,7 +170,12 @@ export class EditorComponent extends React.Component<IProps> {
           macModifier={[Modifier.meta]}
           winModifier={[Modifier.ctrl]}
         />
-        <div tabIndex={0} className="codeContainer__editor" id="mainEditor" />
+        <div
+          tabIndex={0}
+          className="codeContainer__editor"
+          id="mainEditor"
+          hidden={this.props.hidden}
+        />
         {this.renderReferences()}
       </EuiFlexItem>
     );
@@ -199,6 +214,12 @@ export class EditorComponent extends React.Component<IProps> {
 
   private async loadText(text: string, repo: string, file: string, lang: string, revision: string) {
     if (this.monaco) {
+      try {
+        await monaco.editor.colorize(text, lang, {});
+      } catch (e) {
+        // workaround a upstream issue: https://github.com/microsoft/monaco-editor/issues/134
+        lang = 'text';
+      }
       this.editor = await this.monaco.loadFile(repo, file, text, lang, revision);
       this.registerGutterClickHandler();
     }

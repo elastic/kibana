@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['security', 'rollup', 'common', 'header']);
 
-  describe('rollup job', async function () {
+  describe('rollup job', function () {
     this.tags('smoke');
     before(async () => {
       // init data
