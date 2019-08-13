@@ -27,7 +27,7 @@ import {
 } from '../../../common/constants';
 import { getEsSpatialRelationLabel } from '../../../common/i18n_getters';
 
-const GEO_FIELD_VALUE_DELIMITER = '//'; // `/` is not allowed in index pattern name so should not have collisions
+const GEO_FIELD_VALUE_DELIMITER = '/'; // `/` is not allowed in index pattern name so should not have collisions
 
 function createIndexGeoFieldName({ indexPatternTitle, geoFieldName }) {
   return `${indexPatternTitle}${GEO_FIELD_VALUE_DELIMITER}${geoFieldName}`;

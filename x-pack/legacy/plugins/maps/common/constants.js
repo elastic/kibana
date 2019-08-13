@@ -50,8 +50,6 @@ export const ES_SPATIAL_RELATIONS = {
   INTERSECTS: 'INTERSECTS',
   DISJOINT: 'DISJOINT',
   WITHIN: 'WITHIN',
-  // TODO enable when BKD tree supports contains https://github.com/elastic/elasticsearch/issues/41204
-  // CONTAINS: 'CONTAINS'
 };
 
 export const GEO_JSON_TYPE = {

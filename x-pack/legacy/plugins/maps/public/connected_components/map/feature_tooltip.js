@@ -25,8 +25,10 @@ import { FeatureGeometryFilterForm } from './feature_geometry_filter_form';
 const ALL_LAYERS = '_ALL_LAYERS_';
 const DEFAULT_PAGE_NUMBER = 0;
 
-const PROPERTIES_VIEW = 'propertiesView';
-const GEOMETRY_FILTER_VIEW = 'geometryFilterView';
+const VIEWS = {
+  PROPERTIES_VIEW: 'PROPERTIES_VIEW',
+  GEOMETRY_FILTER_VIEW: 'GEOMETRY_FILTER_VIEW'
+};
 
 export class FeatureTooltip extends React.Component {
 
@@ -34,7 +36,7 @@ export class FeatureTooltip extends React.Component {
     uniqueLayers: [],
     pageNumber: DEFAULT_PAGE_NUMBER,
     layerIdFilter: ALL_LAYERS,
-    view: PROPERTIES_VIEW,
+    view: VIEWS.PROPERTIES_VIEW,
   };
 
   constructor() {
@@ -120,11 +122,11 @@ export class FeatureTooltip extends React.Component {
   };
 
   _showGeometryFilterView = () => {
-    this.setState({ view: GEOMETRY_FILTER_VIEW });
+    this.setState({ view: VIEWS.GEOMETRY_FILTER_VIEW });
   }
 
   _showPropertiesView = () => {
-    this.setState({ view: PROPERTIES_VIEW });
+    this.setState({ view: VIEWS.PROPERTIES_VIEW });
   }
 
   _renderProperties(feature) {
@@ -328,7 +330,7 @@ export class FeatureTooltip extends React.Component {
     const currentFeature = filteredFeatures[this.state.pageNumber];
     const filteredGeoFields = this._filterGeoFields(currentFeature);
 
-    if (this.state.view === GEOMETRY_FILTER_VIEW) {
+    if (this.state.view === VIEWS.GEOMETRY_FILTER_VIEW) {
       return (
         <FeatureGeometryFilterForm
           onClose={this._onCloseTooltip}
