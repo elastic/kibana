@@ -293,3 +293,16 @@
   border-left: $euiBorderThin;
   width: 300px !important;
 }
+
+.codeBranchSelectorTabs {
+  max-height: calc(100vh - 18rem);
+  overflow: auto;
+}
+
+.codeBranchSelectorTabContentContainer {
+  padding-top: $euiSizeS;
+}
+
+.codeBranchSelectorPopover {
+  margin-top: $euiSizeXS;
+}
