@@ -10,7 +10,7 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../../maps/common/constants';
 import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable/search_embeddable';
 // TODO: Doing this visualize import makes type_check fail
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable';
-import { EmbeddableInput } from '../../../../../../src/legacy/core_plugins/embeddable_api/public';
+import { EmbeddableInput } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
 export const EmbeddableExpressionType = 'embeddable';
 

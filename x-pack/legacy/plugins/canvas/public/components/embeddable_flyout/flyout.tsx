@@ -12,9 +12,8 @@ import {
   SavedObjectFinder,
   SavedObjectMetaData,
 } from 'ui/saved_objects/components/saved_object_finder';
-
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
-import { embeddableFactories } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/index';
+import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 
 export interface Props {
   onClose: () => void;
@@ -24,25 +23,29 @@ export interface Props {
 
 export class AddEmbeddableFlyout extends React.Component<Props> {
   onAddPanel = (id: string, savedObjectType: string, name: string) => {
+    const embeddableFactories = start.getEmbeddableFactories();
+
     // Find the embeddable type from the saved object type
-    const found = Array.from(embeddableFactories.entries()).find(([_key, embeddableFactory]) => {
+    const found = Array.from(embeddableFactories).find(embeddableFactory => {
       return Boolean(
         embeddableFactory.savedObjectMetaData &&
           embeddableFactory.savedObjectMetaData.type === savedObjectType
       );
     });
 
-    const foundEmbeddableType = found ? found[0] : 'unknown';
+    const foundEmbeddableType = found ? found.type : 'unknown';
 
     this.props.onSelect(id, foundEmbeddableType);
   };
 
   render() {
-    const availableSavedObjects = Array.from(embeddableFactories.entries())
-      .filter(([key]) => {
-        return this.props.availableEmbeddables.includes(key);
+    const embeddableFactories = start.getEmbeddableFactories();
+
+    const availableSavedObjects = Array.from(embeddableFactories)
+      .filter(factory => {
+        return this.props.availableEmbeddables.includes(factory.type);
       })
-      .map(([_key, { savedObjectMetaData }]) => savedObjectMetaData)
+      .map(factory => factory.savedObjectMetaData)
       .filter<SavedObjectMetaData<{}>>(function(
         maybeSavedObjectMetaData
       ): maybeSavedObjectMetaData is SavedObjectMetaData<{}> {
