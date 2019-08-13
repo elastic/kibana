@@ -34,7 +34,7 @@ export {
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 // Field is only used as class in Index Patterns Management UI.
-// FieldList is only used in discover.
+// FieldList is only used in discover and StubIndexPattern.
 export const { FieldList, flattenHitWrapper, formatHitProvider } = data.indexPatterns;
 export const { IndexPatternsProvider } = data.indexPatterns.__LEGACY;
 

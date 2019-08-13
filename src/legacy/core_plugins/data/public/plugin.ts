@@ -82,7 +82,7 @@ export class DataPlugin implements Plugin<DataSetup, void, DataPluginSetupDepend
       indexPatterns: indexPatternsService,
       filter: this.filter.setup({
         uiSettings,
-        indexPatterns: indexPatternsService.IndexPatterns,
+        indexPatterns: indexPatternsService.indexPatterns,
       }),
       query: this.query.setup(),
       search: this.search.setup(),

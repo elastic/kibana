@@ -17,9 +17,6 @@
  * under the License.
  */
 
-// Legacy mocks - must be removed before migrating to new platform.
-jest.mock('ui/chrome');
-
 import { IndexPatternsService, IndexPatternsSetup } from '.';
 import { FieldType } from './fields';
 import { StaticIndexPattern } from './index_patterns';
@@ -27,19 +24,24 @@ import { StaticIndexPattern } from './index_patterns';
 type IndexPatternsServiceClientContract = PublicMethodsOf<IndexPatternsService>;
 
 const createSetupContractMock = () => {
+  // Legacy mock - must be removed before migrating to new platform.
+  // Included here because we only want to call `jest.mock` when somebody creates
+  // the mock for this contract.
+  jest.mock('ui/chrome');
+
   const setupContract: jest.Mocked<IndexPatternsSetup> = {
     FieldList: {} as any,
     flattenHitWrapper: jest.fn(),
     formatHitProvider: jest.fn(),
-    IndexPatterns: jest.fn() as any,
+    indexPatterns: jest.fn() as any,
     ui: {
       IndexPatternSelect: jest.fn(),
     },
     __LEGACY: {
+      IndexPatternsProvider: jest.fn(),
       // For BWC we must temporarily export the class implementation of Field,
       // which is only used externally by the Index Pattern UI.
       FieldImpl: jest.fn(),
-      IndexPatternsProvider: jest.fn(),
     },
   };
 

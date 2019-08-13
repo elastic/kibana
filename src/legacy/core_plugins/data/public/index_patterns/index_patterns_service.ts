@@ -46,7 +46,7 @@ export class IndexPatternsService {
       FieldList,
       flattenHitWrapper,
       formatHitProvider,
-      IndexPatterns: new IndexPatterns(uiSettings, savedObjectsClient),
+      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient),
       ui: {
         IndexPatternSelect,
       },
