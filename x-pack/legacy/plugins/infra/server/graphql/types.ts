@@ -402,6 +402,12 @@ export interface InfraSnapshotMetricInput {
   /** The type of metric */
   type: InfraSnapshotMetricType;
 }
+
+export interface InfraNodeIdsInput {
+  nodeId: string;
+
+  cloudId?: string | null;
+}
 /** The properties to update the source with */
 export interface UpdateSourceInput {
   /** The name of the data source */
@@ -521,7 +527,7 @@ export interface SnapshotInfraSourceArgs {
   filterQuery?: string | null;
 }
 export interface MetricsInfraSourceArgs {
-  nodeId: string;
+  nodeIds: InfraNodeIdsInput;
 
   nodeType: InfraNodeType;
 
@@ -610,6 +616,12 @@ export enum InfraMetric {
   nginxRequestRate = 'nginxRequestRate',
   nginxActiveConnections = 'nginxActiveConnections',
   nginxRequestsPerConnection = 'nginxRequestsPerConnection',
+  awsOverview = 'awsOverview',
+  awsCpuUtilization = 'awsCpuUtilization',
+  awsNetworkBytes = 'awsNetworkBytes',
+  awsNetworkPackets = 'awsNetworkPackets',
+  awsDiskioBytes = 'awsDiskioBytes',
+  awsDiskioOps = 'awsDiskioOps',
   custom = 'custom',
 }
 
@@ -838,7 +850,7 @@ export namespace InfraSourceResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context, MetricsArgs>;
   export interface MetricsArgs {
-    nodeId: string;
+    nodeIds: InfraNodeIdsInput;
 
     nodeType: InfraNodeType;
 

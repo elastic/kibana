@@ -78,6 +78,7 @@ interface Props {
   showCallOutUnauthorizedMsg: boolean;
   start: number;
   sort: Sort;
+  toggleColumn: (column: ColumnHeader) => void;
 }
 
 /** The parent Timeline component */
@@ -107,6 +108,7 @@ export const Timeline = pure<Props>(
     showCallOutUnauthorizedMsg,
     start,
     sort,
+    toggleColumn,
   }) => {
     const combinedQueries = combineQueries(
       dataProviders,
@@ -181,6 +183,7 @@ export const Timeline = pure<Props>(
                         timelineFooterHeight: footerHeight,
                       })}
                       sort={sort}
+                      toggleColumn={toggleColumn}
                       width={width}
                     />
                     <Footer

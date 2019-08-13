@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { Markdown } from 'ui/markdown/markdown';
-import { MarkdownVisParams } from './markdown_fn';
+import { MarkdownVisParams } from './types';
 
 interface MarkdownVisComponentProps extends MarkdownVisParams {
   renderComplete: () => {};
