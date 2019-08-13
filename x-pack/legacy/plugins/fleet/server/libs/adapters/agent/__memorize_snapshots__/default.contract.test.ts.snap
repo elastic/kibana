@@ -16,8 +16,8 @@ exports['Agent Adapter create should allow to create a new agent with the same i
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-13T12:41:44.091Z",
-    "version": "WzYsMV0="
+    "updated_at": "2019-08-14T17:51:31.841Z",
+    "version": "WzE4LDFd"
   }
 }
 
@@ -38,15 +38,15 @@ exports['Agent Adapter create should allow to create a new agent with the same i
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-13T12:41:45.108Z",
-    "version": "WzcsMV0="
+    "updated_at": "2019-08-14T17:51:32.873Z",
+    "version": "WzE5LDFd"
   }
 }
 
 exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - create (5)'] = {
   "results": {
     "type": "agents",
-    "id": "b69f1010-bdc7-11e9-ad76-19114a620e6a",
+    "id": "2831c430-bebc-11e9-babd-cf1c987b236b",
     "attributes": {
       "shared_id": "agent1",
       "active": false,
@@ -60,8 +60,8 @@ exports['Agent Adapter create should allow to create a new agent with the same i
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-13T12:41:47.153Z",
-    "version": "WzksMV0="
+    "updated_at": "2019-08-14T17:51:34.899Z",
+    "version": "WzIxLDFd"
   }
 }
 
@@ -91,8 +91,8 @@ exports['Agent Adapter create should allow to create a new agent with the same i
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:45.108Z",
-        "version": "WzcsMV0="
+        "updated_at": "2019-08-14T17:51:32.873Z",
+        "version": "WzE5LDFd"
       }
     ]
   }
@@ -128,7 +128,7 @@ exports['Agent Adapter create should create a new agent - bulkCreate (4)'] = {
 exports['Agent Adapter create should create a new agent - create (1)'] = {
   "results": {
     "type": "agents",
-    "id": "b284cce0-bdc7-11e9-ad76-19114a620e6a",
+    "id": "2434f410-bebc-11e9-babd-cf1c987b236b",
     "attributes": {
       "shared_id": "agent1",
       "active": false,
@@ -142,8 +142,8 @@ exports['Agent Adapter create should create a new agent - create (1)'] = {
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-13T12:41:40.270Z",
-    "version": "WzAsMV0="
+    "updated_at": "2019-08-14T17:51:28.209Z",
+    "version": "WzE0LDFd"
   }
 }
 
@@ -209,7 +209,7 @@ exports['Agent Adapter create should create a new agent - find (2)'] = {
     "saved_objects": [
       {
         "type": "agents",
-        "id": "b284cce0-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2434f410-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -223,8 +223,8 @@ exports['Agent Adapter create should create a new agent - find (2)'] = {
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:40.270Z",
-        "version": "WzAsMV0="
+        "updated_at": "2019-08-14T17:51:28.209Z",
+        "version": "WzE0LDFd"
       }
     ]
   }
@@ -247,8 +247,8 @@ exports['Agent Adapter create should create a new agent with the specified id if
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-13T12:41:42.052Z",
-    "version": "WzMsMV0="
+    "updated_at": "2019-08-14T17:51:29.805Z",
+    "version": "WzE2LDFd"
   }
 }
 
@@ -301,8 +301,8 @@ exports['Agent Adapter create should create a new agent with the specified id if
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:42.052Z",
-        "version": "WzMsMV0="
+        "updated_at": "2019-08-14T17:51:29.805Z",
+        "version": "WzE2LDFd"
       }
     ]
   }
@@ -394,14 +394,31 @@ exports['Agent Adapter delete should delete an agent - create (3)'] = {
 }
 
 exports['Agent Adapter delete should delete an agent - create (4)'] = {
-  "thrownError": "{\"msg\":\"[mapper_parsing_exception] failed to parse field [agents.local_metadata] of type [text] in document with id 'agents:8ad749d0-bdc6-11e9-bb11-0f64f768e2e5'. Preview of field's value: '{host=elastic.co}'\",\"path\":\"/.kibana/_doc/agents%3A8ad749d0-bdc6-11e9-bb11-0f64f768e2e5\",\"query\":{\"refresh\":\"wait_for\"},\"body\":\"{\\\"agents\\\":{\\\"shared_id\\\":\\\"agent2\\\",\\\"active\\\":false,\\\"access_token\\\":\\\"TOKEN_1\\\",\\\"config_id\\\":\\\"config_id_1\\\",\\\"config_shared_id\\\":\\\"shared_config_id-1\\\",\\\"type\\\":\\\"EPHEMERAL\\\",\\\"version\\\":\\\"1\\\",\\\"local_metadata\\\":{\\\"host\\\":\\\"elastic.co\\\"},\\\"user_provided_metadata\\\":{\\\"color\\\":\\\"blue\\\"},\\\"enrolled_at\\\":\\\"2019-08-05T19:35:14.861Z\\\"},\\\"type\\\":\\\"agents\\\",\\\"references\\\":[],\\\"updated_at\\\":\\\"2019-08-13T12:33:24.205Z\\\"}\",\"statusCode\":400,\"response\":\"{\\\"error\\\":{\\\"root_cause\\\":[{\\\"type\\\":\\\"mapper_parsing_exception\\\",\\\"reason\\\":\\\"failed to parse field [agents.local_metadata] of type [text] in document with id 'agents:8ad749d0-bdc6-11e9-bb11-0f64f768e2e5'. Preview of field's value: '{host=elastic.co}'\\\"}],\\\"type\\\":\\\"mapper_parsing_exception\\\",\\\"reason\\\":\\\"failed to parse field [agents.local_metadata] of type [text] in document with id 'agents:8ad749d0-bdc6-11e9-bb11-0f64f768e2e5'. Preview of field's value: '{host=elastic.co}'\\\",\\\"caused_by\\\":{\\\"type\\\":\\\"illegal_state_exception\\\",\\\"reason\\\":\\\"Can't get text on a START_OBJECT at 1:189\\\"}},\\\"status\\\":400}\"}",
-  "results": null
+  "results": {
+    "type": "agents",
+    "id": "2b3f2b40-bebc-11e9-babd-cf1c987b236b",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-14T17:51:40.020Z",
+    "version": "WzI2LDFd"
+  }
 }
 
 exports['Agent Adapter delete should delete an agent - create (5)'] = {
   "results": {
     "type": "agents",
-    "id": "b9add6b0-bdc7-11e9-ad76-19114a620e6a",
+    "id": "168ba7c0-beb5-11e9-8ad6-b30c30b02632",
     "attributes": {
       "shared_id": "agent2",
       "active": false,
@@ -415,7 +432,7 @@ exports['Agent Adapter delete should delete an agent - create (5)'] = {
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-13T12:41:52.283Z",
+    "updated_at": "2019-08-14T17:00:58.812Z",
     "version": "WzE1LDFd"
   }
 }
@@ -506,7 +523,7 @@ exports['Agent Adapter findByMetadata should allow to find agents by local metad
 exports['Agent Adapter findByMetadata should allow to find agents by local metadata - create (1)'] = {
   "results": {
     "type": "agents",
-    "id": "e1d8bc90-bdc7-11e9-ad76-19114a620e6a",
+    "id": "53abae00-bebc-11e9-babd-cf1c987b236b",
     "attributes": {
       "shared_id": "agent1",
       "active": false,
@@ -520,8 +537,8 @@ exports['Agent Adapter findByMetadata should allow to find agents by local metad
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-13T12:42:59.673Z",
-    "version": "WzEzOCwxXQ=="
+    "updated_at": "2019-08-14T17:52:47.840Z",
+    "version": "WzE1MCwxXQ=="
   }
 }
 
@@ -616,7 +633,7 @@ exports['Agent Adapter findByMetadata should allow to find agents by local metad
     "saved_objects": [
       {
         "type": "agents",
-        "id": "e1d931c0-bdc7-11e9-ad76-19114a620e6a",
+        "id": "53ac2330-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent2",
           "active": false,
@@ -630,8 +647,8 @@ exports['Agent Adapter findByMetadata should allow to find agents by local metad
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:42:59.676Z",
-        "version": "WzEzOSwxXQ=="
+        "updated_at": "2019-08-14T17:52:47.843Z",
+        "version": "WzE1MSwxXQ=="
       }
     ]
   }
@@ -645,26 +662,7 @@ exports['Agent Adapter findByMetadata should allow to find agents by local metad
     "saved_objects": [
       {
         "type": "agents",
-        "id": "e1d931c0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent2",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id-1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"elastic.co\"}",
-          "user_provided_metadata": "{\"color\":\"blue\"}",
-          "enrolled_at": "2019-08-05T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:59.676Z",
-        "version": "WzEzOSwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "e1d8bc90-bdc7-11e9-ad76-19114a620e6a",
+        "id": "53abae00-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -678,8 +676,27 @@ exports['Agent Adapter findByMetadata should allow to find agents by local metad
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:42:59.673Z",
-        "version": "WzEzOCwxXQ=="
+        "updated_at": "2019-08-14T17:52:47.840Z",
+        "version": "WzE1MCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "53ac2330-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"elastic.co\"}",
+          "user_provided_metadata": "{\"color\":\"blue\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:47.843Z",
+        "version": "WzE1MSwxXQ=="
       }
     ]
   }
@@ -741,7 +758,7 @@ exports['Agent Adapter findByMetadata should allow to find agents by user provid
 exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - create (1)'] = {
   "results": {
     "type": "agents",
-    "id": "e3af9f70-bdc7-11e9-ad76-19114a620e6a",
+    "id": "557e2410-bebc-11e9-babd-cf1c987b236b",
     "attributes": {
       "shared_id": "agent1",
       "active": false,
@@ -755,14 +772,31 @@ exports['Agent Adapter findByMetadata should allow to find agents by user provid
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-13T12:43:02.759Z",
-    "version": "WzE0MiwxXQ=="
+    "updated_at": "2019-08-14T17:52:50.896Z",
+    "version": "WzE1NSwxXQ=="
   }
 }
 
 exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - create (2)'] = {
-  "thrownError": "{\"msg\":\"[mapper_parsing_exception] failed to parse field [agents.local_metadata] of type [text] in document with id 'agents:2b294fa0-bdc7-11e9-ae9d-31b033215206'. Preview of field's value: '{host=elastic.co}'\",\"path\":\"/.kibana/_doc/agents%3A2b294fa0-bdc7-11e9-ae9d-31b033215206\",\"query\":{\"refresh\":\"wait_for\"},\"body\":\"{\\\"agents\\\":{\\\"shared_id\\\":\\\"agent2\\\",\\\"active\\\":false,\\\"access_token\\\":\\\"TOKEN_1\\\",\\\"config_id\\\":\\\"config_id_1\\\",\\\"config_shared_id\\\":\\\"shared_config_id-1\\\",\\\"type\\\":\\\"EPHEMERAL\\\",\\\"version\\\":\\\"1\\\",\\\"local_metadata\\\":{\\\"host\\\":\\\"elastic.co\\\"},\\\"user_provided_metadata\\\":{\\\"color\\\":\\\"blue\\\"},\\\"enrolled_at\\\":\\\"2019-08-05T19:35:14.861Z\\\"},\\\"type\\\":\\\"agents\\\",\\\"references\\\":[],\\\"updated_at\\\":\\\"2019-08-13T12:37:53.178Z\\\"}\",\"statusCode\":400,\"response\":\"{\\\"error\\\":{\\\"root_cause\\\":[{\\\"type\\\":\\\"mapper_parsing_exception\\\",\\\"reason\\\":\\\"failed to parse field [agents.local_metadata] of type [text] in document with id 'agents:2b294fa0-bdc7-11e9-ae9d-31b033215206'. Preview of field's value: '{host=elastic.co}'\\\"}],\\\"type\\\":\\\"mapper_parsing_exception\\\",\\\"reason\\\":\\\"failed to parse field [agents.local_metadata] of type [text] in document with id 'agents:2b294fa0-bdc7-11e9-ae9d-31b033215206'. Preview of field's value: '{host=elastic.co}'\\\",\\\"caused_by\\\":{\\\"type\\\":\\\"illegal_state_exception\\\",\\\"reason\\\":\\\"Can't get text on a START_OBJECT at 1:189\\\"}},\\\"status\\\":400}\"}",
-  "results": null
+  "results": {
+    "type": "agents",
+    "id": "6a7c0d20-beba-11e9-9ac4-cd63a8641634",
+    "attributes": {
+      "shared_id": "agent2",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"elastic.co\"}",
+      "user_provided_metadata": "{\"color\":\"blue\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-14T17:39:07.122Z",
+    "version": "WzE1NSwxXQ=="
+  }
 }
 
 exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - delete (2)'] = {
@@ -859,7 +893,7 @@ exports['Agent Adapter findByMetadata should allow to find agents by user provid
     "saved_objects": [
       {
         "type": "agents",
-        "id": "e3af9f70-bdc7-11e9-ad76-19114a620e6a",
+        "id": "557e2410-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -873,8 +907,8 @@ exports['Agent Adapter findByMetadata should allow to find agents by user provid
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:43:02.759Z",
-        "version": "WzE0MiwxXQ=="
+        "updated_at": "2019-08-14T17:52:50.896Z",
+        "version": "WzE1NSwxXQ=="
       }
     ]
   }
@@ -888,26 +922,7 @@ exports['Agent Adapter findByMetadata should allow to find agents by user provid
     "saved_objects": [
       {
         "type": "agents",
-        "id": "e3b014a0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent2",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id-1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"elastic.co\"}",
-          "user_provided_metadata": "{\"color\":\"blue\"}",
-          "enrolled_at": "2019-08-05T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:43:02.762Z",
-        "version": "WzE0MywxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "e3af9f70-bdc7-11e9-ad76-19114a620e6a",
+        "id": "557e2410-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -921,8 +936,27 @@ exports['Agent Adapter findByMetadata should allow to find agents by user provid
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:43:02.759Z",
-        "version": "WzE0MiwxXQ=="
+        "updated_at": "2019-08-14T17:52:50.896Z",
+        "version": "WzE1NSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "557e9940-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"elastic.co\"}",
+          "user_provided_metadata": "{\"color\":\"blue\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:50.900Z",
+        "version": "WzE1NCwxXQ=="
       }
     ]
   }
@@ -1000,7 +1034,7 @@ exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent 
     "saved_objects": [
       {
         "type": "agents",
-        "id": "b9ad8890-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2b3f2b40-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -1014,8 +1048,8 @@ exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent 
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:52.281Z",
-        "version": "WzE0LDFd"
+        "updated_at": "2019-08-14T17:51:40.020Z",
+        "version": "WzI2LDFd"
       }
     ]
   }
@@ -1029,26 +1063,7 @@ exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent 
     "saved_objects": [
       {
         "type": "agents",
-        "id": "b9add6b0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent2",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id-1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"elastic.co\"}",
-          "user_provided_metadata": "{\"color\":\"blue\"}",
-          "enrolled_at": "2019-08-05T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:52.283Z",
-        "version": "WzE1LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "b9ad8890-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2b3f2b40-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -1062,8 +1077,27 @@ exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent 
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:52.281Z",
-        "version": "WzE0LDFd"
+        "updated_at": "2019-08-14T17:51:40.020Z",
+        "version": "WzI2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2b3fa070-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"elastic.co\"}",
+          "user_provided_metadata": "{\"color\":\"blue\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:40.023Z",
+        "version": "WzI3LDFd"
       }
     ]
   }
@@ -1333,6 +1367,266 @@ exports['Agent Adapter list should list all agents - create (1)'] = {
   }
 }
 
+exports['Agent Adapter list should list all agents - create (14)'] = {
+  "results": {
+    "type": "agents",
+    "id": "2d17e2e0-bebc-11e9-babd-cf1c987b236b",
+    "attributes": {
+      "shared_id": "agent13",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-14T17:51:43.118Z",
+    "version": "WzQ1LDFd"
+  }
+}
+
 exports['Agent Adapter list should list all agents - create (15)'] = {
   "results": {
     "type": "agents",
@@ -1594,6 +1888,266 @@ exports['Agent Adapter list should list all agents - create (15)'] = {
     "references": [],
     "updated_at": "2019-08-08T18:36:14.156Z",
     "version": "WzI4LDFd"
+  }
+}
+
+exports['Agent Adapter list should list all agents - create (17)'] = {
+  "results": {
+    "type": "agents",
+    "id": "18671e80-beb5-11e9-8ad6-b30c30b02632",
+    "attributes": {
+      "shared_id": "agent16",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-14T17:01:01.928Z",
+    "version": "WzM2LDFd"
   }
 }
 
@@ -2124,6 +2678,266 @@ exports['Agent Adapter list should list all agents - create (19)'] = {
 exports['Agent Adapter list should list all agents - create (2)'] = {
   "thrownError": "{\"msg\":\"[mapper_parsing_exception] failed to parse field [agents.local_metadata] of type [text] in document with id 'agents:e4a4ca50-bdc6-11e9-b03d-4b4aa76b8b10'. Preview of field's value: '{host=test.fr}'\",\"path\":\"/.kibana/_doc/agents%3Ae4a4ca50-bdc6-11e9-b03d-4b4aa76b8b10\",\"query\":{\"refresh\":\"wait_for\"},\"body\":\"{\\\"agents\\\":{\\\"shared_id\\\":\\\"agent1\\\",\\\"active\\\":false,\\\"access_token\\\":\\\"TOKEN_1\\\",\\\"config_id\\\":\\\"config_id_1\\\",\\\"config_shared_id\\\":\\\"shared_config_id_1\\\",\\\"type\\\":\\\"EPHEMERAL\\\",\\\"version\\\":\\\"1\\\",\\\"local_metadata\\\":{\\\"host\\\":\\\"test.fr\\\"},\\\"user_provided_metadata\\\":{\\\"color\\\":\\\"red\\\"},\\\"enrolled_at\\\":\\\"2019-08-06T19:35:14.861Z\\\"},\\\"type\\\":\\\"agents\\\",\\\"references\\\":[],\\\"updated_at\\\":\\\"2019-08-13T12:35:54.868Z\\\"}\",\"statusCode\":400,\"response\":\"{\\\"error\\\":{\\\"root_cause\\\":[{\\\"type\\\":\\\"mapper_parsing_exception\\\",\\\"reason\\\":\\\"failed to parse field [agents.local_metadata] of type [text] in document with id 'agents:e4a4ca50-bdc6-11e9-b03d-4b4aa76b8b10'. Preview of field's value: '{host=test.fr}'\\\"}],\\\"type\\\":\\\"mapper_parsing_exception\\\",\\\"reason\\\":\\\"failed to parse field [agents.local_metadata] of type [text] in document with id 'agents:e4a4ca50-bdc6-11e9-b03d-4b4aa76b8b10'. Preview of field's value: '{host=test.fr}'\\\",\\\"caused_by\\\":{\\\"type\\\":\\\"illegal_state_exception\\\",\\\"reason\\\":\\\"Can't get text on a START_OBJECT at 1:189\\\"}},\\\"status\\\":400}\"}",
   "results": null
+}
+
+exports['Agent Adapter list should list all agents - create (20)'] = {
+  "results": {
+    "type": "agents",
+    "id": "425d5c40-beba-11e9-9ac4-cd63a8641634",
+    "attributes": {
+      "shared_id": "agent19",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-14T17:37:59.811Z",
+    "version": "WzQ5LDFd"
+  }
 }
 
 exports['Agent Adapter list should list all agents - create (4)'] = {
@@ -5691,121 +6505,7 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
     "saved_objects": [
       {
         "type": "agents",
-        "id": "bb822180-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent10",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-15T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.352Z",
-        "version": "WzE5LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb7e29e0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent2",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-07T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.326Z",
-        "version": "WzM0LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb85a3f0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent18",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-23T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.375Z",
-        "version": "WzM2LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb80e900-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent8",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-13T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.344Z",
-        "version": "WzE4LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb7cca50-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent0",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-05T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.316Z",
-        "version": "WzIwLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb8507b0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent17",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-22T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.371Z",
-        "version": "WzM3LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb7e9f10-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2d123d90-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent3",
           "active": false,
@@ -5819,14 +6519,14 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
           "enrolled_at": "2019-08-08T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:55.328Z",
-        "version": "WzIyLDFd"
+        "updated_at": "2019-08-14T17:51:43.080Z",
+        "version": "WzMwLDFd"
       },
       {
         "type": "agents",
-        "id": "bb826fa0-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2d14fcb0-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
-          "shared_id": "agent11",
+          "shared_id": "agent8",
           "active": false,
           "access_token": "TOKEN_1",
           "config_id": "config_id_1",
@@ -5835,148 +6535,15 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
           "version": "1",
           "local_metadata": "{\"host\":\"test.fr\"}",
           "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-16T19:35:14.861Z"
+          "enrolled_at": "2019-08-13T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:55.354Z",
-        "version": "WzIxLDFd"
+        "updated_at": "2019-08-14T17:51:43.099Z",
+        "version": "WzMzLDFd"
       },
       {
         "type": "agents",
-        "id": "bb85f210-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent19",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-24T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.377Z",
-        "version": "WzM1LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb809ae0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent7",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-12T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.342Z",
-        "version": "WzIzLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb83cf30-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent14",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-19T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.363Z",
-        "version": "WzI0LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb81ac50-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent9",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-14T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.349Z",
-        "version": "WzI1LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb84b990-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent16",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-21T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.369Z",
-        "version": "WzI2LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb7fd790-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent5",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-10T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.337Z",
-        "version": "WzI3LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb838110-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent13",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-18T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.361Z",
-        "version": "WzI4LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb8332f0-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2d16d170-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent12",
           "active": false,
@@ -5990,14 +6557,14 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
           "enrolled_at": "2019-08-17T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:55.359Z",
-        "version": "WzI5LDFd"
+        "updated_at": "2019-08-14T17:51:43.111Z",
+        "version": "WzQyLDFd"
       },
       {
         "type": "agents",
-        "id": "bb7f3b50-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2d108fe0-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
-          "shared_id": "agent4",
+          "shared_id": "agent0",
           "active": false,
           "access_token": "TOKEN_1",
           "config_id": "config_id_1",
@@ -6006,15 +6573,53 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
           "version": "1",
           "local_metadata": "{\"host\":\"test.fr\"}",
           "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-09T19:35:14.861Z"
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:55.332Z",
-        "version": "WzMwLDFd"
+        "updated_at": "2019-08-14T17:51:43.070Z",
+        "version": "WzMxLDFd"
       },
       {
         "type": "agents",
-        "id": "bb7d6690-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2d15e710-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.105Z",
+        "version": "WzQwLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d1af020-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent19",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.138Z",
+        "version": "WzQxLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d112c20-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -6028,12 +6633,12 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
           "enrolled_at": "2019-08-06T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:55.321Z",
-        "version": "WzMxLDFd"
+        "updated_at": "2019-08-14T17:51:43.074Z",
+        "version": "WzMyLDFd"
       },
       {
         "type": "agents",
-        "id": "bb846b70-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2d18cd40-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent15",
           "active": false,
@@ -6047,12 +6652,202 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
           "enrolled_at": "2019-08-20T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:55.367Z",
-        "version": "WzMyLDFd"
+        "updated_at": "2019-08-14T17:51:43.124Z",
+        "version": "WzQzLDFd"
       },
       {
         "type": "agents",
-        "id": "bb8025b0-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2d11a150-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-07T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.077Z",
+        "version": "WzM1LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d165c40-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent11",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-16T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.108Z",
+        "version": "WzQ3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d1571e0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent9",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-14T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.102Z",
+        "version": "WzM5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d194270-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent16",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-21T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.126Z",
+        "version": "WzQ5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d12b2c0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent4",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-09T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.083Z",
+        "version": "WzM3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d199090-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.129Z",
+        "version": "WzQ0LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d148780-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent7",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-12T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.096Z",
+        "version": "WzM2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d185810-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent14",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-19T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.121Z",
+        "version": "WzQ2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d1327f0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent5",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.086Z",
+        "version": "WzM4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d1a05c0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent18",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-23T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.132Z",
+        "version": "WzQ4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d139d20-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent6",
           "active": false,
@@ -6066,8 +6861,27 @@ exports['Agent Adapter list should list all agents - find (21)'] = {
           "enrolled_at": "2019-08-11T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:55.339Z",
-        "version": "WzMzLDFd"
+        "updated_at": "2019-08-14T17:51:43.090Z",
+        "version": "WzM0LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d17e2e0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent13",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-18T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.118Z",
+        "version": "WzQ1LDFd"
       }
     ]
   }
@@ -6081,121 +6895,7 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
     "saved_objects": [
       {
         "type": "agents",
-        "id": "bb822180-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent10",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-15T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.352Z",
-        "version": "WzE5LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb7e29e0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent2",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-07T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.326Z",
-        "version": "WzM0LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb85a3f0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent18",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-23T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.375Z",
-        "version": "WzM2LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb80e900-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent8",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-13T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.344Z",
-        "version": "WzE4LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb7cca50-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent0",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-05T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.316Z",
-        "version": "WzIwLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb8507b0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent17",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-22T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.371Z",
-        "version": "WzM3LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb7e9f10-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2d123d90-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent3",
           "active": false,
@@ -6209,14 +6909,14 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
           "enrolled_at": "2019-08-08T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:55.328Z",
-        "version": "WzIyLDFd"
+        "updated_at": "2019-08-14T17:51:43.080Z",
+        "version": "WzMwLDFd"
       },
       {
         "type": "agents",
-        "id": "bb826fa0-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2d14fcb0-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
-          "shared_id": "agent11",
+          "shared_id": "agent8",
           "active": false,
           "access_token": "TOKEN_1",
           "config_id": "config_id_1",
@@ -6225,148 +6925,15 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
           "version": "1",
           "local_metadata": "{\"host\":\"test.fr\"}",
           "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-16T19:35:14.861Z"
+          "enrolled_at": "2019-08-13T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:55.354Z",
-        "version": "WzIxLDFd"
+        "updated_at": "2019-08-14T17:51:43.099Z",
+        "version": "WzMzLDFd"
       },
       {
         "type": "agents",
-        "id": "bb85f210-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent19",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-24T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.377Z",
-        "version": "WzM1LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb809ae0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent7",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-12T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.342Z",
-        "version": "WzIzLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb83cf30-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent14",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-19T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.363Z",
-        "version": "WzI0LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb81ac50-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent9",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-14T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.349Z",
-        "version": "WzI1LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb84b990-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent16",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-21T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.369Z",
-        "version": "WzI2LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb7fd790-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent5",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-10T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.337Z",
-        "version": "WzI3LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb838110-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent13",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-18T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:41:55.361Z",
-        "version": "WzI4LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "bb8332f0-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2d16d170-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent12",
           "active": false,
@@ -6380,14 +6947,14 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
           "enrolled_at": "2019-08-17T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:55.359Z",
-        "version": "WzI5LDFd"
+        "updated_at": "2019-08-14T17:51:43.111Z",
+        "version": "WzQyLDFd"
       },
       {
         "type": "agents",
-        "id": "bb7f3b50-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2d108fe0-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
-          "shared_id": "agent4",
+          "shared_id": "agent0",
           "active": false,
           "access_token": "TOKEN_1",
           "config_id": "config_id_1",
@@ -6396,15 +6963,53 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
           "version": "1",
           "local_metadata": "{\"host\":\"test.fr\"}",
           "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-09T19:35:14.861Z"
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:55.332Z",
-        "version": "WzMwLDFd"
+        "updated_at": "2019-08-14T17:51:43.070Z",
+        "version": "WzMxLDFd"
       },
       {
         "type": "agents",
-        "id": "bb7d6690-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2d15e710-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.105Z",
+        "version": "WzQwLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d1af020-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent19",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.138Z",
+        "version": "WzQxLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d112c20-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -6418,12 +7023,12 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
           "enrolled_at": "2019-08-06T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:55.321Z",
-        "version": "WzMxLDFd"
+        "updated_at": "2019-08-14T17:51:43.074Z",
+        "version": "WzMyLDFd"
       },
       {
         "type": "agents",
-        "id": "bb846b70-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2d18cd40-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent15",
           "active": false,
@@ -6437,12 +7042,202 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
           "enrolled_at": "2019-08-20T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:55.367Z",
-        "version": "WzMyLDFd"
+        "updated_at": "2019-08-14T17:51:43.124Z",
+        "version": "WzQzLDFd"
       },
       {
         "type": "agents",
-        "id": "bb8025b0-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2d11a150-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-07T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.077Z",
+        "version": "WzM1LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d165c40-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent11",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-16T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.108Z",
+        "version": "WzQ3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d1571e0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent9",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-14T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.102Z",
+        "version": "WzM5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d194270-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent16",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-21T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.126Z",
+        "version": "WzQ5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d12b2c0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent4",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-09T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.083Z",
+        "version": "WzM3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d199090-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.129Z",
+        "version": "WzQ0LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d148780-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent7",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-12T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.096Z",
+        "version": "WzM2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d185810-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent14",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-19T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.121Z",
+        "version": "WzQ2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d1327f0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent5",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.086Z",
+        "version": "WzM4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d1a05c0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent18",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-23T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.132Z",
+        "version": "WzQ4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d139d20-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent6",
           "active": false,
@@ -6456,8 +7251,27 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
           "enrolled_at": "2019-08-11T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:55.339Z",
-        "version": "WzMzLDFd"
+        "updated_at": "2019-08-14T17:51:43.090Z",
+        "version": "WzM0LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "2d17e2e0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent13",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-18T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:51:43.118Z",
+        "version": "WzQ1LDFd"
       }
     ]
   }
@@ -6466,6 +7280,266 @@ exports['Agent Adapter list should list all agents - find (22)'] = {
 exports['Agent Adapter list should support to sort by enrolled_at date ASC - create (10)'] = {
   "thrownError": "{\"msg\":\"[mapper_parsing_exception] failed to parse field [agents.local_metadata] of type [text] in document with id 'agents:e4be1eb0-bdc6-11e9-b03d-4b4aa76b8b10'. Preview of field's value: '{host=test.fr}'\",\"path\":\"/.kibana/_doc/agents%3Ae4be1eb0-bdc6-11e9-b03d-4b4aa76b8b10\",\"query\":{\"refresh\":\"wait_for\"},\"body\":\"{\\\"agents\\\":{\\\"shared_id\\\":\\\"agent9\\\",\\\"active\\\":false,\\\"access_token\\\":\\\"TOKEN_1\\\",\\\"config_id\\\":\\\"config_id_1\\\",\\\"config_shared_id\\\":\\\"shared_config_id_1\\\",\\\"type\\\":\\\"EPHEMERAL\\\",\\\"version\\\":\\\"1\\\",\\\"local_metadata\\\":{\\\"host\\\":\\\"test.fr\\\"},\\\"user_provided_metadata\\\":{\\\"color\\\":\\\"red\\\"},\\\"enrolled_at\\\":\\\"2019-08-14T19:35:14.861Z\\\"},\\\"type\\\":\\\"agents\\\",\\\"references\\\":[],\\\"updated_at\\\":\\\"2019-08-13T12:35:55.035Z\\\"}\",\"statusCode\":400,\"response\":\"{\\\"error\\\":{\\\"root_cause\\\":[{\\\"type\\\":\\\"mapper_parsing_exception\\\",\\\"reason\\\":\\\"failed to parse field [agents.local_metadata] of type [text] in document with id 'agents:e4be1eb0-bdc6-11e9-b03d-4b4aa76b8b10'. Preview of field's value: '{host=test.fr}'\\\"}],\\\"type\\\":\\\"mapper_parsing_exception\\\",\\\"reason\\\":\\\"failed to parse field [agents.local_metadata] of type [text] in document with id 'agents:e4be1eb0-bdc6-11e9-b03d-4b4aa76b8b10'. Preview of field's value: '{host=test.fr}'\\\",\\\"caused_by\\\":{\\\"type\\\":\\\"illegal_state_exception\\\",\\\"reason\\\":\\\"Can't get text on a START_OBJECT at 1:189\\\"}},\\\"status\\\":400}\"}",
   "results": null
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create (14)'] = {
+  "results": {
+    "type": "agents",
+    "id": "2551d9f0-beb5-11e9-8ad6-b30c30b02632",
+    "attributes": {
+      "shared_id": "agent13",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-14T17:01:23.599Z",
+    "version": "WzczLDFd"
+  }
 }
 
 exports['Agent Adapter list should support to sort by enrolled_at date ASC - create (15)'] = {
@@ -6729,6 +7803,266 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - cre
     "references": [],
     "updated_at": "2019-08-08T14:17:40.285Z",
     "version": "WzYzLDFd"
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create (16)'] = {
+  "results": {
+    "type": "agents",
+    "id": "39f5cd10-bebc-11e9-babd-cf1c987b236b",
+    "attributes": {
+      "shared_id": "agent15",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-14T17:52:04.704Z",
+    "version": "Wzg2LDFd"
   }
 }
 
@@ -6999,7 +8333,7 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - cre
 exports['Agent Adapter list should support to sort by enrolled_at date ASC - create (20)'] = {
   "results": {
     "type": "agents",
-    "id": "c855d280-bdc7-11e9-ad76-19114a620e6a",
+    "id": "4f160b30-beba-11e9-9ac4-cd63a8641634",
     "attributes": {
       "shared_id": "agent19",
       "active": false,
@@ -7251,8 +8585,8 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - cre
       }
     },
     "references": [],
-    "updated_at": "2019-08-13T12:42:16.872Z",
-    "version": "Wzc2LDFd"
+    "updated_at": "2019-08-14T17:38:21.155Z",
+    "version": "Wzg5LDFd"
   }
 }
 
@@ -10426,7 +11760,7 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - fin
     "saved_objects": [
       {
         "type": "agents",
-        "id": "c84c5ca0-bdc7-11e9-ad76-19114a620e6a",
+        "id": "39ecf370-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent0",
           "active": false,
@@ -10440,12 +11774,12 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - fin
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:42:16.810Z",
-        "version": "WzU4LDFd"
+        "updated_at": "2019-08-14T17:52:04.647Z",
+        "version": "Wzc5LDFd"
       },
       {
         "type": "agents",
-        "id": "c84d4700-bdc7-11e9-ad76-19114a620e6a",
+        "id": "39edb6c0-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent1",
           "active": false,
@@ -10459,12 +11793,12 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - fin
           "enrolled_at": "2019-08-06T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:42:16.815Z",
-        "version": "WzYzLDFd"
+        "updated_at": "2019-08-14T17:52:04.652Z",
+        "version": "Wzc4LDFd"
       },
       {
         "type": "agents",
-        "id": "c84dbc30-bdc7-11e9-ad76-19114a620e6a",
+        "id": "39ee5300-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent2",
           "active": false,
@@ -10478,8 +11812,8 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - fin
           "enrolled_at": "2019-08-07T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:42:16.818Z",
-        "version": "WzY3LDFd"
+        "updated_at": "2019-08-14T17:52:04.655Z",
+        "version": "WzcxLDFd"
       }
     ]
   }
@@ -10493,140 +11827,7 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - fin
     "saved_objects": [
       {
         "type": "agents",
-        "id": "c84ea690-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent4",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-09T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.825Z",
-        "version": "WzYxLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c85165b0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent9",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-14T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.843Z",
-        "version": "WzU5LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c84c5ca0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent0",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-05T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.810Z",
-        "version": "WzU4LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c854c110-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent16",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-21T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.865Z",
-        "version": "WzcyLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c855d280-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent19",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-24T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.872Z",
-        "version": "Wzc2LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c851dae0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent10",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-15T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.846Z",
-        "version": "WzYwLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c8558460-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent18",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-23T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.870Z",
-        "version": "Wzc0LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c84dbc30-bdc7-11e9-ad76-19114a620e6a",
+        "id": "39ee5300-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent2",
           "active": false,
@@ -10640,202 +11841,12 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - fin
           "enrolled_at": "2019-08-07T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:42:16.818Z",
-        "version": "WzY3LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c84fdf10-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent6",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-11T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.832Z",
-        "version": "WzczLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c8511790-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent8",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-13T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.840Z",
+        "updated_at": "2019-08-14T17:52:04.655Z",
         "version": "WzcxLDFd"
       },
       {
         "type": "agents",
-        "id": "c852ec50-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent12",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-17T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.853Z",
-        "version": "WzcwLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c8502d30-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent7",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-12T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.835Z",
-        "version": "WzY4LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c8536180-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent13",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-18T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.855Z",
-        "version": "WzY5LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c84f69e0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent5",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-10T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.830Z",
-        "version": "WzY1LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c8529e30-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent11",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-16T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.851Z",
-        "version": "WzY0LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c853fdc0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent14",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-19T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.860Z",
-        "version": "WzY2LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c84d4700-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent1",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-06T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.815Z",
-        "version": "WzYzLDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c85472f0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent15",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-20T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:16.863Z",
-        "version": "Wzc1LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "c84e3160-bdc7-11e9-ad76-19114a620e6a",
+        "id": "39eec830-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent3",
           "active": false,
@@ -10849,12 +11860,164 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - fin
           "enrolled_at": "2019-08-08T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:42:16.822Z",
-        "version": "WzYyLDFd"
+        "updated_at": "2019-08-14T17:52:04.659Z",
+        "version": "WzczLDFd"
       },
       {
         "type": "agents",
-        "id": "c8550f30-bdc7-11e9-ad76-19114a620e6a",
+        "id": "39f5cd10-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent15",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-20T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.704Z",
+        "version": "Wzg2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39f41f60-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent12",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-17T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.694Z",
+        "version": "WzgwLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39ecf370-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent0",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.647Z",
+        "version": "Wzc5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39edb6c0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-06T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.652Z",
+        "version": "Wzc4LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39f3aa30-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent11",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-16T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.691Z",
+        "version": "WzcwLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39f271b0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent9",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-14T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.683Z",
+        "version": "Wzc1LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39efb290-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent4",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-09T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.665Z",
+        "version": "Wzc2LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39f027c0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent5",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.668Z",
+        "version": "WzcyLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39f69060-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent17",
           "active": false,
@@ -10868,8 +12031,179 @@ exports['Agent Adapter list should support to sort by enrolled_at date ASC - fin
           "enrolled_at": "2019-08-22T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:42:16.867Z",
+        "updated_at": "2019-08-14T17:52:04.710Z",
+        "version": "Wzg5LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39f18750-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent7",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-12T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.677Z",
         "version": "Wzc3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39f70590-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent18",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-23T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.713Z",
+        "version": "Wzg3LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39f1fc80-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent8",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-13T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.680Z",
+        "version": "Wzc0LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39f4e2b0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent13",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-18T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.699Z",
+        "version": "WzgxLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39f0c400-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent6",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-11T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.671Z",
+        "version": "WzgyLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39f61b30-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent16",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-21T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.707Z",
+        "version": "WzgzLDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39f35c10-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.688Z",
+        "version": "Wzg0LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39f557e0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent14",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-19T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.702Z",
+        "version": "Wzg1LDFd"
+      },
+      {
+        "type": "agents",
+        "id": "39f77ac0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent19",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:04.715Z",
+        "version": "Wzg4LDFd"
       }
     ]
   }
@@ -11411,7 +12745,7 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - cr
 exports['Agent Adapter list should support to sort by enrolled_at date DESC - create (13)'] = {
   "results": {
     "type": "agents",
-    "id": "1c536c70-bd0b-11e9-ba77-eb46c42566de",
+    "id": "5beaa690-beba-11e9-9ac4-cd63a8641634",
     "attributes": {
       "shared_id": "agent12",
       "active": false,
@@ -11420,12 +12754,8 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - cr
       "config_shared_id": "shared_config_id_1",
       "type": "EPHEMERAL",
       "version": "1",
-      "local_metadata": {
-        "host": "test.fr"
-      },
-      "user_provided_metadata": {
-        "color": "red"
-      },
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
       "enrolled_at": {
         "_isAMomentObject": true,
         "_i": "2019-08-05T19:35:14.861Z",
@@ -11667,15 +12997,15 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - cr
       }
     },
     "references": [],
-    "updated_at": "2019-08-12T14:11:42.903Z",
-    "version": "WzExNCwxXQ=="
+    "updated_at": "2019-08-14T17:38:42.681Z",
+    "version": "WzEyOCwxXQ=="
   }
 }
 
 exports['Agent Adapter list should support to sort by enrolled_at date DESC - create (14)'] = {
   "results": {
     "type": "agents",
-    "id": "faedddd0-bd10-11e9-b718-9b4bb3a0f100",
+    "id": "3241c580-beb5-11e9-8ad6-b30c30b02632",
     "attributes": {
       "shared_id": "agent13",
       "active": false,
@@ -11684,12 +13014,8 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - cr
       "config_shared_id": "shared_config_id_1",
       "type": "EPHEMERAL",
       "version": "1",
-      "local_metadata": {
-        "host": "test.fr"
-      },
-      "user_provided_metadata": {
-        "color": "red"
-      },
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
       "enrolled_at": {
         "_isAMomentObject": true,
         "_i": "2019-08-05T19:35:14.861Z",
@@ -11931,8 +13257,8 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - cr
       }
     },
     "references": [],
-    "updated_at": "2019-08-12T14:53:43.853Z",
-    "version": "Wzk3LDFd"
+    "updated_at": "2019-08-14T17:01:45.304Z",
+    "version": "WzExMSwxXQ=="
   }
 }
 
@@ -12197,6 +13523,266 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - cr
     "references": [],
     "updated_at": "2019-08-12T15:05:48.374Z",
     "version": "WzExMywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create (19)'] = {
+  "results": {
+    "type": "agents",
+    "id": "46e4a730-bebc-11e9-babd-cf1c987b236b",
+    "attributes": {
+      "shared_id": "agent18",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": {
+        "_isAMomentObject": true,
+        "_i": "2019-08-05T19:35:14.861Z",
+        "_f": "YYYY-MM-DDTHH:mm:ss.SSSSZ",
+        "_tzm": 0,
+        "_isUTC": false,
+        "_pf": {
+          "empty": false,
+          "unusedTokens": [],
+          "unusedInput": [],
+          "overflow": -1,
+          "charsLeftOver": 0,
+          "nullInput": false,
+          "invalidMonth": null,
+          "invalidFormat": false,
+          "userInvalidated": false,
+          "iso": true,
+          "parsedDateParts": [
+            2019,
+            7,
+            5,
+            19,
+            35,
+            14,
+            861
+          ],
+          "rfc2822": false,
+          "weekdayMismatch": false
+        },
+        "_locale": {
+          "_calendar": {
+            "sameDay": "[Today at] LT",
+            "nextDay": "[Tomorrow at] LT",
+            "nextWeek": "dddd [at] LT",
+            "lastDay": "[Yesterday at] LT",
+            "lastWeek": "[Last] dddd [at] LT",
+            "sameElse": "L"
+          },
+          "_longDateFormat": {
+            "LTS": "h:mm:ss A",
+            "LT": "h:mm A",
+            "L": "MM/DD/YYYY",
+            "LL": "MMMM D, YYYY",
+            "LLL": "MMMM D, YYYY h:mm A",
+            "LLLL": "dddd, MMMM D, YYYY h:mm A"
+          },
+          "_invalidDate": "Invalid date",
+          "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+          "_dayOfMonthOrdinalParse": {},
+          "_relativeTime": {
+            "future": "in %s",
+            "past": "%s ago",
+            "s": "a few seconds",
+            "ss": "%d seconds",
+            "m": "a minute",
+            "mm": "%d minutes",
+            "h": "an hour",
+            "hh": "%d hours",
+            "d": "a day",
+            "dd": "%d days",
+            "M": "a month",
+            "MM": "%d months",
+            "y": "a year",
+            "yy": "%d years"
+          },
+          "_months": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "_monthsShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "_week": {
+            "dow": 0,
+            "doy": 6
+          },
+          "_weekdays": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "_weekdaysMin": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+          ],
+          "_weekdaysShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+          ],
+          "_meridiemParse": {},
+          "_abbr": "en",
+          "_config": {
+            "calendar": {
+              "sameDay": "[Today at] LT",
+              "nextDay": "[Tomorrow at] LT",
+              "nextWeek": "dddd [at] LT",
+              "lastDay": "[Yesterday at] LT",
+              "lastWeek": "[Last] dddd [at] LT",
+              "sameElse": "L"
+            },
+            "longDateFormat": {
+              "LTS": "h:mm:ss A",
+              "LT": "h:mm A",
+              "L": "MM/DD/YYYY",
+              "LL": "MMMM D, YYYY",
+              "LLL": "MMMM D, YYYY h:mm A",
+              "LLLL": "dddd, MMMM D, YYYY h:mm A"
+            },
+            "invalidDate": "Invalid date",
+            "ordinal": "[UNMOCKED-UNSNAPSHOTTED-FUNCTION]",
+            "dayOfMonthOrdinalParse": {},
+            "relativeTime": {
+              "future": "in %s",
+              "past": "%s ago",
+              "s": "a few seconds",
+              "ss": "%d seconds",
+              "m": "a minute",
+              "mm": "%d minutes",
+              "h": "an hour",
+              "hh": "%d hours",
+              "d": "a day",
+              "dd": "%d days",
+              "M": "a month",
+              "MM": "%d months",
+              "y": "a year",
+              "yy": "%d years"
+            },
+            "months": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "monthsShort": [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec"
+            ],
+            "week": {
+              "dow": 0,
+              "doy": 6
+            },
+            "weekdays": [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "weekdaysMin": [
+              "Su",
+              "Mo",
+              "Tu",
+              "We",
+              "Th",
+              "Fr",
+              "Sa"
+            ],
+            "weekdaysShort": [
+              "Sun",
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat"
+            ],
+            "meridiemParse": {},
+            "abbr": "en"
+          },
+          "_dayOfMonthOrdinalParseLenient": {}
+        },
+        "_a": [
+          2019,
+          7,
+          5,
+          19,
+          35,
+          14,
+          861
+        ],
+        "_d": {},
+        "_isValid": true,
+        "_z": null
+      }
+    },
+    "references": [],
+    "updated_at": "2019-08-14T17:52:26.403Z",
+    "version": "WzEyNiwxXQ=="
   }
 }
 
@@ -12850,7 +14436,7 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
     "saved_objects": [
       {
         "type": "agents",
-        "id": "d518baa0-bdc7-11e9-ad76-19114a620e6a",
+        "id": "46e4f550-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent19",
           "active": false,
@@ -12864,12 +14450,12 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
           "enrolled_at": "2019-08-24T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:42:38.281Z",
-        "version": "WzExNywxXQ=="
+        "updated_at": "2019-08-14T17:52:26.405Z",
+        "version": "WzEyNywxXQ=="
       },
       {
         "type": "agents",
-        "id": "d5184570-bdc7-11e9-ad76-19114a620e6a",
+        "id": "46e4a730-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent18",
           "active": false,
@@ -12883,12 +14469,12 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
           "enrolled_at": "2019-08-23T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:42:38.279Z",
-        "version": "WzExNiwxXQ=="
+        "updated_at": "2019-08-14T17:52:26.403Z",
+        "version": "WzEyNiwxXQ=="
       },
       {
         "type": "agents",
-        "id": "d517f750-bdc7-11e9-ad76-19114a620e6a",
+        "id": "46e43200-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent17",
           "active": false,
@@ -12902,8 +14488,8 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
           "enrolled_at": "2019-08-22T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:42:38.277Z",
-        "version": "WzExNCwxXQ=="
+        "updated_at": "2019-08-14T17:52:26.400Z",
+        "version": "WzEyOCwxXQ=="
       }
     ]
   }
@@ -12917,121 +14503,7 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
     "saved_objects": [
       {
         "type": "agents",
-        "id": "d5173400-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent15",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-20T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:38.272Z",
-        "version": "WzExMiwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "d515ad60-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent11",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-16T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:38.261Z",
-        "version": "WzEwMCwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "d515fb80-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent12",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-17T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:38.264Z",
-        "version": "WzEwNywxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "d5100810-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent0",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-05T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:38.224Z",
-        "version": "WzEwMywxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "d5125200-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent5",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-10T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:38.240Z",
-        "version": "Wzk5LDFd"
-      },
-      {
-        "type": "agents",
-        "id": "d514c300-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent9",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-14T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:38.256Z",
-        "version": "WzExMCwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "d512c730-bdc7-11e9-ad76-19114a620e6a",
+        "id": "46de8cb0-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent6",
           "active": false,
@@ -13045,202 +14517,12 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
           "enrolled_at": "2019-08-11T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:42:38.243Z",
-        "version": "WzEwOCwxXQ=="
+        "updated_at": "2019-08-14T17:52:26.363Z",
+        "version": "WzExOSwxXQ=="
       },
       {
         "type": "agents",
-        "id": "d511dcd0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent4",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-09T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:38.237Z",
-        "version": "WzEwMSwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "d5178220-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent16",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-21T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:38.274Z",
-        "version": "WzExNSwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "d516bed0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent14",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-19T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:38.269Z",
-        "version": "WzExMywxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "d518baa0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent19",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-24T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:38.281Z",
-        "version": "WzExNywxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "d5133c60-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent7",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-12T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:38.246Z",
-        "version": "WzEwNCwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "d510f270-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent2",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-07T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:38.231Z",
-        "version": "WzEwOSwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "d5107d40-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent1",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-06T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:38.228Z",
-        "version": "WzEwMiwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "d5153830-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent10",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-15T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:38.259Z",
-        "version": "WzEwNSwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "d51670b0-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent13",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-18T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:38.267Z",
-        "version": "WzExMSwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "d517f750-bdc7-11e9-ad76-19114a620e6a",
-        "attributes": {
-          "shared_id": "agent17",
-          "active": false,
-          "access_token": "TOKEN_1",
-          "config_id": "config_id_1",
-          "config_shared_id": "shared_config_id_1",
-          "type": "EPHEMERAL",
-          "version": "1",
-          "local_metadata": "{\"host\":\"test.fr\"}",
-          "user_provided_metadata": "{\"color\":\"red\"}",
-          "enrolled_at": "2019-08-22T19:35:14.861Z"
-        },
-        "references": [],
-        "updated_at": "2019-08-13T12:42:38.277Z",
-        "version": "WzExNCwxXQ=="
-      },
-      {
-        "type": "agents",
-        "id": "d5144dd0-bdc7-11e9-ad76-19114a620e6a",
+        "id": "46df5000-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent8",
           "active": false,
@@ -13254,12 +14536,126 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
           "enrolled_at": "2019-08-13T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:42:38.253Z",
-        "version": "WzEwNiwxXQ=="
+        "updated_at": "2019-08-14T17:52:26.368Z",
+        "version": "WzExMCwxXQ=="
       },
       {
         "type": "agents",
-        "id": "d5184570-bdc7-11e9-ad76-19114a620e6a",
+        "id": "46dc90e0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-07T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:26.350Z",
+        "version": "WzExNywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "46dda250-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent4",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-09T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:26.357Z",
+        "version": "WzExNCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "46dba680-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent0",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:26.343Z",
+        "version": "WzEyNSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "46e4f550-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent19",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:26.405Z",
+        "version": "WzEyNywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "46e172e0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent13",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-18T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:26.382Z",
+        "version": "WzEyMCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "46e347a0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent15",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-20T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:26.394Z",
+        "version": "WzEyNCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "46e4a730-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent18",
           "active": false,
@@ -13273,12 +14669,88 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
           "enrolled_at": "2019-08-23T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:42:38.279Z",
+        "updated_at": "2019-08-14T17:52:26.403Z",
+        "version": "WzEyNiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "46e03a60-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:26.374Z",
+        "version": "WzExNSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "46df01e0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent7",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-12T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:26.365Z",
+        "version": "WzExMywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "46e43200-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:26.400Z",
+        "version": "WzEyOCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "46dc1bb0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-06T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:26.347Z",
         "version": "WzExNiwxXQ=="
       },
       {
         "type": "agents",
-        "id": "d51167a0-bdc7-11e9-ad76-19114a620e6a",
+        "id": "46dd2d20-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent3",
           "active": false,
@@ -13292,8 +14764,122 @@ exports['Agent Adapter list should support to sort by enrolled_at date DESC - fi
           "enrolled_at": "2019-08-08T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:42:38.234Z",
-        "version": "Wzk4LDFd"
+        "updated_at": "2019-08-14T17:52:26.353Z",
+        "version": "WzEyMiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "46e0fdb0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent12",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-17T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:26.379Z",
+        "version": "WzEyMywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "46e3bcd0-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent16",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-21T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:26.397Z",
+        "version": "WzEyOSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "46e2f980-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent14",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-19T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:26.392Z",
+        "version": "WzEyMSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "46e0af90-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent11",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-16T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:26.376Z",
+        "version": "WzExOCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "46de1780-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent5",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:26.360Z",
+        "version": "WzExMSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "46dfc530-bebc-11e9-babd-cf1c987b236b",
+        "attributes": {
+          "shared_id": "agent9",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-14T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-14T17:52:26.371Z",
+        "version": "WzExMiwxXQ=="
       }
     ]
   }
@@ -13379,7 +14965,7 @@ exports['Agent Adapter update should allow to update an agent - create (4)'] = {
 exports['Agent Adapter update should allow to update an agent - create (5)'] = {
   "results": {
     "type": "agents",
-    "id": "b87110f0-bdc7-11e9-ad76-19114a620e6a",
+    "id": "2a05e7f0-bebc-11e9-babd-cf1c987b236b",
     "attributes": {
       "shared_id": "agent1",
       "active": false,
@@ -13393,8 +14979,8 @@ exports['Agent Adapter update should allow to update an agent - create (5)'] = {
       "enrolled_at": "2019-08-05T19:35:14.861Z"
     },
     "references": [],
-    "updated_at": "2019-08-13T12:41:50.207Z",
-    "version": "WzEyLDFd"
+    "updated_at": "2019-08-14T17:51:37.967Z",
+    "version": "WzI0LDFd"
   }
 }
 
@@ -13423,7 +15009,7 @@ exports['Agent Adapter update should allow to update an agent - find (3)'] = {
     "saved_objects": [
       {
         "type": "agents",
-        "id": "b69f1010-bdc7-11e9-ad76-19114a620e6a",
+        "id": "2831c430-bebc-11e9-babd-cf1c987b236b",
         "attributes": {
           "shared_id": "agent1",
           "active": true,
@@ -13437,8 +15023,8 @@ exports['Agent Adapter update should allow to update an agent - find (3)'] = {
           "enrolled_at": "2019-08-05T19:35:14.861Z"
         },
         "references": [],
-        "updated_at": "2019-08-13T12:41:48.178Z",
-        "version": "WzEwLDFd"
+        "updated_at": "2019-08-14T17:51:35.925Z",
+        "version": "WzIyLDFd"
       }
     ]
   }
@@ -13446,10 +15032,10 @@ exports['Agent Adapter update should allow to update an agent - find (3)'] = {
 
 exports['Agent Adapter update should allow to update an agent - get (2)'] = {
   "results": {
-    "id": "b69f1010-bdc7-11e9-ad76-19114a620e6a",
+    "id": "2831c430-bebc-11e9-babd-cf1c987b236b",
     "type": "agents",
-    "updated_at": "2019-08-13T12:41:48.178Z",
-    "version": "WzEwLDFd",
+    "updated_at": "2019-08-14T17:51:35.925Z",
+    "version": "WzIyLDFd",
     "attributes": {
       "shared_id": "agent1",
       "active": true,
@@ -13468,10 +15054,10 @@ exports['Agent Adapter update should allow to update an agent - get (2)'] = {
 
 exports['Agent Adapter update should allow to update an agent - update (1)'] = {
   "results": {
-    "id": "b69f1010-bdc7-11e9-ad76-19114a620e6a",
+    "id": "2831c430-bebc-11e9-babd-cf1c987b236b",
     "type": "agents",
-    "updated_at": "2019-08-13T12:41:48.178Z",
-    "version": "WzEwLDFd",
+    "updated_at": "2019-08-14T17:51:35.925Z",
+    "version": "WzIyLDFd",
     "references": [],
     "attributes": {
       "active": true

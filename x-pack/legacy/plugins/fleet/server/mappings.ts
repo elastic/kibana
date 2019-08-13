@@ -45,4 +45,29 @@ export const mappings = {
       },
     },
   },
+  tokens: {
+    properties: {
+      type: {
+        type: 'text',
+      },
+      token: {
+        type: 'text',
+      },
+      config_id: {
+        type: 'text',
+      },
+      config_shared_id: {
+        type: 'text',
+      },
+      created_at: {
+        type: 'date',
+      },
+      expire_at: {
+        type: 'date',
+      },
+      active: {
+        type: 'boolean',
+      },
+    },
+  },
 };
