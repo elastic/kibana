@@ -35,6 +35,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useEffect, useState, Fragment } from 'react';
 import { sortBy } from 'lodash';
+import { EuiSpacer } from '@elastic/eui';
 import { SavedQuery } from '../index';
 import { getAllSavedQueries, deleteSavedQuery } from '../lib/saved_query_service';
 import { Query } from '../../../query';
@@ -130,7 +131,14 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   );
 
   const savedQueryRows = () => {
-    const savedQueriesDisplayRows = savedQueries.slice(
+    const savedQueriesWithoutCurrent = savedQueries.filter(savedQuery => {
+      if (!loadedSavedQuery) return true;
+      return savedQuery.id !== loadedSavedQuery.id;
+    });
+    const savedQueriesReordered = loadedSavedQuery
+      ? [loadedSavedQuery, ...savedQueriesWithoutCurrent]
+      : [...savedQueriesWithoutCurrent];
+    const savedQueriesDisplayRows = savedQueriesReordered.slice(
       activePage * pageCount,
       activePage * pageCount + pageCount
     );
@@ -145,6 +153,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
               }}
               flush="left"
               data-test-subj={`load-saved-query-${savedQuery.attributes.title}-button`}
+              textProps={{ className: 'saved-query-list-item-text' }}
             >
               <EuiScreenReaderOnly>
                 <span>
