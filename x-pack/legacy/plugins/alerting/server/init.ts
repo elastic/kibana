@@ -74,7 +74,7 @@ export function init(server: Legacy.Server) {
   const alertTypeRegistry = new AlertTypeRegistry({
     getServices,
     taskManager: taskManager!,
-    fireAction: server.plugins.actions!.fire,
+    executeAction: server.plugins.actions!.execute,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
     getBasePath,
     spaceIdToNamespace,

@@ -245,9 +245,9 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      // fire the action
+      // execute the action
       await supertest
-        .post(`/api/action/${emailActionId}/_fire`)
+        .post(`/api/action/${emailActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {

@@ -53,7 +53,7 @@ const getCreateTaskRunnerFunctionParams = {
     name: 'My test alert',
     executor: jest.fn(),
   },
-  fireAction: jest.fn(),
+  executeAction: jest.fn(),
   encryptedSavedObjectsPlugin,
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
@@ -144,8 +144,8 @@ test('fireAction is called per alert instance that fired', async () => {
   });
   const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
   await runner.run();
-  expect(getCreateTaskRunnerFunctionParams.fireAction).toHaveBeenCalledTimes(1);
-  expect(getCreateTaskRunnerFunctionParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
+  expect(getCreateTaskRunnerFunctionParams.executeAction).toHaveBeenCalledTimes(1);
+  expect(getCreateTaskRunnerFunctionParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
             "apiKeyId": undefined,

@@ -7,7 +7,7 @@
 import { createFireHandler } from './create_fire_handler';
 
 const createFireHandlerParams = {
-  fireAction: jest.fn(),
+  executeAction: jest.fn(),
   spaceId: 'default',
   apiKeyId: '123',
   apiKeyValue: 'abc',
@@ -28,11 +28,11 @@ const createFireHandlerParams = {
 
 beforeEach(() => jest.resetAllMocks());
 
-test('calls fireAction per selected action', async () => {
+test('calls executeAction per selected action', async () => {
   const fireHandler = createFireHandler(createFireHandlerParams);
   await fireHandler('default', {}, {});
-  expect(createFireHandlerParams.fireAction).toHaveBeenCalledTimes(1);
-  expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
+  expect(createFireHandlerParams.executeAction).toHaveBeenCalledTimes(1);
+  expect(createFireHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
         "apiKeyId": "123",
@@ -49,17 +49,17 @@ test('calls fireAction per selected action', async () => {
   `);
 });
 
-test('limits fireAction per action group', async () => {
+test('limits executeAction per action group', async () => {
   const fireHandler = createFireHandler(createFireHandlerParams);
   await fireHandler('other-group', {}, {});
-  expect(createFireHandlerParams.fireAction).toMatchInlineSnapshot(`[MockFunction]`);
+  expect(createFireHandlerParams.executeAction).toMatchInlineSnapshot(`[MockFunction]`);
 });
 
 test('context attribute gets parameterized', async () => {
   const fireHandler = createFireHandler(createFireHandlerParams);
   await fireHandler('default', { value: 'context-val' }, {});
-  expect(createFireHandlerParams.fireAction).toHaveBeenCalledTimes(1);
-  expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
+  expect(createFireHandlerParams.executeAction).toHaveBeenCalledTimes(1);
+  expect(createFireHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
         "apiKeyId": "123",
@@ -79,8 +79,8 @@ test('context attribute gets parameterized', async () => {
 test('state attribute gets parameterized', async () => {
   const fireHandler = createFireHandler(createFireHandlerParams);
   await fireHandler('default', {}, { value: 'state-val' });
-  expect(createFireHandlerParams.fireAction).toHaveBeenCalledTimes(1);
-  expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
+  expect(createFireHandlerParams.executeAction).toHaveBeenCalledTimes(1);
+  expect(createFireHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
         "apiKeyId": "123",

@@ -24,7 +24,7 @@ const alertTypeRegistryParams = {
     };
   },
   taskManager,
-  fireAction: jest.fn(),
+  executeAction: jest.fn(),
   getBasePath: jest.fn().mockReturnValue(undefined),
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.create(),
@@ -85,7 +85,7 @@ Object {
     expect(firstCall.encryptedSavedObjectsPlugin).toBeTruthy();
     expect(firstCall.getBasePath).toBeTruthy();
     expect(firstCall.spaceIdToNamespace).toBeTruthy();
-    expect(firstCall.fireAction).toMatchInlineSnapshot(`[MockFunction]`);
+    expect(firstCall.executeAction).toMatchInlineSnapshot(`[MockFunction]`);
   });
 
   test('should throw an error if type is already registered', () => {

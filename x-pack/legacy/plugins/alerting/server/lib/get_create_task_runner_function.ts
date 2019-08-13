@@ -24,7 +24,7 @@ import {
 interface CreateTaskRunnerFunctionOptions {
   getServices: GetServicesFunction;
   alertType: AlertType;
-  fireAction: ActionsPlugin['fire'];
+  executeAction: ActionsPlugin['execute'];
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
@@ -37,7 +37,7 @@ interface TaskRunnerOptions {
 export function getCreateTaskRunnerFunction({
   getServices,
   alertType,
-  fireAction,
+  executeAction,
   encryptedSavedObjectsPlugin,
   spaceIdToNamespace,
   getBasePath,
@@ -93,7 +93,7 @@ export function getCreateTaskRunnerFunction({
         });
 
         const fireHandler = createFireHandler({
-          fireAction,
+          executeAction,
           apiKeyId,
           apiKeyValue,
           actions: actionsWithIds,

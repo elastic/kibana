@@ -20,7 +20,7 @@ import {
 interface ConstructorOptions {
   getServices: GetServicesFunction;
   taskManager: TaskManager;
-  fireAction: ActionsPlugin['fire'];
+  executeAction: ActionsPlugin['execute'];
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
@@ -29,7 +29,7 @@ interface ConstructorOptions {
 export class AlertTypeRegistry {
   private readonly getServices: GetServicesFunction;
   private readonly taskManager: TaskManager;
-  private readonly fireAction: ActionsPlugin['fire'];
+  private readonly executeAction: ActionsPlugin['execute'];
   private readonly alertTypes: Map<string, AlertType> = new Map();
   private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
   private readonly spaceIdToNamespace: SpaceIdToNamespaceFunction;
@@ -37,14 +37,14 @@ export class AlertTypeRegistry {
 
   constructor({
     encryptedSavedObjectsPlugin,
-    fireAction,
+    executeAction,
     taskManager,
     getServices,
     spaceIdToNamespace,
     getBasePath,
   }: ConstructorOptions) {
     this.taskManager = taskManager;
-    this.fireAction = fireAction;
+    this.executeAction = executeAction;
     this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
     this.getServices = getServices;
     this.getBasePath = getBasePath;
@@ -74,7 +74,7 @@ export class AlertTypeRegistry {
         createTaskRunner: getCreateTaskRunnerFunction({
           alertType,
           getServices: this.getServices,
-          fireAction: this.fireAction,
+          executeAction: this.executeAction,
           encryptedSavedObjectsPlugin: this.encryptedSavedObjectsPlugin,
           getBasePath: this.getBasePath,
           spaceIdToNamespace: this.spaceIdToNamespace,

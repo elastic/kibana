@@ -86,7 +86,7 @@ export const MetricDetail = withMetricPageProviders(
         }
         const { sourceId } = useContext(Source.Context);
         const layouts = layoutCreator(theme);
-        const { name, filteredLayouts, loading: metadataLoading } = useMetadata(
+        const { name, filteredLayouts, loading: metadataLoading, cloudId } = useMetadata(
           nodeId,
           nodeType,
           layouts,
@@ -148,6 +148,7 @@ export const MetricDetail = withMetricPageProviders(
                     timerange={timeRange as InfraTimerangeInput}
                     nodeType={nodeType}
                     nodeId={nodeId}
+                    cloudId={cloudId}
                   >
                     {({ metrics, error, loading, refetch }) => {
                       if (error) {

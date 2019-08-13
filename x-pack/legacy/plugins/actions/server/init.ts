@@ -7,7 +7,7 @@
 import { Legacy } from 'kibana';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
-import { createFireFunction } from './create_fire_function';
+import { createExecuteFunction } from './create_execute_function';
 import { ActionsPlugin, Services } from './types';
 import {
   createRoute,
@@ -16,7 +16,7 @@ import {
   getRoute,
   updateRoute,
   listActionTypesRoute,
-  fireRoute,
+  executeRoute,
 } from './routes';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { SpacesPlugin } from '../../spaces';
@@ -80,13 +80,13 @@ export function init(server: Legacy.Server) {
   findRoute(server);
   updateRoute(server);
   listActionTypesRoute(server);
-  fireRoute({
+  executeRoute({
     server,
     actionTypeRegistry,
     getServices,
   });
 
-  const fireFn = createFireFunction({
+  const executeFn = createExecuteFunction({
     taskManager: taskManager!,
     getScopedSavedObjectsClient: server.savedObjects.getScopedSavedObjectsClient,
     getBasePath,
@@ -103,7 +103,7 @@ export function init(server: Legacy.Server) {
     return actionsClient;
   });
   const exposedFunctions: ActionsPlugin = {
-    fire: fireFn,
+    execute: executeFn,
     registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
     listTypes: actionTypeRegistry.list.bind(actionTypeRegistry),
   };

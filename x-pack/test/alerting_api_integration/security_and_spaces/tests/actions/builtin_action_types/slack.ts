@@ -100,7 +100,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should handle firing with a simulated success', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${simulatedActionId}/_fire`)
+        .post(`/api/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -113,7 +113,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should handle a 40x slack error', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${simulatedActionId}/_fire`)
+        .post(`/api/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -128,7 +128,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
     it('should handle a 429 slack error', async () => {
       const dateStart = new Date().getTime();
       const { body: result } = await supertest
-        .post(`/api/action/${simulatedActionId}/_fire`)
+        .post(`/api/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -147,7 +147,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should handle a 500 slack error', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${simulatedActionId}/_fire`)
+        .post(`/api/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {

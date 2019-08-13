@@ -64,7 +64,7 @@ describe('Header', () => {
 
       expect(
         wrapper
-          .find('[data-test-subj="header-text"]')
+          .find(`[data-test-subj="header-text-${columnHeader.id}"]`)
           .first()
           .text()
       ).toEqual(columnHeader.id);
@@ -363,7 +363,7 @@ describe('Header', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="header-text"]')).toHaveStyleRule(
+      expect(wrapper.find(`[data-test-subj="header-text-${columnHeader.id}"]`)).toHaveStyleRule(
         'text-overflow',
         'ellipsis'
       );

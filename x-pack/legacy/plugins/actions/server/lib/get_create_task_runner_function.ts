@@ -9,8 +9,8 @@ import { ExecutorError } from './executor_error';
 import { TaskInstance } from '../../../task_manager';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
 import {
+  ActionTaskParams,
   ActionTypeRegistryContract,
-  FiredAction,
   GetBasePathFunction,
   GetServicesFunction,
   SpaceIdToNamespaceFunction,
@@ -43,7 +43,7 @@ export function getCreateTaskRunnerFunction({
 
         const {
           attributes: { actionId, params, apiKeyId, apiKeyValue },
-        } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<FiredAction>(
+        } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<ActionTaskParams>(
           'action_task_params',
           actionTaskParamsId,
           { namespace }

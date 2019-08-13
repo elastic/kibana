@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
-import { FireOptions } from './create_fire_function';
+import { ExecuteOptions } from './create_execute_function';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: any) => Services;
@@ -23,7 +23,7 @@ export interface Services {
 export interface ActionsPlugin {
   registerType: ActionTypeRegistry['register'];
   listTypes: ActionTypeRegistry['list'];
-  fire(options: FireOptions): Promise<void>;
+  execute(options: ExecuteOptions): Promise<void>;
 }
 
 // the parameters passed to an action type executor function
@@ -78,7 +78,7 @@ export interface RawAction extends SavedObjectAttributes {
   secrets: SavedObjectAttributes;
 }
 
-export interface FiredAction extends SavedObjectAttributes {
+export interface ActionTaskParams extends SavedObjectAttributes {
   actionId: string;
   params: Record<string, any>;
   apiKeyId: string | null;

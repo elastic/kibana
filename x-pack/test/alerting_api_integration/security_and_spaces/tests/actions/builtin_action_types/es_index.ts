@@ -116,9 +116,9 @@ export default function indexTest({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should fire successly when expected for a single body', async () => {
+    it('should execute successly when expected for a single body', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${createdActionID}/_fire`)
+        .post(`/api/action/${createdActionID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -135,9 +135,9 @@ export default function indexTest({ getService }: FtrProviderContext) {
       expect(items[0]._source).to.eql({ testing: [1, 2, 3] });
     });
 
-    it('should fire successly when expected for with multiple bodies', async () => {
+    it('should execute successly when expected for with multiple bodies', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${createdActionID}/_fire`)
+        .post(`/api/action/${createdActionID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -168,9 +168,9 @@ export default function indexTest({ getService }: FtrProviderContext) {
       expect(passed2).to.be(true);
     });
 
-    it('should fire successly with refresh false', async () => {
+    it('should execute successly with refresh false', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${createdActionID}/_fire`)
+        .post(`/api/action/${createdActionID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -186,7 +186,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
       expect(items.length).to.be.lessThan(2);
 
       const { body: result2 } = await supertest
-        .post(`/api/action/${createdActionID}/_fire`)
+        .post(`/api/action/${createdActionID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -202,12 +202,12 @@ export default function indexTest({ getService }: FtrProviderContext) {
       expect(items.length).to.eql(2);
     });
 
-    it('should fire unsuccessfully when expected', async () => {
+    it('should execute unsuccessfully when expected', async () => {
       let response;
       let result;
 
       response = await supertest
-        .post(`/api/action/${createdActionID}/_fire`)
+        .post(`/api/action/${createdActionID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -223,7 +223,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
       );
 
       response = await supertest
-        .post(`/api/action/${createdActionID}/_fire`)
+        .post(`/api/action/${createdActionID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
