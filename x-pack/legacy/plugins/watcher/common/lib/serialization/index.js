@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { singleLineScript } from './single_line_script';
+export { serializeThresholdWatch } from './serialize_threshold_watch';
+export { buildInput } from './serialization_helpers';

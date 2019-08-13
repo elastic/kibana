@@ -7,12 +7,8 @@
 import { merge } from 'lodash';
 import { BaseWatch } from '../base_watch';
 import { WATCH_TYPES, COMPARATORS, SORT_ORDERS } from '../../../../common/constants';
-import { buildActions } from './build_actions';
-import { buildCondition } from './build_condition';
-import { buildInput } from './build_input';
-import { buildMetadata } from './build_metadata';
-import { buildTransform } from './build_transform';
-import { buildTrigger } from './build_trigger';
+import { serializeThresholdWatch } from '../../../../common/lib/serialization';
+
 import { buildVisualizeQuery } from './build_visualize_query';
 import { formatVisualizeData } from './format_visualize_data';
 
@@ -46,20 +42,7 @@ export class ThresholdWatch extends BaseWatch {
   }
 
   get watchJson() {
-    const result = merge(
-      {},
-      super.watchJson,
-      {
-        trigger: buildTrigger(this),
-        input: buildInput(this),
-        condition: buildCondition(this),
-        transform: buildTransform(this),
-        actions: buildActions(this),
-        metadata: buildMetadata(this)
-      }
-    );
-
-    return result;
+    return serializeThresholdWatch(this);
   }
 
   getVisualizeQuery(visualizeOptions) {

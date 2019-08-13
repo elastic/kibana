@@ -7,14 +7,10 @@
 /*
 watch.trigger.schedule
  */
-function buildSchedule({ triggerIntervalSize, triggerIntervalUnit }) {
+export function buildTrigger(triggerIntervalSize, triggerIntervalUnit) {
   return {
-    interval: `${triggerIntervalSize}${triggerIntervalUnit}`
-  };
-}
-
-export function buildTrigger(watch) {
-  return {
-    schedule: buildSchedule(watch)
+    schedule: {
+      interval: `${triggerIntervalSize}${triggerIntervalUnit}`
+    },
   };
 }

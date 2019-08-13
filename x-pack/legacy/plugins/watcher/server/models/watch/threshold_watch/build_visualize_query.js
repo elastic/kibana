@@ -5,7 +5,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { buildInput } from './build_input';
+import { buildInput } from '../../../../common/lib/serialization';
 import { AGG_TYPES } from '../../../../common/constants';
 
 /*
@@ -93,7 +93,8 @@ function buildAggs(body, { aggType, termField }, dateAgg) {
 }
 
 export function buildVisualizeQuery(watch, visualizeOptions) {
-  const watchInput = buildInput(watch);
+  const { index, timeWindowSize, timeWindowUnit, timeField, aggType, aggField, termField, termSize, termOrder } = watch;
+  const watchInput = buildInput({ index, timeWindowSize, timeWindowUnit, timeField, aggType, aggField, termField, termSize, termOrder });
   const body = watchInput.search.request.body;
   const dateAgg = buildDateAgg({
     field: watch.timeField,
