@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { mapValues, uniq } from 'lodash';
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import {
   EuiComboBox,
@@ -30,6 +30,7 @@ import { IndexPatternPrivateState, IndexPatternField, IndexPattern } from './ind
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
 import { FieldIcon } from './field_icon';
+import { updateLayerIndexPattern } from './state_helpers';
 
 // TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
 const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.FunctionComponent<
@@ -50,6 +51,11 @@ const fieldTypeNames: Record<DataType, string> = {
   date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
 };
 
+function isSingleEmptyLayer(layerMap: IndexPatternPrivateState['layers']) {
+  const layers = Object.values(layerMap);
+  return layers.length === 1 && layers[0].columnOrder.length === 0;
+}
+
 export function IndexPatternDataPanel({
   setState,
   state,
@@ -62,6 +68,11 @@ export function IndexPatternDataPanel({
     (newIndexPattern: string) => {
       setState({
         ...state,
+        layers: isSingleEmptyLayer(state.layers)
+          ? mapValues(state.layers, layer =>
+              updateLayerIndexPattern(layer, indexPatterns[newIndexPattern])
+            )
+          : state.layers,
         currentIndexPatternId: newIndexPattern,
       });
     },
@@ -160,7 +171,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     )
     .slice(0, pageSize);
 
-  const availableFieldTypes = _.uniq(filteredFields.map(({ type }) => type));
+  const availableFieldTypes = uniq(filteredFields.map(({ type }) => type));
   const availableFilteredTypes = state.typeFilter.filter(type =>
     availableFieldTypes.includes(type)
   );

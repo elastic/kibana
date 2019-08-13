@@ -5,9 +5,10 @@
  */
 
 import { CoreSetup, UiSettingsClientContract } from 'src/core/public';
-import { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import chrome, { Chrome } from 'ui/chrome';
 import moment from 'moment-timezone';
+import { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
+
 import {
   renderersRegistry,
   functionsRegistry,
@@ -17,7 +18,6 @@ import { xyVisualization } from './xy_visualization';
 import { InterpreterSetup, RenderFunction } from '../interpreter_types';
 import { xyChart, getXyChartRenderer } from './xy_expression';
 import { legendConfig, xConfig, layerConfig } from './types';
-const detectedTimezone = moment.tz.guess();
 
 export interface XyVisualizationPluginSetupPlugins {
   interpreter: InterpreterSetup;
