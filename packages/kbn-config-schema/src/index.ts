@@ -101,7 +101,7 @@ function maybe<V>(type: Type<V>): Type<V | undefined> {
 }
 
 function nullable<V>(type: Type<V>): Type<V | null> {
-  return schema.oneOf([type, schema.literal(null)], { defaultValue: () => null });
+  return schema.oneOf([type, schema.literal(null)], { defaultValue: null });
 }
 
 function object<P extends Props>(props: P, options?: ObjectTypeOptions<P>): ObjectType<P> {
