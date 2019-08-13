@@ -54,7 +54,7 @@ export function maps(kibana) {
           tilemap: _.get(mapConfig, 'tilemap', [])
         };
       },
-      embeddableFactories: [
+      hacks: [
         'plugins/maps/embeddable/map_embeddable_factory'
       ],
       inspectorViews: [

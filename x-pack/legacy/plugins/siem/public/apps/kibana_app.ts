@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import 'uiExports/hacks';
 import 'uiExports/autocompleteProviders';
-import 'uiExports/embeddableFactories';
 
 import { compose } from '../lib/compose/kibana_compose';
 
