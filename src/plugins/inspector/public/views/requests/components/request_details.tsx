@@ -19,53 +19,62 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiTab,
-  EuiTabs,
-} from '@elastic/eui';
-
-import {
-  RequestDetailsRequest,
-  RequestDetailsResponse,
-  RequestDetailsStats,
-} from './details';
 import { i18n } from '@kbn/i18n';
+import { EuiTab, EuiTabs } from '@elastic/eui';
 
-const DETAILS = [
+import { RequestDetailsRequest, RequestDetailsResponse, RequestDetailsStats } from './details';
+import { RequestDetailsProps } from './types';
+
+interface RequestDetailsState {
+  availableDetails: DetailViewData[];
+  selectedDetail: DetailViewData | null;
+}
+
+export interface DetailViewData {
+  name: string;
+  label: string;
+  component: any;
+}
+
+const DETAILS: DetailViewData[] = [
   {
     name: 'Statistics',
     label: i18n.translate('inspectorViews.requests.statisticsTabLabel', {
-      defaultMessage: 'Statistics'
+      defaultMessage: 'Statistics',
     }),
-    component: RequestDetailsStats
+    component: RequestDetailsStats,
   },
   {
     name: 'Request',
     label: i18n.translate('inspectorViews.requests.requestTabLabel', {
-      defaultMessage: 'Request'
+      defaultMessage: 'Request',
     }),
-    component: RequestDetailsRequest
+    component: RequestDetailsRequest,
   },
   {
     name: 'Response',
     label: i18n.translate('inspectorViews.requests.responseTabLabel', {
-      defaultMessage: 'Response'
+      defaultMessage: 'Response',
     }),
-    component: RequestDetailsResponse
+    component: RequestDetailsResponse,
   },
 ];
 
-class RequestDetails extends Component {
+export class RequestDetails extends Component<RequestDetailsProps, RequestDetailsState> {
+  static propTypes = {
+    request: PropTypes.object.isRequired,
+  };
 
   state = {
     availableDetails: [],
     selectedDetail: null,
   };
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+  static getDerivedStateFromProps(nextProps: RequestDetailsProps, prevState: RequestDetailsState) {
     const selectedDetail = prevState && prevState.selectedDetail;
-    const availableDetails = DETAILS.filter(detail =>
-      !detail.component.shouldShow || detail.component.shouldShow(nextProps.request)
+    const availableDetails = DETAILS.filter(
+      (detail: DetailViewData) =>
+        !detail.component.shouldShow || detail.component.shouldShow(nextProps.request)
     );
     // If the previously selected detail is still available we want to stay
     // on this tab and not set another selectedDetail.
@@ -74,20 +83,24 @@ class RequestDetails extends Component {
     }
 
     return {
-      availableDetails: availableDetails,
-      selectedDetail: availableDetails[0]
+      availableDetails,
+      selectedDetail: availableDetails[0],
     };
   }
 
-  selectDetailsTab = (detail) => {
+  selectDetailsTab = (detail: DetailViewData) => {
     if (detail !== this.state.selectedDetail) {
       this.setState({
-        selectedDetail: detail
+        selectedDetail: detail,
       });
     }
   };
 
-  renderDetailTab = (detail) => {
+  static getSelectedDetailComponent(detail: DetailViewData | null) {
+    return detail ? detail.component : null;
+  }
+
+  renderDetailTab = (detail: DetailViewData) => {
     return (
       <EuiTab
         key={detail.name}
@@ -98,28 +111,21 @@ class RequestDetails extends Component {
         {detail.label}
       </EuiTab>
     );
-  }
+  };
 
   render() {
-    if (this.state.availableDetails.length === 0) {
+    const { selectedDetail, availableDetails } = this.state;
+    const DetailComponent = RequestDetails.getSelectedDetailComponent(selectedDetail);
+
+    if (!availableDetails.length || !DetailComponent) {
       return null;
     }
-    const DetailComponent = this.state.selectedDetail.component;
+
     return (
-      <div>
-        <EuiTabs size="s">
-          { this.state.availableDetails.map(this.renderDetailTab) }
-        </EuiTabs>
-        <DetailComponent
-          request={this.props.request}
-        />
-      </div>
+      <>
+        <EuiTabs size="s">{this.state.availableDetails.map(this.renderDetailTab)}</EuiTabs>
+        <DetailComponent request={this.props.request} />
+      </>
     );
   }
 }
-
-RequestDetails.propTypes = {
-  request: PropTypes.object.isRequired,
-};
-
-export { RequestDetails };

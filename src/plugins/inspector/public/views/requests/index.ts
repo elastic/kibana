@@ -16,7 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
 
-export * from './req_details_request';
-export * from './req_details_response';
-export * from './req_details_stats';
+import { RequestsViewComponent } from './components/requests_view';
+import { Adapters, InspectorViewDescription } from '../../types';
+
+export const RequestsView = {
+  title: i18n.translate('inspectorViews.requests.requestsTitle', {
+    defaultMessage: 'Requests',
+  }),
+  order: 20,
+  help: i18n.translate('inspectorViews.requests.requestsDescriptionTooltip', {
+    defaultMessage: 'View the requests that collected the data',
+  }),
+  shouldShow(adapters: Adapters) {
+    return Boolean(adapters.requests);
+  },
+  component: RequestsViewComponent,
+} as InspectorViewDescription;

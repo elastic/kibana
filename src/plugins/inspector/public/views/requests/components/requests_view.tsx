@@ -19,47 +19,53 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiEmptyPrompt,
-  EuiSpacer,
-  EuiText,
-  EuiTextColor,
-} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiEmptyPrompt, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 
-import { RequestStatus } from 'ui/inspector/adapters';
+import { RequestStatus } from '../../../adapters';
+import { Request } from '../../../adapters/request/types';
+import { InspectorViewProps } from '../../../types';
 
 import { RequestSelector } from './request_selector';
 import { RequestDetails } from './request_details';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
-class RequestsViewComponent extends Component {
+interface RequestSelectorState {
+  requests: Request[];
+  request: Request;
+}
 
-  constructor(props) {
+export class RequestsViewComponent extends Component<InspectorViewProps, RequestSelectorState> {
+  static propTypes = {
+    adapters: PropTypes.object.isRequired,
+  };
+
+  constructor(props: InspectorViewProps) {
     super(props);
+
     props.adapters.requests.on('change', this._onRequestsChange);
 
     const requests = props.adapters.requests.getRequests();
     this.state = {
-      requests: requests,
-      request: requests.length ? requests[0] : null
+      requests,
+      request: requests.length ? requests[0] : null,
     };
   }
 
   _onRequestsChange = () => {
     const requests = this.props.adapters.requests.getRequests();
-    const newState = { requests };
+    const newState = { requests } as RequestSelectorState;
+
     if (!requests.includes(this.state.request)) {
       newState.request = requests.length ? requests[0] : null;
     }
     this.setState(newState);
-  }
+  };
 
-  selectRequest = (request) => {
+  selectRequest = (request: Request) => {
     if (request !== this.state.request) {
       this.setState({ request });
     }
-  }
+  };
 
   componentWillUnmount() {
     this.props.adapters.requests.removeListener('change', this._onRequestsChange);
@@ -104,7 +110,7 @@ class RequestsViewComponent extends Component {
     }
 
     const failedCount = this.state.requests.filter(
-      req => req.status === RequestStatus.ERROR
+      (req: Request) => req.status === RequestStatus.ERROR
     ).length;
 
     return (
@@ -116,7 +122,7 @@ class RequestsViewComponent extends Component {
               defaultMessage="{requestsCount, plural, one {# request was} other {# requests were} } made{failedRequests}"
               values={{
                 requestsCount: this.state.requests.length,
-                failedRequests: (
+                failedRequests:
                   failedCount > 0 ? (
                     <EuiTextColor color="danger">
                       <FormattedMessage
@@ -125,51 +131,31 @@ class RequestsViewComponent extends Component {
                         values={{ failedCount }}
                       />
                     </EuiTextColor>
-                  ) : ''
-                )
+                  ) : (
+                    ''
+                  ),
               }}
             />
           </p>
         </EuiText>
-        <EuiSpacer size="xs"/>
+        <EuiSpacer size="xs" />
         <RequestSelector
           requests={this.state.requests}
           selectedRequest={this.state.request}
           onRequestChanged={this.selectRequest}
         />
-        <EuiSpacer size="xs"/>
-        { this.state.request && this.state.request.description  &&
+        <EuiSpacer size="xs" />
+
+        {this.state.request && this.state.request.description && (
           <EuiText size="xs">
             <p>{this.state.request.description}</p>
           </EuiText>
-        }
+        )}
+
         <EuiSpacer size="m" />
-        { this.state.request &&
-          <RequestDetails
-            request={this.state.request}
-          />
-        }
+
+        {this.state.request && <RequestDetails request={this.state.request} />}
       </>
     );
   }
 }
-
-RequestsViewComponent.propTypes = {
-  adapters: PropTypes.object.isRequired,
-};
-
-const RequestsView = {
-  title: i18n.translate('inspectorViews.requests.requestsTitle', {
-    defaultMessage: 'Requests'
-  }),
-  order: 20,
-  help: i18n.translate('inspectorViews.requests.requestsDescriptionTooltip', {
-    defaultMessage: 'View the requests that collected the data'
-  }),
-  shouldShow(adapters) {
-    return Boolean(adapters.requests);
-  },
-  component: RequestsViewComponent
-};
-
-export { RequestsView };
