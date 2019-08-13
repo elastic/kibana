@@ -51,7 +51,7 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
 
     it('should handle firing the action', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${serverLogActionId}/_fire`)
+        .post(`/api/action/${serverLogActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {

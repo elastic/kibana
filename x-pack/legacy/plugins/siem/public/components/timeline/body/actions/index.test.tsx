@@ -150,7 +150,7 @@ describe('Actions', () => {
     );
 
     wrapper
-      .find('[data-test-subj="pin-event"]')
+      .find('[data-test-subj="pin"]')
       .first()
       .simulate('click');
 
