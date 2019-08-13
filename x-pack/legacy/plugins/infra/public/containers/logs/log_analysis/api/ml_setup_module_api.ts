@@ -10,6 +10,8 @@ import { kfetch } from 'ui/kfetch';
 import { getJobIdPrefix } from '../../../../../common/log_analysis';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 
+const MODULE_ID = 'logs_ui_analysis';
+
 export const callSetupMlModuleAPI = async (
   spaceId: string,
   sourceId: string,
@@ -19,7 +21,7 @@ export const callSetupMlModuleAPI = async (
 ) => {
   const response = await kfetch({
     method: 'POST',
-    pathname: '/api/ml/modules/setup',
+    pathname: `/api/ml/modules/setup/${MODULE_ID}`,
     body: JSON.stringify(
       setupMlModuleRequestPayloadRT.encode({
         indexPatternName: indexPattern,
