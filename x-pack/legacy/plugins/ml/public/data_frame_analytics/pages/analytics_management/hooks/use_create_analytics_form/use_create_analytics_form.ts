@@ -38,7 +38,7 @@ export interface CreateAnalyticsFormProps {
 // List of system fields we want to ignore for the numeric field check.
 const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
 
-function getErrorMessage(error: any) {
+export function getErrorMessage(error: any) {
   if (typeof error === 'object' && typeof error.message === 'string') {
     return error.message;
   }

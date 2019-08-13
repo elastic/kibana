@@ -7,7 +7,7 @@
 import { getInitialState, reducer, ACTION } from './reducer';
 
 describe('useCreateAnalyticsForm', () => {
-  test('reducer: provide a minimum required valid job config, then reset.', () => {
+  test('reducer(): provide a minimum required valid job config, then reset.', () => {
     const initialState = getInitialState();
     expect(initialState.isValid).toBe(false);
 
@@ -27,7 +27,7 @@ describe('useCreateAnalyticsForm', () => {
     expect(resettedState).toEqual(initialState);
   });
 
-  test('reducer: open/close the modal', () => {
+  test('reducer(): open/close the modal', () => {
     const initialState = getInitialState();
     expect(initialState.isModalVisible).toBe(false);
 
@@ -42,7 +42,7 @@ describe('useCreateAnalyticsForm', () => {
     expect(closedModalState.isModalVisible).toBe(false);
   });
 
-  test('reducer: add/reset request messages', () => {
+  test('reducer(): add/reset request messages', () => {
     const initialState = getInitialState();
     expect(initialState.requestMessages).toHaveLength(0);
 
