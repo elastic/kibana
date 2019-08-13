@@ -22,6 +22,12 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Introduction } from './introduction';
 
+jest.mock('../../../../../kibana_react/public', () => {
+  return {
+    Markdown: () => <div className="markdown"/>,
+  };
+});
+
 test('render', () => {
   const component = shallowWithIntl(<Introduction.WrappedComponent
     description="this is a great tutorial about..."

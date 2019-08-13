@@ -16,6 +16,7 @@ import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
 type JobStatus = 'unknown' | 'missing' | 'inconsistent' | 'created' | 'started';
 
 // type JobStatus = 'unknown' | 'closed' | 'closing' | 'failed' | 'opened' | 'opening' | 'deleted';
+
 // type DatafeedStatus = 'unknown' | 'started' | 'starting' | 'stopped' | 'stopping' | 'deleted';
 
 export const useLogAnalysisJobs = ({
@@ -102,6 +103,8 @@ export const useLogAnalysisJobs = ({
     jobStatus,
     isSetupRequired,
     isLoadingSetupStatus,
+    setupMlModule,
+    setupMlModuleRequest,
   };
 };
 

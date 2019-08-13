@@ -1072,6 +1072,7 @@ import { setup, start } from '../core_plugins/visualizations/public/legacy';
 | `ui/vis`                                               | `visualizations.types`                     | --                                                                                                                                 |
 | `ui/vis/vis_factory`                                   | `visualizations.types`                     | --                                                                                                                                 |
 | `ui/vis/vis_filters`                                   | `visualizations.filters`                   | --                                                                                                                                 |
+| `ui/utils/parse_es_interval`                           | `import { parseEsInterval } from '../data/public'`                  | `parseEsInterval`, `ParsedInterval`, `InvalidEsCalendarIntervalError`, `InvalidEsIntervalFormatError` items were moved to the `Data Plugin` as a static code    |
 
 
 #### Server-side

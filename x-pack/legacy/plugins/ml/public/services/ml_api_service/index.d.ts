@@ -29,6 +29,20 @@ declare interface Ml {
     indexAnnotation(annotation: Annotation): Promise<object>;
   };
 
+  dataFrameAnalytics: {
+    getDataFrameAnalytics(analyticsId?: string): Promise<any>;
+    getDataFrameAnalyticsStats(analyticsId?: string): Promise<any>;
+    createDataFrameAnalytics(analyticsId: string, analyticsConfig: any): Promise<any>;
+    deleteDataFrameAnalytics(analyticsId: string): Promise<any>;
+    startDataFrameAnalytics(analyticsId: string): Promise<any>;
+    stopDataFrameAnalytics(
+      analyticsId: string,
+      force?: boolean,
+      waitForCompletion?: boolean
+    ): Promise<any>;
+    getAnalyticsAuditMessages(analyticsId: string): Promise<any>;
+  };
+
   dataFrame: {
     getDataFrameTransforms(jobId?: string): Promise<any>;
     getDataFrameTransformsStats(jobId?: string): Promise<any>;
@@ -47,6 +61,7 @@ declare interface Ml {
   hasPrivileges(obj: object): Promise<any>;
 
   checkMlPrivileges(): Promise<PrivilegesResponse>;
+  checkManageMLPrivileges(): Promise<PrivilegesResponse>;
   getJobStats(obj: object): Promise<any>;
   getDatafeedStats(obj: object): Promise<any>;
   esSearch(obj: object): any;

@@ -76,6 +76,8 @@ export const ProcessDraggable = pure<Props>(
   }
 );
 
+ProcessDraggable.displayName = 'ProcessDraggable';
+
 export const ProcessDraggableWithNonExistentProcess = pure<Props>(
   ({ contextId, eventId, processExecutable, processName, processPid }) => {
     if (processExecutable == null && processName == null && processPid == null) {
@@ -93,3 +95,5 @@ export const ProcessDraggableWithNonExistentProcess = pure<Props>(
     }
   }
 );
+
+ProcessDraggableWithNonExistentProcess.displayName = 'ProcessDraggableWithNonExistentProcess';
