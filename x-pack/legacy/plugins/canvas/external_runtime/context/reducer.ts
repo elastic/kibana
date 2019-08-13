@@ -23,51 +23,78 @@ export const reducer = (state: ExternalEmbedState, action: ExternalEmbedAction) 
     }
     case ExternalEmbedActions.SET_SCRUBBER_VISIBLE: {
       const { footer } = state;
-      footer.isScrubberVisible = action.payload.visible;
 
       return {
         ...state,
-        footer,
+        footer: {
+          ...footer,
+          isScrubberVisible: action.payload.visible,
+        },
       };
     }
     case ExternalEmbedActions.SET_AUTOPLAY: {
       const { settings } = state;
-
-      settings.autoplay.enabled = action.payload.autoplay;
+      const { autoplay } = settings;
 
       return {
         ...state,
-        settings,
+        settings: {
+          ...settings,
+          autoplay: {
+            ...autoplay,
+            enabled: action.payload.autoplay,
+          },
+        },
       };
     }
     case ExternalEmbedActions.SET_AUTOPLAY_ANIMATE: {
       const { settings } = state;
-
-      settings.autoplay.animate = action.payload.animate;
+      const { autoplay } = settings;
+      const { animate } = action.payload;
 
       return {
         ...state,
-        settings,
+        settings: {
+          ...settings,
+          autoplay: {
+            ...autoplay,
+            animate,
+          },
+        },
       };
     }
     case ExternalEmbedActions.SET_AUTOPLAY_INTERVAL: {
       const { settings } = state;
-
-      settings.autoplay.interval = action.payload.interval;
+      const { autoplay } = settings;
+      const { interval } = action.payload;
 
       return {
         ...state,
-        settings,
+        settings: {
+          ...settings,
+          autoplay: {
+            ...autoplay,
+            interval,
+          },
+        },
       };
     }
     case ExternalEmbedActions.SET_TOOLBAR_AUTOHIDE: {
       const { settings } = state;
+      const { toolbar } = settings;
+      const { autohide } = action.payload;
 
       settings.toolbar.autohide = action.payload.autohide;
 
       return {
         ...state,
-        settings,
+        settings: {
+          ...settings,
+          toolbar: {
+            ...toolbar,
+            autohide,
+          },
+        },
       };
     }
     default: {

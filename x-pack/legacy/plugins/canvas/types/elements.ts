@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CanvasRenderable } from './canvas';
+
 export interface ElementSpec {
   name: string;
   image: string;
@@ -87,6 +89,7 @@ interface Position {
 }
 
 export interface PositionedElement {
+  expressionRenderable: CanvasRenderable;
   /**
    * a Canvas element used to populate config forms
    */

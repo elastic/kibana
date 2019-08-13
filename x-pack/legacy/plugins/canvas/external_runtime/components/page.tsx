@@ -7,7 +7,7 @@
 import React from 'react';
 import { ExternalEmbedElement } from './element';
 import { useExternalEmbedState } from '../context';
-import { CanvasPage, CanvasElement } from '../types';
+import { CanvasPage, PositionedElement } from '../types';
 
 // @ts-ignore CSS Module
 import css from './page.module';
@@ -25,7 +25,7 @@ export const Page = (props: Props) => {
   const { height, width, id } = workpad;
   const { elements, style } = props.page;
 
-  const output = elements.map((element: CanvasElement, index) => (
+  const output = elements.map((element: PositionedElement, index) => (
     <ExternalEmbedElement key={element.id} element={element} number={index + 1} />
   ));
 

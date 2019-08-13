@@ -5,9 +5,10 @@
  */
 
 import React from 'react';
+import { CanvasWorkpad } from '../../../../types';
 
 export interface Props {
-  workpad: object;
+  workpad: CanvasWorkpad;
   isInFlight: boolean;
   isAppReady: boolean;
 }

@@ -6,6 +6,7 @@
 
 export * from '../../../../../src/legacy/core_plugins/interpreter/public/types/style';
 export * from './assets';
+export * from './canvas';
 export * from './elements';
 export * from './functions';
 export * from './renderers';

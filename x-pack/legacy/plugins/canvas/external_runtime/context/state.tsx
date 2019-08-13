@@ -10,7 +10,10 @@ import { reducer } from './reducer';
 import { ExternalEmbedAction } from './actions';
 
 export interface ExternalEmbedState {
-  renderersRegistry: any;
+  renderersRegistry: {
+    register: (fn: Function) => void;
+    get: (name: string) => Function;
+  } | null;
   workpad: CanvasWorkpad | null;
   page: number;
   height: number;
