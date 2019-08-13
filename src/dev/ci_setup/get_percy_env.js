@@ -24,12 +24,14 @@ const { stdout: commit } = execa.sync('git', ['rev-parse', 'HEAD']);
 const shortCommit = commit.slice(0, 8);
 
 if (!process.env.JOB_NAME) {
-  throw new Error('getPercyEnv: JOB_NAME environment variable required');
+  throw new Error('getPercyEnv: [JOB_NAME] environment variable required');
 }
 
 const isPr = process.env.JOB_NAME.includes('elastic+kibana+pull-request');
 if (isPr && !(process.env.PR_TARGET_BRANCH && process.env.PR_SOURCE_BRANCH)) {
-  throw new Error('Unable to determine percy environment in prs without [PR_TARGET_BRANCH] and [PR_SOURCE_BRANCH] environment variables');
+  throw new Error(
+    'getPercyEnv: Unable to determine percy environment in prs without [PR_TARGET_BRANCH] and [PR_SOURCE_BRANCH] environment variables'
+  );
 }
 
 let branch;
@@ -37,14 +39,14 @@ if (isPr) {
   branch = process.env.PR_SOURCE_BRANCH;
 } else {
   if (!process.env.branch_specifier) {
-    throw new Error('getPercyEnv: branch_specifier environment variable required');
+    throw new Error('getPercyEnv: [branch_specifier] environment variable required');
   }
 
   branch = process.env.branch_specifier.split('refs/heads/')[1];
 
   if (!branch) {
     throw new Error(
-      `getPercyEnv: branch_specifier [${process.env.branch_specifier}] must start with [refs/heads/]`
+      `getPercyEnv: [branch_specifier=${process.env.branch_specifier}] must start with 'refs/heads/'`
     );
   }
 }
