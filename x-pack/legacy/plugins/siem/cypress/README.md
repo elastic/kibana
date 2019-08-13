@@ -39,6 +39,15 @@ The `username` and `password` from `config/kibana.dev.yml` will be read by the `
 
 See the `Running Tests Interactively` section for details.
 
+### Content Security Policy (CSP) Settings
+
+ Your local or cloud Kibana server must have the `csp.strict: false` setting
+configured in `kibana.dev.yml`, or `kibana.yml`, as shown in the example below:
+
+ ```yaml
+csp.strict: false
+```
+
 ## Running Tests Interactively
 
 To run tests in interactively via the Cypress test runner:

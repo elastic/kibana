@@ -86,6 +86,19 @@ function DefaultEditorAgg({
     }
   }
 
+  // A description of the aggregation, for displaying in the collapsed agg header
+  let aggDescription = '';
+
+  if (agg.type && agg.type.makeLabel) {
+    try {
+      aggDescription = agg.type.makeLabel(agg);
+    } catch (e) {
+      // Date Histogram's `makeLabel` implementation invokes 'write' method for each param, including interval's 'write',
+      // which throws an error when interval is undefined.
+      aggDescription = '';
+    }
+  }
+
   useEffect(() => {
     if (isLastBucketAgg && ['date_histogram', 'histogram'].includes(agg.type.name)) {
       onAggParamsChange(
@@ -97,9 +110,6 @@ function DefaultEditorAgg({
       );
     }
   }, [lastParentPipelineAggTitle, isLastBucket, agg.type]);
-
-  // A description of the aggregation, for displaying in the collapsed agg header
-  const aggDescription = agg.type && agg.type.makeLabel ? agg.type.makeLabel(agg) : '';
 
   const onToggle = (isOpen: boolean) => {
     setIsEditorOpen(isOpen);

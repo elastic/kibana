@@ -8,6 +8,11 @@
 // ML has it's own variables for coloring
 @import 'variables';
 
+// Kibana management page ML section
+#kibanaManagementMLSection {
+  @import 'management/index';
+}
+
 // Protect the rest of Kibana from ML generic namespacing
 // SASSTODO: Prefix ml selectors instead
 #ml-app {

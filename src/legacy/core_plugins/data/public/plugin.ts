@@ -68,13 +68,20 @@ export class DataPlugin implements Plugin<DataSetup, void, DataPluginSetupDepend
   private readonly search: SearchService = new SearchService();
 
   public setup(core: CoreSetup, { __LEGACY, interpreter }: DataPluginSetupDependencies): DataSetup {
-    const indexPatternsService = this.indexPatterns.setup();
+    const { uiSettings } = core;
+    const savedObjectsClient = __LEGACY.savedObjectsClient;
+
+    const indexPatternsService = this.indexPatterns.setup({
+      uiSettings,
+      savedObjectsClient,
+    });
     return {
       expressions: this.expressions.setup({
         interpreter,
       }),
       indexPatterns: indexPatternsService,
       filter: this.filter.setup({
+        uiSettings,
         indexPatterns: indexPatternsService.indexPatterns,
       }),
       query: this.query.setup(),

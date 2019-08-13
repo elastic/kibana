@@ -446,5 +446,6 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
     }
   }
   timelineId="test"
+  toggleColumn={[MockFunction]}
 />
 `;

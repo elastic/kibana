@@ -2,7 +2,7 @@
 
 exports[`Port renders correctly against snapshot 1`] = `
 <Component>
-  <pure(Component)
+  <Port
     contextId="test"
     eventId="abcd"
     fieldName="destination.port"
