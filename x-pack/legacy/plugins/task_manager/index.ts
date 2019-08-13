@@ -55,7 +55,7 @@ export function taskManager(kibana: any) {
       const schema = new SavedObjectsSchema(this.kbnServer.uiExports.savedObjectSchemas);
       const serializer = new SavedObjectsSerializer(schema);
       const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-      const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
+      const savedObjectsRepository = server.savedObjects.getSavedObjectsRepository(
         callWithInternalUser,
         ['task']
       );
@@ -63,7 +63,7 @@ export function taskManager(kibana: any) {
       const taskManagerInstance = new TaskManagerClass({
         kbnServer: this.kbnServer,
         config,
-        savedObjectsRepositoryWithInternalUser,
+        savedObjectsRepository,
         serializer,
       });
       const exposedFunctions: TaskManager = {

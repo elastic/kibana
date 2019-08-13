@@ -29,7 +29,7 @@ export interface StoreOpts {
   index: string;
   maxAttempts: number;
   definitions: TaskDictionary<SanitizedTaskDefinition>;
-  savedObjectsRepositoryWithInternalUser: SavedObjectsClientContract;
+  savedObjectsRepository: SavedObjectsClientContract;
   serializer: SavedObjectsSerializer;
 }
 
@@ -53,7 +53,7 @@ export class TaskStore {
   public readonly index: string;
   private callCluster: ElasticJs;
   private definitions: TaskDictionary<SanitizedTaskDefinition>;
-  private savedObjectsRepositoryWithInternalUser: SavedObjectsClientContract;
+  private savedObjectsRepository: SavedObjectsClientContract;
   private serializer: SavedObjectsSerializer;
 
   /**
@@ -64,7 +64,7 @@ export class TaskStore {
    * @prop {number} maxAttempts - The maximum number of attempts before a task will be abandoned
    * @prop {TaskDefinition} definition - The definition of the task being run
    * @prop {serializer} - The saved object serializer
-   * @prop {savedObjectsRepositoryWithInternalUser} - An instance to the saved objects repository
+   * @prop {savedObjectsRepository} - An instance to the saved objects repository
    */
   constructor(opts: StoreOpts) {
     this.callCluster = opts.callCluster;
@@ -72,7 +72,7 @@ export class TaskStore {
     this.maxAttempts = opts.maxAttempts;
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
-    this.savedObjectsRepositoryWithInternalUser = opts.savedObjectsRepositoryWithInternalUser;
+    this.savedObjectsRepository = opts.savedObjectsRepository;
 
     this.fetchAvailableTasks = this.fetchAvailableTasks.bind(this);
   }
@@ -91,7 +91,7 @@ export class TaskStore {
       );
     }
 
-    const savedObject = await this.savedObjectsRepositoryWithInternalUser.create(
+    const savedObject = await this.savedObjectsRepository.create(
       'task',
       taskInstanceToAttributes(taskInstance),
       { id: taskInstance.id }
@@ -204,7 +204,7 @@ export class TaskStore {
    * @returns {Promise<TaskDoc>}
    */
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
-    const updatedSavedObject = await this.savedObjectsRepositoryWithInternalUser.update(
+    const updatedSavedObject = await this.savedObjectsRepository.update(
       'task',
       doc.id,
       taskInstanceToAttributes(doc),
@@ -221,7 +221,7 @@ export class TaskStore {
    * @returns {Promise<void>}
    */
   public async remove(id: string): Promise<void> {
-    await this.savedObjectsRepositoryWithInternalUser.delete('task', id);
+    await this.savedObjectsRepository.delete('task', id);
   }
 
   private async search(opts: any = {}): Promise<FetchResult> {

@@ -19,7 +19,7 @@ import { FetchOpts, FetchResult, TaskStore } from './task_store';
 export interface TaskManagerOpts {
   kbnServer: any;
   config: any;
-  savedObjectsRepositoryWithInternalUser: SavedObjectsClientContract;
+  savedObjectsRepository: SavedObjectsClientContract;
   serializer: SavedObjectsSerializer;
 }
 
@@ -66,7 +66,7 @@ export class TaskManager {
      * to initialize, and can change after startup */
     const store = new TaskStore({
       serializer: opts.serializer,
-      savedObjectsRepositoryWithInternalUser: opts.savedObjectsRepositoryWithInternalUser,
+      savedObjectsRepository: opts.savedObjectsRepository,
       callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
       index: opts.config.get('xpack.task_manager.index'),
       maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),

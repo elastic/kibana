@@ -67,7 +67,7 @@ describe('TaskStore', () => {
         callCluster,
         maxAttempts: 2,
         definitions: taskDefinitions,
-        savedObjectsRepositoryWithInternalUser: savedObjectsClient,
+        savedObjectsRepository: savedObjectsClient,
       });
       const result = await store.schedule(task);
 
@@ -166,7 +166,7 @@ describe('TaskStore', () => {
         callCluster,
         maxAttempts: 2,
         definitions: taskDefinitions,
-        savedObjectsRepositoryWithInternalUser: savedObjectsClient,
+        savedObjectsRepository: savedObjectsClient,
       });
 
       const result = await store.fetch(opts);
@@ -357,7 +357,7 @@ describe('TaskStore', () => {
         callCluster,
         definitions: taskDefinitions,
         maxAttempts: 2,
-        savedObjectsRepositoryWithInternalUser: savedObjectsClient,
+        savedObjectsRepository: savedObjectsClient,
       });
 
       const result = await store.fetchAvailableTasks();
@@ -588,7 +588,7 @@ describe('TaskStore', () => {
         callCluster: jest.fn(),
         maxAttempts: 2,
         definitions: taskDefinitions,
-        savedObjectsRepositoryWithInternalUser: savedObjectsClient,
+        savedObjectsRepository: savedObjectsClient,
       });
 
       const result = await store.update(task);
@@ -635,7 +635,7 @@ describe('TaskStore', () => {
         callCluster,
         maxAttempts: 2,
         definitions: taskDefinitions,
-        savedObjectsRepositoryWithInternalUser: savedObjectsClient,
+        savedObjectsRepository: savedObjectsClient,
       });
       const result = await store.remove(id);
       expect(result).toBeUndefined();
