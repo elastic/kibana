@@ -22,12 +22,15 @@ import { spawn } from 'child_process';
 import { resolve } from 'path';
 import { promises } from 'fs';
 import { snakeCase } from 'lodash';
+import * as del from 'del';
 
 const ROOT_DIR = resolve(__dirname, '../../../');
+const oneMinute = 60000;
 
 describe('build a plugin', () => {
   const pluginName = 'ispec-plugin';
   const snakeCased = snakeCase(pluginName);
+  const generatedPath = resolve(ROOT_DIR, `plugins/${snakeCased}`);
   // eslint-disable-next-line no-undef
   beforeAll(done => {
     const create = spawn(process.execPath, ['scripts/generate_plugin.js', pluginName], {
@@ -37,10 +40,14 @@ describe('build a plugin', () => {
       create.stdin.write('\n');
     });
     create.on('close', done);
-  }, 150000);
+  }, oneMinute);
+
+  // eslint-disable-next-line no-undef
+  afterAll(() => {
+    del.sync(generatedPath, { force: true });
+  }, oneMinute);
 
   it(`should have created a plugin in a directory named ${snakeCased}`, async () => {
-    const generatedPath = resolve(ROOT_DIR, `plugins/${snakeCased}`);
     const stats = await promises.stat(generatedPath);
     // eslint-disable-next-line no-undef
     expect(stats.isDirectory()).toBe(true);
