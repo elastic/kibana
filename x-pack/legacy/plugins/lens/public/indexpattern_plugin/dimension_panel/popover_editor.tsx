@@ -334,7 +334,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     setState={setState}
                     columnId={columnId}
                     storage={props.storage}
-                    dataPluginDependencies={props.dataPluginDependencies}
+                    uiSettings={props.uiSettings}
                     layerId={layerId}
                   />
                 )}

@@ -546,8 +546,12 @@ export class VectorStyle extends AbstractStyle {
     const symbolId = this._descriptor.properties.symbol.options.symbolId;
     mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(symbolId));
     const color = this._getMBColor(this._descriptor.properties.fillColor);
+    const haloColor = this._getMBColor(this._descriptor.properties.lineColor);
+    const haloWidth = this._getMbSize(this._descriptor.properties.lineWidth);
     // icon-color is only supported on SDF icons.
     mbMap.setPaintProperty(symbolLayerId, 'icon-color', color);
+    mbMap.setPaintProperty(symbolLayerId, 'icon-halo-color', haloColor);
+    mbMap.setPaintProperty(symbolLayerId, 'icon-halo-width', haloWidth);
     mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
 
     // circle sizing is by radius

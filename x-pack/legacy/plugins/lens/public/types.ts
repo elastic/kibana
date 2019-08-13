@@ -6,7 +6,7 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { Query } from 'src/plugins/data/common';
+import { Query, KibanaDatatable } from 'src/plugins/data/common';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 
@@ -165,14 +165,6 @@ export interface OperationMetadata {
 export interface LensMultiTable {
   type: 'lens_multitable';
   tables: Record<string, KibanaDatatable>;
-}
-
-// This is a temporary type definition, to be replaced with
-// the official Kibana Datatable type definition.
-export interface KibanaDatatable {
-  type: 'kibana_datatable';
-  rows: Array<Record<string, unknown>>;
-  columns: Array<{ id: string; name: string }>;
 }
 
 export interface VisualizationProps<T = unknown> {

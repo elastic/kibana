@@ -9,7 +9,10 @@ import { dateHistogramOperation } from './date_histogram';
 import { shallow } from 'enzyme';
 import { DateHistogramIndexPatternColumn, IndexPatternPrivateState } from '../indexpattern';
 import { EuiRange } from '@elastic/eui';
-import { DataPluginDependencies } from '..';
+import { UiSettingsClientContract } from 'src/core/public';
+import { Storage } from 'ui/storage';
+
+jest.mock('ui/new_platform');
 
 describe('date_histogram', () => {
   let state: IndexPatternPrivateState;
@@ -234,7 +237,8 @@ describe('date_histogram', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
-          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+          storage={{} as Storage}
+          uiSettings={{} as UiSettingsClientContract}
         />
       );
 
@@ -249,7 +253,8 @@ describe('date_histogram', () => {
           setState={setStateSpy}
           columnId="col2"
           layerId="second"
-          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+          storage={{} as Storage}
+          uiSettings={{} as UiSettingsClientContract}
         />
       );
 
@@ -264,7 +269,8 @@ describe('date_histogram', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
-          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+          storage={{} as Storage}
+          uiSettings={{} as UiSettingsClientContract}
         />
       );
 
@@ -320,7 +326,8 @@ describe('date_histogram', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
-          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+          storage={{} as Storage}
+          uiSettings={{} as UiSettingsClientContract}
         />
       );
 

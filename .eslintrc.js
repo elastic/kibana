@@ -40,6 +40,7 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
+        'packages/kbn-utility-types/**/*',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'packages/kbn-config-schema/**/*',
         'packages/kbn-pm/**/*',

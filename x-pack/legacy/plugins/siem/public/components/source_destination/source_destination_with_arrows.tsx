@@ -98,3 +98,5 @@ export const SourceDestinationWithArrows = pure<SourceDestinationWithArrowsProps
     </EuiFlexGroup>
   )
 );
+
+SourceDestinationWithArrows.displayName = 'SourceDestinationWithArrows';

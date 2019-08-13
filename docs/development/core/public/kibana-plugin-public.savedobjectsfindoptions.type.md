@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-type?: string | string[];
+type: string | string[];
 ```
