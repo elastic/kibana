@@ -25,7 +25,7 @@ import { Header } from './header';
 import { CategoriesPane } from './categories_pane';
 import { FieldsPane } from './fields_pane';
 
-const TOP_OFFSET = 207;
+const TOP_OFFSET = 267;
 
 const FieldsBrowserContainer = styled.div<{
   top: number;
@@ -148,6 +148,7 @@ export class FieldsBrowser extends React.PureComponent<Props> {
           width={width}
         >
           <Header
+            data-test-subj="header"
             filteredBrowserFields={filteredBrowserFields}
             isSearching={isSearching}
             onOutsideClick={onOutsideClick}
