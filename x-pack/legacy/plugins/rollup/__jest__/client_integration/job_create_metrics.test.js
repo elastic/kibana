@@ -288,7 +288,6 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         let fieldChooserColumn = getFieldChooserColumnForRow(0);
         expectAllFieldChooserInputs(fieldChooserColumn, true);
 
-
         selectAllCheckbox.simulate('change', { checked: false });
         fieldChooserColumn = getFieldChooserColumnForRow(0);
         expectAllFieldChooserInputs(fieldChooserColumn, false);
