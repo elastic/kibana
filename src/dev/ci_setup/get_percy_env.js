@@ -27,6 +27,8 @@ const isPr = process.env.JOB_NAME.includes('elastic+kibana+pull-request');
 
 const { stdout: branch } = execa.sync('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
 
+const prBranch = 'origin/${process.env.ghprbTargetBranch}';
+
 console.log(`export PERCY_PARALLEL_TOTAL=2;`);
 console.log(`export PERCY_PARALLEL_NONCE="${shortCommit}/${isPr ? 'PR' : pkg.branch}/${process.env.BUILD_ID}";`);
-console.log(`export PERCY_TARGET_BRANCH="${isPr ? process.env.ghprbTargetBranch : branch}";`);
+console.log(`export PERCY_TARGET_BRANCH="${isPr ? prBranch : branch}";`);
