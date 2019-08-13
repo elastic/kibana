@@ -51,6 +51,7 @@ import { ContextSetup } from './context';
 
 export { bootstrap } from './bootstrap';
 export { ConfigPath, ConfigService } from './config';
+export { IContextContainer, IContextProvider, IContextHandler } from './context';
 export { CoreId } from './core_context';
 export {
   CallAPIOptions,

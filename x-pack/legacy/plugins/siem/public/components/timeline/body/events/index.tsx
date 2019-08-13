@@ -48,6 +48,7 @@ interface Props {
   minWidth: number;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   rowRenderers: RowRenderer[];
+  toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
   width: number;
 }
@@ -74,6 +75,7 @@ export class Events extends React.PureComponent<Props> {
       onUnPinEvent,
       pinnedEventIds,
       rowRenderers,
+      toggleColumn,
       updateNote,
       width,
     } = this.props;
@@ -100,6 +102,7 @@ export class Events extends React.PureComponent<Props> {
                 pinnedEventIds={pinnedEventIds}
                 rowRenderers={rowRenderers}
                 timelineId={id}
+                toggleColumn={toggleColumn}
                 updateNote={updateNote}
                 width={width}
               />
