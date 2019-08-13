@@ -49,6 +49,14 @@ export class FeatureGeometryFilterForm extends Component {
     relation: ES_SPATIAL_RELATIONS.INTERSECTS,
   };
 
+  componentDidMount() {
+    this.props.reevaluateTooltipPosition();
+  }
+
+  componentDidUpdate() {
+    this.props.reevaluateTooltipPosition();
+  }
+
   _getSelectedGeoField = () => {
     if (!this.state.geoFieldTag) {
       return null;

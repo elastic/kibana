@@ -339,6 +339,7 @@ export class FeatureTooltip extends React.Component {
           feature={currentFeature}
           geoFields={filteredGeoFields}
           addFilters={this.props.addFilters}
+          reevaluateTooltipPosition={this.props.reevaluateTooltipPosition}
         />
       );
     }
