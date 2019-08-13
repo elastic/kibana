@@ -28,6 +28,8 @@ const EventsContainer = styled.div<{
   min-width: ${({ minWidth }) => `${minWidth}px`};
 `;
 
+EventsContainer.displayName = 'EventsContainer';
+
 interface Props {
   actionsColumnWidth: number;
   addNoteToEvent: AddNoteToEvent;

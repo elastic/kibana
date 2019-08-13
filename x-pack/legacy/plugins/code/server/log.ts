@@ -92,7 +92,10 @@ export class Logger implements VsLogger {
         colors: process.stdout.isTTY,
       });
     }
-
-    this.server.log([...this.baseTags, 'error', 'stderr'], msg);
+    if (this.verbose) {
+      this.server.log([...this.baseTags, 'error', 'stderr'], msg);
+    } else {
+      this.server.log([...this.baseTags, 'debug', 'stderr'], msg);
+    }
   }
 }

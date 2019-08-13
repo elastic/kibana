@@ -34,6 +34,8 @@ const TypeIcon = styled(EuiIcon)`
   top: -1px;
 `;
 
+TypeIcon.displayName = 'TypeIcon';
+
 /**
  * An item rendered in the table
  */

@@ -19,6 +19,7 @@
 
 import { ObjectType, TypeOf, Type } from '@kbn/config-schema';
 import { Request, ResponseObject, ResponseToolkit } from 'hapi';
+import Boom from 'boom';
 
 import { Logger } from '../../logging';
 import { KibanaRequest } from './request';
@@ -30,157 +31,171 @@ interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions;
-  handler: (req: Request, responseToolkit: ResponseToolkit, log: Logger) => Promise<ResponseObject>;
+  handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject | Boom<any>>;
 }
 
 /**
- * Provides ability to declare a handler function for a particular path and HTTP request method.
- * Each route can have only one handler functions, which is executed when the route is matched.
- *
- * @example
- * ```ts
- * const router = new Router('my-app');
- * // handler is called when 'my-app/path' resource is requested with `GET` method
- * router.get({ path: '/path', validate: false }, (req, res) => res.ok({ content: 'ok' }));
- * ```
- *
+ * Registers route handlers for specified resource path and method.
  * @public
- * */
-export class Router {
-  public routes: Array<Readonly<RouterRoute>> = [];
+ */
+export interface IRouter {
   /**
-   * @param path - a router path, set as the very first path segment for all registered routes.
+   * Resulted path
    */
-  constructor(readonly path: string) {}
+  routerPath: string;
 
   /**
    * Register a route handler for `GET` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  public get<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
-  ) {
-    const { path, options = {} } = route;
-    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'get');
-    this.routes.push({
-      handler: async (req, responseToolkit, log) =>
-        await this.handle(routeSchemas, req, responseToolkit, handler, log),
-      method: 'get',
-      path,
-      options,
-    });
-  }
+  ) => void;
 
   /**
    * Register a route handler for `POST` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  public post<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
-  ) {
-    const { path, options = {} } = route;
-    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'post');
-    this.routes.push({
-      handler: async (req, responseToolkit, log) =>
-        await this.handle(routeSchemas, req, responseToolkit, handler, log),
-      method: 'post',
-      path,
-      options,
-    });
-  }
+  ) => void;
 
   /**
    * Register a route handler for `PUT` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  public put<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
-  ) {
-    const { path, options = {} } = route;
-    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'put');
-    this.routes.push({
-      handler: async (req, responseToolkit, log) =>
-        await this.handle(routeSchemas, req, responseToolkit, handler, log),
-      method: 'put',
-      path,
-      options,
-    });
-  }
+  ) => void;
 
   /**
    * Register a route handler for `DELETE` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  public delete<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
-  ) {
-    const { path, options = {} } = route;
-    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'delete');
-    this.routes.push({
-      handler: async (req, responseToolkit, log) =>
-        await this.handle(routeSchemas, req, responseToolkit, handler, log),
-      method: 'delete',
-      path,
-      options,
-    });
-  }
+  ) => void;
 
   /**
    * Returns all routes registered with the this router.
    * @returns List of registered routes.
    * @internal
    */
+  getRoutes: () => RouterRoute[];
+}
+
+export type ContextEnhancer<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (
+  handler: RequestHandler<P, Q, B>
+) => RequestHandlerEnhanced<P, Q, B>;
+
+function getRouteFullPath(routerPath: string, routePath: string) {
+  // If router's path ends with slash and route's path starts with slash,
+  // we should omit one of them to have a valid concatenated path.
+  const routePathStartIndex = routerPath.endsWith('/') && routePath.startsWith('/') ? 1 : 0;
+  return `${routerPath}${routePath.slice(routePathStartIndex)}`;
+}
+
+/**
+ * Create the validation schemas for a route
+ *
+ * @returns Route schemas if `validate` is specified on the route, otherwise
+ * undefined.
+ */
+function routeSchemasFromRouteConfig<
+  P extends ObjectType,
+  Q extends ObjectType,
+  B extends ObjectType
+>(route: RouteConfig<P, Q, B>, routeMethod: RouteMethod) {
+  // The type doesn't allow `validate` to be undefined, but it can still
+  // happen when it's used from JavaScript.
+  if (route.validate === undefined) {
+    throw new Error(
+      `The [${routeMethod}] at [${route.path}] does not have a 'validate' specified. Use 'false' as the value if you want to bypass validation.`
+    );
+  }
+
+  if (route.validate !== false) {
+    Object.entries(route.validate).forEach(([key, schema]) => {
+      if (!(schema instanceof Type)) {
+        throw new Error(
+          `Expected a valid schema declared with '@kbn/config-schema' package at key: [${key}].`
+        );
+      }
+    });
+  }
+
+  return route.validate ? route.validate : undefined;
+}
+
+/**
+ * @internal
+ */
+export class Router implements IRouter {
+  public routes: Array<Readonly<RouterRoute>> = [];
+  public get: IRouter['get'];
+  public post: IRouter['post'];
+  public delete: IRouter['delete'];
+  public put: IRouter['put'];
+
+  constructor(
+    readonly routerPath: string,
+    private readonly log: Logger,
+    private readonly enhanceWithContext: ContextEnhancer<any, any, any> = fn => fn.bind(null, {})
+  ) {
+    const buildMethod = (method: RouteMethod) => <
+      P extends ObjectType,
+      Q extends ObjectType,
+      B extends ObjectType
+    >(
+      route: RouteConfig<P, Q, B>,
+      handler: RequestHandler<P, Q, B>
+    ) => {
+      const { path, options = {} } = route;
+      const routeSchemas = routeSchemasFromRouteConfig(route, method);
+
+      this.routes.push({
+        handler: async (req, responseToolkit) =>
+          await this.handle({
+            routeSchemas,
+            request: req,
+            responseToolkit,
+            handler: this.enhanceWithContext(handler),
+          }),
+        method,
+        path: getRouteFullPath(this.routerPath, path),
+        options,
+      });
+    };
+
+    this.get = buildMethod('get');
+    this.post = buildMethod('post');
+    this.delete = buildMethod('delete');
+    this.put = buildMethod('put');
+  }
+
   public getRoutes() {
     return [...this.routes];
   }
 
-  /**
-   * Create the validation schemas for a route
-   *
-   * @returns Route schemas if `validate` is specified on the route, otherwise
-   * undefined.
-   */
-  private routeSchemasFromRouteConfig<
-    P extends ObjectType,
-    Q extends ObjectType,
-    B extends ObjectType
-  >(route: RouteConfig<P, Q, B>, routeMethod: RouteMethod) {
-    // The type doesn't allow `validate` to be undefined, but it can still
-    // happen when it's used from JavaScript.
-    if (route.validate === undefined) {
-      throw new Error(
-        `The [${routeMethod}] at [${route.path}] does not have a 'validate' specified. Use 'false' as the value if you want to bypass validation.`
-      );
-    }
-
-    if (route.validate !== false) {
-      Object.entries(route.validate).forEach(([key, schema]) => {
-        if (!(schema instanceof Type)) {
-          throw new Error(
-            `Expected a valid schema declared with '@kbn/config-schema' package at key: [${key}].`
-          );
-        }
-      });
-    }
-
-    return route.validate ? route.validate : undefined;
-  }
-
-  private async handle<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    routeSchemas: RouteSchemas<P, Q, B> | undefined,
-    request: Request,
-    responseToolkit: ResponseToolkit,
-    handler: RequestHandler<P, Q, B>,
-    log: Logger
-  ) {
+  private async handle<P extends ObjectType, Q extends ObjectType, B extends ObjectType>({
+    routeSchemas,
+    request,
+    responseToolkit,
+    handler,
+  }: {
+    request: Request;
+    responseToolkit: ResponseToolkit;
+    handler: RequestHandlerEnhanced<P, Q, B>;
+    routeSchemas?: RouteSchemas<P, Q, B>;
+  }) {
     let kibanaRequest: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>;
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
@@ -193,11 +208,21 @@ export class Router {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (e) {
-      log.error(e);
+      this.log.error(e);
       return hapiResponseAdapter.toInternalError();
     }
   }
 }
+
+type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => infer Return
+  ? (...rest: Params) => Return
+  : never;
+
+type RequestHandlerEnhanced<
+  P extends ObjectType,
+  Q extends ObjectType,
+  B extends ObjectType
+> = WithoutHeadArgument<RequestHandler<P, Q, B>>;
 
 /**
  * A function executed when route path matched requested resource path.
@@ -208,7 +233,7 @@ export class Router {
  *
  * @example
  * ```ts
- * const router = new Router('my-app');
+ * const router = httpSetup.createRouter();
  * // creates a route handler for GET request on 'my-app/path/{id}' path
  * router.get(
  *   {
@@ -221,8 +246,8 @@ export class Router {
  *     },
  *   },
  *   // function to execute to create a responses
- *   async (request, response) => {
- *     const data = await findObject(request.params.id);
+ *   async (context, request, response) => {
+ *     const data = await context.findObject(request.params.id);
  *     // creates a command to respond with 'not found' error
  *     if (!data) return response.notFound();
  *     // creates a command to send found data to the client
@@ -233,6 +258,7 @@ export class Router {
  * @public
  */
 export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (
+  context: {},
   request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
   response: KibanaResponseFactory
 ) => KibanaResponse<any> | Promise<KibanaResponse<any>>;

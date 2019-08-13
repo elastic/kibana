@@ -32,9 +32,8 @@ import { fieldFormats } from 'ui/registry/field_formats';
 import { expandShorthand } from 'ui/utils/mapping_setup';
 import { toastNotifications } from 'ui/notify';
 import { findObjectByTitle } from 'ui/saved_objects';
-import { IndexPatternsApiClient } from 'ui/index_patterns/index_patterns_api_client';
 import { SavedObjectsClientContract } from 'src/core/public';
-
+import { IndexPatternsApiClient } from './index_patterns_api_client';
 import { IndexPatternMissingIndices } from './errors';
 import { getRoutes } from './get_routes';
 import { FieldList } from './_field_list';
