@@ -19,26 +19,27 @@
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
 import { getDocViewsSorted, DocViewRenderProps } from 'ui/registry/doc_views';
-import { DocViewRenderTab } from './doc_viewer_render_tab';
+import { DocViewerTab } from './doc_viewer_tab';
 
+/**
+ * Rendering tabs with different views of 1 Elasticsearch hit in Discover.
+ * The tabs are provided by the `docs_views` registry.
+ * A view can contain a React `component`, or any JS framework by using
+ * a `render` function.
+ */
 export function DocViewer(renderProps: DocViewRenderProps) {
-  const docViews = getDocViewsSorted(renderProps.hit);
-  const tabs = docViews.map(({ title, render, component }) => {
-    let content;
-    if (component) {
-      const Component = component;
-      // @ts-ignore
-      content = <Component {...renderProps} />;
-    } else if (render) {
-      content = <DocViewRenderTab render={render} renderProps={renderProps} />;
-    } else {
-      content = <div>Invalid Doc Viewer properties</div>;
-    }
-
+  const tabs = getDocViewsSorted(renderProps.hit).map(({ title, render, component }) => {
     return {
       id: title,
       name: title,
-      content,
+      content: (
+        <DocViewerTab
+          title={title}
+          component={component}
+          renderProps={renderProps}
+          render={render}
+        />
+      ),
     };
   });
 

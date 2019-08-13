@@ -16,25 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useRef, useEffect } from 'react';
-import { DocViewRenderFn, DocViewRenderProps } from 'ui/registry/doc_views';
+import React from 'react';
+import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
+// @ts-ignore
+import { formatMsg, formatStack } from '../../../../ui/public/notify/lib';
 
 interface Props {
-  render: DocViewRenderFn;
-  renderProps: DocViewRenderProps;
+  error: Error | string | null;
 }
-/**
- * Responsible for rendering a tab provided by a render function.
- * So any other framework can be used (E.g. legacy Angular 3rd party plugin code)
- * The provided `render` function is called with a reference to the
- * component's `HTMLDivElement` as 1st arg and `renderProps` as 2nd arg
- */
-export function DocViewRenderTab({ render, renderProps }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (ref && ref.current) {
-      return render(ref.current, renderProps);
-    }
-  }, [render, renderProps]);
-  return <div ref={ref} />;
+
+export function DocViewerError({ error }: Props) {
+  const errMsg = formatMsg(error);
+  const errStack = error ? formatStack(error) : '';
+
+  return (
+    <EuiCallOut title={errMsg} color="danger" iconType="cross" data-test-subj="docViewerError">
+      {errStack && <EuiCodeBlock>{errStack}</EuiCodeBlock>}
+    </EuiCallOut>
+  );
 }
