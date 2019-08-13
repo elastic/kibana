@@ -26,6 +26,7 @@ import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { useLogAnalysisResults } from '../../../containers/logs/log_analysis';
 import { useLogAnalysisResultsUrlState } from '../../../containers/logs/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
+import { LogRateResults } from './sections/log_rate';
 
 const DATE_PICKER_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
 
@@ -90,7 +91,7 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
             <EuiPageBody>
               <EuiPageContent>
                 <EuiPageContentBody>
-                  {isLoading ? <>{getLoadingState()}</> : <div>Graph</div>}
+                  <LogRateResults isLoading={isLoading} results={logEntryRate} />
                 </EuiPageContentBody>
               </EuiPageContent>
             </EuiPageBody>
