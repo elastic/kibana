@@ -9,17 +9,16 @@ import {
   EmbeddableExpressionType,
   EmbeddableExpression,
 } from '../../expression_types';
-// import { VisualizeInput } from '../../../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable';
+import { VisualizeInput } from '../../../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable';
 import { buildEmbeddableFilters } from '../../../server/lib/build_embeddable_filters';
 import { Filter } from '../../../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   id: string;
 }
 
-// TODO: Importing from visualize/embeddable chokes type_check script
-// Using an any here now until we can get that resolved
-type Return = EmbeddableExpression</* VisualizeInput */ any & { id: string }>;
+type Return = EmbeddableExpression<VisualizeInput>;
 
 export function savedVisualization(): ExpressionFunction<
   'savedVisualization',
@@ -27,14 +26,15 @@ export function savedVisualization(): ExpressionFunction<
   Arguments,
   Return
 > {
+  const { help, args: argHelp } = getFunctionHelp().savedVisualization;
   return {
     name: 'savedVisualization',
-    help: 'Render a Saved Search Query',
+    help,
     args: {
       id: {
         types: ['string'],
         required: false,
-        help: 'Id of the saved search',
+        help: argHelp.id,
       },
     },
     type: EmbeddableExpressionType,

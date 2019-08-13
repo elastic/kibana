@@ -36,7 +36,7 @@ interface DispatchProps {
   addEmbeddable: (pageId: number, partialElement: { expression: string }) => void;
 }
 
-// Missing state type
+// FIX: Missing state type
 const mapStateToProps = (state: any) => ({ pageId: getSelectedPage(state) });
 
 const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({

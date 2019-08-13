@@ -14,6 +14,7 @@ import {
 import { SearchInput } from '../../../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable';
 import { buildEmbeddableFilters } from '../../../server/lib/build_embeddable_filters';
 import { Filter } from '../../../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   id: string;
@@ -22,14 +23,15 @@ interface Arguments {
 type Return = EmbeddableExpression<Partial<SearchInput> & { id: SearchInput['id'] }>;
 
 export function savedSearch(): ExpressionFunction<'savedSearch', Filter | null, Arguments, Return> {
+  const { help, args: argHelp } = getFunctionHelp().savedSearch;
   return {
     name: 'savedSearch',
-    help: 'Render a Saved Search Query',
+    help,
     args: {
       id: {
         types: ['string'],
         required: false,
-        help: 'Id of the saved search',
+        help: argHelp.id,
       },
     },
     type: EmbeddableExpressionType,

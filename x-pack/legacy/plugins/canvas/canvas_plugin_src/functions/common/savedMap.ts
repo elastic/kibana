@@ -14,6 +14,7 @@ import {
   EmbeddableExpressionType,
   EmbeddableExpression,
 } from '../../expression_types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   id: string;
@@ -34,14 +35,15 @@ interface SavedMapInput extends EmbeddableInput {
 type Return = EmbeddableExpression<SavedMapInput>;
 
 export function savedMap(): ExpressionFunction<'savedMap', Filter | null, Arguments, Return> {
+  const { help, args: argHelp } = getFunctionHelp().savedMap;
   return {
     name: 'savedMap',
-    help: 'Render a Saved Map',
+    help,
     args: {
       id: {
         types: ['string'],
         required: false,
-        help: 'Id of the saved map',
+        help: argHelp.id,
       },
     },
     type: EmbeddableExpressionType,

@@ -5,20 +5,11 @@
  */
 
 import { ExpressionType } from '../../../../../../src/plugins/data/common/expressions';
-// @ts-ignore Untyped Local
-import { MAP_SAVED_OBJECT_TYPE } from '../../../maps/common/constants';
-import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable/search_embeddable';
-// TODO: Doing this visualize import makes type_check fail
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable';
 import { EmbeddableInput } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { EmbeddableTypes } from './embeddable_types';
 
 export const EmbeddableExpressionType = 'embeddable';
-
-export const EmbeddableTypes = {
-  map: MAP_SAVED_OBJECT_TYPE,
-  search: SEARCH_EMBEDDABLE_TYPE,
-  visualization: VISUALIZE_EMBEDDABLE_TYPE,
-};
+export { EmbeddableTypes };
 
 export interface EmbeddableExpression<Input extends EmbeddableInput> {
   type: typeof EmbeddableExpressionType;
