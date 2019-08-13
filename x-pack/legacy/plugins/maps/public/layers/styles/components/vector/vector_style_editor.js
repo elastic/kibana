@@ -12,7 +12,12 @@ import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
 import { OrientationEditor } from './orientation/orientation_editor';
-import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../../vector_style_defaults';
+import {
+  getDefaultDynamicProperties,
+  getDefaultStaticProperties,
+  DEFAULT_FILL_COLORS,
+  DEFAULT_LINE_COLORS
+} from '../../vector_style_defaults';
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_ICON } from '../../vector_constants';
 import { i18n } from '@kbn/i18n';
@@ -91,6 +96,7 @@ export class VectorStyleEditor extends Component {
     return (
       <VectorStyleColorEditor
         styleProperty="fillColor"
+        swatches={DEFAULT_FILL_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.fillColor}
         ordinalFields={this.state.ordinalFields}
@@ -104,6 +110,7 @@ export class VectorStyleEditor extends Component {
     return (
       <VectorStyleColorEditor
         styleProperty="lineColor"
+        swatches={DEFAULT_LINE_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.lineColor}
         ordinalFields={this.state.ordinalFields}
