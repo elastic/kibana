@@ -262,6 +262,7 @@ export class ExpressionInput extends React.Component<Props> {
               }}
               options={{
                 fontSize,
+                scrollBeyondLastLine: false,
                 quickSuggestions: isAutocompleteEnabled,
                 minimap: {
                   enabled: false,
