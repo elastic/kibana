@@ -31,6 +31,7 @@ describe('running the plugin-generator', () => {
   const pluginName = 'ispec-plugin';
   const snakeCased = snakeCase(pluginName);
   const generatedPath = resolve(ROOT_DIR, `plugins/${snakeCased}`);
+  const currentlyFailing = ['lint', 'test:browser', 'test:mocha'];
   // eslint-disable-next-line no-undef
   beforeAll(done => {
     const create = spawn(process.execPath, ['scripts/generate_plugin.js', pluginName], {
@@ -53,22 +54,23 @@ describe('running the plugin-generator', () => {
     expect(stats.isDirectory()).toBe(true);
   });
 
-  it(
-    `should fail on 'yarn lint' within the plugin's root dir`,
-    done => {
-      const yarnLint = spawn('yarn', ['lint'], { cwd: generatedPath });
-
-      yarnLint.stderr.on('data', data => {
-        // eslint-disable-next-line no-undef
-        expect(data.includes('Error:'));
-      });
-
-      yarnLint.on('close', data => {
-        // eslint-disable-next-line no-undef
-        expect(data).not.toBe(0); // Not exit code 0
-        done();
-      });
-    },
-    oneMinute
-  );
+  currentlyFailing.forEach(x => {
+    it(
+      `should fail on 'yarn ${x}' within the plugin's root dir`,
+      done => {
+        console.log(`\n### Testing 'yarn ${x}'`);
+        const yarnCmd = spawn('yarn', [x], { cwd: generatedPath });
+        yarnCmd.stderr.on('data', data => {
+          // eslint-disable-next-line no-undef
+          expect(data.includes('Error:'));
+        });
+        yarnCmd.on('close', data => {
+          // eslint-disable-next-line no-undef
+          expect(data).not.toBe(0); // Not exit code 0
+          done();
+        });
+      },
+      oneMinute * 3
+    );
+  });
 });
