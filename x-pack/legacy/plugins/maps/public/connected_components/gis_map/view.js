@@ -13,11 +13,15 @@ import { AddLayerPanel } from '../layer_addpanel/index';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { ExitFullScreenButton } from 'ui/exit_full_screen';
 import { i18n } from '@kbn/i18n';
+import uuid from 'uuid/v4';
+
+const RENDER_COMPLETE_EVENT = 'renderComplete';
 
 export class GisMap extends Component {
 
   state = {
     isInitialLoadRenderTimeoutComplete: false,
+    domId: uuid(),
   }
 
   componentDidMount() {
@@ -37,6 +41,16 @@ export class GisMap extends Component {
   componentWillUnmount() {
     this._isMounted = false;
     this._clearRefreshTimer();
+  }
+
+  // Need to get the right element until https://github.com/elastic/eui/issues/2220
+  // is fixed, otherwise we can't use ref's to emit the custom event for reporting
+  _onInitialLoadRenderComplete = () => {
+    const el = document.querySelector(`[data-dom-id="${this.state.domId}"]`);
+
+    if (el) {
+      el.dispatchEvent(new CustomEvent(RENDER_COMPLETE_EVENT, { bubbles: true }));
+    }
   }
 
   _setRefreshTimer = () => {
@@ -75,9 +89,10 @@ export class GisMap extends Component {
       () => {
         if (this._isMounted) {
           this.setState({ isInitialLoadRenderTimeoutComplete: true });
+          this._onInitialLoadRenderComplete();
         }
       },
-      1000
+      5000
     );
   }
 
@@ -91,6 +106,8 @@ export class GisMap extends Component {
       exitFullScreen,
       mapInitError,
     } = this.props;
+
+    const { domId } = this.state;
 
     if (mapInitError) {
       return (
@@ -136,6 +153,7 @@ export class GisMap extends Component {
       <EuiFlexGroup
         gutterSize="none"
         responsive={false}
+        data-dom-id={domId}
         data-render-complete={this.state.isInitialLoadRenderTimeoutComplete}
         data-shared-item
       >

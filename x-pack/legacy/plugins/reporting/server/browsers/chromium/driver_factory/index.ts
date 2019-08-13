@@ -102,9 +102,13 @@ export class HeadlessChromiumDriverFactory {
 
       let browser: Browser;
       let page: Page;
+
+      // The inspector works over websockets,
+      // so we need to conditionally interact
+      // with chrome via pipes depending on this flag
       try {
         browser = await launch({
-          pipe: true,
+          pipe: !this.browserConfig.inspect,
           userDataDir,
           executablePath: this.binaryPath,
           ignoreHTTPSErrors: true,
