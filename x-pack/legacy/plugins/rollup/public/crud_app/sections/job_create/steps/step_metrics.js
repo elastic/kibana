@@ -18,6 +18,8 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiPopover,
+  EuiButton,
 } from '@elastic/eui';
 
 
@@ -145,11 +147,13 @@ export class StepMetricsUi extends Component {
       onFieldsChange,
     } = this.props;
 
+    let disabledCheckboxesCount = 0;
+
     /**
      * Look at all the metric configs and include the special "All" checkbox which adds the ability
      * to select a all the checkboxes across columns and rows.
      */
-    return [{
+    const jsxElements = [{
       label: i18n.translate('xpack.rollupJobs.create.stepMetrics.allCheckbox', { defaultMessage: 'All' }),
       type: 'all',
     }].concat(metricTypesConfig).map(({ label, type: metricType, fieldTypes }, idx) => {
@@ -191,6 +195,8 @@ export class StepMetricsUi extends Component {
       // Determine if a select all checkbox is checked.
       isChecked = checkedCount === applicableMetrics.length;
 
+      if (isDisabled) ++disabledCheckboxesCount;
+
       return (
         <EuiCheckbox
           id={`${idx}-select-all-checkbox`}
@@ -210,20 +216,44 @@ export class StepMetricsUi extends Component {
         />
       );
     });
+
+    return {
+      jsxElements,
+      allCheckboxesDisabled: jsxElements.length === disabledCheckboxesCount,
+    };
   }
 
-  getMetricsSelectAllMenu = () => {
+  getMetricsSelectAllMenu() {
+    const { jsxElements: checkboxElements, allCheckboxesDisabled } = this.renderMetricsSelectAllCheckboxes();
     return (
       <Fragment>
-        <EuiFlexGroup alignItems={'center'} direction={'row'}>
-          {
-            this.renderMetricsSelectAllCheckboxes()
-              .map((item, idx) => <EuiFlexItem key={idx}>{item}</EuiFlexItem>)
+        <EuiPopover
+          ownFocus
+          isOpen={this.state.metricsPopoverOpen}
+          closePopover={this.closeMetricsPopover}
+          button={
+            <EuiButton
+              disabled={allCheckboxesDisabled}
+              onClick={this.openMetricsPopover}
+            >
+              {
+                i18n.translate(
+                  'xpack.rollupJobs.create.stepMetrics.selectAllPopoverButtonLabel',
+                  { defaultMessage: 'Select metrics' })
+              }
+            </EuiButton>
           }
-        </EuiFlexGroup>
+        >
+          <EuiFlexGroup alignItems="left" direction="column">
+            {
+              checkboxElements
+                .map((item, idx) => <EuiFlexItem key={idx}>{item}</EuiFlexItem>)
+            }
+          </EuiFlexGroup>
+        </EuiPopover>
       </Fragment>
     );
-  };
+  }
 
   renderRowSelectAll({ fieldName, fieldType, types }) {
     const { onFieldsChange } = this.props;
@@ -424,10 +454,14 @@ export class StepMetricsUi extends Component {
           }
 
           addButton={
-            <EuiFlexGroup justifyContent={'flexStart'} alignItems={'center'}>
-              <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              justifyContent="spaceEvenly"
+              alignItems="center"
+              gutterSize="s"
+            >
+              <EuiFlexItem>
                 <FieldChooser
-                  key={'stepMetricsFieldChooser'}
+                  key="stepMetricsFieldChooser"
                   buttonLabel={
                     <FormattedMessage
                       id="xpack.rollupJobs.create.stepMetrics.fieldsChooserLabel"
