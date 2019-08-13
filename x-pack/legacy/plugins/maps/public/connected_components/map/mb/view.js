@@ -457,7 +457,7 @@ export class MBMapContainer extends React.Component {
   _reevaluateTooltipPosition = () => {
     // Force mapbox to ensure tooltip does not clip map boundary and move anchor when clipping occurs
     requestAnimationFrame(() => {
-      if (this._isMounted) {
+      if (this._isMounted && this.props.tooltipState && this.props.tooltipState.location) {
         this._mbPopup.setLngLat(this.props.tooltipState.location);
       }
     });
