@@ -6,7 +6,7 @@
 
 import React, { useContext } from 'react';
 import chrome from 'ui/chrome';
-import i18n from '@elastic/i18n';
+import { i18n } from '@kbn/i18n';
 import { ColumnarPage } from '../../../components/page';
 import { LoadingPage } from '../../../components/loading_page';
 import { AnalysisPageProviders } from './page_providers';
