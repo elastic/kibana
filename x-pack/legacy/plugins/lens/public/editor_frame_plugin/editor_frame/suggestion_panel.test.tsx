@@ -12,6 +12,7 @@ import {
   createMockDatasource,
   createExpressionRendererMock,
   DatasourceMock,
+  createMockFramePublicAPI,
 } from '../mocks';
 import { ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
 import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
@@ -44,17 +45,19 @@ describe('suggestion_panel', () => {
         datasourceState: {},
         previewIcon: 'empty',
         score: 0.5,
-        state: suggestion1State,
+        visualizationState: suggestion1State,
         visualizationId: 'vis',
         title: 'Suggestion1',
+        keptLayerIds: ['a'],
       },
       {
         datasourceState: {},
         previewIcon: 'empty',
         score: 0.5,
-        state: suggestion2State,
+        visualizationState: suggestion2State,
         visualizationId: 'vis',
         title: 'Suggestion2',
+        keptLayerIds: ['a'],
       },
     ] as Suggestion[]);
 
@@ -76,6 +79,7 @@ describe('suggestion_panel', () => {
       visualizationState: {},
       dispatch: dispatchMock,
       ExpressionRenderer: expressionRendererMock,
+      frame: createMockFramePublicAPI(),
     };
   });
 
@@ -106,6 +110,19 @@ describe('suggestion_panel', () => {
     );
   });
 
+  it('should remove unused layers if suggestion is clicked', () => {
+    defaultProps.frame.datasourceLayers.a = mockDatasource.publicAPIMock;
+    defaultProps.frame.datasourceLayers.b = mockDatasource.publicAPIMock;
+    const wrapper = mount(<SuggestionPanel {...defaultProps} activeVisualizationId="vis2" />);
+
+    wrapper
+      .find('[data-test-subj="lnsSuggestion"]')
+      .first()
+      .simulate('click');
+
+    expect(defaultProps.frame.removeLayers).toHaveBeenCalledWith(['b']);
+  });
+
   it('should render preview expression if there is one', () => {
     mockDatasource.getLayers.mockReturnValue(['first']);
     (getSuggestions as jest.Mock).mockReturnValue([
@@ -113,7 +130,7 @@ describe('suggestion_panel', () => {
         datasourceState: {},
         previewIcon: 'empty',
         score: 0.5,
-        state: suggestion1State,
+        visualizationState: suggestion1State,
         visualizationId: 'vis',
         title: 'Suggestion1',
       },
@@ -121,7 +138,7 @@ describe('suggestion_panel', () => {
         datasourceState: {},
         previewIcon: 'empty',
         score: 0.5,
-        state: suggestion2State,
+        visualizationState: suggestion2State,
         visualizationId: 'vis',
         title: 'Suggestion2',
         previewExpression: 'test | expression',
@@ -183,7 +200,7 @@ describe('suggestion_panel', () => {
         datasourceState: {},
         previewIcon: 'visTable',
         score: 0.5,
-        state: suggestion1State,
+        visualizationState: suggestion1State,
         visualizationId: 'vis',
         title: 'Suggestion1',
       },
@@ -191,7 +208,7 @@ describe('suggestion_panel', () => {
         datasourceState: {},
         previewIcon: 'empty',
         score: 0.5,
-        state: suggestion2State,
+        visualizationState: suggestion2State,
         visualizationId: 'vis',
         title: 'Suggestion2',
         previewExpression: 'test | expression',

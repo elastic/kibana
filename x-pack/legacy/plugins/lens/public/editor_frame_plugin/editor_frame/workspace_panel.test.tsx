@@ -584,6 +584,7 @@ describe('workspace_panel', () => {
         newVisualizationId: 'vis',
         initialState: {},
         datasourceState: {},
+        datasourceId: 'mock',
       });
     });
 
@@ -721,6 +722,7 @@ describe('workspace_panel', () => {
           isFirst: true,
         },
         datasourceState: {},
+        datasourceId: 'mock',
       });
     });
   });

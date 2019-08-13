@@ -51,7 +51,13 @@ export type Action =
       type: 'SWITCH_VISUALIZATION';
       newVisualizationId: string;
       initialState: unknown;
-      datasourceState?: unknown;
+    }
+  | {
+      type: 'SWITCH_VISUALIZATION';
+      newVisualizationId: string;
+      initialState: unknown;
+      datasourceState: unknown;
+      datasourceId: string;
     }
   | {
       type: 'SWITCH_DATASOURCE';
@@ -141,10 +147,13 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
       return {
         ...state,
         datasourceStates:
-          state.activeDatasourceId && action.datasourceState
+          'datasourceId' in action && action.datasourceId
             ? {
                 ...state.datasourceStates,
-                [state.activeDatasourceId]: { state: action.datasourceState, isLoading: false },
+                [action.datasourceId]: {
+                  ...state.datasourceStates[action.datasourceId],
+                  state: action.datasourceState,
+                },
               }
             : state.datasourceStates,
         visualization: {
