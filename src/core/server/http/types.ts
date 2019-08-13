@@ -27,12 +27,6 @@ import { KibanaRequest, KibanaResponseFactory, KibanaResponse } from './router';
 export interface RequestHandlerContext {}
 
 /**
- * A list of RequestHandlerContext object keys.
- * @public
- */
-export type RequestHandlerContextNames = keyof RequestHandlerContext;
-
-/**
  * Parameters passed to the request handler function.
  * @public
  */
@@ -48,8 +42,8 @@ export type RequestHandlerReturn = KibanaResponse;
  * An object that handles registration of http request context providers.
  * @public
  */
-export type RequestHandlerContextContainer = IContextContainer<
-  RequestHandlerContext,
+export type RequestHandlerContextContainer<TContext> = IContextContainer<
+  TContext,
   RequestHandlerReturn | Promise<RequestHandlerReturn>,
   RequestHandlerParams
 >;
@@ -60,8 +54,8 @@ export type RequestHandlerContextContainer = IContextContainer<
  *
  * @public
  */
-export type RequestHandlerContextProvider = IContextProvider<
-  RequestHandlerContext,
-  RequestHandlerContextNames,
+export type RequestHandlerContextProvider<TContext> = IContextProvider<
+  TContext,
+  keyof TContext,
   RequestHandlerParams
 >;

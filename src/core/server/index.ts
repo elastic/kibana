@@ -49,7 +49,6 @@ import {
   HttpServiceSetup,
   HttpServiceStart,
   IRouter,
-  RequestHandlerContextNames,
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
 } from './http';
@@ -96,9 +95,7 @@ export {
   RedirectResponseOptions,
   RequestHandler,
   RequestHandlerContext,
-  RequestHandlerContextNames,
   RequestHandlerContextContainer,
-  RequestHandlerContextProvider,
   RequestHandlerParams,
   RequestHandlerReturn,
   ResponseError,
@@ -167,6 +164,8 @@ export {
   SavedObjectsMigrationVersion,
 } from './types';
 
+export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
+
 /**
  * Context passed to the plugins `setup` method.
  *
@@ -191,10 +190,10 @@ export interface CoreSetup {
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
     basePath: HttpServiceSetup['basePath'];
     isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
-    registerRouteHandlerContext: (
-      name: RequestHandlerContextNames,
-      provider: RequestHandlerContextProvider
-    ) => RequestHandlerContextContainer;
+    registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
+      name: T,
+      provider: RequestHandlerContextProvider<RequestHandlerContext>
+    ) => RequestHandlerContextContainer<RequestHandlerContext>;
     createRouter: () => IRouter;
   };
 }
@@ -208,17 +207,15 @@ export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty
 
 /** @internal */
 export interface InternalCoreSetup {
+  context: ContextSetup;
   http: HttpServiceSetup;
   elasticsearch: ElasticsearchServiceSetup;
-  plugins: PluginsServiceSetup;
 }
 
 /**
  * @public
  */
-export interface InternalCoreStart {
-  plugins: PluginsServiceStart;
-}
+export interface InternalCoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 export {
   ContextSetup,

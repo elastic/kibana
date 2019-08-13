@@ -34,11 +34,9 @@ import { HttpConfig, HttpConfigType } from './http_config';
 import { HttpServer, HttpServerSetup } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 
-import {
-  RequestHandlerContextContainer,
-  RequestHandlerContextProvider,
-  RequestHandlerContextNames,
-} from './types';
+import { RequestHandlerContextContainer, RequestHandlerContextProvider } from './types';
+
+import { RequestHandlerContext } from '../../server';
 
 interface SetupDeps {
   context: ContextSetup;
@@ -82,11 +80,11 @@ export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
    * ```
    * @public
    */
-  registerRouteHandlerContext: (
+  registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
     pluginOpaqueId: PluginOpaqueId,
-    contextName: RequestHandlerContextNames,
-    provider: RequestHandlerContextProvider
-  ) => RequestHandlerContextContainer;
+    contextName: T,
+    provider: RequestHandlerContextProvider<RequestHandlerContext>
+  ) => RequestHandlerContextContainer<RequestHandlerContext>;
 };
 
 /** @public */
@@ -105,7 +103,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
   private readonly logger: LoggerFactory;
   private readonly log: Logger;
   private notReadyServer?: Server;
-  private requestHandlerContext?: RequestHandlerContextContainer;
+  private requestHandlerContext?: RequestHandlerContextContainer<RequestHandlerContext>;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger;
@@ -149,10 +147,10 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
         return router;
       },
 
-      registerRouteHandlerContext: (
+      registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
         pluginOpaqueId: PluginOpaqueId,
-        contextName: RequestHandlerContextNames,
-        provider: RequestHandlerContextProvider
+        contextName: T,
+        provider: RequestHandlerContextProvider<RequestHandlerContext>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
     };
 
