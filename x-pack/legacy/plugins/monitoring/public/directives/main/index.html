@@ -1,9 +1,16 @@
 <div class="app-container">
   <kbn-top-nav-v2
-    name="{{ monitoringMain.name }}-nav"
+    name="monitoringMain.navName"
     config="topNavMenu"
+    app-name="'monitoring'"
     show-search-bar="true"
     show-date-picker="true"
+    date-range-from="monitoringMain.datePicker.timeRange.from"
+    date-range-to="monitoringMain.datePicker.timeRange.to"
+    is-refresh-paused="monitoringMain.datePicker.refreshInterval.pause"
+    refresh-interval="monitoringMain.datePicker.refreshInterval.value"
+    on-refresh-change="monitoringMain.datePicker.onRefreshChange"
+    on-query-submit="monitoringMain.datePicker.onTimeUpdate"
   >
   </kbn-top-nav-v2>
   <div>
