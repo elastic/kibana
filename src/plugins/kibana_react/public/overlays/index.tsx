@@ -18,4 +18,4 @@
  */
 
 export * from './types';
-export * from './pure/open_flyout';
+export * from './create_react_overlays';

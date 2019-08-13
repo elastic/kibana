@@ -22,4 +22,5 @@ import { CoreStart } from '../core/types';
 
 export interface KibanaReactOverlays {
   openFlyout: (node: React.ReactNode) => ReturnType<CoreStart['overlays']['openFlyout']>;
+  openModal: (node: React.ReactNode) => ReturnType<CoreStart['overlays']['openModal']>;
 }

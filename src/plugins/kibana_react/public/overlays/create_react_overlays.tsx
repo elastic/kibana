@@ -18,8 +18,23 @@
  */
 
 import * as React from 'react';
-import { CoreStart } from '../../core/types';
-import { KibanaReactOverlays } from '../types';
+import { KibanaReactCore } from '../core/types';
+import { KibanaReactOverlays } from './types';
 
-export const openFlyoutPure = (core: CoreStart): KibanaReactOverlays['openFlyout'] => node =>
-  core.overlays.openFlyout(<>{node}</>);
+export const createReactOverlays = (core: KibanaReactCore): KibanaReactOverlays => {
+  if (!core.overlays) {
+    throw new TypeError('Could not create KibanaReactOverlays as core.overlays is not available.');
+  }
+
+  const openFlyout: KibanaReactOverlays['openFlyout'] = node =>
+    core.overlays!.openFlyout(<>{node}</>);
+
+  const openModal: KibanaReactOverlays['openModal'] = node => core.overlays!.openModal(<>{node}</>);
+
+  const overlays: KibanaReactOverlays = {
+    openFlyout,
+    openModal,
+  };
+
+  return overlays;
+};
