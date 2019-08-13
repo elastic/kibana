@@ -135,7 +135,7 @@ export class Header extends React.PureComponent<Props> {
                     <EuiFlexItem grow={false}>
                       <FieldNameContainer>
                         <TruncatableHeaderText
-                          data-test-subj="header-text"
+                          data-test-subj={`header-text-${header.id}`}
                           size="xs"
                           width={`${header.width -
                             (ACTIONS_WIDTH + CELL_RESIZE_HANDLE_WIDTH + TITLE_PADDING)}px`}

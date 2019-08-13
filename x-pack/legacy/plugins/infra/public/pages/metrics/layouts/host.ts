@@ -9,6 +9,7 @@ import { InfraMetric } from '../../../graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 import { nginxLayoutCreator } from './nginx';
 import { apmLayoutCreator } from './apm';
+import { awsLayoutCreator } from './aws';
 import {
   InfraMetricLayoutSectionType,
   InfraMetricLayoutVisualizationType,
@@ -367,4 +368,5 @@ export const hostLayoutCreator = (theme: EuiTheme): InfraMetricLayout[] => [
   },
   ...nginxLayoutCreator(theme),
   ...apmLayoutCreator(),
+  ...awsLayoutCreator(theme),
 ];
