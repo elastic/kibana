@@ -11,20 +11,25 @@ import { toastNotifications } from 'ui/notify';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
+import { JobRunner } from '../../../common/job_runner';
 import { mlJobService } from '../../../../../services/job_service';
 import { JsonFlyout } from './json_flyout';
 import { isSingleMetricJobCreator } from '../../../common/job_creator';
 import { JobDetails } from './job_details';
 import { DetectorChart } from './detector_chart';
 import { JobProgress } from './components/job_progress';
+import { PostSaveOptions } from './components/post_save_options';
 
+// ts-ignore
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
     JobCreatorContext
   );
   const [progress, setProgress] = useState(resultsLoader.progress);
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
+  const [creatingJob, setCreatingJob] = useState(false);
   const [isValid, setIsValid] = useState(jobValidator.validationSummary.basic);
+  const [jobRunner, setJobRunner] = useState<JobRunner | null>(null);
 
   useEffect(() => {
     jobCreator.subscribeToProgress(setProgress);
@@ -32,8 +37,10 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
 
   async function start() {
     setShowJsonFlyout(false);
+    setCreatingJob(true);
     try {
-      await jobCreator.createAndStartJob();
+      const jr = await jobCreator.createAndStartJob();
+      setJobRunner(jr);
     } catch (error) {
       // catch and display all job creation errors
       toastNotifications.addDanger({
@@ -42,6 +49,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
         }),
         text: error.message,
       });
+      setCreatingJob(false);
     }
   }
 
@@ -79,13 +87,16 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
             <Fragment>
               <EuiButton
                 onClick={start}
-                isDisabled={progress > 0}
-                disabled={isValid === false}
+                isDisabled={creatingJob === true || isValid === false}
                 data-test-subj="mlJobWizardButtonCreateJob"
               >
                 Create job
               </EuiButton>
               &emsp;
+            </Fragment>
+          )}
+          {creatingJob === false && (
+            <Fragment>
               <EuiButtonEmpty
                 size="s"
                 onClick={toggleJsonFlyout}
@@ -97,7 +108,6 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
               {showJsonFlyout && (
                 <JsonFlyout closeFlyout={() => setShowJsonFlyout(false)} jobCreator={jobCreator} />
               )}
-              &emsp;
             </Fragment>
           )}
           {progress > 0 && (
@@ -105,6 +115,11 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
               <EuiButton onClick={viewResults} data-test-subj="mlJobWizardButtonViewResults">
                 View results
               </EuiButton>
+              {progress === 100 && (
+                <Fragment>
+                  <PostSaveOptions jobRunner={jobRunner} />
+                </Fragment>
+              )}
             </Fragment>
           )}
         </Fragment>

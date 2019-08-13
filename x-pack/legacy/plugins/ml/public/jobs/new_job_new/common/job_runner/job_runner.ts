@@ -66,10 +66,20 @@ export class JobRunner {
   // start the datafeed and then start polling for progress
   // the complete percentage is added to an observable
   // so all pre-subscribed listeners can follow along.
-  public async startDatafeed(): Promise<void> {
+  private async _startDatafeed(
+    start: number | undefined,
+    end: number | undefined,
+    pollProgress: boolean
+  ): Promise<boolean> {
     try {
       await this.openJob();
-      await mlJobService.startDatafeed(this._datafeedId, this._jobId, this._start, this._end);
+      const { started } = await mlJobService.startDatafeed(
+        this._datafeedId,
+        this._jobId,
+        start,
+        end
+      );
+
       this._datafeedState = DATAFEED_STATE.STARTED;
       this._percentageComplete = 0;
 
@@ -87,10 +97,22 @@ export class JobRunner {
       };
       // wait for the first check to run and then return success.
       // all subsequent checks will update the observable
-      await check();
+      if (pollProgress === true) {
+        await check();
+      }
+      return started;
     } catch (error) {
       throw error;
     }
+  }
+
+  public async startDatafeed() {
+    return await this._startDatafeed(this._start, this._end, true);
+  }
+
+  public async startDatafeedInRealTime() {
+    // set end as the start, to start off from where job last ran to
+    return await this._startDatafeed(this._end, undefined, false);
   }
 
   public async getProgress(): Promise<{ progress: Progress; isRunning: boolean }> {
