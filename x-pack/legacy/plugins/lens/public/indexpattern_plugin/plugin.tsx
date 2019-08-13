@@ -10,22 +10,12 @@ import { CoreSetup } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { Storage } from 'ui/storage';
-import { localStorage } from 'ui/storage/storage_service';
 import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
 import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { getIndexPatternDatasource } from './indexpattern';
 import { renameColumns } from './rename_columns';
 import { calculateFilterRatio } from './filter_ratio';
 import { setup as dataSetup } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
-import { QueryBarInput } from '../../../../../../src/legacy/core_plugins/data/public';
-
-// TODO this is a temporary workaround because the QueryBar component is being re-written
-// After the re-write, the component itself will be stateless and can be imported in the file
-// that uses it And it takes a prop out of the chrome plugin which can be passed down through the plugin
-// and dimension panel.
-export type DataPluginDependencies = typeof dataSetup & {
-  components: { QueryBarInput: typeof QueryBarInput };
-};
 
 // TODO these are intermediary types because interpreter is not typed yet
 // They can get replaced by references to the real interfaces as soon as they
@@ -35,7 +25,6 @@ export interface IndexPatternDatasourcePluginPlugins {
   chrome: Chrome;
   interpreter: InterpreterSetup;
   data: typeof dataSetup;
-  storage: Storage;
   toastNotifications: typeof toastNotifications;
 }
 
@@ -51,7 +40,7 @@ class IndexPatternDatasourcePlugin {
 
   setup(
     _core: CoreSetup | null,
-    { interpreter, data, storage, toastNotifications: toast }: IndexPatternDatasourcePluginPlugins
+    { interpreter, data, toastNotifications: toast }: IndexPatternDatasourcePluginPlugins
   ) {
     interpreter.functionsRegistry.register(() => renameColumns);
     interpreter.functionsRegistry.register(() => calculateFilterRatio);
@@ -59,8 +48,8 @@ class IndexPatternDatasourcePlugin {
       chrome,
       interpreter,
       toastNotifications: toast,
-      data: { ...data, components: { QueryBarInput } },
-      storage,
+      data,
+      storage: new Storage(localStorage),
     });
   }
 
@@ -76,7 +65,6 @@ export const indexPatternDatasourceSetup = () =>
       functionsRegistry,
     },
     data: dataSetup,
-    storage: localStorage,
     toastNotifications,
   });
 export const indexPatternDatasourceStop = () => plugin.stop();

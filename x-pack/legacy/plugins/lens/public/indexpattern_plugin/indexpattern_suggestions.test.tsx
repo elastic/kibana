@@ -6,7 +6,6 @@
 
 import chromeMock from 'ui/chrome';
 import { data as dataMock } from '../../../../../../src/legacy/core_plugins/data/public/setup';
-import { localStorage as storageMock } from 'ui/storage/storage_service';
 import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { toastNotifications as notificationsMock } from 'ui/notify';
 import {
@@ -16,14 +15,13 @@ import {
 } from './indexpattern';
 import { Datasource, DatasourceSuggestion } from '../types';
 import { generateId } from '../id_generator';
-import { DataPluginDependencies } from './plugin';
+import { Storage } from 'ui/storage';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
 // chrome, notify, storage are used by ./plugin
 jest.mock('ui/chrome');
 jest.mock('ui/notify');
-jest.mock('ui/storage/storage_service');
 // Contains old and new platform data plugins, used for interpreter and filter ratio
 jest.mock('ui/new_platform');
 jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
@@ -138,10 +136,10 @@ describe('IndexPattern Data Source suggestions', () => {
   beforeEach(() => {
     indexPatternDatasource = getIndexPatternDatasource({
       chrome: chromeMock,
-      storage: storageMock,
+      storage: {} as Storage,
       interpreter: { functionsRegistry },
       toastNotifications: notificationsMock,
-      data: dataMock as DataPluginDependencies,
+      data: dataMock,
     });
 
     persistedState = {

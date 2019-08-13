@@ -10,10 +10,8 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { Registry } from '@kbn/interpreter/target/common';
 import { CoreSetup } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
-import {
-  EmbeddablePlugin,
-  embeddablePlugin,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public';
+import { Plugin as EmbeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { setup as embeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
 import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
@@ -25,7 +23,7 @@ import { EmbeddableFactory } from './embeddable/embeddable_factory';
 export interface EditorFrameSetupPlugins {
   data: typeof data;
   chrome: Chrome;
-  embeddables: EmbeddablePlugin;
+  embeddables: ReturnType<EmbeddablePlugin['setup']>;
   interpreter: InterpreterSetup;
 }
 
@@ -45,7 +43,8 @@ export class EditorFramePlugin {
   public setup(_core: CoreSetup | null, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
     plugins.interpreter.functionsRegistry.register(() => mergeTables);
 
-    plugins.embeddables.addEmbeddableFactory(
+    plugins.embeddables.registerEmbeddableFactory(
+      'lens',
       new EmbeddableFactory(
         plugins.chrome,
         plugins.data.expressions.ExpressionRenderer,
