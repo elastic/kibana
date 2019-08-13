@@ -9,7 +9,10 @@ import { termsOperation } from './terms';
 import { shallow } from 'enzyme';
 import { IndexPatternPrivateState, TermsIndexPatternColumn } from '../indexpattern';
 import { EuiRange, EuiSelect } from '@elastic/eui';
-import { DataPluginDependencies } from '..';
+import { UiSettingsClientContract } from 'src/core/public';
+import { Storage } from 'ui/storage';
+
+jest.mock('ui/new_platform');
 
 describe('terms', () => {
   let state: IndexPatternPrivateState;
@@ -277,7 +280,8 @@ describe('terms', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
-          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+          storage={{} as Storage}
+          uiSettings={{} as UiSettingsClientContract}
         />
       );
 
@@ -321,7 +325,8 @@ describe('terms', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
-          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+          storage={{} as Storage}
+          uiSettings={{} as UiSettingsClientContract}
         />
       );
 
@@ -338,7 +343,8 @@ describe('terms', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
-          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+          storage={{} as Storage}
+          uiSettings={{} as UiSettingsClientContract}
         />
       );
 
@@ -382,7 +388,8 @@ describe('terms', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
-          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+          storage={{} as Storage}
+          uiSettings={{} as UiSettingsClientContract}
         />
       );
 
@@ -402,7 +409,8 @@ describe('terms', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
-          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+          storage={{} as Storage}
+          uiSettings={{} as UiSettingsClientContract}
         />
       );
 
@@ -443,7 +451,8 @@ describe('terms', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
-          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+          storage={{} as Storage}
+          uiSettings={{} as UiSettingsClientContract}
         />
       );
 
@@ -458,7 +467,8 @@ describe('terms', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
-          dataPluginDependencies={({} as unknown) as DataPluginDependencies}
+          storage={{} as Storage}
+          uiSettings={{} as UiSettingsClientContract}
         />
       );
 

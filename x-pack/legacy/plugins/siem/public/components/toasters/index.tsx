@@ -120,3 +120,5 @@ const formatToErrorToastIfNeeded = (
 const ErrorToastContainer = styled.div`
   text-align: right;
 `;
+
+ErrorToastContainer.displayName = 'ErrorToastContainer';

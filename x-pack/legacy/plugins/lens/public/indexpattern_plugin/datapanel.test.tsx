@@ -13,6 +13,7 @@ import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } 
 import { FieldItem } from './field_item';
 import { act } from 'react-dom/test-utils';
 
+jest.mock('ui/new_platform');
 jest.mock('./loader');
 
 const initialState: IndexPatternPrivateState = {

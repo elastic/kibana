@@ -16,6 +16,7 @@ import {
   CountIndexPatternColumn,
 } from './indexpattern';
 
+jest.mock('ui/new_platform');
 jest.mock('./loader');
 
 const expectedIndexPatterns = {

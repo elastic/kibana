@@ -12,10 +12,7 @@ import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { toastNotifications } from 'ui/notify';
 import { Chrome } from 'ui/chrome';
-import {
-  Query,
-  QueryBar as QueryBarType,
-} from '../../../../../../src/legacy/core_plugins/data/public/query';
+import { Query, QueryBar } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
@@ -38,7 +35,6 @@ export function App({
   chrome,
   docId,
   docStorage,
-  QueryBar,
   redirectTo,
 }: {
   editorFrame: EditorFrameInstance;
@@ -46,7 +42,6 @@ export function App({
   store: Storage;
   docId?: string;
   docStorage: SavedObjectStore;
-  QueryBar: typeof QueryBarType;
   redirectTo: (id?: string) => void;
 }) {
   const uiSettings = chrome.getUiSettingsClient();
@@ -175,6 +170,7 @@ export function App({
             query={state.query}
             dateRangeFrom={state.dateRange && state.dateRange.fromDate}
             dateRangeTo={state.dateRange && state.dateRange.toDate}
+            uiSettings={uiSettings}
           />
         </div>
 

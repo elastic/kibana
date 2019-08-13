@@ -83,3 +83,5 @@ export const FlowTargetSelect = pure<FlowTargetSelectProps>(
     />
   )
 );
+
+FlowTargetSelect.displayName = 'FlowTargetSelect';

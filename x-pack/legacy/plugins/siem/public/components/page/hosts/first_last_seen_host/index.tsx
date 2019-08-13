@@ -65,3 +65,5 @@ export const FirstLastSeenHost = pure<{ hostname: string; type: FirstLastSeenHos
     );
   }
 );
+
+FirstLastSeenHost.displayName = 'FirstLastSeenHost';

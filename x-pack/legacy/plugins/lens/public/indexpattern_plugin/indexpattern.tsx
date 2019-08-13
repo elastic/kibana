@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
+import { Storage } from 'ui/storage';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
@@ -19,7 +20,7 @@ import { Query } from '../../../../../../src/legacy/core_plugins/data/public/que
 import { getIndexPatterns } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
-import { IndexPatternDatasourcePluginPlugins, DataPluginDependencies } from './plugin';
+import { IndexPatternDatasourcePluginPlugins } from './plugin';
 import { IndexPatternDataPanel } from './datapanel';
 import {
   getDatasourceSuggestionsForField,
@@ -197,9 +198,9 @@ function removeProperty<T>(prop: string, object: Record<string, T>): Record<stri
 export function getIndexPatternDatasource({
   chrome,
   toastNotifications,
-  data,
   storage,
-}: Omit<IndexPatternDatasourcePluginPlugins, 'data'> & { data: DataPluginDependencies }) {
+}: IndexPatternDatasourcePluginPlugins & { storage: Storage }) {
+  const uiSettings = chrome.getUiSettingsClient();
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
     async initialize(state?: IndexPatternPersistedState) {
@@ -303,7 +304,7 @@ export function getIndexPatternDatasource({
               <IndexPatternDimensionPanel
                 state={state}
                 setState={newState => setState(newState)}
-                dataPluginDependencies={data}
+                uiSettings={uiSettings}
                 storage={storage}
                 layerId={props.layerId}
                 {...props}
