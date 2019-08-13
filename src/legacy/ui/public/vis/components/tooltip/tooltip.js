@@ -102,10 +102,13 @@ Tooltip.prototype.show = function () {
     left: placement.left,
     top: placement.top
   });
+  // The number of columns on the tooltip is currently the only
+  // thing that differenciate one tooltip; from another
   const tooltipColumns = $tooltip.find('tbody > tr:nth-of-type(1) > td').length;
   if (tooltipColumns === 2) {
     // on pointseries tooltip
     const tooltipWidth = $tooltip.outerWidth();
+    // get the last column to the right
     const valueColumn = $tooltip.find('tr:nth-of-type(1) > td:nth-child(2)');
     if (valueColumn.length !== 1) {
       return;
@@ -127,6 +130,7 @@ Tooltip.prototype.show = function () {
   } else if(tooltipColumns === 3) {
     // on hierarchical tooltip
     const tooltipWidth = $tooltip.outerWidth();
+    // get the last column to the right (3rd column)
     const valueColumn = $tooltip.find('tr:nth-of-type(1) > td:nth-child(3)');
     if (valueColumn.length !== 1) {
       return;
