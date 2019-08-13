@@ -54,6 +54,7 @@ interface Props {
   range: string;
   rowRenderers: RowRenderer[];
   sort: Sort;
+  toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
   width: number;
 }
@@ -106,6 +107,7 @@ export const Body = pure<Props>(
     pinnedEventIds,
     rowRenderers,
     sort,
+    toggleColumn,
     updateNote,
     width,
   }) => {
@@ -130,6 +132,7 @@ export const Body = pure<Props>(
             showEventsSelect={false}
             sort={sort}
             timelineId={id}
+            toggleColumn={toggleColumn}
             minWidth={columnWidths}
           />
 
@@ -155,6 +158,7 @@ export const Body = pure<Props>(
               onUnPinEvent={onUnPinEvent}
               pinnedEventIds={pinnedEventIds}
               rowRenderers={rowRenderers}
+              toggleColumn={toggleColumn}
               updateNote={updateNote}
               minWidth={columnWidths}
               width={width}
