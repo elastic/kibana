@@ -8,13 +8,15 @@ import { AgentLib } from './agent';
 import { TokenLib } from './token';
 import { InMemoryAgentAdapter } from './adapters/agent/in_memory';
 import { Agent } from './adapters/agent/adapter_type';
+import { TokenAdapter } from './adapters/tokens/default';
+import { FrameworkLib } from './framework';
 
 jest.mock('./token');
 
 describe('Agent lib', () => {
   describe('Enroll', () => {
     it('Should throw if the enrollment token is not valid', async () => {
-      const token = new TokenLib();
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
       const agentAdapter = new InMemoryAgentAdapter();
       const agentLib = new AgentLib(agentAdapter, token);
 
@@ -39,7 +41,7 @@ describe('Agent lib', () => {
     });
 
     it('Should enroll a new PERMANENT agent', async () => {
-      const token = new TokenLib();
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
       const agentAdapter = new InMemoryAgentAdapter();
       const agentLib = new AgentLib(agentAdapter, token);
 
@@ -63,7 +65,7 @@ describe('Agent lib', () => {
     });
 
     it('Should allow to enroll a new PERMANENT agent again if this agent is active', async () => {
-      const token = new TokenLib();
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
       const agentAdapter = new InMemoryAgentAdapter();
       const agentLib = new AgentLib(agentAdapter, token);
 
@@ -99,7 +101,7 @@ describe('Agent lib', () => {
     });
 
     it('Should not enroll a new PERMANENT agent if this agent is already active', async () => {
-      const token = new TokenLib();
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
       const agentAdapter = new InMemoryAgentAdapter();
       const agentLib = new AgentLib(agentAdapter, token);
 
@@ -135,7 +137,7 @@ describe('Agent lib', () => {
     });
 
     it('Should enroll a new EPHEMERAL_INSTANCE agent', async () => {
-      const token = new TokenLib();
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
       const agentAdapter = new InMemoryAgentAdapter();
       const agentLib = new AgentLib(agentAdapter, token);
 
@@ -158,7 +160,7 @@ describe('Agent lib', () => {
     });
 
     it('When enrolling a new EPHEMERAL_INSTANCE agent it should create a EPHEMERAL agent too', async () => {
-      const token = new TokenLib();
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
       const agentAdapter = new InMemoryAgentAdapter();
       const agentLib = new AgentLib(agentAdapter, token);
 
@@ -179,7 +181,7 @@ describe('Agent lib', () => {
       });
     });
     it('When enrolling multiple EPHEMERAL_INSTANCE agent it should create only one EPHEMERAL agent', async () => {
-      const token = new TokenLib();
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
       const agentAdapter = new InMemoryAgentAdapter();
       const agentLib = new AgentLib(agentAdapter, token);
 
@@ -212,7 +214,7 @@ describe('Agent lib', () => {
 
   describe('Delete', () => {
     it('should delete ephemeral instances', async () => {
-      const token = new TokenLib();
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
       const agentAdapter = new InMemoryAgentAdapter();
       agentAdapter.delete = jest.fn(async () => {});
       const agentLib = new AgentLib(agentAdapter, token);
@@ -226,7 +228,7 @@ describe('Agent lib', () => {
     });
 
     it('should desactivate other agent', async () => {
-      const token = new TokenLib();
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
       const agentAdapter = new InMemoryAgentAdapter();
       agentAdapter.update = jest.fn(async () => {});
       const agentLib = new AgentLib(agentAdapter, token);
@@ -244,7 +246,7 @@ describe('Agent lib', () => {
 
   describe('list', () => {
     it('should return all agents', async () => {
-      const token = new TokenLib();
+      const token = new TokenLib({} as TokenAdapter, {} as FrameworkLib);
       const agentAdapter = new InMemoryAgentAdapter();
       agentAdapter.agents['agent:1'] = { id: 'agent:1' } as Agent;
       agentAdapter.agents['agent:2'] = { id: 'agent:2' } as Agent;
