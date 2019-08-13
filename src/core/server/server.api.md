@@ -579,8 +579,6 @@ export interface RequestHandlerContext {
 // @public
 export type RequestHandlerContextContainer<TContext> = IContextContainer<TContext, RequestHandlerReturn | Promise<RequestHandlerReturn>, RequestHandlerParams>;
 
-// Warning: (ae-forgotten-export) The symbol "IContextProvider" needs to be exported by the entry point index.d.ts
-// 
 // @public
 export type RequestHandlerContextProvider<TContext> = IContextProvider<TContext, keyof TContext, RequestHandlerParams>;
 
