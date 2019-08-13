@@ -125,7 +125,7 @@ export class FeatureTooltip extends React.Component {
         showFilterButtons={this.props.showFilterButtons}
         onCloseTooltip={this._onCloseTooltip}
         addFilters={this.props.addFilters}
-        repositionTooltip={this.props.repositionTooltip}
+        reevaluateTooltipPosition={this.props.reevaluateTooltipPosition}
       />
     );
   }

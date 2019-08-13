@@ -30,6 +30,7 @@ export class FeatureProperties extends React.Component {
 
   componentDidUpdate() {
     this._loadProperties();
+    this.props.reevaluateTooltipPosition();
   }
 
   componentWillUnmount() {
@@ -109,13 +110,6 @@ export class FeatureProperties extends React.Component {
   }
 
   render() {
-
-    requestAnimationFrame(() => {
-      if (this._isMounted) {
-        this.props.repositionTooltip();
-      }
-    });
-
     if (this.state.loadPropertiesErrorMsg) {
       return (
         <EuiCallOut
