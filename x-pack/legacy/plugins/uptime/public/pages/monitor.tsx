@@ -27,9 +27,8 @@ import { BaseLocationOptions } from '../components/functional/ping_list';
 import { useTrackPageview } from '../../../infra/public';
 
 interface MonitorPageProps {
-  location: { pathname: string; search: string };
   logMonitorPageLoad: () => void;
-  match: { params: { id: string } };
+  match: { params: { monitorId: string } };
   // this is the query function provided by Apollo's Client API
   query: <T, TVariables = OperationVariables>(
     options: QueryOptions<TVariables>
@@ -38,13 +37,13 @@ interface MonitorPageProps {
 }
 
 export const MonitorPage = ({
-  location,
   logMonitorPageLoad,
   query,
   setBreadcrumbs,
+  match,
 }: MonitorPageProps) => {
-  const parsedPath = location.pathname.replace(/^(\/monitor\/)/, '').split('/');
-  const [monitorId] = useState<string>(decodeURI(parsedPath[0]));
+  // decode 64 base string, it was decoded to make it a valid url, since monitor id can be a url
+  const monitorId = atob(match.params.monitorId);
   const [pingListPageCount, setPingListPageCount] = useState<number>(10);
   const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrlParams] = useUrlParams();
