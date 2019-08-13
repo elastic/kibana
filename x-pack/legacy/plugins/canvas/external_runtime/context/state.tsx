@@ -5,7 +5,7 @@
  */
 
 import React, { createContext, useContext, Dispatch, useReducer, ReactChild } from 'react';
-import { CanvasWorkpad } from '../types';
+import { CanvasRenderedWorkpad } from '../types';
 import { reducer } from './reducer';
 import { ExternalEmbedAction } from './actions';
 
@@ -14,7 +14,7 @@ export interface ExternalEmbedState {
     register: (fn: Function) => void;
     get: (name: string) => Function;
   } | null;
-  workpad: CanvasWorkpad | null;
+  workpad: CanvasRenderedWorkpad | null;
   page: number;
   height: number;
   width: number;

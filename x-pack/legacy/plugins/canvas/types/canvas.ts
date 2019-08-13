@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore Unlinked Webpack Type
-import ContainerStyle from 'types/interpreter';
 import { ElementPosition } from './elements';
 
 export interface CanvasElement {
@@ -39,16 +37,4 @@ export interface CanvasWorkpad {
   page: number;
   pages: CanvasPage[];
   width: number;
-}
-
-export interface CanvasRenderable {
-  error: string;
-  state: 'ready' | 'error';
-  value: {
-    as: string;
-    containerStyle: ContainerStyle;
-    css: string;
-    type: 'render';
-    value: any;
-  };
 }

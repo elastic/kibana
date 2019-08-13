@@ -15,13 +15,13 @@ import {
 } from '../context';
 // @ts-ignore
 import { renderFunctions } from '../../canvas_plugin_src/renderers';
-import { CanvasWorkpad } from '../types';
+import { CanvasRenderedWorkpad } from '../types';
 
 interface Props {
   height: number;
   width: number;
   page: number;
-  workpad: CanvasWorkpad;
+  workpad: CanvasRenderedWorkpad;
 }
 
 export const App = (props: Props) => {

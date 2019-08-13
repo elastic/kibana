@@ -11,14 +11,14 @@ import Style from 'style-it';
 import { Positionable } from '../../public/components/positionable/positionable';
 // @ts-ignore Untyped local
 import { elementToShape } from '../../public/components/workpad_page/utils';
-import { PositionedElement } from '../types';
+import { CanvasRenderedElement } from '../types';
 import { ExternalEmbedContext } from '../context';
 
 // @ts-ignore CSS Module
 import css from './element.module';
 
 interface Props {
-  element: PositionedElement;
+  element: CanvasRenderedElement;
   number?: number;
 }
 

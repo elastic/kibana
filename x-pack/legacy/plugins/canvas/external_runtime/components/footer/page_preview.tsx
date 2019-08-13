@@ -8,7 +8,7 @@ import React from 'react';
 import { useExternalEmbedState } from '../../context';
 import { Page } from '../page';
 import { setPage } from '../../context/actions';
-import { CanvasPage } from '../../types';
+import { CanvasRenderedPage } from '../../types';
 
 // @ts-ignore CSS Module
 import css from './page_preview.module';
@@ -16,7 +16,7 @@ import css from './page_preview.module';
 interface Props {
   number: number;
   height: number;
-  page: CanvasPage;
+  page: CanvasRenderedPage;
 }
 
 export const PagePreview = ({ number, page, height }: Props) => {

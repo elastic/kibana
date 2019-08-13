@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CanvasWorkpad } from '../types';
+import { CanvasRenderedWorkpad } from '../types';
 
 export enum ExternalEmbedActions {
   SET_WORKPAD = 'SET_WORKPAD',
@@ -29,7 +29,7 @@ const createAction = <T extends ExternalEmbedActions, P>(
   payload,
 });
 
-export const setWorkpad = (workpad: CanvasWorkpad) =>
+export const setWorkpad = (workpad: CanvasRenderedWorkpad) =>
   createAction(ExternalEmbedActions.SET_WORKPAD, { workpad });
 
 export const setPage = (page: number) => createAction(ExternalEmbedActions.SET_PAGE, { page });

@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { App } from '../components/app';
-import { CanvasWorkpad } from '../types';
+import { CanvasRenderedWorkpad } from '../types';
 
 export interface Options {
   height?: number;
@@ -18,7 +18,7 @@ export interface Options {
 export abstract class BaseEmbed {
   protected abstract element: HTMLElement;
   protected abstract options: Options = {};
-  protected abstract _getWorkpad(): Promise<CanvasWorkpad | undefined | null>;
+  protected abstract _getWorkpad(): Promise<CanvasRenderedWorkpad | undefined | null>;
 
   async _render() {
     try {

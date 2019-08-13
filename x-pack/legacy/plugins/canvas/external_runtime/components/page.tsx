@@ -7,13 +7,13 @@
 import React from 'react';
 import { ExternalEmbedElement } from './element';
 import { useExternalEmbedState } from '../context';
-import { CanvasPage, PositionedElement } from '../types';
+import { CanvasRenderedPage, CanvasRenderedElement } from '../types';
 
 // @ts-ignore CSS Module
 import css from './page.module';
 
 interface Props {
-  page: CanvasPage;
+  page: CanvasRenderedPage;
 }
 
 export const Page = (props: Props) => {
@@ -25,7 +25,7 @@ export const Page = (props: Props) => {
   const { height, width, id } = workpad;
   const { elements, style } = props.page;
 
-  const output = elements.map((element: PositionedElement, index) => (
+  const output = elements.map((element: CanvasRenderedElement, index) => (
     <ExternalEmbedElement key={element.id} element={element} number={index + 1} />
   ));
 

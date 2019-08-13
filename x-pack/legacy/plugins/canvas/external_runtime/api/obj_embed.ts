@@ -6,14 +6,14 @@
 
 import 'whatwg-fetch';
 import { BaseEmbed, Options } from './base_embed';
-import { CanvasWorkpad } from '../types';
+import { CanvasRenderedWorkpad } from '../types';
 
 export class Embed extends BaseEmbed {
-  protected workpad: CanvasWorkpad;
+  protected workpad: CanvasRenderedWorkpad;
   protected element: HTMLElement;
   protected options: Options = {};
 
-  constructor(element: HTMLElement, workpad: CanvasWorkpad, options: Options = {}) {
+  constructor(element: HTMLElement, workpad: CanvasRenderedWorkpad, options: Options = {}) {
     super();
     this.workpad = workpad;
     this.options = options;
