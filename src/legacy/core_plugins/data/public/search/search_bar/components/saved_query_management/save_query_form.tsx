@@ -36,10 +36,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryAttributes } from '../../index';
-import { getAllSavedQueries } from '../../lib/saved_query_service';
+import { SavedQueryService } from '../../lib/saved_query_service';
 
 interface Props {
   savedQuery?: SavedQueryAttributes;
+  savedQueryService: SavedQueryService;
   onSave: (savedQueryMeta: SavedQueryMeta) => void;
   onClose: () => void;
   showFilterOption: boolean | undefined;
@@ -55,6 +56,7 @@ export interface SavedQueryMeta {
 
 export const SaveQueryForm: FunctionComponent<Props> = ({
   savedQuery,
+  savedQueryService,
   onSave,
   onClose,
   showFilterOption = true,
@@ -75,8 +77,8 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
 
   useEffect(() => {
     const fetchQueries = async () => {
-      const allSavedQueries = await getAllSavedQueries();
-      const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
+      const allSavedQueries = await savedQueryService.getAllSavedQueries();
+      const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title') as SavedQuery[];
       setSavedQueries(sortedAllSavedQueries);
     };
     fetchQueries();

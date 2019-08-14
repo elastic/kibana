@@ -73,6 +73,14 @@ const mockIndexPattern = {
   ],
 } as IndexPattern;
 
+const mockSavedQueryService = {
+  saveQuery: jest.fn(),
+  getAllSavedQueries: jest.fn(),
+  findSavedQueries: jest.fn(),
+  getSavedQuery: jest.fn(),
+  deleteSavedQuery: jest.fn(),
+};
+
 const kqlQuery = {
   query: 'response:200',
   language: 'kuery',
@@ -91,6 +99,7 @@ describe('SearchBar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
+        savedQueryService={mockSavedQueryService}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -106,6 +115,7 @@ describe('SearchBar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
+        savedQueryService={mockSavedQueryService}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -122,6 +132,7 @@ describe('SearchBar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
+        savedQueryService={mockSavedQueryService}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -140,6 +151,7 @@ describe('SearchBar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
+        savedQueryService={mockSavedQueryService}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -159,6 +171,7 @@ describe('SearchBar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
+        savedQueryService={mockSavedQueryService}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -178,6 +191,7 @@ describe('SearchBar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
+        savedQueryService={mockSavedQueryService}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -198,6 +212,7 @@ describe('SearchBar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
+        savedQueryService={mockSavedQueryService}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}

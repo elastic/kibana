@@ -29,9 +29,9 @@ import { toastNotifications } from 'ui/notify';
 import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPattern, Query, QueryBar, FilterBar } from '../../../../../data/public';
 import { SavedQuery, SavedQueryAttributes } from '../index';
-import { saveQuery } from '../lib/saved_query_service';
 import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_query_form';
 import { SavedQueryManagementComponent } from './saved_query_management/saved_query_management_component';
+import { SavedQueryService } from '../lib/saved_query_service';
 
 interface DateRange {
   from: string;
@@ -46,6 +46,7 @@ export interface SearchBarProps {
   appName: string;
   intl: InjectedIntl;
   uiSettings: UiSettingsClientContract;
+  savedQueryService: SavedQueryService;
   indexPatterns?: IndexPattern[];
   // Query bar
   showQueryBar?: boolean;
@@ -244,9 +245,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     try {
       let response;
       if (this.props.savedQuery && !saveAsNew) {
-        response = await saveQuery(savedQueryAttributes, { overwrite: true });
+        response = await this.props.savedQueryService.saveQuery(savedQueryAttributes, {
+          overwrite: true,
+        });
       } else {
-        response = await saveQuery(savedQueryAttributes);
+        response = await this.props.savedQueryService.saveQuery(savedQueryAttributes);
       }
 
       toastNotifications.addSuccess(`Your query "${response.attributes.title}" was saved`);
@@ -362,7 +365,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onSave={this.onInitiateSave}
         onSaveAsNew={this.onInitiateSaveNew}
         onLoad={this.onLoadSavedQuery}
-        query={this.state.query}
+        savedQueryService={this.props.savedQueryService}
         onClearSavedQuery={this.props.onClearSavedQuery}
       ></SavedQueryManagementComponent>
     );
@@ -434,6 +437,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
             savedQuery={this.props.savedQuery ? this.props.savedQuery.attributes : undefined}
+            savedQueryService={this.props.savedQueryService}
             onSave={this.onSave}
             onClose={() => this.setState({ showSaveQueryModal: false })}
             showFilterOption={this.props.showFilterBar}
@@ -442,6 +446,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         ) : null}
         {this.state.showSaveNewQueryModal ? (
           <SaveQueryForm
+            savedQueryService={this.props.savedQueryService}
             onSave={savedQueryMeta => this.onSave(savedQueryMeta, true)}
             onClose={() => this.setState({ showSaveNewQueryModal: false })}
             showFilterOption={this.props.showFilterBar}

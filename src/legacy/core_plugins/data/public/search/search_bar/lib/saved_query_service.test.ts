@@ -18,12 +18,7 @@
  */
 
 import { SavedQueryAttributes } from '../index';
-import {
-  saveQuery,
-  findSavedQueries,
-  getSavedQuery,
-  deleteSavedQuery,
-} from './saved_query_service';
+import { createSavedQueryService } from './saved_query_service';
 import { FilterStateStore } from '@kbn/es-query';
 
 const savedQueryAttributes: SavedQueryAttributes = {
@@ -66,19 +61,17 @@ const mockSavedObjectsClient = {
   delete: jest.fn(),
 };
 
-jest.mock('ui/chrome', () => {
-  return {
-    getSavedObjectsClient: () => {
-      return mockSavedObjectsClient;
-    },
-  };
-});
+const { deleteSavedQuery, getSavedQuery, findSavedQueries, saveQuery } = createSavedQueryService(
+  // @ts-ignore
+  mockSavedObjectsClient
+);
 
 describe('saved query service', () => {
   afterEach(() => {
     mockSavedObjectsClient.create.mockReset();
     mockSavedObjectsClient.find.mockReset();
     mockSavedObjectsClient.get.mockReset();
+    mockSavedObjectsClient.delete.mockReset();
   });
 
   describe('saveQuery', function() {

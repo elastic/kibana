@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
 import { SavedObjectAttributes } from 'src/core/server';
+import { SavedObjectsClientContract } from 'src/core/public';
 import { SavedQueryAttributes, SavedQuery } from '../index';
 
 interface SerializedSavedQueryAttributes extends SavedObjectAttributes {
@@ -32,117 +32,131 @@ interface SerializedSavedQueryAttributes extends SavedObjectAttributes {
   timefilter?: string;
 }
 
-export const saveQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
+export interface SavedQueryService {
+  saveQuery: (
+    attributes: SavedQueryAttributes,
+    config?: { overwrite: boolean }
+  ) => Promise<SavedQuery>;
+  getAllSavedQueries: () => Promise<SavedQuery[]>;
+  findSavedQueries: (searchText?: string) => Promise<SavedQuery[]>;
+  getSavedQuery: (id: string) => Promise<SavedQuery>;
+  deleteSavedQuery: (id: string) => Promise<{}>;
+}
 
-  const query = {
-    query:
-      typeof attributes.query.query === 'string'
-        ? attributes.query.query
-        : JSON.stringify(attributes.query.query),
-    language: attributes.query.language,
+export const createSavedQueryService = (
+  savedObjectsClient: SavedObjectsClientContract
+): SavedQueryService => {
+  const saveQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
+    const query = {
+      query:
+        typeof attributes.query.query === 'string'
+          ? attributes.query.query
+          : JSON.stringify(attributes.query.query),
+      language: attributes.query.language,
+    };
+
+    const queryObject: SerializedSavedQueryAttributes = {
+      title: attributes.title,
+      description: attributes.description,
+      query,
+    };
+
+    if (attributes.filters) {
+      queryObject.filters = JSON.stringify(attributes.filters);
+    }
+
+    if (attributes.timefilter) {
+      queryObject.timefilter = JSON.stringify(attributes.timefilter);
+    }
+
+    let rawQueryResponse;
+    if (!overwrite) {
+      rawQueryResponse = await savedObjectsClient.create('query', queryObject, {
+        id: attributes.title,
+      });
+    } else {
+      rawQueryResponse = await savedObjectsClient.create('query', queryObject, {
+        id: attributes.title,
+        overwrite: true,
+      });
+    }
+
+    if (rawQueryResponse.error) {
+      throw new Error(rawQueryResponse.error.message);
+    }
+
+    return parseSavedQueryObject(rawQueryResponse);
   };
 
-  const queryObject: SerializedSavedQueryAttributes = {
-    title: attributes.title,
-    description: attributes.description,
-    query,
-  };
-
-  if (attributes.filters) {
-    queryObject.filters = JSON.stringify(attributes.filters);
-  }
-
-  if (attributes.timefilter) {
-    queryObject.timefilter = JSON.stringify(attributes.timefilter);
-  }
-
-  let rawQueryResponse;
-  if (!overwrite) {
-    rawQueryResponse = await savedObjectsClient.create('query', queryObject, {
-      id: attributes.title,
+  const getAllSavedQueries = async (): Promise<SavedQuery[]> => {
+    const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
+      type: 'query',
     });
-  } else {
-    rawQueryResponse = await savedObjectsClient.create('query', queryObject, {
-      id: attributes.title,
-      overwrite: true,
-    });
-  }
 
-  if (rawQueryResponse.error) {
-    throw new Error(rawQueryResponse.error.message);
-  }
-
-  return parseSavedQueryObject(rawQueryResponse);
-};
-
-export const getAllSavedQueries = async (): Promise<SavedQuery[]> => {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
-
-  const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
-    type: 'query',
-  });
-
-  return response.savedObjects.map(
-    (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
-      parseSavedQueryObject(savedObject)
-  );
-};
-
-export const findSavedQueries = async (searchText: string = ''): Promise<SavedQuery[]> => {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
-
-  const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
-    type: 'query',
-    search: searchText,
-    searchFields: ['title^5', 'description'],
-    sortField: '_score',
-  });
-
-  return response.savedObjects.map(
-    (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
-      parseSavedQueryObject(savedObject)
-  );
-};
-
-export const getSavedQuery = async (id: string): Promise<SavedQuery> => {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
-
-  const response = await savedObjectsClient.get<SerializedSavedQueryAttributes>('query', id);
-  return parseSavedQueryObject(response);
-};
-
-export const deleteSavedQuery = async (id: string) => {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
-  return await savedObjectsClient.delete('query', id);
-};
-
-const parseSavedQueryObject = (savedQuery: {
-  id: string;
-  attributes: SerializedSavedQueryAttributes;
-}) => {
-  let queryString;
-  try {
-    queryString = JSON.parse(savedQuery.attributes.query.query);
-  } catch (error) {
-    queryString = savedQuery.attributes.query.query;
-  }
-  const savedQueryItems: SavedQueryAttributes = {
-    title: savedQuery.attributes.title || '',
-    description: savedQuery.attributes.description || '',
-    query: {
-      query: queryString,
-      language: savedQuery.attributes.query.language,
-    },
+    return response.savedObjects.map(
+      (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
+        parseSavedQueryObject(savedObject)
+    );
   };
-  if (savedQuery.attributes.filters) {
-    savedQueryItems.filters = JSON.parse(savedQuery.attributes.filters);
-  }
-  if (savedQuery.attributes.timefilter) {
-    savedQueryItems.timefilter = JSON.parse(savedQuery.attributes.timefilter);
-  }
+
+  const findSavedQueries = async (searchText: string = ''): Promise<SavedQuery[]> => {
+    const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
+      type: 'query',
+      search: searchText,
+      searchFields: ['title^5', 'description'],
+      sortField: '_score',
+    });
+
+    return response.savedObjects.map(
+      (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
+        parseSavedQueryObject(savedObject)
+    );
+  };
+
+  const getSavedQuery = async (id: string): Promise<SavedQuery> => {
+    const response = await savedObjectsClient.get<SerializedSavedQueryAttributes>('query', id);
+    return parseSavedQueryObject(response);
+  };
+
+  const deleteSavedQuery = async (id: string) => {
+    return await savedObjectsClient.delete('query', id);
+  };
+
+  const parseSavedQueryObject = (savedQuery: {
+    id: string;
+    attributes: SerializedSavedQueryAttributes;
+  }) => {
+    let queryString;
+    try {
+      queryString = JSON.parse(savedQuery.attributes.query.query);
+    } catch (error) {
+      queryString = savedQuery.attributes.query.query;
+    }
+    const savedQueryItems: SavedQueryAttributes = {
+      title: savedQuery.attributes.title || '',
+      description: savedQuery.attributes.description || '',
+      query: {
+        query: queryString,
+        language: savedQuery.attributes.query.language,
+      },
+    };
+    if (savedQuery.attributes.filters) {
+      savedQueryItems.filters = JSON.parse(savedQuery.attributes.filters);
+    }
+    if (savedQuery.attributes.timefilter) {
+      savedQueryItems.timefilter = JSON.parse(savedQuery.attributes.timefilter);
+    }
+    return {
+      id: savedQuery.id,
+      attributes: savedQueryItems,
+    };
+  };
+
   return {
-    id: savedQuery.id,
-    attributes: savedQueryItems,
+    saveQuery,
+    getAllSavedQueries,
+    findSavedQueries,
+    getSavedQuery,
+    deleteSavedQuery,
   };
 };

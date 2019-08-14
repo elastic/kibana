@@ -47,6 +47,7 @@ module.directive('kbnTopNavV2', () => {
       const localStorage = new Storage(window.localStorage);
       child.setAttribute('store', 'store');
       child.setAttribute('ui-settings', 'uiSettings');
+      child.setAttribute('saved-objects-client', 'savedObjectsClient');
 
       // Append helper directive
       elem.append(child);
@@ -54,6 +55,7 @@ module.directive('kbnTopNavV2', () => {
       const linkFn = ($scope, _, $attr) => {
         $scope.store = localStorage;
         $scope.uiSettings = chrome.getUiSettingsClient();
+        $scope.savedObjectsClient = chrome.getSavedObjectsClient();
 
         // Watch config changes
         $scope.$watch(() => {
@@ -95,6 +97,7 @@ module.directive('kbnTopNavV2Helper', (reactDirective) => {
       ['savedQuery', { watchDepth: 'reference' }],
       ['store', { watchDepth: 'reference' }],
       ['uiSettings', { watchDepth: 'reference' }],
+      ['savedObjectsClient', { watchDepth: 'reference' }],
       ['intl', { watchDepth: 'reference' }],
       ['store', { watchDepth: 'reference' }],
 

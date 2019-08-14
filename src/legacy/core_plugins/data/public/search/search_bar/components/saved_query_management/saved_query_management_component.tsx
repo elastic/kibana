@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useEffect, useState, Fragment } from 'react';
 import { sortBy } from 'lodash';
 import { SavedQuery } from '../../index';
-import { getAllSavedQueries, deleteSavedQuery } from '../../lib/saved_query_service';
+import { SavedQueryService } from '../../lib/saved_query_service';
 import { SavedQueryListItem } from './saved_query_list_item';
 
 const pageCount = 50;
@@ -40,6 +40,7 @@ const pageCount = 50;
 interface Props {
   showSaveQuery?: boolean;
   loadedSavedQuery?: SavedQuery;
+  savedQueryService: SavedQueryService;
   onSave: () => void;
   onSaveAsNew: () => void;
   onLoad: (savedQuery: SavedQuery) => void;
@@ -53,6 +54,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   onSaveAsNew,
   onLoad,
   onClearSavedQuery,
+  savedQueryService,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
@@ -60,7 +62,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
 
   useEffect(() => {
     const fetchQueries = async () => {
-      const allSavedQueries = await getAllSavedQueries();
+      const allSavedQueries = await savedQueryService.getAllSavedQueries();
       const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
       setSavedQueries(sortedAllSavedQueries);
     };
@@ -101,7 +103,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
       onClearSavedQuery();
     }
 
-    deleteSavedQuery(savedQuery.id);
+    savedQueryService.deleteSavedQuery(savedQuery.id);
   };
 
   const savedQueryPopoverButton = (
@@ -135,6 +137,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
     );
     return savedQueriesDisplayRows.map(savedQuery => (
       <SavedQueryListItem
+        key={savedQuery.id}
         savedQuery={savedQuery}
         isSelected={!!loadedSavedQuery && loadedSavedQuery.id === savedQuery.id}
         onSelect={savedQueryToSelect => {
