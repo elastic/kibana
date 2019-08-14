@@ -14,7 +14,6 @@ export interface Document {
   type?: string;
   visualizationType: string | null;
   title: string;
-  activeDatasourceId: string;
   expression: string;
   state: {
     datasourceMetaData: {

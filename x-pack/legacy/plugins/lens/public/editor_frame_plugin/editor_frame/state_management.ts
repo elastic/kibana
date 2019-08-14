@@ -64,6 +64,21 @@ export type Action =
       newDatasourceId: string;
     };
 
+function getActiveDatasourceIdFromDoc(doc?: Document) {
+  if (!doc) {
+    return null;
+  }
+
+  const [initialDatasourceId] = Object.keys(doc.state.datasourceStates);
+  return initialDatasourceId || null;
+}
+
+function getInitialDatasourceId(props: EditorFrameProps) {
+  return props.initialDatasourceId
+    ? props.initialDatasourceId
+    : getActiveDatasourceIdFromDoc(props.doc);
+}
+
 export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
   const datasourceStates: EditorFrameState['datasourceStates'] = {};
 
@@ -81,7 +96,7 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
   return {
     title: i18n.translate('xpack.lens.chartTitle', { defaultMessage: 'New visualization' }),
     datasourceStates,
-    activeDatasourceId: props.initialDatasourceId ? props.initialDatasourceId : null,
+    activeDatasourceId: getInitialDatasourceId(props),
     visualization: {
       state: null,
       activeId: props.initialVisualizationId,
@@ -124,7 +139,7 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
           }),
           {}
         ),
-        activeDatasourceId: action.doc.activeDatasourceId,
+        activeDatasourceId: getActiveDatasourceIdFromDoc(action.doc),
         visualization: {
           ...state.visualization,
           activeId: action.doc.visualizationType,
