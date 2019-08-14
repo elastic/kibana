@@ -15,6 +15,7 @@ import {
   EuiCallOut,
   EuiEmptyPrompt,
   EuiPopover,
+  EuiTitle,
   SortDirection,
 } from '@elastic/eui';
 
@@ -281,7 +282,7 @@ export const DataFrameTransformList: SFC = () => {
       />
     );
 
-    return (
+    const bulkActionIcon = (
       <EuiPopover
         id="transformBulkActionsMenu"
         button={buttonIcon}
@@ -293,6 +294,19 @@ export const DataFrameTransformList: SFC = () => {
         {bulkActionMenuItems}
       </EuiPopover>
     );
+
+    return [
+      <EuiTitle key="selectedText" size="s">
+        <h3>
+          {i18n.translate('xpack.ml.dataframe.multiTransformActionsMenu.transformsCount', {
+            defaultMessage: '{count} {count, plural, one {transform} other {transforms}} selected',
+            values: { count: transformSelection.length },
+          })}
+        </h3>
+      </EuiTitle>,
+      <div className="mlTransformBulkActionsBorder" />,
+      bulkActionIcon,
+    ];
   };
 
   const search = {
