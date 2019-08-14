@@ -36,7 +36,7 @@ export {
   RedirectResponseOptions,
   RequestHandler,
   ResponseError,
-  ResponseErrorMeta,
+  ResponseErrorAttributes,
   kibanaResponseFactory,
   KibanaResponseFactory,
   RouteConfig,

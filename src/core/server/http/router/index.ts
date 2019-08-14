@@ -34,7 +34,7 @@ export {
   HttpResponsePayload,
   RedirectResponseOptions,
   ResponseError,
-  ResponseErrorMeta,
+  ResponseErrorAttributes,
   KibanaResponse,
   kibanaResponseFactory,
   KibanaResponseFactory,
