@@ -22,6 +22,9 @@ export default function manageRepositoriesFunctionalTests({
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
+  const existsInvisible = async (selector: string) =>
+    await testSubjects.exists(selector, { allowHidden: true });
+
   describe('History', function() {
     this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
@@ -184,12 +187,12 @@ export default function manageRepositoriesFunctionalTests({
 
         const lineNumber = 20;
         await retry.try(async () => {
-          const existence = await testSubjects.exists('codeFileTreeNode-File-tsconfig.json');
+          const existence = await existsInvisible('codeFileTreeNode-File-tsconfig.json');
           expect(existence).to.be(true);
         });
         await testSubjects.click('codeFileTreeNode-File-tsconfig.json');
         await retry.try(async () => {
-          const existence = await testSubjects.exists('codeFileTreeNode-File-package.json');
+          const existence = await existsInvisible('codeFileTreeNode-File-package.json');
           expect(existence).to.be(true);
         });
         await testSubjects.click('codeFileTreeNode-File-package.json');
