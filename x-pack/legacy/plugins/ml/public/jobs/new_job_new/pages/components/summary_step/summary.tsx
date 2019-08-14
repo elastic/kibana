@@ -20,7 +20,6 @@ import { DetectorChart } from './detector_chart';
 import { JobProgress } from './components/job_progress';
 import { PostSaveOptions } from './components/post_save_options';
 
-// ts-ignore
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
     JobCreatorContext
