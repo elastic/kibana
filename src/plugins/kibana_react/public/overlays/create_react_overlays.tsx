@@ -18,7 +18,7 @@
  */
 
 import * as React from 'react';
-import { KibanaServices } from '../core/types';
+import { KibanaServices } from '../context/types';
 import { KibanaReactOverlays } from './types';
 
 export const createReactOverlays = (core: KibanaServices): KibanaReactOverlays => {
