@@ -159,11 +159,21 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
                 flush="left"
                 data-test-subj={`load-saved-query-${savedQuery.attributes.title}-button saved-query-list-item-selected`}
                 textProps={{ className: 'saved-query-list-item-text' }}
+                aria-label={i18n.translate(
+                  'data.search.searchBar.savedQueryPopoverSavedQueryListItemSelectedButtonAriaLabel',
+                  {
+                    defaultMessage: 'Saved query button selected {savedQueryName}',
+                    values: { savedQueryName: savedQuery.attributes.title },
+                  }
+                )}
               >
                 <EuiScreenReaderOnly>
                   <span>
-                    {i18n.translate('data.search.searchBar.savedQueryScreenReaderOpenText', {
-                      defaultMessage: 'Open saved query',
+                    {i18n.translate('data.search.searchBar.savedQueryScreenReaderSelectedText', {
+                      defaultMessage: 'Selected saved query {savedQueryName}',
+                      values: {
+                        savedQueryName: `${savedQuery.attributes.title}`,
+                      },
                     })}
                   </span>
                 </EuiScreenReaderOnly>
@@ -177,6 +187,13 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
                 }}
                 flush="left"
                 data-test-subj={`load-saved-query-${savedQuery.attributes.title}-button`}
+                aria-label={i18n.translate(
+                  'data.search.searchBar.savedQueryPopoverSavedQueryListItemButtonAriaLabel',
+                  {
+                    defaultMessage: 'Saved query button {savedQueryName}',
+                    values: { savedQueryName: savedQuery.attributes.title },
+                  }
+                )}
               >
                 <EuiScreenReaderOnly>
                   <span>
@@ -196,7 +213,13 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
                   <EuiIconTip
                     type="iInCircle"
                     content={savedQuery.attributes.description}
-                    aria-label={`${savedQuery.attributes.title} description`}
+                    aria-label={i18n.translate(
+                      'data.search.searchBar.savedQueryPopoverSavedQueryListItemDescriptionAriaLabel',
+                      {
+                        defaultMessage: '{savedQueryName} description',
+                        values: { savedQueryName: savedQuery.attributes.title },
+                      }
+                    )}
                   />
                 )}
               </EuiFlexItem>
@@ -245,8 +268,8 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
                     aria-label={i18n.translate(
                       'data.search.searchBar.savedQueryPopoverDeleteButtonAriaLabel',
                       {
-                        defaultMessage: 'Delete saved query {title}',
-                        values: { title: savedQuery.attributes.title },
+                        defaultMessage: 'Delete saved query {savedQueryName}',
+                        values: { savedQueryName: savedQuery.attributes.title },
                       }
                     )}
                     data-test-subj={`delete-saved-query-${savedQuery.attributes.title}-button`}
