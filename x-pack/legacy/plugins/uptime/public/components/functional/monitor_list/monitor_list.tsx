@@ -91,15 +91,15 @@ export const MonitorListComponent = (props: Props) => {
 
   return (
     <Fragment>
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.uptime.monitorList.monitoringStatusTitle"
-            defaultMessage="Monitor status"
-          />
-        </h5>
-      </EuiTitle>
       <EuiPanel paddingSize="s">
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.uptime.monitorList.monitoringStatusTitle"
+              defaultMessage="Monitor status"
+            />
+          </h5>
+        </EuiTitle>
         <EuiBasicTable
           error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
           loading={loading}
