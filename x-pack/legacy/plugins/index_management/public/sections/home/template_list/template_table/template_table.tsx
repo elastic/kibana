@@ -39,7 +39,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
   const columns = [
     {
       field: 'name',
-      name: i18n.translate('xpack.idxMgmt.templatesList.table.nameColumnTitle', {
+      name: i18n.translate('xpack.idxMgmt.templateList.table.nameColumnTitle', {
         defaultMessage: 'Name',
       }),
       truncateText: true,
@@ -59,7 +59,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'indexPatterns',
-      name: i18n.translate('xpack.idxMgmt.templatesList.table.indexPatternsColumnTitle', {
+      name: i18n.translate('xpack.idxMgmt.templateList.table.indexPatternsColumnTitle', {
         defaultMessage: 'Index patterns',
       }),
       truncateText: true,
@@ -68,7 +68,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'ilmPolicy',
-      name: i18n.translate('xpack.idxMgmt.templatesList.table.ilmPolicyColumnTitle', {
+      name: i18n.translate('xpack.idxMgmt.templateList.table.ilmPolicyColumnTitle', {
         defaultMessage: 'ILM policy',
       }),
       truncateText: true,
@@ -78,7 +78,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'order',
-      name: i18n.translate('xpack.idxMgmt.templatesList.table.orderColumnTitle', {
+      name: i18n.translate('xpack.idxMgmt.templateList.table.orderColumnTitle', {
         defaultMessage: 'Order',
       }),
       truncateText: true,
@@ -86,7 +86,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'hasMappings',
-      name: i18n.translate('xpack.idxMgmt.templatesList.table.mappingsColumnTitle', {
+      name: i18n.translate('xpack.idxMgmt.templateList.table.mappingsColumnTitle', {
         defaultMessage: 'Mappings',
       }),
       truncateText: true,
@@ -96,7 +96,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'hasSettings',
-      name: i18n.translate('xpack.idxMgmt.templatesList.table.settingsColumnTitle', {
+      name: i18n.translate('xpack.idxMgmt.templateList.table.settingsColumnTitle', {
         defaultMessage: 'Settings',
       }),
       truncateText: true,
@@ -106,7 +106,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'hasAliases',
-      name: i18n.translate('xpack.idxMgmt.templatesList.table.aliasesColumnTitle', {
+      name: i18n.translate('xpack.idxMgmt.templateList.table.aliasesColumnTitle', {
         defaultMessage: 'Aliases',
       }),
       truncateText: true,
@@ -115,17 +115,17 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       render: (hasAliases: boolean) => (hasAliases ? <EuiIcon type="check" /> : null),
     },
     {
-      name: i18n.translate('xpack.idxMgmt.templatesList.table.actionColumnTitle', {
+      name: i18n.translate('xpack.idxMgmt.templateList.table.actionColumnTitle', {
         defaultMessage: 'Actions',
       }),
       width: '75px',
       actions: [
         {
-          name: i18n.translate('xpack.idxMgmt.templatesList.table.actionEditText', {
+          name: i18n.translate('xpack.idxMgmt.templateList.table.actionEditText', {
             defaultMessage: 'Edit',
           }),
           isPrimary: true,
-          description: i18n.translate('xpack.idxMgmt.templatesList.table.actionEditDecription', {
+          description: i18n.translate('xpack.idxMgmt.templateList.table.actionEditDecription', {
             defaultMessage: 'Edit this template',
           }),
           icon: 'pencil',
@@ -135,10 +135,10 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           },
         },
         {
-          name: i18n.translate('xpack.idxMgmt.templatesList.table.actionCloneTitle', {
+          name: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneTitle', {
             defaultMessage: 'Clone',
           }),
-          description: i18n.translate('xpack.idxMgmt.templatesList.table.actionCloneDescription', {
+          description: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneDescription', {
             defaultMessage: 'Clone this template',
           }),
           icon: 'copy',
@@ -147,10 +147,10 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           },
         },
         {
-          name: i18n.translate('xpack.idxMgmt.templatesList.table.actionDeleteText', {
+          name: i18n.translate('xpack.idxMgmt.templateList.table.actionDeleteText', {
             defaultMessage: 'Delete',
           }),
-          description: i18n.translate('xpack.idxMgmt.templatesList.table.actionDeleteDecription', {
+          description: i18n.translate('xpack.idxMgmt.templateList.table.actionDeleteDecription', {
             defaultMessage: 'Delete this template',
           }),
           icon: 'trash',
@@ -189,7 +189,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       {
         type: 'is',
         field: 'ilmPolicy.name',
-        name: i18n.translate('xpack.idxMgmt.templatesList.table.ilmPolicyFilterLabel', {
+        name: i18n.translate('xpack.idxMgmt.templateList.table.ilmPolicyFilterLabel', {
           defaultMessage: 'ILM policy',
         }),
       },
@@ -203,7 +203,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         color="danger"
       >
         <FormattedMessage
-          id="xpack.idxMgmt.templatesList.table.deleteTemplatesButtonLabel"
+          id="xpack.idxMgmt.templateList.table.deleteTemplatesButtonLabel"
           defaultMessage="Delete {count, plural, one {template} other {templates} }"
           values={{ count: selection.length }}
         />
@@ -219,20 +219,20 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
             data-test-subj="reloadButton"
           >
             <FormattedMessage
-              id="xpack.idxMgmt.templatesList.table.reloadTemplatesButtonLabel"
+              id="xpack.idxMgmt.templateList.table.reloadTemplatesButtonLabel"
               defaultMessage="Reload"
             />
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButton
-            href={`#${BASE_PATH}templates_create`}
+            href={`#${BASE_PATH}create_template`}
             fill
             iconType="plusInCircle"
             data-test-subj="createTemplateButton"
           >
             <FormattedMessage
-              id="xpack.idxMgmt.templatesList.table.createTemplatesButtonLabel"
+              id="xpack.idxMgmt.templateList.table.createTemplatesButtonLabel"
               defaultMessage="Create a template"
             />
           </EuiButton>
@@ -270,10 +270,10 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         cellProps={() => ({
           'data-test-subj': 'cell',
         })}
-        data-test-subj="templatesTable"
+        data-test-subj="templateTable"
         message={
           <FormattedMessage
-            id="xpack.idxMgmt.templatesList.table.noIndexTemplatesMessage"
+            id="xpack.idxMgmt.templateList.table.noIndexTemplatesMessage"
             defaultMessage="No templates found"
           />
         }

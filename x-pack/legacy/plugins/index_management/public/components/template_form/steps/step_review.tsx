@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTabbedContent,
-  EuiCodeEditor,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
@@ -26,7 +25,7 @@ import { StepProps } from '../types';
 
 const NoneDescriptionText = () => (
   <FormattedMessage
-    id="xpack.idxMgmt.templatesForm.stepReview.summaryTab.noneDescriptionText"
+    id="xpack.idxMgmt.templateForm.stepReview.summaryTab.noneDescriptionText"
     defaultMessage="None"
   />
 );
@@ -36,12 +35,12 @@ const getDescriptionText = (data: any) => {
 
   return hasEntries ? (
     <FormattedMessage
-      id="xpack.idxMgmt.templatesForm.stepReview.summaryTab.yesDescriptionText"
+      id="xpack.idxMgmt.templateForm.stepReview.summaryTab.yesDescriptionText"
       defaultMessage="Yes"
     />
   ) : (
     <FormattedMessage
-      id="xpack.idxMgmt.templatesForm.stepReview.summaryTab.noDescriptionText"
+      id="xpack.idxMgmt.templateForm.stepReview.summaryTab.noDescriptionText"
       defaultMessage="No"
     />
   );
@@ -70,7 +69,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
           <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle>
               <FormattedMessage
-                id="xpack.idxMgmt.templatesForm.stepReview.summaryTab.indexPatternsLabel"
+                id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsLabel"
                 defaultMessage="Index {numIndexPatterns, plural, one {pattern} other {patterns}}"
                 values={{ numIndexPatterns }}
               />
@@ -97,7 +96,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
 
             <EuiDescriptionListTitle>
               <FormattedMessage
-                id="xpack.idxMgmt.templatesForm.stepReview.summaryTab.orderLabel"
+                id="xpack.idxMgmt.templateForm.stepReview.summaryTab.orderLabel"
                 defaultMessage="Order"
               />
             </EuiDescriptionListTitle>
@@ -107,7 +106,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
 
             <EuiDescriptionListTitle>
               <FormattedMessage
-                id="xpack.idxMgmt.templatesForm.stepReview.summaryTab.versionLabel"
+                id="xpack.idxMgmt.templateForm.stepReview.summaryTab.versionLabel"
                 defaultMessage="Version"
               />
             </EuiDescriptionListTitle>
@@ -121,7 +120,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
           <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle>
               <FormattedMessage
-                id="xpack.idxMgmt.templatesForm.stepReview.summaryTab.settingsLabel"
+                id="xpack.idxMgmt.templateForm.stepReview.summaryTab.settingsLabel"
                 defaultMessage="Has index settings"
               />
             </EuiDescriptionListTitle>
@@ -130,7 +129,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
             </EuiDescriptionListDescription>
             <EuiDescriptionListTitle>
               <FormattedMessage
-                id="xpack.idxMgmt.templatesForm.stepReview.summaryTab.mappingLabel"
+                id="xpack.idxMgmt.templateForm.stepReview.summaryTab.mappingLabel"
                 defaultMessage="Has mappings"
               />
             </EuiDescriptionListTitle>
@@ -139,7 +138,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
             </EuiDescriptionListDescription>
             <EuiDescriptionListTitle>
               <FormattedMessage
-                id="xpack.idxMgmt.templatesForm.stepReview.summaryTab.aliasesLabel"
+                id="xpack.idxMgmt.templateForm.stepReview.summaryTab.aliasesLabel"
                 defaultMessage="Has aliases"
               />
             </EuiDescriptionListTitle>
@@ -164,7 +163,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.idxMgmt.templatesForm.stepReview.requestTab.descriptionText"
+              id="xpack.idxMgmt.templateForm.stepReview.requestTab.descriptionText"
               defaultMessage="This Elasticsearch request will create this index template."
             />
           </p>
@@ -184,7 +183,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
       <EuiTitle>
         <h3 data-test-subj="stepTitle">
           <FormattedMessage
-            id="xpack.idxMgmt.templatesForm.stepReview.stepTitle"
+            id="xpack.idxMgmt.templateForm.stepReview.stepTitle"
             defaultMessage="Review details for '{templateName}'"
             values={{ templateName: name }}
           />
@@ -198,7 +197,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
           <EuiCallOut
             title={
               <FormattedMessage
-                id="xpack.idxMgmt.templatesForm.stepReview.summaryTab.indexPatternsWarningTitle"
+                id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningTitle"
                 defaultMessage="Proceed with caution"
               />
             }
@@ -208,13 +207,13 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
           >
             <p data-test-subj="indexPatternsWarningDescription">
               <FormattedMessage
-                id="xpack.idxMgmt.templatesForm.stepReview.summaryTab.indexPatternsWarningDescription"
+                id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningDescription"
                 defaultMessage="This template contains a wildcard (*) as an index pattern. This will create a catch-all template and apply to all indices."
               />{' '}
               {/* Edit link navigates back to step 1 (logistics) */}
               <EuiLink onClick={updateCurrentStep.bind(null, 1)}>
                 <FormattedMessage
-                  id="xpack.idxMgmt.templatesForm.stepReview.summaryTab.indexPatternsWarningLinkText"
+                  id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningLinkText"
                   defaultMessage="Edit template."
                 />
               </EuiLink>
@@ -229,14 +228,14 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
         tabs={[
           {
             id: 'summary',
-            name: i18n.translate('xpack.idxMgmt.templatesForm.stepReview.summaryTabTitle', {
+            name: i18n.translate('xpack.idxMgmt.templateForm.stepReview.summaryTabTitle', {
               defaultMessage: 'Summary',
             }),
             content: <SummaryTab />,
           },
           {
             id: 'request',
-            name: i18n.translate('xpack.idxMgmt.templatesForm.stepReview.requestTabTitle', {
+            name: i18n.translate('xpack.idxMgmt.templateForm.stepReview.requestTabTitle', {
               defaultMessage: 'Request',
             }),
             content: <RequestTab />,

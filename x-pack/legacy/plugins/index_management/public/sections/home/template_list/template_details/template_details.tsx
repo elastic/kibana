@@ -283,11 +283,11 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
               <EuiFlexItem grow={false}>
                 {/* Manage templates context menu */}
                 <EuiPopover
-                  id="manageTemplatesPanel"
+                  id="manageTemplatePanel"
                   button={
                     <EuiButton
                       fill
-                      data-test-subj="manageTemplatesButton"
+                      data-test-subj="manageTemplateButton"
                       iconType="arrowDown"
                       iconSide="right"
                       onClick={() => setIsPopOverOpen(!isPopoverOpen)}

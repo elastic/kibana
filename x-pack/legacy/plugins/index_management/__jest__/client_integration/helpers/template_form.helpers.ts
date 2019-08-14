@@ -4,35 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, TestBed, TestBedConfig } from '../../../../../../test_utils';
-import { BASE_PATH } from '../../../common/constants';
-import { TemplatesCreate } from '../../../public/sections/templates_create';
+import { TestBed } from '../../../../../../test_utils';
 import { Template } from '../../../common/types';
 
-const testBedConfig: TestBedConfig = {
-  memoryRouter: {
-    initialEntries: [`${BASE_PATH}templates_create`],
-    componentRoutePath: `${BASE_PATH}templates_create`,
-  },
-  doMountAsync: true,
-};
-
-const initTestBed = registerTestBed(TemplatesCreate, testBedConfig);
-
-export interface TemplatesCreateTestBed extends TestBed<TemplatesCreateTestSubjects> {
+export interface TemplateFormTestBed extends TestBed<TemplateFormTestSubjects> {
   actions: {
     clickNextButton: () => void;
     clickBackButton: () => void;
     clickSubmitButton: () => void;
     completeStepOne: ({ name, indexPatterns, order, version }: Partial<Template>) => void;
     completeStepTwo: ({ settings }: Partial<Template>) => void;
-    completeStepThree: () => void;
+    completeStepThree: ({ mappings }: Partial<Template>) => void;
     completeStepFour: ({ aliases }: Partial<Template>) => void;
-    selectSummaryTab: (tab: 'summary' | 'json') => void;
+    selectSummaryTab: (tab: 'summary' | 'request') => void;
   };
 }
 
-export const setup = async (): Promise<TemplatesCreateTestBed> => {
+export const formSetup = async (initTestBed: any): Promise<TemplateFormTestBed> => {
   const testBed = await initTestBed();
 
   // User actions
@@ -90,13 +78,17 @@ export const setup = async (): Promise<TemplatesCreateTestBed> => {
     clickNextButton();
   };
 
-  // For now, leave mappings value empty and proceed to next step
-  // Consider changing once mappings editor plugin is feature complete
-  const completeStepThree = () => {
+  const completeStepThree = ({ mappings }: Partial<Template>) => {
     const { find, exists } = testBed;
 
     expect(exists('stepMappings')).toBe(true);
     expect(find('stepTitle').text()).toEqual('Mappings (optional)');
+
+    if (mappings) {
+      find('mockCodeEditor').simulate('change', {
+        jsonString: mappings,
+      }); // Using mocked EuiCodeEditor
+    }
 
     clickNextButton();
   };
@@ -116,8 +108,8 @@ export const setup = async (): Promise<TemplatesCreateTestBed> => {
     clickNextButton();
   };
 
-  const selectSummaryTab = (tab: 'summary' | 'json') => {
-    const tabs = ['summary', 'json'];
+  const selectSummaryTab = (tab: 'summary' | 'request') => {
+    const tabs = ['summary', 'request'];
 
     testBed
       .find('summaryTabContent')
@@ -141,13 +133,12 @@ export const setup = async (): Promise<TemplatesCreateTestBed> => {
   };
 };
 
-export type TemplatesCreateTestSubjects = TestSubjects;
+export type TemplateFormTestSubjects = TestSubjects;
 
 type TestSubjects =
   | 'backButton'
   | 'codeEditorContainer'
   | 'indexPatternsComboBox'
-  | 'jsonTab'
   | 'indexPatternsWarning'
   | 'indexPatternsWarningDescription'
   | 'mockCodeEditor'
@@ -156,6 +147,7 @@ type TestSubjects =
   | 'nextButton'
   | 'orderInput'
   | 'pageTitle'
+  | 'requestTab'
   | 'saveTemplateError'
   | 'settingsEditor'
   | 'stepAliases'
@@ -166,5 +158,7 @@ type TestSubjects =
   | 'submitButton'
   | 'summaryTab'
   | 'summaryTabContent'
+  | 'templateForm'
+  | 'templateFormContainer'
   | 'testingEditor'
   | 'versionInput';

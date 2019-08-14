@@ -35,7 +35,7 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
           <EuiTitle>
             <h3 data-test-subj="stepTitle">
               <FormattedMessage
-                id="xpack.idxMgmt.templatesForm.stepMappings.stepTitle"
+                id="xpack.idxMgmt.templateForm.stepMappings.stepTitle"
                 defaultMessage="Mappings (optional)"
               />
             </h3>
@@ -46,7 +46,7 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.idxMgmt.templatesForm.stepMappings.mappingsDescription"
+                id="xpack.idxMgmt.templateForm.stepMappings.mappingsDescription"
                 defaultMessage="Define how documents and their fields are stored and indexed."
               />
             </p>
@@ -62,7 +62,7 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
             iconType="help"
           >
             <FormattedMessage
-              id="xpack.idxMgmt.templatesForm.stepMappings.docsButtonLabel"
+              id="xpack.idxMgmt.templateForm.stepMappings.docsButtonLabel"
               defaultMessage="Mapping docs"
             />
           </EuiButtonEmpty>
@@ -75,7 +75,7 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.idxMgmt.templatesForm.stepMappings.fieldMappingsLabel"
+            id="xpack.idxMgmt.templateForm.stepMappings.fieldMappingsLabel"
             defaultMessage="Mappings"
           />
         }
@@ -98,7 +98,7 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
           showGutter={false}
           minLines={6}
           aria-label={i18n.translate(
-            'xpack.idxMgmt.templatesForm.stepMappings.fieldMappingsAriaLabel',
+            'xpack.idxMgmt.templateForm.stepMappings.fieldMappingsAriaLabel',
             {
               defaultMessage: 'Mappings editor',
             }

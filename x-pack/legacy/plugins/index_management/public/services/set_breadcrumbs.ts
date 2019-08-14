@@ -23,24 +23,24 @@ const homeBreadcrumb: Breadcrumb = {
 const breadcrumbsMap: {
   [key: string]: Breadcrumb;
 } = {
-  templatesCreate: {
+  templateCreate: {
     text: i18n.translate('xpack.idxMgmt.breadcrumb.createTemplateLabel', {
       defaultMessage: 'Create template',
     }),
   },
-  templatesEdit: {
+  templateEdit: {
     text: i18n.translate('xpack.idxMgmt.breadcrumb.editTemplateLabel', {
       defaultMessage: 'Edit template',
     }),
   },
-  templatesClone: {
+  templateClone: {
     text: i18n.translate('xpack.idxMgmt.breadcrumb.cloneTemplateLabel', {
       defaultMessage: 'Clone template',
     }),
   },
 };
 
-export const setBreadcrumbs = (type?: 'templatesCreate' | 'templatesEdit' | 'templatesClone') => {
+export const setBreadcrumbs = (type?: 'templateCreate' | 'templateEdit' | 'templateClone') => {
   const breadcrumbs = type
     ? [MANAGEMENT_BREADCRUMB, homeBreadcrumb, breadcrumbsMap[type]]
     : [MANAGEMENT_BREADCRUMB, homeBreadcrumb];

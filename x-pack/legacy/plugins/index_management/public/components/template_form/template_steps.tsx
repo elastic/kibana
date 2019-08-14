@@ -15,19 +15,19 @@ interface Props {
 }
 
 const stepNamesMap: { [key: number]: string } = {
-  1: i18n.translate('xpack.idxMgmt.templatesForm.steps.logisticsStepName', {
+  1: i18n.translate('xpack.idxMgmt.templateForm.steps.logisticsStepName', {
     defaultMessage: 'Logistics',
   }),
-  2: i18n.translate('xpack.idxMgmt.templatesForm.steps.settingsStepName', {
+  2: i18n.translate('xpack.idxMgmt.templateForm.steps.settingsStepName', {
     defaultMessage: 'Settings',
   }),
-  3: i18n.translate('xpack.idxMgmt.templatesForm.steps.mappingsStepName', {
+  3: i18n.translate('xpack.idxMgmt.templateForm.steps.mappingsStepName', {
     defaultMessage: 'Mappings',
   }),
-  4: i18n.translate('xpack.idxMgmt.templatesForm.steps.aliasesStepName', {
+  4: i18n.translate('xpack.idxMgmt.templateForm.steps.aliasesStepName', {
     defaultMessage: 'Aliases',
   }),
-  5: i18n.translate('xpack.idxMgmt.templatesForm.steps.summaryStepName', {
+  5: i18n.translate('xpack.idxMgmt.templateForm.steps.summaryStepName', {
     defaultMessage: 'Review and save',
   }),
 };

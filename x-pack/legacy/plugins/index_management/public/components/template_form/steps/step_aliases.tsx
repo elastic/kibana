@@ -35,7 +35,7 @@ export const StepAliases: React.FunctionComponent<StepProps> = ({
           <EuiTitle>
             <h3 data-test-subj="stepTitle">
               <FormattedMessage
-                id="xpack.idxMgmt.templatesForm.stepAliases.stepTitle"
+                id="xpack.idxMgmt.templateForm.stepAliases.stepTitle"
                 defaultMessage="Aliases (optional)"
               />
             </h3>
@@ -46,7 +46,7 @@ export const StepAliases: React.FunctionComponent<StepProps> = ({
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.idxMgmt.templatesForm.stepAliases.aliasesDescription"
+                id="xpack.idxMgmt.templateForm.stepAliases.aliasesDescription"
                 defaultMessage="Use aliases to refer to the destination index by different names when making requests against Elasticsearch APIs."
               />
             </p>
@@ -62,7 +62,7 @@ export const StepAliases: React.FunctionComponent<StepProps> = ({
             iconType="help"
           >
             <FormattedMessage
-              id="xpack.idxMgmt.templatesForm.stepAliases.docsButtonLabel"
+              id="xpack.idxMgmt.templateForm.stepAliases.docsButtonLabel"
               defaultMessage="Index aliases docs"
             />
           </EuiButtonEmpty>
@@ -75,7 +75,7 @@ export const StepAliases: React.FunctionComponent<StepProps> = ({
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.idxMgmt.templatesForm.stepAliases.fieldAliasesLabel"
+            id="xpack.idxMgmt.templateForm.stepAliases.fieldAliasesLabel"
             defaultMessage="Aliases"
           />
         }
@@ -98,7 +98,7 @@ export const StepAliases: React.FunctionComponent<StepProps> = ({
           showGutter={false}
           minLines={6}
           aria-label={i18n.translate(
-            'xpack.idxMgmt.templatesForm.stepAliases.fieldAliasesAriaLabel',
+            'xpack.idxMgmt.templateForm.stepAliases.fieldAliasesAriaLabel',
             {
               defaultMessage: 'Aliases code editor',
             }

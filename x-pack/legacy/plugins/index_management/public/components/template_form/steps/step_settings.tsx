@@ -35,7 +35,7 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
           <EuiTitle>
             <h3 data-test-subj="stepTitle">
               <FormattedMessage
-                id="xpack.idxMgmt.templatesForm.stepSettings.stepTitle"
+                id="xpack.idxMgmt.templateForm.stepSettings.stepTitle"
                 defaultMessage="Index settings (optional)"
               />
             </h3>
@@ -46,7 +46,7 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.idxMgmt.templatesForm.stepSettings.settingsDescription"
+                id="xpack.idxMgmt.templateForm.stepSettings.settingsDescription"
                 defaultMessage="Define how your indices behave."
               />
             </p>
@@ -62,7 +62,7 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
             iconType="help"
           >
             <FormattedMessage
-              id="xpack.idxMgmt.templatesForm.stepSettings.docsButtonLabel"
+              id="xpack.idxMgmt.templateForm.stepSettings.docsButtonLabel"
               defaultMessage="Index settings docs"
             />
           </EuiButtonEmpty>
@@ -75,7 +75,7 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.idxMgmt.templatesForm.stepSettings.fieldIndexSettingsLabel"
+            id="xpack.idxMgmt.templateForm.stepSettings.fieldIndexSettingsLabel"
             defaultMessage="Index settings"
           />
         }
@@ -98,7 +98,7 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
           showGutter={false}
           minLines={6}
           aria-label={i18n.translate(
-            'xpack.idxMgmt.templatesForm.stepSettings.fieldIndexSettingsAriaLabel',
+            'xpack.idxMgmt.templateForm.stepSettings.fieldIndexSettingsAriaLabel',
             {
               defaultMessage: 'Index settings editor',
             }

@@ -24,6 +24,7 @@ export default function ({ getService }) {
     createTemplate,
     getTemplatePayload,
     deleteTemplates,
+    updateTemplate,
   } = registerHelpers({ supertest });
 
   describe('index templates', () => {
@@ -88,6 +89,29 @@ export default function ({ getService }) {
 
         const { body } = await createTemplate(payload);
         expect(body.message).to.contain('index patterns are missing');
+      });
+    });
+
+    describe('update', () => {
+      it('should update an index template', async () => {
+        const templateName = `template-${getRandomString()}`;
+        const payload = getTemplatePayload(templateName);
+
+        await createTemplate(payload).expect(200);
+
+        let catTemplateResponse = await catTemplate(templateName);
+
+        const { name, version } = payload;
+
+        expect(catTemplateResponse.find(({ name: templateName }) => templateName === name).version).to.equal(version.toString());
+
+        // Update template with new version
+        const updatedVersion = 2;
+        await updateTemplate({ ...payload, version: updatedVersion }, templateName).expect(200);
+
+        catTemplateResponse = await catTemplate(templateName);
+
+        expect(catTemplateResponse.find(({ name: templateName }) => templateName === name).version).to.equal(updatedVersion.toString());
       });
     });
 

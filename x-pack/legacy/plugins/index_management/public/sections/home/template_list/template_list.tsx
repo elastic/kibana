@@ -52,11 +52,11 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   };
 
   const editTemplate = (name: Template['name']) => {
-    history.push(`${BASE_PATH}templates_edit/${encodeURIComponent(name)}`);
+    history.push(`${BASE_PATH}edit_template/${encodeURIComponent(name)}`);
   };
 
   const cloneTemplate = (name: Template['name']) => {
-    history.push(`${BASE_PATH}templates_create/${encodeURIComponent(name)}`);
+    history.push(`${BASE_PATH}create_template/${encodeURIComponent(name)}`);
   };
 
   // Track component loaded
@@ -141,7 +141,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   }
 
   return (
-    <section data-test-subj="templatesList">
+    <div data-test-subj="templateList">
       {content}
       {templateName && (
         <TemplateDetails
@@ -152,6 +152,6 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
           reload={reload}
         />
       )}
-    </section>
+    </div>
   );
 };

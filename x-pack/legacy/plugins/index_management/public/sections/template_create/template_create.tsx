@@ -87,7 +87,7 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps<MatchPa
   let content;
 
   useEffect(() => {
-    const breadcrumbName = name ? 'templatesClone' : 'templatesCreate';
+    const breadcrumbName = name ? 'templateClone' : 'templateCreate';
     setBreadcrumbs(breadcrumbName);
 
     if (name) {

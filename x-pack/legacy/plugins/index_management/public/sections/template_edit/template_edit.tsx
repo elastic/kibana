@@ -29,7 +29,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   const { error, data: template, isLoading } = loadIndexTemplate(name);
 
   useEffect(() => {
-    setBreadcrumbs('templatesEdit');
+    setBreadcrumbs('templateEdit');
   }, []);
 
   const onSave = async (updatedTemplate: Template) => {

@@ -103,12 +103,12 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
 
   const saveButtonLabel = isEditing ? (
     <FormattedMessage
-      id="xpack.idxMgmt.templatesForm.saveButtonLabel"
+      id="xpack.idxMgmt.templateForm.saveButtonLabel"
       defaultMessage="Save template"
     />
   ) : (
     <FormattedMessage
-      id="xpack.idxMgmt.templatesForm.createButtonLabel"
+      id="xpack.idxMgmt.templateForm.createButtonLabel"
       defaultMessage="Create template"
     />
   );
@@ -128,7 +128,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
           <SectionError
             title={
               <FormattedMessage
-                id="xpack.idxMgmt.templatesForm.saveTemplateError"
+                id="xpack.idxMgmt.templateForm.saveTemplateError"
                 defaultMessage="Unable to create template"
               />
             }
@@ -139,7 +139,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
         </Fragment>
       ) : null}
 
-      <EuiForm isInvalid={!isValid} error={validationErrors} data-test-subj="templatesForm">
+      <EuiForm isInvalid={!isValid} error={validationErrors} data-test-subj="templateForm">
         <CurrentStepComponent
           template={template}
           updateTemplate={updateTemplate}
@@ -154,7 +154,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="arrowLeft" onClick={onBack} data-test-subj="backButton">
                 <FormattedMessage
-                  id="xpack.idxMgmt.templatesForm.backButtonLabel"
+                  id="xpack.idxMgmt.templateForm.backButtonLabel"
                   defaultMessage="Back"
                 />
               </EuiButtonEmpty>
@@ -165,7 +165,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               <EuiButton fill iconType="arrowRight" onClick={onNext} data-test-subj="nextButton">
                 <FormattedMessage
-                  id="xpack.idxMgmt.templatesForm.nextButtonLabel"
+                  id="xpack.idxMgmt.templateForm.nextButtonLabel"
                   defaultMessage="Next"
                 />
               </EuiButton>
@@ -184,7 +184,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
               >
                 {isSaving ? (
                   <FormattedMessage
-                    id="xpack.idxMgmt.templatesForm.savingButtonLabel"
+                    id="xpack.idxMgmt.templateForm.savingButtonLabel"
                     defaultMessage="Saving..."
                   />
                 ) : (
