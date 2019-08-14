@@ -51,7 +51,7 @@ export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
         <Fragment>
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem>
-              <BucketSpan />
+              <BucketSpan setIsValid={setIsValid} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup>
