@@ -11,7 +11,7 @@ import { visualizations } from '../../../../../src/legacy/core_plugins/visualiza
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 
 visualizations.types.visTypeAliasRegistry.add({
-  aliasUrl: '/app/lens/',
+  aliasUrl: '/app/lens',
   name: NOT_INTERNATIONALIZED_PRODUCT_NAME,
   title: i18n.translate('xpack.lens.visTypeAlias.title', {
     defaultMessage: 'Lens Visualizations',
@@ -20,7 +20,6 @@ visualizations.types.visTypeAliasRegistry.add({
     defaultMessage: `Lens is a simpler way to create basic visualizations`,
   }),
   icon: 'faceHappy',
-
   appExtensions: {
     visualizations: {
       docTypes: ['lens'],
