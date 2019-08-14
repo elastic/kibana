@@ -15,7 +15,6 @@ function executeJobFn(server) {
   const crypto = cryptoFactory(server);
   const config = server.config();
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, CSV_JOB_TYPE, 'execute-job']);
-  const generateCsv = createGenerateCsv(logger);
   const serverBasePath = config.get('server.basePath');
 
   return async function executeJob(jobId, job, cancellationToken) {
@@ -91,6 +90,7 @@ function executeJobFn(server) {
       })(),
     ]);
 
+    const generateCsv = createGenerateCsv(jobLogger);
     const { content, maxSizeReached, size, csvContainsFormulas } = await generateCsv({
       searchRequest,
       fields,

@@ -37,15 +37,16 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
     CSV_FROM_SAVEDOBJECT_JOB_TYPE,
     'execute-job',
   ]);
-  const generateCsv = createGenerateCsv(logger);
 
   return async function executeJob(
     jobId: string | null,
     job: JobDocPayload,
     realRequest?: Request
   ): Promise<JobDocOutputExecuted> {
-    // if job is immediate, there will not be a jobId
-    const jobLogger = jobId == null ? logger : logger.clone([jobId]);
+    // There will not be a jobID for "immediate" generation.
+    // jobID is only for "queued" jobs
+    // Use the jobID as a logging tag or "immediate"
+    const jobLogger = logger.clone([jobId === null ? 'immediate' : jobId]);
 
     const { basePath, jobParams } = job;
     const { isImmediate, panel, visType } = jobParams;
@@ -54,10 +55,10 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
 
     let requestObject: Request | FakeRequest;
     if (isImmediate && realRequest) {
-      logger.info(`Executing job from immediate API`);
+      jobLogger.info(`Executing job from immediate API`);
       requestObject = realRequest;
     } else {
-      logger.info(`Executing job async using encrypted headers`);
+      jobLogger.info(`Executing job async using encrypted headers`);
       let decryptedHeaders;
       const serializedEncryptedHeaders = job.headers;
       try {
@@ -87,6 +88,7 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
     let maxSizeReached = false;
     let size = 0;
     try {
+      const generateCsv = createGenerateCsv(jobLogger);
       const generateResults: CsvResultFromSearch = await generateCsv(
         requestObject,
         server,
