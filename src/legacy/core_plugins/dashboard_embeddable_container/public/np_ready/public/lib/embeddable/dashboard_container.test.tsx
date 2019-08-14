@@ -21,7 +21,7 @@
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { isErrorEmbeddable, ViewMode, EmbeddableFactory } from '../embeddable_api';
-import { DashboardContainer, ViewportProps } from './dashboard_container';
+import { DashboardContainer, DashboardContainerOptions } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
@@ -33,7 +33,7 @@ import {
   ContactCardEmbeddableOutput,
 } from '../../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
 
-const viewportProps: ViewportProps = {
+const viewportProps: DashboardContainerOptions = {
   getActions: (() => []) as any,
   getAllEmbeddableFactories: (() => []) as any,
   getEmbeddableFactory: undefined as any,

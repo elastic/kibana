@@ -20,25 +20,20 @@
 import { i18n } from '@kbn/i18n';
 import { SavedObjectAttributes } from '../../../../../../../../core/server';
 import { SavedObjectMetaData } from '../types';
-
+import { ContainerOutput, EmbeddableFactory, ErrorEmbeddable, Container } from '../embeddable_api';
 import {
-  ContainerOutput,
-  EmbeddableFactory,
-  ErrorEmbeddable,
-  Container,
-  GetEmbeddableFactory,
-} from '../embeddable_api';
-import { DashboardContainer, DashboardContainerInput, ViewportProps } from './dashboard_container';
+  DashboardContainer,
+  DashboardContainerInput,
+  DashboardContainerOptions,
+  DashboardReactContext,
+} from './dashboard_container';
+import { DashboardCapabilities } from '../types';
+import { createContext } from '../../../../../../../../plugins/kibana_react/public';
 
 export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
 
-export interface DashboardOptions {
+export interface DashboardOptions extends DashboardContainerOptions {
   savedObjectMetaData?: SavedObjectMetaData<SavedObjectAttributes>;
-  capabilities: {
-    showWriteControls: boolean;
-    createNew: boolean;
-  };
-  getFactory: GetEmbeddableFactory;
 }
 
 export class DashboardContainerFactory extends EmbeddableFactory<
@@ -47,11 +42,22 @@ export class DashboardContainerFactory extends EmbeddableFactory<
 > {
   public readonly isContainerType = true;
   public readonly type = DASHBOARD_CONTAINER_TYPE;
-  private allowEditing: boolean;
 
-  constructor(options: DashboardOptions, private readonly containerOptions: ViewportProps) {
+  private readonly allowEditing: boolean;
+  private readonly context: DashboardReactContext;
+
+  constructor(private readonly options: DashboardOptions) {
     super({ savedObjectMetaData: options.savedObjectMetaData });
-    this.allowEditing = options.capabilities.createNew && options.capabilities.showWriteControls;
+
+    const capabilities = (options.application.capabilities
+      .dashboard as unknown) as DashboardCapabilities;
+
+    if (!capabilities || typeof capabilities !== 'object') {
+      throw new TypeError('Dashboard capabilities not found.');
+    }
+
+    this.allowEditing = !!capabilities.createNew && !!capabilities.showWriteControls;
+    this.context = createContext<DashboardOptions>(options);
   }
 
   public isEditable() {
@@ -76,6 +82,6 @@ export class DashboardContainerFactory extends EmbeddableFactory<
     initialInput: DashboardContainerInput,
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> {
-    return new DashboardContainer(initialInput, this.containerOptions, parent);
+    return new DashboardContainer(initialInput, this.options, this.context, parent);
   }
 }

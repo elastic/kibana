@@ -26,7 +26,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { EmbeddableFactory } from '../../embeddable_api';
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
-import { DashboardContainer, ViewportProps } from '../dashboard_container';
+import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
@@ -38,7 +38,7 @@ let dashboardContainer: DashboardContainer | undefined;
 const ExitFullScreenButton = () => <div data-test-subj="exitFullScreenModeText">EXIT</div>;
 
 function getProps(props?: Partial<DashboardViewportProps>): DashboardViewportProps {
-  const viewportProps: ViewportProps = {
+  const viewportProps: DashboardContainerOptions = {
     getActions: (() => []) as any,
     getAllEmbeddableFactories: (() => []) as any,
     getEmbeddableFactory: undefined as any,

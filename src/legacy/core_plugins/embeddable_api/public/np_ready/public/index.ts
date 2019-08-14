@@ -69,3 +69,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { EmbeddablePublicPlugin as Plugin };
+export * from './plugin';
