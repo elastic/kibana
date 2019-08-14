@@ -5,9 +5,9 @@
  */
 import { Server } from 'hapi';
 import { cloneDeep, sortByOrder } from 'lodash';
-import { mergeProjection } from '../../../../public/projections/util/merge_projection';
+import { mergeProjection } from '../../../../common/projections/util/merge_projection';
 import { UIFilters } from '../../../../typings/ui-filters';
-import { Projection } from '../../../../public/projections/typings';
+import { Projection } from '../../../../common/projections/typings';
 import { PromiseReturnType } from '../../../../typings/common';
 import { getFilterAggregations } from './get_filter_aggregations';
 import { Setup } from '../../helpers/setup_request';

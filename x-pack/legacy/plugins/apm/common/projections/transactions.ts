@@ -10,7 +10,7 @@ import {
   TRANSACTION_TYPE,
   PROCESSOR_EVENT,
   TRANSACTION_NAME
-} from '../../common/elasticsearch_fieldnames';
+} from '../elasticsearch_fieldnames';
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
 
 export function getTransactionsProjection({

@@ -5,10 +5,7 @@
  */
 
 import { Setup } from '../../server/lib/helpers/setup_request';
-import {
-  TRANSACTION_NAME,
-  PARENT_ID
-} from '../../common/elasticsearch_fieldnames';
+import { TRANSACTION_NAME, PARENT_ID } from '../elasticsearch_fieldnames';
 import { Options } from '../../server/lib/transaction_groups/fetcher';
 import { getTransactionsProjection } from './transactions';
 import { mergeProjection } from './util/merge_projection';

@@ -10,8 +10,8 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
 import { Setup } from '../helpers/setup_request';
-import { getTransactionGroupsProjection } from '../../../public/projections/transaction_groups';
-import { mergeProjection } from '../../../public/projections/util/merge_projection';
+import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
+import { mergeProjection } from '../../../common/projections/util/merge_projection';
 
 interface TopTransactionOptions {
   type: 'top_transactions';

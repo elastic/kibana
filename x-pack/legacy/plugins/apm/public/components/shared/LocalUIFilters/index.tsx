@@ -16,7 +16,7 @@ import styled from 'styled-components';
 import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { Filter } from './Filter';
 import { useLocalUIFilters } from '../../../hooks/useLocalUIFilters';
-import { PROJECTION } from '../../../projections/typings';
+import { PROJECTION } from '../../../../common/projections/typings';
 
 interface Props {
   projection: PROJECTION;

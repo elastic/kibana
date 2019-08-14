@@ -27,7 +27,7 @@ import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { useTrackPageview } from '../../../../../infra/public';
-import { PROJECTION } from '../../../projections/typings';
+import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 
 export function TransactionDetails() {

@@ -5,7 +5,7 @@
  */
 import { omit } from 'lodash';
 import { Server } from 'hapi';
-import { Projection } from '../../../../public/projections/typings';
+import { Projection } from '../../../../common/projections/typings';
 import { UIFilters } from '../../../../typings/ui-filters';
 import { getUiFiltersES } from '../../helpers/convert_ui_filters/get_ui_filters_es';
 import { localUIFilters, LocalUIFilterName } from './config';

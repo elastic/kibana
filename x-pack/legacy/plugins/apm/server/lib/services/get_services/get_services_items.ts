@@ -5,7 +5,7 @@
  */
 
 import { idx } from '@kbn/elastic-idx';
-import { mergeProjection } from '../../../../public/projections/util/merge_projection';
+import { mergeProjection } from '../../../../common/projections/util/merge_projection';
 import {
   PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
@@ -14,7 +14,7 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
-import { getServicesProjection } from '../../../../public/projections/services';
+import { getServicesProjection } from '../../../../common/projections/services';
 
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
 export async function getServicesItems(setup: Setup) {

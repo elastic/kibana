@@ -5,10 +5,7 @@
  */
 
 import { Setup } from '../../server/lib/helpers/setup_request';
-import {
-  SERVICE_NAME,
-  PROCESSOR_EVENT
-} from '../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, PROCESSOR_EVENT } from '../elasticsearch_fieldnames';
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
 
 export function getMetricsProjection({

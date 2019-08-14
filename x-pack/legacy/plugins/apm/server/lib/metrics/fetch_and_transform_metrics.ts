@@ -8,8 +8,8 @@ import { Setup } from '../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import { ChartBase } from './types';
 import { transformDataToMetricsChart } from './transform_metrics_chart';
-import { getMetricsProjection } from '../../../public/projections/metrics';
-import { mergeProjection } from '../../../public/projections/util/merge_projection';
+import { getMetricsProjection } from '../../../common/projections/metrics';
+import { mergeProjection } from '../../../common/projections/util/merge_projection';
 
 interface Aggs {
   [key: string]: {

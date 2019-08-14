@@ -9,7 +9,7 @@ import {
   SearchParamsMock,
   inspectSearchParams
 } from '../../../../public/utils/testHelpers';
-import { getServicesProjection } from '../../../../public/projections/services';
+import { getServicesProjection } from '../../../../common/projections/services';
 
 describe('local ui filter queries', () => {
   let mock: SearchParamsMock;

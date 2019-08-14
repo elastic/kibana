@@ -11,18 +11,18 @@ import { omit } from 'lodash';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest, Setup } from '../lib/helpers/setup_request';
 import { getEnvironments } from '../lib/ui_filters/get_environments';
-import { PROJECTION, Projection } from '../../public/projections/typings';
+import { PROJECTION, Projection } from '../../common/projections/typings';
 import {
   LocalUIFilterName,
   localUIFilterNames
 } from '../lib/ui_filters/local_ui_filters/config';
 import { getUiFiltersES } from '../lib/helpers/convert_ui_filters/get_ui_filters_es';
 import { getLocalUIFilters } from '../lib/ui_filters/local_ui_filters';
-import { getServicesProjection } from '../../public/projections/services';
-import { getTransactionGroupsProjection } from '../../public/projections/transaction_groups';
-import { getMetricsProjection } from '../../public/projections/metrics';
-import { getErrorGroupsProjection } from '../../public/projections/errors';
-import { getTransactionsProjection } from '../../public/projections/transactions';
+import { getServicesProjection } from '../../common/projections/services';
+import { getTransactionGroupsProjection } from '../../common/projections/transaction_groups';
+import { getMetricsProjection } from '../../common/projections/metrics';
+import { getErrorGroupsProjection } from '../../common/projections/errors';
+import { getTransactionsProjection } from '../../common/projections/transactions';
 
 const defaultErrorHandler = (err: Error) => {
   // eslint-disable-next-line

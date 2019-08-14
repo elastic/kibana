@@ -13,7 +13,7 @@ import { LocalUIFilterName } from '../../server/lib/ui_filters/local_ui_filters/
 import { history } from '../utils/history';
 import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { removeUndefinedProps } from '../context/UrlParamsContext/helpers';
-import { PROJECTION } from '../projections/typings';
+import { PROJECTION } from '../../common/projections/typings';
 import { pickKeys } from '../utils/pickKeys';
 
 const initialData = [] as LocalUIFiltersAPIResponse;

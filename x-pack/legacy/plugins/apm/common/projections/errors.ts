@@ -6,37 +6,38 @@
 
 import { Setup } from '../../server/lib/helpers/setup_request';
 import {
+  PROCESSOR_EVENT,
   SERVICE_NAME,
-  PROCESSOR_EVENT
-} from '../../common/elasticsearch_fieldnames';
+  ERROR_GROUP_ID
+} from '../elasticsearch_fieldnames';
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
 
-export function getServicesProjection({ setup }: { setup: Setup }) {
+export function getErrorGroupsProjection({
+  setup,
+  serviceName
+}: {
+  setup: Setup;
+  serviceName: string;
+}) {
   const { start, end, uiFiltersES, config } = setup;
 
   return {
-    index: [
-      config.get<string>('apm_oss.metricsIndices'),
-      config.get<string>('apm_oss.errorIndices'),
-      config.get<string>('apm_oss.transactionIndices')
-    ],
+    index: config.get<string>('apm_oss.errorIndices'),
     body: {
-      size: 0,
       query: {
         bool: {
           filter: [
-            {
-              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] }
-            },
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [PROCESSOR_EVENT]: 'error' } },
             { range: rangeFilter(start, end) },
             ...uiFiltersES
           ]
         }
       },
       aggs: {
-        services: {
+        error_groups: {
           terms: {
-            field: SERVICE_NAME
+            field: ERROR_GROUP_ID
           }
         }
       }
