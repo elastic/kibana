@@ -8,19 +8,19 @@ import { BaseAction } from './base_action';
 import { ACTION_TYPES, ERROR_CODES } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
 
-export class PagerDutyAction extends BaseAction {
+export class IndexAction extends BaseAction {
   constructor(props, errors) {
-    props.type = ACTION_TYPES.PAGERDUTY;
+    props.type = ACTION_TYPES.INDEX;
     super(props, errors);
 
-    this.description = props.description;
+    this.index = props.index;
   }
 
   // To Kibana
   get downstreamJson() {
     const result = super.downstreamJson;
     Object.assign(result, {
-      description: this.description
+      index: this.index
     });
 
     return result;
@@ -32,10 +32,10 @@ export class PagerDutyAction extends BaseAction {
     const { errors } = this.validateJson(json);
 
     Object.assign(props, {
-      description: json.description
+      index: json.index
     });
 
-    const action = new PagerDutyAction(props, errors);
+    const action = new IndexAction(props, errors);
     return { action, errors };
   }
 
@@ -44,11 +44,8 @@ export class PagerDutyAction extends BaseAction {
     const result = super.upstreamJson;
 
     result[this.id] = {
-      pagerduty: {
-        description: this.description
-      }
+      index: this.index,
     };
-
     return result;
   }
 
@@ -58,37 +55,35 @@ export class PagerDutyAction extends BaseAction {
     const { errors } = this.validateJson(json.actionJson);
 
     Object.assign(props, {
-      description: json.actionJson.pagerduty.description
+      index: json.actionJson.index.index
     });
 
-    const action = new PagerDutyAction(props, errors);
+    const action = new IndexAction(props, errors);
     return { action, errors };
   }
 
   static validateJson(json) {
     const errors = [];
 
-    if (!json.pagerduty) {
+    if (!json.index) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.pagerDutyAction.actionJsonPagerDutyPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonPagerDuty} property',
+        message: i18n.translate('xpack.watcher.models.indexAction.actionJsonIndexPropertyMissingBadRequestMessage', {
+          defaultMessage: 'JSON argument must contain an {actionJsonIndex} property',
           values: {
-            actionJsonPagerDuty: 'actionJson.pagerduty'
+            actionJsonIndex: 'actionJson.index'
           }
         }),
       });
-
-      json.pagerduty = {};
     }
 
-    if (!json.pagerduty.description) {
+    if (json.index && !json.index.index) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.pagerDutyAction.actionJsonPagerDutyDescriptionPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonPagerDutyText} property',
+        message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonIndexNamePropertyMissingBadRequestMessage', {
+          defaultMessage: 'JSON argument must contain an {actionJsonIndexName} property',
           values: {
-            actionJsonPagerDutyText: 'actionJson.pagerduty.description'
+            actionJsonIndexName: 'actionJson.index.index'
           }
         }),
       });
@@ -96,4 +91,5 @@ export class PagerDutyAction extends BaseAction {
 
     return { errors: errors.length ? errors : null };
   }
+
 }

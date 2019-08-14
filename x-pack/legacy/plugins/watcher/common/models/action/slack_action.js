@@ -8,11 +8,12 @@ import { BaseAction } from './base_action';
 import { ACTION_TYPES, ERROR_CODES } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
 
-export class LoggingAction extends BaseAction {
+export class SlackAction extends BaseAction {
   constructor(props, errors) {
-    props.type = ACTION_TYPES.LOGGING;
+    props.type = ACTION_TYPES.SLACK;
     super(props, errors);
 
+    this.to = props.to;
     this.text = props.text;
   }
 
@@ -20,6 +21,7 @@ export class LoggingAction extends BaseAction {
   get downstreamJson() {
     const result = super.downstreamJson;
     Object.assign(result, {
+      to: this.to,
       text: this.text
     });
 
@@ -29,13 +31,15 @@ export class LoggingAction extends BaseAction {
   // From Kibana
   static fromDownstreamJson(json) {
     const props = super.getPropsFromDownstreamJson(json);
+
     const { errors } = this.validateJson(json);
 
     Object.assign(props, {
+      to: json.to,
       text: json.text
     });
 
-    const action = new LoggingAction(props, errors);
+    const action = new SlackAction(props, errors);
     return { action, errors };
   }
 
@@ -44,8 +48,11 @@ export class LoggingAction extends BaseAction {
     const result = super.upstreamJson;
 
     result[this.id] = {
-      logging: {
-        text: this.text
+      slack: {
+        message: {
+          to: this.to,
+          text: this.text
+        }
       }
     };
 
@@ -58,37 +65,37 @@ export class LoggingAction extends BaseAction {
     const { errors } = this.validateJson(json.actionJson);
 
     Object.assign(props, {
-      text: json.actionJson.logging.text
+      to: json.actionJson.slack.message.to,
+      text: json.actionJson.slack.message.text
     });
 
-    const action = new LoggingAction(props, errors);
+    const action = new SlackAction(props, errors);
+
     return { action, errors };
   }
 
   static validateJson(json) {
     const errors = [];
 
-    if (!json.logging) {
+    if (!json.slack) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonLoggingPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonLogging} property',
+        message: i18n.translate('xpack.watcher.models.slackAction.actionJsonSlackPropertyMissingBadRequestMessage', {
+          defaultMessage: 'JSON argument must contain an {actionJsonSlack} property',
           values: {
-            actionJsonLogging: 'actionJson.logging'
+            actionJsonSlack: 'actionJson.slack'
           }
-        }),
+        })
       });
-
-      json.logging = {};
     }
 
-    if (!json.logging.text) {
+    if (json.slack && !json.slack.message) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonLoggingTextPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonLoggingText} property',
+        message: i18n.translate('xpack.watcher.models.slackAction.actionJsonSlackMessagePropertyMissingBadRequestMessage', {
+          defaultMessage: 'JSON argument must contain an {actionJsonSlackMessage} property',
           values: {
-            actionJsonLoggingText: 'actionJson.logging.text'
+            actionJsonSlackMessage: 'actionJson.slack.message'
           }
         }),
       });
@@ -100,10 +107,11 @@ export class LoggingAction extends BaseAction {
   /*
   json.actionJson should have the following structure:
   {
-    "logging" : {
-      "text" : "executed at {{ctx.execution_time}}",
-      ["category" : "xpack.watcher.actions.logging",]
-      ["level" : "info"]
+    "slack" : {
+      "message" : {
+        "to" : "#channel_name, @user"
+        "text" : "executed at {{ctx.execution_time}}",
+      }
     }
   }
   */

@@ -5,6 +5,7 @@
  */
 
 import { forEach } from 'lodash';
+import { Action } from '../../../models/action';
 
 /*
 watch.actions
@@ -13,7 +14,8 @@ export function buildActions(actions) {
   const result = {};
 
   forEach(actions, (action) => {
-    Object.assign(result, action.upstreamJson);
+    const actionModel = Action.fromDownstreamJson(action);
+    Object.assign(result, actionModel.upstreamJson);
   });
 
   return result;

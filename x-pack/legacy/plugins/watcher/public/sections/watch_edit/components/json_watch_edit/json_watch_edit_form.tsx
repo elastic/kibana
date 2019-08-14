@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { serializeJsonWatch } from '../../../../../common/lib/serialization';
 import { ErrableFormRow, SectionError } from '../../../../components';
 import { putWatchApiUrl } from '../../../../lib/documentation_links';
 import { onWatchSave } from '../../watch_edit_actions';
@@ -241,7 +242,11 @@ export const JsonWatchEditForm = () => {
       </EuiForm>
 
       {isRequestVisible ? (
-        <RequestFlyout watch={watch} close={() => setIsRequestVisible(false)} />
+        <RequestFlyout
+          id={watch.id}
+          payload={serializeJsonWatch(watch.name, watch.watch)}
+          close={() => setIsRequestVisible(false)}
+        />
       ) : null}
     </Fragment>
   );

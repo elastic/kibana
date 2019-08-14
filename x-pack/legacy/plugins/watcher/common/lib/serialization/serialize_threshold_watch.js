@@ -14,16 +14,24 @@ import {
   buildTrigger,
 } from './serialization_helpers';
 
-export function serializeThresholdWatch(watch) {
-  const {
-    name,
-    triggerIntervalSize,
-    triggerIntervalUnit,
-    index, timeWindowSize, timeWindowUnit, timeField, aggType, aggField, termField, termSize, termOrder,
-    thresholdComparator, hasTermsAgg, threshold,
-    actions,
-  } = watch;
-
+export function serializeThresholdWatch({
+  name,
+  triggerIntervalSize,
+  triggerIntervalUnit,
+  index,
+  timeWindowSize,
+  timeWindowUnit,
+  timeField,
+  aggType,
+  aggField,
+  termField,
+  termSize,
+  termOrder,
+  thresholdComparator,
+  hasTermsAgg,
+  threshold,
+  actions,
+}) {
   const serializedWatch = {
     trigger: buildTrigger(triggerIntervalSize, triggerIntervalUnit),
     input: buildInput({ index, timeWindowSize, timeWindowUnit, timeField, aggType, aggField, termField, termSize, termOrder }),
@@ -31,7 +39,6 @@ export function serializeThresholdWatch(watch) {
     transform: buildTransform({ aggType, thresholdComparator, hasTermsAgg, threshold }),
     actions: buildActions(actions),
     metadata: {
-      name,
       xpack: {
         type: WATCH_TYPES.THRESHOLD,
       },
@@ -51,6 +58,10 @@ export function serializeThresholdWatch(watch) {
       }),
     },
   };
+
+  if (name) {
+    serializedWatch.metadata.name = name;
+  }
 
   return serializedWatch;
 }

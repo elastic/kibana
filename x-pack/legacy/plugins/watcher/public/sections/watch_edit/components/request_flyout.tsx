@@ -25,11 +25,14 @@ interface Props {
 }
 
 export class RequestFlyout extends PureComponent<Props> {
+  getEsJson(payload) {
+    return JSON.stringify(payload, null, 2);
+  }
+
   render() {
-    const { watch, close } = this.props;
-    const { id, watchString } = watch;
+    const { id, payload, close } = this.props;
     const endpoint = `PUT _watcher/watch/${id || '<watchId>'}`;
-    const request = `${endpoint}\n${watchString}`;
+    const request = `${endpoint}\n${this.getEsJson(payload)}`;
 
     return (
       <EuiFlyout maxWidth={480} onClose={close}>

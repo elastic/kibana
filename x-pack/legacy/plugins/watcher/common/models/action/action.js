@@ -5,7 +5,6 @@
  */
 
 import { set } from 'lodash';
-import { badRequest } from 'boom';
 import { getActionType } from '../../../common/lib/get_action_type';
 import { ACTION_TYPES } from '../../../common/constants';
 import { LoggingAction } from './logging_action';
@@ -16,7 +15,6 @@ import { WebhookAction } from './webhook_action';
 import { PagerDutyAction } from './pagerduty_action';
 import { JiraAction } from './jira_action';
 import { UnknownAction } from './unknown_action';
-import { i18n } from '@kbn/i18n';
 
 const ActionTypes = {};
 set(ActionTypes, ACTION_TYPES.LOGGING, LoggingAction);
@@ -34,63 +32,17 @@ export class Action {
   }
 
   // From Elasticsearch
-  static fromUpstreamJson(json, options = { throwExceptions: {} }) {
-    if (!json.id) {
-      throw badRequest(
-        i18n.translate('xpack.watcher.models.actionStatus.idPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {id} property',
-          values: {
-            id: 'id'
-          }
-        }),
-      );
-    }
-
-    if (!json.actionJson) {
-      throw badRequest(
-        i18n.translate('xpack.watcher.models.action.actionJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJson} property',
-          values: {
-            actionJson: 'actionJson'
-          }
-        }),
-      );
-    }
-
+  static fromUpstreamJson(json) {
     const type = getActionType(json.actionJson);
     const ActionType = ActionTypes[type] || UnknownAction;
-
-    const { action, errors } = ActionType.fromUpstreamJson(json, options);
-    const doThrowException = options.throwExceptions.Action !== false;
-
-    if (errors && doThrowException) {
-      this.throwErrors(errors);
-    }
-
+    const { action } = ActionType.fromUpstreamJson(json);
     return action;
   }
 
   // From Kibana
-  static fromDownstreamJson(json, options = { throwExceptions: {} }) {
+  static fromDownstreamJson(json) {
     const ActionType = ActionTypes[json.type] || UnknownAction;
-
-    const { action, errors } = ActionType.fromDownstreamJson(json);
-    const doThrowException = options.throwExceptions.Action !== false;
-
-    if (errors && doThrowException) {
-      this.throwErrors(errors);
-    }
-
+    const { action } = ActionType.fromDownstreamJson(json);
     return action;
-  }
-
-  static throwErrors(errors) {
-    const allMessages = errors.reduce((message, error) => {
-      if (message) {
-        return `${message}, ${error.message}`;
-      }
-      return error.message;
-    }, '');
-    throw badRequest(allMessages);
   }
 }

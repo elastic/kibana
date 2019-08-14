@@ -40,7 +40,7 @@ class WatchErrorsStub {
 }
 
 const { BaseWatch } = proxyquire('../base_watch', {
-  '../action': { Action: ActionStub },
+  '../../../common/models/action': { Action: ActionStub },
   '../watch_status': { WatchStatus: WatchStatusStub },
   '../watch_errors': { WatchErrors: WatchErrorsStub },
 });

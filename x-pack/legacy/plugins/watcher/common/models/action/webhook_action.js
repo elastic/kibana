@@ -145,7 +145,7 @@ export class WebhookAction extends BaseAction {
   static validateJson(json) {
     const errors = [];
 
-    if (!json.webhook.host) {
+    if (json.webhook && !json.webhook.host) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonWebhookHostPropertyMissingBadRequestMessage', {
@@ -155,10 +155,9 @@ export class WebhookAction extends BaseAction {
           }
         }),
       });
-      json.webhook = {};
     }
 
-    if (!json.webhook.port) {
+    if (json.webhook && !json.webhook.port) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonWebhookPortPropertyMissingBadRequestMessage', {

@@ -4,5 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { serializeJsonWatch } from './serialize_json_watch';
 export { serializeThresholdWatch } from './serialize_threshold_watch';
 export { buildInput } from './serialization_helpers';
+
+// TODO: Address this stub
+export function serializeMonitoringWatch() {
+  return {};
+}

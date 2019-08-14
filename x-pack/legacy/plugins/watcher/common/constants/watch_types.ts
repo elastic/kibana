@@ -6,8 +6,6 @@
 
 export const WATCH_TYPES: { [key: string]: string } = {
   JSON: 'json',
-
   THRESHOLD: 'threshold',
-
   MONITORING: 'monitoring',
 };
