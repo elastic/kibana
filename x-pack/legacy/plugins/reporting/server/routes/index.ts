@@ -35,7 +35,7 @@ export function registerRoutes(server: KbnServer, logger: Logger) {
     const user = request.pre.user;
     const headers = request.headers;
 
-    const job = await enqueueJob(logger, exportTypeId, jobParams, user, headers, request);
+    const job = await enqueueJob(exportTypeId, jobParams, user, headers, request);
 
     // return the queue's job information
     const jobJson = job.toJSON();

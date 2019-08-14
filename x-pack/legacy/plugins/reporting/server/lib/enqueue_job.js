@@ -15,8 +15,7 @@ function enqueueJobFn(server) {
   const browserType = config.get('xpack.reporting.capture.browser.type');
   const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
 
-  return async function enqueueJob(parentLogger, exportTypeId, jobParams, user, headers, request) {
-    const logger = parentLogger.clone(['queue-job']);
+  return async function enqueueJob(exportTypeId, jobParams, user, headers, request) {
     const exportType = exportTypesRegistry.getById(exportTypeId);
     const createJob = exportType.createJobFactory(server);
     const payload = await createJob(jobParams, headers, request);
@@ -32,7 +31,7 @@ function enqueueJobFn(server) {
 
       job.on(esqueueEvents.EVENT_JOB_CREATED, (createdJob) => {
         if (createdJob.id === job.id) {
-          logger.info(`Successfully queued job: ${createdJob.id}`);
+          server.log(['reporting', 'esqueue', 'info'], `Successfully queued job: ${createdJob.id}`);
           resolve(job);
         }
       });
