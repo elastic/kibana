@@ -6,7 +6,6 @@
 
 import React, { PureComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import PropTypes from 'prop-types';
 
 import {
   EuiButtonEmpty,
@@ -20,24 +19,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-export class RequestFlyout extends PureComponent {
-  static propTypes = {
-    close: PropTypes.func.isRequired,
-    watch: PropTypes.object.isRequired,
-  };
+interface Props {
+  close: any;
+  watch: any;
+}
 
-  getEsJson({ phases }) {
-    return JSON.stringify(
-      {
-        policy: {
-          phases,
-        },
-      },
-      null,
-      2
-    );
-  }
-
+export class RequestFlyout extends PureComponent<Props> {
   render() {
     const { watch, close } = this.props;
     const { id, watchString } = watch;
