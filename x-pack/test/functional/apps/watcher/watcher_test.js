@@ -24,16 +24,12 @@ export default function ({ getService, getPageObjects }) {
       // These cannot be deleted via the UI, so we need to delete via the API
       const watches = await esSupertest.get('/.watches/_search');
 
-      try {
-        const watchJSON = JSON.parse(watches.res.text);
-
-        watchJSON.hits.hits.forEach(async hit => {
+      if (watches.status === 200) {
+        for (const hit of watches.body.hits.hits) {
           if (hit._id) {
             await esSupertest.delete(`/_watcher/watch/${hit._id}`);
           }
-        });
-      } catch (e) {
-        // silently swallow error
+        }
       }
 
       await browser.setWindowSize(1600, 1000);
