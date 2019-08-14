@@ -11,6 +11,8 @@ import {
 } from '../../adapter_types';
 import { InfraMetric } from '../../../../../graphql/types';
 
+// see discussion in: https://github.com/elastic/kibana/issues/42687
+
 export const awsDiskioBytes: InfraMetricModelCreator = (
   timeField,
   indexPattern,
@@ -30,14 +32,14 @@ export const awsDiskioBytes: InfraMetricModelCreator = (
       metrics: [
         {
           field: 'aws.ec2.diskio.write.bytes',
-          id: 'max-diskio-out',
-          type: InfraMetricModelMetricType.max,
+          id: 'sum-diskio-out',
+          type: InfraMetricModelMetricType.sum,
         },
         {
-          id: 'by-second-max-diskio-out',
+          id: 'by-second-sum-diskio-out',
           type: InfraMetricModelMetricType.calculation,
-          variables: [{ id: 'var-max', name: 'max', field: 'max-diskio-out' }],
-          script: 'params.max / 300', // TODO: https://github.com/elastic/kibana/issues/42687
+          variables: [{ id: 'var-sum', name: 'sum', field: 'sum-diskio-out' }],
+          script: 'params.sum / 300',
         },
       ],
       split_mode: 'everything',
@@ -47,14 +49,14 @@ export const awsDiskioBytes: InfraMetricModelCreator = (
       metrics: [
         {
           field: 'aws.ec2.diskio.read.bytes',
-          id: 'max-diskio-in',
-          type: InfraMetricModelMetricType.max,
+          id: 'sum-diskio-in',
+          type: InfraMetricModelMetricType.sum,
         },
         {
-          id: 'inverted-by-second-max-diskio-in',
+          id: 'inverted-by-second-sum-diskio-in',
           type: InfraMetricModelMetricType.calculation,
-          variables: [{ id: 'var-max', name: 'max', field: 'max-diskio-in' }],
-          script: 'params.max / -300', // TODO: https://github.com/elastic/kibana/issues/42687
+          variables: [{ id: 'var-sum', name: 'sum', field: 'sum-diskio-in' }],
+          script: 'params.sum / -300',
         },
       ],
       split_mode: 'everything',

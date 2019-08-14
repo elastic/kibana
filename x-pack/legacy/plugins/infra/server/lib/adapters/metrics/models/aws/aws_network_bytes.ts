@@ -11,6 +11,8 @@ import {
 } from '../../adapter_types';
 import { InfraMetric } from '../../../../../graphql/types';
 
+// see discussion in: https://github.com/elastic/kibana/issues/42687
+
 export const awsNetworkBytes: InfraMetricModelCreator = (
   timeField,
   indexPattern,
@@ -30,14 +32,14 @@ export const awsNetworkBytes: InfraMetricModelCreator = (
       metrics: [
         {
           field: 'aws.ec2.network.out.bytes',
-          id: 'max-net-out',
-          type: InfraMetricModelMetricType.max,
+          id: 'sum-net-out',
+          type: InfraMetricModelMetricType.sum,
         },
         {
-          id: 'by-second-max-net-out',
+          id: 'by-second-sum-net-out',
           type: InfraMetricModelMetricType.calculation,
-          variables: [{ id: 'var-max', name: 'max', field: 'max-net-out' }],
-          script: 'params.max / 300', // TODO: https://github.com/elastic/kibana/issues/42687
+          variables: [{ id: 'var-sum', name: 'sum', field: 'sum-net-out' }],
+          script: 'params.sum / 300',
         },
       ],
       split_mode: 'everything',
@@ -47,14 +49,14 @@ export const awsNetworkBytes: InfraMetricModelCreator = (
       metrics: [
         {
           field: 'aws.ec2.network.in.bytes',
-          id: 'max-net-in',
-          type: InfraMetricModelMetricType.max,
+          id: 'sum-net-in',
+          type: InfraMetricModelMetricType.sum,
         },
         {
-          id: 'inverted-by-second-max-net-in',
+          id: 'inverted-by-second-sum-net-in',
           type: InfraMetricModelMetricType.calculation,
-          variables: [{ id: 'var-max', name: 'max', field: 'max-net-in' }],
-          script: 'params.max / -300', // TODO: https://github.com/elastic/kibana/issues/42687
+          variables: [{ id: 'var-sum', name: 'sum', field: 'sum-net-in' }],
+          script: 'params.sum / -300',
         },
       ],
       split_mode: 'everything',

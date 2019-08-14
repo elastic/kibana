@@ -47,6 +47,7 @@ export enum InfraMetricModelMetricType {
   positive_only = 'positive_only', // eslint-disable-line @typescript-eslint/camelcase
   derivative = 'derivative',
   count = 'count',
+  sum = 'sum',
 }
 
 export interface InfraMetricModel {

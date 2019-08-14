@@ -11,6 +11,8 @@ import {
 } from '../../adapter_types';
 import { InfraMetric } from '../../../../../graphql/types';
 
+// see discussion in: https://github.com/elastic/kibana/issues/42687
+
 export const awsDiskioOps: InfraMetricModelCreator = (
   timeField,
   indexPattern,
@@ -30,8 +32,14 @@ export const awsDiskioOps: InfraMetricModelCreator = (
       metrics: [
         {
           field: 'aws.ec2.diskio.write.count',
-          id: 'max-diskio-writes',
-          type: InfraMetricModelMetricType.max,
+          id: 'sum-diskio-writes',
+          type: InfraMetricModelMetricType.sum,
+        },
+        {
+          id: 'by-second-sum-diskio-writes',
+          type: InfraMetricModelMetricType.calculation,
+          variables: [{ id: 'var-sum', name: 'sum', field: 'sum-diskio-writes' }],
+          script: 'params.sum / 300',
         },
       ],
       split_mode: 'everything',
@@ -41,14 +49,14 @@ export const awsDiskioOps: InfraMetricModelCreator = (
       metrics: [
         {
           field: 'aws.ec2.diskio.read.count',
-          id: 'max-diskio-reads',
-          type: InfraMetricModelMetricType.max,
+          id: 'sum-diskio-reads',
+          type: InfraMetricModelMetricType.sum,
         },
         {
-          id: 'inverted-avg-diskio-reads',
+          id: 'inverted-by-second-sum-diskio-reads',
           type: InfraMetricModelMetricType.calculation,
-          variables: [{ id: 'var-max', name: 'max', field: 'max-diskio-reads' }],
-          script: 'params.max * -1',
+          variables: [{ id: 'var-sum', name: 'sum', field: 'sum-diskio-reads' }],
+          script: 'params.sum / -300',
         },
       ],
       split_mode: 'everything',
