@@ -35,6 +35,6 @@ export const DateFormatArgInput = compose<ComponentProps, null>(withProps({ date
 export const dateFormat = () => ({
   name: 'dateFormat',
   displayName: 'Date Format',
-  help: 'Select or enter a valid MomentJS format',
+  help: 'Select or enter a MomentJS format',
   simpleTemplate: templateFromReactComponent(DateFormatArgInput),
 });

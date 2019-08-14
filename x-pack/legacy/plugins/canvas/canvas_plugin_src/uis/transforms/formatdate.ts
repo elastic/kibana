@@ -12,7 +12,6 @@ export const formatdate = () => ({
       name: '_',
       displayName: 'Format',
       argType: 'dateformat',
-      help: 'Select or enter a MomentJS format',
     },
   ],
 });
