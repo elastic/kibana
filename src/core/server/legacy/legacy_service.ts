@@ -32,6 +32,7 @@ import {
   collectLegacyUiExports$,
   SavedObjectsLegacyUiExports,
 } from './plugins';
+import { KibanaConfigType, KibanaConfig } from '../kibana_config';
 
 interface LegacyKbnServer {
   applyLoggingConfiguration: (settings: Readonly<Record<string, any>>) => void;
@@ -84,6 +85,7 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
   private readonly log: Logger;
   private readonly devConfig$: Observable<DevConfig>;
   private readonly httpConfig$: Observable<HttpConfig>;
+  private readonly kibanaConfig$: Observable<KibanaConfig>;
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
   private setupDeps?: LegacyServiceSetupDeps;
