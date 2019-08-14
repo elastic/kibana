@@ -8,8 +8,8 @@ export function setCollectionDisabled(req) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const params = {
     body: {
-      transient: { 'xpack.monitoring.collection.enabled': null }, // clears the disabling method used in testing environment
-      persistent: { 'xpack.monitoring.collection.enabled': false }
+      transient: { 'xpack.monitoring.elasticsearch.collection.enabled': null }, // clears the disabling method used in testing environment
+      persistent: { 'xpack.monitoring.elasticsearch.collection.enabled': false }
     }
   };
 
