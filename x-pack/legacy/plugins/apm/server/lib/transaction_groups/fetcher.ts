@@ -17,10 +17,12 @@ interface TopTransactionOptions {
   type: 'top_transactions';
   serviceName: string;
   transactionType: string;
+  transactionName?: string;
 }
 
 interface TopTraceOptions {
   type: 'top_traces';
+  transactionName?: string;
 }
 
 export type Options = TopTransactionOptions | TopTraceOptions;

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { omit } from 'lodash';
 import { Setup } from '../../server/lib/helpers/setup_request';
 import { TRANSACTION_NAME, PARENT_ID } from '../elasticsearch_fieldnames';
 import { Options } from '../../server/lib/transaction_groups/fetcher';
@@ -12,22 +12,14 @@ import { mergeProjection } from './util/merge_projection';
 
 export function getTransactionGroupsProjection({
   setup,
-  transactionName,
   options
 }: {
   setup: Setup;
-  transactionName?: string;
   options: Options;
 }) {
   const transactionsProjection = getTransactionsProjection({
     setup,
-    ...(options.type === 'top_transactions'
-      ? {
-          serviceName: options.serviceName,
-          transactionType: options.transactionType
-        }
-      : {}),
-    transactionName
+    ...(omit(options, 'type') as Omit<typeof options, 'type'>)
   });
 
   const bool =

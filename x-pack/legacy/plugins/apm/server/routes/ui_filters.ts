@@ -143,9 +143,9 @@ export function initUIFiltersApi(core: InternalCoreSetup) {
         options: {
           type: 'top_transactions',
           transactionType,
-          serviceName
-        },
-        transactionName
+          serviceName,
+          transactionName
+        }
       });
     },
     validators: {
