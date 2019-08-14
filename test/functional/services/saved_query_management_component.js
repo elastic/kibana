@@ -22,6 +22,7 @@ import expect from '@kbn/expect';
 export function SavedQueryManagementComponentProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
+  const retry = getService('retry');
 
   class SavedQueryManagementComponent {
 
@@ -46,6 +47,12 @@ export function SavedQueryManagementComponentProvider({ getService }) {
     async loadSavedQuery(title) {
       await this.openSavedQueryManagementComponent();
       await testSubjects.click(`load-saved-query-${title}-button`);
+      await retry.try(async () => {
+        await this.openSavedQueryManagementComponent();
+        const selectedSavedQueryText = testSubjects.getVisibleText('saved-query-list-item-selected');
+        expect(selectedSavedQueryText).to.eql(title);
+      });
+      await this.closeSavedQueryManagementComponent();
     }
 
     async deleteSavedQuery(title) {
