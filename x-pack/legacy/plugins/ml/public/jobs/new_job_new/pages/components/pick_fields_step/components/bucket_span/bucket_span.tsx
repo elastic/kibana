@@ -5,10 +5,12 @@
  */
 
 import React, { FC, useContext, useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { BucketSpanInput } from './bucket_span_input';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
+import { BucketSpanEstimator } from '../bucket_span_estimator';
 
 export const BucketSpan: FC = () => {
   const {
@@ -20,6 +22,7 @@ export const BucketSpan: FC = () => {
   } = useContext(JobCreatorContext);
   const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);
   const [validation, setValidation] = useState(jobValidator.bucketSpan);
+  const [estimating, setEstimating] = useState(false);
 
   useEffect(() => {
     jobCreator.bucketSpan = bucketSpan;
@@ -36,11 +39,19 @@ export const BucketSpan: FC = () => {
 
   return (
     <Description validation={validation}>
-      <BucketSpanInput
-        setBucketSpan={setBucketSpan}
-        bucketSpan={bucketSpan}
-        isInvalid={validation.valid === false}
-      />
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <BucketSpanInput
+            setBucketSpan={setBucketSpan}
+            bucketSpan={bucketSpan}
+            isInvalid={validation.valid === false}
+            disabled={estimating}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <BucketSpanEstimator setEstimating={setEstimating} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </Description>
   );
 };

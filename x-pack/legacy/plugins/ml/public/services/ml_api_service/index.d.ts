@@ -121,6 +121,10 @@ declare interface Ml {
       end: number
     ): Promise<{ progress: number; isRunning: boolean }>;
   };
+
+  estimateBucketSpan(
+    data: object
+  ): Promise<{ name: string; ms: number; error?: boolean; message?: { msg: string } | string }>;
 }
 
 declare const ml: Ml;
