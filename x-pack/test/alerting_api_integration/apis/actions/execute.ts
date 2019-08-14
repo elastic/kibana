@@ -16,7 +16,7 @@ export default function({ getService }: FtrProviderContext) {
 
   const esTestIndexName = '.kibaka-alerting-test-data';
 
-  describe('fire', () => {
+  describe('execute', () => {
     beforeEach(() => esArchiver.load('actions/basic'));
     afterEach(() => esArchiver.unload('actions/basic'));
 
@@ -52,14 +52,14 @@ export default function({ getService }: FtrProviderContext) {
     });
     after(() => es.indices.delete({ index: esTestIndexName }));
 
-    it('decrypts attributes when calling fire API', async () => {
+    it('decrypts attributes when calling execute API', async () => {
       await supertest
-        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_fire`)
+        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
             index: esTestIndexName,
-            reference: 'actions-fire-1',
+            reference: 'actions-execute-1',
             message: 'Testing 123',
           },
         })
@@ -81,7 +81,7 @@ export default function({ getService }: FtrProviderContext) {
                   },
                   {
                     term: {
-                      reference: 'actions-fire-1',
+                      reference: 'actions-execute-1',
                     },
                   },
                 ],
@@ -95,7 +95,7 @@ export default function({ getService }: FtrProviderContext) {
       expect(indexedRecord._source).to.eql({
         params: {
           index: esTestIndexName,
-          reference: 'actions-fire-1',
+          reference: 'actions-execute-1',
           message: 'Testing 123',
         },
         config: {
@@ -104,33 +104,33 @@ export default function({ getService }: FtrProviderContext) {
         secrets: {
           encrypted: 'This value should be encrypted',
         },
-        reference: 'actions-fire-1',
+        reference: 'actions-execute-1',
         source: 'action:test.index-record',
       });
     });
 
-    it(`can't fire from another space`, async () => {
+    it(`can't execute from another space`, async () => {
       await supertest
-        .post(`/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}/_fire`)
+        .post(`/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
             index: esTestIndexName,
-            reference: 'actions-fire-2',
+            reference: 'actions-execute-2',
             message: 'Testing 123',
           },
         })
         .expect(404);
     });
 
-    it('fire works in a space', async () => {
+    it('execute works in a space', async () => {
       await supertest
-        .post(`/s/space_1/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}/_fire`)
+        .post(`/s/space_1/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
             index: esTestIndexName,
-            reference: 'actions-fire-3',
+            reference: 'actions-execute-3',
             message: 'Testing 123',
           },
         })
@@ -152,7 +152,7 @@ export default function({ getService }: FtrProviderContext) {
                   },
                   {
                     term: {
-                      reference: 'actions-fire-3',
+                      reference: 'actions-execute-3',
                     },
                   },
                 ],
@@ -166,7 +166,7 @@ export default function({ getService }: FtrProviderContext) {
       expect(indexedRecord._source).to.eql({
         params: {
           index: esTestIndexName,
-          reference: 'actions-fire-3',
+          reference: 'actions-execute-3',
           message: 'Testing 123',
         },
         config: {
@@ -175,12 +175,12 @@ export default function({ getService }: FtrProviderContext) {
         secrets: {
           encrypted: 'This value should be encrypted',
         },
-        reference: 'actions-fire-3',
+        reference: 'actions-execute-3',
         source: 'action:test.index-record',
       });
     });
 
-    it('fire still works with encrypted attributes after updating an action', async () => {
+    it('execute still works with encrypted attributes after updating an action', async () => {
       const { body: updatedAction } = await supertest
         .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
@@ -203,12 +203,12 @@ export default function({ getService }: FtrProviderContext) {
         },
       });
       await supertest
-        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_fire`)
+        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
             index: esTestIndexName,
-            reference: 'actions-fire-4',
+            reference: 'actions-execute-4',
             message: 'Testing 123',
           },
         })
@@ -230,7 +230,7 @@ export default function({ getService }: FtrProviderContext) {
                   },
                   {
                     term: {
-                      reference: 'actions-fire-4',
+                      reference: 'actions-execute-4',
                     },
                   },
                 ],
@@ -244,7 +244,7 @@ export default function({ getService }: FtrProviderContext) {
       expect(indexedRecord._source).to.eql({
         params: {
           index: esTestIndexName,
-          reference: 'actions-fire-4',
+          reference: 'actions-execute-4',
           message: 'Testing 123',
         },
         config: {
@@ -253,14 +253,14 @@ export default function({ getService }: FtrProviderContext) {
         secrets: {
           encrypted: 'This value should be encrypted',
         },
-        reference: 'actions-fire-4',
+        reference: 'actions-execute-4',
         source: 'action:test.index-record',
       });
     });
 
     it(`should return 404 when action doesn't exist`, async () => {
       const { body: response } = await supertest
-        .post('/api/action/1/_fire')
+        .post('/api/action/1/_execute')
         .set('kbn-xsrf', 'foo')
         .send({
           params: { foo: true },
@@ -275,7 +275,7 @@ export default function({ getService }: FtrProviderContext) {
 
     it('should return 400 when payload is empty and invalid', async () => {
       const { body: response } = await supertest
-        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_fire`)
+        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({})
         .expect(400);

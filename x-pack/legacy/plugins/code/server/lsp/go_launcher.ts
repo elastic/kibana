@@ -16,6 +16,7 @@ import { LoggerFactory } from '../utils/log_factory';
 import { AbstractLauncher } from './abstract_launcher';
 import { LanguageServerProxy } from './proxy';
 import { InitializeOptions, RequestExpander } from './request_expander';
+import { ExternalProgram } from './process/external_program';
 
 const GO_LANG_DETACH_PORT = 2091;
 
@@ -131,6 +132,6 @@ export class GoServerLauncher extends AbstractLauncher {
     log.info(
       `Launch Go Language Server at port ${port.toString()}, pid:${p.pid}, GOROOT:${goRoot}`
     );
-    return p;
+    return new ExternalProgram(p, this.options, log);
   }
 }

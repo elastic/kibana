@@ -20,13 +20,13 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
-import { MarkdownSimple } from 'ui/markdown';
 import { htmlIdGenerator } from '@elastic/eui';
 import { ScaleType } from '@elastic/charts';
 
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { startsWith, get, cloneDeep, map } from 'lodash';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
+import { MarkdownSimple } from '../../../../../kibana_react/public';
 import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
