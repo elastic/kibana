@@ -45,7 +45,7 @@ export class StringFormatEditor extends DefaultFormatEditor {
       'com.organizations.project.ClassName',
       'hostname.net',
       'SGVsbG8gd29ybGQ=',
-      '%EC%95%88%EB%85%95'
+      '%EC%95%88%EB%85%95+%ED%82%A4%EB%B0%94%EB%82%98'
     ];
   }
 
