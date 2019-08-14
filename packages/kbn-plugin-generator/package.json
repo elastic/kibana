@@ -16,12 +16,5 @@
   },
   "scripts": {
     "test": "jest -c jest.config.integration.js"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
-    "babel-jest": "^24.8.0",
-    "del": "^5.0.0",
-    "jest": "^24.8.0"
   }
 }
