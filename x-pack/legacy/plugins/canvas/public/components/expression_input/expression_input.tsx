@@ -220,7 +220,7 @@ export class ExpressionInput extends React.Component<Props> {
           error={error}
           helpText={helpText}
         >
-          <div style={{ minHeight: 250, flex: `'1 0 250px'` }}>
+          <div className="expressionInput--editor">
             <Editor
               languageId="expression"
               languageDef={language}

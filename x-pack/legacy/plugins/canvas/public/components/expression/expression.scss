@@ -8,6 +8,20 @@
   top: $euiSizeL;
 }
 
+.expressionInput--editor {
+  height: 250px;
+  flex-grow: 1;
+  flex-basis: auto;
+
+  display: flex;
+  flex-direction: row;
+
+  .react-monaco-editor-container {
+    flex-grow: 1;
+    flex-basis: 0%;
+  }
+}
+
 .canvasExpression--fullSize {
   height: calc(100vh - 200px); // space for global nav and autocomplete popup
   display: flex;

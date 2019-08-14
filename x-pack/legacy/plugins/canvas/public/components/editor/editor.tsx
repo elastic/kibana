@@ -113,12 +113,6 @@ export class Editor extends React.Component<Props, {}> {
 
     return (
       <React.Fragment>
-        <ReactResizeDetector
-          handleWidth
-          handleHeight
-          skipOnMount
-          onResize={this.updateDimensions}
-        />
         <MonacoEditor
           theme="euiColors"
           language={languageId}
@@ -130,6 +124,7 @@ export class Editor extends React.Component<Props, {}> {
           height={height}
           options={options}
         />
+        <ReactResizeDetector handleWidth handleHeight onResize={this.updateDimensions} />
       </React.Fragment>
     );
   }

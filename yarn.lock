@@ -4316,6 +4316,13 @@
     "@types/react" "*"
     redux "^4.0.0"
 
+"@types/react-resize-detector@^4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@types/react-resize-detector/-/react-resize-detector-4.0.1.tgz#cc8f012f5957e4826e69b8d2afd59baadcac556c"
+  integrity sha512-i115c58mAIXGS4CnDmKv5N5KNbPcABhph7SSfpsfBEjx9KJ0JcYKDeNc73H200Eo7vVSFnAIIDs7EmVWeoZiaw==
+  dependencies:
+    "@types/react" "*"
+
 "@types/react-router-dom@^4.3.1":
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/@types/react-router-dom/-/react-router-dom-4.3.1.tgz#71fe2918f8f60474a891520def40a63997dafe04"
