@@ -410,7 +410,8 @@ export class WebElementWrapper {
   public async moveMouseTo() {
     await this.retryCall(async function moveMouseTo(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      if (wrapper.browserType === Browsers.Firefox) {
+      const isW3CEnabled = (wrapper.driver as any).executor_.w3c === true;
+      if (isW3CEnabled) {
         const actions = (wrapper.driver as any).actions();
         await actions.move({ x: 0, y: 0 }).perform();
         await actions.move({ x: 10, y: 10, origin: wrapper._webElement }).perform();

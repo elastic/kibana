@@ -16,6 +16,10 @@ export default function ({ getPageObjects }) {
       await PageObjects.maps.loadSavedMap('layer with errors');
     });
 
+    after(async () => {
+      await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
+    });
+
     describe('ESSearchSource with missing index pattern id', () => {
       const MISSING_INDEX_ID = 'idThatDoesNotExitForESSearchSource';
       const LAYER_NAME = MISSING_INDEX_ID;

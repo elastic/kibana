@@ -49,6 +49,10 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.maps.waitForLayerAddPanelClosed();
     });
 
+    after(async () => {
+      await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
+    });
+
     it('should not activate add layer button until indexing succeeds', async () => {
       await indexPoint();
 

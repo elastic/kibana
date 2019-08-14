@@ -40,26 +40,12 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
     static async navigateToUrlAndHandleAlert(url, shouldAcceptAlert) {
       log.debug('Navigate to: ' + url);
-      try {
-        await browser.get(url);
-      } catch(navigationError) {
-        log.debug('Error navigating to url');
+      await browser.get(url);
+      if (shouldAcceptAlert) {
         const alert = await browser.getAlert();
-        if (alert && alert.accept) {
-          if (shouldAcceptAlert) {
-            log.debug('Should accept alert');
-            try {
-              await alert.accept();
-            } catch(alertException) {
-              log.debug('Error accepting alert');
-              throw alertException;
-            }
-          } else {
-            log.debug('Will not accept alert');
-            throw navigationError;
-          }
-        } else {
-          throw navigationError;
+        if (alert) {
+          log.debug('Accepting alert');
+          await alert.accept();
         }
       }
     }
@@ -80,7 +66,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       basePath = '',
       ensureCurrentUrl = true,
       shouldLoginIfPrompted = true,
-      shouldAcceptAlert = true
+      shouldAcceptAlert = false
     } = {}) {
       // we onlt use the pathname from the appConfig and use the subUrl as the hash
       const appConfig = {
@@ -149,7 +135,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return currentUrl;
     }
 
-    navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true, shouldAcceptAlert = true, hash = '' } = {}) {
+    navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true, shouldAcceptAlert = false, hash = '' } = {}) {
       const self = this;
       const appConfig = config.get(['apps', appName]);
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), {

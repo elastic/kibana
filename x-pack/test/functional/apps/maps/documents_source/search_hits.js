@@ -80,6 +80,10 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.maps.setLayerQuery('logstash', 'machine.os.raw : "ios"');
       });
 
+      after(async () => {
+        await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
+      });
+
       it('should apply layer query to search request', async () => {
         await inspector.open();
         await inspector.openInspectorRequestsView();

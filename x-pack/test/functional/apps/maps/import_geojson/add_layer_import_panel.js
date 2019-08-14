@@ -19,6 +19,10 @@ export default function ({ getPageObjects }) {
       await PageObjects.maps.openNewMap();
     });
 
+    after(async () => {
+      await PageObjects.maps.gotoMapListingPage();
+    });
+
     beforeEach(async () => {
       await PageObjects.maps.clickAddLayer();
       await PageObjects.maps.selectGeoJsonUploadSource();

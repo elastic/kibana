@@ -80,9 +80,10 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
           chromeOptions.push('headless', 'disable-gpu');
         }
         chromeCapabilities.set('goog:chromeOptions', {
-          w3c: false,
+          w3c: true,
           args: chromeOptions,
         });
+        chromeCapabilities.set('unexpectedAlertBehaviour', 'accept');
         chromeCapabilities.set('goog:loggingPrefs', { browser: 'ALL' });
         return new Builder()
           .forBrowser(browserType)

@@ -20,6 +20,10 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.maps.selectVectorLayer(LAYER_NAME);
     });
 
+    after(async () => {
+      await PageObjects.maps.gotoMapListingPage();
+    });
+
     it('should show unsaved layer in layer TOC', async () => {
       const vectorLayerExists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
       expect(vectorLayerExists).to.be(true);

@@ -29,6 +29,7 @@ export default function ({ getPageObjects, getService }) {
 
     after(async () => {
       await inspector.close();
+      await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
     });
 
     it('should re-fetch join with refresh timer', async () => {

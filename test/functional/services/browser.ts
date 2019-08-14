@@ -87,6 +87,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async getAlert() {
+      log.debug('Browser.getAlert');
       try {
         return await driver.switchTo().alert();
       } catch (e) {
@@ -171,6 +172,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       xOffset?: number,
       yOffset?: number
     ): Promise<void> {
+      log.debug('Browser.moveMouseTo');
       if (this.isW3CEnabled) {
         // Workaround for scrolling bug in W3C mode: move pointer to { x: 0, y: 0 }
         // https://github.com/mozilla/geckodriver/issues/776
@@ -205,66 +207,57 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * Does a drag-and-drop action from one point to another
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#dragAndDrop
      *
-     * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} from
-     * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} to
+     * @param {{element: WebElementWrapper | {x: number, y: number}, offset?: {x: number, y: number}}} from
+     * @param {{element: WebElementWrapper | {x: number, y: number}, offset?: {x: number, y: number}}} to
      * @return {Promise<void>}
      */
     public async dragAndDrop(
-      from: { offset: { x: any; y: any }; location: any },
-      to: { offset: { x: any; y: any }; location: any }
-    ) {
-      // tslint:disable-next-line:variable-name
-      let _from;
-      // tslint:disable-next-line:variable-name
-      let _to;
-      // tslint:disable-next-line:variable-name
-      const _fromOffset = from.offset
-        ? { x: from.offset.x || 0, y: from.offset.y || 0 }
-        : { x: 0, y: 0 };
-      // tslint:disable-next-line:variable-name
-      const _toOffset = to.offset ? { x: to.offset.x || 0, y: to.offset.y || 0 } : { x: 0, y: 0 };
-      // tslint:disable-next-line:variable-name
-      const _convertPointW3C = async (point: any, offset: { x: any; y: any }) => {
-        if (point.location instanceof WebElementWrapper) {
-          const position = await point.location.getPosition();
-          return {
-            x: Math.round(position.x + offset.x),
-            y: Math.round(position.y + offset.y),
-          };
-        } else {
-          return {
-            x: Math.round(point.location.x + offset.x),
-            y: Math.round(point.location.y + offset.y),
-          };
-        }
-      };
-      // tslint:disable-next-line:variable-name
-      const _convertPoint = (point: any) => {
-        return point.location instanceof WebElementWrapper
-          ? point.location._webElement
-          : point.location;
-      };
-
+      from: { location: { x: number; y: number } },
+      to: { location: { x: number; y: number } }
+    ): Promise<void>;
+    public async dragAndDrop(
+      from: { offset?: { x: any; y: any }; location: any },
+      to: { offset?: { x: any; y: any }; location: any }
+    ): Promise<void> {
+      log.debug('Browser.dragAndDrop');
+      // Chrome 76+ and Firefox
       if (this.isW3CEnabled) {
-        // tslint:disable-next-line:variable-name
-        _from = await _convertPointW3C(from, _fromOffset);
-        // tslint:disable-next-line:variable-name
-        _to = await _convertPointW3C(to, _toOffset);
-        // tslint:disable-next-line:variable-name
-        const _offset = { x: _to.x - _from.x, y: _to.y - _from.y };
-
-        return await this.getActions()
-          .move({ x: _from.x, y: _from.y, origin: 'pointer' })
+        const getPoint = (data: any) => {
+          if (!data.offset) {
+            data.offset = {};
+          }
+          return data.location instanceof WebElementWrapper
+            ? { x: data.offset.x || 10, y: data.offset.y || 10, origin: data.location._webElement }
+            : { x: data.location.x, y: data.location.y, origin: 'pointer' };
+        };
+        const startPoint = getPoint(from);
+        const endPoint = getPoint(to);
+        await this.getActions()
+          .move({ x: 0, y: 0 })
+          .perform();
+        await this.getActions()
+          .move(startPoint)
           .press()
-          .move({ x: _offset.x, y: _offset.y, origin: 'pointer' })
+          .move(endPoint)
           .release()
           .perform();
+        // Chromedriver with `w3c` = false
       } else {
-        // until Chromedriver is not supporting W3C Webdriver Actions API
         // tslint:disable-next-line:variable-name
-        _from = _convertPoint(from);
+        const _convertPoint = (point: any) => {
+          return point.location instanceof WebElementWrapper
+            ? point.location._webElement
+            : point.location;
+        };
         // tslint:disable-next-line:variable-name
-        _to = _convertPoint(to);
+        const _from = _convertPoint(from);
+        // tslint:disable-next-line:variable-name
+        const _to = _convertPoint(to);
+        const _fromOffset = from.offset
+          ? { x: from.offset.x || 0, y: from.offset.y || 0 }
+          : { x: 0, y: 0 };
+        // tslint:disable-next-line:variable-name
+        const _toOffset = to.offset ? { x: to.offset.x || 0, y: to.offset.y || 0 } : { x: 0, y: 0 };
         if (from.location instanceof WebElementWrapper && typeof to.location.x === 'number') {
           return await this.getActions()
             .move({ origin: _from })
@@ -336,13 +329,11 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       const arg0 = args[0];
       if (arg0 instanceof WebElementWrapper) {
         await this.getActions()
-          .pause(this.getActions().mouse)
           .move({ origin: arg0._webElement })
           .click()
           .perform();
       } else if (isNaN(args[1] as number) || isNaN(args[2] as number) === false) {
         await this.getActions()
-          .pause(this.getActions().mouse)
           .move({ origin: { x: args[1], y: args[2] } })
           .click()
           .perform();

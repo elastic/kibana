@@ -104,11 +104,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     // use the search filter box to narrow the results down to a single
     // entry, or at least to a single page of results
-    async loadSavedMap(name) {
+    async loadSavedMap(name, options = { isOnUnsavedMap: false }) {
       log.debug(`Load Saved Map ${name}`);
 
       await retry.try(async () => {
-        await this.searchForMapWithName(name);
+        await this.searchForMapWithName(name, options);
         await this.selectMap(name);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -130,10 +130,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async openNewMap() {
+    async openNewMap(options = { isOnUnsavedMap: false }) {
       log.debug(`Open new Map`);
 
-      await this.gotoMapListingPage();
+      await this.gotoMapListingPage(options);
       await testSubjects.click('newMapLink');
     }
 
@@ -165,10 +165,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return exists;
     }
 
-    async searchForMapWithName(name) {
+    async searchForMapWithName(name, options = { isOnUnsavedMap: false }) {
       log.debug(`searchForMapWithName: ${name}`);
 
-      await this.gotoMapListingPage();
+      await this.gotoMapListingPage(options);
 
       await retry.try(async () => {
         const searchFilter = await testSubjects.find('searchFilter');
@@ -194,20 +194,20 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return hits;
     }
 
-    async gotoMapListingPage() {
+    async gotoMapListingPage(options = { isOnUnsavedMap: false }) {
       log.debug('gotoMapListingPage');
       const onPage = await this.onMapListingPage();
       if (!onPage) {
         await retry.try(async () => {
-          await PageObjects.common.navigateToUrl('maps', '/', { basePath: this.basePath });
+          await PageObjects.common.navigateToUrl('maps', '/', { basePath: this.basePath, shouldAcceptAlert: options.isOnUnsavedMap });
           const onMapListingPage = await this.onMapListingPage();
           if (!onMapListingPage) throw new Error('Not on map listing page.');
         });
       }
     }
 
-    async getMapCountWithName(name) {
-      await this.gotoMapListingPage();
+    async getMapCountWithName(name, options = { isOnUnsavedMap: false }) {
+      await this.gotoMapListingPage(options);
 
       log.debug(`getMapCountWithName: ${name}`);
       await this.searchForMapWithName(name);
