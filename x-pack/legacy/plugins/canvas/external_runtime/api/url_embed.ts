@@ -7,6 +7,13 @@
 import 'whatwg-fetch';
 import { BaseEmbed, Options } from './base_embed';
 
+/**
+ * Embed a Canvas Workpad from a URL.
+ *
+ * NOTE: this is *not* the source workpad one might export from Canvas.  The
+ * workpad loaded from the URL needs to be the transient workpad, where data-
+ * driven expressions have already been evaluated.
+ */
 export class EmbedFromURL extends BaseEmbed {
   protected workpadURL: string;
   protected element: HTMLElement;

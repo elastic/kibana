@@ -8,6 +8,9 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { useExternalEmbedState, setScrubberVisible, setPage, setAutoplay } from '../../context';
 
+/**
+ * The page count and paging controls within the footer of the Embedded Workpad.
+ */
 export const PageControls = () => {
   const [{ workpad, footer, page }, dispatch] = useExternalEmbedState();
 
@@ -21,6 +24,7 @@ export const PageControls = () => {
     dispatch(setAutoplay(false));
     dispatch(setScrubberVisible(!isScrubberVisible));
   };
+
   const setPageNumber = (number: number) => dispatch(setPage(number));
   const currentPage = page + 1;
   const totalPages = workpad.pages.length;

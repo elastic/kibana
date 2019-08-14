@@ -119,10 +119,6 @@ module.exports = {
         loader: 'file-loader',
       },
       {
-        test: require.resolve('jquery'),
-        loader: 'expose-loader?jQuery!expose-loader?$',
-      },
-      {
         test: /\.scss$/,
         exclude: /\.module.(s(a|c)ss)$/,
         use: [

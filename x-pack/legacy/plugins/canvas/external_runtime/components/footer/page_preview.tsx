@@ -19,16 +19,18 @@ interface Props {
   page: CanvasRenderedPage;
 }
 
+/**
+ * The small preview of the page shown within the `Scrubber`.
+ */
 export const PagePreview = ({ number, page, height }: Props) => {
   const [{ workpad }, dispatch] = useExternalEmbedState();
   if (!workpad) {
     return null;
   }
 
+  const onClick = (index: number) => dispatch(setPage(index));
   const { height: workpadHeight, width: workpadWidth } = workpad;
   const scale = height / workpadHeight;
-
-  const onClick = (index: number) => dispatch(setPage(index));
   const style = {
     height: workpadHeight * scale,
     width: workpadWidth * scale,

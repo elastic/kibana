@@ -8,6 +8,9 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { useExternalEmbedState } from '../../context';
 
+/**
+ * The title of the workpad displayed in the right-hand of the footer.
+ */
 export const Title = () => {
   const [{ workpad }] = useExternalEmbedState();
 

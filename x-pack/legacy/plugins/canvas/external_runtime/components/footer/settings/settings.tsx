@@ -15,6 +15,9 @@ import { AutoplaySettings } from './autoplay_settings';
 // @ts-ignore CSS Module
 import css from './settings.module';
 
+/**
+ * The Settings Popover for External Workpads.
+ */
 export const Settings = () => {
   const [{ workpad }] = useExternalEmbedState();
 

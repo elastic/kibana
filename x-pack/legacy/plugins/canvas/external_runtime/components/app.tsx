@@ -24,9 +24,15 @@ interface Props {
   workpad: CanvasRenderedWorkpad;
 }
 
+/**
+ * The overall Embedded Workpad app; the highest-layer component.
+ */
 export const App = (props: Props) => {
   const { workpad, page, height, width } = props;
+
+  // Register all of the rendering experessions with a bespoke registry.
   const renderersRegistry = new RenderFunctionsRegistry();
+  // TODO: don't register the time control; add a mock for it.
   renderFunctions.forEach((fn: Function) => renderersRegistry.register(fn));
 
   const initialState: ExternalEmbedState = {

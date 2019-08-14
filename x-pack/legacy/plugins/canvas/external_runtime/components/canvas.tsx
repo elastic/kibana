@@ -15,6 +15,9 @@ import css from './canvas.module';
 
 let timeout: number = 0;
 
+/**
+ * The "stage" for a workpad, which composes the toolbar and other components.
+ */
 export const Canvas = () => {
   const [
     { workpad, height: containerHeight, width: containerWidth, page, settings },
@@ -38,7 +41,13 @@ export const Canvas = () => {
   };
 
   if (autoplay.enabled && autoplay.interval) {
+    // We need to clear the timeout every time, even if it doesn't need to be or
+    // it's null.  Since one could select a different page from the scrubber at
+    // any point, or change the interval, we need to make sure the interval is
+    // killed on React re-render-- otherwise the pages will start bouncing around
+    // as timeouts are accumulated.
     clearTimeout(timeout);
+
     timeout = setTimeout(
       () => dispatch(setPage(page >= workpad.pages.length - 1 ? 0 : page + 1)),
       getTimeInterval(autoplay.interval)
@@ -51,6 +60,7 @@ export const Canvas = () => {
   const hideToolbar = (hidden: boolean) => {
     if (settings.toolbar.autohide) {
       if (hidden) {
+        // Hide the scrubber if we hide the toolbar.
         dispatch(setScrubberVisible(false));
       }
       setToolbarHidden(hidden);

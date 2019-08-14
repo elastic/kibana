@@ -14,8 +14,13 @@ import css from './scrubber.module';
 
 const THUMBNAIL_HEIGHT = 100;
 
+/**
+ * The panel of previews of the pages in the workpad, allowing one to select and
+ * navigate to a specific page.
+ */
 export const Scrubber = () => {
   const [{ workpad, footer }] = useExternalEmbedState();
+
   if (!workpad) {
     return null;
   }

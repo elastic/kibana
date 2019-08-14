@@ -16,6 +16,9 @@ import { createTimeInterval } from '../../../../public/lib/time_interval';
 // @ts-ignore Untyped local
 import { CustomInterval } from '../../../../public/components/workpad_header/control_settings/custom_interval';
 
+/**
+ * The panel used to configure Autolay in Embedded Workpads.
+ */
 export const AutoplaySettings = () => {
   const [{ settings }, dispatch] = useExternalEmbedState();
 

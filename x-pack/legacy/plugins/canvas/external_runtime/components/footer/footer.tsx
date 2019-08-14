@@ -21,6 +21,9 @@ interface Props {
   hidden?: boolean;
 }
 
+/**
+ * The footer of the Embedded Workpad.
+ */
 export const Footer = ({ hidden = false }: Props) => {
   const [{ workpad, settings }] = useExternalEmbedState();
   if (!workpad) {
@@ -28,6 +31,11 @@ export const Footer = ({ hidden = false }: Props) => {
   }
 
   const { autohide } = settings.toolbar;
+
+  // If autohide is enabled, and the toolbar is hidden, set the scrubber
+  // visibility to hidden.  This is useful for state changes where one
+  // sets the footer to hidden, and the scrubber would be left open with
+  // no toolbar.
   if (autohide && hidden) {
     setScrubberVisible(false);
   }

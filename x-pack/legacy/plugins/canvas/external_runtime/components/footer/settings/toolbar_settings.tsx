@@ -15,6 +15,9 @@ interface Props {
   onChange?: () => void;
 }
 
+/**
+ * The settings panel for the Toolbar of an Embedded Workpad.
+ */
 export const ToolbarSettings = ({ onChange = () => {} }: Props) => {
   const [{ settings }, dispatch] = useExternalEmbedState();
 

@@ -7,6 +7,9 @@
 import { ExternalEmbedState } from './state';
 import { ExternalEmbedAction, ExternalEmbedActions } from './actions';
 
+/**
+ * The Action Reducer for the Embedded Canvas Workpad interface.
+ */
 export const reducer = (state: ExternalEmbedState, action: ExternalEmbedAction) => {
   switch (action.type) {
     case ExternalEmbedActions.SET_WORKPAD: {
@@ -83,8 +86,6 @@ export const reducer = (state: ExternalEmbedState, action: ExternalEmbedAction) 
       const { settings } = state;
       const { toolbar } = settings;
       const { autohide } = action.payload;
-
-      settings.toolbar.autohide = action.payload.autohide;
 
       return {
         ...state,

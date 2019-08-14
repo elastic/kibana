@@ -8,6 +8,10 @@ import 'whatwg-fetch';
 import { BaseEmbed, Options } from './base_embed';
 import { CanvasRenderedWorkpad } from '../types';
 
+/**
+ * Embed a Canvas Workpad using a raw `CanvasRenderedWorkpad` object.  This might have
+ * been saved from transient state, loaded from a `json` file, Webpack, Redux, etc.
+ */
 export class Embed extends BaseEmbed {
   protected workpad: CanvasRenderedWorkpad;
   protected element: HTMLElement;

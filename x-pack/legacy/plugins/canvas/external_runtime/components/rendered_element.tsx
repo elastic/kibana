@@ -15,14 +15,20 @@ import { CanvasRenderedElement } from '../types';
 import { ExternalEmbedContext } from '../context';
 
 // @ts-ignore CSS Module
-import css from './element.module';
+import css from './rendered_element.module';
 
 interface Props {
   element: CanvasRenderedElement;
   number?: number;
 }
 
-export class ExternalEmbedElement extends React.PureComponent<Props> {
+/**
+ * A Rendered Element is different from an Element added to a Canvas Workpad.  A
+ * Rendered Element has actually be evaluated already to gather any data from
+ * datasources, and is just a simple expression to render the result.  This
+ * component renders that "transient" element state.
+ */
+export class RenderedElement extends React.PureComponent<Props> {
   static contextType = ExternalEmbedContext;
   protected ref: React.RefObject<HTMLDivElement>;
 
@@ -40,6 +46,7 @@ export class ExternalEmbedElement extends React.PureComponent<Props> {
     const fn = renderersRegistry.get(as);
 
     try {
+      // TODO: These are stubbed, but may need implementation.
       fn.render(this.ref.current, value.value, {
         done: () => {},
         onDestroy: () => {},

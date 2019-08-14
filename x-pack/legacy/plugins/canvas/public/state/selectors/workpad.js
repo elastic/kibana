@@ -367,7 +367,6 @@ export function getAutoplay(state) {
 
 export function getRenderedWorkpad(state) {
   const currentPages = getPages(state);
-  console.log('Calling for rendered workpad', state);
   const args = get(state, ['transient', 'resolvedArgs']);
   const renderedPages = currentPages.map(page => {
     const { elements, ...rest } = page;
