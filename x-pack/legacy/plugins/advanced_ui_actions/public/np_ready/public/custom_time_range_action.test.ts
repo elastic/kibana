@@ -129,7 +129,7 @@ test('Removing custom time range action resets embeddable back to container time
 
   const start = coreMock.createStart();
   const overlayMock = start.overlays;
-  (overlayMock.openModal as any).mockClear();
+  overlayMock.openModal.mockClear();
   new CustomTimeRangeAction({
     openModal: start.overlays.openModal,
     commonlyUsedRanges: [],
@@ -209,7 +209,7 @@ test('Cancelling custom time range action leaves state alone', async done => {
 
   const start = coreMock.createStart();
   const overlayMock = start.overlays;
-  (overlayMock.openModal as any).mockClear();
+  overlayMock.openModal.mockClear();
   new CustomTimeRangeAction({
     openModal: start.overlays.openModal,
     commonlyUsedRanges: [],
