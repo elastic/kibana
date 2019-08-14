@@ -106,12 +106,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('allow saving via the saved query manager popover with no query loaded', async () => {
+      it('allow saving via the saved query management component popover with no query loaded', async () => {
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('foo');
       });
 
-      it('allow saving a currently loaded saved query as a new query via the saved query manager ', async () => {
+      it('allow saving a currently loaded saved query as a new query via the saved query management component ', async () => {
         await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
           'foo2',
           'bar2',
@@ -121,7 +121,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await savedQueryManagementComponent.savedQueryExistOrFail('foo2');
       });
 
-      it('allow saving changes to a currently loaded query via the saved query manager', async () => {
+      it('allow saving changes to a currently loaded query via the saved query management component', async () => {
         await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.updateCurrentlyLoadedQuery('bar2', false, false);
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
@@ -130,7 +130,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(queryString).to.eql('response:404');
       });
 
-      it('allows deleting saved queries in the saved query manager ', async () => {
+      it('allows deleting saved queries in the saved query management component ', async () => {
         await savedQueryManagementComponent.deleteSavedQuery('foo2');
         // add a manual delay
         await queryBar.setQuery('');
@@ -203,23 +203,23 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.createShortUrlMissingOrFail();
       });
 
-      it('allows loading a saved query via the saved query manager', async () => {
+      it('allows loading a saved query via the saved query management component', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         const queryString = await queryBar.getQueryString();
         expect(queryString).to.eql('response:200');
       });
 
-      it('does not allow saving via the saved query manager popover with no query loaded', async () => {
+      it('does not allow saving via the saved query management component popover with no query loaded', async () => {
         await savedQueryManagementComponent.saveNewQueryMissingOrFail();
       });
 
-      it('does not allow saving changes to saved query from the saved query manager', async () => {
+      it('does not allow saving changes to saved query from the saved query management component', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
       });
 
-      it('does not allow deleting a saved query from the saved query manager', async () => {
+      it('does not allow deleting a saved query from the saved query management component', async () => {
         await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
       });
 
