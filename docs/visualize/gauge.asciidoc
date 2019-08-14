@@ -1,0 +1,66 @@
+[[gauge-chart]]
+== Gauge
+
+The gauge visualization displays your data along a scale that changes color according to where your data falls on the expected scale.
+
+Use the gauge visualization to:
+
+* Compare values between a small number of variables
+
+* Show how metric values relate to reference threshold values
+
+* Determine how a specified field is performing versus how it is expected to perform
+
+//TODO add image
+
+[float]
+[[gauge-chart-choose-data]]
+=== Choose the data you want to display
+
+To choose the data that you want to display in the gauge, specify the aggregation options. 
+
+. In the *Metrics* area, expand the *Metric Count* options.
+
+. From the *Aggregation* dropdown, select the aggregation for the gauge.
+
+. In the *Buckets* area, click *Add*, then select *Split group*.
+
+. From the *Aggregation* dropdown, select the bucket aggregation.
+
+[float]
+[[customize-format-gauge-chart]]
+=== Change the display options
+
+. Select *Options*.
+
+. Change the display and range options.
+
+. To change the colors, expand *Color Options*, then select new colors from the *Color Schema* dropdown.
+
+. To change the style options, expand *Style*, then select the options.
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
+
+[float]
+[[gauge-example]]
+== Example: Create a gauge visualization
+
+[float]
+[[gauge-before-you-begin]]
+=== Before you begin
+
+[float]
+[[gauge-metricbeat-data]]
+=== Create the visualization
+
+[float]
+[[gauge-metricbeat-data-aggregation]]
+=== Choose the data aggregation
+
+[float]
+[[gauge-metricbeat-data-bucket]]
+=== Choose the bucket aggregation
+
+[float]
+[[gauge-metricbeat-data-format]]
+=== Format the gauge

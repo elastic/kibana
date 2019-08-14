@@ -1,8 +1,7 @@
 [[goal-chart]]
-== Goal and Gauge
+== Goal
 
-A goal visualization displays how your metric progresses toward a fixed goal. A gauge visualization displays in which
-predefined range falls your metric.
+A goal visualization displays how your metric progresses toward a fixed goal.
 
 include::y-axis-aggs.asciidoc[]
 

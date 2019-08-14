@@ -3,7 +3,7 @@
 
 [partintro]
 --
-_Visualize_ enables you to create visualizations of the data from your Elasticsearch indices, which you can add to <<dashboard, dashboards>> to analyze and compare.
+_Visualize_ enables you to create visualizations of the data from your Elasticsearch indices, which you can then add to <<dashboard, dashboards>> to analyze and compare.
 
 Kibana visualizations are based on Elasticsearch queries. By using a series of Elasticsearch {ref}/search-aggregations.html[aggregations] to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
 
@@ -13,7 +13,7 @@ Create visualizations from a search saved in <<discover, Discover>>, or start wi
 [[visualization-types]]
 == Types of visualizations
 
-{kib} includes many visualizations that you can use to display your data.
+{kib} includes many visualizations that you can use to analyze and compare your data.
 
 [float]
 [[basic-chart-types]]
