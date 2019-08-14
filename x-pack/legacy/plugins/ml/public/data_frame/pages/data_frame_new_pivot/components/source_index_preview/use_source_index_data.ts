@@ -8,11 +8,10 @@ import React, { useEffect, useState } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
 
-import { idx } from '@kbn/elastic-idx';
-
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { ml } from '../../../../../services/ml_api_service';
+import { getNestedProperty } from '../../../../../util/object_utils';
 
 import {
   getDefaultSelectableFields,
@@ -82,8 +81,11 @@ export const useSourceIndexData = (
           [key: string]: any;
         };
         flattenedFields.forEach(ff => {
-          item[ff] = idx(doc._source, _ => _[ff]);
+          item[ff] = getNestedProperty(doc._source, ff);
           if (item[ff] === undefined) {
+            // If the attribute is undefined, it means it was not a nested property
+            // but had dots in its actual name. This selects the property by its
+            // full name and assigns it to `item[ff]`.
             item[ff] = doc._source[`"${ff}"`];
           }
         });
