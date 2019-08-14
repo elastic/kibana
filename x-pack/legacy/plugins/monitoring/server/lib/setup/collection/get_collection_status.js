@@ -181,7 +181,7 @@ async function detectProducts(req) {
     }
   ];
 
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
   for (const { id, indices } of detectionSearch) {
     const response = await callWithRequest(req, 'cat.indices', { index: indices, format: 'json' });
     if (response.length) {
