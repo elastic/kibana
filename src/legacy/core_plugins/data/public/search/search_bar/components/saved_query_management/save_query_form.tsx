@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiOverlayMask,
@@ -34,7 +34,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SavedQueryAttributes } from '../../index';
+import { sortBy } from 'lodash';
+import { SavedQuery, SavedQueryAttributes } from '../../index';
+import { getAllSavedQueries } from '../../lib/saved_query_service';
 
 interface Props {
   savedQuery?: SavedQueryAttributes;
@@ -60,6 +62,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
 }) => {
   const [title, setTitle] = useState(savedQuery ? savedQuery.title : '');
   const [description, setDescription] = useState(savedQuery ? savedQuery.description : '');
+  const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
     savedQuery ? !!savedQuery.filters : true
   );
@@ -69,6 +72,16 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
   const [shouldIncludeTimefilter, setIncludeTimefilter] = useState(
     savedQuery ? !!savedQuery.timefilter : false
   );
+
+  useEffect(() => {
+    const fetchQueries = async () => {
+      const allSavedQueries = await getAllSavedQueries();
+      const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
+      setSavedQueries(sortedAllSavedQueries);
+    };
+    fetchQueries();
+  }, []);
+
   const savedQueryDescriptionText = i18n.translate(
     'data.search.searchBar.savedQueryDescriptionText',
     {
@@ -76,8 +89,21 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
     }
   );
 
+  const hasTitleConflict = !!savedQueries.find(
+    existingSavedQuery => !savedQuery && existingSavedQuery.attributes.title === title
+  );
+
+  const titleConflictErrorText = i18n.translate(
+    'data.search.searchBar.savedQueryForm.titleConflictText',
+    {
+      defaultMessage: 'Title conflicts with an existing saved query',
+    }
+  );
+
+  const errors = hasTitleConflict ? [titleConflictErrorText] : [];
+
   const saveQueryForm = (
-    <EuiForm>
+    <EuiForm isInvalid={hasTitleConflict} error={errors}>
       <EuiFormRow>
         <EuiText color="subdued">{savedQueryDescriptionText}</EuiText>
       </EuiFormRow>
@@ -88,6 +114,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
         helpText={i18n.translate('data.search.searchBar.savedQueryNameHelpText', {
           defaultMessage: 'Name must be unique.',
         })}
+        isInvalid={hasTitleConflict}
       >
         <EuiFieldText
           disabled={!!savedQuery}
@@ -97,6 +124,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
             setTitle(event.target.value);
           }}
           data-test-subj="saveQueryFormTitle"
+          isInvalid={hasTitleConflict}
         />
       </EuiFormRow>
 
@@ -179,6 +207,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
             }
             fill
             data-test-subj="savedQueryFormSaveButton"
+            disabled={hasTitleConflict}
           >
             {i18n.translate('data.search.searchBar.savedQueryFormSaveButtonText', {
               defaultMessage: 'Save',
