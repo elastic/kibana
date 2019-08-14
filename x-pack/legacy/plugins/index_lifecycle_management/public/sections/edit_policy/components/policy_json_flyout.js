@@ -9,11 +9,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 
 import {
+  EuiButtonEmpty,
   EuiCodeBlock,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiPortal,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -39,48 +40,59 @@ export class PolicyJsonFlyout extends PureComponent {
     const request = `${endpoint}\n${this.getEsJson(lifecycle)}`;
 
     return (
-      <EuiPortal>
-        <EuiFlyout maxWidth={480} onClose={close}>
-          <EuiFlyoutHeader>
-            <EuiTitle>
-              <h2>
-                {policyName ? (
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.policyJsonFlyout.namedTitle"
-                    defaultMessage="Request for {policyName}"
-                    values={{ policyName }}
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.policyJsonFlyout.unnamedTitle"
-                    defaultMessage="Request"
-                  />
-                )}
-              </h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-
-          <EuiFlyoutBody>
-            <EuiText>
-              <p>
+      <EuiFlyout maxWidth={480} onClose={close}>
+        <EuiFlyoutHeader>
+          <EuiTitle>
+            <h2>
+              {policyName ? (
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.policyJsonFlyout.descriptionText"
-                  defaultMessage="This Elasticsearch request will create or update this index lifecycle policy."
+                  id="xpack.indexLifecycleMgmt.policyJsonFlyout.namedTitle"
+                  defaultMessage="Request for '{policyName}'"
+                  values={{ policyName }}
                 />
-              </p>
-            </EuiText>
+              ) : (
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.policyJsonFlyout.unnamedTitle"
+                  defaultMessage="Request"
+                />
+              )}
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
 
-            <EuiSpacer />
+        <EuiFlyoutBody>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.policyJsonFlyout.descriptionText"
+                defaultMessage="This Elasticsearch request will create or update this index lifecycle policy."
+              />
+            </p>
+          </EuiText>
 
-            <EuiCodeBlock
-              language="json"
-              isCopyable
-            >
-              {request}
-            </EuiCodeBlock>
-          </EuiFlyoutBody>
-        </EuiFlyout>
-      </EuiPortal>
+          <EuiSpacer />
+
+          <EuiCodeBlock
+            language="json"
+            isCopyable
+          >
+            {request}
+          </EuiCodeBlock>
+        </EuiFlyoutBody>
+
+        <EuiFlyoutFooter>
+          <EuiButtonEmpty
+            iconType="cross"
+            onClick={close}
+            flush="left"
+          >
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.policyJsonFlyout.closeButtonLabel"
+              defaultMessage="Close"
+            />
+          </EuiButtonEmpty>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
     );
   }
 }
