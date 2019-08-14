@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { AutocompleteField } from '../autocomplete_field';
+import { isDisplayable } from '../../utils/is_displayable';
 
 interface Props {
   intl: InjectedIntl;
@@ -44,8 +45,13 @@ export const MetricsExplorerKueryBar = injectI18n(
       setDraftQuery(query);
     };
 
+    const filteredDerivedIndexPattern = {
+      ...derivedIndexPattern,
+      fields: derivedIndexPattern.fields.filter(field => isDisplayable(field)),
+    };
+
     return (
-      <WithKueryAutocompletion indexPattern={derivedIndexPattern}>
+      <WithKueryAutocompletion indexPattern={filteredDerivedIndexPattern}>
         {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
           <AutocompleteField
             isLoadingSuggestions={isLoadingSuggestions}

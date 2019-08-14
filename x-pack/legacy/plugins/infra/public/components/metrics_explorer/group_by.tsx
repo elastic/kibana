@@ -9,6 +9,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
 import { FieldType } from 'ui/index_patterns';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
+import { isDisplayable } from '../../utils/is_displayable';
 
 interface Props {
   intl: InjectedIntl;
@@ -25,6 +26,19 @@ export const MetricsExplorerGroupBy = injectI18n(({ intl, options, onChange, fie
     },
     [onChange]
   );
+
+  const metricPrefixes = options.metrics
+    .map(
+      metric =>
+        (metric.field &&
+          metric.field
+            .split(/\./)
+            .slice(0, 2)
+            .join('.')) ||
+        null
+    )
+    .filter(metric => metric) as string[];
+
   return (
     <EuiComboBox
       placeholder={intl.formatMessage({
@@ -35,7 +49,7 @@ export const MetricsExplorerGroupBy = injectI18n(({ intl, options, onChange, fie
       singleSelection={true}
       selectedOptions={(options.groupBy && [{ label: options.groupBy }]) || []}
       options={fields
-        .filter(f => f.aggregatable && f.type === 'string')
+        .filter(f => isDisplayable(f, metricPrefixes) && f.aggregatable && f.type === 'string')
         .map(f => ({ label: f.name }))}
       onChange={handleChange}
       isClearable={true}
