@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../../../common/types/fields';
-import { isMultiMetricJobCreator } from '../../../../../common/job_creator';
+import { isMultiMetricJobCreator, isPopulationJobCreator } from '../../../../../common/job_creator';
 import { ml } from '../../../../../../../services/ml_api_service';
 import { useKibanaContext } from '../../../../../../../contexts/kibana';
 
@@ -35,7 +35,8 @@ export function useEstimateBucketSpan() {
     index: kibanaContext.currentIndexPattern.title,
     query: kibanaContext.combinedQuery,
     splitField:
-      isMultiMetricJobCreator(jobCreator) && jobCreator.splitField !== null
+      (isMultiMetricJobCreator(jobCreator) || isPopulationJobCreator(jobCreator)) &&
+      jobCreator.splitField !== null
         ? jobCreator.splitField.id
         : undefined,
     timeField: kibanaContext.currentIndexPattern.timeFieldName,
