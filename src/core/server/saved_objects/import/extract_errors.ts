@@ -16,15 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { SavedObject } from '../service';
-import { ImportError } from './types';
+import { SavedObject } from '../types';
+import { SavedObjectsImportError } from './types';
 
 export function extractErrors(
   savedObjectResults: SavedObject[],
   savedObjectsToImport: SavedObject[]
 ) {
-  const errors: ImportError[] = [];
+  const errors: SavedObjectsImportError[] = [];
   const originalSavedObjectsMap = new Map<string, SavedObject>();
   for (const savedObject of savedObjectsToImport) {
     originalSavedObjectsMap.set(`${savedObject.type}:${savedObject.id}`, savedObject);

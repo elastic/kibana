@@ -27,7 +27,7 @@
     "@kbn/expect": "1.0.0",
     "del": "^4.0.0",
     "getopts": "^2.2.4",
-    "supports-color": "^6.1.0",
+    "supports-color": "^7.0.0",
     "typescript": "3.5.3"
   }
 }

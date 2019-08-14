@@ -14,8 +14,7 @@ import {
   EuiFormHelpText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { data } from 'plugins/data/setup';
-const { QueryBar } = data.query.ui;
+import { QueryBar } from 'plugins/data';
 import { Storage } from 'ui/storage';
 
 const settings = chrome.getUiSettingsClient();
@@ -80,6 +79,7 @@ export class WhereExpression extends Component {
             />
           </EuiFormHelpText>
           <QueryBar
+            uiSettings={settings}
             query={whereQuery ? whereQuery : { language: settings.get('search:queryLanguage'), query: '' }}
             onSubmit={this._onQueryChange}
             appName="maps"

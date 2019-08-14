@@ -45,7 +45,7 @@ export {
 } from './documentation_links';
 
 export {
-  filterItems,
+  filterItems
 } from './filter_items';
 
 export {
@@ -94,6 +94,7 @@ export {
 } from './sort_table';
 
 export {
-  trackUiMetric,
-  METRIC_TYPE,
-} from './track_ui_metric';
+  retypeMetrics,
+} from './retype_metrics';
+
+export { trackUiMetric, METRIC_TYPE } from './track_ui_metric';

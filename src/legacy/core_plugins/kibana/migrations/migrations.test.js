@@ -1788,4 +1788,56 @@ Object {
       /* eslint-enable max-len */
     });
   });
+
+  describe('7.4.0', function () {
+    const migration = migrations.search['7.4.0'];
+
+    test('transforms one dimensional sort arrays into two dimensional arrays', () => {
+      const doc = {
+        id: '123',
+        type: 'search',
+        attributes: {
+          sort: ['bytes', 'desc'],
+        },
+      };
+
+      const expected = {
+        id: '123',
+        type: 'search',
+        attributes: {
+          sort: [['bytes', 'desc']],
+        },
+      };
+
+      const migratedDoc = migration(doc);
+
+      expect(migratedDoc).toEqual(expected);
+    });
+
+    test('doesn\'t modify search docs that already have two dimensional sort arrays', () => {
+      const doc = {
+        id: '123',
+        type: 'search',
+        attributes: {
+          sort: [['bytes', 'desc']],
+        },
+      };
+
+      const migratedDoc = migration(doc);
+
+      expect(migratedDoc).toEqual(doc);
+    });
+
+    test('doesn\'t modify search docs that have no sort array', () => {
+      const doc = {
+        id: '123',
+        type: 'search',
+        attributes: {},
+      };
+
+      const migratedDoc = migration(doc);
+
+      expect(migratedDoc).toEqual(doc);
+    });
+  });
 });

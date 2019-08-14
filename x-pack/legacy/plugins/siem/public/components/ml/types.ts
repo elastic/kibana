@@ -54,7 +54,7 @@ export interface Anomaly {
   detectorIndex: number;
   entityName: string;
   entityValue: string;
-  influencers: Array<Record<string, string>>;
+  influencers?: Array<Record<string, string>>;
   jobId: string;
   rowId: string;
   severity: number;
@@ -125,6 +125,10 @@ export interface MlCapabilities {
     canPreviewDataFrame: boolean;
     canCreateDataFrame: boolean;
     canStartStopDataFrame: boolean;
+    canGetDataFrameAnalytics: boolean;
+    canDeleteDataFrameAnalytics: boolean;
+    canCreateDataFrameAnalytics: boolean;
+    canStartStopDataFrameAnalytics: boolean;
   };
   isPlatinumOrTrialLicense: boolean;
   mlFeatureEnabledInSpace: boolean;
