@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
-import { EuiPanel } from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
+import { EuiButtonEmpty, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { RangesParamEditor } from 'ui/agg_types/controls/ranges';
@@ -29,7 +30,14 @@ import { TextInputOption } from '../controls/text_input';
 import { GaugeVisParams } from '../gauge';
 
 function GaugeOptions(props: VisOptionsProps<GaugeVisParams>) {
-  const { stateParams, setValue, vis } = props;
+  const { stateParams, setValue, vis, uiState } = props;
+  const [isCustomColors, setIsCustomColors] = useState(false);
+
+  useEffect(() => {
+    uiState.on('colorChanged', () => {
+      setIsCustomColors(true);
+    });
+  }, []);
 
   const setGaugeValue = useCallback(
     <T extends keyof GaugeVisParams['gauge']>(paramName: T, value: GaugeVisParams['gauge'][T]) =>
@@ -55,74 +63,90 @@ function GaugeOptions(props: VisOptionsProps<GaugeVisParams>) {
     [stateParams.gauge]
   );
 
+  const resetColorsButton = (
+    <EuiButtonEmpty
+      size="xs"
+      onClick={() => {
+        uiState.set('vis.colors', null);
+        setIsCustomColors(false);
+      }}
+    >
+      <FormattedMessage
+        id="kbnVislibVisTypes.controls.gaugeOptions.resetColorsButtonLabel"
+        defaultMessage="Reset colors"
+      />
+    </EuiButtonEmpty>
+  );
+
   return (
-    <EuiPanel paddingSize="s">
-      <SelectOption
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.gaugeTypeLabel', {
-          defaultMessage: 'Gauge type',
-        })}
-        options={vis.type.editorConfig.collections.gaugeTypes}
-        paramName="gaugeType"
-        value={stateParams.gauge.gaugeType}
-        setValue={setGaugeType}
-      />
+    <>
+      <EuiPanel paddingSize="s">
+        <EuiTitle size="xs">
+          <h2>
+            <FormattedMessage
+              id="kbnVislibVisTypes.controls.gaugeOptions.styleTitle"
+              defaultMessage="Style"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
 
-      <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.percentageModeLabel', {
-          defaultMessage: 'Percentage mode',
-        })}
-        paramName="percentageMode"
-        value={stateParams.gauge.percentageMode}
-        setValue={setGaugeValue}
-      />
+        <SelectOption
+          label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.gaugeTypeLabel', {
+            defaultMessage: 'Gauge type',
+          })}
+          options={vis.type.editorConfig.collections.gaugeTypes}
+          paramName="gaugeType"
+          value={stateParams.gauge.gaugeType}
+          setValue={setGaugeType}
+        />
 
-      <SelectOption
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.alignmentLabel', {
-          defaultMessage: 'Alignment',
-        })}
-        options={vis.type.editorConfig.collections.alignments}
-        paramName="alignment"
-        value={stateParams.gauge.alignment}
-        setValue={setGaugeValue}
-      />
+        <SwitchOption
+          label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.percentageModeLabel', {
+            defaultMessage: 'Percentage mode',
+          })}
+          paramName="percentageMode"
+          value={stateParams.gauge.percentageMode}
+          setValue={setGaugeValue}
+        />
+        <EuiSpacer size="s" />
 
-      <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.displayWarningsLabel', {
-          defaultMessage: 'Display warnings',
-        })}
-        tooltip={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.switchWarningsTipText', {
-          defaultMessage:
-            'Turns on/off warnings. When turned on, a warning will be shown if not all labels could be displayed.',
-        })}
-        paramName="isDisplayWarning"
-        value={stateParams.isDisplayWarning}
-        setValue={setValue}
-      />
+        <SelectOption
+          label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.alignmentLabel', {
+            defaultMessage: 'Alignment',
+          })}
+          options={vis.type.editorConfig.collections.alignments}
+          paramName="alignment"
+          value={stateParams.gauge.alignment}
+          setValue={setGaugeValue}
+        />
 
-      <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.showLegendLabel', {
-          defaultMessage: 'Show legend',
-        })}
-        paramName="addLegend"
-        value={stateParams.addLegend}
-        setValue={setValue}
-      />
+        <EuiTitle size="xs">
+          <h2>
+            <FormattedMessage
+              id="kbnVislibVisTypes.controls.gaugeOptions.labelsTitle"
+              defaultMessage="Labels"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
 
-      <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.showLabelsLabel', {
-          defaultMessage: 'Show labels',
-        })}
-        paramName="show"
-        value={stateParams.gauge.labels.show}
-        setValue={(paramName, value) =>
-          setGaugeValue('labels', { ...stateParams.gauge.labels, [paramName]: value })
-        }
-      />
+        <SwitchOption
+          label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.showLabelsLabel', {
+            defaultMessage: 'Show labels',
+          })}
+          paramName="show"
+          value={stateParams.gauge.labels.show}
+          setValue={(paramName, value) =>
+            setGaugeValue('labels', { ...stateParams.gauge.labels, [paramName]: value })
+          }
+        />
+        <EuiSpacer size="s" />
 
-      {stateParams.gauge.labels.show && (
         <TextInputOption
+          disabled={!stateParams.gauge.labels.show}
           label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.subTextLabel', {
-            defaultMessage: 'Sub text',
+            defaultMessage: 'Sub label',
           })}
           paramName="subText"
           value={stateParams.gauge.style.subText}
@@ -130,10 +154,37 @@ function GaugeOptions(props: VisOptionsProps<GaugeVisParams>) {
             setGaugeValue('style', { ...stateParams.gauge.style, [paramName]: value })
           }
         />
-      )}
 
-      {stateParams.gauge.colorsRange.length > 1 && (
         <SwitchOption
+          disabled={!stateParams.gauge.labels.show}
+          label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.displayWarningsLabel', {
+            defaultMessage: 'Display warnings',
+          })}
+          tooltip={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.switchWarningsTipText', {
+            defaultMessage:
+              'Turns on/off warnings. When turned on, a warning will be shown if not all labels could be displayed.',
+          })}
+          paramName="isDisplayWarning"
+          value={stateParams.isDisplayWarning}
+          setValue={setValue}
+        />
+      </EuiPanel>
+
+      <EuiSpacer size="s" />
+
+      <EuiPanel paddingSize="s">
+        <EuiTitle size="xs">
+          <h2>
+            <FormattedMessage
+              id="kbnVislibVisTypes.controls.gaugeOptions.rangesTitle"
+              defaultMessage="Ranges"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+
+        <SwitchOption
+          disabled={stateParams.gauge.colorsRange.length < 2}
           label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.autoExtendRangeLabel', {
             defaultMessage: 'Auto extend range',
           })}
@@ -144,13 +195,72 @@ function GaugeOptions(props: VisOptionsProps<GaugeVisParams>) {
           value={stateParams.gauge.extendRange}
           setValue={setGaugeValue}
         />
-      )}
+        <EuiSpacer size="s" />
 
-      <RangesParamEditor
-        value={stateParams.gauge.colorsRange}
-        setValue={value => setGaugeValue('colorsRange', value)}
-      />
-    </EuiPanel>
+        <RangesParamEditor
+          value={stateParams.gauge.colorsRange}
+          setValue={value => setGaugeValue('colorsRange', value)}
+        />
+
+        <EuiTitle size="xs">
+          <h2>
+            <FormattedMessage
+              id="kbnVislibVisTypes.controls.gaugeOptions.colorTitle"
+              defaultMessage="Color"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+
+        <SelectOption
+          disabled={stateParams.gauge.colorsRange.length < 2}
+          helpText={i18n.translate(
+            'kbnVislibVisTypes.controls.gaugeOptions.howToChangeColorsDescription',
+            {
+              defaultMessage: 'Note: colors can be changed in the legend.',
+            }
+          )}
+          label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.colorSchemaLabel', {
+            defaultMessage: 'Schema',
+          })}
+          labelAppend={isCustomColors && resetColorsButton}
+          options={vis.type.editorConfig.collections.colorSchemas}
+          paramName="colorSchema"
+          value={stateParams.gauge.colorSchema}
+          setValue={setGaugeValue}
+        />
+
+        <SwitchOption
+          disabled={stateParams.gauge.colorsRange.length < 2}
+          label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.reverseColorSchemaLabel', {
+            defaultMessage: 'Reverse schema',
+          })}
+          paramName="invertColors"
+          value={stateParams.gauge.invertColors}
+          setValue={setGaugeValue}
+        />
+
+        <SwitchOption
+          label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.showLegendLabel', {
+            defaultMessage: 'Show legend',
+          })}
+          paramName="addLegend"
+          value={stateParams.addLegend}
+          setValue={setValue}
+        />
+
+        <SwitchOption
+          label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.showScaleLabel', {
+            defaultMessage: 'Show scale',
+          })}
+          paramName="show"
+          value={stateParams.gauge.scale.show}
+          setValue={(paramName, value) =>
+            setGaugeValue('scale', { ...stateParams.gauge.scale, [paramName]: value })
+          }
+        />
+      </EuiPanel>
+    </>
   );
 }
 

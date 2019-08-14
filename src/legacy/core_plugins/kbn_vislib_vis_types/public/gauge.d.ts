@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
+
 export interface GaugeVisParams {
   readonly type: 'gauge';
   addTooltip: boolean;
@@ -29,7 +31,9 @@ export interface GaugeVisParams {
     readonly type: 'meter';
     alignment: 'automatic' | 'horizontal' | 'vertical';
     colorsRange: Array<{ from: number; to: number }>;
+    colorSchema: ColorSchemas;
     extendRange: boolean;
+    invertColors: boolean;
     gaugeType: 'Arc' | 'Circle';
     labels: {
       show: boolean;
@@ -37,14 +41,11 @@ export interface GaugeVisParams {
     minAngle?: number;
     maxAngle?: number;
     percentageMode: boolean;
-
-    // colorSchema: 'Green to Red',
-    // invertColors: false,
-    // scale: {
-    //   show: true,
-    //   labels: false,
-    //   color: 'rgba(105,112,125,0.2)',
-    // },
+    scale: {
+      show: boolean;
+      readonly labels: false;
+      readonly color: 'rgba(105,112,125,0.2)';
+    };
     style: {
       subText: string;
     };

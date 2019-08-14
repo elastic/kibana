@@ -17,10 +17,12 @@
  * under the License.
  */
 
+import { PersistedState } from 'ui/persisted_state';
 import { Vis } from './../..';
 
 export interface VisOptionsProps<VisParamType = unknown> {
   stateParams: VisParamType;
   vis: Vis;
+  uiState: PersistedState;
   setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
 }

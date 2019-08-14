@@ -21,7 +21,10 @@ import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 interface SelectOptionProps<ParamName extends string, ValidParamValues extends string> {
+  disabled?: boolean;
+  helpText?: React.ReactNode;
   label: string;
+  labelAppend?: React.ReactNode;
   options: Array<{ value: ValidParamValues; text: string }>;
   paramName: ParamName;
   value?: ValidParamValues;
@@ -29,15 +32,19 @@ interface SelectOptionProps<ParamName extends string, ValidParamValues extends s
 }
 
 function SelectOption<ParamName extends string, ValidParamValues extends string>({
+  disabled,
+  helpText,
   label,
+  labelAppend,
   options,
   paramName,
   value,
   setValue,
 }: SelectOptionProps<ParamName, ValidParamValues>) {
   return (
-    <EuiFormRow label={label} fullWidth={true} compressed>
+    <EuiFormRow compressed fullWidth helpText={helpText} label={label} labelAppend={labelAppend}>
       <EuiSelect
+        disabled={disabled}
         options={options}
         value={value}
         onChange={ev => setValue(paramName, ev.target.value as ValidParamValues)}

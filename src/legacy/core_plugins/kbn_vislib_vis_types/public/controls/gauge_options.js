@@ -29,30 +29,6 @@ module.directive('gaugeOptions', function () {
     template: gaugeOptionsTemplate,
     replace: true,
     link: function ($scope) {
-      $scope.collections = $scope.vis.type.editorConfig.collections;
-      $scope.showColorRange = true;
-
-      $scope.$watch('editorState.params.gauge.gaugeType', type => {
-        switch (type) {
-          case 'Arc':
-            $scope.editorState.params.gauge.type = 'meter';
-            $scope.editorState.params.gauge.minAngle = undefined;
-            $scope.editorState.params.gauge.maxAngle = undefined;
-            break;
-          case 'Circle':
-            $scope.editorState.params.gauge.type = 'meter';
-            $scope.editorState.params.gauge.minAngle = 0;
-            $scope.editorState.params.gauge.maxAngle = 2 * Math.PI;
-            break;
-          case 'Metric':
-            $scope.editorState.params.gauge.type = 'simple';
-        }
-      });
-
-      $scope.resetColors = function () {
-        $scope.uiState.set('vis.colors', null);
-        $scope.customColors = false;
-      };
 
       $scope.getGreaterThan = function (index) {
         if (index === 0) return -Infinity;
@@ -65,21 +41,6 @@ module.directive('gaugeOptions', function () {
         const to = previousRange ? from + (previousRange.to - previousRange.from) : 100;
         $scope.editorState.params.gauge.colorsRange.push({ from: from, to: to });
       };
-
-      $scope.removeRange = function (index) {
-        $scope.editorState.params.gauge.colorsRange.splice(index, 1);
-      };
-
-      $scope.getColor = function (index) {
-        const defaultColors = this.uiState.get('vis.defaultColors');
-        const overwriteColors = this.uiState.get('vis.colors');
-        const colors = defaultColors ? _.defaults({}, overwriteColors, defaultColors) : overwriteColors;
-        return colors ? Object.values(colors)[index] : 'transparent';
-      };
-
-      $scope.uiState.on('colorChanged', () => {
-        $scope.customColors = true;
-      });
 
       $scope.requiredText = i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.requiredText', {
         defaultMessage: 'Required:'

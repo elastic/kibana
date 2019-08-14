@@ -33,6 +33,7 @@ uiModules
     ['component', { wrapApply: false }],
     ['stateParams', { watchDepth: 'collection' }],
     ['vis', { watchDepth: 'collection' }],
+    ['uiState', { watchDepth: 'collection' }],
     ['setValue', { watchDepth: 'reference' }],
   ]))
   .directive('visEditorVisOptions', function ($compile) {
@@ -57,6 +58,7 @@ uiModules
             component="editor"
             state-params="editorState.params"
             vis="vis"
+            ui-state="uiState"
             set-value="setValue">
           </vis-options-react-wrapper>`;
         const $editor = $compile(comp)($scope);
