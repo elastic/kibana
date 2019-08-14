@@ -70,7 +70,7 @@ describe('running the plugin-generator', () => {
           done();
         });
       },
-      oneMinute * 3
+      oneMinute * 9
     );
   });
 });
