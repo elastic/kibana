@@ -75,6 +75,16 @@ function GridOptions({
           defaultMessage: 'Show x-axis lines',
         })}
         paramName="categoryLines"
+        tooltip={
+          hasHistogramAgg
+            ? i18n.translate(
+                'kbnVislibVisTypes.controls.pointSeries.gridAxis.yAxisLinesDisabledTooltip',
+                {
+                  defaultMessage: "X-axis lines can't show for histograms.",
+                }
+              )
+            : undefined
+        }
         value={stateParams.grid.categoryLines}
         setValue={setGrid}
         dataTestSubj="showCategoryLines"
