@@ -5,65 +5,81 @@
  */
 
 import expect from '@kbn/expect';
-import { ES_ARCHIVER_ACTION_ID, SPACE_1_ES_ARCHIVER_ACTION_ID } from './constants';
+import { UserAtSpaceScenarios } from '../../scenarios';
+import { getUrlPrefix } from '../../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function getActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('get', () => {
-    before(() => esArchiver.load('actions/basic'));
-    after(() => esArchiver.unload('actions/basic'));
+    let actionsToDelete: Array<{ spaceId: string; id: string }> = [];
 
-    it('should return 200 when finding a record and not return encrypted attributes', async () => {
-      await supertest
-        .get(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            id: ES_ARCHIVER_ACTION_ID,
-            actionTypeId: 'test.index-record',
-            description: 'My action',
-            config: {
-              unencrypted: `This value shouldn't get encrypted`,
-            },
-          });
+    afterEach(async () => {
+      const promises = actionsToDelete.map(({ spaceId, id }) => {
+        return supertest
+          .delete(`${getUrlPrefix(spaceId)}/api/action/${id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(204);
+      });
+      await Promise.all(promises);
+      actionsToDelete = [];
+    });
+
+    for (const scenario of UserAtSpaceScenarios) {
+      const { user, space } = scenario;
+      describe(scenario.id, () => {
+        it('get as user', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              description: 'My action',
+              actionTypeId: 'test.index-record',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            })
+            .expect(200);
+          actionsToDelete.push({ spaceId: space.id, id: createdAction.id });
+
+          const response = await supertestWithoutAuth
+            .get(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}`)
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to get action',
+              });
+              break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                id: createdAction.id,
+                actionTypeId: 'test.index-record',
+                description: 'My action',
+                config: {
+                  unencrypted: `This value shouldn't get encrypted`,
+                },
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
-    });
-
-    it('should return 404 when finding a record in another space', async () => {
-      await supertest.get(`/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}`).expect(404);
-    });
-
-    it('should return 200 when finding a record in a space', async () => {
-      await supertest
-        .get(`/s/space_1/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}`)
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            id: SPACE_1_ES_ARCHIVER_ACTION_ID,
-            actionTypeId: 'test.index-record',
-            description: 'My action',
-            config: {
-              unencrypted: `This value shouldn't get encrypted`,
-            },
-          });
-        });
-    });
-
-    it('should return 404 when not finding a record', async () => {
-      await supertest
-        .get('/api/action/2')
-        .expect(404)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Saved object [action/2] not found',
-          });
-        });
-    });
+      });
+    }
   });
 }

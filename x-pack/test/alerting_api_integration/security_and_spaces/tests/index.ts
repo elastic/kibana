@@ -39,6 +39,7 @@ export default function alertingApiIntegrationTests({
           if (isCustomRoleSpecification(role)) {
             await securityService.role.create(role.name, {
               kibana: role.kibana,
+              elasticsearch: role.elasticsearch,
             });
           }
         }

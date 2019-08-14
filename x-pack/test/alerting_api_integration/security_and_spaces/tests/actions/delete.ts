@@ -6,51 +6,100 @@
 
 import expect from '@kbn/expect';
 
-import { ES_ARCHIVER_ACTION_ID, SPACE_1_ES_ARCHIVER_ACTION_ID } from './constants';
+import { UserAtSpaceScenarios } from '../../scenarios';
+import { getUrlPrefix } from '../../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function deleteActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('delete', () => {
-    beforeEach(() => esArchiver.load('actions/basic'));
-    afterEach(() => esArchiver.unload('actions/basic'));
+    const actionsToDelete: Array<{ spaceId: string; id: string }> = [];
 
-    it('should return 204 when deleting an action', async () => {
-      await supertest
-        .delete(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204, '');
+    after(async () => {
+      const promises = actionsToDelete.map(({ spaceId, id }) => {
+        return supertest
+          .delete(`${getUrlPrefix(spaceId)}/api/action/${id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(204);
+      });
+      await Promise.all(promises);
     });
 
-    it('should return 204 when deleting an action in a space', async () => {
-      await supertest
-        .delete(`/s/space_1/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204, '');
-    });
+    for (const scenario of UserAtSpaceScenarios) {
+      const { user, space } = scenario;
+      describe(scenario.id, () => {
+        it('delete an action', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              description: 'My action',
+              actionTypeId: 'test.index-record',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            })
+            .expect(200);
 
-    it('should return 404 when deleting an action in another space', async () => {
-      await supertest
-        .delete(`/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(404);
-    });
+          const response = await supertestWithoutAuth
+            .delete(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo');
 
-    it(`should return 404 when action doesn't exist`, async () => {
-      await supertest
-        .delete('/api/action/2')
-        .set('kbn-xsrf', 'foo')
-        .expect(404)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Saved object [action/2] not found',
-          });
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to delete action',
+              });
+              actionsToDelete.push({ spaceId: space.id, id: createdAction.id });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
-    });
+
+        it(`action doesn't exist`, async () => {
+          const response = await supertestWithoutAuth
+            .delete(`${getUrlPrefix(space.id)}/api/action/2`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to delete action',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(404);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+      });
+    }
   });
 }

@@ -5,258 +5,228 @@
  */
 
 import expect from '@kbn/expect';
-import { ES_ARCHIVER_ACTION_ID, SPACE_1_ES_ARCHIVER_ACTION_ID } from './constants';
+import { UserAtSpaceScenarios } from '../../scenarios';
+import { getUrlPrefix } from '../../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function updateActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('update', () => {
-    beforeEach(() => esArchiver.load('actions/basic'));
-    afterEach(() => esArchiver.unload('actions/basic'));
+    const actionsToDelete: Array<{ spaceId: string; id: string }> = [];
 
-    it('should return 200 when updating a document', async () => {
-      await supertest
-        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          description: 'My action updated',
-          config: {
-            unencrypted: `This value shouldn't get encrypted`,
-          },
-          secrets: {
-            encrypted: 'This value should be encrypted',
-          },
-        })
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            id: ES_ARCHIVER_ACTION_ID,
-            actionTypeId: 'test.index-record',
-            description: 'My action updated',
-            config: {
-              unencrypted: `This value shouldn't get encrypted`,
-            },
-          });
-        });
-    });
-
-    it('should return 200 when updating a document in a space', async () => {
-      await supertest
-        .put(`/s/space_1/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          description: 'My action updated',
-          config: {
-            unencrypted: `This value shouldn't get encrypted`,
-          },
-          secrets: {
-            encrypted: 'This value should be encrypted',
-          },
-        })
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            id: SPACE_1_ES_ARCHIVER_ACTION_ID,
-            actionTypeId: 'test.index-record',
-            description: 'My action updated',
-            config: {
-              unencrypted: `This value shouldn't get encrypted`,
-            },
-          });
-        });
-    });
-
-    it('should return 404 when updating a document in another space', async () => {
-      await supertest
-        .put(`/api/action/${SPACE_1_ES_ARCHIVER_ACTION_ID}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          description: 'My action updated',
-          config: {
-            unencrypted: `This value shouldn't get encrypted`,
-            encrypted: 'This value should be encrypted',
-          },
-        })
-        .expect(404);
-    });
-
-    it('should not be able to pass null config', async () => {
-      await supertest
-        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          description: 'My action updated',
-          config: null,
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: 'child "config" fails because ["config" must be an object]',
-            validation: {
-              source: 'payload',
-              keys: ['config'],
-            },
-          });
-        });
-    });
-
-    it('should not return encrypted attributes', async () => {
-      const { body: updatedAction } = await supertest
-        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          description: 'My action updated',
-          config: {
-            unencrypted: `This value shouldn't get encrypted`,
-          },
-          secrets: {
-            encrypted: 'This value should be encrypted',
-          },
-        })
-        .expect(200);
-      expect(updatedAction).to.eql({
-        id: ES_ARCHIVER_ACTION_ID,
-        actionTypeId: 'test.index-record',
-        description: 'My action updated',
-        config: {
-          unencrypted: `This value shouldn't get encrypted`,
-        },
+    after(async () => {
+      const promises = actionsToDelete.map(({ spaceId, id }) => {
+        return supertest
+          .delete(`${getUrlPrefix(spaceId)}/api/action/${id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(204);
       });
-      const { body: fetchedAction } = await supertest
-        .get(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
-        .expect(200);
-      expect(fetchedAction).to.eql({
-        id: ES_ARCHIVER_ACTION_ID,
-        actionTypeId: 'test.index-record',
-        description: 'My action updated',
-        config: {
-          unencrypted: `This value shouldn't get encrypted`,
-        },
+      await Promise.all(promises);
+    });
+
+    for (const scenario of UserAtSpaceScenarios) {
+      const { user, space } = scenario;
+      describe(scenario.id, () => {
+        it('update document as user', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              description: 'My action',
+              actionTypeId: 'test.index-record',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            })
+            .expect(200);
+          actionsToDelete.push({ spaceId: space.id, id: createdAction.id });
+
+          const response = await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              description: 'My action updated',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to get action',
+              });
+              break;
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to update action',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                id: createdAction.id,
+                actionTypeId: 'test.index-record',
+                description: 'My action updated',
+                config: {
+                  unencrypted: `This value shouldn't get encrypted`,
+                },
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should not be able to pass null config', async () => {
+          await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/action/1`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              description: 'My action updated',
+              config: null,
+            })
+            .expect(400, {
+              statusCode: 400,
+              error: 'Bad Request',
+              message: 'child "config" fails because ["config" must be an object]',
+              validation: {
+                source: 'payload',
+                keys: ['config'],
+              },
+            });
+        });
+
+        it('non existing document', async () => {
+          const response = await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/action/1`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              description: 'My action updated',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to get action',
+              });
+              break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Saved object [action/1] not found',
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should return 400 when payload is empty and invalid', async () => {
+          await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/action/1`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({})
+            .expect(400, {
+              statusCode: 400,
+              error: 'Bad Request',
+              message: 'child "description" fails because ["description" is required]',
+              validation: { source: 'payload', keys: ['description'] },
+            });
+        });
+
+        it('secrest are not valid', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              description: 'My action',
+              actionTypeId: 'test.index-record',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            })
+            .expect(200);
+          actionsToDelete.push({ spaceId: space.id, id: createdAction.id });
+
+          const response = await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              description: 'My action updated',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 42,
+              },
+            });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to get action',
+              });
+              break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(400);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message:
+                  'error validating action type secrets: [encrypted]: expected value of type [string] but got [number]',
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
       });
-    });
-
-    it('should return 404 when updating a non existing document', async () => {
-      await supertest
-        .put('/api/action/2')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          description: 'My action updated',
-          config: {
-            unencrypted: `This value shouldn't get encrypted`,
-          },
-          secrets: {
-            encrypted: 'This value should be encrypted',
-          },
-        })
-        .expect(404)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Saved object [action/2] not found',
-          });
-        });
-    });
-
-    it('should return 400 when payload is empty and invalid', async () => {
-      await supertest
-        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
-        .set('kbn-xsrf', 'foo')
-        .send({})
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: 'child "description" fails because ["description" is required]',
-            validation: { source: 'payload', keys: ['description'] },
-          });
-        });
-    });
-
-    it(`should return 400 when secrets are not valid`, async () => {
-      await supertest
-        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          description: 'My action updated',
-          config: {
-            unencrypted: `This value shouldn't get encrypted`,
-          },
-          secrets: {
-            encrypted: 42,
-          },
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message:
-              'error validating action type secrets: [encrypted]: expected value of type [string] but got [number]',
-          });
-        });
-    });
-
-    it(`should allow changing non-secret config properties - create`, async () => {
-      let emailActionId: string = '';
-
-      // create the action
-      await supertest
-        .post('/api/action')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          description: 'test email action',
-          actionTypeId: '.email',
-          config: {
-            from: 'email-from@example.com',
-            host: 'host-is-ignored-here.example.com',
-            port: 666,
-          },
-          secrets: {
-            user: 'email-user',
-            password: 'email-password',
-          },
-        })
-        .expect(200)
-        .then((resp: any) => {
-          emailActionId = resp.body.id;
-        });
-
-      // add a new config param
-      await supertest
-        .put(`/api/action/${emailActionId}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          description: 'a test email action 2',
-          config: {
-            from: 'email-from@example.com',
-            service: '__json',
-          },
-          secrets: {
-            user: 'email-user',
-            password: 'email-password',
-          },
-        })
-        .expect(200);
-
-      // execute the action
-      await supertest
-        .post(`/api/action/${emailActionId}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: {
-            to: ['X'],
-            subject: 'email-subject',
-            message: 'email-message',
-          },
-        })
-        .expect(200);
-    });
+    }
   });
 }

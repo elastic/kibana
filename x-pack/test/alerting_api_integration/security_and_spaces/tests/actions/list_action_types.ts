@@ -5,29 +5,37 @@
  */
 
 import expect from '@kbn/expect';
+import { UserAtSpaceScenarios } from '../../scenarios';
+import { getUrlPrefix } from '../../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function listActionTypesTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('list_action_types', () => {
-    it('should return 200 with list of action types containing defaults', async () => {
-      await supertest
-        .get('/api/action/types')
-        .expect(200)
-        .then((resp: any) => {
+    for (const scenario of UserAtSpaceScenarios) {
+      const { user, space } = scenario;
+      describe(scenario.id, () => {
+        it('should return 200 with list of action types containing defaults', async () => {
+          const { body: actionTypes } = await supertestWithoutAuth
+            .get(`${getUrlPrefix(space.id)}/api/action/types`)
+            .auth(user.username, user.password)
+            .expect(200);
+
           function createActionTypeMatcher(id: string, name: string) {
             return (actionType: { id: string; name: string }) => {
               return actionType.id === id && actionType.name === name;
             };
           }
+
           // Check for values explicitly in order to avoid this test failing each time plugins register
           // a new action type
           expect(
-            resp.body.some(createActionTypeMatcher('test.index-record', 'Test: Index Record'))
+            actionTypes.some(createActionTypeMatcher('test.index-record', 'Test: Index Record'))
           ).to.be(true);
         });
-    });
+      });
+    }
   });
 }

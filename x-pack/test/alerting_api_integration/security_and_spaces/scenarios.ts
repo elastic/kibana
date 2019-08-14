@@ -17,6 +17,10 @@ const NoKibanaPrivileges: User = {
           names: ['foo'],
           privileges: ['all'],
         },
+        {
+          names: ['.kibaka-alerting-test-data*'],
+          privileges: ['all'],
+        },
       ],
     },
   },
@@ -43,21 +47,37 @@ const GlobalRead: User = {
         spaces: ['*'],
       },
     ],
+    elasticsearch: {
+      indices: [
+        {
+          names: ['.kibaka-alerting-test-data*'],
+          privileges: ['all'],
+        },
+      ],
+    },
   },
 };
 
 const Space1All: User = {
-  username: 'everything_space_all',
-  fullName: 'everything_space_all',
-  password: 'everything_space_all-password',
+  username: 'space_1_all',
+  fullName: 'space_1_all',
+  password: 'space_1_all-password',
   role: {
-    name: 'everything_space_all_role',
+    name: 'space_1_all_role',
     kibana: [
       {
         base: ['all'],
         spaces: ['space1'],
       },
     ],
+    elasticsearch: {
+      indices: [
+        {
+          names: ['.kibaka-alerting-test-data*'],
+          privileges: ['all'],
+        },
+      ],
+    },
   },
 };
 
@@ -114,19 +134,19 @@ const GlobalReadAtSpace1: GlobalReadAtSpace1 = {
 };
 
 interface Space1AllAtSpace1 extends Scenario {
-  id: 'everything_space_all at space1';
+  id: 'space_1_all at space1';
 }
 const Space1AllAtSpace1: Space1AllAtSpace1 = {
-  id: 'everything_space_all at space1',
+  id: 'space_1_all at space1',
   user: Space1All,
   space: Space1,
 };
 
 interface Space1AllAtSpace2 extends Scenario {
-  id: 'everything_space_all at space2';
+  id: 'space_1_all at space2';
 }
 const Space1AllAtSpace2: Space1AllAtSpace2 = {
-  id: 'everything_space_all at space2',
+  id: 'space_1_all at space2',
   user: Space1All,
   space: Space2,
 };

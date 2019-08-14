@@ -5,131 +5,141 @@
  */
 
 import expect from '@kbn/expect';
+import { UserAtSpaceScenarios } from '../../scenarios';
+import { getUrlPrefix } from '../../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('create', () => {
-    after(() => esArchiver.unload('empty_kibana'));
+    const actionsToDelete: Array<{ spaceId: string; id: string }> = [];
 
-    it('should return 200 when creating an action and not return encrypted attributes', async () => {
-      await supertest
-        .post('/api/action')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          description: 'My action',
-          actionTypeId: 'test.index-record',
-          config: {
-            unencrypted: `This value shouldn't get encrypted`,
-          },
-          secrets: {
-            encrypted: 'This value should be encrypted',
-          },
-        })
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            id: resp.body.id,
-            description: 'My action',
-            actionTypeId: 'test.index-record',
-            config: {
-              unencrypted: `This value shouldn't get encrypted`,
-            },
-          });
-          expect(typeof resp.body.id).to.be('string');
-        });
-    });
-
-    it('should return 200 when creating an action inside a space and to not be accessible from another space', async () => {
-      const { body: createdAction } = await supertest
-        .post('/s/space_1/api/action')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          description: 'My action',
-          actionTypeId: 'test.index-record',
-          config: {
-            unencrypted: `This value shouldn't get encrypted`,
-          },
-          secrets: {
-            encrypted: 'This value should be encrypted',
-          },
-        })
-        .expect(200);
-      expect(createdAction).to.eql({
-        id: createdAction.id,
-        description: 'My action',
-        actionTypeId: 'test.index-record',
-        config: {
-          unencrypted: `This value shouldn't get encrypted`,
-        },
+    after(async () => {
+      const promises = actionsToDelete.map(({ spaceId, id }) => {
+        return supertest
+          .delete(`${getUrlPrefix(spaceId)}/api/action/${id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(204);
       });
-      expect(typeof createdAction.id).to.be('string');
-      await supertest.get(`/s/space_1/api/action/${createdAction.id}`).expect(200);
-      await supertest.get(`/api/action/${createdAction.id}`).expect(404);
+      await Promise.all(promises);
     });
 
-    it(`should return 400 when action type isn't registered`, async () => {
-      await supertest
-        .post('/api/action')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          description: 'My action',
-          actionTypeId: 'test.unregistered-action-type',
-          config: {},
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: 'Action type "test.unregistered-action-type" is not registered.',
-          });
-        });
-    });
+    for (const scenario of UserAtSpaceScenarios) {
+      const { user, space } = scenario;
+      describe(scenario.id, () => {
+        it('create an action', async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              description: 'My action',
+              actionTypeId: 'test.index-record',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            });
 
-    it('should return 400 when payload is empty and invalid', async () => {
-      await supertest
-        .post('/api/action')
-        .set('kbn-xsrf', 'foo')
-        .send({})
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message:
-              'child "description" fails because ["description" is required]. child "actionTypeId" fails because ["actionTypeId" is required]',
-            validation: {
-              source: 'payload',
-              keys: ['description', 'actionTypeId'],
-            },
-          });
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to create action',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                id: response.body.id,
+                description: 'My action',
+                actionTypeId: 'test.index-record',
+                config: {
+                  unencrypted: `This value shouldn't get encrypted`,
+                },
+              });
+              expect(typeof response.body.id).to.be('string');
+              actionsToDelete.push({ spaceId: space.id, id: response.body.id });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
-    });
 
-    it(`should return 400 when config isn't valid`, async () => {
-      await supertest
-        .post('/api/action')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          description: 'my description',
-          actionTypeId: 'test.index-record',
-          config: {
-            unencrypted: 'my unencrypted text',
-          },
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message:
-              'error validating action type secrets: [encrypted]: expected value of type [string] but got [undefined]',
-          });
+        it(`should return 400 when action type isn't registered`, async () => {
+          await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              description: 'My action',
+              actionTypeId: 'test.unregistered-action-type',
+              config: {},
+            })
+            .expect(400)
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'Action type "test.unregistered-action-type" is not registered.',
+              });
+            });
         });
-    });
+
+        it('should return 400 when payload is empty and invalid', async () => {
+          await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({})
+            .expect(400)
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message:
+                  'child "description" fails because ["description" is required]. child "actionTypeId" fails because ["actionTypeId" is required]',
+                validation: {
+                  source: 'payload',
+                  keys: ['description', 'actionTypeId'],
+                },
+              });
+            });
+        });
+
+        it(`should return 400 when config isn't valid`, async () => {
+          await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              description: 'my description',
+              actionTypeId: 'test.index-record',
+              config: {
+                unencrypted: 'my unencrypted text',
+              },
+            })
+            .expect(400)
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message:
+                  'error validating action type secrets: [encrypted]: expected value of type [string] but got [undefined]',
+              });
+            });
+        });
+      });
+    }
   });
 }

@@ -5,81 +5,92 @@
  */
 
 import expect from '@kbn/expect';
-import { ES_ARCHIVER_ACTION_ID, SPACE_1_ES_ARCHIVER_ACTION_ID } from './constants';
+import { UserAtSpaceScenarios } from '../../scenarios';
+import { getUrlPrefix } from '../../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function findActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('find', () => {
-    before(() => esArchiver.load('actions/basic'));
-    after(() => esArchiver.unload('actions/basic'));
+    let actionsToDelete: Array<{ spaceId: string; id: string }> = [];
 
-    it('should return 200 with individual responses', async () => {
-      await supertest
-        .get(
-          '/api/action/_find?search=test.index-record&search_fields=actionTypeId&fields=description'
-        )
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            page: 1,
-            perPage: 20,
-            total: 1,
-            data: [
-              {
-                id: ES_ARCHIVER_ACTION_ID,
-                description: 'My action',
-              },
-            ],
-          });
-        });
+    afterEach(async () => {
+      const promises = actionsToDelete.map(({ spaceId, id }) => {
+        return supertest
+          .delete(`${getUrlPrefix(spaceId)}/api/action/${id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(204);
+      });
+      await Promise.all(promises);
+      actionsToDelete = [];
     });
 
-    it('should return 200 with individual responses in a space', async () => {
-      await supertest
-        .get(
-          '/s/space_1/api/action/_find?search=test.index-record&search_fields=actionTypeId&fields=description'
-        )
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            page: 1,
-            perPage: 20,
-            total: 1,
-            data: [
-              {
-                id: SPACE_1_ES_ARCHIVER_ACTION_ID,
-                description: 'My action',
+    for (const scenario of UserAtSpaceScenarios) {
+      const { user, space } = scenario;
+      describe(scenario.id, () => {
+        it('find as user', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              description: 'My action',
+              actionTypeId: 'test.index-record',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
               },
-            ],
-          });
-        });
-    });
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            })
+            .expect(200);
+          actionsToDelete.push({ spaceId: space.id, id: createdAction.id });
 
-    it('should not return encrypted attributes', async () => {
-      await supertest
-        .get('/api/action/_find?search=test.index-record&search_fields=actionTypeId')
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            page: 1,
-            perPage: 20,
-            total: 1,
-            data: [
-              {
-                id: ES_ARCHIVER_ACTION_ID,
-                description: 'My action',
-                actionTypeId: 'test.index-record',
-                config: {
-                  unencrypted: `This value shouldn't get encrypted`,
-                },
-              },
-            ],
-          });
+          const response = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(
+                space.id
+              )}/api/action/_find?search=test.index-record&search_fields=actionTypeId`
+            )
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to find action',
+              });
+              break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                page: 1,
+                perPage: 20,
+                total: 1,
+                data: [
+                  {
+                    id: createdAction.id,
+                    description: 'My action',
+                    actionTypeId: 'test.index-record',
+                    config: {
+                      unencrypted: `This value shouldn't get encrypted`,
+                    },
+                  },
+                ],
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
-    });
+      });
+    }
   });
 }
