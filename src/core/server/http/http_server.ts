@@ -289,7 +289,7 @@ export class HttpServer {
       if (shouldRedirect) {
         return toolkit.rewriteUrl(newURL);
       }
-      return response.notFound(new Error('not found'));
+      return response.notFound();
     });
   }
 
