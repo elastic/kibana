@@ -91,8 +91,8 @@ export class ColorRampSelect extends Component {
 }
 
 ColorRampSelect.propTypes = {
-  color: PropTypes.string.isRequired,
+  color: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  useCustomColorRamp: PropTypes.bool.isRequired,
+  useCustomColorRamp: PropTypes.bool,
   customColorRamp: PropTypes.array,
 };

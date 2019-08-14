@@ -125,7 +125,6 @@ export const ColorStops = ({
         className="mapColorStop"
         isInvalid={errors.length !== 0}
         error={errors}
-        compressed
       >
         <div>
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">

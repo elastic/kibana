@@ -6,15 +6,15 @@
 
 import { isValidHex } from '@elastic/eui';
 
-export const removeRow = (colorStops, index) => {
+export function removeRow(colorStops, index) {
   if (colorStops.length === 1) {
     return colorStops;
   }
 
   return [...colorStops.slice(0, index), ...colorStops.slice(index + 1)];
-};
+}
 
-export const addRow = (colorStops, index) => {
+export function addRow(colorStops, index) {
   const currentStop = colorStops[index].stop;
   let delta = 1;
   if (index === colorStops.length - 1) {
@@ -38,17 +38,17 @@ export const addRow = (colorStops, index) => {
     newRow,
     ...colorStops.slice(index + 1),
   ];
-};
+}
 
-export const isColorInvalid = color => {
+export function isColorInvalid(color) {
   return !isValidHex(color) || color === '';
-};
+}
 
-export const isStopInvalid = stop => {
+export function isStopInvalid(stop) {
   return stop === '' || isNaN(stop);
-};
+}
 
-export const isInvalid = colorStops => {
+export function isInvalid(colorStops) {
   return colorStops.some((colorStop, index) => {
     // expect stops to be in ascending order
     let isDescending = false;
@@ -63,4 +63,4 @@ export const isInvalid = colorStops => {
       isDescending
     );
   });
-};
+}

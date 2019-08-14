@@ -326,17 +326,22 @@ export class VectorStyle extends AbstractStyle {
 
         // "feature-state" data expressions are not supported with layout properties.
         // To work around this limitation, some styling values must fall back to geojson property values.
-        let supportsFeatureState = true;
-        let isScaled = true;
+        let supportsFeatureState;
+        let isScaled;
         if (styleName === 'iconSize'
           && this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
           supportsFeatureState = false;
+          isScaled = true;
         } else if (styleName === 'iconOrientation') {
           supportsFeatureState = false;
           isScaled = false;
         } else if ((styleName === 'fillColor' || styleName === 'lineColor')
           && options.useCustomColorRamp) {
+          supportsFeatureState = true;
           isScaled = false;
+        } else {
+          supportsFeatureState = true;
+          isScaled = true;
         }
 
         return {
@@ -462,12 +467,18 @@ export class VectorStyle extends AbstractStyle {
 
     return this._getMBDataDrivenColor({
       fieldName: styleDescriptor.options.field.name,
-      colorStops: styleDescriptor.options.useCustomColorRamp
-        ? styleDescriptor.options.customColorRamp.reduce((accumulatedStops, nextStop) => {
-          return [...accumulatedStops, nextStop.stop, nextStop.color];
-        }, [])
-        : getColorRampStops(styleDescriptor.options.color)
+      colorStops: this._getMBColorStops(styleDescriptor)
     });
+  }
+
+  _getMBColorStops(styleDescriptor) {
+    if (styleDescriptor.options.useCustomColorRamp) {
+      return styleDescriptor.options.customColorRamp.reduce((accumulatedStops, nextStop) => {
+        return [...accumulatedStops, nextStop.stop, nextStop.color];
+      }, []);
+    }
+
+    return getColorRampStops(styleDescriptor.options.color);
   }
 
   _isSizeDynamicConfigComplete(styleDescriptor) {

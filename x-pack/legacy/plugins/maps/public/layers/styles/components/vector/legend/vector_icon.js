@@ -103,7 +103,8 @@ function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
       !colorStyleProperty.options.customColorRamp.length) {
       return defaultColor;
     }
-    const middleIndex = Math.floor(colorStyleProperty.options.customColorRamp.length / 2);
+    // favor the lowest color in even arrays
+    const middleIndex = Math.floor((colorStyleProperty.options.customColorRamp.length - 1) / 2);
     return colorStyleProperty.options.customColorRamp[middleIndex].color;
   }
 
