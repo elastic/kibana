@@ -82,13 +82,18 @@ export function MetricChart({ data, args }: MetricChartProps) {
   const value = Number(Number(row[accessor]).toFixed(3)).toString();
 
   return (
-    <AutoScale>
-      <EuiFlexGroup className="lnsChart" alignItems="center" justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <div style={{ textAlign: 'center', fontWeight: 600, fontSize: '60pt' }}>{value}</div>
-          <EuiText textAlign="center">{title}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </AutoScale>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        maxWidth: '100%',
+        maxHeight: '100%',
+      }}
+    >
+      <AutoScale style={{ fontWeight: 600, fontSize: '60pt' }}>{value}</AutoScale>
+      <EuiText textAlign="center">{title}</EuiText>
+    </div>
   );
 }

@@ -26,8 +26,8 @@ describe('AutoScale', () => {
     });
 
     it('is the lesser of the x or y scale', () => {
-      expect(computeScale(mockElement(1000, 2000), mockElement(3000, 8000))).toBe(0.246);
-      expect(computeScale(mockElement(2000, 3000), mockElement(4000, 3200))).toBe(0.496);
+      expect(computeScale(mockElement(1000, 2000), mockElement(3000, 8000))).toBe(0.25);
+      expect(computeScale(mockElement(2000, 3000), mockElement(4000, 3200))).toBe(0.5);
     });
   });
 
@@ -41,12 +41,10 @@ describe('AutoScale', () => {
         )
       ).toMatchInlineSnapshot(`
         <div
-          class="autoscale-parent"
-          style="display:flex;justify-content:center;position:relative;max-width:100%"
+          style="display:flex;justify-content:center;align-items:center;max-width:100%;max-height:100%"
         >
           <div
-            class="autoscale-child"
-            style="transform:scale(0);position:relative"
+            style="transform:scale(0);margin-bottom:-0.5em"
           >
             <h1>
               Hoi!

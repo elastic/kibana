@@ -5,8 +5,10 @@
  */
 
 import React from 'react';
+import _ from 'lodash';
+import { EuiResizeObserver } from '@elastic/eui';
 
-interface Props {
+interface Props extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode | React.ReactNode[];
 }
 
@@ -17,9 +19,19 @@ interface State {
 export class AutoScale extends React.Component<Props, State> {
   private child: Element | null = null;
   private parent: Element | null = null;
+  private scale: () => void;
 
   constructor(props: Props) {
     super(props);
+
+    this.scale = _.throttle(() => {
+      const scale = computeScale(this.parent, this.child);
+
+      // Prevent an infinite render loop
+      if (this.state.scale !== scale) {
+        this.setState({ scale });
+      }
+    });
 
     // An initial scale of 0 means we always redraw
     // at least once, which is sub-optimal, but it
@@ -41,42 +53,44 @@ export class AutoScale extends React.Component<Props, State> {
     }
   };
 
-  scale() {
-    const scale = computeScale(this.parent, this.child);
-
-    // Prevent an infinite render loop
-    if (this.state.scale !== scale) {
-      this.setState({ scale });
-    }
-  }
-
   render() {
     const { children } = this.props;
     const { scale } = this.state;
+    const style = this.props.style || {};
 
     return (
-      <div
-        className="autoscale-parent"
-        ref={this.setParent}
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          position: 'relative',
-          maxWidth: '100%',
-          maxHeight: '100%',
-        }}
-      >
-        <div
-          className="autoscale-child"
-          ref={this.setChild}
-          style={{
-            transform: `scale(${scale})`,
-          }}
-        >
-          {children}
-        </div>
-      </div>
+      <EuiResizeObserver onResize={this.scale}>
+        {resizeRef => (
+          <div
+            {...this.props}
+            ref={el => {
+              this.setParent(el);
+              resizeRef(el);
+            }}
+            style={{
+              ...style,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              maxWidth: '100%',
+              maxHeight: '100%',
+            }}
+          >
+            <div
+              ref={this.setChild}
+              style={{
+                transform: `scale(${scale})`,
+                // When we do a transform scale, it leaves a lot of
+                // white space above and below the element, so we pull
+                // that in with negative margins.
+                marginBottom: `-${(1 - scale) / 2}em`,
+              }}
+            >
+              {children}
+            </div>
+          </div>
+        )}
+      </EuiResizeObserver>
     );
   }
 }
@@ -98,8 +112,8 @@ export function computeScale(
     return 1;
   }
 
-  const scaleX = (parent.clientWidth) / child.clientWidth;
-  const scaleY = (parent.clientHeight) / child.clientHeight;
+  const scaleX = parent.clientWidth / child.clientWidth;
+  const scaleY = parent.clientHeight / child.clientHeight;
 
   return Math.min(1, Math.min(scaleX, scaleY));
 }
