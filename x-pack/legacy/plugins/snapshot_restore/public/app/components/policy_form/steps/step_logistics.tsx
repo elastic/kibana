@@ -281,7 +281,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepLogistics.snapshotNameDescription"
           defaultMessage="Name for the automatic snapshots taken by this policy.
-            Supports date math expressions to easily identify snapshots."
+            A unique identifier will be appended to every snapshot name."
         />
       }
       idAria="policySnapshotNameDescription"
@@ -323,7 +323,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           fullWidth
           onChange={e => {
             updatePolicy({
-              snapshotName: e.target.value,
+              snapshotName: e.target.value.toLowerCase(),
             });
           }}
           onBlur={() => setTouched({ ...touched, snapshotName: true })}

@@ -7,7 +7,7 @@
 import React, { Fragment, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { SlmPolicy } from '../../../../../common/types';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';
 import { SectionError, SectionLoading } from '../../../components';
@@ -135,14 +135,39 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
       />
     );
   } else {
+    const policySchedules = policies.map((policy: SlmPolicy) => policy.schedule);
+    const hasDuplicateSchedules = policySchedules.length > new Set(policySchedules).size;
     content = (
-      <PolicyTable
-        policies={policies || []}
-        reload={reload}
-        openPolicyDetailsUrl={openPolicyDetailsUrl}
-        onPolicyDeleted={onPolicyDeleted}
-        onPolicyExecuted={onPolicyExecuted}
-      />
+      <Fragment>
+        {hasDuplicateSchedules ? (
+          <Fragment>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyScheduleWarningTitle"
+                  defaultMessage="Duplicate schedules found"
+                />
+              }
+              color="warning"
+              iconType="alert"
+            >
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyScheduleWarningDescription"
+                defaultMessage="Some of your policies have the same schedule. Only one snapshot can be taken at
+                  a time. Edit or delete the policies with the duplicate schedule to avoid snapshot failures."
+              />
+            </EuiCallOut>
+            <EuiSpacer />
+          </Fragment>
+        ) : null}
+        <PolicyTable
+          policies={policies || []}
+          reload={reload}
+          openPolicyDetailsUrl={openPolicyDetailsUrl}
+          onPolicyDeleted={onPolicyDeleted}
+          onPolicyExecuted={onPolicyExecuted}
+        />
+      </Fragment>
     );
   }
 

@@ -297,7 +297,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepSettings.ignoreUnavailableDescription"
-          defaultMessage="Indices that do not exist will be ignored during snapshot creation.
+          defaultMessage="Indices that do not exist or are unavailable will be ignored during snapshot creation.
             Otherwise missing indices will cause snapshot creation to fail."
         />
       }
