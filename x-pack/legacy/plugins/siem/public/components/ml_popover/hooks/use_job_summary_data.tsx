@@ -5,9 +5,10 @@
  */
 
 import { useContext, useEffect, useState } from 'react';
+import chrome from 'ui/chrome';
+
 import { jobsSummary } from '../api';
 import { Job } from '../types';
-import { KibanaConfigContext } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { hasMlUserPermissions } from '../../ml/permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_provider';
 import { useStateToaster } from '../../toasters';
@@ -25,7 +26,6 @@ export const getSiemJobsFromJobsSummary = (data: Job[]) =>
 export const useJobSummaryData = (jobIds: string[] = [], refreshToggle = false): Return => {
   const [jobSummaryData, setJobSummaryData] = useState<Job[] | null>(null);
   const [loading, setLoading] = useState(true);
-  const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
   const userPermissions = hasMlUserPermissions(capabilities);
   const [, dispatchToaster] = useStateToaster();
@@ -34,7 +34,7 @@ export const useJobSummaryData = (jobIds: string[] = [], refreshToggle = false):
     if (userPermissions) {
       try {
         const data: Job[] = await jobsSummary(jobIds, {
-          'kbn-version': config.kbnVersion,
+          'kbn-version': chrome.getXsrfToken(),
         });
 
         // TODO: API returns all jobs even though we specified jobIds -- jobsSummary call seems to match request in ML App?

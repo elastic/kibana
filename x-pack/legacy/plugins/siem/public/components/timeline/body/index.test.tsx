@@ -18,6 +18,9 @@ import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { wait } from '../../../lib/helpers';
 
+jest.mock('../../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../../lib/settings/use_timezone_setting');
+
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
 const mockSort: Sort = {

@@ -57,6 +57,9 @@ import {
   NETWORK_TRANSPORT_FIELD_NAME,
 } from '../source_destination/field_names';
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../lib/settings/use_timezone_setting');
+
 const getNetflowInstance = () => (
   <Netflow
     contextId="test"

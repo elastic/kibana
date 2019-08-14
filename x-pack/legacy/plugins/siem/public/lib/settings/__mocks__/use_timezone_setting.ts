@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose } from '../lib/compose/testing_compose';
-
-import { startApp } from './start_app';
-
-startApp(compose());
+export const useTimezoneBrowser = () => {
+  return ['America/New_York'];
+};

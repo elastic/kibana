@@ -16,6 +16,9 @@ import '../../../../mock/ui_settings';
 
 import { FirstLastSeenHost, FirstLastSeenHostType } from '.';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../../../lib/settings/use_timezone_setting');
+
 describe('FirstLastSeen Component', () => {
   // this is just a little hack to silence a warning that we'll get until react
   // fixes this: https://github.com/facebook/react/pull/14853

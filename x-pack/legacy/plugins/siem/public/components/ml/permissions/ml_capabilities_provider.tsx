@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
+import chrome from 'ui/chrome';
+
 import { MlCapabilities } from '../types';
 import { getMlCapabilities } from '../api/get_ml_capabilities';
-import { KibanaConfigContext } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { emptyMlCapabilities } from '../empty_ml_capabilities';
 import { errorToToaster } from '../api/error_to_toaster';
 import { useStateToaster } from '../../toasters';
@@ -20,12 +21,11 @@ MlCapabilitiesContext.displayName = 'MlCapabilitiesContext';
 
 export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ children }) => {
   const [capabilities, setCapabilities] = useState(emptyMlCapabilities);
-  const config = useContext(KibanaConfigContext);
   const [, dispatchToaster] = useStateToaster();
 
   const fetchFunc = async () => {
     try {
-      const mlCapabilities = await getMlCapabilities({ 'kbn-version': config.kbnVersion });
+      const mlCapabilities = await getMlCapabilities({ 'kbn-version': chrome.getXsrfToken() });
       setCapabilities(mlCapabilities);
     } catch (error) {
       errorToToaster({

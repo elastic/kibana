@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiButton, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
-
 import styled from 'styled-components';
 import moment from 'moment';
-import { EuiButton, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
+import chrome from 'ui/chrome';
+
 import { useJobSummaryData } from './hooks/use_job_summary_data';
 import * as i18n from './translations';
-import { KibanaConfigContext } from '../../lib/adapters/framework/kibana_framework_adapter';
 import { Job } from './types';
 import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
 import { MlCapabilitiesContext } from '../ml/permissions/ml_capabilities_provider';
@@ -94,11 +94,9 @@ export const MlPopover = React.memo(() => {
   const [isCreatingJobs, setIsCreatingJobs] = useState(false);
   const [filterQuery, setFilterQuery] = useState('');
   const [, dispatchToaster] = useStateToaster();
-
   const [, configuredIndexPatterns] = useIndexPatterns(refreshToggle);
-  const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
-  const headers = { 'kbn-version': config.kbnVersion };
+  const headers = { 'kbn-version': chrome.getXsrfToken() };
 
   // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
   const enableDatafeed = async (jobName: string, latestTimestampMs: number, enable: boolean) => {

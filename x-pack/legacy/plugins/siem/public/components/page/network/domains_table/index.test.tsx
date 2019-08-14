@@ -23,6 +23,9 @@ import { createStore, networkModel, State } from '../../../../store';
 import { DomainsTable } from '.';
 import { mockDomainsData } from './mock';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../../../lib/settings/use_timezone_setting');
+
 describe('Domains Table Component', () => {
   const loadPage = jest.fn();
   const ip = '10.10.10.10';

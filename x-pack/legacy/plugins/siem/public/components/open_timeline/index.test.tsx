@@ -20,6 +20,9 @@ import { StatefulOpenTimeline } from '.';
 import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../lib/settings/use_timezone_setting');
+
 const getStateChildComponent = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   wrapper: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>

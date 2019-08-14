@@ -3,10 +3,31 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import {
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_DATE_FORMAT_TZ,
+  DEFAULT_BYTES_FORMAT,
+} from '../../common/constants';
 
-import { AppTestingFrameworkAdapter } from '../lib/adapters/framework/testing_framework_adapter';
+export interface MockFrameworks {
+  bytesFormat: string;
+  dateFormat: string;
+  dateFormatTz: string;
+  timezone: string;
+}
 
-export const mockFrameworks: Readonly<Record<string, Partial<AppTestingFrameworkAdapter>>> = {
+export const getMockKibanaUiSetting = (config: MockFrameworks) => (key: string) => {
+  if (key === DEFAULT_DATE_FORMAT) {
+    return [config.dateFormat];
+  } else if (key === DEFAULT_DATE_FORMAT_TZ) {
+    return [config.dateFormatTz];
+  } else if (key === DEFAULT_BYTES_FORMAT) {
+    return [config.bytesFormat];
+  }
+  return [null];
+};
+
+export const mockFrameworks: Readonly<Record<string, MockFrameworks>> = {
   bytes_short: {
     bytesFormat: '0b',
     dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
