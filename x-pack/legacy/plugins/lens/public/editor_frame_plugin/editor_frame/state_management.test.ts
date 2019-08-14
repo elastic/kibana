@@ -143,7 +143,7 @@ describe('editor_frame state management', () => {
         },
         {
           type: 'UPDATE_DATASOURCE_STATE',
-          newState: newDatasourceState,
+          updater: newDatasourceState,
           datasourceId: 'testDatasource',
         }
       );
@@ -152,6 +152,34 @@ describe('editor_frame state management', () => {
     });
 
     it('should update the datasource state with passed in reducer', () => {
+      const datasourceReducer = jest.fn(() => ({ changed: true }));
+      const newState = reducer(
+        {
+          datasourceStates: {
+            testDatasource: {
+              state: {},
+              isLoading: false,
+            },
+          },
+          activeDatasourceId: 'testDatasource',
+          title: 'bbb',
+          visualization: {
+            activeId: 'testVis',
+            state: {},
+          },
+        },
+        {
+          type: 'UPDATE_DATASOURCE_STATE',
+          updater: datasourceReducer,
+          datasourceId: 'testDatasource',
+        }
+      );
+
+      expect(newState.datasourceStates.testDatasource.state).toEqual({ changed: true });
+      expect(datasourceReducer).toHaveBeenCalledTimes(1);
+    });
+
+    it('should update the layer state with passed in reducer', () => {
       const layerReducer = jest.fn((_state, layerId) => ({ inserted: layerId }));
       const newState = reducer(
         {
