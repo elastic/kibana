@@ -25,7 +25,7 @@
  *  @param  {String} timePattern
  *  @return {String}
  */
-export function timePatternToWildcard(timePattern) {
+export function timePatternToWildcard(timePattern: string) {
   let wildcard = '';
   let inEscape = false;
   let inPattern = false;
