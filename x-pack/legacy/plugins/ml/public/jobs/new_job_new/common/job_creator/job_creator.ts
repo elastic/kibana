@@ -247,11 +247,12 @@ export class JobCreator {
     return this._subscribers;
   }
 
-  public async createAndStartJob() {
+  public async createAndStartJob(): Promise<JobRunner> {
     try {
       await this.createJob();
       await this.createDatafeed();
-      await this.startDatafeed();
+      const jobRunner = await this.startDatafeed();
+      return jobRunner;
     } catch (error) {
       throw error;
     }
