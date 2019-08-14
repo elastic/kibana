@@ -8,6 +8,7 @@
     "core": "src/core",
     "inputControl": "src/legacy/core_plugins/input_control_vis",
     "inspectorViews": "src/legacy/core_plugins/inspector_views",
+    "inspector": "src/plugins/inspector",
     "interpreter": "src/legacy/core_plugins/interpreter",
     "dashboardEmbeddableContainer": "src/legacy/core_plugins/dashboard_embeddable_container",
     "kbn": "src/legacy/core_plugins/kibana",
